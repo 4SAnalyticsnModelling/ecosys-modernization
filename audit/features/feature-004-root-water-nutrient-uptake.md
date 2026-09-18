@@ -39,6 +39,16 @@ A standard Baldocchi-type quadratic root-uptake formulation (supply=demand solve
 
 **User-approved scope:** covered generally by `PROJECT_CONTRACT.md`'s translation-completeness requirement; no feature-specific approval doc found beyond that.
 
+## Addendum 2026-09-18 (same session, follow-up pass): band-vs-non-band nutrient kinetics and root-gas geometry -- clean, one minor precision nit
+
+**Band-vs-non-band check (explicitly targeted per this session's standing lesson about domain-asymmetry risk)**: all eight NH4/NO3/H2PO4/HPO4 non-band+band uptake blocks (`uptake.f:2936-3030` NH4 non-band already covered above; `:3031-3114` NH4 band; `:3130-3219`/`:3220-3296` NO3; `:3334-3422`/`:3423-3510` H2PO4; `:3511-3529+`/`:3605+` HPO4) use the identical template in the Fortran itself -- no legacy asymmetry exists to accidentally drop. Zig: `plant_root_nutrient_uptake.zig`'s `solve()` (`:504-519`) dispatches all eight pools through **one shared function** via an 8-value enum and switch-based field lookups (`:110-119,368-411,533-557`) -- architecturally forecloses the copy-paste-asymmetry failure mode by construction (no separate band/non-band code path exists to drift). The numerically-stable quadratic rewrite already noted above is confirmed to extend consistently to all 4 nutrients x 2 zones, not just NH4. **Disposition: `preserved`, no asymmetry found.**
+
+**Minor discrepancy noted (not a gap)**: Fortran's guard uses `.GT.ZERO` where `ZERO=1.0e-15` (`starts.f:93`); Zig's equivalent guards on exact `== 0`. For a zone fraction in `(0,1e-15]` (not expected in real PFT/soil inputs), behavior would diverge. Flagged for a follow-up check of whether such tiny fractions ever occur in production data, not treated as blocking.
+
+**Root-atmosphere gas-transfer geometry** (`RTCR1/RTCR2/RTCRA`, `uptake.f:2004-2029`): Zig `plant_root_gas_exchange.zig` (sha256 `81ECEDD0C56D9F55210FC92F9058277C0566D7F9F7708AF69FCF49B93D7DC56F`), `rootGasCrossSectionPerLengthM` (`:353-369`), reproduces the max/harmonic-combine structure term-for-term. **Constant-precision nit found**: legacy uses literal `3.1416` (5-sig-fig truncation of pi) at `:2018,2020`; this Zig routine uses full-precision `std.math.pi` (relative diff ~1.49e-5, scientifically inconsequential). But this is **inconsistent within the Zig codebase**: the physically-analogous sibling routine in `water_balance.zig:478,481` (also translating `uptake.f`'s pi-based root-geometry formulas) *preserves* the literal `3.1416` (confirmed by grep, including its own test expectations at `:1066,1068`). One sibling kept the legacy literal, the other silently upgraded to true pi -- the domain-asymmetry pattern again, but on a constant-precision axis rather than band/non-band. Impact negligible (<0.002% on a cross-section term feeding gas conductance) -- **disposition: `preserved`, flagged as a minor precision-consistency nit, not a defect under current tolerances.**
+
+**Not covered this pass**: the NPH gas-equilibration solve loop (`uptake.f:2093-~2920`, ~830 lines) and the canopy energy-balance body (`:400-1090`) remain entirely unaudited -- recommended as the next targets. Combined cumulative coverage of `uptake.f` across both passes: ~30% of the 4,359-line file at statement level.
+
 ## Scientific and numerical tests
 
 Not run this pass (source-read only, per contract G1 scope).
