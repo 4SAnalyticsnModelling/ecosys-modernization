@@ -276,6 +276,37 @@ test "the shipped runscript declares the input and output roots" {
     try std.testing.expectApproxEqAbs(@as(f64, 0.10), bounds.latitude_interval_degrees, 1.0e-12);
 }
 
+// ISSUE-007. `starte.f:189`/`:191` derive initial soluble ion concentrations
+// from the soil file's saturated-paste-extract values with two hardcoded
+// oracle multipliers: `CN4X=0.1*CNH4(...)` (ammonium) and
+// `CPOX=0.01*CPO4(...)` (phosphate). The shipped Ottawa `chemistry_units`
+// record configures both as runtime inputs; the phosphate multiplier already
+// matched the oracle exactly (`0.01`), but the ammonium multiplier was
+// shipped as `0.01` -- 10x smaller than the oracle's `0.1` -- systematically
+// under-seeding initial soil ammonium for the whole run. Pins both multipliers
+// against their distinct oracle values so a future edit cannot silently
+// reintroduce the mismatch or swap the two constants.
+test "the shipped runscript's chemistry multipliers match the STARTE oracle" {
+    const allocator = std.testing.allocator;
+    const source = try readRequired(allocator, example_root ++ "/runottawa");
+    defer allocator.free(source);
+
+    var parsed = try runscript_module.parse(allocator, source);
+    defer parsed.deinit();
+    // starte.f:191 CPOX=0.01*CPO4(...)
+    try std.testing.expectApproxEqAbs(
+        @as(f64, 0.01),
+        parsed.chemistry_initialization.saturated_paste_phosphate_multiplier,
+        1.0e-15,
+    );
+    // starte.f:189 CN4X=0.1*CNH4(...)
+    try std.testing.expectApproxEqAbs(
+        @as(f64, 0.1),
+        parsed.chemistry_primary_initialization.soil_ammonium_extract_multiplier,
+        1.0e-15,
+    );
+}
+
 test "required Ottawa inputs match immutable byte provenance" {
     const allocator = std.testing.allocator;
     const metadata = try readRequired(allocator, example_root ++ "/PROVENANCE.json");

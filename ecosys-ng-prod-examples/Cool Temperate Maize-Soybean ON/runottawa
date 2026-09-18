@@ -73,7 +73,7 @@ organic_initialization_file,runottawa_input_files/parameters/soil_organic_initia
 surface_gas_parameter_file,runottawa_input_files/parameters/surface_gas_and_litter_parameters.txt
 soil_nitrogen_parameter_file,runottawa_input_files/parameters/soil_nitrogen_parameters.txt
 chemistry_initialization,0.01,1e-8,1.9e-21,6.3e-26,7.5,6.2e-5,4.8e-10
-chemistry_units,14,31,27,56,40,24.3,23,39.1,32,35.5,1,1,0.01,1
+chemistry_units,14,31,27,56,40,24.3,23,39.1,32,35.5,1,1,0.1,1
 chemistry_reaction_file,runottawa_input_files/parameters/soil_chemistry_reaction_parameters.txt
 fertilizer_units,14
 grid_inputs runottawa_input_files/landscape/grid_cell_inputs.txt
