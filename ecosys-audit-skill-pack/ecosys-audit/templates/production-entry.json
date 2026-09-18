@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "stage": "production-entry",
+  "snapshot": {
+    "path": "audit/manifest/source-snapshot.json",
+    "sha256": null
+  },
+  "checks": [
+    {
+      "id": "source-audit-reviewed",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "current-source-integration",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "bounded-solver-and-rollback",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "independent-conservation",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "releasefast-critical-safety",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "short-integration-completion",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "complete-output-schema",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    }
+  ]
+}

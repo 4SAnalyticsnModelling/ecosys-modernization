@@ -1,0 +1,35 @@
+{
+  "source-audit": [
+    "baseline-integrity",
+    "complete-scope-inventory",
+    "bidirectional-traceability",
+    "state-and-output-bindings",
+    "process-science-review",
+    "feature-boundary-review",
+    "focused-regressions"
+  ],
+  "production-entry": [
+    "source-audit-reviewed",
+    "current-source-integration",
+    "bounded-solver-and-rollback",
+    "independent-conservation",
+    "releasefast-critical-safety",
+    "short-integration-completion",
+    "complete-output-schema"
+  ],
+  "release": [
+    "source-audit-reviewed",
+    "production-entry-reviewed",
+    "clean-releasefast-build",
+    "full-deck-completion",
+    "all-output-comparison",
+    "feature-attribution-accepted",
+    "independent-conservation",
+    "edge-and-failure-tests",
+    "restart-and-repeatability",
+    "same-work-performance",
+    "memory-and-build-report",
+    "independent-release-review",
+    "reproducibility-and-scope-documentation"
+  ]
+}

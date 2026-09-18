@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "stage": "source-audit",
+  "snapshot": {
+    "path": "audit/manifest/source-snapshot.json",
+    "sha256": null
+  },
+  "checks": [
+    {
+      "id": "baseline-integrity",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "complete-scope-inventory",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "bidirectional-traceability",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "state-and-output-bindings",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "process-science-review",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "feature-boundary-review",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "focused-regressions",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    }
+  ]
+}

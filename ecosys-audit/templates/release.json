@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "stage": "release",
+  "snapshot": {
+    "path": "audit/manifest/source-snapshot.json",
+    "sha256": null
+  },
+  "checks": [
+    {
+      "id": "source-audit-reviewed",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "production-entry-reviewed",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "clean-releasefast-build",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "full-deck-completion",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "all-output-comparison",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "feature-attribution-accepted",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "independent-conservation",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "edge-and-failure-tests",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "restart-and-repeatability",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "same-work-performance",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "memory-and-build-report",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "independent-release-review",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    },
+    {
+      "id": "reproducibility-and-scope-documentation",
+      "status": "NOT_ASSESSED",
+      "author": null,
+      "reviewer": null,
+      "evidence": []
+    }
+  ]
+}

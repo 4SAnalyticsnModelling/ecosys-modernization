@@ -1,0 +1,52 @@
+test_all_missing_numeric_column_fails (test_pack.ComparisonTests.test_all_missing_numeric_column_fails) ... ok
+test_changed_input_during_comparison_rejected (test_pack.ComparisonTests.test_changed_input_during_comparison_rejected) ... ok
+test_cli_nonzero_and_no_report_overwrite (test_pack.ComparisonTests.test_cli_nonzero_and_no_report_overwrite) ... ok
+test_duplicate_json_schema_key_rejected (test_pack.ComparisonTests.test_duplicate_json_schema_key_rejected) ... ok
+test_duplicate_keys_rejected (test_pack.ComparisonTests.test_duplicate_keys_rejected) ... ok
+test_empty_outputs_rejected (test_pack.ComparisonTests.test_empty_outputs_rejected) ... ok
+test_exact_category_mismatch_fails (test_pack.ComparisonTests.test_exact_category_mismatch_fails) ... ok
+test_exact_matches_pass (test_pack.ComparisonTests.test_exact_matches_pass) ... ok
+test_extra_column_rejected (test_pack.ComparisonTests.test_extra_column_rejected) ... ok
+test_fortran_d_exponent (test_pack.ComparisonTests.test_fortran_d_exponent) ... ok
+test_justified_near_tolerance_pass (test_pack.ComparisonTests.test_justified_near_tolerance_pass) ... ok
+test_matched_partial_missing_counted (test_pack.ComparisonTests.test_matched_partial_missing_counted) ... ok
+test_misaligned_key_rejected (test_pack.ComparisonTests.test_misaligned_key_rejected) ... ok
+test_missing_other_side_does_not_hide_nan (test_pack.ComparisonTests.test_missing_other_side_does_not_hide_nan) ... ok
+test_missingness_mismatch_fails (test_pack.ComparisonTests.test_missingness_mismatch_fails) ... ok
+test_nan_cannot_be_configured_as_missing (test_pack.ComparisonTests.test_nan_cannot_be_configured_as_missing) ... ok
+test_negative_tolerance_rejected (test_pack.ComparisonTests.test_negative_tolerance_rejected) ... ok
+test_nonfinite_rejected (test_pack.ComparisonTests.test_nonfinite_rejected) ... ok
+test_numeric_mismatch_fails_with_metrics (test_pack.ComparisonTests.test_numeric_mismatch_fails_with_metrics) ... ok
+test_row_count_mismatch_rejected (test_pack.ComparisonTests.test_row_count_mismatch_rejected) ... ok
+test_unapproved_template_rejected (test_pack.ComparisonTests.test_unapproved_template_rejected) ... ok
+test_zero_tolerance_tracks_violation (test_pack.ComparisonTests.test_zero_tolerance_tracks_violation) ... ok
+test_changed_source_invalidates_gate (test_pack.GateTests.test_changed_source_invalidates_gate) ... ok
+test_evidence_tampering_detected (test_pack.GateTests.test_evidence_tampering_detected) ... ok
+test_missing_check_rejected (test_pack.GateTests.test_missing_check_rejected) ... ok
+test_new_source_invalidates_gate (test_pack.GateTests.test_new_source_invalidates_gate) ... ok
+test_no_evidence_rejected (test_pack.GateTests.test_no_evidence_rejected) ... ok
+test_self_review_label_rejected (test_pack.GateTests.test_self_review_label_rejected) ... ok
+test_synthetic_integrity_record (test_pack.GateTests.test_synthetic_integrity_record) ... ok
+test_unassessed_template_blocked (test_pack.GateTests.test_unassessed_template_blocked) ... ok
+test_conflict_preflight_has_no_partial_writes (test_pack.InstallationTests.test_conflict_preflight_has_no_partial_writes) ... ok
+test_copy_install_preserves_model (test_pack.InstallationTests.test_copy_install_preserves_model) ... ok
+test_dry_run_writes_nothing (test_pack.InstallationTests.test_dry_run_writes_nothing) ... ok
+test_empty_existing_instruction_file (test_pack.InstallationTests.test_empty_existing_instruction_file) ... ok
+test_existing_instruction_prefix_preserved (test_pack.InstallationTests.test_existing_instruction_prefix_preserved) ... ok
+test_external_destination_symlink_rejected (test_pack.InstallationTests.test_external_destination_symlink_rejected) ... ok
+test_idempotent (test_pack.InstallationTests.test_idempotent) ... ok
+test_link_install_points_to_canonical (test_pack.InstallationTests.test_link_install_points_to_canonical) ... ok
+test_missing_project_tree_rejected (test_pack.InstallationTests.test_missing_project_tree_rejected) ... ok
+test_all_portable_skill_headers_and_references (test_pack.SkillStructureTests.test_all_portable_skill_headers_and_references) ... ok
+test_caches_excluded_explicitly (test_pack.SnapshotTests.test_caches_excluded_explicitly) ... ok
+test_edit_and_addition_detected (test_pack.SnapshotTests.test_edit_and_addition_detected) ... ok
+test_empty_manifest_rejected (test_pack.SnapshotTests.test_empty_manifest_rejected) ... ok
+test_path_traversal_rejected (test_pack.SnapshotTests.test_path_traversal_rejected) ... ok
+test_removal_detected (test_pack.SnapshotTests.test_removal_detected) ... ok
+test_snapshot_and_unchanged_verification (test_pack.SnapshotTests.test_snapshot_and_unchanged_verification) ... ok
+test_unresolved_input_symlink_rejected (test_pack.SnapshotTests.test_unresolved_input_symlink_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 47 tests in 1.312s
+
+OK

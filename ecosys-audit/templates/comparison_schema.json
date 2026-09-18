@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "status": "NOT_ASSESSED",
+  "description": "TEMPLATE ONLY: replace the example keys/column with the complete discovered normalized output schema. No numerical acceptance values have been assumed.",
+  "approved_by": null,
+  "keys": [
+    "time",
+    "cell"
+  ],
+  "columns": {
+    "REPLACE_WITH_ACTUAL_COLUMN": {
+      "kind": "number",
+      "units": "REQUIRED",
+      "semantics": "instantaneous",
+      "atol": null,
+      "rtol": null,
+      "scale_floor": null,
+      "missing_tokens": [],
+      "min_valid_pairs": 1,
+      "rationale": null
+    }
+  }
+}

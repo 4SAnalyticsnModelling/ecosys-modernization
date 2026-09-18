@@ -1,0 +1,18 @@
+{
+  "status": "NOT_ASSESSED",
+  "same_workload_runtime_target": {
+    "metric": "median Zig wall seconds / median optimized Fortran wall seconds",
+    "maximum": 1.0,
+    "minimum_measured_repeats": 3,
+    "conditions": "Same declared hardware, inputs, duration, output, allocated cores and comparable precision. Report spread and feature differences."
+  },
+  "compile_time_budget_seconds": null,
+  "peak_memory_budget_bytes": null,
+  "historical_ottawa_target": {
+    "seconds": 300,
+    "duration_years": 6,
+    "applicability": "UNCONFIRMED for the current deck/hardware; establish from project evidence before treating it as a gate"
+  },
+  "reviewer": null,
+  "rationale": null
+}

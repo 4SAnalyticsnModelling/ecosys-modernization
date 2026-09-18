@@ -1,0 +1,66 @@
+[
+  {
+    "name": "ecosys-release-orchestrator",
+    "description": "Coordinate the complete ecosys Fortran-to-Zig audit and v1.0.0 release candidate. Use for project startup, resumption, audit planning, stage gates and integration; delegate detailed checks to the focused ecosys skills."
+  },
+  {
+    "name": "ecosys-repository-baseline",
+    "description": "Establish immutable legacy references, equivalent decks, actual toolchains and commands before auditing or benchmarking ecosys-ng. Use when starting, restoring a baseline, or discovering source/input drift."
+  },
+  {
+    "name": "ecosys-fortran-zig-traceability",
+    "description": "Audit every Fortran logical statement, equation, branch and call against Zig with bidirectional provenance. Use for translation completeness, missing routines, index/precision errors or whole-codebase source audit."
+  },
+  {
+    "name": "ecosys-state-io-bindings",
+    "description": "Trace model state, COMMON replacements, process coupling, parsers, units and output writers end to end. Use for binding gaps, stale values, incorrect defaults, suspicious zeros, missing outputs and cumulative-field mismatches."
+  },
+  {
+    "name": "ecosys-process-science-parity",
+    "description": "Review physical and biogeochemical process equations against legacy ecosys and approved replacements. Use for scientific source audits across water, heat, vegetation, carbon, nutrients, gases and other implemented processes."
+  },
+  {
+    "name": "ecosys-conservation-audit",
+    "description": "Build and independently verify local and global conservation budgets for ecosys-ng. Use for mass/energy drift, unexplained pool changes, coupling transfers, solver acceptance and release physics gates."
+  },
+  {
+    "name": "ecosys-nonlinear-solver-audit",
+    "description": "Audit Newton-Raphson, Anderson fallback, bounds, residuals, rollback and freeze-thaw/Richards integration. Use for nonconvergence, oscillation, retry loops, slow hours or physical acceptance failures."
+  },
+  {
+    "name": "ecosys-feature-attribution",
+    "description": "Validate intentional numerical/physical changes and causally attribute output differences. Use for Newton/Anderson, Dall’Amico freeze-thaw, Mualem-van Genuchten, or any claim that drift is an improvement rather than a translation defect."
+  },
+  {
+    "name": "ecosys-validation-tests",
+    "description": "Create a layered test strategy and discriminating regressions for ecosys-ng. Use before integration runs, after fixes, for edge/failure/restart tests and for validating the comparison tooling itself."
+  },
+  {
+    "name": "ecosys-output-comparison",
+    "description": "Compare every legacy and Zig production output file, row and column with verified units and time semantics. Use for parity reports, cumulative daily outputs, significant deviations and final production acceptance."
+  },
+  {
+    "name": "ecosys-divergence-diagnosis",
+    "description": "Find the earliest cause of an ecosys legacy/Zig mismatch or failed hour. Use for significant differences, persistent zeros, solver failures and repeated unsuccessful full-run cycles."
+  },
+  {
+    "name": "ecosys-zig-safety-design",
+    "description": "Apply the project’s Zig principles to ownership, APIs, error paths, memory, maintainability and ReleaseFast safety. Use for code review, refactoring proposals, unsafe constructs and production hardening."
+  },
+  {
+    "name": "ecosys-performance-engineering",
+    "description": "Measure and improve ecosys-ng compile time, ReleaseFast runtime and memory without sacrificing scientific parity. Use after correctness evidence or for a focused diagnosed build/runtime bottleneck."
+  },
+  {
+    "name": "ecosys-build-reproducibility",
+    "description": "Verify pinned compilers, actual build commands, runtime packaging, restart integrity and reproducible ecosys-ng production runs. Use for ReleaseFast compile issues, environment drift and clean-room release checks."
+  },
+  {
+    "name": "ecosys-multi-agent-coordination",
+    "description": "Coordinate Claude Code, Pi and Codex on the same ecosys audit without conflicting edits or duplicate full runs. Use for parallel reviews, subsystem ownership, independent verification and cross-harness handoffs."
+  },
+  {
+    "name": "ecosys-release-verification",
+    "description": "Independently decide whether the audited ecosys-ng candidate meets v1.0.0 production criteria. Use only after source/test/production evidence exists; never infer readiness from compilation or one successful exit."
+  }
+]

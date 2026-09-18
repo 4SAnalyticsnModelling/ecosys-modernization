@@ -1,0 +1,64 @@
+{
+  "status": "NOT_ASSESSED",
+  "note": "Fill from actual build files and tested commands. No executable command is pre-authorized by this template.",
+  "toolchains": {
+    "zig": null,
+    "fortran": null
+  },
+  "commands": {
+    "fortran_build": {
+      "cwd": null,
+      "argv": [],
+      "environment": {},
+      "source_hash": null,
+      "expected_artifacts": [],
+      "completion_condition": null,
+      "last_verified_evidence": null
+    },
+    "fortran_run": {
+      "cwd": null,
+      "argv": [],
+      "environment": {},
+      "source_hash": null,
+      "expected_artifacts": [],
+      "completion_condition": null,
+      "last_verified_evidence": null
+    },
+    "zig_targeted_tests": {
+      "cwd": null,
+      "argv": [],
+      "environment": {},
+      "source_hash": null,
+      "expected_artifacts": [],
+      "completion_condition": null,
+      "last_verified_evidence": null
+    },
+    "zig_short_integration": {
+      "cwd": null,
+      "argv": [],
+      "environment": {},
+      "source_hash": null,
+      "expected_artifacts": [],
+      "completion_condition": null,
+      "last_verified_evidence": null
+    },
+    "zig_releasefast_build": {
+      "cwd": null,
+      "argv": [],
+      "environment": {},
+      "source_hash": null,
+      "expected_artifacts": [],
+      "completion_condition": null,
+      "last_verified_evidence": null
+    },
+    "zig_production_run": {
+      "cwd": null,
+      "argv": [],
+      "environment": {},
+      "source_hash": null,
+      "expected_artifacts": [],
+      "completion_condition": null,
+      "last_verified_evidence": null
+    }
+  }
+}
