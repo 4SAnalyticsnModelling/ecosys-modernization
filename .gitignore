@@ -1,3 +1,4 @@
 ecosys-ng/.zig-cache/
 ecosys-ng/zig-out/
 ecosys-ng/ecosys-ng-bin/
+.claude/scheduled_tasks.lock
