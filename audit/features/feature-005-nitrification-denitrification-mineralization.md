@@ -1,6 +1,18 @@
 # Feature ID: FEAT-005-NITRIFICATION-DENITRIFICATION-MINERALIZATION
 
-Status: PARTIALLY_ASSESSED (first-pass source-audit; `nitro.f` is ~179KB/~7000 lines, only ~4 equations + surrounding blocks read)
+Status: PARTIALLY_ASSESSED (source-audit; `nitro.f` is confirmed 4,592 lines (corrected from an earlier ~7000-line estimate); cumulative direct-read coverage across two passes ~36-37%)
+
+## Addendum 2026-09-18 (same session, follow-up pass): methanogenesis, N2 fixation, litter mineralization -- two clean confirmations, one real undocumented anomaly
+
+**Acetotrophic + hydrogenotrophic methanogenesis** (`:986-1059,1290-1334`) -- Zig: `ecosys-ng/src/soil/microbial/methanogenesis.zig`, `acetotrophic`/`hydrogenotrophic` (`:41-55,94-121`), term-for-term match. Hydrogenotrophic path carries an already-closed, fully-evidenced defect fix (`GAS-METHANOGENESIS-DOUBLE-0.111-001`, `:76-84,112-117`, regression test `:138-177`) correcting a prior double-application of a gram-C-to-gram-H factor that had suppressed hydrogenotrophic CH4 production ~9x -- independently re-verified against `nitro.f:1317-1327` directly, not just trusted from the comment. **Disposition: `preserved`, plus one already-closed `legacy-defect-corrected` sub-finding.**
+
+**Nonsymbiotic N2 fixation** (`:2511-2553`) -- Zig: `ecosys-ng/src/soil/microbial/nonsymbiotic_nitrogen_fixation_step.zig`, term-for-term match. Carries an approved, well-documented extension (`NITRO-N2FIX-SUPPLY`, `:19-31`) adding a dissolved-N2 mass-conservation bound the legacy intensive-Monod term lacks (over-fixes against near-zero N2 mass in frozen/dry layers) -- correctly flagged as a feature with regression tests for both activation and inactivity. **Disposition: `preserved` + approved feature, fully evidenced.**
+
+**Litter-surface NH4/NO3/H2PO4/HPO4 mineralization-immobilization** (`:2296-2481`, the surface sibling of the already-audited soil-layer blocks) -- **real, triangulated anomaly found**: 7 of 8 parallel blocks (soil-layer NH4/NO3/H2PO4/HPO4 and litter NH4/H2PO4/HPO4) use `AMIN1` (demand capped by uptake capacity); litter NO3 alone (`nitro.f:2377`) uses `AMAX1`, contradicting its own header comment and its NH4 sibling three lines above. Triangulated against three axes (soil-vs-litter, NH4-vs-NO3, N-vs-P) to rule out an intentional design choice -- most likely a legacy Fortran typo. Zig (`surface/microbial_mineral_exchange_step.zig`) applies `@min` uniformly for both pools, correctly NOT reproducing the anomaly -- but this deviation from the literal source has no tag/comment/record anywhere, unlike the two clean findings above. **Disposition: `unresolved`** -- filed as `audit/issues/issue-020-nitro-litter-no3-amax1-anomaly-undocumented.md` (Zig's behavior almost certainly correct, but needs a formal review record, not an implicit assumption).
+
+**Soil-layer P mineralization-immobilization** (`:2184-2285`, read as the control/cross-check) -- fully `AMIN1`-consistent, Zig `soil/microbial/phosphorus_exchange_step.zig` matches. `preserved`.
+
+**Coverage**: this pass added ~660 newly-verified lines; cumulative with the prior pass, ~1,650-1,700 of 4,592 lines (~36-37%). Remaining unaudited: colonization/priming/growth-respiration bookkeeping (~lines 160-900,1060-1150,1335-2093,2554-4592) and `nitrogen_state_update.zig`'s `applyZone` (flagged open by the prior pass, still unverified).
 
 ## Scope and provenance
 
