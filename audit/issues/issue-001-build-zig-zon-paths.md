@@ -1,6 +1,6 @@
 # Issue 001 -- build.zig.zon .paths lists nonexistent directories/files
 
-Status: NOT_ASSESSED (severity: low-moderate, packaging/documentation, not proven to block local `zig build`)
+Status: **FIXED 2026-09-18** in `D:\ecosys_modernization` (the master project). See resolution.
 Owner: unassigned
 Candidate/input hashes: audit/manifest/candidate-001-snapshot.json sha256 79eef4efcf97dd130fa1d342d36a09cef6c0cf9053ce6f27f037d2237f770979
 
@@ -21,9 +21,9 @@ Stop/resource budget: one read pass of build.zig.zon/build.zig (done); resolutio
 1. Read `build.zig.zon` and `build.zig`, confirm mismatch, confirm `tools`/`runtime_parameters`/README/MIGRATION absent via `Test-Path`. Result: mismatch confirmed as described above. Next action: leave open, do not fabricate the missing files or silently trim `.paths` without understanding whether `tools/compare_legacy.zig` was intentionally planned.
 
 ## Resolution
-Cause and focused patch: not yet determined -- open.
-Before/after results: n/a
-Regression added and actually executed: n/a
-Invalidated evidence and rerun dependencies: none
-Independent reviewer: none yet
-Remaining limitation or final disposition: UNRESOLVED. Does not block G1 source-reading/testing. Should be resolved before any G4 packaging/release step that relies on `zig build.zig.zon` path fidelity (e.g. distributing this as a fetchable package), and before deciding whether a legacy-output comparator tool is still owed as part of `ecosys-output-comparison` tooling.
+Cause and focused patch: hypothesis (a) turned out to be half right, but for a different tree. The OneDrive reference copy's `build.zig` genuinely does declare `tools/compare_legacy.zig` and `tools/grid_inv_harness.zig` executables wired into a `check` step, and `tools/` and `runtime_parameters/` genuinely exist there. But `D:\ecosys_modernization\ecosys-ng\build.zig` (the master project's own build file) has never had that `check` step or those executables -- it only ever defined the `ecosys_ng` module/executable and `install`/`run`/`test` steps. So `.zon`'s comment was describing the *other* tree, not this one. Separately verified `runtime_parameters/` is not a real functional gap for this tree either: the one source comment citing `runtime_parameters/starts_organic.txt` (`src/soil/organic/parameters.zig:303`) turned out to describe a test-only default-provider function with zero production impact -- the real production data comes from the deck's own `soil_organic_initialization_parameters.txt` via the ordinary runscript file records. Fixed by trimming `build.zig.zon`'s `.paths` to `build.zig`, `build.zig.zon`, `src` -- what this tree's build actually needs -- with an inline comment recording why the other four entries were removed rather than fabricated.
+Before/after results: before, `.paths` listed four nonexistent entries alongside a comment describing tooling this tree's `build.zig` does not have. After, `.paths` matches this tree's actual build exactly.
+Regression added and actually executed: none needed -- this is package-manifest metadata, not executable logic; `zig build test` was already unaffected either way (confirmed both before and after this session's fixes).
+Invalidated evidence and rerun dependencies: none.
+Independent reviewer: none yet.
+Remaining limitation or final disposition: RESOLVED for `D:\ecosys_modernization` as it stands. Noted but explicitly NOT done: porting the OneDrive tree's `tools/compare_legacy.zig` (a legacy-vs-Zig output comparator) and `grid_inv_harness.zig` into the master project. That tooling would be directly useful for this project's output-comparison work, but importing it is a deliberate feature addition with its own scope and risk (unknown size/dependencies, needs its own `build.zig` wiring and review), not a manifest-accuracy fix -- left for explicit future direction rather than done unprompted.

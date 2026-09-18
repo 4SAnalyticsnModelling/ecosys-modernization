@@ -3,18 +3,20 @@
     .version = "1.0.0",
     .minimum_zig_version = "0.16.0",
     .fingerprint = 0x9cd162ed3d1228b3,
-    // `tools` was missing, yet build.zig declares two executables rooted there
-    // (tools/compare_legacy.zig and tools/grid_inv_harness.zig) and wires both
-    // into the `check` step, so a package built from these paths alone could
-    // not configure, let alone build. `runtime_parameters` holds files the
-    // model parses at run time and is likewise not optional.
+    // ISSUE-001. Previously listed `tools`, `runtime_parameters`, `README.md`,
+    // and `MIGRATION.md`, none of which exist in this tree. Verified before
+    // trimming: `zig build test` does not need them, and the one runtime file
+    // path this project's source comments reference
+    // (`runtime_parameters/starts_organic.txt`, in
+    // `src/soil/organic/parameters.zig`) turned out to be stale documentation
+    // for a test-only default provider with zero production impact -- the
+    // real production data lives in the deck's own
+    // `soil_organic_initialization_parameters.txt`, read via the runscript's
+    // ordinary file records, not a fixed `runtime_parameters/` path. No
+    // functional dependency on the four removed paths was found.
     .paths = .{
         "build.zig",
         "build.zig.zon",
         "src",
-        "tools",
-        "runtime_parameters",
-        "README.md",
-        "MIGRATION.md",
     },
 }
