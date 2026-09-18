@@ -1,0 +1,4 @@
+*.bin binary
+*.exe binary
+*.pdb binary
+*.o binary
