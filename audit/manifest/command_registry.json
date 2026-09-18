@@ -53,13 +53,13 @@
       "last_verified_evidence": null
     },
     "zig_production_run": {
-      "cwd": null,
-      "argv": [],
+      "cwd": "<isolated copy of ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON>",
+      "argv": ["ecosys_ng.exe", "--execution-evidence", "<new-file>", "runottawa"],
       "environment": {},
-      "source_hash": null,
-      "expected_artifacts": [],
-      "completion_condition": "NOT_YET_DISCOVERED -- exact argv for pointing the built executable at ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files not yet established; driver/cli.zig and driver/runscript.zig not yet read",
-      "last_verified_evidence": null
+      "source_hash": "git HEAD 771f339, zig build -Doptimize=ReleaseSafe",
+      "expected_artifacts": ["<isolated copy>/runottawa_output_files/", "<execution-evidence path>.json (NDJSON)"],
+      "completion_condition": "DISCOVERED AND EXECUTED 2026-09-18, see audit/runs/run-001-ottawa-diagnostic-2026-09-18.md -- CLI usage confirmed via `ecosys_ng.exe --help`: `[--threads N] [--describe-timeline] [--execution-evidence <new-file>] <runscript>`. --describe-timeline and --execution-evidence are mutually exclusive. Binary built to the custom install prefix ecosys-ng/ecosys-ng-bin/ (gitignored), not zig-out/.",
+      "last_verified_evidence": "run-001: FAILED at hour 2578/262920 (0.98%), error=SoluteReactionSolverDidNotConverge -- see audit/runs/run-001-ottawa-diagnostic-2026-09-18.md for full detail. This is real, trustworthy evidence (unlike the untrusted zig_targeted_tests result above, which has since been separately resolved -- see issue-005's resolution)."
     }
   },
   "helper_commands_executed": [
