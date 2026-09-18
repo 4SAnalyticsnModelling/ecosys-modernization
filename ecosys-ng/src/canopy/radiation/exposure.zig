@@ -87,10 +87,13 @@ pub const ApplyContext = struct {
     /// calls `refreshFromModel` at `ecosys_ng.zig:3509`, before this kernel at
     /// `:3775`, so the values are current within the same hour.
     ///
-    /// It is optional only because `src/ecosys_ng.zig` is owned by the
-    /// Integrator lane and cannot be edited here. Until that one field is
-    /// passed, the leaf-area-only branch remains live and HOUR1-002 remains
-    /// open. See `docs/binding_requests/A6_canopy_exposure_hour1_002.md`.
+    /// HOUR1-002 is CLOSED: the only production call site,
+    /// `stages/hourly_snow_energy.zig`'s `solveSnowSurfaceEnergyAndSoilTransport`
+    /// (called from `stages/hourly_process_driver.zig`), passes this field
+    /// unconditionally whenever `canopy_precipitation_retention` state exists,
+    /// which it does for any deck with plants. The field stays optional
+    /// (rather than required) only so a plant-less deck configuration, where
+    /// this whole kernel is never invoked, still compiles.
     radiation_fractions: ?RadiationFractions = null,
 };
 
@@ -104,12 +107,13 @@ pub const RadiationFractions = struct {
 
 /// Ports HOUR1 FRADT/FRADG/FRADP.
 ///
-/// HOUR1-002. When `context.radiation_fractions` is supplied this is a faithful
-/// projection of the retention owner's `ARLSS`-based fractions. When it is not,
-/// the fallback below sees living *leaf* area only, omitting stalk and standing
-/// dead area, and therefore overstates `ground_exposure_fraction`. That fallback
-/// is retained solely so the existing composition-root call site keeps
-/// compiling; it is not the intended production path.
+/// HOUR1-002 (closed). When `context.radiation_fractions` is supplied -- which
+/// production always does, per the field's own doc comment above -- this is a
+/// faithful projection of the retention owner's `ARLSS`-based fractions. The
+/// leaf-area-only fallback below only fires when it is not supplied, which is
+/// not reachable from the real per-hour driver for any plant-bearing deck; it
+/// is retained solely so a hypothetical caller without retention state still
+/// compiles.
 pub fn applyTile(context: *ApplyContext, range: CellRange) !void {
     const result = context.result;
     // The supplied-fraction shape is validated FIRST, against `result` alone.
