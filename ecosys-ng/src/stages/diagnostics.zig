@@ -1,0 +1,583 @@
+//! Mass-balance reconstruction and debug census helpers.
+//!
+//! Extracted verbatim from `ecosys_ng.zig` so the entry point holds only
+//! `main`. Declaration bodies are unchanged.
+
+const std = @import("std");
+const ecosys = @import("ecosys_ng");
+
+/// Temporary, observation-only trace of the first wet-surface heat/O2 frontier.
+/// Keep the individual canonical carriers visible; do not call a reconstruction
+/// that also publishes arithmetic-provenance diagnostic globals.
+///
+/// The window is retargeted per investigation. It was `[2533, 2536)` for the
+/// hour-2,534 surface frontier; it is now `[2656, 2659)` for
+/// `SURFACE-HEAT-PONDED-LITTER-BOOKING-001`, whose fatal attempt is 2,658.
+///
+/// This is the measurement that investigation needs and it was already wired.
+/// Eight bit-exact verifications established that every individual booking at
+/// that hour is correct while the hour's surface heat closure is not, which
+/// points at an ORDERING effect -- a term moving between two correct bookings.
+/// That is invisible to any hour-resolved probe and visible here, because the
+/// thirteen call sites bracket the substep: `substep_entry`, `after_snow`,
+/// `after_forcing`, `after_recipient_heat`, `accept_entry`,
+/// `after_disappearance_arm`, `after_disappearance_consume`, `after_discharge`,
+/// `after_litter_soil`, `after_snow_compaction`, plus the three in
+/// `hourly_sediment`. Differencing the five carriers across consecutive labels
+/// localizes the move to one stage.
+///
+/// Three hours of tracing, so the per-substep cost that got two broader traces
+/// reverted (6x and 2.3x) does not apply.
+pub fn traceSurfaceFrontier(context: anytype, stage: []const u8, dt_hours: f64) !void {
+    if (comptime @import("builtin").is_test) return;
+    if (context.executed_weather_hours.* < 2656 or context.executed_weather_hours.* >= 2659) return;
+    const oxygen = @intFromEnum(ecosys.gas_transport.Species.oxygen);
+    for (0..context.grid.cell_count) |cell| {
+        const component = cell * ecosys.gas_transport.species_count + oxygen;
+        const gas = context.litter_gas_transport;
+        const organic = try context.surface_organic.totalCarbon_g_c(cell);
+        // PHOSPHORUS-SURFACE-CLOSURE-HOUR-2658-001 attribution, added here
+        // rather than as a new instrument because these thirteen call sites
+        // already bracket the substep across two stage files and are already
+        // gated to the three-hour window. The heat case was attributed with a
+        // purpose-built per-commit trace that had to be reverted for costing
+        // 6x; this rides on a gate that exists.
+        //
+        // The interface transfer is already accounted for
+        // (`surface_to_topsoil = 0.0546924352159549`), leaving
+        // `1.54259794175882e-6` of booked output and `0.000109796384402863` of
+        // booked input unattributed. Differencing these running totals across
+        // consecutive labels names the transaction that books each. No
+        // prediction attached.
+        const surface_scope = context.hourly_layer_boundary_ledger.layout.index(
+            .{ .kind = .surface, .cell = cell },
+        ) catch continue;
+        const surface_activity = context.hourly_layer_boundary_ledger.activity[surface_scope];
+        std.log.info("SURFACE_FRONTIER stage={s} hour={d} dt_hours={e} cell={d} temperature_k={e} cached_capacity_megajoules_per_k={e} liquid_m3={e} ice_we_m3={e} vapor_mol={e} organic_carbon_g_c={e} oxygen_gaseous_g={e} oxygen_dissolved_g={e} oxygen_macro_g={e} oxygen_band_g={e} pending_snow_oxygen_g={e} air_m3={e} booked_phosphorus_input_g={e} booked_phosphorus_output_g={e}", .{
+            stage,                                     context.executed_weather_hours.* + 1,                 dt_hours,                                              cell,
+            context.grid.surface_temperature_k[cell],  context.surface_heat_capacity_megajoules_per_k[cell], context.surface_precipitation.litter_water_m3[cell],   context.surface_litter_ice_m3[cell],
+            gas.water_vapor_mol[cell],                 organic,                                              gas.gaseous_mass_g[component],                         gas.dissolved_mass_g[component],
+            gas.macropore_dissolved_mass_g[component], gas.band_dissolved_mass_g[component],                 context.snow_surface_discharge[cell].litter_g[oxygen], gas.air_volume_m3[cell],
+            surface_activity.phosphorus_input_g,       surface_activity.phosphorus_output_g,
+        });
+    }
+}
+
+pub fn landscapeMassBalanceInputs(context: anytype) ecosys.landscape_mass_balance_runtime.Inputs {
+    return .{
+        .grid = context.grid,
+        .plants = context.plants,
+        .plant_canopy = if (context.detailed_canopy.*) |*canopy| canopy else null,
+        .snow = context.snow_transport,
+        .soil_thermal = context.soil_thermal,
+        .soil_properties = context.soil_solver_properties,
+        .soil_gas = context.gas_transport,
+        .root_gas = if (context.plant_roots.*) |*roots| roots else null,
+        .soil_organic = context.soil_organic,
+        .soil_organic_transport = context.soil_organic_transport,
+        .surface_organic = context.surface_organic,
+        .surface_fire_exchange = context.surface_fire_exchange,
+        .mineral_nitrogen = context.mineral_nitrogen_transport,
+        .fertilizer_band = context.fertilizer_band,
+        .soil_chemistry = context.soil_chemistry,
+        .nitrogen_fertilizer = context.soil_fertilizer_inventory,
+        .mineral_fertilizer = context.mineral_fertilizer_inventory,
+        .suspended_constituents = context.suspended_constituents,
+        .plant_litter_salt_ingress = context.plant_litter_salt_ingress,
+        .micropore_solutes = context.micropore_solute_state,
+        .macropore_solutes = context.macropore_solute_state,
+        .surface_chemistry = context.surface_litter_chemistry,
+        .surface_solutes = context.surface_solute_transport,
+        .surface_fertilizer = context.surface_litter_fertilizer,
+        .surface_denitrification_nitrite_g_n = context.surface_denitrification.nitrite_g_n,
+        .surface = context.surface_precipitation,
+        .surface_ice_water_equivalent_m3 = context.surface_litter_ice_m3,
+        .surface_gas = context.litter_gas_transport,
+        .surface_litter_dry_mass_megagrams = context.surface_litter_geometry.dry_mass_megagrams,
+        .canopy_retention = if (context.canopy_precipitation_retention.*) |*value| value else null,
+        .cell_area_m2 = context.canopy_cell_area_m2,
+        .soil_mass_megagrams_scratch = context.landscape_soil_mass_megagrams_scratch,
+        .parameters = .{
+            .snow_ice_density_megagrams_per_m3 = context.runscript.snow_ice_density_megagrams_per_m3,
+            .snow_latent_heat_of_fusion_megajoules_per_m3 = context.runscript.snow_latent_heat_of_fusion_megajoules_per_m3,
+            .snow_solid_heat_capacity_megajoules_per_m3_k = context.runscript.snow_solid_heat_capacity_megajoules_per_m3_k,
+            .soil_latent_heat_of_fusion_megajoules_per_m3 = context.runscript.soil_phase_heat_parameters.freeze_thaw.latent_heat_of_fusion_megajoules_per_m3,
+            .carbon_g_per_mol = 12,
+            .nitrogen_g_per_mol = context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+            .phosphorus_g_per_mol = context.runscript.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol,
+            .snow_ion_molar_mass_g_per_mol = .{
+                .aluminum = context.runscript.chemistry_primary_initialization.molar_mass_g_per_mol.aluminum,
+                .iron = context.runscript.chemistry_primary_initialization.molar_mass_g_per_mol.iron,
+                .calcium = context.runscript.chemistry_primary_initialization.molar_mass_g_per_mol.calcium,
+                .magnesium = context.runscript.chemistry_primary_initialization.molar_mass_g_per_mol.magnesium,
+                .sodium = context.runscript.chemistry_primary_initialization.molar_mass_g_per_mol.sodium,
+                .potassium = context.runscript.chemistry_primary_initialization.molar_mass_g_per_mol.potassium,
+                .sulfur = context.runscript.chemistry_primary_initialization.molar_mass_g_per_mol.sulfur,
+                .chloride = context.runscript.chemistry_primary_initialization.molar_mass_g_per_mol.chloride,
+            },
+            .surface_physical = .{
+                .dry_organic_heat_capacity_megajoules_per_g_c_k = context.runscript.surface_pond_dry_organic_heat_capacity_megajoules_per_g_c_k,
+                .liquid_water_heat_capacity_megajoules_per_m3_k = context.runscript.soil_phase_heat_parameters.liquid_water_heat_capacity_megajoules_per_m3_k,
+                .ice_heat_capacity_megajoules_per_m3_k = context.runscript.soil_phase_heat_parameters.ice_heat_capacity_megajoules_per_m3_k,
+                .ice_density_megagrams_per_m3 = context.runscript.soil_phase_heat_parameters.freeze_thaw.ice_density_megagrams_per_m3,
+                .latent_heat_of_fusion_megajoules_per_m3 = context.runscript.soil_phase_heat_parameters.freeze_thaw.latent_heat_of_fusion_megajoules_per_m3,
+                .pure_water_melting_temperature_k = context.runscript.soil_phase_heat_parameters.freeze_thaw.pure_water_freezing_temperature_k,
+                .water_molar_mass_g_per_mol = context.runscript.soil_gas_transport_parameters.water_molar_mass_g_per_mol,
+                .liquid_water_density_g_per_m3 = context.runscript.soil_gas_transport_parameters.water_density_g_per_m3,
+            },
+        },
+    };
+}
+
+pub fn reconstructLandscapeMassBalance(context: anytype) !ecosys.mass_balance_audit.Totals {
+    return ecosys.landscape_mass_balance_runtime.reconstruct(
+        landscapeMassBalanceInputs(context),
+        context.landscape_boundary_ledger,
+    );
+}
+
+/// Uses the exact same authoritative storage-owner wiring as the landscape
+/// audit, but preserves horizontal cell scope for hourly acceptance.
+pub fn reconstructLandscapeMassBalanceCells(
+    context: anytype,
+    storage_by_cell: []ecosys.landscape_mass_inventory.Storage,
+) !void {
+    try ecosys.landscape_mass_balance_runtime.reconstructCells(
+        landscapeMassBalanceInputs(context),
+        storage_by_cell,
+    );
+}
+
+/// Reconstructs every soil layer, snow layer, surface and canopy control
+/// volume from the identical authoritative inputs used by the canonical cell
+/// census. `reconstructScopes` also requires their fieldwise partition back to
+/// `canonical_cells_scratch`, so this wrapper cannot silently drift from the
+/// existing landscape/per-cell gate.
+pub fn reconstructLayerMassBalanceScopes(
+    context: anytype,
+    layout: ecosys.layer_local_conservation.Layout,
+    storage_by_scope: []ecosys.landscape_mass_inventory.Storage,
+    canonical_cells_scratch: []ecosys.landscape_mass_inventory.Storage,
+) !void {
+    try ecosys.layer_mass_inventory.reconstructScopes(
+        landscapeMassBalanceInputs(context),
+        layout,
+        storage_by_scope,
+        canonical_cells_scratch,
+    );
+}
+
+pub fn diagnosticStoredNitrogen_g(context: anytype) !f64 {
+    const totals = try reconstructLandscapeMassBalance(context);
+    return totals.residue_nitrogen_g + totals.organic_nitrogen_g +
+        totals.dinitrogen_nitrogen_g + totals.ammonium_nitrogen_g +
+        totals.nitrate_nitrogen_g;
+}
+
+pub fn diagnosticStoredCarbon_g(context: anytype) !f64 {
+    const totals = try reconstructLandscapeMassBalance(context);
+    return totals.residue_carbon_g + totals.organic_carbon_g +
+        totals.carbon_dioxide_carbon_g + totals.plant_carbon_g;
+}
+
+/// The audited heat balance, `storage - external_in + external_out -
+/// internal_production + internal_consumption`, as a running total rather than
+/// a per-day deviation.
+///
+/// The existing `heat stage:` instrument reports the change in census *storage*
+/// alone. That cannot distinguish a stage that moves enthalpy and books it
+/// correctly (storage moves, ledger moves, audit unaffected) from a stage that
+/// changes stored enthalpy with no booking at all (storage moves, ledger does
+/// not, audit breaks). Only the second is a defect, and only the second is what
+/// HEAT-001 is. Differencing this quantity across a stage isolates it: a
+/// conserving stage reads ~0 however much heat it legitimately moves.
+///
+/// This is the same expression as `mass_balance_audit.Balance.heat_megajoules`.
+pub fn diagnosticClosedHeatBalance_megajoules(context: anytype) !f64 {
+    const totals = try reconstructLandscapeMassBalance(context);
+    return totals.heat_storage_megajoules -
+        totals.cumulative_heat_input_megajoules +
+        totals.cumulative_heat_output_megajoules -
+        totals.cumulative_internal_heat_production_megajoules +
+        totals.cumulative_internal_heat_consumption_megajoules;
+}
+
+/// Total surface litter organic carbon across every cell.
+///
+/// The surface census prices litter heat capacity off this carbon
+/// (`landscape_mass_inventory_surface.zig`), so a change here at fixed
+/// temperature moves stored enthalpy with no process flux and must be booked by
+/// `surface_litter_organic_heat_rebase`. Reporting it beside the closed heat
+/// residual makes an unbooked carbon move directly attributable, not inferred.
+pub fn diagnosticSurfaceOrganicCarbon_g_c(context: anytype) !f64 {
+    var total: f64 = 0;
+    for (0..context.surface_organic.layer_count) |cell|
+        total += try context.surface_organic.totalCarbon_g_c(cell);
+    return total;
+}
+
+pub fn diagnosticStoredPhosphorus_g(context: anytype) !f64 {
+    const totals = try reconstructLandscapeMassBalance(context);
+    return totals.residue_phosphorus_g + totals.organic_phosphorus_g +
+        totals.phosphate_phosphorus_g;
+}
+
+pub fn diagnosticPhosphorusOwners_g(context: anytype) ![3]f64 {
+    const totals = try reconstructLandscapeMassBalance(context);
+    return .{ totals.residue_phosphorus_g, totals.organic_phosphorus_g, totals.phosphate_phosphorus_g };
+}
+
+pub fn diagnosticRelayerPhosphateOwners_g(context: anytype) ![3]f64 {
+    const p_mass = context.runscript.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol;
+    var result: [3]f64 = @splat(0);
+    for (0..context.grid.layer_count) |layer| {
+        const zone_fractions = try context.fertilizer_band.scienceZoneFractionsForFlatIndex(layer);
+        const fractions = [2]f64{ zone_fractions.phosphate_non_band, zone_fractions.phosphate_band };
+        const water = context.grid.matrix_liquid_water_m3[layer];
+        const soil_mass = context.soil_solver_properties.matrix_bulk_volume_m3[layer] * context.soil_solver_properties.bulk_density_megagrams_per_m3[layer];
+        const zones = [2]@TypeOf(context.soil_chemistry.non_band_phosphate[0]){ context.soil_chemistry.non_band_phosphate[layer], context.soil_chemistry.band_phosphate[layer] };
+        for (zones, fractions) |zone, fraction| {
+            result[0] += fraction * water * (zone.dissolved_hpo4_mol_p_per_m3 + zone.dissolved_h2po4_mol_p_per_m3) * p_mass;
+            result[1] += fraction * soil_mass * (zone.adsorbed_hpo4_mol_p_per_megagram + zone.adsorbed_h2po4_mol_p_per_megagram) * p_mass;
+            result[2] += fraction * water * (zone.aluminum_phosphate_solid_mol_per_m3 + zone.iron_phosphate_solid_mol_per_m3 + zone.dicalcium_phosphate_solid_mol_per_m3 + 3 * zone.hydroxyapatite_solid_mol_per_m3 + 2 * zone.monocalcium_phosphate_solid_mol_per_m3) * p_mass;
+        }
+    }
+    return result;
+}
+
+/// SOLUTE-CARRIER-PRECIPITATION-DESYNC-001 / PHOSPHORUS-SOIL-SURFACE-BIOGEOCHEMISTRY-HALVES-001.
+///
+/// Dissolved soil phosphate has two storage representations and the ledger reads
+/// only one of them: `diagnosticPhosphorusOwners_g`'s phosphate owner takes
+/// dissolved from the solute transport module's **extensive mol**
+/// (`landscape_mass_inventory_phosphorus_ions.zig:256-272`), while
+/// `diagnosticRelayerPhosphateOwners_g` takes it from
+/// **concentration x water x fraction**. `phosphateImmobileInventory` never reads
+/// the dissolved concentration fields at all.
+///
+/// Printing both at one instant compares the representations directly. The two
+/// have different constant bases (soil-mass conventions differ), so read the
+/// **per-stage deltas** between consecutive prints, not the absolute gap: the
+/// constant basis cancels in a difference. The stage across which the two deltas
+/// disagree by 1.10503606265411e-10 g P owns the defective synchronization.
+///
+/// This exists because four successive mechanisms for that residual were named
+/// from code structure and all four were wrong. It measures which representation
+/// moves instead of inferring it.
+pub fn logPhosphorusRepresentation(context: anytype, comptime stage: []const u8) !void {
+    const owners = try diagnosticPhosphorusOwners_g(context);
+    const relayer = try diagnosticRelayerPhosphateOwners_g(context);
+    // `hourly_cell_conservation.totalPhosphorus` sums FOUR lanes -- residue,
+    // organic, phosphate and plant -- but `diagnosticPhosphorusOwners_g` returns
+    // only the first three. Summing those three and comparing against booked flux
+    // made the uptake publish look like an unbooked +8.4424e-4 g P gain, when the
+    // counterpart simply lives in the plant lane. Carry it so the bracket's total
+    // is the same quantity the gate audits.
+    const plant_g = (try reconstructLandscapeMassBalance(context)).plant_phosphorus_g;
+    // Print all three ledger owners, not just phosphate. The four-stage
+    // decomposition showed the residual is a mismatch between the organic/residue
+    // side (netting -8.46256201977e-4 g P) and the phosphate side (+8.462563124808641e-4):
+    // a mineralization pair that must cancel and does not. Establishing that took
+    // hand arithmetic over assumed splits because this helper was discarding
+    // `owners[0]` and `owners[1]` -- the two values that measure it directly.
+    //
+    // Note the two bases have different SCOPES as well as different constant
+    // offsets: `owners` is whole-landscape (soil + surface litter), while
+    // `diagnosticRelayerPhosphateOwners_g` loops soil layers only. A transport
+    // movement with no concentration counterpart may therefore be surface litter
+    // rather than a representation divergence.
+    // Carry the total matrix water with every print. `phosphateImmobileInventory`
+    // scales the precipitated phosphate by `water_m3 * zone_fraction`, and that
+    // term is ~1192.79 g P -- three orders larger than any flux in this hour. So a
+    // purely numerical change in the water carrier re-bases it and manufactures
+    // phosphorus with no transfer at all: a relative water change of 9.23e-14
+    // (about 416 eps) reproduces the whole 1.1e-10 residual. Printing the carrier
+    // beside the inventory makes that ratio checkable at every boundary instead of
+    // assumed.
+    var matrix_water_m3: f64 = 0;
+    for (context.grid.matrix_liquid_water_m3) |volume_m3| matrix_water_m3 += volume_m3;
+    // Carry the CELL ledger's cumulative booked phosphorus with every print.
+    //
+    // A conservation residual is `(after - before) - (input - output)`, so any
+    // expression built only from those four cannot localize anything -- four such
+    // regroupings were mistaken for attributions in this investigation. Booked
+    // flux sampled at a chosen bracket is outside that set: comparing each
+    // interval's booked delta against its storage delta identifies the interval
+    // whose booking does not match what it moved, which no rearrangement of the
+    // hour's totals can do.
+    var booked_input_g: f64 = 0;
+    var booked_output_g: f64 = 0;
+    for (context.hourly_cell_boundary_ledger.cells) |activity| {
+        booked_input_g += activity.phosphorus_input_g;
+        booked_output_g += activity.phosphorus_output_g;
+    }
+    std.log.info(
+        "phosphorus representation: {s} residue_g={e} organic_g={e} transport_basis_phosphate_g={e} plant_g={e} concentration_dissolved_g={e} concentration_adsorbed_g={e} concentration_precipitated_g={e} matrix_water_m3={e} booked_input_g={e} booked_output_g={e}",
+        .{ stage, owners[0], owners[1], owners[2], plant_g, relayer[0], relayer[1], relayer[2], matrix_water_m3, booked_input_g, booked_output_g },
+    );
+}
+
+/// Water-scaled phosphate mass for one soil layer, evaluated against an
+/// **explicit** carrier rather than the live grid array.
+///
+/// The ledger integrates dissolved and precipitated phosphate as
+/// `concentration * water * zone_fraction`, so its value is only meaningful when
+/// the concentrations and the carrier are consistent. Between a carrier change
+/// and its rebase they are not, and the ledger reads high or low by ~7e-2 g P --
+/// which is the entire explanation for the mid-hour swings that misled several
+/// rounds of this investigation.
+///
+/// A carrier rebase is supposed to preserve exactly this product: it sets
+/// `C_new = C_old * old_water / new_water` so that `C * carrier` is invariant.
+/// Evaluating it against the carrier each concentration is actually valid on
+/// therefore isolates the rebase's true roundoff, which is the quantity
+/// `previewLayerRoundoff` claims to bound.
+pub fn waterScaledPhosphateForLayer(context: anytype, layer: usize, carrier_m3: f64) !f64 {
+    const fractions = try context.fertilizer_band.scienceZoneFractionsForFlatIndex(layer);
+    const p_mass = context.runscript.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol;
+    var total_g: f64 = 0;
+    const zones = [2]@TypeOf(context.soil_chemistry.non_band_phosphate[0]){
+        context.soil_chemistry.non_band_phosphate[layer],
+        context.soil_chemistry.band_phosphate[layer],
+    };
+    for (zones, [2]f64{ fractions.phosphate_non_band, fractions.phosphate_band }) |zone, fraction|
+        total_g += fraction * carrier_m3 * p_mass *
+            (zone.dissolved_hpo4_mol_p_per_m3 + zone.dissolved_h2po4_mol_p_per_m3 +
+                zone.aluminum_phosphate_solid_mol_per_m3 + zone.iron_phosphate_solid_mol_per_m3 +
+                zone.dicalcium_phosphate_solid_mol_per_m3 + 3 * zone.hydroxyapatite_solid_mol_per_m3 +
+                2 * zone.monocalcium_phosphate_solid_mol_per_m3);
+    if (!std.math.isFinite(total_g)) return error.InvalidWaterScaledPhosphateInventory;
+    return total_g;
+}
+
+pub fn diagnosticAmmoniumOwners_g_n(context: anytype) ![6]f64 {
+    const molar_mass = context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol;
+    var result: [6]f64 = @splat(0);
+    for (0..context.grid.cell_count) |cell| {
+        const surface = context.surface_litter_chemistry.cells[cell];
+        const aqueous_carrier_m3 = try ecosys.surface_litter_chemistry_carrier_rebase.effectiveAqueousCarrierM3(
+            context.surface_precipitation.litter_water_m3[cell],
+            context.surface_litter_chemistry.dry_reference_water_m3[cell],
+        );
+        result[0] += aqueous_carrier_m3 * (surface.ammonium_mol_per_m3 + surface.ammonia_mol_per_m3) * molar_mass;
+        result[1] += context.surface_litter_geometry.dry_mass_megagrams[cell] * surface.exchange.ammonium_mol_per_megagram * molar_mass;
+        const fertilizer = context.surface_litter_fertilizer.cells[cell];
+        result[2] += (fertilizer.ammonium_mol_n + fertilizer.ammonia_mol_n + fertilizer.urea_mol_n) * molar_mass;
+    }
+    for (0..context.grid.layer_count) |layer| {
+        const matrix = try context.mineral_nitrogen_transport.matrix.cellAmountsConst(layer);
+        const macro = try context.mineral_nitrogen_transport.macropore.cellAmountsConst(layer);
+        inline for ([_]ecosys.mineral_nitrogen_transport.Species{ .ammonium_non_band, .ammonium_band, .ammonia_non_band, .ammonia_band }) |species| result[3] += (matrix[@intFromEnum(species)] + macro[@intFromEnum(species)]) * molar_mass;
+        const exchange = context.soil_chemistry.cation_exchange_mol_per_megagram[layer];
+        result[4] += context.soil_solver_properties.matrix_bulk_volume_m3[layer] * context.soil_solver_properties.bulk_density_megagrams_per_m3[layer] * (exchange.ammonium_non_band + exchange.ammonium_band) * molar_mass;
+        const fertilizer = context.soil_fertilizer_inventory.soil[layer];
+        result[5] += (fertilizer.broadcast_ammonium_mol_n + fertilizer.broadcast_ammonia_mol_n + fertilizer.broadcast_urea_mol_n + fertilizer.banded_ammonium_mol_n + fertilizer.banded_ammonia_mol_n + fertilizer.banded_urea_mol_n) * molar_mass;
+    }
+    return result;
+}
+
+pub fn diagnosticSnowNitrogen_g(storage: ecosys.landscape_mass_inventory.Storage) f64 {
+    return storage.dinitrogen_nitrogen_g + storage.ammonium_nitrogen_g + storage.nitrate_nitrogen_g;
+}
+
+pub fn diagnosticSnowSpeciesNitrogen_g(amounts: []const f64) f64 {
+    var total_g_n: f64 = 0;
+    const species_count = ecosys.snow_solute_transport.species_count;
+    var first: usize = 0;
+    while (first < amounts.len) : (first += species_count) {
+        inline for ([_]ecosys.snow_solute_transport.Species{
+            .dinitrogen_nitrogen,
+            .nitrous_oxide_nitrogen,
+            .ammonium_nitrogen,
+            .ammonia_nitrogen,
+            .nitrate_nitrogen,
+        }) |species| total_g_n += amounts[first + @intFromEnum(species)];
+    }
+    return total_g_n;
+}
+
+pub fn diagnosticSnowDischargeNitrogen_g(discharge: []const ecosys.snow_solute_transport.SurfaceDischarge) f64 {
+    var total_g_n: f64 = 0;
+    for (discharge) |cell| {
+        total_g_n += diagnosticSnowSpeciesNitrogen_g(&cell.litter_g);
+        total_g_n += diagnosticSnowSpeciesNitrogen_g(&cell.soil_nonband_g);
+        total_g_n += diagnosticSnowSpeciesNitrogen_g(&cell.soil_band_g);
+    }
+    return total_g_n;
+}
+
+fn debugCarbonComponents(context: anytype, totals: ecosys.mass_balance_audit.Totals, label: []const u8) !void {
+    const surface_organic_storage = try ecosys.landscape_mass_inventory.aggregateSurfaceOrganic(
+        context.surface_organic,
+    );
+    const soil_organic_storage = try ecosys.landscape_mass_inventory.aggregateSoilOrganic(
+        context.soil_organic,
+        context.grid,
+    );
+    const area = totals.landscape_area_m2;
+    std.log.debug("{s} components: surf_resid={e} soil_resid={e} soil_org={e} co2={e} cum_co2in={e} cum_cout={e}", .{
+        label,
+        surface_organic_storage.residue_carbon_g / area,
+        soil_organic_storage.residue_carbon_g / area,
+        soil_organic_storage.organic_carbon_g / area,
+        totals.carbon_dioxide_carbon_g / area,
+        totals.cumulative_carbon_dioxide_input_g / area,
+        totals.cumulative_carbon_output_g / area,
+    });
+    // Fine-grained surface sub-pools (cell=0 only)
+    const so = context.surface_organic;
+    const msub = ecosys.soil_organic_initialization.microbial_substrate_count;
+    const mpop = ecosys.soil_organic_initialization.microbial_population_count;
+    const mfrac = ecosys.soil_organic_initialization.kinetic_fraction_count;
+    const sub = ecosys.soil_organic_initialization.substrate_count;
+    const rfrac = ecosys.soil_organic_initialization.residue_fraction_count;
+    const sfrac = ecosys.soil_organic_initialization.structural_fraction_count;
+    var surf_microbial: f64 = 0;
+    for (0..msub) |s| {
+        if (s == 4) continue;
+        const first = (s * mpop) * mfrac;
+        for (so.microbial[first .. first + mpop * mfrac]) |p| surf_microbial += p.carbon_g_c;
+    }
+    var surf_residue: f64 = 0;
+    for (0..3) |s| {
+        const first = s * rfrac;
+        for (so.residue[first .. first + rfrac]) |p| surf_residue += p.carbon_g_c;
+        surf_residue += so.dissolved[s].carbon_g_c + so.adsorbed[s].carbon_g_c;
+        surf_residue += so.dissolved_acetate_carbon_g_c[s] + so.adsorbed_acetate_carbon_g_c[s];
+    }
+    var surf_structural: f64 = 0;
+    for (so.structural[0 .. sub * sfrac]) |p| surf_structural += p.carbon_g_c;
+    // Also log the EXCLUDED surface pools (substrate 3-4 residue/dissolved/adsorbed, substrate 4 microbial)
+    var surf_excluded_resid: f64 = 0;
+    for (3..sub) |s| { // substrates 3 and 4
+        const first = s * rfrac;
+        for (so.residue[first .. first + rfrac]) |p| surf_excluded_resid += p.carbon_g_c;
+        surf_excluded_resid += so.dissolved[s].carbon_g_c + so.adsorbed[s].carbon_g_c;
+        surf_excluded_resid += so.dissolved_acetate_carbon_g_c[s] + so.adsorbed_acetate_carbon_g_c[s];
+    }
+    var surf_microbial_sub4: f64 = 0;
+    {
+        const first = (4 * mpop) * mfrac;
+        for (so.microbial[first .. first + mpop * mfrac]) |p| surf_microbial_sub4 += p.carbon_g_c;
+    }
+    std.log.debug("{s} surf subpools: microbial={e} residue_fracs={e} structural={e} excluded_resid={e} excluded_micro4={e}", .{
+        label,                      surf_microbial / area,      surf_residue / area, surf_structural / area,
+        surf_excluded_resid / area, surf_microbial_sub4 / area,
+    });
+    // Fine-grained soil microbial by substrate category (active layers only)
+    const grid = context.grid;
+    var soil_microbial_resid: f64 = 0;
+    var soil_microbial_org: f64 = 0;
+    for (0..grid.cell_count) |cell| {
+        const active = grid.active_soil_layer_count[cell];
+        for (0..active) |layer| {
+            const layer_cell = cell * grid.soil_layer_capacity + layer;
+            const first_m = layer_cell * msub * mpop * mfrac;
+            for (0..msub) |s| {
+                const m_first = first_m + s * mpop * mfrac;
+                for (context.soil_organic.microbial[m_first .. m_first + mpop * mfrac]) |p| {
+                    if (s == 4) soil_microbial_org += p.carbon_g_c else soil_microbial_resid += p.carbon_g_c;
+                }
+            }
+        }
+    }
+    std.log.debug("{s} soil microbial: resid={e} org={e}", .{
+        label, soil_microbial_resid / area, soil_microbial_org / area,
+    });
+    // Separate gas-CO2 from bicarbonate/carbonate to diagnose balance drift.
+    var gas_co2_g: f64 = 0;
+    var gas_ch4_g: f64 = 0;
+    const gas_state_dbg = context.gas_transport;
+    for (0..grid.cell_count) |cell| {
+        const active = grid.active_soil_layer_count[cell];
+        for (0..active) |layer| {
+            const layer_cell = cell * grid.soil_layer_capacity + layer;
+            const first = layer_cell * ecosys.gas_transport.species_count;
+            const end = first + ecosys.gas_transport.species_count;
+            const gaseous = gas_state_dbg.gaseous_mass_g[first..end];
+            const dissolved = gas_state_dbg.dissolved_mass_g[first..end];
+            const macropore = gas_state_dbg.macropore_dissolved_mass_g[first..end];
+            const band = gas_state_dbg.band_dissolved_mass_g[first..end];
+            gas_co2_g += gaseous[@intFromEnum(ecosys.gas_transport.Species.carbon_dioxide)] +
+                dissolved[@intFromEnum(ecosys.gas_transport.Species.carbon_dioxide)] +
+                macropore[@intFromEnum(ecosys.gas_transport.Species.carbon_dioxide)] +
+                band[@intFromEnum(ecosys.gas_transport.Species.carbon_dioxide)];
+            gas_ch4_g += gaseous[@intFromEnum(ecosys.gas_transport.Species.methane)] +
+                dissolved[@intFromEnum(ecosys.gas_transport.Species.methane)] +
+                macropore[@intFromEnum(ecosys.gas_transport.Species.methane)] +
+                band[@intFromEnum(ecosys.gas_transport.Species.methane)];
+        }
+    }
+    // Bicarbonate/carbonate from micropore + macropore solute amounts.
+    var bicarbonate_g: f64 = 0;
+    const micro = context.micropore_solute_state;
+    const macro = context.macropore_solute_state;
+    for (0..grid.cell_count) |cell| {
+        const active = grid.active_soil_layer_count[cell];
+        for (0..active) |layer| {
+            const layer_cell = cell * grid.soil_layer_capacity + layer;
+            const micro_amounts = try micro.cellAmountsConst(layer_cell);
+            const macro_amounts = try macro.cellAmountsConst(layer_cell);
+            inline for (@typeInfo(ecosys.solute_transport_species.AqueousSpecies).@"enum".fields) |field| {
+                const species: ecosys.solute_transport_species.AqueousSpecies = @enumFromInt(field.value);
+                const is_carbonate_carrier = switch (species) {
+                    .carbonate,
+                    .bicarbonate,
+                    .calcium_carbonate,
+                    .calcium_bicarbonate,
+                    .magnesium_carbonate,
+                    .magnesium_bicarbonate,
+                    .sodium_carbonate,
+                    => true,
+                    else => false,
+                };
+                if (is_carbonate_carrier) {
+                    bicarbonate_g += (micro_amounts[field.value] + macro_amounts[field.value]) * 12.0;
+                }
+            }
+        }
+    }
+    // Chemistry CO2 and bicarbonate — CO2 is synced to gas_transport.dissolved after h-step,
+    // bicarbonate is exported to micropore solute after h-step. Both are counted in EXEC
+    // AFTER the first h-step, but at baseline (before any h-step) they are NOT yet counted.
+    var chem_co2_g: f64 = 0;
+    var chem_bicarb_g: f64 = 0;
+    for (0..grid.cell_count) |cell| {
+        const active = grid.active_soil_layer_count[cell];
+        for (0..active) |layer| {
+            const layer_cell = cell * grid.soil_layer_capacity + layer;
+            const water_m3 = grid.matrix_liquid_water_m3[layer_cell];
+            chem_co2_g += context.soil_chemistry.aqueous[layer_cell].carbon_dioxide * 12.0 * water_m3;
+            chem_bicarb_g += context.soil_chemistry.aqueous[layer_cell].bicarbonate * 12.0 * water_m3;
+        }
+    }
+    // Litter chemistry CO2 — not synced to litter_gas_transport, not in EXEC balance.
+    var litter_chem_co2_g: f64 = 0;
+    var litter_chem_bicarb_g: f64 = 0;
+    var litter_gas_co2_g: f64 = 0;
+    {
+        const litter_chem = context.surface_litter_chemistry;
+        const litter_water = context.surface_precipitation.litter_water_m3;
+        for (0..grid.cell_count) |cell| {
+            const aqueous_carrier_m3 = try ecosys.surface_litter_chemistry_carrier_rebase.effectiveAqueousCarrierM3(
+                litter_water[cell],
+                litter_chem.dry_reference_water_m3[cell],
+            );
+            litter_chem_co2_g += litter_chem.cells[cell].carbon_dioxide_mol_per_m3 * 12.0 * aqueous_carrier_m3;
+            litter_chem_bicarb_g += litter_chem.cells[cell].bicarbonate_mol_per_m3 * 12.0 * aqueous_carrier_m3;
+        }
+    }
+    {
+        const litter_gas = context.litter_gas_transport;
+        const co2_species = @intFromEnum(ecosys.gas_transport.Species.carbon_dioxide);
+        for (0..grid.cell_count) |cell| {
+            const base = cell * ecosys.gas_transport.species_count;
+            litter_gas_co2_g += litter_gas.gaseous_mass_g[base + co2_species] +
+                litter_gas.dissolved_mass_g[base + co2_species];
+        }
+    }
+    std.log.debug("{s} co2 split: gas_co2={e} gas_ch4={e} bicarbonate={e} chem_co2={e} chem_bicarb={e} litter_chem_co2={e} litter_chem_bicarb={e} litter_gas_co2={e}", .{
+        label,                    gas_co2_g / area,            gas_ch4_g / area,        bicarbonate_g / area, chem_co2_g / area, chem_bicarb_g / area,
+        litter_chem_co2_g / area, litter_chem_bicarb_g / area, litter_gas_co2_g / area,
+    });
+}

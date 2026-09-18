@@ -1,0 +1,182 @@
+//! Split out of plant_harvest_runtime.zig by tools/split_decl_group.py.
+//! Pure code motion: every decl below is an exact line slice.
+//!
+//! The declarations live in the `_<group>.zig` files beside this one and
+//! are re-exported here, so `module.name` still resolves for every caller
+//! and the grouping is a file layout choice rather than an API change.
+
+const group_combustion = @import("plant_harvest_source_order_combustion.zig");
+const group_complete_death = @import("plant_harvest_source_order_complete_death.zig");
+const group_dead_branch = @import("plant_harvest_source_order_dead_branch.zig");
+const group_dead_root = @import("plant_harvest_source_order_dead_root.zig");
+const group_disturbance = @import("plant_harvest_source_order_disturbance.zig");
+const group_exchange = @import("plant_harvest_source_order_exchange.zig");
+const group_grazing = @import("plant_harvest_source_order_grazing.zig");
+const group_harvest = @import("plant_harvest_source_order_harvest.zig");
+const group_misc = @import("plant_harvest_source_order_misc.zig");
+const group_tillage = @import("plant_harvest_source_order_tillage.zig");
+
+// combustion
+pub const SourceOrderFireShootCarbon = group_combustion.SourceOrderFireShootCarbon;
+pub const SourceOrderFirePlantInventory = group_combustion.SourceOrderFirePlantInventory;
+pub const SourceOrderFireLayerCarbon = group_combustion.SourceOrderFireLayerCarbon;
+pub const SourceOrderFireInventoryResult = group_combustion.SourceOrderFireInventoryResult;
+pub const sourceOrderAggregateFireCarbonInventory = group_combustion.sourceOrderAggregateFireCarbonInventory;
+pub const SourceOrderCombustionSpecificRates = group_combustion.SourceOrderCombustionSpecificRates;
+pub const SourceOrderCombustionRates = group_combustion.SourceOrderCombustionRates;
+pub const sourceOrderCombustionRates = group_combustion.sourceOrderCombustionRates;
+pub const SourceOrderShootCombustionTotals = group_combustion.SourceOrderShootCombustionTotals;
+pub const SourceOrderShootCombustionFractions = group_combustion.SourceOrderShootCombustionFractions;
+pub const sourceOrderShootCombustionFractions = group_combustion.sourceOrderShootCombustionFractions;
+pub const SourceOrderShootCombustionBranchPools = group_combustion.SourceOrderShootCombustionBranchPools;
+pub const SourceOrderShootCombustionBranchResult = group_combustion.SourceOrderShootCombustionBranchResult;
+pub const SourceOrderShootCombustionResult = group_combustion.SourceOrderShootCombustionResult;
+pub const sourceOrderShootCombustionLosses = group_combustion.sourceOrderShootCombustionLosses;
+pub const SourceOrderShootSaltCombustionBranchResult = group_combustion.SourceOrderShootSaltCombustionBranchResult;
+pub const sourceOrderShootSaltCombustion = group_combustion.sourceOrderShootSaltCombustion;
+pub const SourceOrderShootCombustionNodeState = group_combustion.SourceOrderShootCombustionNodeState;
+pub const SourceOrderShootCombustionNodeLayerState = group_combustion.SourceOrderShootCombustionNodeLayerState;
+pub const SourceOrderStandingDeadCombustionComponent = group_combustion.SourceOrderStandingDeadCombustionComponent;
+pub const SourceOrderStandingDeadCombustionResult = group_combustion.SourceOrderStandingDeadCombustionResult;
+pub const sourceOrderStandingDeadCombustion = group_combustion.sourceOrderStandingDeadCombustion;
+pub const SourceOrderCharcoalCombustionResult = group_combustion.SourceOrderCharcoalCombustionResult;
+pub const sourceOrderCharcoalCombustion = group_combustion.sourceOrderCharcoalCombustion;
+pub const SourceOrderNoCombustionReset = group_combustion.SourceOrderNoCombustionReset;
+pub const sourceOrderResetNoCombustion = group_combustion.sourceOrderResetNoCombustion;
+pub const SourceOrderRootCombustionLayerTotals = group_combustion.SourceOrderRootCombustionLayerTotals;
+pub const SourceOrderRootCombustionFractions = group_combustion.SourceOrderRootCombustionFractions;
+pub const SourceOrderRootCombustionPotentialRates = group_combustion.SourceOrderRootCombustionPotentialRates;
+pub const SourceOrderRootStorageCombustionInput = group_combustion.SourceOrderRootStorageCombustionInput;
+pub const SourceOrderRootStorageCombustionResult = group_combustion.SourceOrderRootStorageCombustionResult;
+pub const sourceOrderRootStorageCombustion = group_combustion.sourceOrderRootStorageCombustion;
+pub const SourceOrderRootCombustionAxisState = group_combustion.SourceOrderRootCombustionAxisState;
+pub const SourceOrderRootCombustionDomainState = group_combustion.SourceOrderRootCombustionDomainState;
+pub const SourceOrderRootCombustionDomainLoss = group_combustion.SourceOrderRootCombustionDomainLoss;
+pub const SourceOrderRootDomainCombustionResult = group_combustion.SourceOrderRootDomainCombustionResult;
+pub const sourceOrderApplyRootDomainCombustion = group_combustion.sourceOrderApplyRootDomainCombustion;
+pub const SourceOrderRootNoduleCombustionResult = group_combustion.SourceOrderRootNoduleCombustionResult;
+pub const sourceOrderRootNoduleCombustion = group_combustion.sourceOrderRootNoduleCombustion;
+pub const SourceOrderRootAxisCombustionReset = group_combustion.SourceOrderRootAxisCombustionReset;
+pub const SourceOrderColdSoilCombustionReset = group_combustion.SourceOrderColdSoilCombustionReset;
+pub const sourceOrderResetColdSoilCombustion = group_combustion.sourceOrderResetColdSoilCombustion;
+
+// complete death
+pub const SourceOrderWholePlantTerminationState = group_complete_death.SourceOrderWholePlantTerminationState;
+pub const SourceOrderWholePlantTerminationResult = group_complete_death.SourceOrderWholePlantTerminationResult;
+pub const sourceOrderWholePlantTermination = group_complete_death.sourceOrderWholePlantTermination;
+pub const SourceOrderCompleteDeathBranchPools = group_complete_death.SourceOrderCompleteDeathBranchPools;
+pub const SourceOrderCompleteDeathShootInput = group_complete_death.SourceOrderCompleteDeathShootInput;
+pub const SourceOrderCompleteDeathShootResult = group_complete_death.SourceOrderCompleteDeathShootResult;
+pub const sourceOrderCompleteDeathShootLitterfall = group_complete_death.sourceOrderCompleteDeathShootLitterfall;
+pub const SourceOrderCompleteDeathRootInput = group_complete_death.SourceOrderCompleteDeathRootInput;
+pub const sourceOrderCompleteDeathRootLitterfall = group_complete_death.sourceOrderCompleteDeathRootLitterfall;
+pub const SourceOrderCompleteDeathBranchState = group_complete_death.SourceOrderCompleteDeathBranchState;
+pub const sourceOrderResetCompleteDeathBranches = group_complete_death.sourceOrderResetCompleteDeathBranches;
+pub const SourceOrderCompleteDeathRootResetState = group_complete_death.SourceOrderCompleteDeathRootResetState;
+pub const sourceOrderResetCompleteDeathRoots = group_complete_death.sourceOrderResetCompleteDeathRoots;
+pub const SourceOrderReseedDate = group_complete_death.SourceOrderReseedDate;
+pub const SourceOrderDeadPerennialReseedResult = group_complete_death.SourceOrderDeadPerennialReseedResult;
+pub const sourceOrderScheduleDeadPerennialReseed = group_complete_death.sourceOrderScheduleDeadPerennialReseed;
+pub const SourceOrderDormantSeedBranch = group_complete_death.SourceOrderDormantSeedBranch;
+pub const SourceOrderDormantSeedActivation = group_complete_death.SourceOrderDormantSeedActivation;
+pub const sourceOrderDormantSeedActivation = group_complete_death.sourceOrderDormantSeedActivation;
+
+// dead branch
+pub const SourceOrderDeadBranchPhenologyState = group_dead_branch.SourceOrderDeadBranchPhenologyState;
+pub const SourceOrderDeadBranchResetInput = group_dead_branch.SourceOrderDeadBranchResetInput;
+pub const sourceOrderResetDeadBranchPhenology = group_dead_branch.sourceOrderResetDeadBranchPhenology;
+pub const SourceOrderDeadBranchLitterPools = group_dead_branch.SourceOrderDeadBranchLitterPools;
+pub const SourceOrderDeadBranchLitterInput = group_dead_branch.SourceOrderDeadBranchLitterInput;
+pub const SourceOrderDeadBranchLitterResult = group_dead_branch.SourceOrderDeadBranchLitterResult;
+pub const sourceOrderDeadBranchLitterfall = group_dead_branch.sourceOrderDeadBranchLitterfall;
+pub const SourceOrderDeadBranchStorageRecoveryInput = group_dead_branch.SourceOrderDeadBranchStorageRecoveryInput;
+pub const SourceOrderDeadBranchStorageRecoveryResult = group_dead_branch.SourceOrderDeadBranchStorageRecoveryResult;
+pub const sourceOrderDeadBranchStorageRecovery = group_dead_branch.sourceOrderDeadBranchStorageRecovery;
+pub const SourceOrderDeadBranchScalarResetState = group_dead_branch.SourceOrderDeadBranchScalarResetState;
+pub const SourceOrderDeadBranchNodeResetState = group_dead_branch.SourceOrderDeadBranchNodeResetState;
+pub const SourceOrderDeadBranchLayerResetState = group_dead_branch.SourceOrderDeadBranchLayerResetState;
+pub const SourceOrderDeadBranchCanopyReset = group_dead_branch.SourceOrderDeadBranchCanopyReset;
+pub const sourceOrderResetDeadBranchCanopy = group_dead_branch.sourceOrderResetDeadBranchCanopy;
+
+// dead root
+pub const SourceOrderDeadRootAxisPools = group_dead_root.SourceOrderDeadRootAxisPools;
+pub const SourceOrderDeadRootLitterInput = group_dead_root.SourceOrderDeadRootLitterInput;
+pub const SourceOrderDeadRootLayerLitter = group_dead_root.SourceOrderDeadRootLayerLitter;
+pub const sourceOrderDeadRootLitterfall = group_dead_root.sourceOrderDeadRootLitterfall;
+pub const SourceOrderRootGasInventory = group_dead_root.SourceOrderRootGasInventory;
+pub const SourceOrderRootGasPhases = group_dead_root.SourceOrderRootGasPhases;
+pub const sourceOrderReleaseDeadRootGases = group_dead_root.sourceOrderReleaseDeadRootGases;
+pub const SourceOrderDeadRootAxisLayerState = group_dead_root.SourceOrderDeadRootAxisLayerState;
+pub const SourceOrderDeadRootDomainAxisState = group_dead_root.SourceOrderDeadRootDomainAxisState;
+pub const SourceOrderDeadRootDomainLayerState = group_dead_root.SourceOrderDeadRootDomainLayerState;
+pub const SourceOrderDeadRootResetState = group_dead_root.SourceOrderDeadRootResetState;
+pub const sourceOrderResetDeadRootState = group_dead_root.sourceOrderResetDeadRootState;
+pub const SourceOrderDeadNoduleLayerPools = group_dead_root.SourceOrderDeadNoduleLayerPools;
+pub const SourceOrderDeadNoduleLitterInput = group_dead_root.SourceOrderDeadNoduleLitterInput;
+pub const sourceOrderDeadNoduleLitterfall = group_dead_root.sourceOrderDeadNoduleLitterfall;
+pub const SourceOrderDeadRootDepthResetState = group_dead_root.SourceOrderDeadRootDepthResetState;
+pub const sourceOrderResetDeadRootDepth = group_dead_root.sourceOrderResetDeadRootDepth;
+
+// disturbance
+pub const sourceOrderHourlyDisturbanceReset = group_disturbance.sourceOrderHourlyDisturbanceReset;
+pub const sourceOrderForestSelfThinningIsEnabled = group_disturbance.sourceOrderForestSelfThinningIsEnabled;
+pub const SourceOrderDisturbanceRemovalInput = group_disturbance.SourceOrderDisturbanceRemovalInput;
+pub const SourceOrderDisturbanceRemovalResult = group_disturbance.SourceOrderDisturbanceRemovalResult;
+pub const sourceOrderTotalDisturbanceRemoval = group_disturbance.sourceOrderTotalDisturbanceRemoval;
+pub const sourceOrderPopulationScaledNumericalThresholds = group_disturbance.sourceOrderPopulationScaledNumericalThresholds;
+pub const sourceOrderAbovegroundDisturbanceIsEnabled = group_disturbance.sourceOrderAbovegroundDisturbanceIsEnabled;
+pub const sourceOrderPopulationAfterDisturbance = group_disturbance.sourceOrderPopulationAfterDisturbance;
+
+// exchange
+pub const SourceOrderSoilPlantExchangeInput = group_exchange.SourceOrderSoilPlantExchangeInput;
+pub const SourceOrderSoilPlantExchangeResult = group_exchange.SourceOrderSoilPlantExchangeResult;
+pub const sourceOrderAccumulateSoilPlantExchange = group_exchange.sourceOrderAccumulateSoilPlantExchange;
+pub const SourceOrderLitterfallAccumulationInput = group_exchange.SourceOrderLitterfallAccumulationInput;
+pub const SourceOrderLitterfallAccumulationResult = group_exchange.SourceOrderLitterfallAccumulationResult;
+pub const sourceOrderAccumulateLitterfall = group_exchange.sourceOrderAccumulateLitterfall;
+
+// grazing
+pub const SourceOrderGrazingLitterLedgerState = group_grazing.SourceOrderGrazingLitterLedgerState;
+pub const SourceOrderGrazingLitterResult = group_grazing.SourceOrderGrazingLitterResult;
+pub const sourceOrderGrazingLitterLedgers = group_grazing.sourceOrderGrazingLitterLedgers;
+
+// harvest
+pub const SourceOrderStandingDeadHarvestInput = group_harvest.SourceOrderStandingDeadHarvestInput;
+pub const SourceOrderStandingDeadHarvestResult = group_harvest.SourceOrderStandingDeadHarvestResult;
+pub const sourceOrderStandingDeadHarvest = group_harvest.sourceOrderStandingDeadHarvest;
+pub const SourceOrderHarvestResidueInput = group_harvest.SourceOrderHarvestResidueInput;
+pub const sourceOrderHarvestResidueRouting = group_harvest.sourceOrderHarvestResidueRouting;
+pub const SourceOrderAbovegroundHarvestLitterInput = group_harvest.SourceOrderAbovegroundHarvestLitterInput;
+pub const SourceOrderAbovegroundHarvestLitterResult = group_harvest.SourceOrderAbovegroundHarvestLitterResult;
+pub const sourceOrderAbovegroundHarvestLitter = group_harvest.sourceOrderAbovegroundHarvestLitter;
+pub const SourceOrderStandingDeadGeometryInput = group_harvest.SourceOrderStandingDeadGeometryInput;
+pub const SourceOrderStandingDeadGeometryResult = group_harvest.SourceOrderStandingDeadGeometryResult;
+pub const sourceOrderStandingDeadGeometry = group_harvest.sourceOrderStandingDeadGeometry;
+pub const sourceOrderCuttingHeightFromLeafAreaRemoval = group_harvest.sourceOrderCuttingHeightFromLeafAreaRemoval;
+
+// misc
+pub const SourceOrderShootSaltInventory = group_misc.SourceOrderShootSaltInventory;
+pub const SourceOrderUncombustedBranchState = group_misc.SourceOrderUncombustedBranchState;
+pub const sourceOrderApplyUncombustedShootState = group_misc.sourceOrderApplyUncombustedShootState;
+
+// tillage
+pub const SourceOrderTillagePopulationState = group_tillage.SourceOrderTillagePopulationState;
+pub const SourceOrderTillagePopulationInput = group_tillage.SourceOrderTillagePopulationInput;
+pub const SourceOrderTillagePopulationResult = group_tillage.SourceOrderTillagePopulationResult;
+pub const sourceOrderTillagePopulationReduction = group_tillage.sourceOrderTillagePopulationReduction;
+pub const SourceOrderTillageBranchPools = group_tillage.SourceOrderTillageBranchPools;
+pub const SourceOrderTillageBranchLitterInput = group_tillage.SourceOrderTillageBranchLitterInput;
+pub const SourceOrderTillageBranchLitterResult = group_tillage.SourceOrderTillageBranchLitterResult;
+pub const sourceOrderTillageBranchLitter = group_tillage.sourceOrderTillageBranchLitter;
+pub const SourceOrderTillageBranchScalarState = group_tillage.SourceOrderTillageBranchScalarState;
+pub const SourceOrderTillageNodeState = group_tillage.SourceOrderTillageNodeState;
+pub const SourceOrderTillageLayerSampleState = group_tillage.SourceOrderTillageLayerSampleState;
+pub const SourceOrderTillageBranchRetentionResult = group_tillage.SourceOrderTillageBranchRetentionResult;
+pub const sourceOrderRetainTillageBranchState = group_tillage.sourceOrderRetainTillageBranchState;
+pub const SourceOrderTillageStandingDeadInput = group_tillage.SourceOrderTillageStandingDeadInput;
+pub const SourceOrderTillageStandingDeadResult = group_tillage.SourceOrderTillageStandingDeadResult;
+pub const sourceOrderTillageStandingDead = group_tillage.sourceOrderTillageStandingDead;
+pub const SourceOrderTillageTerminationState = group_tillage.SourceOrderTillageTerminationState;
+pub const SourceOrderTillageTerminationInput = group_tillage.SourceOrderTillageTerminationInput;
+pub const SourceOrderTillageTerminationResult = group_tillage.SourceOrderTillageTerminationResult;
+pub const sourceOrderTillageTermination = group_tillage.sourceOrderTillageTermination;

@@ -1,0 +1,20 @@
+.{
+    .name = .ecosys_ng,
+    .version = "1.0.0",
+    .minimum_zig_version = "0.16.0",
+    .fingerprint = 0x9cd162ed3d1228b3,
+    // `tools` was missing, yet build.zig declares two executables rooted there
+    // (tools/compare_legacy.zig and tools/grid_inv_harness.zig) and wires both
+    // into the `check` step, so a package built from these paths alone could
+    // not configure, let alone build. `runtime_parameters` holds files the
+    // model parses at run time and is likewise not optional.
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "tools",
+        "runtime_parameters",
+        "README.md",
+        "MIGRATION.md",
+    },
+}

@@ -1,0 +1,2 @@
+# record, latitude, longitude, fertilizer, irrigation, tillage or other soil disturbances
+management_cell	45.30	-75.70	f25fr02	NO	f25til02

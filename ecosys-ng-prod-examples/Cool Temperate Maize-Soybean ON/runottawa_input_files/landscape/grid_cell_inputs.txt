@@ -1,0 +1,2 @@
+# record, latitude, longitude, site file, soil file
+grid_cell	45.30	-75.70	f25si98	f25sol98

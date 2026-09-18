@@ -1,0 +1,2 @@
+# record, latitude, longitude, climate-forcing/simulation-control file
+climate_cell	45.30	-75.70	f25y02

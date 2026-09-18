@@ -1,0 +1,2 @@
+# record, latitude, longitude, weather file
+weather_cell	45.30	-75.70	gbf97h

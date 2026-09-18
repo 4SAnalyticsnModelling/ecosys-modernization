@@ -1,0 +1,395 @@
+{
+  "source": "../examples_ng-prod/Cool Temperate Maize-Soybean ON",
+  "files": [
+    {
+      "path": "runottawa",
+      "bytes": 9796,
+      "sha256": "09DE4E096C3F0B447C40C8BD53F10E6F111F29C84E0A824B2AE731D05C63D188"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_1998.txt",
+      "bytes": 104,
+      "sha256": "542CD1A26A2E9A37C7FF9CA245BE91AA48FE4656441FE51EDF9B2A65718507D5"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_1999.txt",
+      "bytes": 104,
+      "sha256": "5B3D13C4D5266F06D56B664D0FC1CBB98303650549313ABBC356337BBC15D6B9"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_2000.txt",
+      "bytes": 104,
+      "sha256": "9D0140C19362F5284A8D5D8DBEB8D1244C2CADCAA555A97F6F958BF0B10DD8F0"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_2001.txt",
+      "bytes": 104,
+      "sha256": "52AB79474FCD259C2AA83CD78E1E13D8C5451391773CCAB4929E91E1EC4B619B"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_2002.txt",
+      "bytes": 104,
+      "sha256": "C90C5E7604A2C08423FFC9DB50B2EE274B237B43463EB338536228514FFB657D"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_2003.txt",
+      "bytes": 104,
+      "sha256": "C2C2ACB582BE08C527CB3C6607B27E3E18BC791785D1ED754D1620C0C756C23C"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/f25y00",
+      "bytes": 195,
+      "sha256": "CB3487ADB6A74C66395E04745580CF4C6D0143B6D5DABAA302C542FA2AC3BA7C"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/f25y00x",
+      "bytes": 132,
+      "sha256": "435658661062D5D8707FECE3BE0448EE4CC46A7FBC6890F5D849264AFE95141A"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/f25y01",
+      "bytes": 195,
+      "sha256": "A4498B341FD2A97E474710D1E22BC61FAA003F7C6CDE08B77C2DA9BBBDD40268"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/f25y02",
+      "bytes": 195,
+      "sha256": "18776BF82A6202F9FE4EB90F668E9A259836B5036B5460C796B6C43C225ED40F"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/f25y03",
+      "bytes": 195,
+      "sha256": "0AA42B7B29F068F86296503B9A1C58E5161F2CBD5EC87051D106424327DCEA58"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/f25y22",
+      "bytes": 132,
+      "sha256": "04BAC1DF285EC780521434356C637B9AB9D0A5C9CFD083BB978601D970189AE7"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/f25y26",
+      "bytes": 132,
+      "sha256": "DBC701BE86D401718F3C1649706CC217ACDF76E9B248E5FAFB2F459812573DEA"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/f25y98",
+      "bytes": 305,
+      "sha256": "0AB3A4660318DBD373795E1744D1BFC90E848FB8D1F11D0F81A7D1E0B01B2B74"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/f25y98x",
+      "bytes": 131,
+      "sha256": "956D74F70D134DE71B56262920F6A25A7D0E826EF180020F1FCECD82C9CB3976"
+    },
+    {
+      "path": "runottawa_input_files/climate_forcing_and_simulation_controls/f25y99",
+      "bytes": 195,
+      "sha256": "D76DD10496C12493A35299432BAF48D415F4C2201A2EF7F6C696B3F0C57D2966"
+    },
+    {
+      "path": "runottawa_input_files/landscape/f25si98",
+      "bytes": 181,
+      "sha256": "97DD86F1C2BAA73D2C40F073D88F424CD845F41DAEE98197D261D98684BEDE30"
+    },
+    {
+      "path": "runottawa_input_files/landscape/f25sol98",
+      "bytes": 2233,
+      "sha256": "BD8DBC7346B5C181DF7D50756229112B752F43EF1080B7ACF83AA7ECB7503F39"
+    },
+    {
+      "path": "runottawa_input_files/landscape/grid_cell_inputs.txt",
+      "bytes": 92,
+      "sha256": "1D3787270A0A53AB95C6D46E478DB0C3E715A36DC7CC31A58901D5669D3FAAE7"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/f25plt00",
+      "bytes": 78,
+      "sha256": "CEC76634522A76327ED91B87C5A3F0EE4514B3DA04978CE2522912609DD0099E"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/f25plt01",
+      "bytes": 80,
+      "sha256": "7AF1783E4A1FCC3A0498495F5BF1E380F31EFF3BF0CD3865423B48E1781322F7"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/f25plt02",
+      "bytes": 78,
+      "sha256": "2239E9389488124F6D904C72F0CEF996904CCB5C907E78690CC4FA9DC3E522B7"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/f25plt03",
+      "bytes": 79,
+      "sha256": "4BBA6C8019EF3EA3490A97ACB9A6A0EA13FE9A6CEBB147B88532BA13BFA22C0D"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/f25plt26",
+      "bytes": 78,
+      "sha256": "5B221381512F2A7FBB0B5628D432CACF8969BC9B8D08355EA230D5173EBDEDE6"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/f25plt98",
+      "bytes": 80,
+      "sha256": "21CC27425093907AA045982D382430ADA3BECB0740AB6D5A705A9C21D8D99528"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/f25plt99",
+      "bytes": 81,
+      "sha256": "BCACF990441E33A3590DCF1FB4573B60EBA366676F12C36202B8DC4377518F1E"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/plant_grid_1998.txt",
+      "bytes": 106,
+      "sha256": "1C4B82774132BD3D4686CD4D34CFB4DFD30388706E18D14EBE7EFD1D5B415983"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/plant_grid_1999.txt",
+      "bytes": 106,
+      "sha256": "862D73E998B55631A2FAB1CFE53865602121731DD86CA75F0FECC5192A0D61CF"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/plant_grid_2000.txt",
+      "bytes": 106,
+      "sha256": "C9C13AE723639105B49B79E458966E25B62BB1BCD9F0F7804EB851B309D5DDCE"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/plant_grid_2001.txt",
+      "bytes": 106,
+      "sha256": "BC88295C92A6AB625EEB6C9F37D0893F90068153C687B4756AEE83DA0067AB90"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/plant_grid_2002.txt",
+      "bytes": 106,
+      "sha256": "BAECFFAC6F89A7BD6E5E646DD3EA8C67E2E03F2FDFAB2DFC8B9593A44380452F"
+    },
+    {
+      "path": "runottawa_input_files/management/plant/plant_grid_2003.txt",
+      "bytes": 106,
+      "sha256": "FEEEE9A71677EFC06577ED4B0A44F6E306F9D671A2B09D3FB318547518D06F3F"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/fertilizer/f25fr00",
+      "bytes": 183,
+      "sha256": "95E09A11067C848B66C01159D6F42578C045E24F3DC12A64CD373FEC75C384A5"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/fertilizer/f25fr01",
+      "bytes": 93,
+      "sha256": "1B208307BB8711D029269280955C3A7596739361206EAE047825FF9A3FE24211"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/fertilizer/f25fr02",
+      "bytes": 184,
+      "sha256": "5CDC8CE2575D68B31AB4AAE6B6E18A4E14EF2AE77E62A6796FAD44DDEE0259CE"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/fertilizer/f25fr79",
+      "bytes": 89,
+      "sha256": "D022506DE734FAAE720E18C6BB2B86F40476A15B227241122ED2B9D3C04AE055"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/fertilizer/f25fr98",
+      "bytes": 266,
+      "sha256": "D3A078372FC5514483A8BA124B4F9DC40DC2B7E8A7E9FEB9C3D7C40916BD24AF"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/management_grid_1998.txt",
+      "bytes": 139,
+      "sha256": "8AEA62DF3828A00955882F7FE8616FA274E7163F81F30845CCC345196FDC28DD"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/management_grid_1999.txt",
+      "bytes": 139,
+      "sha256": "470AEE910FDB499E021F8CD66D7CDA89F38CFD8638603AEB160D73EBCE0E0E50"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/management_grid_2000.txt",
+      "bytes": 139,
+      "sha256": "9E07FF70DE3A39A2AB956F8908D4EA986D9E4FE5C121AE25D2FAB909FD866021"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/management_grid_2001.txt",
+      "bytes": 139,
+      "sha256": "187518B7D6592B8EC3E8982FE10DBC4160978F4DDFC754747BA4EA59103CCC69"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/management_grid_2002.txt",
+      "bytes": 139,
+      "sha256": "183C6D7FFFE047EE785A786922E0DBE9F1251CAEF01179BD0369C00FD72EA346"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/management_grid_2003.txt",
+      "bytes": 133,
+      "sha256": "CA84AE0030E750B0A8821FF12E51BF2D7D734B48D999900789A9E633C413DAFA"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/tillage_disturbance/f25til00",
+      "bytes": 47,
+      "sha256": "AB7E363E7D0AB3A83541345EBE022FF3F252B814856D385ED2587F9570BF7A4F"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/tillage_disturbance/f25til01",
+      "bytes": 31,
+      "sha256": "60116A271C4892445FBE7DEBCB356E354CC141DAF7660F20B218560EE38BAFA9"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/tillage_disturbance/f25til02",
+      "bytes": 47,
+      "sha256": "F8E1856853169CFEEE75AC5ED2203E954E27AF798A5AC36D6EB60915C60C8044"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/tillage_disturbance/f25til98",
+      "bytes": 50,
+      "sha256": "433281496DA833FEF43865314708C33F737EF75B631F523705096953956DF24F"
+    },
+    {
+      "path": "runottawa_input_files/management/soil/tillage_disturbance/f25til99",
+      "bytes": 47,
+      "sha256": "0CA97609EDA7A44C396C57916EB27C427B3B169B8A6BE154D36D22B6F788982F"
+    },
+    {
+      "path": "runottawa_input_files/parameters/physical_process_parameters.txt",
+      "bytes": 4668,
+      "sha256": "A43B43813E7A6EC8940CA48AFAE040F69DF6FD7908B39097EBB76F1ED7F1044A"
+    },
+    {
+      "path": "runottawa_input_files/parameters/soil_chemistry_reaction_parameters.txt",
+      "bytes": 798,
+      "sha256": "D6986EFE458C6409F8592513E9C89A1462D68B91A4D450CF042E8D4C2C6F1423"
+    },
+    {
+      "path": "runottawa_input_files/parameters/soil_nitrogen_parameters.txt",
+      "bytes": 1495,
+      "sha256": "7B90DA3E5A78D7F4489ECC267C0EED3F67B3DF77660010DDE6325B5D85DB83A8"
+    },
+    {
+      "path": "runottawa_input_files/parameters/soil_organic_initialization_parameters.txt",
+      "bytes": 3670,
+      "sha256": "E5E4163AB7F8DE171FBAAC2BD3F12F661A11729EE9F30D651B15FDF11A58C77F"
+    },
+    {
+      "path": "runottawa_input_files/parameters/surface_gas_and_litter_parameters.txt",
+      "bytes": 2233,
+      "sha256": "4C82F1D2F7B831B4913FFC2F6DA5A112644A78291D1DCB68B550096E3644BA06"
+    },
+    {
+      "path": "runottawa_input_files/plant_functional_types/maiz33",
+      "bytes": 675,
+      "sha256": "E4E8345990769184CC0092457D5C524FBA4C81E91718A7A4CFA97DA1289C171F"
+    },
+    {
+      "path": "runottawa_input_files/plant_functional_types/soyb33",
+      "bytes": 633,
+      "sha256": "29973C32548321FF9D8F215169A54C88D498F6BE7CA34AFCD33BBCA81520903C"
+    },
+    {
+      "path": "runottawa_input_files/plant_functional_types/swhe33",
+      "bytes": 638,
+      "sha256": "E8722028C01AF07BF598E01111D56A12C45DB56E8B9D4B07F290DA1E02F3202F"
+    },
+    {
+      "path": "runottawa_input_files/weather/gbf00h",
+      "bytes": 262057,
+      "sha256": "043273FA2C2746F0469DF8221B3BEA13E30D75279AF6548C6242DEDB63E59C0A"
+    },
+    {
+      "path": "runottawa_input_files/weather/gbf01h",
+      "bytes": 250227,
+      "sha256": "F308416C99469D1E143D89469E9E1A73C1A656B26D22581A28AD21798C2ECA7C"
+    },
+    {
+      "path": "runottawa_input_files/weather/gbf02h",
+      "bytes": 250888,
+      "sha256": "9F8CF7167F2992507CBFFBCBE3B10E9AA39B621A4C197DB997DF66AFE11DF64F"
+    },
+    {
+      "path": "runottawa_input_files/weather/gbf97h",
+      "bytes": 252802,
+      "sha256": "8A2A399E49B67492267EEC5075DE587457886F357D9619AE2865120574792CE6"
+    },
+    {
+      "path": "runottawa_input_files/weather/gbf98h",
+      "bytes": 256195,
+      "sha256": "BDC5230411E6069833FB5ADE3B3A032106591D04AF64C1D739503BDA4C0EAF0B"
+    },
+    {
+      "path": "runottawa_input_files/weather/gbf99h",
+      "bytes": 233507,
+      "sha256": "C79C2C245D04041F99BA10FC561645DA9AB88CE8F93809E47D1C01BD2A892304"
+    },
+    {
+      "path": "runottawa_input_files/weather/weather_grid_1998.txt",
+      "bytes": 77,
+      "sha256": "FABDDEC18DC16B19F9C939A46E7F88493198185258912052F3E647A9E3404329"
+    },
+    {
+      "path": "runottawa_input_files/weather/weather_grid_1999.txt",
+      "bytes": 77,
+      "sha256": "A4161F22769934E44F1DF194911DDBC4BE1CD2FB3BDCAD5066E57BA3CF5A5F92"
+    },
+    {
+      "path": "runottawa_input_files/weather/weather_grid_2000.txt",
+      "bytes": 77,
+      "sha256": "1652B907F8E4ED0463A89E4D6642903326302FFE2D760B77CEF254F14D20C332"
+    },
+    {
+      "path": "runottawa_input_files/weather/weather_grid_2001.txt",
+      "bytes": 77,
+      "sha256": "F7058E0DF8C0D33B2A65239AC4B9229FB7EC7444EF81307DF17B931DD2B074A0"
+    },
+    {
+      "path": "runottawa_input_files/weather/weather_grid_2002.txt",
+      "bytes": 77,
+      "sha256": "273FDC2920D8E4C344A20B2FA80727A064F66DAE6EE97488C0BCA0963EDEDAFC"
+    },
+    {
+      "path": "runottawa_input_files/weather/weather_grid_2003.txt",
+      "bytes": 77,
+      "sha256": "D125E9F26DD414FF5CE5F060F1214A3A43F380AC7A0428FE8556F7FE0999CDFD"
+    },
+    {
+      "path": "runottawa_input_files/write_output_options/f25cd1",
+      "bytes": 477,
+      "sha256": "2155929DA2F3CC9F3BE8A9DDFBCC16A761FBCF183DAB18F968699925F2509C89"
+    },
+    {
+      "path": "runottawa_input_files/write_output_options/f25ch1",
+      "bytes": 334,
+      "sha256": "28D605D3515917CF14113E71EC0E5D3E9708DAEDA6BA32F94C88FBF63787A823"
+    },
+    {
+      "path": "runottawa_input_files/write_output_options/f25ed1",
+      "bytes": 471,
+      "sha256": "5AACD819FD3F002C1B068C41BBBD0E49746C5FFF2E79BF665D4B04453A3598D1"
+    },
+    {
+      "path": "runottawa_input_files/write_output_options/f25eh1",
+      "bytes": 444,
+      "sha256": "2CF9675BE58894989084E57A008500EC1319CA68C0A94276E1FA97541DDD50C5"
+    },
+    {
+      "path": "runottawa_input_files/write_output_options/f25nd1",
+      "bytes": 370,
+      "sha256": "A3F1236CF16058827464B12D6AB74E93E830D325A6B8E04075BAE14DA2A76B9F"
+    },
+    {
+      "path": "runottawa_input_files/write_output_options/f25nh1",
+      "bytes": 323,
+      "sha256": "04806635783D0D9DCCFD184F390F18E580A24787A63B7CE3A61706914577A0D8"
+    },
+    {
+      "path": "runottawa_input_files/write_output_options/f25pd1",
+      "bytes": 355,
+      "sha256": "D23C5016D42FE9221E856573795346EC441C54C2036B80EB961BCEB17A86559A"
+    },
+    {
+      "path": "runottawa_input_files/write_output_options/f25wd1",
+      "bytes": 465,
+      "sha256": "18874EA4CFC64AAFD1F7CBD561B5A1D1FFA2A9AB546AA3704C7ED3C59A52B703"
+    },
+    {
+      "path": "runottawa_input_files/write_output_options/f25wh1",
+      "bytes": 464,
+      "sha256": "D6B7C5EF39BD0E95DC2014790CF6F23D1199730AEFD128CEB2A7DC4447D1BFFF"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+# NITRO soil microbial, nitrogen, oxygen, and methane coefficients.
+soil_nitrification,0.001,0.0002,7000,14,1.4,1.4,0.125,0.125,0.3,0.1,0.5,2.667,3.429,1.143
+soil_denitrification,0.001,1.4,1.4,0.014,1,0.429,0.429,0.214,0.875
+soil_autotrophic_denitrification,0.5,0.333
+soil_chemodenitrification,0.0005,0.001,1e-12,0.5,0,0.5
+nitrous_acid_dissociation_mol_per_m3,0.45
+soil_microbial_thermal_adaptation_offset_k,0
+soil_nitrifier_indices,5,0,1,1
+soil_nitrifier_environment,0.55,0.1,0.1,0.01,0.01,12,0.1
+soil_oxygen_uptake,1e-6,2.3866348449e11,0.064,-1.5e4,0.5,12,12,0.5,0.7,0.001,1e-12
+soil_heterotrophic_respiration,0.125,0.1,0.01,12,12,0.5,0.42016806722689076,0.1,2.667,0.01,0.01,1e-6,1,0.7142857142857143
+soil_microbial_mineral_exchange,0.014,0.0125,0.40,0.014,0.03,0.35,0.003,0.009,0.18,31
+soil_nonsymbiotic_nitrogen_fixation,5,6,0.25,0.02,0.14,0.25
+soil_microbial_turnover,0.01,0.001,0.167,0.333,0.333,0.333,0.150,0.300,0.333,0.25,2.0,5.0,1.0,0.5,0.182e-6
+soil_microbial_layer_mixing,0.001
+soil_methane,4,2,0.001,0.01,0.1,1,10,0.05,1.5,0.111,0.2,0.03,0.5,0.4,0.5,0.125
+# NITRO.F 179--187 anaerobic ECHZ energetics: GCHX GC4X EOMF EOMY EOMH EO2X ENFY.
+# Activates the product-energy feedback in soil_heterotrophic_respiration_step,
+# replacing two fixed growth-respiration ceilings that were misattributed
+# constants. See docs/model_changes.md 'NITRO anaerobic ECHZ product-energy
+# feedback' and DISC-NITRO-001.
+soil_anaerobic_growth_energy,3.0,1.5,37.5,37.5,37.5,0.4,0.5
