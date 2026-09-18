@@ -51,6 +51,10 @@ This makes the pattern of "referenced but absent" now span at least **eight** di
 
 This is the last forensic avenue attempted; no further diagnosis experiments planned without new input from the user or peer session. Nothing was restored (there is nothing under `src/validation`/`src/index` in the bin to restore).
 
+### CONFIRMED STILL RESOLVED after a separate, later incident (2026-09-18, second session, ecosys-modernization-88)
+
+After this issue's fix was committed to git, the root was renamed underscore->hyphen and briefly lost/recovered via the Recycle Bin (unrelated root cause -- see `issue-008-robocopy-move-recycle-bin-recovery.md`). After that recovery, a **fresh, full, unfiltered** `zig test src\module_index.zig` run (not the 52-test filtered check recorded above) completed cleanly: **4286 passed; 1 skipped; 0 failed** (4287 total), exit code 0. This confirms the `src/validation`/`src/index` fix from this issue, and the `build.zig`/`build.zig.zon` fix from issue-001, both survived intact. This is now the authoritative, most-recent trustworthy baseline number for the project -- supersedes the "52 selected tests" figure above as the thing to cite going forward.
+
 ## RESOLUTION (2026-09-18)
 
 The user provided the location of a second, complete copy of this project: `C:\Users\symon.mezbahuddin\OneDrive - Government of Alberta\ProjectsSymon\ecosys_modernization\ecosys-ng`. Verification before touching anything:

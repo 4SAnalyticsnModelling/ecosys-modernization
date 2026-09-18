@@ -34,3 +34,19 @@ Performance impact: not yet measured.
 Author and independent reviewer: dossier opened by this session (ecosys-modernization-af) from source reading only; no independent reviewer yet.
 Evidence paths/hashes: `audit/manifest/candidate-001-snapshot.json` (whole-tree hash only); `ecosys-ng/src/soil/water/phase_change.zig` lines 60-129 read directly this session (2026-09-18).
 Decision: NOT_ASSESSED / open. Do not treat this feature as accepted or as a source of unexplained discrepancy until legacy-side freeze-thaw code is read in full and a matched-state/limiting-case test is actually run.
+
+## Addendum 2026-09-18 (second session, ecosys-modernization-88): a SECOND, distinct legacy freeze-thaw mechanism found and its Zig port verified faithful
+
+This dossier's scope above covers the `dallAmicoEquilibrium` Clapeyron-form treatment. There is a **separate** legacy freeze-thaw mechanism this dossier had not yet traced: the **latent-heat/matric-depressed-freezing-point partition**, `f77src/watsub.f:6386-6446` (surface-litter/snowpack variants at `:1938-1960`, `:2064-2083`, `:2355-2381`, `:2788-2808`, `:3131-3151`):
+```
+TFREEZ = -9.0959E+04 / (PSISV1 - 333.0)                 [6399]  micropore: matric-depressed freezing point
+macropore threshold = 273.15                            [6430]  plain 0C, no depression
+HFLFM1 = VHCP1*(TFREEZ-TK1)/(1.0+6.2913E-03*TFREEZ)      [6404-6405]
+HFLFM  = donor-bounded, scaled by XNPXX                  [6406-6410]
+WFLFL  = -HFLFM/333.0                                    [6411]
+```
+Explicit physical asymmetry: micropore water is capillary-bound (freezing-point-depressed), macropore water behaves as free water (plain 0C, no depression).
+
+**Zig port, verified faithful**: `phase_change.zig`'s `freezeParameters()` (`:328-330`) carries the identical constants (`9.0959e4`, `333`, `6.2913e-3`, `273.15`). `freezeThaw` (`:286-302`) reproduces the formula AND the micropore/macropore asymmetry in one line (`:291`): `threshold_temperature = if (macropore) parameters.pure_water_freezing_temperature_k else freezing_temperature;`, dispatched via public wrappers `matrixFreezeThaw` (`:276-278`, micropore) / `macroporeFreezeThaw` (`:280-284`, macropore). Donor-bounded heat clamp (`:294-297`) and `liquid_change = -heat/latent_heat`, `ice_change = -liquid_change/ice_density` (`:298-299`) match `watsub.f:6406-6411`'s shape. **This half of the freeze-thaw feature is a faithful, verified port (disposition: `preserved`), distinct from and complementary to the `dallAmicoEquilibrium` new-physics half already documented above** — the codebase runs both: the legacy-faithful `freezeThaw` primitive for legacy-equivalent consumers, and `dallAmicoEquilibrium` (paired with the new Mualem-van Genuchten curve) for the hydraulic-conductivity solver. Not yet traced: which specific callers route to which of the two, and whether that routing itself is correct (flagged as a follow-up, not yet done).
+
+Source: fork trace, read-only, this session, citing `D:\ecosys-modernization\f77src\watsub.f` and `D:\ecosys-modernization\ecosys-ng\src\soil\water\phase_change.zig` at git commit `97a33a9`.

@@ -39,3 +39,22 @@ Performance impact: not yet measured (curve-fitting per layer, potentially per h
 Author and independent reviewer: dossier opened by this session (ecosys-modernization-af) from source reading only; no independent reviewer yet.
 Evidence paths/hashes: `ecosys-ng/src/soil/water/retention.zig` (lines 1-560, 610-838 read this session), `ecosys-ng/src/soil/water/solver_properties.zig` (lines 190-280 read this session), `f77src/watsub.f` (lines 1600-1760 read this session, sha256 8606e2ea96e52ee8109cf0ef78b6b49abe0683e68baa41ffacbebaf1fe49da95).
 Decision: NOT_ASSESSED / open.
+
+## Addendum 2026-09-18 (second session, ecosys-modernization-88): a real, narrow gap found in the legacy-preserved branch
+
+`watsub.f:1660-1712`'s actual branch structure for the legacy-faithful curve is:
+```
+IF (BKVL(NUM,...) > ZEROS) THEN        [layer has real mineral bulk mass]
+   normal FC/WP-based retention curve   [:1661-1676]
+ELSEIF (DLYR(3,NUM,...) > DLYRM) THEN  [no mineral mass, layer still "exists" -- DLYRM=ZERO2 (`starts.f:95`), a near-zero existence guard, not a thin-layer threshold]
+   ice-content-analog curve: FCX=FCI*THETIX, WPX=WPI*THETIX   [:1678-1702]
+ELSE                                    [layer doesn't meaningfully exist]
+   snap to saturation (POROS/PSISE)     [:1709-1712]
+```
+The middle branch substitutes an ice-content-derived retention curve for layers with **zero mineral bulk mass** (`BKVL<=0` -- pure organic/peat/ice-dominated material), not merely "thin" layers.
+
+Searched `ecosys-ng/src/soil/water/retention.zig` for `WPI`/`FCI`/any ice-content-analog retention constant: **zero matches**. No `BKVL`-equivalent zero-bulk-density branch found there either. Confirmed this is a real, reachable case in ecosys-ng (not moot/dead-code): `ecosys-ng/src/soil/profile/initialization.zig:44-50` explicitly anticipates `bulk_density <= 0.0` for macropore-fraction purposes (`const macropore_fraction = if (bulk_density <= 0.0) 0.0 else profile.macropore_fraction[layer];`). Adjacent-but-not-matching: `thin_layer_pore_solute_reset.zig`/`thin_soil_boundary_solute_flux_reset.zig` handle degenerate-layer **solute** pore/flux state, a structurally different mechanism for a different physical quantity, not a confirmed counterpart for water-potential.
+
+**Disposition: `unresolved`** on this narrow point (does not change the overall `preserved`/`replaced-by-approved-feature` disposition of the two main curves). Scope is narrow (zero-mineral-bulk-density layers only) and there is no evidence yet that it affects the current production frontier. Next concrete step (not yet done): determine what `ResolvedCurve.waterPotentialMpa` actually returns today for a `bulk_density<=0` layer (falls through to the normal FC/WP branches with degenerate inputs -- may or may not coincidentally reproduce a reasonable shape) and, if wrong, port `watsub.f:1678-1702`'s substitution.
+
+Source: fork trace + direct follow-up, read-only, this session, citing `D:\ecosys-modernization\f77src\{watsub.f,starts.f}` and `D:\ecosys-modernization\ecosys-ng\src\soil\{water\retention.zig,profile\initialization.zig}` at git commit `97a33a9`.
