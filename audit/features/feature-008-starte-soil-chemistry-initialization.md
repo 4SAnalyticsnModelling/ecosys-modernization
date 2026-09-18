@@ -1,6 +1,18 @@
 # Feature ID: FEAT-008-STARTE-SOIL-CHEMISTRY-INITIALIZATION
 
-Status: PARTIALLY_ASSESSED (first-pass source-audit; `starte.f` is 73KB/2205 lines; the two 1000-iteration convergence loops NOT traced, only their seeding inputs)
+Status: PARTIALLY_ASSESSED (source-audit; `starte.f` is 73KB/2205 lines; cumulative coverage now includes most of both convergence loops per the follow-up pass below)
+
+## Addendum 2026-09-18 (same session, follow-up pass): Gapon exchange asymmetry (real, undocumented), plus 3 clean confirmations
+
+**Cation exchange (Gapon), soil vs. litter -- real asymmetry found, `unresolved`**: soil-layer Gapon partition (`:714-736`) weights both numerator and denominator by valence (`*3.0` Al/Fe, `*2.0` Ca/Mg); the litter-surface sibling (`:1828-1841`) keeps the weights in the denominator but drops them from the numerators. **Confirmed reproducible, not a one-off**: `solute.f:4360-4394` (the runtime litter Gapon block) shows the identical mismatch. Zig (`soil/solute/cation_exchange.zig`) implements one unified, always-weighted kernel used for both soil (`chemistry/initialization.zig:630-684`, verified correct against `:715-763`) and litter (`surface/litter_chemistry_step.zig:65,212`) -- i.e. Zig does NOT reproduce the litter-specific unweighted form. No documentation found for this deviation. Filed as `audit/issues/issue-021-litter-gapon-exchange-unweighted-numerator-undocumented.md`.
+
+**`RC0P` (CaPO4 dissociation) hard-coded to zero -- `preserved`, checked both directions**: one of ~8 ion-pair dissociation siblings (`:1075-1077`) is a bare `RC0P=0.0` instead of the active mass-action form its siblings use -- the "N parallel blocks, 1 outlier" shape, but this time confirmed intentional: the species is seeded from nonzero user input (`:1502-1506`) yet never reacted in the Fortran, and no Zig reaction exists for it either (only conservative transport, e.g. `redistribution/surface/overland_flow_litter_salt_update.zig:154-157`) -- checked both Fortran-to-Zig and Zig-to-Fortran directions, both agree it's intentionally inert.
+
+**Generic ion-dissociation clamped mass-action form -- `preserved`**, ~20 siblings (`:826-1102`) faithfully ported via the shared `ion_pairing.zig` kernel plus per-species wrappers, confirmed against the runtime analog (`solute.f:3557-3588`) cited directly in `aqueous_reaction_rates.zig:79-136`. One loose end not yet chased: `RM1P` (`:1097-1098`) mixes `FIONS`/`FIONX` scaling factors within one reaction where its siblings `RF1P`/`RC1P`/`RC2P` use one consistently -- flagged `unresolved` pending a dedicated Zig-side check, not yet performed.
+
+**Manure-nitrogen 50/50 NH4 split -- open trace, not a confirmed gap**: `:1688-1694`'s mass-conserving split into the ammonium pool was searched for in `soil/organic/initialization.zig` and not conclusively located -- may exist under different naming, needs a direct caller trace before escalating.
+
+**Coverage**: fully read `:406-1103,715-763,1401-1710,1778-1997`. Not read: `:1103-1400` (loop-1 flux-summation closure tail) and `:1997-2205` (litter precipitate/exchangeable-P tail).
 
 ## Scope and provenance
 
