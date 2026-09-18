@@ -32,9 +32,18 @@ Zig: `ecosys-ng/src/validation/hourly_cell_conservation.zig` (sha256 `1133181B2A
 
 **Disposition: `replaced-by-approved-feature`** -- a deliberate, substantial upgrade from "commented-out diagnostic" to "designed-as-enforced gate," matching the contract's conservation requirements. **Not independently verified this pass** whether the gate is actually wired into the production accepted-hour path today (the module's own comment flags coverage-completeness as a precondition) -- cross-check against `audit/conservation/` evidence before treating this as closed.
 
+## Addendum 2026-09-18 (same session, follow-up pass): `DO 245`'s bulk (~76% of the 8244-10604 block) -- two real candidate gaps found
+
+Six pool-transfer families sampled: pond N/P solutes+salts (`:8560-8692`, `preserved`), soil fertilizer transfer with an `AMIN1` cap (`:9670-9714`, `preserved`, cap-semantics follow-up flagged), organic matter (`:10322-10356`, `preserved`, not field-verified), gaseous/aqueous gas pools (`:10061-10106`, `preserved`, not field-verified), and two families with a **real asymmetry between the Fortran's pond and soil branches that Zig does not reproduce**:
+
+- **Adsorbed cations/anions/precipitates**: Fortran's soil branch (`:9905-10059`) gates transfer on `L0>L1` (upward only); Fortran's pond branch (`:8984-9014ish`) transfers unconditionally. Zig (`relayering.zig:508-511`) applies the upward-only gate to BOTH branches -- confirmed via the only production call site, with pond-driven boundary changes confirmed live (not dormant) via `pond_domain_transaction.zig:255`.
+- **Root gases**: Fortran's soil branch (`:10413-10450`) is entirely commented out (dormant, correctly mirrored in Zig); Fortran's pond branch (`:8800-8825`) is active. Zig's only production call site (`relayering.zig:575`) excludes gas fields for both branches -- the gas-inclusive Zig functions exist but are dead code outside unit tests.
+
+Both are real, live-code-path asymmetries (not stale comments), verified against actual call sites. **Disposition: `unresolved`** for both, pending conservation/feature-attribution review -- see `audit/issues/issue-017-redist-pond-branch-relayering-asymmetry.md` for full detail and citations.
+
 ## Not covered this pass
 
-Sink-pool block (`:192-609`); most of `DO 245`'s pond/soil redistribution arithmetic (`:8244-10604`, ~2,350 lines only sampled); tillage mixing (`:11017-12842`, contains the already-known `TILLAGE-ORGANIC-MIRROR-OWNER-001`); fire/combustion (`:10680-10973`); runoff/subsurface boundary fluxes (`:616-1439`); net-flux accumulators (`:1439-3935`); freeze-thaw/snowpack (`:3935-4218`).
+Sink-pool block (`:192-609`); the remaining ~24% of `DO 245`'s bulk (`:8965-9439` pond `FY`-decrement mirror, `:10148-10413` macropore aqueous-gas/organic continuation, surveyed by header only); tillage mixing (`:11017-12842`, contains the already-known `TILLAGE-ORGANIC-MIRROR-OWNER-001`); fire/combustion (`:10680-10973`); runoff/subsurface boundary fluxes (`:616-1439`); net-flux accumulators (`:1439-3935`); freeze-thaw/snowpack (`:3935-4218`).
 
 ## Acceptance and review
 
