@@ -1,0 +1,2 @@
+year,day_of_year,month,day,hour,grid_column,grid_row,transpiration[mm],cold_or_water_stress[h],oxygen_stress_factor[fraction]
+1998,365,12,31,23,1,1,-0e0,0e0,0e0
