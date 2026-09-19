@@ -110,8 +110,15 @@ pub const Inputs = struct {
     surface_soil_volume_m3_by_cell: []const f64,
     receiving_soil_bulk_density_megagrams_per_m3_by_cell: []const f64,
     /// Accepted biological SOC change after the legacy DORGE eroded-carbon
-    /// cancellation. Production must not bind the uncancelled hourly SOC
-    /// difference here; PR-GEOM-01B owns that missing producer.
+    /// cancellation. The `PR-GEOM-01B` tag formerly here claimed this
+    /// producer was missing; independently re-verified 2026-09-19
+    /// (audit/issues/issue-012-pr-geom-01b-soc-cancellation-unwired.md,
+    /// closed `preserved`) and found stale: production performs the
+    /// cancellation in `soil/organic/carbon_change.zig`'s
+    /// `publishAcceptedHourlyChange`, using the erosion term published by
+    /// `soil/profile/erosion_organic_bridge.zig`'s
+    /// `publishLocalCarbonNetChangeMapped` (called from
+    /// `stages/hourly_sediment.zig`), matching `redist.f:6871-6873` exactly.
     organic_carbon_change_after_erosion_cancellation_g_c: []const f64,
     macropore_fraction: []const f64,
     reference_bulk_density_megagrams_per_m3: []const f64,

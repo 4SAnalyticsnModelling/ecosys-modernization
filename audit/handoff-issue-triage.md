@@ -14,14 +14,16 @@ backlog, not a new finding.
 
 **54 issue files.** Of these:
 
-- **11 are closed / no longer open**: `issue-001`, `issue-002` (CORRECTION,
+- **12 are closed / no longer open**: `issue-001`, `issue-002` (CORRECTION,
   post-dates this triage pass: an independent gfortran oracle was built and
   ran this checkout's own 30-year Ottawa deck to full completion later the
   same session -- see `issue-002`'s own "Resolution" section and
   `audit/runs/run-002-*.md`; this triage document's Tier/priority text below
   still refers to it as open in a few places and should be read with that
   correction in mind), `issue-005`, `issue-007`,
-  `issue-008`, `issue-010`, `issue-011`, `issue-016`, `issue-019`, `issue-023`
+  `issue-008`, `issue-010`, `issue-011`, `issue-012` (CORRECTION, 2026-09-19
+  independent closing review: false alarm, closed `preserved` -- see
+  executive-summary correction above), `issue-016`, `issue-019`, `issue-023`
   (fixed-and-verified or confirmed-already-correct-with-a-record-added), plus
   `issue-006` (a working note whose content was folded into other issue files
   and the feature dossiers -- not a standalone open item).
@@ -31,8 +33,9 @@ backlog, not a new finding.
   hang and a bounded dynamic rerun did not reproduce the hang -- root cause still
   unconfirmed, see issue file's Diagnosis section; currently worked around by
   using `zig test --test-filter`).
-- **42 are genuinely open** and require a disposition (`preserved`,
-  `replaced-by-approved-feature`, `legacy-defect-corrected`,
+- **41 are genuinely open** (originally tallied as 42; `issue-012` moved to
+  closed per the 2026-09-19 correction above) and require a disposition
+  (`preserved`, `replaced-by-approved-feature`, `legacy-defect-corrected`,
   `retired-with-explicit-scope-approval`, or a fix) before G1 can be called
   complete. These are triaged into Tiers 1-4 and the standalone Tier 7 item
   below.
@@ -63,6 +66,20 @@ a future session needing the raw files (not just the build recipe) must
 rebuild and rerun (~2h40m), or the user should decide whether to preserve a
 copy durably. This is a housekeeping/storage question, not a blocker for
 "outputs comparable to oracle."
+
+**Correction (2026-09-19, independent closing-review pass): `issue-012` is now
+CLOSED (`preserved`), not open, and was never a real gap.** The SOC/erosion
+cancellation term (`GEOM-SUBSIDENCE-001`/`PR-GEOM-01B`) is fully wired in
+production through `soil/organic/carbon_change.zig`'s
+`publishAcceptedHourlyChange` plus `soil/profile/erosion_organic_bridge.zig`'s
+`publishLocalCarbonNetChangeMapped` (called from `stages/hourly_sediment.zig`)
+-- a different, live module pair than the dead `organic_matter_apply.zig`
+kernel the original filing and this triage's Tier-4 entry both traced. This
+was the exact HOUR1-002/SOLUTE-042 stale-comment false-alarm shape, one hop
+further out than the original filing's own check for that pattern covered.
+See `issue-012`'s own "Closing review (2026-09-19)" section and
+`traceability.csv` rows `TRC-028`/`TRC-032` (updated in place). The Tier-4
+entry below for `issue-012` is now stale and superseded by this correction.
 
 **Correction (2026-09-19, post-dates this triage's initial pass): `issue-050`
 is re-ranked from Tier 4 (paperwork) to Tier 1 (human decision needed).** A
@@ -304,11 +321,15 @@ other item's ranking changed.
    full evidence chain and an honest caveat (this is a threshold comparison
    against raw precipitation, not a run-observed trace of `IFLGL` actually
    firing inside the hydrology solve).
-4. **`issue-012`** (`GEOM-SUBSIDENCE-001`/`PR-GEOM-01B`) -- A real, live-wired
-   uncancelled-SOC-change defect in the soil-geometry-boundary transaction,
-   but currently **latent**: a separate, independent hard-wired zero
-   downstream prevents it from moving any layer boundary today. Explicitly
-   flagged "do not fix in isolation" by its own in-code comment.
+4. ~~**`issue-012`** (`GEOM-SUBSIDENCE-001`/`PR-GEOM-01B`) -- A real, live-wired
+   uncancelled-SOC-change defect...~~ **SUPERSEDED (2026-09-19 closing review):
+   CLOSED `preserved`, not a defect.** Independent re-derivation found the
+   cancellation term is fully wired via a different, live module pair
+   (`soil/organic/carbon_change.zig` + `soil/profile/erosion_organic_bridge.zig`,
+   called from `stages/hourly_sediment.zig`) than the dead kernel
+   (`redistribution/erosion/organic_matter_apply.zig`) this entry and the
+   original filing both traced. See the executive-summary correction above and
+   `issue-012`'s own "Closing review" section.
 5. **`issue-028`** (re-ranked down 2026-09-19, was #3) -- `starte.f`'s
    one-time "50% of initial manure protein-N becomes ammonium" amendment has
    no Zig counterpart at all -- confirmed a missing routine, not a
