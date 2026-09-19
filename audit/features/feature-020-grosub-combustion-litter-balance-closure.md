@@ -37,7 +37,7 @@ and needed no further action this pass.
 
 ## Findings
 
-### 1. Fire/combustion cascade (shoot, standing dead, charcoal, root, nodule, storage) -- `preserved` for the live path; dead duplicate helper flagged as `issue-024`
+### 1. Fire/combustion cascade (shoot, standing dead, charcoal, root, nodule, storage) -- `preserved` for the live path; dead duplicate helper flagged as `issue-026`
 
 `grosub.f:11735-12545` (the `ICHKF.EQ.1` block). Canopy/standing-dead/charcoal
 combustion (`:11812-12178`, Arrhenius response `EXP(12.028-60000/RTK)` capped
@@ -93,12 +93,12 @@ constants, specific-rate table, and sharing rules as the dead helper and as
 the Fortran source, and is itself well-tested against the same GROSUB line
 citations. This looks like harmless orphaned scaffolding rather than a
 science-relevant divergence, but per the standing lesson it still needs a
-formal record rather than a silent assumption -- filed as `issue-024`.
+formal record rather than a silent assumption -- filed as `issue-026`.
 
 Disposition: **preserved** for the live production combustion path
 (`shoot_fire.zig` + `plant_root_disturbance.zig` + `disturbance_management_dispatch.zig`).
 The unused `plant_harvest_source_order_combustion.zig` helper module is a
-paperwork/dead-code finding, tracked in `issue-024`, not a `preserved`/`unresolved`
+paperwork/dead-code finding, tracked in `issue-026`, not a `preserved`/`unresolved`
 call on the science itself.
 
 ### 2. Litterfall from standing dead -- `preserved`
@@ -234,7 +234,7 @@ matching `extract.f:949-951`. Live-wired at `ecosys_ng.zig:2517` (comment at
   `PROJECT_CONTRACT.md`, targeted compilations are allowed but a repetitive
   full `ReleaseFast` run was correctly not attempted); all findings are
   static source-to-source trace and call-site verification.
-- `issue-024`'s equivalence claim (live combustion path vs. the dead helper)
+- `issue-026`'s equivalence claim (live combustion path vs. the dead helper)
   rests on matching constants/structure by inspection, not a matched-state
   numerical kernel test comparing the two Zig implementations directly. If a
   reviewer wants stronger evidence before authorizing deletion of the dead
@@ -247,5 +247,5 @@ Author: this session's audit fork, 2026-09-18 (full-range read,
 PARTIALLY_ASSESSED for gate purposes -- five of six findings `preserved`
 with high-confidence exact-match citations on both sides; Finding 1's live
 path `preserved`, its dead duplicate helper and Finding 4's micro-defect each
-given their own tracked issue (`issue-024`, `issue-025`) rather than silently
+given their own tracked issue (`issue-026`, `issue-025`) rather than silently
 assumed harmless, per this project's established recording convention.

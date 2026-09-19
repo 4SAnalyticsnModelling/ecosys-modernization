@@ -1,4 +1,4 @@
-# Issue 024 -- GROSUB combustion cascade has a second, fully-documented Zig implementation that is dead code
+# Issue 026 -- GROSUB combustion cascade has a second, fully-documented Zig implementation that is dead code
 
 Status: OPEN (needs reviewer decision on whether to delete the unused helper; not a mass-balance or science divergence found so far)
 Owner: unassigned
