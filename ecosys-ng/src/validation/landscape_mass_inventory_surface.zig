@@ -29,6 +29,7 @@ const surface_solute_routing = @import("../soil/solute/surface_solute_routing.zi
 const surface_aqueous = @import("../surface/aqueous_runoff_transport.zig");
 const daily_litter_salt = @import("../redistribution/inventory/daily_litter_salt.zig");
 const fire_exchange = @import("../soil/biogeochemistry/organic_matter_fire_exchange.zig");
+const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
 
 pub var diagnostic_surface_ice_water_equivalent_m3: f64 = 0;
 
@@ -205,6 +206,7 @@ pub fn aggregateSurfaceChemistry(
     carbon_g_per_mol: f64,
     nitrogen_g_per_mol: f64,
     phosphorus_g_per_mol: f64,
+    cell_area_m2: []const f64,
 ) !group_support.Storage {
     return aggregateSurfaceChemistryRange(
         chemistry,
@@ -215,6 +217,7 @@ pub fn aggregateSurfaceChemistry(
         carbon_g_per_mol,
         nitrogen_g_per_mol,
         phosphorus_g_per_mol,
+        cell_area_m2,
         0,
         chemistry.cells.len,
     );
@@ -229,6 +232,7 @@ pub fn aggregateSurfaceChemistryCell(
     carbon_g_per_mol: f64,
     nitrogen_g_per_mol: f64,
     phosphorus_g_per_mol: f64,
+    cell_area_m2: []const f64,
     cell: usize,
 ) !group_support.Storage {
     if (cell >= chemistry.cells.len) return error.SurfaceChemistryInventoryCellOutOfBounds;
@@ -241,9 +245,18 @@ pub fn aggregateSurfaceChemistryCell(
         carbon_g_per_mol,
         nitrogen_g_per_mol,
         phosphorus_g_per_mol,
+        cell_area_m2,
         cell,
         cell + 1,
     );
+}
+
+/// `ZEROS2` floor (`starts.f:270`/`starts.f:94`, `solute.f:4018/4050/4172`'s
+/// litter-layer `IF(VOLW(0,NY,NX).GT.ZEROS2(NY,NX))THEN`), scaled to the
+/// cell's actual footprint. issue-061: the litter-layer sibling of the
+/// soil-layer floor issue-060 fixed for `aqueousCarrierM3`.
+fn negligibleLitterWaterVolumeM3(cell_area_m2: f64) f64 {
+    return legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(cell_area_m2);
 }
 
 fn aggregateSurfaceChemistryRange(
@@ -255,6 +268,7 @@ fn aggregateSurfaceChemistryRange(
     carbon_g_per_mol: f64,
     nitrogen_g_per_mol: f64,
     phosphorus_g_per_mol: f64,
+    cell_area_m2: []const f64,
     first_cell: usize,
     end_cell: usize,
 ) !group_support.Storage {
@@ -263,7 +277,7 @@ fn aggregateSurfaceChemistryRange(
         chemistry.dry_reference_water_m3.len != cells or fertilizer.cells.len != cells or
         fertilizer.formulation.len != cells or litter_water_m3.len != cells or
         litter_dry_mass_megagrams.len != cells or
-        denitrification_nitrite_g_n.len != cells)
+        denitrification_nitrite_g_n.len != cells or cell_area_m2.len != cells)
         return error.SurfaceChemistryInventoryDimensionMismatch;
     inline for (.{ carbon_g_per_mol, nitrogen_g_per_mol, phosphorus_g_per_mol }) |molar_mass|
         if (!std.math.isFinite(molar_mass) or molar_mass <= 0)
@@ -276,14 +290,16 @@ fn aggregateSurfaceChemistryRange(
         const mineral_reference_water = chemistry.mineral_reference_water_m3[cell_index];
         const dry_mass = litter_dry_mass_megagrams[cell_index];
         const nitrite_g_n = denitrification_nitrite_g_n[cell_index];
+        const area_m2 = cell_area_m2[cell_index];
         if (!std.math.isFinite(water) or !std.math.isFinite(dry_reference_water) or
             !std.math.isFinite(mineral_reference_water) or !std.math.isFinite(dry_mass))
             return error.NonFiniteSurfaceChemistryInventory;
-        if (!std.math.isFinite(nitrite_g_n))
+        if (!std.math.isFinite(nitrite_g_n) or !std.math.isFinite(area_m2))
             return error.NonFiniteSurfaceChemistryInventory;
-        if (water < 0 or dry_reference_water < 0 or mineral_reference_water < 0 or dry_mass < 0 or nitrite_g_n < 0)
+        if (water < 0 or dry_reference_water < 0 or mineral_reference_water < 0 or dry_mass < 0 or nitrite_g_n < 0 or area_m2 < 0)
             return error.NegativeSurfaceChemistryInventory;
-        const aqueous_carrier = if (water > 0) water else dry_reference_water;
+        const negligible_water_volume_m3 = negligibleLitterWaterVolumeM3(area_m2);
+        const aqueous_carrier = if (water > negligible_water_volume_m3) water else dry_reference_water;
         const cell = chemistry.cells[cell_index];
         try group_support.validateNumericStruct(cell);
         const solid_fertilizer = fertilizer.cells[cell_index];

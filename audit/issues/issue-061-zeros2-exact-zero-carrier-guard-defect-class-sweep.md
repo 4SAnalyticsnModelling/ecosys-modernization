@@ -1,6 +1,6 @@
 # Issue 061 -- systematic sweep for issue-060's defect class ("ZEROS2 floor mistranslated as exact-zero guard on a water/liquid carrier"): found siblings, including one in PRODUCTION model state, not just a validation ledger
 
-Status: NOT_ASSESSED / OPEN -- survey/diagnosis only, no fix applied. Sibling instances found and prioritized; the highest-priority one is materially different in kind from issue-060's own scope (production state mutation, not just an audit-ledger reconstruction).
+Status: FIXED (source + regression tests, 2026-09-19 -- see "## Fix applied" below) -- all three genuine siblings (Findings 1-3) now floor at the shared `legacyNegligibleWaterVolumeM3` (`ZEROS2`) threshold instead of exact zero, mirroring issue-060's `aqueousCarrierM3` fix. Finding 4 remains correctly excluded (not a genuine instance; no action needed). NOT yet independently confirmed by a live full-deck rerun (same reachability-argument caveat as issue-060's own fix: no cheap checkpoint exists to rerun from).
 Owner: unassigned
 Discovered by: this session, 2026-09-19, dedicated defect-class sweep requested after issue-060 diagnosed `aqueousCarrierM3` in `landscape_mass_inventory_phosphorus_ions.zig`.
 
@@ -87,6 +87,57 @@ None of Findings 1-3 have been confirmed by a live instrumented rerun in this pa
 4. Add a synthetic unit reproduction for each of Findings 1-3 (tiny-but-nonzero carrier in, assert no unphysical scale/mass swing out) before attempting a live rerun, consistent with the project's "small compilations, tests, extracted routines... allowed throughout" G1 guidance.
 5. Do not fix blind: this pass is diagnosis-only, per the requesting instructions.
 
-## Disposition
+## Disposition (superseded below by "Fix applied")
 
 No source files were modified by this pass. This is a read-only defect-class sweep. Three genuine, distinct siblings found (Findings 1-3); one candidate reviewed and excluded as not a genuine instance of the defect class (Finding 4). This issue stays `NOT_ASSESSED`/`OPEN` until a fix is proposed, reviewed against the legacy `ZEROS2` correspondence for each site, and validated.
+
+## Fix applied (2026-09-19, this pass)
+
+### Shared floor, factored into one place
+
+Per this issue's own recommendation ("keep the `ZEROS2` literal consistent project-wide"), the `ZERO2=1.0E-06` literal (`starts.f:94`) and its `ZEROS2 = ZERO2*DH*DV` per-cell scaling (`starts.f:270`) are now derived in exactly one place: the new `ecosys-ng/src/core/legacy_water_negligible_floor.zig` (`legacy_negligible_water_volume_m3_per_m2`, `legacyNegligibleWaterVolumeM3`). Issue-060's already-fixed `landscape_mass_inventory_phosphorus_ions.zig` was updated to delegate its own private constant/function to this shared module (pure delegation, no behavior change, its own tests unchanged) rather than leaving two independent derivations. All three fixes below reuse this same shared module.
+
+### Finding 1 (`water_carrier_rebase.zig`) -- HIGHEST PRIORITY, production state
+
+`sourceWaterM3` (previously `if (old_water_m3 > 0) old_water_m3 else state.dry_reference_water_m3[layer]`) now takes a `negligible_water_volume_m3: f64` parameter and widens the guard to `old_water_m3 > negligible_water_volume_m3`. The floor is threaded as a new final parameter through `rebaseLayer`, `rebaseLayerWithRoundoff`, `previewLayerRoundoff`, `validateLayerRebase`, `prepareLayerRebase`, `prepareScaledLayer`, and `rememberDryCarrier`; every "stay dry" branch's own trigger (`new_water_m3 == 0`) is widened identically to `new_water_m3 <= negligible_water_volume_m3`. The substitution/rescale actions themselves are byte-identical to before -- only the threshold that selects between them changed. Every production call site (`hourly_heat_water_solute.zig`'s several loops, `plant_root_water_storage_state_update.zig`'s two `previewLayerRoundoff`/`rebaseLayerWithRoundoff` calls including both `catch unreachable` sites) now computes `legacyNegligibleWaterVolumeM3(cell_area_m2)` from the cell's actual footprint (`context.canopy_cell_area_m2[cell]`, resolving `cell` from a flat layer index via `layer / grid.soil_layer_capacity` where the loop is layer-flat) and passes it through; `plant_root_water_storage_state_update.state_update` gained a new required `cell_area_m2: []const f64` parameter, threaded from `hourly_vegetation.zig`'s existing `context.canopy_cell_area_m2`.
+
+Regression tests added (`water_carrier_rebase.zig`): a BEFORE test that re-derives the old guard as a local closure and shows a collapsed-but-nonzero water value (`1e-320`, chosen so `old_water_m3/new_water_m3` overflows `f64`) manufactures `error.InvalidSoilChemistryWaterCarrier` -- exactly the failure mode that, at the two production `catch unreachable` call sites, would have been a hard panic on an ordinary thin/dry-layer hour, not a controlled error; an AFTER test showing the same inputs through the fixed `rebaseLayer` instead take the "stay dry" branch cleanly (concentration held, live water remembered); a boundary test pinning the strict `>` (not `>=`) comparison and the pre-existing exact-zero case; a floor-validation test rejecting negative/NaN `negligible_water_volume_m3`. The pre-existing "invalid fractions and uncertified mutation reject atomically" test's two assertions that had used `floatMin`/`floatMax` as `old_water_m3`/`new_water_m3` directly were updated: one now reaches the same `floatMin/floatMax` scale-underflow arithmetic via the dry-reference-recall path (`old_water_m3=0`, `state.dry_reference_water_m3[0]` poked to `floatMin` directly) instead of passing `floatMin` as a supposedly-live value (which the fix now correctly reclassifies as negligible/dry before ever reaching that division); the other now uses a genuinely-invalid negative `old_water_m3` instead of relying on the same reclassified magnitude.
+
+### Finding 2 (`landscape_mass_inventory_surface.zig:286`) -- litter layer
+
+`aggregateSurfaceChemistryRange`'s `aqueous_carrier = if (water > 0) water else dry_reference_water` is now `if (water > negligible_water_volume_m3) water else dry_reference_water`, with `negligible_water_volume_m3 = negligibleLitterWaterVolumeM3(cell_area_m2[cell_index])` computed per cell from a new `cell_area_m2: []const f64` parameter threaded through `aggregateSurfaceChemistry`/`aggregateSurfaceChemistryCell`/`aggregateSurfaceChemistryRange` and every call site (`landscape_mass_balance_runtime.zig` x2, `layer_mass_inventory.zig`, `landscape_mass_inventory_test.zig`), all of which already had `inputs.cell_area_m2` in scope from issue-060's own fix. `mineral_reference_water`'s solid-mineral terms are untouched, per this finding's own note that they are not carrier-selected the same way.
+
+Regression tests added (`landscape_mass_inventory_test.zig`): a collapsed-but-nonzero (`1e-9` m3) litter water test proving the result is bit-identical to the pre-existing exact-zero dry case (`84 = 14*2*3`), plus an explicit BEFORE computation (re-deriving the old guard) showing it would have produced `2.8e-8` instead -- a >99.99% fake loss, the same shape as issue-060's own hour-2,894 evidence; a boundary test pinning the strict `>` comparison at the floor.
+
+### Finding 3 (`metabolism_state_update.zig:609`) -- surface metabolism
+
+`effectiveAqueousCarrierM3(live_water_m3, dry_reference_water_m3)` gained a third `negligible_water_volume_m3: f64` parameter and widened its guard identically. `ApplyContext` gained a new required `cell_area_m2: []const f64` field (validated for length in `validate()`); all four call sites (`state_updateCell`, `projectedCellNitrogen_g_n`, `authoritativeCellNitrogen_g_n`, `authoritativeCellPhosphorus_g_p`) compute `negligibleLitterWaterVolumeM3(context.cell_area_m2[cell])`. The sole production constructor (`biogeochemistry_batches.zig`) now sets `.cell_area_m2 = context.canopy_cell_area_m2`.
+
+Regression tests added: a BEFORE/AFTER pair mirroring issue-060's own literal-closure pattern (collapsed `1e-9` m3 carrier manufactures a >99.99% fake loss under the old guard vs. the correct dry-reference substitution under the new one) and a boundary test pinning the strict `>` comparison and the pre-existing exact-zero/ordinary-wet cases.
+
+### Commands run (cwd `ecosys-ng`, Zig 0.16.0, targeted filters only per this project's standing instruction not to run the full suite)
+
+- `zig build` (full executable compile) -> exit 0.
+- `zig test src/module_index.zig --test-filter "issue-061"` -> 61/61 passed (12 new tests across all three fixes plus the shared-floor module's own test).
+- `zig test src/module_index.zig --test-filter "water_carrier_rebase"` -> 68/68 passed.
+- `zig test src/module_index.zig --test-filter "landscape_mass_inventory_surface"` -> 51/51 passed.
+- `zig test src/module_index.zig --test-filter "metabolism_state_update"` -> 52/52 passed.
+- `zig test src/module_index.zig --test-filter "carrier"` -> 167/167 passed.
+- `zig test src/module_index.zig --test-filter "mass_inventory"` -> 94/94 passed.
+- `zig test src/module_index.zig --test-filter "SOIL-CHEM-DRY-CARRIER"` -> 55/55 passed.
+- `zig test src/module_index.zig --test-filter "phosphorus"` -> 88/88 passed.
+- `zig test src/module_index.zig --test-filter "REDIST profile phosphorus"` -> 52/52 passed.
+- `zig test src/module_index.zig --test-filter "REDIST surface chemistry"` -> 52/52 passed.
+- `zig test src/module_index.zig --test-filter "issue-060"` -> 56/56 passed (confirms this pass did not regress issue-060's own fix or its tests).
+- `zig test src/module_index.zig --test-filter "hourly_heat_water_solute"` -> 51/51 passed (all of that file's tests, including its structural/plumbing checks on the call sites this pass edited).
+- `zig test src/module_index.zig --test-filter "root uptake removes soil water"` -> 52/52 passed, explicitly including `plant_root_water_storage_state_update.zig`'s own test by name.
+- `zig test src/module_index.zig --test-filter "insufficient substrate leaves every surface metabolism"` -> 52/52 passed.
+- `zig test --dep ecosys_ng "-Mroot=src/ecosys_ng.zig" "-Mecosys_ng=src/module_index.zig" --test-filter "issue-061"` -> 3/3 passed, confirming the `ecosys_ng.zig`/`hourly_vegetation.zig` side (outside `module_index.zig`'s own reachable graph) compiles and its tests pass.
+
+### Full-run confirmation: not attempted this pass, reachability argument stands in
+
+As with issue-060's own fix: no checkpoint near a hour deep enough to exercise these paths exists, and a fresh from-hour-1 rerun was already assessed there as too slow for a bounded pass. That assessment is unchanged by this pass's fix (no performance-relevant code path was touched -- only threshold comparisons and one new parameter per call site). A live full-deck rerun confirming these three sibling fixes (together with issue-060's) let the run progress further is still pending and is the recommended next bounded action for whoever picks this up next.
+
+### Disposition
+
+`legacy-defect-corrected` (translation defect, investigation-order category "translation/units/indexing/precision defects") for all three findings' guards. Finding 4 remains correctly excluded (documented, approved redesign, not a `ZEROS2` mistranslation). Independent reviewer: not yet done. Full-run confirmation: pending (see above). Traceability: `TRC-316`/`TRC-317`/`TRC-318` (added by this issue's own diagnosis pass to record the pre-fix `unresolved` state) updated in place to `legacy-defect-corrected` with this pass's evidence, rather than appended as new duplicate rows for the same code paths -- confirmed no duplicate `unit_id` via `Import-Csv audit/traceability/traceability.csv | Group-Object unit_id | Where-Object Count -gt 1` (empty result).

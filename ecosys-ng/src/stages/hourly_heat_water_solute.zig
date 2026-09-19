@@ -733,6 +733,7 @@ fn SoilForcingSubstepHooks(
                     topsoil,
                     self.topsoil_water_before_vapor_m3[cell],
                     context.grid.matrix_liquid_water_m3[topsoil],
+                    ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[cell]),
                 );
             }
             if (phosphorus_ingress_trace) try diagnostics.logPhosphorusRepresentation(context, "ingress_after_topsoil_change_rebase");
@@ -756,6 +757,7 @@ fn SoilForcingSubstepHooks(
                     topsoil,
                     self.topsoil_water_before_ingress_m3[cell],
                     context.grid.matrix_liquid_water_m3[topsoil],
+                    ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[cell]),
                 );
             }
             if (phosphorus_ingress_trace) try diagnostics.logPhosphorusRepresentation(context, "ingress_after_soil_ingress_rebase");
@@ -4527,6 +4529,7 @@ fn CoupledSubstepTransaction(
             };
             var booked_bound_phosphorus_g: f64 = 0;
             for (0..context.grid.layer_count) |layer| {
+                const layer_cell = layer / context.grid.soil_layer_capacity;
                 const roundoff = try ecosys.soil_chemistry_water_carrier_rebase.previewLayerRoundoff(
                     context.soil_chemistry,
                     layer,
@@ -4535,6 +4538,7 @@ fn CoupledSubstepTransaction(
                     try self.chemistryRebaseInventoryFractions(layer),
                     12.0,
                     context.runscript.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol,
+                    ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[layer_cell]),
                 );
                 booked_bound_phosphorus_g += roundoff.phosphorus_g;
                 try self.accumulateChemistryRebaseRoundoff(layer, roundoff);
@@ -4561,6 +4565,7 @@ fn CoupledSubstepTransaction(
                     layer,
                     entry_matrix_water_m3[layer],
                     context.grid.matrix_liquid_water_m3[layer],
+                    ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[layer / context.grid.soil_layer_capacity]),
                 ) catch unreachable;
             if (trace_allowance) {
                 var invariant_after_g: f64 = 0;
@@ -7747,6 +7752,7 @@ fn CoupledSubstepTransaction(
                 );
             }
             for (0..context.grid.layer_count) |layer| {
+                const layer_cell = layer / context.grid.soil_layer_capacity;
                 const roundoff = try ecosys.soil_chemistry_water_carrier_rebase.previewLayerRoundoff(
                     context.soil_chemistry,
                     layer,
@@ -7755,6 +7761,7 @@ fn CoupledSubstepTransaction(
                     try self.chemistryRebaseInventoryFractions(layer),
                     12.0,
                     context.runscript.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol,
+                    ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[layer_cell]),
                 );
                 try self.accumulateChemistryRebaseRoundoff(layer, roundoff);
             }
@@ -7771,6 +7778,7 @@ fn CoupledSubstepTransaction(
                     layer,
                     old_matrix_water_m3[layer],
                     new_matrix_water_m3[layer],
+                    ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[layer / context.grid.soil_layer_capacity]),
                 ) catch unreachable;
         }
 
@@ -8101,6 +8109,7 @@ fn CoupledSubstepTransaction(
                     try self.chemistryRebaseInventoryFractions(top),
                     12.0,
                     context.runscript.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol,
+                    ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[cell]),
                 );
                 const surface_chemistry_rebase_roundoff = try ecosys.surface_litter_chemistry_carrier_rebase.previewCellWaterRoundoff(
                     context.surface_litter_chemistry,
@@ -8183,6 +8192,7 @@ fn CoupledSubstepTransaction(
                     top,
                     old_soil_water_m3,
                     candidate.new_soil_water_m3,
+                    ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[cell]),
                 ) catch unreachable;
                 try self.accumulateChemistryRebaseRoundoff(
                     top,
@@ -9644,8 +9654,9 @@ test "temporary PSISO carrier rebase is restored before the accepted soil carrie
     // These two pure-water changes stand in for the topsoil vapor and ingress
     // rebases needed by the coefficient refresh. The prepared concentration is
     // visible to PSISO while every extensive amount remains unchanged.
-    try ecosys.soil_chemistry_water_carrier_rebase.rebaseLayer(&chemistry, 0, 4, 4.5);
-    try ecosys.soil_chemistry_water_carrier_rebase.rebaseLayer(&chemistry, 0, 4.5, 5);
+    const test_negligible_water_volume_m3 = ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(1);
+    try ecosys.soil_chemistry_water_carrier_rebase.rebaseLayer(&chemistry, 0, 4, 4.5, test_negligible_water_volume_m3);
+    try ecosys.soil_chemistry_water_carrier_rebase.rebaseLayer(&chemistry, 0, 4.5, 5, test_negligible_water_volume_m3);
     try std.testing.expectApproxEqAbs(@as(f64, 1.6), chemistry.aqueous[0].magnesium, 1e-15);
     try std.testing.expectApproxEqAbs(@as(f64, 8), chemistry.aqueous[0].magnesium * 5, 1e-14);
 
@@ -9662,7 +9673,7 @@ test "temporary PSISO carrier rebase is restored before the accepted soil carrie
     );
 
     grid.matrix_liquid_water_m3[0] = 2;
-    try ecosys.soil_chemistry_water_carrier_rebase.rebaseLayer(&chemistry, 0, 4, 2);
+    try ecosys.soil_chemistry_water_carrier_rebase.rebaseLayer(&chemistry, 0, 4, 2, test_negligible_water_volume_m3);
     try std.testing.expectApproxEqAbs(@as(f64, 8), chemistry.aqueous[0].magnesium * 2, 1e-14);
     try std.testing.expectEqual(
         @as(f64, 14),

@@ -1,5 +1,17 @@
 const std = @import("std");
 const chemistry = @import("../solute/chemistry_state.zig");
+const legacy_water_negligible_floor = @import("../../core/legacy_water_negligible_floor.zig");
+
+/// `ZEROS2(NY,NX) = ZERO2*DH(NY,NX)*DV(NY,NX)` (`starts.f:270`, `ZERO2=1.0E-06`
+/// at `starts.f:94`), the legacy noise floor `solute.f:610`'s
+/// `IF(VOLW(L,NY,NX).GT.ZEROS2(NY,NX))THEN` tests `VOLW` against. issue-061:
+/// re-exported here (delegating to the shared derivation issue-060's
+/// `landscape_mass_inventory_phosphorus_ions.zig` fix established) so callers
+/// of this file's `rebaseLayer`/`rebaseLayerWithRoundoff`/`previewLayerRoundoff`
+/// can compute the same floor this file's own guards now use.
+pub fn legacyNegligibleWaterVolumeM3(cell_area_m2: f64) f64 {
+    return legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(cell_area_m2);
+}
 
 /// Source-local binary64 provenance for every authoritative landscape-inventory
 /// lane changed by a pure-water carrier rebase. Final C/P census products are
@@ -180,17 +192,19 @@ pub fn rebaseLayer(
     layer: usize,
     old_water_m3: f64,
     new_water_m3: f64,
+    negligible_water_volume_m3: f64,
 ) !void {
-    try validateLayerRebase(state, layer, old_water_m3, new_water_m3);
-    if (new_water_m3 == 0) {
-        rememberDryCarrier(state, layer, old_water_m3);
+    try validateLayerRebase(state, layer, old_water_m3, new_water_m3, negligible_water_volume_m3);
+    if (new_water_m3 <= negligible_water_volume_m3) {
+        rememberDryCarrier(state, layer, old_water_m3, negligible_water_volume_m3);
         return;
     }
     const preview = try prepareScaledLayer(
         state,
         layer,
-        sourceWaterM3(state, layer, old_water_m3),
+        sourceWaterM3(state, layer, old_water_m3, negligible_water_volume_m3),
         new_water_m3,
+        negligible_water_volume_m3,
     );
     commitScaledLayer(state, layer, preview);
     state.dry_reference_water_m3[layer] = 0;
@@ -222,15 +236,16 @@ pub fn rebaseLayerWithRoundoff(
     fractions: InventoryFractions,
     carbon_g_per_mol: f64,
     phosphorus_g_per_mol: f64,
+    negligible_water_volume_m3: f64,
 ) !RoundoffAllowance {
     try validateInventoryMolarMasses(carbon_g_per_mol, phosphorus_g_per_mol);
-    try validateLayerRebase(state, layer, old_water_m3, new_water_m3);
+    try validateLayerRebase(state, layer, old_water_m3, new_water_m3, negligible_water_volume_m3);
     try fractions.validate();
-    if (new_water_m3 == 0) {
-        rememberDryCarrier(state, layer, old_water_m3);
+    if (new_water_m3 <= negligible_water_volume_m3) {
+        rememberDryCarrier(state, layer, old_water_m3, negligible_water_volume_m3);
         return .{};
     }
-    const source_water_m3 = sourceWaterM3(state, layer, old_water_m3);
+    const source_water_m3 = sourceWaterM3(state, layer, old_water_m3, negligible_water_volume_m3);
     if (source_water_m3 == new_water_m3) {
         state.dry_reference_water_m3[layer] = 0;
         return .{};
@@ -243,6 +258,7 @@ pub fn rebaseLayerWithRoundoff(
         fractions,
         carbon_g_per_mol,
         phosphorus_g_per_mol,
+        negligible_water_volume_m3,
     );
     commitScaledLayer(state, layer, preview.scaled);
     state.dry_reference_water_m3[layer] = 0;
@@ -259,12 +275,13 @@ pub noinline fn previewLayerRoundoff(
     fractions: InventoryFractions,
     carbon_g_per_mol: f64,
     phosphorus_g_per_mol: f64,
+    negligible_water_volume_m3: f64,
 ) !RoundoffAllowance {
     try validateInventoryMolarMasses(carbon_g_per_mol, phosphorus_g_per_mol);
-    try validateLayerRebase(state, layer, old_water_m3, new_water_m3);
+    try validateLayerRebase(state, layer, old_water_m3, new_water_m3, negligible_water_volume_m3);
     try fractions.validate();
-    if (new_water_m3 == 0) return .{};
-    const source_water_m3 = sourceWaterM3(state, layer, old_water_m3);
+    if (new_water_m3 <= negligible_water_volume_m3) return .{};
+    const source_water_m3 = sourceWaterM3(state, layer, old_water_m3, negligible_water_volume_m3);
     if (source_water_m3 == new_water_m3) return .{};
     return (try prepareLayerRebase(
         state,
@@ -274,6 +291,7 @@ pub noinline fn previewLayerRoundoff(
         fractions,
         carbon_g_per_mol,
         phosphorus_g_per_mol,
+        negligible_water_volume_m3,
     )).allowance;
 }
 
@@ -285,11 +303,12 @@ fn prepareLayerRebase(
     fractions: InventoryFractions,
     carbon_g_per_mol: f64,
     phosphorus_g_per_mol: f64,
+    negligible_water_volume_m3: f64,
 ) !LayerRebasePreview {
     // Validate the index before taking any layer snapshot. `prepareScaledLayer`
     // repeats the state validation immediately before its private arithmetic;
     // keeping this guard here preserves the public out-of-bounds error contract.
-    try validateLayerRebase(state, layer, old_water_m3, new_water_m3);
+    try validateLayerRebase(state, layer, old_water_m3, new_water_m3, negligible_water_volume_m3);
     try fractions.validate();
     try validateInventoryMolarMasses(carbon_g_per_mol, phosphorus_g_per_mol);
     const non_band_before = state.non_band_phosphate[layer];
@@ -301,6 +320,7 @@ fn prepareLayerRebase(
             layer,
             old_water_m3,
             new_water_m3,
+            negligible_water_volume_m3,
         ),
         .allowance = .{},
     };
@@ -351,13 +371,24 @@ fn prepareLayerRebase(
     return result;
 }
 
-fn sourceWaterM3(state: *const chemistry.State, layer: usize, old_water_m3: f64) f64 {
-    return if (old_water_m3 > 0) old_water_m3 else state.dry_reference_water_m3[layer];
+/// `solute.f:610` keeps extensive `Z*` when `VOLW <= ZEROS2`. issue-061: this
+/// translation previously only substituted `state.dry_reference_water_m3`
+/// when `old_water_m3` was EXACTLY `0` (`old_water_m3 > 0`), not when it
+/// merely fell at or below the `ZEROS2` noise floor -- the same defect class
+/// issue-060 fixed in `landscape_mass_inventory_phosphorus_ions.zig`'s
+/// `aqueousCarrierM3`, but here on the live production `chemistry.State`
+/// mutation rather than a validation ledger. The fix widens the substitution
+/// to `old_water_m3 <= negligible_water_volume_m3`, matching legacy's `<=`
+/// (not `<`) comparison exactly, while leaving the substitution itself (fall
+/// back to `state.dry_reference_water_m3[layer]`) unchanged from what the
+/// exact-zero case already did.
+fn sourceWaterM3(state: *const chemistry.State, layer: usize, old_water_m3: f64, negligible_water_volume_m3: f64) f64 {
+    return if (old_water_m3 > negligible_water_volume_m3) old_water_m3 else state.dry_reference_water_m3[layer];
 }
 
-fn rememberDryCarrier(state: *chemistry.State, layer: usize, old_water_m3: f64) void {
+fn rememberDryCarrier(state: *chemistry.State, layer: usize, old_water_m3: f64, negligible_water_volume_m3: f64) void {
     if (state.dry_reference_water_m3[layer] == 0)
-        state.dry_reference_water_m3[layer] = sourceWaterM3(state, layer, old_water_m3);
+        state.dry_reference_water_m3[layer] = sourceWaterM3(state, layer, old_water_m3, negligible_water_volume_m3);
 }
 
 /// Mutation-free validation shared with multi-layer transaction preflight.
@@ -370,14 +401,17 @@ pub fn validateLayerRebase(
     layer: usize,
     old_water_m3: f64,
     new_water_m3: f64,
+    negligible_water_volume_m3: f64,
 ) !void {
     if (layer >= state.cell_count) return error.SoilChemistryLayerOutOfBounds;
     if (!std.math.isFinite(old_water_m3) or !std.math.isFinite(new_water_m3) or
         old_water_m3 < 0 or new_water_m3 < 0)
         return error.InvalidSoilChemistryWaterCarrier;
+    if (!std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
+        return error.InvalidSoilChemistryWaterCarrier;
     if (state.dry_reference_water_m3.len != state.cell_count)
         return error.SoilChemistryLayerOutOfBounds;
-    const current_water_m3 = sourceWaterM3(state, layer, old_water_m3);
+    const current_water_m3 = sourceWaterM3(state, layer, old_water_m3, negligible_water_volume_m3);
     if (!std.math.isFinite(current_water_m3) or current_water_m3 < 0)
         return error.InvalidSoilChemistryWaterCarrier;
     try validateScalable(state.aqueous[layer], current_water_m3, current_water_m3);
@@ -394,8 +428,9 @@ fn prepareScaledLayer(
     layer: usize,
     old_water_m3: f64,
     new_water_m3: f64,
+    negligible_water_volume_m3: f64,
 ) !ScaledLayer {
-    try validateLayerRebase(state, layer, old_water_m3, new_water_m3);
+    try validateLayerRebase(state, layer, old_water_m3, new_water_m3, negligible_water_volume_m3);
     const scale = if (old_water_m3 == 0) 0 else old_water_m3 / new_water_m3;
     if (!std.math.isFinite(scale) or scale < 0)
         return error.InvalidSoilChemistryWaterCarrier;
@@ -1170,6 +1205,11 @@ noinline fn certifyGroupedGeochemistryInventory(
     return result;
 }
 
+/// The Ottawa deck's actual per-cell footprint (`DH=DV=1.0 m`, per
+/// issue-060's fix), used by every test in this file that is not itself
+/// exercising the floor's own value or boundary.
+const test_negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(1.0);
+
 test "SOLUTE extensive mineral pools require the water-carrier translation" {
     var state = try chemistry.State.init(std.testing.allocator, 1);
     defer state.deinit();
@@ -1178,7 +1218,7 @@ test "SOLUTE extensive mineral pools require the water-carrier translation" {
     state.non_band_phosphate[0].adsorbed_h2po4_mol_p_per_megagram = 5;
     inline for (@typeInfo(GeochemistrySolidState).@"struct".fields) |field|
         @field(state.geochemistry_solids[0], field.name) = 7;
-    try rebaseLayer(&state, 0, 4, 2);
+    try rebaseLayer(&state, 0, 4, 2, test_negligible_water_volume_m3);
     try std.testing.expectEqual(@as(f64, 4), state.aqueous[0].calcium);
     try std.testing.expectEqual(@as(f64, 6), state.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3);
     try std.testing.expectEqual(@as(f64, 5), state.non_band_phosphate[0].adsorbed_h2po4_mol_p_per_megagram);
@@ -1204,7 +1244,7 @@ test "SOIL-CHEM-DRY-CARRIER-001 evaporating the carrier to dryness holds concent
     state.aqueous[0].calcium = 2;
     state.geochemistry_solids[0].calcite_solid_mol_per_m3 = 7;
     const old_water_m3 = 6.42297794652246e-3;
-    try rebaseLayer(&state, 0, old_water_m3, 0);
+    try rebaseLayer(&state, 0, old_water_m3, 0, test_negligible_water_volume_m3);
     try std.testing.expectEqual(@as(f64, 4), state.aqueous[0].nitrate_non_band);
     try std.testing.expectEqual(@as(f64, 2), state.aqueous[0].calcium);
     try std.testing.expectEqual(@as(f64, 7), state.geochemistry_solids[0].calcite_solid_mol_per_m3);
@@ -1215,7 +1255,7 @@ test "SOIL-CHEM-DRY-CARRIER-001 a second dry rebase keeps the first remembered c
     var state = try chemistry.State.init(std.testing.allocator, 1);
     defer state.deinit();
     state.aqueous[0].nitrate_non_band = 4;
-    try rebaseLayer(&state, 0, 2, 0);
+    try rebaseLayer(&state, 0, 2, 0, test_negligible_water_volume_m3);
     _ = try rebaseLayerWithRoundoff(
         &state,
         0,
@@ -1224,6 +1264,7 @@ test "SOIL-CHEM-DRY-CARRIER-001 a second dry rebase keeps the first remembered c
         .{ .phosphate_non_band = 1, .phosphate_band = 0 },
         12,
         31,
+        test_negligible_water_volume_m3,
     );
     try std.testing.expectEqual(@as(f64, 2), state.dry_reference_water_m3[0]);
     try std.testing.expectEqual(@as(f64, 4), state.aqueous[0].nitrate_non_band);
@@ -1233,9 +1274,9 @@ test "SOIL-CHEM-DRY-CARRIER-001 rewetting a dry layer recovers the retained exte
     var state = try chemistry.State.init(std.testing.allocator, 1);
     defer state.deinit();
     state.aqueous[0].nitrate_non_band = 4;
-    try rebaseLayer(&state, 0, 2, 0);
+    try rebaseLayer(&state, 0, 2, 0, test_negligible_water_volume_m3);
     const amount_before = state.aqueous[0].nitrate_non_band * state.dry_reference_water_m3[0];
-    try rebaseLayer(&state, 0, 0, 8);
+    try rebaseLayer(&state, 0, 0, 8, test_negligible_water_volume_m3);
     try std.testing.expectEqual(@as(f64, 0), state.dry_reference_water_m3[0]);
     try std.testing.expectApproxEqRel(amount_before, state.aqueous[0].nitrate_non_band * 8, 1e-15);
 }
@@ -1288,7 +1329,7 @@ test "audited rebase is bitwise literal arithmetic and preview is mutation-free"
     const non_band_before = audited.non_band_phosphate[0];
     const band_before = audited.band_phosphate[0];
     const geochemistry_before = audited.geochemistry_solids[0];
-    const preview = try previewLayerRoundoff(&audited, 0, 4, 4.5, fractions, 12, 31);
+    const preview = try previewLayerRoundoff(&audited, 0, 4, 4.5, fractions, 12, 31, test_negligible_water_volume_m3);
     try std.testing.expectEqualDeep(aqueous_before, audited.aqueous[0]);
     try std.testing.expectEqualDeep(non_band_before, audited.non_band_phosphate[0]);
     try std.testing.expectEqualDeep(band_before, audited.band_phosphate[0]);
@@ -1302,9 +1343,10 @@ test "audited rebase is bitwise literal arithmetic and preview is mutation-free"
         fractions,
         12,
         31,
+        test_negligible_water_volume_m3,
     );
     try std.testing.expectEqualDeep(preview, allowance);
-    try rebaseLayer(&expected, 0, 4, 4.5);
+    try rebaseLayer(&expected, 0, 4, 4.5, test_negligible_water_volume_m3);
     try std.testing.expectEqualDeep(expected.aqueous[0], audited.aqueous[0]);
     try std.testing.expectEqualDeep(expected.non_band_phosphate[0], audited.non_band_phosphate[0]);
     try std.testing.expectEqualDeep(expected.band_phosphate[0], audited.band_phosphate[0]);
@@ -1354,6 +1396,7 @@ test "allowance bounds authoritative fraction-weighted phosphate inventory" {
         fractions,
         12,
         31,
+        test_negligible_water_volume_m3,
     );
     const after_non_band = phosphateInventoryShape(
         state.non_band_phosphate[0],
@@ -1419,6 +1462,7 @@ test "allowance bounds exact landscape geochemistry inventory stoichiometry" {
             .{ .phosphate_non_band = 1, .phosphate_band = 0 },
             12,
             31,
+            test_negligible_water_volume_m3,
         );
         inline for (std.meta.fields(RoundoffAllowance)) |field| {
             const coefficient = @field(case[1], field.name);
@@ -1452,7 +1496,7 @@ test "grouped certification retains independent member anti-masking bounds" {
         .phosphate_non_band = 0.73,
         .phosphate_band = 0.27,
     };
-    const scaled = try prepareScaledLayer(&state, 0, 4, 4.5);
+    const scaled = try prepareScaledLayer(&state, 0, 4, 4.5, test_negligible_water_volume_m3);
     var phosphate_members = try phosphateImmobileRoundoff(
         state.non_band_phosphate[0],
         scaled.non_band_after,
@@ -1481,6 +1525,7 @@ test "grouped certification retains independent member anti-masking bounds" {
         fractions,
         12,
         31,
+        test_negligible_water_volume_m3,
     );
     inline for (std.meta.fields(RoundoffAllowance)) |field| {
         const member_sum = try addCertifiedBounds(
@@ -1506,6 +1551,7 @@ test "zero phosphate fraction is silent while full-water geochemistry certifies"
         .{ .phosphate_non_band = 1, .phosphate_band = 0 },
         12,
         31,
+        test_negligible_water_volume_m3,
     );
     const carbon_after = geochemistryInventoryShape(state.geochemistry_solids[0], 4.5).carbon_mol * 12;
     try std.testing.expectEqual(@as(f64, 0), allowance.phosphorus_mol);
@@ -1539,6 +1585,7 @@ test "allowance contracts with a vanishing nonzero inventory fraction" {
         .{ .phosphate_non_band = 1, .phosphate_band = 0 },
         12,
         31,
+        test_negligible_water_volume_m3,
     );
     const small_fraction = 1.0e-9;
     const small = try previewLayerRoundoff(
@@ -1552,6 +1599,7 @@ test "allowance contracts with a vanishing nonzero inventory fraction" {
         },
         12,
         31,
+        test_negligible_water_volume_m3,
     );
     try std.testing.expect(full.phosphorus_mol > 0);
     try std.testing.expect(small.phosphorus_mol > 0);
@@ -1591,6 +1639,7 @@ test "repeated fraction-weighted carrier chains retain certificate" {
             fractions,
             12,
             31,
+            test_negligible_water_volume_m3,
         ));
         old_water_m3 = new_water_m3;
     }
@@ -1633,6 +1682,7 @@ test "invalid fractions and uncertified mutation reject atomically" {
             .{ .phosphate_non_band = 0.8, .phosphate_band = 0.3 },
             12,
             31,
+            test_negligible_water_volume_m3,
         ),
     );
     try std.testing.expectError(
@@ -1645,6 +1695,7 @@ test "invalid fractions and uncertified mutation reject atomically" {
             .{ .phosphate_non_band = std.math.nan(f64), .phosphate_band = 0 },
             12,
             31,
+            test_negligible_water_volume_m3,
         ),
     );
     try std.testing.expectEqualDeep(non_band_before, state.non_band_phosphate[0]);
@@ -1659,6 +1710,7 @@ test "invalid fractions and uncertified mutation reject atomically" {
             .{ .phosphate_non_band = 1, .phosphate_band = 0 },
             0,
             31,
+            test_negligible_water_volume_m3,
         ),
     );
     try std.testing.expectError(
@@ -1671,20 +1723,32 @@ test "invalid fractions and uncertified mutation reject atomically" {
             .{ .phosphate_non_band = 1, .phosphate_band = 0 },
             12,
             std.math.nan(f64),
+            test_negligible_water_volume_m3,
         ),
     );
     try std.testing.expectEqualDeep(non_band_before, state.non_band_phosphate[0]);
 
+    // issue-061: reproduces the pre-fix test's exact `floatMin/floatMax`
+    // scale-underflow arithmetic (the same computation the original,
+    // unmodified test relied on: `floatMin / floatMax` underflows to exactly
+    // `0.0`), but reaches it through the dry-reference recall path
+    // (`old_water_m3 = 0`, unambiguously "dry" under any floor) instead of
+    // passing `floatMin` directly as a supposedly-"live" `old_water_m3` --
+    // under the new floor, a live `old_water_m3` of `floatMin` would
+    // (correctly) be reclassified as negligible/dry rather than reaching
+    // this division at all, which is the fix's whole point.
+    state.dry_reference_water_m3[0] = std.math.floatMin(f64);
     try std.testing.expectError(
         error.SoilChemistryWaterCarrierRoundoffExceeded,
         rebaseLayerWithRoundoff(
             &state,
             0,
-            std.math.floatMin(f64),
+            0,
             std.math.floatMax(f64),
             .{ .phosphate_non_band = 1, .phosphate_band = 0 },
             12,
             31,
+            test_negligible_water_volume_m3,
         ),
     );
     try std.testing.expectEqualDeep(aqueous_before, state.aqueous[0]);
@@ -1700,12 +1764,138 @@ test "invalid fractions and uncertified mutation reject atomically" {
     );
     try std.testing.expectEqualDeep(non_band_before, state.non_band_phosphate[0]);
 
+    // A negative `old_water_m3` remains unconditionally invalid regardless of
+    // the floor (unlike the pre-fix version of this test, this case no longer
+    // uses `std.math.floatMax`/`floatMin` for `old_water_m3`/`new_water_m3`:
+    // per issue-061, a `new_water_m3` at or below the floor -- which
+    // `floatMin` is -- now takes the dry-reference branch instead of
+    // erroring, so it can no longer exercise this particular error path).
     try std.testing.expectError(
         error.InvalidSoilChemistryWaterCarrier,
-        rebaseLayer(&state, 0, std.math.floatMax(f64), std.math.floatMin(f64)),
+        rebaseLayer(&state, 0, -1, std.math.floatMax(f64), test_negligible_water_volume_m3),
     );
     try std.testing.expectEqualDeep(aqueous_before, state.aqueous[0]);
     try std.testing.expectEqualDeep(non_band_before, state.non_band_phosphate[0]);
     try std.testing.expectEqualDeep(band_before, state.band_phosphate[0]);
     try std.testing.expectEqualDeep(geochemistry_before, state.geochemistry_solids[0]);
+}
+
+test "issue-061: a negligible_water_volume_m3 floor rejects negative/non-finite input" {
+    var state = try chemistry.State.init(std.testing.allocator, 1);
+    defer state.deinit();
+    try std.testing.expectError(
+        error.InvalidSoilChemistryWaterCarrier,
+        rebaseLayer(&state, 0, 4, 4.5, -1),
+    );
+    try std.testing.expectError(
+        error.InvalidSoilChemistryWaterCarrier,
+        rebaseLayer(&state, 0, 4, 4.5, std.math.nan(f64)),
+    );
+}
+
+test "issue-061: BEFORE -- the old exact-zero guard manufactured a non-finite rescale (a would-be panic at the two catch-unreachable call sites) for a collapsed-but-nonzero water carrier" {
+    // Literal reproduction of the old guard this issue replaced
+    // (`water_carrier_rebase.zig`'s `sourceWaterM3`/`rebaseLayer` before this
+    // fix): `if (old_water_m3 > 0) old_water_m3 else
+    // state.dry_reference_water_m3[layer]`, and `new_water_m3 == 0` deciding
+    // whether to stay dry. This is deliberately re-derived here, not
+    // assumed, so the regression is a real before/after comparison.
+    //
+    // Unlike issue-060's `aqueousCarrierM3` (a validation-ledger carrier
+    // *selection*, where the exact-zero-only guard directly manufactures a
+    // wrong finite mass by picking the wrong carrier), this file's rescale
+    // is a `scale = old_water_m3 / new_water_m3` *division*. Routed through
+    // a collapsed-but-nonzero `new_water_m3` -- exactly the regime issue-060
+    // showed `matrix_liquid_water_m3` reaching -- that division is only one
+    // representable step away from silently overflowing to a non-finite
+    // "fake swing" the old guard's own `isFinite` check must then reject.
+    // Per issue-061's own finding, two production call sites
+    // (`hourly_heat_water_solute.zig:4564,8181/8186`) call the fixed
+    // function under `catch unreachable`, having already preflighted the
+    // identical transaction with `previewLayerRoundoff`/`rebaseLayerWithRoundoff`
+    // -- so this manufactured error, reached in production, is not a
+    // controlled failure but a hard panic on an ordinary thin/dry-layer hour.
+    const oldRebaseLayer = struct {
+        fn call(state: *chemistry.State, layer: usize, old_water_m3: f64, new_water_m3: f64) !void {
+            if (layer >= state.cell_count) return error.SoilChemistryLayerOutOfBounds;
+            if (new_water_m3 == 0) {
+                if (state.dry_reference_water_m3[layer] == 0)
+                    state.dry_reference_water_m3[layer] = if (old_water_m3 > 0) old_water_m3 else state.dry_reference_water_m3[layer];
+                return;
+            }
+            const source_water_m3 = if (old_water_m3 > 0) old_water_m3 else state.dry_reference_water_m3[layer];
+            const scale = if (source_water_m3 == 0) 0 else source_water_m3 / new_water_m3;
+            if (!std.math.isFinite(scale) or scale < 0) return error.InvalidSoilChemistryWaterCarrier;
+            inline for (@typeInfo(GeochemistrySolidState).@"struct".fields) |field|
+                @field(state.geochemistry_solids[layer], field.name) *= scale;
+            state.dry_reference_water_m3[layer] = 0;
+        }
+    }.call;
+
+    var old_guard_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer old_guard_state.deinit();
+    old_guard_state.geochemistry_solids[0].calcite_solid_mol_per_m3 = 100;
+    // The layer's normal, pre-collapse water content.
+    const water_before_m3: f64 = 0.05;
+    // A collapsed-but-nonzero water content, of the kind issue-060 diagnosed
+    // for the same `matrix_liquid_water_m3` array: far below the Ottawa
+    // deck's ZEROS2 floor (1.0e-6 m3), and small enough that
+    // `water_before_m3 / water_after_collapsed_m3` overflows `f64` (0.05 /
+    // 1e-320 ~= 5e318, past `f64`'s ~1.80e308 maximum).
+    const water_after_collapsed_m3: f64 = 1e-320;
+
+    // The old exact-zero guard treats `water_after_collapsed_m3` as "live"
+    // (it is not exactly zero) and attempts the division-based rescale,
+    // manufacturing a non-finite "swing" that its own check must reject.
+    try std.testing.expectError(
+        error.InvalidSoilChemistryWaterCarrier,
+        oldRebaseLayer(&old_guard_state, 0, water_before_m3, water_after_collapsed_m3),
+    );
+}
+
+test "issue-061: AFTER -- the ZEROS2-floored guard holds the concentration and remembers the live water instead of rescaling" {
+    const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(1.0);
+    const water_before_m3: f64 = 0.05;
+    // Same collapsed-but-nonzero value the BEFORE test shows overflows the
+    // old guard's division; the new guard never divides by it at all.
+    const water_after_collapsed_m3: f64 = 1e-320;
+
+    var state = try chemistry.State.init(std.testing.allocator, 1);
+    defer state.deinit();
+    state.geochemistry_solids[0].calcite_solid_mol_per_m3 = 100;
+    try rebaseLayer(&state, 0, water_before_m3, water_before_m3, negligible_water_volume_m3);
+    try rebaseLayer(&state, 0, water_before_m3, water_after_collapsed_m3, negligible_water_volume_m3);
+
+    // The collapsed-but-nonzero carrier is at/below the floor, so the new
+    // guard takes the "stay dry" branch: the concentration is held exactly
+    // (not rescaled by a near-zero carrier), and the live water is
+    // remembered for a future rewetting -- exactly what the pre-existing
+    // exact-zero case already did, now also covering this collapsed case.
+    try std.testing.expectEqual(@as(f64, 100), state.geochemistry_solids[0].calcite_solid_mol_per_m3);
+    try std.testing.expectEqual(water_before_m3, state.dry_reference_water_m3[0]);
+}
+
+test "issue-061: the floored guard's boundary matches legacy's GT (not GE) comparison and preserves the exact-zero case" {
+    const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(1.0);
+
+    // Exactly at the floor takes the dry-reference branch (legacy `.GT.ZEROS2`,
+    // strict greater-than, so equality does not count as "present").
+    {
+        var state = try chemistry.State.init(std.testing.allocator, 1);
+        defer state.deinit();
+        state.aqueous[0].calcium = 3;
+        try rebaseLayer(&state, 0, 0.05, negligible_water_volume_m3, negligible_water_volume_m3);
+        try std.testing.expectEqual(@as(f64, 3), state.aqueous[0].calcium);
+        try std.testing.expectEqual(@as(f64, 0.05), state.dry_reference_water_m3[0]);
+    }
+    // One ULP above the floor is treated as present water and rescales.
+    {
+        var state = try chemistry.State.init(std.testing.allocator, 1);
+        defer state.deinit();
+        state.aqueous[0].calcium = 3;
+        const just_above = std.math.nextAfter(f64, negligible_water_volume_m3, std.math.inf(f64));
+        try rebaseLayer(&state, 0, 0.05, just_above, negligible_water_volume_m3);
+        try std.testing.expectApproxEqRel(@as(f64, 3 * 0.05 / just_above), state.aqueous[0].calcium, 1e-12);
+        try std.testing.expectEqual(@as(f64, 0), state.dry_reference_water_m3[0]);
+    }
 }

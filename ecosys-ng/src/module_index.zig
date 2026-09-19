@@ -10,6 +10,7 @@ pub const config = @import("core/config.zig");
 pub const heat_failure_snapshot = @import("soil/heat/failure_snapshot.zig");
 pub const grid = @import("state/grid.zig");
 pub const numerics = @import("core/numerics.zig");
+pub const legacy_water_negligible_floor = @import("core/legacy_water_negligible_floor.zig");
 pub const ice_units = @import("core/ice_units.zig");
 pub const iteration_control = @import("core/iteration_control.zig");
 pub const checkpoint = @import("io/checkpoint/checkpoint.zig");

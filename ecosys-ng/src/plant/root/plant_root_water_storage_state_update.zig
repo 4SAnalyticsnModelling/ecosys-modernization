@@ -17,6 +17,7 @@ pub fn state_update(
     thermal: *SoilThermalState,
     biological_domain_count_by_plant: []const u8,
     chemistry_rebase_inventory_fractions: []const chemistry_rebase.InventoryFractions,
+    cell_area_m2: []const f64,
     carbon_g_per_mol: f64,
     phosphorus_g_per_mol: f64,
     ice_density_megagrams_per_m3: f64,
@@ -40,7 +41,8 @@ pub fn state_update(
         chemistry_rebase_inventory_fractions.len != grid.layer_count or
         chemistry_rebase_roundoff.len != grid.layer_count or
         root_water_storage_roundoff_m3.len != grid.layer_count or
-        root_heat_storage_roundoff_megajoules.len != grid.layer_count)
+        root_heat_storage_roundoff_megajoules.len != grid.layer_count or
+        cell_area_m2.len != grid.cell_count)
         return error.PlantRootWaterStorageDimensionMismatch;
     if (!std.math.isFinite(ice_density_megagrams_per_m3) or
         ice_density_megagrams_per_m3 <= 0)
@@ -81,6 +83,7 @@ pub fn state_update(
             chemistry_rebase_inventory_fractions[soil],
             carbon_g_per_mol,
             phosphorus_g_per_mol,
+            chemistry_rebase.legacyNegligibleWaterVolumeM3(cell_area_m2[cell]),
         );
         const layer_volume_m3 = thermal.layer_volume_m3[soil];
         const old_heat_capacity_megajoules_per_k =
@@ -157,6 +160,7 @@ pub fn state_update(
             chemistry_rebase_inventory_fractions[soil],
             carbon_g_per_mol,
             phosphorus_g_per_mol,
+            chemistry_rebase.legacyNegligibleWaterVolumeM3(cell_area_m2[cell]),
         ) catch unreachable;
         const layer_volume_m3 = thermal.layer_volume_m3[soil];
         const capacity_change_megajoules_per_k =
@@ -328,7 +332,7 @@ test "root uptake removes soil water and preserves dissolved moles" {
     const old_enthalpy_0 = thermal_capacity[0] * thermal_volume[0] * grid.soil_temperature_k[0];
     const old_domain_enthalpy = old_enthalpy_0 +
         thermal_capacity[1] * thermal_volume[1] * grid.soil_temperature_k[1];
-    try state_update(&roots, &grid, &chemistry, &thermal, &.{1}, &chemistry_inventory_fractions, 12, 31, 0.917, 4.19, &root_water_change, &root_heat, &chemistry_roundoff, &water_roundoff, &heat_roundoff);
+    try state_update(&roots, &grid, &chemistry, &thermal, &.{1}, &chemistry_inventory_fractions, &.{1}, 12, 31, 0.917, 4.19, &root_water_change, &root_heat, &chemistry_roundoff, &water_roundoff, &heat_roundoff);
     try std.testing.expectEqual(@as(f64, 7), grid.matrix_liquid_water_m3[0]);
     try std.testing.expectEqual(@as(f64, 7), grid.matrix_liquid_water_m3[1]);
     const new_domain_water_m3 = grid.matrix_liquid_water_m3[0] + grid.matrix_liquid_water_m3[1];
@@ -370,7 +374,7 @@ test "root uptake removes soil water and preserves dissolved moles" {
     const heat_roundoff_before = heat_roundoff;
     try std.testing.expectError(
         error.PlantRootWaterUptakeExceedsSoilStorage,
-        state_update(&roots, &grid, &chemistry, &thermal, &.{1}, &chemistry_inventory_fractions, 12, 31, 0.917, 4.19, &root_water_change, &root_heat, &chemistry_roundoff, &water_roundoff, &heat_roundoff),
+        state_update(&roots, &grid, &chemistry, &thermal, &.{1}, &chemistry_inventory_fractions, &.{1}, 12, 31, 0.917, 4.19, &root_water_change, &root_heat, &chemistry_roundoff, &water_roundoff, &heat_roundoff),
     );
     try std.testing.expectEqualDeep(water_before, grid.matrix_liquid_water_m3[0..2].*);
     try std.testing.expectEqual(concentration_before, chemistry.aqueous[0].nitrate_non_band);

@@ -200,6 +200,7 @@ pub fn reconstruct(
         inputs.parameters.carbon_g_per_mol,
         inputs.parameters.nitrogen_g_per_mol,
         inputs.parameters.phosphorus_g_per_mol,
+        inputs.cell_area_m2,
     ));
     try storage.add(try inventory.aggregateSurfaceTransportComplexes(
         inputs.surface_solutes,
@@ -361,6 +362,7 @@ pub fn reconstructCells(
             inputs.parameters.carbon_g_per_mol,
             inputs.parameters.nitrogen_g_per_mol,
             inputs.parameters.phosphorus_g_per_mol,
+            inputs.cell_area_m2,
             cell,
         ));
         try next.add(try inventory.aggregateSurfaceTransportComplexesCell(

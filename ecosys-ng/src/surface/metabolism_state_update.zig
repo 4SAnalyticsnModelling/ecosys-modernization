@@ -22,12 +22,17 @@ const aqueous_network = @import("../soil/solute/aqueous_network.zig");
 const grid = @import("../state/grid.zig");
 const zone_classification = @import("../soil/solute/charge_classification.zig");
 const scoped_conservation = @import("../validation/scoped_conservation.zig");
+const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
 
 pub const ApplyContext = struct {
     surface_organic: *organic.State,
     litter_chemistry: *chemistry.State,
     litter_gas: *gas.State,
     litter_water_m3: []const f64,
+    /// Per-cell horizontal footprint (m2), used only to derive the legacy
+    /// `ZEROS2` negligible-water floor (issue-061) for
+    /// `effectiveAqueousCarrierM3`; not otherwise consumed by this stage.
+    cell_area_m2: []const f64,
     respiration: *const respiration.State,
     oxygen: *const oxygen.State,
     nitrogen_fixation: *const fixation.State,
@@ -250,6 +255,7 @@ fn state_updateCell(context: *ApplyContext, cell: usize) !void {
     const aqueous_carrier_m3 = effectiveAqueousCarrierM3(
         water_m3,
         context.litter_chemistry.dry_reference_water_m3[cell],
+        negligibleLitterWaterVolumeM3(context.cell_area_m2[cell]),
     );
     const nitrate_before_g_n = context.litter_chemistry.cells[cell].nitrate_mol_per_m3 * aqueous_carrier_m3 * context.nitrogen_molar_mass_g_per_mol;
     const ammonium_before_g_n = context.litter_chemistry.cells[cell].ammonium_mol_per_m3 * aqueous_carrier_m3 * context.nitrogen_molar_mass_g_per_mol;
@@ -606,8 +612,17 @@ fn requireSignedStorageTransfer(
     if (!closure.accepted) return failure;
 }
 
-fn effectiveAqueousCarrierM3(live_water_m3: f64, dry_reference_water_m3: f64) f64 {
-    return if (live_water_m3 > 0) live_water_m3 else dry_reference_water_m3;
+/// `solute.f:610`-style `ZEROS2` floor (issue-060/issue-061): substitutes the
+/// remembered `dry_reference_water_m3` once `live_water_m3` falls at or below
+/// the legacy negligible-water floor, not only when it is exactly zero.
+fn effectiveAqueousCarrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_volume_m3: f64) f64 {
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+}
+
+/// `ZEROS2` scaled to one cell's actual horizontal footprint, for this file's
+/// `effectiveAqueousCarrierM3` callers.
+fn negligibleLitterWaterVolumeM3(cell_area_m2: f64) f64 {
+    return legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(cell_area_m2);
 }
 
 fn concentrationFromExtensiveAmount(amount_g: f64, carrier_m3: f64, molar_mass_g_per_mol: f64) !f64 {
@@ -720,6 +735,7 @@ fn projectedCellNitrogen_g_n(
     const aqueous_carrier = effectiveAqueousCarrierM3(
         water_m3,
         context.litter_chemistry.dry_reference_water_m3[cell],
+        negligibleLitterWaterVolumeM3(context.cell_area_m2[cell]),
     );
     var total = ammonium_after_g_n + nitrate_after_g_n + nitrite_after_g_n +
         aqueous_carrier * context.nitrogen_molar_mass_g_per_mol *
@@ -892,6 +908,7 @@ fn authoritativeCellNitrogen_g_n(context: ApplyContext, cell: usize) !f64 {
     const aqueous_carrier = effectiveAqueousCarrierM3(
         water_m3,
         context.litter_chemistry.dry_reference_water_m3[cell],
+        negligibleLitterWaterVolumeM3(context.cell_area_m2[cell]),
     );
     total += aqueous_carrier * context.nitrogen_molar_mass_g_per_mol *
         (context.litter_chemistry.cells[cell].ammonium_mol_per_m3 +
@@ -937,6 +954,7 @@ fn authoritativeCellPhosphorus_g_p(context: ApplyContext, cell: usize) !f64 {
     const aqueous_carrier = effectiveAqueousCarrierM3(
         water_m3,
         context.litter_chemistry.dry_reference_water_m3[cell],
+        negligibleLitterWaterVolumeM3(context.cell_area_m2[cell]),
     );
     var total = aqueous_carrier * context.phosphorus_molar_mass_g_per_mol *
         (context.litter_chemistry.cells[cell].h2po4_mol_p_per_m3 + context.litter_chemistry.cells[cell].hpo4_mol_p_per_m3);
@@ -974,7 +992,8 @@ test "dry litter metabolism carrier preserves retained aqueous N and P" {
     const ammonium_mol_per_m3: f64 = 3;
     const phosphate_mol_per_m3: f64 = 0.4;
 
-    const carrier = effectiveAqueousCarrierM3(0, dry_reference_m3);
+    const test_negligible_water_volume_m3 = negligibleLitterWaterVolumeM3(1);
+    const carrier = effectiveAqueousCarrierM3(0, dry_reference_m3, test_negligible_water_volume_m3);
     const ammonium_g_n = ammonium_mol_per_m3 * carrier * nitrogen_g_per_mol;
     const phosphate_g_p = phosphate_mol_per_m3 * carrier * phosphorus_g_per_mol;
 
@@ -989,11 +1008,82 @@ test "dry litter metabolism carrier preserves retained aqueous N and P" {
     );
     // A genuinely empty dry cell remains canonically zero; no artificial
     // carrier or concentration floor is introduced.
-    try std.testing.expectEqual(@as(f64, 0), effectiveAqueousCarrierM3(0, 0));
+    try std.testing.expectEqual(@as(f64, 0), effectiveAqueousCarrierM3(0, 0, test_negligible_water_volume_m3));
     try std.testing.expectEqual(@as(f64, 0), try concentrationFromExtensiveAmount(0, 0, nitrogen_g_per_mol));
     try std.testing.expectError(
         error.SurfaceAqueousMassWithoutCarrier,
         concentrationFromExtensiveAmount(1, 0, nitrogen_g_per_mol),
+    );
+}
+
+test "issue-061: BEFORE -- the old exact-zero guard used a collapsed-but-nonzero carrier instead of the remembered dry reference" {
+    // Literal reproduction of the old guard this issue replaced:
+    // `if (live_water_m3 > 0) live_water_m3 else dry_reference_water_m3`.
+    const oldEffectiveAqueousCarrierM3 = struct {
+        fn call(live_water_m3: f64, dry_reference_water_m3: f64) f64 {
+            return if (live_water_m3 > 0) live_water_m3 else dry_reference_water_m3;
+        }
+    }.call;
+
+    const dry_reference_m3: f64 = 2.5;
+    const ammonium_mol_per_m3: f64 = 3;
+    const nitrogen_g_per_mol: f64 = 14;
+    // Below the Ottawa deck's ZEROS2 floor (1.0e-6 m3 for a 1 m2 cell), but
+    // not exactly zero -- the same collapsed-but-nonzero regime issue-060
+    // diagnosed for `matrix_liquid_water_m3`, here on the surface-metabolism
+    // aqueous carrier.
+    const collapsed_water_m3: f64 = 1e-9;
+
+    const old_carrier = oldEffectiveAqueousCarrierM3(collapsed_water_m3, dry_reference_m3);
+    try std.testing.expectEqual(collapsed_water_m3, old_carrier);
+    const old_ammonium_g_n = ammonium_mol_per_m3 * old_carrier * nitrogen_g_per_mol;
+    const correct_ammonium_g_n = ammonium_mol_per_m3 * dry_reference_m3 * nitrogen_g_per_mol;
+    // The old guard's collapsed-carrier result is a >99.99% fake loss
+    // relative to the correct (dry-reference) mass, the same shape as
+    // issue-060's own hour-2,894 evidence.
+    const fake_relative_loss = (correct_ammonium_g_n - old_ammonium_g_n) / correct_ammonium_g_n;
+    try std.testing.expect(fake_relative_loss > 0.9999);
+}
+
+test "issue-061: AFTER -- the ZEROS2-floored guard substitutes the remembered dry reference instead of the collapsed carrier" {
+    const dry_reference_m3: f64 = 2.5;
+    const ammonium_mol_per_m3: f64 = 3;
+    const nitrogen_g_per_mol: f64 = 14;
+    const collapsed_water_m3: f64 = 1e-9; // Below the 1.0e-6 m3 floor.
+    const negligible_water_volume_m3 = negligibleLitterWaterVolumeM3(1);
+
+    const carrier = effectiveAqueousCarrierM3(collapsed_water_m3, dry_reference_m3, negligible_water_volume_m3);
+    try std.testing.expectEqual(dry_reference_m3, carrier);
+    try std.testing.expectEqual(
+        ammonium_mol_per_m3 * dry_reference_m3 * nitrogen_g_per_mol,
+        ammonium_mol_per_m3 * carrier * nitrogen_g_per_mol,
+    );
+}
+
+test "issue-061: the surface-metabolism floored guard's boundary matches legacy's GT (not GE) comparison and preserves the exact-zero case" {
+    const dry_reference_m3: f64 = 2.5;
+    const negligible_water_volume_m3 = negligibleLitterWaterVolumeM3(1);
+
+    // Exactly at the floor takes the dry-reference branch.
+    try std.testing.expectEqual(
+        dry_reference_m3,
+        effectiveAqueousCarrierM3(negligible_water_volume_m3, dry_reference_m3, negligible_water_volume_m3),
+    );
+    // One ULP above the floor is treated as present water.
+    const just_above = std.math.nextAfter(f64, negligible_water_volume_m3, std.math.inf(f64));
+    try std.testing.expectEqual(
+        just_above,
+        effectiveAqueousCarrierM3(just_above, dry_reference_m3, negligible_water_volume_m3),
+    );
+    // The pre-existing exact-zero case is unchanged.
+    try std.testing.expectEqual(
+        dry_reference_m3,
+        effectiveAqueousCarrierM3(0, dry_reference_m3, negligible_water_volume_m3),
+    );
+    // An ordinary, comfortably wet cell is unaffected by the floor.
+    try std.testing.expectEqual(
+        @as(f64, 0.05),
+        effectiveAqueousCarrierM3(0.05, dry_reference_m3, negligible_water_volume_m3),
     );
 }
 
@@ -1048,7 +1138,7 @@ fn validate(context: ApplyContext, range: compute.CellRange) !void {
     if (context.hourly_signed_heterotrophic_respiration_g_c) |ledger| if (ledger.len != context.model_grid.cell_count) return error.HeterotrophicRespirationLedgerDimensionMismatch;
     if (context.hourly_carbon_dioxide_production_g_c) |ledger| if (ledger.len != context.model_grid.cell_count) return error.CarbonDioxideProductionLedgerDimensionMismatch;
     const cells = context.surface_organic.layer_count;
-    if (range.first > range.end or range.end > cells or context.litter_chemistry.cells.len != cells or context.litter_chemistry.dry_reference_water_m3.len != cells or context.litter_gas.cell_count != cells or context.litter_water_m3.len != cells or context.respiration.cell_count != cells or context.oxygen.cell_count != cells or context.nitrogen_fixation.cell_count != cells or context.substrate_uptake.cell_count != cells or context.denitrification.cell_count != cells or context.assimilation.cell_count != cells or context.mineral_exchange.cell_count != cells or context.topsoil_exchange.cell_count != cells or context.turnover.cell_count != cells or context.priming.cellCount() != cells or context.organic_decomposition.cell_count != cells or context.organic_sorption.cell_count != cells or context.litter_colonization.cell_count != cells or context.topsoil_humus_partition.len != cells or context.model_grid.cell_count != cells or context.topsoil_chemistry.cell_count != context.model_grid.layer_count or context.topsoil_organic.layer_count != context.model_grid.layer_count or (context.zone_fractions_by_layer.len != 0 and context.zone_fractions_by_layer.len != context.model_grid.layer_count)) return error.SurfaceMetabolismStateUpdateDimensionMismatch;
+    if (range.first > range.end or range.end > cells or context.litter_chemistry.cells.len != cells or context.litter_chemistry.dry_reference_water_m3.len != cells or context.litter_gas.cell_count != cells or context.litter_water_m3.len != cells or context.cell_area_m2.len != cells or context.respiration.cell_count != cells or context.oxygen.cell_count != cells or context.nitrogen_fixation.cell_count != cells or context.substrate_uptake.cell_count != cells or context.denitrification.cell_count != cells or context.assimilation.cell_count != cells or context.mineral_exchange.cell_count != cells or context.topsoil_exchange.cell_count != cells or context.turnover.cell_count != cells or context.priming.cellCount() != cells or context.organic_decomposition.cell_count != cells or context.organic_sorption.cell_count != cells or context.litter_colonization.cell_count != cells or context.topsoil_humus_partition.len != cells or context.model_grid.cell_count != cells or context.topsoil_chemistry.cell_count != context.model_grid.layer_count or context.topsoil_organic.layer_count != context.model_grid.layer_count or (context.zone_fractions_by_layer.len != 0 and context.zone_fractions_by_layer.len != context.model_grid.layer_count)) return error.SurfaceMetabolismStateUpdateDimensionMismatch;
     for (context.topsoil_humus_partition) |partition| if (!std.math.isFinite(partition[0]) or !std.math.isFinite(partition[1]) or partition[0] < 0 or partition[1] < 0 or @abs(partition[0] + partition[1] - 1) > context.fraction_tolerance) return error.InvalidSurfaceMetabolismStateUpdateParameter;
     if (!std.math.isFinite(context.nitrogen_molar_mass_g_per_mol) or context.nitrogen_molar_mass_g_per_mol <= 0 or !std.math.isFinite(context.phosphorus_molar_mass_g_per_mol) or context.phosphorus_molar_mass_g_per_mol <= 0 or !std.math.isFinite(context.negligible_carbon_g_c) or context.negligible_carbon_g_c < 0 or !std.math.isFinite(context.fraction_tolerance) or context.fraction_tolerance < 0) return error.InvalidSurfaceMetabolismStateUpdateParameter;
     const fractions_to_validate = if (context.zone_fractions_by_layer.len == 0) @as([]const zone_classification.ZoneFractions, &.{context.zone_fractions}) else context.zone_fractions_by_layer;
@@ -1145,7 +1235,7 @@ test "surface metabolism state_update conserves carbon nitrogen and phosphorus" 
     parameters.populations = [_]@import("../soil/microbial/respiration_activity.zig").PopulationParameters{.{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 }} ** respiration.source_population_count;
     const carbon_before = try organic_state.totalCarbon_g_c(0) + try topsoil_organic.totalCarbon_g_c(0) + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.methane)];
     const nitrogen_before = organic_state.dissolved[0].nitrogen_g_n + chemistry_state.cells[0].nitrate_mol_per_m3 * 14 + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.nitrogen)] + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.nitrous_oxide)];
-    var context: ApplyContext = .{ .surface_organic = &organic_state, .litter_chemistry = &chemistry_state, .litter_gas = &gas_state, .litter_water_m3 = &.{1}, .respiration = &respiration_state, .oxygen = &oxygen_state, .nitrogen_fixation = &fixation_state, .substrate_uptake = &uptake_state, .denitrification = &denitrification_state, .assimilation = &assimilation_state, .mineral_exchange = &mineral_exchange_state, .topsoil_exchange = &topsoil_exchange_state, .turnover = &turnover_state, .priming = &priming_state, .organic_decomposition = &organic_decomposition_state, .organic_sorption = &organic_sorption_state, .litter_colonization = &litter_colonization_state, .topsoil_organic = &topsoil_organic, .topsoil_humus_partition = &.{.{ 0.5, 0.5 }}, .topsoil_chemistry = &topsoil_chemistry, .model_grid = &model_grid, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .microbial_parameters = parameters, .nitrogen_molar_mass_g_per_mol = 14, .phosphorus_molar_mass_g_per_mol = 31, .negligible_carbon_g_c = 1e-12, .fraction_tolerance = 1e-12 };
+    var context: ApplyContext = .{ .surface_organic = &organic_state, .litter_chemistry = &chemistry_state, .litter_gas = &gas_state, .litter_water_m3 = &.{1}, .cell_area_m2 = &.{1}, .respiration = &respiration_state, .oxygen = &oxygen_state, .nitrogen_fixation = &fixation_state, .substrate_uptake = &uptake_state, .denitrification = &denitrification_state, .assimilation = &assimilation_state, .mineral_exchange = &mineral_exchange_state, .topsoil_exchange = &topsoil_exchange_state, .turnover = &turnover_state, .priming = &priming_state, .organic_decomposition = &organic_decomposition_state, .organic_sorption = &organic_sorption_state, .litter_colonization = &litter_colonization_state, .topsoil_organic = &topsoil_organic, .topsoil_humus_partition = &.{.{ 0.5, 0.5 }}, .topsoil_chemistry = &topsoil_chemistry, .model_grid = &model_grid, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .microbial_parameters = parameters, .nitrogen_molar_mass_g_per_mol = 14, .phosphorus_molar_mass_g_per_mol = 31, .negligible_carbon_g_c = 1e-12, .fraction_tolerance = 1e-12 };
     const phosphorus_before = try authoritativeCellPhosphorus_g_p(context, 0);
     try applyTile(&context, .{ .first = 0, .end = 1 });
     const carbon_after = try organic_state.totalCarbon_g_c(0) + try topsoil_organic.totalCarbon_g_c(0) + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.methane)];
@@ -1251,7 +1341,7 @@ test "insufficient substrate leaves every surface metabolism pool unchanged" {
     const before_gas = gas_state.dissolved_mass_g;
     var gas_copy: [gas.species_count]f64 = undefined;
     @memcpy(&gas_copy, before_gas[0..gas.species_count]);
-    var context: ApplyContext = .{ .surface_organic = &organic_state, .litter_chemistry = &chemistry_state, .litter_gas = &gas_state, .litter_water_m3 = &.{1}, .respiration = &respiration_state, .oxygen = &oxygen_state, .nitrogen_fixation = &fixation_state, .substrate_uptake = &uptake_state, .denitrification = &denitrification_state, .assimilation = &assimilation_state, .mineral_exchange = &mineral_exchange_state, .topsoil_exchange = &topsoil_exchange_state, .turnover = &turnover_state, .priming = &priming_state, .organic_decomposition = &organic_decomposition_state, .organic_sorption = &organic_sorption_state, .litter_colonization = &litter_colonization_state, .topsoil_organic = &topsoil_organic, .topsoil_humus_partition = &.{.{ 0.5, 0.5 }}, .topsoil_chemistry = &topsoil_chemistry, .model_grid = &model_grid, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .microbial_parameters = parameters, .nitrogen_molar_mass_g_per_mol = 14, .phosphorus_molar_mass_g_per_mol = 31, .negligible_carbon_g_c = 1e-12, .fraction_tolerance = 1e-12 };
+    var context: ApplyContext = .{ .surface_organic = &organic_state, .litter_chemistry = &chemistry_state, .litter_gas = &gas_state, .litter_water_m3 = &.{1}, .cell_area_m2 = &.{1}, .respiration = &respiration_state, .oxygen = &oxygen_state, .nitrogen_fixation = &fixation_state, .substrate_uptake = &uptake_state, .denitrification = &denitrification_state, .assimilation = &assimilation_state, .mineral_exchange = &mineral_exchange_state, .topsoil_exchange = &topsoil_exchange_state, .turnover = &turnover_state, .priming = &priming_state, .organic_decomposition = &organic_decomposition_state, .organic_sorption = &organic_sorption_state, .litter_colonization = &litter_colonization_state, .topsoil_organic = &topsoil_organic, .topsoil_humus_partition = &.{.{ 0.5, 0.5 }}, .topsoil_chemistry = &topsoil_chemistry, .model_grid = &model_grid, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .microbial_parameters = parameters, .nitrogen_molar_mass_g_per_mol = 14, .phosphorus_molar_mass_g_per_mol = 31, .negligible_carbon_g_c = 1e-12, .fraction_tolerance = 1e-12 };
     try std.testing.expectError(error.InsufficientSurfaceMicrobialSubstrate, applyTile(&context, .{ .first = 0, .end = 1 }));
     try std.testing.expectEqual(before_doc, organic_state.dissolved[0]);
     try std.testing.expectEqualSlices(f64, &gas_copy, gas_state.dissolved_mass_g[0..gas.species_count]);

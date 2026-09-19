@@ -26,6 +26,7 @@ const plant_roots = @import("../plant/root/plant_root_system.zig");
 const plant_litter_salt_ingress = @import("../plant/salt/litter_ingress.zig");
 const group_nitrogen = @import("landscape_mass_inventory_nitrogen.zig");
 const group_support = @import("landscape_mass_inventory_support.zig");
+const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
 
 const pending_litter_salt_species = [_]solute_species.AqueousSpecies{
     .aluminum,
@@ -591,11 +592,16 @@ fn carrierAmount(stored_value: f64, carrier: f64) f64 {
 /// the same design `flux.zig:47-62`'s `minimum_layer_heat_capacity_megajoules_per_m2_k`
 /// already uses for the analogous `STARTS 655` floor on the same degenerate
 /// layers (see that file's `ZEROS/ZEROS2 threshold translation gap` note).
-const legacy_negligible_water_volume_m3_per_m2: f64 = 1.0e-6;
+const legacy_negligible_water_volume_m3_per_m2: f64 =
+    legacy_water_negligible_floor.legacy_negligible_water_volume_m3_per_m2;
 
-/// `ZEROS2` scaled to one cell's actual horizontal footprint.
+/// `ZEROS2` scaled to one cell's actual horizontal footprint. issue-061:
+/// delegates to the shared derivation in `core/legacy_water_negligible_floor.zig`
+/// so every sibling site (`water_carrier_rebase.zig`,
+/// `landscape_mass_inventory_surface.zig`, `metabolism_state_update.zig`)
+/// agrees on the same literal and scaling instead of re-deriving it.
 fn legacyNegligibleWaterVolumeM3(cell_area_m2: f64) f64 {
-    return legacy_negligible_water_volume_m3_per_m2 * cell_area_m2;
+    return legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(cell_area_m2);
 }
 
 /// `solute.f:610` keeps extensive `Z*` when `VOLW <= ZEROS2`. issue-060: this

@@ -364,6 +364,7 @@ fn applyRootWaterHeatAtRedistEntry(context: anytype) !void {
         context.soil_thermal,
         context.root_biological_domain_count_by_plant,
         chemistry_rebase_inventory_fractions,
+        context.canopy_cell_area_m2,
         12.0,
         context.runscript.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol,
         context.runscript.soil_phase_heat_parameters.freeze_thaw.ice_density_megagrams_per_m3,

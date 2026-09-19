@@ -349,6 +349,7 @@ test "REDIST surface chemistry retains N P and TION stoichiometry" {
         12,
         14,
         31,
+        &.{1},
     );
     try expectStoragePartition(inventory, &.{try landscape_mass_inventory.aggregateSurfaceChemistryCell(
         &chemistry,
@@ -359,6 +360,7 @@ test "REDIST surface chemistry retains N P and TION stoichiometry" {
         12,
         14,
         31,
+        &.{1},
         0,
     )});
     try std.testing.expectEqual(
@@ -534,8 +536,87 @@ test "dry litter ammonia inventory uses persisted chemistry carrier exactly once
         12,
         14,
         31,
+        &.{1},
     );
     try std.testing.expectEqual(@as(f64, 84), inventory.ammonium_nitrogen_g);
+}
+
+test "issue-061: a litter water content collapsed-but-nonzero below ZEROS2 uses the remembered dry reference, not the collapsed carrier" {
+    var chemistry = try litter_chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry.deinit();
+    var fertilizer = try litter_fertilizer.State.init(std.testing.allocator, 1);
+    defer fertilizer.deinit();
+    chemistry.cells[0].ammonia_mol_per_m3 = 2;
+    chemistry.dry_reference_water_m3[0] = 3;
+    // Below the Ottawa deck's ZEROS2 floor (1.0e-6 m3 for a 1 m2 cell) but
+    // not exactly zero -- the exact scenario issue-060 diagnosed for
+    // `matrix_liquid_water_m3`, here on its litter-layer sibling.
+    const inventory = try landscape_mass_inventory.aggregateSurfaceChemistry(
+        &chemistry,
+        &fertilizer,
+        &.{0},
+        &.{1e-9},
+        &.{0},
+        12,
+        14,
+        31,
+        &.{1},
+    );
+    // AFTER: `84 = 14 * 2 * 3` matches the exact-zero case above
+    // bit-for-bit, confirming the floor -- not exact zero -- is what now
+    // selects the dry reference.
+    try std.testing.expectEqual(@as(f64, 84), inventory.ammonium_nitrogen_g);
+
+    // BEFORE (literal reproduction of the old exact-zero-only guard this
+    // issue replaced: `if (water > 0) water else dry_reference_water`):
+    // `water = 1e-9 > 0` was true, so the collapsed live carrier (1e-9) --
+    // not the remembered dry reference (3) -- would have been used.
+    const old_aqueous_carrier: f64 = if (@as(f64, 1e-9) > 0) 1e-9 else 3;
+    const old_ammonium_nitrogen_g = 14 * (old_aqueous_carrier * 2);
+    try std.testing.expectApproxEqAbs(@as(f64, 2.8e-8), old_ammonium_nitrogen_g, 1e-15);
+    // The old guard's result is a >99.99% fake loss relative to the correct
+    // (post-fix) 84, the same shape as issue-060's own hour-2,894 evidence.
+    const fake_relative_loss = (@as(f64, 84) - old_ammonium_nitrogen_g) / 84.0;
+    try std.testing.expect(fake_relative_loss > 0.9999);
+}
+
+test "issue-061: the litter floor's boundary matches legacy's GT (not GE) comparison" {
+    var chemistry = try litter_chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry.deinit();
+    var fertilizer = try litter_fertilizer.State.init(std.testing.allocator, 1);
+    defer fertilizer.deinit();
+    chemistry.cells[0].ammonia_mol_per_m3 = 2;
+    chemistry.dry_reference_water_m3[0] = 3;
+    const floor_m3 = 1.0e-6; // legacyNegligibleWaterVolumeM3(1.0).
+
+    // Exactly at the floor still takes the dry-reference branch.
+    const at_floor = try landscape_mass_inventory.aggregateSurfaceChemistry(
+        &chemistry,
+        &fertilizer,
+        &.{0},
+        &.{floor_m3},
+        &.{0},
+        12,
+        14,
+        31,
+        &.{1},
+    );
+    try std.testing.expectEqual(@as(f64, 84), at_floor.ammonium_nitrogen_g);
+
+    // One ULP above the floor is treated as present water.
+    const just_above = std.math.nextAfter(f64, floor_m3, std.math.inf(f64));
+    const above_floor = try landscape_mass_inventory.aggregateSurfaceChemistry(
+        &chemistry,
+        &fertilizer,
+        &.{0},
+        &.{just_above},
+        &.{0},
+        12,
+        14,
+        31,
+        &.{1},
+    );
+    try std.testing.expectApproxEqRel(@as(f64, 14 * just_above * 2), above_floor.ammonium_nitrogen_g, 1e-12);
 }
 
 test "EXTRACT canopy inventory supports more than five runtime species" {

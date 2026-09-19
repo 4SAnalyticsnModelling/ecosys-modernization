@@ -198,6 +198,7 @@ pub fn reconstructScopes(
             inputs.parameters.carbon_g_per_mol,
             inputs.parameters.nitrogen_g_per_mol,
             inputs.parameters.phosphorus_g_per_mol,
+            inputs.cell_area_m2,
             cell,
         ));
         try surface.add(try group_surface.aggregateSurfaceTransportComplexesCell(

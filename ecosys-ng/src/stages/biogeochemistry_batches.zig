@@ -748,6 +748,7 @@ noinline fn runSurfaceBiogeochemistryBatch(context: anytype, surface_parameters:
         .litter_chemistry = context.surface_litter_chemistry,
         .litter_gas = context.litter_gas_transport,
         .litter_water_m3 = context.surface_precipitation.litter_water_m3,
+        .cell_area_m2 = context.canopy_cell_area_m2,
         .respiration = context.surface_microbial_respiration,
         .oxygen = context.surface_microbial_oxygen,
         .nitrogen_fixation = context.surface_nonsymbiotic_nitrogen_fixation,
