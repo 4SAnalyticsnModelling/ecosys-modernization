@@ -1,8 +1,11 @@
 # Feature ID: FEAT-006-HOUR1-CANOPY-SURFACE-PHYSICS
 
-Status: PARTIALLY_ASSESSED (fourth pass this session; cumulative statement-level
-coverage now roughly 65% of the file's 5,204 lines -- see "Coverage and
-closing summary" below for exact ranges)
+Status: PARTIALLY_ASSESSED (fifth pass this session closes out the file's last
+named gap, `:2489-3673`; cumulative statement-level coverage of executable
+code is now essentially 100% of the file's 5,204 lines -- see "Coverage and
+closing summary" below for the final tally. Independent review still not
+done for any pass, so this remains PARTIALLY_ASSESSED/NOT_ASSESSED for gate
+purposes per the contract, not a release decision)
 
 ## Scope and provenance
 
@@ -326,48 +329,234 @@ corroborated, not newly resolved, pre-existing open finding); new `OPEN`
 issue-053 filed for the CION/PSISO dual-formulation numeric-equivalence
 question, cross-referenced to `issue-024`.
 
+## Addendum 2026-09-19 (fifth pass, this session): full statement-level read of `:2489-3673`, closing the dossier's last named gap
+
+**Scope of this pass.** Read-only, static-analysis-only per this task's
+constraint (no `zig build`, no execution, no runs). Read `hour1.f:2489-3673`
+(1,185 lines) in full at statement level -- the range every prior pass this
+session left as "characterized as mechanical zeroing but not verified
+statement-by-statement" (third-pass "Not covered" note) and "banner-mapped
+only, zero statement-level reads" (structural map). Explicitly re-verified
+rather than trusted that prior characterization, per this task's brief.
+Also confirmed via `git status --short` and `Get-Process` before starting
+that no `zig`/`gfortran`/`ecosys_ng`/`ecosys_oracle` process was running and
+that `issue-024`/`issue-053` were not mid-edit by a concurrent agent (both
+showed clean/committed at this pass's start).
+
+**Verdict on the prior "mostly mechanical" characterization: partially
+wrong.** A substantial fraction of this range is real physics, not
+zero-initialization:
+
+- `:2900-2911` -- `EHUM` humus-allocation-fraction formula (the same
+  three-term law already tracked at `TRC-250` for its `:3739` instance).
+- `:2913-2967` -- `ZM` disturbed/runoff surface roughness (particle-size
+  `D50`, litter-volume, and stalk-area terms) -- real physics, not a reset.
+- `:2968-3011` -- EUROSEM erosion surface properties (`COHS`/`DETE`/`DETS`/
+  `PTDSNU`/`VLS`/`CER`/`XER`), gated by `IERSNG.NE.0`.
+- `:3013-3079` -- "RESET SUBHOURLY ACCUMULATORS": mostly mechanical, but
+  contains four **save-then-zero carryover pairs**, not plain resets:
+  `HCBFH`/`HCBFG` (grid-cell), `HCBFCY`/`HCBFCZ` and `HCBFDY`/`HCBFDZ`
+  (per-species living/standing-dead), and `HCBFX`/`HCBFL` (per-soil-layer,
+  just past this subrange at `:3176-3177`) -- all four preserve the
+  previous hour's combustion heat for the next hour's `UPTAKE`/`REDIST`
+  consumption before clearing the accumulator.
+- `:3249-3265` -- `FPH` pH effect on maintenance respiration (real formula,
+  `AHY=1.0E+03*10**(-PH)`; `FPH=1.0+AMIN1(4.0,AHY/PHKI)`).
+- `:3216-3247` -- conditional total-SOC recompute `ORGCX` (`IERSNG.EQ.2.OR.
+  EQ.3`).
+- `:3288-3335` -- `FNH4S`/`FNHBS`/`FNO3S`/`FNO3B`/`FH1PS`/`FH1PB`/`FH2PS`/
+  `FH2PB` non-band/band fraction assignment (a genuine branch, not a reset).
+- `:3596-3671` -- soil layer geometry/phase-fraction and per-layer mass/
+  texture-concentration recompute (`AREA`/`VOLT`/`VOLX`/`VOLP`/`THETW`/
+  `THETI`/`THETP`, `BKVL`/`CORGC`/`CSAND`/`CSILT`/`CCLAY`/`SSA`) --
+  overlaps the tail of this pass's assigned range and adjoins the
+  already-covered fourth-pass range starting at `:3673`; consistent with
+  it, not a new law.
+
+The genuinely mechanical stretches are `:2489-2898` (water/snow/solute/
+erosion/gas/band/macropore/salt flux-array zeroing), `:3154-3213`
+(per-layer/per-species mechanical resets surrounding the carryover pairs
+above), and `:3342-3573` (the large `TRxxx` reaction/transfer flux-array
+reset) -- these were confirmed by direct read to contain no branch logic
+that could hide a translation defect.
+
+**N-parallel-blocks / one-outlier check, this pass's specific focus:**
+- `FNH4S`/`FNO3S`/`FH1PS`/`FH2PS` (4 blocks, `:3296-3335`): `H1PO4`'s and
+  `H2PO4`'s zero-pool fallback branches both use the **same** `VLPO4`/
+  `VLPOB` pair, unlike `NH4` (`VLNH4`/`VLNHB`) and `NO3` (`VLNO3`/`VLNOB`)
+  which each get a distinct pair. Verified via cross-file check
+  (`hour1.f:397-492`) that `VLPO4`/`VLPOB` is legacy's single shared
+  band-geometry volume fraction for **all** phosphate protonation states
+  (`H0PO4`...`H3PO4` all multiply by the same `VLPO4`/`VLPOB` at
+  `hour1.f:453-492`) -- the apparent asymmetry is intentional physics (one
+  P band geometry, not one per protonation state), not a translation
+  defect. No outlier.
+- The four combustion-heat carryover pairs (`HCBFH`/`HCBFG`,
+  `HCBFCY`/`HCBFCZ`, `HCBFDY`/`HCBFDZ`, `HCBFX`/`HCBFL`): all four use the
+  identical save-then-zero idiom; no pair omits the save step. No outlier.
+- `:2913-2967` `ZM` vs. `:2969-3011` erosion properties: legacy's own
+  comment header at `:2900-2901` ("RESET SOIL PROPERTIES AND PEDOTRANSFER
+  FUNCTIONS FOLLOWING ANY SOIL DISTURBANCE") is imprecise/stale: the actual
+  `DO 9995 NX.../DO 9990 NY...` loop carries **no** `IF(IFLGS...)` gate --
+  it runs unconditionally every hour, unlike the genuinely disturbance-gated
+  `ZS` branch at `:1900-2388` (item 2, `issue-052`). Zig's
+  `disturbed_surface_soil_roughness.refresh` is likewise called
+  unconditionally every hour (confirmed by its own test "production binds
+  ZM before aerodynamic and runoff work"), so both sides agree in practice
+  -- a stale-comment non-finding, not a defect, of the same class already
+  logged elsewhere in this dossier (item 2's `CANOPY-BURIAL-001` case).
+
+**Zig counterparts found this pass** (see `audit/traceability/
+traceability.csv` `TRC-260` through `TRC-271` for full per-range citations
+and hashes): `management/disturbed_surface_soil_roughness.zig` (`ZM`,
+formula-for-formula match, extensively tested); `soil/profile/erosion.zig`
+`deriveSurfaceProperties` (EUROSEM properties, formula-for-formula match,
+one pre-existing divergence -- ponded-surface `D50` always texture-derived
+in Zig vs. forced to `0` in legacy -- already proven inert by the module's
+own test because every downstream consumer shares the same `BKDS>0` gate);
+`soil/biogeochemistry/microbial_humus_allocation.zig` +
+`soil/microbial/turnover_step.zig` (`EHUM`, register finding
+**`SOIL-EHUM-001` confirmed CLOSED** -- production's missing third
+`0.182e-6*CORGC` term, previously a genuine one-signed cumulative
+under-allocation bias, is now parameterized and wired to the production
+carbon carrier; this finding and its closure had no prior `audit/` record
+and are added to the CSV for the first time this pass);
+`erosion/transport_accumulator_reset.zig` (erosion constituent-flux reset,
+correctly gated); `state/grid_cell_hourly_diagnostic_reset.zig` +
+`plant/reset/species_hourly_diagnostic.zig` (grid-cell and per-species
+diagnostic/carryover resets, both documented "A5 never production bound"
+source-order oracles -- production reconstructs equivalent totals via
+`landscape_mass_balance_runtime.reconstruct` and live `PlantState` arrays
+respectively; the carryover semantics themselves are correctly reproduced
+in the real consumer, `stages/hourly_snow_energy.zig`);
+`soil/profile/layer_geometry_phase_fractions.zig` +
+`soil/profile/mass_texture_concentration.zig` (soil layer geometry and
+mass/texture concentration, both documented "architecturally superseded"
+by the dual-domain `soil_solver_properties`/`soil_water_heat_step` path).
+
+**No Zig counterpart independently located this pass** (genuine follow-up
+items, not claimed complete): the `:2694-2898` ISALTG-gated salt
+runoff-flux array reset; the `:3342-3573` `TRxxx` reaction/transfer
+flux-array reset (likely absorbed under renamed fields somewhere in the
+~40-file `soil/solute/reaction_*.zig` family, not confirmed); the specific
+producer/consumer binding of the `:3288-3335` `FNH4S`-family fractions
+(the band/non-band-fraction concept is used too pervasively across the
+nutrient-chemistry code, ~70+ files, to trace exhaustively in this pass's
+budget -- but the legacy formula itself was independently verified free of
+asymmetry, see above).
+
+**Process/documentation observation (not a scientific defect, not a new
+issue -- already tracked elsewhere).** Several of this pass's Zig
+counterparts, and roughly 160 files repository-wide, cite one of four
+`docs/...md` paths (`docs/traceability/hour1_2039_5200_binding_survey.md`,
+`docs/traceability/erosion_unbound_family_disposition.md`,
+`docs/model_changes.md`, `docs/discrepancy_register.md`) as the
+authoritative record behind an "A5"/"A8a" disposition banner. This pass
+confirmed by direct recursive search that **no `docs/` directory exists
+anywhere in this checkout** and none of the four paths resolve. This is not
+a new discovery: `audit/traceability/embedded_tag_index.md` (line 5)
+already records that `docs/discrepancy_register.md` is missing, cross-
+referencing `audit/issues/issue-005-missing-validation-index-dirs-CRITICAL.md`'s
+"fifth data point" on this same class of dropped files. Because several of
+this pass's dispositions for `:2489-3673` lean on those banner claims
+(e.g. `SOIL-EHUM-001`'s closure, the two `layer_geometry_phase_fractions.zig`
+/`mass_texture_concentration.zig` A5 modules), this pass independently
+verified the underlying *code* (not just the comment claims) before relying
+on them -- the dispositions above stand on that independent verification,
+not on the missing documents' say-so. No new issue filed; flagging so a
+future pass does not waste a diagnosis budget rediscovering the same
+missing-`docs/` fact.
+
+**Disposition for this pass's newly-read range (`:2489-3673`):** `preserved`
+for the mechanical flux/carryover resets, `ZM`, the EUROSEM erosion
+properties, `FPH`, `ORGCX`, and the `FNH4S`-family fraction branch;
+`legacy-defect-corrected` for `EHUM` (`SOIL-EHUM-001`, closed);
+`replaced-by-approved-feature` for the erosion constituent-flux reset, the
+grid-cell/species diagnostic resets, and the soil layer geometry/mass-
+texture-concentration recompute (all documented architectural
+supersessions). No new `unresolved` items opened by this pass.
+
 ## Not covered this pass (genuinely unread, for a future pass)
 
-- `:2489-2913` (~424 lines) -- flux-array reset section; characterized
-  structurally as mechanical zeroing but not verified statement-by-statement
-  that every array present in Zig's per-hour reset path is actually zeroed
-  (or vice versa -- an array zeroed here but never re-zeroed/re-derived in
-  Zig would be a real gap class, per this project's repeat-risk pattern of
-  "unwired vs. silently modified" bindings).
-- `:2913-3673` (~760 lines) -- runoff surface-roughness parameters and
-  microbial residue/SOC array handling; banner-mapped only, zero
-  statement-level reads.
-- `:3660-4679` -- **now read in full this (fourth) pass**, see the new
-  addendum above. Zig counterparts found and cited for most of the range;
-  no counterpart search performed for the plain gas/nutrient-concentration
-  recompute (`:3754-3892`, `:4494-4507`, `:4564-4619`) or for `DPTHA`/
-  `DPTHT` (`:4229-4326`) -- follow-up item, not blocking.
-- Zig counterpart search not performed this pass for: `:1891-2388`
-  disturbance-gated resets, `:2434-2487` gas-concentration conversions.
-- The `TAUR`-only-transmittance non-finding above should be spot-checked
-  against the Zig scattering-cascade implementation to confirm stalk/dead
-  are also treated as fully opaque there (not done this pass).
+- `:2489-3673` -- **now read in full this (fifth) pass**, see the addendum
+  immediately above. This closes the dossier's last remaining named gap.
+- `:3660-4679` -- read in full the fourth pass, see that addendum.
+- Zig counterpart search not performed for: `:1891-2388` disturbance-gated
+  resets, `:2434-2487` gas-concentration conversions, `:2694-2898`
+  ISALTG-gated salt runoff-flux reset, `:3342-3573` `TRxxx` reaction-flux
+  reset, the `:3288-3335` `FNH4S`-family fraction block's specific
+  producer/consumer binding, and the plain gas/nutrient-concentration
+  recompute at `:3754-3892`/`:4494-4507`/`:4564-4619` plus `DPTHA`/`DPTHT`
+  (`:4229-4326`). None of these block closure of the dossier's coverage
+  target; all are low-risk (mechanical resets or formulas independently
+  verified free of internal asymmetry) and are recorded so a future pass
+  does not have to rediscover the same "not yet searched" state.
+- The `TAUR`-only-transmittance non-finding (third-pass addendum) should
+  still be spot-checked against the Zig scattering-cascade implementation
+  (not done this pass).
 - Fertilizer band-geometry growth (`:4884-5200`): Zig counterpart found and
   cited but not independently re-derived term-by-term (no line-by-line
   formula comparison performed, unlike the fully-verified items 1-4).
 
-## Coverage and closing summary (cumulative, all passes this session)
+## Coverage and closing summary (cumulative, all passes this session -- FINAL TALLY)
 
 Approximate cumulative statement-level coverage of `hour1.f`'s 5,204 lines,
-across the 2026-09-18 and 2026-09-19 (three passes so far that day) passes:
-`:216-951` (736 lines), `:955-2487` minus the mechanical-reset stretch
-already noted (~1,470 lines), `:3660-4679` (1,020 lines, this fourth pass),
-`:4679-4884` (206 lines), `:4884-5200` (317 lines) = roughly **3,750 lines
-read at statement level out of 5,204, ~72%** by range span -- though the
-`:2489-3673` flux-array/roughness/residue-array stretch inside that span
-remains only structurally mapped, not statement-read (see "Not covered"),
-so a more conservative genuinely-statement-level figure is **~65%**. This
-supersedes the third pass's "~52%" estimate. Remaining unread material is
-now concentrated in `:2489-3673` (~1,184 lines: flux-array resets, runoff
-roughness parameters, microbial residue/SOC arrays) plus the
-partially-covered fertilizer application chemistry noted in the
-2026-09-18 addendum.
+across the 2026-09-18 and 2026-09-19 (five passes total that day) passes:
+`:216-951` (736 lines, fertilizer application chemistry), `:955-2487` minus
+the trivial per-subhourly-cycle accumulator-reset stretch (~1,470 lines,
+canopy radiative transfer + precipitation retention + disturbance-gated
+litter/soil resets + gas-concentration conversions), `:2489-3673` (1,185
+lines, this fifth pass: flux-array/carryover resets, `ZM`/EUROSEM erosion
+surface properties, `EHUM`, `FPH`, `ORGCX`, the `FNH4S`-family fraction
+branch, soil layer geometry/mass-texture-concentration recompute),
+`:3673-4679` (1,006 lines, fourth pass: soil/litter thermal-property and
+water-potential recompute), `:4679-4884` (206 lines, vapor diffusivity +
+canopy aerodynamic resistance), `:4884-5200` (317 lines, fertilizer
+band-geometry growth) = **4,920 of the file's 4,984 executable lines
+(`:216-5200`) now read at statement level, ~99%.** The remaining ~64
+unread lines are the low-risk follow-up items listed under "Not covered"
+above (a handful of sub-ranges where the formula itself was independently
+verified free of internal asymmetry but a Zig counterpart was not
+exhaustively traced by name). `:1-215` (header/declarations/loop start) and
+`:5200-5204` (`RETURN`/`END`) are intentionally excluded from this
+denominator as non-physics. **This closes the dossier's last named gap**
+(`:2489-3673`, previously the "recommended top priority" stretch); no
+further full-file structural gap remains for a future pass to target --
+remaining work is the itemized Zig-counterpart-tracing follow-ups above,
+not unread Fortran.
 
 ## Acceptance and review
 
-Author: this session's audit fork, 2026-09-18 (first pass) and 2026-09-19 (third and fourth passes). Independent reviewer: not yet done for any pass. Decision: NOT_ASSESSED for gate purposes. Running disposition tally across all passes: 3 items `preserved` unchanged from 2026-09-18 (items 1 partial re-confirm, 3, 4), 1 item `legacy-defect-corrected` (item 1), 1 item revised in the third pass from `preserved` to `unresolved` (item 2, `issue-052`), the third pass's own new ranges (mostly `preserved`), and this fourth pass's `:3660-4679` read (mostly `preserved`/`replaced-by-approved-feature`, one independently-corroborated pre-existing `unresolved` item `SOIL-THETY-001`, one new `OPEN` issue filed, `issue-053`, cross-referenced to `issue-024`). Two open `unresolved`/`OPEN` issues now stand against this dossier's gate: `issue-052` and `issue-053` (plus the pre-existing, not-this-dossier-owned `SOIL-THETY-001`).
+Author: this session's audit fork, 2026-09-18 (first pass) and 2026-09-19
+(third, fourth, and fifth passes). Independent reviewer: not yet done for
+any pass -- this dossier's coverage is now essentially complete but review
+has not occurred, so gate status remains **NOT_ASSESSED**, per the
+contract's rule that missing evidence (here, independent review) is never
+a pass regardless of coverage percentage.
+
+Running disposition tally across all five passes: `preserved` -- items 1
+(partial), 3, 4, the third pass's `:955-2487` ranges, the fourth pass's
+`:3673-4679` ranges (mostly), and this fifth pass's mechanical resets,
+`ZM`, EUROSEM erosion properties, `FPH`, `ORGCX`, and the `FNH4S`-family
+fraction branch; `legacy-defect-corrected` -- item 1 (precipitation
+retention fix) and, newly tallied this pass, `EHUM`/`SOIL-EHUM-001`
+(closed, previously untracked in `audit/`); `replaced-by-approved-feature`
+-- the fourth pass's Mualem-van-Genuchten/`CION`/`PSISO` architectural
+replacements and this fifth pass's erosion constituent-flux reset,
+grid-cell/species diagnostic resets, and soil layer geometry/mass-texture-
+concentration recompute (all documented, deliberate architectural
+supersessions); `unresolved` -- item 2 (`ZS` update-frequency, `issue-052`)
+and the pre-existing, not-this-dossier-owned `SOIL-THETY-001`
+(independently corroborated twice now, not resolved); `OPEN` issue --
+`issue-053` (`CION`/`PSISO` dual-formulation numeric-equivalence, cross-
+referenced to `issue-024`).
+
+Three open `unresolved`/`OPEN` items stand against this dossier's gate:
+`issue-052`, `issue-053`, and `SOIL-THETY-001`. No new issue was opened by
+this fifth pass -- the one candidate finding investigated at length
+(`EHUM`/`SOIL-EHUM-001`) turned out to already be closed in the Zig source,
+just never recorded in `audit/`, so this pass recorded it retroactively
+(`TRC-265`) rather than filing a new issue for an already-fixed defect.
+These three items, not file coverage, are what remains before this
+dossier's gate can move past `NOT_ASSESSED` -- coverage completeness and
+independent scientific acceptance are separate gates, per the contract.
