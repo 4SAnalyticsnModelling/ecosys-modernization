@@ -953,6 +953,32 @@ fn liveGridStateSlice(
 
 pub const minimum_freeze_flow_coupling_substeps: u8 = 4;
 
+/// True when `value` is a rung of the authoritative escalation ladder.
+/// Shared (not duplicated) by every consumer that needs to validate a
+/// substep-count constant against `recovery_substep_counts`, including
+/// this file's own comptime guard below and
+/// `hourly_heat_water_solute.zig`'s stage-level rescue-chain floor --
+/// closing the recurring defect shape documented under
+/// SOLUTE-HYDROGEN-ROW-RECURRING-NONCONVERGENCE-001 and issue-058, where
+/// a substep-count constant silently drifted out of step with this
+/// array because nothing checked membership structurally.
+pub fn isRecoverySubstepCountMember(value: u8) bool {
+    for (recovery_substep_counts) |candidate| {
+        if (candidate == value) return true;
+    }
+    return false;
+}
+
+comptime {
+    // Any constant that names one of the ladder's rungs must actually be
+    // a member of it, so a future edit that changes the ladder without
+    // updating this floor fails to compile instead of crashing or
+    // silently no-op'ing at runtime (issue-058).
+    if (!isRecoverySubstepCountMember(minimum_freeze_flow_coupling_substeps)) @compileError(
+        "minimum_freeze_flow_coupling_substeps must be a member of recovery_substep_counts (see issue-058)",
+    );
+}
+
 fn phaseChangeExceedsLocalWaterTolerance(
     change: HeatInducedIceChange,
     local_water_scale_m3: f64,

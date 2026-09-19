@@ -9697,6 +9697,79 @@ test "bounded recovery chooses only deliberate fallback schedules" {
     try std.testing.expectEqual(@as(u8, 4), try boundedInitialRecoverySubstepCount(1, true));
 }
 
+test "boundedRecoveryFallback matches the old hardcoded 20/32/64 chain across the full u8 domain (before/after equivalence, issue-058)" {
+    // `boundedRecoveryFallback` used to be a plain if/else-if chain over
+    // three named literals (`stiff=20`, `secondary=32`, `maximum=64`)
+    // that never read `recovery_substep_counts`. This test re-derives
+    // that exact pre-fix formula as a literal, independent of any shared
+    // helper or constant, and checks it against the new array-driven
+    // implementation for every possible `u8` input -- not just today's
+    // reachable array members -- so any behavior change at today's
+    // committed ladder values would be caught here.
+    var attempted: u16 = 0;
+    while (attempted <= 255) : (attempted += 1) {
+        const a: u8 = @intCast(attempted);
+        const old_hardcoded_result: ?u8 = if (a < 20)
+            @as(?u8, 20)
+        else if (a < 32)
+            @as(?u8, 32)
+        else if (a < 64)
+            @as(?u8, 64)
+        else
+            null;
+        try std.testing.expectEqual(old_hardcoded_result, boundedRecoveryFallback(a));
+    }
+}
+
+test "fallbackWithinLadder escalates to a new tier beyond today's committed maximum (extensibility, issue-058)" {
+    // A local-only ladder extending 64 -> 128. The production
+    // `recovery_substep_counts` array itself is untouched here (that
+    // decision belongs to issue-015, not this fix). This exercises the
+    // exact mechanism `boundedRecoveryFallback` delegates to, proving
+    // the fix actually solves the extensibility problem -- before this
+    // fix, an analogous change to the real array would either silently
+    // no-op (old chain still capped at 64) or crash, per issue-024
+    // round 7's `STATUS_ACCESS_VIOLATION` reproduction.
+    const extended_ladder = [_]u8{ 1, 2, 4, 8, 16, 20, 32, 64, 128 };
+    try std.testing.expectEqual(
+        @as(?u8, 128),
+        fallbackWithinLadder(&extended_ladder, stiff_heat_direct_recovery_substeps, 64),
+    );
+    try std.testing.expectEqual(
+        @as(?u8, null),
+        fallbackWithinLadder(&extended_ladder, stiff_heat_direct_recovery_substeps, 128),
+    );
+    try std.testing.expectEqual(
+        @as(?u8, 20),
+        fallbackWithinLadder(&extended_ladder, stiff_heat_direct_recovery_substeps, 1),
+    );
+    try std.testing.expectEqual(
+        @as(?u8, 32),
+        fallbackWithinLadder(&extended_ladder, stiff_heat_direct_recovery_substeps, 20),
+    );
+    try std.testing.expectEqual(
+        @as(?u8, 64),
+        fallbackWithinLadder(&extended_ladder, stiff_heat_direct_recovery_substeps, 32),
+    );
+}
+
+test "isRecoverySubstepCountMember distinguishes true ladder rungs from drifted values (guards issue-058 comptime assertions)" {
+    // `minimum_freeze_flow_coupling_substeps` and
+    // `stiff_heat_direct_recovery_substeps` are each guarded by a
+    // `comptime` assertion built on
+    // `ecosys.soil_water_heat_step.isRecoverySubstepCountMember`. A
+    // compile error itself cannot be asserted at runtime, but this test
+    // pins the exact predicate those guards depend on: if a future edit
+    // weakened it (e.g. made it always return true), this would still
+    // catch it, and it is the same function that would have caught both
+    // issue-058's dormant array/chain mismatch and a re-drifted floor
+    // constant before it ever reached a build or production run.
+    inline for (.{ 1, 2, 4, 8, 16, 20, 32, 64 }) |member|
+        try std.testing.expect(ecosys.soil_water_heat_step.isRecoverySubstepCountMember(member));
+    inline for (.{ 0, 3, 5, 17, 21, 63, 65, 80, 128, 255 }) |non_member|
+        try std.testing.expect(!ecosys.soil_water_heat_step.isRecoverySubstepCountMember(non_member));
+}
+
 test "accepted schedule duration uses bounded floating point accumulation" {
     for (ecosys.soil_water_heat_step.recovery_substep_counts) |substep_count| {
         const time_step_hours = 1.0 / @as(f64, @floatFromInt(substep_count));
@@ -11318,22 +11391,64 @@ fn recoverFixedExternalHour(attempt: anytype) !void {
 }
 
 const stiff_heat_direct_recovery_substeps: u8 = 20;
-const secondary_bounded_recovery_substeps: u8 = 32;
-const maximum_bounded_recovery_substeps: u8 = 64;
+/// Derived from `recovery_substep_counts` (heat_step.zig), not hardcoded,
+/// so this stage's escalation ceiling can never drift from the ladder's
+/// own true maximum. Fixes the design gap documented in issue-058 and
+/// SOLUTE-HYDROGEN-ROW-RECURRING-NONCONVERGENCE-001 (hours 2,571 and
+/// 2,604), where this same ceiling was previously a hand-maintained
+/// literal that twice lagged the array's actual contents.
+const maximum_bounded_recovery_substeps: u8 =
+    ecosys.soil_water_heat_step.recovery_substep_counts[
+        ecosys.soil_water_heat_step.recovery_substep_counts.len - 1
+    ];
 const coarsening_probe_cooldown_hours: u8 = 3;
 const gas_coarsening_probe_cooldown_hours: u8 = 23;
 
+comptime {
+    // `stiff_heat_direct_recovery_substeps` names the first rung of this
+    // stage's error-aware rescue chain (the established three-minute
+    // schedule, which also exceeds the quarter-hour freeze-flow floor).
+    // It must actually be a rung of the authoritative ladder, not merely
+    // some value below the ladder's true maximum -- see issue-058. Uses
+    // the shared membership check in heat_step.zig rather than a local
+    // re-derivation, so both files agree on what "a rung" means.
+    if (!ecosys.soil_water_heat_step.isRecoverySubstepCountMember(stiff_heat_direct_recovery_substeps))
+        @compileError(
+            "stiff_heat_direct_recovery_substeps must be a member of soil_water_heat_step.recovery_substep_counts (see issue-058)",
+        );
+}
+
+/// Ladder-parameterized core of the escalation-on-failure chain
+/// (issue-058). The next rung is the smallest `ladder` member that is
+/// both a designated rescue-chain rung (at or above `floor`) and
+/// strictly finer (a larger substep count) than the attempted schedule.
+/// Factored out from `boundedRecoveryFallback` so the identical logic
+/// production uses can be exercised in a test against a ladder that
+/// extends past today's committed maximum, without ever touching the
+/// real `recovery_substep_counts` array.
+fn fallbackWithinLadder(ladder: []const u8, floor: u8, attempted_substep_count: u8) ?u8 {
+    for (ladder) |candidate| {
+        if (candidate < floor) continue;
+        if (candidate > attempted_substep_count) return candidate;
+    }
+    return null;
+}
+
+/// Escalation-on-failure chain for the stage-level bounded recovery
+/// controller. Genuinely array-driven (issue-058): delegates to
+/// `fallbackWithinLadder` over the authoritative `recovery_substep_counts`
+/// ladder, floored at `stiff_heat_direct_recovery_substeps`. Extending
+/// `recovery_substep_counts` past its current maximum therefore extends
+/// this chain automatically and correctly, instead of silently no-op'ing
+/// or crashing the way the previous hardcoded 20/32/64 chain did when
+/// pushed out of sync with the array (issue-058's `STATUS_ACCESS_VIOLATION`
+/// reproduction, issue-024 round 7).
 fn boundedRecoveryFallback(attempted_substep_count: u8) ?u8 {
-    const requested: u8 = if (attempted_substep_count < stiff_heat_direct_recovery_substeps)
-        stiff_heat_direct_recovery_substeps
-    else if (attempted_substep_count < secondary_bounded_recovery_substeps)
-        secondary_bounded_recovery_substeps
-    else if (attempted_substep_count < maximum_bounded_recovery_substeps)
-        maximum_bounded_recovery_substeps
-    else
-        return null;
-    if (requested <= attempted_substep_count) return null;
-    return requested;
+    return fallbackWithinLadder(
+        &ecosys.soil_water_heat_step.recovery_substep_counts,
+        stiff_heat_direct_recovery_substeps,
+        attempted_substep_count,
+    );
 }
 
 fn boundedInitialRecoverySubstepCount(
