@@ -6045,7 +6045,22 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
     // One line per cell per hour at `info`, beside the `daily conservation
     // accepted` line the harness already scrapes. It reads the report and the
     // ledger that were both built above and mutates nothing.
-    for (0..driver_context.state.*.cell_count) |cell| {
+    //
+    // PERFORMANCE-LOGGING-OVERHEAD-001 (2026-09-18): this block is debug
+    // scaffolding left over from a closed investigation (see the
+    // SURFACE-HEAT-PONDED-LITTER-BOOKING-001 / PHOSPHORUS-SURFACE-CLOSURE-
+    // HOUR-2658-001 comments above and below). Measured on the Ottawa
+    // benchmark deck it alone produced 10,312 of 19,248 total log lines
+    // (~54%) over a 2,578-hour run -- one hour's worth of lines fired on
+    // EVERY hour, not just the frontier hour it was written to diagnose.
+    // Every value read here is local to this loop and never used again (the
+    // real conservation gate is `hourly_layer_conservation_report`, evaluated
+    // above unconditionally); gating only this printing block cannot change
+    // any accepted/rejected decision or any written output. Gated behind
+    // `run_support.verbose_diagnostics_enabled` (off by default; enable with
+    // `--verbose-diagnostics`) rather than deleted, so the historical
+    // frontier investigation remains reproducible on demand.
+    if (run_support.verbose_diagnostics_enabled) for (0..driver_context.state.*.cell_count) |cell| {
         const surface_scope = driver_context.layer_conservation_layout.*.index(
             .{ .kind = .surface, .cell = cell },
         ) catch continue;
@@ -6195,7 +6210,7 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
                 surface_closure.accepted,
             },
         );
-    }
+    };
     if (hourly_cell_conservation_report.failing_cell_count[@intFromEnum(ecosys.hourly_cell_conservation.Quantity.heat)] != 0) {
         for (hourly_layer_conservation_report.cells, 0..) |scope_report, index| {
             const address = try driver_context.layer_conservation_layout.*.address(index);
@@ -11983,9 +11998,12 @@ pub fn main(init: std.process.Init) !void {
 
     const args = try init.minimal.args.toSlice(init.arena.allocator());
     const cli_options = ecosys.cli.parse(args) catch |err| {
-        std.log.err("usage: ecosys_ng [--threads <positive integer>] [--describe-timeline] [--execution-evidence <new-file>] <runscript>", .{});
+        std.log.err("usage: ecosys_ng [--threads <positive integer>] [--describe-timeline] [--execution-evidence <new-file>] [--verbose-diagnostics] <runscript>", .{});
         return err;
     };
+    // Set once, single-threaded, before any hourly work or worker threads
+    // start; every later read is read-only. See `run_support.verbose_diagnostics_enabled`.
+    run_support.verbose_diagnostics_enabled = cli_options.verbose_diagnostics;
     var run_plan: RunPlanOwners = undefined;
     try initializeRunPlan(&run_plan, &resources, allocator, init.io, cli_options.runscript_path);
     if (cli_options.describe_timeline) {

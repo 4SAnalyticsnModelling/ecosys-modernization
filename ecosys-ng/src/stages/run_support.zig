@@ -308,6 +308,18 @@ pub const run_log_name = "run.log";
 var active_run_log: ?*std.Io.File.Writer = null;
 var active_run_log_lock: std.atomic.Value(bool) = .init(false);
 
+/// Off-by-default switch for high-frequency, debug-shaped `info` logging left
+/// over from closed frontier investigations (per-hour surface phosphorus/heat
+/// dumps, `TEMP_CHEMISTRY_TRACE`, and similar). `main` sets this exactly once,
+/// from the parsed CLI options, before the single-threaded startup phase ends
+/// and any hourly work begins; every later read (including from worker
+/// threads) is read-only, so this is not mutable model state and carries no
+/// data-race or determinism risk. It does not gate `warn`/`err` diagnostics or
+/// any call site that participates in an acceptance decision -- only pure,
+/// unused-elsewhere `info`-level printing. See
+/// `audit/runs/run-004-logging-overhead-fix-and-remeasurement-2026-09-18.md`.
+pub var verbose_diagnostics_enabled: bool = false;
+
 fn lockActiveRunLog() void {
     var spins: u32 = 0;
     while (active_run_log_lock.cmpxchgWeak(false, true, .acquire, .monotonic) != null) {

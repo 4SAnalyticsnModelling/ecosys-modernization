@@ -22,6 +22,12 @@ pub const Options = struct {
     /// an unreconciled error. `production_acceptance.ps1` must fail such a run,
     /// and the startup banner and the end-of-run survey both say so.
     survey_conservation: bool = false,
+    /// Re-enables high-frequency, debug-shaped `info` logging (per-hour
+    /// surface phosphorus/heat dumps, `TEMP_CHEMISTRY_TRACE`) that is off by
+    /// default because it is leftover frontier-investigation scaffolding, not
+    /// production output. See
+    /// `audit/runs/run-004-logging-overhead-fix-and-remeasurement-2026-09-18.md`.
+    verbose_diagnostics: bool = false,
 };
 
 /// Parses the allocation-free production command line. `thread_limit` is a
@@ -30,6 +36,7 @@ pub fn parse(args: []const [:0]const u8) !Options {
     var runscript_path: ?[]const u8 = null;
     var thread_limit: ?usize = null;
     var survey_conservation = false;
+    var verbose_diagnostics = false;
     var describe_timeline = false;
     var execution_evidence_path: ?[]const u8 = null;
     var index: usize = 1;
@@ -46,6 +53,9 @@ pub fn parse(args: []const [:0]const u8) !Options {
         } else if (std.mem.eql(u8, argument, "--survey-conservation")) {
             if (survey_conservation) return error.DuplicateSurveyConservationOption;
             survey_conservation = true;
+        } else if (std.mem.eql(u8, argument, "--verbose-diagnostics")) {
+            if (verbose_diagnostics) return error.DuplicateVerboseDiagnosticsOption;
+            verbose_diagnostics = true;
         } else if (std.mem.eql(u8, argument, "--threads")) {
             if (thread_limit != null) return error.DuplicateThreadsOption;
             index += 1;
@@ -66,9 +76,26 @@ pub fn parse(args: []const [:0]const u8) !Options {
         .runscript_path = runscript_path orelse return error.MissingRunscriptPath,
         .thread_limit = thread_limit,
         .survey_conservation = survey_conservation,
+        .verbose_diagnostics = verbose_diagnostics,
         .describe_timeline = describe_timeline,
         .execution_evidence_path = execution_evidence_path,
     };
+}
+
+test "verbose diagnostics logging is off unless explicitly requested" {
+    // Off by default: the high-frequency per-hour diagnostic dumps this flag
+    // controls are leftover frontier-investigation scaffolding, not
+    // production output, and must not reappear silently.
+    const default_args = [_][:0]const u8{ "ecosys_ng", "runottawa" };
+    try std.testing.expect(!(try parse(&default_args)).verbose_diagnostics);
+
+    const enabled_args = [_][:0]const u8{ "ecosys_ng", "--verbose-diagnostics", "runottawa" };
+    const enabled = try parse(&enabled_args);
+    try std.testing.expect(enabled.verbose_diagnostics);
+    try std.testing.expectEqualStrings("runottawa", enabled.runscript_path);
+
+    const duplicate = [_][:0]const u8{ "ecosys_ng", "--verbose-diagnostics", "--verbose-diagnostics", "runottawa" };
+    try std.testing.expectError(error.DuplicateVerboseDiagnosticsOption, parse(&duplicate));
 }
 
 test "timeline inspection is explicit and rejects duplicate options" {

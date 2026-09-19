@@ -19,6 +19,7 @@ const group_gas_surface_water = @import("hourly_gas_surface_water.zig");
 const group_support = @import("hourly_process_support.zig");
 const group_sediment = @import("hourly_sediment.zig");
 const group_vegetation = @import("hourly_vegetation.zig");
+const run_support = @import("run_support.zig");
 const AdaptiveHourSchedule = ecosys.adaptive_hour_schedule.State;
 
 const conservation_trace_point_count = 7;
@@ -131,7 +132,9 @@ fn captureFailureConservationTrace(context: anytype, point: usize) !void {
         return error.NonFiniteHourlyFailureTrace;
     context.diagnostic_heat_production_trace_megajoules[point] = heat_production_megajoules;
     context.diagnostic_heat_consumption_trace_megajoules[point] = heat_consumption_megajoules;
-    if (!builtin.is_test and context.executed_weather_hours.* < 2 and context.grid.cell_count > 0) {
+    if (!builtin.is_test and run_support.verbose_diagnostics_enabled and
+        context.executed_weather_hours.* < 2 and context.grid.cell_count > 0)
+    {
         const capture = std.json.Stringify.valueAlloc(context.allocator, .{
             .hour = context.executed_weather_hours.* + 1,
             .point = point,
