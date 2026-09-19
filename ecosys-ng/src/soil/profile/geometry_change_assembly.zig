@@ -37,6 +37,15 @@ pub fn buildOrganicAccumulationReset(
 /// Builds REDIST `DDLYXE` for every active boundary. Erosion/deposition shifts
 /// the entire soil profile datum uniformly and therefore preserves all layer
 /// thicknesses. Positive sediment is deposition; negative sediment is erosion.
+///
+/// Deliberately does not reproduce the legacy f77src/redist.f:7842-7864
+/// (`NN=3` erosion leg of the `DO 225` loop) top-of-profile boundary-carry
+/// omission -- unlike the pond/freeze-thaw/SOC-active-arm siblings, the
+/// erosion leg's soil branch never writes `DDLYX(LX-1,3)`/`DDLYR(LX-1,3)`
+/// when `LX.EQ.NU`. Assigning every boundary explicitly here (including the
+/// top one, via the loop bound `end_boundary + 1`) avoids that gap as a side
+/// effect of this uniform design (see
+/// audit/issues/issue-035-redist-erosion-soc-top-boundary-carry-omission.md).
 pub fn assembleErosionBoundaryChangeM(
     output_boundary_change_m: []f64,
     geometry: *const Geometry.State,
@@ -165,6 +174,12 @@ pub fn assembleOrganicCarbonBoundaryChangeM(
             output_boundary_change_m[boundary_base + layer + 1] = bottom_boundary_change_m;
             deeper_cumulative_m = current_cumulative_m;
         }
+        // Deliberately does not reproduce the legacy f77src/redist.f:7920-7930
+        // (`NN=4` SOC leg's negligible arm of the `DO 225` loop) top-of-profile
+        // boundary-carry omission -- this unconditional write at the top
+        // boundary runs regardless of whether the top layer's own
+        // organic-carbon change was itself negligible (see
+        // audit/issues/issue-035-redist-erosion-soc-top-boundary-carry-omission.md).
         output_boundary_change_m[boundary_base + first] = deeper_cumulative_m;
     }
 }

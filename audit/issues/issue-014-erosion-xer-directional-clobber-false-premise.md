@@ -1,6 +1,6 @@
 # Issue 014 -- EROSION-XER-DIRECTIONAL-CLOBBER-001: real legacy bug correctly not reproduced, but justified by a false "inert" premise; needs a proper review record before G3 output comparison
 
-Status: **OPEN.** Not a suspected translation defect in the Zig code's actual behavior (which is likely the scientifically correct choice) -- the problem is that the choice rests on a false factual claim in its own justifying comment, and this creates a real, predictable, currently-undocumented divergence from the Fortran oracle that must be recorded before output comparison, per contract.
+Status: CLOSED -- `legacy-defect-corrected` (confirmed 2026-09-19; see "Closing review" section below). Originally filed **OPEN.** Not a suspected translation defect in the Zig code's actual behavior (which is likely the scientifically correct choice) -- the problem is that the choice rests on a false factual claim in its own justifying comment, and this creates a real, predictable, currently-undocumented divergence from the Fortran oracle that must be recorded before output comparison, per contract.
 
 Owner: found by this session's audit fork, 2026-09-18, during a full-file `erosion.f` read.
 
@@ -36,3 +36,14 @@ Per `PROJECT_CONTRACT.md`: "A discovered legacy defect needs evidence and review
 ## Evidence
 
 `D:\ecosys-modernization\f77src\erosion.f:541-901`; `D:\ecosys-modernization\f77src\readi.f:152-158`; `D:\ecosys-modernization\ecosys-ng-prod-examples\Cool Temperate Maize-Soybean ON\runottawa_input_files\landscape\f25si98`; `D:\ecosys-modernization\ecosys-ng\src\erosion\eroded_constituents.zig:96-125`; `D:\ecosys-modernization\ecosys-ng\src\redistribution\erosion\organic_matter_apply.zig:66-67`; `D:\ecosys-modernization\ecosys-ng\src\ecosys_ng.zig:10360-12437`; `D:\ecosys-modernization\ecosys-ng\src\stages\hourly_sediment.zig:125,140`.
+
+## Closing review (2026-09-19)
+
+Independently re-verified every factual claim before closing, not just trusted from the issue's own text:
+- `grep -n "ISALTG|IERSNG" f77src/readi.f` confirms `readi.f:154` reads `IETYPG,ISALTG,IERSNG,NCNG,DTBLIG,XXXX,DTBLGG` in that field order from site-file record 3.
+- Read `f77example/Cool Temperate Maize-Soybean ON/f25si98` line 3 directly: `33 1 3 1 1.0 2.5 0.0` -> `IETYPG=33, ISALTG=1, IERSNG=3`. Read the staged `ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/landscape/f25si98` line 3 directly: `33 1 3 1 1.0 0.0` -> same `IETYPG=33, ISALTG=1, IERSNG=3`. Both confirm the issue's claim exactly: `IERSNG=3` is genuinely selected, so every `IF(IERSNG.EQ.1.OR.IERSNG.EQ.3)` branch in `erosion.f` is live for this deck.
+- Confirmed by `Glob` that neither `docs/discrepancy_register.md` nor `docs/traceability/erosion_unbound_family_disposition.md` exists anywhere in this repository -- the old comment's cited support is indeed absent, matching the issue's claim.
+- Corrected `ecosys-ng/src/erosion/eroded_constituents.zig:96-106`'s comment: removed the false "currently inert either way" claim and the two nonexistent doc citations, replaced with an accurate statement that the path is live (citing `f25si98`'s `IERSNG=3`, `readi.f:154`, and this issue's file name), per the issue's own "Next bounded action" item 1. Comment-only change -- no logic, computation, or test was altered.
+- `audit/features/feature-014-erosion-sediment-constituent-transport.md` already contains a full write-up of this exact finding (its own "Confirmed legacy defect..." section, added 2026-09-18) recommending `legacy-defect-corrected`; this pass's independent re-verification agrees with it and the feature file has been updated to record the reviewed closure (see that file's own "Acceptance and review" section).
+
+**Disposition: `legacy-defect-corrected`.** The underlying legacy bug (east/south-bound eroded-constituent transport permanently zeroed by a self-clobbering `NN`-loop) is real and confirmed; Zig's symmetric-application choice not to reproduce it is scientifically preferable and is now correctly and reachably documented in-code (previously it was documented but with a false reachability claim). Per this issue's own item 3: when G3 output comparison eventually runs, expect and treat eroded-constituent east/south-vs-west/north asymmetry relative to the oracle as an *approved* explained difference, not a mystery to re-diagnose. Traceability: `audit/traceability/traceability.csv` already has a clean row for this issue (`TRC-038`); not duplicated -- `traceability.csv` was off-limits this pass (already modified by a concurrent agent).

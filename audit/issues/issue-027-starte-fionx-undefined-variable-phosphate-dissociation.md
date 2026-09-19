@@ -1,6 +1,6 @@
 # Issue 027 -- `starte.f` phosphate dissociation reactions read an undeclared, never-assigned local variable `FIONX`; Zig silently normalizes to a defined value
 
-Status: OPEN (source-audit finding; deepens and supersedes the `RM1P` "sibling inconsistency" note in `audit/features/feature-008-starte-soil-chemistry-initialization.md`'s Addendum)
+Status: CLOSED -- `legacy-defect-corrected` (confirmed 2026-09-19; see "Closing review" section below). Originally filed OPEN (source-audit finding; deepens and supersedes the `RM1P` "sibling inconsistency" note in `audit/features/feature-008-starte-soil-chemistry-initialization.md`'s Addendum)
 Owner: unassigned
 Candidate/input hashes: `f77src/starte.f` sha256 `BBE124F6809BD1720B94DDB8512FAAD5DA2FBAF7131C57A0A13E36496DC174A5`
 
@@ -44,3 +44,12 @@ Exact command: read-only source inspection, no build/run required to establish t
 ## Next bounded action
 
 An independent reviewer should confirm (a) whether the historical `ecosys` codebase has any other file/version where `starte.f`'s `FIONX` usages read `FIONS` instead (a diff against an older/different source distribution, if available, would settle the "typo" hypothesis definitively), and (b) explicitly approve Zig's uniform-`FIONS`-value treatment of `RFES`/`RF1P`/`RM1P` as the intended correction, which would close this out as `legacy-defect-corrected`. No code change is proposed here; this is a documentation/review gap, not a diagnosed-but-unfixed Zig bug.
+
+## Closing review (2026-09-19)
+
+Independently re-verified before closing, not just trusted from the issue's own text:
+- `grep -n "FIONX" f77src/starte.f f77src/solute.f` confirms `FIONX` is declared exactly once, as a `PARAMETER (...,FIONX=0.20,...)` at `solute.f:119`, and is used (never assigned) 5 times in `starte.f` (`:941-942` RFES, `:1061-1062` RF1P, `:1098` RM1P) and dozens of times in `solute.f` itself where it *is* in scope. `starte.f` has its own, different `PARAMETER` list (`:100`, includes `FIONS=FION*1.0`) that never declares `FIONX`. This independently confirms the issue's core claim: `starte.f`'s `FIONX` reads are undefined-behavior uses of an implicitly-typed, unassigned local.
+- Read `ecosys-ng/src/soil/solute/aqueous_reaction_rates.zig:145-179` (the `RFES` analog, `iron_sulfate_association` at `:168`) and `ecosys-ng/src/soil/solute/phosphate_reaction_rates.zig:405-434` (`calculateMinerals`, the `RF1P`/`RF2P`/`RC1P`/`RC2P`/`RM1P` analog): confirmed both pass one shared scale value (`general`/`substrate_limit_fraction`) to both the association and dissociation bound of every reaction in the family, via `ion_pairing.zig`'s single `Parameters.substrate_limit_fraction` field -- there is no code path giving one reaction's two bound terms two different scale constants, matching the issue's claim exactly.
+- Added a short comment at `aqueous_reaction_rates.zig` (immediately above `.iron_sulfate_association`) and at `phosphate_reaction_rates.zig` (immediately above `calculateMinerals`'s `const standard = ...`) citing this issue number and naming the specific legacy lines, so a future refactor toward per-reaction scale constants doesn't silently reintroduce the `FIONX`/`FIONS` split. No logic, computation, or test was changed.
+
+**Disposition: `legacy-defect-corrected`.** The legacy `FIONX` reads are confirmed undefined behavior (not a fixed, reproducible quirk), and Zig's uniform single-constant treatment is the sensible, deterministic, and very likely intended resolution; it is now cited in-code for both call sites. Traceability: `audit/traceability/traceability.csv` already has a clean row for this issue (`TRC-091`); disposition/status there should be treated as superseded by this closing note (not duplicated -- `traceability.csv` was off-limits this pass, already modified by a concurrent agent).

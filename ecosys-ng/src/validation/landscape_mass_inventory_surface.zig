@@ -340,7 +340,10 @@ fn aggregateSurfaceChemistryRange(
             2 * cell.exchange.ammonium_mol_per_megagram +
             cell.phosphate_surface.deprotonated_site_mol_per_megagram +
             2 * cell.phosphate_surface.hydroxyl_site_mol_per_megagram +
-            // Literal REDIST SSX counts XOH2 twice.
+            // Literal REDIST SSX counts XOH2 twice (redist.f:5828-5829);
+            // deliberately preserved for legacy-pseudo-ion parity, confirmed
+            // `preserved` 2026-09-19 (see
+            // audit/issues/issue-034-redist-litter-ssx-xoh2-double-count-deliberately-preserved.md).
             6 * cell.phosphate_surface.protonated_site_mol_per_megagram +
             3 * cell.phosphate_surface.adsorbed_hpo4_mol_p_per_megagram +
             4 * cell.phosphate_surface.adsorbed_h2po4_mol_p_per_megagram;

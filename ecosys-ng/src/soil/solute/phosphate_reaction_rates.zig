@@ -423,6 +423,14 @@ fn calculateMinerals(shared: aqueous_network.State, zone: phosphate_network.Stat
     // precipitation and dissolution directions. TPDA is the corresponding
     // two-sided ceiling for hydroxyapatite; only monocalcium phosphate uses
     // the distinct TPDZ dissolution ceiling.
+    //
+    // Deliberately does not reproduce the legacy f77src/starte.f:1061-1062
+    // (RF1P) and f77src/starte.f:1097-1098 (RM1P) quirk of one or both bound
+    // terms reading the undeclared, never-assigned local `FIONX` instead of
+    // `FIONS` (see
+    // audit/issues/issue-027-starte-fionx-undefined-variable-phosphate-dissociation.md).
+    // `substrate_limit_fraction` below is shared identically by every mineral
+    // reaction's association and dissociation bound.
     const standard = precipitation.Kinetics{ .substrate_limit_fraction = substrate_limit_fraction, .maximum_precipitation_mol_per_m3_step = parameters.maximum_phosphate_precipitation_mol_per_m3_step, .maximum_dissolution_mol_per_m3_step = parameters.maximum_phosphate_precipitation_mol_per_m3_step, .phosphate_activity_coefficient = g1 };
     return .{
         .aluminum_phosphate_mol_per_m3 = try precipitation.calculateExtent(.{ .dissolved_cation_mol_per_m3 = shared.aluminum, .dissolved_phosphate_mol_p_per_m3 = zone.dissolved_h2po4_mol_p_per_m3, .precipitate_mol_per_m3 = zone.aluminum_phosphate_solid_mol_per_m3 }, h2_activity, aluminum_target, .{ .cation_mol_per_mol_precipitate = 1, .phosphorus_mol_per_mol_precipitate = 1 }, standard),

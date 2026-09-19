@@ -93,17 +93,29 @@ pub fn calculateFluxes(state: *FluxState, components: []const Component, surface
 /// bridges. Physical units remain owned by each packed component; erosion
 /// applies only the dimensionless transported surface-mass fraction.
 ///
-/// NOTE (EROSION-XER-DIRECTIONAL-CLOBBER-001, docs/discrepancy_register.md):
+/// NOTE (EROSION-XER-DIRECTIONAL-CLOBBER-001, see
+/// audit/issues/issue-014-erosion-xer-directional-clobber-false-premise.md and
+/// audit/features/feature-014-erosion-sediment-constituent-transport.md):
 /// `erosion.f`'s `X*ER`/`X*EB` per-species flux family has a legacy `NN`-loop
 /// self-clobber (`erosion.f:676--765`) that zeroes the east/south-bound slot
 /// immediately after writing it, so the oracle only ever transports eroded
 /// constituents west/north. This function deliberately applies the
 /// transported fraction symmetrically to all four directions and does not
-/// reproduce that oracle asymmetry. Currently inert either way: no production
-/// site configuration selects an erosion-enabled disturbance mode (see
-/// `docs/traceability/erosion_unbound_family_disposition.md`). If the erosion
-/// path is ever revived, re-argue this against the disposition note rather
-/// than assuming it.
+/// reproduce that oracle asymmetry -- a reviewed, scientifically preferred
+/// choice, confirmed `legacy-defect-corrected` 2026-09-19.
+///
+/// This path is LIVE, not inert (a prior version of this comment claimed
+/// otherwise and was wrong): the required production site file (`f25si98`,
+/// both `f77example/.../f25si98` and the staged
+/// `ecosys-ng-prod-examples/.../landscape/f25si98`) sets `IERSNG=3` (site
+/// record 3, field 3, read by `readi.f:154`), which activates every
+/// `IF(IERSNG.EQ.1.OR.IERSNG.EQ.3)` branch in `erosion.f`, and this function
+/// is wired into the live hourly step (`ecosys_ng.zig`,
+/// `stages/hourly_sediment.zig:125,140`). The two doc files this comment
+/// used to cite (`docs/discrepancy_register.md`,
+/// `docs/traceability/erosion_unbound_family_disposition.md`) do not exist in
+/// this repository. Do not reinstate a claim of dormancy without re-checking
+/// the in-scope deck's actual site file.
 pub fn calculatePackedFluxes(state: *FluxState, surface_soil_mass_megagrams: []const f64, surface_pool_amounts: []const f64, cumulative_sediment: DirectionalSediment) !void {
     if (surface_soil_mass_megagrams.len != state.cell_count or surface_pool_amounts.len != state.east.len or cumulative_sediment.east_megagrams.len != state.cell_count or cumulative_sediment.west_megagrams.len != state.cell_count or cumulative_sediment.south_megagrams.len != state.cell_count or cumulative_sediment.north_megagrams.len != state.cell_count) return error.ErodedConstituentDimensionMismatch;
     inline for (.{ state.east, state.west, state.south, state.north }) |values| @memset(values, 0);

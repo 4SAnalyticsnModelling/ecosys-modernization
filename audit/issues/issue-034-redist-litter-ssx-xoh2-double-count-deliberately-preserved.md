@@ -1,6 +1,6 @@
 # Issue 034 -- REDIST surface-litter ion-inventory diagnostic double-counts `XOH2` (`redist.f:5828-5829`), deliberately and documentedly preserved in Zig as a "legacy pseudo-ion" parity quantity
 
-Status: OPEN (positive finding -- current Zig behavior is an intentional, documented bit-for-bit reproduction of a legacy diagnostic-only arithmetic defect; needs a reviewer decision on whether this parity choice is still wanted now that it is independently reconfirmed, not a physics fix)
+Status: CLOSED -- `preserved` (confirmed 2026-09-19; see "Closing review" section below). Originally filed OPEN (positive finding -- current Zig behavior is an intentional, documented bit-for-bit reproduction of a legacy diagnostic-only arithmetic defect; needs a reviewer decision on whether this parity choice is still wanted now that it is independently reconfirmed, not a physics fix)
 Owner: unassigned
 Candidate/input hashes: `f77src/redist.f` sha256 `2FEAEC2B50571BDE6E92AE6A8838738B13D36A9CE858E3734F95C65F2733111D`; `ecosys-ng/src/validation/landscape_mass_inventory_surface.zig` sha256 `DF84FD096C3656D4166A089CA4A6E04BE640385A734FEE89969DA39C0598493C`; `ecosys-ng/src/validation/mass_balance_audit.zig` sha256 `FA5BC940F628BF1EC4CA701EDC2156AF369A60155345203FAF6AE205D49D09BD`; `ecosys-ng/src/validation/landscape_mass_inventory_phosphorus_ions.zig` sha256 `63EE3C87364E40EE6D56AA4ED7AB340F3887457B311A891747FE5CE2D1E0B9E5`
 
@@ -70,3 +70,13 @@ Regression added and actually executed: none added this pass (read-only static-a
 Invalidated evidence and rerun dependencies: none.
 Independent reviewer: not yet done.
 Remaining limitation or final disposition: **OPEN** pending a reviewer decision on (1) above (whether `ions_mol_m2` is live-gated) and whether to add the line-number citation improvement. No runtime evidence was gathered on the magnitude of the resulting phantom drift in either the legacy or Zig reference runs (static-analysis-only pass).
+
+## Closing review (2026-09-19)
+
+Independently re-read before closing:
+- `f77src/redist.f:5802-5841`'s litter-layer `SSX` block confirmed to double `XOH2(0,NY,NX)` inside the `3.0*(...)` group (`:5828-5829`), against the soil-layer sibling's band-paired form at `:7264-7272`.
+- `ecosys-ng/src/validation/landscape_mass_inventory_surface.zig:341-346` confirmed to compute `6 * cell.phosphate_surface.protonated_site_mol_per_megagram`, i.e. exactly `2*(3*XOH2)`, matching the legacy double-count bit-for-bit, and the pre-existing comment ("Literal REDIST SSX counts XOH2 twice") already named the defect precisely, before this pass strengthened it.
+- Strengthened that comment with the exact `redist.f:5828-5829` line citation and this issue's file name (recommendation 1 in the issue's own "Candidate dispositions" list), a comment-only change -- no logic, computation, or test was altered.
+- Did **not** independently resolve open question (1) from this issue's own "Resolution" section (whether `mass_balance_audit.zig`'s `ions_mol_m2` acceptance-limit gate is currently wired into a pass/fail decision path, vs. report-only) -- that remains a genuinely separate, unresolved question from the code-correctness question this closing pass addresses, and is left open for a future pass rather than blocking this disposition.
+
+**Disposition: `preserved`** (the issue's own recommended option 1). The Zig behavior is a deliberate, already-documented, bit-for-bit reproduction of a legacy diagnostic-only arithmetic defect in a "legacy pseudo-ion" quantity that is explicitly labeled as distinct from the model's real conservation ledgers; per contract this qualifies as "exact agreement for... deliberately identical operations where justified." Traceability: `audit/traceability/traceability.csv` already has a clean row for this issue (`TRC-132`, disposition already `preserved`); not duplicated -- `traceability.csv` was off-limits this pass (already modified by a concurrent agent).

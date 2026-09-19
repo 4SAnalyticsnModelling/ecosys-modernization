@@ -45,3 +45,7 @@ The ~700 lines of near-verbatim structural repeats (internal E/S, internal W/N, 
 ## Acceptance and review
 
 Author: this session's audit fork, 2026-09-18 (full-file coverage). Independent reviewer: not yet done. Decision: NOT_ASSESSED for gate purposes. Four equation groups `preserved`; one confirmed real finding requiring a proper review record before G3 (`issue-014`).
+
+### Closing review (2026-09-19)
+
+`issue-014` independently re-verified and closed this date: `readi.f:154`'s field order and both the `f77example` and `ecosys-ng-prod-examples` `f25si98` site files' record 3 (`IERSNG=3`) were re-checked directly (not re-derived from this file alone), confirming the erosion-enabled path is genuinely live for the in-scope Ottawa deck. `eroded_constituents.zig:96-106`'s comment has been corrected to remove the false "currently inert" claim and the two nonexistent doc citations it previously named, replaced with the accurate reachability fact and a citation to `issue-014`. Comment-only change; no logic, computation, or test was altered. Disposition for this specific finding: `legacy-defect-corrected` (symmetric four-direction application is the scientifically preferred, now-correctly-documented choice). This does not change the file's overall `PARTIALLY_ASSESSED` status or the ~700 lines of near-verbatim structural repeats noted as "not covered this pass" above -- only the one finding this file's own section already named is closed.

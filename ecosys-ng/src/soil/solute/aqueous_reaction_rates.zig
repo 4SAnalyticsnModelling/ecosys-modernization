@@ -165,6 +165,13 @@ pub fn calculate(state: aqueous_network.State, coefficients: activity_coefficien
         .iron_hydroxide_2_association = try reaction(state.iron_hydroxide_1, state.hydroxide, state.iron_hydroxide_2, state.iron_hydroxide_1 * g2, state.hydroxide * g1, state.iron_hydroxide_2 * g1, g2, constants.iron_hydroxide_2, general, slow),
         .iron_hydroxide_3_association = try reaction(state.iron_hydroxide_2, state.hydroxide, state.iron_hydroxide_3, state.iron_hydroxide_2 * g1, state.hydroxide * g1, state.iron_hydroxide_3, g1, constants.iron_hydroxide_3, general, slow),
         .iron_hydroxide_4_association = try reaction(state.iron_hydroxide_3, state.hydroxide, state.iron_hydroxide_4, state.iron_hydroxide_3, state.hydroxide * g1, state.iron_hydroxide_4 * g1, 1, constants.iron_hydroxide_4, general, slow),
+        // Deliberately does not reproduce the legacy f77src/starte.f:941-942
+        // (RFES) quirk of reading the undeclared, never-assigned local
+        // `FIONX` instead of `FIONS` (see
+        // audit/issues/issue-027-starte-fionx-undefined-variable-phosphate-dissociation.md).
+        // `general` (kinetics.general_substrate_limit_fraction) is applied
+        // uniformly to both bound terms here, matching this reaction's
+        // properly-declared siblings.
         .iron_sulfate_association = try reaction(state.iron, state.sulfate, state.iron_sulfate, state.iron * g3, state.sulfate * g2, state.iron_sulfate * g1, g3, constants.iron_sulfate, general, slow),
         .calcium_hydroxide_association = try reaction(state.calcium, state.hydroxide, state.calcium_hydroxide, state.calcium * g2, state.hydroxide * g1, state.calcium_hydroxide * g1, g2, constants.calcium_hydroxide, general, slow),
         .calcium_carbonate_association = try reaction(state.calcium, state.carbonate, state.calcium_carbonate, state.calcium * g2, state.carbonate * g2, state.calcium_carbonate, g2, constants.calcium_carbonate, general, slow),
