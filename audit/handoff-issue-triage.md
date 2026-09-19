@@ -255,7 +255,23 @@ other item's ranking changed.
    root gases) behave differently between Fortran's pond and soil relayering
    branches; Zig applies the soil-branch rule uniformly to both. Confirmed
    **production-live** (pond boundary changes are real, not dormant) --
-   distinguishes this from most other Tier-3/Tier-2 items.
+   distinguishes this from most other Tier-3/Tier-2 items. **Follow-up
+   (2026-09-19): CONFIRMED REACHABLE for Ottawa**, from the deck's own input
+   files (no run needed), using the same bounded reachability method as
+   `issue-050`/`028`/`031`/`044`/`056`. The Fortran pond branch's actual
+   trigger (`redist.f:8530-8531`'s `NN>1 AND IFLGL(L,NN)=1` disjunct) fires
+   whenever hourly surface water+ice exceeds the site's `VOLWD` ponding-
+   capacity threshold (`hour1.f:2373`), which for Ottawa's flat, unfrozen
+   ground works out to only ~4.7mm depth (`ZSX=0.025` m, `hour1.f:118`).
+   Ottawa's own `gbf98h` weather file records single-hour precipitation of
+   10mm (day 198), 12.6mm (day 269) and 14.8mm (day 270) in 1998 alone, each
+   more than double that threshold. This re-ranks `issue-017` up from a
+   generic Tier-3 "confirmed real gap" to a Tier-1-shaped item (needs a
+   scientist/conservation decision on materiality, not more static analysis)
+   -- see `issue-017`'s own "Reachability check (2026-09-19)" section for the
+   full evidence chain and an honest caveat (this is a threshold comparison
+   against raw precipitation, not a run-observed trace of `IFLGL` actually
+   firing inside the hydrology solve).
 4. **`issue-012`** (`GEOM-SUBSIDENCE-001`/`PR-GEOM-01B`) -- A real, live-wired
    uncancelled-SOC-change defect in the soil-geometry-boundary transaction,
    but currently **latent**: a separate, independent hard-wired zero
