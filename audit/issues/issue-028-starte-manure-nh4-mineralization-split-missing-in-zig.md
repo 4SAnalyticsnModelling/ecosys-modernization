@@ -1,6 +1,6 @@
 # Issue 028 -- `starte.f`'s initial manure-protein 50% NH4 pre-mineralization has no Zig counterpart
 
-Status: OPEN (confirmed gap; escalates the "open trace, not a confirmed gap" note in `audit/features/feature-008-starte-soil-chemistry-initialization.md`'s Addendum)
+Status: OPEN (confirmed gap; escalates the "open trace, not a confirmed gap" note in `audit/features/feature-008-starte-soil-chemistry-initialization.md`'s Addendum). **Follow-up (2026-09-19): CONFIRMED NOT REACHABLE for the Ottawa deck** -- `f25sol98`'s manure C/N/P fields (`RSC(2,...)`/`RSN(2,...)`/`RSP(2,...)`) are exactly zero at the surface and every soil layer, in both the legacy and modern input copies. See "Follow-up resolution (2026-09-19)" near the end of this file. Deprioritized accordingly; not closed.
 Owner: unassigned
 Candidate/input hashes: `f77src/starte.f` sha256 `BBE124F6809BD1720B94DDB8512FAAD5DA2FBAF7131C57A0A13E36496DC174A5`; `f77src/starts.f` sha256 `21D67B83BBAC47D9D7B9D882E2088D7F489F2D89EFB9C4F780634434B3152635`
 
@@ -42,3 +42,63 @@ Per `PROJECT_CONTRACT.md`, a discovered legacy defect (or, as here, a discovered
 1. Confirm whether the Ottawa (or any other currently-used) production soil input deck has nonzero initial manure organic matter, to establish real-world materiality.
 2. If material, implement the missing 50/50 transfer as a small, reversible, regression-tested addition at the initialization call site in `ecosys_ng.zig` (after both `soil_organic_initialization.State.init` and `soil_chemistry_initialization.seedProfilePrimaryState` have run for a given layer), citing `starte.f:1688-1694` directly in the new code, with a unit test asserting mass conservation across the two pools.
 3. Independent review before closing.
+
+## Follow-up resolution (2026-09-19) -- NOT REACHABLE for Ottawa; input-file value is exactly zero at every layer
+
+A dedicated, bounded, read-only follow-up (no `zig build`/run, exactly as scoped) resolved item 1 of
+the "Next bounded action" list above.
+
+**Site condition needed for this gap to matter**: `starte.f:1688-1694`'s amendment operates on
+`OSN(1,2,L,NY,NX)`, the protein-N fraction of the **manure** organic-matter complex (`K=2`). Tracing
+`starts.f:780-796` back to its source shows `CORGNX(2)=RSN(2,L,NY,NX)*AREA(3,...)/BKVL(...)` (or
+`/VOLT`) -- i.e. `OSN(1,2,...)` is zero at every layer for which the soil input file's manure-litter-N
+field `RSN(2,L,NY,NX)` is zero. So the condition is: does Ottawa's soil file (`f25sol98`) specify a
+nonzero manure-N value at any layer or the surface?
+
+**Check performed**: `f77src/readi.f:307-311` (surface line) and `:431-439` (per-layer arrays) give the
+exact read order for `RSC/RSN/RSP` at indices `(1,...)`=fine litter, `(0,...)`=woody litter,
+`(2,...)`=manure. Counting `READ(9,*)` statements from the top of the per-cell block against the
+actual `f25sol98` file line-by-line (both `f77example/Cool Temperate Maize-Soybean ON/f25sol98` and
+`ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/landscape/f25sol98`,
+byte-identical in content) confirms:
+
+- Surface record (file line 1): `RSC(2,0)=0, RSN(2,0)=0, RSP(2,0)=0` (the three fields immediately
+  after the woody-litter triplet, before `IXTYP(1),IXTYP(2)`).
+- Per-layer manure triplet is the **last three** of the file's 53 per-layer array reads (one inserted
+  documentation-only line for a `van_genuchten_inflection_pressure_head_m` field at file line 4, not
+  present in the legacy `readi.f` read list, shifts everything below it down by exactly one line but
+  does not change the total count once accounted for -- confirmed by the fact that this makes the
+  53-array read list land exactly on the file's 55 content lines with no remainder). The last three
+  array lines (file lines 53, 54, 55) read, for all 10 soil layers:
+  - Line 53 (`RSC(2,L)`, manure C): `0,0,0,0,0,0,0,0,0,0`
+  - Line 54 (`RSN(2,L)`, manure N): `0,0,0,0,0,0,0,0,0,0`
+  - Line 55 (`RSP(2,L)`, manure P): `0,0,0,0,0,0,0,0,0,0`
+
+  This mapping is independently corroborated by physical plausibility of the three preceding lines
+  (file lines 47-49, `RSC/RSN/RSP(1,L)`, fine litter): `20,40,40,40,20,20,10,10,5,5` /
+  `1,2,2,2,1,1,0.5,0.5,0.25,0.25` / `0.1,0.2,0.2,0.2,0.1,0.1,0.05,0.05,0.025,0.025` -- sensible nonzero
+  crop-residue litter C/N/P, followed by all-zero woody litter (lines 50-52) and all-zero manure
+  (lines 53-55), exactly the pattern expected for a cropland site with surface crop residue but no
+  woody debris and no manure amendment at initialization.
+
+**Verdict: NOT REACHABLE for the Ottawa deck, in any input this project currently has.** `OSN(1,2,L,
+NY,NX)` is exactly zero at every layer and the surface for this deck's own soil file (confirmed
+identical in both the legacy `f77example` copy and the `ecosys-ng-prod-examples` copy), so `starte.f`'s
+50%-to-ammonium amendment operates on a zero quantity -- the amendment computes `ZNH4S += 0.5*0 = 0`
+and `OSN -= 0.5*0 = 0` regardless of whether Zig ports it. Zig's omission of this routine therefore
+produces **no observable divergence** from the legacy oracle for this specific deck. This is a genuine
+missing translation (the code gap itself is real and should remain tracked, not silently closed) but it
+is dormant, not live, for Ottawa.
+
+**What would trigger it**: any soil input file (current or future deck) that specifies a nonzero
+manure-litter C/N/P triplet (`RSC(2,...)`/`RSN(2,...)`/`RSP(2,...)`, surface or any layer) -- e.g. a
+deck explicitly modeling a manured field at initialization. No deck currently in this project's scope
+does so.
+
+**Disposition update**: downgraded from "confirmed gap, urgency unknown" to "confirmed gap, confirmed
+dormant for the only deck this project currently validates against." Still `unresolved` in the sense
+that the routine remains unported (per the contract's "dormant branches remain in the inventory"
+clause, this should not be silently closed), but no longer needs a scope decision before G3 evidence
+work -- it can be scheduled as ordinary backlog rather than prioritized. Traceability: see new row
+`TRC-294` in `audit/traceability/traceability.csv`, which supersedes `TRC-092`'s materiality framing
+(disposition unchanged, `unresolved`) with this dormancy finding.

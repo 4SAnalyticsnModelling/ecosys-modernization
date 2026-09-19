@@ -95,6 +95,28 @@ match for this deck, not a divergence from it. `issue-037` is downgraded
 accordingly -- see Section 4's corrected Tier 3 list and Section 8 item 3
 below; it no longer belongs in the "affects the validated deck today" framing.
 
+**Correction (2026-09-19, same day as the above):** the four Tier 3 items
+this document previously called out as "harder-to-scope... need an
+input-file check before anyone can even judge urgency" (`issue-028`,
+`issue-031`, `issue-044`, `issue-056`) have now had exactly that check run,
+using the same bounded, read-only, input-file/reachability method
+demonstrated on `issue-050`. All four came back decisively **not reachable**
+for the in-scope Ottawa deck (or, for `issue-056`'s rainfall side,
+reachable-but-immaterial): `issue-028`'s manure-N amendment operates on a
+soil file where manure C/N/P are exactly zero at every layer; `issue-031`'s
+CH4 combustion sits behind a fire gate that never opens because no
+`ITILL=22` burn event is scheduled anywhere in the deck's 1998-2002 tillage
+files; `issue-044`'s irrigation-gas-flux mechanism never fires because every
+year's land-management manifest specifies no irrigation file at all; and
+`issue-056`'s rainfall/irrigation ion-pairing network's irrigation side is
+moot for the same reason while its rainfall side's actual chemistry inputs
+(Al/Fe/Ca/Mg/Na/K/SO4/Cl) are zero in every weather-file year checked. None
+of these four needed a run to resolve -- all four verdicts came from the
+deck's own input files alone. See each issue's own "Follow-up resolution
+(2026-09-19)" section, the re-ranked Tier 3 list in Section 4, and the
+updated Section 8 item 5/8 below. No other issue's disposition or ranking
+changed as part of this pass.
+
 ---
 
 ## 2. Tier 1 -- needs a human/scientist decision, not resolvable by more static analysis
@@ -198,8 +220,21 @@ provisionally in this group pending that trace).
 ## 4. Tier 3 -- confirmed real gaps (Zig missing something legacy has, or vice versa)
 
 Ranked by confidence x likely impact, per each issue file's own materiality
-discussion (none of these have been quantified with a run; ranking is based
-on reachability/scope, not measured magnitude).
+discussion; ranking is based on reachability/scope, not measured magnitude.
+
+**Re-ranked 2026-09-19**: a bounded, read-only, input-file/reachability
+follow-up (the same method demonstrated on `issue-050`, see Section 1's
+correction) was run on the four items this section previously flagged as
+"harder-to-scope... need an input-file check before anyone can even judge
+urgency" (`issue-028`, `issue-031`, `issue-044`, `issue-056`). All four came
+back **decisively NOT reachable** (or, for `issue-056`'s rainfall side,
+reachable-but-immaterial) for the in-scope Ottawa deck, from its own input
+files alone -- no run needed. Each issue file's own "Follow-up resolution
+(2026-09-19)" section has the full evidence chain. This moves all four down,
+below the three items with a confirmed-or-plausible-live materiality
+(`issue-040`, `issue-054`, `issue-017`) and alongside the pre-existing
+dormant/latent items (`issue-012`, `issue-055` Part B, `issue-037`). No
+other item's ranking changed.
 
 1. **`issue-040`** -- Root osmotic/turgor water potential (`PSIRO`/`PSIRG`)
    was never ported; Zig substitutes a static per-plant trait constant that
@@ -216,35 +251,54 @@ on reachability/scope, not measured magnitude).
    (nitrate-zone) fraction. Reachable at minimum on hour 1 of every layer and
    after any demand-history reset. Inert only if the deck's NH4/NO3 band
    geometries coincide (not checked).
-3. **`issue-028`** -- `starte.f`'s one-time "50% of initial manure protein-N
-   becomes ammonium" amendment has no Zig counterpart at all -- confirmed a
-   missing routine, not a mistranslated one. Conditional on the deck's soil
-   file specifying nonzero initial manure organic matter (not checked for
-   Ottawa).
-4. **`issue-017`** -- Two pool families (adsorbed cations/anions/precipitates;
+3. **`issue-017`** -- Two pool families (adsorbed cations/anions/precipitates;
    root gases) behave differently between Fortran's pond and soil relayering
    branches; Zig applies the soil-branch rule uniformly to both. Confirmed
    **production-live** (pond boundary changes are real, not dormant) --
    distinguishes this from most other Tier-3/Tier-2 items.
-5. **`issue-031`** -- `redist.f`'s ground-surface secondary CH4 combustion
-   mechanism (Michaelis-Menten-limited, O2-budget-capped) has no confirmed
-   Zig counterpart. Gated on a high-temperature (fire-adjacent) condition;
-   magnitude not estimated.
-6. **`issue-044`** -- Zig's irrigation-water-chemistry schema has no gas
-   species field at all (CO2/CH4/O2/N2/N2O/H2), a broader gap than the single
-   legacy H2-only omission this issue started from. Whether this is even the
-   right Zig module to compare against the legacy mechanism is itself
-   unconfirmed.
-7. **`issue-056`** -- `starte.f`'s rainfall/irrigation ion-pairing/
-   complexation network (Al/Fe/Ca/Mg/Na/K/SO4/CO3) has no confirmed Zig
-   counterpart beyond a narrow closed-form NH4/phosphate piece. Likely low
-   materiality for a non-saline deck, but the actual input files were not
-   checked.
-8. **`issue-012`** (`GEOM-SUBSIDENCE-001`/`PR-GEOM-01B`) -- A real, live-wired
+4. **`issue-012`** (`GEOM-SUBSIDENCE-001`/`PR-GEOM-01B`) -- A real, live-wired
    uncancelled-SOC-change defect in the soil-geometry-boundary transaction,
    but currently **latent**: a separate, independent hard-wired zero
    downstream prevents it from moving any layer boundary today. Explicitly
    flagged "do not fix in isolation" by its own in-code comment.
+5. **`issue-028`** (re-ranked down 2026-09-19, was #3) -- `starte.f`'s
+   one-time "50% of initial manure protein-N becomes ammonium" amendment has
+   no Zig counterpart at all -- confirmed a missing routine, not a
+   mistranslated one. **Follow-up (2026-09-19): CONFIRMED NOT REACHABLE.**
+   `f25sol98`'s manure C/N/P fields (`RSC(2,...)`/`RSN(2,...)`/`RSP(2,...)`)
+   are exactly zero at the surface and every one of the 10 soil layers, in
+   both the legacy and modern copies of the input file. The amendment
+   operates on a confirmed-zero quantity for this deck; the missing routine
+   remains tracked, not closed.
+6. **`issue-031`** (re-ranked down 2026-09-19, was #5) -- `redist.f`'s
+   ground-surface secondary CH4 combustion mechanism (Michaelis-Menten-
+   limited, O2-budget-capped) has no confirmed Zig counterpart. **Follow-up
+   (2026-09-19): CONFIRMED NOT REACHABLE.** The mechanism sits behind an
+   outer fire gate (`ICHKF`) that requires either a scheduled `ITILL=22`
+   burn event or an ambient 100 degC temperature; neither ever occurs across
+   the deck's full five-file, 1998-2002 tillage schedule (`ITILL` codes used:
+   `10,10,8,4,1,1,5,1,1,5,2,8,1,5` -- no `22`), so this sub-block (nested at
+   an even higher 200 degC gate) never executes on either side.
+7. **`issue-044`** (re-ranked down 2026-09-19, was #6) -- Zig's
+   irrigation-water-chemistry schema has no gas species field at all
+   (CO2/CH4/O2/N2/N2O/H2), a broader gap than the single legacy H2-only
+   omission this issue started from. **Follow-up (2026-09-19): CONFIRMED NOT
+   REACHABLE.** Every one of the deck's six yearly land-management manifests
+   (`f25m98`..`f25m03`) specifies `NO` in the irrigation-file slot -- no
+   irrigation is ever scheduled, so the `FLU`-driven flux this whole
+   mechanism depends on is zero every hour regardless of implementation. The
+   three mechanism-identity/scope questions the issue raises remain open in
+   principle but are no longer urgent for this deck.
+8. **`issue-056`** (re-ranked down 2026-09-19, was #7) -- `starte.f`'s
+   rainfall/irrigation ion-pairing/complexation network (Al/Fe/Ca/Mg/Na/K/
+   SO4/CO3) has no confirmed Zig counterpart beyond a narrow closed-form
+   NH4/phosphate piece. **Follow-up (2026-09-19): CONFIRMED NOT REACHABLE/
+   immaterial.** The irrigation (`K=2`) side is moot (no irrigation
+   scheduled, same finding as `issue-044`); the rainfall (`K=1`) side fires
+   every year but the weather files' own rainfall-chemistry record gives
+   `CALRG=CFERG=CCARG=CMGRG=CNARG=CKARG=CSORG=CCLRG=0` for every year
+   checked (1998, 1999, both legacy and modern copies) -- the omitted
+   complexation reactions converge trivially to zero on both sides.
 9. **`issue-055` (Part B only)** -- For `ISALTG!=0` decks (not currently used
     by any deck in this project), the litter-specific cation-exchange/carboxyl
     Newton solve (`starte.f:1726-1906`) has no Zig implementation at all.
@@ -369,8 +423,8 @@ Opinionated, given limited reviewer time:
 2. **`issue-002` is already resolved (correction, post-dates this triage's initial pass) -- the remaining action is only deciding whether to preserve the 1.33GB oracle output durably outside the session scratchpad**, not building/running anything further. Low urgency, pure housekeeping.
 3. **`issue-024`, next, because it is a live investigation one instrumented run away from real progress**, and because its outcome (matric-potential value or substep-schedule gap) plausibly also matters for #1's stiff-solver frontier -- these two investigations should not proceed in total isolation from each other.
 4. **Batch the Tier 2 sign-offs in one reviewer pass**, grouped by the two cross-cutting patterns (Section 6) rather than one-by-one -- most of these need the same 30-second judgment ("Zig's generic kernel avoided this, agreed, add the citation") repeated ~16 times; a single reviewer session covering all of Tier 2 will be far more efficient than 16 separate reviews.
-5. **`issue-040` and `issue-054`** next among the remaining Tier-3 items -- both are concrete, well-localized, plausibly consequential, and cheap to fix once a reviewer signs off (a formula port and a one-field wiring fix, respectively), unlike the harder-to-scope items (`issue-028`, `issue-031`, `issue-044`, `issue-056`) which need an input-file check before anyone can even judge urgency.
+5. **`issue-040` and `issue-054`** next among the remaining Tier-3 items -- both are concrete, well-localized, plausibly consequential, and cheap to fix once a reviewer signs off (a formula port and a one-field wiring fix, respectively). **Correction (2026-09-19):** this bullet previously called `issue-028`, `issue-031`, `issue-044`, `issue-056` "harder-to-scope... need an input-file check before anyone can even judge urgency." A bounded follow-up has since done exactly that check for all four and found each one decisively **not reachable** (or, for `issue-056`'s rainfall side, reachable-but-immaterial) for the in-scope Ottawa deck -- see each issue's own "Follow-up resolution (2026-09-19)" section and the re-ranked Tier 3 list in Section 4. They no longer need scoping; they need only routine backlog scheduling, same as the other confirmed-dormant items.
 6. **`issue-032` (test hang) before anyone leans on `zig build test` as a release gate.** It costs little to triage and its risk (masking an unrelated real failure under a CI timeout) is exactly the kind of thing that should not still be open when G2/G3 evidence starts depending on the test suite being trustworthy.
 7. **Tier 1's remaining items (`issue-018`, `022`, `026`, `030`, `038`, `039`, `047`, `049`, `050`, `051`, `052`)** are all real judgment calls but none currently block anything -- schedule them as a standing backlog for whoever has the relevant domain expertise (solute chemistry for 018/038/045-adjacent; plant/root physiology for 039/047; land-surface/snow physics for 049/051/052; soil-water boundary calibration for 050, added 2026-09-19), rather than trying to force them through this audit's own general-purpose passes.
-8. **`issue-037` and `issue-055` (Part B) last among Tier 3, alongside Tier 4** -- both are correctly-translated, unit-tested reference code for an `ISALTG!=0`/static-salt configuration that no deck currently in this project's scope actually uses (corrected 2026-09-19: `issue-037` was previously ranked #1 in this list on an unverified claim that Ottawa is `ISALTG=0`; it is confirmed `ISALTG=1`). The only action needed is the documentation-scope decision `issue-037`'s own "Disposition" section already describes (document as intentionally-dormant reference translations per the contract's dormant-branches clause), not an urgent wiring fix.
+8. **`issue-037`, `issue-055` (Part B), `issue-028`, `issue-031`, `issue-044`, and `issue-056` last among Tier 3, alongside Tier 4** -- all six are now confirmed-dormant-or-immaterial for the in-scope Ottawa deck (the first two were already known dormant; the last four were confirmed by the 2026-09-19 follow-up, see Section 4 and item 5 above). `issue-037`/`issue-055`(B) need only the documentation-scope decision `issue-037`'s own "Disposition" section already describes (document as intentionally-dormant reference translations per the contract's dormant-branches clause); `issue-028`/`031`/`044`/`056` need only ordinary backlog scheduling for whoever eventually ports the missing routines, not an urgent wiring fix.
 9. **Tier 4 items last** -- true paperwork, address whenever convenient, no urgency.

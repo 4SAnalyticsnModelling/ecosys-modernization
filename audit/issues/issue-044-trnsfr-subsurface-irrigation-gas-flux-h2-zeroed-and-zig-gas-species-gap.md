@@ -1,6 +1,6 @@
 # Issue 044: `trnsfr.f` subsurface-irrigation gas flux hardcodes H2 to zero while five sibling gases compute real values; Zig irrigation-chemistry schema carries no gas species at all
 
-## Status: unresolved (flagged for reviewer judgment, not autonomously dispositioned)
+## Status: unresolved (flagged for reviewer judgment, not autonomously dispositioned). **Follow-up (2026-09-19): CONFIRMED NOT REACHABLE for the Ottawa deck** -- every year's land-management manifest (`f25m98`..`f25m03`) gives `NO` in the irrigation-file slot, so `FLU` (the driver of this entire six-gas block) is zero every hour of the deck's full forcing cycle. See "Follow-up resolution (2026-09-19)" near the end of this file. Deprioritized accordingly; not closed.
 
 ## Location
 
@@ -99,3 +99,46 @@ A reviewer should first confirm whether `IRRIGATION-SUBSURFACE-DEAD-CODE-001`'s 
 the read-only/no-build constraint). No `zig build`/test/run executed this pass.
 
 ## Disposition: `unresolved`
+
+## Follow-up resolution (2026-09-19) -- NOT REACHABLE for Ottawa; the deck schedules no irrigation at all
+
+A dedicated, bounded, read-only follow-up (no `zig build`/run, exactly as scoped) checked the
+precondition that makes any part of this issue matter, independent of the three open
+mechanism-identity questions above.
+
+**Site condition needed for this gap to matter**: `trnsfr.f:825-840`'s entire six-gas flux block
+(`RCOFLU`/`RCHFLU`/`ROXFLU`/`RNGFLU`/`RN2FLU`/`RHGFLU`) is driven by `FLU(L,NY,NX)`, the subsurface
+**irrigation** water flux. If a deck applies zero irrigation for its entire run, `FLU` is zero every
+hour, and all six of these fluxes -- not just the disputed `RHGFLU` -- are zero regardless of whether
+Zig ports the mechanism at all. So the condition is: does the Ottawa deck ever schedule irrigation?
+
+**Check performed**: `f77src/main.f:91-95`'s `DATAC(9,...)` "land management file" is exactly the
+per-year manifest (`f25m98`, `f25m99`, `f25m00`, `f25m01`, `f25m02`, `f25m03`) that names three
+files per grid cell: tillage/disturbance, fertilizer, and **irrigation**. Read all six manifests in
+`f77example/Cool Temperate Maize-Soybean ON/`: every single one gives `NO` in the irrigation slot --
+`f25m98`: "f25til98 f25fr98 NO"; `f25m99`: "f25til99 f25fr79 NO"; `f25m00`: "f25til00 f25fr00 NO";
+`f25m01`: "f25til01 f25fr01 NO"; `f25m02`: "f25til02 f25fr02 NO"; `f25m03`: "NO f25fr79 NO".
+Cross-checked against the modern side: `ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/
+runottawa_input_files/management/soil/management_grid_1998.txt` gives the same three-way manifest
+with an explicit header (`# ... fertilizer, irrigation, tillage or other soil disturbances`) and the
+same `NO` in the irrigation column for 1998.
+
+**Verdict: NOT REACHABLE for the Ottawa deck, in any input this project currently has.** No irrigation
+is scheduled in any year of this deck's full forcing cycle (1998-2003), so `FLU` is zero every hour
+and this entire six-gas subsurface-irrigation flux block -- the H2/sibling asymmetry and the broader
+"Zig's irrigation-chemistry schema has no gas-species field at all" gap alike -- produces a hard zero
+on both sides regardless of implementation. This resolves the issue's real-world materiality without
+needing to resolve the three open mechanism-identity questions above (they remain open as translation-
+completeness questions, just not urgent ones for this deck).
+
+**What would trigger it**: any deck whose land-management manifest names a real irrigation file
+(anything other than `NO` in that slot) with nonzero subsurface water flux and nonzero dissolved-gas
+concentrations. No deck currently in this project's scope schedules irrigation at all.
+
+**Disposition update**: downgraded from "flagged for reviewer judgment, materiality unknown" to
+"confirmed dormant for the only deck this project currently validates against, decisively so from
+input files alone (no run needed)." The three mechanism-identity/scope questions in "Why this is
+flagged rather than dispositioned" remain genuinely open and worth resolving before any future deck
+adds irrigation, but no longer block anything for Ottawa. Traceability: see new row `TRC-296` in
+`audit/traceability/traceability.csv`, which supersedes `TRC-186`'s materiality framing (disposition
+unchanged, `unresolved`) with this dormancy finding.

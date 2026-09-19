@@ -1,6 +1,6 @@
 # Issue 031 -- REDIST ground-surface secondary CH4 combustion (`redist.f:10934-10971`) has no confirmed Zig counterpart
 
-Status: OPEN (needs reviewer decision on materiality; not yet confirmed as a mass-balance-relevant divergence, only confirmed as an unreproduced mechanism)
+Status: OPEN (needs reviewer decision on materiality; not yet confirmed as a mass-balance-relevant divergence, only confirmed as an unreproduced mechanism). **Follow-up (2026-09-19): CONFIRMED NOT REACHABLE for the Ottawa deck** -- no `ITILL=22` fire event is scheduled in any of the deck's five tillage files across 1998-2002, and ambient weather cannot organically reach the outer fire-gate's 100 degC threshold, so `ICHKF` is 0 every hour and this sub-block (nested at 200 degC) never executes on either side. See "Follow-up resolution (2026-09-19)" near the end of this file. Deprioritized accordingly; not closed.
 Owner: unassigned
 Candidate/input hashes: `f77src/redist.f` sha256 `2FEAEC2B50571BDE6E92AE6A8838738B13D36A9CE858E3734F95C65F2733111D`
 
@@ -54,3 +54,48 @@ Regression added and actually executed: none yet.
 Invalidated evidence and rerun dependencies: none.
 Independent reviewer: not yet done.
 Remaining limitation or final disposition: **OPEN**. Per `PROJECT_CONTRACT.md`, this is a genuine candidate gap in a gas-conservation-relevant pathway (CH4/O2/CO2/heat), not merely a documentation gap -- it should not be closed by inference; a reviewer should either estimate its typical magnitude from an existing legacy reference run (comparing `HCBFG`/`RC4OK` magnitudes against other accepted hourly canopy gas terms) or explicitly scope it out.
+
+## Follow-up resolution (2026-09-19) -- NOT REACHABLE for Ottawa; the outer fire gate itself never opens
+
+A dedicated, bounded, read-only follow-up (no `zig build`/run, exactly as scoped) traced the outer
+gate this mechanism sits behind, which this issue's original pass had not yet done.
+
+**Site condition needed for this gap to matter**: the whole sub-block lives inside `IF(ICHKF.EQ.1)`
+(`redist.f:10684`). `ICHKF` ("fire flag: 0=no fire, 1=fire") is set once per hour in `f77src/wthr.f:
+548-562`, and is `1` only if **either** (a) `ITILL(I,NY,NX).EQ.22` at solar noon -- i.e. a scheduled
+management/tillage event of type 22 ("fire"/burn) for that day -- **or** (b) `ICHKL=1`, which itself
+requires some soil layer's temperature `TKS(L,NY,NX)` to exceed `TCMBS=373.15` K (100 degC) or the
+canopy-air temperature `TKQ(NY,NX)` to exceed the same threshold (`wthr.f:50`,
+`PARAMETER (TCMBS=373.15,TCMBL=348.15)`). Neither of these can occur from ambient Ottawa weather
+forcing alone (no plausible air/soil temperature in this climate reaches 100 degC); the only realistic
+path to `ICHKF=1` is a scheduled `ITILL=22` burn event, which would then need to be hot enough to also
+push the ground-surface/canopy-air temperature `TKQGX` past this sub-block's own, even higher,
+`TCMBX=473.15` K (200 degC) gate.
+
+**Check performed**: read every tillage/management file used by the Ottawa deck across its full
+1998-2003 forcing cycle -- `f77example/Cool Temperate Maize-Soybean ON/f25til98`, `f25til99`,
+`f25til00`, `f25til01`, `f25til02` (the deck's `f25m98`..`f25m03` management manifests each point to
+exactly one of these per year; `f25m03` points to `NO` tillage file at all). The complete set of
+`ITILL` codes scheduled across all five files is `{10, 10, 8, 4, 1, 1, 5, 1, 1, 5, 2, 8, 1, 5}` --
+**no `ITILL=22` event appears anywhere** in the deck's full multi-year tillage schedule.
+
+**Verdict: NOT REACHABLE for the Ottawa deck, in any input this project currently has.** Since no fire
+event is ever scheduled and ambient weather cannot organically reach the 100 degC fire-detection
+threshold, `ICHKF` is `0` for every hour of every year in this deck's forcing cycle, so the entire
+`redist.f:10934-10971` sub-block (nested two temperature gates deeper still, at 200 degC) never
+executes in the legacy oracle either. Zig's absence of a counterpart therefore produces **no
+observable divergence** for this deck -- both sides compute a hard zero for this term, one by an
+explicit unreached `IF` branch, the other by never having the code at all.
+
+**What would trigger it**: a deck whose tillage/management schedule includes an `ITILL=22` burn event
+hot enough to drive ground-surface/canopy-air temperature above 473.15 K. No deck currently in this
+project's scope schedules any fire event.
+
+**Disposition update**: downgraded from "needs reviewer decision on materiality, no runtime evidence"
+to "confirmed dormant for the only deck this project currently validates against, decisively so from
+input files alone (no run needed)." `retired-with-explicit-scope-approval` is now a defensible
+disposition for the Ottawa-deck timeframe, but is left for reviewer sign-off rather than
+self-assigned here; the code gap itself remains tracked, not silently closed, per the contract's
+dormant-branches clause. Traceability: see new row `TRC-295` in
+`audit/traceability/traceability.csv`, which supersedes `TRC-122`'s materiality framing (disposition
+unchanged, `unresolved`) with this dormancy finding.
