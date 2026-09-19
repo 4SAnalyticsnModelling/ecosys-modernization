@@ -61,6 +61,18 @@ rebuild and rerun (~2h40m), or the user should decide whether to preserve a
 copy durably. This is a housekeeping/storage question, not a blocker for
 "outputs comparable to oracle."
 
+**Correction (2026-09-19, post-dates this triage's initial pass): `issue-050`
+is re-ranked from Tier 4 (paperwork) to Tier 1 (human decision needed).** A
+bounded follow-up confirmed, from the deck's own input files and source
+alone (no run needed), that Ottawa's grid is a true 1x1 cell (every face is
+a boundary face) and that the site file sets a real, nonzero, exchange-
+enabled `RCHGFU=RCHGFA=10.0` at the N/S lateral boundaries -- exactly the
+condition needed to make the issue's `recharge_frequency_divisor`
+hardcoding (`0`/`1` in production instead of the real site value) a live,
+reachable ~10-11x divisor discrepancy on the validated deck, not a dormant
+or paperwork-only gap. See `issue-050`'s own "Follow-up resolution
+(2026-09-19)" section and the Tier 1 table entry added below.
+
 Of the remaining 40 open items (excluding 015 and 002): the large majority are
 **real but low-materiality** -- either a legacy quirk that Zig's cleaner,
 generic architecture already avoids (just needs a sign-off and a citation), or
@@ -102,6 +114,7 @@ For each: what the two sides do differently, and the decision needed.
 | `issue-049` | Legacy's domain-boundary (lateral grid-edge) snow drift is entirely commented-out/dead in the Fortran; Zig's snow-drift routing reuses the runoff/erosion boundary-openness mask and genuinely exports mass/heat/solutes across an open, downhill lateral boundary during snow-bearing, windy hours. | Check whether the in-scope deck's site file ever has a nonzero open+downhill lateral boundary during snow cover. If live: gate Zig's snow-drift boundary path permanently closed to match legacy exactly, or register this as an approved feature (legacy's dead skeleton suggests an unfinished original feature, not a deliberate physical choice). |
 | `issue-051` | Legacy's own macropore freeze-thaw block is internally inconsistent: its eligibility **gate** correctly uses the pure-water freezing point (273.15 K) but its **driving-force formula** reuses the micropore's matric-depressed freezing point. Zig reproduces this inconsistency bit-for-bit, undocumented on either side. | Correct Zig's formula to relax toward the pure-water freezing point for the macropore path (a `legacy-defect-corrected` candidate), or find/document a physical rationale for the legacy behavior and keep it as `preserved`. Sits in the same freeze-thaw physics area as the already-high-scrutiny Dall'Amico feature. |
 | `issue-052` | Legacy's ground/snow surface roughness `ZS` is "sticky": recomputed only on a rare disturbance/restart event, otherwise held fixed all season. Zig recomputes it from live state every hour, unconditionally. | Is Zig's continuous recompute a deliberate improvement (needs a feature entry + matched-state test) or does exact-parity require an `IFLGS`-equivalent gate in Zig's driver? Feeds the canopy/surface energy-balance chain already under scrutiny in `issue-024`. |
+| `issue-050` (added 2026-09-19, re-ranked up from Tier 4) | The `recharge_frequency_divisor` half of this issue (distinct from its still-paperwork-only `GRID-INV-001/002` dimensional fix) hardcodes `0`/`1` at `solver_residual.zig:474,498,513,530` where legacy uses a real, site-calibrated `RCHGFU`/`RCHGFA`. Confirmed for Ottawa: the deck's own site file gives `RCHGNUG=RCHGSUG=10.0` with N/S exchange enabled, and the deck's 1x1 grid makes every cell's N/S faces boundary faces by construction -- both preconditions the issue needed to matter are now independently confirmed true, not merely possible. | Thread the real per-direction `RCHGFU`/`RCHGFA` value through `recharge_frequency_divisor` at the four lateral call sites (a `legacy-defect-corrected`-shaped fix once reviewed), or produce a documented, reviewed rationale for keeping the hardcode despite disagreeing with the site file (`preserved`/`retired-with-explicit-scope-approval`-shaped). Either way this needs a decision before a feature-register entry can be written; a run to establish the actual m3-scale flux impact is a reasonable next step but the divisor-level ~10-11x discrepancy is already established without one. |
 
 ---
 
@@ -153,9 +166,24 @@ provisionally in this group pending that trace).
   uniform-boundary-assignment design already avoids the gap; currently
   latent regardless (the consuming legs are separately zeroed, see
   `issue-012`).
-- `issue-050`: a real, already-tested dimensional fix to the water-table/
-  tile-drain boundary formulas (`GRID-INV-001/002`) has no feature-register
-  entry -- pure paperwork.
+- `issue-050`: **RE-RANKED to Tier 1, see correction below -- this bullet's
+  "pure paperwork" framing is stale.** The dimensional fix to the
+  water-table/tile-drain boundary formulas (`GRID-INV-001/002`) is still a
+  real, already-tested, paperwork-only gap on its own. But a same-day
+  closing-pass discovery, since confirmed by a dedicated follow-up
+  (2026-09-19), found that this issue also bundles a second, unrelated
+  substitution (`recharge_frequency_divisor` hardcoded to `0`/`1` at
+  `ecosys-ng/src/soil/water/solver_residual.zig:474,498,513,530`) that is
+  demonstrably **not** paperwork: the in-scope Ottawa deck's own site file
+  sets the real `RCHGNUG=RCHGSUG=10.0` (not `0`) with N/S exchange enabled
+  (`RCHGNTG=RCHGSTG=1.0`), and Ottawa's grid is a true 1x1 cell where every
+  face -- including N and S -- is a boundary face by construction
+  (`f77src/main.f:46` reads `NHW,NVN,NHE,NVS=1,1,1,1` from
+  `runottawa`'s first line; independently confirmed via
+  `ecosys-ng/src/soil/profile/boundary_topology.zig:261,263` where a
+  1-row grid's sole row satisfies both the north-face and south-face
+  conditions at once). See `issue-050`'s own "Follow-up resolution
+  (2026-09-19)" section for the full evidence chain.
 - `issue-014`: a real legacy self-clobber bug (east/south-bound eroded-
   constituent transport is permanently zero in the Fortran) is correctly
   **not** reproduced by Zig -- but the code comment justifying that choice
@@ -255,7 +283,7 @@ on reachability/scope, not measured magnitude).
 - `issue-004` (topography/site-file consolidation -- unresolved input-mapping question, never shown to be an actual defect)
 - `issue-006` (embedded-tag working note, superseded/folded into other issues and feature dossiers)
 - `issue-013` (audit-tooling metadata bug: a stage-execution census mischaracterizes a stage as unprovable-as-executed when it is trivially provable; zero science/output impact)
-- `issue-050` (feature-register paperwork for an already-tested dimensional fix -- also listed under Tier 2 Group B for context)
+- ~~`issue-050`~~ **REMOVED from Tier 4, 2026-09-19 -- see Tier 1 addition below and Section 1 correction.** The `GRID-INV-001/002` dimensional-fix half of this issue is still feature-register paperwork, but the issue also bundles a confirmed-reachable `recharge_frequency_divisor` hardcoding gap that is not paperwork; the issue as a whole is re-ranked to Tier 1.
 
 ---
 
@@ -343,6 +371,6 @@ Opinionated, given limited reviewer time:
 4. **Batch the Tier 2 sign-offs in one reviewer pass**, grouped by the two cross-cutting patterns (Section 6) rather than one-by-one -- most of these need the same 30-second judgment ("Zig's generic kernel avoided this, agreed, add the citation") repeated ~16 times; a single reviewer session covering all of Tier 2 will be far more efficient than 16 separate reviews.
 5. **`issue-040` and `issue-054`** next among the remaining Tier-3 items -- both are concrete, well-localized, plausibly consequential, and cheap to fix once a reviewer signs off (a formula port and a one-field wiring fix, respectively), unlike the harder-to-scope items (`issue-028`, `issue-031`, `issue-044`, `issue-056`) which need an input-file check before anyone can even judge urgency.
 6. **`issue-032` (test hang) before anyone leans on `zig build test` as a release gate.** It costs little to triage and its risk (masking an unrelated real failure under a CI timeout) is exactly the kind of thing that should not still be open when G2/G3 evidence starts depending on the test suite being trustworthy.
-7. **Tier 1's remaining items (`issue-018`, `022`, `026`, `030`, `038`, `039`, `047`, `049`, `051`, `052`)** are all real judgment calls but none currently block anything -- schedule them as a standing backlog for whoever has the relevant domain expertise (solute chemistry for 018/038/045-adjacent; plant/root physiology for 039/047; land-surface/snow physics for 049/051/052), rather than trying to force them through this audit's own general-purpose passes.
+7. **Tier 1's remaining items (`issue-018`, `022`, `026`, `030`, `038`, `039`, `047`, `049`, `050`, `051`, `052`)** are all real judgment calls but none currently block anything -- schedule them as a standing backlog for whoever has the relevant domain expertise (solute chemistry for 018/038/045-adjacent; plant/root physiology for 039/047; land-surface/snow physics for 049/051/052; soil-water boundary calibration for 050, added 2026-09-19), rather than trying to force them through this audit's own general-purpose passes.
 8. **`issue-037` and `issue-055` (Part B) last among Tier 3, alongside Tier 4** -- both are correctly-translated, unit-tested reference code for an `ISALTG!=0`/static-salt configuration that no deck currently in this project's scope actually uses (corrected 2026-09-19: `issue-037` was previously ranked #1 in this list on an unverified claim that Ottawa is `ISALTG=0`; it is confirmed `ISALTG=1`). The only action needed is the documentation-scope decision `issue-037`'s own "Disposition" section already describes (document as intentionally-dormant reference translations per the contract's dormant-branches clause), not an urgent wiring fix.
 9. **Tier 4 items last** -- true paperwork, address whenever convenient, no urgency.

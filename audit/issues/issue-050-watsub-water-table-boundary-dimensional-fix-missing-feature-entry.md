@@ -7,21 +7,34 @@ working assumption is **false** for the in-scope Ottawa deck's N/S lateral
 boundaries (site file gives `RCHGNUG=RCHGSUG=10.0`, not 0), which the
 production `recharge_frequency_divisor` hardcoding does not account for. See
 the "Closing-pass discrepancy (2026-09-19)" section near the end of this
-file for the full write-up. Do not treat this as paperwork-only until that
-section's open questions are resolved.
+file for the full write-up. **A same-day bounded follow-up (see "Follow-up
+resolution (2026-09-19)" section, further below) has now CONFIRMED both
+open questions that section raised: the Ottawa deck is a true 1x1 grid where
+every cell's N and S faces are boundary faces by construction, and the
+site file's own N/S exchange-enable flags (`RCHGNTG=RCHGSTG=1.0`) are set,
+so the hardcoded-divisor gap is reachable on the validated deck, not
+hypothetical. Severity is escalated accordingly; do not treat this as
+paperwork.**
 
 ## Impact/severity
 
-Low/paperwork, code and tests are internally consistent (same category as
-`issue-019`). Filed because the contract requires "every intentional
-difference" to have an individual feature-register entry, and this one does
-not, despite being a real, tested, reasoned departure from the legacy
-formula's own internal inconsistency and dimensional defect.
+**Escalated 2026-09-19 (see "Follow-up resolution" section below) --
+NO LONGER low/paperwork.** Originally filed as: "Low/paperwork, code and
+tests are internally consistent (same category as `issue-019`)," because
+the contract requires "every intentional difference" to have an individual
+feature-register entry, and this one did not, despite being framed as a
+real, tested, reasoned departure from the legacy formula's own internal
+inconsistency and dimensional defect.
 
-**Superseded in part, see bottom of file**: the "code and tests are
-internally consistent" framing above refers only to the dimensional
-(`GRID-INV-001/002`) fix, which remains sound. The `recharge_frequency_divisor`
-hardcoding's exactness is now in question, not merely unverified paperwork.
+**Superseded**: the "code and tests are internally consistent" framing
+above refers only to the dimensional (`GRID-INV-001/002`) fix, which
+remains sound. The separate `recharge_frequency_divisor` hardcoding is now
+a confirmed, reachable-on-the-validated-deck discrepancy (a real per-site
+`RCHGFU=RCHGFA=10.0` at Ottawa's N/S lateral boundaries, replaced in
+production by a hardcoded `0`/`1`), not merely unverified paperwork. See
+the "Follow-up resolution (2026-09-19)" section near the end of this file
+for the full resolution of (a) grid dimensions and (b) the other gating
+conditions, both now confirmed satisfiable for this deck.
 
 ## First bad time/cell/process
 
@@ -131,10 +144,15 @@ Not yet done.
 
 ## Final disposition
 
-`unresolved` (paperwork) -- the underlying numerical treatment is a
-well-evidenced `legacy-defect-corrected` candidate, but cannot be marked
-final in the feature register until the entry above exists and is reviewed,
-and until the `RCHGFU=0` assumption is checked against the in-scope deck.
+`unresolved` -- **no longer paperwork-only as of the 2026-09-19 follow-up**
+(see "Follow-up resolution" section below). The dimensional
+(`GRID-INV-001/002`) fix remains a well-evidenced `legacy-defect-corrected`
+candidate on its own. The separate `recharge_frequency_divisor` hardcoding
+is now a confirmed-reachable discrepancy against the in-scope Ottawa deck's
+own site file (`RCHGFU=RCHGFA=10.0` at N/S, not the `0` case the hardcoding
+assumes) and needs a human/scientist decision (thread the real value
+through, or document an approved rationale for the hardcode) before any
+feature-register entry can be written for it.
 
 ## Closing-pass discrepancy (2026-09-19) -- DO NOT CLOSE, checked and disagrees with this issue's own working assumption
 
@@ -218,3 +236,129 @@ treated as **premature** in light of this finding and revisited by whoever
 next has write access to `traceability.csv` (it was already
 modified-but-uncommitted by a concurrent agent this session and was
 therefore off-limits to edit directly this pass).
+
+## Follow-up resolution (2026-09-19) -- (a) and (b) both CONFIRMED reachable; severity escalated
+
+A dedicated, bounded, read-only follow-up (no `zig build`/run performed,
+exactly as scoped) resolved the three open questions from the closing-pass
+discrepancy section above.
+
+**(a) Grid dimensions -- CONFIRMED, 1x1 single-cell grid, N and S are both
+boundary faces simultaneously.** The closing-pass note above cited
+`runottawa`'s `1  1` control line as suggestive evidence, but that specific
+line is actually the `NAX,NDX` scenario-count record (`f77src/main.f:64`),
+not the grid-dimension record. The real grid-dimension record is read one
+line earlier and is unambiguous:
+
+- `f77src/main.f:46`: `READ(5,*)NHW,NVN,NHE,NVS` is the *first* stdin read in
+  the program.
+- `f77example/Cool Temperate Maize-Soybean ON/runottawa` line 1 (the first
+  line inside the `eor` heredoc): `1,1,1,1` -> `NHW=1,NVN=1,NHE=1,NVS=1`.
+  This is a true 1x1 grid: one column, one row, no interior neighbors in
+  any direction.
+- Independently confirmed on the Zig side: `ecosys-ng-prod-examples/Cool
+  Temperate Maize-Soybean ON/runottawa` line 3, `1,1,5` ->
+  `horizontal_cell_count=1, vertical_cell_count=1, plant_species_count=5`
+  (`ecosys-ng/src/driver/runscript.zig:1780-1793`, domain header parsing).
+- `ecosys-ng/src/soil/profile/boundary_topology.zig:261` and `:263`:
+  `if (row == 0) appendLateral(..., .north, ...)` and
+  `if (row + 1 == rows) appendLateral(..., .south, ...)`. For a 1-row grid
+  (`rows=1`), the single row satisfies **both** `row==0` and `row+1==rows`
+  simultaneously -- the one and only cell is wired as a north boundary face
+  **and** a south boundary face at the same time, by construction, not by
+  edge case. There is no "most cells aren't boundary cells" escape here:
+  100% of cells (i.e. the one cell) have live N and S boundary faces.
+
+**(b) Gating conditions -- CONFIRMED satisfiable, from the deck's own site
+file, independent of any run.** `f77src/readi.f:155-156`'s read order is
+`RCHQNG,RCHQEG,RCHQSG,RCHQWG,RCHGNUG,RCHGEUG,RCHGSUG,RCHGWUG,RCHGNTG,RCHGETG,
+RCHGSTG,RCHGWTG,RCHGDG`. Applying this order to `f25si98` line 4 (`0.0 1.0
+1.0 0.0 10.0 0.0 10.0 0.0 1.0 0.0 1.0 0.0 0.0` -- checked in both
+`f77example/Cool Temperate Maize-Soybean ON/f25si98` and
+`ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_
+files/landscape/f25si98`) gives, in addition to the already-confirmed
+`RCHGNUG=RCHGSUG=10.0`: **`RCHGNTG=1.0`, `RCHGSTG=1.0`** (N/S natural-table
+subsurface exchange flag = "unimpeded flow", not "no flow"). In
+`ecosys-ng/src/soil/water/solver_residual.zig` terms, this is
+`boundary_face.natural_exchange_fraction` for the N/S faces -- nonzero,
+so it does not trip the `exchange_fraction == 0 continue` skip at line 447,
+and `distance_m=10.0` does not trip the `distance_m <= 0 continue` skip
+(`GRID-INV-001`) at line 453. Both of the outer gates that would exclude
+this face from the boundary-flux kernels entirely are open for Ottawa's N
+and S faces.
+  The remaining, finer gate is the choice between the discharge branch
+(`:473-474`, `matrixDischarge`, hardcoded divisor `0`) and the recharge
+branch (`:487-498`/`:526-530`, `recharge`, hardcoded divisor `1`), which
+depends on `midpoint_m` (layer midpoint depth) vs. `external_depth_m`
+(natural water-table depth) and, for the discharge branch only, the
+moisture-dependent `matrix_discharge_enabled` sub-loop at `:458-471`. Site
+file `f25si98` line 3 gives `DTBLIG=1.0` (natural water-table depth = 1.0 m
+below the surface), and `f25sol98` line 2 gives the Ottawa soil profile's
+cumulative layer-boundary depths as `0.01,0.025,0.075,0.125,0.175,0.225,
+0.3,0.5,0.8,1.30` m -- a 10-layer profile extending to 1.30 m, straddling
+the 1.0 m water-table depth around layer 9. This means, purely from
+geometry (independent of any hour's moisture state): layers with midpoint
+depth < 1.0 m (roughly the top 8-9 layers) are discharge-branch candidates
+every hour the finer moisture gate also fires, and layers with midpoint
+depth >= 1.0 m (the bottom of the profile) are recharge-branch candidates
+*regardless* of the moisture-dependent `matrix_discharge_enabled` check,
+since the recharge branch's condition (`:487`) requires
+`!matrix_discharge_enabled`, which is the common/default case, not a rare
+one. Over a 6-year, 8760-hour/year run, this is not a hypothetical corner
+case -- it is a geometrically-guaranteed daily condition. (Precisely which
+of the four call sites fires in which hour was not traced hour-by-hour --
+that still requires a run -- but at least one of the four call sites firing
+at the N/S boundary on many/most hours is established by geometry alone,
+and all four call sites share the same hardcoded-divisor defect.)
+
+**(c) Physical-unit magnitude -- NOT computed, correctly left undone.** (a)
+and (b) confirm the code path is reachable, so per this task's own
+instruction (c) should be attempted -- but the *m3* magnitude (as opposed to
+the already-established ~10-11x *divisor ratio*, unchanged from the
+closing-pass section above: legacy `RCHGFU+1.0=11.0` vs. Zig's hardcoded
+`0+1.0=1.0` for the discharge branch; legacy `AMAX1(RCHGFU,1.0)=10.0` vs.
+Zig's hardcoded `1.0` for the recharge/macropore branches) depends on the
+hydraulic conductivity, matric-potential gradient, face area and time
+fraction actually realized hour-by-hour, none of which can be read
+statically from input files -- it requires executing the model. That
+remains out of scope for this bounded, read-only pass and is **not**
+estimated or fabricated here.
+
+**Severity escalation.** This is no longer "low/paperwork." Both conditions
+this issue's own disposition was waiting on are confirmed satisfied for the
+in-scope, validated Ottawa deck: a genuinely 1x1 grid where every boundary
+is simultaneously N and S, and a real, nonzero, site-calibrated
+`RCHGNUG=RCHGSUG=10.0` with subsurface exchange enabled (`RCHGNTG=RCHGSTG=
+1.0`), silently replaced in production by a hardcoded `0`/`1` at all four
+`ecosys-ng/src/soil/water/solver_residual.zig` call sites (`:419,474,498,
+513,530` -- note `:419` is the lower/vertical boundary's
+`recharge_frequency_divisor=1`, correctly matching legacy's own
+`RCHGFU=1.0` hardcode for the vertical case at `watsub.f:5533,5535`, and is
+**not** part of this defect; only the four lateral-boundary call sites at
+`:474,498,513,530` are implicated). This is now a live,
+reachable-on-the-validated-deck numerical discrepancy in a boundary water
+flux, not a dormant/latent one. (The `:419` `freeDrainage` call passes its
+own hardcoded `recharge_frequency_divisor=1` for the lower/vertical
+boundary, structurally separate from the four lateral call sites at
+`:474,498,513,530` this issue is about; legacy also hardcodes
+`RCHGFU=1.0` for the vertical case at `watsub.f:5533` -- but whether
+`freeDrainage`'s formula shape actually matches one of the six RCHGFU/RCHGFA
+divisor forms this issue catalogs, or is a structurally distinct
+"unimpeded gravity drainage" formula that does not use this divisor the
+same way, was not traced this pass and is left as a separate, untouched
+question, not folded into this escalation.) It should be treated as a
+**Tier 1/Tier 3 functional gap requiring a human/scientist decision**
+(thread the real per-direction `RCHGFU`/`RCHGFA` value through
+`recharge_frequency_divisor` at the four lateral call sites, or produce a
+documented, reviewed rationale for why the hardcoded `0`/`1` is the
+intended, approved behavior despite disagreeing with the site file), not
+Tier 2/Tier 4 paperwork. No feature
+file has been written and none should be until this decision is made, since
+writing one now would misrepresent the substitution as reviewed and exact.
+`audit/traceability/traceability.csv` has been updated: `TRC-223`'s row is
+left untouched (preserving history) and a new row `TRC-293` has been added
+recording `disposition=unresolved`, explicitly noting it supersedes
+`TRC-223`'s premature `legacy-defect-corrected` disposition, with this
+pass's evidence. `audit/handoff-issue-triage.md` has been updated to move
+`issue-050` out of Tier 2/Tier 4 framing into a new escalation note (see
+that file's own edit for the exact wording).
