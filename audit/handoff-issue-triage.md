@@ -65,12 +65,23 @@ Of the remaining 40 open items (excluding 015 and 002): the large majority are
 **real but low-materiality** -- either a legacy quirk that Zig's cleaner,
 generic architecture already avoids (just needs a sign-off and a citation), or
 a narrow, conditionally-dormant gap. A smaller set (Tier 3, ranked below) are
-**genuine functional gaps** worth prioritizing for "no science gaps" -- most
-notably `issue-037` (the restricted/static-salt chemistry variant the
-project's own validated Ottawa deck should be using is unreachable in
-production; the deck instead runs the full dynamic-salt formulas, which is a
-live, not dormant, divergence from the legacy design for the *only* deck this
-project currently validates against).
+**genuine functional gaps** worth prioritizing for "no science gaps."
+
+**Correction (2026-09-19, post-dates this triage's initial pass):** the
+executive summary originally singled out `issue-037` here as affecting the
+validated Ottawa deck "today," on the strength of `issue-053`'s claim that
+Ottawa is an `ISALTG=0` (static-salt) deck. That claim was independently
+re-checked and found to be **wrong, unverified against either deck's input
+file**: `f77src/readi.f:154` maps site record 3's second field to `ISALTG`,
+and both `f77example/Cool Temperate Maize-Soybean ON/f25si98` line 3 and the
+modern `ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/.../f25si98`
+line 3 read `ISALTG=1` (dynamic-salt), confirmed on the Zig side too via
+`ecosys-ng/src/state/site.zig`'s `salinity_enabled`/`salinity_enabled_by_cell`
+wiring. Because Ottawa's own legacy oracle also runs the dynamic-salt
+formulas, Zig's current always-dynamic production behavior is the *correct*
+match for this deck, not a divergence from it. `issue-037` is downgraded
+accordingly -- see Section 4's corrected Tier 3 list and Section 8 item 3
+below; it no longer belongs in the "affects the validated deck today" framing.
 
 ---
 
@@ -162,23 +173,14 @@ Ranked by confidence x likely impact, per each issue file's own materiality
 discussion (none of these have been quantified with a run; ranking is based
 on reachability/scope, not measured magnitude).
 
-1. **`issue-037`** -- The restricted/static-salt (`ISALTG=0`) variants of
-   soil cation-exchange, NH4-NH3 dissociation, and phosphate exchange are
-   translated and unit-tested but have **zero production callers**; the full
-   dynamic-salt formulas run instead, unconditionally. This matters because
-   the project's own `issue-053` confirms the Ottawa deck **is** an
-   `ISALTG=0` deck -- i.e. this is not a dormant branch, it is the deck this
-   project actually validates against running the wrong (more complex, not
-   necessarily wrong-in-a-bad-way, but undeniably non-matching) formula set
-   today. Highest-confidence, highest-relevance item in this tier.
-2. **`issue-040`** -- Root osmotic/turgor water potential (`PSIRO`/`PSIRG`)
+1. **`issue-040`** -- Root osmotic/turgor water potential (`PSIRO`/`PSIRG`)
    was never ported; Zig substitutes a static per-plant trait constant that
    never responds to root water status, temperature, or solute
    concentration. The already-correct canopy-side sibling shows the intended
    formula was known and portable. Silently weakens a designed
    drought-response feedback on root extension growth. High confidence,
    plausible real impact, not yet quantified.
-3. **`issue-054`** -- This is the one Tier-3 item that is a **Zig-introduced**
+2. **`issue-054`** -- This is the one Tier-3 item that is a **Zig-introduced**
    translation bug, not an avoided legacy defect: legacy correctly uses two
    different band/non-band volume fractions for the NH3-oxidizer's own NH4
    fallback vs. the NO2-oxidizer's own NO2 fallback; Zig's `makeZone` collapses
@@ -186,41 +188,65 @@ on reachability/scope, not measured magnitude).
    (nitrate-zone) fraction. Reachable at minimum on hour 1 of every layer and
    after any demand-history reset. Inert only if the deck's NH4/NO3 band
    geometries coincide (not checked).
-4. **`issue-028`** -- `starte.f`'s one-time "50% of initial manure protein-N
+3. **`issue-028`** -- `starte.f`'s one-time "50% of initial manure protein-N
    becomes ammonium" amendment has no Zig counterpart at all -- confirmed a
    missing routine, not a mistranslated one. Conditional on the deck's soil
    file specifying nonzero initial manure organic matter (not checked for
    Ottawa).
-5. **`issue-017`** -- Two pool families (adsorbed cations/anions/precipitates;
+4. **`issue-017`** -- Two pool families (adsorbed cations/anions/precipitates;
    root gases) behave differently between Fortran's pond and soil relayering
    branches; Zig applies the soil-branch rule uniformly to both. Confirmed
    **production-live** (pond boundary changes are real, not dormant) --
    distinguishes this from most other Tier-3/Tier-2 items.
-6. **`issue-031`** -- `redist.f`'s ground-surface secondary CH4 combustion
+5. **`issue-031`** -- `redist.f`'s ground-surface secondary CH4 combustion
    mechanism (Michaelis-Menten-limited, O2-budget-capped) has no confirmed
    Zig counterpart. Gated on a high-temperature (fire-adjacent) condition;
    magnitude not estimated.
-7. **`issue-044`** -- Zig's irrigation-water-chemistry schema has no gas
+6. **`issue-044`** -- Zig's irrigation-water-chemistry schema has no gas
    species field at all (CO2/CH4/O2/N2/N2O/H2), a broader gap than the single
    legacy H2-only omission this issue started from. Whether this is even the
    right Zig module to compare against the legacy mechanism is itself
    unconfirmed.
-8. **`issue-056`** -- `starte.f`'s rainfall/irrigation ion-pairing/
+7. **`issue-056`** -- `starte.f`'s rainfall/irrigation ion-pairing/
    complexation network (Al/Fe/Ca/Mg/Na/K/SO4/CO3) has no confirmed Zig
    counterpart beyond a narrow closed-form NH4/phosphate piece. Likely low
    materiality for a non-saline deck, but the actual input files were not
    checked.
-9. **`issue-012`** (`GEOM-SUBSIDENCE-001`/`PR-GEOM-01B`) -- A real, live-wired
+8. **`issue-012`** (`GEOM-SUBSIDENCE-001`/`PR-GEOM-01B`) -- A real, live-wired
    uncancelled-SOC-change defect in the soil-geometry-boundary transaction,
    but currently **latent**: a separate, independent hard-wired zero
    downstream prevents it from moving any layer boundary today. Explicitly
    flagged "do not fix in isolation" by its own in-code comment.
-10. **`issue-055` (Part B only)** -- For `ISALTG!=0` decks (not currently used
+9. **`issue-055` (Part B only)** -- For `ISALTG!=0` decks (not currently used
     by any deck in this project), the litter-specific cation-exchange/carboxyl
     Newton solve (`starte.f:1726-1906`) has no Zig implementation at all.
     Currently dormant, lowest priority in this tier. (Part A of the same
     issue -- a real legacy stale-scalar defect that Zig's unconditional zero
     happens to sidestep -- belongs with the Tier 2 pattern; see Section 6.)
+10. **`issue-037`** (re-ranked down from this section's former #1 -- see
+    "Correction" in Section 1 above) -- The restricted/static-salt
+    (`ISALTG=0`) variants of soil cation-exchange, NH4-NH3 dissociation, and
+    phosphate exchange are translated and unit-tested but have **zero
+    production callers**; the full dynamic-salt formulas run instead,
+    unconditionally. Originally ranked #1 in this tier on the strength of
+    `issue-053`'s claim that Ottawa is an `ISALTG=0` deck. That claim is
+    **wrong**: a definitive re-check of `f77src/readi.f:154` against both
+    `f77example/Cool Temperate Maize-Soybean ON/f25si98` line 3 and the
+    modern `ecosys-ng-prod-examples/.../f25si98` line 3 confirms Ottawa is
+    `ISALTG=1` (dynamic-salt) on both the legacy and Zig sides (Zig's own
+    `site.zig` parses this field into `salinity_enabled_by_cell`, which
+    resolves `true` for Ottawa). Because the legacy oracle itself runs the
+    dynamic-salt formulas for Ottawa, Zig's always-dynamic production
+    behavior is the *correct* match for this deck -- not a divergence from
+    it. This is now the same shape as `issue-055` (Part B) directly above:
+    dormant, correctly-translated reference code for an `ISALTG=0`
+    condition not exercised by any deck currently in scope. Retained in
+    Tier 3 (not demoted to Tier 4) only because the code itself is a real,
+    reachable-if-a-future-deck-sets-`ISALTG=0` gap worth a documented scope
+    decision (per `issue-037`'s own "Disposition": document as intentionally
+    dormant reference translations, per the contract's "dormant branches
+    remain in the inventory" clause) -- it is lowest priority in this tier
+    and does **not** affect the validated Ottawa deck today.
 
 ---
 
@@ -313,10 +339,10 @@ Opinionated, given limited reviewer time:
 
 1. **`issue-015` first, and only via a scope/design decision, not another autonomous fix attempt.** This is the sole item standing between the project and "the production run completes." Two well-evidenced experiments are already spent; a third blind guess is against the contract's own discipline. Get the human/numerical-methods input the issue itself asks for, or make the scope call (shorter validated horizon vs. full 262,920-hour run) explicitly rather than by default.
 2. **`issue-002` is already resolved (correction, post-dates this triage's initial pass) -- the remaining action is only deciding whether to preserve the 1.33GB oracle output durably outside the session scratchpad**, not building/running anything further. Low urgency, pure housekeeping.
-3. **`issue-037`, because it is the only Tier-3 item that affects the validated deck *today*, not conditionally.** A short, bounded check (confirm the Ottawa deck really is `ISALTG=0` in production, which `issue-053` already asserts, then get an explicit scope call on whether the restricted-chemistry variant needs wiring) is cheap and resolves the highest-relevance open science question in the backlog.
-4. **`issue-024`, next, because it is a live investigation one instrumented run away from real progress**, and because its outcome (matric-potential value or substep-schedule gap) plausibly also matters for #1's stiff-solver frontier -- these two investigations should not proceed in total isolation from each other.
-5. **Batch the Tier 2 sign-offs in one reviewer pass**, grouped by the two cross-cutting patterns (Section 6) rather than one-by-one -- most of these need the same 30-second judgment ("Zig's generic kernel avoided this, agreed, add the citation") repeated ~16 times; a single reviewer session covering all of Tier 2 will be far more efficient than 16 separate reviews.
-6. **`issue-040` and `issue-054`** next among the remaining Tier-3 items -- both are concrete, well-localized, plausibly consequential, and cheap to fix once a reviewer signs off (a formula port and a one-field wiring fix, respectively), unlike the harder-to-scope items (`issue-028`, `issue-031`, `issue-044`, `issue-056`) which need an input-file check before anyone can even judge urgency.
-7. **`issue-032` (test hang) before anyone leans on `zig build test` as a release gate.** It costs little to triage and its risk (masking an unrelated real failure under a CI timeout) is exactly the kind of thing that should not still be open when G2/G3 evidence starts depending on the test suite being trustworthy.
-8. **Tier 1's remaining items (`issue-018`, `022`, `026`, `030`, `038`, `039`, `047`, `049`, `051`, `052`)** are all real judgment calls but none currently block anything -- schedule them as a standing backlog for whoever has the relevant domain expertise (solute chemistry for 018/038/045-adjacent; plant/root physiology for 039/047; land-surface/snow physics for 049/051/052), rather than trying to force them through this audit's own general-purpose passes.
+3. **`issue-024`, next, because it is a live investigation one instrumented run away from real progress**, and because its outcome (matric-potential value or substep-schedule gap) plausibly also matters for #1's stiff-solver frontier -- these two investigations should not proceed in total isolation from each other.
+4. **Batch the Tier 2 sign-offs in one reviewer pass**, grouped by the two cross-cutting patterns (Section 6) rather than one-by-one -- most of these need the same 30-second judgment ("Zig's generic kernel avoided this, agreed, add the citation") repeated ~16 times; a single reviewer session covering all of Tier 2 will be far more efficient than 16 separate reviews.
+5. **`issue-040` and `issue-054`** next among the remaining Tier-3 items -- both are concrete, well-localized, plausibly consequential, and cheap to fix once a reviewer signs off (a formula port and a one-field wiring fix, respectively), unlike the harder-to-scope items (`issue-028`, `issue-031`, `issue-044`, `issue-056`) which need an input-file check before anyone can even judge urgency.
+6. **`issue-032` (test hang) before anyone leans on `zig build test` as a release gate.** It costs little to triage and its risk (masking an unrelated real failure under a CI timeout) is exactly the kind of thing that should not still be open when G2/G3 evidence starts depending on the test suite being trustworthy.
+7. **Tier 1's remaining items (`issue-018`, `022`, `026`, `030`, `038`, `039`, `047`, `049`, `051`, `052`)** are all real judgment calls but none currently block anything -- schedule them as a standing backlog for whoever has the relevant domain expertise (solute chemistry for 018/038/045-adjacent; plant/root physiology for 039/047; land-surface/snow physics for 049/051/052), rather than trying to force them through this audit's own general-purpose passes.
+8. **`issue-037` and `issue-055` (Part B) last among Tier 3, alongside Tier 4** -- both are correctly-translated, unit-tested reference code for an `ISALTG!=0`/static-salt configuration that no deck currently in this project's scope actually uses (corrected 2026-09-19: `issue-037` was previously ranked #1 in this list on an unverified claim that Ottawa is `ISALTG=0`; it is confirmed `ISALTG=1`). The only action needed is the documentation-scope decision `issue-037`'s own "Disposition" section already describes (document as intentionally-dormant reference translations per the contract's dormant-branches clause), not an urgent wiring fix.
 9. **Tier 4 items last** -- true paperwork, address whenever convenient, no urgency.
