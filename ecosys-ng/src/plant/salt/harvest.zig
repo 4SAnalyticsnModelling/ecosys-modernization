@@ -233,6 +233,15 @@ fn state_updateShootRemoval(state: *State, inputs: Inputs) void {
     }
 }
 
+// Uses a single scalar physical-tolerance parameter, already scoped to the
+// correct cell, rather than indexing a (plant, row, column) epsilon table.
+// Deliberately does not reproduce the legacy f77src/grosub.f:12825
+// `ZEROP(NZ,NY,NZ)` wrong-grid-index copy-paste bug (17 sibling guards use
+// `ZEROP(NZ,NY,NX)`; only this one substitutes NZ for NX) -- see
+// audit/issues/issue-025-grosub-litterfall-salt-zerop-column-index-typo.md.
+// This class of cross-index substitution cannot occur here by construction;
+// do not "fix" this to reintroduce a per-column epsilon lookup that could
+// carry the same bug.
 fn state_updateRootRemoval(state: *State, inputs: Inputs) void {
     for (0..state.layerCount()) |layer| {
         const start = state.layer_root_offsets[layer];

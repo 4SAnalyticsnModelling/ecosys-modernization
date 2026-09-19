@@ -414,6 +414,14 @@ fn equilibriumCharge(inputs: Inputs, selectivity: Selectivity) !Cations {
     return equilibrium_charge;
 }
 
+// This kernel serves both soil (starte.f:714-736) and litter
+// (starte.f:1828-1841; solute.f:4360-4394) call sites and always applies the
+// *3.0/*2.0 valence weights to both the numerator and denominator. It
+// deliberately does not reproduce the legacy litter-specific bug where
+// those siblings retain the weights in the denominator but drop them from
+// the numerator (see
+// audit/issues/issue-021-litter-gapon-exchange-unweighted-numerator-undocumented.md)
+// -- do not "fix" this to match the legacy defect.
 fn sourceOrderEquilibriumCharge(
     inputs: Inputs,
     selectivity: Selectivity,

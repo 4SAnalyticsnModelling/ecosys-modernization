@@ -1,6 +1,6 @@
 # Issue 029 -- `trnsfr.f`/`trnsfrs.f` vertical macropore/micropore double-depletion guard is applied only for downward (donor-current-cell) flow, not the mirror upward case
 
-Status: OPEN (confirms and closes out the "secondary, lower-confidence lead, not closed" flagged in `audit/features/feature-009-trnsfr-trnsfrs-solute-gas-transport.md`'s Addendum; extended 2026-09-19 to the sibling salt file, see "Sibling-file confirmation" below)
+Status: OPEN, disposition remains `unresolved` (confirms and closes out the "secondary, lower-confidence lead, not closed" flagged in `audit/features/feature-009-trnsfr-trnsfrs-solute-gas-transport.md`'s Addendum; extended 2026-09-19 to the sibling salt file, see "Sibling-file confirmation" below; further extended 2026-09-19 with an independent architectural re-confirmation, see "Independent review, not closure (2026-09-19)" at the end of this file -- structural claims confirmed, but this issue is NOT closed this pass)
 Owner: unassigned
 Candidate/input hashes: `f77src/trnsfr.f` sha256 `466E28F9A84BC67DB7998F213B48FD56312CC9C01DA09E59E6C36117637635EC`; `f77src/trnsfrs.f` sha256 `89F5D7CD44C0561E9B7233AD42164CBB1F9A6DF84BF90480A7A126177C34C5F1`
 
@@ -41,3 +41,43 @@ The Fortran-side defect is confirmed real (directional asymmetry, matching the p
 1. An independent reviewer should determine whether `SOLUTE-XFRS-PHYSICAL`'s approval (or a separate, dedicated review) explicitly covers the vertical convective macropore-netting mechanism, not just the diffusive exchange formula -- if yes, reclassify as `replaced-by-approved-feature`. This applies to both the gas (`trnsfr.f`) and salt (`trnsfrs.f`) instances since they are the same underlying mechanism.
 2. Failing that, construct a targeted matched-state test: an unsaturated macropore layer (`VOLAH>VOLWHM`) with simultaneous nonzero vertical macropore flow and a substantial negative (sink) lateral macro-micro exchange flux, run through both the legacy `trnsfr.f`/`trnsfrs.f` formula (by hand or a minimal harness) and the Zig `aqueous_extensive_transport.zig`/`transport_step.zig` solve, to confirm Zig's iterative acceptance does not allow the same over-depletion the netting term was written to prevent, in either flow direction, for both gases and salts.
 3. Independent review before closing.
+
+## Independent review, not closure (2026-09-19)
+
+Re-read as part of a batch closeout pass covering this and five other Tier 2
+Group A issues (`issue-020`, `issue-021`, `issue-025`, `issue-033`,
+`issue-036`), under a read-only/no-build/no-test-execution constraint for
+that pass. Unlike those five, this issue's own text explicitly declines
+self-closure twice (2026-09-18 original filing and the 2026-09-19
+sibling-file addendum), stating the equivalence between Zig's architecture
+and the legacy netting term's protection "was not proven this pass" and
+requires either a scope-approval review or a matched-state numerical test.
+
+Independently re-read `ecosys-ng/src/soil/gas/aqueous_extensive_transport.zig`'s
+`advance` (`:76-167`) and `acceptLocalConservation` (`:729-768`), and
+`ecosys-ng/src/driver/transport_step.zig`'s `advanceSoilSolutes` (`:348-`,
+convective exchange at `:414`). This independently confirms the issue's
+structural claim: vertical macropore transport is solved first, via a
+symmetric conductance-based iterative solve (`solve`, `:173-`) with no
+donor-direction-dependent term of any kind; the lateral macro-micro pore
+exchange (`calculateConvectivePoreExchangeFlux`/`state_updatePoreExchange`/
+`poreExchange`, `:129-141`) is then computed strictly afterward, reading the
+already-updated post-vertical-transport amounts, not a shared pre-image
+concentration. This sequential (not simultaneous) ordering is a plausible
+source-level explanation for *why* the specific double-counting failure mode
+`trnsfr.f:4396`'s netting term defended against (two flux computations both
+derived from the same stale base-state concentration) cannot arise in
+Zig's architecture in either flow direction -- but this is architectural
+reasoning from reading the solver, not the matched-state numerical test the
+issue itself calls for, and this pass's constraints (no `zig build`, no
+executed binary/test) preclude performing that test now.
+
+**No disposition change.** This issue is not marked closed, `preserved`,
+`legacy-defect-corrected`, or `replaced-by-approved-feature` by this review.
+No code comment was added (a citation comment is only warranted once a
+disposition is actually confirmed, per this batch's own operating
+instructions). The two next-bounded-actions above remain open and are the
+correct path to closure: a scope-review of whether `SOLUTE-XFRS-PHYSICAL`'s
+approval covers this mechanism, or the matched-state test. No traceability
+row was added or altered for this issue this pass (`TRC-093` and `TRC-164`
+both continue to correctly record `disposition=unresolved`).

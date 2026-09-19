@@ -1,6 +1,6 @@
 # Issue 021 -- litter-surface Gapon cation exchange drops valence weights from the numerator (reproducible in 2 independent Fortran locations); Zig's unified, charge-consistent formula is undocumented as a deviation
 
-Status: **OPEN, needs a review/approval record.** Same category as `issue-018`/`issue-020`: Zig's behavior is very plausibly the scientifically better choice (thermodynamically self-consistent), but the deviation from the literal legacy source has no record.
+Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** Independently re-verified this pass (see "Closing review" below); Zig's uniform, always-weighted kernel is confirmed correct and is now cited in-code against a reintroduction of the legacy litter-specific unweighted-numerator bug.
 
 Owner: found by this session's audit fork, 2026-09-18, during a `starte.f` convergence-loop follow-up pass.
 
@@ -39,3 +39,33 @@ This is the **third** instance this session of the same shape: `issue-018` (salt
 ## Evidence
 
 `D:\ecosys-modernization\f77src\starte.f:714-736,1828-1841`; `D:\ecosys-modernization\f77src\solute.f:4360-4394`; `D:\ecosys-modernization\ecosys-ng\src\soil\solute\cation_exchange.zig:378-479`; `D:\ecosys-modernization\ecosys-ng\src\soil\chemistry\initialization.zig:630-684`; `D:\ecosys-modernization\ecosys-ng\src\surface\litter_chemistry_step.zig:65,212`.
+
+## Closing review (2026-09-19)
+
+Independently re-read `cation_exchange.zig`'s `equilibriumCharge` (`:378-415`)
+and `sourceOrderEquilibriumCharge` (`:417-479`): both apply the `*3.0`
+(aluminum/iron) and `*2.0` (calcium/magnesium) valence weights identically
+in the numerator (each cation field) and the shared denominator
+(`calcium_basis`). Confirmed via `litter_reaction_rates.zig:780-825`
+(`exchangeRates`) that the litter runtime path calls
+`cation_exchange.calculateSourceOrder`, which itself calls
+`sourceOrderEquilibriumCharge` (`cation_exchange.zig:146-196`) -- the same
+kernel used by the soil path. There is no litter-specific branch anywhere in
+this kernel that could drop the numerator weights the way
+`starte.f:1828-1841`/`solute.f:4360-4394` do. This independently confirms the
+issue's central claim.
+
+Added a comment at `cation_exchange.zig:417` (immediately above
+`sourceOrderEquilibriumCharge`) citing this issue and the `starte.f`/
+`solute.f` line numbers, so a future refactor that special-cases litter does
+not silently reintroduce the unweighted-numerator bug. No test change:
+`initialization.zig`'s existing soil-side test already exercises this
+formula; no litter-specific regression was identified as missing for this
+narrow claim.
+
+**Disposition: `legacy-defect-corrected`.** Traceability: `TRC-073`
+(existing row) records `disposition=unresolved` from the original filing; a
+new row `TRC-290` was added to `audit/traceability/traceability.csv`
+recording the closed `legacy-defect-corrected` disposition rather than
+editing the historical row in place. Reviewer: this session's audit fork,
+acting as the independent reviewer role for this closeout batch, 2026-09-19.

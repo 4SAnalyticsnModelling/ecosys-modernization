@@ -131,6 +131,13 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
     }
 }
 
+// Applies `@min(demand, uptake_capacity)` uniformly for every litter-surface
+// mineral pool. Deliberately does not reproduce the legacy
+// f77src/nitro.f:2377 `RINOOR=AMAX1(...)` copy-paste bug, where the
+// litter-surface NO3 block alone uses a floor instead of the AMIN1 cap used
+// by all 7 sibling NH4/H2PO4/HPO4 blocks (see
+// audit/issues/issue-020-nitro-litter-no3-amax1-anomaly-undocumented.md) --
+// do not "fix" this to match the legacy defect.
 pub fn calculateExchange(demand: f64, amount: f64, concentration: f64, minimum_concentration: f64, half_saturation: f64, uptake_capacity: f64, share: f64, water_m3: f64) f64 {
     if (demand <= 0) {
         // NITRO mineralizes the complete nonstructural N/P surplus. The

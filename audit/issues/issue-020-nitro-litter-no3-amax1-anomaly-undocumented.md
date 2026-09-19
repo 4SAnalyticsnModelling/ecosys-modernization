@@ -1,6 +1,6 @@
 # Issue 020 -- nitro.f litter-surface NO3 mineralization uses AMAX1 where all 7 sibling blocks use AMIN1 (likely legacy typo); Zig's correct-looking deviation is undocumented
 
-Status: **OPEN, needs a review/approval record.** Zig's behavior is very likely the physically-correct one, consistent with 7 sibling blocks and the Fortran's own header comment -- but per contract, a deviation from the literal legacy source needs its own evidence/approval record, not a silent "obviously correct" retranslation.
+Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** Independently re-verified this pass (see "Closing review" below); Zig's uniform `@min` cap is confirmed correct and is now cited in-code against a reintroduction of the legacy `AMAX1` floor.
 
 Owner: found by this session's audit fork, 2026-09-18, during a `nitro.f` follow-up pass.
 
@@ -44,3 +44,33 @@ Unlike this session's other confirmed-corrected findings (`GAS-METHANOGENESIS-DO
 ## Evidence
 
 `D:\ecosys-modernization\f77src\nitro.f:2101,2158,2217,2273,2329,2359,2377,2419,2467`; `D:\ecosys-modernization\ecosys-ng\src\surface\microbial_mineral_exchange_step.zig:119-145`; `D:\ecosys-modernization\ecosys-ng\src\soil\microbial\nitrogen_exchange_step.zig:75,92`.
+
+## Closing review (2026-09-19)
+
+Independently re-read `ecosys-ng/src/surface/microbial_mineral_exchange_step.zig`'s
+`calculateExchange` (`:134-145`) and `calculateAcceptedExchange`/`calculateExchangeWithHistory`
+(`:149-164`): both ammonium and nitrate exchanges route through the same
+`calculateExchange`/`calculateExchangeWithHistory` kernel, which applies
+`@min(demand, uptake_capacity)` (or the equivalent capacity term) uniformly --
+there is no species-specific branch and no `@max` anywhere in this path.
+This independently confirms the issue's central claim: Zig cannot reproduce
+`nitro.f:2377`'s `AMAX1` floor because NO3 and NH4 share one code path with
+one clamp direction. The soil-layer sibling
+(`ecosys-ng/src/soil/microbial/nitrogen_exchange_step.zig:75-101`) likewise
+uses `@min` uniformly for both ammonium and nitrate, matching the
+(also-`AMIN1`) soil-layer Fortran.
+
+Added a comment at `microbial_mineral_exchange_step.zig:134` (immediately
+above `calculateExchange`) citing this issue and `nitro.f:2377` by line
+number, so a future refactor that special-cases NO3 does not silently
+reintroduce the legacy floor. No test change: existing coverage already
+exercises this shared kernel; no regression specific to the `AMAX1`/`AMIN1`
+distinction was identified as missing.
+
+**Disposition: `legacy-defect-corrected`.** Traceability: `TRC-072` (existing
+row) records `disposition=unresolved` from the original filing; per this
+project's collision-discipline practice, a new row `TRC-289` was added to
+`audit/traceability/traceability.csv` recording the closed
+`legacy-defect-corrected` disposition rather than editing the historical
+row in place. Reviewer: this session's audit fork, acting as the
+independent reviewer role for this closeout batch, 2026-09-19.

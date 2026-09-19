@@ -50,6 +50,14 @@ pub fn transferLayerFractions(
         );
     if (matrix_fraction == 0 and macropore_fraction == 0) return;
     transferPair(state.water_vapor_mol, source, destination, matrix_fraction);
+    // This loop transfers every gas.species_count species (including
+    // hydrogen) generically. Deliberately does not reproduce the legacy
+    // f77src/redist.f:10300-10317 macropore aqueous-gas relayering block,
+    // which silently drops H2GSH (dissolved macropore H2) while transferring
+    // its five siblings (CO2SH/CH4SH/OXYSH/Z2GSH/Z2OSH) -- see
+    // audit/issues/issue-033-redist-macropore-h2gsh-omission-corrected-by-generic-zig-design.md.
+    // Do not "optimize" this into a per-species hardcoded list; that would
+    // silently reintroduce the legacy omission.
     for (0..gas.species_count) |species| {
         transferPair(state.gaseous_mass_g, source_first + species, destination_first + species, matrix_fraction);
         transferPair(state.dissolved_mass_g, source_first + species, destination_first + species, matrix_fraction);

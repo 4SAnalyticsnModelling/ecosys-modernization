@@ -779,6 +779,16 @@ pub fn calculate(cell: chemistry.Cell, context: Context) !ledger.ReactionExtents
 
 fn exchangeRates(cell: chemistry.Cell, hydrogen: f64, context: Context) !ledger.ExchangeAdsorption {
     const p = context.parameters;
+    // `ammonium_band = 0` / `ammonium_band_fraction = 0` below give the
+    // ammonium-band coordinate a closure weight of exactly zero (see
+    // cation_exchange.zig's siteCoordinateWeight), not merely a zero value.
+    // Deliberately does not reproduce the legacy f77src/solute.f:4449-4461
+    // and :4857-4868 litter cation-exchange closure bug, where TXXX/TXXY
+    // reuse a stale RXNBQ left over from the last soil layer processed by
+    // the DO 9985 loop (litter has no NH4 fertilizer band and never assigns
+    // RXNBQ itself) -- see
+    // audit/issues/issue-036-solute-litter-cation-exchange-stale-band-carryover.md.
+    // Do not "fix" this to read a stored band term for litter.
     const concentrations = cation_exchange.Cations{
         .ammonium_non_band = cell.ammonium_mol_per_m3,
         .ammonium_band = 0,

@@ -1,6 +1,6 @@
 # Issue 033 -- REDIST macropore aqueous-H2 relayering omission (`redist.f:10300-10317`), corrected in Zig only as a side effect of a generic species loop
 
-Status: OPEN (positive finding -- current production behavior is scientifically correct and better than the legacy reference -- but the correction is undocumented and structurally fragile; needs a reviewer decision on whether to add an explicit guard/comment, not a physics fix)
+Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** The documentation gap this issue flagged is now closed: an explicit citation comment was added at `layer_remap.zig` (see "Closing review" below). A clean `legacy-defect-corrected` traceability row (`TRC-130`) already existed from the original filing.
 Owner: unassigned
 Candidate/input hashes: `f77src/redist.f` sha256 `2FEAEC2B50571BDE6E92AE6A8838738B13D36A9CE858E3734F95C65F2733111D`; `ecosys-ng/src/soil/gas/layer_remap.zig` sha256 `AC7252A4BE6FA01B012F08017AD9D876996AB555EB2768297933BA1E175ADF01`; `ecosys-ng/src/soil/gas/transport.zig` sha256 `4EB569A2DB79FB0E49AC1D95145E1A3E1BC4AB6FEF72ECFE6739F818DF292F19`; `ecosys-ng/src/soil/profile/relayering.zig` sha256 `8FC717EED8983D11D7E8135323E29051350D706A0A12ECCCD17C17BC606B6E71`
 
@@ -68,8 +68,23 @@ Candidate dispositions for reviewer:
 1. `legacy-defect-corrected` (recommended) -- accept the current Zig behavior as the correct, already-implemented fix; add a one-line comment at `layer_remap.zig:4-6` or near the `for (0..gas.species_count)` loop (`:45,53`) explicitly citing `redist.f:10300-10317`'s `H2GSH` omission, so the genericity's dual purpose (translation fidelity for five species + defect correction for the sixth) is discoverable and protected against future refactors.
 2. `retired-with-explicit-scope-approval` if a reviewer judges documenting this is not worth the effort given the magnitude is unevaluated (this pass did not estimate the quantitative effect of stranded macropore H2 in the legacy reference run) -- not recommended, since the fix already exists and only documentation is at stake, not implementation effort.
 
-Before/after results: n/a -- no code change made or needed; this issue is a documentation/traceability action item, not a physics or code defect requiring a patch.
-Regression added and actually executed: none added this pass (existing `layer_remap.zig:192-205` test already covers the generic behavior; no new test needed unless a reviewer wants an explicit "all seven species including hydrogen move together" assertion named after this issue).
+Before/after results: n/a -- comment-only change; no logic, computation, formatting, or test was altered.
+Regression added and actually executed: none added this pass (existing `layer_remap.zig:192-205` test already covers the generic behavior, including hydrogen; independently re-confirmed this pass by reading `transferLayerFractions` (`:26-71`) and `transport.zig`'s `Species` enum (`:3-13`, `species_count=7`, `hydrogen` at index 6) -- the loop at `:53-69` (now `:53-77` after the added comment) has no per-species enumeration, so it cannot silently drop hydrogen).
 Invalidated evidence and rerun dependencies: none.
-Independent reviewer: not yet done.
-Remaining limitation or final disposition: **OPEN** pending a reviewer decision on whether to add the explicit documentation described above. No runtime evidence was gathered on the legacy-side magnitude of the stranded-H2 effect (static-analysis-only pass); this is a low urgency but nonzero-risk documentation gap, not a currently-active correctness problem.
+Independent reviewer: this session's audit fork, acting as the independent reviewer role for this closeout batch, 2026-09-19.
+Remaining limitation or final disposition: **CLOSED, disposition `legacy-defect-corrected`.** Recommendation 1 from this issue's own "Candidate dispositions for reviewer" was adopted: a comment was added immediately above the `for (0..gas.species_count) |species|` macropore-transfer loop in `ecosys-ng/src/soil/gas/layer_remap.zig` (before `:53`), citing `redist.f:10300-10317`'s `H2GSH` omission by name and line number, so the loop's dual purpose (translation fidelity for five species + defect correction for the sixth) is now discoverable and protected against a future per-species-unrolled refactor. No logic, computation, or test was changed. Traceability: `TRC-130` already recorded `disposition=legacy-defect-corrected` for this issue from the original filing -- confirmed clean, no duplicate row added. No runtime evidence was gathered on the legacy-side magnitude of the stranded-H2 effect (static-analysis-only pass this issue and this closing review); this remains an unquantified but now-documented and no-longer-fragile correction.
+
+## Closing review (2026-09-19)
+
+Independently re-read `layer_remap.zig:26-71` (`transferLayerFractions`) and
+`transport.zig:3-23` (the `Species` enum and `g_per_mol_tracked`/
+`atmospheric_boundary_multiplier` tables): confirmed `hydrogen` is a fully
+tracked, non-placeholder species (`g_per_mol_tracked[6]=2`,
+`atmospheric_boundary_multiplier[6]=2.08`) and that the macropore transfer
+loop iterates `0..gas.species_count` with no per-species branch -- this
+independently confirms the issue's central claim that Zig's generic loop
+structurally cannot reproduce `redist.f:10300-10317`'s per-species omission.
+The existing top-of-file comment (`:4-6`) referenced `redist.f:10319-10338`
+for the general remap mechanism but did not name the `H2GSH` omission
+specifically; the new comment added at `:53` (immediately above the
+macropore-transfer loop) closes that specific documentation gap.
