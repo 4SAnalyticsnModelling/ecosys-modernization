@@ -35,7 +35,39 @@ pub const Limits = struct {
     snowpack_max_iterations: u16 = 20,
     litter_under_snow_max_iterations: u16 = 10,
     /// SOLUTE MRXN: profile and surface-litter reaction equilibrium.
-    solute_reaction_max_iterations: u16 = 60,
+    ///
+    /// Floor of 100, same policy and reason as `organic_transport_max_iterations`
+    /// and `water_heat_solute_max_iterations` above. This was a flat 60,
+    /// the direct translation of `solute.f:111`'s `PARAMETER (MRXN=60)` --
+    /// but Fortran's MRXN=60 bounds a single fixed-point loop that performs
+    /// equilibrium *and* precipitation-dissolution kinetics together in
+    /// every one of its iterations (`solute.f:822-2712`). ecosys-ng's
+    /// equivalent solve (`reaction_solve.zig`'s `solveCellWithWorkspaceAndTrace`)
+    /// instead runs two sequential Newton/Anderson closures -- a pre-kinetic
+    /// equilibrium solve, then (when kinetic geochemistry applies) a
+    /// post-kinetic one -- so a flat 60 that was sized for Fortran's single
+    /// combined sweep is not guaranteed to cover even one of these two
+    /// harder sub-problems on its own.
+    ///
+    /// Measured on the Ottawa deck's hour 2,579 (day 108, the production
+    /// `SoluteReactionSolverDidNotConverge` frontier, issue-015): at the
+    /// substep ladder's committed 64-substep tier, the pre-kinetic closure
+    /// alone exhausted the full 60-iteration ceiling (`newton_steps=36
+    /// picard_steps=24`) without converging (`maximum_scaled_residual=
+    /// 1.16e3`) -- this is a plain budget shortfall for one closure, not a
+    /// stiff-chemistry wall: a diagnostic replay with the ceiling raised to
+    /// 200 converged hour 2,578 and 2,579 immediately, on the first attempt,
+    /// with no substep escalation needed at all. 100 is not that
+    /// diagnostic's 200 (which was "chosen generously... not derived from a
+    /// principled calculation" and flagged for exactly that reason); it is
+    /// this project's own established floor value for every other
+    /// under-provisioned whole-hour solve, and the Ottawa deck's own
+    /// `hard_max_iterations` (`runscript.max_nonlinear_iterations = 100`)
+    /// already permits it without any deck change. If a real deck still
+    /// cannot converge SOLUTE within 100, that is evidence for a further,
+    /// specifically-measured increase or a residual-scaling defect -- not a
+    /// reason to restore 60.
+    solute_reaction_max_iterations: u16 = 100,
     /// STARTE MRXN: initial reaction-equilibrium establishment.
     initial_solute_reaction_max_iterations: u16 = 1000,
     canopy_energy_water_max_iterations: u16 = 100,
@@ -96,7 +128,7 @@ pub const Limits = struct {
             .litter_water_heat_max_iterations = @min(hard_max_iterations, 30),
             .snowpack_max_iterations = @min(hard_max_iterations, 20),
             .litter_under_snow_max_iterations = @min(hard_max_iterations, 10),
-            .solute_reaction_max_iterations = @min(hard_max_iterations, 60),
+            .solute_reaction_max_iterations = @min(hard_max_iterations, 100),
             .initial_solute_reaction_max_iterations = @min(hard_max_iterations, 1000),
             .canopy_energy_water_max_iterations = @min(hard_max_iterations, 100),
             .leaf_co2_max_iterations = @min(hard_max_iterations, 100),
@@ -147,7 +179,7 @@ test "legacy option controls become convergence ceilings" {
     try std.testing.expectEqual(@as(u16, 30), limits.litter_water_heat_max_iterations);
     try std.testing.expectEqual(@as(u16, 20), limits.snowpack_max_iterations);
     try std.testing.expectEqual(@as(u16, 10), limits.litter_under_snow_max_iterations);
-    try std.testing.expectEqual(@as(u16, 60), limits.solute_reaction_max_iterations);
+    try std.testing.expectEqual(@as(u16, 100), limits.solute_reaction_max_iterations);
     try std.testing.expectEqual(@as(u16, 1000), limits.initial_solute_reaction_max_iterations);
     try std.testing.expectEqual(@as(u16, 100), limits.canopy_energy_water_max_iterations);
     try std.testing.expectEqual(@as(u16, 100), limits.leaf_co2_max_iterations);

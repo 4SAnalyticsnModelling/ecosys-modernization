@@ -910,6 +910,34 @@ pub fn solveCellWithWorkspaceAndTrace(
     options: Options,
     trace: ?*SolverTrace,
 ) !Result {
+    return solveCellWithWorkspaceAndTraceUsing(
+        solveEquilibriumWithWorkspace,
+        workspace,
+        state,
+        cell_index,
+        parameters,
+        options,
+        trace,
+    );
+}
+
+// `equilibrium_solve` is injectable only so a test can script deterministic
+// per-closure iteration counts and pin the coordinator-level budget
+// contract below without depending on real chemistry convergence being
+// reproducible at an adversarially tight ceiling (it generally is not --
+// the search dynamics themselves are sensitive to the ceiling, not merely
+// truncated by it). Production always calls the public
+// `solveCellWithWorkspaceAndTrace` above, which fixes `equilibrium_solve`
+// to the real `solveEquilibriumWithWorkspace`.
+fn solveCellWithWorkspaceAndTraceUsing(
+    comptime equilibrium_solve: anytype,
+    workspace: *Workspace,
+    state: *chemistry.State,
+    cell_index: usize,
+    parameters: chemistry.ReactionParameters,
+    options: Options,
+    trace: ?*SolverTrace,
+) !Result {
     diagnostic_control.resetPhaseProfile();
     const profile_started = diagnostic_control.tick();
     defer {
@@ -934,7 +962,7 @@ pub fn solveCellWithWorkspaceAndTrace(
     try rebaseEntryCarboxylCapacity(state, cell_index, parameters);
 
     const equilibrium_parameters = equilibriumClosureParameters(parameters);
-    const first = try solveEquilibriumWithWorkspace(
+    const first = try equilibrium_solve(
         workspace,
         state,
         cell_index,
@@ -954,13 +982,6 @@ pub fn solveCellWithWorkspaceAndTrace(
         return first;
     }
 
-    if (first.iterations >= options.max_iterations) {
-        if (diagnostic_control.isEnabled()) std.log.warn(
-            "SOLUTE geochemistry split exhausted its shared iteration ceiling before post-kinetic equilibrium: cell={d} max_iterations={d}",
-            .{ cell_index, options.max_iterations },
-        );
-        return error.SoluteReactionSolverDidNotConverge;
-    }
     try applyKineticGeochemistryStep(
         &workspace.scratch,
         state,
@@ -968,14 +989,34 @@ pub fn solveCellWithWorkspaceAndTrace(
         parameters,
         workspace.current,
     );
-    var second_options = options;
-    second_options.max_iterations -= first.iterations;
-    const second = try solveEquilibriumWithWorkspace(
+    // The pre- and post-kinetic equilibrium solves are two independent
+    // nonlinear closures over different compositions (before vs. after the
+    // kinetic geochemistry step), not a continuation of the same closure --
+    // so each gets its own full policy ceiling rather than whatever the
+    // other phase happened not to spend. Issue-015's hour-2578/2579
+    // production diagnosis found the previous "leftover" split (`options
+    // .max_iterations - first.iterations`) could starve the second phase to
+    // as little as 4 of the ceiling whenever the first phase converged
+    // late. Both phases now use `options.max_iterations` directly -- the
+    // policy-floored value from `iteration_control.zig:38` (100, not a new
+    // arbitrary number; see that file's comment for why the direct
+    // `solute.f:111` `MRXN=60` translation undersizes this two-closure
+    // split) -- so a truly non-convergent cell still fails within a
+    // bounded, evidence-based budget rather than being allowed to grind
+    // indefinitely. This decoupling alone is not sufficient to clear the
+    // hour-2578/2579 frontier under the committed substep ladder (a live
+    // production replay found the *pre-kinetic* closure alone exhausting
+    // the old flat 60 without ever reaching a second closure); the ceiling
+    // floor raise in `iteration_control.zig` is the change that actually
+    // resolves that case. Both are kept together: this decoupling remains
+    // independently justified for whenever kinetics genuinely is the
+    // bottleneck instead.
+    const second = try equilibrium_solve(
         workspace,
         state,
         cell_index,
         equilibrium_parameters,
-        second_options,
+        options,
         trace,
         1,
     );
@@ -1324,20 +1365,30 @@ test "reaction solver entry retry propagates trace errors and rolls back both cl
     }
 }
 
-test "reaction solver entry retry shares its original ceiling with post kinetic equilibrium" {
+test "reaction solver entry retry gives post kinetic equilibrium its own independent ceiling" {
+    // Regression for issue-015's hour-2578/2579 iteration-budget-starvation
+    // finding: the post-kinetic closure (closure_index 1) used to receive
+    // only `options.max_iterations - closure_counts[0]` -- whatever the
+    // pre-kinetic closure (closure_index 0) had not spent -- which could
+    // starve it to a handful of iterations. It must now receive the full,
+    // independent `options.max_iterations` ceiling regardless of how much
+    // the first closure consumed.
     var captured = try retryTestCapture(@embedFile("testdata/ottawa_day107_hour21_layer0_20260913.b64"));
     defer captured.deinit();
     var suppression = diagnostic_control.suppress();
     defer suppression.restore();
     var workspace = try Workspace.init(std.testing.allocator);
     defer workspace.deinit();
-    var trace = try SolverTrace.init(std.testing.allocator, 62);
+    var trace = try SolverTrace.init(std.testing.allocator, 124);
     defer trace.deinit();
     try std.testing.expect(hasKineticGeochemistry(captured.parameters));
     const actual = try solveCellWithWorkspaceAndTrace(&workspace, &captured.state, 0, captured.parameters, captured.options, &trace);
     try std.testing.expect(actual.converged);
     try std.testing.expect(actual.maximum_scaled_residual <= 1);
-    try std.testing.expect(actual.iterations <= captured.options.max_iterations);
+    // Combined iterations may now reach up to twice the single-phase
+    // ceiling, since each phase independently may spend up to the full
+    // budget; it is no longer bounded by one shared ceiling.
+    try std.testing.expect(actual.iterations <= 2 * @as(u32, captured.options.max_iterations));
     try std.testing.expectEqual(actual.anderson_steps, actual.picard_steps);
     var closure_counts = [_]u16{ 0, 0 };
     var newton: u16 = 0;
@@ -1356,9 +1407,82 @@ test "reaction solver entry retry shares its original ceiling with post kinetic 
     try std.testing.expect(closure_counts[0] > 0 and closure_counts[1] > 0);
     try std.testing.expectEqual(@as(u16, 2), terminal);
     try std.testing.expectEqual(closure_counts[0] + closure_counts[1], actual.iterations);
-    try std.testing.expect(closure_counts[1] <= captured.options.max_iterations - closure_counts[0]);
+    // The key behavioral change: the second closure's own budget is the
+    // full ceiling, independent of what the first closure spent -- not
+    // `max_iterations - closure_counts[0]` as it was before this fix.
+    try std.testing.expect(closure_counts[1] <= captured.options.max_iterations);
     try std.testing.expectEqual(newton, actual.newton_raphson_steps);
     try std.testing.expectEqual(anderson, actual.anderson_steps);
+}
+
+// Side channel for the scripted mock below: Zig's comptime-injected
+// `equilibrium_solve` parameter has a fixed signature shared with the real
+// `solveEquilibriumWithWorkspace`, so it cannot return extra data of its
+// own. A single file-scope slot, written only by this synchronous test's
+// mock and read immediately after, is the simplest way to observe what
+// ceiling the coordinator actually handed the second closure.
+var scripted_second_closure_max_iterations: ?u16 = null;
+
+fn scriptedKineticSplitBudgetProbe(
+    workspace: *Workspace,
+    _: *chemistry.State,
+    _: usize,
+    _: chemistry.ReactionParameters,
+    options: Options,
+    _: ?*SolverTrace,
+    closure_index: u8,
+) !Result {
+    if (closure_index == 1) scripted_second_closure_max_iterations = options.max_iterations;
+    // Report a small, deterministic per-closure cost regardless of the
+    // ceiling offered, so a reviewer reverting to the old
+    // `options.max_iterations - first.iterations` formula would visibly
+    // shrink what this probe observes for closure 1.
+    workspace.last_iteration = 0;
+    return .{ .iterations = 3, .newton_raphson_steps = 2, .picard_steps = 1, .anderson_steps = 1, .maximum_scaled_residual = 0, .converged = true };
+}
+
+test "reaction solver hands post kinetic equilibrium the full ceiling, not a leftover deducted from the pre-kinetic closure" {
+    // Direct regression for issue-015's hour-2578/2579 finding: under the
+    // pre-fix design, the post-kinetic closure (closure_index 1) received
+    // `options.max_iterations - first.iterations` -- whatever the
+    // pre-kinetic closure (closure_index 0) did not spend -- which starved
+    // it to as little as 4 of a 60-iteration ceiling in production. This
+    // uses a scripted `equilibrium_solve` (see `scriptedKineticSplitBudgetProbe`
+    // above) so the assertion is exact and deterministic instead of
+    // depending on real chemistry convergence, which this session's own
+    // diagnosis found to be sensitive to the ceiling value itself and thus
+    // unsuitable for pinning an adversarially tight before/after boundary.
+    var captured = try retryTestCapture(@embedFile("testdata/ottawa_day107_hour21_layer0_20260913.b64"));
+    defer captured.deinit();
+    var suppression = diagnostic_control.suppress();
+    defer suppression.restore();
+    var workspace = try Workspace.init(std.testing.allocator);
+    defer workspace.deinit();
+    try std.testing.expect(hasKineticGeochemistry(captured.parameters));
+
+    scripted_second_closure_max_iterations = null;
+    // The overall call may still fail downstream (the scripted closures do
+    // not perform real chemistry, so the post-kinetic accepted-state
+    // conservation check has no reason to hold) -- irrelevant here; the
+    // fact under test is what ceiling the coordinator handed closure 1,
+    // which the probe already recorded before any such failure.
+    _ = solveCellWithWorkspaceAndTraceUsing(
+        scriptedKineticSplitBudgetProbe,
+        &workspace,
+        &captured.state,
+        0,
+        captured.parameters,
+        captured.options,
+        null,
+    ) catch {};
+
+    try std.testing.expect(scripted_second_closure_max_iterations != null);
+    // The fix: closure 1's ceiling is the original, full
+    // `options.max_iterations`, independent of closure 0's reported cost
+    // (the scripted probe always reports `iterations = 3` for closure 0).
+    // Under the reverted/pre-fix formula this would instead observe
+    // `captured.options.max_iterations - 3`.
+    try std.testing.expectEqual(captured.options.max_iterations, scripted_second_closure_max_iterations.?);
 }
 
 pub fn solveEquilibriumWithWorkspace(
