@@ -1,6 +1,6 @@
 # Issue 023 -- grosub.f:12766 debug WRITE is missing the IYRC argument required by shared FORMAT 8821; crashes any strict-runtime (gfortran) build on the first harvest-day event
 
-Status: RESOLVED (for oracle-build purposes; scratch-only patch applied and verified; not a science/production defect since the statement is diagnostic-only and Zig has no counterpart)
+Status: RESOLVED and CONFIRMED (scratch-only patch applied and verified via a full 30-year successful production run; not a science/production defect since the statement is diagnostic-only and Zig has no counterpart)
 Owner: unassigned
 Candidate/input hashes: audit/manifest/candidate-001-snapshot.json sha256 79eef4efcf97dd130fa1d342d36a09cef6c0cf9053ce6f27f037d2237f770979
 Legacy source anchor: `f77src/grosub.f` sha256 `FBE2EE22EAF6E91F8BC8AC0CE01C208F92BBE34662D0D4BEFA20DF886B83F674`
@@ -44,7 +44,7 @@ Stop/resource budget: resolved on the first experiment; root cause was directly 
 ## Experiments
 Experiment 1: patched a **scratch-only copy** of `grosub.f` (never the tracked `f77src/grosub.f`) at line 12766, changing:
 `WRITE(*,8821)'CASNC0',I,J,NFZ,NX,NY,NZ,NB` -> `WRITE(*,8821)'CASNC0',IYRC,I,J,NFZ,NX,NY,NZ,NB`
-Recompiled that one file and relinked the oracle binary. Result: pending re-run confirmation (see run-002 update).
+Recompiled that one file and relinked the oracle binary. **Result: CONFIRMED FIXED.** The full 30-simulated-year Ottawa deck (see `audit/runs/run-002-independent-gfortran-oracle-build-2026-09-18.md`) subsequently ran to completion (exit code 0, 1,138 output files produced) with no recurrence of this or any other Fortran runtime error -- the harvest-day trigger condition (`DHVSTC.GT.0.0`) fires repeatedly across the 30-year rotation (once per crop cycle in each of the 5 repeats) and never crashed again after the patch, confirming the fix is complete and correct, not merely a one-instance workaround.
 
 ## Resolution
 Cause and focused patch: missing `IYRC` argument in a diagnostic WRITE statement, restored to match its own commented-out sibling and the shared FORMAT's 8-integer spec. Applied only to the isolated scratch oracle-build copy of `grosub.f` -- **the tracked `f77src/grosub.f` is untouched**, per contract (preserve historical build artifacts as-is; a fixed-up build is a "separately named diagnostic build").
