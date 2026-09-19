@@ -14,16 +14,18 @@ backlog, not a new finding.
 
 **54 issue files.** Of these:
 
-- **10 are closed / no longer open**: `issue-001`, `issue-005`, `issue-007`,
+- **11 are closed / no longer open**: `issue-001`, `issue-002` (CORRECTION,
+  post-dates this triage pass: an independent gfortran oracle was built and
+  ran this checkout's own 30-year Ottawa deck to full completion later the
+  same session -- see `issue-002`'s own "Resolution" section and
+  `audit/runs/run-002-*.md`; this triage document's Tier/priority text below
+  still refers to it as open in a few places and should be read with that
+  correction in mind), `issue-005`, `issue-007`,
   `issue-008`, `issue-010`, `issue-011`, `issue-016`, `issue-019`, `issue-023`
   (fixed-and-verified or confirmed-already-correct-with-a-record-added), plus
   `issue-006` (a working note whose content was folded into other issue files
   and the feature dossiers -- not a standalone open item).
-- **2 are infrastructure/process blockers, not science content**: `issue-002`
-  (no genuine legacy Fortran reference output exists anywhere in this
-  checkout; a viable gfortran-oracle path was found and `issue-023` fixed the
-  one build-blocking defect in it, so a real oracle run is now buildable, but
-  none has yet been captured as the project's frozen reference) and
+- **1 is an infrastructure/process blocker, not science content**:
   `issue-032` (a `zig build test` hang in `outer_hour_transaction`, untriaged,
   currently worked around by using `zig test --test-filter`).
 - **42 are genuinely open** and require a disposition (`preserved`,
@@ -46,12 +48,18 @@ outcome), narrow-scope (fires only under conditions not yet confirmed present
 in the validated deck), or a documentation/traceability gap on top of
 already-correct code.
 
-Separately, **`issue-002`'s finding is a second, independent blocker for
-"outputs comparable to oracle"** that would exist even if `issue-015` were
-solved tomorrow: there is currently no genuine frozen Fortran reference run in
-this checkout to compare against. A path to produce one exists (gfortran
-build + the `issue-023` fix), but it has not yet been executed as the
-project's authoritative oracle capture.
+**Correction (post-dates this triage pass): `issue-002` is now RESOLVED, not
+open.** A genuine, independently-built gfortran oracle exists and has run
+this checkout's own 30-year Ottawa deck to full completion (exit code 0,
+1,138 output files) -- see `issue-002`'s own "Resolution" section and
+`audit/runs/run-002-independent-gfortran-oracle-build-2026-09-18.md`. This
+data has already been used for real comparison work this session
+(`feature-019`, `issue-024`). The remaining limitation is durability only:
+the 1.33GB of actual output lives in the session scratchpad, not committed --
+a future session needing the raw files (not just the build recipe) must
+rebuild and rerun (~2h40m), or the user should decide whether to preserve a
+copy durably. This is a housekeeping/storage question, not a blocker for
+"outputs comparable to oracle."
 
 Of the remaining 40 open items (excluding 015 and 002): the large majority are
 **real but low-materiality** -- either a legacy quirk that Zig's cleaner,
@@ -304,7 +312,7 @@ investigation, and should be read as such, not re-derived. Current state:
 Opinionated, given limited reviewer time:
 
 1. **`issue-015` first, and only via a scope/design decision, not another autonomous fix attempt.** This is the sole item standing between the project and "the production run completes." Two well-evidenced experiments are already spent; a third blind guess is against the contract's own discipline. Get the human/numerical-methods input the issue itself asks for, or make the scope call (shorter validated horizon vs. full 262,920-hour run) explicitly rather than by default.
-2. **`issue-002`'s follow-through, in parallel, not blocked by #1.** Actually execute a real gfortran oracle build (using the `issue-023` fix) against this checkout's own `f77src`/`f77example`, and freeze its output as the project's genuine reference run. This unblocks "outputs comparable to oracle" independently of whether #1 resolves, and every other output-comparison-dependent piece of work is stalled without it.
+2. **`issue-002` is already resolved (correction, post-dates this triage's initial pass) -- the remaining action is only deciding whether to preserve the 1.33GB oracle output durably outside the session scratchpad**, not building/running anything further. Low urgency, pure housekeeping.
 3. **`issue-037`, because it is the only Tier-3 item that affects the validated deck *today*, not conditionally.** A short, bounded check (confirm the Ottawa deck really is `ISALTG=0` in production, which `issue-053` already asserts, then get an explicit scope call on whether the restricted-chemistry variant needs wiring) is cheap and resolves the highest-relevance open science question in the backlog.
 4. **`issue-024`, next, because it is a live investigation one instrumented run away from real progress**, and because its outcome (matric-potential value or substep-schedule gap) plausibly also matters for #1's stiff-solver frontier -- these two investigations should not proceed in total isolation from each other.
 5. **Batch the Tier 2 sign-offs in one reviewer pass**, grouped by the two cross-cutting patterns (Section 6) rather than one-by-one -- most of these need the same 30-second judgment ("Zig's generic kernel avoided this, agreed, add the citation") repeated ~16 times; a single reviewer session covering all of Tier 2 will be far more efficient than 16 separate reviews.
