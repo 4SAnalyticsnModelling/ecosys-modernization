@@ -1,0 +1,58 @@
+# Issue 060 -- soil heat solver stagnation + negligible-capacity-layer heat discard cascades into a catastrophic mass-conservation failure at hour 2,894
+
+Status: NOT_ASSESSED / OPEN -- discovered as a byproduct of validating issue-015's hour-2,589 fix in a real long production run; not diagnosed, not fixed, no experiment run yet. This is a NEW, DIFFERENT failure class from issue-015 (SOLUTE reaction-network iteration ceiling) and should not be conflated with it.
+Owner: unassigned
+Discovered by: this session, 2026-09-19, while launching the full 262,920-hour Ottawa production run per issue-015's latest pass.
+
+## Summary
+
+After issue-015's hour-2,578/2,579/2,589 `SoluteReactionSolverDidNotConverge` fix (source `iteration_control.zig` floor `100 -> 200`, deck `runottawa`'s `max_nonlinear_iterations` `100 -> 200`), a real full-deck production run was launched from the updated tracked Ottawa deck. It ran further than any prior attempt on record for this deck -- past hour 2,589 cleanly, continuing to **hour 2,893 accepted, hour 2,894 attempted-but-never-accepted** -- before the process exited with ordinary exit code `1` (a controlled failure, not a panic or access violation). The terminal error is `HourlyCellConservationFailure`, not a SOLUTE non-convergence: this is a **different failure class entirely**, unrelated to the iteration-ceiling fix that got the run this far.
+
+## Evidence
+
+Run artifacts (from this session's scratchpad, referenced from `issue-015`'s latest addendum):
+- Log: `production-run-2026-09-19.log` (2,583 lines)
+- Evidence journal: `production-run-2026-09-19-evidence.json` (last `accepted`: `total_hour=2893`; last `attempted`, never accepted: `total_hour=2894`, `year=1998, day=121, hour=14`)
+
+### Sequence of events (log lines ~2506-2558)
+
+1. `info: daily conservation accepted: day=120 ...` then `info: day advanced: scene_weather_hours=2880` -- day 120 closes cleanly.
+2. Immediately after, at the start of day 121: **`error: soil heat Newton-Raphson/Anderson stagnated after best-state physical audit`** -- `final_scaled_residual=2.24e14`, `best_scaled_residual=2.24e14` (identical, i.e. genuinely stagnant, not merely slow), candidate temperature range `179.5 K` to `284.7 K` (a ~105 K spread -- physically implausible for one hour's change). `soil heat worst conservation component` reports `defect_mj=-8.5`, `tolerance_mj=1.49e-10` -- the defect is ~11 orders of magnitude over tolerance.
+3. `warning: soil coupled schedule failed: substep_count=1 ... error=SoilHeatSolverStagnated`, then `warning: bounded fixed external hour recovery rejected: exact_substep_count=1`, followed by a run of `error: implausible surface conductive flux` lines (the pre-existing, already-tracked, previously-characterized-as-non-fatal diagnostic; tag `DRY-LAYER-UNPHYSICAL-HEAT-SINK-HOUR-2726-001` / `SURFACE-HEAT-BRACKET-RUNAWAY-001`, see "Connection to existing tracked tags" below).
+4. `info: bounded fixed external hour recovery accepted: exact_substep_count=20` -- the hour is nominally recovered via the pre-existing substep-escalation ladder, same mechanism issue-015/058/059 already characterized for SOLUTE. More `implausible surface conductive flux` lines follow at varying substep lengths (`timestep_hours` ranging `5e-2` to `1.25e-1`), all at `cell=0`, all showing `temperature_difference_k` between roughly `-1.3` and `-7.2` -- a large, physically suspicious surface/subsurface split that keeps recurring across several substeps, not a one-off.
+5. **`warning: negligible-capacity layer discarded heat per WATSUB 6907: cell=0 layer=0 total_heat_capacity_megajoules_per_k=2.03e-5 limit_megajoules_per_k=8.38e-5 discarded_megajoules=-1.47e1`** (`heat_step.zig:3348`, citing legacy `redist.f:9655-9659`/`STARTS 655`). Layer 0's heat capacity has fallen far below the `minimum_layer_heat_capacity_megajoules_per_m2_k` floor documented in `flux.zig:47-61` (already flagged as an open gap in `issue-006`, tags `SURFACE-HEAT-BRACKET-RUNAWAY-001`/`DRY-LAYER-UNPHYSICAL-HEAT-SINK-HOUR-2726-001`, status `NOT_ASSESSED`), and ~14.7 MJ of heat is discarded outright rather than tracked.
+6. Two `error: hourly cell conservation failure` blocks follow, for what read as two different accounting scopes (cumulative/global-scale values in the thousands in the first block at lines 2528-2538, e.g. `carbon before=6139.9 after=6132.1`; then per-cell/instantaneous-scale values in the tens at lines 2547-2557, e.g. `carbon before=23.96 after=16.28`) -- both fail the same ultra-tight `physical_limit`/`effective_limit` gate (limits around `1e-8`-`1e-7`, residuals many orders of magnitude larger). The **second block is the dramatic one**: several elements collapse by 97-99.996% of their per-cell pool in one hour, all with `internal_production=0` and `internal_consumption=0` (i.e. the code attributes none of the loss to a modeled process):
+   - `aluminum`: `38.54 -> 0.0309` (99.92% loss)
+   - `iron`: `35.86 -> 0.00176` (99.995% loss)
+   - `calcium`: `35.15 -> 1.056` (97.0% loss)
+   - `magnesium`: `33.38 -> 0.00139` (99.996% loss)
+   - `sodium`: `33.38 -> 0.00134` (99.996% loss)
+   - `potassium`: `33.38 -> 0.00136` (99.996% loss)
+   - `silicon`: `100.1 -> 0.00245` (99.998% loss)
+   - `phosphorus`: `5.99 -> 0.593` (90.1% loss)
+   - `carbon`: `23.96 -> 16.28` (32.1% loss)
+   - `nitrogen`: `3.84 -> 2.69` (29.8% loss)
+
+   `external_inputs`/`external_outputs` for these elements are all tiny (sub-1e-3, several sub-1e-9) relative to the pool collapse -- the loss is not explained by any recorded external flux, consistent with the "no production/consumption attributed" framing above. This is exactly the kind of silent, unattributed mass loss the contract's conservation-ledger requirement exists to catch, and the model's own conservation gate **did** catch it and refused to accept the hour -- a correct fail-safe, not a silent corruption. The run terminates here (`error: HourlyCellConservationFailure`, exit code `1`) after printing its normal stage-execution census (2,894 simulated hours; census pattern otherwise consistent with every prior run on this deck).
+
+## What this is NOT
+
+- **Not a SOLUTE reaction-network non-convergence.** No `SoluteReactionSolverDidNotConverge`/`Stagnated`/`Diverged` line appears anywhere near this failure. Issue-015's iteration-ceiling fix is not implicated and should not be revisited on the basis of this failure.
+- **Not a repeat of issue-058/issue-059's substep-ladder crash.** The run reached `exact_substep_count=20` (well within the committed `64`-tier ladder) via the ordinary recovery path, with no access violation or panic; the failure is a clean, controlled conservation-gate rejection.
+- **Not (as far as this pass can tell) caused by this session's own iteration-ceiling change.** The failure sequence starts with a soil *heat* solver stagnation, not a SOLUTE call, and the heat solver's own iteration limits were not touched by issue-015's fix (`solute_reaction_max_iterations` is a distinct field from any heat-solver ceiling; `initial_solute_reaction_max_iterations` and other fields derived from the same `hard_max_iterations` bump were already checked for side effects in issue-015 and are unrelated to the soil heat solver's own convergence). This has not been proven with a controlled experiment (e.g. rerunning the identical hours under the old `100`-ceiling deck to see if the same heat stagnation occurs at the same hour) -- flagged as the first thing a follow-up pass should check, not assumed here.
+
+## Connection to existing tracked tags (new evidence, not previously connected to a hard failure)
+
+`audit/issues/issue-006-embedded-tag-findings-batch1.md` already tracks `SURFACE-HEAT-BRACKET-RUNAWAY-001` and `DRY-LAYER-UNPHYSICAL-HEAT-SINK-HOUR-2726-001` (status `NOT_ASSESSED`, owner unassigned) as an open gap in `flux.zig`'s `minimum_layer_heat_capacity_megajoules_per_m2_k` floor, previously described elsewhere in this project's history (per issue-015's own prior addenda) as "a live, unresolved, in-progress diagnostic" seen around hours 2,705-2,726, non-fatal. **This run is the first on record to reach far enough, under a real full-deck configuration, to show this same diagnostic family actually cascading into a hard, run-terminating mass-conservation failure** (hour 2,894, a bit later than the previously-observed 2,705-2,726 window, itself under a different substep/iteration configuration). This upgrades `issue-006`'s open item from "cosmetic log noise" to "plausibly load-bearing for whether the full 262,920-hour run can ever complete" -- it should be prioritized accordingly by whoever picks it up, though this pass does not have evidence of a causal link beyond the temporal/textual connection documented here.
+
+## Recommended next steps (not performed in this pass)
+
+1. Do **not** attempt a fix without a bounded, hypothesis-driven experiment (per contract's three-experiment discipline) -- this pass is diagnosis-only, filed promptly rather than guessed at.
+2. First-check experiment: confirm reproducibility -- rerun the identical deck configuration and confirm the same stagnation/collapse recurs at the same hour (this pass observed it once).
+3. Read `flux.zig:47-61`'s `minimum_layer_heat_capacity_megajoules_per_m2_k` and `heat_step.zig:3340-3360`'s discard path in full, plus `redist.f:9655-9659` (`STARTS 655`), to determine whether the floor is simply too low for this specific layer/state, or whether the discard path itself is missing a mass/heat bookkeeping step that the conservation ledger then correctly flags as lost.
+4. Determine whether the specific elements that collapse (Al, Fe, Ca, Mg, Na, K, Si -- all of them, not a random subset) share a common code path (e.g. a shared cation-exchange or mineral-equilibrium routine keyed on the same degenerate layer-0 state) that would explain why they, and not e.g. water or oxygen, are the ones wiped out.
+5. Only after root cause is understood should a fix be proposed; this issue should stay `NOT_ASSESSED`/`OPEN` until then.
+
+## Disposition
+
+No source or deck files were changed by this pass beyond what issue-015 already committed (`iteration_control.zig`, the tracked `runottawa` deck) -- this issue is diagnosis/evidence-filing only. The background production run that produced this evidence has already exited (PID `22952`, exit code `1`); it is not still running. This issue is the new frontier for the "production run completes to the end" goal as of 2026-09-19; issue-015's own scope (the SOLUTE iteration ceiling) is resolved through at least hour 2,893 and should not be reopened on the basis of this different failure.
