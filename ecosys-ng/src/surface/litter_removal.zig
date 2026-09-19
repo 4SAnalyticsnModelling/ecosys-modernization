@@ -15,6 +15,7 @@ const Fertilizer = @import("litter_fertilizer.zig");
 const Denitrification = @import("denitrification_step.zig");
 const Geometry = @import("litter_geometry.zig");
 const GeometryState = @import("litter_geometry_step.zig").State;
+const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
 const litter_substrate_count: usize = 3;
 
 /// Runtime-sized authoritative surface pools bound from the REDIST operation
@@ -153,6 +154,13 @@ pub const RuntimeContext = struct {
     surface_geometry: *GeometryState,
     litter_water_m3: []const f64,
     litter_ice_m3: []const f64,
+    /// `ZEROS2(NY,NX)=ZERO2*DH(NY,NX)*DV(NY,NX)` (`starts.f:270`) per-cell
+    /// footprint. issue-064 sibling: floors `litter_water_m3` before it
+    /// carries the litter aqueous N/P concentration below, mirroring the
+    /// already-fixed `landscape_mass_inventory_surface.zig`/`metabolism_state_update.zig`
+    /// siblings (issue-061) instead of substituting the dry reference only
+    /// at exact zero.
+    cell_area_m2: []const f64,
     surface_temperature_k: []const f64,
     geometry_parameters: Geometry.Parameters,
     nitrogen_g_per_mol: f64,
@@ -254,7 +262,10 @@ pub fn applyRuntimeCell(context: *RuntimeContext, cell: usize, removal_fraction:
     const new_dry_mass = geometry_next.dry_mass_megagrams;
     var chemistry_next = context.surface_chemistry.cells[cell];
     var fertilizer_next = context.surface_fertilizer.cells[cell];
-    const aqueous_carrier = if (context.litter_water_m3[cell] > 0) context.litter_water_m3[cell] else context.surface_chemistry.dry_reference_water_m3[cell];
+    // issue-064 sibling: floor at `ZEROS2`, not exact zero (see the field
+    // doc comment on `RuntimeContext.cell_area_m2` above).
+    const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(context.cell_area_m2[cell]);
+    const aqueous_carrier = if (context.litter_water_m3[cell] > negligible_water_volume_m3) context.litter_water_m3[cell] else context.surface_chemistry.dry_reference_water_m3[cell];
     const aqueous_n_before_mol = aqueous_carrier * (chemistry_next.ammonium_mol_per_m3 + chemistry_next.ammonia_mol_per_m3 + chemistry_next.nitrate_mol_per_m3);
     const phosphate_before_mol = aqueous_carrier * (chemistry_next.hpo4_mol_p_per_m3 + chemistry_next.h2po4_mol_p_per_m3);
     const exchange_ammonium_before_mol = old_dry_mass * chemistry_next.exchange.ammonium_mol_per_megagram;
@@ -353,7 +364,7 @@ fn validateRuntimeContext(context: *const RuntimeContext, cell: usize, removal_f
         context.surface_fertilizer.cells.len != cells or context.surface_fertilizer.formulation.len != cells or
         context.surface_denitrification.cell_count != cells or context.surface_denitrification.nitrite_g_n.len != cells or
         context.surface_geometry.cell_count != cells or context.litter_water_m3.len != cells or
-        context.litter_ice_m3.len != cells or context.surface_temperature_k.len != cells or
+        context.litter_ice_m3.len != cells or context.cell_area_m2.len != cells or context.surface_temperature_k.len != cells or
         context.surface_organic.microbial.len != microbial_count or context.surface_organic.residue.len != residue_count or
         context.surface_organic.dissolved.len != mobile_count or context.surface_organic.adsorbed.len != mobile_count or
         context.surface_organic.dissolved_acetate_carbon_g_c.len != mobile_count or
@@ -363,11 +374,11 @@ fn validateRuntimeContext(context: *const RuntimeContext, cell: usize, removal_f
         return error.SurfaceLitterRemovalDimensionMismatch;
     inline for (@typeInfo(GeometryState).@"struct".fields) |field| if (field.type == []f64 and @field(context.surface_geometry.*, field.name).len != cells)
         return error.SurfaceLitterRemovalDimensionMismatch;
-    inline for (.{ removal_fraction, context.nitrogen_g_per_mol, context.phosphorus_g_per_mol, context.dry_organic_heat_capacity_megajoules_per_g_c_k, context.litter_water_m3[cell], context.litter_ice_m3[cell], context.surface_temperature_k[cell], context.surface_geometry.dry_mass_megagrams[cell], context.surface_chemistry.dry_reference_water_m3[cell] }) |value|
+    inline for (.{ removal_fraction, context.nitrogen_g_per_mol, context.phosphorus_g_per_mol, context.dry_organic_heat_capacity_megajoules_per_g_c_k, context.litter_water_m3[cell], context.litter_ice_m3[cell], context.cell_area_m2[cell], context.surface_temperature_k[cell], context.surface_geometry.dry_mass_megagrams[cell], context.surface_chemistry.dry_reference_water_m3[cell] }) |value|
         if (!std.math.isFinite(value)) return error.NonFiniteSurfaceLitterRemovalInput;
     if (removal_fraction < 0 or removal_fraction > 0.999 or context.nitrogen_g_per_mol <= 0 or
         context.phosphorus_g_per_mol <= 0 or context.dry_organic_heat_capacity_megajoules_per_g_c_k <= 0 or
-        context.litter_water_m3[cell] < 0 or context.litter_ice_m3[cell] < 0 or context.surface_temperature_k[cell] <= 0 or
+        context.litter_water_m3[cell] < 0 or context.litter_ice_m3[cell] < 0 or context.cell_area_m2[cell] <= 0 or context.surface_temperature_k[cell] <= 0 or
         context.surface_geometry.dry_mass_megagrams[cell] < 0 or context.surface_chemistry.dry_reference_water_m3[cell] < 0)
         return error.InvalidSurfaceLitterRemovalInput;
     try validateNumericStruct(Chemistry.Cell, context.surface_chemistry.cells[cell]);
@@ -696,6 +707,7 @@ test "runtime operation 21 maps acetate fertilizer and ledgers conservatively" {
         .surface_geometry = &geometry,
         .litter_water_m3 = &.{2},
         .litter_ice_m3 = &.{0},
+        .cell_area_m2 = &.{1},
         .surface_temperature_k = &.{300},
         .geometry_parameters = testGeometryParameters(),
         .nitrogen_g_per_mol = 14,
@@ -730,6 +742,70 @@ test "runtime operation 21 maps acetate fertilizer and ledgers conservatively" {
     try std.testing.expectEqual(100 - result.carbon_output_g_c, nbp);
 }
 
+test "issue-064 sibling: surface litter removal floors the aqueous carrier at the ZEROS2 floor instead of exact zero" {
+    // Sibling of the already-fixed `landscape_mass_inventory_surface.zig`/
+    // `metabolism_state_update.zig` (issue-061) and `phosphate_inventory.zig`
+    // (issue-064) litter-water-carrier guards: this REDIST operation 21
+    // production commit path had its own, previously-unaudited exact-zero-
+    // only guard on the same collapsible `litter_water_m3` array, feeding
+    // the mineral N/P mass this transaction actually removes from the model
+    // and books to the external ledger.
+    var organic = try Organic.State.init(std.testing.allocator, 1);
+    defer organic.deinit();
+    var chemistry = try Chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry.deinit();
+    var fertilizer = try Fertilizer.State.init(std.testing.allocator, 1);
+    defer fertilizer.deinit();
+    var denitrification = try Denitrification.State.init(std.testing.allocator, 1);
+    defer denitrification.deinit();
+    var geometry = try GeometryState.init(std.testing.allocator, 1);
+    defer geometry.deinit();
+    organic.dissolved[0].carbon_g_c = 100;
+    try refreshTestGeometry(&geometry, &organic, 2, 0);
+    chemistry.cells[0].hpo4_mol_p_per_m3 = 10;
+    chemistry.dry_reference_water_m3[0] = 0.5;
+
+    var carbon_ledger: f64 = 0;
+    var nitrogen_ledger: f64 = 0;
+    var phosphorus_ledger: f64 = 0;
+    var heat_ledger: f64 = 0;
+    var context: RuntimeContext = .{
+        .surface_organic = &organic,
+        .surface_chemistry = &chemistry,
+        .surface_fertilizer = &fertilizer,
+        .surface_denitrification = &denitrification,
+        .surface_geometry = &geometry,
+        // Below the ZEROS2 floor for a 1 m^2 cell (1e-6 m^3), nonzero.
+        .litter_water_m3 = &.{1.0e-9},
+        .litter_ice_m3 = &.{0},
+        .cell_area_m2 = &.{1},
+        .surface_temperature_k = &.{300},
+        .geometry_parameters = testGeometryParameters(),
+        .nitrogen_g_per_mol = 14,
+        .phosphorus_g_per_mol = 31,
+        .ledgers = .{
+            .carbon_output_g_c = &.{&carbon_ledger},
+            .nitrogen_output_g_n = &.{&nitrogen_ledger},
+            .phosphorus_output_g_p = &.{&phosphorus_ledger},
+            .heat_output_megajoules = &.{&heat_ledger},
+        },
+    };
+    const removal_fraction = 0.25;
+    const result = try applyRuntimeCell(&context, 0, removal_fraction);
+
+    // Fixed: the floored carrier substitutes the remembered dry reference
+    // (0.5 m^3), not the collapsed live value, so the removed mineral P mass
+    // matches the dry-reference-basis calculation.
+    const expected_mineral_p_output = removal_fraction * 31 * (0.5 * 10);
+    try std.testing.expectApproxEqAbs(expected_mineral_p_output, result.phosphorus_output_g_p, 1e-9);
+    try std.testing.expectApproxEqAbs(expected_mineral_p_output, phosphorus_ledger, 1e-9);
+    // The old, pre-fix raw-carrier guard would have used the collapsed live
+    // value directly, undercounting this removal's mineral P by ~8 orders of
+    // magnitude.
+    const old_raw_carrier_mineral_p_output = removal_fraction * 31 * (1.0e-9 * 10);
+    try std.testing.expect(result.phosphorus_output_g_p > 1e6 * old_raw_carrier_mineral_p_output);
+}
+
 test "runtime operation 21 late ledger overflow rolls back every owner" {
     var organic = try Organic.State.init(std.testing.allocator, 1);
     defer organic.deinit();
@@ -754,6 +830,7 @@ test "runtime operation 21 late ledger overflow rolls back every owner" {
         .surface_geometry = &geometry,
         .litter_water_m3 = &.{1},
         .litter_ice_m3 = &.{0},
+        .cell_area_m2 = &.{1},
         .surface_temperature_k = &.{300},
         .geometry_parameters = testGeometryParameters(),
         .nitrogen_g_per_mol = 14,

@@ -948,3 +948,117 @@ test "issue-063: transferSolidLayerFraction manufactures fake mass with a raw ne
         try std.testing.expectApproxEqAbs(@as(f64, 0.5), conserved, 1e-9);
     }
 }
+
+test "issue-064: transferAqueousLayerFraction manufactures fake mass with a raw near-zero carrier but conserves mass when the caller floors it first" {
+    // Sibling of the test above, for the free aqueous-ion pools instead of
+    // the geochemistry-solid/phosphate-precipitate pools
+    // (`audit/issues/issue-064-hourly-cell-conservation-failure-hour-2894-multi-element.md`).
+    // `relayering.zig` previously built this call's `ZoneWaterVolumes` from
+    // RAW, unfloored water (`waterZones(src_water_before, ...)` etc.),
+    // guarded only by `concentration()`'s bare `carrier > 0` check, while
+    // `landscape_mass_inventory_phosphorus_ions.zig`'s census always reads
+    // the resulting concentration back through the FLOORED
+    // `aqueousCarrierM3`/`legacyNegligibleWaterVolumeM3` substitution -- the
+    // exact carrier-basis mismatch issue-063 diagnosed and fixed for
+    // `transferSolidLayerFraction`, one call site over, now confirmed to
+    // recur here for `isBasePondedAqueousField` (hydrogen, hydroxide,
+    // aluminum, iron, calcium, magnesium, sodium, potassium; `calcium` used
+    // below, which -- like the others in that list -- falls through
+    // `aqueousFieldVolume` to the plain `shared_m3` carrier).
+    const dry_reference_water_m3: f64 = 0.5;
+    const negligible_water_volume_m3 = 1.0e-6; // ZEROS2 for a 1 m^2 cell.
+    const raw_recipient_water_m3: f64 = 1.0e-9; // below the floor, nonzero.
+
+    const censusCarrier = struct {
+        fn call(live_water_m3: f64) f64 {
+            return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+        }
+    }.call;
+
+    const source_water: ZoneWaterVolumes = .{
+        .shared_m3 = 5.0,
+        .ammonium_non_band_m3 = 5.0,
+        .ammonium_band_m3 = 0,
+        .nitrate_non_band_m3 = 5.0,
+        .nitrate_band_m3 = 0,
+        .phosphate_non_band_m3 = 5.0,
+        .phosphate_band_m3 = 0,
+    };
+
+    // --- OLD (pre-fix relayering.zig) caller behavior: raw, unfloored recipient carrier passed straight through. ---
+    {
+        var chemistry = try chemistry_module.State.init(std.testing.allocator, 2);
+        defer chemistry.deinit();
+        chemistry.aqueous[0].calcium = 100;
+        chemistry.aqueous[1].calcium = 0.2;
+
+        const destination_water: ZoneWaterVolumes = .{
+            .shared_m3 = raw_recipient_water_m3,
+            .ammonium_non_band_m3 = raw_recipient_water_m3,
+            .ammonium_band_m3 = 0,
+            .nitrate_non_band_m3 = raw_recipient_water_m3,
+            .nitrate_band_m3 = 0,
+            .phosphate_non_band_m3 = raw_recipient_water_m3,
+            .phosphate_band_m3 = 0,
+        };
+
+        const recipient_census_before = chemistry.aqueous[1].calcium * censusCarrier(raw_recipient_water_m3);
+
+        try transferAqueousLayerFraction(
+            &chemistry,
+            0,
+            1,
+            source_water,
+            destination_water,
+            source_water,
+            destination_water,
+            false,
+            0.001,
+        );
+
+        const recipient_census_after = chemistry.aqueous[1].calcium * censusCarrier(raw_recipient_water_m3);
+        const manufactured = recipient_census_after - recipient_census_before;
+        // The real transferred amount is 0.001 * (100 * 5.0) = 0.5 mol. The
+        // unfloored write manufactures roughly (dry_reference/raw) times
+        // that -- many orders of magnitude of fake mass, matching hour
+        // 2,894's shape (recipient gain far exceeding the donor's loss).
+        try std.testing.expect(manufactured > 1000 * 0.5);
+    }
+
+    // --- NEW (fixed relayering.zig) caller behavior: floors the carrier the same way the census does. ---
+    {
+        var chemistry = try chemistry_module.State.init(std.testing.allocator, 2);
+        defer chemistry.deinit();
+        chemistry.aqueous[0].calcium = 100;
+        chemistry.aqueous[1].calcium = 0.2;
+
+        const floored_recipient_water_m3 = censusCarrier(raw_recipient_water_m3);
+        const destination_water: ZoneWaterVolumes = .{
+            .shared_m3 = floored_recipient_water_m3,
+            .ammonium_non_band_m3 = floored_recipient_water_m3,
+            .ammonium_band_m3 = 0,
+            .nitrate_non_band_m3 = floored_recipient_water_m3,
+            .nitrate_band_m3 = 0,
+            .phosphate_non_band_m3 = floored_recipient_water_m3,
+            .phosphate_band_m3 = 0,
+        };
+
+        const recipient_census_before = chemistry.aqueous[1].calcium * censusCarrier(raw_recipient_water_m3);
+
+        try transferAqueousLayerFraction(
+            &chemistry,
+            0,
+            1,
+            source_water,
+            destination_water,
+            source_water,
+            destination_water,
+            false,
+            0.001,
+        );
+
+        const recipient_census_after = chemistry.aqueous[1].calcium * censusCarrier(raw_recipient_water_m3);
+        const conserved = recipient_census_after - recipient_census_before;
+        try std.testing.expectApproxEqAbs(@as(f64, 0.5), conserved, 1e-9);
+    }
+}

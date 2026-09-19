@@ -4,6 +4,7 @@ const SoilChemistry = @import("../solute/chemistry_state.zig");
 const SurfaceChemistry = @import("../../surface/litter_chemistry.zig");
 const Phosphate = @import("../solute/phosphate_network.zig");
 const ZoneFractions = @import("../solute/charge_classification.zig").ZoneFractions;
+const legacy_water_negligible_floor = @import("../../core/legacy_water_negligible_floor.zig");
 
 /// REDIST UPP4 inventory. Surface minerals use their persistent mineral-water
 /// reference, which remains authoritative while live litter water is zero.
@@ -88,6 +89,14 @@ pub fn exchangeablePhosphorus_g_p(
 
 /// REDIST UPO4: soluble HPO4 plus H2PO4 in surface litter and both runtime
 /// soil fertilizer zones.
+///
+/// issue-064 sibling: `litter_aqueous_carrier` must floor `litter_water` at
+/// the `ZEROS2` noise floor (`starts.f:270`), not exact zero, before using it
+/// as the mol->g carrier -- otherwise a tiny-but-nonzero collapsed litter
+/// water value (the same array issue-061's `landscape_mass_inventory_surface.zig`
+/// sibling fix already floors) is used raw here while the sibling census
+/// substitutes the much larger `dry_reference_water_m3`, misreporting this
+/// daily ledger's soluble-phosphorus inventory by orders of magnitude.
 pub fn solublePhosphorus_g_p(
     grid: *const Grid.GridState,
     soil: *const SoilChemistry.State,
@@ -97,15 +106,18 @@ pub fn solublePhosphorus_g_p(
     cell: usize,
     fractions_source: anytype,
     phosphorus_molar_mass_g_per_mol: f64,
+    cell_area_m2: f64,
 ) !f64 {
     if (cell >= grid.cell_count or soil.cell_count != grid.layer_count or surface.cells.len != grid.cell_count or surface.dry_reference_water_m3.len != grid.cell_count or soil_water_m3.len != grid.layer_count or litter_water_m3.len != grid.cell_count) return error.PhosphateInventoryDimensionMismatch;
     if (!std.math.isFinite(phosphorus_molar_mass_g_per_mol) or phosphorus_molar_mass_g_per_mol <= 0) return error.InvalidPhosphateInventory;
+    if (!std.math.isFinite(cell_area_m2) or cell_area_m2 <= 0) return error.InvalidPhosphateInventory;
     const litter_water = litter_water_m3[cell];
     const dry_reference_water = surface.dry_reference_water_m3[cell];
     if (!std.math.isFinite(litter_water) or litter_water < 0 or
         !std.math.isFinite(dry_reference_water) or dry_reference_water < 0)
         return error.InvalidPhosphateInventory;
-    const litter_aqueous_carrier = if (litter_water > 0) litter_water else dry_reference_water;
+    const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(cell_area_m2);
+    const litter_aqueous_carrier = if (litter_water > negligible_water_volume_m3) litter_water else dry_reference_water;
     const litter = surface.cells[cell];
     var phosphorus_mol = litter_aqueous_carrier * (litter.hpo4_mol_p_per_m3 + litter.h2po4_mol_p_per_m3);
     for (0..grid.active_soil_layer_count[cell]) |local_layer| {
@@ -181,7 +193,7 @@ test "UPO4 sums surface and runtime-zone soluble phosphate inventories" {
     surface.cells[0].h2po4_mol_p_per_m3 = 2;
     soil.non_band_phosphate[0].dissolved_hpo4_mol_p_per_m3 = 4;
     soil.band_phosphate[1].dissolved_h2po4_mol_p_per_m3 = 8;
-    const result = try solublePhosphorus_g_p(&grid, &soil, &surface, &.{ 10, 20 }, &.{5}, 0, ZoneFractions{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 0.75, .phosphate_band = 0.25 }, 31);
+    const result = try solublePhosphorus_g_p(&grid, &soil, &surface, &.{ 10, 20 }, &.{5}, 0, ZoneFractions{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 0.75, .phosphate_band = 0.25 }, 31, 1);
     try std.testing.expectEqual(@as(f64, 80 * 31), result);
 }
 
@@ -198,6 +210,46 @@ test "UPP4 and UPO4 retain dry surface phosphate on native references" {
     surface.cells[0].h2po4_mol_p_per_m3 = 2;
     surface.cells[0].phosphate_minerals.hydroxyapatite_mol_per_m3 = 5;
     const fractions = ZoneFractions{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 };
-    try std.testing.expectEqual(@as(f64, 6 * 31), try solublePhosphorus_g_p(&grid, &soil, &surface, &.{0}, &.{0}, 0, fractions, 31));
+    try std.testing.expectEqual(@as(f64, 6 * 31), try solublePhosphorus_g_p(&grid, &soil, &surface, &.{0}, &.{0}, 0, fractions, 31, 1));
     try std.testing.expectEqual(@as(f64, 60 * 31), try precipitatedPhosphorus_g_p(&grid, &soil, &surface, &.{0}, &.{0}, 0, fractions, 31));
+}
+
+test "issue-064 sibling: UPO4 floors the litter carrier at the ZEROS2 floor instead of exact zero" {
+    // Sibling of `landscape_mass_inventory_surface.zig`'s already-fixed
+    // `aggregateSurfaceChemistryRange` (issue-061 Finding 2): this daily
+    // UPO4 ledger reads the same collapsible `litter_water_m3` array through
+    // its OWN private exact-zero-only guard, previously undiscovered by that
+    // sweep. A 1e-9 m^3 litter water value (below the ZEROS2 floor for a
+    // 1 m^2 cell, 1e-6 m^3) must be treated the same as exact zero: the
+    // stored concentration is carried on the remembered `dry_reference_water_m3`,
+    // not the collapsed live value.
+    const config = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 });
+    var grid = try Grid.GridState.init(std.testing.allocator, config);
+    defer grid.deinit();
+    var soil = try SoilChemistry.State.init(std.testing.allocator, grid.layer_count);
+    defer soil.deinit();
+    var surface = try SurfaceChemistry.State.init(std.testing.allocator, grid.cell_count);
+    defer surface.deinit();
+    surface.dry_reference_water_m3[0] = 5;
+    surface.cells[0].h2po4_mol_p_per_m3 = 2;
+    const fractions = ZoneFractions{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 };
+
+    // Exact zero (the pre-existing, already-correct branch): substitutes the
+    // dry reference, matching "UPO4 sums surface and runtime-zone soluble
+    // phosphate inventories" above.
+    const exact_zero_result = try solublePhosphorus_g_p(&grid, &soil, &surface, &.{0}, &.{0}, 0, fractions, 31, 1);
+    try std.testing.expectEqual(@as(f64, 5 * 2 * 31), exact_zero_result);
+
+    // Collapsed-but-nonzero (1e-9 m^3), below the ZEROS2 floor for a 1 m^2
+    // cell (1e-6 m^3): must produce the IDENTICAL result as exact zero, not
+    // the old raw-carrier value (5*2*31 vs the old guard's 1e-9*2*31 --
+    // roughly a billionfold undercount of this ledger's soluble phosphorus).
+    const collapsed_result = try solublePhosphorus_g_p(&grid, &soil, &surface, &.{0}, &.{1.0e-9}, 0, fractions, 31, 1);
+    try std.testing.expectEqual(exact_zero_result, collapsed_result);
+
+    // Boundary: strictly above the floor keeps the live carrier.
+    const negligible = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(1.0);
+    const just_above = std.math.nextAfter(f64, negligible, std.math.inf(f64));
+    const above_floor_result = try solublePhosphorus_g_p(&grid, &soil, &surface, &.{0}, &.{just_above}, 0, fractions, 31, 1);
+    try std.testing.expectApproxEqAbs(@as(f64, just_above * 2 * 31), above_floor_result, 1e-15);
 }

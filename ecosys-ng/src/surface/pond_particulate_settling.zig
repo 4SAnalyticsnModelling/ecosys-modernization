@@ -13,6 +13,7 @@ const chemistry_layer_remap = @import("../soil/chemistry/layer_remap.zig");
 const soil_properties_module = @import("../soil/water/solver_properties.zig");
 const charge_classification = @import("../soil/solute/charge_classification.zig");
 const conservation_sidecar = @import("pond_conservation_sidecar.zig");
+const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
 
 pub const SeparatedSurfaceGeometry = settling.SeparatedSurfaceGeometry;
 pub const MineralColumnGeometry = settling.MineralColumnGeometry;
@@ -43,6 +44,13 @@ pub const ParticulateChemistryOwners = struct {
     surface_dry_mass_megagrams: []const f64,
     soil_dry_mass_megagrams: []f64,
     soil_matrix_water_m3: []const f64,
+    /// issue-064 sibling: `ZEROS2(NY,NX)=ZERO2*DH(NY,NX)*DV(NY,NX)`
+    /// (`starts.f:270`) per-cell footprint, used to floor
+    /// `soil_matrix_water_m3` before it carries `transferPondParticulateLayerFraction`'s
+    /// water-normalized solid/precipitate concentrations, exactly like
+    /// issue-063's fix for `relayering.zig`'s sibling call to the same
+    /// underlying `transferSolidLayerFraction`.
+    cell_area_m2: []const f64,
     ammonium_non_band_fraction_by_cell: []const f64,
     phosphate_non_band_water_fraction_by_cell: []const f64,
     /// Required by the production path to settle L>0 SAND/SILT/CLAY and
@@ -133,6 +141,7 @@ fn applyInternal(
             chemistry_owner.soil.cell_count != soil_count or
             chemistry_owner.soil_dry_mass_megagrams.len != soil_count or
             chemistry_owner.soil_matrix_water_m3.len != soil_count or
+            chemistry_owner.cell_area_m2.len != geometry.cell_count or
             chemistry_owner.ammonium_non_band_fraction_by_cell.len != geometry.cell_count or
             chemistry_owner.phosphate_non_band_water_fraction_by_cell.len != geometry.cell_count)
             return error.SurfacePondSettlingChemistryDimensionMismatch;
@@ -275,6 +284,104 @@ fn applyInternal(
     }
 }
 
+/// `ZEROS2(NY,NX) = ZERO2*DH(NY,NX)*DV(NY,NX)` (`starts.f:270`). issue-064
+/// sibling of issue-063's `relayering.zig` fix: shares the same floor with
+/// `chemistry_layer_remap`'s census-side `aqueousCarrierM3` so this file's
+/// `transferSolidLayerFraction` call (via `transferPondParticulateLayerFraction`)
+/// agrees with the census on the same water-carrier basis for the same
+/// degenerate cell/layer.
+fn legacyNegligibleWaterVolumeM3(cell_area_m2: f64) f64 {
+    return legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(cell_area_m2);
+}
+
+/// `solute.f:610` keeps a water-normalized pool represented on the remembered
+/// dry reference carrier whenever the live water carrier is at or below the
+/// `ZEROS2` noise floor. Mirrors `relayering.zig`'s `solidTransferWaterCarrierM3`
+/// exactly (issue-063/064): this file's pond-settling call to
+/// `transferPondParticulateLayerFraction` previously received RAW, unfloored
+/// live water for both carrier arguments, guarded only by
+/// `transferOwnedAmount`'s bare `> 0` check.
+fn solidTransferWaterCarrierM3(
+    live_water_m3: f64,
+    dry_reference_water_m3: f64,
+    negligible_water_volume_m3: f64,
+) !f64 {
+    if (!std.math.isFinite(live_water_m3) or live_water_m3 < 0 or
+        !std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0 or
+        !std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
+        return error.InvalidSurfacePondChemistryCarrier;
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+}
+
+test "issue-064 sibling: pond settling's solidTransferWaterCarrierM3 substitutes the dry reference at and below the ZEROS2 floor" {
+    // Mirrors `relayering.zig`'s own boundary test for the identical helper
+    // (issue-063/064), confirming this file's separate, previously-unaudited
+    // `transferPondParticulateLayerFraction` call site (surface pond settling,
+    // flagged by issue-063's own disposition as "left for a future pass") now
+    // agrees with the census's floored carrier basis instead of passing the
+    // raw live water straight through.
+    const negligible = legacyNegligibleWaterVolumeM3(1.0);
+    try std.testing.expectEqual(@as(f64, 1.0e-6), negligible);
+    try std.testing.expectEqual(@as(f64, 0.5), try solidTransferWaterCarrierM3(0, 0.5, negligible));
+    try std.testing.expectEqual(@as(f64, 0.5), try solidTransferWaterCarrierM3(negligible, 0.5, negligible));
+    const just_above = std.math.nextAfter(f64, negligible, std.math.inf(f64));
+    try std.testing.expectEqual(just_above, try solidTransferWaterCarrierM3(just_above, 0.5, negligible));
+    try std.testing.expectError(error.InvalidSurfacePondChemistryCarrier, solidTransferWaterCarrierM3(-1, 0.5, negligible));
+}
+
+test "issue-064 sibling: pond settling manufactures fake mass with a raw near-zero carrier but conserves mass when floored first" {
+    // Direct reproduction at this file's actual mutator
+    // (`transferPondParticulateLayerFraction`, via `chemistry_layer_remap`'s
+    // shared `transferSolidLayerFraction`), matching the before/after pattern
+    // issue-063 used for the sibling `relayering.zig` call site.
+    const dry_reference_water_m3: f64 = 0.5;
+    const negligible_water_volume_m3 = 1.0e-6; // ZEROS2 for a 1 m^2 cell.
+    const raw_recipient_water_m3: f64 = 1.0e-9; // below the floor, nonzero.
+
+    const censusCarrier = struct {
+        fn call(live_water_m3: f64) f64 {
+            return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+        }
+    }.call;
+
+    // --- OLD (pre-fix) caller behavior: raw, unfloored carrier passed straight through. ---
+    {
+        var chemistry_state = try soil_chemistry_module.State.init(std.testing.allocator, 2);
+        defer chemistry_state.deinit();
+        chemistry_state.geochemistry_solids[0].calcite_solid_mol_per_m3 = 100;
+        chemistry_state.geochemistry_solids[1].calcite_solid_mol_per_m3 = 0.2;
+        const equal_zones: chemistry_layer_remap.ZoneFractionTransition = .{
+            .source_before = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 },
+            .destination_before = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 },
+            .source_after = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 },
+            .destination_after = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 },
+        };
+        const recipient_census_before = chemistry_state.geochemistry_solids[1].calcite_solid_mol_per_m3 * censusCarrier(raw_recipient_water_m3);
+        try chemistry_layer_remap.transferPondParticulateLayerFraction(&chemistry_state, 0, 1, 10, 10, 5.0, raw_recipient_water_m3, equal_zones, 10, 10, 0.001);
+        const recipient_census_after = chemistry_state.geochemistry_solids[1].calcite_solid_mol_per_m3 * censusCarrier(raw_recipient_water_m3);
+        try std.testing.expect(recipient_census_after - recipient_census_before > 1000 * 0.5);
+    }
+
+    // --- NEW (fixed) caller behavior: floors the carrier the same way the census does. ---
+    {
+        var chemistry_state = try soil_chemistry_module.State.init(std.testing.allocator, 2);
+        defer chemistry_state.deinit();
+        chemistry_state.geochemistry_solids[0].calcite_solid_mol_per_m3 = 100;
+        chemistry_state.geochemistry_solids[1].calcite_solid_mol_per_m3 = 0.2;
+        const equal_zones: chemistry_layer_remap.ZoneFractionTransition = .{
+            .source_before = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 },
+            .destination_before = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 },
+            .source_after = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 },
+            .destination_after = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 },
+        };
+        const floored_recipient_water_m3 = try solidTransferWaterCarrierM3(raw_recipient_water_m3, dry_reference_water_m3, negligible_water_volume_m3);
+        const recipient_census_before = chemistry_state.geochemistry_solids[1].calcite_solid_mol_per_m3 * censusCarrier(raw_recipient_water_m3);
+        try chemistry_layer_remap.transferPondParticulateLayerFraction(&chemistry_state, 0, 1, 10, 10, 5.0, floored_recipient_water_m3, equal_zones, 10, 10, 0.001);
+        const recipient_census_after = chemistry_state.geochemistry_solids[1].calcite_solid_mol_per_m3 * censusCarrier(raw_recipient_water_m3);
+        try std.testing.expectApproxEqAbs(@as(f64, 0.5), recipient_census_after - recipient_census_before, 1e-9);
+    }
+}
+
 fn validateWaterColumnMove(
     owners: inventory.Owners,
     chemistry_owners: ?ParticulateChemistryOwners,
@@ -308,14 +415,25 @@ fn validateWaterColumnMove(
         );
         const source_zone = chemistry_owner.zone_fractions_by_layer[source];
         const destination_zone = chemistry_owner.zone_fractions_by_layer[destination];
+        const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(chemistry_owner.cell_area_m2[cell]);
+        const source_water_carrier = try solidTransferWaterCarrierM3(
+            chemistry_owner.soil_matrix_water_m3[source],
+            chemistry_owner.soil.dry_reference_water_m3[source],
+            negligible_water_volume_m3,
+        );
+        const destination_water_carrier = try solidTransferWaterCarrierM3(
+            chemistry_owner.soil_matrix_water_m3[destination],
+            chemistry_owner.soil.dry_reference_water_m3[destination],
+            negligible_water_volume_m3,
+        );
         try chemistry_layer_remap.validatePondParticulateLayerFraction(
             chemistry_owner.soil,
             source,
             destination,
             source_mass,
             destination_mass,
-            chemistry_owner.soil_matrix_water_m3[source],
-            chemistry_owner.soil_matrix_water_m3[destination],
+            source_water_carrier,
+            destination_water_carrier,
             .{
                 .source_before = source_zone,
                 .destination_before = destination_zone,
@@ -363,14 +481,25 @@ fn transferWaterColumnMove(
         );
         const source_zone = chemistry_owner.zone_fractions_by_layer[source];
         const destination_zone = chemistry_owner.zone_fractions_by_layer[destination];
+        const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(chemistry_owner.cell_area_m2[cell]);
+        const source_water_carrier = try solidTransferWaterCarrierM3(
+            chemistry_owner.soil_matrix_water_m3[source],
+            chemistry_owner.soil.dry_reference_water_m3[source],
+            negligible_water_volume_m3,
+        );
+        const destination_water_carrier = try solidTransferWaterCarrierM3(
+            chemistry_owner.soil_matrix_water_m3[destination],
+            chemistry_owner.soil.dry_reference_water_m3[destination],
+            negligible_water_volume_m3,
+        );
         try chemistry_layer_remap.transferPondParticulateLayerFraction(
             chemistry_owner.soil,
             source,
             destination,
             source_mass,
             destination_mass,
-            chemistry_owner.soil_matrix_water_m3[source],
-            chemistry_owner.soil_matrix_water_m3[destination],
+            source_water_carrier,
+            destination_water_carrier,
             .{
                 .source_before = source_zone,
                 .destination_before = destination_zone,
@@ -662,6 +791,7 @@ test "REDIST water-column production owners conserve texture capacity and chemis
         .surface_dry_mass_megagrams = &.{0},
         .soil_dry_mass_megagrams = &soil_mass,
         .soil_matrix_water_m3 = &.{ 1, 1, 2 },
+        .cell_area_m2 = &.{1},
         .ammonium_non_band_fraction_by_cell = &.{0.5},
         .phosphate_non_band_water_fraction_by_cell = &.{0.5},
         .soil_properties = &properties,
@@ -855,6 +985,7 @@ test "late particulate chemistry failure rolls back the complete settling domain
                 .surface_dry_mass_megagrams = &.{ 1, 1 },
                 .soil_dry_mass_megagrams = &soil_dry_mass,
                 .soil_matrix_water_m3 = &.{ 1, 1 },
+                .cell_area_m2 = &.{ 1, 1 },
                 .ammonium_non_band_fraction_by_cell = &.{ 1, 1 },
                 .phosphate_non_band_water_fraction_by_cell = &.{ 1, 1 },
             },

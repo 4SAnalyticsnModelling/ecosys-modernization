@@ -637,6 +637,7 @@ noinline fn settlePondParticulatesAndRebaseHeat(
         .surface_dry_mass_megagrams = context.surface_litter_geometry.dry_mass_megagrams,
         .soil_dry_mass_megagrams = pond_soil_dry_mass_megagrams,
         .soil_matrix_water_m3 = context.grid.matrix_liquid_water_m3,
+        .cell_area_m2 = context.canopy_cell_area_m2,
         .ammonium_non_band_fraction_by_cell = pond_ammonium_non_band_fraction,
         .phosphate_non_band_water_fraction_by_cell = pond_phosphate_non_band_fraction,
         .soil_properties = context.soil_solver_properties,

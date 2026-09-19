@@ -490,10 +490,48 @@ pub fn applyLayerRedistribution(ctx: Context, geometry_changes: Geometry.Disturb
             // 4a. Aqueous chemistry (concentration-based, before/after volumes).
             const src_water_after = ctx.grid.matrix_liquid_water_m3[src_global];
             const dst_water_after = ctx.grid.matrix_liquid_water_m3[dst_global];
-            const src_zones_before = waterZones(src_water_before, src_zone_fractions_before);
-            const dst_zones_before = waterZones(dst_water_before, dst_zone_fractions_before);
-            const src_zones_after = waterZones(src_water_after, src_zone_fractions_after);
-            const dst_zones_after = waterZones(dst_water_after, dst_zone_fractions_after);
+            // issue-064: `transferAqueousLayerFraction`'s own `ZoneWaterVolumes`
+            // carrier basis must share the same floored `ZEROS2` basis issue-063
+            // already threaded into the sibling `transferSolidLayerFraction`
+            // call below (item 4b/computed once here and reused there), or a
+            // near-zero-but-nonzero raw carrier here inflates the stored
+            // aqueous-ion concentration (`concentration()`'s bare
+            // `carrier > 0` guard in `chemistry/layer_remap.zig`) while the
+            // census (`landscape_mass_inventory_phosphorus_ions.zig`'s
+            // `aqueousCarrierM3`) re-multiplies by the floored dry-reference
+            // volume, manufacturing fake mass on the free aqueous-ion pools
+            // (`isBasePondedAqueousField`: hydrogen, hydroxide, aluminum, iron,
+            // calcium, magnesium, sodium, potassium) -- the exact mechanism
+            // issue-063 diagnosed and fixed for the solid/precipitate pools,
+            // one call site over.
+            const cell_area_m2 = ctx.horizontal_cell_width_m[cell] * ctx.vertical_cell_width_m[cell];
+            const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(cell_area_m2);
+            const src_dry_reference_water_m3 = ctx.soil_chemistry.dry_reference_water_m3[src_global];
+            const dst_dry_reference_water_m3 = ctx.soil_chemistry.dry_reference_water_m3[dst_global];
+            const src_water_before_carrier = try solidTransferWaterCarrierM3(
+                src_water_before,
+                src_dry_reference_water_m3,
+                negligible_water_volume_m3,
+            );
+            const dst_water_before_carrier = try solidTransferWaterCarrierM3(
+                dst_water_before,
+                dst_dry_reference_water_m3,
+                negligible_water_volume_m3,
+            );
+            const src_water_after_carrier = try solidTransferWaterCarrierM3(
+                src_water_after,
+                src_dry_reference_water_m3,
+                negligible_water_volume_m3,
+            );
+            const dst_water_after_carrier = try solidTransferWaterCarrierM3(
+                dst_water_after,
+                dst_dry_reference_water_m3,
+                negligible_water_volume_m3,
+            );
+            const src_zones_before = waterZones(src_water_before_carrier, src_zone_fractions_before);
+            const dst_zones_before = waterZones(dst_water_before_carrier, dst_zone_fractions_before);
+            const src_zones_after = waterZones(src_water_after_carrier, src_zone_fractions_after);
+            const dst_zones_after = waterZones(dst_water_after_carrier, dst_zone_fractions_after);
             try chemistry_remap.transferAqueousLayerFraction(
                 ctx.soil_chemistry,
                 src_global,
@@ -530,31 +568,10 @@ pub fn applyLayerRedistribution(ctx: Context, geometry_changes: Geometry.Disturb
                     // already applies when reading these same fields back,
                     // or a degenerate near-zero (but nonzero) carrier at
                     // either endpoint manufactures fake mass instead of
-                    // conserving the transferred amount.
-                    const cell_area_m2 = ctx.horizontal_cell_width_m[cell] * ctx.vertical_cell_width_m[cell];
-                    const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(cell_area_m2);
-                    const src_dry_reference_water_m3 = ctx.soil_chemistry.dry_reference_water_m3[src_global];
-                    const dst_dry_reference_water_m3 = ctx.soil_chemistry.dry_reference_water_m3[dst_global];
-                    const src_water_before_carrier = try solidTransferWaterCarrierM3(
-                        src_water_before,
-                        src_dry_reference_water_m3,
-                        negligible_water_volume_m3,
-                    );
-                    const dst_water_before_carrier = try solidTransferWaterCarrierM3(
-                        dst_water_before,
-                        dst_dry_reference_water_m3,
-                        negligible_water_volume_m3,
-                    );
-                    const src_water_after_carrier = try solidTransferWaterCarrierM3(
-                        src_water_after,
-                        src_dry_reference_water_m3,
-                        negligible_water_volume_m3,
-                    );
-                    const dst_water_after_carrier = try solidTransferWaterCarrierM3(
-                        dst_water_after,
-                        dst_dry_reference_water_m3,
-                        negligible_water_volume_m3,
-                    );
+                    // conserving the transferred amount. issue-064: reuses the
+                    // identical floored carriers computed above for item 4a
+                    // instead of re-deriving them, so both call sites agree
+                    // bit-for-bit on the same basis.
                     try chemistry_remap.transferSolidLayerFraction(
                         ctx.soil_chemistry,
                         src_global,

@@ -2244,6 +2244,7 @@ noinline fn writeAcceptedDailySoilPhosphorusOutput(
                     cell,
                     &driver_context.fertilizer_band_state.*,
                     driver_context.runscript.*.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol,
+                    driver_context.canopy_cell_area_m2.*[cell],
                 ) * area_inverse;
                 var harvested_phosphorus_g_p: f64 = 0;
                 for (0..driver_context.config.*.plant_populations) |species| harvested_phosphorus_g_p += driver_context.plant_daily_flux_ledger.*.harvested_phosphorus_g[cell * driver_context.config.*.plant_populations + species];
@@ -3024,6 +3025,7 @@ noinline fn postScienceManagementAndGasAccounting(driver_context: anytype, advan
                 .surface_geometry = &driver_context.surface_litter_geometry_state.*,
                 .litter_water_m3 = driver_context.surface_precipitation_state.*.litter_water_m3,
                 .litter_ice_m3 = driver_context.surface_litter_ice_m3.*,
+                .cell_area_m2 = driver_context.canopy_cell_area_m2.*,
                 .surface_temperature_k = driver_context.state.*.surface_temperature_k,
                 .geometry_parameters = driver_context.surface_gas_parameters.*.litter_geometry,
                 .ice_density_megagrams_per_m3 = driver_context.runscript.*.soil_phase_heat_parameters.freeze_thaw.ice_density_megagrams_per_m3,
