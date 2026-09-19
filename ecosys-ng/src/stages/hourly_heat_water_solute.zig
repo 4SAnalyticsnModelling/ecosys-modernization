@@ -12072,9 +12072,9 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
     // a pre-existing defect. Remove the frontier window before release freeze.
     const thermal_frontier_trace = context.executed_weather_hours.* >= 2531 and
         context.executed_weather_hours.* < 2534;
-    const thermal_trace_active = !builtin.is_test and
+    const thermal_trace_active = !builtin.is_test and run_support.verbose_diagnostics_enabled and
         (context.executed_weather_hours.* < 8 or thermal_frontier_trace);
-    if (!builtin.is_test and thermal_frontier_trace)
+    if (!builtin.is_test and run_support.verbose_diagnostics_enabled and thermal_frontier_trace)
         std.log.info("THERMAL_FRONTIER hour={d} exact_substep_count={d}", .{
             context.executed_weather_hours.* + 1,
             exact_substep_count,
