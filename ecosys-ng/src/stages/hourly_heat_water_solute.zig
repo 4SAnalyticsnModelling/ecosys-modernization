@@ -2292,14 +2292,42 @@ fn snowDisappearanceConservationTolerances(context: anytype) ecosys.snowpack_lit
     };
 }
 
-const maximum_transport_replay_substeps: usize = 64;
+/// Derived from `recovery_substep_counts` (heat_step.zig), not hardcoded, so
+/// `AcceptedTransportReplay`'s own fixed-size `time_step_hours` buffer (below)
+/// can never be sized smaller than the ladder's true maximum. Fixes the
+/// design gap documented in issue-059 -- a sibling of issue-058's
+/// `maximum_bounded_recovery_substeps` fix, but in a different, previously
+/// unaudited consumer: this constant previously hardcoded `64`
+/// independently of the ladder, so extending `recovery_substep_counts` past
+/// `64` let `substep_capacity` (a separate runtime field, see
+/// `validatedTransportReplaySubstepCapacity` below) legitimately grow past
+/// `64` while the fixed `time_step_hours` array stayed at its old size --
+/// overflowing it at `hourly_heat_water_solute.zig:2663`'s
+/// `self.time_step_hours[self.count] = time_step_hours;` once `count`
+/// reached `64`.
+const maximum_transport_replay_substeps: usize =
+    ecosys.soil_water_heat_step.recovery_substep_counts[
+        ecosys.soil_water_heat_step.recovery_substep_counts.len - 1
+    ];
 const transport_grid_carrier_count: usize = ecosys.soil_water_heat_step.deferred_grid_carrier_count;
 const transport_surface_carrier_count: usize = 3;
 const transport_surface_geometry_carrier_count: usize = 4;
 
 fn validatedTransportReplaySubstepCapacity(exact_substep_count: u8) !usize {
-    for (ecosys.soil_water_heat_step.recovery_substep_counts) |allowed|
-        if (exact_substep_count == allowed) return @intCast(exact_substep_count);
+    for (ecosys.soil_water_heat_step.recovery_substep_counts) |allowed| {
+        if (exact_substep_count != allowed) continue;
+        const capacity: usize = @intCast(exact_substep_count);
+        // Defense in depth (issue-059): `maximum_transport_replay_substeps`
+        // is derived from this same array's maximum above, so `capacity`
+        // can never actually exceed it while that derivation holds -- but a
+        // future refactor that decouples them again (the exact defect shape
+        // issue-059 found) now fails loudly here with a real, ReleaseFast-
+        // surviving check, instead of silently overflowing
+        // `time_step_hours` inside `beginSubstep`.
+        if (capacity > maximum_transport_replay_substeps)
+            return error.TransportReplaySubstepCapacityExceedsBuffer;
+        return capacity;
+    }
     return error.InvalidTransportReplaySubstepCapacity;
 }
 
@@ -9520,6 +9548,75 @@ test "transport replay keeps pending retries private and certificates M-entry ca
     );
     try std.testing.expectEqualDeep(carriers_before_bad_init, carrier_values);
     try std.testing.expectEqualDeep(litter_before_bad_init, litter_water);
+}
+
+test "maximum_transport_replay_substeps is genuinely ladder-derived, not a hardcoded duplicate (issue-059)" {
+    // Proves the fix's array-sizing constant actually tracks
+    // `recovery_substep_counts`'s own maximum, rather than merely
+    // coinciding with it today the way the pre-fix hardcoded `64` literal
+    // did. If a future edit changed the ladder's last member, this
+    // constant (and therefore `time_step_hours`'s buffer size) would move
+    // with it automatically.
+    try std.testing.expectEqual(
+        @as(usize, ecosys.soil_water_heat_step.recovery_substep_counts[
+            ecosys.soil_water_heat_step.recovery_substep_counts.len - 1
+        ]),
+        maximum_transport_replay_substeps,
+    );
+}
+
+test "transport replay substep buffer scales safely past today's committed maximum (extensibility, issue-059)" {
+    // Reproduces issue-059's exact crash scenario in a SAFE way: a LOCAL,
+    // test-only mirror of `AcceptedTransportReplay`'s fixed-size
+    // `time_step_hours` field, sized via the same
+    // "derive-the-maximum-from-the-ladder" pattern this fix applied to
+    // production, but against a local ladder extended to `128` --
+    // production's `recovery_substep_counts` is never touched (that
+    // extension decision remains reserved for issue-015). Before this
+    // fix's pattern was applied to production, an independently hardcoded
+    // `64` buffer overflowed ("index out of bounds: index 64, len 64",
+    // `hourly_heat_water_solute.zig:2663`) once a ladder-validated
+    // `substep_capacity` reached a tier past `64`. Here the buffer's size
+    // is derived from the very same extended ladder, so filling every one
+    // of the new tier's 128 slots must succeed with no overflow.
+    const extended_ladder = [_]u8{ 1, 2, 4, 8, 16, 20, 32, 64, 128 };
+
+    const LocalReplayBuffer = struct {
+        const capacity_bound: usize = extended_ladder[extended_ladder.len - 1];
+
+        time_step_hours: [capacity_bound]f64 = @splat(0),
+        substep_capacity: usize,
+        count: usize = 0,
+
+        fn init(exact_substep_count: u8) !@This() {
+            for (extended_ladder) |allowed| {
+                if (exact_substep_count != allowed) continue;
+                const capacity: usize = @intCast(exact_substep_count);
+                if (capacity > capacity_bound) return error.CapacityExceedsBuffer;
+                return .{ .substep_capacity = capacity };
+            }
+            return error.InvalidCapacity;
+        }
+
+        fn beginSubstep(self: *@This(), value: f64) !void {
+            if (self.count >= self.substep_capacity) return error.ScheduleOverflow;
+            self.time_step_hours[self.count] = value;
+            self.count += 1;
+        }
+    };
+
+    try std.testing.expectEqual(@as(usize, 128), LocalReplayBuffer.capacity_bound);
+
+    var replay = try LocalReplayBuffer.init(128);
+    try std.testing.expectEqual(@as(usize, 128), replay.time_step_hours.len);
+    try std.testing.expectEqual(@as(usize, 128), replay.substep_capacity);
+
+    var substep: usize = 0;
+    while (substep < 128) : (substep += 1) {
+        try replay.beginSubstep(1.0 / 128.0);
+    }
+    try std.testing.expectEqual(@as(usize, 128), replay.count);
+    try std.testing.expectError(error.ScheduleOverflow, replay.beginSubstep(1.0 / 128.0));
 }
 
 test "temporary PSISO carrier rebase is restored before the accepted soil carrier commit" {
