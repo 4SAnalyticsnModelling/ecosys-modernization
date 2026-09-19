@@ -6559,13 +6559,34 @@ fn CoupledSubstepTransaction(
             for (0..grid.cell_count) |cell| {
                 const top = try grid.layerIndex(cell, 0);
                 const matrix_parameters = context.soil_solver_properties.mualem_van_genuchten_parameters[top];
-                const matric_plus_osmotic = try matrix_parameters.pressureHeadAtWaterContent(std.math.clamp(
+                const matric_potential_mpa = try matrix_parameters.pressureHeadAtWaterContent(std.math.clamp(
                     grid.matrix_liquid_water_m3[top] /
                         context.soil_solver_properties.matrix_bulk_volume_m3[top],
                     matrix_parameters.residual_water_content_m3_per_m3,
                     matrix_parameters.saturated_water_content_m3_per_m3,
-                )) * context.runscript.soil_process_parameters.gravitational_water_potential_mpa_per_m +
-                    context.soil_hourly_workspace.osmotic_potential_megapascal[top];
+                )) * context.runscript.soil_process_parameters.gravitational_water_potential_mpa_per_m;
+                const osmotic_potential_mpa = context.soil_hourly_workspace.osmotic_potential_megapascal[top];
+                const matric_plus_osmotic = matric_potential_mpa + osmotic_potential_mpa;
+                // ISSUE-024 ROUND 6 diagnostic (temporary; gated identically to
+                // this file's existing thermal_trace_active pattern, so it is
+                // zero-cost when verbose_diagnostics_enabled is false, and
+                // silent after hour 1). Separates the matric and osmotic terms
+                // feeding the shared TFREEZ/freezing_temperature formula for a
+                // direct oracle-vs-Zig comparison (issue-024 round 5/6).
+                if (!builtin.is_test and run_support.verbose_diagnostics_enabled and
+                    context.executed_weather_hours.* < 1)
+                {
+                    std.log.info("MATRIC_TRACE024 hour={d} cell={d} layer={d} matric_mpa={e} osmotic_mpa={e} matric_plus_osmotic_mpa={e} liquid_m3={e} temperature_k={e}", .{
+                        context.executed_weather_hours.* + 1,
+                        cell,
+                        top,
+                        matric_potential_mpa,
+                        osmotic_potential_mpa,
+                        matric_plus_osmotic,
+                        grid.matrix_liquid_water_m3[top],
+                        grid.soil_temperature_k[top],
+                    });
+                }
                 // WATSUB 2765--2879: FLVGS/freeze-thaw have already committed
                 // in phase_solver; EVAPG now reads their accepted VOLV2/VOLW2.
                 const topsoil_vapor = try ecosys.ground_vapor_exchange.accepted(.{
