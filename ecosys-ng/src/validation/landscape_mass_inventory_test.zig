@@ -880,10 +880,11 @@ test "REDIST profile phosphorus and ions include matrix macropore and immobile o
         fractions,
         12,
         31,
+        &.{ 1, 1 },
     );
     try expectStoragePartition(inventory, &.{
-        try landscape_mass_inventory.aggregateProfilePhosphorusAndIonsCell(&grid, &micropore, &macropore, &chemistry, &pending, &.{ 3, 3, 3, 3 }, &.{ 2, 2, 2, 2 }, fractions, 12, 31, 0),
-        try landscape_mass_inventory.aggregateProfilePhosphorusAndIonsCell(&grid, &micropore, &macropore, &chemistry, &pending, &.{ 3, 3, 3, 3 }, &.{ 2, 2, 2, 2 }, fractions, 12, 31, 1),
+        try landscape_mass_inventory.aggregateProfilePhosphorusAndIonsCell(&grid, &micropore, &macropore, &chemistry, &pending, &.{ 3, 3, 3, 3 }, &.{ 2, 2, 2, 2 }, fractions, 12, 31, &.{ 1, 1 }, 0),
+        try landscape_mass_inventory.aggregateProfilePhosphorusAndIonsCell(&grid, &micropore, &macropore, &chemistry, &pending, &.{ 3, 3, 3, 3 }, &.{ 2, 2, 2, 2 }, fractions, 12, 31, &.{ 1, 1 }, 1),
     });
     // Per cell: 21 mol transported phosphate + 12.5 mol adsorbed/solid
     // chemistry phosphate + 8 mol pending fertilizer phosphate. The
@@ -1007,6 +1008,7 @@ test "SOIL-CHEM-DRY-CARRIER-001 census uses remembered water for a vanished laye
         fractions,
         12,
         31,
+        &.{1},
     );
     chemistry.dry_reference_water_m3[0] = 4;
     const dry = try landscape_mass_inventory.aggregateProfilePhosphorusAndIons(
@@ -1020,6 +1022,7 @@ test "SOIL-CHEM-DRY-CARRIER-001 census uses remembered water for a vanished laye
         fractions,
         12,
         31,
+        &.{1},
     );
     try std.testing.expectEqual(wet.carbon_dioxide_carbon_g, dry.carbon_dioxide_carbon_g);
     try std.testing.expectEqual(wet.aluminum_mol, dry.aluminum_mol);

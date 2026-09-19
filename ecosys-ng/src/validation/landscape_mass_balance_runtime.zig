@@ -181,6 +181,7 @@ pub fn reconstruct(
         inputs.fertilizer_band,
         inputs.parameters.carbon_g_per_mol,
         inputs.parameters.phosphorus_g_per_mol,
+        inputs.cell_area_m2,
     ));
     try storage.add(try inventory.aggregatePendingSurfaceMinerals(
         inputs.mineral_fertilizer,
@@ -338,6 +339,7 @@ pub fn reconstructCells(
             inputs.fertilizer_band,
             inputs.parameters.carbon_g_per_mol,
             inputs.parameters.phosphorus_g_per_mol,
+            inputs.cell_area_m2,
             cell,
         ));
         try next.add(try inventory.aggregatePendingSurfaceMineralsCell(

@@ -116,6 +116,7 @@ pub fn aggregateProfilePhosphorusAndIons(
     fractions_source: anytype,
     carbon_g_per_mol: f64,
     phosphorus_g_per_mol: f64,
+    cell_area_m2: []const f64,
 ) !group_support.Storage {
     return aggregateProfilePhosphorusAndIonsRange(
         grid,
@@ -128,6 +129,7 @@ pub fn aggregateProfilePhosphorusAndIons(
         fractions_source,
         carbon_g_per_mol,
         phosphorus_g_per_mol,
+        cell_area_m2,
         0,
         grid.cell_count,
         null,
@@ -145,6 +147,7 @@ pub fn aggregateProfilePhosphorusAndIonsCell(
     fractions_source: anytype,
     carbon_g_per_mol: f64,
     phosphorus_g_per_mol: f64,
+    cell_area_m2: []const f64,
     cell: usize,
 ) !group_support.Storage {
     if (cell >= grid.cell_count) return error.ProfilePhosphorusIonInventoryCellOutOfBounds;
@@ -159,6 +162,7 @@ pub fn aggregateProfilePhosphorusAndIonsCell(
         fractions_source,
         carbon_g_per_mol,
         phosphorus_g_per_mol,
+        cell_area_m2,
         cell,
         cell + 1,
         null,
@@ -176,6 +180,7 @@ pub fn aggregateProfilePhosphorusAndIonsLayer(
     fractions_source: anytype,
     carbon_g_per_mol: f64,
     phosphorus_g_per_mol: f64,
+    cell_area_m2: []const f64,
     cell: usize,
     layer: usize,
 ) !group_support.Storage {
@@ -192,6 +197,7 @@ pub fn aggregateProfilePhosphorusAndIonsLayer(
         fractions_source,
         carbon_g_per_mol,
         phosphorus_g_per_mol,
+        cell_area_m2,
         cell,
         cell + 1,
         layer,
@@ -209,6 +215,7 @@ fn aggregateProfilePhosphorusAndIonsRange(
     fractions_source: anytype,
     carbon_g_per_mol: f64,
     phosphorus_g_per_mol: f64,
+    cell_area_m2: []const f64,
     first_cell: usize,
     end_cell: usize,
     local_layer_filter: ?usize,
@@ -227,7 +234,8 @@ fn aggregateProfilePhosphorusAndIonsRange(
         pending_fertilizer.soil.len != grid.layer_count or
         soil_water_m3.len != grid.layer_count or
         chemistry.dry_reference_water_m3.len != grid.layer_count or
-        soil_mass_megagrams.len != grid.layer_count)
+        soil_mass_megagrams.len != grid.layer_count or
+        cell_area_m2.len != grid.cell_count)
         return error.ProfilePhosphorusIonInventoryDimensionMismatch;
     if (!std.math.isFinite(carbon_g_per_mol) or carbon_g_per_mol <= 0 or
         !std.math.isFinite(phosphorus_g_per_mol) or
@@ -242,6 +250,9 @@ fn aggregateProfilePhosphorusAndIonsRange(
         const active_layers = grid.active_soil_layer_count[cell];
         if (active_layers > grid.soil_layer_capacity)
             return error.InvalidActiveSoilLayerCount;
+        if (!std.math.isFinite(cell_area_m2[cell]) or cell_area_m2[cell] < 0)
+            return error.InvalidLandscapeCellArea;
+        const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(cell_area_m2[cell]);
         const first_layer = if (local_layer_filter) |layer| @min(layer, active_layers) else 0;
         const end_layer = if (local_layer_filter) |layer| @min(layer + 1, active_layers) else active_layers;
         for (first_layer..end_layer) |layer| {
@@ -251,6 +262,7 @@ fn aggregateProfilePhosphorusAndIonsRange(
             const water_m3 = try aqueousCarrierM3(
                 soil_water_m3[profile_cell],
                 chemistry.dry_reference_water_m3[profile_cell],
+                negligible_water_volume_m3,
             );
             const mass_megagrams = soil_mass_megagrams[profile_cell];
             if (!std.math.isFinite(mass_megagrams) or mass_megagrams < 0)
@@ -412,18 +424,25 @@ pub fn debugIonSubcomponents(
     soil_water_m3: []const f64,
     soil_mass_megagrams: []const f64,
     fractions_source: anytype,
+    cell_area_m2: []const f64,
 ) !IonSubcomponents {
+    if (cell_area_m2.len != grid.cell_count)
+        return error.ProfilePhosphorusIonInventoryDimensionMismatch;
     var result: IonSubcomponents = .{};
     for (0..grid.cell_count) |cell| {
         const active_layers = grid.active_soil_layer_count[cell];
         if (active_layers > grid.soil_layer_capacity)
             return error.InvalidActiveSoilLayerCount;
+        if (!std.math.isFinite(cell_area_m2[cell]) or cell_area_m2[cell] < 0)
+            return error.InvalidLandscapeCellArea;
+        const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(cell_area_m2[cell]);
         for (0..active_layers) |layer| {
             const profile_cell = cell * grid.soil_layer_capacity + layer;
             const fractions = try inventoryFractionsAt(fractions_source, profile_cell);
             const water_m3 = try aqueousCarrierM3(
                 soil_water_m3[profile_cell],
                 chemistry.dry_reference_water_m3[profile_cell],
+                negligible_water_volume_m3,
             );
             const mass_megagrams = soil_mass_megagrams[profile_cell];
 
@@ -562,13 +581,47 @@ fn carrierAmount(stored_value: f64, carrier: f64) f64 {
     return stored_value * carrier;
 }
 
-/// `solute.f:610` keeps extensive `Z*` when `VOLW ≤ ZEROS2`. Zig stores those
-/// as concentrations against `dry_reference_water_m3` once live water vanishes.
-fn aqueousCarrierM3(live_water_m3: f64, dry_reference_water_m3: f64) !f64 {
+/// `ZERO2 = 1.0E-06` (`starts.f:94`), the legacy noise-floor literal that
+/// `ZEROS2(NY,NX) = ZERO2 * DH(NY,NX) * DV(NY,NX)` (`starts.f:270`) scales by
+/// the grid cell's horizontal footprint `DH*DV` (m2). This is the exact
+/// literal `solute.f:610`'s `IF(VOLW(L,NY,NX).GT.ZEROS2(NY,NX))THEN` tests
+/// `VOLW` (soil water content, m3) against. Legacy compares a footprint-area
+/// quantity directly to a volume; that is deliberate, not a units bug -- it
+/// keeps the floor proportional to how `VOLW` itself scales with cell size,
+/// the same design `flux.zig:47-62`'s `minimum_layer_heat_capacity_megajoules_per_m2_k`
+/// already uses for the analogous `STARTS 655` floor on the same degenerate
+/// layers (see that file's `ZEROS/ZEROS2 threshold translation gap` note).
+const legacy_negligible_water_volume_m3_per_m2: f64 = 1.0e-6;
+
+/// `ZEROS2` scaled to one cell's actual horizontal footprint.
+fn legacyNegligibleWaterVolumeM3(cell_area_m2: f64) f64 {
+    return legacy_negligible_water_volume_m3_per_m2 * cell_area_m2;
+}
+
+/// `solute.f:610` keeps extensive `Z*` when `VOLW <= ZEROS2`. issue-060: this
+/// translation previously only substituted `dry_reference_water_m3` when
+/// `live_water_m3` was EXACTLY `0` (`live_water_m3 > 0`), not when it merely
+/// fell at or below the `ZEROS2` noise floor. A collapsed-but-nonzero water
+/// content (observed at hour 2,894 during a heat-solver stagnation/recovery
+/// episode: the same layer's total heat capacity had already fallen below
+/// `flux.zig`'s analogous `STARTS 655` floor) multiplied roughly-unchanged
+/// solid/mineral-precipitate concentrations by a near-zero carrier and
+/// manufactured a large fake mass loss (90-99.996% of several elements'
+/// per-cell pools) that the conservation gate correctly rejected. The fix
+/// widens the substitution to `live_water_m3 <= negligible_water_volume_m3`,
+/// matching legacy's `<=` (not `<`) comparison exactly, while leaving the
+/// substitution itself (fall back to `dry_reference_water_m3`) unchanged from
+/// what the exact-zero case already did.
+fn aqueousCarrierM3(
+    live_water_m3: f64,
+    dry_reference_water_m3: f64,
+    negligible_water_volume_m3: f64,
+) !f64 {
     if (!std.math.isFinite(live_water_m3) or live_water_m3 < 0 or
-        !std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0)
+        !std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0 or
+        !std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
         return error.InvalidProfileChemistryGeometry;
-    return if (live_water_m3 > 0) live_water_m3 else dry_reference_water_m3;
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
 }
 
 fn extensiveGeochemistrySolids(state: anytype, water_m3: f64) @TypeOf(state) {
@@ -782,6 +835,104 @@ test "phosphate immobile inventory excludes transported bare phosphate and retai
         @as(f64, 4 * 5),
         phosphateImmobileInventory(adsorbed_h2po4_only, 1, 1, 1).ion_mol,
         1e-12,
+    );
+}
+
+test "issue-060: the legacy ZEROS2 translation is starts.f's ZERO2 literal, and the Ottawa deck's 1 m2 cell reduces it to 1.0e-6 m3" {
+    // `starts.f:94`: `ZERO2=1.0E-06`. `starts.f:270`:
+    // `ZEROS2(NY,NX)=ZERO2*DH(NY,NX)*DV(NY,NX)`.
+    try std.testing.expectEqual(@as(f64, 1.0e-6), legacy_negligible_water_volume_m3_per_m2);
+    // The Ottawa deck's site file (`f25si98`) gives every cell DH=DV=1.0 m
+    // (also pinned independently at `flux.zig`'s hour-2725/2726 fixtures),
+    // so ZEROS2 = 1.0e-6 * 1.0 * 1.0 = 1.0e-6 m3 for this deck.
+    try std.testing.expectEqual(@as(f64, 1.0e-6), legacyNegligibleWaterVolumeM3(1.0));
+    // A cell with a larger footprint gets a proportionally larger floor,
+    // exactly mirroring how VOLW itself scales with cell size.
+    try std.testing.expectEqual(@as(f64, 4.0e-6), legacyNegligibleWaterVolumeM3(4.0));
+}
+
+test "issue-060: BEFORE -- the old exact-zero guard manufactured a large fake mass loss for a collapsed-but-nonzero water carrier" {
+    // Literal reproduction of the old guard this issue replaced
+    // (`landscape_mass_inventory_phosphorus_ions.zig`'s `aqueousCarrierM3`
+    // before this fix): `if (live_water_m3 > 0) live_water_m3 else
+    // dry_reference_water_m3`. This is deliberately re-derived here, not
+    // assumed, so the regression is a real before/after comparison.
+    const oldAqueousCarrierM3 = struct {
+        fn call(live_water_m3: f64, dry_reference_water_m3: f64) f64 {
+            return if (live_water_m3 > 0) live_water_m3 else dry_reference_water_m3;
+        }
+    }.call;
+
+    // A representative solid-mineral concentration (matching the order of
+    // magnitude of hour 2,894's reported silicon pool, `before=100.136`).
+    const concentration_mol_per_m3: f64 = 100;
+    // The layer's normal, pre-collapse water content.
+    const water_before_m3: f64 = 0.05;
+    // A collapsed-but-nonzero water content, of the kind the hour-2,894
+    // heat-solver stagnation/recovery episode produced: far below the
+    // Ottawa deck's ZEROS2 floor (1.0e-6 m3) but not exactly zero.
+    const water_after_collapsed_m3: f64 = 1e-9;
+
+    const mass_before_mol = concentration_mol_per_m3 *
+        oldAqueousCarrierM3(water_before_m3, water_before_m3);
+    const mass_after_old_mol = concentration_mol_per_m3 *
+        oldAqueousCarrierM3(water_after_collapsed_m3, water_before_m3);
+
+    try std.testing.expectApproxEqAbs(@as(f64, 5), mass_before_mol, 1e-12);
+    try std.testing.expectApproxEqAbs(@as(f64, 1e-7), mass_after_old_mol, 1e-15);
+
+    // No modeled process touched this mass (internal_production/consumption
+    // are both zero in the real failure); the old guard alone manufactures a
+    // >99.99% fake loss, matching the 90-99.996% collapses issue-060 logged.
+    const fake_relative_loss = (mass_before_mol - mass_after_old_mol) / mass_before_mol;
+    try std.testing.expect(fake_relative_loss > 0.9999);
+}
+
+test "issue-060: AFTER -- the ZEROS2-floored guard substitutes the stable reference and reports no manufactured loss" {
+    const concentration_mol_per_m3: f64 = 100;
+    const water_before_m3: f64 = 0.05;
+    const water_after_collapsed_m3: f64 = 1e-9;
+    const cell_area_m2: f64 = 1; // The Ottawa deck's actual per-cell footprint.
+    const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(cell_area_m2);
+
+    const mass_before_mol = concentration_mol_per_m3 *
+        try aqueousCarrierM3(water_before_m3, water_before_m3, negligible_water_volume_m3);
+    const mass_after_new_mol = concentration_mol_per_m3 *
+        try aqueousCarrierM3(water_after_collapsed_m3, water_before_m3, negligible_water_volume_m3);
+
+    // The collapsed-but-nonzero carrier is at/below the floor, so the new
+    // guard substitutes the same stable reference volume the exact-zero case
+    // already used -- the extensive mass is unchanged, not manufactured-lost.
+    try std.testing.expectEqual(mass_before_mol, mass_after_new_mol);
+    try std.testing.expectApproxEqAbs(@as(f64, 5), mass_after_new_mol, 1e-12);
+}
+
+test "issue-060: the floored guard's boundary matches legacy's GT (not GE) comparison and preserves the exact-zero case" {
+    const dry_reference_water_m3: f64 = 4;
+    const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(1.0);
+
+    // Exactly at the floor takes the fallback (legacy `.GT.ZEROS2`, strict
+    // greater-than, so equality does not count as "present").
+    try std.testing.expectEqual(
+        dry_reference_water_m3,
+        try aqueousCarrierM3(negligible_water_volume_m3, dry_reference_water_m3, negligible_water_volume_m3),
+    );
+    // One ULP above the floor is treated as present water.
+    const just_above = std.math.nextAfter(f64, negligible_water_volume_m3, std.math.inf(f64));
+    try std.testing.expectEqual(
+        just_above,
+        try aqueousCarrierM3(just_above, dry_reference_water_m3, negligible_water_volume_m3),
+    );
+    // The pre-existing exact-zero case is unchanged: it was already below any
+    // positive floor, so it still substitutes the reference volume.
+    try std.testing.expectEqual(
+        dry_reference_water_m3,
+        try aqueousCarrierM3(0, dry_reference_water_m3, negligible_water_volume_m3),
+    );
+    // Ordinary, comfortably wet layers are unaffected by the floor.
+    try std.testing.expectEqual(
+        @as(f64, 0.05),
+        try aqueousCarrierM3(0.05, dry_reference_water_m3, negligible_water_volume_m3),
     );
 }
 

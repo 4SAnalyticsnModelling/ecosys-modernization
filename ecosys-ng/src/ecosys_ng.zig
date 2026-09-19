@@ -6390,6 +6390,7 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
             driver_context.hourly_science_context.*.grid.matrix_liquid_water_m3,
             driver_context.hourly_science_context.*.landscape_soil_mass_megagrams_scratch,
             driver_context.hourly_science_context.*.fertilizer_band,
+            driver_context.hourly_science_context.*.canopy_cell_area_m2,
         );
         std.log.debug("hourly ion subcomponent trace: hour={d} dissolved_aqueous_mol={e} immobile_phosphate_ion_mol={e} cation_exchange_mol={e} geochemistry_solids_mol={e} pending_fertilizer_ion_mol={e}", .{ advance_context.scene_weather_hours.* + 1, ion_subcomponents.dissolved_aqueous_mol, ion_subcomponents.immobile_phosphate_ion_mol, ion_subcomponents.cation_exchange_mol, ion_subcomponents.geochemistry_solids_mol, ion_subcomponents.pending_fertilizer_ion_mol });
         const per_species = try ecosys.landscape_mass_inventory.debugDissolvedAqueousPerSpecies(driver_context.hourly_science_context.*.grid, driver_context.hourly_science_context.*.micropore_solute_state, driver_context.hourly_science_context.*.macropore_solute_state);

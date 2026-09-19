@@ -101,6 +101,7 @@ pub fn reconstructScopes(
                 inputs.fertilizer_band,
                 inputs.parameters.carbon_g_per_mol,
                 inputs.parameters.phosphorus_g_per_mol,
+                inputs.cell_area_m2,
                 cell,
                 layer,
             ));
