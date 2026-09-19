@@ -1,6 +1,240 @@
 # Feature ID: FEAT-005-NITRIFICATION-DENITRIFICATION-MINERALIZATION
 
-Status: PARTIALLY_ASSESSED (source-audit; `nitro.f` is confirmed 4,592 lines (corrected from an earlier ~7000-line estimate); cumulative direct-read coverage across four passes ~81-82%)
+Status: ASSESSED (source-audit; `nitro.f` is confirmed 4,592 lines (corrected from an earlier ~7000-line estimate); cumulative direct-read coverage across five passes ~100% -- see fifth-pass closing summary below. Independent reviewer pass and gate sign-off still pending; disposition remains source-audit-level, not a gate PASS.)
+
+## Addendum 2026-09-19 (fifth pass, CLOSES nitro.f's remaining gaps): parameter/setup block, nitrification competition+inhibition setup, methanotrophs/O2 uptake solver, growth-respiration/DOC-DON-DOP partitioning+recycling+humification -- one real new defect found, two loose ends resolved
+
+Read-only, static-analysis-only pass (no `zig build`, no binary execution, no
+test run). Confirmed `git status --short` clean and no
+`zig`/`gfortran`/`ecosys_ng`/`ecosys_x`/`ecosys_oracle` process running before
+starting (a concurrent `hour1.f` pass had already committed and cleared by
+the time this pass began; its `issue-053` and TRC rows were re-checked and
+avoided by number).
+
+**Full statement-level read this pass, the dossier's four remaining named
+gaps:** `nitro.f:160-900` (~740 lines: parameter/decomposition-rate setup,
+per-layer total substrate/biomass aggregation, DOC/acetate/O2/NH4/NO3/PO4
+competition-fraction setup shared across microbial+root+mycorrhizal
+populations, and the aerobic-heterotroph/fermenter/acetotrophic-methanogen
+respiration-potential chain RGOCY->RGOMP->ROXYP), `:1060-1150` (NH4
+competition-factor setup and nitrification-inhibition decay preceding the
+already-audited NH3/NO2 oxidation reactions), `:1335-1666` (methanotroph CH4
+oxidation with its own sub-hour gas-dissolution loop, the shared quadratic O2
+uptake solver used by all aerobes, and the RCO2X/RCH3X/RCH4X/RH2GX
+respiration-product allocation), and `:2482-2918` (microbial
+maintenance/growth-respiration split, non-symbiotic N2 fixation respiration
+coupling, DOC/DON/DOP/acetate uptake driven by growth respiration,
+senescence-triggered decomposition, and C:N:P recycling/humification of
+decomposition products).
+
+**`:160-900` setup and aerobic/anaerobic respiration potential** -- Zig:
+`ecosys-ng/src/soil/microbial/respiration_activity.zig`
+(`aerobicSubstrateLimitedRespiration`, `totalActivity_g_c_per_step`,
+`totalSurfaceActivity_g_c_per_step`) and
+`ecosys-ng/src/soil/microbial/anaerobic_growth_respiration.zig` (fermenter
+and acetotrophic product-energy feedback, `nitro.f:556-557,918-928,1000-1004`,
+extensively self-documented with a source-statement table and its own
+`bind_nitro_001_double_mutation_analysis` provenance note). Independently
+re-derived `aerobicSubstrateLimitedRespiration` term-for-term against
+`nitro.f:855-873` (`FSBSTC`/`FSBSTA`/`RGOCY`/`RGOCZ`/`RGOAZ`/`RGOCX`/`RGOAX`/
+`RGOCP`/`RGOAP`/`RGOMP`/`ECHZ`/`ROXYM=2.667*RGOMP`) -- exact match including
+the min-of-(microbial-limited, supply-limited) structure. `preserved`.
+
+**`:1060-1150` NH4 competition-factor setup and nitrification-inhibition
+decay -- REAL DEFECT FOUND.** The inhibition-decay math itself
+(`ZNFNI=ZNFNI*(1-RNFNI*TFNX*XNFH)`, `ZNFN4S=ZNFN0-ZNFNI/(1+CNH4S/ZHKI)`,
+`nitro.f:1113-1115`) is exactly reproduced by
+`ecosys-ng/src/soil/microbial/nitrification.zig`'s `calculatePotential`
+(`updated_inhibition`/`non_band_inhibition`/`band_inhibition`, lines 80,90-91)
+-- `preserved`. **But the NH4/NO2 competition-fallback fractions
+(`nitro.f:1088-1097` FNH4/FNB4 vs `:1209-1218` FNO2/FNB2) are conflated in
+Zig**: `nitrification_step.zig`'s `makeZone` sets one `Zone.fallback_available_fraction`
+field to the nitrate-zone volume fraction (`fractions.nitrate_non_band/band`,
+correct for the NO2-oxidizer's own fallback, which legacy aliases to
+`FNO3S`/`FNO3B` at `nitro.f:338-339`) and reuses that *same* field for the
+NH3-oxidizer's own fallback in `nitrification.zig:81-82`, where the legacy
+instead uses the independently-set ammonium-zone fraction (`FNH4S`/`FNHBS`).
+Confirmed via `charge_classification.zig`'s own test that `ammonium_non_band`
+and `nitrate_non_band` are genuinely independent runtime values (test uses
+0.75 vs 0.65), not aliases. This is exactly the project's recurring "N
+parallel blocks, 1 outlier" pattern: two sibling competition-fallback
+formulas that must each use their own zone's volume fraction, one of which
+was miswired to the other's. Reachable at minimum on hour 1 of every run and
+whenever a layer's aggregate ammonium-demand history resets (new/thawed
+layer), and only numerically inert when a deck's NH4 and NO3 band geometries
+happen to coincide. Filed as
+`audit/issues/issue-054-nitro-nitrification-ammonium-fallback-uses-nitrate-zone-fraction.md`.
+**Disposition: `unresolved`** (confirmed defect, impact not yet quantified --
+needs a build/run to measure, out of scope for this static pass).
+
+**`:1335-1666` methanotrophs, O2 uptake solver, respiration-product
+allocation** -- Zig: `ecosys-ng/src/soil/gas/methane_step.zig` /
+`methane_oxidation.zig` (CH4 dissolution/oxidation sub-hour loop),
+`ecosys-ng/src/soil/gas/oxygen_solver.zig` (`activeUptake`, the shared
+implicit O2 quadratic solve used by all aerobic populations), and
+`ecosys-ng/src/soil/microbial/respiration_products_step.zig`
+(`applyTile`, RCO2X/RCH3X/RCH4X/RH2GX product split). Independently
+re-derived the O2 solver's quadratic algebraically against
+`nitro.f:1541-1543` (`B=-RUPMX-DIFOX*OXKM-X`, `C=X*RUPMX`,
+`RMPOX=(-B-SQRT(B*B-4*C))/2`): expanding `B^2-4C` gives exactly
+`(demand-x)^2 + half_saturation_term*(2*(demand+x)+half_saturation_term)`,
+matching `oxygen_solver.zig:203` verbatim, and confirmed the stabilized
+`2*(demand/denominator)*x` form is algebraically identical to
+`(sum-root)/2` via the same expansion (`sum^2-discriminant=4*demand*x`) --
+the Zig form is a numerically-stable rearrangement, not a different
+equation. `preserved`. The RCO2X/RCH3X/RCH4X/RH2GX product split
+(`nitro.f:1638-1665`, including the `0.333`/`0.667`/`0.111` fermenter split
+and the `0.50`/`0.50` acetotrophic-methanogen split) is reproduced exactly in
+`respiration_products_step.zig:78-89`, with a well-documented, independently
+verified-safe edge case for the K=5 (autotrophic complex) branch that legacy
+handles differently (`RCH4X=RGOMO`, no CO2/acetate split) but which the Zig
+comment proves is unobservable today because an upstream substrate-loop
+clamp (`substrate_uptake_step.zig`) never populates K=5's
+`actual_aerobic_respiration_g_c`. `preserved`.
+
+**`:2482-2918` maintenance/growth respiration, N2 fixation coupling,
+DOC/DON/DOP uptake, recycling, decomposition, humification, senescence** --
+Zig: `ecosys-ng/src/soil/microbial/metabolism.zig` (`maintenance`,
+`nonsymbioticNitrogenFixation`, `respirationDrivenSubstrateUptake`,
+`recyclingFractions`, `decompose`, `acceleratedSenescence`). Independently
+re-derived every equation term-for-term against direct re-reads of
+`nitro.f:2496-2913`: `maintenance()`'s `growth_respiration_g_c=max(0,oxygen_limited-total)`/
+`senescence_respiration_deficit_g_c=max(0,total-oxygen_limited)` matches
+`RGOMT=AMAX1(0,RGOMO-RMOMT)`/`RXOMT=AMAX1(0,RMOMT-RGOMO)` exactly (`:2507-2509`);
+`respirationDrivenSubstrateUptake`'s `aerobic_carbon`/`denitrification_carbon`/
+`doc`/`acetate`/`dissolved_organic_nitrogen`/`dissolved_organic_phosphorus`
+match `CGOMX`/`CGOMD`/`CGOQC`/`CGOAC`/`CGOMN`/`CGOMP` exactly, including the
+`K.LE.4` vs autotrophic branch split (`:2580-2613`); `recyclingFractions`'s
+carbon/nitrogen/phosphorus balance clamps match `CCC`/`CNC`/`CPC`/`RCCC`/
+`RCCN`/`RCCP` exactly (`:2627-2646`); `decompose()`'s
+`rate=sqrt(temperature_response)*water_response*basal_rate*microbial_carbon_response*dt`
+matches `SPOMX=SQRT(TFNX)*WFNG*SPOMC(M)*SPOMK*XNFH` exactly (`:2695`), and its
+recycled/humified/microbial_residue split matches `R3OMC`/`RHOMC`/`RCOMC`
+exactly including the humified-carbon-not-litterfall-carbon multiplier used
+in the N,P humus-ratio ceiling (`:2699-2748`); `acceleratedSenescence`'s
+gate (`enabled = deficit>negligible AND total_maintenance>negligible AND
+recycling.carbon>0`) and `deficit_fraction=deficit/total` match the
+`IF(RXOMT.GT.ZEROS.AND.RMOMT.GT.ZEROS.AND.RCCC.GT.ZERO)` gate and
+`FRM=RXOMT/RMOMT` exactly (`:2767-2769`), with the same recycled/humified/
+residue split reused (`:2777-2801`). No asymmetry defect found anywhere in
+this range. **Disposition: `preserved`.**
+
+**Loose end 1 of 2, RESOLVED (with a scope correction to prior passes'
+description):** `nitrogen_state_update.zig`'s `applyZone` (the standing open
+item since pass 1) was traced directly. It is a small, private, 20-line
+function (`nitrogen_state_update.zig:1438-1457`) called exactly twice per
+layer (non-band, band; call sites at lines 214-215) that commits *only* the
+mineral-N triplet (ammonium/nitrate/nitrite) from nitrification +
+heterotrophic denitrification + autotrophic (nitrifier-)denitrification +
+chemodenitrification fluxes. Verified its mass-balance structure directly:
+`ammonium -= ammonia_oxidation + autotrophic_ammonium_oxidation`;
+`nitrate += nitrite_oxidation - nitrate_reduction`; `nitrite = nitrite +
+ammonia_oxidation + autotrophic_ammonium_oxidation + nitrate_reduction -
+nitrite_oxidation - heterotrophic_nitrite_reduction -
+autotrophic_nitrite_reduction - chemo_nitrite_reduction` -- this is exactly
+the NH4->NO2->NO3 flow topology independently confirmed against the
+Fortran's RVOXA/RNNO2/RDNO3/RDNO2/RDN2/RCN2O flux family in the third-pass
+addendum (denitrification cascade) and the fourth-pass chemodenitrification
+finding. **`applyZone` itself is `preserved`, verified correct.**
+**Correction**: the fourth-pass addendum's claim that `applyZone`'s "scope
+now effectively covers... decomposition, priming, colonization" is
+overclaimed and is corrected here. Those organic-pool (OSC/OQC/ORC/OHC/OMC)
+commits are performed by *separate* helpers in the same file
+(`addPool`/`subtractPool` at lines 318-320,434-449, and
+`applyMicrobialExchange` for the mineralization-immobilization
+ammonium/nitrate/phosphate exchange at lines 216-223) inside the same
+per-layer orchestrator `state_updateLayer` (line 70) -- `applyZone` proper
+never touches organic state. The correct broader claim is that
+`state_updateLayer`, not `applyZone`, is the single per-layer state-commit
+entry point that composes all of these narrower, independently-named
+helpers. This does not change any prior pass's disposition (all the
+decomposition/priming/colonization/sorption/combustion/mixing equations
+already verified `preserved` in earlier passes remain `preserved`); it only
+corrects which function name owns which commit.
+
+**Loose end 2 of 2, RESOLVED:** `Z4MX`/`Z4KU`/`Z4MN`/`ZOMX`/`ZOKU`/`ZOMN`
+(`nitro.f:154-155`: `Z4MX=1.4E-02, Z4KU=0.40, Z4MN=0.0125, ZOMX=1.4E-02,
+ZOKU=0.35, ZOMN=0.03`) checked against
+`ecosys-ng/src/soil/nutrients/nitrogen_parameters.zig`'s
+`MicrobialMineralExchangeParameters` struct, with production numeric values
+found at `ecosys-ng/src/surface/autotrophic_complex_step.zig:978` and
+confirmed against the production config-string format
+(`"soil_microbial_mineral_exchange 0.014 0.0125 0.40 0.014 0.03 0.35 ..."`
+found in a delimited-input test): `ammonium_maximum_uptake_g_n_per_m2_h=0.014`
+(=`Z4MX`), `ammonium_minimum_concentration_g_n_per_m3=0.0125` (=`Z4MN`),
+`ammonium_half_saturation_g_n_per_m3=0.4` (=`Z4KU`),
+`nitrate_maximum_uptake_g_n_per_m2_h=0.014` (=`ZOMX`),
+`nitrate_minimum_concentration_g_n_per_m3=0.03` (=`ZOMN`),
+`nitrate_half_saturation_g_n_per_m3=0.35` (=`ZOKU`). All six constants match
+exactly. `CNOMC` (max microbial N:C ratio) was already independently
+confirmed used correctly throughout this and prior passes (e.g. `:2534`
+`RGN2P` derivation, `:2630` `CCC` derivation) via the shared
+`nitrogen_parameters`/microbial-state plumbing -- no separate constant-table
+check needed beyond the equation-level verification already done.
+**Disposition: `preserved`.**
+
+**Cross-check against other files' findings:** none of this pass's items
+overlap with `solute.f`'s open issues, `starte.f`'s partial coverage,
+`redist.f`'s/`watsub.f`'s closed audits, or the concurrent `hour1.f` pass
+(`issue-053`, unrelated). `issue-054` is the only new open item.
+
+**Coverage:** this pass added the four remaining named gaps
+(`:160-900,1060-1150,1335-1666,2482-2918`, ~866 lines). Combined with all
+four prior passes, `nitro.f`'s full 4,592 lines are now covered at
+statement level. See closing summary below.
+
+## Closing summary (nitro.f, five passes, 2026-09-18/2026-09-19)
+
+**Final tally:**
+- **Lines read at statement level: 4,592 of 4,592 (100%)**, across five
+  passes (pass 1: nitrification/denitrification/mineralization backbone +
+  scope correction from ~7,000 to 4,592 lines; pass 2 (2026-09-18
+  follow-up): methanogenesis, N2 fixation, litter mineralization; pass 3:
+  denitrification cascade completion + chemodenitrification; pass 4:
+  SOC/residue/sorbed decomposition, priming, sorption, litter colonization,
+  layer mixing, fire/combustion, gas-flux aggregation; pass 5 (this
+  addendum): parameter/setup block, nitrification competition+inhibition
+  setup, methanotrophs/O2 solver, growth-respiration/DOC-DON-DOP
+  partitioning+recycling+humification).
+- **Dispositions:** the overwhelming majority `preserved` (functional-form
+  and constant-level exact matches, independently re-derived against direct
+  Fortran reads, not trusted from comments alone). Two approved-feature
+  additions noted in earlier passes (`NITRO-N2FIX-SUPPLY` dissolved-N2
+  mass-conservation bound). One already-closed `legacy-defect-corrected`
+  sub-finding (`GAS-METHANOGENESIS-DOUBLE-0.111-001`, hydrogenotrophic
+  methanogenesis). Two `unresolved` items: `issue-020` (litter NO3 `AMAX1`
+  anomaly, Zig behavior almost certainly correct but undocumented) and this
+  pass's new `issue-054` (nitrification ammonium-fallback zone-fraction
+  conflation, confirmed defect, unquantified impact).
+- **Zig homes confirmed across all passes:**
+  `ecosys-ng/src/soil/microbial/` (nitrification, denitrification,
+  autotrophic/chemodenitrification, methanogenesis, respiration_activity,
+  anaerobic_growth_respiration, metabolism, layer_mixing,
+  respiration_products_step, nitrogen_exchange_step, phosphorus_exchange_step,
+  nonsymbiotic_nitrogen_fixation_step), `ecosys-ng/src/soil/organic/`
+  (decomposition_step, priming_step, sorption, litter_colonization_step,
+  combustion), `ecosys-ng/src/soil/biogeochemistry/`
+  (organic_substrate_decomposition, organic_priming_exchange,
+  organic_matter_fire_exchange), `ecosys-ng/src/soil/gas/`
+  (methane_step, methane_oxidation, oxygen_solver, oxygen_allocation,
+  biogeochemical_gas_aggregation), `ecosys-ng/src/soil/nutrients/`
+  (nitrogen_state_update, nitrogen_parameters, reactive_nitrogen_state,
+  competition_history), and `ecosys-ng/src/surface/` (the litter-surface
+  siblings of most of the above).
+- **Both standing loose ends from pass 1 resolved this pass**: `applyZone`
+  verified correct for its actual (narrower-than-previously-described) scope;
+  `Z4MX`/`Z4KU`/`Z4MN`/`ZOMX`/`ZOKU`/`ZOMN` constants verified identical.
+- **What still needs human/reviewer attention**: `issue-054` (new, needs a
+  build/run to quantify impact and a scope decision on whether it is
+  material enough to fix before v1.0.0); `issue-020` (needs a formal review
+  record, not a fix); an independent reviewer pass on all five addenda
+  (none of `feature-005`'s content has been independently re-verified by a
+  separate reviewer yet, per contract's "Independent review is a separate
+  pass with evidence, not multiple agents agreeing on a summary").
+- **Not in scope for this static pass**: no build, run, or test was
+  performed; `issue-054`'s numerical impact is unmeasured; conservation/
+  physical-acceptance checks for any of these equations were not attempted
+  (that is a G2 concern, not G1 source audit).
 
 ## Addendum 2026-09-19 (fourth pass): SOC/residue/sorbed decomposition, priming, sorption, litter colonization, layer mixing, fire/combustion, gas-flux aggregation (`nitro.f:2973-4592`) -- the largest remaining block, all clean
 
@@ -86,18 +320,35 @@ Read-only static pass. Confirmed no `zig`/`gfortran`/`ecosys_ng`/`ecosys_oracle`
 
 **2. Corrected translation defect, found via in-code evidence -- independently re-derived 2026-09-19 (see addendum above):** `denitrification.zig:143-176`'s doc comment on `AutotrophicInputs.ammonium_supply_per_nitrite_reduction` documents a previously-reconstructed bound that conflated two distinct source constants -- `nitro.f:2029/2031` (`FNH4*3.0*ZNH4S*XNFH`) vs `nitro.f:2040/2041` (`0.333`) -- computing `NH4/0.333 = 3.003x NH4` instead of keeping `3` and `0.333` as separate factors, overstating the electron-donor ceiling by `1.001001x`. **`nitro.f:2029-2041` was independently re-read in the 2026-09-19 pass and confirms the comment exactly**: the two constants are textually and numerically distinct in the legacy source. Disposition: **`preserved`** (revised from the prior pass's tentative `legacy-defect-corrected` -- the thing that was corrected was a prior Zig-side translation draft conflating the two constants, not a defect in the legacy Fortran; current Zig state matches legacy exactly, so `preserved` is the correct disposition per the contract's vocabulary).
 
-## Not covered this pass (as of 2026-09-19, fourth pass)
+## Not covered (historical -- superseded, see fifth-pass closing summary above)
 
-Remaining unaudited in `nitro.f` (~820-870 of 4,592 lines, ~18-19%):
-- `:160-900` -- parameter/decomposition-rate declarations and setup (mostly comment blocks + initialization, low equation density, not yet swept for embedded logic beyond the banner sweep).
-- `:1060-1150` -- NH4 competition-factor and nitrification-inhibition setup preceding the already-audited `:1153-1170`/`:1251-1265` nitrification reactions.
-- `:1335-1666` -- methanotrophs (CH4 oxidation) and O2 uptake/dissolution mechanics; C/O2-cycle-focused, lower priority for this N-cycle feature but shared inputs (`ROXYM`/`ROXYO`) feed the denitrification unmet-O2-demand terms audited earlier this session.
-- `:2482-2918` -- microbial maintenance/growth respiration, DOC/DON/DOP uptake partitioning driven by growth respiration, C:N:P recycling from senescence, humification -- largely C-cycle bookkeeping with embedded N,P terms (`CGOMN`/`CGOMP` etc.); not yet independently read.
-- `nitrogen_state_update.zig`'s `applyZone` (standing open item from pass 1, its scope now extended by the fourth pass to cover essentially the entire file's state-commit path -- nitrification, denitrification, mineralization, decomposition, priming, colonization, and the gas-flux/mineral-N aggregation at `:3527-3858,3904-4160` all funnel through it -- not yet independently traced against the Fortran equations it claims to port).
-- Constant-level check of `Z4MX/Z4KU/ZOMX/ZOKU/CNOMC` against `nitrogen_parameters.zig` (flagged open since pass 1, still not done).
+As of the fourth pass, ~820-870 of 4,592 lines and the two loose ends below
+were still open. **All were closed by the fifth pass (2026-09-19, see
+addendum above).** Kept here for history:
+- `:160-900`, `:1060-1150`, `:1335-1666`, `:2482-2918` -- closed, fifth pass.
+- `nitrogen_state_update.zig`'s `applyZone` -- closed, fifth pass (verified
+  correct for its actual scope; prior passes' description of its scope was
+  corrected).
+- Constant-level check of `Z4MX/Z4KU/ZOMX/ZOKU/CNOMC` -- closed, fifth pass
+  (all six constants confirmed identical).
 
-Already covered (do not re-audit): nitrification (`:1153-1170,1251-1265`); heterotrophic+autotrophic denitrification NO3->NO2->N2O (`:1667-2063`); NH4/NO3/H2PO4/HPO4 mineralization-immobilization, soil and litter (`:2064-2481`); N2 fixation (`:2511-2553`); methanogenesis (`:986-1059,1290-1334`); chemodenitrification (`:2919-2972`); heterotrophic decomposition of structural/residue/sorbed substrates and humification (`:3182-3458`, fourth pass); priming redistribution (`:3003-3179`, fourth pass); DOC/DON/DOP/acetate sorption-desorption (`:3460-3525`, fourth pass); litter colonization (`:3860-3902`, fourth pass); inter-layer microbial mixing (`:4162-4246`, fourth pass); fire/combustion (`:4286-4592`, fourth pass); gas-flux aggregation equations (`:3996-4020`, fourth pass, equation-level only).
+Already covered (do not re-audit): the entire file, `:1-4592`. See the
+fifth-pass closing summary above for the full Zig-home list and final tally.
 
 ## Acceptance and review
 
-Author: this session's audit fork, 2026-09-18/2026-09-19 (four passes, explicitly scoped per each addendum above). Independent reviewer: not yet done. Evidence: file:line citations above; git status showed only a concurrent `hour1.f` pass's unrelated files modified at the start of the fourth pass (static read-only, no `zig build`/tests executed, confirmed again immediately before committing). Decision: NOT_ASSESSED for gate purposes; all equations read to date `preserved` (one `unresolved` issue-020 anomaly on litter NO3 `AMAX1`, filed separately); `applyZone` remains the standing open verification gap blocking a coverage-complete assessment, now understood to cover essentially the whole file's state-commit path rather than just the mineralization potentials originally scoped. `nitro.f`'s audit is NOT complete: ~820-870 lines remain unread (`:160-900,1060-1150,1335-1666,2482-2918`) plus the `applyZone` trace and the `Z4MX`/etc. constant check.
+Author: this session's audit fork, 2026-09-18/2026-09-19 (five passes,
+explicitly scoped per each addendum above). Independent reviewer: not yet
+done -- this is the single largest remaining action item for this dossier.
+Evidence: file:line citations above; each pass confirmed `git status
+--short` clean of unrelated changes and no `zig`/`gfortran`/`ecosys_ng`/
+`ecosys_oracle` process running before starting (static read-only passes
+throughout this dossier's history; no `zig build`/test/run ever executed as
+part of this feature's audit). **Decision: source-audit coverage of
+`nitro.f` is now complete (4,592/4,592 lines, 100%) with one new open
+`unresolved` issue (`issue-054`) and one pre-existing open `unresolved`
+issue (`issue-020`), both needing reviewer/build-time follow-up. This
+dossier remains NOT_ASSESSED for formal gate purposes** (per contract,
+"Missing evidence is never a pass" and independent review is a distinct,
+not-yet-performed step) **but `nitro.f`'s G1 source-audit work itself is
+complete.**
