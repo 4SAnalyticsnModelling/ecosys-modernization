@@ -420,6 +420,16 @@ pub fn applyLayerRedistribution(ctx: Context, geometry_changes: Geometry.Disturb
                 );
 
             // 1. Water / heat.
+            //
+            // `issue-062`. `water_heat_remap`'s own VHCPRX-floor fallback
+            // (`redist.f` 9660--9665) can discard or manufacture a small,
+            // bounded amount of energy on either side of this exact boundary
+            // when a resulting layer's heat capacity ends at or below the
+            // floor -- faithful legacy behavior, not a translation defect.
+            // Capture it so the `stageBoundary` snapshot check below can net
+            // it out instead of misreading it as an unexplained donor/
+            // recipient mismatch.
+            var water_heat_floor_discard: water_heat_remap.FloorDiscard = .{};
             try water_heat_remap.transferLayerFractions(
                 ctx.grid,
                 ctx.soil_thermal,
@@ -428,6 +438,7 @@ pub fn applyLayerRedistribution(ctx: Context, geometry_changes: Geometry.Disturb
                 fx,
                 fho,
                 ctx.water_heat_parameters,
+                &water_heat_floor_discard,
             );
 
             // FHOL is intensive: the donor keeps its property, while the
@@ -604,6 +615,12 @@ pub fn applyLayerRedistribution(ctx: Context, geometry_changes: Geometry.Disturb
                     recipient_before_activity.?,
                     donor_after_activity,
                     recipient_after_activity,
+                    // `issue-062`: `src_layer`/`dst_layer` are always the
+                    // donor/recipient of the water/heat remap above, so its
+                    // reported source/destination discard maps directly onto
+                    // donor/recipient here.
+                    water_heat_floor_discard.source_megajoules +
+                        water_heat_floor_discard.destination_megajoules,
                 );
             }
         }

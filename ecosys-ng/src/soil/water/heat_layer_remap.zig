@@ -10,6 +10,25 @@ pub const Parameters = struct {
     minimum_heat_capacity_megajoules_per_k: f64,
 };
 
+/// `issue-062`. `redist.f` 9660--9665 (mirrored below at the `minimum_heat_capacity_megajoules_per_k`
+/// fallback) assigns a side's temperature from the undivided layer's
+/// temperature instead of dividing energy by a heat capacity at or below
+/// `VHCPRX`, whenever that side's resulting capacity is nonzero but too small
+/// to divide by. That is faithful, deliberately-tested legacy behavior (see
+/// this file's own fallback tests), but it means the side's actual final
+/// state -- `capacity_after * assigned_temperature` -- can differ from the
+/// exact conservative energy split computed just above it. This struct
+/// reports that difference so a downstream conservation consumer with its
+/// own before/after snapshot of the same transfer (e.g.
+/// `relayering_activity.zig`'s `stageBoundary`) can net it out before
+/// comparing donor loss against recipient gain, instead of independently
+/// discovering -- via a crash -- that it needs its own floor patch. Zero on
+/// a side whenever that side's exact division path was taken.
+pub const FloorDiscard = struct {
+    source_megajoules: f64 = 0,
+    destination_megajoules: f64 = 0,
+};
+
 const Candidate = struct {
     source_matrix_liquid_water_m3: f64,
     destination_matrix_liquid_water_m3: f64,
@@ -37,6 +56,9 @@ const Candidate = struct {
     destination_total_heat_capacity_megajoules_per_k: f64,
     source_temperature_k: f64,
     destination_temperature_k: f64,
+    /// See `FloorDiscard`. Zero unless this side's floor fallback fired.
+    source_discarded_megajoules: f64,
+    destination_discarded_megajoules: f64,
 };
 
 /// Matrix-only compatibility entry point. Production REDIST uses
@@ -49,8 +71,9 @@ pub fn transferLayerFraction(
     destination: usize,
     fraction: f64,
     parameters: Parameters,
+    floor_discard: ?*FloorDiscard,
 ) !void {
-    try transferLayerFractions(grid, thermal, source, destination, fraction, 0, parameters);
+    try transferLayerFractions(grid, thermal, source, destination, fraction, 0, parameters, floor_discard);
 }
 
 /// Conservative coupled REDIST water/ice/heat remap. `matrix_fraction` is
@@ -65,8 +88,13 @@ pub fn transferLayerFractions(
     matrix_fraction: f64,
     macropore_fraction: f64,
     parameters: Parameters,
+    floor_discard: ?*FloorDiscard,
 ) !void {
     const candidate = try calculate(grid, thermal, source, destination, matrix_fraction, macropore_fraction, parameters);
+    if (floor_discard) |out| out.* = .{
+        .source_megajoules = candidate.source_discarded_megajoules,
+        .destination_megajoules = candidate.destination_discarded_megajoules,
+    };
 
     grid.matrix_liquid_water_m3[source] = candidate.source_matrix_liquid_water_m3;
     grid.matrix_liquid_water_m3[destination] = candidate.destination_matrix_liquid_water_m3;
@@ -221,6 +249,8 @@ fn calculate(
         .destination_total_heat_capacity_megajoules_per_k = undefined,
         .source_temperature_k = undefined,
         .destination_temperature_k = undefined,
+        .source_discarded_megajoules = undefined,
+        .destination_discarded_megajoules = undefined,
     };
     result.source_total_heat_capacity_megajoules_per_k = result.source_dry_heat_capacity_megajoules_per_k +
         parameters.liquid_water_heat_capacity_megajoules_per_m3_k * (result.source_matrix_liquid_water_m3 + result.source_macropore_liquid_water_m3 + result.source_water_vapor_volume_m3) +
@@ -274,8 +304,33 @@ fn calculate(
     result.destination_temperature_k = if (result.destination_total_heat_capacity_megajoules_per_k > parameters.minimum_heat_capacity_megajoules_per_k) destination_energy_after / result.destination_total_heat_capacity_megajoules_per_k else grid.soil_temperature_k[source];
     result.source_temperature_k = if (result.source_total_heat_capacity_megajoules_per_k > parameters.minimum_heat_capacity_megajoules_per_k) source_energy_after / result.source_total_heat_capacity_megajoules_per_k else result.destination_temperature_k;
 
+    // `issue-062`/`FloorDiscard`. Whenever the fallback above fired, the side's
+    // actual final state (`capacity_after * assigned_temperature`) is not the
+    // exact conservative split (`*_energy_after`) computed a few lines above --
+    // that is precisely what `redist.f` 9660--9665 accepts by holding the
+    // undivided temperature instead of dividing. Report the difference so a
+    // caller with its own before/after transfer snapshot (this file's own
+    // callers are its regression tests; production's is
+    // `relayering_activity.zig`'s `stageBoundary`) can recognize this exact,
+    // bounded, already-characterized event instead of treating it as an
+    // unexplained conservation violation. Zero whenever the exact division
+    // path was taken.
+    result.destination_discarded_megajoules =
+        if (result.destination_total_heat_capacity_megajoules_per_k > parameters.minimum_heat_capacity_megajoules_per_k)
+            0
+        else
+            result.destination_total_heat_capacity_megajoules_per_k * result.destination_temperature_k - destination_energy_after;
+    result.source_discarded_megajoules =
+        if (result.source_total_heat_capacity_megajoules_per_k > parameters.minimum_heat_capacity_megajoules_per_k)
+            0
+        else
+            result.source_total_heat_capacity_megajoules_per_k * result.source_temperature_k - source_energy_after;
+
+    inline for (.{ result.source_total_heat_capacity_megajoules_per_k, result.destination_total_heat_capacity_megajoules_per_k, result.source_temperature_k, result.destination_temperature_k, result.source_discarded_megajoules, result.destination_discarded_megajoules }) |value| {
+        if (!std.math.isFinite(value)) return error.InvalidWaterHeatLayerRemapResult;
+    }
     inline for (.{ result.source_total_heat_capacity_megajoules_per_k, result.destination_total_heat_capacity_megajoules_per_k, result.source_temperature_k, result.destination_temperature_k }) |value| {
-        if (!std.math.isFinite(value) or value < 0) return error.InvalidWaterHeatLayerRemapResult;
+        if (value < 0) return error.InvalidWaterHeatLayerRemapResult;
     }
     // A zero-volume source may still legitimately hold heat capacity, because
     // its macropore stores stay attached to the layer (`redist.f` 9609--9622,
@@ -386,7 +441,7 @@ test "a fully transferred source layer that retains macropore water is accepted"
         grid.macropore_ice_water_m3[0] + grid.macropore_ice_water_m3[1];
 
     // This is the call that failed in the fen's first simulated hour.
-    try transferLayerFraction(&grid, &thermal, 0, 1, 1.0, parameters);
+    try transferLayerFraction(&grid, &thermal, 0, 1, 1.0, parameters, null);
 
     // Tier 1: the source's matrix domain is empty and its macropore domain is
     // untouched, which is the source behaviour being asserted.
@@ -452,7 +507,7 @@ test "an emptied source with no retained storage inherits the destination temper
     // No macropore storage is retained, so a full transfer leaves the source with
     // literally nothing: zero volume, zero capacity, zero stores.
     try std.testing.expectEqual(@as(f64, 0), grid.macropore_liquid_water_m3[0]);
-    try transferLayerFraction(&grid, &thermal, 0, 1, 1.0, parameters);
+    try transferLayerFraction(&grid, &thermal, 0, 1, 1.0, parameters, null);
     // Accepted, because a source with zero retained capacity is consistent: it
     // holds no energy, and it inherits the destination temperature exactly as
     // `redist.f` 9660--9665 does through its `TKS(L,NY,NX)` fallback.
@@ -590,7 +645,7 @@ test "a partial transfer leaves retained macropore heat in the source layer" {
     }
     const energy_before = censusEnergy(&grid, &thermal, parameters);
 
-    try transferLayerFraction(&grid, &thermal, 0, 1, 0.4, parameters);
+    try transferLayerFraction(&grid, &thermal, 0, 1, 0.4, parameters, null);
 
     // Tier 2: energy is still conserved. Both formulations pass this, which is
     // exactly why it is not sufficient on its own.
@@ -649,7 +704,7 @@ test "remap conserves the EXEC census heat definition when a layer holds vapor" 
     }
 
     const energy_before = censusEnergy(&grid, &thermal, parameters);
-    try transferLayerFraction(&grid, &thermal, 0, 1, 0.25, parameters);
+    try transferLayerFraction(&grid, &thermal, 0, 1, 0.25, parameters, null);
     const energy_after = censusEnergy(&grid, &thermal, parameters);
     try std.testing.expectApproxEqRel(energy_before, energy_after, 1e-12);
 }
@@ -703,7 +758,7 @@ test "REDIST water heat remap conserves matrix stores and energy while leaving m
         total_heat_capacity_megajoules_per_m3_k[index] = censusHeatCapacityPerK(&grid, &thermal, index, parameters) / layer_volume_m3[index];
     }
     const initial_energy = censusEnergy(&grid, &thermal, parameters);
-    try transferLayerFraction(&grid, &thermal, 0, 1, 0.25, parameters);
+    try transferLayerFraction(&grid, &thermal, 0, 1, 0.25, parameters, null);
     try std.testing.expectApproxEqAbs(@as(f64, 0.3), grid.matrix_liquid_water_m3[0], 1e-14);
     try std.testing.expectApproxEqAbs(@as(f64, 0.4), grid.matrix_liquid_water_m3[1], 1e-14);
     try std.testing.expectEqual(@as(f64, 0.1), grid.macropore_liquid_water_m3[0]);
@@ -736,7 +791,7 @@ test "REDIST zero-volume recipient is refilled conservatively" {
     total_heat_capacity_megajoules_per_m3_k[0] = censusHeatCapacityPerK(&grid, &thermal, 0, parameters) / layer_volume_m3[0];
     const energy_before = censusEnergy(&grid, &thermal, parameters);
 
-    try transferLayerFraction(&grid, &thermal, 0, 1, 0.25, parameters);
+    try transferLayerFraction(&grid, &thermal, 0, 1, 0.25, parameters, null);
 
     try std.testing.expectApproxEqAbs(@as(f64, 0.5), layer_volume_m3[1], 1e-14);
     try std.testing.expectApproxEqAbs(@as(f64, 0.1), grid.matrix_liquid_water_m3[1], 1e-14);
@@ -773,7 +828,7 @@ test "REDIST zero-matrix donor transfers retained macropore phases and heat" {
     total_heat_capacity_megajoules_per_m3_k[1] = censusHeatCapacityPerK(&grid, &thermal, 1, parameters) / layer_volume_m3[1];
     const energy_before = censusEnergy(&grid, &thermal, parameters);
 
-    try transferLayerFractions(&grid, &thermal, 0, 1, 0.5, 0.5, parameters);
+    try transferLayerFractions(&grid, &thermal, 0, 1, 0.5, 0.5, parameters, null);
 
     try std.testing.expectEqual(@as(f64, 0), layer_volume_m3[0]);
     try std.testing.expectApproxEqAbs(@as(f64, 0.1), grid.macropore_liquid_water_m3[0], 1e-14);
@@ -822,7 +877,7 @@ test "REDIST coupled remap moves macropore phases and their enthalpy conservativ
     const macropore_ice_before = grid.macropore_ice_water_m3[0] + grid.macropore_ice_water_m3[1];
     const macropore_capacity_before = grid.macropore_pore_capacity_m3[0] + grid.macropore_pore_capacity_m3[1];
 
-    try transferLayerFractions(&grid, &thermal, 0, 1, 0.25, 0.25, parameters);
+    try transferLayerFractions(&grid, &thermal, 0, 1, 0.25, 0.25, parameters, null);
 
     try std.testing.expectApproxEqAbs(@as(f64, 0.09), grid.macropore_liquid_water_m3[0], 1e-14);
     try std.testing.expectApproxEqAbs(@as(f64, 0.23), grid.macropore_liquid_water_m3[1], 1e-14);
@@ -832,4 +887,102 @@ test "REDIST coupled remap moves macropore phases and their enthalpy conservativ
     try std.testing.expectApproxEqRel(energy_before, censusEnergy(&grid, &thermal, parameters), 1e-12);
     try std.testing.expectApproxEqRel(@as(f64, 280), grid.soil_temperature_k[0], 1e-13);
     try std.testing.expectApproxEqRel(@as(f64, 280), grid.soil_temperature_k[1], 1e-13);
+}
+
+test "issue-062: the redist.f 9660-9665 remap-time floor fallback reports the energy its undivided-temperature fallback discards" {
+    // A thin, nearly-dry source layer (hour 2894's degenerate cell-0/layer-0
+    // shape, per issue-060/062) transferring almost all of its tiny water
+    // content into a well-watered destination at a different temperature.
+    // Leaving 0.1% of the source's already-tiny water content puts its
+    // resulting capacity (~4.19e-6 MJ/K) below the 8.38e-5 `VHCPRX`-style
+    // floor, so `redist.f` 9660--9665's undivided-temperature fallback must
+    // fire for the source side only.
+    const config = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 2, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 4 });
+    var grid = try GridState.init(std.testing.allocator, config);
+    defer grid.deinit();
+    var thermal: thermal_module.State = undefined;
+    var layer_volume_m3 = [_]f64{ 0.05, 0.10 };
+    var dry_heat_capacity_megajoules_per_m3_k = [_]f64{ 0, 0 };
+    var total_heat_capacity_megajoules_per_m3_k = [_]f64{ 0, 0 };
+    var porosity_fraction = [_]f64{ 0.9, 0.9 };
+    thermal.layer_volume_m3 = &layer_volume_m3;
+    thermal.dry_solid_heat_capacity_megajoules_per_m3_k = &dry_heat_capacity_megajoules_per_m3_k;
+    thermal.total_heat_capacity_megajoules_per_m3_k = &total_heat_capacity_megajoules_per_m3_k;
+    thermal.porosity_fraction = &porosity_fraction;
+
+    grid.matrix_liquid_water_m3[0] = 0.001;
+    grid.matrix_liquid_water_m3[1] = 1.0;
+    grid.soil_temperature_k[0] = 300;
+    grid.soil_temperature_k[1] = 280;
+
+    const parameters: Parameters = .{
+        .liquid_water_heat_capacity_megajoules_per_m3_k = 4.19,
+        .ice_heat_capacity_megajoules_per_m3_k = 1.9274,
+        // `starts.f:655` VHCPRX = 8.380E-05 * AREA, the same floor issue-060/062 cite.
+        .minimum_heat_capacity_megajoules_per_k = 8.380e-5,
+    };
+    for (0..2) |index| {
+        thermal.total_heat_capacity_megajoules_per_m3_k[index] =
+            censusHeatCapacityPerK(&grid, &thermal, index, parameters) / thermal.layer_volume_m3[index];
+    }
+    const energy_before = censusEnergy(&grid, &thermal, parameters);
+
+    var discard: FloorDiscard = .{};
+    try transferLayerFraction(&grid, &thermal, 0, 1, 0.999, parameters, &discard);
+
+    // The destination's resulting capacity (~4.19 MJ/K) stays far above the
+    // floor, so its exact division path is unaffected.
+    try std.testing.expectEqual(@as(f64, 0), discard.destination_megajoules);
+    // The source's resulting capacity is below the floor: its fallback
+    // fired and it must report a materially nonzero discard, or this
+    // struct is reporting nothing useful.
+    try std.testing.expect(@abs(discard.source_megajoules) > 1e-6);
+
+    // The identity this struct exists to preserve, checked structurally
+    // (not by hand-deriving the exact split's own magic numbers): whatever
+    // the fallback added to or removed from the system relative to the
+    // exact conservative split is exactly recoverable as the reported
+    // discard, with no other unaccounted term. `energy_after - energy_before`
+    // is the whole system's real energy change, and the exact split alone
+    // would have kept that at exactly zero.
+    // Absolute, not relative: `energy_after`/`energy_before` are ~1174 MJ
+    // scale and their difference is only ~8e-5 MJ, so comparing on a
+    // relative basis against the tiny result amplifies ordinary ~1e-13 MJ
+    // float noise from the two large operands into a spurious failure.
+    const energy_after = censusEnergy(&grid, &thermal, parameters);
+    try std.testing.expectApproxEqAbs(
+        discard.source_megajoules + discard.destination_megajoules,
+        energy_after - energy_before,
+        1e-9,
+    );
+}
+
+test "issue-062: FloorDiscard reports zero on both sides when both endpoints divide normally" {
+    const config = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 2, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 4 });
+    var grid = try GridState.init(std.testing.allocator, config);
+    defer grid.deinit();
+    var thermal: thermal_module.State = undefined;
+    var layer_volume_m3 = [_]f64{ 2, 3 };
+    var dry_heat_capacity_megajoules_per_m3_k = [_]f64{ 1, 2 };
+    var total_heat_capacity_megajoules_per_m3_k = [_]f64{ 0, 0 };
+    var porosity_fraction = [_]f64{ 0.5, 0.5 };
+    thermal.layer_volume_m3 = &layer_volume_m3;
+    thermal.dry_solid_heat_capacity_megajoules_per_m3_k = &dry_heat_capacity_megajoules_per_m3_k;
+    thermal.total_heat_capacity_megajoules_per_m3_k = &total_heat_capacity_megajoules_per_m3_k;
+    thermal.porosity_fraction = &porosity_fraction;
+    grid.matrix_liquid_water_m3[0] = 0.4;
+    grid.matrix_liquid_water_m3[1] = 0.3;
+    grid.matrix_ice_water_m3[0] = 0.2;
+    grid.matrix_ice_water_m3[1] = 0.1;
+    grid.soil_temperature_k[0] = 280;
+    grid.soil_temperature_k[1] = 290;
+    const parameters: Parameters = .{ .liquid_water_heat_capacity_megajoules_per_m3_k = 4.19, .ice_heat_capacity_megajoules_per_m3_k = 1.9274, .minimum_heat_capacity_megajoules_per_k = 0 };
+    for (0..2) |index|
+        total_heat_capacity_megajoules_per_m3_k[index] = censusHeatCapacityPerK(&grid, &thermal, index, parameters) / layer_volume_m3[index];
+
+    var discard: FloorDiscard = .{};
+    try transferLayerFraction(&grid, &thermal, 0, 1, 0.25, parameters, &discard);
+
+    try std.testing.expectEqual(@as(f64, 0), discard.source_megajoules);
+    try std.testing.expectEqual(@as(f64, 0), discard.destination_megajoules);
 }

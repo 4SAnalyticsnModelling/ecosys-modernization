@@ -1004,6 +1004,7 @@ test "soil relayering publishes material and negative enthalpy in independent di
         .{ .water_m3 = 2, .heat_megajoules = -2, .organic_carbon_g = 4 },
         .{ .water_m3 = 6, .heat_megajoules = -6, .organic_carbon_g = 2 },
         .{ .water_m3 = 6, .heat_megajoules = -6, .organic_carbon_g = 5 },
+        0,
     );
     try sidecar.commitAttempt();
 
@@ -1061,6 +1062,7 @@ test "soil relayering adapter honors nonzero first active layer" {
         .{ .water_m3 = 1 },
         .{ .water_m3 = 2 },
         .{ .water_m3 = 2 },
+        0,
     );
     try sidecar.commitAttempt();
 
