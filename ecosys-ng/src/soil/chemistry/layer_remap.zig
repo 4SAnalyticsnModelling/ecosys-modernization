@@ -850,3 +850,101 @@ test "REDIST aqueous concentration uses pre-transfer amount and post-transfer ca
     try std.testing.expectApproxEqAbs(@as(f64, 4), chemistry.aqueous[0].calcium, 1e-14);
     try std.testing.expectApproxEqAbs(@as(f64, 2.0 / 4.5), chemistry.aqueous[1].calcium, 1e-14);
 }
+
+test "issue-063: transferSolidLayerFraction manufactures fake mass with a raw near-zero carrier but conserves mass when the caller floors it first" {
+    // Reproduces the hour-2,894 mechanism
+    // (`audit/issues/issue-063-relayering-activity-carbon-dioxide-carbon-mismatch-hour-2894.md`):
+    // `relayering.zig` previously passed this call's water-carrier arguments
+    // RAW (guarded only by `transferOwnedAmount`'s bare `scale_after > 0`
+    // check), while `landscape_mass_inventory_phosphorus_ions.zig`'s census
+    // always reads the resulting concentration back through the FLOORED
+    // `aqueousCarrierM3`/`legacyNegligibleWaterVolumeM3` substitution. A
+    // degenerate recipient carrier (at or below `ZEROS2`, nonzero) therefore
+    // inflates the stored concentration, and the census re-multiplies that
+    // inflated value by the much larger substituted reference volume --
+    // manufacturing mass with no physical process or bookkeeping error in
+    // either endpoint alone. `relayering.zig`'s fix floors all four carrier
+    // arguments the same way before calling this function; this test proves
+    // the underlying arithmetic is sound either way -- the caller's carrier
+    // choice is what determines whether the result is legacy-consistent.
+    const dry_reference_water_m3: f64 = 0.5;
+    const negligible_water_volume_m3 = 1.0e-6; // ZEROS2 for a 1 m^2 cell.
+    const raw_recipient_water_m3: f64 = 1.0e-9; // below the floor, nonzero.
+
+    // Census-style reader: always uses the floored carrier, exactly like
+    // `landscape_mass_inventory_phosphorus_ions.zig`'s private `aqueousCarrierM3`.
+    const censusCarrier = struct {
+        fn call(live_water_m3: f64) f64 {
+            return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+        }
+    }.call;
+
+    // --- OLD (pre-fix relayering.zig) caller behavior: raw, unfloored carrier passed straight through. ---
+    {
+        var chemistry = try chemistry_module.State.init(std.testing.allocator, 2);
+        defer chemistry.deinit();
+        chemistry.geochemistry_solids[0].calcite_solid_mol_per_m3 = 100;
+        chemistry.geochemistry_solids[1].calcite_solid_mol_per_m3 = 0.2;
+
+        const recipient_census_before = chemistry.geochemistry_solids[1].calcite_solid_mol_per_m3 *
+            censusCarrier(raw_recipient_water_m3);
+
+        try transferSolidLayerFraction(
+            &chemistry,
+            0,
+            1,
+            10,
+            10,
+            5.0,
+            raw_recipient_water_m3,
+            equal_zone_transition,
+            10,
+            10,
+            5.0,
+            raw_recipient_water_m3,
+            0.001,
+        );
+
+        const recipient_census_after = chemistry.geochemistry_solids[1].calcite_solid_mol_per_m3 *
+            censusCarrier(raw_recipient_water_m3);
+        const manufactured = recipient_census_after - recipient_census_before;
+        // The real transferred amount is 0.001 * (100 * 5.0) = 0.5 mol. The
+        // unfloored write manufactures roughly (dry_reference/raw) times
+        // that -- many orders of magnitude of fake mass, matching hour
+        // 2,894's shape (recipient gain far exceeding the donor's loss).
+        try std.testing.expect(manufactured > 1000 * 0.5);
+    }
+
+    // --- NEW (fixed relayering.zig) caller behavior: floors the carrier the same way the census does. ---
+    {
+        var chemistry = try chemistry_module.State.init(std.testing.allocator, 2);
+        defer chemistry.deinit();
+        chemistry.geochemistry_solids[0].calcite_solid_mol_per_m3 = 100;
+        chemistry.geochemistry_solids[1].calcite_solid_mol_per_m3 = 0.2;
+
+        const floored_recipient_water_m3 = censusCarrier(raw_recipient_water_m3);
+        const recipient_census_before = chemistry.geochemistry_solids[1].calcite_solid_mol_per_m3 *
+            censusCarrier(raw_recipient_water_m3);
+
+        try transferSolidLayerFraction(
+            &chemistry,
+            0,
+            1,
+            10,
+            10,
+            5.0,
+            floored_recipient_water_m3,
+            equal_zone_transition,
+            10,
+            10,
+            5.0,
+            floored_recipient_water_m3,
+            0.001,
+        );
+
+        const recipient_census_after = chemistry.geochemistry_solids[1].calcite_solid_mol_per_m3 *
+            censusCarrier(raw_recipient_water_m3);
+        const conserved = recipient_census_after - recipient_census_before;
+        try std.testing.expectApproxEqAbs(@as(f64, 0.5), conserved, 1e-9);
+    }
+}

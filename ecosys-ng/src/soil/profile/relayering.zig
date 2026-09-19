@@ -30,6 +30,7 @@ const fertilizer_remap = @import("../nutrients/fertilizer_layer_remap.zig");
 const mineral_remap = @import("../nutrients/mineral_layer_remap.zig");
 const root_remap = @import("../../plant/root/plant_root_layer_remap.zig");
 const relayering_activity = @import("relayering_activity.zig");
+const legacy_water_negligible_floor = @import("../../core/legacy_water_negligible_floor.zig");
 
 test {
     _ = relayering_activity;
@@ -522,14 +523,46 @@ pub fn applyLayerRedistribution(ctx: Context, geometry_changes: Geometry.Disturb
                 const solid_transfer_fraction = if (src_layer > dst_layer) fx else 0;
                 {
                     const moved_mass = fx * src_mass_before;
+                    // issue-063: `transferSolidLayerFraction`'s geochemistry-
+                    // solid/phosphate-precipitate loops must see the same
+                    // floored water-carrier basis
+                    // `landscape_mass_inventory_phosphorus_ions.zig`'s census
+                    // already applies when reading these same fields back,
+                    // or a degenerate near-zero (but nonzero) carrier at
+                    // either endpoint manufactures fake mass instead of
+                    // conserving the transferred amount.
+                    const cell_area_m2 = ctx.horizontal_cell_width_m[cell] * ctx.vertical_cell_width_m[cell];
+                    const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(cell_area_m2);
+                    const src_dry_reference_water_m3 = ctx.soil_chemistry.dry_reference_water_m3[src_global];
+                    const dst_dry_reference_water_m3 = ctx.soil_chemistry.dry_reference_water_m3[dst_global];
+                    const src_water_before_carrier = try solidTransferWaterCarrierM3(
+                        src_water_before,
+                        src_dry_reference_water_m3,
+                        negligible_water_volume_m3,
+                    );
+                    const dst_water_before_carrier = try solidTransferWaterCarrierM3(
+                        dst_water_before,
+                        dst_dry_reference_water_m3,
+                        negligible_water_volume_m3,
+                    );
+                    const src_water_after_carrier = try solidTransferWaterCarrierM3(
+                        src_water_after,
+                        src_dry_reference_water_m3,
+                        negligible_water_volume_m3,
+                    );
+                    const dst_water_after_carrier = try solidTransferWaterCarrierM3(
+                        dst_water_after,
+                        dst_dry_reference_water_m3,
+                        negligible_water_volume_m3,
+                    );
                     try chemistry_remap.transferSolidLayerFraction(
                         ctx.soil_chemistry,
                         src_global,
                         dst_global,
                         src_mass_before,
                         dst_mass_before,
-                        src_water_before,
-                        dst_water_before,
+                        src_water_before_carrier,
+                        dst_water_before_carrier,
                         .{
                             .source_before = chemistryZoneFractions(src_zone_fractions_before),
                             .destination_before = chemistryZoneFractions(dst_zone_fractions_before),
@@ -538,8 +571,8 @@ pub fn applyLayerRedistribution(ctx: Context, geometry_changes: Geometry.Disturb
                         },
                         src_mass_before - moved_mass,
                         dst_mass_before + moved_mass,
-                        src_water_after,
-                        dst_water_after,
+                        src_water_after_carrier,
+                        dst_water_after_carrier,
                         solid_transfer_fraction,
                     );
                 }
@@ -1163,6 +1196,56 @@ fn stagedLayerBottomFromSurface(
 ) f64 {
     return stagedBoundaryDepth(geometry, changes, cell, layer + 1) -
         stagedBoundaryDepth(geometry, changes, cell, first_active_layer);
+}
+
+/// `ZEROS2(NY,NX) = ZERO2*DH(NY,NX)*DV(NY,NX)` (`starts.f:270`). issue-063:
+/// shares the same floor `landscape_mass_inventory_phosphorus_ions.zig`'s
+/// census already applies through its own `aqueousCarrierM3`, so this file's
+/// `chemistry_remap.transferSolidLayerFraction` call agrees with the census
+/// on the same water-carrier basis for the same degenerate cell/layer.
+fn legacyNegligibleWaterVolumeM3(cell_area_m2: f64) f64 {
+    return legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(cell_area_m2);
+}
+
+/// `solute.f:610` keeps a water-normalized pool represented on the remembered
+/// dry reference carrier whenever the live water carrier is at or below the
+/// `ZEROS2` noise floor. issue-063: `chemistry_remap.transferSolidLayerFraction`'s
+/// geochemistry-solid/phosphate-precipitate loops previously received this
+/// call's RAW, unfloored live water for all four carrier arguments, guarded
+/// only by `transferOwnedAmount`'s bare `> 0` check -- while
+/// `landscape_mass_inventory_phosphorus_ions.zig`'s census already read the
+/// SAME fields back through this exact floored substitution. That basis
+/// mismatch let a near-zero-but-nonzero raw carrier inflate the recipient's
+/// stored concentration, which the census then re-multiplied by the much
+/// larger floored reference volume -- manufacturing large fake mass at a
+/// degenerate cell/layer (hour 2,894, `carbon_dioxide_carbon_g`, issue-063).
+/// Deliberately mirrors `landscape_mass_inventory_phosphorus_ions.zig`'s own
+/// private `aqueousCarrierM3` rather than importing it: that file is a
+/// validation-only module and this is a production mutator.
+fn solidTransferWaterCarrierM3(
+    live_water_m3: f64,
+    dry_reference_water_m3: f64,
+    negligible_water_volume_m3: f64,
+) !f64 {
+    if (!std.math.isFinite(live_water_m3) or live_water_m3 < 0 or
+        !std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0 or
+        !std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
+        return error.InvalidRelayeringWaterCarrier;
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+}
+
+test "issue-063: solidTransferWaterCarrierM3 substitutes the dry reference at and below the ZEROS2 floor, matching the census" {
+    const negligible = legacyNegligibleWaterVolumeM3(1.0);
+    try std.testing.expectEqual(@as(f64, 1.0e-6), negligible);
+    // At or below the floor: substitute the remembered dry reference,
+    // exactly like `landscape_mass_inventory_phosphorus_ions.zig`'s
+    // `aqueousCarrierM3` (`<=`, not `<`, per `solute.f:610`).
+    try std.testing.expectEqual(@as(f64, 0.5), try solidTransferWaterCarrierM3(0, 0.5, negligible));
+    try std.testing.expectEqual(@as(f64, 0.5), try solidTransferWaterCarrierM3(negligible, 0.5, negligible));
+    // Strictly above the floor: keep the live carrier.
+    const just_above = std.math.nextAfter(f64, negligible, std.math.inf(f64));
+    try std.testing.expectEqual(just_above, try solidTransferWaterCarrierM3(just_above, 0.5, negligible));
+    try std.testing.expectError(error.InvalidRelayeringWaterCarrier, solidTransferWaterCarrierM3(-1, 0.5, negligible));
 }
 
 /// Build the distinct runtime nutrient carriers used by concentration state.
