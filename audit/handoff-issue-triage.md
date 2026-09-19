@@ -26,8 +26,11 @@ backlog, not a new finding.
   `issue-006` (a working note whose content was folded into other issue files
   and the feature dossiers -- not a standalone open item).
 - **1 is an infrastructure/process blocker, not science content**:
-  `issue-032` (a `zig build test` hang in `outer_hour_transaction`, untriaged,
-  currently worked around by using `zig test --test-filter`).
+  `issue-032` (a `zig build test` hang, reported against `outer_hour_transaction`;
+  2026-09-19 diagnosis static-analysis-confirmed the named test's own body cannot
+  hang and a bounded dynamic rerun did not reproduce the hang -- root cause still
+  unconfirmed, see issue file's Diagnosis section; currently worked around by
+  using `zig test --test-filter`).
 - **42 are genuinely open** and require a disposition (`preserved`,
   `replaced-by-approved-feature`, `legacy-defect-corrected`,
   `retired-with-explicit-scope-approval`, or a fix) before G1 can be called
