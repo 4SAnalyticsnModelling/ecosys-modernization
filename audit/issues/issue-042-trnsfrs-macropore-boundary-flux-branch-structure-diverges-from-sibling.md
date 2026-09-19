@@ -1,6 +1,6 @@
 # Issue 042 -- `trnsfrs.f` subsurface macropore *boundary* discharge/recharge branch structure diverges from both its own micropore boundary treatment and the sibling gas file at the identical location
 
-Status: OPEN
+Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** See "Closing review (2026-09-19)" section at the end of this file: an independent reviewer pass (this session) confirms the legacy branch-structure asymmetry is a genuine unreviewed defect (Pattern A, consistent with 15+ other confirmed instances in this backlog) and that Zig's uniform, sign-based treatment is the scientifically favorable, architecturally-forced resolution. A citation comment has been added at `ecosys-ng/src/soil/solute/external_boundaries.zig` (in `calculateNetFluxMol`'s doc comment).
 Owner: unassigned
 Candidate/input hashes: `f77src/trnsfrs.f` sha256 `89F5D7CD44C0561E9B7233AD42164CBB1F9A6DF84BF90480A7A126177C34C5F1`; `f77src/trnsfr.f` sha256 `466E28F9A84BC67DB7998F213B48FD56312CC9C01DA09E59E6C36117637635EC`
 
@@ -44,3 +44,13 @@ The legacy branch structure at `trnsfrs.f:8082-8415` is confirmed to diverge, in
 1. An independent reviewer should determine whether `trnsfrs.f:8092`'s single-sided discharge condition (`NN.EQ.1` only) and the `FLWM`-vs-`FLWHM` gate in the two recharge branches are (a) an unreviewed legacy defect at the lateral domain boundaries, consistent with this project's recurring directional-asymmetry pattern, or (b) intentional given some site-file/boundary-condition convention not surfaced by this pass's static read.
 2. If (a): confirm Zig's uniform sign-based treatment is an acceptable (and should be documented as `legacy-defect-corrected`) resolution, ideally with a targeted matched-state test constructing a lateral macropore boundary face where `FLWM` and `FLWHM` disagree in sign, comparing legacy's zeroed/misclassified output against Zig's.
 3. Independent review before closing.
+
+## Closing review (2026-09-19)
+
+Independent reviewer pass performed this session, per the "next bounded action" above. Findings:
+
+1. **(a) vs (b):** No physical or site-file-convention rationale for gating macropore boundary recharge on the *micropore* flux's sign was found anywhere in `trnsfrs.f` or its surrounding commentary. The three-way contrast the issue itself documents -- `trnsfrs.f`'s own micropore section (symmetric, correct variable), the sibling gas file `trnsfr.f`'s macropore section at the identical physical location (symmetric discharge branch), and `trnsfrs.f`'s macropore section alone (asymmetric discharge branch) -- is the same "N parallel blocks, one outlier" copy-paste shape independently confirmed at 15+ other locations in this backlog (`handoff-issue-triage.md` Section 6, Pattern A). Reviewer judgment: (a), an unreviewed legacy defect, not an intentional convention.
+2. Re-read `ecosys-ng/src/soil/solute/external_boundaries.zig` in full this pass to independently verify the issue's own claim: `calculateNetFluxMol` branches only on `if (boundary.outward_water_flux_m3_per_step > 0) ... else if (... < 0) ...` -- there is no `NN`/orientation parameter anywhere in the function, so it cannot inherit either the missing-discharge-coverage gap or the `FLWM`/`FLWHM` variable mix-up. Confirmed independently, matching the issue's claim.
+3. No matched-state kernel test was added this pass (comment-only change, per this closing pass's scope); the existing test suite in `external_boundaries.zig` ("macropore recharge is capped by the donor-content VFLWX ceiling", "macropore recharge keeps the boundary term when it is the smaller magnitude") already exercises the sign-based macropore path generically, though not specifically for the `FLWM`/`FLWHM`-disagreement scenario. Recommended as a future addition, not blocking this disposition.
+
+**Disposition confirmed: `legacy-defect-corrected`.** A citation comment was added to `calculateNetFluxMol`'s doc comment in `ecosys-ng/src/soil/solute/external_boundaries.zig` naming this issue and instructing future refactors not to add an `NN`-style orientation parameter that would restore the asymmetry. Traceability: existing row `TRC-178` carried `disposition=unresolved`; a new row `TRC-284` was added reflecting this closure rather than overwriting `TRC-178` (preserving the original finding's evidence trail).

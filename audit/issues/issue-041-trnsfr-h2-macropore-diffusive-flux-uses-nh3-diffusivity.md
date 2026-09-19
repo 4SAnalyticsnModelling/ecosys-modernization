@@ -1,6 +1,6 @@
 # Issue 041 -- `trnsfr.f:4744` H2 macropore-to-macropore diffusive flux uses the NH4/NH3 aqueous diffusivity coefficient (`DIFNH`) instead of its own (`DIFHG`); Zig does not reproduce this but only incidentally
 
-Status: **OPEN, confirmed legacy source defect; Zig side does not reproduce it, but the non-reproduction is an architectural side effect, not a documented, reviewed fix.** Needs a reviewer's disposition call (`legacy-defect-corrected` vs. requiring an explicit feature/scope entry) rather than being closed autonomously.
+Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** Independently re-verified this session (read `dissolved_gas_face_parameters.zig` in full): the per-species loop always indexes `reference_diffusivity_m2_per_h[species]` for that same species, so H2 always gets its own `HLSG` constant and never `ZNSG`, confirming the issue's own claim. A citation comment has been added at `ecosys-ng/src/soil/gas/dissolved_gas_face_parameters.zig:82-88` (immediately before the per-species loop) naming this issue and instructing future refactors not to reintroduce the legacy species-swap. A clean traceability row already existed for this exact disposition (`TRC-175`, `disposition=legacy-defect-corrected`); no duplicate row added.
 
 Owner: found by this session's audit fork, 2026-09-19, during a full statement-level read of `trnsfr.f:3918-5906` (the "SOLUTE FLUXES BETWEEN ADJACENT GRID CELLS" / macropore-micropore exchange / gaseous transport block, the largest remaining unread contiguous range in `trnsfr.f` per `feature-009`).
 
@@ -56,3 +56,7 @@ This means Zig's H2 macropore-to-macropore diffusive flux is scientifically *cor
 ## Evidence
 
 `D:\ecosys-modernization\f77src\trnsfr.f:2034-2098,4276-4334,4552-4794,4865,4978` (sha256 `466E28F9A84BC67DB7998F213B48FD56312CC9C01DA09E59E6C36117637635EC`); `D:\ecosys-modernization\ecosys-ng\src\soil\gas\dissolved_gas_face_parameters.zig:7-23,46-90` (sha256 `BDAC133847F460DA1D117B3B9ADC5E1C28E6C62B2C9CD7880F53C86D4F52547B`).
+
+## Closing review (2026-09-19)
+
+Independently re-read `ecosys-ng/src/soil/gas/dissolved_gas_face_parameters.zig` in full this pass (not just the excerpt quoted above). Confirmed: `RuntimeParameters.reference_diffusivity_m2_per_h` is a 7-entry array keyed by species (index 6 = H2's own `7.34e-6`, index 5 = NH3's `4.00e-6`), and `State.refresh`'s per-face loop (`for (0..gas.species_count) |species|`) always reads `parameters.reference_diffusivity_m2_per_h[species]` for the same `species` index it is currently computing -- there is no code path by which one species' conductance could read another species' constant. This structurally cannot reproduce `trnsfr.f:4744`'s `DIFNH`-for-`DIFHG` swap. Disposition confirmed: **`legacy-defect-corrected`**. A code comment citing this issue was added directly above the loop (`dissolved_gas_face_parameters.zig:82-88`). Traceability: `TRC-175` already carries this exact disposition; no new row needed.

@@ -17,6 +17,18 @@ pub const Boundary = struct {
 /// the donor-content-based, `VFLWX`-bounded rate (`AMAX1`/`AMIN1` against
 /// `VFLW*donor_content`), whichever has the smaller magnitude. Callers must
 /// pass `false` for micropore boundaries and `true` for macropore boundaries.
+///
+/// Deliberately does not reproduce a separate legacy defect: `trnsfrs.f`'s
+/// macropore boundary discharge branch (`:8092`) covers only `NN.EQ.1`
+/// (missing the `NN.EQ.2`/`FLWHM.LT.0.0` mirror present in both the
+/// micropore section above it and the sibling gas file `trnsfr.f:6500-6501`
+/// at the identical location), and its two recharge branches gate on
+/// `FLWM` instead of `FLWHM`. This function classifies discharge vs.
+/// recharge purely by the sign of `outward_water_flux_m3_per_step`, so every
+/// macropore boundary face is always resolved by its own flux's sign
+/// regardless of orientation. See
+/// `audit/issues/issue-042-trnsfrs-macropore-boundary-flux-branch-structure-diverges-from-sibling.md`.
+/// Do not add an `NN`-style orientation parameter to "restore" this asymmetry.
 pub fn calculateNetFluxMol(state: *const solute.State, boundary: Boundary, maximum_transport_fraction: f64, discharge_mobility_fraction: []const f64, recharge_concentration_mol_per_m3: []const f64, output_net_flux_mol: []f64, apply_donor_content_ceiling: bool) !void {
     if (boundary.cell_index >= state.cell_count) return error.SoluteBoundaryCellIndexOutOfBounds;
     if (discharge_mobility_fraction.len != state.species_count or recharge_concentration_mol_per_m3.len != state.species_count or output_net_flux_mol.len != state.species_count) return error.TransportSpeciesCountMismatch;

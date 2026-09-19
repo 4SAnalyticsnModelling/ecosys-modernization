@@ -664,6 +664,14 @@ fn captureAcceptedFaceFlux(
     };
 }
 
+/// Applies the discharge/recharge convective boundary rule uniformly to
+/// every species in `amounts` -- there is no species-specific carve-out.
+/// Deliberately does not reproduce the legacy `f77src/trnsfr.f:6491-6496`
+/// macropore boundary defect, where the six inorganic gases
+/// (CO2/CH4/O2/N2/N2O/H2) are hardcoded to a constant `0.0` regardless of
+/// flux direction or concentration (see
+/// `audit/issues/issue-043-trnsfr-macropore-boundary-gas-flux-hardcoded-zero.md`,
+/// Finding A). Do not add a species exclusion here to match that omission.
 fn state_updateBoundary(amounts: []f64, water_m3: f64, outward_water_m3: f64, recharge: []const f64, maximum_fraction: f64, ledger: []f64, external_inputs: []f64, external_outputs: []f64) !void {
     if (amounts.len != recharge.len or amounts.len != ledger.len or amounts.len != external_inputs.len or amounts.len != external_outputs.len)
         return error.AqueousExtensiveTransportDimensionMismatch;

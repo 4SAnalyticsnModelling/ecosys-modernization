@@ -46,6 +46,17 @@ pub const SourceOrderMineralCompletion = struct {
     final_state: MineralCompletionState,
 };
 
+/// Computes gibbsite/iron-hydroxide/calcite/gypsum precipitation-dissolution
+/// extents and silicate weathering from one consistent state snapshot per
+/// call. Deliberately does not reproduce the legacy `solute.f` 60th-iteration
+/// (`M.EQ.MRXN`) staleness asymmetry, where the `IF(M.NE.MRXN)` update-skip
+/// gate exempts CHY1/COH1/CAL1/CFE1 but not CCA1/CCO31/CSO41, so calcite and
+/// gypsum see one-iteration-stale Ca/CO3/SO4 on the final sub-iteration while
+/// gibbsite/Fe(OH)3 see fresh Al/Fe (see
+/// `audit/issues/issue-045-solute-reaction-loop-final-iteration-cation-freshness-asymmetry.md`).
+/// There is no "final iteration" concept here -- every accepted Newton step
+/// updates the full joint state together. Do not add one to match the
+/// legacy artifact.
 pub fn calculate(shared: aqueous_network.State, solids: geochemistry.SolidState, coefficients: activity_coefficients.Result, products: SolubilityProducts, kinetics: Kinetics) !geochemistry.Transformations {
     try validate(shared, solids, coefficients, products, kinetics);
     const g1 = coefficients.monovalent_activity_coefficient;

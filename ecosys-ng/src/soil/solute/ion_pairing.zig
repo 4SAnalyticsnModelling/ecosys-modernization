@@ -21,6 +21,17 @@ pub const Parameters = struct {
 
 /// Reusable kernel for the SOLUTE binary reactions A + B <-> AB. Positive
 /// flux associates the free ions; negative flux dissociates the pair.
+///
+/// The dissociation-side substrate limit
+/// (`substrate_limit_fraction * min(free_first, free_second)`) is always
+/// computed fresh from this call's own `state` reactants -- there is no
+/// mutable scratch variable shared across reaction calls. Deliberately does
+/// not reproduce the legacy `solute.f:4538` litter RHCO3 defect, where the
+/// dissociation clamp reads a stale carboxyl-exchange scratch variable
+/// (`XMIN`, last assigned for an unrelated reaction) instead of the
+/// freshly-computed `XMINN` two lines above it (see
+/// `audit/issues/issue-046-solute-litter-rhco3-stale-carboxyl-substrate-limit.md`).
+/// Do not introduce cross-call mutable state here to match that bug.
 pub fn calculate(state: ReactionState, activities: Activities, parameters: Parameters) !f64 {
     try validate(state, activities, parameters);
     if (activities.free_second_mol_per_m3 == 0) return bounded(

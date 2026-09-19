@@ -79,6 +79,13 @@ pub const State = struct {
             const water_velocity_m_per_step = @abs(faces.micropore_water_flux_m3_per_step[face_index]) / area_m2;
             const dispersion_m2_per_step = parameters.dispersivity_coefficient * std.math.pow(f64, mean_distance_m, parameters.dispersivity_distance_exponent) * step_h * @min(step_h, water_velocity_m_per_step);
             const temperature_factor = std.math.pow(f64, model_grid.soil_temperature_k[destination] / parameters.reference_temperature_k, parameters.temperature_exponent);
+            // Each species always indexes its own reference_diffusivity_m2_per_h
+            // entry below. Deliberately does not reproduce the legacy
+            // f77src/trnsfr.f:4744 copy-paste bug (DFHHGS=DIFNH*(...) instead
+            // of DIFHG*(...), i.e. H2's macropore diffusive flux erroneously
+            // reusing NH4/NH3's diffusivity) -- see
+            // audit/issues/issue-041-trnsfr-h2-macropore-diffusive-flux-uses-nh3-diffusivity.md.
+            // Do not "fix" this loop to match the legacy defect.
             for (0..gas.species_count) |species| {
                 const index = face_index * gas.species_count + species;
                 const diffusivity_m2_per_step = parameters.reference_diffusivity_m2_per_h[species] * temperature_factor * step_h;

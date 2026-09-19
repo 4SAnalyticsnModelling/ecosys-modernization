@@ -1482,6 +1482,15 @@ pub fn advanceMapped(
             science.ice_heat_capacity_megajoules_per_m3_k,
             science.freeze_thaw.ice_density_megagrams_per_m3,
         );
+    // Each soil layer's own dry solid heat capacity, from that layer's own
+    // bulk density and volume -- this feeds the per-layer Dall'Amico phase
+    // solve (soil/water/enthalpy_balance.zig) unconditionally, regardless of
+    // snow/litter presence above. Deliberately does not reproduce the legacy
+    // f77src/watsub.f:2082-2083 under-snow defect, where the soil surface's
+    // freeze-thaw energy availability (HFLFGX) is scaled by the litter's
+    // heat capacity (VHCPR2) instead of the soil's own (VHCPG2) -- see
+    // audit/issues/issue-048-watsub-under-snow-soil-freeze-thaw-uses-litter-heat-capacity.md.
+    // Do not thread a litter/surface heat capacity into this per-layer array.
     const dry_capacity = try allocator.alloc(f64, grid.layer_count);
     defer allocator.free(dry_capacity);
     for (dry_capacity, thermal.dry_solid_heat_capacity_megajoules_per_m3_k, properties.layer_volume_m3) |*capacity, density, volume| {
