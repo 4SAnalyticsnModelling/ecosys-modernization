@@ -1,0 +1,314 @@
+# Issue backlog triage -- ecosys-ng v1.0.0 audit (G1 source-audit sweep)
+
+Read-only synthesis of the 54 issue files that exist under `audit/issues/` as of
+2026-09-19 (`issue-001` through `issue-056`; `issue-003` was drafted then folded
+into `issue-005` per `audit/handoff.md`, and `issue-009` was never filed --
+neither number should be recreated). This document does not change any
+disposition, does not edit any of the 54 source files, and does not touch
+`audit/traceability/traceability.csv`. It is a coordinator-facing map of the
+backlog, not a new finding.
+
+---
+
+## 1. Executive summary
+
+**54 issue files.** Of these:
+
+- **10 are closed / no longer open**: `issue-001`, `issue-005`, `issue-007`,
+  `issue-008`, `issue-010`, `issue-011`, `issue-016`, `issue-019`, `issue-023`
+  (fixed-and-verified or confirmed-already-correct-with-a-record-added), plus
+  `issue-006` (a working note whose content was folded into other issue files
+  and the feature dossiers -- not a standalone open item).
+- **2 are infrastructure/process blockers, not science content**: `issue-002`
+  (no genuine legacy Fortran reference output exists anywhere in this
+  checkout; a viable gfortran-oracle path was found and `issue-023` fixed the
+  one build-blocking defect in it, so a real oracle run is now buildable, but
+  none has yet been captured as the project's frozen reference) and
+  `issue-032` (a `zig build test` hang in `outer_hour_transaction`, untriaged,
+  currently worked around by using `zig test --test-filter`).
+- **42 are genuinely open** and require a disposition (`preserved`,
+  `replaced-by-approved-feature`, `legacy-defect-corrected`,
+  `retired-with-explicit-scope-approval`, or a fix) before G1 can be called
+  complete. These are triaged into Tiers 1-4 and the standalone Tier 7 item
+  below.
+
+**Single most important fact for the stated success criteria** (no science
+gaps; production run completes; outputs comparable to oracle; performant):
+**`issue-015` is a functional BLOCKER for "the production run completes."**
+The Ottawa deck fails at hour 2,578/262,920 (0.98%) with
+`SoluteReactionSolverDidNotConverge`, a stiff Al/Fe/Ca-hydroxide-phosphate
+reaction-network disequilibrium. Two independent, well-evidenced fix attempts
+have already been tried and refuted; the issue's own conclusion is that this
+needs a human numerical-methods design decision, not another autonomous
+guess. Nothing else in this backlog blocks the run from completing -- every
+other open item is either latent (never yet observed to change the run's
+outcome), narrow-scope (fires only under conditions not yet confirmed present
+in the validated deck), or a documentation/traceability gap on top of
+already-correct code.
+
+Separately, **`issue-002`'s finding is a second, independent blocker for
+"outputs comparable to oracle"** that would exist even if `issue-015` were
+solved tomorrow: there is currently no genuine frozen Fortran reference run in
+this checkout to compare against. A path to produce one exists (gfortran
+build + the `issue-023` fix), but it has not yet been executed as the
+project's authoritative oracle capture.
+
+Of the remaining 40 open items (excluding 015 and 002): the large majority are
+**real but low-materiality** -- either a legacy quirk that Zig's cleaner,
+generic architecture already avoids (just needs a sign-off and a citation), or
+a narrow, conditionally-dormant gap. A smaller set (Tier 3, ranked below) are
+**genuine functional gaps** worth prioritizing for "no science gaps" -- most
+notably `issue-037` (the restricted/static-salt chemistry variant the
+project's own validated Ottawa deck should be using is unreachable in
+production; the deck instead runs the full dynamic-salt formulas, which is a
+live, not dormant, divergence from the legacy design for the *only* deck this
+project currently validates against).
+
+---
+
+## 2. Tier 1 -- needs a human/scientist decision, not resolvable by more static analysis
+
+For each: what the two sides do differently, and the decision needed.
+
+| Issue | What differs | Decision needed |
+|---|---|---|
+| `issue-015` | Ottawa deck fails to converge at hour 2,578; same failure class the mature reference project needed a human decision on after 6+ refuted hypotheses. Two fixes already tried and refuted here too. | Numerical-methods input on the stiff reaction-network solver, or a scope decision on what "production run completes" requires for v1.0.0. **Already the user's own prior decision point** -- flagged here only for completeness. |
+| `issue-018` | Legacy's flawed macropore/micropore diffusive-exchange cap (`XFRS=0.05`) was replaced with better physics for **salts** (documented, tested) but the **gas/dissolved-nutrient** pathway still runs the literal, admittedly-flawed legacy formula. | Should the salt-side physics fix extend to gases, or is there a domain-specific reason (e.g. Henry's-law equilibration dominating) it was scoped to salts only? |
+| `issue-022` | A well-documented "exact GROSUB" grazing-removal helper (faithfully reproduces a legacy ear/grain leftover-demand-dropping quirk) is dead code; the live path uses a structurally different algorithm that never truncates carried-forward demand. | Adopt the live algorithm as the approved replacement (retire the dead helper), or restore literal-cascade fidelity. Not a mass-balance issue, but changes the relative organ split under partial grazing. |
+| `issue-026` | Same shape as `issue-022` for fire/combustion: a second, fully-"exact"-cited combustion implementation is dead code; a structurally different live path (different files, different internal representation) appears to compute the same equations but has never been proven numerically equivalent. | Confirm equivalence with a matched-state test, then retire the dead helper -- or, if a divergence is found, treat as a design decision like `issue-022`. |
+| `issue-030` | Legacy suppresses re-initialization / forces a checkpoint reload at multi-scene/year-boundary discontinuities via the `IDAYR`/`IOLD` gate; Zig's own source comment admits it has no confirmed equivalent action-taking gate, only a census that measures whether the boundary is crossed. | Determine whether Zig's continuous-state architecture makes the legacy suppression unnecessary by construction, or whether a real state-continuity gap exists at the six-year-repeat boundaries this project's own validation deck crosses. |
+| `issue-038` | Zig's production silicate-weathering path shares one local hydrogen budget between natural- and ground-rock dissolution of the same mineral -- physics with **no legacy counterpart at all**. The faithful (no shared budget) translation exists only in a self-test, unused in production. | Is the added H+-budget-sharing an intentional, reviewed robustness improvement (needs its own feature entry) or should production call the faithful translation instead? |
+| `issue-039` | Legacy always substitutes the root domain's (N=1) primary-axis count/depth for the mycorrhizal domain too (mycorrhizal axis count is frozen/dead state in legacy `grosub.f`). Zig grows each domain's axis count independently and uses each domain's own value. | Materiality gated on whether any in-scope PFT sets `mycorrhizal_type=2` (not checked). If yes: fix Zig to substitute domain 0's value everywhere, or approve independent mycorrhizal-axis growth as a reviewed feature. |
+| `issue-047` | Legacy caps an annual root-to-stalk phosphorus transfer using the **nitrogen** pool (`ZPOOLR`) instead of the phosphorus pool (`PPOOLR`) -- a copy/paste slip that can drive `PPOOLR` negative. Zig faithfully reproduces the same (wrong) cap but fails loudly instead of silently going negative. | Preserve the exact legacy formula (`preserved`, accepting the bounded risk the runtime guard already catches) or correct the clamp to `PPOOLR` (`legacy-defect-corrected`, a real physics change needing sign-off). |
+| `issue-049` | Legacy's domain-boundary (lateral grid-edge) snow drift is entirely commented-out/dead in the Fortran; Zig's snow-drift routing reuses the runoff/erosion boundary-openness mask and genuinely exports mass/heat/solutes across an open, downhill lateral boundary during snow-bearing, windy hours. | Check whether the in-scope deck's site file ever has a nonzero open+downhill lateral boundary during snow cover. If live: gate Zig's snow-drift boundary path permanently closed to match legacy exactly, or register this as an approved feature (legacy's dead skeleton suggests an unfinished original feature, not a deliberate physical choice). |
+| `issue-051` | Legacy's own macropore freeze-thaw block is internally inconsistent: its eligibility **gate** correctly uses the pure-water freezing point (273.15 K) but its **driving-force formula** reuses the micropore's matric-depressed freezing point. Zig reproduces this inconsistency bit-for-bit, undocumented on either side. | Correct Zig's formula to relax toward the pure-water freezing point for the macropore path (a `legacy-defect-corrected` candidate), or find/document a physical rationale for the legacy behavior and keep it as `preserved`. Sits in the same freeze-thaw physics area as the already-high-scrutiny Dall'Amico feature. |
+| `issue-052` | Legacy's ground/snow surface roughness `ZS` is "sticky": recomputed only on a rare disturbance/restart event, otherwise held fixed all season. Zig recomputes it from live state every hour, unconditionally. | Is Zig's continuous recompute a deliberate improvement (needs a feature entry + matched-state test) or does exact-parity require an `IFLGS`-equivalent gate in Zig's driver? Feeds the canopy/surface energy-balance chain already under scrutiny in `issue-024`. |
+
+---
+
+## 3. Tier 2 -- confirmed legacy defects already avoided/fixed in Zig, just need sign-off
+
+In every item below, Zig's current behavior is plausibly or demonstrably the
+scientifically correct one; the only remaining action is a reviewer
+confirming the disposition (usually `legacy-defect-corrected` or
+`preserved`-deliberate) and, where noted, adding a citation/comment so a
+future refactor doesn't accidentally reintroduce the legacy defect. None of
+these block anything today.
+
+**Group A -- "N parallel blocks, one outlier" typos that Zig's per-species/
+generic-kernel architecture already cannot reproduce** (see Section 6):
+`issue-020` (nitro.f litter NO3 clamp direction), `issue-021` (starte.f/
+solute.f litter Gapon exchange valence weighting), `issue-025` (grosub.f
+litterfall salt `ZEROP` wrong grid-index -- legacy-only, no Zig counterpart
+exists to even carry the bug), `issue-029` (trnsfr.f/trnsfrs.f vertical
+macropore netting applied to only one flow direction, confirmed in both the
+gas and salt sibling files), `issue-033` (redist.f macropore H2 relayering
+silently dropped, five siblings correct), `issue-036` (solute.f litter
+cation-exchange closure reads a stale soil-layer leftover), `issue-041`
+(trnsfr.f H2 macropore diffusive flux reuses the NH4/NH3 diffusivity
+constant), `issue-042` (trnsfrs.f macropore boundary branch coverage misses
+one of four discharge/recharge cases), `issue-043` (trnsfr.f: three co-located
+defects -- six inorganic gases hardcoded to zero at the subsurface macropore
+boundary; a recharge-branch variable mix-up; a "reset the wrong species
+family" zero-branch), `issue-045` (solute.f: 2 of 4 closing-block minerals
+missed the same-iteration-freshness exemption their siblings got), `issue-046`
+(solute.f litter `RHCO3` clamp reads a stale, unrelated carboxyl-exchange
+scratch variable), `issue-048` (watsub.f under-snow soil freeze-thaw uses the
+litter's heat capacity instead of the soil's -- Zig's non-reproduction is
+**plausible but not yet confirmed** by tracing the actual call site; treat as
+provisionally in this group pending that trace).
+
+**Group B -- other already-favorable, undocumented deviations or paperwork-only gaps:**
+- `issue-027`: `starte.f` reads a never-declared, never-assigned local
+  (`FIONX`) in 3 reactions -- genuinely undefined legacy behavior (stack
+  garbage under the historical `-auto-scalar` build flag). Zig normalizes to
+  the one sensible constant (`FIONS`) uniformly. Needs a reviewer sign-off,
+  not a fix.
+- `issue-034`: `redist.f`'s surface-litter ion-inventory diagnostic
+  double-counts one adsorption term. Zig **deliberately** reproduces this
+  bit-for-bit (with an in-code comment already naming it) to keep a legacy
+  diagnostic quantity in exact parity. Needs a reviewer to confirm this
+  parity choice is still wanted and to add the missing line-number citation.
+- `issue-035`: `redist.f`'s erosion/SOC top-of-profile boundary-carry
+  statement is missing (present for the other 3 of 4 mechanisms). Zig's
+  uniform-boundary-assignment design already avoids the gap; currently
+  latent regardless (the consuming legs are separately zeroed, see
+  `issue-012`).
+- `issue-050`: a real, already-tested dimensional fix to the water-table/
+  tile-drain boundary formulas (`GRID-INV-001/002`) has no feature-register
+  entry -- pure paperwork.
+- `issue-014`: a real legacy self-clobber bug (east/south-bound eroded-
+  constituent transport is permanently zero in the Fortran) is correctly
+  **not** reproduced by Zig -- but the code comment justifying that choice
+  claims the path is "inert," which is false (`IERSNG=3` is selected by the
+  actual Ottawa site file, and the path is live-wired). Needs the comment
+  corrected and a proper feature-register entry made **before** G3 output
+  comparison, or this will be misdiagnosed later as an unexplained
+  translation bug.
+
+---
+
+## 4. Tier 3 -- confirmed real gaps (Zig missing something legacy has, or vice versa)
+
+Ranked by confidence x likely impact, per each issue file's own materiality
+discussion (none of these have been quantified with a run; ranking is based
+on reachability/scope, not measured magnitude).
+
+1. **`issue-037`** -- The restricted/static-salt (`ISALTG=0`) variants of
+   soil cation-exchange, NH4-NH3 dissociation, and phosphate exchange are
+   translated and unit-tested but have **zero production callers**; the full
+   dynamic-salt formulas run instead, unconditionally. This matters because
+   the project's own `issue-053` confirms the Ottawa deck **is** an
+   `ISALTG=0` deck -- i.e. this is not a dormant branch, it is the deck this
+   project actually validates against running the wrong (more complex, not
+   necessarily wrong-in-a-bad-way, but undeniably non-matching) formula set
+   today. Highest-confidence, highest-relevance item in this tier.
+2. **`issue-040`** -- Root osmotic/turgor water potential (`PSIRO`/`PSIRG`)
+   was never ported; Zig substitutes a static per-plant trait constant that
+   never responds to root water status, temperature, or solute
+   concentration. The already-correct canopy-side sibling shows the intended
+   formula was known and portable. Silently weakens a designed
+   drought-response feedback on root extension growth. High confidence,
+   plausible real impact, not yet quantified.
+3. **`issue-054`** -- This is the one Tier-3 item that is a **Zig-introduced**
+   translation bug, not an avoided legacy defect: legacy correctly uses two
+   different band/non-band volume fractions for the NH3-oxidizer's own NH4
+   fallback vs. the NO2-oxidizer's own NO2 fallback; Zig's `makeZone` collapses
+   both into one shared field, wiring the ammonia-oxidizer to the wrong
+   (nitrate-zone) fraction. Reachable at minimum on hour 1 of every layer and
+   after any demand-history reset. Inert only if the deck's NH4/NO3 band
+   geometries coincide (not checked).
+4. **`issue-028`** -- `starte.f`'s one-time "50% of initial manure protein-N
+   becomes ammonium" amendment has no Zig counterpart at all -- confirmed a
+   missing routine, not a mistranslated one. Conditional on the deck's soil
+   file specifying nonzero initial manure organic matter (not checked for
+   Ottawa).
+5. **`issue-017`** -- Two pool families (adsorbed cations/anions/precipitates;
+   root gases) behave differently between Fortran's pond and soil relayering
+   branches; Zig applies the soil-branch rule uniformly to both. Confirmed
+   **production-live** (pond boundary changes are real, not dormant) --
+   distinguishes this from most other Tier-3/Tier-2 items.
+6. **`issue-031`** -- `redist.f`'s ground-surface secondary CH4 combustion
+   mechanism (Michaelis-Menten-limited, O2-budget-capped) has no confirmed
+   Zig counterpart. Gated on a high-temperature (fire-adjacent) condition;
+   magnitude not estimated.
+7. **`issue-044`** -- Zig's irrigation-water-chemistry schema has no gas
+   species field at all (CO2/CH4/O2/N2/N2O/H2), a broader gap than the single
+   legacy H2-only omission this issue started from. Whether this is even the
+   right Zig module to compare against the legacy mechanism is itself
+   unconfirmed.
+8. **`issue-056`** -- `starte.f`'s rainfall/irrigation ion-pairing/
+   complexation network (Al/Fe/Ca/Mg/Na/K/SO4/CO3) has no confirmed Zig
+   counterpart beyond a narrow closed-form NH4/phosphate piece. Likely low
+   materiality for a non-saline deck, but the actual input files were not
+   checked.
+9. **`issue-012`** (`GEOM-SUBSIDENCE-001`/`PR-GEOM-01B`) -- A real, live-wired
+   uncancelled-SOC-change defect in the soil-geometry-boundary transaction,
+   but currently **latent**: a separate, independent hard-wired zero
+   downstream prevents it from moving any layer boundary today. Explicitly
+   flagged "do not fix in isolation" by its own in-code comment.
+10. **`issue-055` (Part B only)** -- For `ISALTG!=0` decks (not currently used
+    by any deck in this project), the litter-specific cation-exchange/carboxyl
+    Newton solve (`starte.f:1726-1906`) has no Zig implementation at all.
+    Currently dormant, lowest priority in this tier. (Part A of the same
+    issue -- a real legacy stale-scalar defect that Zig's unconditional zero
+    happens to sidestep -- belongs with the Tier 2 pattern; see Section 6.)
+
+---
+
+## 5. Tier 4 -- low-materiality / cosmetic / paperwork-only
+
+- `issue-004` (topography/site-file consolidation -- unresolved input-mapping question, never shown to be an actual defect)
+- `issue-006` (embedded-tag working note, superseded/folded into other issues and feature dossiers)
+- `issue-013` (audit-tooling metadata bug: a stage-execution census mischaracterizes a stage as unprovable-as-executed when it is trivially provable; zero science/output impact)
+- `issue-050` (feature-register paperwork for an already-tested dimensional fix -- also listed under Tier 2 Group B for context)
+
+---
+
+## 6. Cross-cutting patterns (stated once, applies throughout)
+
+**Pattern A -- "N parallel blocks, one outlier."** By far the most common
+defect shape found this session (15+ confirmed instances: `issue-017`,
+`018`, `020`, `021`, `025`, `029`, `033`, `034`, `035`, `036`, `041`, `042`,
+`043`, `045`, `046`, `047`, `048`, `050`, `051`, `054`, `055`). A legacy
+author hand-duplicated a block of statements for a sibling species/direction/
+domain/organ and either forgot to update one variable name, forgot one member
+of a species family, or never wrote the mirror-image branch at all. When you
+see "confirmed by direct comparison against N structurally identical sibling
+locations" in an issue file, this is the pattern; it does not need to be
+re-explained per item above.
+
+**Pattern B -- "Zig's generic/architectural design incidentally avoids a
+legacy defect without a documented review."** The second most common shape
+(most of Tier 2 above). Because Zig frequently replaced N hand-unrolled
+Fortran call sites with one generic, per-species/per-domain-parameterized
+kernel, many Pattern-A legacy defects are architecturally *impossible* to
+reproduce in Zig -- not because anyone found and fixed that specific
+statement, but as a side effect of the kernel's genericity. This is
+scientifically favorable but creates two risks the contract's evidence
+discipline exists to catch: (1) no record exists distinguishing "reviewed and
+approved" from "nobody has looked," and (2) a future refactor toward a more
+"optimized," per-species-unrolled version of the same kernel could silently
+*reintroduce* the exact legacy defect with no test flagging it as a
+regression against the Fortran (only against Zig's own prior behavior).
+Every Tier 2 item's recommended action is some version of "add the citation/
+comment so this is protected against that refactor."
+
+---
+
+## 7. Still-open, actively-tracked investigation: `issue-024`
+
+`issue-024` (top 1-2 soil layers' water content diverges from the oracle,
+growing from -53% at hour 1 to +124% by hour 2,578) is not a simple defect
+report -- it is a live, multi-round (5 rounds, 11 numbered experiments)
+investigation, and should be read as such, not re-derived. Current state:
+
+- **Ruled out** (rounds 1-3): baseline/initialization mismatch; the
+  already-known `SOIL-INITSAT-001` water-table-saturation gap (doesn't touch
+  this layer); evaporation as the dominant hour-1 term (it's freeze-thaw,
+  not evaporation); a raw air-temperature forcing/parsing mismatch (proven
+  byte-identical inputs and a correct Zig parser).
+- **Ruled out** (round 4, bounded 2-experiment follow-up on `issue-048`):
+  the litter-heat-capacity substitution bug is real and would matter *if*
+  reachable, but is structurally unreachable at hour 1 for this specific deck
+  (zero snowpack, zero hour-1 precipitation) -- so it does not explain this
+  issue's hour-1 finding, though it remains open for later snow-covered
+  hours.
+- **Substantially deprioritized, not eliminated** (round 5, bounded
+  follow-up on `issue-053`): a real Zig production-path osmotic potential was
+  hand-derived for the exact cell/hour for the first time (`~-0.0076 MPa`), and
+  a sensitivity check shows this magnitude (and any plausible value the
+  still-unobtained Fortran-side number could take, for this non-saline deck)
+  is roughly 3 orders of magnitude too small to explain the observed >=15 degC
+  effective freeze-threshold gap by itself.
+- **Two live candidates remain**: (1) the **matric** (not osmotic) component
+  of the potential feeding the verified-textually-identical freezing-point
+  formula on each side -- still requires one instrumented log line on each
+  side, never yet added; (2) a possible structural gap where Zig's flat
+  substep-recovery schedule doesn't compound the way Fortran's `NFH x NPH`
+  (4 x >=20 = >=80 substeps/hour for this thin, low-heat-capacity top layer)
+  does.
+- **What's needed next**: a genuinely new instrumented short run (both sides
+  logging the matric potential at the point it feeds the freezing-point
+  formula) -- everything obtainable from existing captured logs and hand
+  computation has now been extracted. This is explicitly *not* the same
+  frontier as `issue-015` (different hour, different mechanism family), but
+  both eventually route through the same reaction/phase-change machinery, so
+  a fix to either should be re-checked against the other before being
+  declared complete.
+
+---
+
+## 8. Recommended order of attention
+
+Opinionated, given limited reviewer time:
+
+1. **`issue-015` first, and only via a scope/design decision, not another autonomous fix attempt.** This is the sole item standing between the project and "the production run completes." Two well-evidenced experiments are already spent; a third blind guess is against the contract's own discipline. Get the human/numerical-methods input the issue itself asks for, or make the scope call (shorter validated horizon vs. full 262,920-hour run) explicitly rather than by default.
+2. **`issue-002`'s follow-through, in parallel, not blocked by #1.** Actually execute a real gfortran oracle build (using the `issue-023` fix) against this checkout's own `f77src`/`f77example`, and freeze its output as the project's genuine reference run. This unblocks "outputs comparable to oracle" independently of whether #1 resolves, and every other output-comparison-dependent piece of work is stalled without it.
+3. **`issue-037`, because it is the only Tier-3 item that affects the validated deck *today*, not conditionally.** A short, bounded check (confirm the Ottawa deck really is `ISALTG=0` in production, which `issue-053` already asserts, then get an explicit scope call on whether the restricted-chemistry variant needs wiring) is cheap and resolves the highest-relevance open science question in the backlog.
+4. **`issue-024`, next, because it is a live investigation one instrumented run away from real progress**, and because its outcome (matric-potential value or substep-schedule gap) plausibly also matters for #1's stiff-solver frontier -- these two investigations should not proceed in total isolation from each other.
+5. **Batch the Tier 2 sign-offs in one reviewer pass**, grouped by the two cross-cutting patterns (Section 6) rather than one-by-one -- most of these need the same 30-second judgment ("Zig's generic kernel avoided this, agreed, add the citation") repeated ~16 times; a single reviewer session covering all of Tier 2 will be far more efficient than 16 separate reviews.
+6. **`issue-040` and `issue-054`** next among the remaining Tier-3 items -- both are concrete, well-localized, plausibly consequential, and cheap to fix once a reviewer signs off (a formula port and a one-field wiring fix, respectively), unlike the harder-to-scope items (`issue-028`, `issue-031`, `issue-044`, `issue-056`) which need an input-file check before anyone can even judge urgency.
+7. **`issue-032` (test hang) before anyone leans on `zig build test` as a release gate.** It costs little to triage and its risk (masking an unrelated real failure under a CI timeout) is exactly the kind of thing that should not still be open when G2/G3 evidence starts depending on the test suite being trustworthy.
+8. **Tier 1's remaining items (`issue-018`, `022`, `026`, `030`, `038`, `039`, `047`, `049`, `051`, `052`)** are all real judgment calls but none currently block anything -- schedule them as a standing backlog for whoever has the relevant domain expertise (solute chemistry for 018/038/045-adjacent; plant/root physiology for 039/047; land-surface/snow physics for 049/051/052), rather than trying to force them through this audit's own general-purpose passes.
+9. **Tier 4 items last** -- true paperwork, address whenever convenient, no urgency.
