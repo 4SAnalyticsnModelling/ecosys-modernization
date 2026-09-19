@@ -1,6 +1,6 @@
 # Feature ID: FEAT-020-GROSUB-COMBUSTION-LITTER-BALANCE-CLOSURE
 
-Status: PARTIALLY_ASSESSED (source-audit; assigned range `f77src/grosub.f:11685-13177` read in full this pass, closing the gap left after TRC-032..TRC-035 (`8748-11557`); independent review not yet done)
+Status: PARTIALLY_ASSESSED (source-audit; assigned range `f77src/grosub.f:11685-13177` read in full this pass, closing the gap left after TRC-168..TRC-171 (`8748-11557`; renumbered from an original TRC-032..TRC-035 after a later-discovered numbering collision was fixed); independent review not yet done)
 
 ## Scope and provenance
 
@@ -122,7 +122,7 @@ identity (initial carbon equals remaining plus litterfall). Live-wired via
 `grosub.f:12628-12653` (`TCSN0`/`TZSN0`/`TPSN0`, `HCSNC`/`HZSNC`/`HPSNC`,
 `TCSNC`/`TZSNC`/`TPSNC`, `CSNCL`) is a mechanical summation of the `CSNC`/
 `ZSNC`/`PSNC` litterfall arrays already produced by Finding 2 and the sibling
-tillage/death litterfall blocks covered by `TRC-033`..`TRC-035`. Not
+tillage/death litterfall blocks covered by `TRC-169`..`TRC-171`. Not
 independently re-derived this pass beyond confirming the summation targets
 (`TCSNC` etc.) are consumed by the balance-closure identity in Finding 5
 (`grosub.f:13073` `+TCSNC(NZ,NY,NX)`) and by the salt-litterfall fraction in

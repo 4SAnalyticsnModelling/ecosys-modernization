@@ -35,4 +35,4 @@ Independent reviewer: not yet done.
 Remaining limitation or final disposition: **OPEN, needs human/reviewer design decision** (same shape as issue-015 -- this is a design-intent question, not a mechanical bug fix). Per PROJECT_CONTRACT.md, never revert `allocateGrazingDemand`'s corrective-pass improvement merely to match the legacy leftover-dropping defect without explicit scope approval.
 
 ## Traceability gap noted
-No traceability row existed for `grosub.f` lines >= 8748 before this issue; see TRC-032..TRC-034 added to `audit/traceability/traceability.csv` in the same commit as this file. No prior `issue-0NN` tag existed anywhere under `ecosys-ng/src` for this grazing-cascade range.
+No traceability row existed for `grosub.f` lines >= 8748 before this issue; see TRC-168..TRC-170 added to `audit/traceability/traceability.csv` in the same commit as this file (renumbered from an original TRC-032..TRC-034 after a numbering collision with pre-existing rows was discovered and fixed later in the session -- see the traceability CSV's own history). No prior `issue-0NN` tag existed anywhere under `ecosys-ng/src` for this grazing-cascade range.
