@@ -8052,8 +8052,20 @@ noinline fn runTimeline(driver_context: anytype, evidence_writer: ?*std.Io.Write
                 // day boundary. Per-hour timing remains available in debug
                 // builds without forcing two synchronous writes and a run-log
                 // flush for every simulated hour.
+                //
+                // PERF_HOUR_TRACE (run-006, temporary profiling instrumentation):
+                // when `--verbose-diagnostics` is passed, also surface every
+                // non-day-boundary hour's elapsed_ms at `info` level so a
+                // profiling pass can reconstruct a full per-hour timing series
+                // without a ReleaseSafe/Debug rebuild. Off by default (identical
+                // to the pre-existing `debug`-only behavior); read-only
+                // `run_support.verbose_diagnostics_enabled` gate, no state or
+                // output change. Candidate for removal or promotion once the
+                // retry-ladder profiling this supports is complete.
                 if (scene_weather_hours % 24 == 0)
                     std.log.info("day advanced: scene_weather_hours={d} final_hour_elapsed_ms={d}", .{ scene_weather_hours, hour_elapsed_ms })
+                else if (run_support.verbose_diagnostics_enabled)
+                    std.log.info("PERF_HOUR_TRACE scene_weather_hours={d} elapsed_ms={d}", .{ scene_weather_hours, hour_elapsed_ms })
                 else
                     std.log.debug("hour advanced: scene_weather_hours={d} elapsed_ms={d}", .{ scene_weather_hours, hour_elapsed_ms });
             }
