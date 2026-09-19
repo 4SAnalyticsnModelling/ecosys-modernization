@@ -87,6 +87,7 @@ fn makeZone(context: ApplyContext, layer: usize, unit: usize, water_m3: f64, ban
     return .{
         .substrate_access_fraction = ammonium_fraction,
         .fallback_available_fraction = nitrite_fraction,
+        .ammonium_fallback_fraction = ammonium_fraction,
         .ammonium_concentration_g_n_per_m3 = ammonium_concentration * context.nitrogen_molar_mass_g_per_mol,
         .ammonia_concentration_g_n_per_m3 = ammonia_concentration * context.nitrogen_molar_mass_g_per_mol,
         .nitrite_concentration_g_n_per_m3 = if (nitrite_volume > 0) nitrite_amount / nitrite_volume else 0,
@@ -128,4 +129,28 @@ test "separate runtime nitrifier roles write distinct zone potentials" {
     try std.testing.expect(result.non_band_ammonia_oxidation_potential_g_n[0] > 0);
     try std.testing.expectEqual(@as(f64, 0), result.non_band_nitrite_oxidation_potential_g_n[0]);
     try std.testing.expect(result.non_band_nitrite_oxidation_potential_g_n[1] > 0);
+}
+
+test "makeZone sources ammonium_fallback_fraction from the ammonium zone, not the nitrate zone (issue-054)" {
+    var model_grid = try grid.GridState.init(std.testing.allocator, .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1, .worker_threads = 1, .tile_cells = 1, .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .mass_balance_tolerance = 1e-12, .negligible_quantity_threshold = 1e-12, .max_nonlinear_iterations = 20, .picard_relaxation = 0.5 });
+    defer model_grid.deinit();
+    model_grid.matrix_liquid_water_m3[0] = 1;
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    var reactive_state = try reactive.State.init(std.testing.allocator, 1, 1);
+    defer reactive_state.deinit();
+    var result = try fluxes.State.init(std.testing.allocator, 1, 1);
+    defer result.deinit();
+    // Distinct, independently-placed ammonium (0.75) and nitrate (0.65) band/non-band
+    // volume fractions, matching charge_classification.zig's own test values, so a bug
+    // that conflates the two fractions is numerically observable.
+    const context: ApplyContext = .{ .result = &result, .reactive_nitrogen = &reactive_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .zone_fractions = .{ .ammonium_non_band = 0.75, .ammonium_band = 0.75, .nitrate_non_band = 0.65, .nitrate_band = 0.65, .phosphate_non_band = 0.5, .phosphate_band = 0.5 }, .roles = &.{.ammonia_oxidizer}, .temperature_water_activity = &.{1}, .nitrogen_phosphorus_activity = &.{1}, .aqueous_co2_activity = &.{1}, .active_biomass_g_c = &.{1}, .microbial_active_fraction = &.{1}, .parameters = .{ .minimum_competition_fraction = 0.001, .inhibition_decay_per_h = 0.0002, .inhibition_decay_ammonium_constant_g_n_per_m3 = 7000, .ammonia_product_inhibition_g_n_per_m3 = 14, .ammonium_half_saturation_g_n_per_m3 = 1.4, .nitrite_half_saturation_g_n_per_m3 = 1.4, .ammonia_oxidation_rate_g_n_per_g_c_h = 0.125, .nitrite_oxidation_rate_g_n_per_g_c_h = 0.125, .ammonia_oxidizer_carbon_efficiency_g_c_per_g_n = 0.3, .nitrite_oxidizer_carbon_efficiency_g_c_per_g_n = 0.1, .growth_respiration_fraction = 0.5, .oxygen_per_respired_carbon_g_o_per_g_c = 2.667, .oxygen_per_ammonium_n_g_o_per_g_n = 3.429, .oxygen_per_nitrite_n_g_o_per_g_n = 1.143 }, .nitrogen_molar_mass_g_per_mol = 14, .timestep_h = 1, .negligible_demand_g_n = 1e-12 };
+    const zone = makeZone(context, 0, 0, 1, false);
+    // Before the fix, ammonium_fallback_fraction did not exist and the ammonium
+    // competition term reused fallback_available_fraction (the nitrate-zone
+    // fraction, 0.65) for the ammonia-oxidizer's own NH4 fallback. It must equal
+    // the ammonium-zone fraction (0.75), and the nitrite-competition path's
+    // existing use of fallback_available_fraction (0.65) must stay unchanged.
+    try std.testing.expectApproxEqAbs(@as(f64, 0.75), zone.ammonium_fallback_fraction, 1e-14);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.65), zone.fallback_available_fraction, 1e-14);
 }

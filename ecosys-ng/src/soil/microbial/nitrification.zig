@@ -25,6 +25,7 @@ pub const Parameters = struct {
 pub const Zone = struct {
     substrate_access_fraction: f64,
     fallback_available_fraction: f64,
+    ammonium_fallback_fraction: f64,
     ammonium_concentration_g_n_per_m3: f64,
     ammonia_concentration_g_n_per_m3: f64,
     nitrite_concentration_g_n_per_m3: f64,
@@ -78,8 +79,8 @@ pub fn calculatePotential(inputs: Inputs, parameters: Parameters) !Potential {
     try parameters.validate();
     try validateInputs(inputs);
     const updated_inhibition = if (inputs.initial_inhibition_activity > inputs.negligible_demand_g_n) @max(0, inputs.current_inhibition_activity * (1 - parameters.inhibition_decay_per_h * inputs.temperature_water_activity * inputs.timestep_h)) else inputs.current_inhibition_activity;
-    const non_band_ammonium_competition = competition(inputs.non_band.previous_total_ammonium_demand_g_n, inputs.non_band.previous_ammonia_oxidation_capacity_g_n, inputs.non_band.fallback_available_fraction * inputs.microbial_active_fraction, inputs.negligible_demand_g_n, parameters.minimum_competition_fraction);
-    const band_ammonium_competition = competition(inputs.band.previous_total_ammonium_demand_g_n, inputs.band.previous_ammonia_oxidation_capacity_g_n, inputs.band.fallback_available_fraction * inputs.microbial_active_fraction, inputs.negligible_demand_g_n, parameters.minimum_competition_fraction);
+    const non_band_ammonium_competition = competition(inputs.non_band.previous_total_ammonium_demand_g_n, inputs.non_band.previous_ammonia_oxidation_capacity_g_n, inputs.non_band.ammonium_fallback_fraction * inputs.microbial_active_fraction, inputs.negligible_demand_g_n, parameters.minimum_competition_fraction);
+    const band_ammonium_competition = competition(inputs.band.previous_total_ammonium_demand_g_n, inputs.band.previous_ammonia_oxidation_capacity_g_n, inputs.band.ammonium_fallback_fraction * inputs.microbial_active_fraction, inputs.negligible_demand_g_n, parameters.minimum_competition_fraction);
     const non_band_nitrite_competition = competition(inputs.non_band.previous_total_nitrite_demand_g_n, inputs.non_band.previous_nitrite_oxidation_capacity_g_n, inputs.microbial_active_fraction * inputs.non_band.fallback_available_fraction, inputs.negligible_demand_g_n, parameters.minimum_competition_fraction);
     const band_nitrite_competition = competition(inputs.band.previous_total_nitrite_demand_g_n, inputs.band.previous_nitrite_oxidation_capacity_g_n, inputs.microbial_active_fraction * inputs.band.fallback_available_fraction, inputs.negligible_demand_g_n, parameters.minimum_competition_fraction);
 
@@ -167,7 +168,7 @@ fn testParameters() Parameters {
 }
 
 fn testZone() Zone {
-    return .{ .substrate_access_fraction = 0.5, .fallback_available_fraction = 1, .ammonium_concentration_g_n_per_m3 = 1.4, .ammonia_concentration_g_n_per_m3 = 0, .nitrite_concentration_g_n_per_m3 = 1.4, .ammonium_amount_g_n = 10, .nitrite_amount_g_n = 10, .previous_total_ammonium_demand_g_n = 0, .previous_ammonia_oxidation_capacity_g_n = 0, .previous_total_nitrite_demand_g_n = 0, .previous_nitrite_oxidation_capacity_g_n = 0 };
+    return .{ .substrate_access_fraction = 0.5, .fallback_available_fraction = 1, .ammonium_fallback_fraction = 1, .ammonium_concentration_g_n_per_m3 = 1.4, .ammonia_concentration_g_n_per_m3 = 0, .nitrite_concentration_g_n_per_m3 = 1.4, .ammonium_amount_g_n = 10, .nitrite_amount_g_n = 10, .previous_total_ammonium_demand_g_n = 0, .previous_ammonia_oxidation_capacity_g_n = 0, .previous_total_nitrite_demand_g_n = 0, .previous_nitrite_oxidation_capacity_g_n = 0 };
 }
 
 test "ammonia and nitrite potentials preserve NITRO Monod equations" {
@@ -187,6 +188,27 @@ test "historical capacity remains substrate-unlimited by competing inventory" {
     const result = try calculatePotential(.{ .non_band = zone, .band = zone, .temperature_water_activity = 1, .nitrogen_phosphorus_activity = 1, .aqueous_co2_activity = 1, .active_oxidizer_biomass_g_c = 10, .microbial_active_fraction = 1, .timestep_h = 1, .initial_inhibition_activity = 0, .current_inhibition_activity = 0, .negligible_demand_g_n = 1e-12 }, testParameters());
     try std.testing.expect(result.non_band_ammonia_oxidation_capacity_g_n > result.non_band_ammonia_oxidation_g_n);
     try std.testing.expect(result.non_band_nitrite_oxidation_capacity_g_n > result.non_band_nitrite_oxidation_g_n);
+}
+
+test "ammonium competition fallback scales with the ammonium zone fraction, not the nitrate zone fraction (issue-054)" {
+    var zone = testZone();
+    // Distinct, independently-placed ammonium (0.75) vs nitrate (0.65) zone
+    // fractions, matching charge_classification.zig's own test values.
+    // previous_total_ammonium_demand_g_n/previous_total_nitrite_demand_g_n are
+    // already 0 in testZone(), so both competition terms take the fallback
+    // branch (cold-start / newly-active-layer condition per issue-054).
+    zone.ammonium_fallback_fraction = 0.75;
+    zone.fallback_available_fraction = 0.65;
+    const result = try calculatePotential(.{ .non_band = zone, .band = zone, .temperature_water_activity = 1, .nitrogen_phosphorus_activity = 1, .aqueous_co2_activity = 1, .active_oxidizer_biomass_g_c = 10, .microbial_active_fraction = 1, .timestep_h = 1, .initial_inhibition_activity = 0, .current_inhibition_activity = 0, .negligible_demand_g_n = 1e-12 }, testParameters());
+    // Before the fix this evaluated to 0.65 (the nitrate-zone fraction, reused
+    // in error for the ammonia-oxidizer's own NH4 fallback). After the fix it
+    // must equal the ammonium-zone fraction, 0.75.
+    try std.testing.expectApproxEqAbs(@as(f64, 0.75), result.non_band_ammonium_competition_fraction, 1e-14);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.75), result.band_ammonium_competition_fraction, 1e-14);
+    // The nitrite-oxidizer's own fallback must remain on the nitrate-zone
+    // fraction (unchanged behavior).
+    try std.testing.expectApproxEqAbs(@as(f64, 0.65), result.non_band_nitrite_competition_fraction, 1e-14);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.65), result.band_nitrite_competition_fraction, 1e-14);
 }
 
 test "nitrification state_update conserves mineral nitrogen and limits substrate" {
