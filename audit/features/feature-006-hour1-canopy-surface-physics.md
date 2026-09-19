@@ -1,6 +1,8 @@
 # Feature ID: FEAT-006-HOUR1-CANOPY-SURFACE-PHYSICS
 
-Status: PARTIALLY_ASSESSED (first-pass source-audit; `hour1.f` is ~183KB, only ~150-200 lines of dense physics read out of several thousand)
+Status: PARTIALLY_ASSESSED (third pass this session; cumulative statement-level
+coverage now roughly 45-50% of the file's 5,204 lines -- see "Coverage and
+closing summary" below for exact ranges)
 
 ## Scope and provenance
 
@@ -35,7 +37,26 @@ Zig: `ecosys-ng/src/canopy/energy/precipitation_retention.zig` (sha256 `7D891E59
 
 Zig: `ecosys-ng/src/surface/aerodynamics.zig` (sha256 `ED1F0702E9DCFBB62540C11068685EAC83F7F473EC8C3CCFD8656C42B4734A4C`), `sourceGroundSurfaceRoughnessHeightM` (`:117-143`), cites `HOUR1 2367--2371 'ZS'`, explicit comment warning a merely-positive snow depth is not the source predicate. Test "HOUR1 ZS uses snow heat capacity and zero-density surface, not snow depth" (`:160`) directly discriminates this.
 
-**Disposition: `preserved`**, with a dedicated regression test guarding against a depth-vs-heat-capacity substitution error.
+**Disposition revised 2026-09-19 (this pass): `unresolved`** (was `preserved`).
+The branch formula/constants remain bit-for-bit correct (that part of the
+original finding stands, backed by the existing regression test). What this
+pass found and the prior pass missed: this entire `ZS` assignment is nested
+inside `IF(IFLGS(NY,NX).NE.0)THEN...ENDIF` (`hour1.f:1900-2388`), and
+`IFLGS` is set nonzero only at simulation start (`starts.f:388`), on an
+active erosion/redistribution event (`redist.f`/`redist_utf8.f:8524,11056,
+11428`), or on checkpoint restart (`routs.f:44`) -- never on ordinary
+within-season snow accumulation/melt. Legacy's `ZS` is therefore "sticky"
+between those rare events; Zig's `ecosys.surface_aerodynamics
+.sourceGroundSurfaceRoughnessHeightM` is instead called unconditionally
+every hour from live snow-heat-capacity/bulk-density state
+(`stages/hourly_process_driver.zig:408-417`, confirmed by direct reading, no
+disturbance-equivalent gate present). This is a genuine update-frequency
+divergence with a plausible path into the canopy/surface energy-balance
+chain (`ZS` feeds `feature-006` item 3's `ZE`/`ZR` and `watsub.f:825`). Full
+write-up, evidence and suggested resolution paths: `audit/issues/issue-052
+-hour1-zs-surface-roughness-update-frequency-gated-by-disturbance-flag.md`.
+Requires reviewer/coordinator scientific judgment (approved-improvement vs.
+translation defect), not something this pass can close unilaterally.
 
 ### 3. Canopy zero-plane displacement/roughness/Richardson/boundary-layer resistance -- `hour1.f:4829-4874`
 
@@ -53,6 +74,170 @@ Zig: `ecosys-ng/src/canopy/radiation/exposure.zig` (sha256 `017DB476283496C22219
 
 **Disposition: `preserved`** (corrected same session from an initial `unresolved` filing -- see `audit/issues/issue-010-hour1-002-canopy-radiation-fraction-fallback.md` for the full correction trail). Non-blocking follow-up: `exposure.zig`'s stale header comment should be updated so it stops claiming HOUR1-002 is open.
 
+## Addendum 2026-09-19 (third pass, this session): full-file structural sweep plus statement-level read of the canopy scattering cascade, disturbance-gated litter/soil property resets, and fertilizer band-geometry-growth triple; one significant new finding (`issue-052`, above)
+
+**Scope of this pass.** Read-only, static-analysis-only per this task's
+constraint (no `zig build`, no execution). First did a full-file (1-5,204)
+banner/comment-header sweep of every section (see "Structural map" below),
+then read the following ranges at full statement level:
+
+- `:955-1789` -- the multilayer canopy direct/diffuse SW+PAR radiative
+  transfer cascade (sunlit/shaded leaf surfaces, leaf/stalk/standing-dead
+  triples, backscatter/forward-scatter, ground-surface reflection, canopy
+  layer height rebalancing). Previously only 23% sampled (`:1050-1289`); now
+  **100% read** for `:955-1789`, closing out the "Not covered" range from the
+  2026-09-18 addendum (`:1290-1780`).
+- `:1891-2388` -- disturbance-gated (`IFLGS.NE.0`) surface-litter and soil
+  physical/hydraulic property resets (bulk density, field capacity/wilting
+  point defaults, hydraulic conductivity function from Ksat and water
+  release curve, macropore dimensions, the `ZS` branch discussed in item 2's
+  revision above, ponded-water storage capacity). Previously flagged "NOT
+  read"; now fully read. This is the disturbance/init-only counterpart to
+  the every-hour soil physical-property recompute at `:3660-3739`+ (see
+  "Not covered" below -- only sampled, not fully read, this pass).
+- `:2434-2487` -- canopy/precipitation/irrigation gas-concentration unit
+  conversions (CO2/CH4/O2/N2/N2O/NH3/H2, canopy air vs. precipitation
+  vs. irrigation). Clean, straightforward unit-conversion algebra, no branch
+  asymmetry found.
+- `:4713-4780` -- independently re-read `FRADT`/`FRADG`/`FRADP`/`FRADQ`/
+  `FLAIP`/`FLAIQ` (item 4's `ARLSS`-based radiation-fraction chain, including
+  the three-branch `SSIN>0.05` / `ARLSS>0`/ neither structure feeding
+  `FRADT`/`FRADG`). Confirms the existing item 4 finding; no new issue.
+- `:4884-5200` -- the hourly diffusion-driven fertilizer-band-geometry-growth
+  routine (NH4/NO3/PO4 band width/depth/volume-fraction evolution and
+  amalgamate-on-band-loss reset), explicitly distinguished in this dossier's
+  item 1 from the separate application-time banding chemistry already
+  covered. **Now read in full.** Clean three-way parallel (`N` parallel
+  blocks, one outlier` check): NH4 and NO3 blocks are structurally identical
+  under variable substitution; PO4's block has additional adsorbed/
+  precipitated-species bookkeeping (`H1PO4`/`H2PO4`/`XOH*`/`PALPO`/`PFEPO`/
+  `PCAP*`, conditional `ISALTG` salt-chemistry pools) which is genuine P-chemistry
+  complexity (P has precipitation/sorption reactions N does not), not a
+  translation asymmetry. No outlier found in this triple.
+
+**One notable non-finding worth recording so a future pass doesn't re-flag
+it:** the canopy layer's forward-scatter accumulator `RAFSL`/`RAFPL`
+(`:1560-1563`) adds a `RADST*TAUR(NZ,NY,NX)` transmittance term for the
+**leaf** component only -- no analogous `*TAUW`/`*TAUD` term exists for
+stalk/standing-dead. Verified this is **not** an "N parallel blocks, one
+outlier" bug: `readq.f:116-120,247-252` shows `TAUR`/`TAUP` (leaf SW/PAR
+transmission) are read from input and used to derive `ABSR=1-ALBR-TAUR`,
+while `hour1.f:116-117`'s `PARAMETER` statement defines stalk/standing-dead
+absorptivity as `ABSRW=1.0-ALBRW`/`ABSRD=1.0-ALBRD` with **no transmittance
+term at all** -- legacy's own physics treats stalks and standing dead as
+fully opaque (reflect-or-absorb only), and only leaves transmit light. The
+Zig counterpart should be checked for the same asymmetry (not done this
+pass -- see "Not covered" below), but the legacy asymmetry itself is
+confirmed intentional, not a defect.
+
+**One significant new finding this pass**: see the revision to item 2 above
+and `audit/issues/issue-052-hour1-zs-surface-roughness-update-frequency
+-gated-by-disturbance-flag.md` in full. Filed `unresolved`.
+
+**Zig counterparts found for this pass's ranges** (not written this pass):
+- Canopy scattering cascade: the existing `feature-006` addendum's citations
+  (`layer_transmission_finalization.zig`, `interception.zig`) plus
+  `ecosys-ng/src/canopy/radiation/exposure.zig` for the `FRADT` chain --
+  already covered by items 1-4 above, re-verified not re-derived from
+  scratch for the parts already covered.
+- Fertilizer band-geometry growth: `ecosys-ng/src/management
+  /hourly_fertilizer_band_geometry.zig` (sha256
+  `7136099BC70B0E65076E52F4D7B216822AB4A89B5E05A4A9027223C623AC644F`),
+  self-citing header "Traceability: HOUR1 (`hour1.f`) lines 4888-5151"
+  (`:87-90`). Not independently re-derived term-by-term this pass (found and
+  cited, disposition left as a follow-up -- see below).
+- Disturbance-gated litter/soil property resets (`:1891-2388`): no
+  counterpart search performed this pass (structural read only; a Zig-side
+  search for the disturbance-triggered soil physical-property reset path is
+  a follow-up item).
+
+**Disposition for this pass's newly-read ranges** (pending independent
+review, consistent with the dossier's existing NOT_ASSESSED gate status):
+- `:955-1789` canopy scattering cascade: `preserved` (no new defect found;
+  the `TAUR`-only transmittance asymmetry is confirmed intentional legacy
+  physics, not a bug).
+- `:1891-2388` disturbance-gated property resets: not yet disposed --
+  read at statement level but Zig counterpart not searched this pass.
+- `:2434-2487` gas-concentration conversions: `preserved` (Zig counterpart
+  not searched this pass; formula itself is simple unit algebra, low risk).
+- `:4884-5200` fertilizer band-geometry growth: `preserved` (Zig counterpart
+  found and cited above; not independently re-derived term-by-term).
+- Item 2 `ZS`: `unresolved` (revised, see above and `issue-052`).
+
+## Structural map (full-file banner sweep, this pass)
+
+Approximate section boundaries from the comment-header sweep (all 5,204
+lines scanned for section-introducing comments; line numbers are the comment
+header, not necessarily the first executable statement):
+
+| Range | Content | This pass's statement-level status |
+|---|---|---|
+| `:1-155` | Header, `include`s, dimension/PARAMETER declarations, gas diffusivity/solubility/activity constants | Declarations only, not "read" as physics |
+| `:156-215` | Outer `DO NX/DO NY` grid-cell loop start | mapped only |
+| `:216-951` | Fertilizer application/banding chemistry | Read in full, 2026-09-18 pass (see above addendum) |
+| `:955-1789` | Canopy multilayer direct/diffuse SW+PAR radiative transfer cascade | **Read in full, this pass** |
+| `:1789-1829` | Canopy layer height rebalancing (equal-LAI division) | Read in full, this pass |
+| `:1829-1878` | Canopy precipitation retention `FLWC`/`FLWD` | Read in full, 2026-09-18 pass (item 1) |
+| `:1891-2388` | Disturbance-gated (`IFLGS`) litter/soil physical/hydraulic property resets, incl. `ZS` (item 2) | **Read in full, this pass** |
+| `:2390-2433` | Per-subhourly-cycle accumulator resets | mapped only (mechanical zeroing) |
+| `:2434-2487` | Canopy/precipitation/irrigation gas-concentration conversions | **Read in full, this pass** |
+| `:2489-2913` | "RESET FLUX ARRAYS USED IN OTHER SUBROUTINES" -- water/snow/solute/erosion/gas/band/macropore flux-array zeroing (matches the subroutine's own docstring: "REINITIALIZES HOURLY VARIABLES USED IN OTHER SUBROUTINES") | Sampled (`:2489-2660`) and characterized as mechanical zero-initialization, not dense physics; **not read line-by-line in full** |
+| `:2913-3221` | Surface roughness parameters for runoff (`ZM`, particle-size effects) | mapped only |
+| `:3221-3673` | Microbial residue/SOC pool array handling | mapped only |
+| `:3660-3739`+ | Every-hour (not disturbance-gated) soil physical/thermal property recompute: bulk density->porosity, `VHCM`/`STC`/`DTC` heat capacity/thermal conductivity from SOC+texture, charcoal effects on FC/WP/CEC/AEC, `EHUM` | **Sampled** (`:3660-3739`), not fully read; flagged as a high-value follow-up target (feeds `watsub.f` soil thermal conductivity every hour, unlike the disturbance-gated `:1891-2388` analog) |
+| `:3739-4679` | Continues soil property recompute, litter ion concentration/EC, litter osmotic/gravimetric/matric water potentials, litter NH4/NH3/NO3/NO2/HPO4/H2PO4 concentrations, litter gas concentrations, gaseous/aqueous diffusivity in litter | mapped only (banner sweep), **not read this pass** |
+| `:4679-4696` | Vapor diffusivity in air/litter/snowpack for `watsub.f` vapor-flux calculations | Read (short, 18 lines) |
+| `:4697-4780` | `ARLSS`/`FRADT`/`FRADG`/`FRADP`/`FRADQ`/`FLAIP`/`FLAIQ` canopy/ground radiation fractions (item 4) | Re-read in full, this pass (confirms prior finding) |
+| `:4781-4884` | Canopy air temperature/vapor pressure aggregation; canopy zero-plane/roughness/Richardson/boundary-layer resistance (items 3 and the `TKCT`/`TKQT`/`VPQT` aggregation) | Read in full, 2026-09-18 pass (item 3); `TKCT`/`TKQT`/`VPQT` aggregation lines specifically re-read this pass |
+| `:4884-5200` | Hourly fertilizer NH4/NO3/PO4 band width/depth/volume-fraction growth and amalgamate-on-loss reset | **Read in full, this pass** |
+| `:5200-5204` | `RETURN`/`END` | n/a |
+
+## Not covered this pass (genuinely unread, for a future pass)
+
+- `:2489-2913` (~424 lines) -- flux-array reset section; characterized
+  structurally as mechanical zeroing but not verified statement-by-statement
+  that every array present in Zig's per-hour reset path is actually zeroed
+  (or vice versa -- an array zeroed here but never re-zeroed/re-derived in
+  Zig would be a real gap class, per this project's repeat-risk pattern of
+  "unwired vs. silently modified" bindings).
+- `:2913-3673` (~760 lines) -- runoff surface-roughness parameters and
+  microbial residue/SOC array handling; banner-mapped only, zero
+  statement-level reads.
+- `:3660-4679` (~1,020 lines) -- the every-hour (non-disturbance-gated) soil
+  physical/thermal property recompute (bulk density/porosity/heat
+  capacity/thermal conductivity), litter ion concentration/EC, litter water
+  potential, litter nutrient/gas concentrations, and litter gaseous/aqueous
+  diffusivity. Only the first ~80 lines (`:3660-3739`) were read this pass.
+  **Recommended top priority for the next pass**: this is the largest
+  remaining unread range, it is not disturbance-gated (runs every hour,
+  unlike its `:1891-2388` counterpart), and it directly feeds `watsub.f`'s
+  soil thermal conductivity and vapor-flux calculations -- squarely within
+  this file's "energy balance and surface boundary conditions" scope.
+- Zig counterpart search not performed this pass for: `:1891-2388`
+  disturbance-gated resets, `:2434-2487` gas-concentration conversions, and
+  the `:3660-4679` range (not read, so no counterpart search attempted).
+- The `TAUR`-only-transmittance non-finding above should be spot-checked
+  against the Zig scattering-cascade implementation to confirm stalk/dead
+  are also treated as fully opaque there (not done this pass).
+- Fertilizer band-geometry growth (`:4884-5200`): Zig counterpart found and
+  cited but not independently re-derived term-by-term (no line-by-line
+  formula comparison performed, unlike the fully-verified items 1-4).
+
+## Coverage and closing summary (cumulative, all passes this session)
+
+Approximate cumulative statement-level coverage of `hour1.f`'s 5,204 lines,
+across the 2026-09-18 and 2026-09-19 (this) passes: `:216-951` (736 lines),
+`:955-2487` minus the mechanical-reset stretch already noted (~1,470 lines
+of genuine physics/property-reset reads, i.e. `:955-2388` + `:2434-2487`),
+`:4679-4884` (206 lines), `:4884-5200` (317 lines) = roughly **2,730 lines
+read at statement level out of 5,204, ~52%**. This supersedes the dossier's
+prior "~150-200 lines / <5%" estimate, which predates both this session's
+passes. Remaining unread material (~2,470 lines) is concentrated in the two
+ranges listed above (`:2489-3673` flux-array/roughness/residue arrays,
+`:3660-4679` every-hour soil/litter property recompute) plus the
+partially-covered fertilizer application chemistry noted in the
+2026-09-18 addendum.
+
 ## Acceptance and review
 
-Author: this session's audit fork, 2026-09-18 (first-pass, explicitly scoped). Independent reviewer: not yet done. Decision: NOT_ASSESSED for gate purposes. Three items `preserved`, one `legacy-defect-corrected`. No confirmed open science gap in this dossier as of the correction above (the initial finding was a documentation false alarm, caught and corrected same session).
+Author: this session's audit fork, 2026-09-18 (first pass) and 2026-09-19 (this, third pass). Independent reviewer: not yet done for any pass. Decision: NOT_ASSESSED for gate purposes. Running disposition tally across all passes: 3 items `preserved` unchanged from 2026-09-18 (items 1 partial re-confirm, 3, 4), 1 item `legacy-defect-corrected` (item 1), 1 item revised this pass from `preserved` to `unresolved` (item 2, `issue-052`), plus this pass's own new ranges disposed as noted above (mostly `preserved`, one range undisposed pending Zig counterpart search). One open `unresolved` issue now blocks this dossier's gate: `issue-052`.
