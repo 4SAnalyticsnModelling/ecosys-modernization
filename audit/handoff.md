@@ -334,3 +334,94 @@ Assignment: close `feature-017`'s (`solute.f`, cation/anion ion-pairing and exch
 Traceability rows `TRC-195` through `TRC-197` added this pass. `traceability.csv`'s last row was re-checked immediately before appending (`TRC-194`, 193 rows, zero duplicates) and again immediately before this update (196 rows total, zero duplicate `unit_id`s, `Import-Csv | Group-Object unit_id | Where-Object Count -gt 1` empty). `audit/issues/`'s last file before this pass was `issue-045`; re-checked immediately before filing (still `issue-045`) and again before this update -- `issue-046` is new, no collision.
 
 **Running tally update (project-wide, file-scoped additions)**: `solute.f` now accounts for 5 of its own filed issues (`issue-036`, `issue-037`, `issue-038`, `issue-045`, `issue-046`) plus a cross-reference to `issue-021`. **Next bounded action**: get an independent reviewer pass on `feature-017`'s 15 findings (highest-value next step for this file, since depth-read is done but review is not, mirroring the same standing recommendation already made for `feature-004`/`feature-009`/`feature-010`); separately, continue the G1 sweep on any other remaining large unaudited files project-wide.
+
+## Update 2026-09-19 (later session, continued, read-only/static-analysis-only pass): `watsub.f:6197-6554` and `:6554-7030` read in full -- resolves this file's last accounting gap; `watsub.f` depth-read now COMPLETE; one new defect (`issue-051`)
+
+Assignment: read `watsub.f`'s two remaining unresolved sub-ranges,
+`:6197-6554` (357 lines, never itemized by any prior pass despite closing
+both previously-*named* gaps) and `:6554-7030` (476 lines, labeled "state
+updates" in the scope note but never confirmed actually read), per
+`feature-018`'s own "Not covered this pass" note flagging the accounting
+question. Confirmed `git status --short` clean and no
+`zig`/`gfortran`/`ecosys_ng`/`ecosys_x`/`ecosys_oracle` process running
+before starting; strictly read-only this pass (no `zig build`, no binary
+execution, no test run).
+
+**Result: full statement-level read of both ranges (833 lines).** Neither
+range was a trivial DO-loop closeout. `:6197-6554` (item 13) contains real
+physics: net runoff/snow-drift flux bookkeeping (`:6208-6267`, already
+covered by traceability's own `TRC-224` even though no dossier item text
+ever named it -- a CSV/prose cross-referencing gap, not a coverage gap),
+net soil water/vapor/heat flux accumulation, below-surface
+evaporation-condensation (exact match to `phase_change.zig`'s
+`vaporLiquidEquilibrium`, whose own doc comment self-identifies as this
+exact WATSUB formula), micropore/macropore freeze-thaw, and macro-to-micropore
+infiltration (exact match to `macroporeMatrixExchange`). `:6554-7030`
+(item 14) is genuinely the state-variable-update section the scope note
+claimed: snowpack/litter/soil per-layer water/vapor/ice/temperature commits,
+snow-drift application, pond-to-litter transfer on snowpack disappearance,
+and a final-substep pond-surface-loss bookkeeping shortcut, plus one
+fully-dead diagnostic block (artificial soil warming, hardcoded-bounds,
+commented out in every configuration).
+
+**New finding -- `issue-051` (macropore freeze-thaw eligibility gate and its
+own driving-force formula disagree on the target temperature, faithfully
+reproduced in Zig).** The micropore freeze-thaw block (`:6399-6418`) is
+internally consistent: both its gate and its formula key on the same
+matric-depressed `TFREEZ`. The macropore block (`:6430-6446`) is not: its
+gate correctly uses pure-water `273.15` (macropore water is free/
+gravitational, not matric-bound), but its formula (`HFLFH1`, `:6435-6436`)
+reuses the *same* depressed `TFREEZ` computed for the micropore, not
+`273.15` -- an estimated 0.8-2.4 K reference-temperature bias at plausible
+unsaturated matric potentials, entering linearly into the latent-heat
+partition. Directly confirmed this exact inconsistency is bit-for-bit
+reproduced in the live Zig production call path (`phase_change.zig`'s
+`freezeThaw`, whose `threshold_temperature` branches on `macropore` but
+whose `unlimited_heat` always uses the depressed value; `phase_solver.zig`'s
+call site passes the identical potential to both the matrix and macropore
+calls) -- not a translation accident, a faithfully-preserved legacy internal
+inconsistency, undocumented on either side. This is the fourth "N parallel
+blocks, one outlier" finding in this exact file this session (after
+`issue-048`, `issue-049`, `issue-050`), continuing this session's
+highest-hit-rate recurring defect pattern (12+ confirmed project-wide, now 4
+in `watsub.f` alone).
+
+**`watsub.f`'s depth-read is now complete (all 7,030 lines)** -- the sixth
+file this session to reach full closure, after `redist.f`/`feature-010`,
+`uptake.f`/`feature-004`, `trnsfr.f`+`trnsfrs.f`/`feature-009`, and
+`solute.f`/`feature-017`. A "Closing tally for this dossier" section was
+added to `feature-018`: 14 numbered items total across all passes, dominant
+disposition `preserved`, 2 `replaced-by-approved-feature` (Mualem-van
+Genuchten conductivity via `feature-002`, macropore-face unification), 1
+`legacy-defect-corrected` undocumented in the feature register
+(`issue-050`'s numerical half), 1 proposed-but-unreviewed
+`legacy-defect-corrected` (`issue-048`), 2 `unresolved` (`issue-049`,
+`issue-051`), and 2 paperwork-only feature-register gaps (`issue-019`,
+`issue-050`'s registration half). Full list of open issues touching this
+file: `issue-015` (shared stiff-solver frontier), `issue-019`, `issue-048`,
+`issue-049`, `issue-050`, `issue-051`. `FEAT-018` remains
+`PARTIALLY_ASSESSED`/`NOT_ASSESSED` for gate purposes -- depth-read is
+complete, but no independent reviewer pass has yet been applied to any of
+its 14 items, and item 14's `:6808-6968` per-soil-layer commit loop was only
+matched at the module level, not re-derived term-by-term.
+
+Traceability rows `TRC-225` through `TRC-231` added this pass.
+`traceability.csv`'s last row was re-checked immediately before appending
+(`TRC-224`, 223 rows, zero duplicates) and again immediately before
+committing (231 rows total, zero duplicate `unit_id`s per
+`Import-Csv | Group-Object unit_id | Where-Object Count -gt 1` returning
+empty). `audit/issues/`'s last file before this pass was `issue-050`;
+re-checked immediately before filing (still `issue-050`) and again before
+committing -- `issue-051` is new, no collision.
+
+**Running tally update (project-wide, file-scoped additions)**: `watsub.f`
+now accounts for 4 of its own filed issues (`issue-019`, `issue-048`,
+`issue-049`, `issue-050`) plus one new this pass (`issue-051`), and shares
+`issue-015` with the rest of the project. **Next bounded action**: get an
+independent reviewer pass on `feature-018`'s 14 items (highest-value next
+step for this file, since depth-read is done but review is not, mirroring
+the same standing recommendation already made for
+`feature-004`/`feature-009`/`feature-010`/`feature-017`); resolve
+`issue-051` (decide fix-and-test vs. document-as-intentional); separately,
+continue the G1 sweep on any other remaining large unaudited files
+project-wide.

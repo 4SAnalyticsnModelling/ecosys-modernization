@@ -1,10 +1,10 @@
 # Feature ID: FEAT-018-WATSUB-HEAT-WATER-SOLVER-CORE
 
-Status: PARTIALLY_ASSESSED (source-audit; `watsub.f` is 7,030 lines, not the ~4,500 previously estimated; with this pass's pond/runoff/drift and boundary/water-table/tile-drain ranges added to the concurrent snowpack pass, roughly 5,300 of 7,030 lines -- about 75% -- have now been read at statement level; both of the two previously-named "not covered" gaps are closed, but a newly-surfaced, not-yet-itemized `:6197-6554` sub-range and the two open issues below (`issue-049`, `issue-050`) keep this dossier at `PARTIALLY_ASSESSED` rather than complete)
+Status: PARTIALLY_ASSESSED (source-audit; `watsub.f` is 7,030 lines; depth-read is now COMPLETE end to end -- this pass closed the last two unresolved sub-ranges, `:6197-6554` (net flux accumulation, below-surface evaporation-condensation, and micropore/macropore freeze-thaw, item 13) and `:6554-7030` (state-variable updates from net fluxes, item 14, confirming the scope note's "state updates" label was accurate). One new defect found and filed (`issue-051`). Depth-read completeness does not equal review completeness: four open issues touch this file (`issue-019`, `issue-049`, `issue-050`, `issue-051`) plus the shared `issue-015` stiff-solver frontier, and no independent reviewer pass has yet been applied to any of this dossier's 14 items -- see the closing tally at the end of this dossier)
 
 ## Scope and provenance
 
-Legacy source: `f77src/watsub.f` (sha256 `8606E2EA96E52EE8109CF0EF78B6B49ABE0683E68BAA41FFACBEBAF1FE49DA95`; corrected this pass -- the previously recorded digest here was a 63-character transcription that dropped one hex digit, re-verified against a fresh `Get-FileHash` this pass, file otherwise unchanged and untouched by this or any concurrent agent). **Size correction**: 7,030 lines, not ~4,500 as earlier sessions estimated. Structure: surface energy balance/snowpack physics (`:1-3733`); pond/runoff/snow-drift routing (`:3737-4370`); the actual solver core this dossier covers (`:4370-6197` -- boundary location, water-potential assembly, Darcy/Richards water flux, hydraulic conductivity, macropore Poiseuille flow, vapor diffusion, thermal conductivity/conduction, water-table/tile-drain boundaries); state updates (`:6554-7030`). Retention (feature-002) and freeze-thaw (feature-001) already covered, excluded here.
+Legacy source: `f77src/watsub.f` (sha256 `8606E2EA96E52EE8109CF0EF78B6B49ABE0683E68BAA41FFACBEBAF1FE49DA95`; corrected this pass -- the previously recorded digest here was a 63-character transcription that dropped one hex digit, re-verified against a fresh `Get-FileHash` this pass, file otherwise unchanged and untouched by this or any concurrent agent). **Size correction**: 7,030 lines, not ~4,500 as earlier sessions estimated. Structure: surface energy balance/snowpack physics (`:1-3733`); pond/runoff/snow-drift routing (`:3737-4370`); the actual solver core this dossier covers (`:4370-6197` -- boundary location, water-potential assembly, Darcy/Richards water flux, hydraulic conductivity, macropore Poiseuille flow, vapor diffusion, thermal conductivity/conduction, water-table/tile-drain boundaries); net flux bookkeeping and below-surface evaporation-condensation/freeze-thaw (`:6197-6554`, item 13); state updates (`:6554-7030`, item 14). Retention (feature-002) and freeze-thaw (feature-001) already covered, excluded here.
 
 ### 1. Unsaturated (Richards/Darcy) water flux -- `replaced-by-approved-feature`
 
@@ -62,14 +62,209 @@ Canopy-air aerodynamic exchange and boundary-layer conductance export (`:4194-43
 
 The six discharge/recharge flux formulas that follow (`:5819-6145`) contain a genuine legacy "N parallel blocks, 1 outlier" pattern -- both the natural-table and tile-drain micropore-discharge formulas divide by `(RCHG+1.0)` while their four siblings (both macropore-discharge instances and both recharge instances) divide by `AMAX1(RCHG,1.0)` -- compounded by a dimensional defect (no formula divides the driving potential by an actual physical separation length). Zig's `soil/water/boundary.zig` fixes both, already tested (`GRID-INV-001`/`GRID-INV-002`/`GRID-INV-R3`, whose own test comments state "Legacy `watsub.f` carries the same defect ... so legacy agreement is inadmissible evidence"), but has no feature-register entry -- the same paperwork gap as item 5/`issue-019`. Full detail in `audit/issues/issue-050-watsub-water-table-boundary-dimensional-fix-missing-feature-entry.md`.
 
+### 13. Net runoff/snow-drift flux bookkeeping, net soil water/vapor/heat flux accumulation, below-surface evaporation-condensation, and micropore/macropore freeze-thaw -- resolves the `:6197-6554` accounting gap; mostly `preserved`, one new `unresolved` finding
+
+This pass read `watsub.f:6197-6554` (357 lines) in full at statement level to
+resolve the accounting question raised by every prior pass's "Not covered
+this pass" note. Finding: **this range is not a trivial DO-loop closeout**;
+it contains real, substantive physics, and part of it (`:6208-6267`) had
+already been itemized in `audit/traceability/traceability.csv` as `TRC-224`
+even though no feature-dossier item text ever named it -- a
+documentation/cross-referencing gap between the CSV and this dossier's prose,
+not a coverage gap. The genuinely new-to-any-pass sub-range is `:6268-6554`
+(287 lines).
+
+- `:6208-6267` (already `TRC-224`, re-confirmed this pass, not re-narrated):
+  net runoff/snow-drift E/S-vs-W/N flux bookkeeping (`TQR1`/`TQS1`/`TQW1`/
+  `TQI1`/`THQR1`/`THQS1`), gated by the `IFLBM`/`IFLBMS` direction flags
+  computed earlier (item 10/11's range) -- internally symmetric between the
+  runoff and snow-drift siblings, no new finding.
+- `:6269-6341` (`preserved`): net soil micropore/macropore water, vapor, and
+  heat flux accumulation (`TFLWL`/`TFLVL`/`TFLWLX`/`TFLWHL`/`THFLWL`) into the
+  next-existing-destination-layer variables (`N6`), then folded into the
+  running total flux arrays (`FLW`/`FLV`/`FLWX`/`FLWH`/`HFLW`) consumed by
+  `trnsfr.f` (per this file's own in-line documentation, already audited from
+  the `trnsfr.f`/`trnsfrs.f` side this session, `feature-009`).
+- `:6345-6384` (`preserved`, exact constant match): below-surface-layer
+  evaporation-condensation. `VPLV=2.173E-03/TK1*0.61*EXP(5360.0*(3.661E-03
+  -1.0/TK1))*EXP(18.0*PSISV1/(8.3143*TK1))` (`:6363-6365`) is the exact same
+  formula (down to every constant) as Zig's `vaporLiquidEquilibrium`
+  (`ecosys-ng/src/soil/water/phase_change.zig` (sha256
+  `88A54A1A58972393ECEBEE71960A920A3A1724DCC2494E49B7EBC62121E461CC`),
+  `:23-33`), whose own doc comment (`:21-22`) explicitly identifies itself as
+  "WATSUB's below-surface VOLV/VOLW equilibrium."
+- `:6386-6457` (micropore/macropore freeze-thaw): micropore block
+  (`:6399-6418`) is internally consistent -- its eligibility gate and its
+  driving-force formula both key on the same matric-depressed `TFREEZ`
+  (`:6399`, computed from the layer's own `PSISV1=PSISM1+PSISO`). The
+  macropore block (`:6430-6446`) is **not** internally consistent: its
+  eligibility gate correctly compares against pure-water `273.15` (`:6430-
+  6433`, appropriate since macropore water is free/gravitational, not
+  matric-bound), but its driving-force formula (`HFLFH1`, `:6435-6436`)
+  reuses the *same* matric-depressed `TFREEZ` from the micropore calculation
+  instead of `273.15`. Confirmed this exact inconsistency is faithfully
+  reproduced -- not corrected, not diverged -- in the current Zig production
+  call path (`phase_change.zig`'s `freezeThaw`, `:286-302`, whose
+  `threshold_temperature` at `:291` branches on `macropore` but whose
+  `unlimited_heat` at `:293` always uses the depressed `freezing_temperature`;
+  confirmed at the call site, `ecosys-ng/src/soil/water/phase_solver.zig`
+  (sha256 `9EDA9CD994559FDC6DE189FD8565192BCE41266AAAD6282BFD7A66BC9E82C300`),
+  `:1514-1521` and `:1535-1543`, both passing the identical
+  `matric_plus_osmotic_potential_megapascal`). This is the fourth "N parallel
+  blocks, one outlier" finding in this file this session (after `issue-048`,
+  `issue-049`, `issue-050`) but a different shape: a legacy internal
+  inconsistency bit-for-bit preserved into production, undocumented on either
+  side. Filed as `audit/issues/issue-051-watsub-macropore-freeze-thaw-uses-micropore-depressed-freezing-point.md`.
+  **Disposition: `unresolved`, pending independent review of whether to
+  correct the Zig formula or document the reuse as intentional.**
+- `:6459-6550` (`preserved`): total/accumulated freeze-thaw and
+  evaporation-condensation tallies (`XWFLVL`/`XHFLVL`/`TWFLVL`/`THFLVL`/
+  `XWFLFL`/`XWFLFH`/`XHFLFL`/`TWFLFL`/`TWFLFH`/`THFLFL`, consumed by
+  `redist.f`, already audited this session as `feature-010`) and
+  macro-to-micropore infiltration (`FINHL`/`FINHM`/`FINH`, `:6512-6550`).
+  The infiltration formula (`FINHX=6.283*HCND(2,1,...)*AREA*(PSISE-PSISA1)
+  /LOG(PHOL/HRAD)*XNPHX`, `:6513-6515`) matches Zig's
+  `macroporeMatrixExchange` (`phase_change.zig:319-326`) constant-for-constant
+  (`6.283`, the same log-spacing-over-radius form, the same donor/receiver
+  bound structure) -- no new finding.
+
+### 14. State-variable updates from net fluxes -- resolves the `:6554-7030` accounting gap; `preserved`, not independently re-derived equation-by-equation
+
+`watsub.f:6554-7030` (476 lines) read in full at statement level, confirming
+the scope note's "state updates" label was accurate (not a stale guess): this
+is the routine's terminal `M.LT.NPH` / `ELSE` split (`:6556`/`:7007`) that
+commits the substep's net fluxes into persistent state, then falls through to
+`RETURN` (`:7027-7028`).
+
+- `:6557-6615`: snowpack water/vapor/ice volume and temperature update per
+  layer (`VOLS0`/`VOLW0`/`VOLV0`/`VOLI0`/`TK0`), with a cascading fallback
+  (`VHCPWM(M+1,L,..).GT.VHCPWX` -> real update; else layer 1 takes `TKQG`,
+  deeper layers inherit the layer above, `:6588-6595`). This exact fallback
+  is the one already independently confirmed by
+  `ecosys-ng/src/soil/water/snow_inactive_temperature.zig`'s own header
+  comment ("WATSUB assigns ground-air temperature to layer one and the
+  preceding snow temperature to deeper layers whenever `VHCPWM2 <= VHCPWX`"),
+  found via keyword search this pass, not re-derived line-by-line.
+- `:6626-6638`: snow-drift net flux (`TQS1`/`TQW1`/`TQI1`/`THQS1`, from item
+  13's bookkeeping) applied to the top snow layer only, with the same
+  cascading temperature fallback.
+- `:6655-6683`: if the snowpack's top layer drops to/below the minimum heat
+  capacity while the ground-surface air temperature is above freezing, all
+  remaining snowpack mass/heat is transferred to the litter layer
+  (`XFLWSX`/`XFLWWX`/`XFLWVX`/`XFLWIX`/`XHFLWX`, consumed by `redist.f`) --
+  a "snowpack disappears" terminal case, structurally a one-off rather than
+  part of any parallel-block family.
+- `:6710-6743`: surface litter water/vapor/ice volume and temperature update,
+  folding in runoff (`TQR1`/`THQR1`, item 13) and the litter's own
+  evaporation-condensation/freeze-thaw fluxes (already audited, items 6-9);
+  `:6744-6745` blends snow-cover-weighted and snow-free-weighted ground
+  temperature (`TKGS=FSNW*TK0(1)+FSNX*(TK1(0)*CVRDW+TK1(NUM)*BAREW)`) --
+  matches the cover-fraction-weighting convention already confirmed
+  elsewhere in this file (item 6's `snow_base_thermal_coupling.zig`).
+- `:6808-6968`: the main per-soil-layer state commit loop (`DO 9785
+  L=NUM,NL`) -- water/vapor/ice/macropore volumes, porosity-derived air
+  volumes with a `BKDS.GT.ZERO`/else split for degenerate (zero-bulk-density)
+  layers, `THETWX`/`THETIX`/`THETPX`/`THETPY` bulk concentrations, `FMAC`/
+  `CNDH1` macropore-fraction-scaled conductivity, and the layer's own
+  heat-capacity-gated temperature update (`:6907-6926`, same
+  `VHCP1.GT.VHCPRX` guard pattern as the snowpack/litter blocks above it,
+  falling back to `TKQG`/`TK1(L-1)` for degenerate layers). Includes one
+  fully-commented-out diagnostic feature (`:6887-6894`, "artificial soil
+  warming," an experiment-only heat-flux injection guarded by hardcoded
+  `I`/`NX`/`NY`/`L` bounds) -- dead code in every configuration, not a
+  production path.
+- `:6980-7025`: pond-surface-loss bookkeeping -- if the surface layer's bulk
+  density and heat capacity indicate the pond has fully evaporated, `NUM`
+  (the active surface-layer index) is advanced to the next real layer and its
+  flux values are cached (`FLWNX`/`FLVNX`/`FLWXNX`/`FLWHNX`/`HFLWNX`) for
+  `redist.f`; the `ELSE` branch (`M.EQ.NPH`, the final substep) instead reuses
+  those cached values (`FLWNU`/etc.) rather than recomputing, since the full
+  per-substep state commit above only runs for `M.LT.NPH`. This is an
+  intentional last-substep shortcut, not a parallel-block asymmetry to flag.
+
+**Disposition: `preserved`** at the structural/formula level for every block
+read. **Caveat, matching this dossier's own items 9/10 precedent**: given
+this pass's time budget, Zig counterparts were confirmed to exist and match
+at the function/module level (`snow_inactive_temperature.zig`,
+`phase_solver.zig`, `temperature_solver.zig`, and the snow/litter/soil update
+paths already cited across items 1-13) but the ~416 executable lines of the
+per-soil-layer commit loop (`:6808-6968`) specifically were **not**
+independently re-derived term-by-term against a single named Zig owner this
+pass -- flagged honestly rather than claimed, consistent with the contract's
+"missing evidence is never a pass" rule. No new defect found in this range
+beyond item 13's freeze-thaw finding, which lands one section earlier.
+
 ## Not covered this pass
 
-Both previously-named gaps (`:3737-4370` pond/runoff/drift routing, `:5264-6197` boundary/water-table/tile-drain logic) are now closed by items 10-12 above, and the snowpack range (`:1-3800`) is closed by the concurrent pass's items 6-9. **However**, closing the two *named* gaps surfaced an accounting question this pass did not resolve: the scope note above lists `:4370-6197` as "the actual solver core" and `:6554-7030` as "state updates," but no item in this dossier (across any pass) explicitly itemizes `:6197-6554` (357 lines, immediately after this pass's coverage ends and before the state-update section the scope note names). This may be a trivial DO-loop closeout carried over from the `:4370`-rooted solver loop, or a genuinely unaudited sub-range -- not determined this pass and not claimed either way. Flagging per the evidence guide's requirement that coverage denominators come from the real source graph, not from what was happened to be inspected.
+None outstanding for this file. Both of the two previously-open accounting
+gaps (`:6197-6554`, `:6554-7030`) are now closed by items 13-14 above. Combined
+with items 1-12's prior closure of `:3737-4370`, `:5264-6197`, and the
+concurrent snowpack pass's closure of `:1-3800`, **`watsub.f`'s depth-read is
+now complete end to end (all 7,030 lines)** -- the sixth file this session to
+reach that state, after `redist.f`/`feature-010`, `uptake.f`/`feature-004`,
+`trnsfr.f`+`trnsfrs.f`/`feature-009`, and `solute.f`/`feature-017`. See the
+closing tally below for the residual scope (open issues, unreviewed items)
+that depth-read completeness does not by itself resolve.
 
 ## Acceptance and review
 
-Author: this session's audit fork, 2026-09-18 (items 1-5); continued 2026-09-19 (items 6-9, snowpack surface-energy-balance range; items 10-12, pond/runoff/drift and boundary/water-table/tile-drain ranges, a separate parallel fork on the same file). Independent reviewer: not yet done. Decision: NOT_ASSESSED for gate purposes. Of twelve items: eight `preserved`/`replaced-by-approved-feature` cleanly; two functionally sound but missing their formal feature-register entry (`issue-019`, `issue-050`, paperwork only); one (item 7) a genuine legacy Fortran defect confirmed by direct source comparison, filed as `issue-048` with a proposed but not-yet-reviewed `legacy-defect-corrected` disposition, flagged as an incidental candidate mechanism for `issue-024`'s still-open freeze-thaw divergence; one (item 11) a genuine, unresolved functional divergence -- legacy structurally cannot drift snow across a domain boundary, Zig's production wiring can -- filed as `issue-049` pending a check of whether the in-scope deck's site file ever makes that path live. This pass's read was static source analysis only (no build, run, or binary execution), per this session's read-only constraint.
+Author: this session's audit fork, 2026-09-18 (items 1-5); continued
+2026-09-19 (items 6-9, snowpack surface-energy-balance range; items 10-12,
+pond/runoff/drift and boundary/water-table/tile-drain ranges, a separate
+parallel fork on the same file; items 13-14, the final `:6197-6554` and
+`:6554-7030` accounting-gap closure, this pass). Independent reviewer: not
+yet done for any item. Decision: NOT_ASSESSED for gate purposes. This pass's
+read was static source analysis only (no build, run, or binary execution),
+per this session's read-only constraint; `git status --short` was confirmed
+clean and no `zig`/`gfortran`/`ecosys_ng`/`ecosys_x`/`ecosys_oracle` process
+was running before starting.
 
 ### Closing tally for this dossier
 
-This pass and the concurrent snowpack pass together close both gaps named in every prior "Not covered this pass" section (`:3737-4370`, `:5264-6197`, and `:1-3800`/`:1400-2600`). That is **not** the same claim as "this dossier's audit is complete": (a) the `:6197-6554` accounting gap noted above has not been itemized by any pass; (b) `issue-049` and `issue-050` remain open with next actions that were not executed (site-file check; new feature-register entry); (c) items 1/5's already-registered replacements (feature-001/002) and this pass's newly-found item 12 dimensional fix are not independently reviewed; (d) no build, test, or run evidence backs any item in this file -- every disposition above rests on static source comparison only. Recommend the next session either close `issue-049`/`issue-050` and the `:6197-6554` question, or explicitly accept them as known residual scope before treating `FEAT-018` as ready for a gate decision.
+**`watsub.f`'s depth-read is now complete (7,030/7,030 lines accounted for
+by at least one pass's item), mirroring the full closures already reached
+this session for `redist.f`, `uptake.f`, `trnsfr.f`+`trnsfrs.f`, and
+`solute.f`.** Depth-read completeness is a distinct, narrower claim than
+"fully reviewed" -- see the residual scope below.
+
+**Final item count and dispositions**: 14 numbered items across all passes.
+- `preserved`: items 2, 3, 4, 6, 8, 9, 10, 12 (eligibility-flag half), 13
+  (all but the freeze-thaw sub-finding), 14 -- the dominant disposition
+  throughout this file, consistent with `watsub.f` being a translation-target
+  routine rather than a locus of approved physics changes (those live in
+  `feature-001`/`feature-002`, cross-referenced but not re-litigated here).
+- `replaced-by-approved-feature`: items 1 (Mualem-van Genuchten conductivity,
+  `feature-002`), 5 (macropore-face unification removing a legacy
+  gravity-only defect).
+- `legacy-defect-corrected` (undocumented in the feature register):
+  item 12's discharge/recharge-formula half (`issue-050`).
+- Proposed `legacy-defect-corrected` pending review: item 7 (`issue-048`).
+- `unresolved`: item 11 (`issue-049`), item 13's new freeze-thaw finding
+  (`issue-051`).
+- Paperwork-only registration gaps (functionally sound, no feature entry):
+  item 5 (`issue-019`), item 12 (`issue-050`, doubles as the disposition note
+  above).
+
+**Full list of open issues touching this file**: `issue-015` (shared,
+project-wide stiff-solver frontier -- `watsub.f` is upstream of but not
+itself the cause of that convergence wall), `issue-019` (macropore-flow
+unification missing a feature-register entry, paperwork), `issue-048`
+(under-snow soil freeze-thaw uses the litter's heat capacity, proposed
+`legacy-defect-corrected` pending review), `issue-049` (domain-boundary snow
+drift: legacy-disabled, Zig-enabled, `unresolved`), `issue-050`
+(water-table/tile-drain dimensional fix missing a feature-register entry,
+paperwork), `issue-051` (macropore freeze-thaw reuses the micropore's
+matric-depressed freezing point instead of pure water, `unresolved`, new this
+pass).
+
+**What has not been done, stated plainly**: (a) no item in this dossier has
+an independent reviewer pass; (b) no build, test, or run evidence backs any
+item -- every disposition rests on static source comparison only, per this
+session's read-only constraint; (c) item 14's `:6808-6968` per-layer commit
+loop was matched at the module level, not re-derived term-by-term against a
+single named Zig owner; (d) `issue-049`/`issue-050`/`issue-051`'s own
+suggested next actions (site-file check; new feature-register entry;
+review-and-fix-or-document decision) have not been executed. Recommend the
+next session prioritize an independent review pass over further depth-reading
+for this file, since depth-read is now the completed half of the work and
+review is the entirely-undone half.
