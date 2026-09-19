@@ -67,7 +67,26 @@ pub const Limits = struct {
     /// cannot converge SOLUTE within 100, that is evidence for a further,
     /// specifically-measured increase or a residual-scaling defect -- not a
     /// reason to restore 60.
-    solute_reaction_max_iterations: u16 = 100,
+    ///
+    /// 2026-09-19 update (issue-015, hour-2,589 frontier): the 100 floor
+    /// above resolved hour 2,578/2,579, but the Ottawa deck's production
+    /// replay under the committed 100 floor then failed at hour 2,589 with
+    /// the identical error class, exhausting the full 100-iteration ceiling
+    /// at every substep tier (`8`: `60+40=100`; `20`: `62+38=100`; `32`:
+    /// `53+47=100`; `64`: `70+30=100`) with `maximum_scaled_residual` still
+    /// falling (`1.79e3` -> `5.6e2`) -- a plain budget shortfall, not
+    /// stagnation, the same signature that motivated the 60 -> 100 change
+    /// above. A bounded, reverted diagnostic raised this floor to 200 (and
+    /// the deck's own `hard_max_iterations` to match) and confirmed hours
+    /// 2,578, 2,579 and 2,589 all clear, with the run continuing cleanly to
+    /// at least hour 2,712 before being deliberately stopped. 200 is chosen
+    /// here (not the diagnostic's untested-further headroom) as the next
+    /// evidence-based step in the same 60 -> 100 -> 200 progression: it is
+    /// the exact value the bounded replay validated, not a fresh guess. As
+    /// before, if a real deck still cannot converge SOLUTE within 200, that
+    /// is evidence for a further, specifically-measured increase or a
+    /// residual-scaling defect -- not a reason to restore 100.
+    solute_reaction_max_iterations: u16 = 200,
     /// STARTE MRXN: initial reaction-equilibrium establishment.
     initial_solute_reaction_max_iterations: u16 = 1000,
     canopy_energy_water_max_iterations: u16 = 100,
@@ -128,7 +147,7 @@ pub const Limits = struct {
             .litter_water_heat_max_iterations = @min(hard_max_iterations, 30),
             .snowpack_max_iterations = @min(hard_max_iterations, 20),
             .litter_under_snow_max_iterations = @min(hard_max_iterations, 10),
-            .solute_reaction_max_iterations = @min(hard_max_iterations, 100),
+            .solute_reaction_max_iterations = @min(hard_max_iterations, 200),
             .initial_solute_reaction_max_iterations = @min(hard_max_iterations, 1000),
             .canopy_energy_water_max_iterations = @min(hard_max_iterations, 100),
             .leaf_co2_max_iterations = @min(hard_max_iterations, 100),
@@ -179,7 +198,7 @@ test "legacy option controls become convergence ceilings" {
     try std.testing.expectEqual(@as(u16, 30), limits.litter_water_heat_max_iterations);
     try std.testing.expectEqual(@as(u16, 20), limits.snowpack_max_iterations);
     try std.testing.expectEqual(@as(u16, 10), limits.litter_under_snow_max_iterations);
-    try std.testing.expectEqual(@as(u16, 100), limits.solute_reaction_max_iterations);
+    try std.testing.expectEqual(@as(u16, 200), limits.solute_reaction_max_iterations);
     try std.testing.expectEqual(@as(u16, 1000), limits.initial_solute_reaction_max_iterations);
     try std.testing.expectEqual(@as(u16, 100), limits.canopy_energy_water_max_iterations);
     try std.testing.expectEqual(@as(u16, 100), limits.leaf_co2_max_iterations);
