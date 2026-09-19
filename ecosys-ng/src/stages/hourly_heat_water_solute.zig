@@ -728,12 +728,35 @@ fn SoilForcingSubstepHooks(
             if (phosphorus_ingress_trace) try diagnostics.logPhosphorusRepresentation(context, "ingress_before_topsoil_change_rebase");
             for (0..context.grid.cell_count) |cell| {
                 const topsoil = try context.grid.layerIndex(cell, 0);
+                // ISSUE-065 DRY_CARRIER_TRACE: bounded, hour-2,894-windowed
+                // capture of `dry_reference_water_m3`'s stored value at the
+                // point it is read/consumed, per issue-065's addendum
+                // (`water_carrier_rebase.zig`'s `rememberDryCarrier` theory).
+                // Exploratory scratch instrumentation, not gated permanently.
+                const dry_carrier_trace_2894 = context.executed_weather_hours.* >= 2888 and
+                    context.executed_weather_hours.* < 2896 and topsoil == 0;
+                if (dry_carrier_trace_2894) std.log.info(
+                    "DRY_CARRIER_TRACE site=topsoil_vapor_rebase hour={d} cell={d} layer={d} old_water_m3={e} new_water_m3={e} negligible_water_volume_m3={e} dry_reference_before={e}",
+                    .{
+                        context.executed_weather_hours.* + 1,
+                        cell,
+                        topsoil,
+                        self.topsoil_water_before_vapor_m3[cell],
+                        context.grid.matrix_liquid_water_m3[topsoil],
+                        ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[cell]),
+                        context.soil_chemistry.dry_reference_water_m3[topsoil],
+                    },
+                );
                 try ecosys.soil_chemistry_water_carrier_rebase.rebaseLayer(
                     context.soil_chemistry,
                     topsoil,
                     self.topsoil_water_before_vapor_m3[cell],
                     context.grid.matrix_liquid_water_m3[topsoil],
                     ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[cell]),
+                );
+                if (dry_carrier_trace_2894) std.log.info(
+                    "DRY_CARRIER_TRACE site=topsoil_vapor_rebase hour={d} cell={d} layer={d} dry_reference_after={e}",
+                    .{ context.executed_weather_hours.* + 1, cell, topsoil, context.soil_chemistry.dry_reference_water_m3[topsoil] },
                 );
             }
             if (phosphorus_ingress_trace) try diagnostics.logPhosphorusRepresentation(context, "ingress_after_topsoil_change_rebase");
@@ -752,12 +775,32 @@ fn SoilForcingSubstepHooks(
             if (phosphorus_ingress_trace) try diagnostics.logPhosphorusRepresentation(context, "ingress_before_soil_ingress_rebase");
             for (0..context.grid.cell_count) |cell| {
                 const topsoil = try context.grid.layerIndex(cell, 0);
+                // ISSUE-065 DRY_CARRIER_TRACE, see the topsoil_vapor_rebase
+                // site above for rationale.
+                const dry_carrier_trace_2894 = context.executed_weather_hours.* >= 2888 and
+                    context.executed_weather_hours.* < 2896 and topsoil == 0;
+                if (dry_carrier_trace_2894) std.log.info(
+                    "DRY_CARRIER_TRACE site=soil_ingress_rebase hour={d} cell={d} layer={d} old_water_m3={e} new_water_m3={e} negligible_water_volume_m3={e} dry_reference_before={e}",
+                    .{
+                        context.executed_weather_hours.* + 1,
+                        cell,
+                        topsoil,
+                        self.topsoil_water_before_ingress_m3[cell],
+                        context.grid.matrix_liquid_water_m3[topsoil],
+                        ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[cell]),
+                        context.soil_chemistry.dry_reference_water_m3[topsoil],
+                    },
+                );
                 try ecosys.soil_chemistry_water_carrier_rebase.rebaseLayer(
                     context.soil_chemistry,
                     topsoil,
                     self.topsoil_water_before_ingress_m3[cell],
                     context.grid.matrix_liquid_water_m3[topsoil],
                     ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[cell]),
+                );
+                if (dry_carrier_trace_2894) std.log.info(
+                    "DRY_CARRIER_TRACE site=soil_ingress_rebase hour={d} cell={d} layer={d} dry_reference_after={e}",
+                    .{ context.executed_weather_hours.* + 1, cell, topsoil, context.soil_chemistry.dry_reference_water_m3[topsoil] },
                 );
             }
             if (phosphorus_ingress_trace) try diagnostics.logPhosphorusRepresentation(context, "ingress_after_soil_ingress_rebase");
@@ -4559,7 +4602,22 @@ fn CoupledSubstepTransaction(
                     );
                 }
             }
-            for (0..context.grid.layer_count) |layer|
+            for (0..context.grid.layer_count) |layer| {
+                // ISSUE-065 DRY_CARRIER_TRACE, see the topsoil_vapor_rebase
+                // site (`:731`) for rationale. This is the main per-layer
+                // WATSUB commit call site named in issue-065's addendum.
+                const dry_carrier_trace_2894 = context.executed_weather_hours.* >= 2888 and
+                    context.executed_weather_hours.* < 2896 and layer == 0;
+                if (dry_carrier_trace_2894) std.log.info(
+                    "DRY_CARRIER_TRACE site=watsub_commit hour={d} layer={d} old_water_m3={e} new_water_m3={e} dry_reference_before={e}",
+                    .{
+                        context.executed_weather_hours.* + 1,
+                        layer,
+                        entry_matrix_water_m3[layer],
+                        context.grid.matrix_liquid_water_m3[layer],
+                        context.soil_chemistry.dry_reference_water_m3[layer],
+                    },
+                );
                 ecosys.soil_chemistry_water_carrier_rebase.rebaseLayer(
                     context.soil_chemistry,
                     layer,
@@ -4567,6 +4625,11 @@ fn CoupledSubstepTransaction(
                     context.grid.matrix_liquid_water_m3[layer],
                     ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[layer / context.grid.soil_layer_capacity]),
                 ) catch unreachable;
+                if (dry_carrier_trace_2894) std.log.info(
+                    "DRY_CARRIER_TRACE site=watsub_commit hour={d} layer={d} dry_reference_after={e}",
+                    .{ context.executed_weather_hours.* + 1, layer, context.soil_chemistry.dry_reference_water_m3[layer] },
+                );
+            }
             if (trace_allowance) {
                 var invariant_after_g: f64 = 0;
                 for (0..context.grid.layer_count) |layer| {
@@ -7772,7 +7835,24 @@ fn CoupledSubstepTransaction(
                     old_surface_water_m3[cell],
                     new_surface_water_m3[cell],
                 ) catch unreachable;
-            for (0..context.grid.layer_count) |layer|
+            for (0..context.grid.layer_count) |layer| {
+                // ISSUE-065 DRY_CARRIER_TRACE, see the topsoil_vapor_rebase
+                // site (`:731`) for rationale. This is the TRNSFR
+                // transport-replay commit call site named in issue-065's
+                // addendum; `self.transport_replay.count`-many substeps can
+                // call this within a single external hour.
+                const dry_carrier_trace_2894 = self.context.executed_weather_hours.* >= 2888 and
+                    self.context.executed_weather_hours.* < 2896 and layer == 0;
+                if (dry_carrier_trace_2894) std.log.info(
+                    "DRY_CARRIER_TRACE site=transport_replay hour={d} layer={d} old_water_m3={e} new_water_m3={e} dry_reference_before={e}",
+                    .{
+                        self.context.executed_weather_hours.* + 1,
+                        layer,
+                        old_matrix_water_m3[layer],
+                        new_matrix_water_m3[layer],
+                        context.soil_chemistry.dry_reference_water_m3[layer],
+                    },
+                );
                 ecosys.soil_chemistry_water_carrier_rebase.rebaseLayer(
                     context.soil_chemistry,
                     layer,
@@ -7780,6 +7860,11 @@ fn CoupledSubstepTransaction(
                     new_matrix_water_m3[layer],
                     ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[layer / context.grid.soil_layer_capacity]),
                 ) catch unreachable;
+                if (dry_carrier_trace_2894) std.log.info(
+                    "DRY_CARRIER_TRACE site=transport_replay hour={d} layer={d} dry_reference_after={e}",
+                    .{ self.context.executed_weather_hours.* + 1, layer, context.soil_chemistry.dry_reference_water_m3[layer] },
+                );
+            }
         }
 
         fn accumulateLitterSoilLocalTransfer(
@@ -8187,6 +8272,22 @@ fn CoupledSubstepTransaction(
                     old_litter_water_m3,
                     candidate.new_litter_water_m3,
                 ) catch unreachable;
+                // ISSUE-065 DRY_CARRIER_TRACE, see the topsoil_vapor_rebase
+                // site (`:731`) for rationale. This is the litter/soil
+                // interface commit call site named in issue-065's addendum.
+                const dry_carrier_trace_2894 = context.executed_weather_hours.* >= 2888 and
+                    context.executed_weather_hours.* < 2896 and top == 0;
+                if (dry_carrier_trace_2894) std.log.info(
+                    "DRY_CARRIER_TRACE site=litter_soil_interface hour={d} cell={d} layer={d} old_water_m3={e} new_water_m3={e} dry_reference_before={e}",
+                    .{
+                        context.executed_weather_hours.* + 1,
+                        cell,
+                        top,
+                        old_soil_water_m3,
+                        candidate.new_soil_water_m3,
+                        context.soil_chemistry.dry_reference_water_m3[top],
+                    },
+                );
                 ecosys.soil_chemistry_water_carrier_rebase.rebaseLayer(
                     context.soil_chemistry,
                     top,
@@ -8194,6 +8295,10 @@ fn CoupledSubstepTransaction(
                     candidate.new_soil_water_m3,
                     ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[cell]),
                 ) catch unreachable;
+                if (dry_carrier_trace_2894) std.log.info(
+                    "DRY_CARRIER_TRACE site=litter_soil_interface hour={d} cell={d} layer={d} dry_reference_after={e}",
+                    .{ context.executed_weather_hours.* + 1, cell, top, context.soil_chemistry.dry_reference_water_m3[top] },
+                );
                 try self.accumulateChemistryRebaseRoundoff(
                     top,
                     candidate.chemistry_rebase_roundoff,
