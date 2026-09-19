@@ -1,6 +1,6 @@
 # Issue 040 -- UPTAKE.F's root osmotic/turgor potential equation (PSIRO/PSIRG, the temperature- and nonstructural-solute-dependent Van't Hoff term) was never ported; Zig substitutes a static per-plant constant, so root turgor never responds to root water status and silently neutralizes the downstream root-extension water-stress limitation
 
-Status: **OPEN, needs a coordinator decision (fix vs. scope approval).**
+Status: **OPEN, Tier 1 -- confirmed by 2026-09-19 scoping check to need a coordinator/scientist decision, not a simple fix; no source change made this pass.**
 
 Owner: found by this session's audit fork, 2026-09-19, auditing the assigned range `f77src/uptake.f:1229-2003`, while characterizing the canopy-energy-balance closure/default-path block that computes root water/osmotic/turgor potentials after the TKCY convergence solve.
 
@@ -60,6 +60,60 @@ Static analysis only, per this pass's read-only-audit constraint (no build/run p
 ## Disposition
 
 `unresolved`. Needs a coordinator decision: (a) port the full `FDMR`/`TKS`/`CCPOLR`/`OSWT`/`CSALTR` osmotic-adjustment formula for roots, mirroring the already-correct canopy-side `water_osmotic_potential.zig` (same functional form, root-specific inputs, one call per `(plant,domain,layer)` per hour inside the same hourly root-hydraulics pass that already computes `root_potential`); or (b) obtain explicit scope approval to treat the constant-turgor simplification as a deliberate, reviewed approximation (would need its own feature-register entry with a stated scientific rationale and envelope, since none exists today).
+
+## Scoping check (2026-09-19)
+
+Bounded, read-only-only triage pass (no build/run performed), done to decide
+between implementing a fix this pass (the `issue-054` pattern: a simple,
+unambiguous, low-risk wire-up with a clearly correct source value) versus
+leaving this for a human/scientist decision (the `issue-050` pattern: a
+judgment call and/or a gap that cannot be bounded by static analysis alone).
+**Conclusion: this is the `issue-050` pattern, not the `issue-054` pattern.**
+Two independent reasons:
+
+1. **Not a simple wire-up -- confirmed plumbing gap, not just a missing
+   formula.** Read `ecosys-ng/src/plant/root/water_balance.zig`'s
+   `state_updateRootHydraulicsWithCanopyPotential` signature and body
+   (`:821-889`) and its sole call site,
+   `ecosys-ng/src/stages/hourly_snow_energy.zig:654`. The function's actual
+   parameter list carries only `soil_total_water_potential_megapascal`,
+   `canopy_water_potential_megapascal`, the two resistance arrays, and the
+   static per-plant `leaf_osmotic_potential_at_zero_total_megapascal` trait --
+   no per-layer temperature, no nonstructural-solute-concentration, no
+   salt-concentration array is passed in today. `FDMR`/`OSWT`/`PSIRO`'s three
+   missing legacy inputs (`TKS`, `CCPOLR`, `CSALTR`) are **not** simply unused
+   local variables sitting one line away, unlike `issue-054`'s fix. A repo
+   grep confirms the *concepts* exist elsewhere in the codebase --
+   root-nonstructural-concentration-shaped state in
+   `plant_root_nutrient_uptake.zig`/`plant_root_system.zig` and root-salt
+   state in `plant_root_salt_exchange.zig` -- but none of it currently flows
+   into this water-balance call. Threading it in is real cross-module
+   plumbing (new parameters, a data source per input, and -- per the
+   contract's transactional-trial-state rule -- keeping the whole staged
+   `solveLivingCanopyCells`/`state_updateRootHydraulicsWithCanopyPotential`
+   transaction still fully revertible on failure), not a one-field
+   substitution. The issue's own "not investigated this pass" caveat on data
+   availability is now confirmed true: the plumbing gap is real.
+2. **Reachability/materiality cannot be bounded by static input-file
+   analysis**, unlike `issue-050`/`028`/`031`/`044`/`056` (each resolved this
+   session by checking a static flag or a constant-zero input field). This
+   term's magnitude depends on **emergent simulated state** -- how negative
+   root total water potential (`PSIRT`) actually gets under transpiration
+   demand between rain events, plus per-layer root temperature and
+   nonstructural-C/N/P concentration trajectories -- none of which is a
+   static site/weather/management input that can be read off a file. No
+   full-season run exists for this deck yet (`issue-015` blocks completion at
+   hour 2,578/262,920), and this pass's read-only-first constraint precludes
+   starting one to find out. A matched-state kernel test (feed both formulas
+   the same `PSIRT`/temperature/solute series) could bound this without a
+   full run, but was not built this pass and is itself a design choice
+   (what series to feed) that benefits from coordinator sign-off given point
+   1 above.
+
+Both findings independently confirm the disposition below is unchanged and
+this stays **Tier 1** (needs a coordinator/scientist decision) rather than
+being promoted to a Phase-2 fix in this pass. No source file was modified;
+no test was added; no build or run was performed.
 
 ## Evidence
 

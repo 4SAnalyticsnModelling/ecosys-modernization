@@ -117,6 +117,28 @@ deck's own input files alone. See each issue's own "Follow-up resolution
 updated Section 8 item 5/8 below. No other issue's disposition or ranking
 changed as part of this pass.
 
+**Correction (2026-09-19, later same day): `issue-040` is re-ranked from
+Tier 3 (this section's former #1, "cheap to fix") to Tier 1 (human decision
+needed).** A bounded scoping check (same read-only method as the corrections
+above) found `issue-040` does **not** match the `issue-054` pattern this
+document previously implied for it. First, the three legacy inputs the
+missing root osmotic/turgor formula needs (`TKS`/temperature, `CCPOLR`/
+nonstructural-solute concentration, `CSALTR`/salt concentration) are not
+currently plumbed into `state_updateRootHydraulicsWithCanopyPotential`
+(`ecosys-ng/src/plant/root/water_balance.zig:821-889`) or its sole caller
+(`ecosys-ng/src/stages/hourly_snow_energy.zig:654`) -- the fix needs real
+cross-module plumbing (the concepts exist elsewhere, e.g.
+`plant_root_nutrient_uptake.zig`, `plant_root_salt_exchange.zig`, but are not
+wired to this call site), not a one-field substitution. Second, unlike
+`issue-050`/`028`/`031`/`044`/`056`, this term's reachability for Ottawa
+cannot be settled from static site/weather/management input files -- it
+depends on emergent simulated root-water-potential/temperature/solute
+trajectories that only a run or a matched-state kernel test could produce,
+neither performed this pass (and no full-season run exists yet; `issue-015`
+still blocks completion at hour 2,578). See `issue-040`'s own "Scoping check
+(2026-09-19)" section for the full evidence chain and the Tier 1 table entry
+added below.
+
 ---
 
 ## 2. Tier 1 -- needs a human/scientist decision, not resolvable by more static analysis
@@ -136,6 +158,7 @@ For each: what the two sides do differently, and the decision needed.
 | `issue-049` | Legacy's domain-boundary (lateral grid-edge) snow drift is entirely commented-out/dead in the Fortran; Zig's snow-drift routing reuses the runoff/erosion boundary-openness mask and genuinely exports mass/heat/solutes across an open, downhill lateral boundary during snow-bearing, windy hours. | Check whether the in-scope deck's site file ever has a nonzero open+downhill lateral boundary during snow cover. If live: gate Zig's snow-drift boundary path permanently closed to match legacy exactly, or register this as an approved feature (legacy's dead skeleton suggests an unfinished original feature, not a deliberate physical choice). |
 | `issue-051` | Legacy's own macropore freeze-thaw block is internally inconsistent: its eligibility **gate** correctly uses the pure-water freezing point (273.15 K) but its **driving-force formula** reuses the micropore's matric-depressed freezing point. Zig reproduces this inconsistency bit-for-bit, undocumented on either side. | Correct Zig's formula to relax toward the pure-water freezing point for the macropore path (a `legacy-defect-corrected` candidate), or find/document a physical rationale for the legacy behavior and keep it as `preserved`. Sits in the same freeze-thaw physics area as the already-high-scrutiny Dall'Amico feature. |
 | `issue-052` | Legacy's ground/snow surface roughness `ZS` is "sticky": recomputed only on a rare disturbance/restart event, otherwise held fixed all season. Zig recomputes it from live state every hour, unconditionally. | Is Zig's continuous recompute a deliberate improvement (needs a feature entry + matched-state test) or does exact-parity require an `IFLGS`-equivalent gate in Zig's driver? Feeds the canopy/surface energy-balance chain already under scrutiny in `issue-024`. |
+| `issue-040` (added 2026-09-19, re-ranked down from Tier 3) | Root osmotic/turgor water potential (`PSIRO`/`PSIRG`) from `uptake.f`'s temperature- and nonstructural-solute-dependent Van't Hoff term was never ported; Zig substitutes a static per-plant trait constant. A 2026-09-19 scoping check found the fix needs new cross-module plumbing (temperature, nonstructural-solute-concentration and salt-concentration arrays are not currently passed into `water_balance.zig`'s root-hydraulics call, though the underlying concepts exist elsewhere in the plant/root modules), and that reachability for Ottawa cannot be bounded from static input files the way `issue-050`/`028`/`031`/`044`/`056` were -- it depends on emergent simulated root-water-status trajectories. | Port the full `FDMR`/`TKS`/`CCPOLR`/`OSWT`/`CSALTR` formula (mirroring the already-correct canopy-side `water_osmotic_potential.zig`), including the new plumbing, and validate with a matched-state kernel test; or obtain explicit scope approval to keep the constant-turgor simplification with its own feature-register entry and scientific rationale. Either path needs coordinator/scientist sign-off, not another autonomous static-analysis pass. |
 | `issue-050` (added 2026-09-19, re-ranked up from Tier 4) | The `recharge_frequency_divisor` half of this issue (distinct from its still-paperwork-only `GRID-INV-001/002` dimensional fix) hardcodes `0`/`1` at `solver_residual.zig:474,498,513,530` where legacy uses a real, site-calibrated `RCHGFU`/`RCHGFA`. Confirmed for Ottawa: the deck's own site file gives `RCHGNUG=RCHGSUG=10.0` with N/S exchange enabled, and the deck's 1x1 grid makes every cell's N/S faces boundary faces by construction -- both preconditions the issue needed to matter are now independently confirmed true, not merely possible. | Thread the real per-direction `RCHGFU`/`RCHGFA` value through `recharge_frequency_divisor` at the four lateral call sites (a `legacy-defect-corrected`-shaped fix once reviewed), or produce a documented, reviewed rationale for keeping the hardcode despite disagreeing with the site file (`preserved`/`retired-with-explicit-scope-approval`-shaped). Either way this needs a decision before a feature-register entry can be written; a run to establish the actual m3-scale flux impact is a reasonable next step but the divisor-level ~10-11x discrepancy is already established without one. |
 
 ---
@@ -236,13 +259,19 @@ below the three items with a confirmed-or-plausible-live materiality
 dormant/latent items (`issue-012`, `issue-055` Part B, `issue-037`). No
 other item's ranking changed.
 
-1. **`issue-040`** -- Root osmotic/turgor water potential (`PSIRO`/`PSIRG`)
-   was never ported; Zig substitutes a static per-plant trait constant that
-   never responds to root water status, temperature, or solute
-   concentration. The already-correct canopy-side sibling shows the intended
-   formula was known and portable. Silently weakens a designed
-   drought-response feedback on root extension growth. High confidence,
-   plausible real impact, not yet quantified.
+1. ~~`issue-040`~~ **RE-RANKED to Tier 1, 2026-09-19 -- see Section 1's
+   correction and the Tier 1 table above.** Root osmotic/turgor water
+   potential (`PSIRO`/`PSIRG`) was never ported; Zig substitutes a static
+   per-plant trait constant that never responds to root water status,
+   temperature, or solute concentration. The already-correct canopy-side
+   sibling shows the intended formula was known and portable. Silently
+   weakens a designed drought-response feedback on root extension growth.
+   High confidence, plausible real impact, not yet quantified -- but a
+   bounded scoping check found the fix requires new cross-module plumbing
+   (not a simple wire-up) and that reachability cannot be bounded from
+   static input files alone, so this no longer belongs in this tier's
+   "concrete, well-localized, cheap to fix" framing (see Section 8 item 5's
+   correction).
 2. **`issue-054`** -- This is the one Tier-3 item that is a **Zig-introduced**
    translation bug, not an avoided legacy defect: legacy correctly uses two
    different band/non-band volume fractions for the NH3-oxidizer's own NH4
@@ -439,7 +468,7 @@ Opinionated, given limited reviewer time:
 2. **`issue-002` is already resolved (correction, post-dates this triage's initial pass) -- the remaining action is only deciding whether to preserve the 1.33GB oracle output durably outside the session scratchpad**, not building/running anything further. Low urgency, pure housekeeping.
 3. **`issue-024`, next, because it is a live investigation one instrumented run away from real progress**, and because its outcome (matric-potential value or substep-schedule gap) plausibly also matters for #1's stiff-solver frontier -- these two investigations should not proceed in total isolation from each other.
 4. **Batch the Tier 2 sign-offs in one reviewer pass**, grouped by the two cross-cutting patterns (Section 6) rather than one-by-one -- most of these need the same 30-second judgment ("Zig's generic kernel avoided this, agreed, add the citation") repeated ~16 times; a single reviewer session covering all of Tier 2 will be far more efficient than 16 separate reviews.
-5. **`issue-040` and `issue-054`** next among the remaining Tier-3 items -- both are concrete, well-localized, plausibly consequential, and cheap to fix once a reviewer signs off (a formula port and a one-field wiring fix, respectively). **Correction (2026-09-19):** this bullet previously called `issue-028`, `issue-031`, `issue-044`, `issue-056` "harder-to-scope... need an input-file check before anyone can even judge urgency." A bounded follow-up has since done exactly that check for all four and found each one decisively **not reachable** (or, for `issue-056`'s rainfall side, reachable-but-immaterial) for the in-scope Ottawa deck -- see each issue's own "Follow-up resolution (2026-09-19)" section and the re-ranked Tier 3 list in Section 4. They no longer need scoping; they need only routine backlog scheduling, same as the other confirmed-dormant items.
+5. **`issue-054`** next among the remaining Tier-3 items -- concrete, well-localized, plausibly consequential, and cheap to fix once a reviewer signs off (a one-field wiring fix). **Correction (2026-09-19): `issue-040` (a formula port) is removed from this bullet and re-ranked to Tier 1** -- a bounded scoping check found it needs new cross-module plumbing (temperature/nonstructural-solute/salt-concentration arrays not currently threaded into the root water-balance call) and that its reachability cannot be bounded from static input files the way the items below were, so it is not "cheap to fix" in the way this bullet originally implied; see `issue-040`'s own "Scoping check (2026-09-19)" section and the Tier 1 table entry above. Separately, this bullet previously also called `issue-028`, `issue-031`, `issue-044`, `issue-056` "harder-to-scope... need an input-file check before anyone can even judge urgency." this bullet previously called `issue-028`, `issue-031`, `issue-044`, `issue-056` "harder-to-scope... need an input-file check before anyone can even judge urgency." A bounded follow-up has since done exactly that check for all four and found each one decisively **not reachable** (or, for `issue-056`'s rainfall side, reachable-but-immaterial) for the in-scope Ottawa deck -- see each issue's own "Follow-up resolution (2026-09-19)" section and the re-ranked Tier 3 list in Section 4. They no longer need scoping; they need only routine backlog scheduling, same as the other confirmed-dormant items.
 6. **`issue-032` (test hang) before anyone leans on `zig build test` as a release gate.** It costs little to triage and its risk (masking an unrelated real failure under a CI timeout) is exactly the kind of thing that should not still be open when G2/G3 evidence starts depending on the test suite being trustworthy.
 7. **Tier 1's remaining items (`issue-018`, `022`, `026`, `030`, `038`, `039`, `047`, `049`, `050`, `051`, `052`)** are all real judgment calls but none currently block anything -- schedule them as a standing backlog for whoever has the relevant domain expertise (solute chemistry for 018/038/045-adjacent; plant/root physiology for 039/047; land-surface/snow physics for 049/051/052; soil-water boundary calibration for 050, added 2026-09-19), rather than trying to force them through this audit's own general-purpose passes.
 8. **`issue-037`, `issue-055` (Part B), `issue-028`, `issue-031`, `issue-044`, and `issue-056` last among Tier 3, alongside Tier 4** -- all six are now confirmed-dormant-or-immaterial for the in-scope Ottawa deck (the first two were already known dormant; the last four were confirmed by the 2026-09-19 follow-up, see Section 4 and item 5 above). `issue-037`/`issue-055`(B) need only the documentation-scope decision `issue-037`'s own "Disposition" section already describes (document as intentionally-dormant reference translations per the contract's dormant-branches clause); `issue-028`/`031`/`044`/`056` need only ordinary backlog scheduling for whoever eventually ports the missing routines, not an urgent wiring fix.
