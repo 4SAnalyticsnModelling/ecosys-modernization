@@ -1,7 +1,7 @@
 # Feature ID: FEAT-006-HOUR1-CANOPY-SURFACE-PHYSICS
 
-Status: PARTIALLY_ASSESSED (third pass this session; cumulative statement-level
-coverage now roughly 45-50% of the file's 5,204 lines -- see "Coverage and
+Status: PARTIALLY_ASSESSED (fourth pass this session; cumulative statement-level
+coverage now roughly 65% of the file's 5,204 lines -- see "Coverage and
 closing summary" below for exact ranges)
 
 ## Scope and provenance
@@ -192,6 +192,140 @@ header, not necessarily the first executable statement):
 | `:4884-5200` | Hourly fertilizer NH4/NO3/PO4 band width/depth/volume-fraction growth and amalgamate-on-loss reset | **Read in full, this pass** |
 | `:5200-5204` | `RETURN`/`END` | n/a |
 
+## Addendum 2026-09-19 (fourth pass, this session): full statement-level read of `:3660-4679`, the every-hour soil/litter thermal-property and water-potential recompute -- this dossier's own previously-flagged top-priority gap
+
+**Scope of this pass.** Read-only, static-analysis-only per this task's
+constraint (no `zig build`, no execution, no runs). Read `hour1.f:3660-4679`
+(1,020 lines) in full at statement level -- the range the third pass's "Not
+covered" section flagged as "**Recommended top priority for the next
+pass**" because it is the every-hour (non-disturbance-gated) counterpart to
+the disturbance-gated `:1891-2388` litter/soil property resets, and because
+it directly feeds `watsub.f`'s soil thermal conductivity and (via `PSISM`/
+`PSISO`) freezing-point calculations. Also read `audit/issues/issue-024`'s
+current state first per this pass's brief, without reopening its paused
+rounds 1-4 diagnosis loop.
+
+**What this range covers, confirmed by direct read:**
+- `:3660-3672` -- per-layer sand/silt/clay concentration finalization
+  (`CSAND`/`CSILT`/`CCLAY`), specific-surface-area `SSA` when `ISALTG.NE.0`.
+- `:3673-3739` -- soil solid-phase heat-capacity/thermal-conductivity
+  formulation from SOC+texture (`VORGC`/`VMINL`/`VSAND`, `STC`/`DTC`,
+  `POROS`), charcoal FC/WP/CEC/AEC increment, `EHUM` humus-allocation
+  fraction. Legacy's own `VHCM` line here (`:3697-3698`) is commented-out
+  dead code (VHCM is actually owned by `starts.f`); confirmed this is
+  already correctly understood on the Zig side (`soil/heat/solver_residual.zig:398-407`
+  explains the same fact independently).
+- `:3754-3892` -- soil gaseous (`CO2G..H2GG`, 7-way parallel) and aqueous
+  (`CO2S..H2GS`, 6-way parallel) concentrations from mass/volume; NH4/NH3/
+  NO3/NO2/HPO4/H2PO4/total-P concentrations in non-band and band zones
+  (fully parallel non-band/band pair, each internally consistent).
+- `:3894-4000` -- previous-timestep substrate-uptake carryover reset
+  (mechanical); gaseous/aqueous diffusivity temperature scaling (`TFACG`/
+  `TFACL`) for every tracked gas/solute, `ISALTG`-conditional salt-species
+  extension.
+- `:4001-4078` -- total soil ion strength/activity coefficients/electrical
+  conductivity (`CSTR`/`CION`/`A1`/`A2`/`A3`/`ECND`), extended Debye-Huckel
+  law over three charge classes -- **see new finding below, `issue-053`.**
+- `:4080-4106` -- Ostwald solubility coefficients (CO2/CH4/O2/N2/N2O/NH3/H2)
+  temperature- and ionic-strength-adjusted.
+- `:4107-4170` -- three-branch log-log matric water potential `PSISM` for
+  soil layers (below-wilting / field-capacity-to-wilting / near-saturation
+  branches), plus a fourth branch for the zero-bulk-density/ice-only case.
+- `:4171-4195` -- osmotic/gravimetric/total water potential (`PSISO`/
+  `PSISH`/`PSIST`).
+- `:4197-4326` -- root-penetration resistance `RSCS` (entirely commented
+  out in legacy itself -- dead code, hard-set to `0.0`, "NOT CURRENTLY
+  USED"); hydraulic conductivity `CNDU`; active-layer depth `DPTHA`; water-
+  table depth `DPTHT`.
+- `:4329-4562` -- the dedicated surface-litter (layer 0) physical/water/ion
+  block: volume/porosity/water-content geometry from `RC0`/`BKRS`, then a
+  three-way branch for litter matric/osmotic/total water potential and ion
+  activity (litter present+wet / litter present+dry, falling back to the
+  top soil layer's `PSISM`/`PSISO`/`PSISH`/`PSIST` / no litter volume at
+  all, same fallback) -- verified complete, no missing `ELSE`, no
+  stale-state gap.
+- `:4564-4649` -- litter gas concentrations, litter gas solubility, litter
+  aqueous concentrations, litter gaseous/aqueous diffusivity (parallel
+  structure to the soil-layer version above, confirmed).
+- `:4651-4679` -- litter substrate-uptake carryover reset (mechanical,
+  parallel to `:3894-3932`'s soil version); start of the vapor-diffusivity
+  section (already read/disposed by the third pass).
+
+**N-parallel-blocks / one-outlier check, this pass's specific focus:**
+- Soil-layer PSISM (`:4127-4170`) vs. litter-layer PSISM (`:4386-4400`):
+  structurally parallel three/four-branch log-log forms, correctly using
+  each layer's own `THETW`/`THETWR`. No asymmetry found in the *branch
+  structure* itself.
+- **Confirmed, by independent re-derivation, the pre-existing open
+  `SOIL-THETY-001` finding** (found by a prior pass, not new this pass):
+  the below-wilting-point branch (`HCN=0.50` log-log extrapolation) is
+  applied identically to soil layers (`:4131-4134`) and litter (`:4386-
+  4389`) in legacy, but production is asymmetric -- litter
+  (`surface/litter_geometry.zig:35`) keeps the legacy extrapolation while
+  soil layers (`soil/water/retention.zig:680`) invert their own Mualem-
+  van-Genuchten curve instead. This pass's direct statement-level read of
+  both `hour1.f` branches independently corroborates the finding's premise
+  (the two legacy branches genuinely are identical in form); does not
+  newly resolve it.
+- Gas concentration blocks (7-way gaseous, 6-way aqueous, NH4/NO3/PO4 non-
+  band vs. band pairs): all internally parallel and complete, no missing
+  member found in either soil-layer or litter-layer versions.
+- Litter's three-way PSISM fallback branch (wet / dry-with-fallback / no-
+  litter-with-fallback): verified complete against the soil-layer
+  analog's own `ELSE` (`:4168-4170`) -- no outlier.
+
+**One significant new finding this pass:** the legacy `CION`/`CSTR`
+extended-Debye-Huckel computation (`:4001-4078`), which is PSISO's sole
+input and therefore directly upstream of `issue-024`'s still-open "matric-
+plus-osmotic potential" candidate, has two structurally different Zig
+implementations -- a never-production-bound, byte-for-byte source-order
+translation kept as a test oracle (`ecosys-ng/src/soil/chemistry
+/ionic_strength_conductivity.zig`) and the actual production-bound path
+fed by the full dynamic solute-reaction-network species state
+(`ecosys-ng/src/soil/solute/activity_coefficients.zig` +
+`charge_classification.zig`, via `chemistry_state.State.activityCoefficients`
+at `hourly_workspace.zig:159-161`). The two implement the identical
+formula (confirmed by direct comparison), but whether their *inputs*
+numerically agree for this deck's top soil layer at hour 1 has never been
+checked. Filed as `audit/issues/issue-053-hour1-cion-osmotic-potential
+-dual-formulation-unverified-equivalence.md`; cross-referenced as an
+incidental note in `issue-024` (same pattern as that issue's existing
+`issue-048` incidental note), not reopening that issue's paused diagnosis
+loop.
+
+**Zig counterparts found this pass** (see `audit/traceability/traceability.csv`
+`TRC-250` through `TRC-255` for the full per-range citations): `soil/profile
+/initialization.zig` (`solidThermalTerms`) + `soil/profile
+/runtime_material_refresh.zig` (`refreshAcceptedHour`, confirmed called every
+accepted hour via `ecosys_ng.zig:6621`, matching legacy's cadence) +
+`management/charcoal_soil_property_adjustment.zig` + `soil/microbial
+/turnover_step.zig` for the thermal/charcoal/EHUM range; `soil/solute
+/activity_coefficients.zig` + `charge_classification.zig` +
+`soil/runtime/hourly_workspace.zig` + `soil/chemistry
+/ionic_strength_conductivity.zig` for the CION/PSISO range; `soil/water
+/retention.zig` (Mualem-van-Genuchten) + its independent validation module
+for the PSISM range; `surface/litter_water_environment.zig` for the litter
+water-potential block; `surface/residue_diffusivity.zig` for the
+diffusivity range. No Zig counterpart was located this pass for the plain
+gas/nutrient-concentration recompute (`:3754-3892`, `:4494-4507`,
+`:4564-4619`) or for `DPTHA`/`DPTHT` (`:4229-4326`) -- these appear
+consistent with this project's documented pattern of computing simple
+mass/volume concentrations at the point of use rather than caching a
+per-hour array, but this was not confirmed by a counterpart search this
+pass; flagged as a follow-up below.
+
+**Disposition for this pass's newly-read range (`:3660-4679`):**
+`preserved` for the thermal/charcoal/EHUM property recompute, the gas/
+nutrient concentration and diffusivity blocks, and the litter water-
+potential three-way branch (no asymmetry found beyond already-tracked
+items); `replaced-by-approved-feature` for the PSISM Mualem-van-Genuchten
+replacement and for the CION/PSISO architectural replacement (the
+replacement itself looks deliberate and well-managed); `unresolved` for
+the `SOIL-THETY-001` dry-end litter-vs-soil inconsistency (independently
+corroborated, not newly resolved, pre-existing open finding); new `OPEN`
+issue-053 filed for the CION/PSISO dual-formulation numeric-equivalence
+question, cross-referenced to `issue-024`.
+
 ## Not covered this pass (genuinely unread, for a future pass)
 
 - `:2489-2913` (~424 lines) -- flux-array reset section; characterized
@@ -203,19 +337,13 @@ header, not necessarily the first executable statement):
 - `:2913-3673` (~760 lines) -- runoff surface-roughness parameters and
   microbial residue/SOC array handling; banner-mapped only, zero
   statement-level reads.
-- `:3660-4679` (~1,020 lines) -- the every-hour (non-disturbance-gated) soil
-  physical/thermal property recompute (bulk density/porosity/heat
-  capacity/thermal conductivity), litter ion concentration/EC, litter water
-  potential, litter nutrient/gas concentrations, and litter gaseous/aqueous
-  diffusivity. Only the first ~80 lines (`:3660-3739`) were read this pass.
-  **Recommended top priority for the next pass**: this is the largest
-  remaining unread range, it is not disturbance-gated (runs every hour,
-  unlike its `:1891-2388` counterpart), and it directly feeds `watsub.f`'s
-  soil thermal conductivity and vapor-flux calculations -- squarely within
-  this file's "energy balance and surface boundary conditions" scope.
+- `:3660-4679` -- **now read in full this (fourth) pass**, see the new
+  addendum above. Zig counterparts found and cited for most of the range;
+  no counterpart search performed for the plain gas/nutrient-concentration
+  recompute (`:3754-3892`, `:4494-4507`, `:4564-4619`) or for `DPTHA`/
+  `DPTHT` (`:4229-4326`) -- follow-up item, not blocking.
 - Zig counterpart search not performed this pass for: `:1891-2388`
-  disturbance-gated resets, `:2434-2487` gas-concentration conversions, and
-  the `:3660-4679` range (not read, so no counterpart search attempted).
+  disturbance-gated resets, `:2434-2487` gas-concentration conversions.
 - The `TAUR`-only-transmittance non-finding above should be spot-checked
   against the Zig scattering-cascade implementation to confirm stalk/dead
   are also treated as fully opaque there (not done this pass).
@@ -226,18 +354,20 @@ header, not necessarily the first executable statement):
 ## Coverage and closing summary (cumulative, all passes this session)
 
 Approximate cumulative statement-level coverage of `hour1.f`'s 5,204 lines,
-across the 2026-09-18 and 2026-09-19 (this) passes: `:216-951` (736 lines),
-`:955-2487` minus the mechanical-reset stretch already noted (~1,470 lines
-of genuine physics/property-reset reads, i.e. `:955-2388` + `:2434-2487`),
-`:4679-4884` (206 lines), `:4884-5200` (317 lines) = roughly **2,730 lines
-read at statement level out of 5,204, ~52%**. This supersedes the dossier's
-prior "~150-200 lines / <5%" estimate, which predates both this session's
-passes. Remaining unread material (~2,470 lines) is concentrated in the two
-ranges listed above (`:2489-3673` flux-array/roughness/residue arrays,
-`:3660-4679` every-hour soil/litter property recompute) plus the
+across the 2026-09-18 and 2026-09-19 (three passes so far that day) passes:
+`:216-951` (736 lines), `:955-2487` minus the mechanical-reset stretch
+already noted (~1,470 lines), `:3660-4679` (1,020 lines, this fourth pass),
+`:4679-4884` (206 lines), `:4884-5200` (317 lines) = roughly **3,750 lines
+read at statement level out of 5,204, ~72%** by range span -- though the
+`:2489-3673` flux-array/roughness/residue-array stretch inside that span
+remains only structurally mapped, not statement-read (see "Not covered"),
+so a more conservative genuinely-statement-level figure is **~65%**. This
+supersedes the third pass's "~52%" estimate. Remaining unread material is
+now concentrated in `:2489-3673` (~1,184 lines: flux-array resets, runoff
+roughness parameters, microbial residue/SOC arrays) plus the
 partially-covered fertilizer application chemistry noted in the
 2026-09-18 addendum.
 
 ## Acceptance and review
 
-Author: this session's audit fork, 2026-09-18 (first pass) and 2026-09-19 (this, third pass). Independent reviewer: not yet done for any pass. Decision: NOT_ASSESSED for gate purposes. Running disposition tally across all passes: 3 items `preserved` unchanged from 2026-09-18 (items 1 partial re-confirm, 3, 4), 1 item `legacy-defect-corrected` (item 1), 1 item revised this pass from `preserved` to `unresolved` (item 2, `issue-052`), plus this pass's own new ranges disposed as noted above (mostly `preserved`, one range undisposed pending Zig counterpart search). One open `unresolved` issue now blocks this dossier's gate: `issue-052`.
+Author: this session's audit fork, 2026-09-18 (first pass) and 2026-09-19 (third and fourth passes). Independent reviewer: not yet done for any pass. Decision: NOT_ASSESSED for gate purposes. Running disposition tally across all passes: 3 items `preserved` unchanged from 2026-09-18 (items 1 partial re-confirm, 3, 4), 1 item `legacy-defect-corrected` (item 1), 1 item revised in the third pass from `preserved` to `unresolved` (item 2, `issue-052`), the third pass's own new ranges (mostly `preserved`), and this fourth pass's `:3660-4679` read (mostly `preserved`/`replaced-by-approved-feature`, one independently-corroborated pre-existing `unresolved` item `SOIL-THETY-001`, one new `OPEN` issue filed, `issue-053`, cross-referenced to `issue-024`). Two open `unresolved`/`OPEN` issues now stand against this dossier's gate: `issue-052` and `issue-053` (plus the pre-existing, not-this-dossier-owned `SOIL-THETY-001`).
