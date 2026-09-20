@@ -26,9 +26,25 @@ pub fn isPhysicalTemperatureK(temperature_k: f64) bool {
 }
 
 pub fn validateSoilTemperaturePhysicalDomain(temperature_k: []const f64) !void {
-    for (temperature_k) |value|
-        if (!isPhysicalTemperatureK(value))
+    for (temperature_k, 0..) |value, index| {
+        if (!isPhysicalTemperatureK(value)) {
+            // issue-068 (2026-09-20): this check's bare error name gave no
+            // way to tell a marginal overshoot from a genuine blow-up. Log
+            // the offending value and its position in the caller-supplied
+            // slice before propagating (this is a per-cell array at the
+            // `validateInputs` entry gate, but the dense multi-layer
+            // solver's own commit path calls this with one cell's per-layer
+            // state, so `array_index` deliberately does not claim to be a
+            // grid cell index). This only fires on the already-exceptional
+            // rejection path (never on a normal accepted hour), so it
+            // carries no hot-path cost.
+            if (!builtin.is_test) std.log.warn(
+                "TEMP_DIAGNOSTIC soil heat physical-domain violation: array_index={d} temperature_k={e} minimum_physical_temperature_k={e} maximum_physical_temperature_k={e}",
+                .{ index, value, minimum_physical_temperature_k, maximum_physical_temperature_k },
+            );
             return error.SoilHeatSolverTemperatureOutsidePhysicalDomain;
+        }
+    }
 }
 
 pub fn validateInputs(grid: *const grid_module.GridState, faces: []const group_types.Face, properties: group_types.Properties, water_fluxes: group_types.WaterHeatFluxes, heat_flux_megajoules: []const f64, options: group_types.Options) !void {
