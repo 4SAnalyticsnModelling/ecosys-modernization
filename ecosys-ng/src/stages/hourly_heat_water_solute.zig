@@ -7485,6 +7485,29 @@ fn CoupledSubstepTransaction(
                 context.runscript.root_nutrient_parameters,
                 time_step_hours,
             );
+            // ISSUE-065 (seventeenth pass): the sixteenth addendum's handoff
+            // named `mineral_nitrogen_transport.advance`'s output and its
+            // booking into `hourly_layer_boundary_ledger` as the last
+            // untraced nitrogen candidate. This brackets exactly the
+            // `advance()` call: capture profile_cell 0's own extensive
+            // storage (matrix+macropore, all eight species) immediately
+            // before and after, plus the water carrier `advance()` actually
+            // uses internally (`matrix.water_volume_m3[0]`, raw, per
+            // `advance`'s own unconditional `@memcpy` from
+            // `inputs.matrix_water_volume_m3`), so a rerun can directly
+            // compare `advance()`'s own reported state change against the
+            // face-flux/boundary-export values it reports for the SAME call
+            // -- rather than continuing to infer the comparison from
+            // `requireLocalConservation`'s pass/fail alone.
+            const mineral_n_species_count = ecosys.mineral_nitrogen_transport.species_count;
+            const nitrogen_trace_2894 = !builtin.is_test and
+                context.executed_weather_hours.* >= 2888 and context.executed_weather_hours.* < 2896;
+            var before_matrix_mol: f64 = 0;
+            var before_macro_mol: f64 = 0;
+            if (nitrogen_trace_2894) {
+                for (context.mineral_nitrogen_transport.matrix.amount_mol[0..mineral_n_species_count]) |v| before_matrix_mol += v;
+                for (context.mineral_nitrogen_transport.macropore.amount_mol[0..mineral_n_species_count]) |v| before_macro_mol += v;
+            }
             _ = try ecosys.mineral_nitrogen_transport.advance(context.allocator, context.mineral_nitrogen_transport, .{
                 .active_by_layer = context.soil_transport_faces.active_by_layer,
                 .matrix_water_volume_m3 = context.grid.matrix_liquid_water_m3,
@@ -7516,6 +7539,51 @@ fn CoupledSubstepTransaction(
                 .matrix_face_flux_mol_by_component = self.mineral_micropore_face_step_mol,
                 .macropore_face_flux_mol_by_component = self.mineral_macropore_face_step_mol,
             });
+            if (nitrogen_trace_2894) {
+                var after_matrix_mol: f64 = 0;
+                var after_macro_mol: f64 = 0;
+                for (context.mineral_nitrogen_transport.matrix.amount_mol[0..mineral_n_species_count]) |v| after_matrix_mol += v;
+                for (context.mineral_nitrogen_transport.macropore.amount_mol[0..mineral_n_species_count]) |v| after_macro_mol += v;
+                // Net mol flowing INTO profile_cell 0 across every face this
+                // call touched (matrix and macropore), signed per
+                // `recordFaceTransfers`' own convention: positive flux moves
+                // first_cell -> second_cell.
+                var net_face_in_mol: f64 = 0;
+                for (context.soil_transport_faces.micropore_faces, 0..) |face, face_index| {
+                    if (face.first_cell != 0 and face.second_cell != 0) continue;
+                    const start = face_index * mineral_n_species_count;
+                    for (self.mineral_micropore_face_step_mol[start..][0..mineral_n_species_count]) |flux|
+                        net_face_in_mol += if (face.first_cell == 0) -flux else flux;
+                }
+                for (context.soil_transport_faces.macropore_faces, 0..) |face, face_index| {
+                    if (face.first_cell != 0 and face.second_cell != 0) continue;
+                    const start = face_index * mineral_n_species_count;
+                    for (self.mineral_macropore_face_step_mol[start..][0..mineral_n_species_count]) |flux|
+                        net_face_in_mol += if (face.first_cell == 0) -flux else flux;
+                }
+                const boundary_export_g = context.mineral_nitrogen_transport.boundary_export_g_n_per_step[0];
+                const boundary_export_mol = boundary_export_g / context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol;
+                const storage_before_mol = before_matrix_mol + before_macro_mol;
+                const storage_after_mol = after_matrix_mol + after_macro_mol;
+                const storage_delta_mol = storage_after_mol - storage_before_mol;
+                const implied_delta_mol = net_face_in_mol - boundary_export_mol;
+                std.log.info(
+                    "DRY_CARRIER_TRACE site=mineral_nitrogen_advance_call hour={d} cell=0 layer=0 storage_before_mol={e} storage_after_mol={e} storage_delta_mol={e} net_face_flux_in_mol={e} boundary_export_g_n={e} implied_delta_mol={e} residual_mol={e} matrix_water_volume_m3={e} live_water_m3={e} dry_reference_water_m3={e}",
+                    .{
+                        context.executed_weather_hours.* + 1,
+                        storage_before_mol,
+                        storage_after_mol,
+                        storage_delta_mol,
+                        net_face_in_mol,
+                        boundary_export_g,
+                        implied_delta_mol,
+                        storage_delta_mol - implied_delta_mol,
+                        context.mineral_nitrogen_transport.matrix.water_volume_m3[0],
+                        context.grid.matrix_liquid_water_m3[0],
+                        context.soil_chemistry.dry_reference_water_m3[0],
+                    },
+                );
+            }
             try context.mineral_nitrogen_transport.publishMatrix(
                 context.soil_chemistry,
                 context.soil_reactive_nitrogen,
@@ -12388,6 +12456,49 @@ noinline fn publishHourlyLayerTransportLedgers(
         context,
         coupled_substeps,
     );
+    // ISSUE-065 (seventeenth pass): direct trace of the LEDGER side of the
+    // sixteenth addendum's handoff question -- does the cumulative
+    // `hourly_layer_boundary_ledger` entry this transaction is about to
+    // commit for cell 0/layer 0 match the layer's own authoritative
+    // mineral-N storage read (`aggregateProfileMineralNitrogenLayer`, the
+    // same aggregator the census gate itself uses) at the same instant?
+    // Logged once per hour, immediately before the candidate is committed,
+    // so a rerun can compare this cumulative booked total directly against
+    // the per-call `mineral_nitrogen_advance_call` trace's own totals.
+    if (!builtin.is_test and
+        context.executed_weather_hours.* >= 2888 and context.executed_weather_hours.* < 2896)
+    {
+        const layer0_index = try context.hourly_layer_boundary_ledger.layout.index(.{ .kind = .soil_layer, .cell = 0, .layer = 0 });
+        const booked = layer_candidate.activity[layer0_index];
+        try ecosys.landscape_mass_balance_runtime.deriveSoilMass(
+            context.soil_solver_properties.matrix_bulk_volume_m3,
+            context.soil_solver_properties.bulk_density_megagrams_per_m3,
+            context.landscape_soil_mass_megagrams_scratch,
+        );
+        const storage = try ecosys.landscape_mass_inventory.aggregateProfileMineralNitrogenLayer(
+            context.grid,
+            context.mineral_nitrogen_transport,
+            context.soil_chemistry,
+            context.soil_fertilizer_inventory,
+            context.landscape_soil_mass_megagrams_scratch,
+            context.fertilizer_band,
+            context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+            0,
+            0,
+        );
+        std.log.info(
+            "DRY_CARRIER_TRACE site=mineral_nitrogen_layer_ledger_commit hour={d} cell=0 layer=0 booked_nitrogen_input_g={e} booked_nitrogen_output_g={e} booked_net_g={e} storage_ammonium_nitrogen_g={e} storage_nitrate_nitrogen_g={e} storage_mineral_nitrogen_total_g={e}",
+            .{
+                context.executed_weather_hours.* + 1,
+                booked.nitrogen_input_g,
+                booked.nitrogen_output_g,
+                booked.nitrogen_input_g - booked.nitrogen_output_g,
+                storage.ammonium_nitrogen_g,
+                storage.nitrate_nitrogen_g,
+                storage.ammonium_nitrogen_g + storage.nitrate_nitrogen_g,
+            },
+        );
+    }
     @memcpy(context.hourly_layer_boundary_ledger.activity, layer_candidate.activity);
 }
 

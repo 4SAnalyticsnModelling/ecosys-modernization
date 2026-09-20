@@ -507,6 +507,65 @@ pub fn tracePhosphateBandGeometryLayer0(context: anytype, comptime site: []const
     );
 }
 
+/// ISSUE-065 (seventeenth pass): the sixteenth addendum's by-elimination
+/// proof showed the census's phosphate aggregator
+/// (`landscape_mass_inventory_phosphorus_ions.zig`'s
+/// `aggregateProfilePhosphorusAndIonsRange`, `:276-380`) sums exactly three
+/// additive terms for layer 0, and terms 2 (immobile/concentration-basis,
+/// `chemistry.non_band_phosphate[0]`/`band_phosphate[0]`) and 3
+/// (pending/extensive-mol, `chemistry.pending_non_band_phosphate_mol[0]`/
+/// `pending_band_phosphate_mol[0]`) are now proven bit-for-bit frozen across
+/// the ENTIRE `convergeHourlySoilChemistry` call at hour 2,894 -- so if the
+/// residual is anywhere inside this call, it must be in term 1, the
+/// aqueous/transport-basis dissolved-phosphate `amount_mol`
+/// (`context.micropore_solute_state`/`macropore_solute_state`), which no
+/// prior pass has measured directly (only inferred by elimination). This
+/// isolates term 1 alone -- the sum, over every phosphate-carrier
+/// `AqueousSpecies` (`transport_species.diffusivityClass(species) ==
+/// .phosphate`), of `micropore.cellAmountsConst(0)[i] +
+/// macropore.cellAmountsConst(0)[i]`, converted to grams P by the same
+/// `phosphorus_g_per_mol` the gate itself uses (`:287-288`) -- so a rerun
+/// bracketing every call inside `publishHourlyChemistry`
+/// (`soil_chemistry_convergence.zig:990-1024`:
+/// `validateCarrierVolumesScaled`, `refreshMatrixFromReactionState`,
+/// `exportChemistry`, `consumeUndissolved`) can show exactly which one moves
+/// it, rather than continuing to infer the location by elimination.
+///
+/// Gated identically to the established `DRY_CARRIER_TRACE` convention.
+pub fn tracePhosphateAqueousTransportTermLayer0(context: anytype, comptime site: []const u8) !void {
+    if (comptime @import("builtin").is_test) return;
+    if (context.executed_weather_hours.* < 2888 or context.executed_weather_hours.* >= 2896) return;
+    if (context.grid.cell_count == 0) return;
+    const micro = context.micropore_solute_state;
+    const macro = context.macropore_solute_state;
+    const micro_amounts = try micro.cellAmountsConst(0);
+    const macro_amounts = try macro.cellAmountsConst(0);
+    const p_mass = context.runscript.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol;
+    var micro_mol: f64 = 0;
+    var macro_mol: f64 = 0;
+    inline for (@typeInfo(ecosys.solute_transport_species.AqueousSpecies).@"enum".fields) |field| {
+        const species: ecosys.solute_transport_species.AqueousSpecies = @enumFromInt(field.value);
+        if (ecosys.solute_transport_species.diffusivityClass(species) == .phosphate) {
+            micro_mol += micro_amounts[field.value];
+            macro_mol += macro_amounts[field.value];
+        }
+    }
+    std.log.info(
+        "DRY_CARRIER_TRACE site={s} hour={d} cell=0 layer=0 micropore_phosphate_mol={e} macropore_phosphate_mol={e} aqueous_transport_phosphate_g={e} micropore_water_volume_m3={e} macropore_water_volume_m3={e} live_water_m3={e} dry_reference_water_m3={e}",
+        .{
+            site,
+            context.executed_weather_hours.* + 1,
+            micro_mol,
+            macro_mol,
+            (micro_mol + macro_mol) * p_mass,
+            micro.water_volume_m3[0],
+            macro.water_volume_m3[0],
+            context.grid.matrix_liquid_water_m3[0],
+            context.soil_chemistry.dry_reference_water_m3[0],
+        },
+    );
+}
+
 fn sumStructFieldsF64(value: anytype) f64 {
     var total: f64 = 0;
     inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| {

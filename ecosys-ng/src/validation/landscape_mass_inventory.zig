@@ -36,6 +36,11 @@ pub const aggregateSuspendedComponentAmounts = group_misc.aggregateSuspendedComp
 // nitrogen
 pub const aggregateProfileMineralNitrogen = group_nitrogen.aggregateProfileMineralNitrogen;
 pub const aggregateProfileMineralNitrogenCell = group_nitrogen.aggregateProfileMineralNitrogenCell;
+// ISSUE-065 (seventeenth pass): re-exported (previously unexported, though
+// already implemented) so a layer-granular trace can read the exact same
+// authoritative aggregate the cell-level trace already uses, at cell 0/layer
+// 0 specifically rather than the whole (single-layer-filtered) cell.
+pub const aggregateProfileMineralNitrogenLayer = group_nitrogen.aggregateProfileMineralNitrogenLayer;
 
 // organic
 pub const aggregateSurfaceOrganic = group_organic.aggregateSurfaceOrganic;
