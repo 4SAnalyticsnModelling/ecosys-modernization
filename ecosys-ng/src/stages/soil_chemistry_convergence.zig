@@ -5,6 +5,7 @@
 
 const std = @import("std");
 const ecosys = @import("ecosys_ng");
+const diagnostics = @import("diagnostics.zig");
 
 /// Owns the short-lived slices used by one hourly chemistry invocation.
 ///
@@ -140,12 +141,17 @@ pub noinline fn convergeHourlySoilChemistry(
                 bulk_density_megagrams_per_m3,
                 water_m3,
             );
+            const materialize_fractions = try context.fertilizer_band.scienceZoneFractions(cell, layer_within_cell);
+            if (cell == 0 and layer_within_cell == 0)
+                diagnostics.traceMaterializePendingSolidsLayer0(context, "before_materialize_pending_solids", water_m3, materialize_fractions);
             try context.soil_chemistry.materializePendingSolids(
                 layer,
                 soil_mass_megagrams,
                 water_m3,
-                try context.fertilizer_band.scienceZoneFractions(cell, layer_within_cell),
+                materialize_fractions,
             );
+            if (cell == 0 and layer_within_cell == 0)
+                diagnostics.traceMaterializePendingSolidsLayer0(context, "after_materialize_pending_solids", water_m3, materialize_fractions);
         }
     }
     try ecosys.mineral_fertilizer_inventory.publishWetted(

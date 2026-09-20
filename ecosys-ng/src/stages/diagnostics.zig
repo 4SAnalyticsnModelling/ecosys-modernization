@@ -282,6 +282,62 @@ pub fn traceStageBoundaryLayer0Carbon(context: anytype, comptime stage: []const 
     );
 }
 
+/// ISSUE-065 (fourteenth addendum): the thirteenth addendum localized
+/// phosphorus's entire hour-2,894 drop to inside `convergeHourlySoilChemistry`'s
+/// scratch block, then narrowed the search to `updateFertilizerBandGeometry`
+/// as the only unconditionally-running function -- but this deck's phosphate
+/// band is confirmed (this pass, by reading the deck's own `plant_nutrients`
+/// runscript record and its one hour-2894-relevant fertilizer event) never
+/// active (`initial_phosphate_band_fraction=0`, no banded application by hour
+/// 2894), so that mechanism cannot fire. Re-reading `convergeHourlySoilChemistry`
+/// in full (not just its named scratch block) surfaces an earlier,
+/// unconditional call this issue never traced: `materializePendingSolids`
+/// (`chemistry_state.zig`), called once per active layer, every hour, using
+/// the RAW `context.grid.matrix_liquid_water_m3[layer]` (no
+/// `dry_reference_water_m3` substitution) as the water carrier for every
+/// water-carried immobile phosphate/geochemistry-solid field. Trace the
+/// exact carrier and pending/concentration totals bracketing that call for
+/// cell 0/layer 0, so a rerun can show whether a nonzero pending amount is
+/// being materialized against an anomalous (near-zero but nonzero, or
+/// otherwise carrier-mismatched) water volume at hour 2894.
+///
+/// Gated identically to the established `DRY_CARRIER_TRACE` convention.
+pub fn traceMaterializePendingSolidsLayer0(
+    context: anytype,
+    comptime site: []const u8,
+    water_m3: f64,
+    fractions: anytype,
+) void {
+    if (comptime @import("builtin").is_test) return;
+    if (context.executed_weather_hours.* < 2888 or context.executed_weather_hours.* >= 2896) return;
+    const chemistry = context.soil_chemistry;
+    std.log.info(
+        "DRY_CARRIER_TRACE site={s} hour={d} cell=0 layer=0 water_m3={e} dry_reference_water_m3={e} phosphate_non_band_fraction={e} phosphate_band_fraction={e} pending_non_band_phosphate_sum={e} pending_band_phosphate_sum={e} pending_geochemistry_solids_sum={e} non_band_phosphate_sum={e} band_phosphate_sum={e} geochemistry_solids_sum={e}",
+        .{
+            site,
+            context.executed_weather_hours.* + 1,
+            water_m3,
+            chemistry.dry_reference_water_m3[0],
+            fractions.phosphate_non_band,
+            fractions.phosphate_band,
+            sumStructFieldsF64(chemistry.pending_non_band_phosphate_mol[0]),
+            sumStructFieldsF64(chemistry.pending_band_phosphate_mol[0]),
+            sumStructFieldsF64(chemistry.pending_geochemistry_solids_mol[0]),
+            sumStructFieldsF64(chemistry.non_band_phosphate[0]),
+            sumStructFieldsF64(chemistry.band_phosphate[0]),
+            sumStructFieldsF64(chemistry.geochemistry_solids[0]),
+        },
+    );
+}
+
+fn sumStructFieldsF64(value: anytype) f64 {
+    var total: f64 = 0;
+    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| {
+        total += @field(value, field.name);
+    }
+    return total;
+}
+
 pub fn diagnosticStoredNitrogen_g(context: anytype) !f64 {
     const totals = try reconstructLandscapeMassBalance(context);
     return totals.residue_nitrogen_g + totals.organic_nitrogen_g +

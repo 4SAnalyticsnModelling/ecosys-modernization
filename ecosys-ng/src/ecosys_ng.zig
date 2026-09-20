@@ -7697,6 +7697,15 @@ noinline fn advanceHour(driver_context: anytype, timeline_state: *TimelineState,
     );
     defer driver_context.fixed_hour_recovery_workspace.*.unbindOuterTransaction(&outer_hour_transaction);
     try prepareAcceptedHourStorageAndLedgers(driver_context, advance_context);
+    // ISSUE-065 (fourteenth addendum): the thirteenth addendum's whole-cell
+    // mineral-N stage-boundary trace proved the gate's `-8.138e-3` g N
+    // residual is invisible anywhere between `before_nitro` and
+    // `after_erosion_redist_transport`. This call sits immediately after the
+    // hour's own `hourly_layer_storage_before` capture
+    // (`prepareAcceptedHourStorageAndLedgers`) but before WTHR/HOUR1/WATSUB
+    // (`executeHourlyScience`) starts, bracketing the pre-window scope the
+    // prior addendum could not observe.
+    try diagnostics.traceStageBoundaryLayer0Carbon(driver_context.hourly_science_context.*, "before_science_pre_window");
     const hour_identity = try resolveHourIdentity(driver_context, advance_context, timestamp);
     if (timeline_state.execution_journal) |journal| try journal.attempt(.{
         .execution = advance_context.pass.*.execution_iteration + 1,
@@ -7823,6 +7832,13 @@ noinline fn advanceHour(driver_context: anytype, timeline_state: *TimelineState,
         "TEMP_PROFILE post_science elapsed_ms={d}",
         .{temporary_profile_start.durationTo(std.Io.Clock.now(.boot, driver_context.init.*.io)).toMilliseconds()},
     );
+    // ISSUE-065 (fourteenth addendum): the symmetric post-window boundary --
+    // immediately after `postScienceAccounting` completes but before
+    // `acceptHourAndPublish`'s own `hourly_layer_storage_after` capture.
+    // Bracketing this and the pre-window call above lets a single rerun show
+    // directly whether nitrogen's residual first appears outside the
+    // previously-traced stage window on either end.
+    try diagnostics.traceStageBoundaryLayer0Carbon(driver_context.hourly_science_context.*, "after_post_science_accounting");
     const accept_hour_context = .{
         .current_day_of_year = &current_day_of_year,
         .current_year = &current_year,
