@@ -51,6 +51,14 @@ pub const Options = struct {
     /// physical stiffness. Values above the internal 256-component safety cap
     /// are clamped.
     dense_newton_max_components: usize = 256,
+    /// Temporary, narrowly-gated diagnostic hook for the issue-067 hour-2895
+    /// layer-0 near-desiccation frontier investigation. When set to a valid
+    /// flattened layer index, the solve's own accepted per-cell residual and
+    /// tolerance band are logged at the moment the stopping criterion is
+    /// satisfied (`null` in production; the caller gates this behind
+    /// `run_support.verbose_diagnostics_enabled` and an hour window). Safe to
+    /// remove once issue-067 is resolved.
+    diagnostic_trace_layer_index: ?usize = null,
 };
 
 pub const Result = struct {
@@ -146,6 +154,7 @@ fn solveAndBindTransportFacesControlled(allocator: std.mem.Allocator, grid: *gri
         const norm = try scaledNorm(current, residual, options);
         if (!retrying_newton_after_anderson and norm <= 1) {
             try residualAt(grid, shared_faces, geometry, properties, base, current, target, residual, scratch, shared_faces.vapor_flux_m3_per_step);
+            logDiagnosticTrace(options, current, residual);
             @memcpy(grid.water_vapor_volume_m3, current);
             @memcpy(hydrology.water_vapor_volume_m3, current);
             @memset(hydrology.vapor_face_flux_m3_per_step, 0);
@@ -373,6 +382,7 @@ fn solveAndBindTransportFacesControlled(allocator: std.mem.Allocator, grid: *gri
     const final_norm = try scaledNorm(current, residual, options);
     if (!newton_retry_required and final_norm <= 1) {
         try residualAt(grid, shared_faces, geometry, properties, base, current, target, residual, scratch, shared_faces.vapor_flux_m3_per_step);
+        logDiagnosticTrace(options, current, residual);
         @memcpy(grid.water_vapor_volume_m3, current);
         @memcpy(hydrology.water_vapor_volume_m3, current);
         @memset(hydrology.vapor_face_flux_m3_per_step, 0);
@@ -396,6 +406,20 @@ fn projectConservedTotal(values: []f64, required_total: f64) bool {
     }
     values[largest_index] += required_total - actual_total;
     return std.math.isFinite(values[largest_index]) and values[largest_index] >= 0;
+}
+
+/// Temporary issue-067 diagnostic: logs the solve's own accepted per-cell
+/// residual and tolerance band for `options.diagnostic_trace_layer_index`
+/// (a no-op when unset, which is every production/test call). See
+/// `Options.diagnostic_trace_layer_index`.
+fn logDiagnosticTrace(options: Options, current: []const f64, residual: []const f64) void {
+    const index = options.diagnostic_trace_layer_index orelse return;
+    if (index >= current.len or index >= residual.len) return;
+    const accepted_band_m3 = options.absolute_tolerance_m3 + options.relative_tolerance * @abs(current[index]);
+    std.log.info(
+        "TEMP_DIAGNOSTIC vapor solver accepted residual (issue-067): layer_index={d} current_water_vapor_volume_m3={e} residual_m3={e} absolute_tolerance_m3={e} relative_tolerance={e} accepted_band_m3={e}",
+        .{ index, current[index], residual[index], options.absolute_tolerance_m3, options.relative_tolerance, accepted_band_m3 },
+    );
 }
 
 fn residualAt(grid: *const grid_module.GridState, faces: *const transport_hydrology.SoilFaces, geometry: FaceGeometry, properties: Properties, base: []const f64, trial: []const f64, target: []f64, residual: []f64, scratch: []f64, output_flux: []f64) !void {

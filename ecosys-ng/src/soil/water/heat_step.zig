@@ -1365,6 +1365,12 @@ pub const MappedOptions = struct {
     /// whole-hour rollback semantics. Production rejects a non-null pointer.
     test_substep_control: ?*TestSubstepControl = null,
     temporary_profile: ?TemporaryProfile = null,
+    /// Temporary diagnostic passthrough for the issue-067 hour-2895 vapor
+    /// solver residual trace. See
+    /// `vapor_solver.Options.diagnostic_trace_layer_index`. `null` in
+    /// production; the caller gates this behind
+    /// `run_support.verbose_diagnostics_enabled` and an hour window.
+    diagnostic_vapor_layer_index: ?usize = null,
 };
 
 /// Builds zero-copy solver views over mapped runtime state, then performs one
@@ -1547,7 +1553,7 @@ pub fn advanceMapped(
         .water_options = .{ .max_iterations = options.max_iterations, .absolute_tolerance_m3 = options.water_absolute_tolerance_m3, .relative_tolerance = options.nonlinear_relative_tolerance, .picard_relaxation = options.picard_relaxation, .maximum_newton_fraction = 1.0, .dense_newton_max_components = options.dense_newton_max_components },
         .vapor_geometry = .{ .source_path_length_m = geometry.source_path_length_m, .destination_path_length_m = geometry.destination_path_length_m, .face_area_m2 = geometry.face_area_m2 },
         .vapor_properties = .{ .vapor_diffusivity_m2_per_h = workspace.vapor_diffusivity_m2_per_h, .air_fraction = workspace.air_fraction, .porosity_fraction = properties.porosity_fraction, .tortuosity = options.vapor_pore_tortuosity, .time_step_hours = options.time_step_hours },
-        .vapor_options = .{ .max_iterations = options.max_iterations, .absolute_tolerance_m3 = options.water_absolute_tolerance_m3, .relative_tolerance = options.nonlinear_relative_tolerance, .picard_relaxation = options.picard_relaxation, .dense_newton_max_components = options.dense_newton_max_components },
+        .vapor_options = .{ .max_iterations = options.max_iterations, .absolute_tolerance_m3 = options.water_absolute_tolerance_m3, .relative_tolerance = options.nonlinear_relative_tolerance, .picard_relaxation = options.picard_relaxation, .dense_newton_max_components = options.dense_newton_max_components, .diagnostic_trace_layer_index = options.diagnostic_vapor_layer_index },
         .phase_properties = .{ .active_by_layer = faces.active_by_layer, .matrix_bulk_volume_m3 = properties.matrix_bulk_volume_m3, .retention_curve = properties.retention_curve, .mualem_van_genuchten_parameters = properties.mualem_van_genuchten_parameters, .macropore_mualem_van_genuchten_parameters = workspace.macropore_mualem_van_genuchten_parameters, .osmotic_potential_megapascal = workspace.osmotic_potential_megapascal, .saturation_water_potential_megapascal = properties.saturation_water_potential_megapascal, .heat_capacity_megajoules_per_k = dynamic_heat_capacity, .saturated_lateral_matrix_conductivity_m2_per_h_megapascal = workspace.saturated_lateral_matrix_conductivity_m2_per_h_megapascal, .face_area_m2 = workspace.plan_area_m2, .macropore_spacing_m = workspace.macropore_spacing_m, .macropore_radius_m = workspace.macropore_radius_m, .pore_exchange_enabled = workspace.macropore_exchange_enabled, .conservation_cell_area_m2 = conservation_area_by_layer, .conservation_layer_capacity = grid.soil_layer_capacity, .vapor = science.vapor_equilibrium, .freeze_thaw = science.freeze_thaw, .gravitational_water_potential_mpa_per_m = workspace.gravitational_water_potential_mpa_per_m, .liquid_water_heat_capacity_megajoules_per_m3_k = science.liquid_water_heat_capacity_megajoules_per_m3_k, .ice_heat_capacity_megajoules_per_m3_k = ice_heat_capacity_per_water_equivalent_m3_k, .time_step_hours = options.time_step_hours },
         .phase_options = .{ .max_iterations = options.max_iterations, .absolute_tolerance_m3 = options.water_absolute_tolerance_m3, .absolute_temperature_tolerance_k = options.temperature_absolute_tolerance_k, .relative_tolerance = options.nonlinear_relative_tolerance, .energy_conservation_absolute_tolerance_megajoules_per_m2 = options.heat_conservation_absolute_tolerance_megajoules_per_m2, .energy_conservation_relative_tolerance = options.heat_conservation_relative_tolerance, .picard_relaxation = options.picard_relaxation },
         .heat_geometry = .{ .source_path_length_m = geometry.source_path_length_m, .destination_path_length_m = geometry.destination_path_length_m, .face_area_m2 = geometry.face_area_m2 },
@@ -2106,6 +2112,8 @@ pub fn advance(allocator: std.mem.Allocator, grid: *grid_module.GridState, hydro
         inputs.water_conservation_relative_tolerance,
         inputs.cell_area_m2,
         inputs.water_storage_roundoff_allowance_m3_by_layer,
+        inputs.vapor_options.absolute_tolerance_m3,
+        inputs.vapor_options.relative_tolerance,
     );
     const spatial_heat_energy_change = if (diagnostics_enabled)
         try enthalpyChangeFromSnapshot(stage_enthalpy_megajoules_by_cell, grid, dry_solid_heat_capacity_megajoules_per_k, inputs.phase_properties.liquid_water_heat_capacity_megajoules_per_m3_k, inputs.phase_properties.ice_heat_capacity_megajoules_per_m3_k, inputs.phase_properties.freeze_thaw.latent_heat_of_fusion_megajoules_per_m3, inputs.phase_properties.freeze_thaw.pure_water_freezing_temperature_k)
@@ -3445,6 +3453,18 @@ fn validatePerLayerPostRichardsTotalWaterClosure(
     relative_tolerance: f64,
     cell_area_m2: []const f64,
     roundoff_allowance_m3_by_layer: []f64,
+    /// The vapor solver's own already-configured, already-accepted
+    /// convergence criterion (`vapor_solver.Options.absolute_tolerance_m3`/
+    /// `.relative_tolerance`, i.e. `inputs.vapor_options.*` at the production
+    /// call site). `vapor_internal_gain_m3` below is a direct readout of that
+    /// solver's converged face fluxes, so its own accepted residual for the
+    /// layer -- not exact IEEE roundoff -- is a legitimate, already-tested
+    /// error floor for this identity, sized identically to the tolerance the
+    /// solver was actually run with (issue-067). Pass `0, 0` to disable this
+    /// term, matching every pre-existing call site/test that never accounted
+    /// for it.
+    vapor_solver_absolute_tolerance_m3: f64,
+    vapor_solver_relative_tolerance: f64,
 ) !void {
     const layers = grid.layer_count;
     if (post_richards_total_water_equivalent_m3.len != layers or
@@ -3483,6 +3503,21 @@ fn validatePerLayerPostRichardsTotalWaterClosure(
             const expected_gain_m3 = vapor_internal_gain_m3[layer] - displaced_m3 + boundary_gain_m3;
             const activity_scale_m3 = maximumMagnitude(&.{ before_m3, after_m3, expected_gain_m3 });
             const representation_floor_m3 = 4096 * std.math.floatEps(f64) * activity_scale_m3;
+            // `vapor_internal_gain_m3[layer]` is a direct readout of the vapor
+            // solver's own converged face fluxes (`heat_step.zig`'s
+            // `inputs.vapor_options` feeds that solver exactly
+            // `vapor_solver_absolute_tolerance_m3`/`_relative_tolerance`
+            // below), so it carries that solver's own already-accepted
+            // convergence slack, not just binary64 representation error. In
+            // the degenerate near-desiccated case this identity was written
+            // for (issue-067), that flux is ~87x the layer's own remaining
+            // water content, so `representation_floor_m3` above -- scaled
+            // from the post-cancellation `activity_scale_m3` -- structurally
+            // cannot see it. This term reuses the solver's own declared
+            // tolerance band unchanged; it is not a new or widened
+            // conservation tolerance.
+            const vapor_solver_accepted_band_m3 = vapor_solver_absolute_tolerance_m3 +
+                vapor_solver_relative_tolerance * @abs(vapor_internal_gain_m3[layer]);
             const closure = try scoped_conservation.evaluate(.{
                 .storage_before = before_m3,
                 .storage_after = after_m3,
@@ -3491,7 +3526,7 @@ fn validatePerLayerPostRichardsTotalWaterClosure(
             }, .{
                 .absolute = absolute_tolerance_m * cell_area,
                 .relative = relative_tolerance,
-                .upstream_arithmetic_roundoff_allowance = representation_floor_m3,
+                .upstream_arithmetic_roundoff_allowance = representation_floor_m3 + vapor_solver_accepted_band_m3,
             });
             if (!closure.accepted) {
                 if (!builtin.is_test) std.log.err("per-layer post-Richards total-water closure mismatch: cell={d} layer={d} before_m3={e} after_m3={e} vapor_internal_gain_m3={e} phase_displacement_m3={e} post_phase_boundary_m3={e} residual_m3={e} normalized_relative={e} limit_m3={e}", .{ cell, layer_offset, before_m3, after_m3, vapor_internal_gain_m3[layer], displaced_m3, boundary_gain_m3, closure.residual, closure.normalized_relative, closure.acceptance_limit });
@@ -3784,21 +3819,99 @@ test "post-Richards phase and vapor water gate rejects opposing layer defects" {
     defer hydrology.deinit();
     var faces = try hydrology_module.buildSoilFaces(std.testing.allocator, &hydrology, &grid);
     defer faces.deinit();
-    try std.testing.expectError(error.PerLayerPostRichardsTotalWaterClosureMismatch, validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &.{ 1, 1 }, &.{}, &.{ 0, 0 }, 1e-12, 1e-9, &.{1}, &.{}));
+    try std.testing.expectError(error.PerLayerPostRichardsTotalWaterClosureMismatch, validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &.{ 1, 1 }, &.{}, &.{ 0, 0 }, 1e-12, 1e-9, &.{1}, &.{}, 0, 0));
     var post_richards_roundoff = [_]f64{ 0, 0 };
-    try validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &.{ 1.5, 0.5 }, &.{}, &.{ 0, 0 }, 1e-12, 1e-9, &.{1}, &post_richards_roundoff);
+    try validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &.{ 1.5, 0.5 }, &.{}, &.{ 0, 0 }, 1e-12, 1e-9, &.{1}, &post_richards_roundoff, 0, 0);
     try std.testing.expect(post_richards_roundoff[0] > 0 and post_richards_roundoff[1] > 0);
     grid.matrix_liquid_water_m3[0] = 1.7;
-    try std.testing.expectError(error.PerLayerPostRichardsTotalWaterClosureMismatch, validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &.{ 1.5, 0.5 }, &.{}, &.{ 0, 0 }, 1e-12, 1e-9, &.{1}, &.{}));
-    try validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &.{ 1.5, 0.5 }, &.{}, &.{ 0.2, 0 }, 1e-12, 1e-9, &.{1}, &.{});
+    try std.testing.expectError(error.PerLayerPostRichardsTotalWaterClosureMismatch, validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &.{ 1.5, 0.5 }, &.{}, &.{ 0, 0 }, 1e-12, 1e-9, &.{1}, &.{}, 0, 0));
+    try validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &.{ 1.5, 0.5 }, &.{}, &.{ 0.2, 0 }, 1e-12, 1e-9, &.{1}, &.{}, 0, 0);
     grid.matrix_liquid_water_m3[0] = 1.4;
     const upward_credit = [_]PhaseDisplacement{
         .{ .matrix_liquid_water_m3 = 0.1, .advective_enthalpy_megajoules = 117.32 },
         .{},
     };
-    try validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &.{ 1.5, 0.5 }, &upward_credit, &.{ 0, 0 }, 1e-12, 1e-9, &.{1}, &.{});
+    try validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &.{ 1.5, 0.5 }, &upward_credit, &.{ 0, 0 }, 1e-12, 1e-9, &.{1}, &.{}, 0, 0);
     const invalid_credit = [_]PhaseDisplacement{ .{ .matrix_liquid_water_m3 = -0.1 }, .{} };
-    try std.testing.expectError(error.InvalidSoilPhaseDisplacement, validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &.{ 1.5, 0.5 }, &invalid_credit, &.{ 0, 0 }, 1e-12, 1e-9, &.{1}, &.{}));
+    try std.testing.expectError(error.InvalidSoilPhaseDisplacement, validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &.{ 1.5, 0.5 }, &invalid_credit, &.{ 0, 0 }, 1e-12, 1e-9, &.{1}, &.{}, 0, 0));
+}
+
+// Regression test for issue-067 (hour-2895 per-layer post-Richards total-water
+// closure mismatch). Uses the exact recorded before/after/flux/residual
+// values from the actual production failure: layer 0, near-fully desiccated
+// (`before_m3~1.04e-7`), with two nearly-cancelling ~9e-6-scale fluxes (vapor
+// transport in, surface evaporation out) whose ~5.79e-16 m3 net mismatch is
+// the vapor solver's own accepted Newton convergence slack for that layer
+// (empirically confirmed: `TEMP_DIAGNOSTIC vapor solver accepted residual`
+// reported `residual_m3=-5.786488638508808e-16` for this exact layer/hour,
+// matching this check's own `residual_m3=5.786492873673544e-16` to ~7
+// significant figures), not a new conservation defect.
+test "post-Richards vapor water gate accounts for the vapor solver's own accepted convergence slack without becoming toothless" {
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 2, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .max_nonlinear_iterations = 10 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    @memset(grid.active_soil_layer_count, 2);
+    var hydrology = try hydrology_module.State.init(std.testing.allocator, 1, 1, 2, 1);
+    defer hydrology.deinit();
+    var faces = try hydrology_module.buildSoilFaces(std.testing.allocator, &hydrology, &grid);
+    defer faces.deinit();
+
+    // The real hour-2895 vapor-transport flux into layer 0, carried by the
+    // face between layer 0 and layer 1. Sign follows the same
+    // `vapor_internal_gain_m3[first_cell] -= flux; [second_cell] += flux;`
+    // convention the checked function itself uses.
+    const vapor_flux_into_layer0_m3: f64 = 8.989422010247231e-6;
+    var found_face = false;
+    for (faces.micropore_faces, 0..) |face, index| {
+        if (face.first_cell == 0 and face.second_cell == 1) {
+            faces.vapor_flux_m3_per_step[index] = -vapor_flux_into_layer0_m3;
+            faces.active_by_face[index] = true;
+            found_face = true;
+        } else if (face.first_cell == 1 and face.second_cell == 0) {
+            faces.vapor_flux_m3_per_step[index] = vapor_flux_into_layer0_m3;
+            faces.active_by_face[index] = true;
+            found_face = true;
+        }
+    }
+    try std.testing.expect(found_face);
+
+    // Layer 1 is an inert large reservoir supplying that flux with its own
+    // exact (zero-residual) closure, so only layer 0's degenerate case is
+    // under test.
+    const layer1_before_m3: f64 = 1.0;
+    grid.matrix_liquid_water_m3[1] = layer1_before_m3 - vapor_flux_into_layer0_m3;
+
+    // Layer 0: the real recorded before/after/boundary values.
+    const before_m3 = [_]f64{ 1.0399626626397992e-7, layer1_before_m3 };
+    grid.matrix_liquid_water_m3[0] = 3.991456771405978e-25; // real recorded after_m3
+    const boundary_gain_m3 = [_]f64{ -9.09341827708986e-6, 0 };
+
+    // The vapor solver's own actually-configured production tolerances for
+    // this hour (confirmed by direct instrumentation:
+    // `absolute_tolerance_m3=9.999999999999999e-14 relative_tolerance=1e-8`).
+    const vapor_solver_absolute_tolerance_m3: f64 = 1e-13;
+    const vapor_solver_relative_tolerance: f64 = 1e-8;
+
+    // (a) The OLD pure-relative check (no vapor-solver allowance) rejects
+    // this exact degenerate-but-legitimate case, reproducing issue-067.
+    try std.testing.expectError(
+        error.PerLayerPostRichardsTotalWaterClosureMismatch,
+        validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &before_m3, &.{}, &boundary_gain_m3, 0, 1e-9, &.{1}, &.{}, 0, 0),
+    );
+
+    // (b) The NEW hybrid check, given the vapor solver's own already-accepted
+    // tolerance, correctly accepts it.
+    try validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &before_m3, &.{}, &boundary_gain_m3, 0, 1e-9, &.{1}, &.{}, vapor_solver_absolute_tolerance_m3, vapor_solver_relative_tolerance);
+
+    // (c) The NEW hybrid check still rejects a genuine violation larger than
+    // the vapor solver's own accepted band (~1.9e-13 m3 here): inject an
+    // extra 1e-11 m3 of unaccounted water into layer 0's after-state, two
+    // orders of magnitude past what the solver's own tolerance can explain.
+    grid.matrix_liquid_water_m3[0] += 1e-11;
+    try std.testing.expectError(
+        error.PerLayerPostRichardsTotalWaterClosureMismatch,
+        validatePerLayerPostRichardsTotalWaterClosure(std.testing.allocator, &grid, &faces, &before_m3, &.{}, &boundary_gain_m3, 0, 1e-9, &.{1}, &.{}, vapor_solver_absolute_tolerance_m3, vapor_solver_relative_tolerance),
+    );
 }
 
 test "post-phase boundary hook is source ordered before spatial heat" {
