@@ -179,6 +179,7 @@ pub const State = struct {
             ammonia_owner.chemistry,
             gas_state,
             litter_water_m3,
+            cell_area_m2,
             ammonia_owner.nitrogen_molar_mass_g_per_mol,
         );
         @memset(self.atmospheric_flux_g_per_h, 0);
@@ -309,6 +310,7 @@ pub const State = struct {
             ammonia_owner.chemistry,
             gas_state,
             litter_water_m3,
+            cell_area_m2,
             ammonia_owner.nitrogen_molar_mass_g_per_mol,
             ammonia_owner.absolute_tolerance_g_n,
             ammonia_owner.relative_tolerance,
