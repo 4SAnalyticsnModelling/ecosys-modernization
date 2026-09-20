@@ -12174,6 +12174,31 @@ noinline fn publishPhaseAndBoundaryHeat(
     // difference per accepted layer and substep. Treat it as an internal
     // reference-state transformation at every conservation scope; it is not a
     // boundary flux and it is not another application of phase latent heat.
+    // issue-068 (fourth round, 2026-09-20): `temperatureForCellEnthalpy`
+    // (`heat_step.zig`) books the same kind of internal reference-state
+    // energy discrepancy into a dedicated
+    // `renormalization_floor_discard_megajoules_by_layer` ledger whenever it
+    // holds a chronically near-zero-heat-capacity layer's prior temperature
+    // instead of dividing. It is netted into
+    // `validatePerLayerSpatialHeatClosure`'s per-layer check already; fold it
+    // into this SAME "signed internal heat" publication too so the
+    // withheld/discarded energy is accounted for at the cell, landscape, and
+    // per-layer conservation scopes as well, instead of silently vanishing
+    // from the whole-model census.
+    const soil_phase_reference_and_floor_discard_heat_by_layer = try context.allocator.alloc(
+        f64,
+        accepted_soil_water_heat.phase_endpoint_reference_heat_megajoules_by_layer.len,
+    );
+    defer context.allocator.free(soil_phase_reference_and_floor_discard_heat_by_layer);
+    for (
+        soil_phase_reference_and_floor_discard_heat_by_layer,
+        accepted_soil_water_heat.phase_endpoint_reference_heat_megajoules_by_layer,
+        accepted_soil_water_heat.renormalization_floor_discard_megajoules_by_layer,
+    ) |*combined, phase_endpoint_heat_megajoules, floor_discard_megajoules| {
+        if (!std.math.isFinite(floor_discard_megajoules))
+            return error.NonFiniteSoilRenormalizationFloorDiscard;
+        combined.* = try checkedAddFiniteValue(phase_endpoint_heat_megajoules, floor_discard_megajoules);
+    }
     const soil_phase_reference_heat_by_cell = try context.allocator.alloc(
         f64,
         context.grid.cell_count,
@@ -12182,7 +12207,7 @@ noinline fn publishPhaseAndBoundaryHeat(
     @memset(soil_phase_reference_heat_by_cell, 0);
     var soil_phase_reference_heat_total: f64 = 0;
     for (
-        accepted_soil_water_heat.phase_endpoint_reference_heat_megajoules_by_layer,
+        soil_phase_reference_and_floor_discard_heat_by_layer,
         0..,
     ) |heat_megajoules, layer| {
         if (!std.math.isFinite(heat_megajoules))
@@ -12206,7 +12231,7 @@ noinline fn publishPhaseAndBoundaryHeat(
     try ecosys.layer_local_conservation.accumulateSoilLayerSignedInternalHeat(
         context.hourly_layer_boundary_ledger,
         context.grid.active_soil_layer_count,
-        accepted_soil_water_heat.phase_endpoint_reference_heat_megajoules_by_layer,
+        soil_phase_reference_and_floor_discard_heat_by_layer,
     );
     try context.landscape_boundary_ledger.accumulateAccepted(.{
         .heat_input_megajoules = accepted_soil_water_heat.solver.heat.boundary_heat_input_megajoules,

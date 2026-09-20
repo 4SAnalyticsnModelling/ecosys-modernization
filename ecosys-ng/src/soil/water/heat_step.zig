@@ -107,6 +107,19 @@ pub const Inputs = struct {
     /// Source-derived WATSUB phase endpoint-reference heat by layer. Positive
     /// values are internal production and negative values consumption.
     phase_endpoint_reference_heat_megajoules_by_layer: []f64 = &.{},
+    /// issue-068 (fourth round, 2026-09-20): per-layer energy discrepancy
+    /// booked when `temperatureForCellEnthalpy` holds a chronically
+    /// near-zero-heat-capacity layer's PRIOR temperature instead of dividing
+    /// an enthalpy mismatch by that near-zero capacity (mirrors
+    /// `solver_residual.zig`'s `residualAtImpl` and WATSUB 6907--6913's own
+    /// `TK1 = TKS` hold-don't-divide rule, at the identical floor
+    /// `validatePerLayerSpatialHeatClosure` already uses). Positive values are
+    /// energy the layer should have gained but did not; negative values are
+    /// energy it should have lost but did not. Netted into
+    /// `validatePerLayerSpatialHeatClosure`'s `expected_gain_megajoules` so a
+    /// held-back layer is not reported as a spurious closure violation. Empty
+    /// disables booking, matching every other optional per-layer ledger here.
+    renormalization_floor_discard_megajoules_by_layer: []f64 = &.{},
     /// Source-certified binary64 representation bounds from the accepted
     /// Richards and post-Richards water closure gates. Optional output.
     water_storage_roundoff_allowance_m3_by_layer: []f64 = &.{},
@@ -197,6 +210,9 @@ pub const DeferredMappedResult = struct {
     /// soil layer. Positive values are internal production and negative values
     /// are internal consumption in the canonical enthalpy census.
     phase_endpoint_reference_heat_megajoules_by_layer: []f64,
+    /// issue-068 (fourth round): accepted per-layer renormalization-floor
+    /// discard. See `Inputs.renormalization_floor_discard_megajoules_by_layer`.
+    renormalization_floor_discard_megajoules_by_layer: []f64,
     water_storage_roundoff_allowance_m3_by_layer: []f64,
     heat_storage_roundoff_allowance_megajoules_by_layer: []f64,
     accepted_substeps: u8 = 1,
@@ -208,6 +224,7 @@ pub const DeferredMappedResult = struct {
 
     pub fn deinit(self: *DeferredMappedResult) void {
         self.allocator.free(self.phase_endpoint_reference_heat_megajoules_by_layer);
+        self.allocator.free(self.renormalization_floor_discard_megajoules_by_layer);
         self.allocator.free(self.water_storage_roundoff_allowance_m3_by_layer);
         self.allocator.free(self.heat_storage_roundoff_allowance_megajoules_by_layer);
         self.allocator.free(self.phase_displacement_by_layer);
@@ -234,6 +251,7 @@ const DeferredOutputOwner = struct {
     boundary_heat_output_megajoules_by_cell: ?[]f64 = null,
     phase_displacement_by_layer: ?[]PhaseDisplacement = null,
     phase_endpoint_reference_heat_megajoules_by_layer: ?[]f64 = null,
+    renormalization_floor_discard_megajoules_by_layer: ?[]f64 = null,
     water_storage_roundoff_allowance_m3_by_layer: ?[]f64 = null,
     heat_storage_roundoff_allowance_megajoules_by_layer: ?[]f64 = null,
 
@@ -244,6 +262,7 @@ const DeferredOutputOwner = struct {
     noinline fn deinit(self: *DeferredOutputOwner) void {
         if (self.grid_delta_by_layer_carrier) |buffer| self.allocator.free(buffer);
         if (self.phase_endpoint_reference_heat_megajoules_by_layer) |buffer| self.allocator.free(buffer);
+        if (self.renormalization_floor_discard_megajoules_by_layer) |buffer| self.allocator.free(buffer);
         if (self.water_storage_roundoff_allowance_m3_by_layer) |buffer| self.allocator.free(buffer);
         if (self.heat_storage_roundoff_allowance_megajoules_by_layer) |buffer| self.allocator.free(buffer);
         if (self.phase_displacement_by_layer) |buffer| self.allocator.free(buffer);
@@ -262,6 +281,7 @@ const DeferredOutputOwner = struct {
         self.boundary_heat_output_megajoules_by_cell = null;
         self.phase_displacement_by_layer = null;
         self.phase_endpoint_reference_heat_megajoules_by_layer = null;
+        self.renormalization_floor_discard_megajoules_by_layer = null;
         self.water_storage_roundoff_allowance_m3_by_layer = null;
         self.heat_storage_roundoff_allowance_megajoules_by_layer = null;
     }
@@ -286,6 +306,7 @@ const DeferredOutputOwner = struct {
             .boundary_heat_output_megajoules_by_cell = self.boundary_heat_output_megajoules_by_cell orelse unreachable,
             .phase_displacement_by_layer = phase_displacement,
             .phase_endpoint_reference_heat_megajoules_by_layer = self.phase_endpoint_reference_heat_megajoules_by_layer orelse unreachable,
+            .renormalization_floor_discard_megajoules_by_layer = self.renormalization_floor_discard_megajoules_by_layer orelse unreachable,
             .water_storage_roundoff_allowance_m3_by_layer = self.water_storage_roundoff_allowance_m3_by_layer orelse unreachable,
             .heat_storage_roundoff_allowance_megajoules_by_layer = self.heat_storage_roundoff_allowance_megajoules_by_layer orelse unreachable,
             .accepted_substeps = accepted_substeps,
@@ -316,6 +337,8 @@ const RecoveryScratch = struct {
     substep_phase_displacement_by_layer: ?[]PhaseDisplacement = null,
     schedule_phase_endpoint_reference_heat_by_layer: ?[]f64 = null,
     substep_phase_endpoint_reference_heat_by_layer: ?[]f64 = null,
+    schedule_renormalization_floor_discard_by_layer: ?[]f64 = null,
+    substep_renormalization_floor_discard_by_layer: ?[]f64 = null,
     schedule_water_storage_roundoff_allowance_by_layer: ?[]f64 = null,
     substep_water_storage_roundoff_allowance_by_layer: ?[]f64 = null,
     schedule_heat_storage_roundoff_allowance_by_layer: ?[]f64 = null,
@@ -328,6 +351,8 @@ const RecoveryScratch = struct {
     noinline fn deinit(self: *RecoveryScratch) void {
         if (self.substep_phase_endpoint_reference_heat_by_layer) |buffer| self.allocator.free(buffer);
         if (self.schedule_phase_endpoint_reference_heat_by_layer) |buffer| self.allocator.free(buffer);
+        if (self.substep_renormalization_floor_discard_by_layer) |buffer| self.allocator.free(buffer);
+        if (self.schedule_renormalization_floor_discard_by_layer) |buffer| self.allocator.free(buffer);
         if (self.substep_water_storage_roundoff_allowance_by_layer) |buffer| self.allocator.free(buffer);
         if (self.schedule_water_storage_roundoff_allowance_by_layer) |buffer| self.allocator.free(buffer);
         if (self.substep_heat_storage_roundoff_allowance_by_layer) |buffer| self.allocator.free(buffer);
@@ -362,6 +387,8 @@ const RecoveryScratch = struct {
         self.substep_phase_displacement_by_layer = null;
         self.schedule_phase_endpoint_reference_heat_by_layer = null;
         self.substep_phase_endpoint_reference_heat_by_layer = null;
+        self.schedule_renormalization_floor_discard_by_layer = null;
+        self.substep_renormalization_floor_discard_by_layer = null;
         self.schedule_water_storage_roundoff_allowance_by_layer = null;
         self.substep_water_storage_roundoff_allowance_by_layer = null;
         self.schedule_heat_storage_roundoff_allowance_by_layer = null;
@@ -401,6 +428,9 @@ noinline fn allocateDeferredRecoveryBuffers(
     outputs.phase_endpoint_reference_heat_megajoules_by_layer = try allocator.alloc(f64, layer_count);
     scratch.schedule_phase_endpoint_reference_heat_by_layer = try allocator.alloc(f64, layer_count);
     scratch.substep_phase_endpoint_reference_heat_by_layer = try allocator.alloc(f64, layer_count);
+    outputs.renormalization_floor_discard_megajoules_by_layer = try allocator.alloc(f64, layer_count);
+    scratch.schedule_renormalization_floor_discard_by_layer = try allocator.alloc(f64, layer_count);
+    scratch.substep_renormalization_floor_discard_by_layer = try allocator.alloc(f64, layer_count);
     outputs.water_storage_roundoff_allowance_m3_by_layer = try allocator.alloc(f64, layer_count);
     scratch.schedule_water_storage_roundoff_allowance_by_layer = try allocator.alloc(f64, layer_count);
     scratch.substep_water_storage_roundoff_allowance_by_layer = try allocator.alloc(f64, layer_count);
@@ -499,6 +529,10 @@ pub const TestSubstepControl = struct {
     /// Test-only source-derived phase endpoint-reference heat. Each accepted
     /// synthetic substep contributes this complete per-layer signal.
     phase_endpoint_reference_heat_megajoules_by_layer: []const f64 = &.{},
+    /// Test-only renormalization-floor discard signal (issue-068, fourth
+    /// round). Each accepted synthetic substep contributes this complete
+    /// per-layer signal.
+    renormalization_floor_discard_megajoules_by_layer: []const f64 = &.{},
     /// Test-only a-priori water-storage representation bound emitted by each
     /// accepted synthetic substep.
     water_storage_roundoff_allowance_m3_by_layer: []const f64 = &.{},
@@ -532,6 +566,9 @@ pub fn advanceMappedDeferred(
     if (options.phase_endpoint_reference_heat_megajoules_by_layer.len != 0 and
         options.phase_endpoint_reference_heat_megajoules_by_layer.len != grid.layer_count)
         return error.SoilPhaseReferenceHeatDimensionMismatch;
+    if (options.renormalization_floor_discard_megajoules_by_layer.len != 0 and
+        options.renormalization_floor_discard_megajoules_by_layer.len != grid.layer_count)
+        return error.SoilRenormalizationFloorDiscardDimensionMismatch;
     if (options.water_storage_roundoff_allowance_m3_by_layer.len != 0 and
         options.water_storage_roundoff_allowance_m3_by_layer.len != grid.layer_count)
         return error.WaterStorageRoundoffProvenanceDimensionMismatch;
@@ -543,11 +580,13 @@ pub fn advanceMappedDeferred(
         return error.HeatConservationCellDimensionMismatch;
     @memset(options.phase_displacement_by_layer, .{});
     @memset(options.phase_endpoint_reference_heat_megajoules_by_layer, 0);
+    @memset(options.renormalization_floor_discard_megajoules_by_layer, 0);
     @memset(options.water_storage_roundoff_allowance_m3_by_layer, 0);
     @memset(options.heat_storage_roundoff_allowance_megajoules_by_layer, 0);
     @memset(options.external_water_advective_enthalpy_outward_megajoules_by_layer, 0);
     errdefer @memset(options.phase_displacement_by_layer, .{});
     errdefer @memset(options.phase_endpoint_reference_heat_megajoules_by_layer, 0);
+    errdefer @memset(options.renormalization_floor_discard_megajoules_by_layer, 0);
     errdefer @memset(options.water_storage_roundoff_allowance_m3_by_layer, 0);
     errdefer @memset(options.heat_storage_roundoff_allowance_megajoules_by_layer, 0);
     errdefer @memset(options.external_water_advective_enthalpy_outward_megajoules_by_layer, 0);
@@ -604,6 +643,9 @@ pub fn advanceMappedDeferred(
     const accepted_phase_endpoint_reference_heat_by_layer = deferred_outputs.phase_endpoint_reference_heat_megajoules_by_layer.?;
     const schedule_phase_endpoint_reference_heat_by_layer = recovery_scratch.schedule_phase_endpoint_reference_heat_by_layer.?;
     const substep_phase_endpoint_reference_heat_by_layer = recovery_scratch.substep_phase_endpoint_reference_heat_by_layer.?;
+    const accepted_renormalization_floor_discard_by_layer = deferred_outputs.renormalization_floor_discard_megajoules_by_layer.?;
+    const schedule_renormalization_floor_discard_by_layer = recovery_scratch.schedule_renormalization_floor_discard_by_layer.?;
+    const substep_renormalization_floor_discard_by_layer = recovery_scratch.substep_renormalization_floor_discard_by_layer.?;
     const accepted_water_storage_roundoff_allowance_by_layer = deferred_outputs.water_storage_roundoff_allowance_m3_by_layer.?;
     const schedule_water_storage_roundoff_allowance_by_layer = recovery_scratch.schedule_water_storage_roundoff_allowance_by_layer.?;
     const substep_water_storage_roundoff_allowance_by_layer = recovery_scratch.substep_water_storage_roundoff_allowance_by_layer.?;
@@ -616,6 +658,7 @@ pub fn advanceMappedDeferred(
     @memset(accepted_boundary_heat_output_by_cell, 0);
     @memset(accepted_phase_displacement_by_layer, .{});
     @memset(accepted_phase_endpoint_reference_heat_by_layer, 0);
+    @memset(accepted_renormalization_floor_discard_by_layer, 0);
     @memset(accepted_water_storage_roundoff_allowance_by_layer, 0);
     @memset(accepted_heat_storage_roundoff_allowance_by_layer, 0);
     if (options.exact_substep_count) |exact| {
@@ -673,6 +716,7 @@ pub fn advanceMappedDeferred(
         @memset(schedule_heat_induced_ice_change_by_layer, .{});
         @memset(schedule_phase_displacement_by_layer, .{});
         @memset(schedule_phase_endpoint_reference_heat_by_layer, 0);
+        @memset(schedule_renormalization_floor_discard_by_layer, 0);
         @memset(schedule_water_storage_roundoff_allowance_by_layer, 0);
         @memset(schedule_heat_storage_roundoff_allowance_by_layer, 0);
         var schedule_solver: ?Result = null;
@@ -701,6 +745,7 @@ pub fn advanceMappedDeferred(
             @memset(substep_heat_induced_ice_change_by_layer, .{});
             @memset(substep_phase_displacement_by_layer, .{});
             @memset(substep_phase_endpoint_reference_heat_by_layer, 0);
+            @memset(substep_renormalization_floor_discard_by_layer, 0);
             @memset(substep_water_storage_roundoff_allowance_by_layer, 0);
             @memset(substep_heat_storage_roundoff_allowance_by_layer, 0);
             substep_options.external_water_advective_enthalpy_outward_megajoules_by_cell = substep_external_water_heat_by_cell;
@@ -711,6 +756,8 @@ pub fn advanceMappedDeferred(
             substep_options.phase_displacement_by_layer = substep_phase_displacement_by_layer;
             substep_options.phase_endpoint_reference_heat_megajoules_by_layer =
                 substep_phase_endpoint_reference_heat_by_layer;
+            substep_options.renormalization_floor_discard_megajoules_by_layer =
+                substep_renormalization_floor_discard_by_layer;
             substep_options.water_storage_roundoff_allowance_m3_by_layer =
                 substep_water_storage_roundoff_allowance_by_layer;
             substep_options.heat_storage_roundoff_allowance_megajoules_by_layer =
@@ -808,6 +855,10 @@ pub fn advanceMappedDeferred(
                 substep_phase_endpoint_reference_heat_by_layer,
             ) |*total, part| total.* = try checkedAddFinite(total.*, part);
             for (
+                schedule_renormalization_floor_discard_by_layer,
+                substep_renormalization_floor_discard_by_layer,
+            ) |*total, part| total.* = try checkedAddFinite(total.*, part);
+            for (
                 schedule_water_storage_roundoff_allowance_by_layer,
                 substep_water_storage_roundoff_allowance_by_layer,
             ) |*total, part| total.* = try checkedAddNonnegativeRoundUp(total.*, part);
@@ -843,6 +894,10 @@ pub fn advanceMappedDeferred(
                 schedule_phase_endpoint_reference_heat_by_layer,
             );
             @memcpy(
+                accepted_renormalization_floor_discard_by_layer,
+                schedule_renormalization_floor_discard_by_layer,
+            );
+            @memcpy(
                 accepted_water_storage_roundoff_allowance_by_layer,
                 schedule_water_storage_roundoff_allowance_by_layer,
             );
@@ -868,6 +923,11 @@ pub fn advanceMappedDeferred(
         @memcpy(
             options.phase_endpoint_reference_heat_megajoules_by_layer,
             accepted_phase_endpoint_reference_heat_by_layer,
+        );
+    if (options.renormalization_floor_discard_megajoules_by_layer.len != 0)
+        @memcpy(
+            options.renormalization_floor_discard_megajoules_by_layer,
+            accepted_renormalization_floor_discard_by_layer,
         );
     if (options.water_storage_roundoff_allowance_m3_by_layer.len != 0)
         @memcpy(
@@ -1346,6 +1406,9 @@ pub const MappedOptions = struct {
     phase_displacement_by_layer: []PhaseDisplacement = &.{},
     /// Optional accepted phase endpoint-reference heat by layer.
     phase_endpoint_reference_heat_megajoules_by_layer: []f64 = &.{},
+    /// Optional accepted renormalization-floor discard by layer. See
+    /// `Inputs.renormalization_floor_discard_megajoules_by_layer`.
+    renormalization_floor_discard_megajoules_by_layer: []f64 = &.{},
     water_storage_roundoff_allowance_m3_by_layer: []f64 = &.{},
     heat_storage_roundoff_allowance_megajoules_by_layer: []f64 = &.{},
     /// HOUR1 DPTHT litter/pond arm (`VOLW(0)`, `VOLWRX`, `AREA(3,0)`), cell
@@ -1428,6 +1491,9 @@ pub fn advanceMapped(
     if (options.phase_endpoint_reference_heat_megajoules_by_layer.len != 0 and
         options.phase_endpoint_reference_heat_megajoules_by_layer.len != grid.layer_count)
         return error.SoilPhaseReferenceHeatDimensionMismatch;
+    if (options.renormalization_floor_discard_megajoules_by_layer.len != 0 and
+        options.renormalization_floor_discard_megajoules_by_layer.len != grid.layer_count)
+        return error.SoilRenormalizationFloorDiscardDimensionMismatch;
     if (options.water_storage_roundoff_allowance_m3_by_layer.len != 0 and
         options.water_storage_roundoff_allowance_m3_by_layer.len != grid.layer_count)
         return error.WaterStorageRoundoffProvenanceDimensionMismatch;
@@ -1441,6 +1507,7 @@ pub fn advanceMapped(
     @memset(options.heat_induced_ice_change_by_layer, .{});
     @memset(options.phase_displacement_by_layer, .{});
     @memset(options.phase_endpoint_reference_heat_megajoules_by_layer, 0);
+    @memset(options.renormalization_floor_discard_megajoules_by_layer, 0);
     @memset(options.water_storage_roundoff_allowance_m3_by_layer, 0);
     @memset(options.heat_storage_roundoff_allowance_megajoules_by_layer, 0);
     if (options.test_substep_control) |control| {
@@ -1470,6 +1537,16 @@ pub fn advanceMapped(
                 @memcpy(
                     options.phase_endpoint_reference_heat_megajoules_by_layer,
                     control.phase_endpoint_reference_heat_megajoules_by_layer,
+                );
+            }
+            if (control.renormalization_floor_discard_megajoules_by_layer.len != 0) {
+                if (control.renormalization_floor_discard_megajoules_by_layer.len != options.renormalization_floor_discard_megajoules_by_layer.len)
+                    return error.SoilRenormalizationFloorDiscardDimensionMismatch;
+                for (control.renormalization_floor_discard_megajoules_by_layer) |value|
+                    if (!std.math.isFinite(value)) return error.NonFiniteSoilRenormalizationFloorDiscard;
+                @memcpy(
+                    options.renormalization_floor_discard_megajoules_by_layer,
+                    control.renormalization_floor_discard_megajoules_by_layer,
                 );
             }
             if (control.water_storage_roundoff_allowance_m3_by_layer.len != 0) {
@@ -1585,6 +1662,7 @@ pub fn advanceMapped(
         .heat_induced_ice_change_by_layer = options.heat_induced_ice_change_by_layer,
         .phase_displacement_by_layer = options.phase_displacement_by_layer,
         .phase_endpoint_reference_heat_megajoules_by_layer = options.phase_endpoint_reference_heat_megajoules_by_layer,
+        .renormalization_floor_discard_megajoules_by_layer = options.renormalization_floor_discard_megajoules_by_layer,
         .water_storage_roundoff_allowance_m3_by_layer = options.water_storage_roundoff_allowance_m3_by_layer,
         .heat_storage_roundoff_allowance_megajoules_by_layer = options.heat_storage_roundoff_allowance_megajoules_by_layer,
         .post_phase_context = if (options.substep_transaction_hooks) |hooks| hooks.context else null,
@@ -1630,6 +1708,9 @@ pub fn advance(allocator: std.mem.Allocator, grid: *grid_module.GridState, hydro
     if (inputs.phase_endpoint_reference_heat_megajoules_by_layer.len != 0 and
         inputs.phase_endpoint_reference_heat_megajoules_by_layer.len != grid.layer_count)
         return error.SoilPhaseReferenceHeatDimensionMismatch;
+    if (inputs.renormalization_floor_discard_megajoules_by_layer.len != 0 and
+        inputs.renormalization_floor_discard_megajoules_by_layer.len != grid.layer_count)
+        return error.SoilRenormalizationFloorDiscardDimensionMismatch;
     if (inputs.water_storage_roundoff_allowance_m3_by_layer.len != 0 and
         inputs.water_storage_roundoff_allowance_m3_by_layer.len != grid.layer_count)
         return error.WaterStorageRoundoffProvenanceDimensionMismatch;
@@ -1648,6 +1729,8 @@ pub fn advance(allocator: std.mem.Allocator, grid: *grid_module.GridState, hydro
     errdefer @memset(inputs.phase_displacement_by_layer, .{});
     @memset(inputs.phase_endpoint_reference_heat_megajoules_by_layer, 0);
     errdefer @memset(inputs.phase_endpoint_reference_heat_megajoules_by_layer, 0);
+    @memset(inputs.renormalization_floor_discard_megajoules_by_layer, 0);
+    errdefer @memset(inputs.renormalization_floor_discard_megajoules_by_layer, 0);
     @memset(inputs.water_storage_roundoff_allowance_m3_by_layer, 0);
     errdefer @memset(inputs.water_storage_roundoff_allowance_m3_by_layer, 0);
     @memset(inputs.heat_storage_roundoff_allowance_megajoules_by_layer, 0);
@@ -1819,6 +1902,8 @@ pub fn advance(allocator: std.mem.Allocator, grid: *grid_module.GridState, hydro
         inputs.phase_properties.ice_heat_capacity_megajoules_per_m3_k,
         inputs.phase_properties.freeze_thaw.latent_heat_of_fusion_megajoules_per_m3,
         inputs.phase_properties.freeze_thaw.pure_water_freezing_temperature_k,
+        inputs.cell_area_m2,
+        inputs.renormalization_floor_discard_megajoules_by_layer,
     );
     try validateAcceptedWaterBoundaryBalance(
         grid,
@@ -1865,6 +1950,8 @@ pub fn advance(allocator: std.mem.Allocator, grid: *grid_module.GridState, hydro
         inputs.phase_properties.ice_heat_capacity_megajoules_per_m3_k,
         inputs.phase_properties.freeze_thaw.latent_heat_of_fusion_megajoules_per_m3,
         inputs.phase_properties.freeze_thaw.pure_water_freezing_temperature_k,
+        inputs.cell_area_m2,
+        inputs.renormalization_floor_discard_megajoules_by_layer,
     );
     traceThermalStage(temporary_profile, "vapor_rebase", grid, inputs, dry_solid_heat_capacity_megajoules_per_k);
     const vapor_energy_change = if (diagnostics_enabled)
@@ -2112,6 +2199,7 @@ pub fn advance(allocator: std.mem.Allocator, grid: *grid_module.GridState, hydro
         inputs.cell_area_m2,
         inputs.heat_storage_roundoff_allowance_megajoules_by_layer,
         inputs.phase_endpoint_reference_heat_megajoules_by_layer,
+        inputs.renormalization_floor_discard_megajoules_by_layer,
     );
     try validatePerLayerPostRichardsTotalWaterClosure(
         allocator,
@@ -2349,6 +2437,16 @@ fn temperatureForCellEnthalpy(
     ice_heat_capacity_megajoules_per_m3_k: f64,
     latent_heat_of_fusion_megajoules_per_m3: f64,
     pure_water_melting_temperature_k: f64,
+    /// This cell's plan area, MJ K-1 m-2 floor scaling per
+    /// `heat_flux.minimum_layer_heat_capacity_megajoules_per_m2_k` (the same
+    /// `STARTS 655`/`VHCPRX` floor `validatePerLayerSpatialHeatClosure` and
+    /// `solver_residual.zig`'s `residualAtImpl` already use). Zero disables
+    /// the floor guard, matching every other diagnostics-disabled caller in
+    /// this file that passes an empty `cell_area_m2`.
+    cell_area_m2: f64,
+    /// issue-068 (fourth round, 2026-09-20). Empty disables booking. See
+    /// `Inputs.renormalization_floor_discard_megajoules_by_layer`.
+    renormalization_floor_discard_megajoules_by_layer: []f64,
 ) !f64 {
     const frozen_water_equivalent_m3 =
         grid.matrix_ice_water_m3[layer] + grid.macropore_ice_water_m3[layer];
@@ -2358,11 +2456,44 @@ fn temperatureForCellEnthalpy(
                 grid.macropore_liquid_water_m3[layer] +
                 grid.water_vapor_volume_m3[layer]) +
         ice_heat_capacity_megajoules_per_m3_k * frozen_water_equivalent_m3;
-    if (!(temperature_coefficient > 0)) return error.InvalidSoilHeatCapacity;
     const fusion_offset_megajoules = frozen_water_equivalent_m3 *
         (liquid_water_heat_capacity_megajoules_per_m3_k * pure_water_melting_temperature_k -
             latent_heat_of_fusion_megajoules_per_m3 -
             ice_heat_capacity_megajoules_per_m3_k * pure_water_melting_temperature_k);
+    // issue-068 (fourth round, 2026-09-20): WATSUB 6907--6913 / `redist.f:
+    // 9655-9659`'s `TK1 = TKS` fallback, and this codebase's own
+    // `solver_residual.zig` `residualAtImpl` (`target[cell] = base[cell]`
+    // when `heat_capacity <= minimum_heat_capacity`), already hold a
+    // chronically near-zero-heat-capacity layer's PRIOR temperature rather
+    // than dividing an energy mismatch by that near-zero capacity. Mirror
+    // that already-approved rule here, at the identical floor
+    // `validatePerLayerSpatialHeatClosure` uses
+    // (`heat_flux.minimum_layer_heat_capacity_megajoules_per_m2_k *
+    // cell_area`), instead of committing the physically absurd temperature
+    // this inversion previously produced for hour 2,895/cell 0/layer 0
+    // (401.75/452.64/455.14 K). Book the resulting energy discrepancy -- what
+    // this cell's storage should have gained (or lost) had the inversion
+    // gone through, but did not because the temperature was held -- into the
+    // dedicated ledger below so `validatePerLayerSpatialHeatClosure` can net
+    // it out of `expected_gain_megajoules` instead of reading a false
+    // violation whenever this layer's capacity later recovers above the
+    // floor within the same hour.
+    const negligible_capacity_limit_megajoules_per_k =
+        heat_flux.minimum_layer_heat_capacity_megajoules_per_m2_k * cell_area_m2;
+    if (cell_area_m2 > 0 and temperature_coefficient <= negligible_capacity_limit_megajoules_per_k) {
+        const held_temperature_k = grid.soil_temperature_k[layer];
+        if (renormalization_floor_discard_megajoules_by_layer.len != 0) {
+            const held_actual_megajoules =
+                temperature_coefficient * held_temperature_k + fusion_offset_megajoules;
+            const discard_megajoules = try checkedAddFinite(target_megajoules, -held_actual_megajoules);
+            renormalization_floor_discard_megajoules_by_layer[layer] = try checkedAddFinite(
+                renormalization_floor_discard_megajoules_by_layer[layer],
+                discard_megajoules,
+            );
+        }
+        return held_temperature_k;
+    }
+    if (!(temperature_coefficient > 0)) return error.InvalidSoilHeatCapacity;
     const temperature_k =
         (target_megajoules - fusion_offset_megajoules) /
         temperature_coefficient;
@@ -2373,21 +2504,15 @@ fn temperatureForCellEnthalpy(
     // domain guard the dense multi-layer Newton/Anderson solver enforces on
     // its OWN commit path (`solver_solve.zig`'s `commitAcceptedState`/
     // `allTemperaturesPhysicallyValid`). For an ordinary layer `isFinite and
-    // > 0` already implies a temperature far inside [173.15, 373.15] K, but
-    // for the same chronically near-zero-heat-capacity layer this issue
-    // chain has tracked since issue-060 (`temperature_coefficient` at or
-    // below WATSUB's own `VHCPRX` floor), a small, otherwise-ordinary
-    // `target_megajoules`/`fusion_offset_megajoules` mismatch divided by that
-    // near-zero capacity produces a finite, positive, but physically absurd
-    // temperature -- reaching the heat solver's OWN entry gate
-    // (`validateInputs`) on its very next call with no Newton-loop diagnostic
-    // in between, which is the exact signature this round's diagnostic run
-    // captured for hour 2,895 at cell 0/layer 0. Reusing the same
-    // `isPhysicalTemperatureK` primitive every sibling scalar/dense solver
-    // already enforces (never a new or widened bound) and a distinct,
-    // explicitly retryable error name lets the existing, already-tested
-    // fixed-hour substep recovery ladder (`isFixedHourDtRecoveryFailure`)
-    // refine `dt` instead of committing this candidate.
+    // > 0` already implies a temperature far inside [173.15, 373.15] K.
+    // Above the floor guarded immediately above, this guard remains in place
+    // as a belt-and-suspenders check for any other, still-unidentified route
+    // to an absurd value. Reusing the same `isPhysicalTemperatureK` primitive
+    // every sibling scalar/dense solver already enforces (never a new or
+    // widened bound) and a distinct, explicitly retryable error name lets the
+    // existing, already-tested fixed-hour substep recovery ladder
+    // (`isFixedHourDtRecoveryFailure`) refine `dt` instead of committing this
+    // candidate.
     if (!heat_solver.isPhysicalTemperatureK(temperature_k))
         return error.SoilHeatRenormalizedTemperatureOutsidePhysicalDomain;
     return temperature_k;
@@ -2404,10 +2529,17 @@ fn renormalizeTemperatureToFixedCellEnthalpy(
     ice_heat_capacity_megajoules_per_m3_k: f64,
     latent_heat_of_fusion_megajoules_per_m3: f64,
     pure_water_melting_temperature_k: f64,
+    cell_area_m2: []const f64,
+    renormalization_floor_discard_megajoules_by_layer: []f64,
 ) !void {
     if (before_megajoules_by_cell.len != grid.layer_count or
         dry_solid_heat_capacity_megajoules_per_k.len != grid.layer_count)
         return error.SoilEnergyDiagnosticDimensionMismatch;
+    if (cell_area_m2.len != 0 and cell_area_m2.len != grid.cell_count)
+        return error.HeatConservationCellDimensionMismatch;
+    if (renormalization_floor_discard_megajoules_by_layer.len != 0 and
+        renormalization_floor_discard_megajoules_by_layer.len != grid.layer_count)
+        return error.SoilRenormalizationFloorDiscardDimensionMismatch;
     for (0..grid.cell_count) |cell| for (0..grid.active_soil_layer_count[cell]) |layer_offset| {
         const layer = try grid.layerIndex(cell, layer_offset);
         grid.soil_temperature_k[layer] = try temperatureForCellEnthalpy(
@@ -2419,6 +2551,8 @@ fn renormalizeTemperatureToFixedCellEnthalpy(
             ice_heat_capacity_megajoules_per_m3_k,
             latent_heat_of_fusion_megajoules_per_m3,
             pure_water_melting_temperature_k,
+            if (cell_area_m2.len == 0) 0 else cell_area_m2[cell],
+            renormalization_floor_discard_megajoules_by_layer,
         );
     };
 }
@@ -2438,8 +2572,15 @@ fn renormalizeTemperatureToConservedEnthalpy(
     ice_heat_capacity_megajoules_per_m3_k: f64,
     latent_heat_of_fusion_megajoules_per_m3: f64,
     pure_water_melting_temperature_k: f64,
+    cell_area_m2: []const f64,
+    renormalization_floor_discard_megajoules_by_layer: []f64,
 ) !void {
     if (before_megajoules_by_cell.len != grid.layer_count) return error.SoilEnergyDiagnosticDimensionMismatch;
+    if (cell_area_m2.len != 0 and cell_area_m2.len != grid.cell_count)
+        return error.HeatConservationCellDimensionMismatch;
+    if (renormalization_floor_discard_megajoules_by_layer.len != 0 and
+        renormalization_floor_discard_megajoules_by_layer.len != grid.layer_count)
+        return error.SoilRenormalizationFloorDiscardDimensionMismatch;
     for (0..grid.cell_count) |cell| for (0..grid.active_soil_layer_count[cell]) |layer| {
         const index = try grid.layerIndex(cell, layer);
         const departed_m3 =
@@ -2462,6 +2603,8 @@ fn renormalizeTemperatureToConservedEnthalpy(
             ice_heat_capacity_megajoules_per_m3_k,
             latent_heat_of_fusion_megajoules_per_m3,
             pure_water_melting_temperature_k,
+            if (cell_area_m2.len == 0) 0 else cell_area_m2[cell],
+            renormalization_floor_discard_megajoules_by_layer,
         );
     };
 }
@@ -3294,6 +3437,15 @@ fn validatePerLayerSpatialHeatClosure(
     /// hourly census sees the same oracle rule this closure already skips.
     /// Empty disables booking; production passes the phase-endpoint lane.
     negligible_capacity_unabsorbed_megajoules_by_layer: []f64,
+    /// issue-068 (fourth round, 2026-09-20): per-layer energy discrepancy
+    /// booked by `temperatureForCellEnthalpy` when it held a chronically
+    /// near-zero-heat-capacity layer's prior temperature instead of dividing.
+    /// Netted into `expected_gain_megajoules` below so a held-back layer's
+    /// actual storage change is compared against the SAME adjusted
+    /// expectation, rather than the raw flux-only tally that assumed the
+    /// renormalization inversion actually ran. Empty disables netting
+    /// (read-only; this function does not book into it).
+    renormalization_floor_discard_megajoules_by_layer: []const f64,
 ) !void {
     const layers = grid.layer_count;
     if (initial_enthalpy_megajoules.len != layers or
@@ -3306,7 +3458,9 @@ fn validatePerLayerSpatialHeatClosure(
         (roundoff_allowance_megajoules_by_layer.len != 0 and
             roundoff_allowance_megajoules_by_layer.len != layers) or
         (negligible_capacity_unabsorbed_megajoules_by_layer.len != 0 and
-            negligible_capacity_unabsorbed_megajoules_by_layer.len != layers))
+            negligible_capacity_unabsorbed_megajoules_by_layer.len != layers) or
+        (renormalization_floor_discard_megajoules_by_layer.len != 0 and
+            renormalization_floor_discard_megajoules_by_layer.len != layers))
         return error.HeatConservationLayerDimensionMismatch;
     const internal_gain_megajoules = try allocator.alloc(f64, layers);
     defer allocator.free(internal_gain_megajoules);
@@ -3351,7 +3505,18 @@ fn validatePerLayerSpatialHeatClosure(
             );
             const source_megajoules = cell_heat_source_megajoules[layer];
             const boundary_gain_megajoules = hydrology.boundary_heat_exchange_megajoules_per_layer_per_step[layer];
-            const expected_gain_megajoules = internal_gain_megajoules[layer] + source_megajoules + boundary_gain_megajoules;
+            // issue-068 (fourth round): a layer this hour's renormalization
+            // held (see `temperatureForCellEnthalpy`) received less (or more)
+            // storage change than the raw flux/source/boundary tally implies,
+            // by exactly the booked discrepancy. Net it out here so the
+            // comparison below is against the ACTUAL, held-back trajectory,
+            // not the trajectory that would have existed had the inversion
+            // divided through unconditionally.
+            const renormalization_floor_discard_megajoules = if (renormalization_floor_discard_megajoules_by_layer.len == 0)
+                0
+            else
+                renormalization_floor_discard_megajoules_by_layer[layer];
+            const expected_gain_megajoules = internal_gain_megajoules[layer] + source_megajoules + boundary_gain_megajoules - renormalization_floor_discard_megajoules;
             // `DRY-LAYER-UNPHYSICAL-HEAT-SINK-HOUR-2726-001`. WATSUB 6907--6913
             // does not solve a layer whose heat capacity is at or below `VHCPRX`;
             // it holds `TKS` and the energy the layer cannot absorb is discarded.
@@ -3836,10 +4001,48 @@ test "per-layer enthalpy gate rejects opposing defects that cancel in the cell s
     try fillCellEnthalpyRoundoffAllowances(&initial_enthalpy_roundoff, &grid, &dry_capacity, 4.19, 1.9274 / 0.917, 333, 273.15);
     hydrology.boundary_heat_exchange_megajoules_per_layer_per_step[0] = 0.5;
     hydrology.boundary_heat_exchange_megajoules_per_layer_per_step[1] = -0.5;
-    try std.testing.expectError(error.PerLayerSpatialHeatClosureMismatch, validatePerLayerSpatialHeatClosure(std.testing.allocator, &grid, &hydrology, &faces, &initial_enthalpy, &initial_enthalpy_roundoff, &.{ 0, 0 }, &dry_capacity, &.{ 0, 0 }, 4.19, 1.9274 / 0.917, 333, 273.15, 1e-12, 1e-9, &.{1}, &.{}, &.{}));
-    try validatePerLayerSpatialHeatClosure(std.testing.allocator, &grid, &hydrology, &faces, &initial_enthalpy, &initial_enthalpy_roundoff, &.{ 0.5, 0.5 }, &dry_capacity, &.{ 0, 0 }, 4.19, 1.9274 / 0.917, 333, 273.15, 1e-12, 1e-9, &.{1}, &.{}, &.{});
+    try std.testing.expectError(error.PerLayerSpatialHeatClosureMismatch, validatePerLayerSpatialHeatClosure(std.testing.allocator, &grid, &hydrology, &faces, &initial_enthalpy, &initial_enthalpy_roundoff, &.{ 0, 0 }, &dry_capacity, &.{ 0, 0 }, 4.19, 1.9274 / 0.917, 333, 273.15, 1e-12, 1e-9, &.{1}, &.{}, &.{}, &.{}));
+    try validatePerLayerSpatialHeatClosure(std.testing.allocator, &grid, &hydrology, &faces, &initial_enthalpy, &initial_enthalpy_roundoff, &.{ 0.5, 0.5 }, &dry_capacity, &.{ 0, 0 }, 4.19, 1.9274 / 0.917, 333, 273.15, 1e-12, 1e-9, &.{1}, &.{}, &.{}, &.{});
     @memset(hydrology.boundary_heat_exchange_megajoules_per_layer_per_step, 0);
-    try validatePerLayerSpatialHeatClosure(std.testing.allocator, &grid, &hydrology, &faces, &initial_enthalpy, &initial_enthalpy_roundoff, &.{ 0, 0 }, &dry_capacity, &.{ 0, 0 }, 4.19, 1.9274 / 0.917, 333, 273.15, 1e-12, 1e-9, &.{1}, &.{}, &.{});
+    try validatePerLayerSpatialHeatClosure(std.testing.allocator, &grid, &hydrology, &faces, &initial_enthalpy, &initial_enthalpy_roundoff, &.{ 0, 0 }, &dry_capacity, &.{ 0, 0 }, 4.19, 1.9274 / 0.917, 333, 273.15, 1e-12, 1e-9, &.{1}, &.{}, &.{}, &.{});
+}
+
+test "issue-068 (fourth round): validatePerLayerSpatialHeatClosure nets a booked renormalization-floor discard instead of flagging a false violation" {
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 2, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .max_nonlinear_iterations = 10 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    @memset(grid.active_soil_layer_count, 2);
+    @memset(grid.soil_temperature_k, 280);
+    var hydrology = try hydrology_module.State.init(std.testing.allocator, 1, 1, 2, 1);
+    defer hydrology.deinit();
+    var faces = try hydrology_module.buildSoilFaces(std.testing.allocator, &hydrology, &grid);
+    defer faces.deinit();
+    const dry_capacity = [_]f64{ 1, 1 };
+    var initial_enthalpy: [2]f64 = undefined;
+    var initial_enthalpy_roundoff: [2]f64 = undefined;
+    try fillCellEnthalpyMegajoules(&initial_enthalpy, &grid, &dry_capacity, 4.19, 1.9274 / 0.917, 333, 273.15);
+    try fillCellEnthalpyRoundoffAllowances(&initial_enthalpy_roundoff, &grid, &dry_capacity, 4.19, 1.9274 / 0.917, 333, 273.15);
+    // Identical fixture to the immediately preceding test: an untouched,
+    // storage-unchanged pair of layers with an opposing 0.5/-0.5 MJ boundary
+    // exchange -- WITHOUT netting this is exactly the false violation the
+    // preceding test proves at `error.PerLayerSpatialHeatClosureMismatch`.
+    hydrology.boundary_heat_exchange_megajoules_per_layer_per_step[0] = 0.5;
+    hydrology.boundary_heat_exchange_megajoules_per_layer_per_step[1] = -0.5;
+    // Simulates `temperatureForCellEnthalpy` having held each layer's prior
+    // temperature earlier in the same hour and booked exactly the amount
+    // that would otherwise have reconciled this boundary exchange with
+    // storage (i.e. the layer's storage genuinely does not reflect this
+    // boundary term because the renormalization inversion was held instead
+    // of dividing). Netting this into `expected_gain_megajoules` must turn
+    // the same otherwise-violating fixture into a pass.
+    const renormalization_floor_discard = [_]f64{ 0.5, -0.5 };
+    try validatePerLayerSpatialHeatClosure(std.testing.allocator, &grid, &hydrology, &faces, &initial_enthalpy, &initial_enthalpy_roundoff, &.{ 0, 0 }, &dry_capacity, &.{ 0, 0 }, 4.19, 1.9274 / 0.917, 333, 273.15, 1e-12, 1e-9, &.{1}, &.{}, &.{}, &renormalization_floor_discard);
+    // An empty discard array (the default for every one of the 35 existing
+    // call sites of the sibling `phase_endpoint_reference_heat_megajoules_by_layer`
+    // ledger, none of which this change touches) reproduces the original
+    // failure exactly -- proof the new parameter is what changed the
+    // outcome, not an unrelated side effect of this test's fixture.
+    try std.testing.expectError(error.PerLayerSpatialHeatClosureMismatch, validatePerLayerSpatialHeatClosure(std.testing.allocator, &grid, &hydrology, &faces, &initial_enthalpy, &initial_enthalpy_roundoff, &.{ 0, 0 }, &dry_capacity, &.{ 0, 0 }, 4.19, 1.9274 / 0.917, 333, 273.15, 1e-12, 1e-9, &.{1}, &.{}, &.{}, &.{}));
 }
 
 test "post-Richards phase and vapor water gate rejects opposing layer defects" {
@@ -4436,13 +4639,16 @@ test "live accepted delta removes exactly one 38-allocation snapshot" {
     const coefficient_allocation_count =
         workspace_state_slice_descriptors.len + thermal_state_slice_descriptors.len;
     // `allocateDeferredRecoveryBuffers` performs one `allocator.alloc` per line in
-    // its body: 26 today, after the water- and heat-storage
+    // its body: 29 today, after the water- and heat-storage
     // roundoff-allowance provenance buffer groups (3 allocations each: outputs,
-    // schedule, substep) were added for conservation tracking. This constant is
-    // deliberately hardcoded, not computed, so any future change to that
-    // function's allocation count must be re-verified here rather than silently
-    // absorbed.
-    const deferred_buffer_allocation_count: usize = 26;
+    // schedule, substep) were added for conservation tracking, and after
+    // issue-068 (fourth round, 2026-09-20) added a third such group -- outputs,
+    // schedule, and substep buffers for
+    // `renormalization_floor_discard_megajoules_by_layer` -- for the same
+    // reason (+3, from 26). This constant is deliberately hardcoded, not
+    // computed, so any future change to that function's allocation count must
+    // be re-verified here rather than silently absorbed.
+    const deferred_buffer_allocation_count: usize = 29;
     const grid_delta_allocation_count: usize = 1;
     const former_success_allocation_count =
         3 * snapshot_allocation_count +
@@ -4476,7 +4682,9 @@ test "live accepted delta removes exactly one 38-allocation snapshot" {
         );
         defer result.deinit();
         try std.testing.expectEqual(live_success_allocation_count, allocation_counter.alloc_index);
-        try std.testing.expectEqual(@as(usize, 136), allocation_counter.alloc_index);
+        // issue-068 (fourth round): 139, not 136 -- see
+        // `deferred_buffer_allocation_count`'s updated comment above.
+        try std.testing.expectEqual(@as(usize, 139), allocation_counter.alloc_index);
         try std.testing.expectEqual(
             @as(usize, 2 * deferred_grid_carrier_count),
             result.grid_delta_by_layer_carrier.len,
@@ -4620,6 +4828,8 @@ test "vapor-only transport temperature rebase preserves each layer canonical ent
         ice_capacity,
         fusion_latent,
         melting_temperature_k,
+        &.{},
+        &.{},
     );
 
     try std.testing.expect(grid.soil_temperature_k[0] > 270);
@@ -4672,6 +4882,13 @@ test "issue-068 (second round): renormalized cell enthalpy inversion rejects an 
     // diagnostic captured, but reached here through the renormalization
     // inversion rather than the dense Newton/Anderson solver's commit path.
     const target_megajoules = dry_capacity * 280.0 + 5.0e-3;
+    // issue-068 (fourth round): `cell_area_m2 = 0` deliberately disables the
+    // fourth round's hold-don't-divide floor guard (matching every other
+    // diagnostics-disabled caller in this file that passes an empty
+    // `cell_area_m2`), so this call still exercises the RAW division this
+    // issue chain originally captured producing an out-of-domain temperature
+    // -- proof the pre-existing division mechanism is unchanged when the new
+    // floor guard is not wired in.
     try std.testing.expectError(
         error.SoilHeatRenormalizedTemperatureOutsidePhysicalDomain,
         temperatureForCellEnthalpy(
@@ -4683,8 +4900,109 @@ test "issue-068 (second round): renormalized cell enthalpy inversion rejects an 
             ice_capacity,
             fusion_latent,
             melting_temperature_k,
+            0,
+            &.{},
         ),
     );
+}
+
+test "issue-068 (fourth round): temperatureForCellEnthalpy holds the prior temperature and books the discrepancy instead of dividing by a near-zero heat capacity" {
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(
+        .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 },
+        .{ .worker_threads = 1, .tile_cells = 1 },
+        .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-9, .max_nonlinear_iterations = 1 },
+    );
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.active_soil_layer_count[0] = 1;
+    grid.soil_temperature_k[0] = 280;
+    // Chronically near-desiccated layer, matching hour 2,895's own cell
+    // 0/layer 0 (`total_heat_capacity_megajoules_per_k` in the `2e-5` range
+    // against WATSUB's own `VHCPRX` floor of `8.38e-5 * area`).
+    grid.matrix_liquid_water_m3[0] = 0;
+    grid.matrix_ice_water_m3[0] = 0;
+    grid.macropore_liquid_water_m3[0] = 0;
+    grid.macropore_ice_water_m3[0] = 0;
+    grid.water_vapor_volume_m3[0] = 0;
+    const dry_capacity: f64 = 2.03e-5;
+    const liquid_capacity = 4.185;
+    const ice_capacity = 1.93;
+    const fusion_latent = 333.55;
+    const melting_temperature_k = 273.15;
+    // Same 5e-3 MJ mismatch as the previous test, which the OLD code (or this
+    // code with the floor disabled) resolves to ~526 K. `cell_area_m2 = 1`
+    // puts `negligible_capacity_limit_megajoules_per_k =
+    // 8.38e-5 * 1 = 8.38e-5`, comfortably above this layer's `2.03e-5`
+    // capacity, so the floor guard is live.
+    const target_megajoules = dry_capacity * 280.0 + 5.0e-3;
+    var discard_by_layer = [_]f64{0};
+    const result = try temperatureForCellEnthalpy(
+        target_megajoules,
+        &grid,
+        0,
+        dry_capacity,
+        liquid_capacity,
+        ice_capacity,
+        fusion_latent,
+        melting_temperature_k,
+        1,
+        &discard_by_layer,
+    );
+    // Held the PRIOR temperature exactly, not the absurd ~526 K division.
+    try std.testing.expectEqual(@as(f64, 280), result);
+    try std.testing.expect(!heat_solver.isPhysicalTemperatureK(526));
+    // The booked discrepancy equals target - (coefficient*held + fusion
+    // offset); with zero ice/water, fusion offset is zero and the
+    // coefficient is exactly `dry_capacity`.
+    const expected_discard = target_megajoules - dry_capacity * 280.0;
+    try std.testing.expectApproxEqAbs(expected_discard, discard_by_layer[0], 1e-15);
+
+    // Second call in the same hour accumulates rather than overwrites.
+    _ = try temperatureForCellEnthalpy(
+        target_megajoules,
+        &grid,
+        0,
+        dry_capacity,
+        liquid_capacity,
+        ice_capacity,
+        fusion_latent,
+        melting_temperature_k,
+        1,
+        &discard_by_layer,
+    );
+    try std.testing.expectApproxEqAbs(2 * expected_discard, discard_by_layer[0], 1e-15);
+}
+
+test "issue-068 (fourth round): an empty renormalization_floor_discard_megajoules_by_layer disables booking but still holds" {
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(
+        .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 },
+        .{ .worker_threads = 1, .tile_cells = 1 },
+        .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-9, .max_nonlinear_iterations = 1 },
+    );
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.active_soil_layer_count[0] = 1;
+    grid.soil_temperature_k[0] = 280;
+    grid.matrix_liquid_water_m3[0] = 0;
+    grid.matrix_ice_water_m3[0] = 0;
+    grid.macropore_liquid_water_m3[0] = 0;
+    grid.macropore_ice_water_m3[0] = 0;
+    grid.water_vapor_volume_m3[0] = 0;
+    const dry_capacity: f64 = 2.03e-5;
+    const target_megajoules = dry_capacity * 280.0 + 5.0e-3;
+    const result = try temperatureForCellEnthalpy(
+        target_megajoules,
+        &grid,
+        0,
+        dry_capacity,
+        4.185,
+        1.93,
+        333.55,
+        273.15,
+        1,
+        &.{},
+    );
+    try std.testing.expectEqual(@as(f64, 280), result);
 }
 
 test "issue-068 (second round): renormalized cell enthalpy inversion is a no-op for an ordinary in-domain layer" {
@@ -4711,6 +5029,12 @@ test "issue-068 (second round): renormalized cell enthalpy inversion is a no-op 
     // A small, ordinary energy nudge stays deep inside the physical domain at
     // this layer's normal (non-degenerate) heat capacity.
     const target_megajoules = before + 1.0e-3;
+    // issue-068 (fourth round): a nonzero `cell_area_m2` and a live discard
+    // ledger are supplied here too (not just `0`/`&.{}` as elsewhere) to
+    // prove the fourth round's floor guard is a genuine no-op for an
+    // ordinary, well-above-floor layer -- `dry_capacity=2.0` is far above
+    // `negligible_capacity_limit_megajoules_per_k = 8.38e-5 * 1`.
+    var discard_by_layer = [_]f64{0};
     const result = try temperatureForCellEnthalpy(
         target_megajoules,
         &grid,
@@ -4720,8 +5044,11 @@ test "issue-068 (second round): renormalized cell enthalpy inversion is a no-op 
         ice_capacity,
         fusion_latent,
         melting_temperature_k,
+        1,
+        &discard_by_layer,
     );
     try std.testing.expect(result > 279 and result < 281);
+    try std.testing.expectEqual(@as(f64, 0), discard_by_layer[0]);
 }
 
 test "issue-068 (second round): the renormalized-temperature domain error is fixed-hour dt recoverable" {
