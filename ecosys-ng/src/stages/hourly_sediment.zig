@@ -44,6 +44,7 @@ noinline fn packSuspendedSurface(context: anytype) !void {
         context.erosion_topsoil_layer_by_cell,
         context.erosion_canonical_topsoil_mass_megagrams,
         context.grid.matrix_liquid_water_m3,
+        context.canopy_cell_area_m2,
         context.erosion_topsoil_zone_fractions,
         context.soil_chemistry,
         context.eroded_chemistry_workspace.pools,
@@ -74,7 +75,7 @@ noinline fn unpackSuspendedSurface(context: anytype) !void {
     try ecosys.suspended_constituents.unpackFamily(state.layout, cells, .dry_mineral_fertilizer, context.erosion_topsoil_constituent_pools, context.eroded_mineral_fertilizer_workspace.pools);
     try ecosys.soil_erosion_mineral_fertilizer_bridge.unpackSurfaceMapped(context.mineral_fertilizer_inventory, context.erosion_topsoil_layer_by_cell, context.eroded_mineral_fertilizer_workspace.pools);
     try ecosys.suspended_constituents.unpackFamily(state.layout, cells, .chemistry_live_and_pending, context.erosion_topsoil_constituent_pools, context.eroded_chemistry_workspace.pools);
-    try ecosys.soil_erosion_chemistry_bridge.unpackMapped(cells, capacity, context.erosion_topsoil_layer_by_cell, context.erosion_canonical_topsoil_mass_megagrams, context.grid.matrix_liquid_water_m3, context.erosion_topsoil_zone_fractions, context.soil_chemistry, context.eroded_chemistry_workspace.pools);
+    try ecosys.soil_erosion_chemistry_bridge.unpackMapped(cells, capacity, context.erosion_topsoil_layer_by_cell, context.erosion_canonical_topsoil_mass_megagrams, context.grid.matrix_liquid_water_m3, context.canopy_cell_area_m2, context.erosion_topsoil_zone_fractions, context.soil_chemistry, context.eroded_chemistry_workspace.pools);
 
     const texture = try state.layout.range(.mineral_texture);
     const exchange = try state.layout.range(.exchange_capacity);
