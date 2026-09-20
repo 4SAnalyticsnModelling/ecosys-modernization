@@ -1105,6 +1105,13 @@ pub fn isFixedHourDtRecoveryFailure(err: anyerror) bool {
         error.SoilHeatSolverStagnated,
         error.SoilHeatSolverDidNotConverge,
         error.SoilHeatSolverTemperatureOutsidePhysicalDomain,
+        // issue-068 (2026-09-20, second round): see
+        // `temperatureForCellEnthalpy`'s own doc comment. Distinct from
+        // `SoilHeatSolverTemperatureOutsidePhysicalDomain` so a rerun's log
+        // can tell the pre-solve renormalization inversion apart from the
+        // dense Newton/Anderson solver's own commit gate, even though both
+        // enforce the identical physical band and both recover the same way.
+        error.SoilHeatRenormalizedTemperatureOutsidePhysicalDomain,
         error.NewtonPicardDiverged,
         error.NewtonPicardStagnated,
         error.NewtonPicardDidNotConverge,
@@ -1371,6 +1378,11 @@ pub const MappedOptions = struct {
     /// production; the caller gates this behind
     /// `run_support.verbose_diagnostics_enabled` and an hour window.
     diagnostic_vapor_layer_index: ?usize = null,
+    /// issue-068 (2026-09-20, second round): same hour/cell gating as
+    /// `diagnostic_vapor_layer_index` above, threaded to
+    /// `heat_solver.Options.diagnostic_trace_layer_index` instead. `null` in
+    /// production.
+    diagnostic_heat_layer_index: ?usize = null,
 };
 
 /// Builds zero-copy solver views over mapped runtime state, then performs one
@@ -1558,7 +1570,7 @@ pub fn advanceMapped(
         .phase_options = .{ .max_iterations = options.max_iterations, .absolute_tolerance_m3 = options.water_absolute_tolerance_m3, .absolute_temperature_tolerance_k = options.temperature_absolute_tolerance_k, .relative_tolerance = options.nonlinear_relative_tolerance, .energy_conservation_absolute_tolerance_megajoules_per_m2 = options.heat_conservation_absolute_tolerance_megajoules_per_m2, .energy_conservation_relative_tolerance = options.heat_conservation_relative_tolerance, .picard_relaxation = options.picard_relaxation },
         .heat_geometry = .{ .source_path_length_m = geometry.source_path_length_m, .destination_path_length_m = geometry.destination_path_length_m, .face_area_m2 = geometry.face_area_m2 },
         .heat_properties = .{ .heat_capacity_megajoules_per_k = dynamic_heat_capacity, .minimum_heat_capacity_megajoules_per_k = workspace.minimum_heat_capacity_megajoules_per_k, .bulk_density_megagrams_per_m3 = properties.bulk_density_megagrams_per_m3, .liquid_water_fraction = dynamic_liquid_fraction, .ice_fraction = dynamic_ice_fraction, .air_fraction = dynamic_air_fraction, .fraction_of_pore_volume_air_filled = dynamic_pore_air_fraction, .solid_conductivity_numerator_m_megajoules_per_h_k = thermal.solid_thermal_conductivity_numerator_m_megajoules_per_h_k, .solid_conductivity_denominator = thermal.solid_thermal_conductivity_denominator, .is_top_soil_layer = workspace.is_top_soil_layer, .top_snow_heat_capacity_megajoules_per_k = workspace.top_snow_heat_capacity_megajoules_per_k, .maximum_negligible_snow_heat_capacity_megajoules_per_k = workspace.maximum_negligible_snow_heat_capacity_megajoules_per_k, .snow_storage_heat_flux_megajoules = scaled_snow_storage_heat, .cell_heat_source_megajoules = scaled_cell_heat_source, .liquid_water_heat_capacity_megajoules_per_m3_k = science.liquid_water_heat_capacity_megajoules_per_m3_k, .turbulence = science.heat_turbulence, .time_step_hours = options.time_step_hours, .geothermal_boundary = if (options.geothermal_enabled_by_cell) |enabled_by_cell| .{ .topology = options.boundary_topology orelse return error.MissingGeothermalBoundaryTopology, .layer_bottom_depth_m = properties.layer_bottom_depth_m, .lower_face_area_m2 = workspace.plan_area_m2, .enabled_by_cell = enabled_by_cell, .mean_annual_temperature_k_by_cell = options.mean_annual_temperature_k_by_cell, .minimum_source_depth_m = options.geothermal_minimum_source_depth_m, .source_depth_below_profile_m = options.geothermal_source_depth_below_profile_m, .conductivity_m_megajoules_per_h_k = options.geothermal_conductivity_m_megajoules_per_h_k, .geothermal_flux_megajoules_per_m2_h = options.geothermal_flux_megajoules_per_m2_h } else null, .enthalpy_coupling = .{ .matrix_liquid_water_m3 = grid.matrix_liquid_water_m3, .matrix_ice_water_equivalent_m3 = grid.matrix_ice_water_m3, .porous_medium_volume_m3 = properties.matrix_bulk_volume_m3, .matrix_pore_capacity_m3 = grid.matrix_pore_capacity_m3, .mualem_van_genuchten = properties.mualem_van_genuchten_parameters, .gravitational_water_potential_mpa_per_m = workspace.gravitational_water_potential_mpa_per_m, .pure_water_melting_temperature_k = science.freeze_thaw.pure_water_freezing_temperature_k, .ice_water_equivalent_heat_capacity_megajoules_per_m3_k = ice_heat_capacity_per_water_equivalent_m3_k, .latent_heat_of_fusion_megajoules_per_m3 = science.freeze_thaw.latent_heat_of_fusion_megajoules_per_m3, .ice_density_megagrams_per_m3 = science.freeze_thaw.ice_density_megagrams_per_m3, .solver_options = .{ .max_iterations = options.max_iterations, .absolute_enthalpy_tolerance_megajoules = options.enthalpy_absolute_tolerance_megajoules, .relative_enthalpy_tolerance = options.nonlinear_relative_tolerance }, .conservation_cell_area_m2 = conservation_area_by_layer, .conservation_absolute_tolerance_megajoules_per_m2 = options.heat_conservation_absolute_tolerance_megajoules_per_m2, .conservation_relative_tolerance = options.heat_conservation_relative_tolerance, .macropore_liquid_water_m3 = grid.macropore_liquid_water_m3, .macropore_ice_water_equivalent_m3 = grid.macropore_ice_water_m3, .macropore_porous_medium_volume_m3 = grid.macropore_pore_capacity_m3, .macropore_mualem_van_genuchten = workspace.macropore_mualem_van_genuchten_parameters } },
-        .heat_options = .{ .failure_report_io = options.heat_failure_report_io, .max_iterations = options.max_iterations, .absolute_tolerance_k = options.temperature_absolute_tolerance_k, .relative_tolerance = options.nonlinear_relative_tolerance, .picard_relaxation = options.picard_relaxation, .maximum_newton_fraction = 1.0, .dense_newton_max_components = options.dense_newton_max_components },
+        .heat_options = .{ .failure_report_io = options.heat_failure_report_io, .max_iterations = options.max_iterations, .absolute_tolerance_k = options.temperature_absolute_tolerance_k, .relative_tolerance = options.nonlinear_relative_tolerance, .picard_relaxation = options.picard_relaxation, .maximum_newton_fraction = 1.0, .dense_newton_max_components = options.dense_newton_max_components, .diagnostic_trace_layer_index = options.diagnostic_heat_layer_index },
         .heat_workspace = heat_workspace,
         .dry_solid_heat_capacity_megajoules_per_k = dry_capacity,
         .water_conservation_absolute_tolerance_m = options.water_conservation_absolute_tolerance_m,
@@ -2356,6 +2368,28 @@ fn temperatureForCellEnthalpy(
         temperature_coefficient;
     if (!std.math.isFinite(temperature_k) or temperature_k <= 0)
         return error.InvalidRenormalizedSoilTemperature;
+    // issue-068 (2026-09-20, second round): this inversion writes directly
+    // into `grid.soil_temperature_k` (both callers below), bypassing every
+    // domain guard the dense multi-layer Newton/Anderson solver enforces on
+    // its OWN commit path (`solver_solve.zig`'s `commitAcceptedState`/
+    // `allTemperaturesPhysicallyValid`). For an ordinary layer `isFinite and
+    // > 0` already implies a temperature far inside [173.15, 373.15] K, but
+    // for the same chronically near-zero-heat-capacity layer this issue
+    // chain has tracked since issue-060 (`temperature_coefficient` at or
+    // below WATSUB's own `VHCPRX` floor), a small, otherwise-ordinary
+    // `target_megajoules`/`fusion_offset_megajoules` mismatch divided by that
+    // near-zero capacity produces a finite, positive, but physically absurd
+    // temperature -- reaching the heat solver's OWN entry gate
+    // (`validateInputs`) on its very next call with no Newton-loop diagnostic
+    // in between, which is the exact signature this round's diagnostic run
+    // captured for hour 2,895 at cell 0/layer 0. Reusing the same
+    // `isPhysicalTemperatureK` primitive every sibling scalar/dense solver
+    // already enforces (never a new or widened bound) and a distinct,
+    // explicitly retryable error name lets the existing, already-tested
+    // fixed-hour substep recovery ladder (`isFixedHourDtRecoveryFailure`)
+    // refine `dt` instead of committing this candidate.
+    if (!heat_solver.isPhysicalTemperatureK(temperature_k))
+        return error.SoilHeatRenormalizedTemperatureOutsidePhysicalDomain;
     return temperature_k;
 }
 
@@ -4606,6 +4640,93 @@ test "vapor-only transport temperature rebase preserves each layer canonical ent
             64 * std.math.floatEps(f64) * @max(1, @abs(expected)),
         );
     }
+}
+
+test "issue-068 (second round): renormalized cell enthalpy inversion rejects an out-of-domain temperature for a near-zero-capacity layer" {
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(
+        .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 },
+        .{ .worker_threads = 1, .tile_cells = 1 },
+        .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-9, .max_nonlinear_iterations = 1 },
+    );
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.active_soil_layer_count[0] = 1;
+    grid.soil_temperature_k[0] = 280;
+    // Chronically near-desiccated layer, matching hour 2,895's own cell
+    // 0/layer 0 (`total_heat_capacity_megajoules_per_k` in the `2e-5` range
+    // against WATSUB's own `VHCPRX` floor of `8.38e-5`).
+    grid.matrix_liquid_water_m3[0] = 0;
+    grid.matrix_ice_water_m3[0] = 0;
+    grid.macropore_liquid_water_m3[0] = 0;
+    grid.macropore_ice_water_m3[0] = 0;
+    grid.water_vapor_volume_m3[0] = 0;
+    const dry_capacity: f64 = 2.03e-5;
+    const liquid_capacity = 4.185;
+    const ice_capacity = 1.93;
+    const fusion_latent = 333.55;
+    const melting_temperature_k = 273.15;
+    // A 5e-3 MJ mismatch is unremarkable at ordinary heat capacities; divided
+    // by this near-zero capacity it reaches ~526 K, well outside the
+    // [173.15, 373.15] K band -- the exact "small residual over a
+    // chronically near-zero heat capacity" mechanism this issue's own
+    // diagnostic captured, but reached here through the renormalization
+    // inversion rather than the dense Newton/Anderson solver's commit path.
+    const target_megajoules = dry_capacity * 280.0 + 5.0e-3;
+    try std.testing.expectError(
+        error.SoilHeatRenormalizedTemperatureOutsidePhysicalDomain,
+        temperatureForCellEnthalpy(
+            target_megajoules,
+            &grid,
+            0,
+            dry_capacity,
+            liquid_capacity,
+            ice_capacity,
+            fusion_latent,
+            melting_temperature_k,
+        ),
+    );
+}
+
+test "issue-068 (second round): renormalized cell enthalpy inversion is a no-op for an ordinary in-domain layer" {
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(
+        .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 },
+        .{ .worker_threads = 1, .tile_cells = 1 },
+        .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-9, .max_nonlinear_iterations = 1 },
+    );
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.active_soil_layer_count[0] = 1;
+    grid.soil_temperature_k[0] = 280;
+    grid.matrix_liquid_water_m3[0] = 0.1;
+    grid.matrix_ice_water_m3[0] = 0;
+    grid.macropore_liquid_water_m3[0] = 0;
+    grid.macropore_ice_water_m3[0] = 0;
+    grid.water_vapor_volume_m3[0] = 0.001;
+    const dry_capacity: f64 = 2.0;
+    const liquid_capacity = 4.185;
+    const ice_capacity = 1.93;
+    const fusion_latent = 333.55;
+    const melting_temperature_k = 273.15;
+    const before = cellEnthalpyMegajoules(&grid, 0, dry_capacity, liquid_capacity, ice_capacity, fusion_latent, melting_temperature_k);
+    // A small, ordinary energy nudge stays deep inside the physical domain at
+    // this layer's normal (non-degenerate) heat capacity.
+    const target_megajoules = before + 1.0e-3;
+    const result = try temperatureForCellEnthalpy(
+        target_megajoules,
+        &grid,
+        0,
+        dry_capacity,
+        liquid_capacity,
+        ice_capacity,
+        fusion_latent,
+        melting_temperature_k,
+    );
+    try std.testing.expect(result > 279 and result < 281);
+}
+
+test "issue-068 (second round): the renormalized-temperature domain error is fixed-hour dt recoverable" {
+    try std.testing.expect(isFixedHourDtRecoveryFailure(error.SoilHeatRenormalizedTemperatureOutsidePhysicalDomain));
+    try std.testing.expect(isRetryableSolverFailure(error.SoilHeatRenormalizedTemperatureOutsidePhysicalDomain));
 }
 
 test "mapped soil solve retains unit-specific nonlinear floors" {

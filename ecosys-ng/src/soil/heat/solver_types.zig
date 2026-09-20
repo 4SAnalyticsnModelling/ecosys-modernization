@@ -197,6 +197,17 @@ pub const Options = struct {
     /// directional Newton/Picard path.
     dense_newton_max_components: usize = 256,
     recovery_routing_test_control: ?*RecoveryRoutingTestControl = null,
+    /// issue-068 (2026-09-20, second round): temporary, narrowly-gated
+    /// diagnostic mirroring `vapor_solver.Options.diagnostic_trace_layer_index`.
+    /// `null` in production; the caller gates this behind an hour window
+    /// (2893-2896) and cell 0/layer 0, matching this session's other
+    /// TEMP_DIAGNOSTIC instrumentation. When set, every named "commit `current`"
+    /// site in `solveWithWorkspace` logs this layer's temperature immediately
+    /// after writing it, tagged with the specific branch that wrote it, so a
+    /// commit that lands outside the physical domain can be attributed to its
+    /// exact caller instead of only surfacing generically at the next
+    /// `residualAt` call or at `commitAcceptedState`.
+    diagnostic_trace_layer_index: ?usize = null,
 };
 
 pub const Result = struct {

@@ -93,7 +93,30 @@ fn residualAtImpl(
     solver_options: group_types.Options,
     target_enthalpy_output: ?[]f64,
 ) !void {
-    _ = solver_options;
+    // issue-068 (2026-09-20, second round): narrowly-gated fallback diagnostic.
+    // `solver_options.diagnostic_trace_layer_index` is `null` in production
+    // except for a caller-imposed hour window (2893-2896) and cell 0/layer 0.
+    // The primary instrumentation for this round lives at every named
+    // "commit into `current`" site in `solver_solve.zig`'s `solveWithWorkspace`
+    // (see `logDomainDiagnosticIfGated`), which attributes a bad commit to its
+    // exact acceptance branch. This fallback additionally reports the
+    // argument identity (`base` vs `trial`) whenever THIS function is the one
+    // that first observes the violation, in case the leak reaches here
+    // through an argument that is not a straight copy of `current` at any
+    // named commit site (for example a probe/candidate array this round's
+    // audit did not attribute to a specific commit).
+    if (!builtin.is_test) if (solver_options.diagnostic_trace_layer_index) |index| {
+        if (index < base.len and !group_validation.isPhysicalTemperatureK(base[index]))
+            std.log.warn(
+                "TEMP_DIAGNOSTIC soil heat residualAtImpl domain violation (issue-068): argument=base array_index={d} temperature_k={e}",
+                .{ index, base[index] },
+            );
+        if (index < trial.len and !group_validation.isPhysicalTemperatureK(trial[index]))
+            std.log.warn(
+                "TEMP_DIAGNOSTIC soil heat residualAtImpl domain violation (issue-068): argument=trial array_index={d} temperature_k={e}",
+                .{ index, trial[index] },
+            );
+    };
     try group_validation.validateSoilTemperaturePhysicalDomain(base);
     try group_validation.validateSoilTemperaturePhysicalDomain(trial);
     if (target_enthalpy_output) |values|

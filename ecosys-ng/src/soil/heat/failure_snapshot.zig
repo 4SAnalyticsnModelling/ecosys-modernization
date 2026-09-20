@@ -19,7 +19,10 @@ fn omitted(comptime name: []const u8) bool {
     return std.mem.eql(u8, name, "allocator") or
         std.mem.eql(u8, name, "diagnostic_trace") or
         std.mem.eql(u8, name, "recovery_routing_test_control") or
-        std.mem.eql(u8, name, "failure_report_io");
+        std.mem.eql(u8, name, "failure_report_io") or
+        // issue-068 (2026-09-20, second round): temporary diagnostic field on
+        // `group_types.Options`, not part of any captured snapshot's schema.
+        std.mem.eql(u8, name, "diagnostic_trace_layer_index");
 }
 
 fn writeData(stream: *std.json.Stringify, value: anytype) std.json.Stringify.Error!void {

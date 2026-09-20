@@ -50,6 +50,9 @@ pub const Result = group_types.Result;
 pub const Workspace = group_types.Workspace;
 
 // validation
+pub const isPhysicalTemperatureK = group_validation.isPhysicalTemperatureK;
+pub const minimum_physical_temperature_k = group_validation.minimum_physical_temperature_k;
+pub const maximum_physical_temperature_k = group_validation.maximum_physical_temperature_k;
 
 test {
     // A bare reference is what makes `zig build test` reach a file.

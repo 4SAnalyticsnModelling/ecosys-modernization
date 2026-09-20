@@ -610,6 +610,28 @@ fn allTemperaturesPhysicallyValid(temperature_k: []const f64) bool {
     return true;
 }
 
+/// issue-068 (2026-09-20, second round): temporary, narrowly-gated diagnostic.
+/// `options.diagnostic_trace_layer_index` is `null` in production except for
+/// a caller-imposed hour window (2893-2896) and cell 0/layer 0, mirroring
+/// `vapor_solver`'s established `diagnostic_trace_layer_index` convention
+/// (see that struct field's own doc comment). When set, this fires
+/// immediately after every named "commit into `current`" site below reports
+/// its own tag, so the exact branch that first writes an out-of-domain value
+/// into `current` can be attributed directly, instead of only surfacing
+/// generically at the next `residualAt` call or at `commitAcceptedState`
+/// (both of which already validate, but cannot say which earlier branch is
+/// responsible). Costs one pointer-null check per commit site when disabled.
+fn logDomainDiagnosticIfGated(options: group_types.Options, comptime site: []const u8, current: []const f64, iteration: u16) void {
+    if (builtin.is_test) return;
+    const index = options.diagnostic_trace_layer_index orelse return;
+    if (index >= current.len) return;
+    if (group_validation.isPhysicalTemperatureK(current[index])) return;
+    std.log.warn(
+        "TEMP_DIAGNOSTIC soil heat commit-site domain violation (issue-068): site=" ++ site ++ " iteration={d} array_index={d} temperature_k={e}",
+        .{ iteration, index, current[index] },
+    );
+}
+
 /// Commits an accepted nonlinear state as one externally visible transaction.
 /// Every fallible check is completed against the staged temperature, phase,
 /// boundary ledger, and face flux before the first caller-owned slice changes.
@@ -2893,6 +2915,7 @@ pub fn solveWithWorkspace(
                         if (selected_norm >= representable_norm)
                             break :known_transition_probe;
                         @memcpy(current, if (select_upper) candidate else probe);
+                        logDomainDiagnosticIfGated(options, "phase_transition_unbracketed_endpoint", current, iteration);
                         newton_steps += 1;
                         phase_transition_newton_steps += 1;
                         committed_neighbor = true;
@@ -2947,6 +2970,7 @@ pub fn solveWithWorkspace(
                         );
                     }
                     @memcpy(current, if (select_upper) candidate else probe);
+                    logDomainDiagnosticIfGated(options, "phase_transition_bracketed_endpoint", current, iteration);
                     newton_steps += 1;
                     phase_transition_newton_steps += 1;
                     committed_neighbor = true;
@@ -3037,6 +3061,7 @@ pub fn solveWithWorkspace(
                     if (properties.enthalpy_coupling == null)
                         rememberIteration(current, residual, previous_state, previous_residual, previous_previous_state, previous_previous_residual, &history_count);
                     @memcpy(current, candidate);
+                    logDomainDiagnosticIfGated(options, "adjacent_representable_endpoint_relocation", current, iteration);
                     newton_steps += 1;
                     committed_neighbor = true;
                     break;
@@ -3185,6 +3210,7 @@ pub fn solveWithWorkspace(
                                 if (properties.enthalpy_coupling == null)
                                     rememberIteration(current, residual, previous_state, previous_residual, previous_previous_state, previous_previous_residual, &history_count);
                                 @memcpy(current, accelerated);
+                                logDomainDiagnosticIfGated(options, "repriced_adjacent_endpoint_neighbor", current, iteration);
                                 newton_steps += 1;
                                 if (!full_step_improved)
                                     damped_directional_newton_steps += 1;
@@ -3277,6 +3303,7 @@ pub fn solveWithWorkspace(
                 &constitutive_energy_newton_probes,
             )) |accepted| {
                 @memcpy(current, accelerated);
+                logDomainDiagnosticIfGated(options, "phase_transition_exact_inversion", current, iteration);
                 newton_steps += 1;
                 phase_transition_newton_steps += 1;
                 constitutive_energy_newton_steps += 1;
@@ -3387,6 +3414,7 @@ pub fn solveWithWorkspace(
                     .probe_count = &enthalpy_dense_newton_probes,
                 })) |accepted| {
                     @memcpy(current, accelerated);
+                    logDomainDiagnosticIfGated(options, "dense_signed_enthalpy_newton", current, iteration);
                     newton_steps += 1;
                     enthalpy_dense_newton_steps += 1;
                     if (accepted.fraction < 1 and !accepted.full_step_improved)
@@ -3442,6 +3470,7 @@ pub fn solveWithWorkspace(
                                         if (properties.enthalpy_coupling == null)
                                             rememberIteration(current, residual, previous_state, previous_residual, previous_previous_state, previous_previous_residual, &history_count);
                                         @memcpy(current, candidate);
+                                        logDomainDiagnosticIfGated(options, "dense_numerical_jacobian_newton", current, iteration);
                                         newton_steps += 1;
                                         accepted_newton = true;
                                         break;
@@ -3517,6 +3546,7 @@ pub fn solveWithWorkspace(
                                 if (properties.enthalpy_coupling == null)
                                     rememberIteration(current, residual, previous_state, previous_residual, previous_previous_state, previous_previous_residual, &history_count);
                                 @memcpy(current, accelerated);
+                                logDomainDiagnosticIfGated(options, "component_secant_directional_newton", current, iteration);
                                 newton_steps += 1;
                                 if (priced.fraction < 1 and !priced.full_step_improved)
                                     damped_directional_newton_steps += 1;
@@ -3560,6 +3590,7 @@ pub fn solveWithWorkspace(
                                 if (properties.enthalpy_coupling == null)
                                     rememberIteration(current, residual, previous_state, previous_residual, previous_previous_state, previous_previous_residual, &history_count);
                                 @memcpy(current, accelerated);
+                                logDomainDiagnosticIfGated(options, "plain_directional_newton", current, iteration);
                                 newton_steps += 1;
                                 if (priced.fraction < 1 and !priced.full_step_improved)
                                     damped_directional_newton_steps += 1;
@@ -3759,6 +3790,7 @@ pub fn solveWithWorkspace(
                     if (properties.enthalpy_coupling == null)
                         rememberIteration(current, residual, previous_state, previous_residual, previous_previous_state, previous_previous_residual, &history_count);
                     @memcpy(current, accelerated);
+                    logDomainDiagnosticIfGated(options, "topology_newton", current, iteration);
                     newton_steps += 1;
                     topology_newton_steps += 1;
                     continue;
@@ -4013,6 +4045,7 @@ pub fn solveWithWorkspace(
                     if (properties.enthalpy_coupling == null)
                         rememberIteration(current, residual, previous_state, previous_residual, previous_previous_state, previous_previous_residual, &history_count);
                     @memcpy(current, accelerated);
+                    logDomainDiagnosticIfGated(options, "enthalpy_topology_newton", current, iteration);
                     newton_steps += 1;
                     enthalpy_topology_newton_steps += 1;
                     continue;
@@ -4097,6 +4130,7 @@ pub fn solveWithWorkspace(
                         accepted_state_endpoint_proof_norm =
                             best_megajoule_active_set_norm;
                         @memcpy(current, accelerated);
+                        logDomainDiagnosticIfGated(options, "megajoule_active_set_newton", current, iteration);
                         newton_steps += 1;
                         megajoule_active_set_newton_steps += 1;
                         if (accepted.fraction < 1 and !accepted.full_step_improved)
@@ -4178,6 +4212,7 @@ pub fn solveWithWorkspace(
                         if (properties.enthalpy_coupling == null)
                             rememberIteration(current, residual, previous_state, previous_residual, previous_previous_state, previous_previous_residual, &history_count);
                         @memcpy(current, accelerated);
+                        logDomainDiagnosticIfGated(options, "constitutive_energy_newton_active_set", current, iteration);
                         newton_steps += 1;
                         constitutive_energy_newton_steps += 1;
                         if (accepted.fraction < 1 and !accepted.full_step_improved)
@@ -4530,6 +4565,7 @@ pub fn solveWithWorkspace(
                             &constitutive_energy_newton_probes,
                         )) |accepted| {
                             @memcpy(current, accelerated);
+                            logDomainDiagnosticIfGated(options, "constitutive_energy_newton_wrong_side_storage", current, iteration);
                             newton_steps += 1;
                             constitutive_energy_newton_steps += 1;
                             if (accepted.fraction < 1 and
@@ -4551,6 +4587,7 @@ pub fn solveWithWorkspace(
         // consumes this iteration, regardless of how many Anderson depths
         // improved the incumbent candidate before the final commit.
         @memcpy(current, candidate);
+        logDomainDiagnosticIfGated(options, "plain_anderson_accept", current, iteration);
         anderson_steps += 1;
         picard_steps += 1;
         slow_newton_norm_count = 0;
@@ -4560,6 +4597,7 @@ pub fn solveWithWorkspace(
     }
     if (restore_best_before_final_audit and best_state_valid) {
         @memcpy(current, best_state);
+        logDomainDiagnosticIfGated(options, "restore_best_state_before_final_audit", current, iteration);
         accepted_state_endpoint_proof_valid = false;
         accepted_state_endpoint_proof_norm = std.math.inf(f64);
         @memset(accepted_endpoint_proof_mask, 0);
@@ -4786,6 +4824,7 @@ pub fn solveWithWorkspace(
             }
             validateSoilTemperaturePhysicalDomain(candidate) catch break;
             @memcpy(current, candidate);
+            logDomainDiagnosticIfGated(options, "conservation_refinement_tail", current, iteration);
             if (endpoint_proof_valid)
                 @memcpy(
                     enthalpy_endpoint_mask,
