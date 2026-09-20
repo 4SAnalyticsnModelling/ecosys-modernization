@@ -52,6 +52,11 @@ pub const aggregatePlantCarbonNitrogenPhosphorusCell = group_plant.aggregatePlan
 // phosphorus ions
 pub const aggregateProfilePhosphorusAndIons = group_phosphorus_ions.aggregateProfilePhosphorusAndIons;
 pub const aggregateProfilePhosphorusAndIonsCell = group_phosphorus_ions.aggregateProfilePhosphorusAndIonsCell;
+// ISSUE-065 ninth pass: exposes the single-layer variant already used in
+// production (`layer_mass_inventory.zig`) so a stage-boundary diagnostic can
+// call the exact same authoritative computation the failing hourly gate uses
+// for `carbon_dioxide_carbon_g`, without duplicating its arithmetic.
+pub const aggregateProfilePhosphorusAndIonsLayer = group_phosphorus_ions.aggregateProfilePhosphorusAndIonsLayer;
 pub const aggregatePendingSurfaceMinerals = group_phosphorus_ions.aggregatePendingSurfaceMinerals;
 pub const aggregatePendingSurfaceMineralsCell = group_phosphorus_ions.aggregatePendingSurfaceMineralsCell;
 pub const aggregatePendingPlantLitterSalts = group_phosphorus_ions.aggregatePendingPlantLitterSalts;

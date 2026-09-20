@@ -12908,6 +12908,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
     // still untouched. Publish biological sources before any TRNSFR consumer.
     // HOUR1/NITRO consume the accepted physical air/temperature and amount-
     // owner carrier mirrors published atomically by each WATSUB acceptance.
+    try diagnostics.traceStageBoundaryLayer0Carbon(context, "before_nitro");
     try group_sediment.routeSedimentAndErosion(
         context,
         .nitro,
@@ -12930,6 +12931,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         "TEMP_PROFILE attempt nitro elapsed_ms={d} substeps={d}",
         .{ temporary_profile_start.durationTo(std.Io.Clock.now(.boot, context.io)).toMilliseconds(), exact_substep_count },
     );
+    try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_nitro");
     try captureFailureConservationTrace(context, 0);
     // PHOSPHORUS-SOIL-SURFACE-BIOGEOCHEMISTRY-HALVES-001. Measurement showed the
     // topsoil dissolved phosphate moves the CONCENTRATION basis in the `.nitro`
@@ -12963,6 +12965,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         "TEMP_PROFILE attempt biology elapsed_ms={d} substeps={d}",
         .{ temporary_profile_start.durationTo(std.Io.Clock.now(.boot, context.io)).toMilliseconds(), exact_substep_count },
     );
+    try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_uptake_growth_extract");
     try captureFailureConservationTrace(context, 2);
     try group_sediment.routeSedimentAndErosion(
         context,
@@ -12986,8 +12989,10 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         "TEMP_PROFILE attempt solute elapsed_ms={d} substeps={d}",
         .{ temporary_profile_start.durationTo(std.Io.Clock.now(.boot, context.io)).toMilliseconds(), exact_substep_count },
     );
+    try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_solute_phase");
     try captureFailureConservationTrace(context, 3);
     try coupled_substeps.replayAcceptedTransport();
+    try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_transport_replay");
     if (temporary_profile_active) std.log.info(
         "TEMP_PROFILE attempt replay elapsed_ms={d} substeps={d}",
         .{ temporary_profile_start.durationTo(std.Io.Clock.now(.boot, context.io)).toMilliseconds(), exact_substep_count },
@@ -13049,6 +13054,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
     // publishing before replay left the public dry-gas boundary arrays holding
     // only `advance`'s final substep, while storage reflected every substep.
     coupled_substeps.publishAcceptedLedgers();
+    try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_publish_accepted_ledgers");
     // Surface NITRO has now completed, so the litter-atmosphere gas owner is
     // part of the same late TRNSFR phase instead of consuming prior-hour gas.
     try group_sediment.routeSedimentAndErosion(
@@ -13069,6 +13075,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         &diagnostic_previous_n_g,
         &diagnostic_previous_p_g,
     );
+    try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_surface_gas_phase");
     try captureFailureConservationTrace(context, 6);
     try publishPhaseAndBoundaryHeat(context, &accepted_soil_water_heat);
     try publishHourlyCellTransportLedgers(context, &coupled_substeps);
@@ -13218,6 +13225,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         std.log.debug("transport ammonium owners delta: surface_aq={e} surface_exchange={e} surface_fertilizer={e} soil_aq={e} soil_exchange={e} soil_fertilizer={e}", .{ owners[0] - diagnostic_transport_ammonium_before[0], owners[1] - diagnostic_transport_ammonium_before[1], owners[2] - diagnostic_transport_ammonium_before[2], owners[3] - diagnostic_transport_ammonium_before[3], owners[4] - diagnostic_transport_ammonium_before[4], owners[5] - diagnostic_transport_ammonium_before[5] });
         diagnostic_previous_n_g = current_n_g;
     }
+    try diagnostics.traceStageBoundaryLayer0Carbon(context, "before_erosion_redist_transport");
     try group_gas_surface_water.transportDissolvedGasAndSurfaceWater(
         context,
         hour_of_day,
@@ -13236,6 +13244,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         &diagnostic_previous_n_g,
         &diagnostic_previous_p_g,
     );
+    try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_erosion_redist_transport");
     // Generation publication is delayed until all mutating science has
     // succeeded, so a later stage failure cannot leave accepted retry files
     // behind while memory is rolled back.

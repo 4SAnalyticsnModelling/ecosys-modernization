@@ -167,6 +167,61 @@ pub fn reconstructLayerMassBalanceScopes(
     );
 }
 
+/// ISSUE-065 ninth pass: stage-boundary trace for the hour-2,894 layer-0 mass
+/// loss investigation (`audit/issues/issue-065-...md`, eighth addendum's
+/// closing hypothesis -- "a third, unidentified writer (most likely
+/// TRNSFR/TRNSFRS/REDIST) must be mutating layer 0's chemistry state"). The
+/// carrier/mutator (`water_carrier_rebase.zig`) and the SOLUTE reaction-network
+/// gate (`soil_chemistry_convergence.zig`) are both execution-confirmed
+/// innocent for magnitude at hour 2,894/layer 0 (third/eighth addenda). This
+/// calls the SAME authoritative computation the failing gate itself uses to
+/// populate `carbon_dioxide_carbon_g` for `hourly_layer_storage_before/after`
+/// (`aggregateProfilePhosphorusAndIonsLayer`, `layer_mass_inventory.zig:93`) at
+/// every named per-hour stage boundary, so the exact stage where the value
+/// drops can be read directly from the log instead of inferred from a partial
+/// domain-wide trace.
+///
+/// Gated to `[2888, 2896)`, cell 0, layer 0 only: at most a handful of extra
+/// reconstructions per production run, matching this issue's established
+/// `DRY_CARRIER_TRACE` convention (third/fourth/fifth/seventh addenda).
+pub fn traceStageBoundaryLayer0Carbon(context: anytype, comptime stage: []const u8) !void {
+    if (comptime @import("builtin").is_test) return;
+    if (context.executed_weather_hours.* < 2888 or context.executed_weather_hours.* >= 2896) return;
+    if (context.grid.cell_count == 0) return;
+    try ecosys.landscape_mass_balance_runtime.deriveSoilMass(
+        context.soil_solver_properties.matrix_bulk_volume_m3,
+        context.soil_solver_properties.bulk_density_megagrams_per_m3,
+        context.landscape_soil_mass_megagrams_scratch,
+    );
+    const layer0 = try ecosys.landscape_mass_inventory.aggregateProfilePhosphorusAndIonsLayer(
+        context.grid,
+        context.micropore_solute_state,
+        context.macropore_solute_state,
+        context.soil_chemistry,
+        context.mineral_fertilizer_inventory,
+        context.grid.matrix_liquid_water_m3,
+        context.landscape_soil_mass_megagrams_scratch,
+        context.fertilizer_band,
+        12,
+        context.runscript.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol,
+        context.canopy_cell_area_m2,
+        0,
+        0,
+    );
+    std.log.info(
+        "DRY_CARRIER_TRACE site=stage_boundary stage={s} hour={d} cell=0 layer=0 live_water_m3={e} dry_reference_water_m3={e} carbon_dioxide_carbon_g={e} ion_inventory_mol={e} phosphate_phosphorus_g={e}",
+        .{
+            stage,
+            context.executed_weather_hours.* + 1,
+            context.grid.matrix_liquid_water_m3[0],
+            context.soil_chemistry.dry_reference_water_m3[0],
+            layer0.carbon_dioxide_carbon_g,
+            layer0.ion_inventory_mol,
+            layer0.phosphate_phosphorus_g,
+        },
+    );
+}
+
 pub fn diagnosticStoredNitrogen_g(context: anytype) !f64 {
     const totals = try reconstructLandscapeMassBalance(context);
     return totals.residue_nitrogen_g + totals.organic_nitrogen_g +

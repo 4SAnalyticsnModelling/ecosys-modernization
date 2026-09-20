@@ -798,6 +798,7 @@ noinline fn routePondSettlingAndFinalize(
     var diagnostic_previous_p_g = diagnostic_previous_p_g_ptr.*;
     defer diagnostic_previous_p_g_ptr.* = diagnostic_previous_p_g;
     if (phase == .erosion_redist) {
+        try diagnostics.traceStageBoundaryLayer0Carbon(context, "before_pond_settling");
         const diagnostic_pond_before = if (diagnostic_first_hour) try diagnostics.reconstructLandscapeMassBalance(context) else undefined;
         const diagnostic_ammonium_before = if (diagnostic_first_hour) try diagnostics.diagnosticAmmoniumOwners_g_n(context) else undefined;
         // POND-VOLWD-CONFLATION-001: surface ponding capacity is ground-surface retention
@@ -945,6 +946,7 @@ noinline fn routePondSettlingAndFinalize(
             pond_settling_geometry,
             settling_carbon_before_g_c,
         );
+        try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_pond_settling");
         if (diagnostic_first_hour) {
             const components = try diagnostics.reconstructLandscapeMassBalance(context);
             std.log.debug("heat stage: pre_pond_processes hour={d} delta_megajoules={e}", .{ context.executed_weather_hours.* + 1, diagnostic_heat_before_settling_megajoules - diagnostic_previous_heat_megajoules });
@@ -959,6 +961,7 @@ noinline fn routePondSettlingAndFinalize(
             pond_phosphate_non_band_fraction,
             pond_phosphate_band_fraction,
         );
+        try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_pond_domain_transfer");
         if (diagnostic_first_hour) {
             const heat_megajoules = (try diagnostics.reconstructLandscapeMassBalance(context)).heat_storage_megajoules;
             std.log.debug("heat stage: pond_domain_transaction hour={d} delta_megajoules={e}", .{ context.executed_weather_hours.* + 1, heat_megajoules - diagnostic_previous_heat_megajoules });
@@ -995,6 +998,7 @@ noinline fn routePondSettlingAndFinalize(
             context.soil_organic,
             context.soil_microbial,
         );
+        try diagnostics.traceStageBoundaryLayer0Carbon(context, "before_redist_finalize");
         if (diagnostic_first_hour) {
             const components = try diagnostics.reconstructLandscapeMassBalance(context);
             const current_n_g = try diagnostics.diagnosticStoredNitrogen_g(context);
@@ -1014,6 +1018,7 @@ noinline fn routePondSettlingAndFinalize(
             snow_vapor_equilibrium_report,
             subsurface_irrigation_chemistry_parameters,
         );
+        try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_redist_finalize");
     }
 }
 
