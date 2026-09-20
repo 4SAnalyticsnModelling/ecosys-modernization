@@ -5834,6 +5834,24 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
         driver_context.hourly_layer_storage_after.*,
         driver_context.hourly_cell_storage_after.*,
     );
+    // ISSUE-065 DRY_CARRIER_TRACE (census side): bounded, hour-2,894-windowed
+    // capture of the exact water-carrier inputs and the resulting
+    // `carbon_dioxide_carbon_g` census total immediately after the "after"
+    // snapshot is reconstructed, to compare against the mutator-side trace
+    // already captured in `hourly_heat_water_solute.zig`. Exploratory scratch
+    // instrumentation, not gated permanently.
+    if (driver_context.executed_weather_hours.* >= 2888 and
+        driver_context.executed_weather_hours.* < 2896 and
+        driver_context.hourly_science_context.*.grid.cell_count > 0)
+        std.log.info(
+            "DRY_CARRIER_TRACE site=census_after hour={d} cell=0 layer=0 live_water_m3={e} dry_reference_water_m3={e} carbon_dioxide_carbon_g_after={e}",
+            .{
+                driver_context.executed_weather_hours.* + 1,
+                driver_context.hourly_science_context.*.grid.matrix_liquid_water_m3[0],
+                driver_context.hourly_science_context.*.soil_chemistry.dry_reference_water_m3[0],
+                driver_context.hourly_cell_storage_after.*[0].carbon_dioxide_carbon_g,
+            },
+        );
     try ecosys.layer_local_conservation.accumulateAcceptedWaterStorageUpdateRoundoff(
         driver_context.hourly_cell_boundary_ledger,
         driver_context.hourly_layer_boundary_ledger,
@@ -6646,6 +6664,21 @@ noinline fn prepareAcceptedHourStorageAndLedgers(driver_context: anytype, advanc
         driver_context.hourly_layer_storage_before.*,
         driver_context.hourly_cell_storage_before.*,
     );
+    // ISSUE-065 DRY_CARRIER_TRACE (census side): see the `census_after` site
+    // in `acceptHourAndPublish` for rationale. This is the matching
+    // hour-start "before" capture.
+    if (driver_context.executed_weather_hours.* >= 2888 and
+        driver_context.executed_weather_hours.* < 2896 and
+        driver_context.hourly_science_context.*.grid.cell_count > 0)
+        std.log.info(
+            "DRY_CARRIER_TRACE site=census_before hour={d} cell=0 layer=0 live_water_m3={e} dry_reference_water_m3={e} carbon_dioxide_carbon_g_before={e}",
+            .{
+                driver_context.executed_weather_hours.* + 1,
+                driver_context.hourly_science_context.*.grid.matrix_liquid_water_m3[0],
+                driver_context.hourly_science_context.*.soil_chemistry.dry_reference_water_m3[0],
+                driver_context.hourly_cell_storage_before.*[0].carbon_dioxide_carbon_g,
+            },
+        );
     // The HOUR1 refresh has already committed signed DORGCC
     // exchange-site creation/loss. Reconstruct the pre-refresh
     // storage side here and book the same signed extensive delta
