@@ -268,6 +268,7 @@ pub fn executeHourlyScience(
         context.soil_chemistry,
         context.micropore_solute_state,
         context.fertilizer_band,
+        context.config.physical_tolerance.water_volume_m3,
     );
     // Legacy TRNSFR copies extensive ZNH4S/ZNH4B inventories before water
     // transport. Capture mineral N at the same boundary; reconstructing

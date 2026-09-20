@@ -998,6 +998,7 @@ noinline fn publishHourlyChemistry(
         context.soil_chemistry,
         context.micropore_solute_state,
         context.fertilizer_band,
+        context.config.physical_tolerance.water_volume_m3,
     );
     try ecosys.fertilizer_band_production.consumeUndissolved(
         context.allocator,

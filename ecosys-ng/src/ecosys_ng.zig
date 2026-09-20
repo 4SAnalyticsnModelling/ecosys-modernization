@@ -8082,6 +8082,7 @@ noinline fn runTimeline(driver_context: anytype, evidence_writer: ?*std.Io.Write
                         &driver_context.initial_chemistry_state.*,
                         &driver_context.micropore_solute_state.*,
                         &driver_context.fertilizer_band_state.*,
+                        driver_context.config.*.physical_tolerance.water_volume_m3,
                     );
                 }
                 const totals = try reconstructLandscapeMassBalance(

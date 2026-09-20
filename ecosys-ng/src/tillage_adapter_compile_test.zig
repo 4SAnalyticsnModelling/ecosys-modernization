@@ -241,7 +241,7 @@ test "tillage runtime adapter compiles" {
     defer macropore_solutes.deinit();
     @memcpy(micropore_solutes.water_volume_m3, grid.matrix_liquid_water_m3);
     @memcpy(macropore_solutes.water_volume_m3, grid.macropore_liquid_water_m3);
-    try AqueousBridge.exportChemistry(&chemistry, &micropore_solutes, &fertilizer_band);
+    try AqueousBridge.exportChemistry(&chemistry, &micropore_solutes, &fertilizer_band, 0);
     macropore_solutes.amount_mol[@intFromEnum(SoluteSpecies.hydrogen)] = 0.75;
     macropore_solutes.amount_mol[@intFromEnum(SoluteSpecies.non_band_hpo4)] = 0.25;
     macropore_solutes.amount_mol[@intFromEnum(SoluteSpecies.band_hpo4)] = 0.7;

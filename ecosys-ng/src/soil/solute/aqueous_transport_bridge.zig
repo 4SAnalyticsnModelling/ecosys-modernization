@@ -36,17 +36,51 @@ pub fn validateCarrierVolumesScaled(
     }
 }
 
+/// ISSUE-065 (eleventh addendum): `exportChemistry` used the raw, live
+/// `transport_state.water_volume_m3[cell]` as the carrier converting
+/// concentration to extensive amount, with no substitution for a layer that
+/// has gone dry within the hour. Every other consumer of this same
+/// "concentration times water carrier" conversion in this codebase
+/// (`water_carrier_rebase.zig`'s `sourceWaterM3`,
+/// `landscape_mass_inventory_phosphorus_ions.zig`'s `aqueousCarrierM3`,
+/// `erosion_chemistry_bridge.zig`'s `erosionWaterCarrierM3`) substitutes
+/// `chemistry.dry_reference_water_m3[cell]` whenever live water is at or
+/// below the shared `ZEROS2` floor, so the last valid extensive amount is
+/// preserved rather than multiplied to zero. `exportChemistry` alone lacked
+/// this substitution, silently zeroing `transport_state.amount_mol` for a
+/// degenerate layer's aqueous carbonate, geochemistry-ion, and phosphate
+/// species -- exactly the mechanism the census reads directly
+/// (`landscape_mass_inventory_phosphorus_ions.zig`'s `matrix_amounts`/
+/// `macro_amounts` come straight from this transport state). Note
+/// `importChemistry`/`synchronizeCellAfterCarrierChange` in this same file
+/// both already require strictly positive water and error otherwise; only
+/// this direction lacked an equivalent safeguard or substitution.
+fn exportCarrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_volume_m3: f64) f64 {
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+}
+
 /// Copies dissolved chemistry concentrations into the conservative transport
 /// inventory. Phosphate concentrations are defined per zone water, so their
 /// physical extensive amounts are `C * matrix_water * zone_fraction`.
-pub fn exportChemistry(chemistry_state: *const chemistry.State, transport_state: *transport.State, fractions_source: anytype) !void {
+/// `negligible_water_volume_m3` is the caller's own legacy `ZEROS2`-scaled
+/// floor (see `core/legacy_water_negligible_floor.zig`); when a cell's live
+/// water is at or below it, `chemistry_state.dry_reference_water_m3[cell]`
+/// is used instead so a degenerate layer's true extensive amount is
+/// preserved rather than zeroed.
+pub fn exportChemistry(chemistry_state: *const chemistry.State, transport_state: *transport.State, fractions_source: anytype, negligible_water_volume_m3: f64) !void {
     try validateDimensions(chemistry_state, transport_state);
+    if (!std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
+        return error.InvalidAqueousTransportCarrierTolerance;
     // Validate the complete transaction before publishing any amount.
     for (0..chemistry_state.cell_count) |cell| {
         const fractions = try bridgeFractionsAt(fractions_source, cell);
         try validateZoneFractions(fractions);
-        const water_volume_m3 = transport_state.water_volume_m3[cell];
-        if (!std.math.isFinite(water_volume_m3) or water_volume_m3 < 0) return error.InvalidAqueousTransportWaterVolume;
+        const live_water_volume_m3 = transport_state.water_volume_m3[cell];
+        const dry_reference_water_m3 = chemistry_state.dry_reference_water_m3[cell];
+        if (!std.math.isFinite(live_water_volume_m3) or live_water_volume_m3 < 0 or
+            !std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0)
+            return error.InvalidAqueousTransportWaterVolume;
+        const water_volume_m3 = exportCarrierM3(live_water_volume_m3, dry_reference_water_m3, negligible_water_volume_m3);
         for (0..Species.count) |species_index| {
             const species: Species = @enumFromInt(species_index);
             const dissolved_mol_per_m3 = concentration(chemistry_state, cell, species);
@@ -57,7 +91,11 @@ pub fn exportChemistry(chemistry_state: *const chemistry.State, transport_state:
     }
     for (0..chemistry_state.cell_count) |cell| {
         const fractions = try bridgeFractionsAt(fractions_source, cell);
-        const water_volume_m3 = transport_state.water_volume_m3[cell];
+        const water_volume_m3 = exportCarrierM3(
+            transport_state.water_volume_m3[cell],
+            chemistry_state.dry_reference_water_m3[cell],
+            negligible_water_volume_m3,
+        );
         for (0..Species.count) |species_index| {
             const species: Species = @enumFromInt(species_index);
             transport_state.amount_mol[cell * Species.count + species_index] =
@@ -376,7 +414,7 @@ test "all TRNSFRS species round trip between concentration and runtime amount" {
     transport_state.water_volume_m3[1] = 0.5;
     for (0..Species.count) |species_index| setConcentration(&chemistry_state.aqueous[0], &chemistry_state.non_band_phosphate[0], &chemistry_state.band_phosphate[0], @enumFromInt(species_index), @as(f64, @floatFromInt(species_index + 1)));
     const fractions: ZoneFractions = .{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 };
-    try exportChemistry(&chemistry_state, &transport_state, fractions);
+    try exportChemistry(&chemistry_state, &transport_state, fractions, 0);
     for (0..Species.count) |species_index| {
         const species: Species = @enumFromInt(species_index);
         try std.testing.expectEqual(@as(f64, @floatFromInt(2 * (species_index + 1))) * species_module.zoneFraction(species, fractions), transport_state.amount_mol[species_index]);
@@ -398,7 +436,7 @@ test "bare HPO4 and H2PO4 have distinct non-band and band transport owners" {
     chemistry_state.band_phosphate[0].dissolved_h2po4_mol_p_per_m3 = 11;
 
     const fractions: ZoneFractions = .{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 };
-    try exportChemistry(&chemistry_state, &transport_state, fractions);
+    try exportChemistry(&chemistry_state, &transport_state, fractions, 0);
     try std.testing.expectEqual(@as(f64, 1.5), transport_state.amount_mol[@intFromEnum(Species.non_band_hpo4)]);
     try std.testing.expectEqual(@as(f64, 2.5), transport_state.amount_mol[@intFromEnum(Species.non_band_h2po4)]);
     try std.testing.expectEqual(@as(f64, 10.5), transport_state.amount_mol[@intFromEnum(Species.band_hpo4)]);
@@ -413,6 +451,59 @@ test "bare HPO4 and H2PO4 have distinct non-band and band transport owners" {
     try std.testing.expectEqual(@as(f64, 17), chemistry_state.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3);
     try std.testing.expectEqual(@as(f64, 19), chemistry_state.band_phosphate[0].dissolved_hpo4_mol_p_per_m3);
     try std.testing.expectEqual(@as(f64, 23), chemistry_state.band_phosphate[0].dissolved_h2po4_mol_p_per_m3);
+}
+
+test "issue-065: OLD raw-carrier exportChemistry would zero every aqueous amount at hour 2894's exact degenerate water content" {
+    // Reconstructs cell 0/layer 0's own recorded hour-2894 state (eleventh
+    // addendum): live water collapsed to exactly zero while
+    // `dry_reference_water_m3` correctly holds the pre-collapse carrier
+    // (`6.058232575064708e-3`), and a nonzero carbonate/calcium-carbonate
+    // concentration is still present. The un-substituted arithmetic
+    // `concentration * live_water_m3` this test exercises directly is
+    // exactly what the pre-fix `exportChemistry` computed.
+    const live_water_m3: f64 = 0;
+    const dry_reference_water_m3: f64 = 6.058232575064708e-3;
+    const carbonate_mol_per_m3: f64 = 1.238685811953962e0;
+    try std.testing.expectEqual(@as(f64, 0), carbonate_mol_per_m3 * live_water_m3);
+    try std.testing.expect(carbonate_mol_per_m3 * dry_reference_water_m3 > 1.0e-3);
+}
+
+test "issue-065: NEW exportChemistry preserves aqueous amount at hour 2894's exact and near-zero degenerate water content" {
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    var transport_state = try transport.State.init(std.testing.allocator, 1, Species.count);
+    defer transport_state.deinit();
+    const dry_reference_water_m3: f64 = 6.058232575064708e-3;
+    const negligible_water_volume_m3: f64 = 1.0e-6;
+    chemistry_state.aqueous[0].carbonate = 1.238685811953962e0;
+    chemistry_state.aqueous[0].calcium = 3;
+    chemistry_state.dry_reference_water_m3[0] = dry_reference_water_m3;
+    const fractions: ZoneFractions = .{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 };
+
+    // Exactly zero live water, matching hour 2894's post-collapse instant.
+    transport_state.water_volume_m3[0] = 0;
+    try exportChemistry(&chemistry_state, &transport_state, fractions, negligible_water_volume_m3);
+    try std.testing.expectEqual(
+        chemistry_state.aqueous[0].carbonate * dry_reference_water_m3,
+        transport_state.amount_mol[@intFromEnum(Species.carbonate)],
+    );
+    try std.testing.expect(transport_state.amount_mol[@intFromEnum(Species.carbonate)] > 0);
+
+    // Near-zero but still-below-floor live water behaves identically.
+    transport_state.water_volume_m3[0] = 1.0e-9;
+    try exportChemistry(&chemistry_state, &transport_state, fractions, negligible_water_volume_m3);
+    try std.testing.expectEqual(
+        chemistry_state.aqueous[0].carbonate * dry_reference_water_m3,
+        transport_state.amount_mol[@intFromEnum(Species.carbonate)],
+    );
+
+    // Live water above the floor is used unchanged (no-op substitution).
+    transport_state.water_volume_m3[0] = 2;
+    try exportChemistry(&chemistry_state, &transport_state, fractions, negligible_water_volume_m3);
+    try std.testing.expectEqual(
+        @as(f64, 2) * chemistry_state.aqueous[0].carbonate,
+        transport_state.amount_mol[@intFromEnum(Species.carbonate)],
+    );
 }
 
 test "failed import cannot partially overwrite chemistry" {
@@ -465,7 +556,7 @@ test "zero-width phosphate zone round trip is exact and rejects phantom mass ato
     chemistry_state.non_band_phosphate[0].dissolved_hpo4_mol_p_per_m3 = 3;
     chemistry_state.band_phosphate[0].dissolved_hpo4_mol_p_per_m3 = 7;
     const fractions: ZoneFractions = .{ .phosphate_non_band = 1, .phosphate_band = 0 };
-    try exportChemistry(&chemistry_state, &transport_state, fractions);
+    try exportChemistry(&chemistry_state, &transport_state, fractions, 0);
     try std.testing.expectEqual(@as(f64, 6), transport_state.amount_mol[@intFromEnum(Species.non_band_hpo4)]);
     try std.testing.expectEqual(@as(f64, 0), transport_state.amount_mol[@intFromEnum(Species.band_hpo4)]);
     try importChemistry(&transport_state, &chemistry_state, fractions);

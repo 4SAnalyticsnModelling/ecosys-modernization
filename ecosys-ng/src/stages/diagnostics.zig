@@ -220,6 +220,32 @@ pub fn traceStageBoundaryLayer0Carbon(context: anytype, comptime stage: []const 
             layer0.phosphate_phosphorus_g,
         },
     );
+    // ISSUE-065 (eleventh addendum): does nitrogen have its own water-carrier
+    // round trip that `erosion_chemistry_bridge.zig`'s/`exportChemistry`'s
+    // fixes did not touch? `mineral_nitrogen_transport.initializeMatrix`
+    // (called via `refreshMatrixFromReactionState`/`captureHourStartMatrix`)
+    // computes `amounts[...] = aqueous.* * matrix_water_volume_m3[cell] *
+    // fraction` with no dry-reference substitution. Trace the matrix's own
+    // extensive ammonium/nitrate amounts for layer 0 alongside the
+    // authoritative `chemistry.aqueous[0]` concentrations that back them, so
+    // a rerun can show whether/when this zeroes at hour 2894.
+    const mineral_amounts = try context.mineral_nitrogen_transport.matrix.cellAmountsConst(0);
+    std.log.info(
+        "DRY_CARRIER_TRACE site=stage_boundary_nitrogen stage={s} hour={d} cell=0 layer=0 live_water_m3={e} dry_reference_water_m3={e} ammonium_non_band_conc={e} nitrate_non_band_conc={e} matrix_ammonium_non_band_mol={e} matrix_ammonium_band_mol={e} matrix_nitrate_non_band_mol={e} matrix_nitrate_band_mol={e} matrix_water_volume_m3={e}",
+        .{
+            stage,
+            context.executed_weather_hours.* + 1,
+            context.grid.matrix_liquid_water_m3[0],
+            context.soil_chemistry.dry_reference_water_m3[0],
+            context.soil_chemistry.aqueous[0].ammonium_non_band,
+            context.soil_chemistry.aqueous[0].nitrate_non_band,
+            mineral_amounts[@intFromEnum(ecosys.mineral_nitrogen_transport.Species.ammonium_non_band)],
+            mineral_amounts[@intFromEnum(ecosys.mineral_nitrogen_transport.Species.ammonium_band)],
+            mineral_amounts[@intFromEnum(ecosys.mineral_nitrogen_transport.Species.nitrate_non_band)],
+            mineral_amounts[@intFromEnum(ecosys.mineral_nitrogen_transport.Species.nitrate_band)],
+            context.mineral_nitrogen_transport.matrix.water_volume_m3[0],
+        },
+    );
 }
 
 pub fn diagnosticStoredNitrogen_g(context: anytype) !f64 {
