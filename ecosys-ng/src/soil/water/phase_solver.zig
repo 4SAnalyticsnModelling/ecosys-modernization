@@ -109,6 +109,18 @@ pub const Options = struct {
     /// Compatibility field only. Production validation rejects false because
     /// an unaccelerated fixed-point fallback is not permitted.
     anderson_recovery_enabled: bool = true,
+    /// issue-068 (numerical-analysis round, 2026-09-20): per-iteration global
+    /// scaled-residual trace, mirroring `vapor_solver.Options.diagnostic_trace_layer_index`'s
+    /// established convention exactly (a call-site-gated, no-cost-when-null
+    /// diagnostic; `null` in every production/test call except the one narrow
+    /// hour window this issue's chain already gates its siblings to). The
+    /// index value itself is not read for indexing here -- this solve's own
+    /// `norm` is already a single global scaled-residual scalar over the
+    /// whole state vector, not a per-component value -- it is reused purely
+    /// as the identical enable/disable gate and log tag every sibling solver
+    /// already uses, so a future reader does not have to learn a second
+    /// convention. See `logIterationDiagnosticTrace`.
+    diagnostic_trace_layer_index: ?usize = null,
 };
 
 /// Divergence and oscillation watch over the sequence of scaled residual norms.
@@ -577,13 +589,15 @@ noinline fn solveControlledImpl(
             slow_newton_last_recorded_step = newton_steps;
         }
         var phase_energy_accepted = false;
-        if (!retrying_newton_after_anderson and norm <= 1 and
-            committableState(grid, current, properties.freeze_thaw.ice_density_megagrams_per_m3))
-        {
+        const norm_admissible_and_not_retrying = !retrying_newton_after_anderson and norm <= 1;
+        const committable = norm_admissible_and_not_retrying and
+            committableState(grid, current, properties.freeze_thaw.ice_density_megagrams_per_m3);
+        if (committable) {
             const check = try evaluatePhaseEnergyConservation(base, current, trial_displacement, properties, options);
             phase_energy_accepted = check.accepted;
             if (check.diagnostic) |diagnostic| last_phase_energy_diagnostic.* = diagnostic;
         }
+        logIterationDiagnosticTrace(options, iteration, norm, committable, phase_energy_accepted);
         if (phase_energy_accepted) {
             try residualAt(grid, properties, base, current, target, residual, scratch, trial_heat, trial_exchange, trial_displacement);
             // Publish the iterate whose F(x)-x residual was actually accepted.
@@ -2857,6 +2871,24 @@ fn scaledNorm(base: []const f64, state: []const f64, residual: []const f64, opti
         maximum = @max(maximum, scaledResidualAt(base, state, residual, options, index));
     }
     return maximum;
+}
+
+/// issue-068 (numerical-analysis round, 2026-09-20): per-iteration trace of
+/// the solve's own global scaled-residual norm, gated identically to every
+/// sibling solver's `diagnostic_trace_layer_index` convention (a no-op when
+/// unset, which is every production/test call except the one narrow hour
+/// window this issue's chain already gates its siblings to). Added to
+/// answer this round's specific question -- is the residual trend leading
+/// into a `SoilPhaseSolverStagnated` exit monotonically decreasing (iteration-
+/// starved), oscillating, or flat (genuinely stuck) -- which the pre-existing
+/// terminal-only stagnation log (below) cannot show on its own.
+fn logIterationDiagnosticTrace(options: Options, iteration: u16, norm: f64, committable: bool, phase_energy_accepted: bool) void {
+    if (builtin.is_test) return;
+    const index = options.diagnostic_trace_layer_index orelse return;
+    std.log.info(
+        "TEMP_DIAGNOSTIC phase solver iteration residual trace (issue-068 numerical-analysis round): trace_index={d} iteration={d} max_iterations={d} scaled_residual={e} committable={} phase_energy_accepted={}",
+        .{ index, iteration + 1, options.max_iterations, norm, committable, phase_energy_accepted },
+    );
 }
 
 test "phase Newton recovery targets the component that limits convergence merit" {
