@@ -192,6 +192,7 @@ noinline fn prepareErosionSurfaceExchange(context: anytype) !void {
         context.erosion_topsoil_zone_fractions[cell] =
             try context.fertilizer_band.scienceZoneFractionsForFlatIndex(top_layer);
     }
+    diagnostics.traceErosionAmmoniumExchangeLayer0(context, "before_pack");
     try packSuspendedSurface(context);
     try ecosys.suspended_constituents.exchangeLocal(
         context.suspended_constituents,
@@ -200,6 +201,7 @@ noinline fn prepareErosionSurfaceExchange(context: anytype) !void {
         context.surface_erosion.local_detachment_megagrams,
         context.erosion_topsoil_layer_by_cell,
     );
+    try diagnostics.traceErosionAmmoniumLocalTransferLayer0(context, "after_exchange_local");
     try ecosys.layer_local_conservation.accumulateSuspendedLocalExchange(
         context.hourly_layer_boundary_ledger,
         context.suspended_constituents,
@@ -212,6 +214,7 @@ noinline fn prepareErosionSurfaceExchange(context: anytype) !void {
         },
     );
     try unpackSuspendedSurface(context);
+    diagnostics.traceErosionAmmoniumExchangeLayer0(context, "after_unpack");
 
     try copySuspendedFamilyBuffer(
         context.suspended_constituents,

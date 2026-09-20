@@ -209,12 +209,13 @@ pub fn traceStageBoundaryLayer0Carbon(context: anytype, comptime stage: []const 
         0,
     );
     std.log.info(
-        "DRY_CARRIER_TRACE site=stage_boundary stage={s} hour={d} cell=0 layer=0 live_water_m3={e} dry_reference_water_m3={e} carbon_dioxide_carbon_g={e} ion_inventory_mol={e} phosphate_phosphorus_g={e}",
+        "DRY_CARRIER_TRACE site=stage_boundary stage={s} hour={d} cell=0 layer=0 live_water_m3={e} dry_reference_water_m3={e} soil_mass_megagrams={e} carbon_dioxide_carbon_g={e} ion_inventory_mol={e} phosphate_phosphorus_g={e}",
         .{
             stage,
             context.executed_weather_hours.* + 1,
             context.grid.matrix_liquid_water_m3[0],
             context.soil_chemistry.dry_reference_water_m3[0],
+            context.landscape_soil_mass_megagrams_scratch[0],
             layer0.carbon_dioxide_carbon_g,
             layer0.ion_inventory_mol,
             layer0.phosphate_phosphorus_g,
@@ -326,6 +327,91 @@ pub fn traceMaterializePendingSolidsLayer0(
             sumStructFieldsF64(chemistry.non_band_phosphate[0]),
             sumStructFieldsF64(chemistry.band_phosphate[0]),
             sumStructFieldsF64(chemistry.geochemistry_solids[0]),
+        },
+    );
+}
+
+/// ISSUE-065 (fifteenth pass): the fourteenth addendum narrowed nitrogen's
+/// remaining ~8.14e-3 g N residual to a possible booking mismatch inside
+/// layer 0's own erosion LOCAL exchange (soil<->surface within the same
+/// cell), specifically the fraction-sensitive `exchange_ammonium_mol_n`
+/// sub-pool -- `erosion_chemistry_bridge.zig`'s `cationCarrier` is the only
+/// cation whose packed extensive amount depends on
+/// `fractions.ammonium_non_band`/`ammonium_band` rather than soil mass alone.
+/// Reconstructs the exact extensive ammonium amount (concentration * carrier
+/// + pending, matching `packMapped`'s own formula exactly) at layer 0, so a
+/// "before pack" and "after unpack" pair of calls -- bracketing the entire
+/// pack/exchange/unpack round trip -- lets a rerun compute the true applied
+/// change and compare it against the flux `accumulateSuspendedLocalExchange`
+/// separately books (see `traceErosionAmmoniumLocalTransferLayer0` below).
+///
+/// Gated identically to the established `DRY_CARRIER_TRACE` convention.
+pub fn traceErosionAmmoniumExchangeLayer0(
+    context: anytype,
+    comptime site: []const u8,
+) void {
+    if (comptime @import("builtin").is_test) return;
+    if (context.executed_weather_hours.* < 2888 or context.executed_weather_hours.* >= 2896) return;
+    if (context.grid.cell_count == 0) return;
+    const chemistry = context.soil_chemistry;
+    const soil_mass = context.erosion_canonical_topsoil_mass_megagrams[0];
+    const fractions = context.erosion_topsoil_zone_fractions[0];
+    const conc = chemistry.cation_exchange_mol_per_megagram[0];
+    const pending = chemistry.pending_cation_exchange_mol[0];
+    const amount_non_band = conc.ammonium_non_band * soil_mass * fractions.ammonium_non_band + pending.ammonium_non_band;
+    const amount_band = conc.ammonium_band * soil_mass * fractions.ammonium_band + pending.ammonium_band;
+    std.log.info(
+        "DRY_CARRIER_TRACE site={s} hour={d} cell=0 layer=0 soil_mass_megagrams={e} ammonium_non_band_fraction={e} ammonium_band_fraction={e} ammonium_non_band_conc={e} ammonium_band_conc={e} pending_ammonium_non_band_mol={e} pending_ammonium_band_mol={e} amount_ammonium_non_band_mol={e} amount_ammonium_band_mol={e} amount_ammonium_total_mol={e}",
+        .{
+            site,
+            context.executed_weather_hours.* + 1,
+            soil_mass,
+            fractions.ammonium_non_band,
+            fractions.ammonium_band,
+            conc.ammonium_non_band,
+            conc.ammonium_band,
+            pending.ammonium_non_band,
+            pending.ammonium_band,
+            amount_non_band,
+            amount_band,
+            amount_non_band + amount_band,
+        },
+    );
+}
+
+/// ISSUE-065 (fifteenth pass): companion to `traceErosionAmmoniumExchangeLayer0`.
+/// Called once, immediately after `suspended_constituents.exchangeLocal` has
+/// run (and before `accumulateSuspendedLocalExchange` books it), this reads
+/// the exact same two packed-component indices
+/// (`chemistry_live_and_pending`'s ammonium_non_band/ammonium_band slots,
+/// per `cation_exchange.Cations`' field order) that the ledger booking reads,
+/// directly from `suspended_constituents`' own arrays -- the signed flux the
+/// ledger will book (`local_transfer_to_suspension`) and the post-exchange
+/// topsoil/suspended packed amounts, so it can be compared against the
+/// before/after amounts the sibling trace reconstructs from persistent
+/// chemistry state.
+pub fn traceErosionAmmoniumLocalTransferLayer0(
+    context: anytype,
+    comptime site: []const u8,
+) !void {
+    if (comptime @import("builtin").is_test) return;
+    if (context.executed_weather_hours.* < 2888 or context.executed_weather_hours.* >= 2896) return;
+    if (context.grid.cell_count == 0) return;
+    const state = context.suspended_constituents;
+    const chemistry_range = try state.layout.range(.chemistry_live_and_pending);
+    const idx_non_band = chemistry_range.start + 0;
+    const idx_band = chemistry_range.start + 1;
+    std.log.info(
+        "DRY_CARRIER_TRACE site={s} hour={d} cell=0 topsoil_ammonium_non_band_mol={e} topsoil_ammonium_band_mol={e} suspended_ammonium_non_band_mol={e} suspended_ammonium_band_mol={e} local_transfer_ammonium_non_band_mol={e} local_transfer_ammonium_band_mol={e}",
+        .{
+            site,
+            context.executed_weather_hours.* + 1,
+            context.erosion_topsoil_constituent_pools[idx_non_band],
+            context.erosion_topsoil_constituent_pools[idx_band],
+            state.pools[idx_non_band],
+            state.pools[idx_band],
+            state.local_transfer_to_suspension[idx_non_band],
+            state.local_transfer_to_suspension[idx_band],
         },
     );
 }
