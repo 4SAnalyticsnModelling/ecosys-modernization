@@ -246,6 +246,40 @@ pub fn traceStageBoundaryLayer0Carbon(context: anytype, comptime stage: []const 
             context.mineral_nitrogen_transport.matrix.water_volume_m3[0],
         },
     );
+    // ISSUE-065 (thirteenth addendum): the twelfth addendum's fix
+    // (`mineral_nitrogen_transport.zig`'s `initializeMatrix`/`publishMatrix`
+    // carrier substitution) execution-confirmed the `hourly_sediment.zig:988`
+    // zeroing event no longer occurs, yet the gate's own nitrogen residual only
+    // improved ~16.5% -- a second, distinct leak remains. The raw matrix-mol
+    // trace above only watches `ammonium_non_band`/`nitrate_non_band`; it
+    // cannot see a drop in ammonia, nitrite, exchange, or dry-fertilizer
+    // contributions, or a drop that happens outside the twelve call sites this
+    // trace already brackets. This calls the SAME authoritative aggregator the
+    // gate itself uses for the cell's mineral-N total (single-cell deck, so
+    // `cell=0` here is the entire gate scope, not a layer subset) at every
+    // stage boundary, mirroring exactly how `phosphate_phosphorus_g` above
+    // already localizes phosphorus.
+    const nitrogen_cell = try ecosys.landscape_mass_inventory.aggregateProfileMineralNitrogenCell(
+        context.grid,
+        context.mineral_nitrogen_transport,
+        context.soil_chemistry,
+        context.soil_fertilizer_inventory,
+        context.landscape_soil_mass_megagrams_scratch,
+        context.fertilizer_band,
+        context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+        0,
+    );
+    std.log.info(
+        "DRY_CARRIER_TRACE site=stage_boundary_nitrogen_total stage={s} hour={d} cell=0 ammonium_nitrogen_g={e} nitrate_nitrogen_g={e} mineral_nitrogen_total_g={e} ion_inventory_mol={e}",
+        .{
+            stage,
+            context.executed_weather_hours.* + 1,
+            nitrogen_cell.ammonium_nitrogen_g,
+            nitrogen_cell.nitrate_nitrogen_g,
+            nitrogen_cell.ammonium_nitrogen_g + nitrogen_cell.nitrate_nitrogen_g,
+            nitrogen_cell.ion_inventory_mol,
+        },
+    );
 }
 
 pub fn diagnosticStoredNitrogen_g(context: anytype) !f64 {
