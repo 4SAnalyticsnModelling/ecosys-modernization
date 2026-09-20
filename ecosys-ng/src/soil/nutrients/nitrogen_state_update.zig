@@ -46,6 +46,22 @@ pub const ApplyContext = struct {
     // rather than reusing the top layer's value for the whole column.
     humus_partition_by_layer: []const [2]f64,
     water_volume_m3: []const f64,
+    // ISSUE-065 (eighteenth pass): phosphate's dissolved concentration is the
+    // only species family in this kernel read from and written back to
+    // `chemistry_state` using the raw live carrier (`water_volume_m3[layer]`)
+    // with no substitution for a layer that has gone dry within the hour.
+    // Ammonium/nitrate deliberately keep the legacy `VOLW>ZEROS2` "skip the
+    // update, leave the prior concentration alone" contract via
+    // `concentrationFromMass`'s own `volume<=0 => return 0` guard combined
+    // with `mineral_nitrogen_transport` owning their authoritative transport
+    // carrier separately -- phosphate has no such second owner, so zeroing
+    // its concentration here permanently destroys the extensive mass instead
+    // of preserving it the way `soil_chemistry_water_carrier_rebase.zig`'s
+    // `rememberDryCarrier`/`sourceWaterM3` do everywhere else in this
+    // codebase. Default `0` preserves every existing caller/test's behavior
+    // exactly (the substitution below is a no-op whenever
+    // `water_volume_m3[layer] > 0`, true for every non-degenerate test).
+    negligible_water_volume_m3: f64 = 0,
     zone_fractions: zones.ZoneFractions,
     zone_fractions_by_layer: []const zones.ZoneFractions = &.{},
     oxygen_satisfaction_fraction: []const f64,
@@ -71,18 +87,51 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
     try context.reactive_nitrogen.validateLayer(layer);
     const zone_fractions = zoneFractionsAt(context.*, layer);
     const water_m3 = context.water_volume_m3[layer];
+    // ISSUE-065 (eighteenth pass): substitute the remembered dry-reference
+    // carrier for every species' mass<->concentration round trip in this
+    // function, matching `aqueous_transport_bridge.exportCarrierM3`'s
+    // established substitution rule exactly. Raw `water_m3` is kept
+    // unchanged for the acidity stage's own carrier
+    // (`.water_volume_m3 = water_m3` below) and for the diagnostic-only
+    // warning logs, so this fix touches nothing but the mass/concentration
+    // round trip itself. `authoritativeLayerNitrogen_g_n`/
+    // `authoritativeLayerPhosphorus_g_p` below apply the identical
+    // substitution so the before/after transactional census
+    // (`requireProjectedClosure`) stays self-consistent rather than comparing
+    // a live-water-basis "before" against a dry-reference-basis "after".
+    //
+    // Ammonium/nitrate were previously left on the raw carrier because
+    // `mineral_nitrogen_transport.publishMatrix` was believed to be the sole
+    // authoritative writer of `chemistry.aqueous[cell].ammonium_non_band`/
+    // `nitrate_non_band` (it already substitutes `dry_reference_water_m3`
+    // correctly, per the twelfth addendum's own fix comment at
+    // `mineral_nitrogen_transport.zig:178-187`). That belief is false: this
+    // function's own `state_updateLayer` writes the SAME fields earlier in
+    // the same hour (`.nitro` phase, before `mineral_nitrogen_transport`'s
+    // `.solute`-phase pack/unpack ever runs), so a live-water zero here
+    // corrupts the concentration `mineral_nitrogen_transport` packs from --
+    // the identical two-writers-one-carrier-contract shape as the phosphate
+    // defect this pass already confirmed and fixed via direct execution
+    // evidence (hour 2,894's phosphorus residual cleared to roundoff after
+    // this exact substitution; nitrogen's own residual is bit-for-bit
+    // unaffected by that phosphate-only fix, confirming this is a distinct,
+    // analogous defect rather than the same call).
+    const effective_water_m3 = if (water_m3 > context.negligible_water_volume_m3)
+        water_m3
+    else
+        context.chemistry_state.dry_reference_water_m3[layer];
     const n_mass = context.nitrogen_molar_mass_g_per_mol;
-    var ammonium_non_band = context.chemistry_state.aqueous[layer].ammonium_non_band * water_m3 * zone_fractions.ammonium_non_band * n_mass;
-    var ammonium_band = context.chemistry_state.aqueous[layer].ammonium_band * water_m3 * zone_fractions.ammonium_band * n_mass;
+    var ammonium_non_band = context.chemistry_state.aqueous[layer].ammonium_non_band * effective_water_m3 * zone_fractions.ammonium_non_band * n_mass;
+    var ammonium_band = context.chemistry_state.aqueous[layer].ammonium_band * effective_water_m3 * zone_fractions.ammonium_band * n_mass;
     if (ammonium_non_band > 1e8 or ammonium_band > 1e8) std.log.warn(
         "large ammonium entering state_update: layer={d} non_band_g={e} band_g={e} non_band_conc={e} water_m3={e}",
         .{ layer, ammonium_non_band, ammonium_band, context.chemistry_state.aqueous[layer].ammonium_non_band, water_m3 },
     );
-    var nitrate_non_band = context.chemistry_state.aqueous[layer].nitrate_non_band * water_m3 * zone_fractions.nitrate_non_band * n_mass;
-    var nitrate_band = context.chemistry_state.aqueous[layer].nitrate_band * water_m3 * zone_fractions.nitrate_band * n_mass;
+    var nitrate_non_band = context.chemistry_state.aqueous[layer].nitrate_non_band * effective_water_m3 * zone_fractions.nitrate_non_band * n_mass;
+    var nitrate_band = context.chemistry_state.aqueous[layer].nitrate_band * effective_water_m3 * zone_fractions.nitrate_band * n_mass;
     const p_mass = context.phosphorus_molar_mass_g_per_mol;
-    var h2po4 = [2]f64{ context.chemistry_state.non_band_phosphate[layer].dissolved_h2po4_mol_p_per_m3 * water_m3 * zone_fractions.phosphate_non_band * p_mass, context.chemistry_state.band_phosphate[layer].dissolved_h2po4_mol_p_per_m3 * water_m3 * zone_fractions.phosphate_band * p_mass };
-    var hpo4 = [2]f64{ context.chemistry_state.non_band_phosphate[layer].dissolved_hpo4_mol_p_per_m3 * water_m3 * zone_fractions.phosphate_non_band * p_mass, context.chemistry_state.band_phosphate[layer].dissolved_hpo4_mol_p_per_m3 * water_m3 * zone_fractions.phosphate_band * p_mass };
+    var h2po4 = [2]f64{ context.chemistry_state.non_band_phosphate[layer].dissolved_h2po4_mol_p_per_m3 * effective_water_m3 * zone_fractions.phosphate_non_band * p_mass, context.chemistry_state.band_phosphate[layer].dissolved_h2po4_mol_p_per_m3 * effective_water_m3 * zone_fractions.phosphate_band * p_mass };
+    var hpo4 = [2]f64{ context.chemistry_state.non_band_phosphate[layer].dissolved_hpo4_mol_p_per_m3 * effective_water_m3 * zone_fractions.phosphate_non_band * p_mass, context.chemistry_state.band_phosphate[layer].dissolved_hpo4_mol_p_per_m3 * effective_water_m3 * zone_fractions.phosphate_band * p_mass };
     var nitrite_non_band = context.reactive_nitrogen.non_band_nitrite_g_n[layer];
     var nitrite_band = context.reactive_nitrogen.band_nitrite_g_n[layer];
     const n2o_index = try gas.massIndex(layer, .nitrous_oxide, context.gas_state.cell_count);
@@ -645,14 +694,14 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
         if (colonized.* > pool.carbon_g_c) return error.InvalidSoilLitterColonizationStateUpdate;
     }
 
-    const ammonium_non_band_concentration = try concentrationFromMass(ammonium_non_band, water_m3, zone_fractions.ammonium_non_band, n_mass);
-    const ammonium_band_concentration = try concentrationFromMass(ammonium_band, water_m3, zone_fractions.ammonium_band, n_mass);
-    const nitrate_non_band_concentration = try concentrationFromMass(nitrate_non_band, water_m3, zone_fractions.nitrate_non_band, n_mass);
-    const nitrate_band_concentration = try concentrationFromMass(nitrate_band, water_m3, zone_fractions.nitrate_band, n_mass);
-    const non_band_h2po4_concentration = try concentrationFromMass(h2po4[0], water_m3, zone_fractions.phosphate_non_band, p_mass);
-    const band_h2po4_concentration = try concentrationFromMass(h2po4[1], water_m3, zone_fractions.phosphate_band, p_mass);
-    const non_band_hpo4_concentration = try concentrationFromMass(hpo4[0], water_m3, zone_fractions.phosphate_non_band, p_mass);
-    const band_hpo4_concentration = try concentrationFromMass(hpo4[1], water_m3, zone_fractions.phosphate_band, p_mass);
+    const ammonium_non_band_concentration = try concentrationFromMass(ammonium_non_band, effective_water_m3, zone_fractions.ammonium_non_band, n_mass);
+    const ammonium_band_concentration = try concentrationFromMass(ammonium_band, effective_water_m3, zone_fractions.ammonium_band, n_mass);
+    const nitrate_non_band_concentration = try concentrationFromMass(nitrate_non_band, effective_water_m3, zone_fractions.nitrate_non_band, n_mass);
+    const nitrate_band_concentration = try concentrationFromMass(nitrate_band, effective_water_m3, zone_fractions.nitrate_band, n_mass);
+    const non_band_h2po4_concentration = try concentrationFromMass(h2po4[0], effective_water_m3, zone_fractions.phosphate_non_band, p_mass);
+    const band_h2po4_concentration = try concentrationFromMass(h2po4[1], effective_water_m3, zone_fractions.phosphate_band, p_mass);
+    const non_band_hpo4_concentration = try concentrationFromMass(hpo4[0], effective_water_m3, zone_fractions.phosphate_non_band, p_mass);
+    const band_hpo4_concentration = try concentrationFromMass(hpo4[1], effective_water_m3, zone_fractions.phosphate_band, p_mass);
     try validatePublishedAmmonium(
         layer,
         context.chemistry_state.water_mol_per_m3[layer],
@@ -920,9 +969,20 @@ fn authoritativeLayerNitrogen_g_n(context: ApplyContext, layer: usize) !f64 {
     var total: f64 = context.reactive_nitrogen.non_band_nitrite_g_n[layer] +
         context.reactive_nitrogen.band_nitrite_g_n[layer];
     const water_m3 = context.water_volume_m3[layer];
+    // ISSUE-065 (eighteenth pass): must match `state_updateLayer`'s own
+    // `effective_water_m3` substitution exactly -- see that function's
+    // comment for why. Otherwise this "before" census would use a different
+    // carrier basis than the "after" census
+    // (`projectedLayerNitrogen_g_n`/`projectedLayerCarbonDelta_g_c`, which
+    // both sum the already-substituted mass values directly) and trip
+    // `requireProjectedClosure` on every hour a layer is dry.
+    const effective_water_m3 = if (water_m3 > context.negligible_water_volume_m3)
+        water_m3
+    else
+        context.chemistry_state.dry_reference_water_m3[layer];
     const aqueous = context.chemistry_state.aqueous[layer];
     const zone_fractions = zoneFractionsAt(context, layer);
-    total += context.nitrogen_molar_mass_g_per_mol * water_m3 *
+    total += context.nitrogen_molar_mass_g_per_mol * effective_water_m3 *
         (aqueous.ammonium_non_band * zone_fractions.ammonium_non_band +
             aqueous.ammonium_band * zone_fractions.ammonium_band +
             aqueous.nitrate_non_band * zone_fractions.nitrate_non_band +
@@ -963,11 +1023,23 @@ fn authoritativeLayerNitrogen_g_n(context: ApplyContext, layer: usize) !f64 {
 /// cancel identically across this process-local census.
 fn authoritativeLayerPhosphorus_g_p(context: ApplyContext, layer: usize) !f64 {
     const water_m3 = context.water_volume_m3[layer];
+    // ISSUE-065 (eighteenth pass): must match `state_updateLayer`'s own
+    // `phosphate_water_m3` substitution exactly, or this "before" census
+    // (read at the top of `state_updateLayer`, before any owner changes)
+    // would use a different carrier basis than the "after" census
+    // (`projectedLayerPhosphorus_g_p`, which sums the already-substituted
+    // `h2po4`/`hpo4` extensive mass directly) and trip
+    // `requireProjectedClosure` on every hour a layer is dry, not just the
+    // hours this fix actually changes behavior for.
+    const phosphate_water_m3 = if (water_m3 > context.negligible_water_volume_m3)
+        water_m3
+    else
+        context.chemistry_state.dry_reference_water_m3[layer];
     const p_mass = context.phosphorus_molar_mass_g_per_mol;
     const non_band = context.chemistry_state.non_band_phosphate[layer];
     const band = context.chemistry_state.band_phosphate[layer];
     const zone_fractions = zoneFractionsAt(context, layer);
-    var total = p_mass * water_m3 *
+    var total = p_mass * phosphate_water_m3 *
         (zone_fractions.phosphate_non_band *
             (non_band.dissolved_h2po4_mol_p_per_m3 + non_band.dissolved_hpo4_mol_p_per_m3) +
             zone_fractions.phosphate_band *
@@ -1698,6 +1770,168 @@ test "layer nitrogen state_update conserves zones gases and DON atomically" {
     try std.testing.expectApproxEqAbs(@as(f64, 0.09), microbial_state.structural[1].carbon_g_c, 1e-15);
     const expected_hydrogen_mol = 1 + 0.1429 * (0.1 - 0.03) - 0.0714 * 0.04;
     try std.testing.expectApproxEqAbs(expected_hydrogen_mol, chemistry_state.aqueous[0].hydrogen, 1e-15);
+}
+
+test "ISSUE-065: a dry layer's phosphate carrier round-trip reproduces the wet layer's result exactly, via dry_reference_water_m3" {
+    // Regression for the eighteenth-pass finding: `state_updateLayer` used to
+    // read AND write phosphate's dissolved concentration using the raw live
+    // carrier (`context.water_volume_m3[layer]`) with no substitution, so a
+    // layer with live water at/below the negligible floor had its phosphate
+    // concentration silently collapsed toward zero (mass computed against a
+    // zero carrier, then divided back by the same zero carrier via
+    // `concentrationFromMass`'s `volume<=0 => return 0` guard) instead of
+    // being preserved via `dry_reference_water_m3`, the mechanism this
+    // codebase already uses everywhere else (`exportCarrierM3`,
+    // `soil_chemistry_water_carrier_rebase.rebaseLayer`) to keep a dry
+    // layer's true extensive amount recoverable.
+    //
+    // This test runs the SAME phosphate inputs (concentration=1,
+    // fraction=1, p_mass=31, no microbial exchange flux) through two calls:
+    // one with `water_volume_m3=1` (live, wet), one with
+    // `water_volume_m3=0` and `dry_reference_water_m3=1` (dry, but
+    // remembering the same value the wet case used live). If the
+    // substitution is correct, both must publish the identical final
+    // concentration -- not the dry case collapsing to zero.
+    const wet = try runSinglePhosphateLayer(1, 0);
+    const dry = try runSinglePhosphateLayer(0, 1);
+    try std.testing.expectEqual(wet, dry);
+    try std.testing.expect(dry != 0);
+}
+
+fn runSinglePhosphateLayer(live_water_m3: f64, dry_reference_water_m3: f64) !f64 {
+    var reactive_state = try reactive.State.init(std.testing.allocator, 1, 1);
+    defer reactive_state.deinit();
+    var phosphorus_state = try phosphorus.State.init(std.testing.allocator, 1, 1);
+    defer phosphorus_state.deinit();
+    var turnover_state = try turnover.State.init(std.testing.allocator, 1, 1);
+    defer turnover_state.deinit();
+    var colonization_state = try colonization.State.init(std.testing.allocator, 1);
+    defer colonization_state.deinit();
+    var sorption_state = try organic_sorption.State.init(std.testing.allocator, 1);
+    defer sorption_state.deinit();
+    var decomposition_state = try organic_decomposition.State.init(std.testing.allocator, 1);
+    defer decomposition_state.deinit();
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    chemistry_state.water_mol_per_m3[0] = 100;
+    chemistry_state.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3 = 1;
+    chemistry_state.dry_reference_water_m3[0] = dry_reference_water_m3;
+    var gas_state = try gas.State.init(std.testing.allocator, 1);
+    defer gas_state.deinit();
+    var organic_state = try organic.State.init(std.testing.allocator, 1);
+    defer organic_state.deinit();
+    var microbial_state = try microbial.State.init(std.testing.allocator, 1, 1, 1, 1);
+    defer microbial_state.deinit();
+    var workspace = try fluxes.State.init(std.testing.allocator, 1, 1);
+    defer workspace.deinit();
+    var context: ApplyContext = .{
+        .reactive_nitrogen = &reactive_state,
+        .phosphorus_history = &phosphorus_state,
+        .chemistry_state = &chemistry_state,
+        .gas_state = &gas_state,
+        .organic_state = &organic_state,
+        .microbial_state = &microbial_state,
+        .flux_workspace = &workspace,
+        .microbial_turnover = &turnover_state,
+        .litter_colonization = &colonization_state,
+        .organic_sorption = &sorption_state,
+        .organic_decomposition = &decomposition_state,
+        .humus_partition_by_layer = &.{.{ 0.5, 0.5 }},
+        .water_volume_m3 = &.{live_water_m3},
+        .negligible_water_volume_m3 = 1e-9,
+        .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 },
+        .oxygen_satisfaction_fraction = &.{1},
+        .redox_satisfaction_fraction = &.{1},
+        .nitrogen_molar_mass_g_per_mol = 14,
+        .phosphorus_molar_mass_g_per_mol = 31,
+        .negligible_hydrogen_mol = 1e-12,
+        .negligible_carbon_g_c = 1e-12,
+        .fraction_tolerance = 1e-12,
+        .salinity_enabled_by_cell = &.{false},
+        .soil_layer_capacity = 1,
+    };
+    try applyTile(&context, .{ .first = 0, .end = 1 });
+    return chemistry_state.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3;
+}
+
+test "ISSUE-065: a dry layer's ammonium/nitrate carrier round-trip reproduces the wet layer's result exactly, via dry_reference_water_m3" {
+    // Sibling regression to the phosphate case above: `state_updateLayer`'s
+    // ammonium/nitrate mass<->concentration round trip had the identical
+    // raw-live-carrier defect, mistakenly left alone on the theory that
+    // `mineral_nitrogen_transport.publishMatrix` (which already substitutes
+    // `dry_reference_water_m3` correctly) was the sole authoritative writer
+    // of `chemistry.aqueous[cell].ammonium_non_band`/`nitrate_non_band`. It
+    // is not: this function writes the same fields first, in the same hour,
+    // so a live-water zero here silently destroys the extensive mineral-N
+    // mass before `mineral_nitrogen_transport` ever sees it.
+    const wet = try runSingleAmmoniumNitrateLayer(1, 0);
+    const dry = try runSingleAmmoniumNitrateLayer(0, 1);
+    try std.testing.expectEqual(wet.ammonium_non_band, dry.ammonium_non_band);
+    try std.testing.expectEqual(wet.nitrate_non_band, dry.nitrate_non_band);
+    try std.testing.expect(dry.ammonium_non_band != 0);
+    try std.testing.expect(dry.nitrate_non_band != 0);
+}
+
+const AmmoniumNitrateResult = struct { ammonium_non_band: f64, nitrate_non_band: f64 };
+
+fn runSingleAmmoniumNitrateLayer(live_water_m3: f64, dry_reference_water_m3: f64) !AmmoniumNitrateResult {
+    var reactive_state = try reactive.State.init(std.testing.allocator, 1, 1);
+    defer reactive_state.deinit();
+    var phosphorus_state = try phosphorus.State.init(std.testing.allocator, 1, 1);
+    defer phosphorus_state.deinit();
+    var turnover_state = try turnover.State.init(std.testing.allocator, 1, 1);
+    defer turnover_state.deinit();
+    var colonization_state = try colonization.State.init(std.testing.allocator, 1);
+    defer colonization_state.deinit();
+    var sorption_state = try organic_sorption.State.init(std.testing.allocator, 1);
+    defer sorption_state.deinit();
+    var decomposition_state = try organic_decomposition.State.init(std.testing.allocator, 1);
+    defer decomposition_state.deinit();
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    chemistry_state.water_mol_per_m3[0] = 100;
+    chemistry_state.aqueous[0].ammonium_non_band = 1;
+    chemistry_state.aqueous[0].nitrate_non_band = 1;
+    chemistry_state.dry_reference_water_m3[0] = dry_reference_water_m3;
+    var gas_state = try gas.State.init(std.testing.allocator, 1);
+    defer gas_state.deinit();
+    var organic_state = try organic.State.init(std.testing.allocator, 1);
+    defer organic_state.deinit();
+    var microbial_state = try microbial.State.init(std.testing.allocator, 1, 1, 1, 1);
+    defer microbial_state.deinit();
+    var workspace = try fluxes.State.init(std.testing.allocator, 1, 1);
+    defer workspace.deinit();
+    var context: ApplyContext = .{
+        .reactive_nitrogen = &reactive_state,
+        .phosphorus_history = &phosphorus_state,
+        .chemistry_state = &chemistry_state,
+        .gas_state = &gas_state,
+        .organic_state = &organic_state,
+        .microbial_state = &microbial_state,
+        .flux_workspace = &workspace,
+        .microbial_turnover = &turnover_state,
+        .litter_colonization = &colonization_state,
+        .organic_sorption = &sorption_state,
+        .organic_decomposition = &decomposition_state,
+        .humus_partition_by_layer = &.{.{ 0.5, 0.5 }},
+        .water_volume_m3 = &.{live_water_m3},
+        .negligible_water_volume_m3 = 1e-9,
+        .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 },
+        .oxygen_satisfaction_fraction = &.{1},
+        .redox_satisfaction_fraction = &.{1},
+        .nitrogen_molar_mass_g_per_mol = 14,
+        .phosphorus_molar_mass_g_per_mol = 31,
+        .negligible_hydrogen_mol = 1e-12,
+        .negligible_carbon_g_c = 1e-12,
+        .fraction_tolerance = 1e-12,
+        .salinity_enabled_by_cell = &.{false},
+        .soil_layer_capacity = 1,
+    };
+    try applyTile(&context, .{ .first = 0, .end = 1 });
+    return .{
+        .ammonium_non_band = chemistry_state.aqueous[0].ammonium_non_band,
+        .nitrate_non_band = chemistry_state.aqueous[0].nitrate_non_band,
+    };
 }
 
 test "methane carbon routes to authoritative K5 methanogen and methanotroph owners" {

@@ -566,6 +566,74 @@ pub fn tracePhosphateAqueousTransportTermLayer0(context: anytype, comptime site:
     );
 }
 
+/// ISSUE-065 (eighteenth pass): the seventeenth addendum localized phosphorus's
+/// entire hour-2,894 residual to `aqueous_transport_bridge.exportChemistry`
+/// (`soil_chemistry_convergence.zig:997`) and hypothesized a WATSUB-collapse-
+/// before-deferred-rebase timing gap, but that measurement only ever compared
+/// the STALE `transport_state.amount_mol` (term 1, unchanged by anything except
+/// `exportChemistry`/`importChemistry`/`advanceTransport`) against
+/// `exportChemistry`'s own fresh recompute. It never traced the underlying
+/// `chemistry_state` CONCENTRATION fields (`non_band_phosphate[0]`/
+/// `band_phosphate[0]`'s dissolved species) or the fertilizer-band ZONE
+/// FRACTION themselves across the hour, so it could not distinguish "the
+/// concentration is already wrong before `exportChemistry` runs" from "the
+/// rebase that would correct it is deferred past `exportChemistry`".
+///
+/// This traces the IMPLIED aqueous export `exportChemistry` would compute
+/// RIGHT NOW from the current `chemistry_state` concentrations, the current
+/// `context.fertilizer_band` zone fractions, and the current carrier
+/// (`exportCarrierM3`'s own substitution rule, reproduced here rather than
+/// imported, since it is `fn`-private to `aqueous_transport_bridge.zig`) --
+/// independent of `transport_state.amount_mol` entirely. Called at every
+/// `traceStageBoundaryLayer0Carbon` boundary already bracketing the hour
+/// (`before_nitro`, `after_nitro`, `after_uptake_growth_extract`,
+/// `after_solute_phase`, `after_transport_replay`), so a rerun shows exactly
+/// which boundary the implied value first drops at, across both hour 2,893
+/// (still within the `[2888, 2896)` window) and hour 2,894 -- rather than only
+/// the already-known single-call attribution inside hour 2,894 alone.
+pub fn traceImpliedPhosphateExportLayer0(context: anytype, comptime site: []const u8) !void {
+    if (comptime @import("builtin").is_test) return;
+    if (context.executed_weather_hours.* < 2888 or context.executed_weather_hours.* >= 2896) return;
+    if (context.grid.cell_count == 0) return;
+    const chemistry_state = context.soil_chemistry;
+    const fractions = try context.fertilizer_band.scienceZoneFractionsForFlatIndex(0);
+    const live_water_m3 = context.grid.matrix_liquid_water_m3[0];
+    const dry_reference_water_m3 = chemistry_state.dry_reference_water_m3[0];
+    const negligible_water_volume_m3 = ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[0]);
+    const carrier_m3 = if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+    var non_band_conc_sum: f64 = 0;
+    var band_conc_sum: f64 = 0;
+    inline for (@typeInfo(ecosys.solute_transport_species.AqueousSpecies).@"enum".fields) |field| {
+        const species: ecosys.solute_transport_species.AqueousSpecies = @enumFromInt(field.value);
+        if (ecosys.solute_transport_species.diffusivityClass(species) == .phosphate) {
+            const dissolved_mol_per_m3 = ecosys.soil_aqueous_transport_bridge.concentration(chemistry_state, 0, species);
+            if (comptime std.mem.startsWith(u8, field.name, "band_")) {
+                band_conc_sum += dissolved_mol_per_m3;
+            } else {
+                non_band_conc_sum += dissolved_mol_per_m3;
+            }
+        }
+    }
+    const p_mass = context.runscript.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol;
+    const implied_aqueous_phosphate_g = carrier_m3 * p_mass *
+        (fractions.phosphate_non_band * non_band_conc_sum + fractions.phosphate_band * band_conc_sum);
+    std.log.info(
+        "DRY_CARRIER_TRACE site=implied_{s} hour={d} cell=0 layer=0 implied_aqueous_phosphate_g={e} carrier_m3={e} live_water_m3={e} dry_reference_water_m3={e} phosphate_non_band_fraction={e} phosphate_band_fraction={e} non_band_conc_sum_mol_per_m3={e} band_conc_sum_mol_per_m3={e}",
+        .{
+            site,
+            context.executed_weather_hours.* + 1,
+            implied_aqueous_phosphate_g,
+            carrier_m3,
+            live_water_m3,
+            dry_reference_water_m3,
+            fractions.phosphate_non_band,
+            fractions.phosphate_band,
+            non_band_conc_sum,
+            band_conc_sum,
+        },
+    );
+}
+
 fn sumStructFieldsF64(value: anytype) f64 {
     var total: f64 = 0;
     inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| {

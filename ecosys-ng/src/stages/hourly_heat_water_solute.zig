@@ -13022,6 +13022,12 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
     // HOUR1/NITRO consume the accepted physical air/temperature and amount-
     // owner carrier mirrors published atomically by each WATSUB acceptance.
     try diagnostics.traceStageBoundaryLayer0Carbon(context, "before_nitro");
+    // ISSUE-065 (eighteenth pass): directly test the seventeenth addendum's
+    // timing-gap hypothesis by tracing the IMPLIED aqueous phosphate export
+    // (concentration/carrier/zone-fraction recompute, independent of the
+    // stale `transport_state.amount_mol`) at every stage boundary bracketing
+    // WATSUB's accepted final carrier through TRNSFR's replay.
+    try diagnostics.traceImpliedPhosphateExportLayer0(context, "before_nitro");
     try group_sediment.routeSedimentAndErosion(
         context,
         .nitro,
@@ -13045,6 +13051,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         .{ temporary_profile_start.durationTo(std.Io.Clock.now(.boot, context.io)).toMilliseconds(), exact_substep_count },
     );
     try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_nitro");
+    try diagnostics.traceImpliedPhosphateExportLayer0(context, "after_nitro");
     try captureFailureConservationTrace(context, 0);
     // PHOSPHORUS-SOIL-SURFACE-BIOGEOCHEMISTRY-HALVES-001. Measurement showed the
     // topsoil dissolved phosphate moves the CONCENTRATION basis in the `.nitro`
@@ -13079,6 +13086,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         .{ temporary_profile_start.durationTo(std.Io.Clock.now(.boot, context.io)).toMilliseconds(), exact_substep_count },
     );
     try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_uptake_growth_extract");
+    try diagnostics.traceImpliedPhosphateExportLayer0(context, "after_uptake_growth_extract");
     try captureFailureConservationTrace(context, 2);
     try group_sediment.routeSedimentAndErosion(
         context,
@@ -13103,9 +13111,11 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         .{ temporary_profile_start.durationTo(std.Io.Clock.now(.boot, context.io)).toMilliseconds(), exact_substep_count },
     );
     try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_solute_phase");
+    try diagnostics.traceImpliedPhosphateExportLayer0(context, "after_solute_phase");
     try captureFailureConservationTrace(context, 3);
     try coupled_substeps.replayAcceptedTransport();
     try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_transport_replay");
+    try diagnostics.traceImpliedPhosphateExportLayer0(context, "after_transport_replay");
     if (temporary_profile_active) std.log.info(
         "TEMP_PROFILE attempt replay elapsed_ms={d} substeps={d}",
         .{ temporary_profile_start.durationTo(std.Io.Clock.now(.boot, context.io)).toMilliseconds(), exact_substep_count },
