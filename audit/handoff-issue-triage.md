@@ -571,7 +571,8 @@ eliminated. `issue-065` (OPEN) is now the project's critical-path blocker for
 | `issue-062` | After the `issue-060`/`061` fixes, a fresh full-fix-batch run still failed at hour 2,894, now with a *different* terminal error, `RelayeringActivityConservationFailure` -- a second, previously-unaudited consumer of the same underlying WATSUB-6907 negligible-heat-capacity-layer discard (confirmed faithful legacy behavior in both `watsub.f:6907-6913` and `redist.f:9645-9666`, not a Zig defect). | FIXED (source + regression tests), confirmed by live resumed-checkpoint run | Fix is a shared cross-consumer reconciliation ledger (a `FloorDiscard` struct threaded from `heat_layer_remap.zig` through `relayering.zig` into `stageBoundary`'s heat comparison), not a third independent per-consumer patch. |
 | `issue-063` | After `issue-062`'s fix, hour 2,894 failed on a different, previously-masked field: `carbon_dioxide_carbon_g`. Root cause: a carrier-basis mismatch -- `chemistry_remap.transferSolidLayerFraction` (the mutator) rescales solid/precipitate concentration fields using raw, unfloored live water, while the census reads the same fields back using the floored `aqueousCarrierM3` substitution. | FIXED (Option A) and validated | Confirmed by a live resumed-checkpoint run: this specific field/error no longer occurs. Clearing it unmasked a new, broader frontier -- exactly the "masking risk" this issue's own writeup warned about -- filed as `issue-064`. |
 | `issue-064` | After `issue-063`'s fix, hour 2,894 failed on a broader gate, `HourlyCellConservationFailure`, across ten quantities simultaneously (carbon, nitrogen, phosphorus, aluminum, iron, calcium, magnesium, sodium, potassium, silicon). Leading hypothesis: the same carrier-basis mismatch recurring one call site over, on the free aqueous-ion pools (`transferAqueousLayerFraction`/`waterZones`). | Diagnosed mechanism FIXED and validated in isolation; **leading hypothesis REFUTED for hour 2,894's actual failure** (the fix does not clear it). | Fix implemented, unit-tested, confirmed correct on its own terms. The exhaustive sweep requested alongside it found and fixed 3 more genuine siblings of the same defect class: `pond_particulate_settling.zig`, `phosphate_inventory.zig`, `litter_removal.zig` -- bringing the total confirmed `ZEROS2`-exact-zero-guard instances fixed across `issue-060`/`061`/`064` to **8**. None of this clears hour 2,894; the real root cause is a different mechanism. Continued diagnosis filed separately as `issue-065`. |
-| `issue-065` | Hour 2,894's `HourlyCellConservationFailure` persists, bit-for-bit identical residuals, after all 8 `ZEROS2`-class fixes above. | **OPEN, `NOT_ASSESSED` -- actively being diagnosed (by a separate agent) as of this writing. Do not treat as resolved.** | Diagnosis reframed (per the issue's own latest addendum): a new census-side trace proves layer 0 is innocent on *both* the mutator side and the census side. The multi-element mass loss (~7.66 g carbon and matching residuals in nitrogen, phosphorus, aluminum, iron, calcium, magnesium, sodium, potassium, silicon) must be occurring in one of the cell's other 11 soil layers -- a location no prior instrumentation in this chain has observed. No fix attempted yet. **This table is a snapshot; check `issue-065`'s own file for its current status before citing it** -- this triage document does not own that file and does not update it. |
+| `issue-065` | Hour 2,894's `HourlyCellConservationFailure` persists, bit-for-bit identical residuals, after all 8 `ZEROS2`-class fixes above. | **OPEN, `NOT_ASSESSED` -- actively being diagnosed (by a separate agent) as of this writing. Do not treat as resolved.** *(Update, 2026-09-20 housekeeping pass, see Section 9.4: still OPEN/`UNRESOLVED`, but narrowed enormously since this row was first written -- down from ten simultaneous multi-order-of-magnitude element residuals to two small, sub-gram residuals (nitrogen and phosphorus), after three further real, committed, tested fixes. This row's original text below is preserved as the historical snapshot at the time it was written, not the current state.)* | Diagnosis reframed (per the issue's own latest addendum): a new census-side trace proves layer 0 is innocent on *both* the mutator side and the census side. The multi-element mass loss (~7.66 g carbon and matching residuals in nitrogen, phosphorus, aluminum, iron, calcium, magnesium, sodium, potassium, silicon) must be occurring in one of the cell's other 11 soil layers -- a location no prior instrumentation in this chain has observed. No fix attempted yet. **This table is a snapshot; check `issue-065`'s own file for its current status before citing it** -- this triage document does not own that file and does not update it. |
+| `issue-066` (added 2026-09-20 housekeeping pass) | `litter_ammonia_phase_bridge.zig`'s `refreshTransientFromChemistry`/`publishTransientToChemistry` pack/unpack round trip used an exact-zero-only litter-water guard instead of the shared `ZEROS2`/`dry_reference_water_m3` carrier substitution -- the same defect class as the `issue-060`-`065` chain, found by a dedicated pack/unpack-shaped sweep, in a bridge whose naming convention `issue-061`'s keyword sweep could not match. Notably, the local per-species conservation closure check in the same file (`litter_gas_transport_step.zig`) explicitly excludes ammonia, so a manufactured mass discard here would not have been caught by that gate. | **CLOSED, `legacy-defect-corrected`.** | Fix applied 2026-09-20: added a `litterAmmoniaCarrierM3` helper (mirrors `erosionWaterCarrierM3`/`sourceWaterM3`), threaded a new `cell_area_m2` parameter, widened both guards to the `ZEROS2`-floored form, and substituted `dry_reference_water_m3` in both the pack multiply and the unpack divide. Both production call sites (`litter_gas_transport_step.zig`) updated; one pre-existing test's semantics corrected (it had asserted the defect's own behavior as expected); two new OLD/NEW regression tests added. Targeted `zig test` (all 5 `litter_ammonia_phase_bridge.zig` tests, all 3 `litter_gas_transport_step.zig` tests) and `zig build -Doptimize=ReleaseFast` pass. Not execution-confirmed against a live production run (not required per this fix's own validation note -- the defect is self-contained and isolated, matching how `issue-064`/TRC-326 was accepted on regression-test evidence alone). Not shown to explain hour 2,894 specifically -- it is a separately-reachable sibling defect (surface litter ammonia, not soil layer 0's erosion/aqueous-transport/mineral-nitrogen carriers `issue-065` traces). |
 
 ### 9.3 What this means for the rest of this document
 
@@ -594,3 +595,87 @@ eliminated. `issue-065` (OPEN) is now the project's critical-path blocker for
   space now the cell's other 11 soil layers)." That is forward motion on the
   hardest-to-satisfy criterion in Section 1's executive summary, even though
   the criterion (full 262,920-hour completion) is not yet met.
+
+### 9.4 Update (2026-09-20, documentation-consolidation pass): `issue-066` fixed; `issue-065` narrowed to two small residuals
+
+This subsection is a read-only accuracy update to 9.1-9.3 above, written during a
+documentation-only housekeeping pass while `issue-065` was still being actively
+diagnosed by a separate agent under source review. It does not edit
+`issue-065`'s own file (that file's own Status line remains authoritative for
+its current wording -- re-check it before citing) and does not attempt any new
+diagnosis; everything below is a summary of what `issue-065`'s and `issue-066`'s
+own files already established and cited, as of this writing.
+
+**`issue-066` is now CLOSED, disposition `legacy-defect-corrected`.** A
+dedicated read-only sweep (looking specifically for pack/unpack-shaped
+bidirectional carrier round trips, a shape issue-061's original keyword sweep
+could not match) found that `litter_ammonia_phase_bridge.zig`'s
+`refreshTransientFromChemistry`/`publishTransientToChemistry` used an
+exact-zero-only litter-water guard instead of the shared `ZEROS2`/
+`dry_reference_water_m3` carrier substitution -- the same defect class as the
+`issue-060`-`065` chain, in a bridge whose own local conservation gate
+explicitly excludes ammonia from its closure check (so a manufactured
+discard here would have gone unsupervised). The fix (a new
+`litterAmmoniaCarrierM3` helper, a threaded `cell_area_m2` parameter, both
+guards widened to the floored form) was applied, both production call sites
+updated, one pre-existing test's semantics corrected, and two new OLD/NEW
+regression tests added; targeted tests and a `ReleaseFast` build pass. Not
+execution-confirmed against a live production run, and not shown to explain
+hour 2,894 -- it is a separately-reachable sibling defect, not part of the
+`issue-065` chain itself. See the table entry above and `issue-066`'s own
+file for full evidence.
+
+**`issue-065` has made enormous, well-documented progress since Section 9.2's
+table was written**, though it remains open. After the eight `ZEROS2`-class
+fixes tallied there, hour 2,894 continued to fail identically across ten
+simultaneous elements; several further hypotheses (the `dry_reference_water_m3`
+stored value, the census-side read, a layer-0 misattribution) were tested by
+direct execution and refuted before the search located and fixed three more
+real, distinct siblings of the same underlying carrier-substitution defect
+class:
+
+- `erosion_chemistry_bridge.zig`'s `packMapped`/`unpackMapped` -- root-caused
+  and fixed; resolved the majority of the original ten-element residual set.
+- `aqueous_transport_bridge.zig`'s `exportChemistry` -- a third sibling,
+  fixed; resolved eight of the remaining nine elements (carbon, aluminum,
+  iron, calcium, magnesium, sodium, potassium, silicon) down to
+  arithmetic-roundoff-level residuals (~1e-14 to 1e-15), which the
+  conservation gate now accepts as passing.
+- `mineral_nitrogen_transport.zig`'s `initializeMatrix`/`publishMatrix` --
+  nitrogen's own separate carrier-substitution defect, execution-confirmed
+  and fixed for the pack/unpack round trip itself (a partial fix: it made
+  the round trip symmetric and correct in isolation, but did not fully clear
+  nitrogen's own residual at hour 2,894 -- see below).
+
+After 15+ rigorous diagnostic rounds and these several real, validated,
+committed fixes, `issue-065`'s own Status line (as of its latest addendum,
+2026-09-20) reports exactly **two** remaining unresolved residuals at hour
+2,894, both sub-gram:
+
+- **Phosphorus**: `-3.755396571828448e-2` g P (~0.038 g), bit-for-bit
+  unchanged across the latest round; several further leads (fertilizer
+  band-geometry, an unsubstituted water carrier, a band-repartition
+  mechanism) have each been individually instrumented and refuted.
+- **Nitrogen**: `-8.138080492849031e-3` g N (~0.008 g), unchanged; narrowed
+  to a small booking mismatch inside the large, legitimate, already-booked
+  erosion exchange at layer 0, specifically the fraction-sensitive
+  `exchange_ammonium_mol_n` sub-pool -- not yet traced to a specific
+  arithmetic step.
+
+Both residuals remain **unresolved** as of this writing; `issue-065` is still
+open and under active diagnosis. **This is not a claim of completion** -- it
+is a large, evidence-based narrowing (ten simultaneous, multi-order-of-
+magnitude element mismatches down to two small, well-localized residuals)
+after real, committed source fixes, not a resolution.
+
+**Net effect on the project's "production run completes" goal criterion**:
+the production run's blocking frontier has moved from hour 2,578
+(pre-session; a failure class the mature reference project's own history
+suggested might need a fundamental redesign or a human numerical-methods
+decision) to hour 2,894 (current), now blocked by two small, well-localized
+residuals rather than ten simultaneous, multi-order-of-magnitude ones. This
+is a substantial, evidence-based improvement. Full 262,920-hour completion
+is **not yet achieved** -- do not read this subsection as reporting the run
+complete. Check `issue-065`'s own file for its exact current Status-line
+wording before citing its state elsewhere; this triage document does not own
+that file and does not update it.
