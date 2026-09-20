@@ -363,7 +363,29 @@ noinline fn solveHourlyReactionLayer(
         context.soil_solver_properties.bulk_density_megagrams_per_m3[layer],
         water_volume_m3,
     );
-    if (water_volume_m3 <= context.config.physical_tolerance.waterVolume(bulk_volume_m3)) return;
+    // ISSUE-065 DRY_CARRIER_TRACE: does the SOLUTE reaction network's own
+    // VOLW-floor gate (faithful to solute.f:160-161's
+    // `VOLW(L,NY,NX).GT.ZEROS2(NY,NX)`) fire for cell 0/layer 0 at hour
+    // 2894, and is it booked/logged anywhere the way WATSUB 6907 books its
+    // heat discard? Gated to the same established hour window/cell/layer.
+    const solute_gate_trace_2894 = context.executed_weather_hours.* >= 2888 and
+        context.executed_weather_hours.* < 2896 and cell == 0 and layer_within_cell == 0;
+    const solute_gate_floor_m3 = context.config.physical_tolerance.waterVolume(bulk_volume_m3);
+    const solute_gate_skipped = water_volume_m3 <= solute_gate_floor_m3;
+    if (solute_gate_trace_2894) std.log.info(
+        "DRY_CARRIER_TRACE site=solute_reaction_gate hour={d} cell={d} layer={d} water_volume_m3={e} floor_m3={e} dry_reference_water_m3={e} skipped={} aqueous_carbon_dioxide_mol_per_m3={e}",
+        .{
+            context.executed_weather_hours.* + 1,
+            cell,
+            layer_within_cell,
+            water_volume_m3,
+            solute_gate_floor_m3,
+            context.soil_chemistry.dry_reference_water_m3[layer],
+            solute_gate_skipped,
+            context.soil_chemistry.aqueous[layer].carbon_dioxide,
+        },
+    );
+    if (solute_gate_skipped) return;
     // SOLUTE TUPN3S/TUPN3B is already applied atomically at the
     // root/gas owner boundary. Reapplying it here was a duplicate
     // soil loss; the former `@max(0, ...)` also hid an unmet donor.
