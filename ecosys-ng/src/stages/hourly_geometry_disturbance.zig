@@ -320,6 +320,37 @@ pub fn finalize(context: anytype) !void {
         context.soil_geometry.first_active_layer,
         context.grid.active_soil_layer_count,
     );
+    // ISSUE-065 (sixteenth pass): the fifteenth addendum refuted the erosion
+    // LOCAL soil<->surface exchange (`erosion_chemistry_bridge.zig`) as
+    // nitrogen's remaining ~8.14e-3 g N mechanism (it books exactly zero
+    // ammonium transfer at hour 2894) and named REDIST layer<->layer
+    // relayering (this exact call) as the sharpest untraced candidate, since
+    // `layer_local_conservation.inventory.Storage` (the `Record.transfer`
+    // shape) carries an `ammonium_nitrogen_g` field. `stageBoundary`'s own
+    // per-field conservation gate (`relayering_activity.zig:253-274`) enforces
+    // donor-loss == recipient-gain to within tolerance for every field
+    // including this one, and `RelayeringActivityConservationFailure` has
+    // never fired in this issue's entire history -- so if this boundary
+    // records a nonzero transfer, it is by construction internally
+    // conserving (moves mass from layer 0 to layer 1, does not destroy it).
+    // Logging the accepted boundary record for cell 0's layer0/layer1
+    // boundary (`upper_layer=0`) directly answers whether this mechanism
+    // records any transfer at all at hour 2894, and rules it in or out as a
+    // net-cell-level mass sink independent of that internal guarantee.
+    if (context.executed_weather_hours.* >= 2888 and context.executed_weather_hours.* < 2896 and cell_count > 0) {
+        const boundary = try activity_sidecar.record(0, 0);
+        std.log.info(
+            "DRY_CARRIER_TRACE site=redist_relayering_boundary hour={d} cell=0 upper_layer=0 direction={s} ammonium_nitrogen_g={e} nitrate_nitrogen_g={e} phosphate_phosphorus_g={e} carbon_dioxide_carbon_g={e}",
+            .{
+                context.executed_weather_hours.* + 1,
+                @tagName(boundary.direction),
+                boundary.transfer.ammonium_nitrogen_g,
+                boundary.transfer.nitrate_nitrogen_g,
+                boundary.transfer.phosphate_phosphorus_g,
+                boundary.transfer.carbon_dioxide_carbon_g,
+            },
+        );
+    }
 }
 
 const SavedMemoryRegion = struct {

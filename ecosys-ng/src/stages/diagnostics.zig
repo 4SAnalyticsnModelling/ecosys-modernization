@@ -416,6 +416,97 @@ pub fn traceErosionAmmoniumLocalTransferLayer0(
     );
 }
 
+/// ISSUE-065 (sixteenth pass): the fifteenth addendum proved every previously
+/// checked input to the census's phosphate aggregator (water carrier,
+/// soil-mass carrier, reaction-solver internals) is bit-for-bit constant
+/// across the exact window (`after_uptake_growth_extract` ->
+/// `after_solute_phase`) where the whole drop occurs, yet the aggregator's
+/// own output changes. `mineral_fertilizer_inventory.publishWetted` (called
+/// inside `convergeHourlySoilChemistry`, before its named scratch block) is a
+/// genuine, not-yet-examined writer to `chemistry.non_band_phosphate[0]`'s
+/// and `chemistry.band_phosphate[0]`'s `monocalcium_phosphate_solid_mol_per_m3`/
+/// `hydroxyapatite_solid_mol_per_m3` fields, driven by the RAW (not
+/// `dry_reference_water_m3`-substituted) `context.grid.matrix_liquid_water_m3`
+/// carrier -- the same defect shape as every other fix in this issue's
+/// history, just at a call site none of the prior fifteen passes traced.
+/// Logs the pending (undissolved) fertilizer inventory's phosphate-relevant
+/// fields alongside the persistent concentration sums, so a rerun can show
+/// directly whether this call's phosphate branch is live (nonzero pending
+/// inventory) at hour 2,894, or a confirmed no-op (this deck never applies
+/// N/P fertilizer, so this may simply corroborate that fact directly rather
+/// than by inference).
+///
+/// Gated identically to the established `DRY_CARRIER_TRACE` convention.
+pub fn tracePublishWettedPhosphateLayer0(context: anytype, comptime site: []const u8) void {
+    if (comptime @import("builtin").is_test) return;
+    if (context.executed_weather_hours.* < 2888 or context.executed_weather_hours.* >= 2896) return;
+    const chemistry = context.soil_chemistry;
+    const pending = context.mineral_fertilizer_inventory.soil[0];
+    std.log.info(
+        "DRY_CARRIER_TRACE site={s} hour={d} cell=0 layer=0 live_water_m3={e} dry_reference_water_m3={e} pending_broadcast_monocalcium_phosphate_mol={e} pending_banded_monocalcium_phosphate_mol={e} pending_hydroxyapatite_mol={e} pending_calcite_mol={e} non_band_phosphate_sum={e} band_phosphate_sum={e} geochemistry_solids_sum={e}",
+        .{
+            site,
+            context.executed_weather_hours.* + 1,
+            context.grid.matrix_liquid_water_m3[0],
+            chemistry.dry_reference_water_m3[0],
+            pending.broadcast_monocalcium_phosphate_mol,
+            pending.banded_monocalcium_phosphate_mol,
+            pending.hydroxyapatite_mol,
+            pending.calcite_mol,
+            sumStructFieldsF64(chemistry.non_band_phosphate[0]),
+            sumStructFieldsF64(chemistry.band_phosphate[0]),
+            sumStructFieldsF64(chemistry.geochemistry_solids[0]),
+        },
+    );
+}
+
+/// ISSUE-065 (sixteenth pass): reading `updateFertilizerBandGeometry` and its
+/// `fertilizer_band_nitrate_phosphate.updateGeometry` mutator shows the
+/// deck's `plant_nutrients` runscript record (`plant_nutrients,0,0,0,1,1,1,1`)
+/// sets `initial_phosphate_band_row_spacing_m=1` (the record's SEVENTH field,
+/// per `driver/runscript.zig:369-377`) -- a value the fourteenth addendum's
+/// own reading never checked, having stopped at the record's THIRD field
+/// (`initial_phosphate_band_fraction=0`). `updateGeometry`'s own early-return
+/// guard (`soil_chemistry_convergence.zig:664`, `fertilizer_band_nitrate_phosphate.zig:146`)
+/// is driven by `phosphate_row_width_m > 0` alone, NOT by the
+/// `active_by_family` flag the fourteenth addendum actually read -- these are
+/// two independent gates. If row spacing is genuinely 1 m, band geometry
+/// updates are NOT a confirmed dead end after all: `updateGeometry` runs its
+/// full body every hour and persistently mutates
+/// `context.fertilizer_band`'s own `band_volume_fraction[phosphate]`, exactly
+/// the mechanism the thirteenth addendum's unconfirmed candidate named.
+/// Traces both the RAW current zone fraction (`zoneFractions`, what the
+/// geometry mutator just wrote) and the SYNCED science fraction
+/// (`scienceZoneFractions`, what the census/materialization call sites
+/// actually consult) immediately before and after the
+/// `updateFertilizerBandGeometry` call, so a rerun shows directly whether the
+/// fraction the census reads actually moves at hour 2,894 -- not merely
+/// whether the mechanism is theoretically live.
+///
+/// Gated identically to the established `DRY_CARRIER_TRACE` convention.
+pub fn tracePhosphateBandGeometryLayer0(context: anytype, comptime site: []const u8) !void {
+    if (comptime @import("builtin").is_test) return;
+    if (context.executed_weather_hours.* < 2888 or context.executed_weather_hours.* >= 2896) return;
+    const chemistry = context.soil_chemistry;
+    const raw = try context.fertilizer_band.zoneFractions(0, 0);
+    const synced = try context.fertilizer_band.scienceZoneFractions(0, 0);
+    std.log.info(
+        "DRY_CARRIER_TRACE site={s} hour={d} cell=0 layer=0 live_water_m3={e} dry_reference_water_m3={e} raw_phosphate_non_band={e} raw_phosphate_band={e} synced_phosphate_non_band={e} synced_phosphate_band={e} non_band_phosphate_sum={e} band_phosphate_sum={e}",
+        .{
+            site,
+            context.executed_weather_hours.* + 1,
+            context.grid.matrix_liquid_water_m3[0],
+            chemistry.dry_reference_water_m3[0],
+            raw.phosphate_non_band,
+            raw.phosphate_band,
+            synced.phosphate_non_band,
+            synced.phosphate_band,
+            sumStructFieldsF64(chemistry.non_band_phosphate[0]),
+            sumStructFieldsF64(chemistry.band_phosphate[0]),
+        },
+    );
+}
+
 fn sumStructFieldsF64(value: anytype) f64 {
     var total: f64 = 0;
     inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| {

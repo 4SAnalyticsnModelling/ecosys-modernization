@@ -154,6 +154,7 @@ pub noinline fn convergeHourlySoilChemistry(
                 diagnostics.traceMaterializePendingSolidsLayer0(context, "after_materialize_pending_solids", water_m3, materialize_fractions);
         }
     }
+    diagnostics.tracePublishWettedPhosphateLayer0(context, "before_publish_wetted");
     try ecosys.mineral_fertilizer_inventory.publishWetted(
         context.mineral_fertilizer_inventory,
         context.soil_chemistry,
@@ -167,12 +168,15 @@ pub noinline fn convergeHourlySoilChemistry(
             .relative = context.config.physical_tolerance.relative,
         },
     );
+    diagnostics.tracePublishWettedPhosphateLayer0(context, "after_publish_wetted");
     {
         const reaction_scratch_mark = scratch_allocations.mark();
         defer scratch_allocations.releaseTo(reaction_scratch_mark);
         try applyFertilizerDissolution(context, &scratch_allocations);
         try solveHourlyReactionCells(context, failure_report, &scratch_allocations);
+        try diagnostics.tracePhosphateBandGeometryLayer0(context, "before_update_fertilizer_band_geometry");
         try updateFertilizerBandGeometry(context, &scratch_allocations);
+        try diagnostics.tracePhosphateBandGeometryLayer0(context, "after_update_fertilizer_band_geometry");
     }
     try publishHourlyChemistry(context, fertilizer_band_hour);
 }
