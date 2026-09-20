@@ -1161,6 +1161,13 @@ pub fn isFixedHourDtRecoveryFailure(err: anyerror) bool {
         error.SoilPhaseSolverStagnated,
         error.SoilPhaseSolverDidNotConverge,
         error.SoilPhaseCandidateExceedsPoreCapacity,
+        // issue-068 (2026-09-20, sixth round): `phase_solver.zig`'s own
+        // simultaneous VOLW/VOLV/VOLI/VOLWH/VOLIH + endpoint-temperature
+        // solve, a genuinely separate accept path from the dense spatial
+        // heat solver's `commitAcceptedState` and from
+        // `temperatureForCellEnthalpy`'s renormalization inversion (both
+        // already guarded). Recovers identically to its siblings.
+        error.SoilPhaseSolverTemperatureOutsidePhysicalDomain,
         error.SoilHeatSolverDiverged,
         error.SoilHeatSolverStagnated,
         error.SoilHeatSolverDidNotConverge,
@@ -5054,6 +5061,11 @@ test "issue-068 (second round): renormalized cell enthalpy inversion is a no-op 
 test "issue-068 (second round): the renormalized-temperature domain error is fixed-hour dt recoverable" {
     try std.testing.expect(isFixedHourDtRecoveryFailure(error.SoilHeatRenormalizedTemperatureOutsidePhysicalDomain));
     try std.testing.expect(isRetryableSolverFailure(error.SoilHeatRenormalizedTemperatureOutsidePhysicalDomain));
+}
+
+test "issue-068 (sixth round): the phase solver's own out-of-domain endpoint temperature error is fixed-hour dt recoverable" {
+    try std.testing.expect(isFixedHourDtRecoveryFailure(error.SoilPhaseSolverTemperatureOutsidePhysicalDomain));
+    try std.testing.expect(isRetryableSolverFailure(error.SoilPhaseSolverTemperatureOutsidePhysicalDomain));
 }
 
 test "mapped soil solve retains unit-specific nonlinear floors" {

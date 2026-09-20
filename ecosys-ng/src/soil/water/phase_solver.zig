@@ -6,6 +6,7 @@ const numerics = @import("../../core/numerics.zig");
 const retention = @import("retention.zig");
 const ice_units = @import("../../core/ice_units.zig");
 const scoped_conservation = @import("../../validation/scoped_conservation.zig");
+const heat_solver = @import("../heat/solver.zig");
 
 pub const Properties = struct {
     /// Runtime DLYRM mask. Empty preserves standalone all-layer behavior.
@@ -2047,6 +2048,27 @@ fn committableState(grid: *const grid_module.GridState, state: []const f64, ice_
         if (!std.math.isFinite(state[1 * cells + cell]) or state[1 * cells + cell] < 0 or
             !std.math.isFinite(state[5 * cells + cell]) or state[5 * cells + cell] <= 0)
             return false;
+        // issue-068 (2026-09-20, sixth round): this simultaneous VOLW/VOLV/
+        // VOLI/VOLWH/VOLIH + endpoint-temperature solve is a genuinely
+        // separate Newton/Anderson loop from the dense spatial heat solver in
+        // `solver_solve.zig`, with its own accept path directly into
+        // `grid.soil_temperature_k` (`state_update` below). Its only prior
+        // temperature check was `> 0` -- finite and above absolute zero, but
+        // not bounded to the same [173.15, 373.15] K physical domain every
+        // sibling solver enforces before committing. A residual-scaled accept
+        // here is exactly as vulnerable to a near-zero-heat-capacity layer
+        // (this issue's chronic cell 0/layer 0) as the two branches guarded
+        // in `solver_solve.zig`'s `allTemperaturesPhysicallyValid` (issue-068,
+        // second round): a small scaled residual can still hide a huge
+        // absolute temperature departure. Guarding the acceptance gate here
+        // (rather than widening or removing this check) makes a physically
+        // absurd candidate fall through to this solver's own existing,
+        // already-tested `.stagnated`/`SoilPhaseSolverDidNotConverge` failure
+        // path instead of being committed -- never changes behavior for a
+        // normal layer, whose endpoint temperature is already far inside the
+        // band.
+        if (!heat_solver.isPhysicalTemperatureK(state[5 * cells + cell]))
+            return false;
     }
     return true;
 }
@@ -2086,6 +2108,18 @@ fn state_update(grid: *grid_module.GridState, state: []const f64, ice_density_me
         if (!std.math.isFinite(state[0 * cells + cell] + state[3 * cells + cell]) or
             !std.math.isFinite(state[2 * cells + cell] + state[4 * cells + cell]))
             return error.InvalidSoilPhaseCandidate;
+        // issue-068 (2026-09-20, sixth round): belt-and-suspenders match to
+        // `committableState`'s own new guard above (same rationale as
+        // `commitAcceptedState`'s own internal `validateSoilTemperaturePhysicalDomain`
+        // call in `solver_solve.zig`, which re-checks a value its caller
+        // already validated). A distinct error name -- not a reuse of
+        // `InvalidSoilPhaseCandidate` -- keeps this failure separately
+        // attributable in a log, the same reasoning that gave
+        // `SoilHeatRenormalizedTemperatureOutsidePhysicalDomain` its own name
+        // in the second round rather than reusing
+        // `SoilHeatSolverTemperatureOutsidePhysicalDomain`.
+        if (!heat_solver.isPhysicalTemperatureK(state[5 * cells + cell]))
+            return error.SoilPhaseSolverTemperatureOutsidePhysicalDomain;
     }
     @memcpy(grid.matrix_liquid_water_m3, state[0 * cells .. 1 * cells]);
     @memcpy(grid.water_vapor_volume_m3, state[1 * cells .. 2 * cells]);
@@ -2170,6 +2204,68 @@ test "phase commit publishes endpoint temperature and rejects it atomically" {
     try std.testing.expectError(error.InvalidSoilPhaseCandidate, state_update(&grid, &rejected, 0.917));
     try std.testing.expectEqual(@as(f64, 0.75), grid.matrix_liquid_water_m3[0]);
     try std.testing.expectEqual(@as(f64, 271.25), grid.soil_temperature_k[0]);
+}
+
+test "issue-068 (sixth round): state_update rejects a finite but physically absurd endpoint temperature" {
+    // Direct proof that `state_update`'s own belt-and-suspenders guard fires
+    // for the exact class of finite, positive, but physically absurd
+    // endpoint temperature this issue chain has chased since the third
+    // round (401.75-519.16 K, all comfortably `> 0` and finite, which is all
+    // this function checked before this round). 452.64 K is one of the
+    // exact captured hour-2895 offending values from the fifth round's own
+    // validation run.
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(
+        .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 },
+        .{ .worker_threads = 1, .tile_cells = 1 },
+        .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 },
+    );
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.matrix_pore_capacity_m3[0] = 2;
+    grid.macropore_pore_capacity_m3[0] = 1;
+    grid.soil_temperature_k[0] = 271.25;
+
+    var too_hot = [_]f64{ 0.75, 0.015625, 0.25, 0.25, 0.125, 452.64 };
+    try std.testing.expectError(
+        error.SoilPhaseSolverTemperatureOutsidePhysicalDomain,
+        state_update(&grid, &too_hot, 0.917),
+    );
+    // Rejected atomically: no carrier, including temperature, changed.
+    try std.testing.expectEqual(@as(f64, 271.25), grid.soil_temperature_k[0]);
+    try std.testing.expectEqual(@as(f64, 0), grid.matrix_liquid_water_m3[0]);
+
+    var too_cold = [_]f64{ 0.75, 0.015625, 0.25, 0.25, 0.125, 120.0 };
+    try std.testing.expectError(
+        error.SoilPhaseSolverTemperatureOutsidePhysicalDomain,
+        state_update(&grid, &too_cold, 0.917),
+    );
+    try std.testing.expectEqual(@as(f64, 271.25), grid.soil_temperature_k[0]);
+}
+
+test "issue-068 (sixth round): committableState requires the endpoint temperature inside the physical domain" {
+    // Proves the acceptance-gate half of the fix (mirroring `solver_solve.zig`'s
+    // `allTemperaturesPhysicallyValid`, issue-068 second round): a candidate
+    // otherwise admissible to `committableState` (finite, non-negative
+    // carriers, non-overfilled pores) is rejected purely because its endpoint
+    // temperature is outside [173.15, 373.15] K, so `solve`'s own Newton/
+    // Anderson loop falls through to its existing tested failure path
+    // instead of ever reaching `state_update`.
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(
+        .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 },
+        .{ .worker_threads = 1, .tile_cells = 1 },
+        .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 },
+    );
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.matrix_pore_capacity_m3[0] = 2;
+    grid.macropore_pore_capacity_m3[0] = 1;
+
+    const in_domain = [_]f64{ 0.75, 0.015625, 0.25, 0.25, 0.125, 271.25 };
+    try std.testing.expect(committableState(&grid, &in_domain, 0.917));
+
+    var out_of_domain = in_domain;
+    out_of_domain[5] = 452.64;
+    try std.testing.expect(!committableState(&grid, &out_of_domain, 0.917));
 }
 
 fn addDirection(current: []const f64, direction: []const f64, fraction: f64, output: []f64) !void {
