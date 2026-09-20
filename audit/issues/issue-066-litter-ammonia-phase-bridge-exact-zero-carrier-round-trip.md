@@ -111,3 +111,450 @@ Per this pass's item 3/4 checks: `erosion_mineral_bridge.zig`, `erosion_fertiliz
 ## Disposition
 
 `unresolved` -- genuine, reachable, previously-undiscovered candidate identified and documented by static reading; no fix attempted, no live reproduction performed, per this pass's explicit diagnosis-only mandate. Not a regression of, and does not reopen, any prior issue's fix. The concurrently-in-progress `aqueous_transport_bridge.zig` fix (issue-065, uncommitted at the time of this pass) is unaffected and not claimed by this issue.
+
+## Fix specification (ready to apply)
+
+Produced by a dedicated read-only scoping pass (2026-09-19/20), while a separate heavy build+run for issue-065 held the machine. No source file was touched, no build was run. This section is a complete, ready-to-apply specification; the fix agent should be able to apply the diffs below directly and run the two focused test files.
+
+### 1. Root-cause template being reused
+
+Identical shape to `erosion_chemistry_bridge.zig`'s `packMapped`/`unpackMapped` fix, commit `bb84420` (`git show bb84420 -- ecosys-ng/src/soil/profile/erosion_chemistry_bridge.zig`):
+
+- Add `const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");` (this file lives in `src/surface/`, one level from `src/core/`, unlike erosion's `src/soil/profile/` two levels -- hence `../core/...` not `../../core/...`).
+- Add a `cell_area_m2: []const f64` parameter to both public functions (and to `validateDimensions`), used only to derive the per-cell `ZEROS2` floor via `legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(area_m2)`.
+- Add a private helper `litterAmmoniaCarrierM3(live_water_m3, dry_reference_water_m3, negligible_water_volume_m3) !f64`, structurally identical to `erosionWaterCarrierM3`: `return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;` after validating all three inputs are finite and non-negative.
+- Widen **both** guards (pack's `water > 0` and unpack's `water == 0`) to the floored form, and substitute the carrier everywhere the raw `water` was previously multiplied/divided.
+
+**Important correction to this issue's own Evidence section, found while drafting this fix**: the Evidence section above frames the exact-zero branch as "the safe, legacy-analogous 'layer does not exist' branch, matching the already-reviewed-and-excluded `litter_chemistry_carrier_rebase.zig` design." Re-reading `litter_chemistry_carrier_rebase.zig`'s own `effectiveAqueousCarrierM3` (`return if (live_water_m3 > 0) live_water_m3 else dry_reference_water_m3;`) during this pass shows that sibling does **not** leave the value untouched at exact zero -- it substitutes `dry_reference_water_m3` there too, every time. `litter_chemistry_types.zig`'s own doc comment on `dry_reference_water_m3` confirms why: "the remembered dry reference... so the extensive amount survives" -- i.e. a dry cell's stored `ammonia_mol_per_m3` is *already expressed against* `dry_reference_water_m3`, not against raw (zero) water. So `refreshTransientFromChemistry`'s current exact-zero pack branch (`else 0`) is itself part of the same defect, not a correctly-scoped exclusion; this issue's own "Recommended next steps" item 2 already said to widen "the exact-zero guards... to `<= negligible_water_volume_m3`" -- this fix follows that item 2 instruction literally, superseding the more cautious framing in the Evidence section above. The fix agent should not be confused by the apparent conflict between the two: item 2's concrete instruction is correct and is what this section implements.
+
+### 2. Exact before/after: `litter_ammonia_phase_bridge.zig`
+
+**Import** (top of file, after existing imports):
+
+```zig
+// BEFORE
+const std = @import("std");
+const chemistry = @import("litter_chemistry.zig");
+const gas = @import("../soil/gas/transport.zig");
+
+// AFTER
+const std = @import("std");
+const chemistry = @import("litter_chemistry.zig");
+const gas = @import("../soil/gas/transport.zig");
+const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
+```
+
+**`refreshTransientFromChemistry`** (lines 13-39):
+
+```zig
+// BEFORE
+pub fn refreshTransientFromChemistry(
+    chemistry_state: *const chemistry.State,
+    gas_state: *gas.State,
+    litter_water_m3: []const f64,
+    nitrogen_molar_mass_g_per_mol: f64,
+) !void {
+    try validateDimensions(chemistry_state, gas_state, litter_water_m3, nitrogen_molar_mass_g_per_mol);
+    for (chemistry_state.cells, litter_water_m3) |cell, water| {
+        if (!std.math.isFinite(cell.ammonia_mol_per_m3) or cell.ammonia_mol_per_m3 < 0)
+            return error.InvalidLitterAmmoniaInventory;
+        const mass = if (water > 0)
+            cell.ammonia_mol_per_m3 * water * nitrogen_molar_mass_g_per_mol
+        else
+            0;
+        if (!std.math.isFinite(mass) or mass < 0)
+            return error.InvalidLitterAmmoniaInventory;
+    }
+    for (chemistry_state.cells, litter_water_m3, 0..) |cell, water, cell_index| {
+        const index = cell_index * gas.species_count + @intFromEnum(gas.Species.ammonia);
+        gas_state.dissolved_mass_g[index] = if (water > 0)
+            cell.ammonia_mol_per_m3 * water * nitrogen_molar_mass_g_per_mol
+        else
+            0;
+        gas_state.macropore_dissolved_mass_g[index] = 0;
+        gas_state.band_dissolved_mass_g[index] = 0;
+    }
+}
+
+// AFTER
+pub fn refreshTransientFromChemistry(
+    chemistry_state: *const chemistry.State,
+    gas_state: *gas.State,
+    litter_water_m3: []const f64,
+    cell_area_m2: []const f64,
+    nitrogen_molar_mass_g_per_mol: f64,
+) !void {
+    try validateDimensions(chemistry_state, gas_state, litter_water_m3, cell_area_m2, nitrogen_molar_mass_g_per_mol);
+    for (chemistry_state.cells, litter_water_m3, chemistry_state.dry_reference_water_m3, cell_area_m2) |cell, water, dry_reference_water, area_m2| {
+        if (!std.math.isFinite(cell.ammonia_mol_per_m3) or cell.ammonia_mol_per_m3 < 0)
+            return error.InvalidLitterAmmoniaInventory;
+        const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(area_m2);
+        const water_carrier = try litterAmmoniaCarrierM3(water, dry_reference_water, negligible_water_volume_m3);
+        const mass = cell.ammonia_mol_per_m3 * water_carrier * nitrogen_molar_mass_g_per_mol;
+        if (!std.math.isFinite(mass) or mass < 0)
+            return error.InvalidLitterAmmoniaInventory;
+    }
+    for (chemistry_state.cells, litter_water_m3, cell_area_m2, 0..) |cell, water, area_m2, cell_index| {
+        const index = cell_index * gas.species_count + @intFromEnum(gas.Species.ammonia);
+        const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(area_m2);
+        const water_carrier = try litterAmmoniaCarrierM3(water, chemistry_state.dry_reference_water_m3[cell_index], negligible_water_volume_m3);
+        gas_state.dissolved_mass_g[index] = cell.ammonia_mol_per_m3 * water_carrier * nitrogen_molar_mass_g_per_mol;
+        gas_state.macropore_dissolved_mass_g[index] = 0;
+        gas_state.band_dissolved_mass_g[index] = 0;
+    }
+}
+```
+
+**`publishTransientToChemistry`** (lines 41-75):
+
+```zig
+// BEFORE
+pub fn publishTransientToChemistry(
+    chemistry_state: *chemistry.State,
+    gas_state: *const gas.State,
+    litter_water_m3: []const f64,
+    nitrogen_molar_mass_g_per_mol: f64,
+    absolute_tolerance_g_n: f64,
+    relative_tolerance: f64,
+) !void {
+    try validateDimensions(chemistry_state, gas_state, litter_water_m3, nitrogen_molar_mass_g_per_mol);
+    if (!std.math.isFinite(absolute_tolerance_g_n) or absolute_tolerance_g_n < 0 or
+        !std.math.isFinite(relative_tolerance) or relative_tolerance < 0)
+        return error.InvalidLitterAmmoniaBridgeTolerance;
+    for (litter_water_m3, 0..) |water, cell_index| {
+        const index = cell_index * gas.species_count + @intFromEnum(gas.Species.ammonia);
+        const dissolved = gas_state.dissolved_mass_g[index];
+        if (!std.math.isFinite(dissolved) or dissolved < 0)
+            return error.InvalidTransientLitterAmmoniaInventory;
+        if (!std.math.isFinite(gas_state.macropore_dissolved_mass_g[index]) or
+            gas_state.macropore_dissolved_mass_g[index] != 0 or
+            !std.math.isFinite(gas_state.band_dissolved_mass_g[index]) or
+            gas_state.band_dissolved_mass_g[index] != 0)
+            return error.NoncanonicalTransientLitterAmmonia;
+        if (water == 0) {
+            const scale = @max(1.0, dissolved);
+            if (dissolved > absolute_tolerance_g_n + relative_tolerance * scale)
+                return error.LitterAmmoniaWithoutWaterCarrier;
+        }
+    }
+    for (litter_water_m3, 0..) |water, cell_index| {
+        if (water == 0) continue;
+        const index = cell_index * gas.species_count + @intFromEnum(gas.Species.ammonia);
+        chemistry_state.cells[cell_index].ammonia_mol_per_m3 =
+            gas_state.dissolved_mass_g[index] / nitrogen_molar_mass_g_per_mol / water;
+    }
+}
+
+// AFTER
+pub fn publishTransientToChemistry(
+    chemistry_state: *chemistry.State,
+    gas_state: *const gas.State,
+    litter_water_m3: []const f64,
+    cell_area_m2: []const f64,
+    nitrogen_molar_mass_g_per_mol: f64,
+    absolute_tolerance_g_n: f64,
+    relative_tolerance: f64,
+) !void {
+    try validateDimensions(chemistry_state, gas_state, litter_water_m3, cell_area_m2, nitrogen_molar_mass_g_per_mol);
+    if (!std.math.isFinite(absolute_tolerance_g_n) or absolute_tolerance_g_n < 0 or
+        !std.math.isFinite(relative_tolerance) or relative_tolerance < 0)
+        return error.InvalidLitterAmmoniaBridgeTolerance;
+    for (litter_water_m3, cell_area_m2, 0..) |water, area_m2, cell_index| {
+        const index = cell_index * gas.species_count + @intFromEnum(gas.Species.ammonia);
+        const dissolved = gas_state.dissolved_mass_g[index];
+        if (!std.math.isFinite(dissolved) or dissolved < 0)
+            return error.InvalidTransientLitterAmmoniaInventory;
+        if (!std.math.isFinite(gas_state.macropore_dissolved_mass_g[index]) or
+            gas_state.macropore_dissolved_mass_g[index] != 0 or
+            !std.math.isFinite(gas_state.band_dissolved_mass_g[index]) or
+            gas_state.band_dissolved_mass_g[index] != 0)
+            return error.NoncanonicalTransientLitterAmmonia;
+        const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(area_m2);
+        const water_carrier = try litterAmmoniaCarrierM3(water, chemistry_state.dry_reference_water_m3[cell_index], negligible_water_volume_m3);
+        if (water_carrier == 0) {
+            const scale = @max(1.0, dissolved);
+            if (dissolved > absolute_tolerance_g_n + relative_tolerance * scale)
+                return error.LitterAmmoniaWithoutWaterCarrier;
+        }
+    }
+    for (litter_water_m3, cell_area_m2, 0..) |water, area_m2, cell_index| {
+        const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(area_m2);
+        const water_carrier = try litterAmmoniaCarrierM3(water, chemistry_state.dry_reference_water_m3[cell_index], negligible_water_volume_m3);
+        if (water_carrier == 0) continue;
+        const index = cell_index * gas.species_count + @intFromEnum(gas.Species.ammonia);
+        chemistry_state.cells[cell_index].ammonia_mol_per_m3 =
+            gas_state.dissolved_mass_g[index] / nitrogen_molar_mass_g_per_mol / water_carrier;
+    }
+}
+```
+
+**`validateDimensions`** (lines 88-107):
+
+```zig
+// BEFORE
+fn validateDimensions(
+    chemistry_state: *const chemistry.State,
+    gas_state: *const gas.State,
+    litter_water_m3: []const f64,
+    nitrogen_molar_mass_g_per_mol: f64,
+) !void {
+    if (!std.math.isFinite(nitrogen_molar_mass_g_per_mol) or nitrogen_molar_mass_g_per_mol <= 0)
+        return error.InvalidNitrogenMolarMass;
+    if (chemistry_state.cells.len == 0 or
+        chemistry_state.dry_reference_water_m3.len != chemistry_state.cells.len or
+        gas_state.cell_count != chemistry_state.cells.len or
+        litter_water_m3.len != chemistry_state.cells.len)
+        return error.LitterAmmoniaPhaseBridgeDimensionMismatch;
+    try gas_state.validateShape();
+    for (litter_water_m3, chemistry_state.dry_reference_water_m3) |water, dry_reference| {
+        if (!std.math.isFinite(water) or water < 0 or
+            !std.math.isFinite(dry_reference) or dry_reference < 0)
+            return error.InvalidLitterAmmoniaWaterCarrier;
+    }
+}
+
+// AFTER
+fn validateDimensions(
+    chemistry_state: *const chemistry.State,
+    gas_state: *const gas.State,
+    litter_water_m3: []const f64,
+    cell_area_m2: []const f64,
+    nitrogen_molar_mass_g_per_mol: f64,
+) !void {
+    if (!std.math.isFinite(nitrogen_molar_mass_g_per_mol) or nitrogen_molar_mass_g_per_mol <= 0)
+        return error.InvalidNitrogenMolarMass;
+    if (chemistry_state.cells.len == 0 or
+        chemistry_state.dry_reference_water_m3.len != chemistry_state.cells.len or
+        gas_state.cell_count != chemistry_state.cells.len or
+        litter_water_m3.len != chemistry_state.cells.len or
+        cell_area_m2.len != chemistry_state.cells.len)
+        return error.LitterAmmoniaPhaseBridgeDimensionMismatch;
+    try gas_state.validateShape();
+    for (litter_water_m3, chemistry_state.dry_reference_water_m3, cell_area_m2) |water, dry_reference, area_m2| {
+        if (!std.math.isFinite(water) or water < 0 or
+            !std.math.isFinite(dry_reference) or dry_reference < 0 or
+            !std.math.isFinite(area_m2) or area_m2 < 0)
+            return error.InvalidLitterAmmoniaWaterCarrier;
+    }
+}
+```
+
+**New helper** (add near `validateDimensions`, e.g. immediately after it):
+
+```zig
+/// `ZEROS2(NY,NX) = ZERO2*DH(NY,NX)*DV(NY,NX)` (`starts.f:270`). issue-066:
+/// shares the same floor `landscape_mass_inventory_surface.zig`'s private
+/// `negligibleLitterWaterVolumeM3` already applies for this exact litter
+/// scope, and `erosion_chemistry_bridge.zig`'s now-fixed
+/// `erosionWaterCarrierM3` already applies for the structurally identical
+/// pack/unpack shape (issue-065), so this file's
+/// `refreshTransientFromChemistry`/`publishTransientToChemistry` round trip
+/// agrees with both on the same water-carrier basis for the same degenerate
+/// cell. Mirrors `erosionWaterCarrierM3`'s own error-set-local duplication
+/// rather than importing it: this file is a distinct production mutator.
+fn litterAmmoniaCarrierM3(
+    live_water_m3: f64,
+    dry_reference_water_m3: f64,
+    negligible_water_volume_m3: f64,
+) !f64 {
+    if (!std.math.isFinite(live_water_m3) or live_water_m3 < 0 or
+        !std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0 or
+        !std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
+        return error.InvalidLitterAmmoniaWaterCarrier;
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+}
+```
+
+### 3. Call-site inventory (everything that must change)
+
+Found by grepping the whole `ecosys-ng` tree for `refreshTransientFromChemistry` and `publishTransientToChemistry`: only two files reference either name.
+
+**Production (must be updated, one file, two call sites)** -- `ecosys-ng/src/surface/litter_gas_transport_step.zig`, both inside `State.advanceWithFailureReport` (which `State.advance` merely forwards to). `cell_area_m2` is **already** a parameter of `advanceWithFailureReport` (used at its own line 192 for `thickness`), so no new parameter needs threading into `litter_gas_transport_step.zig`'s own public API -- only the two internal bridge calls change:
+
+```zig
+// BEFORE (pack call, line 178)
+try ammonia_bridge.refreshTransientFromChemistry(
+    ammonia_owner.chemistry,
+    gas_state,
+    litter_water_m3,
+    ammonia_owner.nitrogen_molar_mass_g_per_mol,
+);
+
+// AFTER
+try ammonia_bridge.refreshTransientFromChemistry(
+    ammonia_owner.chemistry,
+    gas_state,
+    litter_water_m3,
+    cell_area_m2,
+    ammonia_owner.nitrogen_molar_mass_g_per_mol,
+);
+```
+
+```zig
+// BEFORE (unpack call, line 308)
+try ammonia_bridge.publishTransientToChemistry(
+    ammonia_owner.chemistry,
+    gas_state,
+    litter_water_m3,
+    ammonia_owner.nitrogen_molar_mass_g_per_mol,
+    ammonia_owner.absolute_tolerance_g_n,
+    ammonia_owner.relative_tolerance,
+);
+
+// AFTER
+try ammonia_bridge.publishTransientToChemistry(
+    ammonia_owner.chemistry,
+    gas_state,
+    litter_water_m3,
+    cell_area_m2,
+    ammonia_owner.nitrogen_molar_mass_g_per_mol,
+    ammonia_owner.absolute_tolerance_g_n,
+    ammonia_owner.relative_tolerance,
+);
+```
+
+**Tests only (must be updated, same file as the fix, 3 existing tests)** -- `litter_ammonia_phase_bridge.zig`'s own three tests call both functions directly and must gain a `cell_area_m2` argument (any positive value works; `&.{1, 1}` / `&.{1}` matches this fix's own new tests below and keeps `ZEROS2` floors at the documented `1.0e-6` m3):
+
+- `"litter chemistry ammonia is sole aqueous owner and transient round trip is exact"` (lines 109-124): both calls get `&.{ 1, 1 },` inserted before `14.01`/before the tolerance pair respectively. No assertion changes needed (`water = {3, 4}` is far above any floor).
+- `"invalid later transient leaves all litter chemistry owners unchanged"` (lines 140-152): both calls get `&.{ 1, 1 },` inserted. No assertion changes needed (`water = {1, 1}` is far above any floor).
+- `"dry retained ammonia remains chemistry owned and never enters gas mirror"` (lines 126-138): **assertions must change**, not just the argument list -- see item 4 below. This test currently encodes the pre-fix behavior it is named for.
+
+**No other production or test call sites exist anywhere in the repository for either function.**
+
+### 4. Existing test that must change semantics, not just signature
+
+`"dry retained ammonia remains chemistry owned and never enters gas mirror"` (lines 126-138) sets `chemistry_state.cells[0].ammonia_mol_per_m3 = 4`, `chemistry_state.dry_reference_water_m3[0] = 2`, `water = {0}`, `molar_mass = 14`. Pre-fix, `water == 0` takes the "layer does not exist" branch: pack sets `dissolved_mass_g[ammonia] = 0` and publish leaves the concentration untouched at `4`.
+
+Post-fix, `water = 0 <= negligible_water_volume_m3 (1.0e-6 for area 1 m2)`, so the carrier is `dry_reference_water_m3[0] = 2`, not `0`. This is the correct behavior per item 1's correction above: a dry cell's stored concentration is *already* expressed against `dry_reference_water_m3`, so packing it against raw (zero) water was always the bug, not a deliberate exclusion. The fixed round trip (with no solver-side mutation in this test) still recovers the original concentration exactly, because both pack and unpack now consistently use the same substituted carrier -- but the **intermediate** packed mass is no longer `0`.
+
+```zig
+// BEFORE
+test "dry retained ammonia remains chemistry owned and never enters gas mirror" {
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    var gas_state = try gas.State.init(std.testing.allocator, 1);
+    defer gas_state.deinit();
+    chemistry_state.cells[0].ammonia_mol_per_m3 = 4;
+    chemistry_state.dry_reference_water_m3[0] = 2;
+    try refreshTransientFromChemistry(&chemistry_state, &gas_state, &.{0}, 14);
+    const ammonia = @intFromEnum(gas.Species.ammonia);
+    try std.testing.expectEqual(@as(f64, 0), gas_state.dissolved_mass_g[ammonia]);
+    try publishTransientToChemistry(&chemistry_state, &gas_state, &.{0}, 14, 1e-12, 1e-9);
+    try std.testing.expectEqual(@as(f64, 4), chemistry_state.cells[0].ammonia_mol_per_m3);
+}
+
+// AFTER
+test "dry retained ammonia is packed onto the dry-reference carrier and round-trips exactly" {
+    // issue-066: pre-fix, this test asserted the defect itself (packed mass
+    // forced to exactly 0 at water==0, discarding the true extensive amount
+    // the concentration represents against dry_reference_water_m3). Fixed
+    // behavior: the dry cell's true extensive mass (concentration *
+    // dry_reference_water_m3 * molar_mass = 4 * 2 * 14 = 112 g N) is now
+    // correctly packed into the transient mirror, and with no solver-side
+    // mutation between pack and unpack, the round trip recovers the exact
+    // original concentration.
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    var gas_state = try gas.State.init(std.testing.allocator, 1);
+    defer gas_state.deinit();
+    chemistry_state.cells[0].ammonia_mol_per_m3 = 4;
+    chemistry_state.dry_reference_water_m3[0] = 2;
+    try refreshTransientFromChemistry(&chemistry_state, &gas_state, &.{0}, &.{1}, 14);
+    const ammonia = @intFromEnum(gas.Species.ammonia);
+    try std.testing.expectApproxEqAbs(@as(f64, 112), gas_state.dissolved_mass_g[ammonia], 1e-12);
+    try publishTransientToChemistry(&chemistry_state, &gas_state, &.{0}, &.{1}, 14, 1e-12, 1e-9);
+    try std.testing.expectApproxEqAbs(@as(f64, 4), chemistry_state.cells[0].ammonia_mol_per_m3, 1e-12);
+}
+```
+
+### 5. New regression tests (OLD destroys mass / NEW preserves mass)
+
+No live production trace exists for this bridge (issue-066 performed no rerun; `hour1.f:4494-4603` gives only the general `CNH3S = ZNH3S/VOLW`-shaped equation, not a numeric example). Representative values are used, reusing this file's own existing fixture magnitudes (`ammonia_mol_per_m3 = 4`, `dry_reference_water_m3 = 2`, `nitrogen_molar_mass_g_per_mol = 14`) for continuity, plus a near-zero-but-nonzero `1.0e-9` m3 water content (two orders of magnitude below the `1.0 m2`-cell `ZEROS2` floor of `1.0e-6` m3).
+
+```zig
+test "issue-066: OLD raw-carrier pack/unpack arithmetic would destroy litter aqueous ammonia mass at a near-zero-but-nonzero water content" {
+    // Reproduces this issue's own diagnosis by direct arithmetic, matching
+    // the pre-fix `refreshTransientFromChemistry`/`publishTransientToChemistry`
+    // formulas exactly (`if (water > 0) concentration * water * molar_mass
+    // else 0` / `dissolved / molar_mass / water`) -- those formulas are no
+    // longer reachable through the public entry points after the fix above,
+    // so this test documents historical behavior rather than calling into
+    // the module.
+    const dry_reference_water_m3: f64 = 2;
+    const live_water_m3: f64 = 1.0e-9; // below the 1.0e-6 m3 ZEROS2 floor for a 1 m2 cell
+    const nitrogen_molar_mass_g_per_mol: f64 = 14;
+    const concentration_mol_per_m3: f64 = 4;
+    const true_mass_g_n = concentration_mol_per_m3 * dry_reference_water_m3 * nitrogen_molar_mass_g_per_mol;
+    try std.testing.expectApproxEqAbs(@as(f64, 112), true_mass_g_n, 1e-12);
+
+    // Pack side: OLD `water > 0` is true even at 1e-9, so the raw live water
+    // is used directly as the carrier, discarding nearly all the true
+    // extensive mass with no ledger entry -- nothing physically removed the
+    // water-borne ammonia; the litter is simply mid-evaporation.
+    const packed_old_g_n = concentration_mol_per_m3 * live_water_m3 * nitrogen_molar_mass_g_per_mol;
+    try std.testing.expect(packed_old_g_n / true_mass_g_n < 1.0e-6);
+
+    // Unpack side: if the true mass (112 g N) were ever present in the
+    // mirror at this water content (e.g. carried over from wet-hour
+    // chemistry the solver did not touch because dissolved-phase exchange
+    // was zero that hour), OLD's unpack divides by the same raw near-zero
+    // water, manufacturing a physically impossible concentration nine
+    // orders of magnitude above the correct value -- the "fake mass swing"
+    // this defect class produces once real chemistry, not just an inert
+    // round trip, is on either side of the divide.
+    const unpacked_old_concentration_mol_per_m3 = true_mass_g_n / nitrogen_molar_mass_g_per_mol / live_water_m3;
+    try std.testing.expect(unpacked_old_concentration_mol_per_m3 > 1.0e9);
+}
+
+test "issue-066: NEW refreshTransientFromChemistry/publishTransientToChemistry round trip preserves litter aqueous ammonia mass through a genuine solver-side mutation at a near-zero-but-nonzero water content" {
+    // Two cells: cell 0 is mid-evaporation (live water 1e-9 m3, below the
+    // ZEROS2 floor, dry_reference_water_m3 = 2 m3 remembered from before it
+    // went dry); cell 1 is ordinarily wet (4 m3, unaffected by the fix,
+    // included to prove per-cell independence). A real solver-style
+    // transfer of 14 g N from cell 0 to cell 1 (matching this file's own
+    // pre-existing "round trip is exact" test's own transfer magnitude) is
+    // applied between pack and unpack, proving this is not merely an inert
+    // closed loop.
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 2);
+    defer chemistry_state.deinit();
+    var gas_state = try gas.State.init(std.testing.allocator, 2);
+    defer gas_state.deinit();
+    chemistry_state.cells[0].ammonia_mol_per_m3 = 4;
+    chemistry_state.cells[1].ammonia_mol_per_m3 = 5;
+    chemistry_state.dry_reference_water_m3[0] = 2;
+    const litter_water_m3 = [_]f64{ 1.0e-9, 4 };
+    const cell_area_m2 = [_]f64{ 1, 1 };
+    try refreshTransientFromChemistry(&chemistry_state, &gas_state, &litter_water_m3, &cell_area_m2, 14);
+    const ammonia = @intFromEnum(gas.Species.ammonia);
+    try std.testing.expectApproxEqAbs(@as(f64, 112), gas_state.dissolved_mass_g[ammonia], 1e-9);
+    try std.testing.expectApproxEqAbs(@as(f64, 280), gas_state.dissolved_mass_g[gas.species_count + ammonia], 1e-9);
+
+    // A real transfer: 14 g N moves from cell 0's aqueous ammonia to
+    // cell 1's, exactly as if the coupled gas/water solver had equilibrated
+    // some of cell 0's now-correctly-available inventory toward cell 1's
+    // phase (the bridge itself does not move mass between cells; this
+    // simulates what a real intervening solve does to the shared mirror).
+    gas_state.dissolved_mass_g[ammonia] -= 14;
+    gas_state.dissolved_mass_g[gas.species_count + ammonia] += 14;
+
+    try publishTransientToChemistry(&chemistry_state, &gas_state, &litter_water_m3, &cell_area_m2, 14, 1e-12, 1e-9);
+    // Cell 0: (112 - 14) g N / 14 / dry_reference_water_m3(2) = 3.5 mol/m3 --
+    // NOT (112 - 14) / 14 / live_water_m3(1e-9), which would be ~7.0e9.
+    try std.testing.expectApproxEqAbs(@as(f64, 3.5), chemistry_state.cells[0].ammonia_mol_per_m3, 1e-9);
+    try std.testing.expectApproxEqAbs(@as(f64, 5.25), chemistry_state.cells[1].ammonia_mol_per_m3, 1e-9);
+}
+```
+
+### 6. Reachability/severity re-check (performed this pass, static reading only)
+
+Re-verified by reading the actual call chain, not assuming it from the original evidence session:
+
+1. `litter_gas_transport_step.zig`'s `State.advanceWithFailureReport` calls `ammonia_bridge.refreshTransientFromChemistry` at line 178 unconditionally at the top of the function (before even its own dimension-mismatch check at line 185), and calls `ammonia_bridge.publishTransientToChemistry` at line 308 unconditionally after the solver and the per-species closure check, with no `if` gating either call on litter presence, ammonia presence, or wetness. Confirmed by direct reading, not inferred.
+2. The sole production caller of `State.advanceWithFailureReport` for this state is `ecosys-ng/src/stages/hourly_sediment.zig:1159`, inside `if (phase == .surface_gas) { ... }` (function `routeSedimentAndErosion`/`routeBiogeochemistryAndSolutes`, `ProductionPhase` enum `{ nitro, solute, surface_gas, erosion_redist }`). The call at line 1159 has no additional conditional wrapping it beyond the phase check itself -- confirmed by reading lines 1152-1199 directly.
+3. `routeSedimentAndErosion(context, .surface_gas, ...)` is itself called unconditionally, with no gating condition, from `ecosys-ng/src/stages/hourly_heat_water_solute.zig:13060` (grepped and read with context; the call sits at the same top-level indentation as the sibling `.nitro` call at line 12912 and `.solute` call at line 12970, all three unconditional statements in the same function body, not inside any `if`).
+4. This confirms the issue's own reachability claim ("`State.advance` runs this pack/unpack pair unconditionally every hour the surface litter gas solver executes") rather than merely repeating it: the full call chain from the hourly driver down to both bridge functions was read end to end this pass and contains no gate narrower than "the hourly driver executed this hour," which it does every production hour. Severity is unchanged from the original diagnosis: this is not a rare degenerate case, it is the ordinary evaporation/rewetting cycle.
+5. The severity claim that this bridge's own local conservation gate would not catch a manufactured discard is also re-confirmed: `litter_gas_transport_step.zig:279-306`'s per-species closure loop explicitly does `if (species == @intFromEnum(gas.Species.ammonia)) continue;`, unconditionally skipping ammonia every hour, for every cell. This was re-read directly, not assumed.
+
+### 7. Suggested minimal validation (per this issue's own "recommended next steps" item 4 and the project contract's cheapest-evidence preference)
+
+`zig build test` scoped to (or including) `litter_ammonia_phase_bridge.zig` and `litter_gas_transport_step.zig` is sufficient to validate this fix in isolation: both existing test files' full suites (4 tests in `litter_gas_transport_step.zig`, now 5 in `litter_ammonia_phase_bridge.zig` after item 4's rename and the two new tests in item 5) should pass. No full-deck rerun is required to accept this fix, matching how issue-064 (TRC-326) was validated by regression test alone. A full `ReleaseFast` rerun remains appropriate only once the machine is free and only to re-measure whatever residual the issue-065 campaign is independently chasing; this fix does not need one to be considered complete.
