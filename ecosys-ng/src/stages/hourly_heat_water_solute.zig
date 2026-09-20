@@ -7521,6 +7521,7 @@ fn CoupledSubstepTransaction(
                 context.soil_reactive_nitrogen,
                 context.fertilizer_band,
                 context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+                context.config.physical_tolerance.water_volume_m3,
             );
             try addFiniteSlices(self.mineral_boundary_total_g_n, context.mineral_nitrogen_transport.boundary_export_g_n_per_step);
             try addFiniteSlices(self.mineral_micropore_face_total_mol, self.mineral_micropore_face_step_mol);
@@ -7681,6 +7682,7 @@ fn CoupledSubstepTransaction(
                 context.soil_reactive_nitrogen,
                 context.fertilizer_band,
                 context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+                context.config.physical_tolerance.water_volume_m3,
             );
             try self.accumulateAcceptedGasBubbleActivity();
             try addFiniteSlices(self.gas_atmospheric_total_g, context.soil_gas_transport.atmospheric_flux_g_per_h);

@@ -134,6 +134,7 @@ test "same-hour reaction ammonia refresh reaches the root gas consumer" {
         &.{2},
         fractions,
         14,
+        0,
     );
     try refreshTransientFromMineral(&mineral_state, &gas_state, 14);
 

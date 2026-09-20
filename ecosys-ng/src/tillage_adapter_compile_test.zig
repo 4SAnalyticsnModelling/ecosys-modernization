@@ -247,7 +247,7 @@ test "tillage runtime adapter compiles" {
     macropore_solutes.amount_mol[@intFromEnum(SoluteSpecies.band_hpo4)] = 0.7;
     var mineral_nitrogen_transport = try MineralNitrogen.State.init(std.testing.allocator, 2);
     defer mineral_nitrogen_transport.deinit();
-    try mineral_nitrogen_transport.initializeMatrix(&chemistry, &reactive_nitrogen, grid.matrix_liquid_water_m3, &fertilizer_band, 14);
+    try mineral_nitrogen_transport.initializeMatrix(&chemistry, &reactive_nitrogen, grid.matrix_liquid_water_m3, &fertilizer_band, 14, 0);
     mineral_nitrogen_transport.macropore.amount_mol[@intFromEnum(MineralNitrogen.Species.ammonium_non_band)] = 0.5;
     var surface_water = [_]f64{0.05};
     var surface_ice = [_]f64{0.01};

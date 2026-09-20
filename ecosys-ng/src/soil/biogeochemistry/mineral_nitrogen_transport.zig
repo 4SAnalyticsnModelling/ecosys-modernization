@@ -66,6 +66,29 @@ pub const State = struct {
     /// Imports authoritative reaction-state concentrations into the matrix
     /// domain. Macropore inventories are deliberately not overwritten: STARTE
     /// initializes them to zero and subsequent transport owns their history.
+    ///
+    /// ISSUE-065 (twelfth addendum): a cell whose live water has collapsed to
+    /// (or below) the shared `ZEROS2` floor within the hour still has a
+    /// physically meaningful concentration, defined relative to
+    /// `chemistry.dry_reference_water_m3[cell]` (the layer's own remembered
+    /// pre-collapse carrier -- see `water_carrier_rebase.zig`'s
+    /// `rememberDryCarrier`), not relative to the (now near-zero) live water.
+    /// Multiplying by the raw live water here silently zeroed the true
+    /// extensive amount, the identical carrier-basis-mismatch defect class
+    /// already fixed at three sibling sites this issue
+    /// (`erosion_chemistry_bridge.zig`'s `erosionWaterCarrierM3`,
+    /// `aqueous_transport_bridge.zig`'s `exportCarrierM3`,
+    /// `water_carrier_rebase.zig`'s `sourceWaterM3` itself). `water_volume_m3`
+    /// still receives the *raw* live water (unchanged): that field is also the
+    /// live transport carrier `advance()`'s own face-flux physics reads, and
+    /// substituting it here would silently change diffusion/convection
+    /// behavior for a genuinely dry layer. Only the concentration-to-amount
+    /// conversion below is substituted -- mirroring exactly how
+    /// `aqueous_transport_bridge.zig`'s `exportChemistry` never rewrites
+    /// `transport_state.water_volume_m3` either. `publishMatrix` below
+    /// substitutes the identical carrier on the unpack side so the round trip
+    /// stays symmetric and never divides a preserved nonzero amount by a raw
+    /// zero.
     pub fn initializeMatrix(
         self: *State,
         chemistry: *const chemistry_module.State,
@@ -73,13 +96,19 @@ pub const State = struct {
         matrix_water_volume_m3: []const f64,
         fractions_source: anytype,
         nitrogen_molar_mass_g_per_mol: f64,
+        negligible_water_volume_m3: f64,
     ) !void {
         try validateBinding(self, chemistry, reactive, matrix_water_volume_m3, fractions_source, nitrogen_molar_mass_g_per_mol);
+        if (!std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
+            return error.InvalidMineralNitrogenTransportInput;
         @memcpy(self.matrix.water_volume_m3, matrix_water_volume_m3);
         for (0..self.cell_count) |cell| {
             const fractions = try bindingFractionsAt(fractions_source, cell);
             const aqueous = chemistry.aqueous[cell];
-            const water = matrix_water_volume_m3[cell];
+            const dry_reference_water_m3 = chemistry.dry_reference_water_m3[cell];
+            if (!std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0)
+                return error.InvalidMineralNitrogenTransportInput;
+            const water = carrierM3(matrix_water_volume_m3[cell], dry_reference_water_m3, negligible_water_volume_m3);
             const amounts = try self.matrix.cellAmounts(cell);
             amounts[index(.ammonium_non_band)] = aqueous.ammonium_non_band * water * fractions.ammonium_non_band;
             amounts[index(.ammonium_band)] = aqueous.ammonium_band * water * fractions.ammonium_band;
@@ -102,6 +131,7 @@ pub const State = struct {
         matrix_water_volume_m3: []const f64,
         fractions_source: anytype,
         nitrogen_molar_mass_g_per_mol: f64,
+        negligible_water_volume_m3: f64,
     ) !void {
         try self.initializeMatrix(
             chemistry,
@@ -109,6 +139,7 @@ pub const State = struct {
             matrix_water_volume_m3,
             fractions_source,
             nitrogen_molar_mass_g_per_mol,
+            negligible_water_volume_m3,
         );
     }
 
@@ -122,6 +153,7 @@ pub const State = struct {
         matrix_water_volume_m3: []const f64,
         fractions_source: anytype,
         nitrogen_molar_mass_g_per_mol: f64,
+        negligible_water_volume_m3: f64,
     ) !void {
         try self.initializeMatrix(
             chemistry,
@@ -129,6 +161,7 @@ pub const State = struct {
             matrix_water_volume_m3,
             fractions_source,
             nitrogen_molar_mass_g_per_mol,
+            negligible_water_volume_m3,
         );
     }
 
@@ -141,17 +174,34 @@ pub const State = struct {
 
     /// Publishes only the matrix domain back to reaction state. Macropore
     /// inventory stays transport-owned and cannot be silently collapsed.
+    ///
+    /// ISSUE-065 (twelfth addendum): the divisor here must be the identical
+    /// substituted carrier `initializeMatrix` used to pack the amount being
+    /// unpacked, or a preserved nonzero amount over a raw zero live-water
+    /// carrier trips `MineralNitrogenInZeroWaterDomain` as a pure side effect
+    /// of the pack-side fix -- not a new science finding. Nothing mutates
+    /// `self.matrix.water_volume_m3[cell]` or `chemistry.dry_reference_water_m3[cell]`
+    /// between the last `initializeMatrix`-family call and this one (`advance`'s
+    /// face-flux transport only changes `amount_mol`), so recomputing the same
+    /// substitution from those two fields here reproduces the exact carrier
+    /// the pack side used, making the round trip symmetric.
     pub fn publishMatrix(
         self: *const State,
         chemistry: *chemistry_module.State,
         reactive: *reactive_module.State,
         fractions_source: anytype,
         nitrogen_molar_mass_g_per_mol: f64,
+        negligible_water_volume_m3: f64,
     ) !void {
         try validateBinding(self, chemistry, reactive, self.matrix.water_volume_m3, fractions_source, nitrogen_molar_mass_g_per_mol);
+        if (!std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
+            return error.InvalidMineralNitrogenTransportInput;
         for (0..self.cell_count) |cell| {
             const fractions = try bindingFractionsAt(fractions_source, cell);
-            const water = self.matrix.water_volume_m3[cell];
+            const dry_reference_water_m3 = chemistry.dry_reference_water_m3[cell];
+            if (!std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0)
+                return error.InvalidMineralNitrogenTransportInput;
+            const water = carrierM3(self.matrix.water_volume_m3[cell], dry_reference_water_m3, negligible_water_volume_m3);
             const amounts = try self.matrix.cellAmountsConst(cell);
             const nh4_non_band_conc = try concentration(amounts[index(.ammonium_non_band)], water, fractions.ammonium_non_band);
             if (nh4_non_band_conc > 1000) std.log.warn(
@@ -606,6 +656,18 @@ fn index(species: Species) usize {
     return @intFromEnum(species);
 }
 
+/// ISSUE-065 (twelfth addendum): mirrors `erosion_chemistry_bridge.zig`'s
+/// `erosionWaterCarrierM3`, `aqueous_transport_bridge.zig`'s
+/// `exportCarrierM3`, and `water_carrier_rebase.zig`'s `sourceWaterM3`
+/// exactly. Substitutes the layer's remembered pre-collapse carrier whenever
+/// live water is at or below the shared `ZEROS2` floor, so `initializeMatrix`
+/// (pack) and `publishMatrix` (unpack) agree on the same nonzero basis for a
+/// degenerate layer instead of one silently using raw (possibly zero) live
+/// water.
+fn carrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_volume_m3: f64) f64 {
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+}
+
 fn concentration(amount_mol: f64, water_m3: f64, fraction: f64) !f64 {
     if (fraction == 0 or water_m3 == 0) {
         if (amount_mol > 1e-12) return error.MineralNitrogenInZeroWaterDomain;
@@ -979,7 +1041,7 @@ test "hour-start capture conserves zoned ammonium through wetting and drying" {
         chemistry.aqueous[0].ammonium_non_band = 2;
         chemistry.aqueous[0].ammonium_band = 4;
         state.macropore.amount_mol[index(.ammonium_non_band)] = 0.125;
-        try state.captureHourStartMatrix(&chemistry, &reactive, &.{1}, fractions, 14);
+        try state.captureHourStartMatrix(&chemistry, &reactive, &.{1}, fractions, 14, 0);
         _ = try advance(std.testing.allocator, &state, .{
             .active_by_layer = &.{true},
             .matrix_water_volume_m3 = &.{water_after_m3},
@@ -999,11 +1061,69 @@ test "hour-start capture conserves zoned ammonium through wetting and drying" {
             .nitrogen_molar_mass_g_per_mol = 14,
             .solver_options = .{ .max_iterations = 4 },
         });
-        try state.publishMatrix(&chemistry, &reactive, fractions, 14);
+        try state.publishMatrix(&chemistry, &reactive, fractions, 14, 0);
         try std.testing.expectApproxEqAbs(@as(f64, 1.5), state.matrix.amount_mol[index(.ammonium_non_band)], 1e-15);
         try std.testing.expectApproxEqAbs(@as(f64, 1), state.matrix.amount_mol[index(.ammonium_band)], 1e-15);
         try std.testing.expectApproxEqAbs(@as(f64, 0.125), state.macropore.amount_mol[index(.ammonium_non_band)], 1e-15);
         try std.testing.expectApproxEqAbs(2 / water_after_m3, chemistry.aqueous[0].ammonium_non_band, 1e-15);
         try std.testing.expectApproxEqAbs(4 / water_after_m3, chemistry.aqueous[0].ammonium_band, 1e-15);
     }
+}
+
+test "issue-065: OLD raw-carrier initializeMatrix/publishMatrix would destroy mineral-N mass at hour 2894's exact degenerate water content" {
+    // Reconstructs cell 0/layer 0's own recorded hour-2894 state (eleventh
+    // addendum, Step 3): live water collapsed to exactly zero while
+    // `dry_reference_water_m3` correctly holds the pre-collapse carrier
+    // (`6.058232575064708e-3`), and a nonzero, still-valid ammonium
+    // concentration is present. The un-substituted arithmetic
+    // `concentration * live_water_m3` this test exercises directly is
+    // exactly what the pre-fix `initializeMatrix` computed (silently zeroing
+    // the true extensive amount), and the reverse division by the same raw
+    // zero is exactly what the pre-fix `publishMatrix` would have needed to
+    // invert -- undefined for a nonzero amount, which is why a naive
+    // pack-only fix risks a new `MineralNitrogenInZeroWaterDomain` error.
+    const live_water_m3: f64 = 0;
+    const dry_reference_water_m3: f64 = 6.058232575064708e-3;
+    const ammonium_non_band_conc: f64 = 1.8677e-2;
+    try std.testing.expectEqual(@as(f64, 0), ammonium_non_band_conc * live_water_m3);
+    try std.testing.expect(ammonium_non_band_conc * dry_reference_water_m3 > 1e-4);
+}
+
+test "issue-065: NEW initializeMatrix/publishMatrix round trip preserves mineral-N mass at hour 2894's exact and near-zero degenerate water content" {
+    const fractions: ZoneFractions = .{
+        .ammonium_non_band = 1,
+        .ammonium_band = 0,
+        .nitrate_non_band = 1,
+        .nitrate_band = 0,
+    };
+    const dry_reference_water_m3: f64 = 6.058232575064708e-3;
+    const negligible_water_volume_m3: f64 = 1.0e-6;
+    var state = try State.init(std.testing.allocator, 1);
+    defer state.deinit();
+    var chemistry = try chemistry_module.State.init(std.testing.allocator, 1);
+    defer chemistry.deinit();
+    var reactive = try reactive_module.State.init(std.testing.allocator, 1, 1);
+    defer reactive.deinit();
+    chemistry.aqueous[0].ammonium_non_band = 1.8677e-2;
+    chemistry.dry_reference_water_m3[0] = dry_reference_water_m3;
+
+    // Exactly zero live water, matching hour 2894's post-collapse instant:
+    // the true extensive amount must be preserved, not zeroed.
+    try state.initializeMatrix(&chemistry, &reactive, &.{0}, fractions, 14, negligible_water_volume_m3);
+    const expected_amount_mol = chemistry.aqueous[0].ammonium_non_band * dry_reference_water_m3;
+    try std.testing.expectEqual(expected_amount_mol, state.matrix.amount_mol[index(.ammonium_non_band)]);
+    try std.testing.expect(state.matrix.amount_mol[index(.ammonium_non_band)] > 0);
+
+    // publishMatrix must invert the identical substitution symmetrically --
+    // not trip MineralNitrogenInZeroWaterDomain on the preserved amount.
+    try state.publishMatrix(&chemistry, &reactive, fractions, 14, negligible_water_volume_m3);
+    try std.testing.expectApproxEqAbs(@as(f64, 1.8677e-2), chemistry.aqueous[0].ammonium_non_band, 1e-15);
+
+    // Near-zero but still-below-floor live water behaves identically.
+    try state.initializeMatrix(&chemistry, &reactive, &.{1.0e-9}, fractions, 14, negligible_water_volume_m3);
+    try std.testing.expectEqual(expected_amount_mol, state.matrix.amount_mol[index(.ammonium_non_band)]);
+
+    // Live water above the floor is used unchanged (no-op substitution).
+    try state.initializeMatrix(&chemistry, &reactive, &.{2}, fractions, 14, negligible_water_volume_m3);
+    try std.testing.expectEqual(@as(f64, 2) * chemistry.aqueous[0].ammonium_non_band, state.matrix.amount_mol[index(.ammonium_non_band)]);
 }

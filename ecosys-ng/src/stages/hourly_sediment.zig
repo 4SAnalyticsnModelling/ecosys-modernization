@@ -991,6 +991,7 @@ noinline fn routePondSettlingAndFinalize(
             context.grid.matrix_liquid_water_m3,
             context.fertilizer_band,
             context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+            context.config.physical_tolerance.water_volume_m3,
         );
         // Pond and settling steps transfer surface_organic.microbial into soil_organic.microbial
         // but cannot reach soil_microbial directly.  Propagate the update now so that
@@ -1321,6 +1322,7 @@ noinline fn routeBiogeochemistryAndSolutes(
             context.grid.matrix_liquid_water_m3,
             context.fertilizer_band,
             context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+            context.config.physical_tolerance.water_volume_m3,
         );
         if (diagnostic_first_hour) {
             const current_n_g = try diagnostics.diagnosticStoredNitrogen_g(context);
@@ -1354,6 +1356,7 @@ noinline fn routeBiogeochemistryAndSolutes(
             context.grid.matrix_liquid_water_m3,
             context.fertilizer_band,
             context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+            context.config.physical_tolerance.water_volume_m3,
         );
         if (diagnostic_first_hour) {
             const current_n_g = try diagnostics.diagnosticStoredNitrogen_g(context);

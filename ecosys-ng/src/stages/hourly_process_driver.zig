@@ -279,6 +279,7 @@ pub fn executeHourlyScience(
         context.grid.matrix_liquid_water_m3,
         context.fertilizer_band,
         context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+        context.config.physical_tolerance.water_volume_m3,
     );
     if (diagnostic_first_hour) {
         const current_n_g = try diagnostics.diagnosticStoredNitrogen_g(context);

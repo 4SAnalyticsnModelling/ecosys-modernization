@@ -993,6 +993,7 @@ noinline fn publishHourlyChemistry(
         context.grid.matrix_liquid_water_m3,
         context.fertilizer_band,
         context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+        context.config.physical_tolerance.water_volume_m3,
     );
     try ecosys.soil_aqueous_transport_bridge.exportChemistry(
         context.soil_chemistry,

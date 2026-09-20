@@ -11032,6 +11032,7 @@ noinline fn initializeTransportConservationOwners(
         // capture. This must precede the first cell/layer storage census.
         inputs.fertilizer_band_state,
         runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+        config.physical_tolerance.water_volume_m3,
     );
     owners.surface_transport_state = try ecosys.surface_solute_routing.State.init(
         allocator,

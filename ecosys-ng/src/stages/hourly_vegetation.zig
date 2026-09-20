@@ -147,6 +147,7 @@ noinline fn advanceAcceptedRootUptake(context: anytype) !void {
         context.grid.matrix_liquid_water_m3,
         context.fertilizer_band,
         context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+        context.config.physical_tolerance.water_volume_m3,
     );
     // UPTAKE before GROSUB (`soil.f:175,182`): the root oxygen constraint
     // `WFR` must be current-hour before `applyRootMetabolism` reads
@@ -243,6 +244,7 @@ noinline fn advanceAcceptedRootUptake(context: anytype) !void {
             context.soil_reactive_nitrogen,
             context.fertilizer_band,
             context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
+            context.config.physical_tolerance.water_volume_m3,
         );
     };
     try root_processes.applyRootNutrientUptake(context.*);

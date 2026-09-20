@@ -729,6 +729,7 @@ test "hour-one census sees initialized transport mineral nitrogen before capture
         grid.matrix_liquid_water_m3,
         transport_fractions,
         14,
+        0,
     );
 
     const before_capture = try landscape_mass_inventory.aggregateProfileMineralNitrogenCell(
@@ -752,6 +753,7 @@ test "hour-one census sees initialized transport mineral nitrogen before capture
         grid.matrix_liquid_water_m3,
         transport_fractions,
         14,
+        0,
     );
     try std.testing.expectEqualSlices(f64, initialized_amounts, transport.matrix.amount_mol);
     const after_capture = try landscape_mass_inventory.aggregateProfileMineralNitrogenCell(
