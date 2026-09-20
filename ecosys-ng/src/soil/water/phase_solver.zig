@@ -592,6 +592,13 @@ noinline fn solveControlledImpl(
         const norm_admissible_and_not_retrying = !retrying_newton_after_anderson and norm <= 1;
         const committable = norm_admissible_and_not_retrying and
             committableState(grid, current, properties.freeze_thaw.ice_density_megagrams_per_m3);
+        // issue-068 (seventh-round follow-up): only characterize the exact
+        // window this round is asking about -- the residual is already
+        // admissible but the aggregate acceptance gate is not -- so this
+        // never fires for an ordinary committable iteration or hour.
+        if (norm_admissible_and_not_retrying and !committable) {
+            logCommittableStateDiagnosticIfGated(options, iteration, grid, current, properties.freeze_thaw.ice_density_megagrams_per_m3);
+        }
         if (committable) {
             const check = try evaluatePhaseEnergyConservation(base, current, trial_displacement, properties, options);
             phase_energy_accepted = check.accepted;
@@ -2889,6 +2896,151 @@ fn logIterationDiagnosticTrace(options: Options, iteration: u16, norm: f64, comm
         "TEMP_DIAGNOSTIC phase solver iteration residual trace (issue-068 numerical-analysis round): trace_index={d} iteration={d} max_iterations={d} scaled_residual={e} committable={} phase_energy_accepted={}",
         .{ index, iteration + 1, options.max_iterations, norm, committable, phase_energy_accepted },
     );
+}
+
+/// issue-068 (2026-09-20, seventh-round follow-up): per-cell/per-check trace
+/// of `committableState`'s own hard nonnegativity/pore-capacity gate,
+/// including `derivedAirVolumeM3`'s inputs/output and the specific failing
+/// check's signed margin (negative == infeasible, magnitude == how far past
+/// the boundary). The seventh round's own iteration trace above proved the
+/// gate stays `false` for 3-4 iterations after the residual norm is already
+/// `<=1`, but only reported the aggregate boolean, not which of the ~12
+/// flattened cell-layers or which specific check is the blocker. This
+/// re-implements `committableState`'s exact checks (never changes them) and
+/// only emits a line for a check that actually fails, gated identically to
+/// every sibling diagnostic in this file (a no-op unless
+/// `diagnostic_trace_layer_index` is set, which is only this issue's own
+/// narrow hour-2893-2896/cell-0 window). Called only when the residual norm
+/// is already admissible but the aggregate gate is not -- the exact window
+/// this round is trying to characterize -- so it never fires for an ordinary
+/// committable iteration or an ordinary (non-degenerate) hour.
+fn logCommittableStateDiagnosticIfGated(
+    options: Options,
+    iteration: u16,
+    grid: *const grid_module.GridState,
+    state: []const f64,
+    ice_density_megagrams_per_m3: f64,
+) void {
+    if (builtin.is_test) return;
+    const index = options.diagnostic_trace_layer_index orelse return;
+    const cells = grid.layer_count;
+    if (state.len != 6 * cells) {
+        std.log.warn(
+            "TEMP_DIAGNOSTIC phase solver committableState trace (issue-068 seventh round): trace_index={d} iteration={d} state dimension mismatch state_len={d} expected={d}",
+            .{ index, iteration + 1, state.len, 6 * cells },
+        );
+        return;
+    }
+    for (0..cells) |cell| {
+        const layer_scale = grid.matrix_pore_capacity_m3[cell] + grid.macropore_pore_capacity_m3[cell];
+        logDerivedAirVolumeDiagnosticIfFailing(
+            index,
+            iteration,
+            cell,
+            "matrix",
+            grid.matrix_pore_capacity_m3[cell],
+            state[cell],
+            state[2 * cells + cell],
+            ice_density_megagrams_per_m3,
+            layer_scale,
+        );
+        logDerivedAirVolumeDiagnosticIfFailing(
+            index,
+            iteration,
+            cell,
+            "macropore",
+            grid.macropore_pore_capacity_m3[cell],
+            state[3 * cells + cell],
+            state[4 * cells + cell],
+            ice_density_megagrams_per_m3,
+            layer_scale,
+        );
+        const vapor_m3 = state[1 * cells + cell];
+        if (!std.math.isFinite(vapor_m3) or vapor_m3 < 0) {
+            std.log.warn(
+                "TEMP_DIAGNOSTIC phase solver committableState trace (issue-068 seventh round): trace_index={d} iteration={d} cell={d} check=water_vapor_volume_m3_nonnegativity FAILS water_vapor_volume_m3={e} margin_m3={e}",
+                .{ index, iteration + 1, cell, vapor_m3, vapor_m3 },
+            );
+        }
+        const temperature_k = state[5 * cells + cell];
+        if (!std.math.isFinite(temperature_k) or temperature_k <= 0 or
+            !heat_solver.isPhysicalTemperatureK(temperature_k))
+        {
+            std.log.warn(
+                "TEMP_DIAGNOSTIC phase solver committableState trace (issue-068 seventh round): trace_index={d} iteration={d} cell={d} check=endpoint_temperature_domain FAILS temperature_k={e}",
+                .{ index, iteration + 1, cell, temperature_k },
+            );
+        }
+    }
+}
+
+/// Re-implements `derivedAirVolumeM3`'s exact checks (never changes them) to
+/// report which specific sub-check fails and its signed margin. Silent when
+/// every sub-check passes, including the ordinary roundoff-clamped case
+/// (`raw_air_m3` slightly negative but within `poreCapacityRoundoffToleranceM3`)
+/// -- that path is already accepted by `derivedAirVolumeM3` itself and is not
+/// this round's open question.
+fn logDerivedAirVolumeDiagnosticIfFailing(
+    index: usize,
+    iteration: u16,
+    cell: usize,
+    domain_name: []const u8,
+    capacity_m3: f64,
+    liquid_m3: f64,
+    ice_water_equivalent_m3: f64,
+    ice_density_megagrams_per_m3: f64,
+    layer_scale_m3: f64,
+) void {
+    if (!std.math.isFinite(capacity_m3) or capacity_m3 < 0 or
+        !std.math.isFinite(layer_scale_m3) or layer_scale_m3 < 0)
+    {
+        std.log.warn(
+            "TEMP_DIAGNOSTIC phase solver committableState trace (issue-068 seventh round): trace_index={d} iteration={d} cell={d} domain={s} check=capacity_or_scale_finite FAILS capacity_m3={e} layer_scale_m3={e}",
+            .{ index, iteration + 1, cell, domain_name, capacity_m3, layer_scale_m3 },
+        );
+        return;
+    }
+    if (!std.math.isFinite(liquid_m3) or liquid_m3 < 0) {
+        std.log.warn(
+            "TEMP_DIAGNOSTIC phase solver committableState trace (issue-068 seventh round): trace_index={d} iteration={d} cell={d} domain={s} check=liquid_nonnegativity FAILS liquid_m3={e} margin_m3={e}",
+            .{ index, iteration + 1, cell, domain_name, liquid_m3, liquid_m3 },
+        );
+        return;
+    }
+    if (!std.math.isFinite(ice_water_equivalent_m3) or ice_water_equivalent_m3 < 0) {
+        std.log.warn(
+            "TEMP_DIAGNOSTIC phase solver committableState trace (issue-068 seventh round): trace_index={d} iteration={d} cell={d} domain={s} check=ice_water_equivalent_nonnegativity FAILS ice_water_equivalent_m3={e} margin_m3={e}",
+            .{ index, iteration + 1, cell, domain_name, ice_water_equivalent_m3, ice_water_equivalent_m3 },
+        );
+        return;
+    }
+    const physical_ice_m3 = ice_units.physicalVolumeM3FromWaterEquivalent(ice_water_equivalent_m3, ice_density_megagrams_per_m3) catch {
+        std.log.warn(
+            "TEMP_DIAGNOSTIC phase solver committableState trace (issue-068 seventh round): trace_index={d} iteration={d} cell={d} domain={s} check=ice_density_conversion FAILS ice_water_equivalent_m3={e} ice_density_megagrams_per_m3={e}",
+            .{ index, iteration + 1, cell, domain_name, ice_water_equivalent_m3, ice_density_megagrams_per_m3 },
+        );
+        return;
+    };
+    const raw_air_m3 = capacity_m3 - liquid_m3 - physical_ice_m3;
+    if (!std.math.isFinite(raw_air_m3)) {
+        std.log.warn(
+            "TEMP_DIAGNOSTIC phase solver committableState trace (issue-068 seventh round): trace_index={d} iteration={d} cell={d} domain={s} check=raw_air_finite FAILS capacity_m3={e} liquid_m3={e} physical_ice_m3={e}",
+            .{ index, iteration + 1, cell, domain_name, capacity_m3, liquid_m3, physical_ice_m3 },
+        );
+        return;
+    }
+    const tolerance_m3 = poreCapacityRoundoffToleranceM3(capacity_m3, layer_scale_m3);
+    if (raw_air_m3 < -tolerance_m3) {
+        // Signed margin: negative == infeasible; magnitude is how far past
+        // the roundoff-tolerant boundary this candidate's implied air volume
+        // sits (i.e. how much the layer is overfilled beyond what roundoff
+        // alone would explain).
+        const margin_m3 = raw_air_m3 + tolerance_m3;
+        std.log.warn(
+            "TEMP_DIAGNOSTIC phase solver committableState trace (issue-068 seventh round): trace_index={d} iteration={d} cell={d} domain={s} check=pore_capacity FAILS capacity_m3={e} liquid_m3={e} physical_ice_m3={e} raw_air_m3={e} tolerance_m3={e} margin_m3={e}",
+            .{ index, iteration + 1, cell, domain_name, capacity_m3, liquid_m3, physical_ice_m3, raw_air_m3, tolerance_m3, margin_m3 },
+        );
+    }
 }
 
 test "phase Newton recovery targets the component that limits convergence merit" {
