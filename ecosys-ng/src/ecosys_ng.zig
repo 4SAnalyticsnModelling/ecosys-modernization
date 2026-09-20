@@ -6051,6 +6051,85 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
         },
     );
     defer hourly_layer_conservation_report.deinit(driver_context.allocator.*);
+    // ISSUE-065 DRY_CARRIER_TRACE (per-layer breakdown): bounded, hour-2,894-
+    // windowed dump of every one of the cell's soil layers (not just layer 0,
+    // the only layer any prior pass's instrumentation ever observed) for
+    // every one of the ten quantities this issue's `HourlyCellConservationFailure`
+    // reports (carbon/nitrogen/phosphorus/aluminum/iron/calcium/magnesium/
+    // sodium/potassium/silicon). This reuses the per-scope storage arrays and
+    // the per-scope local-conservation closures (`hourly_layer_conservation_report`,
+    // computed unconditionally just above, for every soil/snow/surface/canopy
+    // scope, not only when a quantity's cell-wide gate happens to fail) rather
+    // than adding a new water-carrier trace mechanism -- both are already
+    // populated once per hour with no extra science-path cost. Exploratory
+    // scratch instrumentation, not gated permanently.
+    if (driver_context.executed_weather_hours.* >= 2888 and
+        driver_context.executed_weather_hours.* < 2896)
+    {
+        const per_layer_quantities = [_]ecosys.hourly_cell_conservation.Quantity{
+            .carbon,    .nitrogen,  .phosphorus, .aluminum,  .iron,
+            .calcium,   .magnesium, .sodium,     .potassium, .silicon,
+        };
+        for (hourly_layer_conservation_report.cells, 0..) |scope_report, index| {
+            const address = try driver_context.layer_conservation_layout.*.address(index);
+            if (address.kind != .soil_layer or address.cell != 0) continue;
+            const before = driver_context.hourly_layer_storage_before.*[index];
+            const after = driver_context.hourly_layer_storage_after.*[index];
+            const nitrogen_before = before.residue_nitrogen_g + before.organic_nitrogen_g + before.dinitrogen_nitrogen_g + before.ammonium_nitrogen_g + before.nitrate_nitrogen_g + before.plant_nitrogen_g;
+            const nitrogen_after = after.residue_nitrogen_g + after.organic_nitrogen_g + after.dinitrogen_nitrogen_g + after.ammonium_nitrogen_g + after.nitrate_nitrogen_g + after.plant_nitrogen_g;
+            const phosphorus_before = before.residue_phosphorus_g + before.organic_phosphorus_g + before.phosphate_phosphorus_g + before.plant_phosphorus_g;
+            const phosphorus_after = after.residue_phosphorus_g + after.organic_phosphorus_g + after.phosphate_phosphorus_g + after.plant_phosphorus_g;
+            std.log.info(
+                "DRY_CARRIER_TRACE site=per_layer_storage hour={d} cell=0 layer={d} carbon_before={e} carbon_after={e} carbon_dioxide_carbon_g_before={e} carbon_dioxide_carbon_g_after={e} nitrogen_before={e} nitrogen_after={e} phosphorus_before={e} phosphorus_after={e} aluminum_mol_before={e} aluminum_mol_after={e} iron_mol_before={e} iron_mol_after={e} calcium_mol_before={e} calcium_mol_after={e} magnesium_mol_before={e} magnesium_mol_after={e} sodium_mol_before={e} sodium_mol_after={e} potassium_mol_before={e} potassium_mol_after={e} silicon_mol_before={e} silicon_mol_after={e} live_water_m3={e} dry_reference_water_m3={e}",
+                .{
+                    driver_context.executed_weather_hours.* + 1,
+                    address.layer,
+                    before.residue_carbon_g + before.organic_carbon_g + before.carbon_dioxide_carbon_g + before.plant_carbon_g,
+                    after.residue_carbon_g + after.organic_carbon_g + after.carbon_dioxide_carbon_g + after.plant_carbon_g,
+                    before.carbon_dioxide_carbon_g,
+                    after.carbon_dioxide_carbon_g,
+                    nitrogen_before,
+                    nitrogen_after,
+                    phosphorus_before,
+                    phosphorus_after,
+                    before.aluminum_mol,
+                    after.aluminum_mol,
+                    before.iron_mol,
+                    after.iron_mol,
+                    before.calcium_mol,
+                    after.calcium_mol,
+                    before.magnesium_mol,
+                    after.magnesium_mol,
+                    before.sodium_mol,
+                    after.sodium_mol,
+                    before.potassium_mol,
+                    after.potassium_mol,
+                    before.silicon_mol,
+                    after.silicon_mol,
+                    driver_context.hourly_science_context.*.grid.matrix_liquid_water_m3[address.layer],
+                    driver_context.hourly_science_context.*.soil_chemistry.dry_reference_water_m3[address.layer],
+                },
+            );
+            for (per_layer_quantities) |quantity| {
+                const closure = scope_report.closure[@intFromEnum(quantity)];
+                std.log.info(
+                    "DRY_CARRIER_TRACE site=per_layer_closure hour={d} cell=0 layer={d} quantity={s} residual={e} absolute={e} acceptance_limit={e} arithmetic_roundoff_allowance={e} effective_acceptance_limit={e} physical_accepted={} accepted={}",
+                    .{
+                        driver_context.executed_weather_hours.* + 1,
+                        address.layer,
+                        @tagName(quantity),
+                        closure.residual,
+                        closure.absolute,
+                        closure.acceptance_limit,
+                        closure.arithmetic_roundoff_allowance,
+                        closure.effective_acceptance_limit,
+                        closure.physical_accepted,
+                        closure.accepted,
+                    },
+                );
+            }
+        }
+    }
     // SURFACE-HEAT-PONDED-LITTER-BOOKING-001: the surface scope's six heat terms
     // EVERY hour, not only on the hour that fails.
     //
