@@ -8,6 +8,7 @@
 
 const std = @import("std");
 const ice_units = @import("../../core/ice_units.zig");
+const legacy_water_negligible_floor = @import("../../core/legacy_water_negligible_floor.zig");
 const Grid = @import("../../state/grid.zig").GridState;
 const SoilGeometry = @import("../../soil/profile/layer_geometry.zig");
 const SoilProperties = @import("../../soil/water/solver_properties.zig");
@@ -1081,15 +1082,20 @@ pub fn apply(context: *Context, cell: usize, tillage_depth_m: f64, mixing_fracti
     context.surface_ice_m3[cell] = physical_gas.surface_ice_m3;
     context.surface_heat_capacity_megajoules_per_k[cell] = physical_gas.surface_heat_capacity_megajoules_per_k;
     context.surface_gas.water_vapor_mol[cell] = physical_gas.surface_vapor_m3 / 18.0e-6;
+    // issue-064 (deferred cluster, now fixed): widen the exact-zero guard to
+    // the shared `ZEROS2`-equivalent floor, matching
+    // `solidTransferWaterCarrierM3`/`legacyNegligibleWaterVolumeM3` in
+    // `relayering.zig` and the other already-fixed siblings in this defect
+    // class, so a near-zero-but-nonzero live surface water carrier does not
+    // get treated as "real" here while the census substitutes the dry
+    // reference for the same field.
+    const commit_negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(context.cell_area_m2[cell]);
     SurfaceAqueousTillage.commitTillageSurfaceAmounts(
         context.surface_chemistry,
         context.surface_solute_transport,
         cell,
         physical_gas.surface_water_m3,
-        if (physical_gas.surface_water_m3 > 0)
-            physical_gas.surface_water_m3
-        else
-            physical_gas.surface_dry_reference_water_m3,
+        tillageWaterCarrierM3(physical_gas.surface_water_m3, physical_gas.surface_dry_reference_water_m3, commit_negligible_water_volume_m3),
         physical_gas.surface_dynamic_amount_mol,
     ) catch unreachable;
     const pending_per_cell = (layers + 1) * PlantLitterSaltIngress.salt_count;
@@ -1594,10 +1600,15 @@ noinline fn finishOrderedSequence(
         surface_mixable_after,
     );
 
-    const remaining_surface_aqueous_carrier = if (phase[0][cell] > 0)
-        phase[0][cell]
-    else
-        context.surface_chemistry.dry_reference_water_m3[cell] * biomass.surface_remaining_fraction;
+    // issue-064: same `ZEROS2`-equivalent floor as the other tillage
+    // surface-water guards fixed in this pass (this cell's carrier basis
+    // must agree everywhere it is derived from `phase[0][cell]`).
+    const rebuild_negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(context.cell_area_m2[cell]);
+    const remaining_surface_aqueous_carrier = tillageWaterCarrierM3(
+        phase[0][cell],
+        context.surface_chemistry.dry_reference_water_m3[cell] * biomass.surface_remaining_fraction,
+        rebuild_negligible_water_volume_m3,
+    );
     if (remaining_surface_aqueous_carrier == 0) {
         for (plant_litter_salt_dynamic_coordinates, 0..) |coordinate, salt| {
             plant_litter_salt_pending[salt] = dynamic[coordinate].surface_amount[cell];
@@ -1647,7 +1658,7 @@ noinline fn finishOrderedSequence(
         .surface_dynamic_amount_mol = @splat(0),
         .plant_litter_salt_pending_mol = plant_litter_salt_pending,
         .surface_mineral_reference_water_m3 = context.surface_chemistry.mineral_reference_water_m3[cell],
-        .surface_dry_reference_water_m3 = if (phase[0][cell] > 0) 0 else context.surface_chemistry.dry_reference_water_m3[cell] * biomass.surface_remaining_fraction,
+        .surface_dry_reference_water_m3 = if (phase[0][cell] > rebuild_negligible_water_volume_m3) 0 else context.surface_chemistry.dry_reference_water_m3[cell] * biomass.surface_remaining_fraction,
         .surface_chemistry = surface_owners.chemistry,
         .surface_fertilizer = surface_owners.fertilizer,
         .mineral_soil = mineral_soil,
@@ -2509,8 +2520,65 @@ fn setSurfaceInventory(family: *surface_chemical_transfer.TransferFamily, cell: 
     if (!std.math.isFinite(family.surface_amount[cell])) return error.NonFiniteTillageSurfaceChemistryInventory;
 }
 
+/// `ZEROS2(NY,NX) = ZERO2*DH(NY,NX)*DV(NY,NX)` (`starts.f:270`). issue-064
+/// (deferred cluster, now fixed): shared floor-substitution helper for this
+/// file's tillage surface/aqueous water-carrier guards, mirroring
+/// `relayering.zig`'s `solidTransferWaterCarrierM3` exactly. A bare `> 0`
+/// guard treats any nonzero-but-negligible live water carrier as "real",
+/// while a sibling site (or the whole-hour census) may already substitute
+/// the remembered dry/mineral reference for the same field at the same
+/// floor -- that basis mismatch is the exact defect class already fixed at
+/// issue-060/061/063/064's other instances. `> `, not `>=`, matches legacy's
+/// own strict comparison (`solute.f:610`).
+fn tillageWaterCarrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_volume_m3: f64) f64 {
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+}
+
+test "issue-064: tillageWaterCarrierM3 substitutes the dry reference at and below the ZEROS2 floor instead of only at exact zero" {
+    const negligible = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(1.0);
+    try std.testing.expectEqual(@as(f64, 1.0e-6), negligible);
+
+    // A near-zero-but-nonzero raw carrier -- the exact shape this defect
+    // class manufactures fake mass from at issue-060/061/063's other sites.
+    const near_zero_raw_carrier: f64 = 1.0e-9;
+    try std.testing.expect(near_zero_raw_carrier > 0);
+    const dry_reference_m3: f64 = 0.5;
+    const concentration_mol_per_m3: f64 = 20.0;
+
+    // OLD guard (bare `> 0`, this file's behavior before this fix): the
+    // near-zero raw carrier is accepted as "real", manufacturing a fake mass
+    // more than five orders of magnitude below the physically correct value.
+    const old_carrier = if (near_zero_raw_carrier > 0) near_zero_raw_carrier else dry_reference_m3;
+    const old_mass_mol = concentration_mol_per_m3 * old_carrier;
+    try std.testing.expectEqual(@as(f64, 1.0e-9), old_carrier);
+    try std.testing.expectEqual(@as(f64, 2.0e-8), old_mass_mol);
+
+    // NEW guard (this fix): the same near-zero raw carrier is at/below the
+    // ZEROS2-equivalent floor, so the remembered dry reference is
+    // substituted instead, producing a stable, physically sensible mass.
+    const new_carrier = tillageWaterCarrierM3(near_zero_raw_carrier, dry_reference_m3, negligible);
+    const new_mass_mol = concentration_mol_per_m3 * new_carrier;
+    try std.testing.expectEqual(dry_reference_m3, new_carrier);
+    try std.testing.expectEqual(@as(f64, 10.0), new_mass_mol);
+    try std.testing.expect(new_mass_mol / old_mass_mol > 1.0e5);
+
+    // Strictly above the floor: both guards agree and keep the live carrier.
+    const just_above = std.math.nextAfter(f64, negligible, std.math.inf(f64));
+    try std.testing.expectEqual(just_above, tillageWaterCarrierM3(just_above, dry_reference_m3, negligible));
+    // At exactly the floor: OLD guard (`> 0`) would still have kept the live
+    // carrier since `negligible > 0`, but NEW guard substitutes the dry
+    // reference -- this is the boundary the fix actually widens.
+    try std.testing.expect(negligible > 0);
+    try std.testing.expectEqual(dry_reference_m3, tillageWaterCarrierM3(negligible, dry_reference_m3, negligible));
+}
+
 fn surfaceAqueousCarrier(context: *const Context, cell: usize) f64 {
-    return if (context.surface_water_m3[cell] > 0) context.surface_water_m3[cell] else context.surface_chemistry.dry_reference_water_m3[cell];
+    // issue-064: widen the exact-zero guard to the shared `ZEROS2`-equivalent
+    // floor (`legacyNegligibleWaterVolumeM3`), matching the already-fixed
+    // siblings of this defect class (issue-060/061/063/064) rather than a
+    // bare `> 0` check.
+    const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(context.cell_area_m2[cell]);
+    return tillageWaterCarrierM3(context.surface_water_m3[cell], context.surface_chemistry.dry_reference_water_m3[cell], negligible_water_volume_m3);
 }
 
 fn gatherSurfaceTransfers(context: *const Context, cell: usize, dynamic_salts: bool, core: *[surface_chemical_transfer.core_family_count]surface_chemical_transfer.TransferFamily, dynamic: *[surface_chemical_transfer.dynamic_salt_family_count]surface_chemical_transfer.TransferFamily) !void {
@@ -2554,7 +2622,10 @@ fn surfaceOwnersAfter(context: *const Context, cell: usize, dynamic_salts: bool,
         .nitrite_g_n = core[9].surface_amount[cell],
     };
     const old_dry = context.surface_chemistry.dry_reference_water_m3[cell];
-    const water = if (new_water_m3 > 0) new_water_m3 else old_dry * remaining;
+    // issue-064: same floor as `surfaceAqueousCarrier`'s before-side carrier,
+    // so the after-side census agrees with it on the same basis.
+    const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(context.cell_area_m2[cell]);
+    const water = tillageWaterCarrierM3(new_water_m3, old_dry * remaining, negligible_water_volume_m3);
     const mass = context.surface_geometry.dry_mass_megagrams[cell] * remaining;
     const concentration = struct {
         fn value(inventory: f64, carrier: f64) !f64 {
@@ -3109,8 +3180,13 @@ noinline fn incorporateSurfacePhase(
         try salt_incorporation.incorporate(allocator, .{ .simulation = if (dynamic_salts) .enabled else .disabled, .layer = layer, .layer_count = layers, .incorporation_fraction = fi, .layer_amounts = salt_slices, .mixed_totals = salt_totals });
     }
     try validateMappedSurfaceIncorporation(chemistry_before_surface, chemistry_storage, layers, &mineral_chemistry_coordinates, mineral_totals[6..], &salt_coordinates, &salt_totals);
+    // issue-064: same `ZEROS2`-equivalent floor as this cell's other tillage
+    // surface/aqueous water-carrier guards -- `ZEROS2` scales with the
+    // cell's horizontal footprint only, so one floor value covers every
+    // layer of this cell.
+    const pending_salt_negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(context.cell_area_m2[cell]);
     for (0..layers) |layer| {
-        if (matrix_water[layer] > 0) continue;
+        if (matrix_water[layer] > pending_salt_negligible_water_volume_m3) continue;
         for (plant_litter_salt_dynamic_coordinates, 0..) |coordinate, salt| {
             const chemistry_index = (salt_offset + coordinate) * layers + layer;
             const pending_index = (layer + 1) * PlantLitterSaltIngress.salt_count + salt;
