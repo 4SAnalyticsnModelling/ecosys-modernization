@@ -51,6 +51,98 @@ test "REAL-DECK-HOUR-11-FATAL-STAGNATION-001: physically absurd soil temperature
     try group_solve.validateSoilTemperaturePhysicalDomain(&.{ 173.15, 280, 373.15 });
 }
 
+test "issue-068: hour-2895's exact offending temperatures (401.75/452.64/455.14 K) violate the physical domain" {
+    // Exact values captured by issue-068's diagnostic logging at hour 2,895,
+    // cell 0/layer 0 (a chronically near-zero-heat-capacity layer), at
+    // escalating substep_count=20/32/64 respectively -- 28.6/79.5/82.0 K
+    // past the 373.15 K ceiling, confirmed a genuine numerical instability
+    // (escalating substeps made the overshoot WORSE, not better), not a
+    // marginal/roundoff overshoot. Before this issue's fix, the two
+    // residual-scaled early-accept branches in `solve()` would commit a
+    // value like this whenever their own scaled-residual criterion alone
+    // was satisfied; see the end-to-end wiring proof below for confirmation
+    // that both branches now also require `allTemperaturesPhysicallyValid`.
+    try std.testing.expectError(
+        error.SoilHeatSolverTemperatureOutsidePhysicalDomain,
+        group_solve.validateSoilTemperaturePhysicalDomain(&.{4.017531898751224e2}),
+    );
+    try std.testing.expectError(
+        error.SoilHeatSolverTemperatureOutsidePhysicalDomain,
+        group_solve.validateSoilTemperaturePhysicalDomain(&.{4.5264430224579985e2}),
+    );
+    try std.testing.expectError(
+        error.SoilHeatSolverTemperatureOutsidePhysicalDomain,
+        group_solve.validateSoilTemperaturePhysicalDomain(&.{4.551385293197757e2}),
+    );
+}
+
+test "issue-068: both residual-scaled early-accept branches require the candidate to be inside the physical domain before committing" {
+    // Direct source-text proof that the fix actually reached both sites
+    // issue-068 named (the mid-loop `norm <= 1` branch and the tail's
+    // `strict_accept`/`practical_accept` branch), not just one of them, and
+    // that the guard sits between the acceptance decision and the call to
+    // `commitAcceptedState` -- i.e. a candidate that fails the guard falls
+    // through to the existing `.iteration_limit`/`.stagnated`/`.diverged`
+    // failure path instead of ever reaching `commitAcceptedState` (which
+    // would otherwise raise `SoilHeatSolverTemperatureOutsidePhysicalDomain`
+    // from inside a bare `try`, aborting the solve immediately and skipping
+    // that failure path's own richer diagnostics).
+    const source = try readSolverSolveSource();
+    defer std.testing.allocator.free(source);
+
+    const mid_loop_accept = std.mem.indexOf(
+        u8,
+        source,
+        "if (!retrying_newton_after_anderson and norm <= 1 and",
+    ) orelse return error.MissingHeatMidLoopEarlyAccept;
+    const mid_loop_commit = std.mem.indexOfPos(
+        u8,
+        source,
+        mid_loop_accept,
+        "commitAcceptedState(",
+    ) orelse return error.MissingHeatMidLoopCommit;
+    try std.testing.expect(std.mem.indexOf(
+        u8,
+        source[mid_loop_accept..mid_loop_commit],
+        "allTemperaturesPhysicallyValid(current)",
+    ) != null);
+
+    const tail_accept = std.mem.indexOf(
+        u8,
+        source,
+        "if ((strict_accept or practical_accept) and",
+    ) orelse return error.MissingHeatTailEarlyAccept;
+    const tail_commit = std.mem.indexOfPos(
+        u8,
+        source,
+        tail_accept,
+        "commitAcceptedState(",
+    ) orelse return error.MissingHeatTailCommit;
+    try std.testing.expect(std.mem.indexOf(
+        u8,
+        source[tail_accept..tail_commit],
+        "allTemperaturesPhysicallyValid(current)",
+    ) != null);
+
+    // The guard itself must be built on the same primitive every other
+    // per-trial admissibility check in this file already uses
+    // (`group_validation.isPhysicalTemperatureK`), not a redefinition of
+    // the physical domain -- this never widens the bound in
+    // `solver_validation.zig`.
+    const guard_fn = std.mem.indexOf(
+        u8,
+        source,
+        "fn allTemperaturesPhysicallyValid(temperature_k: []const f64) bool {",
+    ) orelse return error.MissingHeatDomainGuardHelper;
+    const guard_fn_end = std.mem.indexOfPos(u8, source, guard_fn, "\n}") orelse
+        return error.MissingHeatDomainGuardHelperEnd;
+    try std.testing.expect(std.mem.indexOf(
+        u8,
+        source[guard_fn..guard_fn_end],
+        "group_validation.isPhysicalTemperatureK(value)",
+    ) != null);
+}
+
 test "heat Newton rejects an impossible full step and accepts a bounded backtrack" {
     const cfg = try @import("../../core/config.zig").SimulationConfig.init(
         .{ .lon_count = 2, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 },

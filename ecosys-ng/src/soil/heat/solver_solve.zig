@@ -581,6 +581,35 @@ pub fn validateSoilTemperaturePhysicalDomain(temperature_k: []const f64) !void {
     return group_validation.validateSoilTemperaturePhysicalDomain(temperature_k);
 }
 
+/// issue-068 (2026-09-20): the two residual-scaled "early accept" branches
+/// below (the mid-loop `norm <= 1` branch, and the tail's
+/// `strict_accept`/`practical_accept` branch) previously called
+/// `commitAcceptedState` as soon as their own scaled-residual criterion was
+/// satisfied, trusting `commitAcceptedState`'s own
+/// `validateSoilTemperaturePhysicalDomain` call to catch a physically
+/// absurd candidate. For an ordinary layer this is harmless -- a small
+/// scaled residual already implies a temperature far inside the valid
+/// domain -- but for a chronically near-zero-heat-capacity layer, a small
+/// scaled energy residual divided by a near-zero capacity can correspond to
+/// a temperature tens of kelvin outside [173.15, 373.15] K (observed:
+/// 401.75 K / 452.64 K / 455.14 K at hour 2,895, cell 0/layer 0, escalating
+/// substep_count=20/32/64). Committing that candidate raised
+/// `SoilHeatSolverTemperatureOutsidePhysicalDomain` from inside
+/// `commitAcceptedState` via a bare `try`, aborting the whole solve
+/// immediately and skipping every richer `.iteration_limit`/`.stagnated`/
+/// `.diverged` diagnostic below. Checking the domain here, before either
+/// branch decides to accept, lets a candidate that fails this check fall
+/// through to that existing, already-tested failure path instead of being
+/// committed -- this never changes behavior for a normal layer (the check
+/// is satisfied trivially) and never widens the physical-domain bound
+/// itself.
+fn allTemperaturesPhysicallyValid(temperature_k: []const f64) bool {
+    for (temperature_k) |value| {
+        if (!group_validation.isPhysicalTemperatureK(value)) return false;
+    }
+    return true;
+}
+
 /// Commits an accepted nonlinear state as one externally visible transaction.
 /// Every fallible check is completed against the staged temperature, phase,
 /// boundary ledger, and face flux before the first caller-owned slice changes.
@@ -3186,7 +3215,9 @@ pub fn solveWithWorkspace(
             @memcpy(best_state, current);
             best_state_valid = true;
         }
-        if (!retrying_newton_after_anderson and norm <= 1) {
+        if (!retrying_newton_after_anderson and norm <= 1 and
+            allTemperaturesPhysicallyValid(current))
+        {
             try group_residual.residualAt(faces, properties, water_fluxes, base, current, target, residual, scratch, trial_flux, phase_buffers, options);
             const nonlinear_norm = try group_residual.scaledNorm(current, residual, scratch, properties.enthalpy_coupling != null, options);
             const conservation_norm = try group_residual.conservationScaledNormWithRepresentedEndpoints(
@@ -4899,7 +4930,16 @@ pub fn solveWithWorkspace(
         conservation_norm <= 1;
     if (options.diagnostic_trace) |trace| if (trace.on_final_acceptance) |callback|
         callback(trace.context, nonlinear_norm, conservation_norm, strict_accept, practical_accept);
-    if (strict_accept or practical_accept) {
+    // issue-068 (2026-09-20): see `allTemperaturesPhysicallyValid`'s
+    // docstring above `commitAcceptedState`. `strict_accept`/
+    // `practical_accept` are both purely residual-scaled; require `current`
+    // to also be inside the physically valid domain before treating either
+    // as a real acceptance, so a physically absurd candidate falls through
+    // to the existing `.iteration_limit`/`.stagnated`/`.diverged` failure
+    // path below instead of being committed.
+    if ((strict_accept or practical_accept) and
+        allTemperaturesPhysicallyValid(current))
+    {
         if (practical_accept and !strict_accept and !builtin.is_test)
             std.log.warn("soil heat solver accepted via practical-residual path (NEWTON-ANDERSON-PRACTICAL-ACCEPTANCE-001): nonlinear_norm={e} conservation_norm={e} final_norm={e}", .{ nonlinear_norm, conservation_norm, final_norm });
         try group_residual.fillConservationRepresentabilityAllowances(
