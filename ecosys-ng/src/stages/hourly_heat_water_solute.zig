@@ -9985,11 +9985,13 @@ test "bounded recovery chooses only deliberate fallback schedules" {
 }
 
 test "boundedInitialRecoverySubstepCount: ICHKV proactive floor (issue-024/issue-068/issue-077)" {
-    // No-op proof (task requirement 3/4c): when the proactive floor is
-    // inactive, the preferred count -- including the ordinary default of
-    // 1 -- passes through completely unchanged, for every combination of
-    // the other existing floor.
-    try std.testing.expectEqual(@as(u8, 1), try boundedInitialRecoverySubstepCount(1, false, false));
+    // Updated 2026-09-21 for the universal NFH=4 baseline (below): the
+    // ordinary default of 1 is no longer a no-op -- it is now floored to
+    // 4 unconditionally, per `universal_nfh_baseline_substeps`. The
+    // dedicated "universal NFH=4 baseline" test group below covers that
+    // floor's own before/after behavior in detail; this test keeps
+    // covering the ICHKV-specific floor's interaction with it.
+    try std.testing.expectEqual(@as(u8, 4), try boundedInitialRecoverySubstepCount(1, false, false));
     try std.testing.expectEqual(@as(u8, 64), try boundedInitialRecoverySubstepCount(64, false, false));
     try std.testing.expectEqual(@as(u8, 4), try boundedInitialRecoverySubstepCount(1, true, false));
     // New behavior (task requirement 4b): when the proactive floor is
@@ -10005,6 +10007,41 @@ test "boundedInitialRecoverySubstepCount: ICHKV proactive floor (issue-024/issue
     // Both floors active simultaneously: the larger of the two applies,
     // exactly as `@max` implies (both are floors on the same quantity).
     try std.testing.expectEqual(@as(u8, 20), try boundedInitialRecoverySubstepCount(1, true, true));
+}
+
+test "boundedInitialRecoverySubstepCount: universal NFH=4 baseline floors every hour's first attempt (issue-024, 2026-09-21 committed fix)" {
+    // (a) Hours that previously requested 1 (the ordinary, un-escalated
+    // default -- no freeze-flow floor, no ICHKV floor active) are now
+    // floored to 4, matching Fortran's unconditional `wthr.f:589-601`
+    // `NFH=4` baseline for every non-fire hour. Before this fix, this
+    // returned 1 unchanged (see the previous test's now-updated first
+    // assertion, and issue-024's diagnostic-experiment section for the
+    // full before/after production evidence at hours 2,894/2,895/3,252).
+    try std.testing.expectEqual(@as(u8, 4), try boundedInitialRecoverySubstepCount(1, false, false));
+    try std.testing.expectEqual(@as(u8, 4), try boundedInitialRecoverySubstepCount(2, false, false));
+    try std.testing.expectEqual(@as(u8, 4), try boundedInitialRecoverySubstepCount(4, false, false));
+
+    // (b) Hours that already requested a preferred count at or above 4
+    // (e.g. an already-escalated degenerate hour whose adaptive schedule
+    // has climbed the ladder from a prior hour's failure) are completely
+    // unaffected -- the new floor is a strict no-op on the ceiling side,
+    // never lowering an already-larger request.
+    try std.testing.expectEqual(@as(u8, 8), try boundedInitialRecoverySubstepCount(8, false, false));
+    try std.testing.expectEqual(@as(u8, 16), try boundedInitialRecoverySubstepCount(16, false, false));
+    try std.testing.expectEqual(@as(u8, 20), try boundedInitialRecoverySubstepCount(20, false, false));
+    try std.testing.expectEqual(@as(u8, 32), try boundedInitialRecoverySubstepCount(32, false, false));
+    try std.testing.expectEqual(@as(u8, 64), try boundedInitialRecoverySubstepCount(64, false, false));
+
+    // (c) Legacy source justification, cited exactly: `f77src/wthr.f:589-601`
+    // fixes `NFH=4` (the outer `DO 9990 NFZ=1,NFH` substep count at
+    // `soil.f:145`) unconditionally for every non-fire external hour --
+    // it is not gated by any per-layer heat-capacity/thinness condition
+    // (that additional, conditional escalation to `NPH>=20` is `ICHKV`,
+    // `wthr.f:568-571`, tested separately above). This asserts the
+    // committed constant actually equals that cited legacy value, so a
+    // future accidental edit of `universal_nfh_baseline_substeps` without
+    // updating this citation would be caught here.
+    try std.testing.expectEqual(@as(u8, 4), universal_nfh_baseline_substeps);
 }
 
 test "boundedRecoveryFallback matches the old hardcoded 20/32/64 chain across the full u8 domain (before/after equivalence, issue-058)" {
@@ -10141,7 +10178,15 @@ test "fixed external hour recovery rolls back before its single bounded fallback
             self.biology_call_count += 1;
             self.scientific_pool += 10;
             self.accepted_ledger += 2;
-            if (substep_count == 1) {
+            // Updated 2026-09-21 for the universal NFH=4 baseline: a fresh
+            // hour's first attempt is now unconditionally floored at 4
+            // (`universal_nfh_baseline_substeps`), not 1, so this first
+            // rejected rung is now 4, not 1. `substep_count == 2` below
+            // remains dead in this specific test (as it already was
+            // before this fix -- the escalation chain never revisits 2),
+            // kept only for local readability of the fixture's full
+            // three-rung shape.
+            if (substep_count == 4) {
                 self.scientific_pool += 100;
                 self.soil_failure_count += 1;
                 self.scientific_pool = 7;
@@ -10163,7 +10208,7 @@ test "fixed external hour recovery rolls back before its single bounded fallback
 
     var fixture: Fixture = .{};
     try recoverFixedExternalHour(&fixture);
-    try std.testing.expectEqualSlices(u8, &.{ 1, 20 }, fixture.attempted_schedules[0..2]);
+    try std.testing.expectEqualSlices(u8, &.{ 4, 20 }, fixture.attempted_schedules[0..2]);
     try std.testing.expectEqual(@as(usize, 2), fixture.attempt_count);
     try std.testing.expectEqual(@as(usize, 1), fixture.rollback_count);
     try std.testing.expectEqual(@as(usize, 2), fixture.biology_call_count);
@@ -10275,7 +10320,11 @@ test "adaptive fixed-hour recovery still terminates and reports failure when eve
         error.NewtonPicardStagnated,
         recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor, false),
     );
-    try std.testing.expectEqualSlices(u8, &.{ 1, 20, 32, 64 }, fixture.schedules[0..fixture.attempts]);
+    // Updated 2026-09-21 for the universal NFH=4 baseline: the first
+    // attempt is now floored at 4, not 1 (see
+    // `universal_nfh_baseline_substeps`); the rest of the escalation
+    // chain (20, 32, 64) is unaffected.
+    try std.testing.expectEqualSlices(u8, &.{ 4, 20, 32, 64 }, fixture.schedules[0..fixture.attempts]);
 }
 
 test "adaptive fixed-hour recovery retains a successful gas fallback" {
@@ -10322,14 +10371,29 @@ test "adaptive fixed-hour recovery skips sub-quarter-hour rung after phase requi
         }
     };
 
+    // Updated 2026-09-21 for the universal NFH=4 baseline
+    // (`universal_nfh_baseline_substeps`): a fresh hour's first attempt is
+    // now unconditionally floored at 4, which already equals
+    // `minimum_freeze_flow_coupling_substeps` (also 4) -- so the
+    // `HeatInducedPhaseChangeRequiresQuarterHourSubsteps` failure this
+    // test previously exercised on a bare first attempt (floored only at
+    // 1 before this fix) can no longer occur on any fresh hour's first
+    // attempt at all; it is subsumed by the universal floor. The first
+    // attempt now succeeds immediately at substep_count=4, and
+    // `freeze_flow_coupling_floor_active` is instead set directly from
+    // this attempt's own significant-phase-change signal -- a real,
+    // correct behavior change caused by the fix, not a test weakening.
     var fixture: Fixture = .{};
     var preferred: u8 = 1;
     var cooldown: u8 = 0;
     var freeze_flow_floor = false;
     try recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor, false);
-    try std.testing.expectEqualSlices(u8, &.{ 1, 20 }, fixture.schedules[0..fixture.attempts]);
-    try std.testing.expectEqual(@as(u8, 20), preferred);
-    try std.testing.expectEqual(coarsening_probe_cooldown_hours, cooldown);
+    try std.testing.expectEqualSlices(u8, &.{4}, fixture.schedules[0..fixture.attempts]);
+    try std.testing.expectEqual(@as(u8, 4), preferred);
+    // No escalation occurred (the first attempt was accepted outright), so
+    // the coarsening-probe cooldown, only ever set on a failed/escalated
+    // attempt, stays at its initial value.
+    try std.testing.expectEqual(@as(u8, 0), cooldown);
     try std.testing.expect(freeze_flow_floor);
 
     // A later accepted quarter-hour schedule with no significant heat-induced
@@ -10361,9 +10425,11 @@ test "adaptive fixed-hour recovery jumps directly from stiff whole-hour heat" {
     var cooldown: u8 = 0;
     var freeze_flow_floor = false;
     try recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor, false);
+    // Updated 2026-09-21 for the universal NFH=4 baseline: the first
+    // attempt is now floored at 4, not 1.
     try std.testing.expectEqualSlices(
         u8,
-        &.{ 1, stiff_heat_direct_recovery_substeps },
+        &.{ 4, stiff_heat_direct_recovery_substeps },
         fixture.schedules[0..fixture.attempts],
     );
     try std.testing.expectEqual(stiff_heat_direct_recovery_substeps, preferred);
@@ -10466,7 +10532,9 @@ test "fixed external hour gives every dt-recoverable WATSUB candidate one bounde
             self.schedules[self.attempts] = substep_count;
             self.attempts += 1;
             self.scientific_pool += 1;
-            if (substep_count == 1) {
+            // Updated 2026-09-21 for the universal NFH=4 baseline: the
+            // first attempt is now floored at 4, not 1.
+            if (substep_count == 4) {
                 // The production attempt transaction performs this rollback
                 // before returning the rejected coarse-schedule error.
                 self.scientific_pool = 5;
@@ -10497,7 +10565,9 @@ test "fixed external hour gives every dt-recoverable WATSUB candidate one bounde
         var fixture: Fixture = .{ .failure = failure };
         try recoverFixedExternalHour(&fixture);
         try std.testing.expectEqual(@as(usize, 2), fixture.attempts);
-        try std.testing.expectEqualSlices(u8, &.{ 1, 20 }, &fixture.schedules);
+        // Updated 2026-09-21 for the universal NFH=4 baseline: the first
+        // attempt is now floored at 4, not 1.
+        try std.testing.expectEqualSlices(u8, &.{ 4, 20 }, &fixture.schedules);
         try std.testing.expectEqual(@as(f64, 6), fixture.scientific_pool);
     }
 
@@ -11695,6 +11765,26 @@ const maximum_bounded_recovery_substeps: u8 =
 const coarsening_probe_cooldown_hours: u8 = 3;
 const gas_coarsening_probe_cooldown_hours: u8 = 23;
 
+/// Fortran's `wthr.f:589-601` fixes `NFH=4` as a universal, unconditional
+/// substep baseline for every non-fire hour, for every layer -- an outer
+/// `DO 9990 NFZ=1,NFH` loop (`soil.f:145`) that calls `HOUR1`+`WATSUB` four
+/// times per external hour regardless of whether the hour "needs" it, with
+/// `ICHKV`'s escalation to `NPH>=20` (`wthr.f:568-571`) layered ON TOP of
+/// this baseline, not a replacement for it. Zig's `boundedInitialRecoverySubstepCount`
+/// previously defaulted every hour's first attempt to `1` (the whole hour,
+/// no subdivision at all) and only floored to a finer schedule reactively,
+/// after a detected failure, or proactively but only for the narrow
+/// already-thin-at-the-hour-start `ICHKV` case -- missing this universal
+/// baseline entirely. issue-024's 2026-09-21 diagnostic experiment
+/// (documented in that issue's file) confirmed applying this floor
+/// unconditionally prevents hour 2,894's layer-0 collapse, clears hour
+/// 2,895, and reaches hour 3,252 (358 hours further than any prior
+/// attempt) before a new, distinct failure -- and was measurably faster,
+/// not slower, because it eliminates most of the costly reactive
+/// escalation-ladder retries. Authorized for implementation per
+/// `HANDOFF-SUMMARY-2026-09-20.md` Section 3's human-reviewer decision.
+const universal_nfh_baseline_substeps: u8 = 4;
+
 comptime {
     // `stiff_heat_direct_recovery_substeps` names the first rung of this
     // stage's error-aware rescue chain (the established three-minute
@@ -11706,6 +11796,12 @@ comptime {
     if (!ecosys.soil_water_heat_step.isRecoverySubstepCountMember(stiff_heat_direct_recovery_substeps))
         @compileError(
             "stiff_heat_direct_recovery_substeps must be a member of soil_water_heat_step.recovery_substep_counts (see issue-058)",
+        );
+    // `universal_nfh_baseline_substeps` (Fortran's `NFH=4`) must likewise
+    // actually be a rung of the authoritative ladder.
+    if (!ecosys.soil_water_heat_step.isRecoverySubstepCountMember(universal_nfh_baseline_substeps))
+        @compileError(
+            "universal_nfh_baseline_substeps must be a member of soil_water_heat_step.recovery_substep_counts (see issue-024)",
         );
 }
 
@@ -11748,6 +11844,14 @@ fn boundedInitialRecoverySubstepCount(
     ichkv_proactive_floor_active: bool,
 ) !u8 {
     var requested = @min(preferred_substep_count, maximum_bounded_recovery_substeps);
+    // issue-024 (2026-09-21, universal NFH=4 baseline, see
+    // `universal_nfh_baseline_substeps`'s doc comment): Fortran
+    // unconditionally subdivides EVERY non-fire hour into at least
+    // `NFH=4` substeps before ever attempting WATSUB, regardless of
+    // whether the hour would have converged fine at `substep_count=1`.
+    // This floor applies to every hour's first attempt, not only the
+    // narrower freeze-flow/`ICHKV` cases floored below.
+    requested = @max(requested, universal_nfh_baseline_substeps);
     if (freeze_flow_coupling_floor_active)
         requested = @max(
             requested,
