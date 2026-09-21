@@ -5,6 +5,8 @@ Owner: unassigned
 Candidate/input hashes: audit/manifest/candidate-001-snapshot.json sha256 79eef4efcf97dd130fa1d342d36a09cef6c0cf9053ce6f27f037d2237f770979
 Source finding: `audit/features/feature-019-oracle-vs-zig-output-comparison-hour1-2578.md` (first quantitative oracle-vs-Zig comparison, this session)
 
+Cross-reference (2026-09-20): `feature-019`'s "Extended comparison through hour 2,894" section shows this issue's layer-1 divergence is roughly bounded in absolute terms through hour ~2893, then collapses abruptly to near-total desiccation at hour 2894 -- one hour before the hour-2895 frontier `issue-068` tracks for the same cell/layer-0 -- new evidence for the paired issue-024/issue-068 decision, not a re-diagnosis.
+
 Failure signature and first bad time/location/process:
 Comparing the independently-built gfortran oracle's hourly water output (`f77example` Ottawa deck, year 1998, `01998f25wh1`) against ecosys-ng's own diagnostic run of the identical deck (same site, same hours 1-2578, `.../modelled_outputs/water/..._f25wh1.txt`), layer-1 volumetric liquid water fraction diverges from hour 1 onward and the divergence **grows monotonically in relative terms rather than staying bounded**:
 

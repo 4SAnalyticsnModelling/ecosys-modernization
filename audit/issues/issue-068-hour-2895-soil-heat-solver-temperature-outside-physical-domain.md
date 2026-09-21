@@ -14,6 +14,8 @@ Status (prior): OPEN -- SIXTH ROUND (2026-09-20): the THIRD previously-unaudited
 Owner: unassigned (diagnosed 2026-09-20, follow-up session after issue-067's fix)
 Discovered by: prior session, 2026-09-20, while validating issue-067's hybrid-tolerance fix for `PerLayerPostRichardsTotalWaterClosureMismatch`. Diagnosed by this session (same day, follow-up pass).
 
+Cross-reference (2026-09-20): `feature-019`'s "Extended comparison through hour 2,894" section, using an already-captured fresh-from-hour-1 run, shows cell 0/layer 0's liquid-water fraction collapsing from ~0.61 to ~1.0e-5 in the single hour (2894) immediately preceding this issue's hour-2895 failure -- output-level corroboration of the near-total-desiccation state this issue's own rounds describe, and new evidence for the paired issue-024/issue-068 decision.
+
 ## Summary
 
 With issue-067's fix applied (`validatePerLayerPostRichardsTotalWaterClosure` now sizes its `upstream_arithmetic_roundoff_allowance` from the vapor solver's own already-accepted convergence tolerance, see issue-067), a fresh `ReleaseFast` fresh-from-hour-1 validation run of the tracked `Cool Temperate Maize-Soybean ON` deck (`runottawa`) confirmed the water-closure mismatch is gone (zero occurrences of `PerLayerPostRichardsTotalWaterClosureMismatch` anywhere in the run's log), but hour 2,895 still fails to commit -- now on a different, later-stage check:
