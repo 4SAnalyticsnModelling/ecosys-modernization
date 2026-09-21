@@ -103,23 +103,69 @@ does not re-derive or re-rank them.
 
 ## 5. Performance status
 
-Most recent measurement: `audit/runs/run-007-fresh-postfix-batch-remeasurement-2026-09-19.md`
-(no `run-008` exists yet as of this writing -- a fresher measurement from a
-concurrent agent may land after this document). Key numbers:
+**Superseded.** Most recent measurement: `audit/runs/run-008-longer-window-remeasurement-2026-09-20.md`,
+a fresh same-day remeasurement over the **full currently-reachable window**
+(hour 1 through the natural hour-2,894/2,895 boundary), superseding
+`run-007`'s narrower hour-2,568-checkpoint numbers below. Key numbers:
 
-- Zig, single-threaded, hour-2,568 checkpoint (matched to Fortran's day-108
-  marker): median **232.91 s** (3 repeats, ~4.0% spread).
-- Fortran oracle, same checkpoint: median **41.01 s** this run, versus
-  **131.46 s** in the earlier `run-003` baseline -- a disclosed, unresolved
-  ~3.2-3.6x discrepancy between two Fortran measurement sessions (leading
-  candidate: sustained CPU thermal/power state, not confirmed).
-- Resulting Zig/Fortran ratio is reported both ways rather than picking one:
-  **5.68x** (fresh Fortran) or **1.77x** (historical Fortran baseline). The
-  acceptance bar (ratio <= 1) is **not met** under either reading.
-- The iteration-ceiling fix (`issue-015`) does **not** measurably slow down
-  typical/steady hours; its extra cost is concentrated in a few rare, hard
-  hours in the newly-reachable 2,568-2,893 stretch (dominated by hour 2,592
-  at 15.3 s, ~65x the largest steady-region spike).
+- **The Zig/Fortran ratio over the full window is ~23.7x** (median 1,042.71 s
+  Zig vs. 44.01 s Fortran; range across min/max repeat combinations
+  22.0x-26.3x), measured with 3 repeats each side, on AC power with a
+  confirmed/logged power plan. This is dramatically worse than `run-007`'s
+  previously-reported ~2.0x (1.77x-5.68x) and **should not be quoted as
+  superseded by, or interchangeable with, that older number** -- the two
+  measure different windows, not the same workload at two points in time.
+- **This is not a Zig performance regression.** Zig's own absolute wall time
+  to the *same* hour-2894/2895 boundary is essentially unchanged from
+  `run-007`'s own prior full-tail sample -- in fact ~6% *faster*
+  (1,042.71 s here vs. 1,113.54 s in `run-007`), despite `run-008` running on
+  top of the full `issue-058`-`issue-068` correctness-fix batch and reaching
+  one more accepted hour (`last_hour=2894` vs. `run-007`'s `2893`) before
+  failing on a harder, later frontier. The correctness fixes did not add net
+  wall-time cost on this workload.
+- **Why the ratio got so much worse, then: measurement-window scope, not
+  code behavior.** `run-007`'s ~2.0x number was computed at a truncated
+  hour-2,568 checkpoint that excluded almost the entire expensive tail.
+  `run-008` measures the full tail out to the new, later hour-2,894/2,895
+  frontier -- which is exactly where the real cost is concentrated. Fortran's
+  own per-hour cost stays flat and small (~0.015 s/h) across the longer
+  window, so extending the matched window by ~1,000 hours costs Fortran only
+  a few extra seconds, while it costs Zig several hundred additional seconds
+  concentrated in a handful of hard hours -- that asymmetry, not a uniform
+  per-hour slowdown, is what drives the ratio from ~2x to ~24x.
+- **The extra cost is concentrated, not spread evenly.** Only 178 total
+  retry-ladder escalation events (92 rejected + 86 accepted) occur across the
+  entire 2,894-hour run -- well under 10% of all hours. Day-boundary sampling
+  found hour 2,592 alone costs ~14-16 s (the single largest sampled value,
+  corroborated across all 3 repeats and cross-session against `run-007`'s
+  independent 15.3 s finding at the same hour), with secondary spikes at
+  hours 2,856, 2,880, and 2,808. `run-008` confirmed none of the newly-added
+  solver-safety-guard diagnostics (including one new unconditional log line
+  that is a quarter of the default log's volume) fire during ordinary
+  full-hour steps -- they are structurally confined to already-rare
+  sub-hour retry substeps.
+- The acceptance bar (ratio <= 1) is **not met**, and is missed by a larger
+  margin than any prior measurement in this series now that the full window
+  is measured.
+- **Speculative connection to the open reviewer decision (Section 3):** the
+  specific hard hours driving this cost concentration (2,592, 2,856, 2,880,
+  2,808) sit in the same newly-reachable stretch produced by, and share the
+  same SOLUTE/phase-solver Newton-Anderson stiffness mechanism as, the
+  degenerate cell-0/layer-0 scenario that `issue-024`/`issue-068`'s pending
+  substep-schedule question (Section 3) is about. It is plausible that
+  whichever way that reviewer decision resolves could also shift this
+  performance picture -- but `run-008` did not test this, this is not an
+  established causal link, and it should be treated as a hypothesis for a
+  future run, not a claim that fixing correctness here would fix
+  performance.
+- Superseded prior reading, retained for provenance only: Zig, single-
+  threaded, hour-2,568 checkpoint (matched to Fortran's day-108 marker):
+  median 232.91 s (3 repeats, ~4.0% spread); Fortran oracle, same checkpoint:
+  median 41.01 s that run, versus 131.46 s in the earlier `run-003` baseline
+  (a disclosed, still-unresolved ~3.2-3.6x cross-session Fortran
+  discrepancy, leading candidate sustained CPU thermal/power state, not
+  confirmed) -- yielding the two-way-reported 5.68x/1.77x figures now
+  superseded by `run-008`'s full-window ~23.7x above.
 
 ---
 
@@ -132,7 +178,7 @@ concurrent agent may land after this document). Key numbers:
 - `audit/issues/issue-024-top-layer-water-content-divergence-oracle-vs-zig.md`
 - `audit/issues/issue-058-*.md` through `issue-068-*.md` -- full evidence
   trail for each fix/round summarized above.
-- `audit/runs/run-001-*.md` through `run-007-*.md` -- performance and
+- `audit/runs/run-001-*.md` through `run-008-*.md` -- performance and
   diagnostic run history.
 - `ecosys-audit/PROJECT_CONTRACT.md`, `ecosys-audit/EVIDENCE_GUIDE.md` --
   governing evidence discipline for any follow-up work.
