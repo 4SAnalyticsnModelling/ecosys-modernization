@@ -32,6 +32,15 @@ below; it is not more autonomous guessing that is needed next.
 
 ## 2. What's fully resolved
 
+This session also closed out the "exact-zero water-carrier" defect class
+first identified in `issue-060`. Two independent search methodologies --
+keyword/function-name-based (the original `issue-060`-`067` sweeps) and
+consumer-of-the-live-water-field-based (the newer `issue-069`/`072`/`073`/
+`074` sweeps, the latter three run concurrently by this session and two
+independent peer sessions) -- now find **zero remaining instances**; the
+defect class is believed **exhaustively closed**. See the two new bullets
+at the end of this list.
+
 - **`issue-015`** -- Ottawa's hour-2,578/2,579/2,589 `SoluteReactionSolverDidNotConverge` frontier. Root cause: a two-phase SOLUTE equilibrium split shared one flat iteration ceiling unevenly; fixed by giving the post-kinetic phase its own budget and raising the shared floor from 60 to 100 (matching this project's existing floor-of-100 policy for sibling solvers). Committed and validated by a fresh from-hour-1 run clearing all three named hours on the first attempt.
 - **`issue-058`** -- `recovery_substep_counts` had two independently hardcoded consumers that only agreed by coincidence, a latent crash risk. Fixed: `boundedRecoveryFallback` made genuinely array-driven with comptime membership guards on both consumers.
 - **`issue-059`** -- `TransportReplay.time_step_hours`'s fixed `[64]f64` buffer would overflow if the substep ladder were ever extended past 64. Fixed: buffer sizing now derives from the ladder's real maximum, plus a runtime capacity check that survives `ReleaseFast`.
@@ -42,6 +51,32 @@ below; it is not more autonomous guessing that is needed next.
 - **`issue-066`** -- `litter_ammonia_phase_bridge.zig`'s pack/unpack round trip used an exact-zero litter-water guard instead of the shared `ZEROS2`/`dry_reference_water_m3` substitution, in a bridge whose own local conservation gate excludes ammonia. Fixed (`legacy-defect-corrected`), regression-tested.
 - **`issue-067`** -- once hour 2,894 cleared, hour 2,895 failed on a new water-volume closure check. Root-caused to a tolerance-provenance gap (the check didn't account for the vapor solver's own already-accepted Newton convergence slack); fixed by threading that solver's real tolerance into the check's existing `upstream_arithmetic_roundoff_allowance` field. Confirmed by direct instrumentation and a fresh full validation run: the error class no longer occurs anywhere through hour 2,895.
 - **`issue-068`'s first three rounds** -- three independent, zero-regression solver-safety guards (rounds 2, 3/5, and 6) closing every then-known unguarded path by which a physically absurd temperature could be silently committed into `grid.soil_temperature_k`. All three verified sound by dedicated regression tests and a full fresh-from-hour-1 run showing zero domain-violation events anywhere in a 2,895-hour run.
+- **`issue-069`** -- an independent review of `issue-060` through `issue-067`
+  checking for gaps between their sweeps found two more genuine siblings of
+  the same defect class, missed by every prior sweep because each searched
+  by function-name/keyword/naming-convention heuristics that these two call
+  sites didn't match. Both fixed. Finding A is confirmed both by its own
+  regression tests and by a fresh-from-hour-1 live production run over the
+  full currently-reachable range (hour 1-2,894/2,895); Finding B is
+  confirmed by regression test only, consistent with its own confirmed
+  non-reachability on the current Ottawa deck.
+- **`issue-072`/`issue-073`/`issue-074`** -- a further, more exhaustive
+  sweep abandoned keyword-based searching entirely and instead searched by
+  every consumer of the raw live-water field directly, run concurrently by
+  this session and two independent peer sessions. This found 9 more genuine
+  instances of the same defect class (issue-072: 2 findings; issue-073: 4
+  findings; issue-074: 2 findings), all fixed. All are now live-validated:
+  `issue-074` by its own fresh-from-hour-1 production run reaching the
+  established hour-2,894/2,895 frontier with no new failure class; `issue-072`
+  and `issue-073` together via a shared clean, uncontended re-run that
+  reached the same frontier in 19.39 minutes (inside the established
+  ~19-25 minute baseline band) with byte-for-byte identical log/failure
+  behavior to the `run-008` baseline (an earlier attempt at this same
+  validation was inconclusive only because of contention from other
+  concurrent agents on the machine, not a fix defect). With this batch, the
+  "exact-zero water-carrier" defect class is closed with zero known
+  remaining instances after two independent search methodologies across
+  three concurrent sessions.
 
 ---
 
@@ -178,7 +213,28 @@ a fresh same-day remeasurement over the **full currently-reachable window**
 - `audit/issues/issue-024-top-layer-water-content-divergence-oracle-vs-zig.md`
 - `audit/issues/issue-058-*.md` through `issue-068-*.md` -- full evidence
   trail for each fix/round summarized above.
+- `audit/issues/issue-069-*.md`, `issue-072-*.md`, `issue-073-*.md`,
+  `issue-074-*.md` -- the water-carrier defect class's closing batch (see
+  Section 2).
 - `audit/runs/run-001-*.md` through `run-008-*.md` -- performance and
   diagnostic run history.
 - `ecosys-audit/PROJECT_CONTRACT.md`, `ecosys-audit/EVIDENCE_GUIDE.md` --
   governing evidence discipline for any follow-up work.
+
+---
+
+## 7. Loose end found along the way (not yet triaged)
+
+- **`pond_inventory_transfer.zig`** has a pre-existing, unrelated compile
+  break (a stale test literal missing `CarrierVolumes.cell_area_m2`),
+  noticed by the `issue-074` implementing agent while working a different
+  fix in a neighboring file. Reproduced even at commits before this
+  session's fix chain started (confirmed via `git stash`/retest at git HEAD
+  `ce0564e`), so it predates and is unrelated to any of this session's
+  water-carrier work. It only affects the full, untargeted
+  `zig test src/module_index.zig` (no filter) and `zig build test`; targeted/
+  filtered tests and `zig build`/`zig build -Doptimize=ReleaseFast` are
+  unaffected. Flagged by that agent as out of `issue-074`'s scope and left
+  unfixed; not yet triaged into its own issue number. Whoever picks this
+  project back up next should file it and assign it before relying on the
+  full untargeted test suite.
