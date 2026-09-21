@@ -61,33 +61,22 @@ fn applyMechanicalFreezingDisplacement(
             matrix_excess,
             properties.nonlinear_time_fraction,
         );
-        // MECHANICAL-RELIEF-DONOR-BOUND-ONLY-001. The oracle deliberately
-        // gives this term a DIFFERENT bound from the Darcy term it is added
-        // to, and the difference is the whole point of the term. The vertical
-        // Darcy flux IS recipient-clamped -- `watsub.f:4885-4886` is
-        //   `FLQL=AMIN1(0.0,AMAX1(FLQZ,-VOLW2(N6,N5,N4)*XNPHX,-VOLP2N*XNPHX))`
-        // with `VOLP2N=VOLP1(N3,N2,N1)-FLWL(3,N3,N2,N1)` (`:4884`), i.e. the
-        // recipient's CLAMPED, nonnegative air volume. The mechanical
-        // excess-relief term is then added ON TOP at `watsub.f:4898-4902`
-        //   `FLQL=FLQL+AMIN1(0.0,AMAX1(-VOLW2(N6,N5,N4)*XNPHX,VOLP1Z(N6,N5,N4)))`
-        // bounded ONLY by the donor's own water and by the signed excess
-        // itself -- there is no `VOLP1(N3)` term. `:4927-4932` then applies it
-        // and re-clamps `VOLP2` with `AMAX1(0.0,..)`, so the oracle knowingly
-        // pushes liquid into an already-full recipient and lets that recipient
-        // become the next substep's donor. The macropore leg is identical:
-        // clamped Darcy at `:4973-4974` (by `VOLPH1(N6)`), then the donor-only
-        // mechanical term at `:4987-4990`, both gated `N.EQ.3` exactly like
-        // this loop's own vertical filter.
-        //
-        // Routing this term through `limitFluxForAssembledTarget` applied the
-        // Darcy term's recipient clamp to it, which zeroes the relief whenever
-        // the shallower layer is itself at or over capacity -- precisely the
-        // saturated-column case the term exists to resolve, and the reason a
-        // tilled zone could not drain (`issue-083`). The donor bound already
-        // keeps the donor nonnegative: `mechanicalFreezingDisplacementM3`
-        // returns at worst `-target[destination] * time_fraction`, so dropping
-        // the recipient clamp cannot produce negative water anywhere.
-        const matrix_flux = requested_matrix;
+        const matrix_flux = group_flux.limitFluxForAssembledTarget(
+            requested_matrix,
+            target[0..cells],
+            source,
+            destination,
+            try group_flux.physicalLiquidCapacityM3(
+                grid.matrix_pore_capacity_m3[source],
+                grid.matrix_ice_water_m3[source],
+                properties.ice_density_megagrams_per_m3,
+            ),
+            try group_flux.physicalLiquidCapacityM3(
+                grid.matrix_pore_capacity_m3[destination],
+                grid.matrix_ice_water_m3[destination],
+                properties.ice_density_megagrams_per_m3,
+            ),
+        );
         group_flux.applyConservativeFlux(target[0..cells], source, destination, matrix_flux);
         micro_fluxes[face_index] += matrix_flux;
 
@@ -133,14 +122,22 @@ fn applyMechanicalFreezingDisplacement(
             macropore_excess,
             properties.nonlinear_time_fraction,
         );
-        // MECHANICAL-RELIEF-DONOR-BOUND-ONLY-001, macropore leg. Same oracle
-        // asymmetry as the matrix leg above: clamped Darcy flux at
-        // `watsub.f:4973-4974`, then `:4987-4990` adds
-        //   `FLWHL=FLWHL+AMIN1(0.0,AMAX1(-VOLWH1(N6,N5,N4)*XNPHX,VOLPH1Z(N6,N5,N4)))`
-        // with no recipient term. `VOLPH1Z` is the macropore signed excess
-        // (`watsub.f:221-222`, `:6824-6825`), the exact counterpart of
-        // `VOLP1Z`.
-        const macropore_flux = requested_macropore;
+        const macropore_flux = group_flux.limitFluxForAssembledTarget(
+            requested_macropore,
+            target[cells..],
+            source,
+            destination,
+            try group_flux.physicalLiquidCapacityM3(
+                grid.macropore_pore_capacity_m3[source],
+                grid.macropore_ice_water_m3[source],
+                properties.ice_density_megagrams_per_m3,
+            ),
+            try group_flux.physicalLiquidCapacityM3(
+                grid.macropore_pore_capacity_m3[destination],
+                grid.macropore_ice_water_m3[destination],
+                properties.ice_density_megagrams_per_m3,
+            ),
+        );
         group_flux.applyConservativeFlux(target[cells..], source, destination, macropore_flux);
         macro_fluxes[face_index] += macropore_flux;
     }
@@ -179,39 +176,16 @@ pub fn residualAt(grid: *const grid_module.GridState, faces: []const group_types
         };
     @memset(micro_fluxes, 0);
     @memset(macro_fluxes, 0);
-    // MECHANICAL-RELIEF-DONOR-BOUND-ONLY-001. The prepass runs BEFORE the
-    // per-cell ceiling below, and the ceiling is taken from the post-prepass
-    // `target` rather than from `base`, because the prepass is now allowed to
-    // credit an already-full shallower recipient (see
-    // `applyMechanicalFreezingDisplacement`, `watsub.f:4898-4902`). That credit
-    // is not an optimizer degree of freedom: it is a deterministic,
-    // donor-bounded function of the accepted entry state and the grid, so a
-    // trial is still rejected the moment it goes beyond what the entry state
-    // plus the oracle's own mandated transfers require. Deriving the ceiling
-    // from `base` instead would reject the relief this term exists to perform
-    // whenever the recipient was already at capacity -- the saturated-column
-    // case of `issue-083`. `target` at this point is `base`, plus any external
-    // source applied above, plus the prepass; all three are optimizer-
-    // independent.
-    try applyMechanicalFreezingDisplacement(grid, faces, properties, target, micro_fluxes, macro_fluxes);
     for (0..cells) |cell| {
         // The nonlinear coordinate is conserved water equivalent. HOUR1 may
         // lower a deep layer's rigid pore capacity beneath its accepted water
         // inventory; physical ice expansion creates the same signed demand.
-        // The mechanical prepass above is the source-shaped owner of both
+        // The mechanical prepass below is the source-shaped owner of both
         // transfers. Permit a trial no farther outside the water-equivalent
-        // bound than that state, while still rejecting optimizer excursions
-        // that manufacture additional overfill.
-        // Take the union of the two admissible states, not the post-prepass
-        // one alone. A DONOR layer's post-prepass `target` is LOWER than its
-        // entry value (the prepass just debited it), and the trial coordinate
-        // is still entitled to sit at the accepted entry overfill it started
-        // from; a RECIPIENT layer's is HIGHER by the credit it was just
-        // mandated to absorb. `acceptedEntryLiquidCeilingM3` is monotone in
-        // its liquid argument, so the max admits both without admitting
-        // anything the optimizer chose.
-        const matrix_entry_ceiling = try group_flux.acceptedEntryLiquidCeilingM3(grid.matrix_pore_capacity_m3[cell], @max(base[cell], target[cell]), grid.matrix_ice_water_m3[cell]);
-        const macropore_entry_ceiling = try group_flux.acceptedEntryLiquidCeilingM3(grid.macropore_pore_capacity_m3[cell], @max(base[cells + cell], target[cells + cell]), grid.macropore_ice_water_m3[cell]);
+        // bound than the accepted entry state, while still rejecting optimizer
+        // excursions that manufacture additional overfill.
+        const matrix_entry_ceiling = try group_flux.acceptedEntryLiquidCeilingM3(grid.matrix_pore_capacity_m3[cell], base[cell], grid.matrix_ice_water_m3[cell]);
+        const macropore_entry_ceiling = try group_flux.acceptedEntryLiquidCeilingM3(grid.macropore_pore_capacity_m3[cell], base[cells + cell], grid.macropore_ice_water_m3[cell]);
         // issue-078 (2026-09-21): a narrowly-gated, temporary trace of this
         // cell's own hour-entry state -- the accepted `base[cell]` water
         // equivalent against the capacity `runtime_material_refresh.zig`'s
@@ -235,6 +209,7 @@ pub fn residualAt(grid: *const grid_module.GridState, faces: []const group_types
         if (trial[cell] > matrix_entry_ceiling + group_hydraulics.poreCapacityRoundoffToleranceM3(matrix_entry_ceiling) or
             trial[cells + cell] > macropore_entry_ceiling + group_hydraulics.poreCapacityRoundoffToleranceM3(macropore_entry_ceiling)) return error.SoilWaterCandidateExceedsPoreCapacity;
     }
+    try applyMechanicalFreezingDisplacement(grid, faces, properties, target, micro_fluxes, macro_fluxes);
     for (faces, 0..) |face, face_index| {
         if (!face.active) continue;
         const source = face.source_cell;
