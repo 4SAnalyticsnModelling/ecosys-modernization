@@ -628,7 +628,40 @@ noinline fn solveControlledImpl(
             // changes nothing at all, whenever the full step already
             // succeeds -- the overwhelming majority of cells/hours.
             if (feasibleExceptTemperatureDomain(grid, current, properties.freeze_thaw.ice_density_megagrams_per_m3)) {
-                if (try attemptTemperatureDomainBacktracking(
+                // issue-068 (temperature-coordinate backtracking round): try
+                // the more targeted variant FIRST. The uniform backtrack
+                // above (round 9, kept below as a fallback, never removed)
+                // scales all 6 components -- including the mass-side ones
+                // `feasibleExceptTemperatureDomain` has already confirmed
+                // are not the objection -- by the identical factor. This
+                // retreats ONLY the endpoint-temperature coordinate toward
+                // `recovery_state`'s value, leaving every mass-side trial
+                // *input* at its already-good full-step value. See
+                // `attemptTemperatureCoordinateBacktracking`'s own doc
+                // comment for why this is a legitimate, separable trial
+                // point to evaluate (not why it is guaranteed to succeed --
+                // it is not, because `residualAt`'s phase-equilibrium
+                // physics still couples the resulting mass *residual* to
+                // whatever temperature is tried).
+                if (try attemptTemperatureCoordinateBacktracking(
+                    grid,
+                    properties,
+                    base,
+                    recovery_state,
+                    current,
+                    residual,
+                    target,
+                    scratch,
+                    trial_heat,
+                    trial_exchange,
+                    trial_displacement,
+                    candidate,
+                    candidate_residual,
+                    options,
+                )) |damped_norm| {
+                    norm = damped_norm;
+                    committable = true;
+                } else if (try attemptTemperatureDomainBacktracking(
                     grid,
                     properties,
                     base,
@@ -2232,6 +2265,100 @@ fn attemptTemperatureDomainBacktracking(
     var attempt: u8 = 0;
     while (attempt < max_attempts) : (attempt += 1) {
         for (damped_state, base_point, full_step_state) |*damped, from, to| damped.* = from + factor * (to - from);
+        if (residualAt(grid, properties, base, damped_state, target, damped_residual, scratch, trial_heat, trial_exchange, trial_displacement)) |_| {
+            if (scaledNorm(base, damped_state, damped_residual, options)) |damped_norm| {
+                if (damped_norm <= 1 and committableState(grid, damped_state, properties.freeze_thaw.ice_density_megagrams_per_m3)) {
+                    @memcpy(full_step_state, damped_state);
+                    @memcpy(full_step_residual, damped_residual);
+                    return damped_norm;
+                }
+            } else |_| {}
+        } else |_| {}
+        factor *= 0.5;
+    }
+    return null;
+}
+
+/// issue-068 (temperature-coordinate backtracking round): pure arithmetic
+/// construction with no solver-shaped side effects, factored out so its
+/// separation property (mass-side coordinates copied verbatim from
+/// `full_step_state`; ONLY the endpoint-temperature coordinate blended
+/// toward `base_point`) can be unit-tested directly, independent of
+/// `residualAt`/`committableState`. Contrast with the uniform blend inlined
+/// in `attemptTemperatureDomainBacktracking` above
+/// (`from + factor * (to - from)` applied to EVERY one of the 6*cells
+/// components): here every mass-side index in `[0, 5 * cells)` is an exact
+/// copy of `full_step_state`, never a blend, and only the `[5 * cells,
+/// 6 * cells)` temperature block is blended.
+fn blendTemperatureCoordinateOnly(damped_state: []f64, base_point: []const f64, full_step_state: []const f64, cells: usize, factor: f64) void {
+    @memcpy(damped_state, full_step_state);
+    for (0..cells) |cell| {
+        const index = 5 * cells + cell;
+        damped_state[index] = base_point[index] + factor * (full_step_state[index] - base_point[index]);
+    }
+}
+
+/// issue-068 (temperature-coordinate backtracking round): a more targeted
+/// variant of `attemptTemperatureDomainBacktracking` above, tried first at
+/// the call site. That function scales the WHOLE 6-component step (mass +
+/// temperature) by a single uniform factor, which also pulls back the
+/// mass-side components (matrix/macropore liquid, ice, vapor) even though
+/// `feasibleExceptTemperatureDomain` has already confirmed they are not the
+/// objection -- they are already admissible at their full-step
+/// (`full_step_state`) values. This function instead blends ONLY the
+/// endpoint-temperature coordinate toward its pre-step (`base_point`)
+/// value via `blendTemperatureCoordinateOnly`, leaving every mass-side
+/// component's trial *input* at its already-good full-step value.
+///
+/// Why this is mathematically well-defined (the feasibility question this
+/// round was assigned to answer first): `residualAt` is a pure function of
+/// an arbitrary state vector of the right shape -- it does not require its
+/// argument to have been produced by a single coupled Newton/Anderson step.
+/// Every other trial point this solve loop already prices (directional
+/// probes, block-Newton candidates, Anderson-mixed iterates) is likewise an
+/// ad hoc combination fed through the identical `residualAt`/`scaledNorm`/
+/// `committableState` pipeline. A hybrid point (full-step mass inputs,
+/// damped temperature input) is therefore a legitimate candidate to
+/// evaluate, exactly as legitimate as the uniform-factor hybrid the sibling
+/// function above already prices.
+///
+/// This does NOT mean the mass-side residual is unaffected by damping only
+/// temperature: read in full, `residualAt`'s vapor-liquid-equilibrium and
+/// freeze-thaw calls take the trial temperature as a direct input, so
+/// `target[matrix_water]`/`target[vapor]`/`target[matrix_ice]`/etc. --
+/// and therefore the mass-side residual `target - trial` -- are recomputed
+/// as a function of whatever temperature is tried, even when the trial
+/// mass *inputs* are held fixed. The premise "the mass side stays at its
+/// already-converged residual for free" is therefore not guaranteed by
+/// construction; it is only checked, honestly, by re-running the full,
+/// unmodified `scaledNorm<=1`/`committableState` gate on the resulting
+/// hybrid point below, the same as every other candidate this file prices.
+/// This is why the sibling uniform backtrack is kept as a fallback rather
+/// than removed: if this more targeted attempt cannot find an admissible
+/// point (because the coupling above defeats it), the more conservative
+/// whole-step damping still gets a chance.
+fn attemptTemperatureCoordinateBacktracking(
+    grid: *const grid_module.GridState,
+    properties: Properties,
+    base: []const f64,
+    base_point: []const f64,
+    full_step_state: []f64,
+    full_step_residual: []f64,
+    target: []f64,
+    scratch: []f64,
+    trial_heat: []f64,
+    trial_exchange: []f64,
+    trial_displacement: DisplacementOutputs,
+    damped_state: []f64,
+    damped_residual: []f64,
+    options: Options,
+) !?f64 {
+    const cells = grid.layer_count;
+    const max_attempts: u8 = 6;
+    var factor: f64 = 0.5;
+    var attempt: u8 = 0;
+    while (attempt < max_attempts) : (attempt += 1) {
+        blendTemperatureCoordinateOnly(damped_state, base_point, full_step_state, cells, factor);
         if (residualAt(grid, properties, base, damped_state, target, damped_residual, scratch, trial_heat, trial_exchange, trial_displacement)) |_| {
             if (scaledNorm(base, damped_state, damped_residual, options)) |damped_norm| {
                 if (damped_norm <= 1 and committableState(grid, damped_state, properties.freeze_thaw.ice_density_megagrams_per_m3)) {
@@ -4255,6 +4382,117 @@ test "issue-068 (backtracking round): backtracking exhausts its attempt budget a
     var damped_residual: [6]f64 = undefined;
 
     const result = try attemptTemperatureDomainBacktracking(
+        &grid,
+        properties,
+        &base,
+        &base_point,
+        &full_step_state,
+        &full_step_residual,
+        &target,
+        &scratch,
+        &trial_heat,
+        &trial_exchange,
+        displacement,
+        &damped_state,
+        &damped_residual,
+        .{ .max_iterations = 20 },
+    );
+    try std.testing.expect(result == null);
+    try std.testing.expectEqualSlices(f64, &full_step_state_before, &full_step_state);
+    try std.testing.expectEqualSlices(f64, &full_step_residual_before, &full_step_residual);
+}
+
+test "issue-068 (temperature-coordinate round): blendTemperatureCoordinateOnly leaves every mass-side component at its full-step value, unlike the uniform blend" {
+    // Direct, pure-arithmetic proof of the property this round's whole
+    // variant depends on: the OLD (round 9) uniform blend
+    // (`from + factor * (to - from)` applied to every one of the 6
+    // components, reproduced here by hand rather than by calling private
+    // production code a second time) moves the mass-side components away
+    // from their full-step values whenever `base_point`'s mass differs from
+    // `full_step_state`'s mass (exactly the production case: Newton moves
+    // mass a little even while driving the residual to machine-noise scale).
+    // The NEW blend must leave every mass-side index an exact copy of
+    // `full_step_state` and blend ONLY the temperature coordinate.
+    const cells: usize = 1;
+    const base_point = [_]f64{ 0.70, 0.014, 0.24, 0.24, 0.12, 280 };
+    const full_step_state = [_]f64{ 0.75, 0.015625, 0.25, 0.25, 0.125, 519.16 };
+    var damped_state: [6]f64 = undefined;
+    const factor: f64 = 0.5;
+
+    blendTemperatureCoordinateOnly(&damped_state, &base_point, &full_step_state, cells, factor);
+
+    // Mass-side components (indices 0..5*cells): exact copy of the
+    // full-step state, never blended.
+    try std.testing.expectEqualSlices(f64, full_step_state[0..5], damped_state[0..5]);
+    // Temperature coordinate: blended toward `base_point`.
+    try std.testing.expectApproxEqAbs(
+        base_point[5] + factor * (full_step_state[5] - base_point[5]),
+        damped_state[5],
+        1.0e-9,
+    );
+
+    // Contrast: the OLD uniform formula, applied to the SAME two points and
+    // factor, would NOT leave the mass side at its full-step value -- this
+    // is the actual difference between round 9's mechanism and this round's.
+    for (0..5) |index| {
+        const uniform_blend = base_point[index] + factor * (full_step_state[index] - base_point[index]);
+        try std.testing.expect(uniform_blend != full_step_state[index]);
+    }
+}
+
+test "issue-068 (temperature-coordinate round): attemptTemperatureCoordinateBacktracking exhausts its attempt budget and leaves the caller's buffers untouched when no damped temperature is committable" {
+    // Mirrors the round-9 exhaustion test above exactly, for the new
+    // function: `base_point` (380 K) and `full_step_state` (519.16 K, the
+    // same eighth-round hour-2895 capture) are BOTH already above the
+    // 373.15 K ceiling, so every convex combination the halving schedule
+    // can produce for the temperature coordinate also stays above it --
+    // `committableState` is guaranteed to keep rejecting for the entire
+    // fixed attempt budget. Mass-side components are identical between
+    // `base_point` and `full_step_state` here (mirroring the motivating
+    // production scenario of an already mass-converged step), so this also
+    // exercises the case where the temperature-only blend and the uniform
+    // blend would agree on the mass side by coincidence -- the point under
+    // test is still that the function gives up cleanly and leaves both
+    // buffers byte-for-byte unchanged, letting the caller fall through to
+    // the uniform backtrack (and, if that also fails, to the existing
+    // `SoilPhaseSolverStagnated`/`SoilPhaseSolverDidNotConverge` exit).
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(
+        .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 },
+        .{ .worker_threads = 1, .tile_cells = 1 },
+        .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 },
+    );
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.matrix_pore_capacity_m3[0] = 2;
+    grid.macropore_pore_capacity_m3[0] = 1;
+
+    var large_capacity = [_]f64{10};
+    var properties = testProperties();
+    properties.heat_capacity_megajoules_per_k = &large_capacity;
+    const base = [_]f64{ 0.75, 0.015625, 0.25, 0.25, 0.125, 380 };
+    const base_point = base;
+    var full_step_state = base;
+    full_step_state[5] = 519.16;
+    var full_step_residual = [_]f64{ 0, 0, 0, 0, 0, 0 };
+    const full_step_state_before = full_step_state;
+    const full_step_residual_before = full_step_residual;
+
+    var target: [6]f64 = undefined;
+    var scratch: [6]f64 = undefined;
+    var trial_heat = [_]f64{0};
+    var trial_exchange = [_]f64{0};
+    var displacement_storage: [5]f64 = undefined;
+    const displacement: DisplacementOutputs = .{
+        .matrix_liquid_water_m3 = displacement_storage[0..1],
+        .matrix_ice_water_equivalent_m3 = displacement_storage[1..2],
+        .macropore_liquid_water_m3 = displacement_storage[2..3],
+        .macropore_ice_water_equivalent_m3 = displacement_storage[3..4],
+        .advective_enthalpy_megajoules = displacement_storage[4..5],
+    };
+    var damped_state: [6]f64 = undefined;
+    var damped_residual: [6]f64 = undefined;
+
+    const result = try attemptTemperatureCoordinateBacktracking(
         &grid,
         properties,
         &base,
