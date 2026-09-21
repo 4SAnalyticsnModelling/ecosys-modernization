@@ -194,6 +194,71 @@ need to be revisited regardless of how this decision resolves -- it is a
 correct, kept translation restoration that is simply inert as the *sole*
 answer to hour 2,894, per its own round-2 validation.
 
+**Added 2026-09-21: a second, NOT-YET-TESTED hypothesis, clearly distinct from
+the just-tested-and-refuted conditional `ICHKV` pre-check above -- also
+requiring human sign-off before any implementation attempt.** `issue-024`'s
+own round 8 (see that issue's file) implemented and validated a *conditional*
+proactive check: `ICHKV`-equivalent escalation to `NPH>=20` substeps, but only
+for a layer already thin/low-heat-capacity *at the hour's start*. It correctly
+does not resolve hour 2,895, because cell 0/layer 0's heat capacity is still
+above the `ICHKV` threshold at the *start* of hour 2,894 -- the layer only
+becomes degenerate *during* that hour's own within-hour collapse, which a
+check evaluated at the hour boundary cannot foresee. That result is now
+settled and does not need re-litigating.
+
+The new hypothesis is a different, unconditional mechanism, already
+established by this session's own earlier research (`issue-024` rounds 2-3,
+`wthr.f:589-601`): Fortran's `NFH=4` is a **fixed, universal baseline**
+substep count applied to *every* non-fire hour, for *every* layer,
+unconditionally -- `ICHKV`'s escalation to `NPH>=20` is an *additional*,
+conditional escalation layered *on top of* this universal `NFH=4` baseline,
+not a replacement for it. Zig's `heat_step.zig`/`hourly_heat_water_solute.zig`
+currently default every hour's *first* attempt to `substep_count=1`, not `4`
+-- meaning Zig is missing the universal baseline entirely, not just the
+conditional `ICHKV` escalation on top of it. This matters directly for hour
+2,894: `issue-077`'s already-committed evaporation-cap fix computes its limit
+as `owner_liquid_water_m3 * substep_fraction_of_hour` (`substep_fraction_of_hour
+= 1/substep_count`); at `substep_count=1` this cap equals the *entire*
+layer's water (no effective restriction). If Zig instead started every hour
+at `substep_count=4` (matching Fortran's actual universal baseline, not
+merely the conditional `ICHKV` tier), the same already-correct `issue-077`
+cap would automatically limit each of those 4 substeps to at most 1/4 of the
+layer's water -- a fundamentally different, more gradual within-hour
+trajectory that might never reach the single-step near-total-desiccation
+state observed at hour 2,894 at all.
+
+**Why this is being documented, not implemented, this pass, and why it needs
+human sign-off before any implementation attempt** -- unlike the
+conditional `ICHKV` check (which by construction only affects rare,
+already-identified degenerate hours), universally changing every hour's
+starting substep count from 1 to 4 would affect **all 262,920 hours** of the
+full 30-year simulation, not a narrow flagged subset. Two separate, serious
+implications follow, and both require deliberate weighing rather than an
+autonomous attempt:
+1. **Performance.** Running every hour at a minimum of 4 substeps instead of
+   1 could, roughly proportionally in the worst case, further increase the
+   already-bad ~23.7x-slower-than-Fortran ratio (Section 5) for the vast
+   majority of hours that currently converge fine at `substep_count=1`. The
+   true impact is not knowable without measuring it, since most hours may
+   still converge in fewer *effective* Newton iterations even when forced
+   through 4 physical substeps -- but it could also be close to a flat 4x
+   wall-time multiplier on top of an already-failing performance gate.
+2. **Numerical behavior.** This would change the exact computed trajectory
+   of *every* hour of the simulation, not just the currently-failing ones --
+   a far broader output-fidelity change than a narrowly-scoped conditional
+   fix, with implications for every already-completed comparison against the
+   Fortran oracle (issue-024's own rounds 1-7, `feature-019`, and every
+   output-comparison artifact keyed to the current `substep_count=1`
+   baseline would need to be treated as potentially stale).
+
+A full-run performance/behavior impact assessment is not knowable without
+actually trying this across a broad hour range -- exactly the kind of
+costly, consequential experiment (a blanket architectural change, not a
+targeted diagnostic) that should be authorized deliberately by a human
+reviewer, not run speculatively by an autonomous pass. No source change has
+been made or attempted for this hypothesis. See `issue-024`'s round 8 section
+for the short cross-reference pointer to this entry.
+
 ---
 
 ## 4. Remaining science-gap backlog
