@@ -1039,6 +1039,169 @@ comptime {
     );
 }
 
+/// `wthr.f:568-571`'s `ICHKV` trigger, verbatim:
+/// `IF(VHCP(NU(NY,NX),NY,NX).LT.4.19E-03*AREA(3,NU(NY,NX),NY,NX))ICHKV=1`.
+/// When the top active layer's heat capacity falls below this area-scaled
+/// threshold, Fortran does not wait for a failed coarse attempt: `wthr.f
+/// :589-601` forces `NPH=MAX(20,NPX)` for the WHOLE hour, before `soil.f`
+/// ever calls `HOUR1`/`WATSUB` for that hour. This is a genuinely
+/// different constant from `heat_flux.
+/// minimum_layer_heat_capacity_megajoules_per_m2_k` (`STARTS 655`'s
+/// `VHCPRX=8.380E-05*AREA`, used by `validatePerLayerSpatialHeatClosure`/
+/// `residualAtImpl`/`temperatureForCellEnthalpy`) -- the two thresholds are
+/// not interchangeable and neither stands in for the other. See
+/// issue-024 (rounds 6/7), issue-068 (tenth round) and issue-077 (which
+/// found the purely reactive `recovery_substep_counts` ladder structurally
+/// unable to catch a physically-absurd single-substep flux whenever the
+/// coarse, `substep_count=1` attempt happens to "succeed" numerically
+/// anyway, e.g. hour 2,894's single-hour evaporation collapse).
+pub const ichkv_top_layer_heat_capacity_threshold_megajoules_per_m2_k: f64 = 4.19e-3;
+
+/// True when any top soil layer's CURRENT heat capacity is below the
+/// `ICHKV` threshold, area-scaled per layer -- the proactive counterpart
+/// to `heat_flux.minimum_layer_heat_capacity_megajoules_per_m2_k`'s
+/// already-established reactive floor pattern.
+///
+/// `dry_solid_heat_capacity_megajoules_per_m3_k`/`layer_volume_m3` are the
+/// slow-changing (erosion/relayering-only) material/geometry properties
+/// (`soil_thermal`/`soil_solver_properties`, refreshed once per accepted
+/// hour by `runtime_material_refresh.refreshAcceptedHour`, not touched
+/// mid-hour by the WATSUB recovery ladder); `grid`'s water/ice/vapor
+/// volumes are read directly from the live model state, which is always
+/// current, so this query is exact for the hour's true starting state,
+/// not a one-hour-stale approximation. `plan_area_m2`/`is_top_soil_layer`
+/// are the same per-layer arrays `iteration_control.
+/// waterHeatSoluteCeilingForCurrentState` already reads.
+///
+/// Pure and allocation-free: it has no side effect on any schedule, ladder,
+/// or Newton/Anderson acceptance/damping state. The caller decides what,
+/// if anything, to do with the result.
+pub fn ichkvTopLayerHeatCapacityBelowThreshold(
+    grid: *const grid_module.GridState,
+    dry_solid_heat_capacity_megajoules_per_m3_k: []const f64,
+    layer_volume_m3: []const f64,
+    liquid_water_heat_capacity_megajoules_per_m3_k: f64,
+    ice_heat_capacity_megajoules_per_m3_k: f64,
+    plan_area_m2: []const f64,
+    is_top_soil_layer: []const bool,
+) !bool {
+    if (dry_solid_heat_capacity_megajoules_per_m3_k.len != grid.layer_count or
+        layer_volume_m3.len != grid.layer_count or
+        plan_area_m2.len != grid.layer_count or
+        is_top_soil_layer.len != grid.layer_count)
+        return error.IchkvProactiveFloorDimensionMismatch;
+    if (!std.math.isFinite(liquid_water_heat_capacity_megajoules_per_m3_k) or
+        liquid_water_heat_capacity_megajoules_per_m3_k <= 0 or
+        !std.math.isFinite(ice_heat_capacity_megajoules_per_m3_k) or
+        ice_heat_capacity_megajoules_per_m3_k <= 0)
+        return error.InvalidIchkvProactiveFloorThermalParameter;
+    for (
+        dry_solid_heat_capacity_megajoules_per_m3_k,
+        layer_volume_m3,
+        plan_area_m2,
+        is_top_soil_layer,
+        0..,
+    ) |dry_solid_per_m3, volume_m3, area_m2, is_top, layer| {
+        if (!is_top) continue;
+        if (!std.math.isFinite(dry_solid_per_m3) or dry_solid_per_m3 < 0 or
+            !std.math.isFinite(volume_m3) or volume_m3 < 0 or
+            !std.math.isFinite(area_m2) or area_m2 <= 0)
+            return error.InvalidIchkvProactiveFloorThermalState;
+        const heat_capacity_megajoules_per_k = dry_solid_per_m3 * volume_m3 +
+            liquid_water_heat_capacity_megajoules_per_m3_k *
+                (grid.matrix_liquid_water_m3[layer] +
+                    grid.macropore_liquid_water_m3[layer] +
+                    grid.water_vapor_volume_m3[layer]) +
+            ice_heat_capacity_megajoules_per_m3_k *
+                (grid.matrix_ice_water_m3[layer] + grid.macropore_ice_water_m3[layer]);
+        if (!std.math.isFinite(heat_capacity_megajoules_per_k))
+            return error.InvalidIchkvProactiveFloorThermalState;
+        if (heat_capacity_megajoules_per_k <
+            ichkv_top_layer_heat_capacity_threshold_megajoules_per_m2_k * area_m2)
+            return true;
+    }
+    return false;
+}
+
+test "ichkvTopLayerHeatCapacityBelowThreshold is a no-op for an ordinary, well-hydrated top layer" {
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 2, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .max_nonlinear_iterations = 10 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    // issue-077's own hour-2893 magnitude for this exact cell/layer: far
+    // above the 4.19e-3 MJ/K ICHKV threshold at this 1 m2 footprint.
+    grid.matrix_liquid_water_m3[0] = 6.058e-3;
+    const dry_solid = [_]f64{ 1.1, 1.1 };
+    const volume = [_]f64{ 0.01, 0.01 };
+    const area = [_]f64{ 1.0, 1.0 };
+    const is_top = [_]bool{ true, false };
+    try std.testing.expect(!try ichkvTopLayerHeatCapacityBelowThreshold(&grid, &dry_solid, &volume, 4.19, 1.9274, &area, &is_top));
+}
+
+test "ichkvTopLayerHeatCapacityBelowThreshold trips true for a genuinely thin/low-heat-capacity top layer" {
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 2, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .max_nonlinear_iterations = 10 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    // issue-068's own measured hour-2895 magnitude for this exact cell/layer:
+    // heat capacity chronically 2-3e-5 MJ/K, far below the 4.19e-3 MJ/K
+    // threshold at this 1 m2 footprint.
+    grid.matrix_liquid_water_m3[0] = 1.1e-7;
+    const dry_solid = [_]f64{ 2.0e-5, 1.1 };
+    const volume = [_]f64{ 0.01, 0.01 };
+    const area = [_]f64{ 1.0, 1.0 };
+    const is_top = [_]bool{ true, false };
+    try std.testing.expect(try ichkvTopLayerHeatCapacityBelowThreshold(&grid, &dry_solid, &volume, 4.19, 1.9274, &area, &is_top));
+}
+
+test "ichkvTopLayerHeatCapacityBelowThreshold ignores a below-threshold layer that is not the top soil layer" {
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 2, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .max_nonlinear_iterations = 10 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.matrix_liquid_water_m3[0] = 6.058e-3;
+    grid.matrix_liquid_water_m3[1] = 1.1e-7;
+    const dry_solid = [_]f64{ 1.1, 2.0e-5 };
+    const volume = [_]f64{ 0.01, 0.01 };
+    const area = [_]f64{ 1.0, 1.0 };
+    const is_top = [_]bool{ true, false };
+    try std.testing.expect(!try ichkvTopLayerHeatCapacityBelowThreshold(&grid, &dry_solid, &volume, 4.19, 1.9274, &area, &is_top));
+}
+
+test "ichkvTopLayerHeatCapacityBelowThreshold rejects mismatched array lengths" {
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 2, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .max_nonlinear_iterations = 10 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    const dry_solid = [_]f64{1.1};
+    const volume = [_]f64{ 0.01, 0.01 };
+    const area = [_]f64{ 1.0, 1.0 };
+    const is_top = [_]bool{ true, false };
+    try std.testing.expectError(error.IchkvProactiveFloorDimensionMismatch, ichkvTopLayerHeatCapacityBelowThreshold(&grid, &dry_solid, &volume, 4.19, 1.9274, &area, &is_top));
+}
+
+test "ichkvTopLayerHeatCapacityBelowThreshold rejects an invalid thermal parameter" {
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 2, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .max_nonlinear_iterations = 10 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    const dry_solid = [_]f64{ 1.1, 1.1 };
+    const volume = [_]f64{ 0.01, 0.01 };
+    const area = [_]f64{ 1.0, 1.0 };
+    const is_top = [_]bool{ true, false };
+    try std.testing.expectError(error.InvalidIchkvProactiveFloorThermalParameter, ichkvTopLayerHeatCapacityBelowThreshold(&grid, &dry_solid, &volume, 0, 1.9274, &area, &is_top));
+    try std.testing.expectError(error.InvalidIchkvProactiveFloorThermalParameter, ichkvTopLayerHeatCapacityBelowThreshold(&grid, &dry_solid, &volume, 4.19, std.math.nan(f64), &area, &is_top));
+}
+
+test "ichkvTopLayerHeatCapacityBelowThreshold rejects invalid per-layer thermal state" {
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 2, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .max_nonlinear_iterations = 10 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    const dry_solid_negative = [_]f64{ -1.0, 1.1 };
+    const volume = [_]f64{ 0.01, 0.01 };
+    const area = [_]f64{ 1.0, 1.0 };
+    const is_top = [_]bool{ true, false };
+    try std.testing.expectError(error.InvalidIchkvProactiveFloorThermalState, ichkvTopLayerHeatCapacityBelowThreshold(&grid, &dry_solid_negative, &volume, 4.19, 1.9274, &area, &is_top));
+    const dry_solid = [_]f64{ 1.1, 1.1 };
+    const zero_area = [_]f64{ 0.0, 1.0 };
+    try std.testing.expectError(error.InvalidIchkvProactiveFloorThermalState, ichkvTopLayerHeatCapacityBelowThreshold(&grid, &dry_solid, &volume, 4.19, 1.9274, &zero_area, &is_top));
+}
+
 fn phaseChangeExceedsLocalWaterTolerance(
     change: HeatInducedIceChange,
     local_water_scale_m3: f64,

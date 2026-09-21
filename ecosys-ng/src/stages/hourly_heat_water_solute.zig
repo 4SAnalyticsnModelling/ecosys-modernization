@@ -9980,8 +9980,31 @@ test "bounded recovery chooses only deliberate fallback schedules" {
         @as(?u8, null),
         boundedRecoveryFallback(64),
     );
-    try std.testing.expectEqual(@as(u8, 64), try boundedInitialRecoverySubstepCount(64, false));
-    try std.testing.expectEqual(@as(u8, 4), try boundedInitialRecoverySubstepCount(1, true));
+    try std.testing.expectEqual(@as(u8, 64), try boundedInitialRecoverySubstepCount(64, false, false));
+    try std.testing.expectEqual(@as(u8, 4), try boundedInitialRecoverySubstepCount(1, true, false));
+}
+
+test "boundedInitialRecoverySubstepCount: ICHKV proactive floor (issue-024/issue-068/issue-077)" {
+    // No-op proof (task requirement 3/4c): when the proactive floor is
+    // inactive, the preferred count -- including the ordinary default of
+    // 1 -- passes through completely unchanged, for every combination of
+    // the other existing floor.
+    try std.testing.expectEqual(@as(u8, 1), try boundedInitialRecoverySubstepCount(1, false, false));
+    try std.testing.expectEqual(@as(u8, 64), try boundedInitialRecoverySubstepCount(64, false, false));
+    try std.testing.expectEqual(@as(u8, 4), try boundedInitialRecoverySubstepCount(1, true, false));
+    // New behavior (task requirement 4b): when the proactive floor is
+    // active, the FIRST attempt starts at the ladder's existing 20-substep
+    // rung (Fortran's `NPH=MAX(20,NPX)` baseline for this exact `ICHKV`
+    // condition), not at the default of 1 -- a different starting point in
+    // the already-existing ladder, not a new rung.
+    try std.testing.expectEqual(@as(u8, 20), try boundedInitialRecoverySubstepCount(1, false, true));
+    // A preferred count already at or above 20 is unaffected (the floor
+    // only ever raises, never lowers, the requested count).
+    try std.testing.expectEqual(@as(u8, 32), try boundedInitialRecoverySubstepCount(32, false, true));
+    try std.testing.expectEqual(@as(u8, 64), try boundedInitialRecoverySubstepCount(64, false, true));
+    // Both floors active simultaneously: the larger of the two applies,
+    // exactly as `@max` implies (both are floors on the same quantity).
+    try std.testing.expectEqual(@as(u8, 20), try boundedInitialRecoverySubstepCount(1, true, true));
 }
 
 test "boundedRecoveryFallback matches the old hardcoded 20/32/64 chain across the full u8 domain (before/after equivalence, issue-058)" {
@@ -10082,23 +10105,13 @@ test "accepted phase activity owns the freeze flow floor" {
     var preferred: u8 = 4;
     var cooldown: u8 = 0;
     var freeze_flow_floor = true;
-    try recoverFixedExternalHourAdaptively(
-        &active,
-        &preferred,
-        &cooldown,
-        &freeze_flow_floor,
-    );
+    try recoverFixedExternalHourAdaptively(&active, &preferred, &cooldown, &freeze_flow_floor, false);
     try std.testing.expect(freeze_flow_floor);
     try std.testing.expectEqual(@as(u8, 4), preferred);
 
     var inactive = Fixture{ .accepted_had_significant_heat_induced_phase_change = false };
     cooldown = 0;
-    try recoverFixedExternalHourAdaptively(
-        &inactive,
-        &preferred,
-        &cooldown,
-        &freeze_flow_floor,
-    );
+    try recoverFixedExternalHourAdaptively(&inactive, &preferred, &cooldown, &freeze_flow_floor, false);
     try std.testing.expect(!freeze_flow_floor);
     try std.testing.expectEqual(@as(u8, 2), preferred);
 }
@@ -10196,7 +10209,7 @@ test "adaptive fixed-hour recovery escalates through the full fallback chain to 
     var preferred: u8 = 16;
     var cooldown: u8 = 0;
     var freeze_flow_floor = false;
-    try recoverFixedExternalHourAdaptively(&refinement, &preferred, &cooldown, &freeze_flow_floor);
+    try recoverFixedExternalHourAdaptively(&refinement, &preferred, &cooldown, &freeze_flow_floor, false);
     try std.testing.expectEqualSlices(u8, &.{ 16, 20, 32 }, refinement.schedules[0..refinement.attempts]);
     try std.testing.expectEqual(@as(u8, 32), preferred);
     try std.testing.expectEqual(coarsening_probe_cooldown_hours, cooldown);
@@ -10204,7 +10217,7 @@ test "adaptive fixed-hour recovery escalates through the full fallback chain to 
     var accepted = Fixture{ .minimum_successful_substeps = 32 };
     preferred = 20;
     cooldown = 0;
-    try recoverFixedExternalHourAdaptively(&accepted, &preferred, &cooldown, &freeze_flow_floor);
+    try recoverFixedExternalHourAdaptively(&accepted, &preferred, &cooldown, &freeze_flow_floor, false);
     try std.testing.expectEqualSlices(u8, &.{ 20, 32 }, accepted.schedules[0..accepted.attempts]);
     try std.testing.expectEqual(@as(u8, 32), preferred);
     try std.testing.expectEqual(coarsening_probe_cooldown_hours, cooldown);
@@ -10236,7 +10249,7 @@ test "adaptive fixed-hour recovery escalates past the secondary rescue to the tr
     var preferred: u8 = 16;
     var cooldown: u8 = 0;
     var freeze_flow_floor = false;
-    try recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor);
+    try recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor, false);
     try std.testing.expectEqualSlices(u8, &.{ 16, 20, 32, 64 }, fixture.schedules[0..fixture.attempts]);
     try std.testing.expectEqual(@as(u8, 64), preferred);
     try std.testing.expectEqual(coarsening_probe_cooldown_hours, cooldown);
@@ -10260,7 +10273,7 @@ test "adaptive fixed-hour recovery still terminates and reports failure when eve
     var freeze_flow_floor = false;
     try std.testing.expectError(
         error.NewtonPicardStagnated,
-        recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor),
+        recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor, false),
     );
     try std.testing.expectEqualSlices(u8, &.{ 1, 20, 32, 64 }, fixture.schedules[0..fixture.attempts]);
 }
@@ -10282,12 +10295,7 @@ test "adaptive fixed-hour recovery retains a successful gas fallback" {
     var preferred: u8 = 4;
     var cooldown: u8 = 0;
     var freeze_flow_floor = false;
-    try recoverFixedExternalHourAdaptively(
-        &fixture,
-        &preferred,
-        &cooldown,
-        &freeze_flow_floor,
-    );
+    try recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor, false);
     try std.testing.expectEqualSlices(
         u8,
         &.{ 4, 20 },
@@ -10318,7 +10326,7 @@ test "adaptive fixed-hour recovery skips sub-quarter-hour rung after phase requi
     var preferred: u8 = 1;
     var cooldown: u8 = 0;
     var freeze_flow_floor = false;
-    try recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor);
+    try recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor, false);
     try std.testing.expectEqualSlices(u8, &.{ 1, 20 }, fixture.schedules[0..fixture.attempts]);
     try std.testing.expectEqual(@as(u8, 20), preferred);
     try std.testing.expectEqual(coarsening_probe_cooldown_hours, cooldown);
@@ -10329,7 +10337,7 @@ test "adaptive fixed-hour recovery skips sub-quarter-hour rung after phase requi
     preferred = 4;
     cooldown = 0;
     fixture = .{ .retain_phase_activity = false };
-    try recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor);
+    try recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor, false);
     try std.testing.expectEqualSlices(u8, &.{4}, fixture.schedules[0..fixture.attempts]);
     try std.testing.expectEqual(@as(u8, 2), preferred);
     try std.testing.expect(!freeze_flow_floor);
@@ -10352,12 +10360,7 @@ test "adaptive fixed-hour recovery jumps directly from stiff whole-hour heat" {
     var preferred: u8 = 1;
     var cooldown: u8 = 0;
     var freeze_flow_floor = false;
-    try recoverFixedExternalHourAdaptively(
-        &fixture,
-        &preferred,
-        &cooldown,
-        &freeze_flow_floor,
-    );
+    try recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor, false);
     try std.testing.expectEqualSlices(
         u8,
         &.{ 1, stiff_heat_direct_recovery_substeps },
@@ -10382,7 +10385,7 @@ test "adaptive fixed-hour recovery reports its bounded terminal failure" {
     var freeze_flow_floor = false;
     try std.testing.expectError(
         error.SoilHeatSolverStagnated,
-        recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor),
+        recoverFixedExternalHourAdaptively(&fixture, &preferred, &cooldown, &freeze_flow_floor, false),
     );
 }
 
@@ -11674,6 +11677,7 @@ fn recoverFixedExternalHour(attempt: anytype) !void {
         &preferred_substep_count,
         &obsolete_cooldown,
         &freeze_flow_coupling_floor_active,
+        false,
     );
 }
 
@@ -11741,6 +11745,7 @@ fn boundedRecoveryFallback(attempted_substep_count: u8) ?u8 {
 fn boundedInitialRecoverySubstepCount(
     preferred_substep_count: u8,
     freeze_flow_coupling_floor_active: bool,
+    ichkv_proactive_floor_active: bool,
 ) !u8 {
     var requested = @min(preferred_substep_count, maximum_bounded_recovery_substeps);
     if (freeze_flow_coupling_floor_active)
@@ -11748,6 +11753,18 @@ fn boundedInitialRecoverySubstepCount(
             requested,
             ecosys.soil_water_heat_step.minimum_freeze_flow_coupling_substeps,
         );
+    // issue-024/issue-068/issue-077: `wthr.f:568-571`'s `ICHKV` check is
+    // PROACTIVE -- Fortran forces `NPH=MAX(20,NPX)` for the whole hour
+    // before ever attempting WATSUB, whenever the top active layer's heat
+    // capacity is already below the area-scaled threshold at the START of
+    // the hour. This floors the FIRST attempt only, at the ladder's own
+    // `stiff_heat_direct_recovery_substeps` (20) rung -- a different
+    // starting point already inside the existing, already-tested ladder,
+    // not a new ceiling, damping variant, or Newton/Anderson change. Every
+    // hour where no layer trips the underlying check leaves `requested`
+    // (and therefore the returned substep count) untouched.
+    if (ichkv_proactive_floor_active)
+        requested = @max(requested, stiff_heat_direct_recovery_substeps);
     for (ecosys.soil_water_heat_step.recovery_substep_counts) |supported|
         if (supported == requested) return requested;
     return error.InvalidPreferredHourlyRecoverySubstepCount;
@@ -11862,10 +11879,12 @@ fn recoverFixedExternalHourAdaptively(
     preferred_substep_count: *u8,
     coarsening_probe_cooldown: *u8,
     freeze_flow_coupling_floor_active: *bool,
+    ichkv_proactive_floor_active: bool,
 ) !void {
     var substep_count = try boundedInitialRecoverySubstepCount(
         preferred_substep_count.*,
         freeze_flow_coupling_floor_active.*,
+        ichkv_proactive_floor_active,
     );
     var previous_error: ?anyerror = null;
     while (true) {
@@ -12160,11 +12179,32 @@ pub fn solveSoilHeatWaterAndSoluteTransport(
     const fixed_hour_workspace: *FixedHourRecoveryWorkspace =
         @ptrCast(@alignCast(context.fixed_hour_recovery_workspace));
     const adaptive_schedule = &fixed_hour_workspace.adaptive_hour_schedule;
+    // issue-024/issue-068/issue-077 (`wthr.f:568-571`'s `ICHKV`): evaluated
+    // against the hour's TRUE starting state -- `context.grid`'s water/ice
+    // volumes are always current (never mid-hour-stale), and
+    // `context.soil_thermal.dry_solid_heat_capacity_megajoules_per_m3_k`/
+    // `context.soil_solver_properties.layer_volume_m3` are the slow-changing
+    // (erosion/relayering-only) material/geometry properties
+    // `runtime_material_refresh.refreshAcceptedHour` already keeps current
+    // as of the end of the previous accepted hour, not values this
+    // function's own per-attempt `soil_hourly_workspace.refresh` happens to
+    // have cached from a still-earlier attempt. This is a pure query with
+    // no side effect; it only decides the FIRST attempt's starting point.
+    const ichkv_proactive_floor_active = try ecosys.soil_water_heat_step.ichkvTopLayerHeatCapacityBelowThreshold(
+        context.grid,
+        context.soil_thermal.dry_solid_heat_capacity_megajoules_per_m3_k,
+        context.soil_solver_properties.layer_volume_m3,
+        context.runscript.soil_phase_heat_parameters.liquid_water_heat_capacity_megajoules_per_m3_k,
+        context.runscript.soil_phase_heat_parameters.ice_heat_capacity_megajoules_per_m3_k,
+        context.soil_hourly_workspace.plan_area_m2,
+        context.soil_hourly_workspace.is_top_soil_layer,
+    );
     try recoverFixedExternalHourAdaptively(
         &recovery_attempt,
         &adaptive_schedule.preferred_substep_count,
         &adaptive_schedule.coarsening_probe_cooldown_hours,
         &adaptive_schedule.freeze_flow_coupling_floor_active,
+        ichkv_proactive_floor_active,
     );
 }
 
