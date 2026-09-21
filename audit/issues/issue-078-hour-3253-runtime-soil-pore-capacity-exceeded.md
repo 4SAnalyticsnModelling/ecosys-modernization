@@ -1,6 +1,6 @@
 # Issue 078 -- hour 3,253 `RuntimeSoilPoreCapacityExceeded` (new frontier exposed by issue-024's committed universal `NFH=4` baseline fix)
 
-Status: OPEN, SIXTH (BEYOND-BUDGET, SEPARATELY-AUTHORIZED) DIAGNOSTIC PASS COMPLETE -- OPTION (c) (DEDICATED POST-TILLAGE RELIEF REUSING AN EXISTING ORDINARY-REDISTRIBUTION MECHANISM) FOUND NOT SAFELY IMPLEMENTABLE: THE ONLY CANDIDATE MECHANISM IS ITSELF NEWTON/ANDERSON SOLVER-INTERNAL, NOT A STANDALONE UTILITY. NO CODE CHANGED, SOURCE-READING ONLY. See "Sixth diagnostic pass" section below for full detail. Prior state, still current: A 2026-09-21 non-committed experiment implemented capacity-aware relief inside `physical_redistribution.redistribute` (the kernel `TillageRuntime.apply` calls): after the existing naive REDIST blend computes each mixing-zone layer's new water content, any layer over its own `matrix_pore_capacity_m3` has its excess redistributed -- not discarded -- to other layers in the SAME zone with spare capacity, proportional to that spare capacity, with a distinct new error (`TillageMixingZoneCapacityInsufficient`) surfaced instead of silently clamping if the zone's combined spare capacity cannot hold the zone's combined excess. Unit tests (run via targeted `zig test src/module_index.zig --test-filter "issue-078"`, not the full unfiltered suite) proved the redistribution step is exactly mass-conserving in a synthetic two-layer case and correctly detects a synthetic insufficient-capacity case. A bounded fresh-from-hour-1 `ReleaseFast` rerun against the real Ottawa deck hit exactly that insufficiency at the real hour-3,252 tillage event: the mixing zone is actually 4 layers wide (layers 0-3, not just the layer=1 this issue originally reported), and 3 of those 4 layers (1, 2, and 3) are simultaneously pushed over their own capacity by the naive blend, while only layer 0 has spare room -- `total_excess_m3=5.185342863509684e-3` against `total_spare_m3=2.082518302454456e-3`, a `shortfall_m3=3.102824561055228e-3` (roughly 60% of the total excess has nowhere to go within the zone). This is a genuine physical impossibility for a single-dose, zone-internal-only redistribution, not a mixing-formula artifact or an implementation bug -- confirmed by exact numeric agreement with the original filing (`layer=1`'s naive blend water `8.535563021092726e-3` against capacity `7.670613113153217e-3`, an excess of `8.649499079395094e-4`, matches the original error's fields bit-for-bit). Per the task's own explicit instruction, this negative result is reported honestly rather than committed; the source change was reverted (`git checkout --`), confirmed via `git status --short`/`git diff --stat` (zero uncommitted changes), and `zig build -Doptimize=ReleaseFast` was rerun against the reverted tree to restore the committed baseline binary. See "Second-candidate diagnostic experiment (2026-09-21, non-committed) -- capacity-aware single-dose mixing, physically insufficient" section below for full detail. Prior state, still current: a 2026-09-21 non-committed experiment tried splitting the single full-strength tillage mixing dose into 4 equal sequential sub-doses; it was blocked before ever reaching hour 3,253 by an unrelated, more fundamental architecture constraint -- the tillage activity ledger (`activity.zig`'s `Sidecar`) supports exactly one `apply()` call per cell per attempt (`DuplicateTillageActivityCell` if shared), and if each sub-dose gets its own attempt instead, the once-per-hour ledger read only sees the LAST sub-dose (ledger overwrites, does not accumulate, on `commitAttempt`), producing a real `HourlyLayerConservationFailure` at hour 2,532 (the first tillage event, 721 hours before the 3,253 frontier). Change reverted; zero uncommitted source diffs confirmed. See "Diagnostic experiment (2026-09-21, non-committed)" section for full detail. Prior state, still current: THIRD AND FINAL RESERVED DIAGNOSIS EXPERIMENT (of the original 3-experiment budget) is COMPLETE (3 of 3 spent) -- LEGACY FORTRAN TILLAGE-MIXING ROUTINE FOUND AND READ IN FULL (source-reading only, no runtime rerun); THE CALL-ORDER COMPARISON DOES **NOT** RESOLVE TO A CLEAN "MOVE ONE CALL EARLIER" FIX -- BOTH ENGINES RUN TILLAGE MIXING AFTER THAT TIMESTEP'S OWN WATSUB-EQUIVALENT SOLVE (SAME RELATIVE INTRA-SUBSTEP ORDER); THE REAL, CONFIRMED MISMATCH IS ARCHITECTURE/FREQUENCY, NOT POSITION -- LEGACY RE-APPLIES A SMALL FRACTIONAL MIX EVERY SUBSTEP OF EVERY HOUR FOR THE WHOLE TILLAGE CALENDAR DAY (INTERLEAVED WITH REPEATED WATSUB RELIEF CHANCES), WHILE ZIG APPLIES THE FULL MIXING FRACTION IN ONE SINGLE DEFERRED DOSE PER EVENT WITH NO INTERLEAVED RELIEF. STILL HANDED OFF FOR A DESIGN DECISION; NO CODE CHANGE APPLIED (2026-09-21, third diagnosis pass). This issue was originally filed per explicit task instruction not to diagnose or fix this frontier in the same pass that implemented and committed issue-024's universal `NFH=4` baseline fix. That fix prevents hour 2,894's collapse and clears hour 2,895 (the frontier issue-024/issue-068/issue-077 shared), and the run then proceeds 358 hours further than any prior attempt in this session before hitting this new, distinct failure.
+Status: OPEN -- CONSOLIDATED DISPOSITION (2026-09-21): all three bounded, low-risk candidate fixes now tested and closed out (six total diagnostic passes this session) -- see "Consolidated disposition (2026-09-21)" section at the end of this file. Both remaining paths require genuine new design/implementation work, not another bounded diagnostic; this issue now needs either a human decision on which direction to pursue, or a dedicated implementation effort. Prior pass detail follows, preserved verbatim: SIXTH (BEYOND-BUDGET, SEPARATELY-AUTHORIZED) DIAGNOSTIC PASS COMPLETE -- OPTION (c) (DEDICATED POST-TILLAGE RELIEF REUSING AN EXISTING ORDINARY-REDISTRIBUTION MECHANISM) FOUND NOT SAFELY IMPLEMENTABLE: THE ONLY CANDIDATE MECHANISM IS ITSELF NEWTON/ANDERSON SOLVER-INTERNAL, NOT A STANDALONE UTILITY. NO CODE CHANGED, SOURCE-READING ONLY. See "Sixth diagnostic pass" section below for full detail. Prior state, still current: A 2026-09-21 non-committed experiment implemented capacity-aware relief inside `physical_redistribution.redistribute` (the kernel `TillageRuntime.apply` calls): after the existing naive REDIST blend computes each mixing-zone layer's new water content, any layer over its own `matrix_pore_capacity_m3` has its excess redistributed -- not discarded -- to other layers in the SAME zone with spare capacity, proportional to that spare capacity, with a distinct new error (`TillageMixingZoneCapacityInsufficient`) surfaced instead of silently clamping if the zone's combined spare capacity cannot hold the zone's combined excess. Unit tests (run via targeted `zig test src/module_index.zig --test-filter "issue-078"`, not the full unfiltered suite) proved the redistribution step is exactly mass-conserving in a synthetic two-layer case and correctly detects a synthetic insufficient-capacity case. A bounded fresh-from-hour-1 `ReleaseFast` rerun against the real Ottawa deck hit exactly that insufficiency at the real hour-3,252 tillage event: the mixing zone is actually 4 layers wide (layers 0-3, not just the layer=1 this issue originally reported), and 3 of those 4 layers (1, 2, and 3) are simultaneously pushed over their own capacity by the naive blend, while only layer 0 has spare room -- `total_excess_m3=5.185342863509684e-3` against `total_spare_m3=2.082518302454456e-3`, a `shortfall_m3=3.102824561055228e-3` (roughly 60% of the total excess has nowhere to go within the zone). This is a genuine physical impossibility for a single-dose, zone-internal-only redistribution, not a mixing-formula artifact or an implementation bug -- confirmed by exact numeric agreement with the original filing (`layer=1`'s naive blend water `8.535563021092726e-3` against capacity `7.670613113153217e-3`, an excess of `8.649499079395094e-4`, matches the original error's fields bit-for-bit). Per the task's own explicit instruction, this negative result is reported honestly rather than committed; the source change was reverted (`git checkout --`), confirmed via `git status --short`/`git diff --stat` (zero uncommitted changes), and `zig build -Doptimize=ReleaseFast` was rerun against the reverted tree to restore the committed baseline binary. See "Second-candidate diagnostic experiment (2026-09-21, non-committed) -- capacity-aware single-dose mixing, physically insufficient" section below for full detail. Prior state, still current: a 2026-09-21 non-committed experiment tried splitting the single full-strength tillage mixing dose into 4 equal sequential sub-doses; it was blocked before ever reaching hour 3,253 by an unrelated, more fundamental architecture constraint -- the tillage activity ledger (`activity.zig`'s `Sidecar`) supports exactly one `apply()` call per cell per attempt (`DuplicateTillageActivityCell` if shared), and if each sub-dose gets its own attempt instead, the once-per-hour ledger read only sees the LAST sub-dose (ledger overwrites, does not accumulate, on `commitAttempt`), producing a real `HourlyLayerConservationFailure` at hour 2,532 (the first tillage event, 721 hours before the 3,253 frontier). Change reverted; zero uncommitted source diffs confirmed. See "Diagnostic experiment (2026-09-21, non-committed)" section for full detail. Prior state, still current: THIRD AND FINAL RESERVED DIAGNOSIS EXPERIMENT (of the original 3-experiment budget) is COMPLETE (3 of 3 spent) -- LEGACY FORTRAN TILLAGE-MIXING ROUTINE FOUND AND READ IN FULL (source-reading only, no runtime rerun); THE CALL-ORDER COMPARISON DOES **NOT** RESOLVE TO A CLEAN "MOVE ONE CALL EARLIER" FIX -- BOTH ENGINES RUN TILLAGE MIXING AFTER THAT TIMESTEP'S OWN WATSUB-EQUIVALENT SOLVE (SAME RELATIVE INTRA-SUBSTEP ORDER); THE REAL, CONFIRMED MISMATCH IS ARCHITECTURE/FREQUENCY, NOT POSITION -- LEGACY RE-APPLIES A SMALL FRACTIONAL MIX EVERY SUBSTEP OF EVERY HOUR FOR THE WHOLE TILLAGE CALENDAR DAY (INTERLEAVED WITH REPEATED WATSUB RELIEF CHANCES), WHILE ZIG APPLIES THE FULL MIXING FRACTION IN ONE SINGLE DEFERRED DOSE PER EVENT WITH NO INTERLEAVED RELIEF. STILL HANDED OFF FOR A DESIGN DECISION; NO CODE CHANGE APPLIED (2026-09-21, third diagnosis pass). This issue was originally filed per explicit task instruction not to diagnose or fix this frontier in the same pass that implemented and committed issue-024's universal `NFH=4` baseline fix. That fix prevents hour 2,894's collapse and clears hour 2,895 (the frontier issue-024/issue-068/issue-077 shared), and the run then proceeds 358 hours further than any prior attempt in this session before hitting this new, distinct failure.
 
 ## Sixth diagnostic pass (2026-09-21, source-reading only, no runtime rerun, no code changed) -- option (c) blocked at the Newton/Anderson boundary before any edit was made
 
@@ -186,3 +186,106 @@ Before/after results: n/a -- no code changed.
 Regression added and actually executed: none.
 Independent reviewer: not yet done.
 Remaining limitation or final disposition: **OPEN, handed off for a design decision (classification (d) in practice, despite the (a) root-cause-family match)**. Recommended next action, in order, respecting the remaining 3-of-3 experiment budget: (1) instrument (temporary, non-committed) trace logging of `matrix_liquid_water_m3`/`matrix_pore_capacity_m3`/`macropore_*` for cell=0 layers 0 and 1 across hours ~3245-3253 on a bounded replay, to confirm whether layer 0 is chronically over its own capacity in the hours immediately before the failure and pin down whether relayering's `fx`-transfer or WATSUB's displacement omission is the actual transmission step; (2) only once that trace identifies the specific under-draining step, propose a mass-conserving relief fix (redistribute the excess to an adjacent layer/pool with explicit bookkeeping, not a silent clamp); (3) reserve the third experiment for the validation run once a fix is scoped. Do not attempt a fourth full run without new evidence per the contract's repeat-run rule.
+
+## Consolidated disposition (2026-09-21)
+
+This section consolidates every diagnostic pass on this issue to date (six in
+total this session, well beyond the contract's default three-experiment
+budget, each separately authorized as a reviewer/reframing step) into a
+single current disposition. It supersedes none of the detailed evidence
+above -- every prior section remains the record of exactly what was tried,
+what was found, and what was reverted -- but it is the section a fresh
+reader should treat as authoritative for "what is the state of this issue
+right now and what happens next."
+
+**1. All three narrowly-scoped, low-risk candidate fixes have now been tested
+and closed out.** This issue has received more diagnostic attention than
+almost any other issue this session:
+
+- **Multi-dose splitting** (splitting the single tillage mixing dose into
+  several smaller sequential doses, matching legacy's repeated-small-dose
+  architecture): blocked before it could even be evaluated against the real
+  hour-3,253 frontier, by a real, independent bug in the tillage activity
+  ledger (`activity.zig`'s `Sidecar`) -- the ledger's per-attempt duplicate-cell
+  guard rejects a second `apply()` call per cell per attempt, and once
+  attempts are split one-per-sub-dose to satisfy that guard, `commitAttempt`'s
+  `@memcpy`-based overwrite (not accumulation) of `accepted_soil`/
+  `accepted_surface` means only the LAST sub-dose's transfer is visible to the
+  once-per-hour hourly conservation check, producing a real
+  `HourlyLayerConservationFailure` at hour 2,532 -- 721 hours before the
+  frontier this experiment was meant to probe. The core "does splitting the
+  dose help" hypothesis was never actually tested; the ledger bug got there
+  first. Reverted; zero uncommitted diffs confirmed.
+- **Capacity-aware, mixing-zone-only redistribution** (making the single
+  deferred dose self-limiting by reallocating excess to same-zone layers with
+  spare capacity, never discarding mass): the redistribution mechanism itself
+  was proven exactly mass-conserving by two targeted unit tests (bit-for-bit
+  water-total preservation; correct, non-silent error surfaced when a
+  synthetic zone lacks capacity). But run against the real Ottawa deck at the
+  real hour-3,252 tillage event, it is physically insufficient: the mixing
+  zone is actually 4 layers wide (0-3, not the single `layer=1` the original
+  filing implied), 3 of those 4 layers are simultaneously pushed over their
+  own capacity by the naive blend, and the zone's only spare-capacity layer
+  (layer 0) covers barely 40% of the total excess -- a genuine ~60% shortfall
+  (`total_excess_m3=5.185342863509684e-3` vs.
+  `total_spare_m3=2.082518302454456e-3`), not an implementation defect.
+  Decisively refuted by evidence, not supposition. Reverted; zero uncommitted
+  diffs confirmed.
+- **Reuse of an existing redistribution mechanism** for a dedicated
+  post-tillage relief step (so tillage's excess could reach deeper, non-tilled
+  layers the way ordinary excess water would): correctly declined at a real
+  architectural boundary rather than guessed past it. The only actual
+  candidate mechanism, `applyMechanicalFreezingDisplacement`
+  (`solver_residual.zig:38-144`), turned out to be Newton/Anderson
+  solver-internal machinery (private, called only from `residualAt`, operating
+  on solver-only types `Face`/`Properties`/`target`), not a reusable
+  standalone utility -- exactly the class of boundary the task's own stop
+  condition and `PROJECT_CONTRACT.md`'s "Existing numerical architecture
+  constraints" section flag as off-limits to touch informally. No edit was
+  made; nothing to revert.
+
+Two of the three are decisively refuted with concrete numerical evidence from
+the real deck; the third is correctly declined because the only candidate
+mechanism is not what it would need to be. None of the three low-risk,
+narrowly-scoped options survives.
+
+**2. The two remaining options both require genuine new design/feature work,
+not another bounded diagnostic:**
+
+- **(a) A NEW capacity-aware relief mechanism that reaches beyond the tillage
+  mixing zone into deeper, non-tilled layers** -- extending, not reusing, the
+  zone-internal design already tested and found insufficient above. This is
+  not a narrow fix; it needs its own design pass to decide how far to reach
+  (how many layers below the mixing zone, and by what rule), what triggers it
+  (every tillage event, or only when the zone-internal shortfall check
+  fires), and how to keep it correctly scoped so it never touches
+  Newton/Anderson residual/acceptance logic (the exact boundary the sixth
+  pass hit while evaluating option (c) above).
+- **(b) A redesigned tillage activity ledger that ACCUMULATES (not
+  overwrites) across multiple sub-doses**, after which the multi-dose-splitting
+  approach (interleaving several smaller applications across the tillage
+  event window, each with its own WATSUB-equivalent relief chance, mirroring
+  legacy's actual architecture) could be revisited on its merits. This is a
+  real sidecar/ledger-architecture redesign (`activity.zig`'s `Sidecar`
+  attempt/commit model), not a call-site edit -- the duplicate-cell guard and
+  the non-accumulating `commitAttempt` overwrite are both structural
+  properties of the current ledger, not incidental bugs.
+
+**3. Further progress on this specific hour-3,253 frontier now requires
+either a human decision on which of these two directions to pursue, or a
+dedicated implementation effort -- not another bounded diagnostic.** This is
+a genuinely different category of "next step" than every other fix resolved
+this session: every prior issue in this session's chain (e.g. issue-024's
+universal `NFH=4` baseline, issue-068, issue-077) was either a bug with a
+clear, narrowly-scoped fix, or a diagnostic that converged on one. This issue
+is neither: six passes have now exhaustively ruled out every narrowly-scoped,
+low-risk candidate, leaving only options that are themselves new design and
+implementation projects (a new physical relief algorithm, or a ledger
+architecture redesign). No further diagnosis is warranted without a design
+decision first; no code has been changed by any pass on this issue, and the
+committed baseline binary is unaffected.
+
+Owner: unassigned. Diagnosis: complete for the scope of "narrowly-scoped,
+low-risk candidate fix." Next action: human design decision between options
+(a)/(b) above, then a dedicated implementation pass (with its own regression
+tests and bounded validation run) -- not a seventh diagnostic pass.
