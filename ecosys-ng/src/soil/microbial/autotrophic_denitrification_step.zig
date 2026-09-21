@@ -87,7 +87,7 @@ fn makeZone(context: ApplyContext, layer: usize, unit: usize, water_m3: f64, ban
     const active_fraction = context.environment.microbial_active_fraction[unit];
     return .{
         .nitrite_fraction = nitrite_fraction,
-        .nitrite_concentration_g_n_per_m3 = if (nitrite_volume > 0) nitrite_amount / nitrite_volume else 0,
+        .nitrite_concentration_g_n_per_m3 = if (nitrite_volume > context.negligible_water_volume_m3) nitrite_amount / nitrite_volume else 0,
         .nitrite_amount_g_n = nitrite_amount,
         .ammonium_amount_g_n = ammonium_amount,
         .nitrite_competition_fraction = competition(previous_nitrite_total, previous_nitrite_capacity, active_fraction * nitrite_fraction, context.negligible_nitrogen_g_n, context.parameters.denitrification.minimum_competition_fraction),
@@ -155,4 +155,68 @@ test "runtime ammonia oxidizer performs oxygen-deficit autotrophic denitrificati
     try std.testing.expect(result.non_band_autotrophic_nitrite_reduction_potential_g_n[0] > 0);
     try std.testing.expectApproxEqRel(result.non_band_autotrophic_nitrite_reduction_potential_g_n[0] * 0.333, result.non_band_autotrophic_ammonium_oxidation_potential_g_n[0], 1e-12);
     try std.testing.expect(result.denitrification_respiration_g_c[0] > 0);
+}
+
+test "issue-072 Finding B: makeZone's nitrite_concentration no longer spikes when nitrite_fraction collapses below the floor while total water_m3 stays wet" {
+    // OLD guard on `nitrite_volume = water_m3 * nitrite_fraction` was
+    // `nitrite_volume > 0` (exact-zero only) even though the file's own
+    // per-layer skip (`water_m3 <= context.negligible_water_volume_m3`) uses
+    // the shared floor two lines above. A tiny-but-nonzero nitrite_fraction
+    // (band/non-band split) with a comfortably wet total water_m3 still hit
+    // the unfloored division and spiked nitrite_concentration_g_n_per_m3,
+    // saturating the downstream Monod capacity term toward its maximum --
+    // backwards from legacy's floor-gated zero. NEW widens to the floor.
+    const water_m3: f64 = 1;
+    const negligible_water_volume_m3: f64 = 1e-6;
+    const nitrite_fraction: f64 = negligible_water_volume_m3 / (2 * water_m3); // nitrite_volume below the floor
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    var reactive_state = try reactive.State.init(std.testing.allocator, 1, 1);
+    defer reactive_state.deinit();
+    reactive_state.non_band_nitrite_g_n[0] = 1;
+    var result = try fluxes.State.init(std.testing.allocator, 1, 1);
+    defer result.deinit();
+    var oxygen_state = try oxygen.State.init(std.testing.allocator, 1, 1, 1);
+    defer oxygen_state.deinit();
+    var environment = try nitrifier_environment.State.init(std.testing.allocator, 1, 1);
+    defer environment.deinit();
+    environment.roles[0] = .ammonia_oxidizer;
+    const context: ApplyContext = .{
+        .result = &result,
+        .reactive_nitrogen = &reactive_state,
+        .chemistry_state = &chemistry_state,
+        .model_grid = undefined,
+        .oxygen_state = &oxygen_state,
+        .environment = &environment,
+        .retention_curve = &.{},
+        .matrix_bulk_volume_m3 = &.{},
+        .zone_fractions = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = nitrite_fraction, .nitrate_band = nitrite_fraction, .phosphate_non_band = 0.5, .phosphate_band = 0.5 },
+        .parameters = .{
+            .nitrification = .{ .minimum_competition_fraction = 0.001, .inhibition_decay_per_h = 0, .inhibition_decay_ammonium_constant_g_n_per_m3 = 1, .ammonia_product_inhibition_g_n_per_m3 = 1, .ammonium_half_saturation_g_n_per_m3 = 1, .nitrite_half_saturation_g_n_per_m3 = 1, .ammonia_oxidation_rate_g_n_per_g_c_h = 1, .nitrite_oxidation_rate_g_n_per_g_c_h = 1, .ammonia_oxidizer_carbon_efficiency_g_c_per_g_n = 0.3, .nitrite_oxidizer_carbon_efficiency_g_c_per_g_n = 0.1, .growth_respiration_fraction = 0.5, .oxygen_per_respired_carbon_g_o_per_g_c = 2.667, .oxygen_per_ammonium_n_g_o_per_g_n = 3.429, .oxygen_per_nitrite_n_g_o_per_g_n = 1.143 },
+            .denitrification = .{ .minimum_competition_fraction = 0.001, .nitrate_half_saturation_g_n_per_m3 = 1.4, .nitrite_half_saturation_g_n_per_m3 = 1.4, .nitrous_oxide_half_saturation_g_n_per_m3 = 0.014, .product_inhibition_rate_g_n_per_m3_step = 1, .carbon_per_nitrate_n_g_c_per_g_n = 0.429, .carbon_per_nitrite_n_g_c_per_g_n = 0.429, .carbon_per_nitrous_oxide_n_g_c_per_g_n = 0.214, .nitrate_n_per_unmet_oxygen_g_n_per_g_o = 0.875 },
+            .autotrophic_denitrification = .{ .anaerobic_growth_respiration_fraction = 0.5, .additional_ammonium_oxidation_per_nitrite_reduction = 0.333 },
+            .chemodenitrification = .{ .reaction_rate_per_h = 0, .minimum_competition_fraction = 0.001, .negligible_demand_g_n = 1e-12, .nitrous_oxide_product_fraction = 0.5, .dinitrogen_product_fraction = 0, .dissolved_organic_nitrogen_product_fraction = 0.5 },
+            .nitrous_acid_dissociation_mol_per_m3 = 0.45,
+            .microbial_thermal_adaptation_offset_k = 0,
+            .nitrifier_indices = .{ .autotrophic_substrate_index = 0, .ammonia_oxidizer_population_index = 0, .nitrite_oxidizer_population_index = 1, .heterotrophic_denitrifier_population_index = 1 },
+            .nitrifier_environment = .{ .labile_biomass_fraction = 0.5, .ammonia_oxidizer_target_nitrogen_per_carbon_g_n_per_g_c = 0.1, .nitrite_oxidizer_target_nitrogen_per_carbon_g_n_per_g_c = 0.1, .ammonia_oxidizer_target_phosphorus_per_carbon_g_p_per_g_c = 0.01, .nitrite_oxidizer_target_phosphorus_per_carbon_g_p_per_g_c = 0.01, .aqueous_co2_half_saturation_g_c_per_m3 = 1, .water_potential_sensitivity_per_megapascal = 0.1 },
+            .oxygen_uptake = .{ .microbial_radius_m = 1e-6, .microbial_count_per_g_c = 1, .oxygen_half_saturation_g_o_per_m3 = 0.064, .hygroscopic_water_potential_megapascal = -1.5e4, .air_water_exchange_reference_time_h = 0.5, .wet_exchange_exponent = 12, .dry_exchange_exponent = 12, .minimum_transition_water_fraction = 0.5, .aqueous_tortuosity_coefficient = 0.7, .minimum_allocation_fraction = 0.001, .negligible_oxygen_demand_g_o = 1e-12 },
+            .heterotrophic_respiration = .{ .substrate_unlimited_respiration_per_h = 0.125, .target_nitrogen_per_carbon_g_n_per_g_c = 0.1, .target_phosphorus_per_carbon_g_p_per_g_c = 0.01, .doc_half_saturation_g_c_per_m3 = 12, .acetate_half_saturation_g_c_per_m3 = 12, .doc_respiration_requirement_g_c_per_g_c = 0.5, .acetate_respiration_requirement_g_c_per_g_c = 0.42016806722689076, .water_potential_sensitivity_per_megapascal = 0.1, .oxygen_per_respired_carbon_g_o_per_g_c = 2.667, .specific_maintenance_respiration_g_c_per_g_n_per_h = 0.01, .decomposition_density_half_saturation_g_c_per_g_c = 0.01, .maintenance_density_half_saturation_g_c_per_g_c = 1e-6, .acidity_half_response_mol_per_m3 = 1, .denitrification_growth_respiration_fraction_g_c_per_g_c = 0.7142857142857143 },
+            .microbial_mineral_exchange = .{ .ammonium_maximum_uptake_g_n_per_m2_h = 0.014, .ammonium_minimum_concentration_g_n_per_m3 = 0.0125, .ammonium_half_saturation_g_n_per_m3 = 0.40, .nitrate_maximum_uptake_g_n_per_m2_h = 0.014, .nitrate_minimum_concentration_g_n_per_m3 = 0.03, .nitrate_half_saturation_g_n_per_m3 = 0.35, .phosphate_maximum_uptake_g_p_per_m2_h = 0.003, .phosphate_minimum_concentration_g_p_per_m3 = 0.009, .phosphate_half_saturation_g_p_per_m3 = 0.18, .phosphorus_molar_mass_g_per_mol = 31 },
+            .nonsymbiotic_nitrogen_fixation = .{ .aerobic_diazotroph_population_index = 5, .anaerobic_diazotroph_population_index = 6, .aerobic_yield_g_n_per_g_c = 0.25, .anaerobic_yield_g_n_per_g_c = 0.02, .dinitrogen_half_saturation_g_n_per_m3 = 0.14, .nonstructural_to_structural_rate_per_h = 0.25 },
+            .microbial_turnover = .{ .labile_basal_decomposition_rate_per_h = 0.01, .resistant_basal_decomposition_rate_per_h = 0.001, .minimum_carbon_recycling_fraction = 0.167, .carbon_recycling_range_fraction = 0.333, .maximum_nitrogen_recycling_fraction = 0.333, .maximum_phosphorus_recycling_fraction = 0.333, .humification_intercept = 0.150, .humification_clay_coefficient = 0.300, .humification_maximum_clay_fraction = 0.333, .woody_colonization_per_g_respired_carbon = 0.25, .fine_litter_colonization_per_g_respired_carbon = 2, .manure_colonization_per_g_respired_carbon = 5, .particulate_colonization_per_g_respired_carbon = 1, .humus_colonization_per_g_respired_carbon = 0.5, .humification_organic_carbon_coefficient_per_g_per_megagram = 0.182e-6 },
+        },
+        .nitrogen_molar_mass_g_per_mol = 14,
+        .timestep_h = 1,
+        .negligible_water_volume_m3 = negligible_water_volume_m3,
+        .negligible_nitrogen_g_n = 1e-12,
+    };
+    const zone = makeZone(context, 0, 0, water_m3, false);
+    // NEW behaviour: below the floor, nitrite_concentration collapses to 0.
+    try std.testing.expectEqual(@as(f64, 0), zone.nitrite_concentration_g_n_per_m3);
+    // Sanity: the OLD guard's arithmetic would have produced a huge spurious
+    // concentration at this same nitrite_volume, confirming the widened
+    // guard (not an unrelated code path) is what changed the outcome.
+    const nitrite_volume = water_m3 * nitrite_fraction;
+    try std.testing.expect(reactive_state.non_band_nitrite_g_n[0] / nitrite_volume > 1e5);
 }

@@ -99,6 +99,39 @@ fn hourlyChemistrySoilMass(
     return soil_mass_megagrams;
 }
 
+/// `solute.f:610`-style `ZEROS2` floor (issue-073 Finding C), for
+/// `updateFertilizerBandGeometry`'s own nitrate/phosphate/precipitate mass
+/// pools -- distinct call site from, but the same floor shape as,
+/// `solveHourlyReactionLayer`'s own already-established gate earlier in this
+/// same file. Below the floor, substitutes the persistent
+/// `dry_reference_water_m3` carrier instead of scaling every pool by a
+/// vanishing live-water multiplier, keeping this function's pools
+/// consistent with what the reaction solver assumed for the same layer this
+/// same hour.
+fn fertilizerBandGeometryCarrierM3(water_volume_m3: f64, floor_m3: f64, dry_reference_water_m3: f64) f64 {
+    return if (water_volume_m3 > floor_m3) water_volume_m3 else dry_reference_water_m3;
+}
+
+test "issue-073 Finding C: fertilizerBandGeometryCarrierM3 substitutes the dry reference below the floor, passes the live carrier through above it" {
+    const floor_m3: f64 = 1e-6;
+    const dry_reference_m3: f64 = 0.4;
+    // Below the floor (tiny-but-nonzero): substitutes the retained carrier.
+    try std.testing.expectEqual(dry_reference_m3, fertilizerBandGeometryCarrierM3(floor_m3 / 2, floor_m3, dry_reference_m3));
+    // Exactly zero: still substitutes (matches legacy's ZEROS2 gate, not an
+    // exact-zero-only guard).
+    try std.testing.expectEqual(dry_reference_m3, fertilizerBandGeometryCarrierM3(0, floor_m3, dry_reference_m3));
+    // Above the floor: the live carrier passes through unchanged.
+    try std.testing.expectEqual(@as(f64, 1), fertilizerBandGeometryCarrierM3(1, floor_m3, dry_reference_m3));
+
+    // OLD/NEW comparison at a tiny-but-nonzero water_volume_m3: the OLD
+    // (unguarded) multiplication would have manufactured a >99.99% fake
+    // mass loss relative to the correct (dry-reference) mass.
+    const concentration_mol_per_m3: f64 = 10;
+    const old_mol = concentration_mol_per_m3 * (floor_m3 / 2);
+    const new_mol = concentration_mol_per_m3 * fertilizerBandGeometryCarrierM3(floor_m3 / 2, floor_m3, dry_reference_m3);
+    try std.testing.expect(old_mol < new_mol * 1e-4);
+}
+
 pub noinline fn convergeHourlySoilChemistry(
     context: anytype,
     fertilizer_band_hour: ecosys.fertilizer_band_phase_coordinator.HourToken,
@@ -781,13 +814,34 @@ noinline fn updateFertilizerBandGeometry(
             const non_band = context.soil_chemistry.non_band_phosphate[global_layer];
             const band = context.soil_chemistry.band_phosphate[global_layer];
             const water_volume_m3 = context.grid.matrix_liquid_water_m3[global_layer];
+            const bulk_volume_m3 = context.soil_solver_properties.matrix_bulk_volume_m3[global_layer];
             const soil_mass_megagrams = try hourlyChemistrySoilMass(
-                context.soil_solver_properties.matrix_bulk_volume_m3[global_layer],
+                bulk_volume_m3,
                 context.soil_solver_properties.bulk_density_megagrams_per_m3[global_layer],
                 water_volume_m3,
             );
-            const nitrate_nonband_g_n = layer.nitrate_non_band * water_volume_m3 * 14.0;
-            const nitrate_band_g_n = layer.nitrate_band * water_volume_m3 * 14.0;
+            // issue-073 Finding C: below `solveHourlyReactionLayer`'s own
+            // ZEROS2-equivalent floor (same file, same layer, same hour --
+            // `context.config.physical_tolerance.waterVolume(bulk_volume_m3)`),
+            // that function returns early and leaves this layer's aqueous
+            // concentrations at their stale (pre-hour) values instead of
+            // updating them against the collapsed carrier. Scaling those
+            // stale concentrations by the raw (collapsed) water_volume_m3
+            // here would manufacture a spurious near-zero mass pool
+            // inconsistent with what the reaction solver itself assumed for
+            // the same layer this same hour. Substituting the persistent
+            // `dry_reference_water_m3` carrier keeps this function's pools
+            // consistent with `solveHourlyReactionLayer`'s own dry-reference
+            // bookkeeping, mirroring the fix pattern this defect class uses
+            // everywhere else in this codebase.
+            const fertilizer_band_water_floor_m3 = context.config.physical_tolerance.waterVolume(bulk_volume_m3);
+            const effective_water_volume_m3 = fertilizerBandGeometryCarrierM3(
+                water_volume_m3,
+                fertilizer_band_water_floor_m3,
+                context.soil_chemistry.dry_reference_water_m3[global_layer],
+            );
+            const nitrate_nonband_g_n = layer.nitrate_non_band * effective_water_volume_m3 * 14.0;
+            const nitrate_band_g_n = layer.nitrate_band * effective_water_volume_m3 * 14.0;
             const nitrite_nonband_g_n = context.soil_reactive_nitrogen.non_band_nitrite_g_n[global_layer];
             const nitrite_band_g_n = context.soil_reactive_nitrogen.band_nitrite_g_n[global_layer];
             if (!std.math.isFinite(nitrate_nonband_g_n) or !std.math.isFinite(nitrate_band_g_n) or !std.math.isFinite(nitrite_nonband_g_n) or !std.math.isFinite(nitrite_band_g_n))
@@ -796,10 +850,10 @@ noinline fn updateFertilizerBandGeometry(
             const fertilizer_nitrate_band_g_n = context.soil_fertilizer_inventory.soil[global_layer].banded_nitrate_mol_n * 14.0;
             if (!std.math.isFinite(fertilizer_nitrate_nonband_g_n) or !std.math.isFinite(fertilizer_nitrate_band_g_n))
                 return error.InvalidHourlySoilChemistryGeometry;
-            const hydrogen_phosphate_nonband_mol = non_band.dissolved_hpo4_mol_p_per_m3 * water_volume_m3;
-            const hydrogen_phosphate_band_mol = band.dissolved_hpo4_mol_p_per_m3 * water_volume_m3;
-            const dihydrogen_phosphate_nonband_mol = non_band.dissolved_h2po4_mol_p_per_m3 * water_volume_m3;
-            const dihydrogen_phosphate_band_mol = band.dissolved_h2po4_mol_p_per_m3 * water_volume_m3;
+            const hydrogen_phosphate_nonband_mol = non_band.dissolved_hpo4_mol_p_per_m3 * effective_water_volume_m3;
+            const hydrogen_phosphate_band_mol = band.dissolved_hpo4_mol_p_per_m3 * effective_water_volume_m3;
+            const dihydrogen_phosphate_nonband_mol = non_band.dissolved_h2po4_mol_p_per_m3 * effective_water_volume_m3;
+            const dihydrogen_phosphate_band_mol = band.dissolved_h2po4_mol_p_per_m3 * effective_water_volume_m3;
             if (!(std.math.isFinite(hydrogen_phosphate_nonband_mol) and std.math.isFinite(hydrogen_phosphate_band_mol) and std.math.isFinite(dihydrogen_phosphate_nonband_mol) and std.math.isFinite(dihydrogen_phosphate_band_mol)))
                 return error.InvalidHourlySoilChemistryGeometry;
             const adsorbed_oh0_nonband_mol = non_band.deprotonated_site_mol_per_megagram * soil_mass_megagrams;
@@ -812,34 +866,34 @@ noinline fn updateFertilizerBandGeometry(
             const adsorbed_hpo4_band_mol = band.adsorbed_hpo4_mol_p_per_megagram * soil_mass_megagrams;
             const adsorbed_h2po4_nonband_mol = non_band.adsorbed_h2po4_mol_p_per_megagram * soil_mass_megagrams;
             const adsorbed_h2po4_band_mol = band.adsorbed_h2po4_mol_p_per_megagram * soil_mass_megagrams;
-            const aluminum_phosphate_nonband_mol = non_band.aluminum_phosphate_solid_mol_per_m3 * water_volume_m3;
-            const aluminum_phosphate_band_mol = band.aluminum_phosphate_solid_mol_per_m3 * water_volume_m3;
-            const iron_phosphate_nonband_mol = non_band.iron_phosphate_solid_mol_per_m3 * water_volume_m3;
-            const iron_phosphate_band_mol = band.iron_phosphate_solid_mol_per_m3 * water_volume_m3;
-            const dicalcium_phosphate_nonband_mol = non_band.dicalcium_phosphate_solid_mol_per_m3 * water_volume_m3;
-            const dicalcium_phosphate_band_mol = band.dicalcium_phosphate_solid_mol_per_m3 * water_volume_m3;
-            const hydroxyapatite_nonband_mol = non_band.hydroxyapatite_solid_mol_per_m3 * water_volume_m3;
-            const hydroxyapatite_band_mol = band.hydroxyapatite_solid_mol_per_m3 * water_volume_m3;
-            const monocalcium_phosphate_nonband_mol = non_band.monocalcium_phosphate_solid_mol_per_m3 * water_volume_m3;
-            const monocalcium_phosphate_band_mol = band.monocalcium_phosphate_solid_mol_per_m3 * water_volume_m3;
+            const aluminum_phosphate_nonband_mol = non_band.aluminum_phosphate_solid_mol_per_m3 * effective_water_volume_m3;
+            const aluminum_phosphate_band_mol = band.aluminum_phosphate_solid_mol_per_m3 * effective_water_volume_m3;
+            const iron_phosphate_nonband_mol = non_band.iron_phosphate_solid_mol_per_m3 * effective_water_volume_m3;
+            const iron_phosphate_band_mol = band.iron_phosphate_solid_mol_per_m3 * effective_water_volume_m3;
+            const dicalcium_phosphate_nonband_mol = non_band.dicalcium_phosphate_solid_mol_per_m3 * effective_water_volume_m3;
+            const dicalcium_phosphate_band_mol = band.dicalcium_phosphate_solid_mol_per_m3 * effective_water_volume_m3;
+            const hydroxyapatite_nonband_mol = non_band.hydroxyapatite_solid_mol_per_m3 * effective_water_volume_m3;
+            const hydroxyapatite_band_mol = band.hydroxyapatite_solid_mol_per_m3 * effective_water_volume_m3;
+            const monocalcium_phosphate_nonband_mol = non_band.monocalcium_phosphate_solid_mol_per_m3 * effective_water_volume_m3;
+            const monocalcium_phosphate_band_mol = band.monocalcium_phosphate_solid_mol_per_m3 * effective_water_volume_m3;
             if (!std.math.isFinite(adsorbed_oh0_nonband_mol) or !std.math.isFinite(adsorbed_oh0_band_mol) or !std.math.isFinite(adsorbed_oh1_nonband_mol) or !std.math.isFinite(adsorbed_oh1_band_mol) or !std.math.isFinite(adsorbed_oh2_nonband_mol) or !std.math.isFinite(adsorbed_oh2_band_mol) or !std.math.isFinite(adsorbed_hpo4_nonband_mol) or !std.math.isFinite(adsorbed_hpo4_band_mol) or !std.math.isFinite(adsorbed_h2po4_nonband_mol) or !std.math.isFinite(adsorbed_h2po4_band_mol) or !std.math.isFinite(aluminum_phosphate_nonband_mol) or !std.math.isFinite(aluminum_phosphate_band_mol) or !std.math.isFinite(iron_phosphate_nonband_mol) or !std.math.isFinite(iron_phosphate_band_mol) or !std.math.isFinite(dicalcium_phosphate_nonband_mol) or !std.math.isFinite(dicalcium_phosphate_band_mol) or !std.math.isFinite(hydroxyapatite_nonband_mol) or !std.math.isFinite(hydroxyapatite_band_mol) or !std.math.isFinite(monocalcium_phosphate_nonband_mol) or !std.math.isFinite(monocalcium_phosphate_band_mol))
                 return error.InvalidHourlySoilChemistryGeometry;
-            const phosphate_nonband_mol = non_band.dissolved_po4_mol_p_per_m3 * water_volume_m3;
-            const phosphate_band_mol = band.dissolved_po4_mol_p_per_m3 * water_volume_m3;
-            const phosphoric_acid_nonband_mol = non_band.dissolved_h3po4_mol_p_per_m3 * water_volume_m3;
-            const phosphoric_acid_band_mol = band.dissolved_h3po4_mol_p_per_m3 * water_volume_m3;
-            const iron_hpo4_nonband_mol = non_band.iron_hpo4_pair_mol_per_m3 * water_volume_m3;
-            const iron_hpo4_band_mol = band.iron_hpo4_pair_mol_per_m3 * water_volume_m3;
-            const iron_h2po4_nonband_mol = non_band.iron_h2po4_pair_mol_per_m3 * water_volume_m3;
-            const iron_h2po4_band_mol = band.iron_h2po4_pair_mol_per_m3 * water_volume_m3;
-            const calcium_hpo4_nonband_mol = non_band.calcium_po4_pair_mol_per_m3 * water_volume_m3;
-            const calcium_hpo4_band_mol = band.calcium_po4_pair_mol_per_m3 * water_volume_m3;
-            const calcium_h2po4_nonband_mol = non_band.calcium_h2po4_pair_mol_per_m3 * water_volume_m3;
-            const calcium_h2po4_band_mol = band.calcium_h2po4_pair_mol_per_m3 * water_volume_m3;
-            const calcium_phosphate_nonband_mol = non_band.calcium_po4_pair_mol_per_m3 * water_volume_m3;
-            const calcium_phosphate_band_mol = band.calcium_po4_pair_mol_per_m3 * water_volume_m3;
-            const magnesium_hpo4_nonband_mol = non_band.magnesium_hpo4_pair_mol_per_m3 * water_volume_m3;
-            const magnesium_hpo4_band_mol = band.magnesium_hpo4_pair_mol_per_m3 * water_volume_m3;
+            const phosphate_nonband_mol = non_band.dissolved_po4_mol_p_per_m3 * effective_water_volume_m3;
+            const phosphate_band_mol = band.dissolved_po4_mol_p_per_m3 * effective_water_volume_m3;
+            const phosphoric_acid_nonband_mol = non_band.dissolved_h3po4_mol_p_per_m3 * effective_water_volume_m3;
+            const phosphoric_acid_band_mol = band.dissolved_h3po4_mol_p_per_m3 * effective_water_volume_m3;
+            const iron_hpo4_nonband_mol = non_band.iron_hpo4_pair_mol_per_m3 * effective_water_volume_m3;
+            const iron_hpo4_band_mol = band.iron_hpo4_pair_mol_per_m3 * effective_water_volume_m3;
+            const iron_h2po4_nonband_mol = non_band.iron_h2po4_pair_mol_per_m3 * effective_water_volume_m3;
+            const iron_h2po4_band_mol = band.iron_h2po4_pair_mol_per_m3 * effective_water_volume_m3;
+            const calcium_hpo4_nonband_mol = non_band.calcium_po4_pair_mol_per_m3 * effective_water_volume_m3;
+            const calcium_hpo4_band_mol = band.calcium_po4_pair_mol_per_m3 * effective_water_volume_m3;
+            const calcium_h2po4_nonband_mol = non_band.calcium_h2po4_pair_mol_per_m3 * effective_water_volume_m3;
+            const calcium_h2po4_band_mol = band.calcium_h2po4_pair_mol_per_m3 * effective_water_volume_m3;
+            const calcium_phosphate_nonband_mol = non_band.calcium_po4_pair_mol_per_m3 * effective_water_volume_m3;
+            const calcium_phosphate_band_mol = band.calcium_po4_pair_mol_per_m3 * effective_water_volume_m3;
+            const magnesium_hpo4_nonband_mol = non_band.magnesium_hpo4_pair_mol_per_m3 * effective_water_volume_m3;
+            const magnesium_hpo4_band_mol = band.magnesium_hpo4_pair_mol_per_m3 * effective_water_volume_m3;
             if (!std.math.isFinite(phosphate_nonband_mol) or !std.math.isFinite(phosphate_band_mol) or !std.math.isFinite(phosphoric_acid_nonband_mol) or !std.math.isFinite(phosphoric_acid_band_mol) or !std.math.isFinite(iron_hpo4_nonband_mol) or !std.math.isFinite(iron_hpo4_band_mol) or !std.math.isFinite(iron_h2po4_nonband_mol) or !std.math.isFinite(iron_h2po4_band_mol) or !std.math.isFinite(calcium_hpo4_nonband_mol) or !std.math.isFinite(calcium_hpo4_band_mol) or !std.math.isFinite(calcium_h2po4_nonband_mol) or !std.math.isFinite(calcium_h2po4_band_mol) or !std.math.isFinite(calcium_phosphate_nonband_mol) or !std.math.isFinite(calcium_phosphate_band_mol) or !std.math.isFinite(magnesium_hpo4_nonband_mol) or !std.math.isFinite(magnesium_hpo4_band_mol))
                 return error.InvalidHourlySoilChemistryGeometry;
             nitrate_nonband_pools[local_layer] = nitrate_nonband_g_n;

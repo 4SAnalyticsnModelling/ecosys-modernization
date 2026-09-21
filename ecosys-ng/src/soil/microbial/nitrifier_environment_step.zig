@@ -66,6 +66,11 @@ pub const ApplyContext = struct {
     matric_plus_osmotic_potential_megapascal: []const f64,
     thermal_adaptation_offset_k_by_cell: []const f64,
     parameters: nitrogen_parameters.Parameters,
+    /// `solute.f:610`-style `ZEROS2` floor (issue-072 Finding A): this file
+    /// previously had no floor field at all, guarding `co2_concentration`'s
+    /// division by an exact-zero check instead of legacy's actual
+    /// `VOLW(L,NY,NX).GT.ZEROS2(NY,NX)` gate (`hour1.f:3777-3787`).
+    negligible_water_volume_m3: f64,
 };
 
 pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
@@ -84,7 +89,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
         const water = @exp(environment.water_potential_sensitivity_per_megapascal * context.matric_plus_osmotic_potential_megapascal[layer]);
         const water_m3 = context.model_grid.matrix_liquid_water_m3[layer];
         const co2_index = try gas.massIndex(layer, .carbon_dioxide, context.gas_state.cell_count);
-        const co2_concentration = if (water_m3 > 0) context.gas_state.dissolved_mass_g[co2_index] / water_m3 else 0;
+        const co2_concentration = if (water_m3 > context.negligible_water_volume_m3) context.gas_state.dissolved_mass_g[co2_index] / water_m3 else 0;
         const co2_activity = co2_concentration / (co2_concentration + environment.aqueous_co2_half_saturation_g_c_per_m3);
         const units = [2]usize{ ammonia_unit, nitrite_unit };
         const target_n = [2]f64{ environment.ammonia_oxidizer_target_nitrogen_per_carbon_g_n_per_g_c, environment.nitrite_oxidizer_target_nitrogen_per_carbon_g_n_per_g_c };
@@ -116,6 +121,7 @@ fn validate(context: ApplyContext, range: compute.CellRange) !void {
     if (context.result.process_unit_count_per_layer != expected_units) return error.NitrifierEnvironmentDimensionMismatch;
     const indices = context.parameters.nitrifier_indices;
     if (indices.autotrophic_substrate_index >= context.microbial_state.substrate_count or indices.ammonia_oxidizer_population_index >= context.microbial_state.population_count or indices.nitrite_oxidizer_population_index >= context.microbial_state.population_count) return error.NitrifierRuntimeIndexOutOfBounds;
+    if (!std.math.isFinite(context.negligible_water_volume_m3) or context.negligible_water_volume_m3 < 0) return error.InvalidNitrifierEnvironmentInput;
     try nitrogen_parameters.validate(context.parameters);
 }
 
@@ -141,7 +147,7 @@ test "nitrifier environment consumes the authoritative per-cell offset" {
     var result = try State.init(std.testing.allocator, 2, 42);
     defer result.deinit();
     const source = "soil_nitrification 0.001 0.0002 7000 14 1.4 1.4 0.125 0.125 0.3 0.1 0.5 2.667 3.429 1.143\nsoil_denitrification 0.001 1.4 1.4 0.014 1 0.429 0.429 0.214 0.875\nsoil_autotrophic_denitrification 0.5 0.333\nsoil_chemodenitrification 0.0005 0.001 1e-12 0.5 0 0.5\nnitrous_acid_dissociation_mol_per_m3 0.45\nsoil_microbial_thermal_adaptation_offset_k 0\nsoil_nitrifier_indices 5 0 1 1\nsoil_nitrifier_environment 0.55 0.1 0.1 0.01 0.01 12 0.1\nsoil_oxygen_uptake 1e-6 2.3866348449e11 0.064 -1.5e4 0.5 12 12 0.5 0.7 0.001 1e-12\nsoil_heterotrophic_respiration 0.125 0.1 0.01 12 12 0.5 0.42016806722689076 0.1 2.667 0.01 0.01 1e-6 1 0.7142857142857143\nsoil_microbial_mineral_exchange 0.014 0.0125 0.40 0.014 0.03 0.35 0.003 0.009 0.18 31\nsoil_nonsymbiotic_nitrogen_fixation 5 6 0.25 0.02 0.14 0.25\nsoil_microbial_turnover 0.01 0.001 0.167 0.333 0.333 0.333 0.150 0.300 0.333";
-    var context: ApplyContext = .{ .result = &result, .microbial_state = &microbial_state, .model_grid = &model_grid, .gas_state = &gas_state, .matric_plus_osmotic_potential_megapascal = &.{ 0, 0 }, .thermal_adaptation_offset_k_by_cell = &.{ 0, 3.1968 }, .parameters = try nitrogen_parameters.parse(source ++ " 0.25 2.0 5.0 1.0 0.5 0.182e-6") };
+    var context: ApplyContext = .{ .result = &result, .microbial_state = &microbial_state, .model_grid = &model_grid, .gas_state = &gas_state, .matric_plus_osmotic_potential_megapascal = &.{ 0, 0 }, .thermal_adaptation_offset_k_by_cell = &.{ 0, 3.1968 }, .parameters = try nitrogen_parameters.parse(source ++ " 0.25 2.0 5.0 1.0 0.5 0.182e-6"), .negligible_water_volume_m3 = 1e-12 };
     try applyTile(&context, .{ .first = 0, .end = 2 });
     try std.testing.expectEqual(nitrification_step.Role.ammonia_oxidizer, result.roles[ammonia]);
     try std.testing.expectApproxEqAbs(@as(f64, 1), result.active_biomass_g_c[ammonia], 1e-15);
@@ -151,4 +157,39 @@ test "nitrifier environment consumes the authoritative per-cell offset" {
         result.temperature_water_activity[adapted_ammonia] >
             result.temperature_water_activity[ammonia],
     );
+}
+
+test "issue-072 Finding A: a near-zero-but-nonzero water_m3 no longer spikes CO2 activity toward its maximum" {
+    // OLD guard was `water_m3 > 0` (exact-zero only). At a tiny-but-nonzero
+    // water_m3 (an ordinary drying/freeze-drying layer), the OLD guard let
+    // co2_concentration = dissolved_mass_g / water_m3 spike, saturating
+    // co2_activity = C/(C+K) toward 1 -- backwards from legacy's floor-gated
+    // zero (`hour1.f:3777-3787`). The NEW guard widens to the shared
+    // `negligible_water_volume_m3` floor, matching legacy's `ZEROS` gate.
+    var model_grid = try grid.GridState.init(std.testing.allocator, .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1, .worker_threads = 1, .tile_cells = 1, .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .mass_balance_tolerance = 1e-12, .negligible_quantity_threshold = 1e-12, .max_nonlinear_iterations = 20, .picard_relaxation = 0.5 });
+    defer model_grid.deinit();
+    @memset(model_grid.soil_temperature_k, 298.15);
+    const negligible_water_volume_m3: f64 = 1e-6;
+    model_grid.matrix_liquid_water_m3[0] = negligible_water_volume_m3 / 2; // tiny-but-nonzero, below the floor
+    var gas_state = try gas.State.init(std.testing.allocator, 1);
+    defer gas_state.deinit();
+    gas_state.dissolved_mass_g[try gas.massIndex(0, .carbon_dioxide, 1)] = 12;
+    var microbial_state = try microbial.State.init(std.testing.allocator, 1, 1, 6, 2);
+    defer microbial_state.deinit();
+    var result = try State.init(std.testing.allocator, 1, 12);
+    defer result.deinit();
+    const source = "soil_nitrification 0.001 0.0002 7000 14 1.4 1.4 0.125 0.125 0.3 0.1 0.5 2.667 3.429 1.143\nsoil_denitrification 0.001 1.4 1.4 0.014 1 0.429 0.429 0.214 0.875\nsoil_autotrophic_denitrification 0.5 0.333\nsoil_chemodenitrification 0.0005 0.001 1e-12 0.5 0 0.5\nnitrous_acid_dissociation_mol_per_m3 0.45\nsoil_microbial_thermal_adaptation_offset_k 0\nsoil_nitrifier_indices 5 0 1 1\nsoil_nitrifier_environment 0.55 0.1 0.1 0.01 0.01 12 0.1\nsoil_oxygen_uptake 1e-6 2.3866348449e11 0.064 -1.5e4 0.5 12 12 0.5 0.7 0.001 1e-12\nsoil_heterotrophic_respiration 0.125 0.1 0.01 12 12 0.5 0.42016806722689076 0.1 2.667 0.01 0.01 1e-6 1 0.7142857142857143\nsoil_microbial_mineral_exchange 0.014 0.0125 0.40 0.014 0.03 0.35 0.003 0.009 0.18 31\nsoil_nonsymbiotic_nitrogen_fixation 5 6 0.25 0.02 0.14 0.25\nsoil_microbial_turnover 0.01 0.001 0.167 0.333 0.333 0.333 0.150 0.300 0.333";
+    var context: ApplyContext = .{ .result = &result, .microbial_state = &microbial_state, .model_grid = &model_grid, .gas_state = &gas_state, .matric_plus_osmotic_potential_megapascal = &.{0}, .thermal_adaptation_offset_k_by_cell = &.{0}, .parameters = try nitrogen_parameters.parse(source ++ " 0.25 2.0 5.0 1.0 0.5 0.182e-6"), .negligible_water_volume_m3 = negligible_water_volume_m3 };
+    try applyTile(&context, .{ .first = 0, .end = 1 });
+    const ammonia = try microbial_state.populationIndex(0, 0, 5, 0);
+    // NEW behaviour: below the floor, co2_concentration collapses to 0, so
+    // co2_activity (a genuine Michaelis-Menten term) is exactly 0, not
+    // saturated toward 1 the way the OLD exact-zero guard would have let it.
+    try std.testing.expectEqual(@as(f64, 0), result.aqueous_co2_activity[ammonia]);
+
+    // Sanity: the OLD guard's arithmetic would have produced a huge spurious
+    // concentration/activity at this same water_m3, confirming the guard
+    // widening is what changed the outcome, not an unrelated code path.
+    const old_co2_concentration = gas_state.dissolved_mass_g[try gas.massIndex(0, .carbon_dioxide, 1)] / model_grid.matrix_liquid_water_m3[0];
+    try std.testing.expect(old_co2_concentration > 1e6);
 }

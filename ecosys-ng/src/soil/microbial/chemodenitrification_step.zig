@@ -19,6 +19,10 @@ pub const ApplyContext = struct {
     zone_fractions_by_layer: []const zones.ZoneFractions = &.{},
     parameters: parameters.Parameters,
     timestep_h: f64,
+    /// `solute.f:610`-style `ZEROS2` floor (issue-073 Finding D): `zone()`'s
+    /// `nitrous_acid_concentration_g_n_per_m3` division previously used an
+    /// exact-zero-only guard (`zone_water_m3 > 0`) instead of this floor.
+    negligible_water_volume_m3: f64,
 };
 
 /// Exact NITRO.F 553--555 dissociation order:
@@ -57,8 +61,8 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
         const band_nitrite = context.reactive_nitrogen.band_nitrite_g_n[layer];
         const temperature = try metabolism.growthTemperatureResponse(context.model_grid.soil_temperature_k[layer], context.thermal_adaptation_offset_k_by_cell[layer / context.model_grid.soil_layer_capacity]);
         const result = try reaction.calculate(.{
-            .non_band = zone(non_band_nitrite, non_band_volume, acid_fraction, zone_fractions.nitrate_non_band, context.reactive_nitrogen.previous_total_non_band_nitrite_demand_g_n[layer], context.reactive_nitrogen.previous_non_band_chemodenitrification_capacity_g_n[layer]),
-            .band = zone(band_nitrite, band_volume, acid_fraction, zone_fractions.nitrate_band, context.reactive_nitrogen.previous_total_band_nitrite_demand_g_n[layer], context.reactive_nitrogen.previous_band_chemodenitrification_capacity_g_n[layer]),
+            .non_band = zone(non_band_nitrite, non_band_volume, acid_fraction, zone_fractions.nitrate_non_band, context.reactive_nitrogen.previous_total_non_band_nitrite_demand_g_n[layer], context.reactive_nitrogen.previous_non_band_chemodenitrification_capacity_g_n[layer], context.negligible_water_volume_m3),
+            .band = zone(band_nitrite, band_volume, acid_fraction, zone_fractions.nitrate_band, context.reactive_nitrogen.previous_total_band_nitrite_demand_g_n[layer], context.reactive_nitrogen.previous_band_chemodenitrification_capacity_g_n[layer], context.negligible_water_volume_m3),
             .water_volume_m3 = water_m3,
             .temperature_response = temperature,
             .timestep_h = context.timestep_h,
@@ -73,8 +77,8 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
     }
 }
 
-fn zone(nitrite_g_n: f64, zone_water_m3: f64, acid_fraction: f64, reaction_volume_fraction: f64, previous_total: f64, previous_capacity: f64) reaction.Zone {
-    return .{ .nitrous_acid_concentration_g_n_per_m3 = if (zone_water_m3 > 0) nitrite_g_n / zone_water_m3 * acid_fraction else 0, .nitrite_g_n = nitrite_g_n, .dissolved_fraction = reaction_volume_fraction, .reaction_volume_fraction = reaction_volume_fraction, .previous_total_nitrite_demand_g_n = previous_total, .previous_unlimited_reduction_g_n = previous_capacity };
+fn zone(nitrite_g_n: f64, zone_water_m3: f64, acid_fraction: f64, reaction_volume_fraction: f64, previous_total: f64, previous_capacity: f64, negligible_water_volume_m3: f64) reaction.Zone {
+    return .{ .nitrous_acid_concentration_g_n_per_m3 = if (zone_water_m3 > negligible_water_volume_m3) nitrite_g_n / zone_water_m3 * acid_fraction else 0, .nitrite_g_n = nitrite_g_n, .dissolved_fraction = reaction_volume_fraction, .reaction_volume_fraction = reaction_volume_fraction, .previous_total_nitrite_demand_g_n = previous_total, .previous_unlimited_reduction_g_n = previous_capacity };
 }
 
 fn validate(context: ApplyContext, range: compute.CellRange) !void {
@@ -82,6 +86,7 @@ fn validate(context: ApplyContext, range: compute.CellRange) !void {
     if (range.first > range.end or range.end > layers or context.result.layer_count != layers or context.reactive_nitrogen.layer_count != layers or context.chemistry_state.cell_count != layers or context.thermal_adaptation_offset_k_by_cell.len != context.model_grid.cell_count or (context.zone_fractions_by_layer.len != 0 and context.zone_fractions_by_layer.len != layers)) return error.SoilChemodenitrificationDimensionMismatch;
     for (context.thermal_adaptation_offset_k_by_cell) |offset_k| if (!std.math.isFinite(offset_k)) return error.NonFiniteMicrobialThermalAdaptationOffset;
     if (!std.math.isFinite(context.timestep_h) or context.timestep_h <= 0) return error.InvalidSoilChemodenitrificationTimestep;
+    if (!std.math.isFinite(context.negligible_water_volume_m3) or context.negligible_water_volume_m3 < 0) return error.InvalidSoilChemodenitrificationNegligibleWaterVolume;
     try parameters.validate(context.parameters);
 }
 
@@ -115,9 +120,28 @@ test "layer chemodenitrification derives both zone fluxes without mutation" {
     var result = try fluxes.State.init(std.testing.allocator, 1, 1);
     defer result.deinit();
     const source = "soil_nitrification 0.001 0.0002 7000 14 1.4 1.4 0.125 0.125 0.3 0.1 0.5 2.667 3.429 1.143\nsoil_denitrification 0.001 1.4 1.4 0.014 1 0.429 0.429 0.214 0.875\nsoil_autotrophic_denitrification 0.5 0.333\nsoil_chemodenitrification 0.0005 0.001 1e-12 0.5 0 0.5\nnitrous_acid_dissociation_mol_per_m3 0.45\nsoil_microbial_thermal_adaptation_offset_k 0\nsoil_nitrifier_indices 5 0 1 1\nsoil_nitrifier_environment 0.55 0.1 0.1 0.01 0.01 12 0.1\nsoil_oxygen_uptake 1e-6 2.3866348449e11 0.064 -1.5e4 0.5 12 12 0.5 0.7 0.001 1e-12\nsoil_heterotrophic_respiration 0.125 0.1 0.01 12 12 0.5 0.42016806722689076 0.1 2.667 0.01 0.01 1e-6 1 0.7142857142857143\nsoil_microbial_mineral_exchange 0.014 0.0125 0.40 0.014 0.03 0.35 0.003 0.009 0.18 31\nsoil_nonsymbiotic_nitrogen_fixation 5 6 0.25 0.02 0.14 0.25\nsoil_microbial_turnover 0.01 0.001 0.167 0.333 0.333 0.333 0.150 0.300 0.333";
-    var context: ApplyContext = .{ .result = &result, .reactive_nitrogen = &reactive_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .thermal_adaptation_offset_k_by_cell = &.{0}, .zone_fractions = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 }, .parameters = try parameters.parse(source ++ " 0.25 2.0 5.0 1.0 0.5 0.182e-6"), .timestep_h = 1 };
+    var context: ApplyContext = .{ .result = &result, .reactive_nitrogen = &reactive_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .thermal_adaptation_offset_k_by_cell = &.{0}, .zone_fractions = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 }, .parameters = try parameters.parse(source ++ " 0.25 2.0 5.0 1.0 0.5 0.182e-6"), .timestep_h = 1, .negligible_water_volume_m3 = 1e-12 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(result.chemodenitrification_non_band_nitrite_reduction_g_n[0] > 0);
     try std.testing.expect(result.chemodenitrification_band_nitrite_reduction_g_n[0] > 0);
     try std.testing.expectEqual(@as(f64, 1), reactive_state.non_band_nitrite_g_n[0]);
+}
+
+test "issue-073 Finding D: zone()'s nitrous_acid_concentration no longer spikes below the floor" {
+    // OLD guard was `zone_water_m3 > 0` (exact-zero only). NEW widens to the
+    // shared `negligible_water_volume_m3` floor, matching legacy's
+    // ZEROS-gated suppression (`hour1.f:3777`/`nitro.f:2955`).
+    const negligible_water_volume_m3: f64 = 1e-6;
+    const zone_water_m3 = negligible_water_volume_m3 / 2; // tiny-but-nonzero, below the floor
+    const old = zone_water_m3 > 0;
+    const new_ = zone_water_m3 > negligible_water_volume_m3;
+    try std.testing.expect(old);
+    try std.testing.expect(!new_);
+    const nitrite_g_n: f64 = 1;
+    const acid_fraction: f64 = 0.5;
+    const result = zone(nitrite_g_n, zone_water_m3, acid_fraction, 0.5, 0, 0, negligible_water_volume_m3);
+    try std.testing.expectEqual(@as(f64, 0), result.nitrous_acid_concentration_g_n_per_m3);
+    // Sanity: the OLD guard's arithmetic would have produced a huge spurious
+    // concentration at this same zone_water_m3.
+    try std.testing.expect(nitrite_g_n / zone_water_m3 * acid_fraction > 1e5);
 }

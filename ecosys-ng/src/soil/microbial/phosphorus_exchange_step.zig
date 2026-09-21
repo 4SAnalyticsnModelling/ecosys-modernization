@@ -26,6 +26,12 @@ pub const ApplyContext = struct {
     timestep_h: f64,
     negligible_carbon_g_c: f64,
     negligible_phosphorus_g_p: f64,
+    /// `solute.f:610`-style `ZEROS2` floor (issue-073 Finding B): this file
+    /// previously had no floor at all on `water_m3` for `exchangePair`'s
+    /// concentration->mass conversion; widened via a per-layer skip,
+    /// mirroring `autotrophic_denitrification_step.zig`'s/
+    /// `heterotrophic_denitrification_step.zig`'s own established pattern.
+    negligible_water_volume_m3: f64,
 };
 
 /// Ports NITRO RIPOP/RIPOO/RIPBO/RIPO4/RIPOB followed by
@@ -39,6 +45,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
     for (range.first..range.end) |layer| {
         const zone_fractions = if (context.zone_fractions_by_layer.len == 0) context.zone_fractions else context.zone_fractions_by_layer[layer];
         const water_m3 = context.model_grid.matrix_liquid_water_m3[layer];
+        if (water_m3 <= context.negligible_water_volume_m3) continue;
         const fractions = [2]f64{ zone_fractions.phosphate_non_band, zone_fractions.phosphate_band };
         const h2_concentration = [2]f64{ context.chemistry_state.non_band_phosphate[layer].dissolved_h2po4_mol_p_per_m3 * p.phosphorus_molar_mass_g_per_mol, context.chemistry_state.band_phosphate[layer].dissolved_h2po4_mol_p_per_m3 * p.phosphorus_molar_mass_g_per_mol };
         const hp_concentration = [2]f64{ context.chemistry_state.non_band_phosphate[layer].dissolved_hpo4_mol_p_per_m3 * p.phosphorus_molar_mass_g_per_mol, context.chemistry_state.band_phosphate[layer].dissolved_hpo4_mol_p_per_m3 * p.phosphorus_molar_mass_g_per_mol };
@@ -102,6 +109,7 @@ fn validate(context: ApplyContext, range: compute.CellRange) !void {
     if (range.first > range.end or range.end > layers or context.phosphorus_history.layer_count != layers or context.chemistry_state.cell_count != layers or context.microbial_state.cell_count * context.microbial_state.layer_count != layers or context.result.process_unit_count_per_layer != context.microbial_state.substrate_count * context.microbial_state.population_count or context.phosphorus_history.process_unit_count_per_layer != context.result.process_unit_count_per_layer or context.matric_plus_osmotic_potential_megapascal.len != layers or context.thermal_adaptation_offset_k_by_cell.len != context.microbial_state.cell_count or (context.zone_fractions_by_layer.len != 0 and context.zone_fractions_by_layer.len != layers)) return error.SoilMicrobialPhosphorusExchangeDimensionMismatch;
     for (context.thermal_adaptation_offset_k_by_cell) |offset_k| if (!std.math.isFinite(offset_k)) return error.NonFiniteMicrobialThermalAdaptationOffset;
     if (!std.math.isFinite(context.timestep_h) or context.timestep_h <= 0 or !std.math.isFinite(context.negligible_carbon_g_c) or context.negligible_carbon_g_c < 0 or !std.math.isFinite(context.negligible_phosphorus_g_p) or context.negligible_phosphorus_g_p < 0) return error.InvalidSoilMicrobialPhosphorusExchangeInput;
+    if (!std.math.isFinite(context.negligible_water_volume_m3) or context.negligible_water_volume_m3 < 0) return error.InvalidSoilMicrobialPhosphorusExchangeInput;
 }
 
 test "runtime microbial phosphate exchange immobilizes deficits and mineralizes surplus" {
@@ -131,7 +139,7 @@ test "runtime microbial phosphate exchange immobilizes deficits and mineralizes 
         "soil_microbial_mineral_exchange 0.014 0.0125 0.40 0.014 0.03 0.35 0.003 0.009 0.18 31\n" ++
         "soil_nonsymbiotic_nitrogen_fixation 5 6 0.25 0.02 0.14 0.25\n" ++
         "soil_microbial_turnover 0.01 0.001 0.167 0.333 0.333 0.333 0.150 0.300 0.333 0.25 2.0 5.0 1.0 0.5 0.182e-6";
-    var context: ApplyContext = .{ .result = &result, .phosphorus_history = &phosphorus_history, .microbial_state = &microbial_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .matric_plus_osmotic_potential_megapascal = &.{0}, .thermal_adaptation_offset_k_by_cell = &.{0}, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .parameters = try nitrogen_parameters.parse(source), .timestep_h = 1, .negligible_carbon_g_c = 1e-12, .negligible_phosphorus_g_p = 1e-12 };
+    var context: ApplyContext = .{ .result = &result, .phosphorus_history = &phosphorus_history, .microbial_state = &microbial_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .matric_plus_osmotic_potential_megapascal = &.{0}, .thermal_adaptation_offset_k_by_cell = &.{0}, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .parameters = try nitrogen_parameters.parse(source), .timestep_h = 1, .negligible_carbon_g_c = 1e-12, .negligible_phosphorus_g_p = 1e-12, .negligible_water_volume_m3 = 1e-12 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(result.non_band_microbial_h2po4_exchange_g_p[0] > 0);
     try std.testing.expect(result.non_band_microbial_h2po4_capacity_g_p[0] > 0);
@@ -139,4 +147,42 @@ test "runtime microbial phosphate exchange immobilizes deficits and mineralizes 
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(result.non_band_microbial_h2po4_exchange_g_p[0] < 0);
     try std.testing.expectEqual(@as(f64, 0), result.non_band_microbial_hpo4_exchange_g_p[0]);
+}
+
+test "issue-073 Finding B: a near-zero-but-nonzero layer water_m3 is skipped instead of feeding an unfloored exchangePair" {
+    // OLD: no guard at all on water_m3 for exchangePair's concentration->mass
+    // conversion. NEW: a per-layer skip (mirroring the two already-fixed
+    // siblings in this same directory) leaves the reset (zero)
+    // exchange/capacity in place instead of proceeding on a
+    // tiny-but-nonzero carrier.
+    const config = @import("../../core/config.zig").SimulationConfig{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1, .worker_threads = 1, .tile_cells = 1, .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .mass_balance_tolerance = 1e-12, .negligible_quantity_threshold = 1e-12, .max_nonlinear_iterations = 20, .picard_relaxation = 0.5 };
+    var model_grid = try grid.GridState.init(std.testing.allocator, config);
+    defer model_grid.deinit();
+    const negligible_water_volume_m3: f64 = 1e-6;
+    model_grid.matrix_liquid_water_m3[0] = negligible_water_volume_m3 / 2; // tiny-but-nonzero, below the floor
+    model_grid.soil_temperature_k[0] = 293.15;
+    var microbial_state = try microbial.State.init(std.testing.allocator, 1, 1, 1, 1);
+    defer microbial_state.deinit();
+    microbial_state.structural[0] = .{ .carbon_g_c = 0.55, .nitrogen_g_n = 0.055, .phosphorus_g_p = 0.0055 };
+    microbial_state.nonstructural[0].carbon_g_c = 1;
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    chemistry_state.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3 = 1;
+    var phosphorus_history = try history.State.init(std.testing.allocator, 1, 1);
+    defer phosphorus_history.deinit();
+    var result = try fluxes.State.init(std.testing.allocator, 1, 1);
+    defer result.deinit();
+    const source =
+        "soil_nitrification 0.001 0.0002 7000 14 1.4 1.4 0.125 0.125 0.3 0.1 0.5 2.667 3.429 1.143\n" ++
+        "soil_denitrification 0.001 1.4 1.4 0.014 1 0.429 0.429 0.214 0.875\nsoil_autotrophic_denitrification 0.5 0.333\n" ++
+        "soil_chemodenitrification 0.0005 0.001 1e-12 0.5 0 0.5\nnitrous_acid_dissociation_mol_per_m3 0.45\nsoil_microbial_thermal_adaptation_offset_k 0\n" ++
+        "soil_nitrifier_indices 5 0 1 1\nsoil_nitrifier_environment 0.55 0.1 0.1 0.01 0.01 12 0.1\n" ++
+        "soil_oxygen_uptake 1e-6 2.3866348449e11 0.064 -1.5e4 0.5 12 12 0.5 0.7 0.001 1e-12\n" ++
+        "soil_heterotrophic_respiration 0.125 0.1 0.01 12 12 0.5 0.42016806722689076 0.1 2.667 0.01 0.01 1e-6 1 0.7142857142857143\n" ++
+        "soil_microbial_mineral_exchange 0.014 0.0125 0.40 0.014 0.03 0.35 0.003 0.009 0.18 31\n" ++
+        "soil_nonsymbiotic_nitrogen_fixation 5 6 0.25 0.02 0.14 0.25\n" ++
+        "soil_microbial_turnover 0.01 0.001 0.167 0.333 0.333 0.333 0.150 0.300 0.333 0.25 2.0 5.0 1.0 0.5 0.182e-6";
+    var context: ApplyContext = .{ .result = &result, .phosphorus_history = &phosphorus_history, .microbial_state = &microbial_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .matric_plus_osmotic_potential_megapascal = &.{0}, .thermal_adaptation_offset_k_by_cell = &.{0}, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .parameters = try nitrogen_parameters.parse(source), .timestep_h = 1, .negligible_carbon_g_c = 1e-12, .negligible_phosphorus_g_p = 1e-12, .negligible_water_volume_m3 = negligible_water_volume_m3 };
+    try applyTile(&context, .{ .first = 0, .end = 1 });
+    try std.testing.expectEqual(@as(f64, 0), result.non_band_microbial_h2po4_exchange_g_p[0]);
 }

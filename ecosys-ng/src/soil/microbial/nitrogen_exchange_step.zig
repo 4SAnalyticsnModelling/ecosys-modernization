@@ -27,6 +27,12 @@ pub const ApplyContext = struct {
     timestep_h: f64,
     negligible_carbon_g_c: f64,
     negligible_nitrogen_g_n: f64,
+    /// `solute.f:610`-style `ZEROS2` floor (issue-073 Finding B): this file
+    /// previously had no floor at all on `water_m3` for the
+    /// concentration->mass `available_g_n` conversion; widened via a
+    /// per-layer skip, mirroring `autotrophic_denitrification_step.zig`'s/
+    /// `heterotrophic_denitrification_step.zig`'s own established pattern.
+    negligible_water_volume_m3: f64,
 };
 
 /// Ports NITRO RINHP/RINHO/RINHB/RINH4/RINB4 and the following
@@ -41,6 +47,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
     for (range.first..range.end) |layer| {
         const zone_fractions = if (context.zone_fractions_by_layer.len == 0) context.zone_fractions else context.zone_fractions_by_layer[layer];
         const water_m3 = context.model_grid.matrix_liquid_water_m3[layer];
+        if (water_m3 <= context.negligible_water_volume_m3) continue;
         const aqueous = context.chemistry_state.aqueous[layer];
         const ammonium_concentration = [2]f64{ aqueous.ammonium_non_band * context.nitrogen_molar_mass_g_per_mol, aqueous.ammonium_band * context.nitrogen_molar_mass_g_per_mol };
         const nitrate_concentration = [2]f64{ aqueous.nitrate_non_band * context.nitrogen_molar_mass_g_per_mol, aqueous.nitrate_band * context.nitrogen_molar_mass_g_per_mol };
@@ -122,6 +129,7 @@ fn validate(context: ApplyContext, range: compute.CellRange) !void {
     for (context.thermal_adaptation_offset_k_by_cell) |offset_k| if (!std.math.isFinite(offset_k)) return error.NonFiniteMicrobialThermalAdaptationOffset;
     inline for (.{ context.nitrogen_molar_mass_g_per_mol, context.timestep_h }) |value| if (!std.math.isFinite(value) or value <= 0) return error.InvalidSoilMicrobialNitrogenExchangeInput;
     if (!std.math.isFinite(context.negligible_carbon_g_c) or context.negligible_carbon_g_c < 0 or !std.math.isFinite(context.negligible_nitrogen_g_n) or context.negligible_nitrogen_g_n < 0) return error.InvalidSoilMicrobialNitrogenExchangeInput;
+    if (!std.math.isFinite(context.negligible_water_volume_m3) or context.negligible_water_volume_m3 < 0) return error.InvalidSoilMicrobialNitrogenExchangeInput;
 }
 
 test "runtime microbial nitrogen exchange immobilizes deficits and mineralizes surplus" {
@@ -153,12 +161,53 @@ test "runtime microbial nitrogen exchange immobilizes deficits and mineralizes s
         "soil_nonsymbiotic_nitrogen_fixation 5 6 0.25 0.02 0.14 0.25\n" ++
         "soil_microbial_turnover 0.01 0.001 0.167 0.333 0.333 0.333 0.150 0.300 0.333 0.25 2.0 5.0 1.0 0.5 0.182e-6";
     const parsed = try nitrogen_parameters.parse(source);
-    var context: ApplyContext = .{ .result = &result, .reactive_nitrogen = &reactive_state, .microbial_state = &microbial_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .matric_plus_osmotic_potential_megapascal = &.{0}, .thermal_adaptation_offset_k_by_cell = &.{0}, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .parameters = parsed, .nitrogen_molar_mass_g_per_mol = 14, .timestep_h = 1, .negligible_carbon_g_c = 1e-12, .negligible_nitrogen_g_n = 1e-12 };
+    var context: ApplyContext = .{ .result = &result, .reactive_nitrogen = &reactive_state, .microbial_state = &microbial_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .matric_plus_osmotic_potential_megapascal = &.{0}, .thermal_adaptation_offset_k_by_cell = &.{0}, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .parameters = parsed, .nitrogen_molar_mass_g_per_mol = 14, .timestep_h = 1, .negligible_carbon_g_c = 1e-12, .negligible_nitrogen_g_n = 1e-12, .negligible_water_volume_m3 = 1e-12 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(result.non_band_microbial_ammonium_exchange_g_n[0] > 0);
     try std.testing.expect(result.non_band_microbial_ammonium_capacity_g_n[0] > 0);
     microbial_state.nonstructural[0].nitrogen_g_n = 1;
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(result.non_band_microbial_ammonium_exchange_g_n[0] < 0);
+    try std.testing.expectEqual(@as(f64, 0), result.non_band_microbial_nitrate_exchange_g_n[0]);
+}
+
+test "issue-073 Finding B: a near-zero-but-nonzero layer water_m3 is skipped instead of feeding an unfloored available_g_n" {
+    // OLD: no guard at all on water_m3 for the concentration->mass
+    // `available_g_n` conversion. NEW: a per-layer skip (mirroring the two
+    // already-fixed siblings in this same directory) leaves the reset
+    // (zero) exchange/capacity in place instead of proceeding on a
+    // tiny-but-nonzero carrier.
+    const config = @import("../../core/config.zig").SimulationConfig{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1, .worker_threads = 1, .tile_cells = 1, .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .mass_balance_tolerance = 1e-12, .negligible_quantity_threshold = 1e-12, .max_nonlinear_iterations = 20, .picard_relaxation = 0.5 };
+    var model_grid = try grid.GridState.init(std.testing.allocator, config);
+    defer model_grid.deinit();
+    const negligible_water_volume_m3: f64 = 1e-6;
+    model_grid.matrix_liquid_water_m3[0] = negligible_water_volume_m3 / 2; // tiny-but-nonzero, below the floor
+    model_grid.soil_temperature_k[0] = 293.15;
+    var microbial_state = try microbial.State.init(std.testing.allocator, 1, 1, 1, 1);
+    defer microbial_state.deinit();
+    microbial_state.structural[0] = .{ .carbon_g_c = 0.55, .nitrogen_g_n = 0.055, .phosphorus_g_p = 0.0055 };
+    microbial_state.nonstructural[0].carbon_g_c = 1;
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    chemistry_state.aqueous[0].ammonium_non_band = 1;
+    chemistry_state.aqueous[0].nitrate_non_band = 1;
+    var reactive_state = try reactive.State.init(std.testing.allocator, 1, 1);
+    defer reactive_state.deinit();
+    var result = try fluxes.State.init(std.testing.allocator, 1, 1);
+    defer result.deinit();
+    const source =
+        "soil_nitrification 0.001 0.0002 7000 14 1.4 1.4 0.125 0.125 0.3 0.1 0.5 2.667 3.429 1.143\n" ++
+        "soil_denitrification 0.001 1.4 1.4 0.014 1 0.429 0.429 0.214 0.875\nsoil_autotrophic_denitrification 0.5 0.333\n" ++
+        "soil_chemodenitrification 0.0005 0.001 1e-12 0.5 0 0.5\nnitrous_acid_dissociation_mol_per_m3 0.45\nsoil_microbial_thermal_adaptation_offset_k 0\n" ++
+        "soil_nitrifier_indices 5 0 1 1\nsoil_nitrifier_environment 0.55 0.1 0.1 0.01 0.01 12 0.1\n" ++
+        "soil_oxygen_uptake 1e-6 2.3866348449e11 0.064 -1.5e4 0.5 12 12 0.5 0.7 0.001 1e-12\n" ++
+        "soil_heterotrophic_respiration 0.125 0.1 0.01 12 12 0.5 0.42016806722689076 0.1 2.667 0.01 0.01 1e-6 1 0.7142857142857143\n" ++
+        "soil_microbial_mineral_exchange 0.014 0.0125 0.40 0.014 0.03 0.35 0.003 0.009 0.18 31\n" ++
+        "soil_nonsymbiotic_nitrogen_fixation 5 6 0.25 0.02 0.14 0.25\n" ++
+        "soil_microbial_turnover 0.01 0.001 0.167 0.333 0.333 0.333 0.150 0.300 0.333 0.25 2.0 5.0 1.0 0.5 0.182e-6";
+    const parsed = try nitrogen_parameters.parse(source);
+    var context: ApplyContext = .{ .result = &result, .reactive_nitrogen = &reactive_state, .microbial_state = &microbial_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .matric_plus_osmotic_potential_megapascal = &.{0}, .thermal_adaptation_offset_k_by_cell = &.{0}, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .parameters = parsed, .nitrogen_molar_mass_g_per_mol = 14, .timestep_h = 1, .negligible_carbon_g_c = 1e-12, .negligible_nitrogen_g_n = 1e-12, .negligible_water_volume_m3 = negligible_water_volume_m3 };
+    try applyTile(&context, .{ .first = 0, .end = 1 });
+    try std.testing.expectEqual(@as(f64, 0), result.non_band_microbial_ammonium_exchange_g_n[0]);
     try std.testing.expectEqual(@as(f64, 0), result.non_band_microbial_nitrate_exchange_g_n[0]);
 }

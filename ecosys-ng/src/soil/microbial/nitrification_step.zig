@@ -28,6 +28,13 @@ pub const ApplyContext = struct {
     nitrogen_molar_mass_g_per_mol: f64,
     timestep_h: f64,
     negligible_demand_g_n: f64,
+    /// `solute.f:610`-style `ZEROS2` floor (issue-073 Findings B/D): guards
+    /// both `makeZone`'s `ammonium_amount_g_n` multiplication (line 94, no
+    /// prior guard at all) and its `nitrite_concentration_g_n_per_m3`
+    /// division (line 93, previously an exact-zero-only guard) with a single
+    /// per-layer skip, matching `heterotrophic_denitrification_step.zig`'s
+    /// and `autotrophic_denitrification_step.zig`'s own established pattern.
+    negligible_water_volume_m3: f64,
 };
 
 pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
@@ -35,6 +42,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
     const units_per_layer = context.result.process_unit_count_per_layer;
     for (range.first..range.end) |layer| {
         const water_m3 = context.model_grid.matrix_liquid_water_m3[layer];
+        if (water_m3 <= context.negligible_water_volume_m3) continue;
         const first = layer * units_per_layer;
         for (first..first + units_per_layer) |unit| {
             if (context.roles[unit] == .inactive) continue;
@@ -90,7 +98,7 @@ fn makeZone(context: ApplyContext, layer: usize, unit: usize, water_m3: f64, ban
         .ammonium_fallback_fraction = ammonium_fraction,
         .ammonium_concentration_g_n_per_m3 = ammonium_concentration * context.nitrogen_molar_mass_g_per_mol,
         .ammonia_concentration_g_n_per_m3 = ammonia_concentration * context.nitrogen_molar_mass_g_per_mol,
-        .nitrite_concentration_g_n_per_m3 = if (nitrite_volume > 0) nitrite_amount / nitrite_volume else 0,
+        .nitrite_concentration_g_n_per_m3 = if (nitrite_volume > context.negligible_water_volume_m3) nitrite_amount / nitrite_volume else 0,
         .ammonium_amount_g_n = ammonium_concentration * water_m3 * ammonium_fraction * context.nitrogen_molar_mass_g_per_mol,
         .nitrite_amount_g_n = nitrite_amount,
         .previous_total_ammonium_demand_g_n = if (context.nutrient_competition) |history| history.soil_previous_total[@intFromEnum(if (band) competition_history.SoilPool.ammonium_band else competition_history.SoilPool.ammonium_non_band)][layer] else if (band) context.reactive_nitrogen.previous_total_band_ammonium_demand_g_n[layer] else context.reactive_nitrogen.previous_total_non_band_ammonium_demand_g_n[layer],
@@ -105,7 +113,7 @@ fn validate(context: ApplyContext, range: compute.CellRange) !void {
     const units = try std.math.mul(usize, layers, context.result.process_unit_count_per_layer);
     if (range.first > range.end or range.end > layers or context.result.layer_count != layers or context.reactive_nitrogen.layer_count != layers or context.chemistry_state.cell_count != layers or (context.zone_fractions_by_layer.len != 0 and context.zone_fractions_by_layer.len != layers)) return error.SoilNitrificationDimensionMismatch;
     inline for (.{ context.roles, context.temperature_water_activity, context.nitrogen_phosphorus_activity, context.aqueous_co2_activity, context.active_biomass_g_c, context.microbial_active_fraction }) |values| if (values.len != units) return error.SoilNitrificationDimensionMismatch;
-    if (!std.math.isFinite(context.nitrogen_molar_mass_g_per_mol) or context.nitrogen_molar_mass_g_per_mol <= 0 or !std.math.isFinite(context.timestep_h) or context.timestep_h <= 0 or !std.math.isFinite(context.negligible_demand_g_n) or context.negligible_demand_g_n < 0) return error.InvalidSoilNitrificationRuntimeInput;
+    if (!std.math.isFinite(context.nitrogen_molar_mass_g_per_mol) or context.nitrogen_molar_mass_g_per_mol <= 0 or !std.math.isFinite(context.timestep_h) or context.timestep_h <= 0 or !std.math.isFinite(context.negligible_demand_g_n) or context.negligible_demand_g_n < 0 or !std.math.isFinite(context.negligible_water_volume_m3) or context.negligible_water_volume_m3 < 0) return error.InvalidSoilNitrificationRuntimeInput;
     for (context.temperature_water_activity, context.nitrogen_phosphorus_activity, context.aqueous_co2_activity, context.active_biomass_g_c, context.microbial_active_fraction) |temperature, nutrient, co2, biomass, active| inline for (.{ temperature, nutrient, co2, biomass, active }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSoilNitrificationRuntimeInput;
 }
 
@@ -124,7 +132,7 @@ test "separate runtime nitrifier roles write distinct zone potentials" {
     var result = try fluxes.State.init(std.testing.allocator, 1, 2);
     defer result.deinit();
     const nitrification_parameters: reaction.Parameters = .{ .minimum_competition_fraction = 0.001, .inhibition_decay_per_h = 0.0002, .inhibition_decay_ammonium_constant_g_n_per_m3 = 7000, .ammonia_product_inhibition_g_n_per_m3 = 14, .ammonium_half_saturation_g_n_per_m3 = 1.4, .nitrite_half_saturation_g_n_per_m3 = 1.4, .ammonia_oxidation_rate_g_n_per_g_c_h = 0.125, .nitrite_oxidation_rate_g_n_per_g_c_h = 0.125, .ammonia_oxidizer_carbon_efficiency_g_c_per_g_n = 0.3, .nitrite_oxidizer_carbon_efficiency_g_c_per_g_n = 0.1, .growth_respiration_fraction = 0.5, .oxygen_per_respired_carbon_g_o_per_g_c = 2.667, .oxygen_per_ammonium_n_g_o_per_g_n = 3.429, .oxygen_per_nitrite_n_g_o_per_g_n = 1.143 };
-    var context: ApplyContext = .{ .result = &result, .reactive_nitrogen = &reactive_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .zone_fractions = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 }, .roles = &.{ .ammonia_oxidizer, .nitrite_oxidizer }, .temperature_water_activity = &.{ 1, 1 }, .nitrogen_phosphorus_activity = &.{ 1, 1 }, .aqueous_co2_activity = &.{ 1, 1 }, .active_biomass_g_c = &.{ 1, 1 }, .microbial_active_fraction = &.{ 1, 1 }, .parameters = nitrification_parameters, .nitrogen_molar_mass_g_per_mol = 14, .timestep_h = 1, .negligible_demand_g_n = 1e-12 };
+    var context: ApplyContext = .{ .result = &result, .reactive_nitrogen = &reactive_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .zone_fractions = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 }, .roles = &.{ .ammonia_oxidizer, .nitrite_oxidizer }, .temperature_water_activity = &.{ 1, 1 }, .nitrogen_phosphorus_activity = &.{ 1, 1 }, .aqueous_co2_activity = &.{ 1, 1 }, .active_biomass_g_c = &.{ 1, 1 }, .microbial_active_fraction = &.{ 1, 1 }, .parameters = nitrification_parameters, .nitrogen_molar_mass_g_per_mol = 14, .timestep_h = 1, .negligible_demand_g_n = 1e-12, .negligible_water_volume_m3 = 1e-12 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(result.non_band_ammonia_oxidation_potential_g_n[0] > 0);
     try std.testing.expectEqual(@as(f64, 0), result.non_band_nitrite_oxidation_potential_g_n[0]);
@@ -144,7 +152,7 @@ test "makeZone sources ammonium_fallback_fraction from the ammonium zone, not th
     // Distinct, independently-placed ammonium (0.75) and nitrate (0.65) band/non-band
     // volume fractions, matching charge_classification.zig's own test values, so a bug
     // that conflates the two fractions is numerically observable.
-    const context: ApplyContext = .{ .result = &result, .reactive_nitrogen = &reactive_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .zone_fractions = .{ .ammonium_non_band = 0.75, .ammonium_band = 0.75, .nitrate_non_band = 0.65, .nitrate_band = 0.65, .phosphate_non_band = 0.5, .phosphate_band = 0.5 }, .roles = &.{.ammonia_oxidizer}, .temperature_water_activity = &.{1}, .nitrogen_phosphorus_activity = &.{1}, .aqueous_co2_activity = &.{1}, .active_biomass_g_c = &.{1}, .microbial_active_fraction = &.{1}, .parameters = .{ .minimum_competition_fraction = 0.001, .inhibition_decay_per_h = 0.0002, .inhibition_decay_ammonium_constant_g_n_per_m3 = 7000, .ammonia_product_inhibition_g_n_per_m3 = 14, .ammonium_half_saturation_g_n_per_m3 = 1.4, .nitrite_half_saturation_g_n_per_m3 = 1.4, .ammonia_oxidation_rate_g_n_per_g_c_h = 0.125, .nitrite_oxidation_rate_g_n_per_g_c_h = 0.125, .ammonia_oxidizer_carbon_efficiency_g_c_per_g_n = 0.3, .nitrite_oxidizer_carbon_efficiency_g_c_per_g_n = 0.1, .growth_respiration_fraction = 0.5, .oxygen_per_respired_carbon_g_o_per_g_c = 2.667, .oxygen_per_ammonium_n_g_o_per_g_n = 3.429, .oxygen_per_nitrite_n_g_o_per_g_n = 1.143 }, .nitrogen_molar_mass_g_per_mol = 14, .timestep_h = 1, .negligible_demand_g_n = 1e-12 };
+    const context: ApplyContext = .{ .result = &result, .reactive_nitrogen = &reactive_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .zone_fractions = .{ .ammonium_non_band = 0.75, .ammonium_band = 0.75, .nitrate_non_band = 0.65, .nitrate_band = 0.65, .phosphate_non_band = 0.5, .phosphate_band = 0.5 }, .roles = &.{.ammonia_oxidizer}, .temperature_water_activity = &.{1}, .nitrogen_phosphorus_activity = &.{1}, .aqueous_co2_activity = &.{1}, .active_biomass_g_c = &.{1}, .microbial_active_fraction = &.{1}, .parameters = .{ .minimum_competition_fraction = 0.001, .inhibition_decay_per_h = 0.0002, .inhibition_decay_ammonium_constant_g_n_per_m3 = 7000, .ammonia_product_inhibition_g_n_per_m3 = 14, .ammonium_half_saturation_g_n_per_m3 = 1.4, .nitrite_half_saturation_g_n_per_m3 = 1.4, .ammonia_oxidation_rate_g_n_per_g_c_h = 0.125, .nitrite_oxidation_rate_g_n_per_g_c_h = 0.125, .ammonia_oxidizer_carbon_efficiency_g_c_per_g_n = 0.3, .nitrite_oxidizer_carbon_efficiency_g_c_per_g_n = 0.1, .growth_respiration_fraction = 0.5, .oxygen_per_respired_carbon_g_o_per_g_c = 2.667, .oxygen_per_ammonium_n_g_o_per_g_n = 3.429, .oxygen_per_nitrite_n_g_o_per_g_n = 1.143 }, .nitrogen_molar_mass_g_per_mol = 14, .timestep_h = 1, .negligible_demand_g_n = 1e-12, .negligible_water_volume_m3 = 1e-12 };
     const zone = makeZone(context, 0, 0, 1, false);
     // Before the fix, ammonium_fallback_fraction did not exist and the ammonium
     // competition term reused fallback_available_fraction (the nitrate-zone
@@ -153,4 +161,41 @@ test "makeZone sources ammonium_fallback_fraction from the ammonium zone, not th
     // existing use of fallback_available_fraction (0.65) must stay unchanged.
     try std.testing.expectApproxEqAbs(@as(f64, 0.75), zone.ammonium_fallback_fraction, 1e-14);
     try std.testing.expectApproxEqAbs(@as(f64, 0.65), zone.fallback_available_fraction, 1e-14);
+}
+
+test "issue-073 Findings B/D: a near-zero-but-nonzero layer water_m3 no longer feeds an unfloored ammonium/nitrite carrier" {
+    // OLD: applyTile had no per-layer skip at all, and makeZone's
+    // nitrite_concentration division used an exact-zero-only guard. A
+    // tiny-but-nonzero water_m3 fed both the unguarded ammonium_amount_g_n
+    // multiplication (line 94) and spiked nitrite_concentration_g_n_per_m3
+    // (line 93) toward legacy's floor-gated zero being missed. NEW adds a
+    // single per-layer skip (mirroring heterotrophic/autotrophic
+    // denitrification's own established pattern) that protects both sites.
+    var model_grid = try grid.GridState.init(std.testing.allocator, .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1, .worker_threads = 1, .tile_cells = 1, .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .mass_balance_tolerance = 1e-12, .negligible_quantity_threshold = 1e-12, .max_nonlinear_iterations = 20, .picard_relaxation = 0.5 });
+    defer model_grid.deinit();
+    const negligible_water_volume_m3: f64 = 1e-6;
+    model_grid.matrix_liquid_water_m3[0] = negligible_water_volume_m3 / 2; // tiny-but-nonzero, below the floor
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    chemistry_state.aqueous[0].ammonium_non_band = 1;
+    chemistry_state.aqueous[0].ammonium_band = 1;
+    var reactive_state = try reactive.State.init(std.testing.allocator, 1, 2);
+    defer reactive_state.deinit();
+    reactive_state.non_band_nitrite_g_n[0] = 1;
+    reactive_state.band_nitrite_g_n[0] = 1;
+    var result = try fluxes.State.init(std.testing.allocator, 1, 2);
+    defer result.deinit();
+    const nitrification_parameters: reaction.Parameters = .{ .minimum_competition_fraction = 0.001, .inhibition_decay_per_h = 0.0002, .inhibition_decay_ammonium_constant_g_n_per_m3 = 7000, .ammonia_product_inhibition_g_n_per_m3 = 14, .ammonium_half_saturation_g_n_per_m3 = 1.4, .nitrite_half_saturation_g_n_per_m3 = 1.4, .ammonia_oxidation_rate_g_n_per_g_c_h = 0.125, .nitrite_oxidation_rate_g_n_per_g_c_h = 0.125, .ammonia_oxidizer_carbon_efficiency_g_c_per_g_n = 0.3, .nitrite_oxidizer_carbon_efficiency_g_c_per_g_n = 0.1, .growth_respiration_fraction = 0.5, .oxygen_per_respired_carbon_g_o_per_g_c = 2.667, .oxygen_per_ammonium_n_g_o_per_g_n = 3.429, .oxygen_per_nitrite_n_g_o_per_g_n = 1.143 };
+    var context: ApplyContext = .{ .result = &result, .reactive_nitrogen = &reactive_state, .chemistry_state = &chemistry_state, .model_grid = &model_grid, .zone_fractions = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 }, .roles = &.{ .ammonia_oxidizer, .nitrite_oxidizer }, .temperature_water_activity = &.{ 1, 1 }, .nitrogen_phosphorus_activity = &.{ 1, 1 }, .aqueous_co2_activity = &.{ 1, 1 }, .active_biomass_g_c = &.{ 1, 1 }, .microbial_active_fraction = &.{ 1, 1 }, .parameters = nitrification_parameters, .nitrogen_molar_mass_g_per_mol = 14, .timestep_h = 1, .negligible_demand_g_n = 1e-12, .negligible_water_volume_m3 = negligible_water_volume_m3 };
+    try applyTile(&context, .{ .first = 0, .end = 1 });
+    // NEW behaviour: below the floor, the whole layer is skipped, leaving
+    // the reset (zero) potentials in place instead of a spurious spike.
+    try std.testing.expectEqual(@as(f64, 0), result.non_band_ammonia_oxidation_potential_g_n[0]);
+    try std.testing.expectEqual(@as(f64, 0), result.non_band_nitrite_oxidation_potential_g_n[1]);
+
+    // Sanity: the OLD arithmetic at this same water_m3 would have produced a
+    // huge spurious nitrite concentration, confirming the added skip (not an
+    // unrelated code path) is what changed the outcome.
+    const old_nitrite_volume = model_grid.matrix_liquid_water_m3[0] * context.zone_fractions.nitrate_non_band;
+    try std.testing.expect(reactive_state.non_band_nitrite_g_n[0] / old_nitrite_volume > 1e5);
 }

@@ -127,6 +127,11 @@ pub const ApplyContext = struct {
     minimum_competition_fraction: f64 = 0.001,
     negligible_nitrogen_g_n: f64 = 0,
     negligible_phosphorus_g_p: f64 = 0,
+    /// `solute.f:610`-style `ZEROS2` floor (issue-073 Finding B):
+    /// `calculateZoneExchange`/`calculateZoneExchangeWithHistory` guarded
+    /// `water <= 0` (exact-zero only); `calculateAcceptedZoneExchange` now
+    /// short-circuits both paths at this floor before delegating.
+    negligible_water_volume_m3: f64 = 0,
 };
 
 /// NITRO L=0 residual RINH4R/RINO3R/RIPO4R/RIP14R against NU topsoil.
@@ -190,6 +195,11 @@ pub fn calculateZoneExchange(demand: f64, non_band_concentration: f64, band_conc
 pub const ZoneExchangeResult = struct { exchange: f64 = 0, capacity: f64 = 0 };
 
 fn calculateAcceptedZoneExchange(context: ApplyContext, pool: competition_history.SurfacePool, layer: usize, cell: usize, competitor: usize, demand: f64, non_band_concentration: f64, band_concentration: f64, water: f64, non_band_fraction: f64, band_fraction: f64, minimum: f64, half: f64, maximum_capacity: f64, fallback: f64, source_uses_maximum: bool) !ZoneExchangeResult {
+    // issue-073 Finding B: widen the shared `water <= 0` exact-zero guard
+    // both `calculateZoneExchange` and `calculateZoneExchangeWithHistory`
+    // apply internally to the established `negligible_water_volume_m3`
+    // floor, at the single call point both paths share.
+    if (water <= context.negligible_water_volume_m3) return .{};
     if (context.nutrient_competition) |accepted| {
         const soil_pool: competition_history.SoilPool = switch (pool) {
             .ammonium => .ammonium_non_band,
@@ -225,7 +235,7 @@ fn validate(context: ApplyContext, range: compute.CellRange) !void {
     for (context.autotrophic_active_biomass_g_c) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSurfaceTopsoilExchangeParameter;
     const fractions_to_validate = if (context.zone_fractions_by_layer.len == 0) @as([]const zones.ZoneFractions, &.{context.zone_fractions}) else context.zone_fractions_by_layer;
     for (fractions_to_validate) |fractions| inline for (@typeInfo(zones.ZoneFractions).@"struct".fields) |field| if (!std.math.isFinite(@field(fractions, field.name)) or @field(fractions, field.name) < 0 or @field(fractions, field.name) > 1) return error.InvalidSurfaceTopsoilExchangeParameter;
-    if (!std.math.isFinite(context.minimum_competition_fraction) or context.minimum_competition_fraction < 0 or !std.math.isFinite(context.negligible_nitrogen_g_n) or context.negligible_nitrogen_g_n < 0 or !std.math.isFinite(context.negligible_phosphorus_g_p) or context.negligible_phosphorus_g_p < 0) return error.InvalidSurfaceTopsoilExchangeParameter;
+    if (!std.math.isFinite(context.minimum_competition_fraction) or context.minimum_competition_fraction < 0 or !std.math.isFinite(context.negligible_nitrogen_g_n) or context.negligible_nitrogen_g_n < 0 or !std.math.isFinite(context.negligible_phosphorus_g_p) or context.negligible_phosphorus_g_p < 0 or !std.math.isFinite(context.negligible_water_volume_m3) or context.negligible_water_volume_m3 < 0) return error.InvalidSurfaceTopsoilExchangeParameter;
     if ((context.nutrient_competition == null) != (context.nutrient_competition_attempt == null)) return error.IncompleteSurfaceTopsoilNutrientCompetitionBinding;
 }
 
@@ -273,6 +283,38 @@ test "NITRO 260-269 topsoil mineral totals preserve addition and clamp order" {
     try std.testing.expectEqual(@as(f64, 1), totals.nitrite_g_n);
     try std.testing.expectEqual(@as(f64, 1.5), totals.hydrogen_phosphate_g_p);
     try std.testing.expectEqual(@as(f64, 0), totals.dihydrogen_phosphate_g_p);
+}
+
+test "issue-073 Finding B: a near-zero-but-nonzero topsoil water is skipped instead of feeding an unfloored exchange" {
+    // OLD: `calculateZoneExchange`/`calculateZoneExchangeWithHistory` only
+    // guarded `water <= 0` (exact-zero only). NEW:
+    // `calculateAcceptedZoneExchange` now short-circuits both paths at the
+    // shared `negligible_water_volume_m3` floor before either can run on a
+    // tiny-but-nonzero carrier.
+    const runtime_config = try config.SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 });
+    var model_grid = try grid.GridState.init(std.testing.allocator, runtime_config);
+    defer model_grid.deinit();
+    const negligible_water_volume_m3: f64 = 1e-6;
+    model_grid.matrix_liquid_water_m3[0] = negligible_water_volume_m3 / 2; // tiny-but-nonzero, below the floor
+    var topsoil = try chemistry.State.init(std.testing.allocator, 1);
+    defer topsoil.deinit();
+    topsoil.aqueous[0].ammonium_non_band = 1;
+    topsoil.aqueous[0].nitrate_non_band = 1;
+    topsoil.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3 = 1;
+    var surface = try organic.State.init(std.testing.allocator, 1);
+    defer surface.deinit();
+    surface.microbial[0].carbon_g_c = 0.55;
+    surface.microbial[2].carbon_g_c = 1;
+    var litter = try litter_exchange.State.init(std.testing.allocator, 1);
+    defer litter.deinit();
+    var state = try State.init(std.testing.allocator, 1);
+    defer state.deinit();
+    const n = [_]f64{0.1} ** 105;
+    const p = [_]f64{0.01} ** 105;
+    var context: ApplyContext = .{ .result = &state, .model_grid = &model_grid, .topsoil_chemistry = &topsoil, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .surface_organic = &surface, .litter_exchange = &litter, .growth_temperature_response = &.{1}, .matric_plus_osmotic_potential_megapascal = &.{0}, .microbial_nitrogen_to_carbon_g_n_per_g_c = &n, .microbial_phosphorus_to_carbon_g_p_per_g_c = &p, .labile_biomass_fraction = 0.55, .microbial_surface_area_m2_per_g_c = 3, .nitrogen_molar_mass_g_per_mol = 14, .parameters = .{ .ammonium_maximum_uptake_g_n_per_m2_h = 0.014, .ammonium_minimum_concentration_g_n_per_m3 = 0.0125, .ammonium_half_saturation_g_n_per_m3 = 0.4, .nitrate_maximum_uptake_g_n_per_m2_h = 0.014, .nitrate_minimum_concentration_g_n_per_m3 = 0.03, .nitrate_half_saturation_g_n_per_m3 = 0.35, .phosphate_maximum_uptake_g_p_per_m2_h = 0.003, .phosphate_minimum_concentration_g_p_per_m3 = 0.009, .phosphate_half_saturation_g_p_per_m3 = 0.18, .phosphorus_molar_mass_g_per_mol = 31 }, .timestep_h = 1, .negligible_water_volume_m3 = negligible_water_volume_m3 };
+    try applyTile(&context, .{ .first = 0, .end = 1 });
+    try std.testing.expectEqual(@as(f64, 0), state.ammonium_exchange_g_n[0]);
+    try std.testing.expectEqual(@as(f64, 0), state.h2po4_exchange_g_p[0]);
 }
 
 test "NITRO topsoil mineral totals reject a non-finite late phosphate input" {
