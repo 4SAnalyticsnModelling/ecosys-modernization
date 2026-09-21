@@ -1,0 +1,1211 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-09-21T19:50:08.955515+00:00",
+  "index_created_utc": "2026-09-21T19:39:39.110853+00:00",
+  "traceability_csv": {
+    "path": "traceability.csv",
+    "rows": 367,
+    "sha256": "d980bc1f255c68c8700703e7c71786debb7cde41da2ab9e2c1a3aaafd09a89d4"
+  },
+  "scope": {
+    "basis": "Executable statements in files listed in f77src/makefile SRCS. Out-of-build files (for example redist_utf8.f) are excluded from both numerator and denominator.",
+    "in_build_files": 40,
+    "excluded_out_of_build": [
+      "f77src/redist_utf8.f"
+    ]
+  },
+  "coverage": {
+    "executable_statements": 46739,
+    "covered": 31095,
+    "uncovered": 15644,
+    "fraction": 0.66529
+  },
+  "dispositions": {
+    "legacy-defect-corrected": 60,
+    "preserved": 195,
+    "replaced-by-approved-feature": 32,
+    "unresolved": 80
+  },
+  "blocking_disposition_rows": 80,
+  "rows_citing_out_of_scope_files": {},
+  "rows_with_stripped_annotations": [
+    "TRC-044",
+    "TRC-197",
+    "TRC-287",
+    "TRC-307",
+    "TRC-359"
+  ],
+  "whole_file_claims_out_of_scope": [],
+  "problems": [
+    {
+      "unit_id": "TRC-007",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/reaction_solve.zig: row cites 623ae7178cbc..., file is f3b3c0bf621c..."
+    },
+    {
+      "unit_id": "TRC-008",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_heat_water_solute.zig: row cites fce767ad491f..., file is 26460f5ec7a6..."
+    },
+    {
+      "unit_id": "TRC-011",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/nitrification.zig: row cites 7ee3ea8dde00..., file is acba97948738..."
+    },
+    {
+      "unit_id": "TRC-013",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/nitrogen_exchange_step.zig: row cites cb2ef6ade635..., file is f11ff5cd871d..."
+    },
+    {
+      "unit_id": "TRC-027",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_heat_water_solute.zig: row cites fce767ad491f..., file is 26460f5ec7a6..."
+    },
+    {
+      "unit_id": "TRC-028",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/profile/geometry_disturbance_transaction.zig: row cites e99fa3e8300b..., file is 2a2b1e11df26..."
+    },
+    {
+      "unit_id": "TRC-038",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/erosion/eroded_constituents.zig: row cites 7fc00da0105d..., file is 4357d5573089..."
+    },
+    {
+      "unit_id": "TRC-039",
+      "kind": "unusable-zig-path",
+      "detail": "ecosys-ng-prod-examples/.../parameters/soil_chemistry_reaction_parameters.txt (geochemistry_kinetics field 3/4)"
+    },
+    {
+      "unit_id": "TRC-039",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "0 paths vs 2 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-053",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/profile/relayering.zig: row cites e99fa3e8300b..., file is f48d7fda3f37..."
+    },
+    {
+      "unit_id": "TRC-059",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/gas/aqueous_extensive_transport.zig: row cites 012702e6dcce..., file is 96082df59c94..."
+    },
+    {
+      "unit_id": "TRC-060",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/cation_exchange.zig: row cites 7e9d3b2c6fcb..., file is a74051dccb6f..."
+    },
+    {
+      "unit_id": "TRC-062",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/ion_pairing.zig: row cites 8734f803ff49..., file is d3d86ed210a8..."
+    },
+    {
+      "unit_id": "TRC-072",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/surface/microbial_mineral_exchange_step.zig: row cites 877de675c756..., file is 88fd7e7a0fff..."
+    },
+    {
+      "unit_id": "TRC-073",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/cation_exchange.zig: row cites 7e9d3b2c6fcb..., file is a74051dccb6f..."
+    },
+    {
+      "unit_id": "TRC-074",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/ion_pairing.zig: row cites 8734f803ff49..., file is d3d86ed210a8..."
+    },
+    {
+      "unit_id": "TRC-075",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/aqueous_reaction_rates.zig: row cites bc6e1581d8f1..., file is 12efc673029f..."
+    },
+    {
+      "unit_id": "TRC-031",
+      "kind": "unknown-fortran-path",
+      "detail": "ecosys-ng validation metadata (no Fortran counterpart -- this is an audit-tooling accuracy issue)"
+    },
+    {
+      "unit_id": "TRC-169",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "3 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-170",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "2 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-173",
+      "kind": "missing-zig-path",
+      "detail": "n/a (cosmetic Fortran-only header-text defect"
+    },
+    {
+      "unit_id": "TRC-173",
+      "kind": "missing-zig-path",
+      "detail": "n/no Zig counterpart needed)"
+    },
+    {
+      "unit_id": "TRC-076",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "3 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-078",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "2 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-080",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "2 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-082",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/plant/salt/harvest.zig: row cites c0597bd21ded..., file is 8c7b8c25f2dc..."
+    },
+    {
+      "unit_id": "TRC-088",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/water/heat_step.zig: row cites 62b0c39bc494..., file is 24b0e04a8c3b..."
+    },
+    {
+      "unit_id": "TRC-089",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/surface/ground_vapor_exchange.zig: row cites 39c8b66a5937..., file is 3da031b65b53..."
+    },
+    {
+      "unit_id": "TRC-090",
+      "kind": "unknown-fortran-path",
+      "detail": "f77src/f25y98 (gbf98h weather deck"
+    },
+    {
+      "unit_id": "TRC-090",
+      "kind": "unknown-fortran-path",
+      "detail": "f77src/not a f77src source file, but this checkout's legacy weather-forcing input)"
+    },
+    {
+      "unit_id": "TRC-091",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "3 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-092",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "2 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-093",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "3 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-094",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "2 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-098",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "3 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-100",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_process_driver.zig: row cites aa346d425c9b..., file is 3b5a567a7c81..."
+    },
+    {
+      "unit_id": "TRC-101",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "2 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-105",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "2 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-108",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/ecosys_ng.zig: row cites 98f15d0ca238..., file is 3f43753abced..."
+    },
+    {
+      "unit_id": "TRC-109",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/ecosys_ng.zig: row cites 98f15d0ca238..., file is 3f43753abced..."
+    },
+    {
+      "unit_id": "TRC-111",
+      "kind": "missing-zig-path",
+      "detail": "n/a (no legacy-observable output to map)"
+    },
+    {
+      "unit_id": "TRC-116",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/heat/solver_residual.zig: row cites f40cf48a8e9b..., file is 2f2624b16700..."
+    },
+    {
+      "unit_id": "TRC-117",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "4 paths vs 2 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-117",
+      "kind": "missing-zig-path",
+      "detail": "ecosys-ng/src/soil/water/snow_solute_transport.zig"
+    },
+    {
+      "unit_id": "TRC-120",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/surface/pond_particulate_settling.zig: row cites c8b7bddbfaf4..., file is ddfc5f23d346..."
+    },
+    {
+      "unit_id": "TRC-123",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/redistribution/tillage/runtime_adapter.zig: row cites da8bd3fac47a..., file is 9a60cf9cd1a3..."
+    },
+    {
+      "unit_id": "TRC-129",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/profile/geometry_disturbance_transaction.zig: row cites e99fa3e8300b..., file is 2a2b1e11df26..."
+    },
+    {
+      "unit_id": "TRC-129",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/profile/relayering.zig: row cites 8fc717eed898..., file is f48d7fda3f37..."
+    },
+    {
+      "unit_id": "TRC-130",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/gas/layer_remap.zig: row cites ac7252a4be6f..., file is 61af386b4117..."
+    },
+    {
+      "unit_id": "TRC-130",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/profile/relayering.zig: row cites 8fc717eed898..., file is f48d7fda3f37..."
+    },
+    {
+      "unit_id": "TRC-131",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_heat_water_solute.zig: row cites fce767ad491f..., file is 26460f5ec7a6..."
+    },
+    {
+      "unit_id": "TRC-131",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/redistribution/pond/particulate_settling.zig: row cites c8b7bddbfaf4..., file is 1ce32b42e175..."
+    },
+    {
+      "unit_id": "TRC-132",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/validation/landscape_mass_inventory_surface.zig: row cites df84fd096c36..., file is 32d2c493da3a..."
+    },
+    {
+      "unit_id": "TRC-133",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_heat_water_solute.zig: row cites fce767ad491f..., file is 26460f5ec7a6..."
+    },
+    {
+      "unit_id": "TRC-133",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/gas/layer_remap.zig: row cites ac7252a4be6f..., file is 61af386b4117..."
+    },
+    {
+      "unit_id": "TRC-133",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/validation/landscape_mass_inventory_phosphorus_ions.zig: row cites 63ee3c87364e..., file is 2d963fa60a18..."
+    },
+    {
+      "unit_id": "TRC-134",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/validation/layer_local_conservation.zig: row cites f327e8bcc6fa..., file is b7903b6db752..."
+    },
+    {
+      "unit_id": "TRC-135",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/profile/geometry_change_assembly.zig: row cites b6a5e13d1916..., file is 507724e8b62f..."
+    },
+    {
+      "unit_id": "TRC-135",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/surface/pond_domain_transaction.zig: row cites a2184fc83295..., file is d2faf2045af8..."
+    },
+    {
+      "unit_id": "TRC-135",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/profile/geometry_disturbance_transaction.zig: row cites e99fa3e8300b..., file is 2a2b1e11df26..."
+    },
+    {
+      "unit_id": "TRC-136",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/profile/geometry_change_assembly.zig: row cites b6a5e13d1916..., file is 507724e8b62f..."
+    },
+    {
+      "unit_id": "TRC-137",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/surface/litter_reaction_rates.zig: row cites 84303eb46e1a..., file is be3867a35b03..."
+    },
+    {
+      "unit_id": "TRC-137",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/cation_exchange.zig: row cites 7e9d3b2c6fcb..., file is a74051dccb6f..."
+    },
+    {
+      "unit_id": "TRC-138",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/aqueous_reaction_rates.zig: row cites bc6e1581d8f1..., file is 12efc673029f..."
+    },
+    {
+      "unit_id": "TRC-141",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/geochemistry_reaction_rates.zig: row cites 3a26cbaafbe2..., file is dceba875a48c..."
+    },
+    {
+      "unit_id": "TRC-139",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/aqueous_reaction_rates.zig: row cites bc6e1581d8f1..., file is 12efc673029f..."
+    },
+    {
+      "unit_id": "TRC-153",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/core/iteration_control.zig: row cites 89a021a65e4a..., file is 547bc2636270..."
+    },
+    {
+      "unit_id": "TRC-167",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/surface/aqueous_runoff_transport.zig: row cites var..., file is dec3ef9079ea..."
+    },
+    {
+      "unit_id": "TRC-167",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/snow_solute_transport.zig: row cites var..., file is d40c7525cba5..."
+    },
+    {
+      "unit_id": "TRC-161",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/validation/layer_local_conservation.zig: row cites f327e8bcc6fa..., file is b7903b6db752..."
+    },
+    {
+      "unit_id": "TRC-174",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/gas/dissolved_gas_face_parameters.zig: row cites bdac133847f4..., file is da8a0dc5000c..."
+    },
+    {
+      "unit_id": "TRC-175",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/gas/dissolved_gas_face_parameters.zig: row cites bdac133847f4..., file is da8a0dc5000c..."
+    },
+    {
+      "unit_id": "TRC-176",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/external_boundaries.zig: row cites 83cf613b4f49..., file is 89d53fd97586..."
+    },
+    {
+      "unit_id": "TRC-177",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/external_boundaries.zig: row cites 83cf613b4f49..., file is 89d53fd97586..."
+    },
+    {
+      "unit_id": "TRC-178",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/external_boundaries.zig: row cites 83cf613b4f49..., file is 89d53fd97586..."
+    },
+    {
+      "unit_id": "TRC-179",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/gas/aqueous_extensive_transport.zig: row cites 012702e6dcce..., file is 96082df59c94..."
+    },
+    {
+      "unit_id": "TRC-179",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/external_boundaries.zig: row cites 83cf613b4f49..., file is 89d53fd97586..."
+    },
+    {
+      "unit_id": "TRC-180",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/gas/aqueous_extensive_transport.zig: row cites 012702e6dcce..., file is 96082df59c94..."
+    },
+    {
+      "unit_id": "TRC-180",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/external_boundaries.zig: row cites 83cf613b4f49..., file is 89d53fd97586..."
+    },
+    {
+      "unit_id": "TRC-183",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/external_boundaries.zig: row cites 83cf613b4f49..., file is 89d53fd97586..."
+    },
+    {
+      "unit_id": "TRC-184",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/external_boundaries.zig: row cites 83cf613b4f49..., file is 89d53fd97586..."
+    },
+    {
+      "unit_id": "TRC-185",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "5 paths vs 4 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-187",
+      "kind": "missing-zig-path",
+      "detail": "n/a (not independently re-verified this pass"
+    },
+    {
+      "unit_id": "TRC-187",
+      "kind": "missing-zig-path",
+      "detail": "generic nitro.f/uptake.f/solute.f sink-accumulation family already cited for the soil-layer form via TRC-185)"
+    },
+    {
+      "unit_id": "TRC-188",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/phosphate_reaction_rates.zig: row cites ea0c72f21ce1..., file is 5664431bd836..."
+    },
+    {
+      "unit_id": "TRC-189",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/phosphate_reaction_rates.zig: row cites ea0c72f21ce1..., file is 5664431bd836..."
+    },
+    {
+      "unit_id": "TRC-190",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/reaction_solve.zig: row cites 623ae7178cbc..., file is f3b3c0bf621c..."
+    },
+    {
+      "unit_id": "TRC-190",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/geochemistry_reaction_rates.zig: row cites 3a26cbaafbe2..., file is dceba875a48c..."
+    },
+    {
+      "unit_id": "TRC-195",
+      "kind": "missing-zig-path",
+      "detail": "n/a (restricted pathway confirmed unreachable in production per issue-037"
+    },
+    {
+      "unit_id": "TRC-195",
+      "kind": "missing-zig-path",
+      "detail": "n/no dedicated Zig counterpart audited this pass)"
+    },
+    {
+      "unit_id": "TRC-196",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/surface/litter_reaction_rates.zig: row cites 84303eb46e1a..., file is be3867a35b03..."
+    },
+    {
+      "unit_id": "TRC-197",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/surface/litter_reaction_rates.zig: row cites 84303eb46e1a..., file is be3867a35b03..."
+    },
+    {
+      "unit_id": "TRC-197",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/ion_pairing.zig: row cites 8734f803ff49..., file is d3d86ed210a8..."
+    },
+    {
+      "unit_id": "TRC-202",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/canopy/symbiosis/plant_symbiotic_fixation.zig: row cites e1e086aedbc4..., file is 7977e30843a2..."
+    },
+    {
+      "unit_id": "TRC-220",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/water/solver_residual.zig: row cites f7c4ec006dae..., file is 49323188fb6b..."
+    },
+    {
+      "unit_id": "TRC-221",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_process_driver.zig: row cites aa346d425c9b..., file is 3b5a567a7c81..."
+    },
+    {
+      "unit_id": "TRC-222",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_heat_water_solute.zig: row cites d648c471da68..., file is 26460f5ec7a6..."
+    },
+    {
+      "unit_id": "TRC-224",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/water/solver_residual.zig: row cites f7c4ec006dae..., file is 49323188fb6b..."
+    },
+    {
+      "unit_id": "TRC-225",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/water/phase_solver.zig: row cites 9eda9cd99455..., file is fbc8b6943caf..."
+    },
+    {
+      "unit_id": "TRC-228",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/water/phase_solver.zig: row cites 9eda9cd99455..., file is fbc8b6943caf..."
+    },
+    {
+      "unit_id": "TRC-231",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/water/phase_solver.zig: row cites 9eda9cd99455..., file is fbc8b6943caf..."
+    },
+    {
+      "unit_id": "TRC-236",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "2 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-234",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/chemodenitrification_step.zig: row cites 2382a23be44d..., file is f3ab85e3e74d..."
+    },
+    {
+      "unit_id": "TRC-252",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "2 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-247",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/nitrification.zig: row cites 7ee3ea8dde00..., file is acba97948738..."
+    },
+    {
+      "unit_id": "TRC-247",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/nitrification_step.zig: row cites 09f7d5af1e34..., file is 57b5f018d520..."
+    },
+    {
+      "unit_id": "TRC-248",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "2 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-258",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/nutrients/nitrogen_state_update.zig: row cites 1361840afee9..., file is effdfd4ef1cc..."
+    },
+    {
+      "unit_id": "TRC-267",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "2 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-279",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_process_driver.zig: row cites aa346d425c9b..., file is 3b5a567a7c81..."
+    },
+    {
+      "unit_id": "TRC-279",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_heat_water_solute.zig: row cites d648c471da68..., file is 26460f5ec7a6..."
+    },
+    {
+      "unit_id": "TRC-279",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_sediment.zig: row cites 72b47011a64b..., file is 345ce4667b29..."
+    },
+    {
+      "unit_id": "TRC-280",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/ecosys_ng.zig: row cites e9f35f7116d8..., file is 3f43753abced..."
+    },
+    {
+      "unit_id": "TRC-286",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/solute/reaction_solve.zig: row cites 623ae7178cbc..., file is f3b3c0bf621c..."
+    },
+    {
+      "unit_id": "TRC-287",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/surface/litter_reaction_rates.zig: row cites 84303eb46e1a..., file is be3867a35b03..."
+    },
+    {
+      "unit_id": "TRC-288",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/water/heat_step.zig: row cites fce05c2ba08d..., file is 24b0e04a8c3b..."
+    },
+    {
+      "unit_id": "TRC-288",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/water/enthalpy_balance.zig: row cites 717adcbb9223..., file is d0e2a27403b6..."
+    },
+    {
+      "unit_id": "TRC-293",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/water/solver_residual.zig: row cites f7c4ec006dae..., file is 49323188fb6b..."
+    },
+    {
+      "unit_id": "TRC-294",
+      "kind": "zig-path-hash-count-mismatch",
+      "detail": "2 paths vs 1 hashes; cannot attribute hashes to files"
+    },
+    {
+      "unit_id": "TRC-298",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/nitrification_step.zig: row cites 8e6f1640148e..., file is 57b5f018d520..."
+    },
+    {
+      "unit_id": "TRC-308",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/water/heat_step.zig: row cites 864c298a489d..., file is 24b0e04a8c3b..."
+    },
+    {
+      "unit_id": "TRC-308",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_heat_water_solute.zig: row cites a9d93db05ef8..., file is 26460f5ec7a6..."
+    },
+    {
+      "unit_id": "TRC-309",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/water/heat_step.zig: row cites 864c298a489d..., file is 24b0e04a8c3b..."
+    },
+    {
+      "unit_id": "TRC-309",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_heat_water_solute.zig: row cites a9d93db05ef8..., file is 26460f5ec7a6..."
+    },
+    {
+      "unit_id": "TRC-310",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_heat_water_solute.zig: row cites fbf7fa5a2ae2..., file is 26460f5ec7a6..."
+    },
+    {
+      "unit_id": "TRC-310",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/water/heat_step.zig: row cites 864c298a489d..., file is 24b0e04a8c3b..."
+    },
+    {
+      "unit_id": "TRC-311",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/hourly_heat_water_solute.zig: row cites fbf7fa5a2ae2..., file is 26460f5ec7a6..."
+    },
+    {
+      "unit_id": "TRC-313",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/core/iteration_control.zig: row cites 5978f49a5c85..., file is 547bc2636270..."
+    },
+    {
+      "unit_id": "TRC-315",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/validation/landscape_mass_inventory_phosphorus_ions.zig: row cites ec5318dd900f..., file is 2d963fa60a18..."
+    },
+    {
+      "unit_id": "TRC-318",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/surface/metabolism_state_update.zig: row cites 842bab0921a8..., file is 306b895ec593..."
+    },
+    {
+      "unit_id": "TRC-321",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/profile/relayering.zig: row cites 9701ec1a03be..., file is f48d7fda3f37..."
+    },
+    {
+      "unit_id": "TRC-326",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/redistribution/tillage/runtime_adapter.zig: row cites c9176c7dc061..., file is 9a60cf9cd1a3..."
+    },
+    {
+      "unit_id": "TRC-331",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/surface/metabolism_state_update.zig: row cites 842bab0921a8..., file is 306b895ec593..."
+    },
+    {
+      "unit_id": "TRC-332",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/nitrification_step.zig: row cites 8e6f1640148e..., file is 57b5f018d520..."
+    },
+    {
+      "unit_id": "TRC-333",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/nitrogen_exchange_step.zig: row cites cb2ef6ade635..., file is f11ff5cd871d..."
+    },
+    {
+      "unit_id": "TRC-334",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/phosphorus_exchange_step.zig: row cites 5a6316d6c303..., file is 05eb1d3d861a..."
+    },
+    {
+      "unit_id": "TRC-335",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/surface/topsoil_mineral_exchange_step.zig: row cites 0413f8ab6e36..., file is c83868b7a9ce..."
+    },
+    {
+      "unit_id": "TRC-336",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/stages/soil_chemistry_convergence.zig: row cites d0391bc5af53..., file is 051ac5702be2..."
+    },
+    {
+      "unit_id": "TRC-337",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/nitrifier_environment_step.zig: row cites 3b4528f2e5de..., file is e30c0437b79b..."
+    },
+    {
+      "unit_id": "TRC-338",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/autotrophic_denitrification_step.zig: row cites 1bf33ea979e1..., file is cf5d95ffb7e2..."
+    },
+    {
+      "unit_id": "TRC-339",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/nitrification_step.zig: row cites 8e6f1640148e..., file is 57b5f018d520..."
+    },
+    {
+      "unit_id": "TRC-340",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/microbial/chemodenitrification_step.zig: row cites 2382a23be44d..., file is f3ab85e3e74d..."
+    },
+    {
+      "unit_id": "TRC-352",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/canopy/symbiosis/plant_symbiotic_fixation.zig: row cites e1e086aedbc4..., file is 7977e30843a2..."
+    },
+    {
+      "unit_id": "TRC-353",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/driver/outer_hour_transaction.zig: row cites c21d76c72b43..., file is f03531c1dc74..."
+    },
+    {
+      "unit_id": "TRC-354",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/io/output/production_integration_test.zig: row cites 070f7f5d2ec3..., file is 2970552f2f31..."
+    },
+    {
+      "unit_id": "TRC-355",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/heat/solver_tests.zig: row cites ccf7fedbb09f..., file is e14a92f2b785..."
+    },
+    {
+      "unit_id": "TRC-356",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/heat/solver_tests.zig: row cites ccf7fedbb09f..., file is e14a92f2b785..."
+    },
+    {
+      "unit_id": "TRC-357",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/heat/solver_tests.zig: row cites ccf7fedbb09f..., file is e14a92f2b785..."
+    },
+    {
+      "unit_id": "TRC-358",
+      "kind": "stale-zig-sha256",
+      "detail": "ecosys-ng/src/soil/heat/solver_tests.zig: row cites ccf7fedbb09f..., file is e14a92f2b785..."
+    }
+  ],
+  "per_file": [
+    {
+      "path": "f77src/BLOCKDATA001.f",
+      "executable_statements": 0,
+      "covered": 0,
+      "uncovered": 0,
+      "coverage_fraction": null,
+      "largest_gap": null
+    },
+    {
+      "path": "f77src/day.f",
+      "executable_statements": 251,
+      "covered": 157,
+      "uncovered": 94,
+      "coverage_fraction": 0.625498,
+      "largest_gap": "44-61"
+    },
+    {
+      "path": "f77src/erosion.f",
+      "executable_statements": 778,
+      "covered": 329,
+      "uncovered": 449,
+      "coverage_fraction": 0.422879,
+      "largest_gap": "31-33"
+    },
+    {
+      "path": "f77src/exec.f",
+      "executable_statements": 57,
+      "covered": 55,
+      "uncovered": 2,
+      "coverage_fraction": 0.964912,
+      "largest_gap": "101-102"
+    },
+    {
+      "path": "f77src/extract.f",
+      "executable_statements": 378,
+      "covered": 47,
+      "uncovered": 331,
+      "coverage_fraction": 0.124339,
+      "largest_gap": "46-48"
+    },
+    {
+      "path": "f77src/foutp.f",
+      "executable_statements": 307,
+      "covered": 0,
+      "uncovered": 307,
+      "coverage_fraction": 0.0,
+      "largest_gap": "24-34"
+    },
+    {
+      "path": "f77src/fouts.f",
+      "executable_statements": 559,
+      "covered": 60,
+      "uncovered": 499,
+      "coverage_fraction": 0.107335,
+      "largest_gap": "22-32"
+    },
+    {
+      "path": "f77src/grosub.f",
+      "executable_statements": 5723,
+      "covered": 3127,
+      "uncovered": 2596,
+      "coverage_fraction": 0.546392,
+      "largest_gap": "227-228"
+    },
+    {
+      "path": "f77src/hfunc.f",
+      "executable_statements": 407,
+      "covered": 200,
+      "uncovered": 207,
+      "coverage_fraction": 0.4914,
+      "largest_gap": "53-55"
+    },
+    {
+      "path": "f77src/hour1.f",
+      "executable_statements": 3081,
+      "covered": 2375,
+      "uncovered": 706,
+      "coverage_fraction": 0.770854,
+      "largest_gap": "130-132"
+    },
+    {
+      "path": "f77src/main.f",
+      "executable_statements": 39,
+      "covered": 0,
+      "uncovered": 39,
+      "coverage_fraction": 0.0,
+      "largest_gap": "18-18"
+    },
+    {
+      "path": "f77src/nitro.f",
+      "executable_statements": 1894,
+      "covered": 1439,
+      "uncovered": 455,
+      "coverage_fraction": 0.759768,
+      "largest_gap": "917-917"
+    },
+    {
+      "path": "f77src/outpd.f",
+      "executable_statements": 223,
+      "covered": 0,
+      "uncovered": 223,
+      "coverage_fraction": 0.0,
+      "largest_gap": "33-41"
+    },
+    {
+      "path": "f77src/outph.f",
+      "executable_statements": 153,
+      "covered": 0,
+      "uncovered": 153,
+      "coverage_fraction": 0.0,
+      "largest_gap": "33-41"
+    },
+    {
+      "path": "f77src/outsd.f",
+      "executable_statements": 775,
+      "covered": 0,
+      "uncovered": 775,
+      "coverage_fraction": 0.0,
+      "largest_gap": "33-40"
+    },
+    {
+      "path": "f77src/outsh.f",
+      "executable_statements": 240,
+      "covered": 56,
+      "uncovered": 184,
+      "coverage_fraction": 0.233333,
+      "largest_gap": "34-41"
+    },
+    {
+      "path": "f77src/readi.f",
+      "executable_statements": 392,
+      "covered": 0,
+      "uncovered": 392,
+      "coverage_fraction": 0.0,
+      "largest_gap": "35-39"
+    },
+    {
+      "path": "f77src/readq.f",
+      "executable_statements": 161,
+      "covered": 0,
+      "uncovered": 161,
+      "coverage_fraction": 0.0,
+      "largest_gap": "28-30"
+    },
+    {
+      "path": "f77src/reads.f",
+      "executable_statements": 733,
+      "covered": 9,
+      "uncovered": 724,
+      "coverage_fraction": 0.012278,
+      "largest_gap": "39-43"
+    },
+    {
+      "path": "f77src/redist.f",
+      "executable_statements": 7064,
+      "covered": 6894,
+      "uncovered": 170,
+      "coverage_fraction": 0.975934,
+      "largest_gap": "198-203"
+    },
+    {
+      "path": "f77src/routp.f",
+      "executable_statements": 429,
+      "covered": 0,
+      "uncovered": 429,
+      "coverage_fraction": 0.0,
+      "largest_gap": "30-33"
+    },
+    {
+      "path": "f77src/routq.f",
+      "executable_statements": 173,
+      "covered": 0,
+      "uncovered": 173,
+      "coverage_fraction": 0.0,
+      "largest_gap": "30-38"
+    },
+    {
+      "path": "f77src/routs.f",
+      "executable_statements": 428,
+      "covered": 1,
+      "uncovered": 427,
+      "coverage_fraction": 0.002336,
+      "largest_gap": "33-37"
+    },
+    {
+      "path": "f77src/soil.f",
+      "executable_statements": 83,
+      "covered": 83,
+      "uncovered": 0,
+      "coverage_fraction": 1.0,
+      "largest_gap": null
+    },
+    {
+      "path": "f77src/solute.f",
+      "executable_statements": 2379,
+      "covered": 2023,
+      "uncovered": 356,
+      "coverage_fraction": 0.850357,
+      "largest_gap": "2884-2884"
+    },
+    {
+      "path": "f77src/split.f",
+      "executable_statements": 79,
+      "covered": 0,
+      "uncovered": 79,
+      "coverage_fraction": 0.0,
+      "largest_gap": "24-32"
+    },
+    {
+      "path": "f77src/splitc.f",
+      "executable_statements": 19,
+      "covered": 0,
+      "uncovered": 19,
+      "coverage_fraction": 0.0,
+      "largest_gap": "14-32"
+    },
+    {
+      "path": "f77src/starte.f",
+      "executable_statements": 1346,
+      "covered": 772,
+      "uncovered": 574,
+      "coverage_fraction": 0.573551,
+      "largest_gap": "110-116"
+    },
+    {
+      "path": "f77src/startq.f",
+      "executable_statements": 650,
+      "covered": 346,
+      "uncovered": 304,
+      "coverage_fraction": 0.532308,
+      "largest_gap": "63-85"
+    },
+    {
+      "path": "f77src/starts.f",
+      "executable_statements": 1071,
+      "covered": 486,
+      "uncovered": 585,
+      "coverage_fraction": 0.453782,
+      "largest_gap": "93-100"
+    },
+    {
+      "path": "f77src/stomate.f",
+      "executable_statements": 150,
+      "covered": 37,
+      "uncovered": 113,
+      "coverage_fraction": 0.246667,
+      "largest_gap": "55-57"
+    },
+    {
+      "path": "f77src/trnsfr.f",
+      "executable_statements": 4158,
+      "covered": 3849,
+      "uncovered": 309,
+      "coverage_fraction": 0.925685,
+      "largest_gap": "2356-2358"
+    },
+    {
+      "path": "f77src/trnsfrs.f",
+      "executable_statements": 6874,
+      "covered": 5962,
+      "uncovered": 912,
+      "coverage_fraction": 0.867326,
+      "largest_gap": "342-344"
+    },
+    {
+      "path": "f77src/uptake.f",
+      "executable_statements": 1796,
+      "covered": 1236,
+      "uncovered": 560,
+      "coverage_fraction": 0.688196,
+      "largest_gap": "88-95"
+    },
+    {
+      "path": "f77src/visual.f",
+      "executable_statements": 92,
+      "covered": 92,
+      "uncovered": 0,
+      "coverage_fraction": 1.0,
+      "largest_gap": null
+    },
+    {
+      "path": "f77src/watsub.f",
+      "executable_statements": 2891,
+      "covered": 1314,
+      "uncovered": 1577,
+      "coverage_fraction": 0.454514,
+      "largest_gap": "123-124"
+    },
+    {
+      "path": "f77src/woutp.f",
+      "executable_statements": 232,
+      "covered": 0,
+      "uncovered": 232,
+      "coverage_fraction": 0.0,
+      "largest_gap": "30-37"
+    },
+    {
+      "path": "f77src/woutq.f",
+      "executable_statements": 6,
+      "covered": 0,
+      "uncovered": 6,
+      "coverage_fraction": 0.0,
+      "largest_gap": "18-20"
+    },
+    {
+      "path": "f77src/wouts.f",
+      "executable_statements": 390,
+      "covered": 0,
+      "uncovered": 390,
+      "coverage_fraction": 0.0,
+      "largest_gap": "35-35"
+    },
+    {
+      "path": "f77src/wthr.f",
+      "executable_statements": 278,
+      "covered": 146,
+      "uncovered": 132,
+      "coverage_fraction": 0.52518,
+      "largest_gap": "51-52"
+    }
+  ],
+  "largest_gaps": [
+    {
+      "path": "f77src/routs.f",
+      "lines": "148-490",
+      "statements": 343
+    },
+    {
+      "path": "f77src/wouts.f",
+      "lines": "122-464",
+      "statements": 343
+    },
+    {
+      "path": "f77src/trnsfrs.f",
+      "lines": "4280-4454",
+      "statements": 175
+    },
+    {
+      "path": "f77src/trnsfrs.f",
+      "lines": "4668-4840",
+      "statements": 173
+    },
+    {
+      "path": "f77src/routp.f",
+      "lines": "113-261",
+      "statements": 149
+    },
+    {
+      "path": "f77src/woutp.f",
+      "lines": "105-253",
+      "statements": 149
+    },
+    {
+      "path": "f77src/routp.f",
+      "lines": "334-474",
+      "statements": 141
+    },
+    {
+      "path": "f77src/trnsfr.f",
+      "lines": "5641-5765",
+      "statements": 125
+    },
+    {
+      "path": "f77src/uptake.f",
+      "lines": "3688-3803",
+      "statements": 116
+    },
+    {
+      "path": "f77src/startq.f",
+      "lines": "754-843",
+      "statements": 90
+    },
+    {
+      "path": "f77src/trnsfrs.f",
+      "lines": "4531-4614",
+      "statements": 84
+    },
+    {
+      "path": "f77src/hour1.f",
+      "lines": "3077-3152",
+      "statements": 76
+    },
+    {
+      "path": "f77src/readi.f",
+      "lines": "487-550",
+      "statements": 64
+    },
+    {
+      "path": "f77src/grosub.f",
+      "lines": "9198-9258",
+      "statements": 61
+    },
+    {
+      "path": "f77src/readi.f",
+      "lines": "554-613",
+      "statements": 60
+    },
+    {
+      "path": "f77src/erosion.f",
+      "lines": "341-399",
+      "statements": 59
+    },
+    {
+      "path": "f77src/extract.f",
+      "lines": "458-516",
+      "statements": 59
+    },
+    {
+      "path": "f77src/fouts.f",
+      "lines": "566-624",
+      "statements": 59
+    },
+    {
+      "path": "f77src/starts.f",
+      "lines": "414-472",
+      "statements": 59
+    },
+    {
+      "path": "f77src/fouts.f",
+      "lines": "385-442",
+      "statements": 58
+    }
+  ],
+  "limitations": "Line-range coverage only. A covered statement means a row claims a Zig counterpart for those lines; it does not mean the counterpart is correct, tested, or scientifically justified. Statement counts come from static parsing, not from the compiler."
+}

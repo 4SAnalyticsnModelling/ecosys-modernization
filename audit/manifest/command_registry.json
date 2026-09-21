@@ -1,19 +1,138 @@
 {
-  "status": "IN_PROGRESS",
-  "note": "Populated from commands actually executed in this session on 2026-09-17. Windows 11 (win32, build 26100), PowerShell 7+.",
+  "status": "PARTIAL",
+  "note": "Populated 2026-09-21 for the analysis tooling only. Every argv under 'analysis' was executed successfully on this machine on that date; the six model build/run slots remain null because they have NOT been run in this pass and must not be treated as verified. No executable command here is pre-authorized by the contract.",
   "toolchains": {
-    "zig": "0.16.0 (scoop shim at C:\\Users\\symon.mezbahuddin\\scoop\\shims\\zig.exe; matches ecosys-ng/build.zig.zon minimum_zig_version)",
-    "fortran": "GNU Fortran (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 16.1.0 at C:\\Users\\symon.mezbahuddin\\mingw64\\bin\\gfortran.exe -- NOTE: f77src/makefile specifies CF=ifort (Intel Fortran) with FFLAGS=-O2 -mp1 -r8 -i4 -align dcommons -cpp -auto-scalar. ifort is not installed on this machine. gfortran is a substitute compiler, not the historical oracle compiler; -r8 (promote REAL to 8 bytes) and -i4 and -align dcommons semantics must be reproduced with gfortran-equivalent flags (-fdefault-real-8 -fdefault-double-8, no direct -align dcommons equivalent) and verified, not assumed. This is an open G0 baseline gap -- see audit/issues/issue-002-fortran-toolchain-substitution.md.",
-    "python": "Python 3.15.0a8 (py -3 launcher) -- used only for skill-pack helper scripts, not part of the model toolchain."
+    "zig": {
+      "version": "0.16.0",
+      "source": "zig version",
+      "verified_utc": "2026-09-21"
+    },
+    "fortran": {
+      "legacy_reference_compiler": "ifort",
+      "legacy_reference_flags": "-O2 -mp1 -r8 -i4 -align dcommons -cpp -auto-scalar",
+      "legacy_reference_available_on_this_host": false,
+      "oracle_substitute": "GNU Fortran 16.1.0 (MinGW-W64 x86_64-ucrt-posix-seh)",
+      "oracle_precision_flags": [
+        "-ffixed-form",
+        "-ffixed-line-length-72",
+        "-fdefault-real-8",
+        "-fdefault-double-8"
+      ],
+      "oracle_legacy_dialect_flags": [
+        "-std=legacy",
+        "-fallow-argument-mismatch"
+      ],
+      "note": "ifort is not installed on this host, so gfortran reproduces the -r8/-i4 precision contract only. This is not a claim of ifort-identical code generation. gfortran 16 implements the Fortran 2023 SPLIT intrinsic, which shadows this project's split.f and makes soil.f fail with 'Too many arguments in call to split' even though the call is correct (split.f declares 10 arguments, soil.f passes 10). Declare EXTERNAL split after that unit's header, or compile that one unit with -std=f95.",
+      "verified_utc": "2026-09-21"
+    },
+    "python": {
+      "runner": "uv",
+      "note": "All ecosys-audit/scripts/*.py carry PEP 723 inline metadata and are stdlib-only, so `uv run <script>` pins a managed interpreter instead of inheriting whichever python is on PATH (on this host, PATH python is MSYS2 3.12.13).",
+      "verified_utc": "2026-09-21"
+    }
+  },
+  "analysis": {
+    "note": "Read-only navigation and audit tooling. Safe at every gate including G0. Run from the project root.",
+    "f77_index_build": {
+      "cwd": ".",
+      "argv": ["uv", "run", "ecosys-audit/scripts/f77index.py", "--root", ".", "--out", "audit/manifest/f77index.json"],
+      "environment": {},
+      "expected_artifacts": ["audit/manifest/f77index.json"],
+      "completion_condition": "exit 0 and totals.unclosed_loops == 0",
+      "last_verified_evidence": "2026-09-21: 95 files, 95 units, 53 COMMON blocks, 1520 loops, 0 unclosed, 53803 executable statements. All 41 program units re-extract by recorded line ranges and compile standalone under the oracle flags.",
+      "note": "Refuses to overwrite an existing output; delete or choose a new path to rebuild."
+    },
+    "f77_query": {
+      "cwd": ".",
+      "argv": ["uv", "run", "ecosys-audit/scripts/f77query.py", "<subcommand>", "..."],
+      "environment": {},
+      "expected_artifacts": [],
+      "completion_condition": "exit 0",
+      "last_verified_evidence": "2026-09-21: units, stats, outline, loops, show, common, callers, grep all exercised.",
+      "subcommands": {
+        "units": "uv run ecosys-audit/scripts/f77query.py units",
+        "outline": "uv run ecosys-audit/scripts/f77query.py outline grosub.f --depth 1",
+        "show_loop": "uv run ecosys-audit/scripts/f77query.py show grosub.f --loop 2990",
+        "show_lines": "uv run ecosys-audit/scripts/f77query.py show redist.f --lines 6870-6900",
+        "common": "uv run ecosys-audit/scripts/f77query.py common BLK13A --users",
+        "grep": "uv run ecosys-audit/scripts/f77query.py grep 'ZNH4FA\\(' --limit 40",
+        "loops": "uv run ecosys-audit/scripts/f77query.py loops uptake.f"
+      }
+    },
+    "traceability_coverage": {
+      "cwd": ".",
+      "argv": ["uv", "run", "ecosys-audit/scripts/tracecov.py", "--root", ".", "--out", "audit/traceability/coverage-<date>.json"],
+      "environment": {},
+      "expected_artifacts": ["audit/traceability/coverage-<date>.json"],
+      "completion_condition": "exit 0 means no problems and no blocking dispositions; exit 1 means a report was produced but something blocks a gate",
+      "last_verified_evidence": "audit/traceability/coverage-2026-09-21.json: 66.53% statement coverage (31095/46739 in-build executable statements), 80 unresolved dispositions, 149 problems (117 stale zig_sha256, 20 path/hash count mismatches, 8 missing zig paths, 3 unknown fortran paths, 1 unusable zig path)."
+    },
+    "binding_state_audit": {
+      "cwd": ".",
+      "argv": ["uv", "run", "ecosys-audit/scripts/bindcheck.py", "--root", ".", "--out", "audit/manifest/bindcheck-<date>.json"],
+      "environment": {},
+      "expected_artifacts": ["audit/manifest/bindcheck-<date>.json"],
+      "completion_condition": "exit 0 means no register contradictions; exit 1 means a declared binding contradicts the index",
+      "last_verified_evidence": "audit/manifest/bindcheck-2026-09-21.json: 2970 COMMON members across 53 blocks; 214 names occur in Zig code, 1067 comment-only, 1689 absent; 553 named in traceability.csv. audit/traceability/bindings.csv has no usable rows, so shape validation was skipped."
+    },
+    "kernel_oracle_generate": {
+      "cwd": ".",
+      "argv": ["uv", "run", "ecosys-audit/scripts/kernelgen.py", "<ROUTINE>", "--root", ".", "--scope", "referenced"],
+      "environment": {},
+      "expected_artifacts": [
+        "audit/tests/kernels/kernel_<routine>.f",
+        "audit/tests/kernels/kernel_<routine>.layout.json",
+        "audit/tests/kernels/kernel_<routine>.build.ps1"
+      ],
+      "completion_condition": "exit 0 and the reported snapshot size is acceptable for the intended test",
+      "last_verified_evidence": "2026-09-21 STOMATE: 15 includes, 13 COMMON blocks, 74 items, 36994008 bytes per side. Driver compiled and linked, ran twice on a zero-filled snapshot with bit-identical output (SHA256 9562904C1865D93F...), and mutated 2 of 36994008 bytes.",
+      "note": "--scope referenced dumps only members the routine mentions; --scope included dumps every member of every included block, which for UPTAKE is about 237 MB per side. Always check the reported size before generating snapshots."
+    },
+    "kernel_oracle_build": {
+      "cwd": ".",
+      "argv": ["pwsh", "-NoProfile", "-File", "audit/tests/kernels/kernel_<routine>.build.ps1"],
+      "environment": {},
+      "expected_artifacts": ["audit/tests/kernels/build/kernel_<routine>.exe"],
+      "completion_condition": "exit 0 and the executable exists",
+      "last_verified_evidence": "2026-09-21: kernel_stomate.exe built and linked.",
+      "note": "The driver and the legacy unit are separate translation units on purpose. The driver needs ACCESS='STREAM' (Fortran 2003, rejected by -std=legacy); the legacy unit needs -std=legacy. Both carry identical precision flags."
+    },
+    "legacy_unit_compile_check": {
+      "cwd": ".",
+      "argv": ["gfortran", "-c", "-ffixed-form", "-ffixed-line-length-72", "-fdefault-real-8", "-fdefault-double-8", "-std=legacy", "-fallow-argument-mismatch", "-I", "f77src", "-o", "<tmp>/<unit>.o", "f77src/<unit>.f"],
+      "environment": {},
+      "expected_artifacts": ["<tmp>/<unit>.o"],
+      "completion_condition": "exit 0",
+      "last_verified_evidence": "2026-09-21: 40 of 41 units compile directly; soil.f additionally needs EXTERNAL split or -std=f95, after which all 41 pass."
+    },
+    "loc_denominator": {
+      "cwd": ".",
+      "argv": ["tokei", "--output", "json", "f77src", "ecosys-ng/src"],
+      "environment": {},
+      "expected_artifacts": [],
+      "completion_condition": "exit 0",
+      "last_verified_evidence": "2026-09-21: tokei 12.1.2 installed and on PATH.",
+      "note": "Use f77index totals for the audited-statement denominator; tokei is for coarse line accounting only. The two are not interchangeable."
+    },
+    "benchmark": {
+      "cwd": ".",
+      "argv": ["hyperfine", "--warmup", "1", "--runs", "<n>", "<command>"],
+      "environment": {},
+      "expected_artifacts": [],
+      "completion_condition": "exit 0",
+      "last_verified_evidence": "2026-09-21: hyperfine 1.20.0 installed and on PATH. No model workload has been benchmarked yet.",
+      "note": "G4 requires fair, repeated, variance-reported measurements. Do not quote a single wall-clock reading as a performance result."
+    }
   },
   "commands": {
+    "note": "NOT populated in this pass. Every slot below is null because none of these commands was executed or verified on 2026-09-21. Do not infer an argv from the analysis section above; establish and record each one against real build files before use, per G0.",
     "fortran_build": {
-      "cwd": "f77src",
-      "argv": ["make", "-f", "makefile"],
+      "cwd": null,
+      "argv": [],
       "environment": {},
       "source_hash": null,
-      "expected_artifacts": ["f77src/ecosys.x"],
-      "completion_condition": "NOT_YET_EXECUTED -- makefile calls ifort/icc, unavailable here; gfortran substitution not yet attempted or verified",
+      "expected_artifacts": [],
+      "completion_condition": null,
       "last_verified_evidence": null
     },
     "fortran_run": {
@@ -22,17 +141,17 @@
       "environment": {},
       "source_hash": null,
       "expected_artifacts": [],
-      "completion_condition": "NOT_YET_DISCOVERED -- legacy run invocation/control file (e.g. f77example/.../runottawa) not yet inspected for exact argv",
+      "completion_condition": null,
       "last_verified_evidence": null
     },
     "zig_targeted_tests": {
-      "cwd": "ecosys-ng",
-      "argv": ["zig", "build", "test"],
+      "cwd": null,
+      "argv": [],
       "environment": {},
-      "source_hash": "audit/manifest/candidate-001-snapshot.json sha256 79eef4efcf97dd130fa1d342d36a09cef6c0cf9053ce6f27f037d2237f770979",
+      "source_hash": null,
       "expected_artifacts": [],
-      "completion_condition": "zig build test exits after running the module_index test artifact and the ecosys_ng.zig executable test artifact",
-      "last_verified_evidence": "PROVISIONAL/UNVERIFIED as of 2026-09-17 -- background run blu4d3r8h reported 'run test 4274 pass, 1 skip, 12 fail (4287 total)' and exit code 0, but src/validation/ and src/index/ (imported by module_index.zig and required for that result to be real) are absent from disk right now and a direct `zig test src/module_index.zig` fails immediately with FileNotFound on those imports. See audit/issues/issue-005-missing-validation-index-dirs-CRITICAL.md -- do not treat the pass/fail counts as evidence until resolved. A second run (b8hsk60ow) was stopped after 20+ minutes idle rather than trusted."
+      "completion_condition": null,
+      "last_verified_evidence": null
     },
     "zig_short_integration": {
       "cwd": null,
@@ -40,43 +159,26 @@
       "environment": {},
       "source_hash": null,
       "expected_artifacts": [],
-      "completion_condition": "NOT_YET_DISCOVERED -- look for a short/staged runner distinct from the full production deck (e.g. driver/runscript.zig, driver/cli.zig invocation with a short input)",
+      "completion_condition": null,
       "last_verified_evidence": null
     },
     "zig_releasefast_build": {
-      "cwd": "ecosys-ng",
-      "argv": ["zig", "build", "-Doptimize=ReleaseFast"],
+      "cwd": null,
+      "argv": [],
       "environment": {},
       "source_hash": null,
-      "expected_artifacts": ["ecosys-ng-bin/ecosys_ng(.exe)"],
-      "completion_condition": "NOT_YET_EXECUTED -- deferred until G1/G2 source audit and production-entry checks pass per contract order",
+      "expected_artifacts": [],
+      "completion_condition": null,
       "last_verified_evidence": null
     },
     "zig_production_run": {
-      "cwd": "<isolated copy of ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON>",
-      "argv": ["ecosys_ng.exe", "--execution-evidence", "<new-file>", "runottawa"],
+      "cwd": null,
+      "argv": [],
       "environment": {},
-      "source_hash": "git HEAD 771f339, zig build -Doptimize=ReleaseSafe",
-      "expected_artifacts": ["<isolated copy>/runottawa_output_files/", "<execution-evidence path>.json (NDJSON)"],
-      "completion_condition": "DISCOVERED AND EXECUTED 2026-09-18, see audit/runs/run-001-ottawa-diagnostic-2026-09-18.md -- CLI usage confirmed via `ecosys_ng.exe --help`: `[--threads N] [--describe-timeline] [--execution-evidence <new-file>] <runscript>`. --describe-timeline and --execution-evidence are mutually exclusive. Binary built to the custom install prefix ecosys-ng/ecosys-ng-bin/ (gitignored), not zig-out/.",
-      "last_verified_evidence": "run-001: FAILED at hour 2578/262920 (0.98%), error=SoluteReactionSolverDidNotConverge -- see audit/runs/run-001-ottawa-diagnostic-2026-09-18.md for full detail. This is real, trustworthy evidence (unlike the untrusted zig_targeted_tests result above, which has since been separately resolved -- see issue-005's resolution)."
+      "source_hash": null,
+      "expected_artifacts": [],
+      "completion_condition": null,
+      "last_verified_evidence": null
     }
-  },
-  "helper_commands_executed": [
-    {
-      "argv": ["py", "-3", "ecosys-audit-skill-pack/install.py", "--root", "D:\\ecosys_modernization", "--mode", "copy"],
-      "purpose": "dry run of skill pack installer",
-      "result": "0 conflicts, 55 planned additions"
-    },
-    {
-      "argv": ["py", "-3", "ecosys-audit-skill-pack/install.py", "--root", "D:\\ecosys_modernization", "--mode", "copy", "--apply"],
-      "purpose": "apply skill pack installer (adds .agents/skills, .claude/skills, ecosys-audit/, appends managed block to AGENTS.md/CLAUDE.md)",
-      "result": "applied; no model source/reference/deck files touched"
-    },
-    {
-      "argv": ["py", "-3", "ecosys-audit/scripts/snapshot.py", "--root", ".", "--out", "audit/manifest/candidate-001-snapshot.json"],
-      "purpose": "hash all files in the four authoritative trees",
-      "result": "1408 files hashed; manifest sha256 79eef4efcf97dd130fa1d342d36a09cef6c0cf9053ce6f27f037d2237f770979"
-    }
-  ]
+  }
 }
