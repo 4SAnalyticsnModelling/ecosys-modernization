@@ -299,6 +299,15 @@ def main() -> int:
     p.set_defaults(handler=cmd_stats)
 
     args = parser.parse_args()
+    # Several legacy files carry mojibake in comments (see redist.f vs redist_utf8.f).
+    # Sources are decoded latin-1 so every byte round-trips, which can yield C1 control
+    # characters such as U+0091 that the Windows console codepage cannot encode. Without
+    # this, printing those lines raises UnicodeEncodeError and the tool exits 1.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors='replace')
+        except (AttributeError, OSError):
+            pass
     kinds = ('prose', 'glossary', 'dormant-code')
     if getattr(args, 'sections', None) is not None:
         args.sections = kinds if args.sections == 'all' else tuple(

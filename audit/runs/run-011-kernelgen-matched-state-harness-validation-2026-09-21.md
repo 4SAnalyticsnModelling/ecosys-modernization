@@ -1,5 +1,11 @@
 # Run 011 -- matched-state kernel harness (`kernelgen.py`) validated end to end on STOMATE
 
+> **CORRECTION, same day, before this record was relied on (see `issue-082`).** A follow-up run with a *physical* input state showed the generated driver hardcodes every scalar argument to zero (`I=J=NFZ=NZ=NY=NX=0`) and calls `STOMATE(0,0,0,0,0,0)`, which is out of bounds for arrays whose lower bound is 1. Consequences for what is written below:
+> - The build, link, and 36,994,008-byte stream round trip remain **validated**.
+> - "Proof the routine actually ran, not just the I/O" -- the 2-nonzero-byte diff -- was **too generous a reading**. With all-zero subscripts the only effect available to the routine is an out-of-bounds store, so those 2 bytes are most likely that store's signature rather than legitimate computation. Do not cite them as evidence the oracle computes correctly.
+> - The harness therefore **cannot yet answer a science question**, for a second reason beyond the input-writer gap named at the bottom of this record.
+> - `kernel_writer.py`, written after this run, is separately **verified correct** (offset table in the addendum below).
+
 Date: 2026-09-21. Executed by the adversarial Claude/Pi session; the harness was written by the peer Pi session, the build and run recorded here were performed by this session (Pi had explicitly not built or run anything, and said so plainly when asked).
 
 **Why this matters beyond the tooling**: `issue-024`, `issue-079` and `issue-080` each name a "matched-state kernel comparison" as their required next experiment, and all three have been blocked on the same missing capability -- no way to drive a single legacy Fortran routine in isolation with a chosen input state. `issue-078`'s sixth pass hit a related wall from the Zig side. This run establishes that the capability now exists and works.
@@ -40,6 +46,28 @@ From `audit/reviews/review-pi-2026-09-21-round12-kernelgen.md`:
 3. **The internal-block extraction** for the three issues that actually need it: `issue-024`/`issue-079` need the WATSUB freeze-thaw blocks (`watsub.f:2802-2823` snow-free surface, `:6399-6415` deep-layer micropore), and `issue-080` needs the REDIST tillage mixing blend (`redist.f:12137-12203`). None of the three is a standalone subroutine, so each needs the wrapper or slicer path.
 
 Recommended order: input writer first (it is the one item every downstream use needs), then the WATSUB freeze-thaw wrapper, since `issue-024` is the top-priority science gap and its disposition question is currently unanswerable without exactly this measurement.
+
+## Addendum (same day): `kernel_writer.py` verified, and the physical-state run that exposed `issue-082`
+
+`kernel_writer.py` (peer-written after this run's first half) was given a 12-assignment physical STOMATE state and produced a `36,994,008`-byte snapshot, exit 0. Its byte placement was then checked **against a hand calculation from the layout manifest**, not taken on trust:
+
+| member | layout offset | read back | expected | verdict |
+|---|---|---|---|---|
+| `TKC(1,1,1)` | 7,340,000 | 298.15 | 298.15 | OK |
+| `TCC(1,1,1)` | 7,336,000 | 25 | 25 | OK |
+| `O2I(1,1,1)` | 7,300,000 | 210000 | 210000 | OK |
+| `SSIN(1,1)` | 36,724,000 | 0.866 | 0.866 | OK |
+| `CO2Q(1,1)` | 36,724,800 | 400 | 400 | OK |
+| `ARLFP(1,1,1)` | 36,136,000 | 3 | 3 | OK |
+| `FCO2(1,1,1)` | 36,930,000 | 0.7 | 0.7 | OK |
+| `PAR(1,1,1,1,1,1)` | 7,988,000 | 1200 | 1200 | OK |
+| `FMOL(1,1,1)` pre-run | 33,128,000 | 0 | 0 | OK |
+| `WGLF(1,1,1,1,1)` | 0 | 0 | 12 | **hand calc wrong** |
+| `ARLF(1,1,1,1,1)` | 520,000 | 0 | 0.6 | **hand calc wrong** |
+
+The two apparent failures were the hand calculation, not the tool: both arrays declare their first bound as **`0:25`** (26 extents), so index `[1,...]` correctly lands one element in, at byte offset 8 -- and the values were found there exactly (`WGLF` byte 8 = 12, `ARLF` byte 520,008 = 0.6). **The writer handled the zero-lower-bound case that this project's own dialect notes single out as silently producing wrong science; the hand check did not.** That is the strongest available evidence for the writer's correctness, since it got right the one thing an independent checker got wrong.
+
+Running the kernel on that state (exit 0, 0.068 s) then preserved every input-only member bit-for-bit -- `TKC` 298.15, `CO2Q` 400, `SSIN` 0.866 -- confirming the full snapshot round trip, while `FMOL(1,1,1)` and `CO2I(1,1,1)` came back **0** against hand-computed expectations of `1.2194e4/298.15 = 40.90` and `0.7*400 = 280`. Both are assigned at `stomate.f:55-56`, before the `SSIN`/`ARLFP` gate at `:57-58`, so they cannot legitimately be zero for an in-bounds subscript. That is what exposed `issue-082`.
 
 ## Hygiene
 
