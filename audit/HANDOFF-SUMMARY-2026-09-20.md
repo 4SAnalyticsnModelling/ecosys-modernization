@@ -98,25 +98,85 @@ should not be split into two independent calls.
 - `audit/issues/issue-024-top-layer-water-content-divergence-oracle-vs-zig.md`
 - `audit/issues/issue-068-hour-2895-soil-heat-solver-temperature-outside-physical-domain.md`
 
-**The exact question:** at cell 0/layer 0 -- a chronically near-desiccated,
-near-zero-heat-capacity top soil layer -- does Zig's heat-solver
-substep-recovery schedule need an `ICHKV`-equivalent compounding tier,
-extending `recovery_substep_counts` past its current maximum of 64 (e.g. to
-80, matching Fortran's effective `NFH x NPH = 4 x 20 = 80` substeps/hour
-ceiling for this exact thin/low-heat-capacity scenario)? **And if so**, this
-needs a properly-controlled experiment that isolates substep count from the
+**Sharpened 2026-09-21, by `issue-077`'s round-2 validation (a separate,
+already-fixed-and-committed defect at the same cell/layer -- see that issue
+for the full evidence; summarized here only to sharpen this decision's
+framing, not to reopen or substitute for it).** `issue-077` restored a
+genuinely missing, correctly-derived Fortran cap (`EVAPGW`'s per-substep
+fractional-of-available-liquid-water limiter, the `XNPHX` term) in
+`ground_vapor_exchange.zig`, confirmed source-correct and zero-regression --
+but a fresh-from-hour-1 validation run showed it is **structurally inert**
+for hour 2,894/cell 0/layer 0 specifically, and diagnosed exactly why:
+Fortran's substep subdivision is **proactive** -- every hour is
+unconditionally subdivided into at least `NFH=4` substeps and further to
+`NPH>=20` under `ICHKV` for a thin/low-heat-capacity top layer (this exact
+layer), *before* the physics is attempted at all, regardless of whether a
+full-hour step would have numerically "succeeded." Zig's substep escalation
+(`recovery_substep_counts` in `heat_step.zig`) is **reactive** -- it always
+tries `substep_count=1` (the whole hour, `time_step_hours=1.0`) first, and
+only escalates if that attempt is flagged as a failure by its own
+convergence/admissibility checks. At hour 2,894, the full-hour WATSUB-stage
+attempt is accepted cleanly (no failure signal fires), so no escalation is
+ever triggered -- even though a physically-absurd near-total evaporation of
+the layer's water occurs within that single accepted step, exactly the kind
+of event Fortran's unconditional per-hour subdivision exists to prevent from
+ever being attempted in one piece. Any fractional-cap formula, however
+correctly derived, is bit-for-bit inert whenever `substep_count=1`, because
+the cap's own precondition (a substep shorter than the full hour) is never
+met.
+
+**This sharpens, but does not replace, the question below.** The
+previously-tested hypothesis -- "the substep ceiling is too low, extend
+`recovery_substep_counts` past 64" -- targets the *reactive* ladder's
+maximum rung and has not itself been tried yet for issue-068's hour 2,895
+(the eleventh round that would have tried it was explicitly declined,
+reserved for this human decision). `issue-077`'s finding reframes what a
+fix would actually need to be: not (only) a taller reactive ladder, but a
+**proactive, `ICHKV`-equivalent pre-check** -- evaluated *before* the
+substep_count=1 full-hour attempt is ever tried, for thin/low-heat-capacity
+layers matching Fortran's `ICHKV` condition -- that forces subdivision
+up front rather than waiting for a failure signal this specific scenario
+(a numerically "clean" but physically absurd full-hour accept) never
+produces. This points at a different location in the code for the change:
+a pre-attempt gate ahead of `heat_step.zig`'s retry-ladder entry point,
+not a tweak to the ladder's own post-failure escalation values.
+
+**The exact question, sharpened:** at cell 0/layer 0 -- a chronically
+near-desiccated, near-zero-heat-capacity top soil layer -- does Zig need a
+**proactive** `ICHKV`-equivalent pre-check that forces substep subdivision
+before attempting a full-hour step for thin/low-heat-capacity layers
+(matching Fortran's actual always-subdivide architecture), **rather than or
+in addition to** simply extending `recovery_substep_counts`'s reactive
+ceiling past its current maximum of 64 (e.g. to 80, matching Fortran's
+effective `NFH x NPH = 4 x 20 = 80` substeps/hour ceiling for this exact
+scenario)? **If a taller reactive ceiling alone is tried**, this needs a
+properly-controlled experiment that isolates substep count from the
 iteration-budget confound `issue-015`'s own investigation already exposed
 (a shared/starved iteration ceiling produced a misleading "more substeps
 helps" signal there; any future substep experiment must control for that
-before attributing an outcome to substep count alone). **Or**, is a
-different, larger algorithmic redesign of the phase solver's
-constrained-Newton feasibility handling required instead -- because two
-safe, fully validated, zero-regression backtracking/damping variants have
-already been tried (`issue-068` round 9: uniform whole-step damping; round
-10: temperature-coordinate-only damping) and **neither resolved hour 2,895**,
+before attributing an outcome to substep count alone) -- and, per
+`issue-077`'s finding, should not be expected to help hour 2,894/2,895's
+specific failure mode unless it is also made to trigger *proactively*
+rather than only on a detected failure. **Or**, is a different, larger
+algorithmic redesign of the phase solver's constrained-Newton feasibility
+handling required instead -- because two safe, fully validated,
+zero-regression backtracking/damping variants have already been tried
+(`issue-068` round 9: uniform whole-step damping; round 10:
+temperature-coordinate-only damping) and **neither resolved hour 2,895**,
 both exhausting a conservative 6-attempt/0.5-halving budget without finding
 a point simultaneously inside the physical temperature domain and within the
-tight residual-admissibility tolerance.
+tight residual-admissibility tolerance. **These are not mutually
+exclusive**: `issue-068`'s own ten rounds of solver-conditioning work (the
+Newton/Anderson feasibility-vs-residual mismatch, a mass-side residual that
+converges to machine-noise scale while the coupled endpoint-temperature
+component overshoots the physical domain because the phase-enthalpy
+relationship divides by a near-zero heat capacity) may still be a separate,
+additional factor even if proactive subdivision were added -- `issue-077`'s
+finding explains why a *specific already-tried translation fix* had no
+effect at hour 2,894, and identifies where a not-yet-tried architectural
+change would need to go; it does not by itself prove that change would
+resolve hour 2,895, nor that it would make the Newton/Anderson conditioning
+question moot.
 
 `issue-068`'s own text: the mass-side residual for this layer converges
 cleanly to machine-noise scale while the coupled endpoint-temperature
@@ -128,7 +188,11 @@ substep ladder to 80, exactly the question above) was requested and
 experiment is reserved for an authorized human decision, not another
 autonomous pass. No source change is pending; the three safety guards and
 two backtracking enhancements already committed do not need to be revisited
-regardless of how this decision resolves.
+regardless of how this decision resolves. `issue-077`'s fix (the
+`XNPHX`-equivalent fractional cap) is also already committed and does not
+need to be revisited regardless of how this decision resolves -- it is a
+correct, kept translation restoration that is simply inert as the *sole*
+answer to hour 2,894, per its own round-2 validation.
 
 ---
 
