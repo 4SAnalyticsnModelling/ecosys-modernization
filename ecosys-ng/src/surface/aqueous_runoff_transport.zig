@@ -11,6 +11,7 @@ const surface_routing = @import("../soil/solute/surface_solute_routing.zig");
 const transport_species = @import("../soil/solute/transport_species.zig");
 const overland_litter_salt = @import("../redistribution/surface/overland_flow_litter_salt_update.zig");
 const daily_litter_salt = @import("../redistribution/inventory/daily_litter_salt.zig");
+const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
 
 pub const Directions = runoff_carrier.Directions;
 pub const ElementMass = runoff_carrier.ElementMass;
@@ -43,6 +44,23 @@ comptime {
         @compileError("REDIST tillage surface-salt coordinate order changed");
 }
 
+/// `ZEROS2(NY,NX) = ZERO2*DH(NY,NX)*DV(NY,NX)` (`starts.f:270`). issue-069
+/// Finding B: shared carrier-selection helper for `gatherTillageSurfaceAmounts`'s
+/// water-carrier guard, mirroring `runtime_adapter.zig`'s
+/// `tillageWaterCarrierM3` exactly (this file cannot import that private
+/// helper, so it is deliberately re-derived here rather than imported, same
+/// as `erosion_chemistry_bridge.zig`'s own `erosionWaterCarrierM3`). A bare
+/// `> 0` guard treats any nonzero-but-negligible live water carrier as
+/// "real", while `commitTillageSurfaceAmounts`'s own caller
+/// (`runtime_adapter.zig`'s `surfaceOwnersAfter`, issue-064) already
+/// substitutes the dry reference for the same field at the same floor --
+/// that basis mismatch is the exact defect class already fixed at
+/// issue-060/061/063/064/065/066's other instances. `>`, not `>=`, matches
+/// legacy's own strict comparison (`solute.f:610`).
+fn tillageSurfaceWaterCarrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_volume_m3: f64) f64 {
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+}
+
 /// Gathers REDIST `TZALGS..TZM1PGS` amounts for one surface cell.  Wet free
 /// ions use the current water carrier; a dry cell uses the chemistry owner's
 /// retained reference carrier.  Complexes, HYSI, and the eight phosphate
@@ -52,12 +70,19 @@ pub fn gatherTillageSurfaceAmounts(
     extensive: *const surface_routing.State,
     cell: usize,
     actual_water_m3: f64,
+    negligible_water_volume_m3: f64,
 ) !TillageSurfaceAmounts {
     try validateTillageOwners(chemistry, extensive, cell, actual_water_m3);
-    const represented_carrier_m3 = if (actual_water_m3 > 0)
-        actual_water_m3
-    else
-        chemistry.dry_reference_water_m3[cell];
+    if (!std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
+        return error.InvalidTillageSurfaceAqueousCarrier;
+    // issue-069 Finding B: widened from an exact-zero-only guard
+    // (`actual_water_m3 > 0`) to the shared `ZEROS2`-equivalent floor, so a
+    // near-zero-but-nonzero raw carrier is no longer treated as "real" here
+    // while its write-side sibling (`commitTillageSurfaceAmounts`'s caller,
+    // issue-064) already substitutes the dry reference for the same field at
+    // the same floor. Not reachable in the current Ottawa deck (no tillage
+    // scheduled); fixed for the next deck that schedules one.
+    const represented_carrier_m3 = tillageSurfaceWaterCarrierM3(actual_water_m3, chemistry.dry_reference_water_m3[cell], negligible_water_volume_m3);
     if (!std.math.isFinite(represented_carrier_m3) or represented_carrier_m3 < 0)
         return error.InvalidTillageSurfaceAqueousCarrier;
 
@@ -896,7 +921,7 @@ test "REDIST tillage surface adapter binds all 42 authoritative coordinates in s
         extensive.amount_mol[species_index] = @floatFromInt(species_index + 1);
     extensive.amount_mol[@intFromEnum(Species.band_phosphate)] = 99;
 
-    const gathered = try gatherTillageSurfaceAmounts(&chemistry, &extensive, 0, 0);
+    const gathered = try gatherTillageSurfaceAmounts(&chemistry, &extensive, 0, 0, 0);
     for (0..12) |species_index|
         try std.testing.expectEqual(
             2 * @as(f64, @floatFromInt(species_index + 1)),
@@ -925,7 +950,7 @@ test "REDIST tillage surface adapter binds all 42 authoritative coordinates in s
     );
     try std.testing.expectEqualDeep(
         remaining,
-        try gatherTillageSurfaceAmounts(&chemistry, &extensive, 0, 0),
+        try gatherTillageSurfaceAmounts(&chemistry, &extensive, 0, 0, 0),
     );
 }
 
@@ -954,6 +979,72 @@ test "REDIST tillage surface owner publish rejects a late invalid coordinate ato
     try std.testing.expectEqual(dry_before, chemistry.dry_reference_water_m3[0]);
     try std.testing.expectEqual(carrier_before, extensive.carrier_volume_m3[0]);
     try std.testing.expectEqualSlices(f64, amounts_before, extensive.amount_mol);
+}
+
+test "issue-069 Finding B: tillageSurfaceWaterCarrierM3 substitutes the dry reference at and below the ZEROS2 floor instead of only at exact zero" {
+    const negligible = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(1.0);
+    try std.testing.expectEqual(@as(f64, 1.0e-6), negligible);
+
+    // A near-zero-but-nonzero raw carrier -- the exact shape this defect
+    // class manufactures fake mass from at issue-060/061/063/064/065/066's
+    // other sites.
+    const near_zero_raw_carrier: f64 = 1.0e-9;
+    try std.testing.expect(near_zero_raw_carrier > 0);
+    const dry_reference_m3: f64 = 0.5;
+    const concentration_mol_per_m3: f64 = 20.0;
+
+    // OLD guard (bare `> 0`, this file's behavior before this fix): the
+    // near-zero raw carrier is accepted as "real", manufacturing a fake mass
+    // more than eight orders of magnitude below the physically correct
+    // value.
+    const old_carrier = if (near_zero_raw_carrier > 0) near_zero_raw_carrier else dry_reference_m3;
+    const old_mass_mol = concentration_mol_per_m3 * old_carrier;
+    try std.testing.expectEqual(@as(f64, 1.0e-9), old_carrier);
+    try std.testing.expectApproxEqAbs(@as(f64, 2.0e-8), old_mass_mol, 1e-22);
+
+    // NEW guard (this fix): the same near-zero raw carrier is at/below the
+    // ZEROS2-equivalent floor, so the remembered dry reference is
+    // substituted instead, producing a stable, physically sensible mass.
+    const new_carrier = tillageSurfaceWaterCarrierM3(near_zero_raw_carrier, dry_reference_m3, negligible);
+    const new_mass_mol = concentration_mol_per_m3 * new_carrier;
+    try std.testing.expectEqual(dry_reference_m3, new_carrier);
+    try std.testing.expectEqual(@as(f64, 10.0), new_mass_mol);
+    try std.testing.expect(new_mass_mol / old_mass_mol > 1.0e8);
+
+    // Strictly above the floor: both guards agree and keep the live carrier.
+    const just_above = std.math.nextAfter(f64, negligible, std.math.inf(f64));
+    try std.testing.expectEqual(just_above, tillageSurfaceWaterCarrierM3(just_above, dry_reference_m3, negligible));
+    // At exactly the floor: OLD guard (`> 0`) would still have kept the live
+    // carrier since `negligible > 0`, but NEW guard substitutes the dry
+    // reference -- this is the boundary the fix actually widens.
+    try std.testing.expect(negligible > 0);
+    try std.testing.expectEqual(dry_reference_m3, tillageSurfaceWaterCarrierM3(negligible, dry_reference_m3, negligible));
+}
+
+test "issue-069 Finding B: near-zero-but-nonzero actual_water_m3 no longer manufactures a fake mass swing in gatherTillageSurfaceAmounts" {
+    var chemistry = try Chemistry.init(std.testing.allocator, 1);
+    defer chemistry.deinit();
+    var extensive = try surface_routing.State.init(std.testing.allocator, 1, 1, species_count);
+    defer extensive.deinit();
+    chemistry.cells[0].aluminum_mol_per_m3 = 20;
+    chemistry.dry_reference_water_m3[0] = 0.5;
+
+    const near_zero_raw_carrier: f64 = 1.0e-9;
+    const negligible = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(1.0);
+
+    // OLD (pre-fix) behavior, replicated manually: the bare
+    // `actual_water_m3 > 0` guard accepted the near-zero raw carrier as
+    // "real", manufacturing a fake mass more than six orders of magnitude
+    // below the physically correct value (dry-reference basis).
+    const old_gathered_aluminum_mol = chemistry.cells[0].aluminum_mol_per_m3 * near_zero_raw_carrier;
+    const true_mol = chemistry.cells[0].aluminum_mol_per_m3 * chemistry.dry_reference_water_m3[0];
+    try std.testing.expect(old_gathered_aluminum_mol / true_mol < 1.0e-6);
+
+    // NEW (fixed) behavior: the widened guard substitutes the dry reference
+    // for the near-zero raw carrier, matching the physically correct basis
+    // exactly, and stays stable across the ZEROS2-equivalent floor.
+    const gathered = try gatherTillageSurfaceAmounts(&chemistry, &extensive, 0, near_zero_raw_carrier, negligible);
+    try std.testing.expectEqual(true_mol, gathered[@intFromEnum(Species.aluminum)]);
 }
 
 /// Molecular formula of every runtime aqueous coordinate. `*_phosphate` is

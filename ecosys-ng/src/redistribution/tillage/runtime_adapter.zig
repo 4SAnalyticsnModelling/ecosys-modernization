@@ -2599,11 +2599,19 @@ fn gatherSurfaceTransfers(context: *const Context, cell: usize, dynamic_salts: b
     core[30].surface_amount[cell] = 0; // surface nitrification-inhibitor owner is scientifically absent
 
     _ = dynamic_salts;
+    // issue-069 Finding B: widen `gatherTillageSurfaceAmounts`'s own
+    // internal exact-zero guard to the shared `ZEROS2`-equivalent floor,
+    // matching its write-side sibling `commitTillageSurfaceAmounts`'s own
+    // caller below (issue-064) so a near-zero-but-nonzero raw surface water
+    // carrier is not treated as "real" on the read side while the write
+    // side already substitutes the dry reference for the same field.
+    const gather_negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(context.cell_area_m2[cell]);
     const dynamic_amounts = try SurfaceAqueousTillage.gatherTillageSurfaceAmounts(
         context.surface_chemistry,
         context.surface_solute_transport,
         cell,
         context.surface_water_m3[cell],
+        gather_negligible_water_volume_m3,
     );
     for (dynamic_amounts, 0..) |amount, index|
         dynamic[index].surface_amount[cell] = amount;

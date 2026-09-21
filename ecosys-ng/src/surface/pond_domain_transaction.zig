@@ -194,6 +194,8 @@ pub fn apply(workspace: *Workspace, owners: Owners, inputs: Inputs) !void {
         inputs.nitrate_non_band_water_fraction_by_cell.len != grid.cell_count or
         inputs.phosphate_non_band_water_fraction_by_cell.len != grid.cell_count or
         inputs.phosphate_band_water_fraction_by_cell.len != grid.cell_count or
+        inputs.horizontal_cell_width_m.len != grid.cell_count or
+        inputs.vertical_cell_width_m.len != grid.cell_count or
         !std.math.isFinite(inputs.water_molar_mass_g_per_mol) or
         inputs.water_molar_mass_g_per_mol <= 0 or
         !std.math.isFinite(inputs.liquid_water_density_g_per_m3) or
@@ -229,7 +231,7 @@ pub fn apply(workspace: *Workspace, owners: Owners, inputs: Inputs) !void {
         const layer = inputs.transitions.destination_soil_layer[cell];
         const fraction = inputs.transitions.transfer_fraction[cell];
         const destination = cell * grid.soil_layer_capacity + layer;
-        const carriers = try carrierVolumes(owners, cell, destination, fraction, inputs.water_heat_parameters.ice_density_megagrams_per_m3, inputs.ammonium_non_band_water_fraction_by_cell[cell], inputs.nitrate_non_band_water_fraction_by_cell[cell], inputs.phosphate_non_band_water_fraction_by_cell[cell]);
+        const carriers = try carrierVolumes(owners, cell, destination, fraction, inputs.water_heat_parameters.ice_density_megagrams_per_m3, inputs.ammonium_non_band_water_fraction_by_cell[cell], inputs.nitrate_non_band_water_fraction_by_cell[cell], inputs.phosphate_non_band_water_fraction_by_cell[cell], inputs.horizontal_cell_width_m[cell] * inputs.vertical_cell_width_m[cell]);
         // HEAT-001: the state_update pass now reads the pre-move carbon, so the
         // preflight must validate against that same operand.
         const organic_carbon_g_c = try owners.inventories.surface_organic.totalCarbon_g_c(cell);
@@ -269,7 +271,7 @@ pub fn apply(workspace: *Workspace, owners: Owners, inputs: Inputs) !void {
         const layer = inputs.transitions.destination_soil_layer[cell];
         const fraction = inputs.transitions.transfer_fraction[cell];
         const destination = cell * grid.soil_layer_capacity + layer;
-        const carriers = carrierVolumes(owners, cell, destination, fraction, inputs.water_heat_parameters.ice_density_megagrams_per_m3, inputs.ammonium_non_band_water_fraction_by_cell[cell], inputs.nitrate_non_band_water_fraction_by_cell[cell], inputs.phosphate_non_band_water_fraction_by_cell[cell]) catch unreachable;
+        const carriers = carrierVolumes(owners, cell, destination, fraction, inputs.water_heat_parameters.ice_density_megagrams_per_m3, inputs.ammonium_non_band_water_fraction_by_cell[cell], inputs.nitrate_non_band_water_fraction_by_cell[cell], inputs.phosphate_non_band_water_fraction_by_cell[cell], inputs.horizontal_cell_width_m[cell] * inputs.vertical_cell_width_m[cell]) catch unreachable;
         var heat_parameters = inputs.water_heat_parameters;
         heat_parameters.minimum_heat_capacity_megajoules_per_k = inputs.minimum_heat_capacity_megajoules_per_k[cell];
         const moved_surface_volume_m3 = fraction * owners.water_heat.surface_geometry.dry_litter_volume_m3[cell];
@@ -402,7 +404,7 @@ fn vaporWaterEquivalentAndValidateMirror(
     return water_equivalent_m3;
 }
 
-fn carrierVolumes(owners: Owners, cell: usize, destination: usize, fraction: f64, ice_density_megagrams_per_m3: f64, ammonium_non_band_water_fraction: f64, nitrate_non_band_water_fraction: f64, phosphate_non_band_water_fraction: f64) !chemistry.CarrierVolumes {
+fn carrierVolumes(owners: Owners, cell: usize, destination: usize, fraction: f64, ice_density_megagrams_per_m3: f64, ammonium_non_band_water_fraction: f64, nitrate_non_band_water_fraction: f64, phosphate_non_band_water_fraction: f64, cell_area_m2: f64) !chemistry.CarrierVolumes {
     if (destination >= owners.soil_properties.layer_count) return error.SurfacePondDomainDimensionMismatch;
     const surface_water = owners.water_heat.surface_liquid_water_m3[cell];
     const surface_ice = owners.water_heat.surface_ice_m3[cell];
@@ -441,6 +443,7 @@ fn carrierVolumes(owners: Owners, cell: usize, destination: usize, fraction: f64
         // that actually moves into soil. When pore capacity is full (scale=0),
         // no dissolved species transfer regardless of the dry-mass fraction.
         .dissolved_chemistry_fraction = fraction * water_transfer_scale,
+        .cell_area_m2 = cell_area_m2,
     };
 }
 

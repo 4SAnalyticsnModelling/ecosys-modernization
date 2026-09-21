@@ -4,6 +4,7 @@ const surface_module = @import("litter_chemistry.zig");
 const carrier_rebase = @import("litter_chemistry_carrier_rebase.zig");
 const soil_module = @import("../soil/solute/chemistry_state.zig");
 const conservation_sidecar = @import("pond_conservation_sidecar.zig");
+const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
 
 pub const CarrierVolumes = struct {
     surface_water_before_m3: f64,
@@ -24,6 +25,13 @@ pub const CarrierVolumes = struct {
     // less than the dry-material fraction when water transfer is capped by
     // available pore capacity. Set equal to fraction when unconstrained.
     dissolved_chemistry_fraction: f64,
+    /// Cell horizontal footprint (`DH*DV`, `starts.f:270`), used to derive
+    /// this cell's `ZEROS2`-equivalent water-carrier noise floor via
+    /// `legacyNegligibleWaterVolumeM3`. issue-069 Finding A: without this,
+    /// `calculate`/`acceptedSurfaceTransfer` compared `surface_water_*_m3`
+    /// against exact zero only, the same mistranslated-`ZEROS2` shape already
+    /// fixed at issue-060/061/063/064/065/066's other call sites.
+    cell_area_m2: f64,
 };
 
 /// Native extensive carriers for the REDIST L=0 particulate-settling subset.
@@ -276,10 +284,16 @@ pub fn acceptedSurfaceTransfer(
 ) !conservation_sidecar.Transfer {
     _ = try calculate(surface, soil, cell, destination, carriers, dynamic_salts, fraction);
     const source = surface.cells[cell];
-    const aqueous_reference = if (carriers.surface_water_before_m3 > 0)
-        carriers.surface_water_before_m3
-    else
-        surface.dry_reference_water_m3[cell];
+    // issue-069 Finding A: widened from an exact-zero-only guard to the
+    // shared `ZEROS2`-equivalent floor, matching `calculate`'s own
+    // `surface_aqueous_before_m3` derivation exactly so this conservation
+    // ledger never disagrees with the production mutator it accounts for.
+    const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(carriers.cell_area_m2);
+    const aqueous_reference = pondSurfaceWaterCarrierM3(
+        carriers.surface_water_before_m3,
+        surface.dry_reference_water_m3[cell],
+        negligible_water_volume_m3,
+    );
     const aqueous_scale = carriers.dissolved_chemistry_fraction * aqueous_reference;
     const dry_scale = fraction * carriers.surface_dry_mass_before_megagrams;
     const mineral_scale = fraction * surface.mineral_reference_water_m3[cell];
@@ -433,6 +447,21 @@ pub fn acceptedSoilParticulateTransfer(
     return result;
 }
 
+/// `ZEROS2(NY,NX) = ZERO2*DH(NY,NX)*DV(NY,NX)` (`starts.f:270`). issue-069
+/// Finding A: shared carrier-selection helper for this file's surface pond
+/// water-carrier guards, mirroring `runtime_adapter.zig`'s
+/// `tillageWaterCarrierM3` and `erosion_chemistry_bridge.zig`'s
+/// `erosionWaterCarrierM3` exactly. A bare `> 0` guard treats any
+/// nonzero-but-negligible live water carrier as "real", while a sibling
+/// carrier (or the whole-hour census) may already substitute the remembered
+/// dry/mineral reference for the same field at the same floor -- that basis
+/// mismatch is the exact defect class already fixed at issue-060/061/063/
+/// 064/065/066's other instances. `>`, not `>=`, matches legacy's own strict
+/// comparison (`solute.f:610`).
+fn pondSurfaceWaterCarrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_volume_m3: f64) f64 {
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+}
+
 fn calculate(
     surface: *const surface_module.State,
     soil: *const soil_module.State,
@@ -479,24 +508,27 @@ fn calculate(
     inline for (.{ dry_reference_before, mineral_reference_before }) |reference|
         if (!std.math.isFinite(reference) or reference < 0)
             return error.InvalidSurfacePondChemistryCarrier;
-    const surface_aqueous_before_m3 = if (carriers.surface_water_before_m3 > 0)
-        carriers.surface_water_before_m3
-    else
-        dry_reference_before;
-    const surface_dry_reference_after_m3 = if (carriers.surface_water_after_m3 > 0)
+    // issue-069 Finding A: the three carrier selections below used to gate on
+    // `carriers.surface_water_*_m3 > 0` (exact zero only), the same
+    // mistranslated-`ZEROS2` shape already fixed at issue-060/061/063/064/
+    // 065/066's other call sites (`starts.f:270`,
+    // `legacyNegligibleWaterVolumeM3`). A near-zero-but-nonzero raw carrier
+    // was accepted as "real" and multiplied directly into aqueous
+    // concentrations, manufacturing a fake mass swing relative to the
+    // correct dry-reference basis. Widened to the shared floor via
+    // `pondSurfaceWaterCarrierM3`; `carriers.surface_water_before_m3 == 0`
+    // is likewise widened to `<= negligible_water_volume_m3` so the dry
+    // reference is rebuilt consistently on both sides of the same floor.
+    const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(carriers.cell_area_m2);
+    const surface_aqueous_before_m3 = pondSurfaceWaterCarrierM3(carriers.surface_water_before_m3, dry_reference_before, negligible_water_volume_m3);
+    const surface_dry_reference_after_m3 = if (carriers.surface_water_after_m3 > negligible_water_volume_m3)
         0
-    else if (carriers.surface_water_before_m3 == 0)
+    else if (carriers.surface_water_before_m3 <= negligible_water_volume_m3)
         dry_reference_before
     else
         carriers.surface_water_before_m3 * (1 - carriers.dissolved_chemistry_fraction);
-    const surface_aqueous_after_m3 = if (carriers.surface_water_after_m3 > 0)
-        carriers.surface_water_after_m3
-    else
-        surface_dry_reference_after_m3;
-    const surface_mineral_reference_after_m3 = if (carriers.surface_water_after_m3 > 0)
-        carriers.surface_water_after_m3
-    else
-        mineral_reference_before;
+    const surface_aqueous_after_m3 = pondSurfaceWaterCarrierM3(carriers.surface_water_after_m3, surface_dry_reference_after_m3, negligible_water_volume_m3);
+    const surface_mineral_reference_after_m3 = pondSurfaceWaterCarrierM3(carriers.surface_water_after_m3, mineral_reference_before, negligible_water_volume_m3);
 
     var result: Candidate = .{
         .surface = surface.cells[cell],
@@ -761,6 +793,7 @@ test "pond chemistry sidecars exclude mirrored carbon and material capacity" {
         .surface_dry_mass_after_megagrams = 1,
         .soil_dry_mass_after_megagrams = 6,
         .dissolved_chemistry_fraction = 0.5,
+        .cell_area_m2 = 1,
     };
     const accepted = try acceptedSurfaceTransfer(
         &surface,
@@ -876,7 +909,7 @@ test "surface chemistry mixes into soil non-band owners on native carriers" {
     surface.cells[0].h2po4_mol_p_per_m3 = 2;
     surface.cells[0].exchange.calcium_mol_per_megagram = 3;
     soil.aqueous[0].ammonium_non_band = 1;
-    const carriers: CarrierVolumes = .{ .surface_water_before_m3 = 2, .soil_shared_water_before_m3 = 2, .soil_phosphate_non_band_water_before_m3 = 2, .surface_water_after_m3 = 1, .soil_shared_water_after_m3 = 3, .soil_phosphate_non_band_water_after_m3 = 3, .surface_dry_mass_before_megagrams = 2, .soil_dry_mass_before_megagrams = 2, .surface_dry_mass_after_megagrams = 1, .soil_dry_mass_after_megagrams = 3, .dissolved_chemistry_fraction = 0.5 };
+    const carriers: CarrierVolumes = .{ .surface_water_before_m3 = 2, .soil_shared_water_before_m3 = 2, .soil_phosphate_non_band_water_before_m3 = 2, .surface_water_after_m3 = 1, .soil_shared_water_after_m3 = 3, .soil_phosphate_non_band_water_after_m3 = 3, .surface_dry_mass_before_megagrams = 2, .soil_dry_mass_before_megagrams = 2, .surface_dry_mass_after_megagrams = 1, .soil_dry_mass_after_megagrams = 3, .dissolved_chemistry_fraction = 0.5, .cell_area_m2 = 1 };
     try transferSurfaceFractionToSoil(&surface, &soil, 0, 0, carriers, false, 0.5);
     try std.testing.expectEqual(@as(f64, 4), surface.cells[0].ammonium_mol_per_m3);
     try std.testing.expectApproxEqAbs(@as(f64, 2), soil.aqueous[0].ammonium_non_band, 1e-14);
@@ -910,6 +943,7 @@ test "pond mineral nitrogen conserves amount on non-band zone water" {
         .ammonium_non_band_water_fraction = 0.8,
         .nitrate_non_band_water_fraction = 0.6,
         .dissolved_chemistry_fraction = 0.5,
+        .cell_area_m2 = 1,
     };
     const ammonium_before = 4.0 * 2.0 + 1.0 * 5.0 * 0.8;
     const nitrate_before = 2.0 * 2.0 + 3.0 * 5.0 * 0.6;
@@ -947,6 +981,7 @@ test "pond dry transfer conserves fraction-weighted exchanger and phosphate site
         .soil_dry_mass_after_megagrams = 6,
         .ammonium_non_band_water_fraction = 0.4,
         .dissolved_chemistry_fraction = 0.5,
+        .cell_area_m2 = 1,
     };
     const exchange_before = 10.0 * 2.0 + 5.0 * (0.4 * 2.0 + 0.6 * 3.0);
     const phosphate_sites_before = 6.0 * 2.0 + 5.0 * (0.4 * 4.0 + 0.6 * 5.0);
@@ -968,7 +1003,7 @@ test "fixed salt mode preserves optional salt amounts while water carrier change
     defer soil.deinit();
     surface.cells[0].sulfate_mol_per_m3 = 5;
     surface.cells[0].bicarbonate_mol_per_m3 = 4;
-    const carriers: CarrierVolumes = .{ .surface_water_before_m3 = 1, .soil_shared_water_before_m3 = 1, .soil_phosphate_non_band_water_before_m3 = 1, .surface_water_after_m3 = 0.5, .soil_shared_water_after_m3 = 1.5, .soil_phosphate_non_band_water_after_m3 = 1.5, .surface_dry_mass_before_megagrams = 1, .soil_dry_mass_before_megagrams = 1, .surface_dry_mass_after_megagrams = 0.5, .soil_dry_mass_after_megagrams = 1.5, .dissolved_chemistry_fraction = 0.5 };
+    const carriers: CarrierVolumes = .{ .surface_water_before_m3 = 1, .soil_shared_water_before_m3 = 1, .soil_phosphate_non_band_water_before_m3 = 1, .surface_water_after_m3 = 0.5, .soil_shared_water_after_m3 = 1.5, .soil_phosphate_non_band_water_after_m3 = 1.5, .surface_dry_mass_before_megagrams = 1, .soil_dry_mass_before_megagrams = 1, .surface_dry_mass_after_megagrams = 0.5, .soil_dry_mass_after_megagrams = 1.5, .dissolved_chemistry_fraction = 0.5, .cell_area_m2 = 1 };
     try transferSurfaceFractionToSoil(&surface, &soil, 0, 0, carriers, false, 0.5);
     try std.testing.expectEqual(@as(f64, 5), surface.cells[0].sulfate_mol_per_m3);
     try std.testing.expectEqual(@as(f64, 0), soil.aqueous[0].sulfate);
@@ -1017,6 +1052,7 @@ test "pond carrier growth preserves unmoved soil silicate amounts" {
         .surface_dry_mass_after_megagrams = 0,
         .soil_dry_mass_after_megagrams = 2,
         .dissolved_chemistry_fraction = 1,
+        .cell_area_m2 = 1,
     };
     try transferSurfaceFractionToSoil(&surface, &soil, 0, 0, carriers, false, 0);
     inline for (.{
@@ -1062,6 +1098,7 @@ test "dissolved chemistry fraction zero leaves soil aqueous state unchanged whil
         .surface_dry_mass_after_megagrams = 1,
         .soil_dry_mass_after_megagrams = 3,
         .dissolved_chemistry_fraction = 0,
+        .cell_area_m2 = 1,
     };
     try transferSurfaceFractionToSoil(&surface, &soil, 0, 0, carriers, false, 0.5);
     // Dissolved: no transfer, soil stays at 5
@@ -1093,6 +1130,7 @@ test "pond precipitates follow solid fraction rather than capped water fraction"
         .surface_dry_mass_after_megagrams = 2,
         .soil_dry_mass_after_megagrams = 7,
         .dissolved_chemistry_fraction = 0.1,
+        .cell_area_m2 = 1,
     };
     try transferSurfaceFractionToSoil(&surface, &soil, 0, 0, carriers, true, 0.5);
     try std.testing.expectApproxEqAbs(@as(f64, 20.0 / 9.0), surface.cells[0].phosphate_minerals.aluminum_phosphate_mol_per_m3, 1e-14);
@@ -1127,6 +1165,7 @@ test "dry pond-domain transfer conserves retained aqueous and mineral native inv
         .surface_dry_mass_after_megagrams = 1,
         .soil_dry_mass_after_megagrams = 3,
         .dissolved_chemistry_fraction = 0.5,
+        .cell_area_m2 = 1,
     };
     const nitrate_before_mol = surface.cells[0].nitrate_mol_per_m3 * surface.dry_reference_water_m3[0] +
         soil.aqueous[0].nitrate_non_band * carriers.soil_shared_water_before_m3;
@@ -1171,6 +1210,7 @@ test "wet pond-domain transfer to dryness preserves residual solute through rewe
         .surface_dry_mass_after_megagrams = 1,
         .soil_dry_mass_after_megagrams = 3,
         .dissolved_chemistry_fraction = 0.25,
+        .cell_area_m2 = 1,
     };
     const before_mol = surface.cells[0].nitrate_mol_per_m3 * 4 +
         soil.aqueous[0].nitrate_non_band * 2;
@@ -1210,6 +1250,7 @@ test "dry pond-domain unbound aqueous inventory fails atomically" {
             .surface_dry_mass_after_megagrams = 0.5,
             .soil_dry_mass_after_megagrams = 1.5,
             .dissolved_chemistry_fraction = 0.5,
+            .cell_area_m2 = 1,
         },
         false,
         0.5,
@@ -1238,6 +1279,7 @@ test "water-only pond chemistry transfers with zero dry carrier" {
         .surface_dry_mass_after_megagrams = 0,
         .soil_dry_mass_after_megagrams = 2,
         .dissolved_chemistry_fraction = 1,
+        .cell_area_m2 = 1,
     };
     try transferSurfaceFractionToSoil(
         &surface,
@@ -1257,4 +1299,95 @@ test "water-only pond chemistry transfers with zero dry carrier" {
         soil.aqueous[0].nitrate_non_band,
         1e-14,
     );
+}
+
+test "issue-069 Finding A: pondSurfaceWaterCarrierM3 substitutes the dry reference at and below the ZEROS2 floor instead of only at exact zero" {
+    const negligible = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(1.0);
+    try std.testing.expectEqual(@as(f64, 1.0e-6), negligible);
+
+    // A near-zero-but-nonzero raw carrier -- the exact shape this defect
+    // class manufactures fake mass from at issue-060/061/063/064/065/066's
+    // other sites.
+    const near_zero_raw_carrier: f64 = 1.0e-9;
+    try std.testing.expect(near_zero_raw_carrier > 0);
+    const dry_reference_m3: f64 = 0.5;
+    const concentration_mol_per_m3: f64 = 20.0;
+
+    // OLD guard (bare `> 0`, this file's behavior before this fix): the
+    // near-zero raw carrier is accepted as "real", manufacturing a fake mass
+    // more than eight orders of magnitude below the physically correct
+    // value.
+    const old_carrier = if (near_zero_raw_carrier > 0) near_zero_raw_carrier else dry_reference_m3;
+    const old_mass_mol = concentration_mol_per_m3 * old_carrier;
+    try std.testing.expectEqual(@as(f64, 1.0e-9), old_carrier);
+    try std.testing.expectApproxEqAbs(@as(f64, 2.0e-8), old_mass_mol, 1e-22);
+
+    // NEW guard (this fix): the same near-zero raw carrier is at/below the
+    // ZEROS2-equivalent floor, so the remembered dry reference is
+    // substituted instead, producing a stable, physically sensible mass.
+    const new_carrier = pondSurfaceWaterCarrierM3(near_zero_raw_carrier, dry_reference_m3, negligible);
+    const new_mass_mol = concentration_mol_per_m3 * new_carrier;
+    try std.testing.expectEqual(dry_reference_m3, new_carrier);
+    try std.testing.expectEqual(@as(f64, 10.0), new_mass_mol);
+    try std.testing.expect(new_mass_mol / old_mass_mol > 1.0e8);
+
+    // Strictly above the floor: both guards agree and keep the live carrier.
+    const just_above = std.math.nextAfter(f64, negligible, std.math.inf(f64));
+    try std.testing.expectEqual(just_above, pondSurfaceWaterCarrierM3(just_above, dry_reference_m3, negligible));
+    // At exactly the floor: OLD guard (`> 0`) would still have kept the live
+    // carrier since `negligible > 0`, but NEW guard substitutes the dry
+    // reference -- this is the boundary the fix actually widens.
+    try std.testing.expect(negligible > 0);
+    try std.testing.expectEqual(dry_reference_m3, pondSurfaceWaterCarrierM3(negligible, dry_reference_m3, negligible));
+}
+
+test "issue-069 Finding A: near-zero-but-nonzero surface water carrier no longer manufactures a fake mass swing in transferSurfaceFractionToSoil" {
+    var surface = try surface_module.State.init(std.testing.allocator, 1);
+    defer surface.deinit();
+    var soil = try soil_module.State.init(std.testing.allocator, 1);
+    defer soil.deinit();
+    surface.cells[0].ammonium_mol_per_m3 = 20;
+    surface.dry_reference_water_m3[0] = 0.5;
+    soil.aqueous[0].ammonium_non_band = 3;
+
+    const near_zero_raw_carrier: f64 = 1.0e-9;
+    const carriers: CarrierVolumes = .{
+        .surface_water_before_m3 = near_zero_raw_carrier,
+        .soil_shared_water_before_m3 = 2,
+        .soil_phosphate_non_band_water_before_m3 = 2,
+        .surface_water_after_m3 = 0,
+        .soil_shared_water_after_m3 = 2,
+        .soil_phosphate_non_band_water_after_m3 = 2,
+        .surface_dry_mass_before_megagrams = 1,
+        .soil_dry_mass_before_megagrams = 1,
+        .surface_dry_mass_after_megagrams = 0.5,
+        .soil_dry_mass_after_megagrams = 1.5,
+        .dissolved_chemistry_fraction = 1,
+        .cell_area_m2 = 1,
+    };
+
+    // Physically correct pre-transfer ammonium mass, on the dry-reference
+    // basis a near-zero-but-nonzero live carrier must fall back to
+    // (issue-060's own established basis).
+    const true_before_mol = surface.cells[0].ammonium_mol_per_m3 * surface.dry_reference_water_m3[0] +
+        soil.aqueous[0].ammonium_non_band * carriers.soil_shared_water_before_m3;
+
+    // Manually replicate the OLD (pre-fix) exact-zero-only guard's basis to
+    // prove it manufactures a fake mass swing: the pre-fix `calculate` used
+    // the raw near-zero carrier directly (since it is `> 0`) instead of
+    // substituting the dry reference.
+    const old_source_amount_mol = surface.cells[0].ammonium_mol_per_m3 * near_zero_raw_carrier;
+    try std.testing.expect(old_source_amount_mol / true_before_mol < 1.0e-6);
+
+    try transferSurfaceFractionToSoil(&surface, &soil, 0, 0, carriers, false, 1);
+
+    // NEW (fixed) behavior: total ammonium mass is conserved to roundoff
+    // across the transfer, because the widened guard substitutes the dry
+    // reference for the near-zero raw carrier instead of manufacturing a
+    // near-total fake mass loss.
+    const after_mol = surface.cells[0].ammonium_mol_per_m3 * surface.dry_reference_water_m3[0] +
+        soil.aqueous[0].ammonium_non_band * carriers.soil_shared_water_after_m3;
+    try std.testing.expectApproxEqAbs(true_before_mol, after_mol, 1e-12);
+    try std.testing.expectEqual(@as(f64, 0), surface.cells[0].ammonium_mol_per_m3);
+    try std.testing.expectEqual(@as(f64, 8), soil.aqueous[0].ammonium_non_band);
 }
