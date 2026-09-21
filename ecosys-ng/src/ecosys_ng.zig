@@ -6528,6 +6528,13 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
     };
     try writeAcceptedHourOutputs(driver_context, timeline_state, &accepted_output_context);
     if (timeline_state.execution_journal) |journal| try journal.accept();
+    // issue-078 (2026-09-21, second experiment): bisect trace, placed after
+    // `driver_context.executed_weather_hours.*` has already incremented
+    // (line above) for the hour that just completed -- so this call's own
+    // `hour` label is one ahead of the hour whose pipeline just finished
+    // (matching this issue's `+1` label convention applied to the
+    // POST-increment counter). No-op outside the gated window.
+    try diagnostics.traceIssue078SoilPoreOverfill(driver_context.hourly_science_context.*, "end_of_accept_hour_and_publish_post_increment");
 }
 
 /// Prepares irrigation, calendars, material caches, hourly ledgers, and the
@@ -6712,6 +6719,12 @@ noinline fn prepareAcceptedHourStorageAndLedgers(driver_context: anytype, advanc
             .soil_layer_capacity = driver_context.state.*.soil_layer_capacity,
         },
     );
+    // issue-078 (2026-09-21, second experiment): bisect between the end of
+    // the PREVIOUS hour's `finalizeRedistAndLedgers` (already traced, and
+    // shown clean) and this hour's own `refreshAcceptedHour` entry check
+    // (where the failure is raised) -- narrowly gated, no-op outside the
+    // hour window.
+    try diagnostics.traceIssue078SoilPoreOverfill(driver_context.hourly_science_context.*, "start_of_prepare_accepted_hour_storage_before_refresh");
     // HOUR1 3656--3715: accepted prior-hour tillage, erosion and
     // organic changes become constitutive soil material at the
     // next fixed one-hour boundary. The refresh stages every

@@ -127,6 +127,15 @@ pub const Properties = struct {
     /// layer. It is populated from the boundary equations themselves, never
     /// reconstructed from the accepted storage endpoint.
     boundary_water_exchange_m3_per_layer_per_step: ?[]f64 = null,
+    /// issue-078 (2026-09-21): global soil-layer index to gate a temporary,
+    /// narrowly-scoped diagnostic trace of `residualAt`'s entry-overfill
+    /// check and `applyMechanicalFreezingDisplacement`'s (the WATSUB vertical
+    /// displacement prepass) per-face relief for that layer. `null` is a
+    /// no-op, matching the sibling `diagnostic_trace_layer_index` convention
+    /// already used by `vapor_solver.Options`/`heat_solver.Options`/
+    /// `phase_solver.Options`. Production leaves this null except for the one
+    /// narrow hour window this issue gates its own trace to.
+    diagnostic_trace_layer_index: ?usize = null,
 };
 
 pub const Options = struct {

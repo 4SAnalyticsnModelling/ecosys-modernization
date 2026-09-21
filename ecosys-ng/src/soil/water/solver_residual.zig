@@ -80,6 +80,34 @@ fn applyMechanicalFreezingDisplacement(
         group_flux.applyConservativeFlux(target[0..cells], source, destination, matrix_flux);
         micro_fluxes[face_index] += matrix_flux;
 
+        // issue-078 (2026-09-21): a narrowly-gated, temporary trace of the
+        // WATSUB vertical-displacement mechanical prepass's own per-face
+        // relief amount. `matrix_excess` is the DESTINATION's signed pore
+        // deficit (negative == over capacity); `requested_matrix` is the
+        // donor-bounded relief the prepass computes for it;
+        // `matrix_flux` is that request after this face's own
+        // source/destination availability limiting. This prepass only ever
+        // relieves the DESTINATION side by moving liquid up into the
+        // SOURCE side (see `mechanicalFreezingDisplacementM3`'s doc
+        // comment) -- it never checks whether the SOURCE itself is over
+        // capacity. A no-op unless `properties.diagnostic_trace_layer_index`
+        // is set, which only this issue's own bounded rerun does.
+        if (!builtin.is_test) if (properties.diagnostic_trace_layer_index) |trace_index|
+            if (source == trace_index or destination == trace_index)
+                std.log.info(
+                    "TEMP_DIAGNOSTIC issue-078 mechanical prepass (matrix): trace_index={d} face_source={d} face_destination={d} destination_excess_pore_volume_m3={e} requested_matrix_m3={e} matrix_flux_m3={e} source_liquid_after_flux_m3={e} destination_liquid_after_flux_m3={e}",
+                    .{
+                        trace_index,
+                        source,
+                        destination,
+                        matrix_excess,
+                        requested_matrix,
+                        matrix_flux,
+                        target[source],
+                        target[destination],
+                    },
+                );
+
         if (grid.macropore_pore_capacity_m3[source] <= 0 or
             grid.macropore_pore_capacity_m3[destination] <= 0)
             continue;
@@ -158,6 +186,26 @@ pub fn residualAt(grid: *const grid_module.GridState, faces: []const group_types
         // excursions that manufacture additional overfill.
         const matrix_entry_ceiling = try group_flux.acceptedEntryLiquidCeilingM3(grid.matrix_pore_capacity_m3[cell], base[cell], grid.matrix_ice_water_m3[cell]);
         const macropore_entry_ceiling = try group_flux.acceptedEntryLiquidCeilingM3(grid.macropore_pore_capacity_m3[cell], base[cells + cell], grid.macropore_ice_water_m3[cell]);
+        // issue-078 (2026-09-21): a narrowly-gated, temporary trace of this
+        // cell's own hour-entry state -- the accepted `base[cell]` water
+        // equivalent against the capacity `runtime_material_refresh.zig`'s
+        // own hour-boundary check validated it against, plus the derived
+        // entry overfill (positive == already over capacity entering this
+        // hour's nonlinear solve). A no-op unless
+        // `properties.diagnostic_trace_layer_index` is set.
+        if (!builtin.is_test) if (properties.diagnostic_trace_layer_index) |trace_index|
+            if (cell == trace_index)
+                std.log.info(
+                    "TEMP_DIAGNOSTIC issue-078 entry ceiling/overfill: trace_index={d} matrix_pore_capacity_m3={e} base_matrix_liquid_m3={e} matrix_ice_water_m3={e} matrix_entry_ceiling_m3={e} matrix_entry_overfill_m3={e}",
+                    .{
+                        trace_index,
+                        grid.matrix_pore_capacity_m3[cell],
+                        base[cell],
+                        grid.matrix_ice_water_m3[cell],
+                        matrix_entry_ceiling,
+                        base[cell] - grid.matrix_pore_capacity_m3[cell],
+                    },
+                );
         if (trial[cell] > matrix_entry_ceiling + group_hydraulics.poreCapacityRoundoffToleranceM3(matrix_entry_ceiling) or
             trial[cells + cell] > macropore_entry_ceiling + group_hydraulics.poreCapacityRoundoffToleranceM3(macropore_entry_ceiling)) return error.SoilWaterCandidateExceedsPoreCapacity;
     }

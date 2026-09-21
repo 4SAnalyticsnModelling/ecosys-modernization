@@ -481,8 +481,10 @@ pub fn finalizeRedistAndLedgers(
         context.soil_organic_carbon_change_g_c_per_h,
     );
     try diagnostics.traceStageBoundaryLayer0Carbon(context, "before_geometry_disturbance_finalize");
+    try diagnostics.traceIssue078SoilPoreOverfill(context, "before_geometry_disturbance_finalize");
     try geometry_disturbance.finalize(context);
     try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_geometry_disturbance_finalize");
+    try diagnostics.traceIssue078SoilPoreOverfill(context, "after_geometry_disturbance_finalize");
     // REDIST HEATIN precipitation term. Publish only after every hourly
     // process above has accepted its state. Rainfall already includes the
     // runtime irrigation addition; using the pre-routing atmospheric depths

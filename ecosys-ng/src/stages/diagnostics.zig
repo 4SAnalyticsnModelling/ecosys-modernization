@@ -283,6 +283,51 @@ pub fn traceStageBoundaryLayer0Carbon(context: anytype, comptime stage: []const 
     );
 }
 
+/// issue-078 (2026-09-21): a narrowly-gated, temporary trace of cell 0's own
+/// layer 0/1/2 matrix pore occupancy vs. capacity, bracketing the end-of-hour
+/// REDIST geometry/relayering transaction (`geometry_disturbance.finalize`,
+/// which owns `soil_profile_relayering.applyEndOfHourGeometry` ->
+/// `heat_layer_remap.transferLayerFractions`). This issue's diagnosis
+/// hypothesizes that layer 0's hour-entry overfill has no relief path in the
+/// WATSUB vertical-displacement mechanical prepass (it only ever relieves a
+/// DEEPER layer by moving liquid UP into the layer above, never the reverse),
+/// so any residual overfill still on layer 0 when this stage boundary is
+/// reached is exactly what `transferLayerFractions`'s fx-weighted extensive
+/// transfer can carry one layer deeper (layer 1), matching
+/// `audit/issues/issue-078-...md`'s transmission hypothesis. Called
+/// immediately before and after `geometry_disturbance.finalize` (see the two
+/// call sites in `hourly_vegetation.zig`, alongside the existing
+/// `traceStageBoundaryLayer0Carbon` calls), so the before/after difference at
+/// each layer isolates exactly what this one stage moved. Gated to
+/// `[3248, 3254]`, cell 0, layers 0-2 only -- a no-op everywhere else,
+/// matching this session's established `DRY_CARRIER_TRACE`/`TEMP_DIAGNOSTIC`
+/// hour-window convention.
+pub fn traceIssue078SoilPoreOverfill(context: anytype, comptime stage: []const u8) !void {
+    if (comptime @import("builtin").is_test) return;
+    const hour = context.executed_weather_hours.* + 1;
+    if (hour < 3248 or hour > 3254) return;
+    if (context.grid.cell_count == 0) return;
+    for ([_]usize{ 0, 1, 2 }) |layer_offset| {
+        const index = context.grid.layerIndex(0, layer_offset) catch continue;
+        const capacity_m3 = context.grid.matrix_pore_capacity_m3[index];
+        const liquid_m3 = context.grid.matrix_liquid_water_m3[index];
+        const ice_m3 = context.grid.matrix_ice_water_m3[index];
+        std.log.info(
+            "TEMP_DIAGNOSTIC issue-078 pore overfill stage boundary: stage={s} hour={d} cell=0 layer={d} index={d} matrix_pore_capacity_m3={e} matrix_liquid_water_m3={e} matrix_ice_water_m3={e} matrix_overfill_m3={e}",
+            .{
+                stage,
+                hour,
+                layer_offset,
+                index,
+                capacity_m3,
+                liquid_m3,
+                ice_m3,
+                liquid_m3 - capacity_m3,
+            },
+        );
+    }
+}
+
 /// ISSUE-065 (fourteenth addendum): the thirteenth addendum localized
 /// phosphorus's entire hour-2,894 drop to inside `convergeHourlySoilChemistry`'s
 /// scratch block, then narrowed the search to `updateFertilizerBandGeometry`
