@@ -33,12 +33,19 @@ test "model hour driver binds canonical endpoints and distinct consumer clocks" 
     try std.testing.expect(std.mem.indexOf(u8, driver_source, "if (accepted_context.timestamp.*.hour == 24) 23 else") == null);
 }
 
+// issue-076: these helpers search an `@embedFile`'d copy of this repository's
+// own driver source, so on a CRLF checkout a needle written with `\n` cannot
+// match. Scan CR-insensitively instead of assuming the checkout's line endings.
+const source_scan = @import("../../core/source_scan.zig");
+
 fn requiredIndex(needle: []const u8) !usize {
-    return std.mem.indexOf(u8, driver_source, needle) orelse error.MissingOutputTransactionIntegration;
+    return source_scan.indexOfIgnoringCarriageReturns(driver_source, needle) orelse
+        error.MissingOutputTransactionIntegration;
 }
 
 fn requiredIndexIn(source: []const u8, needle: []const u8) !usize {
-    return std.mem.indexOf(u8, source, needle) orelse error.MissingOutputTransactionIntegration;
+    return source_scan.indexOfIgnoringCarriageReturns(source, needle) orelse
+        error.MissingOutputTransactionIntegration;
 }
 
 fn assertEveryOccurrenceBetween(needle: []const u8, first: usize, last: usize, expected_count: usize) !void {

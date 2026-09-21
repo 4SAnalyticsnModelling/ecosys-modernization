@@ -13,6 +13,7 @@ pub const numerics = @import("core/numerics.zig");
 pub const legacy_water_negligible_floor = @import("core/legacy_water_negligible_floor.zig");
 pub const ice_units = @import("core/ice_units.zig");
 pub const iteration_control = @import("core/iteration_control.zig");
+pub const source_scan = @import("core/source_scan.zig");
 pub const checkpoint = @import("io/checkpoint/checkpoint.zig");
 pub const checkpoint_manifest = @import("io/checkpoint/manifest.zig");
 pub const checkpoint_schedule = @import("io/checkpoint/schedule.zig");

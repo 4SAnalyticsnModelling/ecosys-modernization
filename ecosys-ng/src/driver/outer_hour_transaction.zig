@@ -1,4 +1,5 @@
 const std = @import("std");
+const source_scan = @import("../core/source_scan.zig");
 const config_module = @import("../core/config.zig");
 const checkpoint = @import("../io/checkpoint/checkpoint.zig");
 const bundle_reader = @import("../io/checkpoint/bundle_reader.zig");
@@ -1527,7 +1528,12 @@ test "production outer hour explicitly owns soil gas and pending surface ledger"
         ".pending_surface_gas_ledger = driver_context.pending_surface_gas_ledger.*",
         ".tillage_local_activity = &driver_context.tillage_local_activity.*",
         ".dry_branch_executions = dry_branch_executions_owner",
-    }) |binding| try std.testing.expectEqual(@as(usize, 1), std.mem.count(u8, advance_phase, binding));
+        // issue-076: item 2 embeds a `\n`, so on a CRLF checkout a plain
+        // `std.mem.count` reported 0 for a binding that is present and correct.
+    }) |binding| try std.testing.expectEqual(
+        @as(usize, 1),
+        source_scan.countIgnoringCarriageReturns(advance_phase, binding),
+    );
     const weather_next = std.mem.indexOf(u8, advance_phase, "try stream.next()") orelse return error.MissingWeatherMaterialization;
     const transaction_begin = std.mem.indexOf(u8, advance_phase, "driver_context.outer_hour_transaction_workspace.*.begin(") orelse return error.MissingOuterHourTransaction;
     const outer_defer = std.mem.indexOfPos(u8, advance_phase, transaction_begin, "defer outer_hour_transaction.deinit();") orelse return error.MissingOuterHourDefer;

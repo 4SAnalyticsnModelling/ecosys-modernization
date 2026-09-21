@@ -21,6 +21,9 @@ const group_misc = @import("solver_misc.zig");
 const group_residual = @import("solver_residual.zig");
 const group_solve = @import("solver_solve.zig");
 const group_types = @import("solver_types.zig");
+// issue-076: this checkout is CRLF, so `\n`-only needles cannot match the
+// production text these assertions read back from disk.
+const source_scan = @import("../../core/source_scan.zig");
 
 fn readSolverSolveSource() ![]u8 {
     return std.Io.Dir.cwd().readFileAlloc(
@@ -3620,11 +3623,10 @@ test "final conservation refinement retains adjacent endpoints while free coordi
         refinement,
         "priceRepresentableNewtonDirection(",
     ) == 2);
-    try std.testing.expect(std.mem.indexOf(
-        u8,
+    try std.testing.expect(source_scan.containsIgnoringCarriageReturns(
         refinement,
         "enthalpy_endpoint_mask,\n                    accepted_endpoint_proof_mask,",
-    ) != null);
+    ));
     try std.testing.expect(std.mem.count(
         u8,
         refinement,
@@ -3742,8 +3744,7 @@ test "heat primary Newton yields only to measured recovery signals" {
     // full merit. Signed energy gets a topology-independent bounded dense
     // path only where the sequential-column operator is unavailable; the
     // legacy K-linearized branch remains first only when K governs.
-    const enthalpy_dense = std.mem.indexOf(
-        u8,
+    const enthalpy_dense = source_scan.indexOfIgnoringCarriageReturns(
         primary,
         "if (use_dense_newton and\n                energy_merit_dominates and",
     ) orelse return error.MissingHeatDenseEnthalpyNewton;
@@ -3752,8 +3753,7 @@ test "heat primary Newton yields only to measured recovery signals" {
         primary,
         "if (use_dense_newton and !energy_merit_dominates) {",
     ) orelse return error.MissingHeatDenseNewton;
-    const directional_gate = std.mem.indexOf(
-        u8,
+    const directional_gate = source_scan.indexOfIgnoringCarriageReturns(
         primary,
         "if (energy_merit_dominates)\n                    break :temperature_residual_directional;",
     ) orelse return error.MissingHeatDirectionalMeritGate;
@@ -3775,11 +3775,10 @@ test "transition-optimized endpoint discovery full-scans before recovery or ceil
     // iteration disables optimization before the hard ceiling is checked.
     const source = try readSolverSolveSource();
     defer std.testing.allocator.free(source);
-    try std.testing.expect(std.mem.indexOf(
-        u8,
+    try std.testing.expect(source_scan.containsIgnoringCarriageReturns(
         source,
         "!force_full_endpoint_scan and\n                iteration + 1 < options.max_iterations",
-    ) != null);
+    ));
     const retry_guard = std.mem.indexOf(
         u8,
         source,
@@ -3792,16 +3791,14 @@ test "transition-optimized endpoint discovery full-scans before recovery or ceil
         "// RECOVERY.",
     ) orelse return error.MissingAndersonRecovery;
     const barrier = source[retry_guard..recovery];
-    try std.testing.expect(std.mem.indexOf(
-        u8,
+    try std.testing.expect(source_scan.containsIgnoringCarriageReturns(
         barrier,
         "endpoint_discovery_optimization_skipped and\n            !force_full_endpoint_scan",
-    ) != null);
-    try std.testing.expect(std.mem.indexOf(
-        u8,
+    ));
+    try std.testing.expect(source_scan.containsIgnoringCarriageReturns(
         barrier,
         "force_full_endpoint_scan = true;\n            continue;",
-    ) != null);
+    ));
     const full_scan = std.mem.indexOf(
         u8,
         barrier,
@@ -3826,16 +3823,14 @@ test "transition-optimized endpoint discovery full-scans before recovery or ceil
         "terminal_reason = .diverged;",
     ) orelse return error.MissingHeatDivergenceDeferral;
     const divergence_barrier = source[divergence_watch..divergence_defer];
-    try std.testing.expect(std.mem.indexOf(
-        u8,
+    try std.testing.expect(source_scan.containsIgnoringCarriageReturns(
         divergence_barrier,
         "endpoint_discovery_optimization_skipped and\n                        !force_full_endpoint_scan",
-    ) != null);
-    try std.testing.expect(std.mem.indexOf(
-        u8,
+    ));
+    try std.testing.expect(source_scan.containsIgnoringCarriageReturns(
         divergence_barrier,
         "force_full_endpoint_scan = true;\n                        continue;",
-    ) != null);
+    ));
 
     const exhausted_audit = std.mem.indexOf(
         u8,
@@ -4193,16 +4188,17 @@ test "rejected mixed endpoint repricing preserves the current signed MJ vector" 
         "if (committed_neighbor) continue;",
     ) orelse return error.MissingMixedEndpointRepricingCloseout;
     const branch = source[branch_start..branch_end];
-    try std.testing.expect(std.mem.indexOf(
-        u8,
+    try std.testing.expect(source_scan.containsIgnoringCarriageReturns(
         branch,
         "probe_residual,\n                                        topology_lower,\n                                        topology_diagonal,",
-    ) != null);
-    try std.testing.expect(std.mem.indexOf(
-        u8,
+    ));
+    // This negative assertion was previously passing for the wrong reason: on a
+    // CRLF checkout its `\n` needle could not match regardless of what the
+    // production text said, so it proved nothing (issue-076).
+    try std.testing.expect(!source_scan.containsIgnoringCarriageReturns(
         branch,
         "probe_residual,\n                                        accelerated_residual,\n                                        topology_diagonal,",
-    ) == null);
+    ));
 }
 
 test "exact enthalpy Anderson promotion is unpublished until a Newton retry" {

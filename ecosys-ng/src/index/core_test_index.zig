@@ -56,5 +56,6 @@ test {
     _ = ecosys.numerics;
     _ = ecosys.options;
     _ = ecosys.simulation_timeline;
+    _ = ecosys.source_scan;
     _ = ecosys.execution_evidence;
 }

@@ -606,7 +606,10 @@ test "production binds WTHR fire to root and canopy before one-shot inoculum pub
     const advance_phase = production_source[advance_start..timeline_start];
     const transaction = std.mem.indexOf(u8, advance_phase, "driver_context.outer_hour_transaction_workspace.*.begin(") orelse return error.MissingOuterHourTransaction;
     const prepare = std.mem.indexOf(u8, advance_phase, "try prepareHourlyScience(driver_context,") orelse return error.MissingHourlyPreparationCall;
-    const science = std.mem.indexOfPos(u8, advance_phase, prepare, "executeHourlyScience(\n        driver_context.hourly_science_context.*") orelse return error.MissingHourlyScienceCall;
+    // issue-076: this needle embeds a `\n`, so on a CRLF checkout the plain
+    // `indexOfPos` failed and reported a missing call that is in fact present
+    // and correctly ordered. Scan CR-insensitively.
+    const science = @import("../../core/source_scan.zig").indexOfPosIgnoringCarriageReturns(advance_phase, prepare, "executeHourlyScience(\n        driver_context.hourly_science_context.*") orelse return error.MissingHourlyScienceCall;
     const post_science = std.mem.indexOfPos(u8, advance_phase, science, "try postScienceAccounting(driver_context,") orelse return error.MissingPostScienceCall;
     try std.testing.expect(transaction < prepare);
     try std.testing.expect(prepare < science);
