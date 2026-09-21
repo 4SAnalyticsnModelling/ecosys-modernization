@@ -540,6 +540,12 @@ noinline fn solveControlledImpl(
     // a snapshot taken while `current` and `residual` still correspond.
     const recovery_state = try allocator.alloc(f64, components);
     defer allocator.free(recovery_state);
+    // issue-068 (constrained-Newton backtracking round): seed with the
+    // initial iterate so a committable-gate check at iteration 0 (were one
+    // ever to occur) reads a well-defined "no step yet taken" base point
+    // instead of undefined allocator memory, rather than requiring a special
+    // case in the backtracking trigger below.
+    @memcpy(recovery_state, current);
     var history_count: u8 = 0;
     var anderson_recovery_steps: u16 = 0;
     var watch: ResidualWatch = .{};
@@ -574,7 +580,13 @@ noinline fn solveControlledImpl(
         const retrying_newton_after_anderson = newton_retry_required;
         newton_retry_required = false;
         try residualAt(grid, properties, base, current, target, residual, scratch, trial_heat, trial_exchange, trial_displacement);
-        const norm = try scaledNorm(base, current, residual, options);
+        // issue-068 (constrained-Newton backtracking round): `var`, not
+        // `const` -- the backtracking fallback below may replace `current`/
+        // `residual` with a damped candidate and must report that
+        // candidate's own residual, not the stale pre-damping value. Every
+        // read of `norm` before that fallback can possibly run is unaffected
+        // (the fallback only ever narrows, never widens, what is accepted).
+        var norm = try scaledNorm(base, current, residual, options);
         // Only accepted Newton promotions extend the contraction history.
         // Anderson states reset it, while a rejected speculative recovery is
         // not repriced until Newton has changed the trajectory.
@@ -590,7 +602,7 @@ noinline fn solveControlledImpl(
         }
         var phase_energy_accepted = false;
         const norm_admissible_and_not_retrying = !retrying_newton_after_anderson and norm <= 1;
-        const committable = norm_admissible_and_not_retrying and
+        var committable = norm_admissible_and_not_retrying and
             committableState(grid, current, properties.freeze_thaw.ice_density_megagrams_per_m3);
         // issue-068 (seventh-round follow-up): only characterize the exact
         // window this round is asking about -- the residual is already
@@ -598,6 +610,44 @@ noinline fn solveControlledImpl(
         // never fires for an ordinary committable iteration or hour.
         if (norm_admissible_and_not_retrying and !committable) {
             logCommittableStateDiagnosticIfGated(options, iteration, grid, current, properties.freeze_thaw.ice_density_megagrams_per_m3);
+            // issue-068 (constrained-Newton backtracking round): a standard
+            // damped/backtracking line search for the exact mechanism the
+            // eighth round decisively localized -- the residual is already
+            // admissible, `committableState` still rejects `current`, and
+            // (confirmed by re-running every nonnegativity/pore-capacity
+            // check unmodified, never bypassed or relaxed) the ONLY reason
+            // is the endpoint-temperature physical-domain check. Retreats
+            // the exact step that produced `current` from `recovery_state`
+            // (the pre-step iterate it was taken from, still holding last
+            // iteration's snapshot at this point -- `recovery_state` is not
+            // overwritten for this iteration until after this block) by a
+            // fixed halving factor, for a small fixed attempt budget, until
+            // a scaled candidate is simultaneously residual-admissible and
+            // fully committable. This branch is reached only when
+            // `committable` is already false; it can never engage, and
+            // changes nothing at all, whenever the full step already
+            // succeeds -- the overwhelming majority of cells/hours.
+            if (feasibleExceptTemperatureDomain(grid, current, properties.freeze_thaw.ice_density_megagrams_per_m3)) {
+                if (try attemptTemperatureDomainBacktracking(
+                    grid,
+                    properties,
+                    base,
+                    recovery_state,
+                    current,
+                    residual,
+                    target,
+                    scratch,
+                    trial_heat,
+                    trial_exchange,
+                    trial_displacement,
+                    candidate,
+                    candidate_residual,
+                    options,
+                )) |damped_norm| {
+                    norm = damped_norm;
+                    committable = true;
+                }
+            }
         }
         if (committable) {
             const check = try evaluatePhaseEnergyConservation(base, current, trial_displacement, properties, options);
@@ -2092,6 +2142,108 @@ fn committableState(grid: *const grid_module.GridState, state: []const f64, ice_
             return false;
     }
     return true;
+}
+
+// issue-068 (constrained-Newton backtracking round): the exact same
+// nonnegativity/pore-capacity checks as `committableState` above, WITH THE
+// SAME FLOOR/TOLERANCE HANDLING, minus only the final endpoint-temperature
+// physical-domain check. Every failing branch here is one `committableState`
+// itself also rejects on, unmodified. Used only to prove -- before the
+// backtracking fallback below is allowed to engage -- that a rejection is
+// attributable exclusively to the temperature-domain check, never to the
+// nonnegativity/pore-capacity gate this issue chain's contract explicitly
+// forbids touching. Returning `true` here does not mean `state` is
+// committable; it means `committableState`'s only possible objection to
+// `state` is the temperature band.
+fn feasibleExceptTemperatureDomain(grid: *const grid_module.GridState, state: []const f64, ice_density_megagrams_per_m3: f64) bool {
+    const cells = grid.layer_count;
+    if (state.len != 6 * cells) return false;
+    for (0..cells) |cell| {
+        const layer_scale = grid.matrix_pore_capacity_m3[cell] +
+            grid.macropore_pore_capacity_m3[cell];
+        _ = derivedAirVolumeM3(
+            grid.matrix_pore_capacity_m3[cell],
+            state[cell],
+            state[2 * cells + cell],
+            ice_density_megagrams_per_m3,
+            layer_scale,
+        ) catch return false;
+        _ = derivedAirVolumeM3(
+            grid.macropore_pore_capacity_m3[cell],
+            state[3 * cells + cell],
+            state[4 * cells + cell],
+            ice_density_megagrams_per_m3,
+            layer_scale,
+        ) catch return false;
+        if (!std.math.isFinite(state[1 * cells + cell]) or state[1 * cells + cell] < 0 or
+            !std.math.isFinite(state[5 * cells + cell]) or state[5 * cells + cell] <= 0)
+            return false;
+    }
+    return true;
+}
+
+/// issue-068 (constrained-Newton backtracking round): standard damped/
+/// backtracking line search. `full_step_state` is the trial iterate that
+/// `committableState` has already rejected for the temperature-domain check
+/// specifically (the caller has already confirmed, via
+/// `feasibleExceptTemperatureDomain`, that no other check is implicated).
+/// `base_point` is the pre-step iterate `full_step_state` was computed from.
+/// Retries the identical step `base_point -> full_step_state`, scaled by a
+/// fixed halving factor, retreating toward `base_point`, for a small fixed
+/// attempt budget -- a textbook box-constrained-Newton backtracking line
+/// search, not a new solver architecture: it changes only how far along an
+/// already-chosen direction the solver steps, never what direction is
+/// chosen, what residual is solved, or what counts as converged.
+///
+/// `damped_state`/`damped_residual` are caller-owned scratch of the same
+/// length as `full_step_state`/`full_step_residual` (in production, the
+/// same `candidate`/`candidate_residual` buffers the caller's own Newton
+/// fallbacks below use -- safe to borrow here because every one of those
+/// fallbacks fully overwrites both before its own first read, matching the
+/// existing pattern already used throughout this solve loop).
+///
+/// On success, overwrites `full_step_state`/`full_step_residual` in place
+/// with the accepted damped candidate and returns its scaled residual norm.
+/// On failure (attempt budget exhausted without finding a scaled candidate
+/// that is both residual-admissible, `norm<=1`, and fully `committableState`
+/// -- including, unmodified, the nonnegativity/pore-capacity checks this
+/// function never relaxes), returns `null` and leaves both buffers
+/// byte-for-byte unchanged, so the caller's existing fallback cascade and
+/// eventual `SoilPhaseSolverStagnated`/`SoilPhaseSolverDidNotConverge` exit
+/// engage exactly as they already do when this function is never called.
+fn attemptTemperatureDomainBacktracking(
+    grid: *const grid_module.GridState,
+    properties: Properties,
+    base: []const f64,
+    base_point: []const f64,
+    full_step_state: []f64,
+    full_step_residual: []f64,
+    target: []f64,
+    scratch: []f64,
+    trial_heat: []f64,
+    trial_exchange: []f64,
+    trial_displacement: DisplacementOutputs,
+    damped_state: []f64,
+    damped_residual: []f64,
+    options: Options,
+) !?f64 {
+    const max_attempts: u8 = 6;
+    var factor: f64 = 0.5;
+    var attempt: u8 = 0;
+    while (attempt < max_attempts) : (attempt += 1) {
+        for (damped_state, base_point, full_step_state) |*damped, from, to| damped.* = from + factor * (to - from);
+        if (residualAt(grid, properties, base, damped_state, target, damped_residual, scratch, trial_heat, trial_exchange, trial_displacement)) |_| {
+            if (scaledNorm(base, damped_state, damped_residual, options)) |damped_norm| {
+                if (damped_norm <= 1 and committableState(grid, damped_state, properties.freeze_thaw.ice_density_megagrams_per_m3)) {
+                    @memcpy(full_step_state, damped_state);
+                    @memcpy(full_step_residual, damped_residual);
+                    return damped_norm;
+                }
+            } else |_| {}
+        } else |_| {}
+        factor *= 0.5;
+    }
+    return null;
 }
 
 fn state_update(grid: *grid_module.GridState, state: []const f64, ice_density_megagrams_per_m3: f64) !void {
@@ -3997,4 +4149,128 @@ test "phase Anderson recovery leaves the iterate alone when it cannot improve it
     try second_fixture.residualAtCurrent();
     try std.testing.expect(!attemptAndersonRecovery(second_fixture.context(options), second_fixture.cells, second_fixture.current, second_fixture.residual, second_fixture.previous_state, second_fixture.previous_residual, second_fixture.previous_state, second_fixture.previous_residual, 1, achieved_norm));
     try std.testing.expectEqualSlices(f64, &second_entry, second_fixture.current);
+}
+
+test "issue-068 (backtracking round): feasibleExceptTemperatureDomain isolates the temperature check from every nonnegativity/pore-capacity check" {
+    // Mirrors the sixth round's own `committableState` test fixture exactly
+    // (same grid, same in-domain state, same out-of-domain temperature
+    // value, 452.64 K -- one of the fifth round's own captured hour-2895
+    // offending values) and extends it to prove the isolation property the
+    // backtracking trigger depends on: this helper agrees with
+    // `committableState` on every failure EXCEPT the temperature-domain one,
+    // where it must report `true` (feasible except for that one check) so
+    // the caller knows it is safe to engage backtracking; for every other
+    // failure it must agree with `committableState` and report `false`,
+    // proving the nonnegativity/pore-capacity gate is never bypassed.
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(
+        .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 },
+        .{ .worker_threads = 1, .tile_cells = 1 },
+        .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 },
+    );
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.matrix_pore_capacity_m3[0] = 2;
+    grid.macropore_pore_capacity_m3[0] = 1;
+
+    const in_domain = [_]f64{ 0.75, 0.015625, 0.25, 0.25, 0.125, 271.25 };
+    try std.testing.expect(committableState(&grid, &in_domain, 0.917));
+    try std.testing.expect(feasibleExceptTemperatureDomain(&grid, &in_domain, 0.917));
+
+    var temperature_only_violation = in_domain;
+    temperature_only_violation[5] = 452.64;
+    try std.testing.expect(!committableState(&grid, &temperature_only_violation, 0.917));
+    try std.testing.expect(feasibleExceptTemperatureDomain(&grid, &temperature_only_violation, 0.917));
+
+    // Negative vapor: `committableState` rejects on the nonnegativity check,
+    // never the temperature check (which still passes here) -- this
+    // function must also report `false`, never bypassing that gate.
+    var vapor_violation = in_domain;
+    vapor_violation[1] = -1.0e-6;
+    try std.testing.expect(!committableState(&grid, &vapor_violation, 0.917));
+    try std.testing.expect(!feasibleExceptTemperatureDomain(&grid, &vapor_violation, 0.917));
+
+    // Matrix pore-capacity overfill (liquid alone exceeds the 2 m3
+    // capacity): `committableState` rejects on the pore-capacity check, and
+    // this function must also report `false`.
+    var pore_capacity_violation = in_domain;
+    pore_capacity_violation[0] = 3.0;
+    try std.testing.expect(!committableState(&grid, &pore_capacity_violation, 0.917));
+    try std.testing.expect(!feasibleExceptTemperatureDomain(&grid, &pore_capacity_violation, 0.917));
+}
+
+test "issue-068 (backtracking round): backtracking exhausts its attempt budget and leaves the caller's buffers untouched when no damped step is committable" {
+    // A deterministic, fully-controlled proof of the fallback path required
+    // whenever damping cannot repair the candidate (this task's own
+    // requirement that a non-miracle outcome must still fall through
+    // correctly, not regress). `base_point` (380 K) and `full_step_state`
+    // (519.16 K, one of the eighth round's own captured hour-2895 values)
+    // are BOTH already above the 373.15 K ceiling, so every convex
+    // combination the halving schedule can produce also stays above it --
+    // `committableState` is therefore guaranteed to keep rejecting on the
+    // temperature check for the entire fixed attempt budget, regardless of
+    // how the mass-side residual behaves. This proves the function gives up
+    // cleanly (returns `null`) rather than looping unboundedly or accepting
+    // an infeasible candidate, and that it leaves both the state and
+    // residual buffers it was given byte-for-byte unchanged on that path --
+    // exactly what lets the caller fall through to its existing, unmodified
+    // `SoilPhaseSolverStagnated`/`SoilPhaseSolverDidNotConverge` exit.
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(
+        .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 },
+        .{ .worker_threads = 1, .tile_cells = 1 },
+        .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 },
+    );
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.matrix_pore_capacity_m3[0] = 2;
+    grid.macropore_pore_capacity_m3[0] = 1;
+
+    // A larger-than-default heat capacity, comfortably above this fixture's
+    // own liquid/ice heat-capacity contribution, so `residualAt` evaluates
+    // this state cleanly (the point under test is the domain gate, not the
+    // solid-heat-capacity input validation `residualAt` performs first).
+    var large_capacity = [_]f64{10};
+    var properties = testProperties();
+    properties.heat_capacity_megajoules_per_k = &large_capacity;
+    const base = [_]f64{ 0.75, 0.015625, 0.25, 0.25, 0.125, 380 };
+    const base_point = base;
+    var full_step_state = base;
+    full_step_state[5] = 519.16;
+    var full_step_residual = [_]f64{ 0, 0, 0, 0, 0, 0 };
+    const full_step_state_before = full_step_state;
+    const full_step_residual_before = full_step_residual;
+
+    var target: [6]f64 = undefined;
+    var scratch: [6]f64 = undefined;
+    var trial_heat = [_]f64{0};
+    var trial_exchange = [_]f64{0};
+    var displacement_storage: [5]f64 = undefined;
+    const displacement: DisplacementOutputs = .{
+        .matrix_liquid_water_m3 = displacement_storage[0..1],
+        .matrix_ice_water_equivalent_m3 = displacement_storage[1..2],
+        .macropore_liquid_water_m3 = displacement_storage[2..3],
+        .macropore_ice_water_equivalent_m3 = displacement_storage[3..4],
+        .advective_enthalpy_megajoules = displacement_storage[4..5],
+    };
+    var damped_state: [6]f64 = undefined;
+    var damped_residual: [6]f64 = undefined;
+
+    const result = try attemptTemperatureDomainBacktracking(
+        &grid,
+        properties,
+        &base,
+        &base_point,
+        &full_step_state,
+        &full_step_residual,
+        &target,
+        &scratch,
+        &trial_heat,
+        &trial_exchange,
+        displacement,
+        &damped_state,
+        &damped_residual,
+        .{ .max_iterations = 20 },
+    );
+    try std.testing.expect(result == null);
+    try std.testing.expectEqualSlices(f64, &full_step_state_before, &full_step_state);
+    try std.testing.expectEqualSlices(f64, &full_step_residual_before, &full_step_residual);
 }
