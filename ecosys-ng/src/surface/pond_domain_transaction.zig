@@ -13,6 +13,7 @@ const solute_transport_module = @import("../soil/solute/transport.zig");
 const aqueous_species_module = @import("../soil/solute/transport_species.zig");
 const aqueous_bridge = @import("../soil/solute/aqueous_transport_bridge.zig");
 const conservation_sidecar = @import("pond_conservation_sidecar.zig");
+const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
 
 const pond_base_changed_species = [_]aqueous_species_module.AqueousSpecies{
     .hydrogen,
@@ -355,6 +356,21 @@ pub fn apply(workspace: *Workspace, owners: Owners, inputs: Inputs) !void {
     // water/heat transfer changes their shared carrier. Publish those species
     // and dilute every unchanged transport-owned species without altering its
     // extensive amount.
+    //
+    // ISSUE-074 Finding B (most severe of the three call sites): this loop
+    // used to pass `grid.matrix_liquid_water_m3[destination]` straight
+    // through with no water-volume guard of any kind -- not even the
+    // exact-zero-only guard the other two call sites in this defect-class
+    // family had. `synchronizeCellAfterCarrierChange`'s own pre-issue-074
+    // `<= 0` guard therefore turned an ordinary fully-collapsed
+    // (exact-zero) pond-domain water carrier into a panic here via
+    // `catch unreachable`, and any near-zero-but-nonzero carrier was used
+    // raw. `legacyNegligibleWaterVolumeM3` supplies the same
+    // `ZEROS2`-equivalent floor this cell's own `carrierVolumes` above
+    // already derives from the identical `horizontal_cell_width_m *
+    // vertical_cell_width_m` footprint, so this call now substitutes
+    // `owners.soil_chemistry.dry_reference_water_m3[destination]` instead
+    // of erroring or diluting onto a spurious near-zero carrier.
     for (0..grid.cell_count) |cell| {
         if (!inputs.transitions.active[cell]) continue;
         const destination = cell * grid.soil_layer_capacity +
@@ -372,6 +388,9 @@ pub fn apply(workspace: *Workspace, owners: Owners, inputs: Inputs) !void {
                 .phosphate_non_band = inputs.phosphate_non_band_water_fraction_by_cell[cell],
                 .phosphate_band = inputs.phosphate_band_water_fraction_by_cell[cell],
             },
+            legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(
+                inputs.horizontal_cell_width_m[cell] * inputs.vertical_cell_width_m[cell],
+            ),
         ) catch unreachable;
     }
     @memcpy(owners.soil_properties.layer_thickness_m, owners.soil_geometry.layer_thickness_m);
@@ -472,6 +491,7 @@ test "pond carrier synchronization preserves untouched phosphate species" {
             .phosphate_non_band = 0.25,
             .phosphate_band = 0.75,
         },
+        0,
     );
 
     try std.testing.expectEqual(
@@ -489,5 +509,97 @@ test "pond carrier synchronization preserves untouched phosphate species" {
     try std.testing.expectEqual(
         @as(f64, 5),
         soil_chemistry.non_band_phosphate[0].dissolved_hpo4_mol_p_per_m3,
+    );
+}
+
+test "issue-074 Finding B: pond-domain-collapse carrier reconciliation no longer requires a manual water guard at this call site" {
+    // Before this fix, `apply()`'s loop passed `grid.matrix_liquid_water_m3
+    // [destination]` straight into `synchronizeCellAfterCarrierChange` with
+    // no guard of any kind (not even the exact-zero-only guard the other
+    // two call sites in this defect-class family had), wrapped in
+    // `catch unreachable`. An ordinary fully-collapsed pond-domain water
+    // carrier (exact zero, or a near-zero remainder) therefore either
+    // panicked (exact zero, via the removed `<= 0` guard's error) or, for a
+    // near-zero remainder, diluted every unchanged species onto a spurious
+    // near-zero carrier instead of the dry reference. This test calls the
+    // same function with this file's own `legacyNegligibleWaterVolumeM3`
+    // floor convention (`horizontal_cell_width_m * vertical_cell_width_m`,
+    // matching `carrierVolumes` above) and confirms it neither panics nor
+    // fabricates a mass swing at either degenerate water value.
+    var soil_chemistry = try soil_chemistry_module.State.init(std.testing.allocator, 1);
+    defer soil_chemistry.deinit();
+    var transport = try solute_transport_module.State.init(
+        std.testing.allocator,
+        1,
+        aqueous_species_module.AqueousSpecies.count,
+    );
+    defer transport.deinit();
+    const dry_reference_water_m3: f64 = 5.0e-3;
+    soil_chemistry.dry_reference_water_m3[0] = dry_reference_water_m3;
+    transport.water_volume_m3[0] = 1;
+    // `calcium_carbonate` is not in either changed-species list below, so it
+    // takes the "unchanged" (dilute-onto-the-new-carrier) path -- the same
+    // path every routine, non-collapsing hour exercises for the bulk of the
+    // transport-owned species.
+    transport.amount_mol[@intFromEnum(aqueous_species_module.AqueousSpecies.calcium_carbonate)] = 6;
+    soil_chemistry.aqueous[0].calcium_carbonate = 6;
+    // `carbonate` is in `pond_carbonate_changed_species`, so its chemistry
+    // concentration is authoritative input and its extensive amount is what
+    // gets republished onto the new carrier.
+    soil_chemistry.aqueous[0].carbonate = 9;
+    const horizontal_cell_width_m: f64 = 1;
+    const vertical_cell_width_m: f64 = 1;
+    const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(
+        horizontal_cell_width_m * vertical_cell_width_m,
+    );
+
+    // Exact-zero water carrier (a fully collapsed pond domain): substitutes
+    // the dry reference instead of panicking through `catch unreachable`.
+    try aqueous_bridge.synchronizeCellAfterCarrierChange(
+        &soil_chemistry,
+        &transport,
+        0,
+        0,
+        &pond_base_changed_species ++ pond_carbonate_changed_species,
+        aqueous_bridge.ZoneFractions{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 },
+        negligible_water_volume_m3,
+    );
+    try std.testing.expectEqual(dry_reference_water_m3, transport.water_volume_m3[0]);
+    try std.testing.expectApproxEqRel(
+        @as(f64, 6) / dry_reference_water_m3,
+        soil_chemistry.aqueous[0].calcium_carbonate,
+        1.0e-12,
+    );
+    try std.testing.expectApproxEqRel(
+        @as(f64, 9) * dry_reference_water_m3,
+        transport.amount_mol[@intFromEnum(aqueous_species_module.AqueousSpecies.carbonate)],
+        1.0e-12,
+    );
+
+    // Near-zero-but-nonzero remainder behaves identically, not like a real
+    // carrier.
+    transport.water_volume_m3[0] = dry_reference_water_m3;
+    transport.amount_mol[@intFromEnum(aqueous_species_module.AqueousSpecies.calcium_carbonate)] = 6;
+    soil_chemistry.aqueous[0].calcium_carbonate = 6;
+    soil_chemistry.aqueous[0].carbonate = 9;
+    try aqueous_bridge.synchronizeCellAfterCarrierChange(
+        &soil_chemistry,
+        &transport,
+        0,
+        1.0e-9,
+        &pond_base_changed_species ++ pond_carbonate_changed_species,
+        aqueous_bridge.ZoneFractions{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 },
+        negligible_water_volume_m3,
+    );
+    try std.testing.expectEqual(dry_reference_water_m3, transport.water_volume_m3[0]);
+    try std.testing.expectApproxEqRel(
+        @as(f64, 6) / dry_reference_water_m3,
+        soil_chemistry.aqueous[0].calcium_carbonate,
+        1.0e-12,
+    );
+    try std.testing.expectApproxEqRel(
+        @as(f64, 9) * dry_reference_water_m3,
+        transport.amount_mol[@intFromEnum(aqueous_species_module.AqueousSpecies.carbonate)],
+        1.0e-12,
     );
 }

@@ -51,11 +51,20 @@ pub fn validateCarrierVolumesScaled(
 /// degenerate layer's aqueous carbonate, geochemistry-ion, and phosphate
 /// species -- exactly the mechanism the census reads directly
 /// (`landscape_mass_inventory_phosphorus_ions.zig`'s `matrix_amounts`/
-/// `macro_amounts` come straight from this transport state). Note
-/// `importChemistry`/`synchronizeCellAfterCarrierChange` in this same file
-/// both already require strictly positive water and error otherwise; only
-/// this direction lacked an equivalent safeguard or substitution.
-fn exportCarrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_volume_m3: f64) f64 {
+/// `macro_amounts` come straight from this transport state).
+///
+/// ISSUE-074: the paragraph above used to assert that `importChemistry`/
+/// `synchronizeCellAfterCarrierChange` in this same file "already require
+/// strictly positive water and error otherwise" and therefore did not need
+/// this same substitution. That assertion was wrong: "requires strictly
+/// positive" (`<= 0` -> error) is not the same guarantee as "requires above
+/// the `ZEROS2` floor" -- a tiny-but-nonzero carrier passed both functions'
+/// old guards unchanged and was used raw, reproducing this exact defect
+/// shape (mirror-imaged: a near-zero divisor manufactures a spuriously huge
+/// concentration for `importChemistry`, instead of a spuriously small
+/// amount). Both now share this same helper, renamed from `exportCarrierM3`
+/// since it is no longer export-direction-only.
+fn carrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_volume_m3: f64) f64 {
     return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
 }
 
@@ -80,7 +89,7 @@ pub fn exportChemistry(chemistry_state: *const chemistry.State, transport_state:
         if (!std.math.isFinite(live_water_volume_m3) or live_water_volume_m3 < 0 or
             !std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0)
             return error.InvalidAqueousTransportWaterVolume;
-        const water_volume_m3 = exportCarrierM3(live_water_volume_m3, dry_reference_water_m3, negligible_water_volume_m3);
+        const water_volume_m3 = carrierM3(live_water_volume_m3, dry_reference_water_m3, negligible_water_volume_m3);
         for (0..Species.count) |species_index| {
             const species: Species = @enumFromInt(species_index);
             const dissolved_mol_per_m3 = concentration(chemistry_state, cell, species);
@@ -91,7 +100,7 @@ pub fn exportChemistry(chemistry_state: *const chemistry.State, transport_state:
     }
     for (0..chemistry_state.cell_count) |cell| {
         const fractions = try bridgeFractionsAt(fractions_source, cell);
-        const water_volume_m3 = exportCarrierM3(
+        const water_volume_m3 = carrierM3(
             transport_state.water_volume_m3[cell],
             chemistry_state.dry_reference_water_m3[cell],
             negligible_water_volume_m3,
@@ -121,16 +130,34 @@ pub fn exportConcentrations(chemistry_state: *const chemistry.State, output_mol_
 }
 
 /// Publishes a transported micropore inventory back to the chemistry state.
-/// The update is staged so zero water or a non-finite value cannot partially
-/// overwrite the reaction state.
-pub fn importChemistry(transport_state: *const transport.State, chemistry_state: *chemistry.State, fractions_source: anytype) !void {
+/// The update is staged so an invalid water volume or a non-finite value
+/// cannot partially overwrite the reaction state.
+///
+/// ISSUE-074: the old guard (`water_volume_m3 <= 0`) rejected exact zero (and
+/// negatives) but let any near-zero-but-positive carrier below the shared
+/// `ZEROS2`-equivalent floor through unchanged, using it directly as the
+/// divisor inside `concentrationFromAmount`. A near-zero divisor manufactures
+/// a spuriously huge concentration for a preserved extensive mass -- the
+/// mirror image of `exportChemistry`'s pre-issue-065 defect. Widened to reuse
+/// `carrierM3` exactly like `exportChemistry`: `negligible_water_volume_m3`
+/// is the caller's own legacy `ZEROS2`-scaled floor (see
+/// `core/legacy_water_negligible_floor.zig`); when a cell's live water is at
+/// or below it, `chemistry_state.dry_reference_water_m3[cell]` is used
+/// instead.
+pub fn importChemistry(transport_state: *const transport.State, chemistry_state: *chemistry.State, fractions_source: anytype, negligible_water_volume_m3: f64) !void {
     try validateDimensions(chemistry_state, transport_state);
+    if (!std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
+        return error.InvalidAqueousTransportCarrierTolerance;
     // Validate the complete transaction before changing any concentration.
     for (0..chemistry_state.cell_count) |cell| {
         const fractions = try bridgeFractionsAt(fractions_source, cell);
         try validateZoneFractions(fractions);
-        const water_volume_m3 = transport_state.water_volume_m3[cell];
-        if (!std.math.isFinite(water_volume_m3) or water_volume_m3 <= 0) return error.AqueousTransportRequiresPositiveWaterVolume;
+        const live_water_volume_m3 = transport_state.water_volume_m3[cell];
+        const dry_reference_water_m3 = chemistry_state.dry_reference_water_m3[cell];
+        if (!std.math.isFinite(live_water_volume_m3) or live_water_volume_m3 < 0 or
+            !std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0)
+            return error.InvalidAqueousTransportWaterVolume;
+        const water_volume_m3 = carrierM3(live_water_volume_m3, dry_reference_water_m3, negligible_water_volume_m3);
         for (0..Species.count) |species_index| {
             const species: Species = @enumFromInt(species_index);
             const amount_mol = transport_state.amount_mol[cell * Species.count + species_index];
@@ -140,7 +167,11 @@ pub fn importChemistry(transport_state: *const transport.State, chemistry_state:
     }
     for (0..chemistry_state.cell_count) |cell| {
         const fractions = try bridgeFractionsAt(fractions_source, cell);
-        const water_volume_m3 = transport_state.water_volume_m3[cell];
+        const water_volume_m3 = carrierM3(
+            transport_state.water_volume_m3[cell],
+            chemistry_state.dry_reference_water_m3[cell],
+            negligible_water_volume_m3,
+        );
         for (0..Species.count) |species_index| {
             const species: Species = @enumFromInt(species_index);
             const amount_mol = transport_state.amount_mol[cell * Species.count + species_index];
@@ -153,6 +184,27 @@ pub fn importChemistry(transport_state: *const transport.State, chemistry_state:
 /// and a declared subset of concentrations. Changed species publish their
 /// new extensive amounts; every other transport-owned species preserves its
 /// amount and is diluted onto the new carrier.
+///
+/// ISSUE-074: `new_water_volume_m3` used to be rejected only at exact zero
+/// (and negatives); any near-zero-but-positive caller-supplied carrier below
+/// the shared `ZEROS2`-equivalent floor was used raw for both directions
+/// (concentration -> mass for `changed_species`, mass -> concentration for
+/// everything else) and was then written back as the new
+/// `transport_state.water_volume_m3[cell]` baseline, propagating the
+/// un-substituted carrier forward into every later call (including
+/// `importChemistry`). One caller (`pond_domain_transaction.zig`'s
+/// pond-domain-collapse reconciliation) had no guard of its own at all and
+/// relied entirely on this function; at exact zero the old `<= 0` guard's
+/// `error.AqueousTransportRequiresPositiveWaterVolume` reached that caller's
+/// `catch unreachable` and panicked. `negligible_water_volume_m3` is the
+/// caller's own legacy `ZEROS2`-scaled floor (see
+/// `core/legacy_water_negligible_floor.zig`); a caller-supplied volume at or
+/// below it is now substituted with `chemistry_state.dry_reference_water_m3
+/// [cell]` -- mirroring `exportChemistry`/`importChemistry` -- rather than
+/// rejected, since every production call site runs unconditionally and
+/// cannot treat a routine near-zero carrier as an exceptional error. The
+/// *substituted* carrier, not the raw caller-supplied value, is what gets
+/// published back into `transport_state.water_volume_m3[cell]`.
 pub fn synchronizeCellAfterCarrierChange(
     chemistry_state: *chemistry.State,
     transport_state: *transport.State,
@@ -160,13 +212,20 @@ pub fn synchronizeCellAfterCarrierChange(
     new_water_volume_m3: f64,
     changed_species: []const Species,
     fractions_source: anytype,
+    negligible_water_volume_m3: f64,
 ) !void {
     try validateDimensions(chemistry_state, transport_state);
     const fractions = try bridgeFractionsAt(fractions_source, cell);
     try validateZoneFractions(fractions);
     if (cell >= chemistry_state.cell_count) return error.AqueousTransportCellIndexOutOfBounds;
-    if (!std.math.isFinite(new_water_volume_m3) or new_water_volume_m3 <= 0)
+    if (!std.math.isFinite(new_water_volume_m3) or new_water_volume_m3 < 0)
         return error.AqueousTransportRequiresPositiveWaterVolume;
+    if (!std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
+        return error.InvalidAqueousTransportCarrierTolerance;
+    const dry_reference_water_m3 = chemistry_state.dry_reference_water_m3[cell];
+    if (!std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0)
+        return error.InvalidAqueousTransportWaterVolume;
+    const water_volume_m3 = carrierM3(new_water_volume_m3, dry_reference_water_m3, negligible_water_volume_m3);
     const amounts = try transport_state.cellAmounts(cell);
     for (amounts) |amount_mol| {
         if (!std.math.isFinite(amount_mol) or amount_mol < 0)
@@ -176,30 +235,30 @@ pub fn synchronizeCellAfterCarrierChange(
         const value = concentration(chemistry_state, cell, species);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidAqueousChemistryConcentration;
-        const amount_mol = value * new_water_volume_m3 * species_module.zoneFraction(species, fractions);
+        const amount_mol = value * water_volume_m3 * species_module.zoneFraction(species, fractions);
         if (!std.math.isFinite(amount_mol)) return error.InvalidAqueousTransportAmount;
     }
     for (0..Species.count) |species_index| {
         const species: Species = @enumFromInt(species_index);
         if (!containsSpecies(changed_species, species))
-            _ = try concentrationFromAmount(amounts[species_index], new_water_volume_m3, species, fractions);
+            _ = try concentrationFromAmount(amounts[species_index], water_volume_m3, species, fractions);
     }
 
     for (0..Species.count) |species_index| {
         const species: Species = @enumFromInt(species_index);
         if (containsSpecies(changed_species, species)) {
-            amounts[species_index] = concentration(chemistry_state, cell, species) * new_water_volume_m3 * species_module.zoneFraction(species, fractions);
+            amounts[species_index] = concentration(chemistry_state, cell, species) * water_volume_m3 * species_module.zoneFraction(species, fractions);
         } else {
             setConcentration(
                 &chemistry_state.aqueous[cell],
                 &chemistry_state.non_band_phosphate[cell],
                 &chemistry_state.band_phosphate[cell],
                 species,
-                concentrationFromAmount(amounts[species_index], new_water_volume_m3, species, fractions) catch unreachable,
+                concentrationFromAmount(amounts[species_index], water_volume_m3, species, fractions) catch unreachable,
             );
         }
     }
-    transport_state.water_volume_m3[cell] = new_water_volume_m3;
+    transport_state.water_volume_m3[cell] = water_volume_m3;
 }
 
 fn bridgeFractionsAt(source: anytype, cell: usize) !ZoneFractions {
@@ -420,7 +479,7 @@ test "all TRNSFRS species round trip between concentration and runtime amount" {
         try std.testing.expectEqual(@as(f64, @floatFromInt(2 * (species_index + 1))) * species_module.zoneFraction(species, fractions), transport_state.amount_mol[species_index]);
     }
     @memcpy(transport_state.amount_mol[Species.count .. 2 * Species.count], transport_state.amount_mol[0..Species.count]);
-    try importChemistry(&transport_state, &chemistry_state, fractions);
+    try importChemistry(&transport_state, &chemistry_state, fractions, 0);
     for (0..Species.count) |species_index| try std.testing.expectEqual(@as(f64, @floatFromInt(4 * (species_index + 1))), concentration(&chemistry_state, 1, @enumFromInt(species_index)));
 }
 
@@ -446,7 +505,7 @@ test "bare HPO4 and H2PO4 have distinct non-band and band transport owners" {
     transport_state.amount_mol[@intFromEnum(Species.non_band_h2po4)] = 8.5;
     transport_state.amount_mol[@intFromEnum(Species.band_hpo4)] = 28.5;
     transport_state.amount_mol[@intFromEnum(Species.band_h2po4)] = 34.5;
-    try importChemistry(&transport_state, &chemistry_state, fractions);
+    try importChemistry(&transport_state, &chemistry_state, fractions, 0);
     try std.testing.expectEqual(@as(f64, 13), chemistry_state.non_band_phosphate[0].dissolved_hpo4_mol_p_per_m3);
     try std.testing.expectEqual(@as(f64, 17), chemistry_state.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3);
     try std.testing.expectEqual(@as(f64, 19), chemistry_state.band_phosphate[0].dissolved_hpo4_mol_p_per_m3);
@@ -507,13 +566,24 @@ test "issue-065: NEW exportChemistry preserves aqueous amount at hour 2894's exa
 }
 
 test "failed import cannot partially overwrite chemistry" {
+    // ISSUE-074: with the naive `<= 0` guard removed, exact-zero (and
+    // near-zero) live water with no dry reference either is no longer an
+    // automatic error by itself -- it now falls back to `carrierM3`'s dry
+    // reference (0 here). What must still fail atomically is mass that
+    // cannot be represented on that (still zero) carrier, exactly as
+    // `concentrationFromAmount` already requires for every other species in
+    // this file (see "zero-width phosphate zone round trip" below).
     var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
     defer chemistry_state.deinit();
     chemistry_state.aqueous[0].calcium = 3;
     var transport_state = try transport.State.init(std.testing.allocator, 1, Species.count);
     defer transport_state.deinit();
     transport_state.water_volume_m3[0] = 0;
-    try std.testing.expectError(error.AqueousTransportRequiresPositiveWaterVolume, importChemistry(&transport_state, &chemistry_state, ZoneFractions{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 }));
+    transport_state.amount_mol[@intFromEnum(Species.calcium)] = 5;
+    try std.testing.expectError(
+        error.AqueousTransportAmountWithoutZoneCarrier,
+        importChemistry(&transport_state, &chemistry_state, ZoneFractions{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 }, 0),
+    );
     try std.testing.expectEqual(@as(f64, 3), chemistry_state.aqueous[0].calcium);
 }
 
@@ -538,6 +608,7 @@ test "carrier synchronization preserves unchanged complexes and publishes transf
         2,
         &.{ .carbonate, .bicarbonate },
         ZoneFractions{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 },
+        0,
     );
 
     try std.testing.expectEqual(@as(f64, 10), amounts[@intFromEnum(Species.carbonate)]);
@@ -559,12 +630,149 @@ test "zero-width phosphate zone round trip is exact and rejects phantom mass ato
     try exportChemistry(&chemistry_state, &transport_state, fractions, 0);
     try std.testing.expectEqual(@as(f64, 6), transport_state.amount_mol[@intFromEnum(Species.non_band_hpo4)]);
     try std.testing.expectEqual(@as(f64, 0), transport_state.amount_mol[@intFromEnum(Species.band_hpo4)]);
-    try importChemistry(&transport_state, &chemistry_state, fractions);
+    try importChemistry(&transport_state, &chemistry_state, fractions, 0);
     try std.testing.expectEqual(@as(f64, 3), chemistry_state.non_band_phosphate[0].dissolved_hpo4_mol_p_per_m3);
     try std.testing.expectEqual(@as(f64, 0), chemistry_state.band_phosphate[0].dissolved_hpo4_mol_p_per_m3);
 
     transport_state.amount_mol[@intFromEnum(Species.band_hpo4)] = 1;
     const before = chemistry_state.non_band_phosphate[0];
-    try std.testing.expectError(error.AqueousTransportAmountWithoutZoneCarrier, importChemistry(&transport_state, &chemistry_state, fractions));
+    try std.testing.expectError(error.AqueousTransportAmountWithoutZoneCarrier, importChemistry(&transport_state, &chemistry_state, fractions, 0));
     try std.testing.expectEqualDeep(before, chemistry_state.non_band_phosphate[0]);
+}
+
+test "issue-074: OLD raw-carrier importChemistry would manufacture a spuriously huge concentration at a near-zero-but-nonzero water volume" {
+    // Mirrors issue-065's own OLD/NEW pair, mirror-imaged for the
+    // mass-to-concentration direction: the pre-fix guard was
+    // `water_volume_m3 <= 0`, so this near-zero-but-positive carrier passed
+    // it unchanged and was used raw as the divisor. A preserved extensive
+    // amount divided by a near-zero carrier manufactures a spuriously huge
+    // concentration instead of the correct, dry-reference-preserved value.
+    const near_zero_but_positive_water_m3: f64 = 1.0e-9;
+    const dry_reference_water_m3: f64 = 6.058232575064708e-3;
+    const amount_mol: f64 = 1.238685811953962e0 * dry_reference_water_m3;
+    const old_raw_concentration = amount_mol / near_zero_but_positive_water_m3;
+    const correct_concentration = amount_mol / dry_reference_water_m3;
+    try std.testing.expect(old_raw_concentration > 1.0e5 * correct_concentration);
+}
+
+test "issue-074: NEW importChemistry preserves concentration at exact and near-zero degenerate water content" {
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    var transport_state = try transport.State.init(std.testing.allocator, 1, Species.count);
+    defer transport_state.deinit();
+    const dry_reference_water_m3: f64 = 6.058232575064708e-3;
+    const negligible_water_volume_m3: f64 = 1.0e-6;
+    chemistry_state.dry_reference_water_m3[0] = dry_reference_water_m3;
+    const fractions: ZoneFractions = .{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 };
+    const carbonate_amount_mol: f64 = 1.238685811953962e0 * dry_reference_water_m3;
+    transport_state.amount_mol[@intFromEnum(Species.carbonate)] = carbonate_amount_mol;
+
+    // Exactly zero live water: substitutes the dry reference rather than
+    // erroring or dividing by zero.
+    transport_state.water_volume_m3[0] = 0;
+    try importChemistry(&transport_state, &chemistry_state, fractions, negligible_water_volume_m3);
+    try std.testing.expectApproxEqRel(
+        @as(f64, 1.238685811953962e0),
+        chemistry_state.aqueous[0].carbonate,
+        1.0e-12,
+    );
+
+    // Near-zero but still-below-floor live water behaves identically.
+    transport_state.water_volume_m3[0] = 1.0e-9;
+    chemistry_state.aqueous[0].carbonate = 0;
+    try importChemistry(&transport_state, &chemistry_state, fractions, negligible_water_volume_m3);
+    try std.testing.expectApproxEqRel(
+        @as(f64, 1.238685811953962e0),
+        chemistry_state.aqueous[0].carbonate,
+        1.0e-12,
+    );
+
+    // Live water above the floor is used unchanged (no-op substitution).
+    transport_state.water_volume_m3[0] = 2;
+    transport_state.amount_mol[@intFromEnum(Species.carbonate)] = 2 * 1.238685811953962e0;
+    try importChemistry(&transport_state, &chemistry_state, fractions, negligible_water_volume_m3);
+    try std.testing.expectApproxEqRel(
+        @as(f64, 1.238685811953962e0),
+        chemistry_state.aqueous[0].carbonate,
+        1.0e-12,
+    );
+}
+
+test "issue-074: OLD synchronizeCellAfterCarrierChange guard panics via caller's catch unreachable at exact-zero water" {
+    // pond_domain_transaction.zig's own call site (the most severe of
+    // Finding B's three) has no water-volume guard of any kind and always
+    // wraps this call in `catch unreachable`. The pre-fix `<= 0` guard
+    // therefore turned an ordinary exact-zero (fully collapsed) pond-domain
+    // water carrier into a caller-side panic instead of a handled substitution.
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    var transport_state = try transport.State.init(std.testing.allocator, 1, Species.count);
+    defer transport_state.deinit();
+    transport_state.water_volume_m3[0] = 1;
+    chemistry_state.aqueous[0].hydrogen = 3;
+    const old_guard_result = oldExactZeroGuard(0);
+    try std.testing.expectError(error.AqueousTransportRequiresPositiveWaterVolume, old_guard_result);
+}
+
+fn oldExactZeroGuard(new_water_volume_m3: f64) !void {
+    // Reproduces the exact pre-issue-074 guard shape removed from
+    // `synchronizeCellAfterCarrierChange` above, isolated so this test does
+    // not itself have to trigger a real `catch unreachable` panic to prove
+    // the old code path was an error (and therefore a panic at that one
+    // unguarded call site) for an entirely ordinary collapsed-water state.
+    if (!std.math.isFinite(new_water_volume_m3) or new_water_volume_m3 <= 0)
+        return error.AqueousTransportRequiresPositiveWaterVolume;
+}
+
+test "issue-074: NEW synchronizeCellAfterCarrierChange substitutes the dry reference at exact-zero and near-zero water instead of erroring" {
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    var transport_state = try transport.State.init(std.testing.allocator, 1, Species.count);
+    defer transport_state.deinit();
+    const dry_reference_water_m3: f64 = 4;
+    const negligible_water_volume_m3: f64 = 1.0e-6;
+    chemistry_state.dry_reference_water_m3[0] = dry_reference_water_m3;
+    transport_state.water_volume_m3[0] = 1;
+    const amounts = try transport_state.cellAmounts(0);
+    amounts[@intFromEnum(Species.bicarbonate)] = 8;
+    chemistry_state.aqueous[0].bicarbonate = 8;
+    chemistry_state.aqueous[0].hydrogen = 5;
+    const fractions = ZoneFractions{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 };
+
+    // Exact-zero water carrier: substitutes the dry reference (4) rather
+    // than erroring (and, at the one unguarded production call site, rather
+    // than panicking through `catch unreachable`).
+    try synchronizeCellAfterCarrierChange(
+        &chemistry_state,
+        &transport_state,
+        0,
+        0,
+        &.{.hydrogen},
+        fractions,
+        negligible_water_volume_m3,
+    );
+    try std.testing.expectEqual(dry_reference_water_m3, transport_state.water_volume_m3[0]);
+    // Unchanged species (bicarbonate) is diluted onto the substituted
+    // carrier and preserves its extensive amount exactly.
+    try std.testing.expectApproxEqRel(@as(f64, 8) / dry_reference_water_m3, chemistry_state.aqueous[0].bicarbonate, 1.0e-12);
+    // Changed species (hydrogen) publishes its new extensive amount on the
+    // same substituted carrier.
+    try std.testing.expectApproxEqRel(@as(f64, 5) * dry_reference_water_m3, amounts[@intFromEnum(Species.hydrogen)], 1.0e-12);
+
+    // Near-zero-but-nonzero water carrier behaves identically to exact zero.
+    transport_state.water_volume_m3[0] = dry_reference_water_m3;
+    amounts[@intFromEnum(Species.bicarbonate)] = 8;
+    chemistry_state.aqueous[0].bicarbonate = 2;
+    chemistry_state.aqueous[0].hydrogen = 5;
+    try synchronizeCellAfterCarrierChange(
+        &chemistry_state,
+        &transport_state,
+        0,
+        1.0e-9,
+        &.{.hydrogen},
+        fractions,
+        negligible_water_volume_m3,
+    );
+    try std.testing.expectEqual(dry_reference_water_m3, transport_state.water_volume_m3[0]);
+    try std.testing.expectApproxEqRel(@as(f64, 8) / dry_reference_water_m3, chemistry_state.aqueous[0].bicarbonate, 1.0e-12);
 }

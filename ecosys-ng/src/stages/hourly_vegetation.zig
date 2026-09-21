@@ -287,6 +287,7 @@ noinline fn beginRootGrowthAndSynchronizePhosphate(
                     .band_h2po4,
                 },
                 context.fertilizer_band,
+                ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[cell]),
             );
         }
     }

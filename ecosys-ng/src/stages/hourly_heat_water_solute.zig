@@ -7386,6 +7386,7 @@ fn CoupledSubstepTransaction(
                 context.micropore_solute_state,
                 context.soil_chemistry,
                 context.fertilizer_band,
+                context.config.physical_tolerance.water_volume_m3,
             );
             try ecosys.subsurface_irrigation_chemistry.addPhosphateFractionWithZones(
                 context.irrigation_loads,
@@ -7407,6 +7408,9 @@ fn CoupledSubstepTransaction(
                     context.grid.matrix_liquid_water_m3[layer],
                     &.{ .non_band_hpo4, .non_band_h2po4, .band_hpo4, .band_h2po4 },
                     context.fertilizer_band,
+                    ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(
+                        context.canopy_cell_area_m2[layer / context.grid.soil_layer_capacity],
+                    ),
                 );
             }
         }
