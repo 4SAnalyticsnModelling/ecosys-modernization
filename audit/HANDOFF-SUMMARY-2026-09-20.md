@@ -364,6 +364,40 @@ multi-layer, multi-hundred-hour water-balance error. Exact quantification
 `issue-024`'s new cross-reference and `issue-079`'s "Mechanism-tracing pass"
 section for full evidence.
 
+**Updated 2026-09-21 -- `issue-024`'s rounds 9-10 now make this the single
+most important, best-characterized remaining science gap in this backlog,**
+ahead of the routine Tier-1 items listed above and clearly distinct in kind
+from the production-run-blocking decision (`issue-078`, hour 3,253,
+Section 3). Ten rounds total (five from the original session, five --
+rounds 6-10 -- from this session) have now exhausted every hypothesis
+reachable by bounded source-tracing, hand arithmetic, log instrumentation,
+and controlled experiments: substep-schedule/resolution (refuted twice,
+including after the committed `NFH=4` fix -- round 9 found hour 1's
+ice-conversion fraction gets measurably *worse*, not better, under more
+substeps, ruling out "not enough substeps" in either direction); osmotic
+potential magnitude (too small by ~3 orders of magnitude); matric potential
+magnitude (round 10 hand-verified that the ~800x headline gap is
+predominantly a *consequence* of the already-occurring over-conversion --
+both curves evaluated at very different water contents -- not an
+independent cause, with one small, disclosed, intentional secondary
+contributor flagged for scientific-scope review, not a bug); freezing-point
+formula fidelity and call-order/forcing/binding equivalence (both verified
+identical). What remains untested is deliberately out of scope for further
+bounded diagnostics: the Newton/Anderson solver's own internal convergence
+criterion/merit function (the same high-blast-radius solver-core work
+already gated on human sign-off for `issue-068`/`issue-078`), or a dedicated,
+multi-day specialist literature review of the coupled Dall'Amico
+enthalpy-balance discretization itself. See `issue-024`'s "Consolidated
+disposition (2026-09-21)" section (end of file) for the full hypothesis
+ledger. **Why this matters more than it may first appear:** unlike
+`issue-078` (an architecture/dispatch-frequency decision) and the Tier-1
+backlog (routine science-parity judgment calls), this question is about
+whether the coupled freeze-thaw solve computes the right answer at all for
+this parameter regime -- and resolving it could plausibly resolve, at once,
+both `issue-024`'s own original chronic near-surface divergence finding and
+`issue-079`'s winter multi-layer creep, since both are now attributed to
+this same root mechanism rather than to two independent defects.
+
 ---
 
 ## 5. Performance status
