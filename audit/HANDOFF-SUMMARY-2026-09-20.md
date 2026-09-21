@@ -342,6 +342,28 @@ these block the production run; they are science-parity/feature-attribution
 judgment calls for whoever has the relevant domain expertise. This document
 does not re-derive or re-rank them.
 
+**Added 2026-09-21 -- a newly-discovered, still-open science gap that reframes
+`issue-024`'s scope, distinct from the production-run-blocking items above
+(`issue-024`'s own substep-schedule sub-question is already RESOLVED/
+IMPLEMENTED per Section 3; `issue-068` is resolved as part of that same fix;
+`issue-078` is the current production-blocking frontier).** `issue-079`
+(winter multi-layer soil-water creep: Zig's soil layers 2-6 rise monotonically
+over simulated hours ~100-1,000 while the Fortran oracle's own layers 2-6 stay
+flat/oscillating) ran a mechanism-tracing pass and found the creep's onset in
+each affected layer coincides precisely with that layer's own residual
+cold-snap ice melting to near-zero. `issue-079`'s revised disposition: this is
+very likely the **same general defect family** as `issue-024`'s still-open
+Dall'Amico freeze-thaw over-conversion root-cause question (rounds 1-8, hour
+1/layer 1), recurring layer-by-layer as frost recedes through the profile,
+rather than an independent mechanism. This is a genuinely important addition
+to this document's picture of remaining science gaps: it reframes what
+`issue-024`'s round-1-8 question was previously understood to cover, from an
+apparent single-hour/single-layer curiosity to a potentially systemic,
+multi-layer, multi-hundred-hour water-balance error. Exact quantification
+(over-conversion vs. ordinary Richards redistribution) is not yet done -- see
+`issue-024`'s new cross-reference and `issue-079`'s "Mechanism-tracing pass"
+section for full evidence.
+
 ---
 
 ## 5. Performance status
