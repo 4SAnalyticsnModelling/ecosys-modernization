@@ -225,6 +225,32 @@ a fresh same-day remeasurement over the **full currently-reachable window**
 
 ## 7. Loose end found along the way (not yet triaged)
 
+**RESOLVED 2026-09-21 -- see `audit/issues/issue-075-pond-inventory-transfer-stale-carrier-volumes-literal.md`.**
+Fixed: one missing `.cell_area_m2 = 1` field added to a single anonymous
+`CarrierVolumes` struct literal in `pond_inventory_transfer.zig`'s test
+`"pond sidecars count canonical gas and chemistry mirrors exactly once"`
+(lines 465-477). Test-only change, no production logic touched. Confirmed
+by targeted `zig test src/module_index.zig --test-filter ...` on that test
+plus a broader sweep (`"carrier"` filter, 184/184 passed) and a full
+untargeted `zig test src/module_index.zig` run (compiles cleanly now; see
+issue-075 for the run's pass/fail counts, which are governed by
+already-tracked runtime issues, not this compile break).
+
+**Provenance correction:** the original note below (preserved for
+reference) claimed this break "predates and is unrelated to any of this
+session's water-carrier work," citing a `git stash`/retest at HEAD
+`ce0564e`. This pass checked that claim with
+`git merge-base --is-ancestor 89e17ba ce0564e` (exit `0`) and found it does
+**not** hold at that scope: `89e17ba` (`issue-069`, explicitly part of this
+same session's water-carrier chain per Section 2 above) is what added the
+required `cell_area_m2` field and is an ancestor of `ce0564e` -- so the
+break was introduced by `issue-069`'s own commit missing one cross-file
+call site, not something that predates this session. It does correctly
+predate the *later* `issue-072`/`073`/`074` sub-chain, which is the
+narrower claim the original `git stash` check actually supports. See
+issue-075 for full detail.
+
+Original note (preserved for provenance, superseded above):
 - **`pond_inventory_transfer.zig`** has a pre-existing, unrelated compile
   break (a stale test literal missing `CarrierVolumes.cell_area_m2`),
   noticed by the `issue-074` implementing agent while working a different

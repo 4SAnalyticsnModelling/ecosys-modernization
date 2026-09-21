@@ -474,6 +474,7 @@ test "pond sidecars count canonical gas and chemistry mirrors exactly once" {
             .surface_dry_mass_after_megagrams = 0.75,
             .soil_dry_mass_after_megagrams = 1.25,
             .dissolved_chemistry_fraction = 0.25,
+            .cell_area_m2 = 1,
         },
         false,
         0.25,
