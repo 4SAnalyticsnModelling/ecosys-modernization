@@ -54,6 +54,29 @@ Not every stale hash means the finding is wrong -- most cited files changed for 
 
 Note the shape: the four largest are **restart read/write routines** (`ROUTS`/`WOUTS` for soil state, `ROUTP`/`WOUTP` for plant state), which no prior audit pass has touched at all. That is a coherent, previously-unnamed gap and it bears directly on the restart-integrity criterion that `ecosys-build-reproducibility` owns, not only on statement counts. The `trnsfr.f`/`trnsfrs.f` blocks are the already-known ~90% untraced remainder of those two files.
 
+## Second measurement from the same tooling round: legacy COMMON state, and why its headline number must NOT be read as coverage
+
+`ecosys-audit/scripts/bindcheck.py --root ../..` (same `PYTHONPATH` requirement) audits the legacy COMMON blocks against the Zig tree. Run here, exit 0:
+
+| quantity | value |
+|---|---|
+| COMMON blocks | 53 |
+| declared members | 2,970 |
+| name occurs in Zig **code** | 214 |
+| name occurs **only in comments** | 1,067 |
+| name **absent from Zig entirely** | 1,689 |
+| named in `traceability.csv` | 553 |
+| short, collision-prone names | 195 |
+| Zig files scanned | 879 |
+
+**The 1,689 figure is not 1,689 missing state variables, and anyone who quotes it that way will be wrong.** ecosys-ng is a deliberate modular redesign that renames state descriptively (`VOLW` becomes `matrix_liquid_water_m3`, and so on), so a legacy name being absent is expected for correctly-ported state. The tool's own header says the converse explicitly ("A name occurrence is evidence that a symbol was considered, NOT evidence that it was translated correctly"); this issue records the other half.
+
+**Calibrated against the worst-looking block, so the interpretation is not speculative.** `BLK20A` (84 members, **zero** occurrences in either code or comments) is the `XQR*`/`XQS*` family -- per-direction runoff and snowpack solute flux arrays dimensioned `(2,2,JV,JH)` for aluminum, iron, hydrogen, calcium, magnesium, sodium, potassium, hydroxide, sulfate, chloride, carbonate, bicarbonate and the phosphate species (`f77src/blk20a.h`). ecosys-ng demonstrably implements that domain: `redistribution/surface/aqueous_runoff_transport.zig` (73 KB), `runoff.zig` (51 KB), `runoff_carrier.zig`, `overland_flow_litter_salt_update.zig`, `overland_flow_state_update_gate.zig`, `snow_redistribution_salt_update.zig` and `snow_redistribution_solute_update.zig` -- while a grep for the literal `XQR`/`XQS` across the whole `redistribution/` tree returns exactly **1** hit. So this block's state is ported, and simply carries no legacy-name provenance.
+
+**What the number therefore does measure, and it is still worth having: a bidirectional-provenance gap.** `PROJECT_CONTRACT.md` requires traceability with bidirectional provenance, and `ecosys-fortran-zig-traceability` is scoped to auditing "every Fortran logical statement, equation, branch and call against Zig with bidirectional provenance." For 1,689 legacy members there is currently no mechanical way to get from the legacy symbol to its Zig owner, because the Zig side neither uses the name nor cites it in a comment. The 1,067 comment-only members are the opposite and better case: provenance recorded, implementation to be confirmed separately. Treat the per-block table as a **worklist ordered by provenance debt**, not as a coverage metric. The blocks with zero occurrences of any kind -- `BLK20A` (84), `BLK22A` (57), `BLK20D` (54), `BLK20C` (49), `BLK22B` (49) -- are where a reviewer starting from the legacy side has nothing at all to follow.
+
+Also noted by the tool and worth fixing cheaply: `audit/traceability/bindings.csv` "has no usable rows", so its shape/type validation stage was skipped entirely. That register exists but is empty of anything the tool can use.
+
 ## Recommended next actions, in order
 
 1. **Re-hash the ledger, but only with per-row confirmation.** A blanket rehash would silently convert 117 "verified against an old version" rows into "verified against current" without anyone re-reading the cited lines -- manufacturing evidence rather than recording it. The honest procedure is: for each stale row, diff the *cited line range* between the recorded hash's version and current; if the range is unchanged, update the hash and note why; if it changed, the row needs re-verification before its hash moves.
