@@ -236,24 +236,62 @@ pub fn refreshAcceptedHour(context: *const Context) !usize {
             const macro_entry_scale = @max(1, @max(macro_capacity, macro_occupied));
             const matrix_entry_roundoff = 128 * std.math.floatEps(f64) * matrix_entry_scale;
             const macro_entry_roundoff = 128 * std.math.floatEps(f64) * macro_entry_scale;
-            // The accepted entry state must fit the capacity owned by the
-            // preceding hour. A smaller capacity derived immediately above is
-            // different: HOUR1 3604--3606 clamps only the derived air carrier,
-            // then 3704--3715 publishes the smaller VOLA without deleting or
+            // A smaller capacity derived immediately above is not a defect:
+            // HOUR1 3604--3606 clamps only the derived air carrier, then
+            // 3704--3715 publishes the smaller VOLA without deleting or
             // relocating water. The following WATSUB vertical displacement
             // path owns that conservative transfer.
-            if (matrix_occupied > previous_matrix_capacity + matrix_entry_roundoff or
+            //
+            // MATRIX-ENTRY-OVERFILL-DOMAIN-002. The matrix entry state may
+            // also exceed the preceding hour's pore capacity outright, and
+            // that is the oracle's own domain rather than an error. WATSUB
+            // carries a SIGNED excess next to the clamped air carrier --
+            // `watsub.f:211-217` is
+            //   `VOLP1Z=VOLA1-VOLW1-VOLI1`
+            //   `VOLP1=AMAX1(0.0,VOLP1Z)`
+            // and `watsub.f:4894` names `VOLP1Z` "excess water+ice (-ve)".
+            // The expulsion at `watsub.f:4898-4902` is donor-rate-bounded to
+            // `AMAX1(-VOLW2*XNPHX,VOLP1Z)`, so an excess larger than one
+            // substep's donor allowance SURVIVES into the next substep by
+            // construction; `:4927-4932` re-clamps `VOLP2` with `AMAX1(0.0,..)`
+            // and never errors, exactly as `hour1.f:4366` clamps instead of
+            // rejecting. Tillage is the routine producer of such a state:
+            // `redist.f:12180-12181` blends the mixed-zone water with no
+            // capacity clamp and `:12186-12189` leaves the `VOLP`/`VOLA`
+            // updates commented out, while `soil.f:145-223` re-enters WATSUB
+            // on the following substep to drain it. This tree already states
+            // the same policy on the solver side -- see
+            // `MATRIX-ENTRY-OVERFILL-DOMAIN-001`
+            // (`stages/hourly_heat_water_solute.zig:1571`) and
+            // `soil/water/solver_flux.zig:117-135`, "accepted entry overfill
+            // may persist transiently, but a nonlinear proposal may not
+            // manufacture any additional overfill". This guard was the last
+            // site that contradicted it.
+            //
+            // What stays fatal, and why this is a domain correction rather
+            // than a loosened tolerance: the oracle states no explicit
+            // ceiling, but liquid plus ice can never occupy more than the
+            // layer's own bulk volume, so that -- not the pore capacity -- is
+            // the physical bound. Enforcing it keeps this guard's real
+            // protective value against a grossly unphysical carrier (its own
+            // regression below stages twice the bulk volume) while admitting
+            // precisely the transient the oracle admits. The derived air
+            // carrier below is already the `VOLP1` analogue and still clamps
+            // at zero, so no consumer observes negative air.
+            if (matrix_occupied > matrix_volume + matrix_entry_roundoff or
                 macro_occupied > macro_capacity + macro_entry_roundoff)
             {
                 if (!builtin.is_test) std.log.err(
-                    "runtime soil entry pore capacity exceeded: cell={d} layer={d} index={d} previous_matrix_capacity_m3={e} refreshed_matrix_capacity_m3={e} matrix_occupied_m3={e} previous_matrix_excess_m3={e} macropore_capacity_m3={e} macropore_occupied_m3={e} macropore_excess_m3={e}",
+                    "runtime soil entry state exceeds its physical bound: cell={d} layer={d} index={d} matrix_bulk_volume_m3={e} previous_matrix_capacity_m3={e} refreshed_matrix_capacity_m3={e} matrix_occupied_m3={e} matrix_volume_excess_m3={e} previous_matrix_excess_m3={e} macropore_capacity_m3={e} macropore_occupied_m3={e} macropore_excess_m3={e}",
                     .{
                         cell,
                         first + offset,
                         index,
+                        matrix_volume,
                         previous_matrix_capacity,
                         matrix_capacity,
                         matrix_occupied,
+                        matrix_occupied - matrix_volume,
                         matrix_occupied - previous_matrix_capacity,
                         macro_capacity,
                         macro_occupied,
@@ -676,7 +714,31 @@ test "accepted material refresh is atomic and updates retention and solid therma
     grid.matrix_liquid_water_m3[deep] = 0;
     try std.testing.expectEqual(layer_capacity, try refreshAcceptedHour(&context));
 
+    // MATRIX-ENTRY-OVERFILL-DOMAIN-002. An accepted entry state that exceeds
+    // its own pore capacity outright -- what post-science tillage leaves
+    // behind, `redist.f:12180-12181` blending with no clamp -- is the oracle's
+    // domain, not an error: `watsub.f:211-217` carries the signed `VOLP1Z`
+    // excess and `:4898-4902` drains it at a donor-bounded rate over the
+    // following substeps. The conserved water carrier must survive untouched
+    // and the derived air carrier must read exactly zero, mirroring
+    // `VOLP1=AMAX1(0.0,VOLP1Z)`.
+    const overfill_capacity = grid.matrix_pore_capacity_m3[deep];
+    const overfill_volume = properties.matrix_bulk_volume_m3[deep];
+    try std.testing.expect(overfill_capacity < overfill_volume);
+    const staged_overfill = 0.5 * (overfill_capacity + overfill_volume);
+    grid.matrix_liquid_water_m3[deep] = staged_overfill;
+    try std.testing.expectEqual(layer_capacity, try refreshAcceptedHour(&context));
+    try std.testing.expectEqual(staged_overfill, grid.matrix_liquid_water_m3[deep]);
+    try std.testing.expectEqual(@as(f64, 0), grid.matrix_air_volume_m3[deep]);
+    // The signed excess stays reconstructible for the drain path: the refresh
+    // must not have quietly grown the capacity to swallow it.
+    try std.testing.expect(staged_overfill > grid.matrix_pore_capacity_m3[deep]);
+    grid.matrix_liquid_water_m3[deep] = 0;
+    try std.testing.expectEqual(layer_capacity, try refreshAcceptedHour(&context));
+
     // An invalid late capacity leaves every already-staged owner unchanged.
+    // Beyond the layer's own bulk volume there is no physical container left,
+    // so this stays fatal and stays atomic.
     const before_porosity = try allocator.dupe(f64, properties.porosity_fraction);
     defer allocator.free(before_porosity);
     const before_stc = try allocator.dupe(f64, thermal.solid_thermal_conductivity_numerator_m_megajoules_per_h_k);
