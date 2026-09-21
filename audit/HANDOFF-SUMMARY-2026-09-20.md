@@ -1,0 +1,138 @@
+# Handoff summary -- ecosys-ng v1.0.0 audit, 2026-09-20
+
+Single entry point for this session's production-run work. Read this first;
+it points to the detailed evidence trail rather than repeating it. This
+document is itself read-only synthesis -- it changes no disposition, source
+file, or prior issue file.
+
+---
+
+## 1. Executive summary
+
+This session's production-run work moved the Ottawa deck's blocking frontier
+from **hour 2,578** to **hour 2,894**, a real, validated ~317-hour advance,
+by finding and fixing more than a dozen genuine defects (a stiff-solver
+iteration-budget starvation bug, two substep-ladder consistency/overflow
+crash risks, and a family of ~10 "exact-zero water-carrier" mass-conservation
+substitution bugs across water/nitrogen/phosphorus/ammonia carrier bridges).
+The run now advances to **hour 2,895** before failing, and a further
+same-session fix (issue-067) cleared one more layer of that new frontier
+(a water-closure-tolerance provenance bug). What remains blocking hour 2,895
+is a **chronic, near-desiccated single soil layer (cell 0, layer 0)** whose
+phase-enthalpy Newton/Anderson solve cannot find a state that is
+simultaneously residual-admissible and inside the physical temperature
+domain -- ten rounds of diagnosis and two independently safe, zero-regression
+algorithmic enhancements (two different Newton-backtracking variants) did
+not resolve it, and the issue's own tenth round explicitly and formally
+escalated this to a human numerics reviewer rather than continuing further
+autonomous iteration. This blocker is described precisely in Section 3
+below; it is not more autonomous guessing that is needed next.
+
+---
+
+## 2. What's fully resolved
+
+- **`issue-015`** -- Ottawa's hour-2,578/2,579/2,589 `SoluteReactionSolverDidNotConverge` frontier. Root cause: a two-phase SOLUTE equilibrium split shared one flat iteration ceiling unevenly; fixed by giving the post-kinetic phase its own budget and raising the shared floor from 60 to 100 (matching this project's existing floor-of-100 policy for sibling solvers). Committed and validated by a fresh from-hour-1 run clearing all three named hours on the first attempt.
+- **`issue-058`** -- `recovery_substep_counts` had two independently hardcoded consumers that only agreed by coincidence, a latent crash risk. Fixed: `boundedRecoveryFallback` made genuinely array-driven with comptime membership guards on both consumers.
+- **`issue-059`** -- `TransportReplay.time_step_hours`'s fixed `[64]f64` buffer would overflow if the substep ladder were ever extended past 64. Fixed: buffer sizing now derives from the ladder's real maximum, plus a runtime capacity check that survives `ReleaseFast`.
+- **`issue-060`/`issue-061`** -- the "exact-zero water-carrier" defect-class family: legacy's `VOLW.GT.ZEROS2` floor was mistranslated as an exact-zero-only guard in several mass-inventory/carrier-rebase modules, discarding real mass. Fixed at the original site (`landscape_mass_inventory_phosphorus_ions.zig`) plus three siblings found by a dedicated sweep.
+- **`issue-062`** -- a second, previously-unaudited consumer of the same legacy negligible-heat-capacity-layer discard triggered `RelayeringActivityConservationFailure`. Fixed with a shared cross-consumer `FloorDiscard` reconciliation ledger rather than a third independent patch.
+- **`issue-063`/`issue-064`** -- a carrier-basis mismatch (mutator used raw live water, census used the floored substitute) caused carbon and then a broader ten-element (C/N/P/Al/Fe/Ca/Mg/Na/K/Si) conservation failure at hour 2,894. Fixed for carbon directly; the requested exhaustive sweep found and fixed 3 more siblings, bringing the total confirmed `ZEROS2`-class fixes across `issue-060`/`061`/`064` to 8.
+- **`issue-065`** -- after the 8 fixes above, hour 2,894 still failed identically; 15+ further diagnostic rounds located and fixed three more distinct siblings of the same carrier-substitution defect class (`erosion_chemistry_bridge.zig`, `aqueous_transport_bridge.zig`, `mineral_nitrogen_transport.zig`/`nitrogen_state_update.zig`), fully clearing hour 2,894.
+- **`issue-066`** -- `litter_ammonia_phase_bridge.zig`'s pack/unpack round trip used an exact-zero litter-water guard instead of the shared `ZEROS2`/`dry_reference_water_m3` substitution, in a bridge whose own local conservation gate excludes ammonia. Fixed (`legacy-defect-corrected`), regression-tested.
+- **`issue-067`** -- once hour 2,894 cleared, hour 2,895 failed on a new water-volume closure check. Root-caused to a tolerance-provenance gap (the check didn't account for the vapor solver's own already-accepted Newton convergence slack); fixed by threading that solver's real tolerance into the check's existing `upstream_arithmetic_roundoff_allowance` field. Confirmed by direct instrumentation and a fresh full validation run: the error class no longer occurs anywhere through hour 2,895.
+- **`issue-068`'s first three rounds** -- three independent, zero-regression solver-safety guards (rounds 2, 3/5, and 6) closing every then-known unguarded path by which a physically absurd temperature could be silently committed into `grid.soil_temperature_k`. All three verified sound by dedicated regression tests and a full fresh-from-hour-1 run showing zero domain-violation events anywhere in a 2,895-hour run.
+
+---
+
+## 3. The one specific decision needed from a human reviewer
+
+**`issue-024` and `issue-068` should be reviewed together, as one decision** --
+per `issue-068`'s own tenth-round consolidation, which explicitly states this
+should not be split into two independent calls.
+
+- `audit/issues/issue-024-top-layer-water-content-divergence-oracle-vs-zig.md`
+- `audit/issues/issue-068-hour-2895-soil-heat-solver-temperature-outside-physical-domain.md`
+
+**The exact question:** at cell 0/layer 0 -- a chronically near-desiccated,
+near-zero-heat-capacity top soil layer -- does Zig's heat-solver
+substep-recovery schedule need an `ICHKV`-equivalent compounding tier,
+extending `recovery_substep_counts` past its current maximum of 64 (e.g. to
+80, matching Fortran's effective `NFH x NPH = 4 x 20 = 80` substeps/hour
+ceiling for this exact thin/low-heat-capacity scenario)? **And if so**, this
+needs a properly-controlled experiment that isolates substep count from the
+iteration-budget confound `issue-015`'s own investigation already exposed
+(a shared/starved iteration ceiling produced a misleading "more substeps
+helps" signal there; any future substep experiment must control for that
+before attributing an outcome to substep count alone). **Or**, is a
+different, larger algorithmic redesign of the phase solver's
+constrained-Newton feasibility handling required instead -- because two
+safe, fully validated, zero-regression backtracking/damping variants have
+already been tried (`issue-068` round 9: uniform whole-step damping; round
+10: temperature-coordinate-only damping) and **neither resolved hour 2,895**,
+both exhausting a conservative 6-attempt/0.5-halving budget without finding
+a point simultaneously inside the physical temperature domain and within the
+tight residual-admissibility tolerance.
+
+`issue-068`'s own text: the mass-side residual for this layer converges
+cleanly to machine-noise scale while the coupled endpoint-temperature
+component overshoots 72-146 K past the [173.15, 373.15] K physical domain,
+because the phase-enthalpy relationship divides an energy quantity by this
+layer's near-zero heat capacity. An eleventh autonomous round (extending the
+substep ladder to 80, exactly the question above) was requested and
+**explicitly declined** by the tenth round's own stop order -- that specific
+experiment is reserved for an authorized human decision, not another
+autonomous pass. No source change is pending; the three safety guards and
+two backtracking enhancements already committed do not need to be revisited
+regardless of how this decision resolves.
+
+---
+
+## 4. Remaining science-gap backlog
+
+Unchanged by this session's production-run-focused work. See
+`audit/handoff-issue-triage.md` Section 2 ("Tier 1 -- needs a human/scientist
+decision") for the full list and evidence: `issue-018`, `022`, `026`, `030`,
+`038`, `039`, `040`, `047`, `049`, `050`, `051`, `052`, plus the re-ranked
+`issue-017` (Tier 3 item confirmed reachable on the validated deck). None of
+these block the production run; they are science-parity/feature-attribution
+judgment calls for whoever has the relevant domain expertise. This document
+does not re-derive or re-rank them.
+
+---
+
+## 5. Performance status
+
+Most recent measurement: `audit/runs/run-007-fresh-postfix-batch-remeasurement-2026-09-19.md`
+(no `run-008` exists yet as of this writing -- a fresher measurement from a
+concurrent agent may land after this document). Key numbers:
+
+- Zig, single-threaded, hour-2,568 checkpoint (matched to Fortran's day-108
+  marker): median **232.91 s** (3 repeats, ~4.0% spread).
+- Fortran oracle, same checkpoint: median **41.01 s** this run, versus
+  **131.46 s** in the earlier `run-003` baseline -- a disclosed, unresolved
+  ~3.2-3.6x discrepancy between two Fortran measurement sessions (leading
+  candidate: sustained CPU thermal/power state, not confirmed).
+- Resulting Zig/Fortran ratio is reported both ways rather than picking one:
+  **5.68x** (fresh Fortran) or **1.77x** (historical Fortran baseline). The
+  acceptance bar (ratio <= 1) is **not met** under either reading.
+- The iteration-ceiling fix (`issue-015`) does **not** measurably slow down
+  typical/steady hours; its extra cost is concentrated in a few rare, hard
+  hours in the newly-reachable 2,568-2,893 stretch (dominated by hour 2,592
+  at 15.3 s, ~65x the largest steady-region spike).
+
+---
+
+## 6. Where to look for detail
+
+- `audit/handoff-issue-triage.md` -- master backlog triage; Section 9 has the
+  full `issue-058` -> `issue-066` chain narrative and table.
+- `audit/handoff.md` -- general project handoff / G0-G1 history.
+- `audit/issues/issue-015-hour-2578-frontier-needs-human-design-decision.md`
+- `audit/issues/issue-024-top-layer-water-content-divergence-oracle-vs-zig.md`
+- `audit/issues/issue-058-*.md` through `issue-068-*.md` -- full evidence
+  trail for each fix/round summarized above.
+- `audit/runs/run-001-*.md` through `run-007-*.md` -- performance and
+  diagnostic run history.
+- `ecosys-audit/PROJECT_CONTRACT.md`, `ecosys-audit/EVIDENCE_GUIDE.md` --
+  governing evidence discipline for any follow-up work.
