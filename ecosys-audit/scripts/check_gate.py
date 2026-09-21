@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = []
+# ///
 """Check gate bookkeeping, artifact hashes and source freshness, not scientific truth."""
 from __future__ import annotations
 import argparse

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = []
+# ///
 """Strict comparison of already-normalized, identically ordered CSV outputs.
 
 This is NOT a parser for raw ecosys files or a proof of full-run completeness.

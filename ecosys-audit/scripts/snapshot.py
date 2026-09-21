@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = []
+# ///
 """Hash the four preserved project trees; no builds or model modifications. Python 3.10+."""
 from __future__ import annotations
 import argparse
