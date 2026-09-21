@@ -765,6 +765,30 @@ fn SoilForcingSubstepHooks(
             for (0..context.grid.cell_count) |cell|
                 self.topsoil_water_before_ingress_m3[cell] =
                     context.grid.matrix_liquid_water_m3[try context.grid.layerIndex(cell, 0)];
+            // ISSUE-079 CREEP_TRACE: bounded (hours 100-200, cell 0), one-pass
+            // diagnostic to localize the winter multi-layer liquid-water creep
+            // (layers 2-6 rising +0.05/1000h while runoff/ET are negligible).
+            // Not gated permanently; exploratory scratch instrumentation.
+            const issue079_creep_trace = !builtin.is_test and
+                self.context.executed_weather_hours.* >= 99 and
+                self.context.executed_weather_hours.* < 200;
+            if (issue079_creep_trace) {
+                const cell = 0;
+                var layer_water: [7]f64 = undefined;
+                for (0..7) |layer| layer_water[layer] =
+                    context.grid.matrix_liquid_water_m3[try context.grid.layerIndex(cell, layer)];
+                std.log.info(
+                    "ISSUE079_CREEP_TRACE stage=pre_ingress hour={d} dt_hours={e} matrix_rate_m3_per_h={e} macro_rate_m3_per_h={e} l0={e} l1={e} l2={e} l3={e} l4={e} l5={e} l6={e}",
+                    .{
+                        context.executed_weather_hours.* + 1,
+                        time_step_hours,
+                        context.surface_precipitation.water_to_matrix_m3_per_h[cell],
+                        context.surface_precipitation.water_to_macropore_m3_per_h[cell],
+                        layer_water[0], layer_water[1], layer_water[2], layer_water[3],
+                        layer_water[4], layer_water[5], layer_water[6],
+                    },
+                );
+            }
             try ecosys.surface_precipitation.state_updateSoilIngress(
                 context.surface_precipitation,
                 context.grid,
@@ -772,6 +796,20 @@ fn SoilForcingSubstepHooks(
                 time_step_hours,
                 context.runscript.soil_phase_heat_parameters.freeze_thaw.ice_density_megagrams_per_m3,
             );
+            if (issue079_creep_trace) {
+                const cell = 0;
+                var layer_water: [7]f64 = undefined;
+                for (0..7) |layer| layer_water[layer] =
+                    context.grid.matrix_liquid_water_m3[try context.grid.layerIndex(cell, layer)];
+                std.log.info(
+                    "ISSUE079_CREEP_TRACE stage=post_ingress hour={d} l0={e} l1={e} l2={e} l3={e} l4={e} l5={e} l6={e}",
+                    .{
+                        context.executed_weather_hours.* + 1,
+                        layer_water[0], layer_water[1], layer_water[2], layer_water[3],
+                        layer_water[4], layer_water[5], layer_water[6],
+                    },
+                );
+            }
             if (phosphorus_ingress_trace) try diagnostics.logPhosphorusRepresentation(context, "ingress_before_soil_ingress_rebase");
             for (0..context.grid.cell_count) |cell| {
                 const topsoil = try context.grid.layerIndex(cell, 0);
