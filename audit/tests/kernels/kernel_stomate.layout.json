@@ -1,0 +1,2397 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-09-21T19:57:31.882741+00:00",
+  "routine": "STOMATE",
+  "source": "f77src/stomate.f:2-673",
+  "source_sha256": "5e8acbaa44c1ac633c5dd75ba2c6897d4b63f4955c4d0157d33083ddcb003aff",
+  "arguments": [
+    "I",
+    "J",
+    "NFZ",
+    "NZ",
+    "NY",
+    "NX"
+  ],
+  "includes": [
+    "parameters.h",
+    "blkc.h",
+    "blk1cp.h",
+    "blk1g.h",
+    "blk1n.h",
+    "blk1p.h",
+    "blk2a.h",
+    "blk3.h",
+    "blk5.h",
+    "blk8a.h",
+    "blk8b.h",
+    "blk9a.h",
+    "blk9b.h",
+    "blk9c.h",
+    "blk1u.h"
+  ],
+  "scope": "referenced",
+  "blocks_restricted_to": [
+    "BLK1CP",
+    "BLK1G",
+    "BLK1N",
+    "BLK1P",
+    "BLK1U",
+    "BLK2A",
+    "BLK3",
+    "BLK5",
+    "BLK8A",
+    "BLK8B",
+    "BLK9A",
+    "BLK9B",
+    "BLKC"
+  ],
+  "stream": {
+    "format": "Fortran unformatted stream access, one record per item, in the order given below. Element order is Fortran column-major.",
+    "endianness": "native (little-endian on this x86_64 host)",
+    "total_bytes": 36994008,
+    "items": 74
+  },
+  "build": {
+    "compiler": "gfortran",
+    "driver_flags": [
+      "-ffixed-form",
+      "-ffixed-line-length-72",
+      "-fdefault-real-8",
+      "-fdefault-double-8"
+    ],
+    "legacy_flags": [
+      "-ffixed-form",
+      "-ffixed-line-length-72",
+      "-fdefault-real-8",
+      "-fdefault-double-8",
+      "-std=legacy",
+      "-fallow-argument-mismatch"
+    ],
+    "include_path": "f77src",
+    "note": "The driver and the legacy unit are separate translation units: the driver needs ACCESS='STREAM' (Fortran 2003, rejected by -std=legacy) and the legacy unit needs -std=legacy. Both carry the same -fdefault-real-8 precision contract. gfortran 16 implements the Fortran 2023 SPLIT intrinsic, which shadows this project's own split.f and makes soil.f fail with \"Too many arguments in call to split\". The call is correct: split.f declares 10 arguments and soil.f passes 10. Declare EXTERNAL split after the unit header (see header_line_end) or compile that unit with -std=f95. These flags reproduce the ifort -r8 -i4 precision contract recorded in fflags; they are not a claim of ifort-identical code generation."
+  },
+  "layout": [
+    {
+      "name": "WGLF",
+      "common_block": "BLK1CP",
+      "declared_in": "f77src/blk1cp.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 65000,
+      "bounds": [
+        {
+          "lower": "0",
+          "upper": "25",
+          "extent": 26
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 0,
+      "byte_size": 520000
+    },
+    {
+      "name": "ARLF",
+      "common_block": "BLK1CP",
+      "declared_in": "f77src/blk1cp.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 65000,
+      "bounds": [
+        {
+          "lower": "0",
+          "upper": "25",
+          "extent": 26
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 520000,
+      "byte_size": 520000
+    },
+    {
+      "name": "ARLFL",
+      "common_block": "BLK1CP",
+      "declared_in": "f77src/blk1cp.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 6,
+      "elements": 715000,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JL",
+          "extent": 11
+        },
+        {
+          "lower": "0",
+          "upper": "25",
+          "extent": 26
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 1040000,
+      "byte_size": 5720000
+    },
+    {
+      "name": "WSLF",
+      "common_block": "BLK1CP",
+      "declared_in": "f77src/blk1cp.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 65000,
+      "bounds": [
+        {
+          "lower": "0",
+          "upper": "25",
+          "extent": 26
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 6760000,
+      "byte_size": 520000
+    },
+    {
+      "name": "CCPOLB",
+      "common_block": "BLK1CP",
+      "declared_in": "f77src/blk1cp.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 4,
+      "elements": 2500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7280000,
+      "byte_size": 20000
+    },
+    {
+      "name": "O2I",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7300000,
+      "byte_size": 4000
+    },
+    {
+      "name": "CO2I",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7304000,
+      "byte_size": 4000
+    },
+    {
+      "name": "DCO2",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7308000,
+      "byte_size": 4000
+    },
+    {
+      "name": "CO2L",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7312000,
+      "byte_size": 4000
+    },
+    {
+      "name": "O2L",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7316000,
+      "byte_size": 4000
+    },
+    {
+      "name": "SCO2",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7320000,
+      "byte_size": 4000
+    },
+    {
+      "name": "SO2",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7324000,
+      "byte_size": 4000
+    },
+    {
+      "name": "XKCO2L",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7328000,
+      "byte_size": 4000
+    },
+    {
+      "name": "XKCO2O",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7332000,
+      "byte_size": 4000
+    },
+    {
+      "name": "TCC",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7336000,
+      "byte_size": 4000
+    },
+    {
+      "name": "TKC",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7340000,
+      "byte_size": 4000
+    },
+    {
+      "name": "HEAT",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7344000,
+      "byte_size": 4000
+    },
+    {
+      "name": "PARDIF",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 6,
+      "elements": 80000,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "4",
+          "extent": 4
+        },
+        {
+          "lower": "1",
+          "upper": "4",
+          "extent": 4
+        },
+        {
+          "lower": "1",
+          "upper": "JC",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7348000,
+      "byte_size": 640000
+    },
+    {
+      "name": "PAR",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 6,
+      "elements": 80000,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "4",
+          "extent": 4
+        },
+        {
+          "lower": "1",
+          "upper": "4",
+          "extent": 4
+        },
+        {
+          "lower": "1",
+          "upper": "JC",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 7988000,
+      "byte_size": 640000
+    },
+    {
+      "name": "SURFX",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 7,
+      "elements": 2750000,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "4",
+          "extent": 4
+        },
+        {
+          "lower": "1",
+          "upper": "JL",
+          "extent": 11
+        },
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 8628000,
+      "byte_size": 22000000
+    },
+    {
+      "name": "VCGRO",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 62500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 30628000,
+      "byte_size": 500000
+    },
+    {
+      "name": "VGRO",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 62500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 31128000,
+      "byte_size": 500000
+    },
+    {
+      "name": "COMPL",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 62500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 31628000,
+      "byte_size": 500000
+    },
+    {
+      "name": "ETGRO",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 62500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 32128000,
+      "byte_size": 500000
+    },
+    {
+      "name": "CBXN",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 62500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 32628000,
+      "byte_size": 500000
+    },
+    {
+      "name": "FMOL",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 33128000,
+      "byte_size": 4000
+    },
+    {
+      "name": "FRADP",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 33132000,
+      "byte_size": 4000
+    },
+    {
+      "name": "CO2B",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 62500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 33136000,
+      "byte_size": 500000
+    },
+    {
+      "name": "VCGR4",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 62500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 33636000,
+      "byte_size": 500000
+    },
+    {
+      "name": "VGRO4",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 62500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 34136000,
+      "byte_size": 500000
+    },
+    {
+      "name": "ETGR4",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 62500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 34636000,
+      "byte_size": 500000
+    },
+    {
+      "name": "CBXN4",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 62500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 35136000,
+      "byte_size": 500000
+    },
+    {
+      "name": "CPOOL4",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 62500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 35636000,
+      "byte_size": 500000
+    },
+    {
+      "name": "ARLFP",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36136000,
+      "byte_size": 4000
+    },
+    {
+      "name": "FDBK",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 4,
+      "elements": 2500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36140000,
+      "byte_size": 20000
+    },
+    {
+      "name": "FDBK4",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 5,
+      "elements": 62500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "25",
+          "extent": 25
+        },
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36160000,
+      "byte_size": 500000
+    },
+    {
+      "name": "FDBKX",
+      "common_block": "BLK1G",
+      "declared_in": "f77src/blk1g.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 4,
+      "elements": 2500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36660000,
+      "byte_size": 20000
+    },
+    {
+      "name": "CZPOLB",
+      "common_block": "BLK1N",
+      "declared_in": "f77src/blk1n.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 4,
+      "elements": 2500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36680000,
+      "byte_size": 20000
+    },
+    {
+      "name": "CPPOLB",
+      "common_block": "BLK1P",
+      "declared_in": "f77src/blk1p.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 4,
+      "elements": 2500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36700000,
+      "byte_size": 20000
+    },
+    {
+      "name": "RSMN",
+      "common_block": "BLK1U",
+      "declared_in": "f77src/blk1u.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36720000,
+      "byte_size": 4000
+    },
+    {
+      "name": "SSIN",
+      "common_block": "BLK2A",
+      "declared_in": "f77src/blk2a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 2,
+      "elements": 100,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36724000,
+      "byte_size": 800
+    },
+    {
+      "name": "CO2Q",
+      "common_block": "BLK2A",
+      "declared_in": "f77src/blk2a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 2,
+      "elements": 100,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36724800,
+      "byte_size": 800
+    },
+    {
+      "name": "FLG4",
+      "common_block": "BLK3",
+      "declared_in": "f77src/blk3.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 4,
+      "elements": 2500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36725600,
+      "byte_size": 20000
+    },
+    {
+      "name": "VRNS",
+      "common_block": "BLK3",
+      "declared_in": "f77src/blk3.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 4,
+      "elements": 2500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36745600,
+      "byte_size": 20000
+    },
+    {
+      "name": "VRNF",
+      "common_block": "BLK3",
+      "declared_in": "f77src/blk3.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 4,
+      "elements": 2500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36765600,
+      "byte_size": 20000
+    },
+    {
+      "name": "ATRP",
+      "common_block": "BLK3",
+      "declared_in": "f77src/blk3.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 4,
+      "elements": 2500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36785600,
+      "byte_size": 20000
+    },
+    {
+      "name": "NBR",
+      "common_block": "BLK3",
+      "declared_in": "f77src/blk3.h",
+      "effective_type": "i32",
+      "element_bytes": 4,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36805600,
+      "byte_size": 2000
+    },
+    {
+      "name": "IDTHB",
+      "common_block": "BLK3",
+      "declared_in": "f77src/blk3.h",
+      "effective_type": "i32",
+      "element_bytes": 4,
+      "rank": 4,
+      "elements": 2500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36807600,
+      "byte_size": 10000
+    },
+    {
+      "name": "TAU0",
+      "common_block": "BLK5",
+      "declared_in": "f77src/blk5.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 1100,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JL",
+          "extent": 11
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36817600,
+      "byte_size": 8800
+    },
+    {
+      "name": "TAUS",
+      "common_block": "BLK5",
+      "declared_in": "f77src/blk5.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 1100,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JL",
+          "extent": 11
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36826400,
+      "byte_size": 8800
+    },
+    {
+      "name": "NU",
+      "common_block": "BLK8A",
+      "declared_in": "f77src/blk8a.h",
+      "effective_type": "i32",
+      "element_bytes": 4,
+      "rank": 2,
+      "elements": 100,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36835200,
+      "byte_size": 400
+    },
+    {
+      "name": "AREA",
+      "common_block": "BLK8B",
+      "declared_in": "f77src/blk8b.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 4,
+      "elements": 6300,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "3",
+          "extent": 3
+        },
+        {
+          "lower": "0",
+          "upper": "JZ",
+          "extent": 21
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36835600,
+      "byte_size": 50400
+    },
+    {
+      "name": "VCMX",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36886000,
+      "byte_size": 4000
+    },
+    {
+      "name": "VOMX",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36890000,
+      "byte_size": 4000
+    },
+    {
+      "name": "VCMX4",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36894000,
+      "byte_size": 4000
+    },
+    {
+      "name": "XKCO2",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36898000,
+      "byte_size": 4000
+    },
+    {
+      "name": "XKO2",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36902000,
+      "byte_size": 4000
+    },
+    {
+      "name": "XKCO24",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36906000,
+      "byte_size": 4000
+    },
+    {
+      "name": "RUBP",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36910000,
+      "byte_size": 4000
+    },
+    {
+      "name": "PEPC",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36914000,
+      "byte_size": 4000
+    },
+    {
+      "name": "ETMX",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36918000,
+      "byte_size": 4000
+    },
+    {
+      "name": "CHL",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36922000,
+      "byte_size": 4000
+    },
+    {
+      "name": "CHL4",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36926000,
+      "byte_size": 4000
+    },
+    {
+      "name": "FCO2",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36930000,
+      "byte_size": 4000
+    },
+    {
+      "name": "VRNL",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 4,
+      "elements": 2500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36934000,
+      "byte_size": 20000
+    },
+    {
+      "name": "RSMH",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36954000,
+      "byte_size": 4000
+    },
+    {
+      "name": "VRNX",
+      "common_block": "BLK9A",
+      "declared_in": "f77src/blk9a.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 4,
+      "elements": 2500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JB",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36958000,
+      "byte_size": 20000
+    },
+    {
+      "name": "OFFST",
+      "common_block": "BLK9B",
+      "declared_in": "f77src/blk9b.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36978000,
+      "byte_size": 4000
+    },
+    {
+      "name": "ICTYP",
+      "common_block": "BLK9B",
+      "declared_in": "f77src/blk9b.h",
+      "effective_type": "i32",
+      "element_bytes": 4,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36982000,
+      "byte_size": 2000
+    },
+    {
+      "name": "ISTYP",
+      "common_block": "BLK9B",
+      "declared_in": "f77src/blk9b.h",
+      "effective_type": "i32",
+      "element_bytes": 4,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36984000,
+      "byte_size": 2000
+    },
+    {
+      "name": "IWTYP",
+      "common_block": "BLK9B",
+      "declared_in": "f77src/blk9b.h",
+      "effective_type": "i32",
+      "element_bytes": 4,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36986000,
+      "byte_size": 2000
+    },
+    {
+      "name": "IBTYP",
+      "common_block": "BLK9B",
+      "declared_in": "f77src/blk9b.h",
+      "effective_type": "i32",
+      "element_bytes": 4,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36988000,
+      "byte_size": 2000
+    },
+    {
+      "name": "ZERO",
+      "common_block": "BLKC",
+      "declared_in": "f77src/blkc.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 0,
+      "elements": 1,
+      "bounds": [],
+      "byte_offset": 36990000,
+      "byte_size": 8
+    },
+    {
+      "name": "ZEROP",
+      "common_block": "BLKC",
+      "declared_in": "f77src/blkc.h",
+      "effective_type": "f64",
+      "element_bytes": 8,
+      "rank": 3,
+      "elements": 500,
+      "bounds": [
+        {
+          "lower": "1",
+          "upper": "JP",
+          "extent": 5
+        },
+        {
+          "lower": "1",
+          "upper": "JY",
+          "extent": 10
+        },
+        {
+          "lower": "1",
+          "upper": "JX",
+          "extent": 10
+        }
+      ],
+      "byte_offset": 36990008,
+      "byte_size": 4000
+    }
+  ],
+  "limitations": "Restoring and dumping COMMON state proves state-in/state-out equivalence for the members listed here only. Members outside this scope are left at whatever the driver initialised, so a routine that reads them will not be exercised faithfully. This is the legacy oracle only; the Zig counterpart needs the binding register, not name matching."
+}
