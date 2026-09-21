@@ -47,18 +47,57 @@ pub const PhaseSplit = struct {
 /// WATSUB EVAP*V/EVAP*W. `unlimited_water_change_m3` and returned changes use
 /// the owner sign convention (positive inward). This helper also accepts rates
 /// when all three inputs use rate units.
+///
+/// `substep_fraction_of_hour` is the fraction of the external hour that this
+/// call represents (i.e. `1/substep_count` for whichever substep schedule the
+/// hour ultimately runs under; `accepted` below passes its own
+/// `time_step_hours`, which is exactly this fraction -- see
+/// `hourly_heat_water_solute.zig`'s `postPhasePreHeat`, which receives
+/// `inputs.phase_properties.time_step_hours` from `heat_step.zig`).
+///
+/// ISSUE-077: legacy `EVAPGW` (`watsub.f:2863-2864`) caps the liquid-water
+/// evaporation leg not only at "don't exceed available water" but
+/// ADDITIONALLY at an explicit per-substep fractional-rate limiter,
+/// `-VOLW2*XNPHX`, where `XNPHX=1/(NFH*NPH)` (`wthr.f:607-618`) is the
+/// reciprocal of the compounded substep count for the hour -- the same
+/// fraction the demand-side conductance (`PAREX`, `hour1.f:168`) already
+/// applies once. Fortran applies it a SECOND time, specifically to how much
+/// of the standing liquid pool one substep may remove, independent of how
+/// large atmospheric demand is: a deliberate numerical/physical throttle, not
+/// merely an availability floor. Prior to this fix, this function had no
+/// counterpart to that second application, so sufficiently large demand could
+/// remove the owner's entire liquid pool in a single substep (confirmed as
+/// the mechanism behind cell 0/layer 1's hour-2894 near-total desiccation,
+///0.6058->1.04e-5, in the tracked Ottawa deck).
+///
+/// The fractional floor below is applied ADDITIONALLY to (never instead of)
+/// the pre-existing "don't go negative" floor: because
+/// `0 < substep_fraction_of_hour <= 1`, `-owner_liquid_water_m3 *
+/// substep_fraction_of_hour` is always the same as, or less negative
+/// (tighter) than, `-owner_liquid_water_m3`, so taking the `@max` of both is
+/// a strict, monotonic tightening. For any call where the fractional cap does
+/// not bind (the common case -- demand already within the substep's
+/// allotted fraction of the pool, or `substep_fraction_of_hour == 1`, i.e. a
+/// single-substep hour), the result is bit-for-bit identical to the
+/// pre-fix formula.
 pub fn splitVaporThenLiquid(
     unlimited_water_change_m3: f64,
     owner_vapor_water_equivalent_m3: f64,
     owner_liquid_water_m3: f64,
+    substep_fraction_of_hour: f64,
 ) !PhaseSplit {
-    inline for (.{ unlimited_water_change_m3, owner_vapor_water_equivalent_m3, owner_liquid_water_m3 }) |value|
+    inline for (.{ unlimited_water_change_m3, owner_vapor_water_equivalent_m3, owner_liquid_water_m3, substep_fraction_of_hour }) |value|
         if (!std.math.isFinite(value)) return error.NonFiniteGroundVaporPhaseSplit;
     if (owner_vapor_water_equivalent_m3 < 0 or owner_liquid_water_m3 < 0)
         return error.InvalidGroundVaporPhaseSplit;
+    if (substep_fraction_of_hour <= 0 or substep_fraction_of_hour > 1)
+        return error.InvalidGroundVaporPhaseSplit;
     const vapor_change = @max(unlimited_water_change_m3, -owner_vapor_water_equivalent_m3);
     const liquid_remainder = unlimited_water_change_m3 - vapor_change;
-    const liquid_change = @max(liquid_remainder, -owner_liquid_water_m3);
+    const full_pool_floor = -owner_liquid_water_m3;
+    const fractional_rate_floor = -owner_liquid_water_m3 * substep_fraction_of_hour;
+    const liquid_floor = @max(full_pool_floor, fractional_rate_floor);
+    const liquid_change = @max(liquid_remainder, liquid_floor);
     return .{
         .vapor_water_change_m3 = vapor_change,
         .liquid_water_change_m3 = liquid_change,
@@ -112,6 +151,7 @@ pub fn accepted(inputs: Inputs) !Accepted {
         unlimited_water_change_m3,
         inputs.owner_vapor_water_equivalent_m3,
         inputs.owner_liquid_water_m3,
+        inputs.time_step_hours,
     );
     const water_change_m3 = split.total_water_change_m3;
     const donor_temperature_k = if (water_change_m3 >= 0)
@@ -252,14 +292,80 @@ test "invalid candidate cannot publish a partial activity" {
 }
 
 test "WATSUB phase split consumes represented vapor before liquid" {
-    const split = try splitVaporThenLiquid(-0.5, 0.2, 0.1);
+    const split = try splitVaporThenLiquid(-0.5, 0.2, 0.1, 1.0);
     try std.testing.expectEqual(@as(f64, -0.2), split.vapor_water_change_m3);
     try std.testing.expectEqual(@as(f64, -0.1), split.liquid_water_change_m3);
     try std.testing.expectApproxEqAbs(@as(f64, -0.3), split.total_water_change_m3, 1e-15);
     try std.testing.expect(split.vapor_limited);
     try std.testing.expect(split.liquid_limited);
 
-    const condensation = try splitVaporThenLiquid(0.25, 0, 0);
+    const condensation = try splitVaporThenLiquid(0.25, 0, 0, 1.0);
     try std.testing.expectEqual(@as(f64, 0.25), condensation.vapor_water_change_m3);
     try std.testing.expectEqual(@as(f64, 0), condensation.liquid_water_change_m3);
+}
+
+test "issue-077: hour-2894 desiccation scenario -- pre-fix cap would deplete ~100% of layer 1 in one substep; the fractional-rate cap now limits it to the substep's XNPHX-equivalent share" {
+    // Reconstructed from feature-019's captured hour-2893/2894 table and
+    // issue-077's quantitative consistency check: cell footprint 1 m2
+    // (f25si98:7-8, DH=DV=1.0), layer-1 thickness 0.01 m (f25sol98 row 2,
+    // CDPTH(1)) => layer volume 0.01 m3. Hour-2893's liquid fraction 0.6058
+    // => owner_liquid_water_m3 = 0.006058 m3 (6.058 mm-equivalent). The
+    // observed hour-2894 evapotranspiration spike (6.26559 mm ~= 0.0062656
+    // m3) exceeds the entire pool, so an even larger unbounded demand is used
+    // here to isolate the cap itself (both formulas floor once demand
+    // magnitude exceeds the pool, regardless of exactly how much larger).
+    // issue-060 captured this hour's actual recovery ladder attempts
+    // (substep_count=20,32,64); 20 (time_step_hours=1/20=0.05) is used here.
+    const owner_liquid_water_m3: f64 = 0.006058;
+    const unlimited_water_change_m3: f64 = -0.05;
+    const substep_fraction_of_hour: f64 = 1.0 / 20.0;
+
+    // Pre-issue-077 formula: liquid leg capped only at "don't exceed
+    // available water" -- no fractional-rate term. Reproduced inline
+    // (not calling production code) specifically to document the historical
+    // defect this fix corrects; intentionally kept, not dead code.
+    const pre_fix_liquid_change_m3 = @max(unlimited_water_change_m3, -owner_liquid_water_m3);
+    try std.testing.expectEqual(-owner_liquid_water_m3, pre_fix_liquid_change_m3);
+    try std.testing.expectApproxEqAbs(@as(f64, 1.0), @abs(pre_fix_liquid_change_m3) / owner_liquid_water_m3, 1e-12);
+
+    // Current formula: matches Fortran's EVAPGW/-VOLW2*XNPHX
+    // (watsub.f:2863-2864).
+    const split = try splitVaporThenLiquid(unlimited_water_change_m3, 0, owner_liquid_water_m3, substep_fraction_of_hour);
+    const expected_capped_change_m3 = -owner_liquid_water_m3 * substep_fraction_of_hour;
+    try std.testing.expectApproxEqAbs(expected_capped_change_m3, split.liquid_water_change_m3, 1e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, 1.0 / 20.0), @abs(split.liquid_water_change_m3) / owner_liquid_water_m3, 1e-12);
+    try std.testing.expect(split.liquid_limited);
+    // The fix strictly tightens: it never permits more removal than the
+    // pre-fix formula did.
+    try std.testing.expect(@abs(split.liquid_water_change_m3) < @abs(pre_fix_liquid_change_m3));
+}
+
+test "issue-077: normal, non-degenerate demand already within the substep fraction is a complete no-op (critical no-op proof)" {
+    // Common-case check: whenever demand does not saturate the fractional
+    // cap, the new formula must be bit-for-bit identical to the pre-fix one.
+    const owner_liquid_water_m3: f64 = 0.006058;
+    const substep_fraction_of_hour: f64 = 1.0 / 20.0;
+    const modest_unlimited_water_change_m3: f64 = -0.00005; // well under owner_liquid_water_m3 * substep_fraction_of_hour (~3.029e-4)
+
+    const pre_fix_liquid_change_m3 = @max(modest_unlimited_water_change_m3, -owner_liquid_water_m3);
+    const split = try splitVaporThenLiquid(modest_unlimited_water_change_m3, 0, owner_liquid_water_m3, substep_fraction_of_hour);
+
+    try std.testing.expectEqual(pre_fix_liquid_change_m3, split.liquid_water_change_m3);
+    try std.testing.expectEqual(modest_unlimited_water_change_m3, split.liquid_water_change_m3);
+    try std.testing.expect(!split.liquid_limited);
+
+    // Sweep the real substep ladder (heat_step.recovery_substep_counts) and a
+    // range of pool sizes: for any demand already within the substep's
+    // allotted fraction of the pool, the new cap must never engage.
+    const substep_counts = [_]f64{ 1, 2, 4, 8, 16, 20, 32, 64 };
+    var pool_m3: f64 = 0.0001;
+    while (pool_m3 < 1.0) : (pool_m3 *= 10) {
+        for (substep_counts) |count| {
+            const fraction = 1.0 / count;
+            const demand = -0.5 * pool_m3 * fraction; // half the fractional cap: must be a pure no-op
+            const s = try splitVaporThenLiquid(demand, 0, pool_m3, fraction);
+            try std.testing.expectApproxEqAbs(demand, s.liquid_water_change_m3, 1e-12 * pool_m3 + 1e-18);
+            try std.testing.expect(!s.liquid_limited);
+        }
+    }
 }
