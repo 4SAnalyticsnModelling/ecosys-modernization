@@ -50,7 +50,17 @@ Disposition: **`replaced-by-approved-feature`** for the format itself (binary bu
 
 ## Open gaps, stated precisely
 
-1. **State-coverage equivalence is unverified.** The reviewer lane asserted the Zig subsystem "covers all 12 functional state families identified in the legacy routines." That claim is **recorded, not accepted**: no per-family mapping from the 568 legacy I/O items to Zig checkpoint fields has been built, and a sweeping completeness assertion is exactly what the contract's "all agents agree is not a release decision" rule targets. This is the next real piece of work here.
+1. **State-coverage equivalence: unit 22 now MAPPED AND VERIFIED; units 21 and 26-29 still unverified.**
+
+   The reviewer lane's original sweeping claim ("covers all 12 functional state families") was refused as evidence and sent back for a per-family mapping. Asked for one, it **revised its own number** to 11 families with 1 unmapped -- which is the adversarial loop doing its job, and a reminder not to bank a round figure from either side.
+
+   **Unit 22 (96 statement pairs: microbial biomass, litter fractions, SOM/humus, fertilizer state): 11 families, all 11 persisted by ecosys-ng.** Ten map to `soil_organic_checkpoint.zig`/`soil_biogeochemistry_checkpoint.zig` directly. The eleventh, `HCBFL` (subsurface combustion heat), is **not** in those members but **is** persisted -- independently verified here, not taken from the report:
+   - legacy: written `wouts.f:462` `WRITE(22,91)I,IDATA(3),(HCBFL(L,NY,NX),L=0,NLI(NY,NX))`, read back `routs.f:488`; semantics are a one-cycle delay (`hour1.f:3176-3177` copies `HCBFL`->`HCBFX` then zeroes it; `redist.f:10717` accumulates it; initialized `starts.f:1640`)
+   - ecosys-ng: `soil_geometry_checkpoint.zig:46` `delayed_subsurface_combustion_heat_megajoules`, restored at `bundle_reader.zig:184`, live owner `ecosys_ng.zig:11143` used at `:5294`
+
+   So unit 22 has **no state-coverage gap** -- only a placement difference (the geometry bundle rather than the organic/biogeochemistry members). The reviewer's added remark that it carries "differing lifecycle semantics" is **its observation, not verified here**; the one-cycle delay above is the thing to check if anyone pursues it.
+
+   **Still genuinely unverified: unit 21 (275 pairs, the largest by far) and the four plant units 26-29 (197 pairs).** Those are the remaining work for this gap. Do not generalize the unit-22 result to them.
 2. ~~**No executed round-trip test.**~~ **WITHDRAWN -- this gap was filed in error and the opposite is true.** It was written from the absence of a round-trip test *in this record*, without checking the test suite; tracing it immediately afterwards found a substantial one already in place. This is the same false-alarm pattern this project has logged repeatedly ("before filing from absence, trace the live code"), and it is recorded rather than quietly deleted.
 
    `ecosys-ng/src/io/checkpoint/` carries **102 tests**, executed as part of the main suite. `zig test src/module_index.zig --test-filter "checkpoint"` -> **172 passed, 1 skipped, 0 failed, exit 0**. They include real round-trips and, more valuable for restart integrity, a large family of *refuse-rather-than-fabricate* version guards:
