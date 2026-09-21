@@ -2,3 +2,12 @@ ecosys-ng/.zig-cache/
 ecosys-ng/zig-out/
 ecosys-ng/ecosys-ng-bin/
 .claude/scheduled_tasks.lock
+
+# Generated, derivable artifacts -- never commit these.
+# `__pycache__/` is Python bytecode debris. `audit/manifest/f77index.json` is a
+# 3.6 MB index regenerated from `f77src/` by `ecosys-audit/scripts/f77index.py`;
+# committing a derived index invites it going stale against the sources it
+# describes, which is exactly the failure mode this audit keeps finding in
+# hand-maintained records.
+__pycache__/
+audit/manifest/f77index.json
