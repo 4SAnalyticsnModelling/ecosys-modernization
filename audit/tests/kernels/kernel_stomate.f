@@ -19,13 +19,94 @@ C     Layout: 74 items, 36994008 bytes, see the JSON manifest.
       include "blk9c.h"
       include "blk1u.h"
       INTEGER I,J,NFZ,NZ,NY,NX
+      CHARACTER*32 CARG
+      INTEGER NARGS, IARG
       INTEGER IOS
-      I=0
-      J=0
-      NFZ=0
-      NZ=0
-      NY=0
-      NX=0
+      I=-9999
+      J=-9999
+      NFZ=-9999
+      NZ=-9999
+      NY=-9999
+      NX=-9999
+      NARGS=COMMAND_ARGUMENT_COUNT()
+      IF(NARGS.GE.6)THEN
+      CALL GET_COMMAND_ARGUMENT(1,CARG)
+      READ(CARG,*,IOSTAT=IOS) I
+      IF(IOS.NE.0)THEN
+      WRITE(*,*)'kernelgen: bad argv integer for I',CARG
+      STOP 2
+      ENDIF
+      CALL GET_COMMAND_ARGUMENT(2,CARG)
+      READ(CARG,*,IOSTAT=IOS) J
+      IF(IOS.NE.0)THEN
+      WRITE(*,*)'kernelgen: bad argv integer for J',CARG
+      STOP 2
+      ENDIF
+      CALL GET_COMMAND_ARGUMENT(3,CARG)
+      READ(CARG,*,IOSTAT=IOS) NFZ
+      IF(IOS.NE.0)THEN
+      WRITE(*,*)'kernelgen: bad argv integer for NFZ',CARG
+      STOP 2
+      ENDIF
+      CALL GET_COMMAND_ARGUMENT(4,CARG)
+      READ(CARG,*,IOSTAT=IOS) NZ
+      IF(IOS.NE.0)THEN
+      WRITE(*,*)'kernelgen: bad argv integer for NZ',CARG
+      STOP 2
+      ENDIF
+      CALL GET_COMMAND_ARGUMENT(5,CARG)
+      READ(CARG,*,IOSTAT=IOS) NY
+      IF(IOS.NE.0)THEN
+      WRITE(*,*)'kernelgen: bad argv integer for NY',CARG
+      STOP 2
+      ENDIF
+      CALL GET_COMMAND_ARGUMENT(6,CARG)
+      READ(CARG,*,IOSTAT=IOS) NX
+      IF(IOS.NE.0)THEN
+      WRITE(*,*)'kernelgen: bad argv integer for NX',CARG
+      STOP 2
+      ENDIF
+      ELSE
+      OPEN(82,FILE='kernel_stomate.args',FORM='UNFORMATTED',
+     2ACCESS='STREAM',STATUS='OLD',IOSTAT=IOS)
+      IF(IOS.EQ.0)THEN
+      READ(82) I
+      READ(82) J
+      READ(82) NFZ
+      READ(82) NZ
+      READ(82) NY
+      READ(82) NX
+      CLOSE(82)
+      ELSE
+      WRITE(*,*)'kernelgen: missing required arguments'
+      WRITE(*,*)'supply 6 args: I,J,NFZ,NZ,NY,NX'
+      STOP 2
+      ENDIF
+      ENDIF
+      IF(I.LT.1.OR.I.GT.366)THEN
+      WRITE(*,*)'kernelgen: argument I out of bounds [1,366]:',I
+      STOP 2
+      ENDIF
+      IF(J.LT.1.OR.J.GT.24)THEN
+      WRITE(*,*)'kernelgen: argument J out of bounds [1,24]:',J
+      STOP 2
+      ENDIF
+      IF(NFZ.LT.1.OR.NFZ.GT.100)THEN
+      WRITE(*,*)'kernelgen: argument NFZ out of bounds [1,100]:',NFZ
+      STOP 2
+      ENDIF
+      IF(NZ.LT.1.OR.NZ.GT.JP)THEN
+      WRITE(*,*)'kernelgen: argument NZ out of bounds [1,JP]:',NZ
+      STOP 2
+      ENDIF
+      IF(NY.LT.1.OR.NY.GT.JY)THEN
+      WRITE(*,*)'kernelgen: argument NY out of bounds [1,JY]:',NY
+      STOP 2
+      ENDIF
+      IF(NX.LT.1.OR.NX.GT.JX)THEN
+      WRITE(*,*)'kernelgen: argument NX out of bounds [1,JX]:',NX
+      STOP 2
+      ENDIF
       OPEN(81,FILE='kernel_stomate.in',FORM='UNFORMATTED',
      2ACCESS='STREAM',STATUS='OLD',IOSTAT=IOS)
       IF(IOS.NE.0)THEN
@@ -107,17 +188,6 @@ C     Layout: 74 items, 36994008 bytes, see the JSON manifest.
       READ(81) ZERO
       READ(81) ZEROP
       CLOSE(81)
-      OPEN(82,FILE='kernel_stomate.args',FORM='UNFORMATTED',
-     2ACCESS='STREAM',STATUS='OLD',IOSTAT=IOS)
-      IF(IOS.EQ.0)THEN
-      READ(82) I
-      READ(82) J
-      READ(82) NFZ
-      READ(82) NZ
-      READ(82) NY
-      READ(82) NX
-      CLOSE(82)
-      ENDIF
       CALL STOMATE(I,J,NFZ,NZ,NY,NX)
       OPEN(83,FILE='kernel_stomate.out',FORM='UNFORMATTED',
      2ACCESS='STREAM',STATUS='REPLACE',IOSTAT=IOS)

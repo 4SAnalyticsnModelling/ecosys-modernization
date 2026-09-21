@@ -44,11 +44,12 @@ RE_IDENTIFIER = re.compile(r'[A-Z][A-Z0-9_]*')
 PRECISION_FLAGS = ('-ffixed-form', '-ffixed-line-length-72', '-fdefault-real-8',
                    '-fdefault-double-8')
 # The legacy unit needs a permissive dialect that also hides the Fortran 2023 SPLIT
-# intrinsic. The driver needs ACCESS='STREAM', which is Fortran 2003 and therefore
+# intrinsic. For diagnostic safety, -fcheck=bounds catches any out-of-bounds subscripts immediately.
+# The driver needs ACCESS='STREAM', which is Fortran 2003 and therefore
 # rejected under -std=legacy, so the two are compiled as separate translation units with
 # the same precision contract and then linked.
-LEGACY_FLAGS = PRECISION_FLAGS + ('-std=legacy', '-fallow-argument-mismatch')
-DRIVER_FLAGS = PRECISION_FLAGS
+LEGACY_FLAGS = PRECISION_FLAGS + ('-std=legacy', '-fallow-argument-mismatch', '-fcheck=bounds')
+DRIVER_FLAGS = PRECISION_FLAGS + ('-fcheck=bounds',)
 ORACLE_FLAGS = LEGACY_FLAGS
 TYPE_BYTES = {'f64': 8, 'f32': 4, 'i32': 4, 'i64': 8, 'bool32': 4, 'char': 1}
 FORTRAN_KEYWORDS = frozenset({
@@ -185,6 +186,21 @@ def emit_fixed(add, text: str) -> None:
         add((' ' * (CODE_START - 1) if position == 0 else ' ' * (CODE_START - 2) + '2') + line)
 
 
+# Standard subscript upper bounds from f77src/parameters.h
+KNOWN_ARG_BOUNDS = {
+    'NX': (1, 'JX'),
+    'NY': (1, 'JY'),
+    'NZ': (1, 'JP'),
+    'NHW': (1, 'JC'),
+    'NHE': (1, 'JC'),
+    'NVN': (1, 'JC'),
+    'NVS': (1, 'JC'),
+    'I': (1, 366),
+    'J': (1, 24),
+    'NFZ': (1, 100),
+}
+
+
 def fortran_driver(unit: dict, layout: list[dict], stream: str) -> str:
     """Emit a fixed-form driver. All state travels through COMMON, not arguments."""
     includes = [entry['name'] for entry in unit['includes']]
@@ -208,12 +224,48 @@ def fortran_driver(unit: dict, layout: list[dict], stream: str) -> str:
     # in this codebase, so they are integers under -i4.
     if arguments:
         emit_fixed(add, f'INTEGER {",".join(arguments)}')
+        emit_fixed(add, f'CHARACTER*32 CARG')
+        emit_fixed(add, f'INTEGER NARGS, IARG')
     emit_fixed(add, 'INTEGER IOS')
     if arguments:
-        # Initialised explicitly because the COMMON snapshot does not carry arguments; an
-        # optional .args stream overrides these defaults below.
+        # Default all scalar arguments to sentinel -9999 so unsupplied arguments trip bounds check
         for name in arguments:
-            emit_fixed(add, f'{name}=0')
+            emit_fixed(add, f'{name}=-9999')
+        # Check command line arguments first via GET_COMMAND_ARGUMENT
+        emit_fixed(add, 'NARGS=COMMAND_ARGUMENT_COUNT()')
+        emit_fixed(add, f'IF(NARGS.GE.{len(arguments)})THEN')
+        for idx, name in enumerate(arguments, start=1):
+            emit_fixed(add, f'CALL GET_COMMAND_ARGUMENT({idx},CARG)')
+            emit_fixed(add, f'READ(CARG,*,IOSTAT=IOS) {name}')
+            emit_fixed(add, 'IF(IOS.NE.0)THEN')
+            emit_fixed(add, f"WRITE(*,*)'kernelgen: bad argv integer for {name}',CARG")
+            emit_fixed(add, 'STOP 2')
+            emit_fixed(add, 'ENDIF')
+        emit_fixed(add, 'ELSE')
+        # Fallback to .args binary sidecar file if present
+        emit_fixed(add, f"OPEN(82,FILE='{stream}.args',FORM='UNFORMATTED',"
+                        f"ACCESS='STREAM',STATUS='OLD',IOSTAT=IOS)")
+        emit_fixed(add, 'IF(IOS.EQ.0)THEN')
+        for name in arguments:
+            emit_fixed(add, f'READ(82) {name}')
+        emit_fixed(add, 'CLOSE(82)')
+        emit_fixed(add, 'ELSE')
+        emit_fixed(add, f"WRITE(*,*)'kernelgen: missing required arguments'")
+        emit_fixed(add, f"WRITE(*,*)'supply {len(arguments)} args: {','.join(arguments)}'")
+        emit_fixed(add, 'STOP 2')
+        emit_fixed(add, 'ENDIF')
+        emit_fixed(add, 'ENDIF')
+
+        # Bounds checks for all known arguments to prevent silent out-of-bounds indexing
+        for name in arguments:
+            uname = name.upper()
+            if uname in KNOWN_ARG_BOUNDS:
+                low, high = KNOWN_ARG_BOUNDS[uname]
+                emit_fixed(add, f'IF({name}.LT.{low}.OR.{name}.GT.{high})THEN')
+                emit_fixed(add, f"WRITE(*,*)'kernelgen: argument {name} out of bounds [{low},{high}]:',{name}")
+                emit_fixed(add, 'STOP 2')
+                emit_fixed(add, 'ENDIF')
+
     emit_fixed(add, f"OPEN(81,FILE='{stream}.in',FORM='UNFORMATTED',"
                     f"ACCESS='STREAM',STATUS='OLD',IOSTAT=IOS)")
     emit_fixed(add, 'IF(IOS.NE.0)THEN')
@@ -223,14 +275,6 @@ def fortran_driver(unit: dict, layout: list[dict], stream: str) -> str:
     for item in layout:
         emit_fixed(add, f'READ(81) {item["name"]}')
     emit_fixed(add, 'CLOSE(81)')
-    if arguments:
-        emit_fixed(add, f"OPEN(82,FILE='{stream}.args',FORM='UNFORMATTED',"
-                        f"ACCESS='STREAM',STATUS='OLD',IOSTAT=IOS)")
-        emit_fixed(add, 'IF(IOS.EQ.0)THEN')
-        for name in arguments:
-            emit_fixed(add, f'READ(82) {name}')
-        emit_fixed(add, 'CLOSE(82)')
-        emit_fixed(add, 'ENDIF')
     emit_fixed(add, call)
     emit_fixed(add, f"OPEN(83,FILE='{stream}.out',FORM='UNFORMATTED',"
                     f"ACCESS='STREAM',STATUS='REPLACE',IOSTAT=IOS)")

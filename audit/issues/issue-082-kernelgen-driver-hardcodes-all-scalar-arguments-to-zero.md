@@ -1,6 +1,8 @@
 # Issue 082 -- `kernelgen.py`'s generated driver hardcodes every scalar argument to 0, so the routine is called out of bounds and computes nothing
 
-Status: OPEN, blocking. Filed 2026-09-21 by the adversarial Claude/Pi session while executing the round-13 verification protocol. **This blocks every matched-state kernel comparison** -- the experiment `issue-024`, `issue-079` and `issue-080` all name as their required next step.
+Status: **FIXED AND VALIDATED, same day (2026-09-21)** -- see `audit/runs/run-012-kernelgen-harness-validated-against-hand-arithmetic-2026-09-21.md`. The peer author rewrote the generator to take `I/J/NFZ/NZ/NY/NX` from `COMMAND_ARGUMENT_COUNT`/`GET_COMMAND_ARGUMENT` with a `<kernel>.args` sidecar fallback, to emit in-Fortran bounds checks that `STOP 2` before opening the snapshot, and to add `-fcheck=bounds` to both the driver and legacy-unit compiles. Rebuilt and re-run here on the run lane, with all three guard cases tested explicitly: out-of-bounds `NZ=0` refused (`argument NZ out of bounds [1,JP]`, exit 2), no-arguments refused (exit 2), valid subscripts accepted (exit 0, 0.068 s). The decisive proof is that the two quantities this issue used to expose the defect now come out right: `FMOL(1,1,1) = 40.89887640449439` against a hand-computed `1.2194e4/298.15`, matching to full f64 precision, and `CO2I(1,1,1) = 280` against `0.7*400`, exactly. Original filing preserved below unchanged.
+
+Original status: OPEN, blocking. Filed 2026-09-21 by the adversarial Claude/Pi session while executing the round-13 verification protocol. **This blocks every matched-state kernel comparison** -- the experiment `issue-024`, `issue-079` and `issue-080` all name as their required next step.
 
 Owner: the peer Pi session authored `kernelgen.py`; this issue was found and is recorded by the Claude session, which owns the run lane and performed the build/run.
 

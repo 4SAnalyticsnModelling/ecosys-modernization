@@ -8,10 +8,10 @@ $out = if ($args.Count -ge 1) { $args[0] } else { Join-Path $PWD 'audit/tests/ke
 New-Item -ItemType Directory -Path $out -Force | Out-Null
 
 
-& gfortran -c -ffixed-form -ffixed-line-length-72 -fdefault-real-8 -fdefault-double-8 -I f77src `
+& gfortran -c -ffixed-form -ffixed-line-length-72 -fdefault-real-8 -fdefault-double-8 -fcheck=bounds -I f77src `
   -o (Join-Path $out 'kernel_stomate.o') 'audit/tests/kernels/kernel_stomate.f'
 if ($LASTEXITCODE -ne 0) { throw "driver compile failed" }
-& gfortran -c -ffixed-form -ffixed-line-length-72 -fdefault-real-8 -fdefault-double-8 -std=legacy -fallow-argument-mismatch -I f77src `
+& gfortran -c -ffixed-form -ffixed-line-length-72 -fdefault-real-8 -fdefault-double-8 -std=legacy -fallow-argument-mismatch -fcheck=bounds -I f77src `
   -o (Join-Path $out 'stomate.o') 'f77src/stomate.f'
 if ($LASTEXITCODE -ne 0) { throw "legacy unit compile failed" }
 & gfortran -o (Join-Path $out 'kernel_stomate.exe') `

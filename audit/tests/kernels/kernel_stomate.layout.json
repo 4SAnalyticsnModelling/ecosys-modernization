@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "created_utc": "2026-09-21T19:57:31.882741+00:00",
+  "created_utc": "2026-09-21T20:10:45.314254+00:00",
   "routine": "STOMATE",
   "source": "f77src/stomate.f:2-673",
   "source_sha256": "5e8acbaa44c1ac633c5dd75ba2c6897d4b63f4955c4d0157d33083ddcb003aff",
@@ -57,7 +57,8 @@
       "-ffixed-form",
       "-ffixed-line-length-72",
       "-fdefault-real-8",
-      "-fdefault-double-8"
+      "-fdefault-double-8",
+      "-fcheck=bounds"
     ],
     "legacy_flags": [
       "-ffixed-form",
@@ -65,7 +66,8 @@
       "-fdefault-real-8",
       "-fdefault-double-8",
       "-std=legacy",
-      "-fallow-argument-mismatch"
+      "-fallow-argument-mismatch",
+      "-fcheck=bounds"
     ],
     "include_path": "f77src",
     "note": "The driver and the legacy unit are separate translation units: the driver needs ACCESS='STREAM' (Fortran 2003, rejected by -std=legacy) and the legacy unit needs -std=legacy. Both carry the same -fdefault-real-8 precision contract. gfortran 16 implements the Fortran 2023 SPLIT intrinsic, which shadows this project's own split.f and makes soil.f fail with \"Too many arguments in call to split\". The call is correct: split.f declares 10 arguments and soil.f passes 10. Declare EXTERNAL split after the unit header (see header_line_end) or compile that unit with -std=f95. These flags reproduce the ifort -r8 -i4 precision contract recorded in fflags; they are not a claim of ifort-identical code generation."
