@@ -9,24 +9,56 @@ file, or prior issue file.
 
 ## 1. Executive summary
 
-This session's production-run work moved the Ottawa deck's blocking frontier
-from **hour 2,578** to **hour 2,894**, a real, validated ~317-hour advance,
-by finding and fixing more than a dozen genuine defects (a stiff-solver
-iteration-budget starvation bug, two substep-ladder consistency/overflow
-crash risks, and a family of ~10 "exact-zero water-carrier" mass-conservation
-substitution bugs across water/nitrogen/phosphorus/ammonia carrier bridges).
-The run now advances to **hour 2,895** before failing, and a further
-same-session fix (issue-067) cleared one more layer of that new frontier
-(a water-closure-tolerance provenance bug). What remains blocking hour 2,895
-is a **chronic, near-desiccated single soil layer (cell 0, layer 0)** whose
-phase-enthalpy Newton/Anderson solve cannot find a state that is
-simultaneously residual-admissible and inside the physical temperature
-domain -- ten rounds of diagnosis and two independently safe, zero-regression
-algorithmic enhancements (two different Newton-backtracking variants) did
-not resolve it, and the issue's own tenth round explicitly and formally
-escalated this to a human numerics reviewer rather than continuing further
-autonomous iteration. This blocker is described precisely in Section 3
-below; it is not more autonomous guessing that is needed next.
+**This session's biggest result: the Ottawa deck's blocking frontier moved
+from hour 2,894/2,895 -- where it had been stuck for the vast majority of
+this session, across issue-065's 18 rounds and issue-068's 10+ rounds -- all
+the way to hour 3,252, a genuine, validated ~358-hour advance beyond that
+long-stuck point.** The breakthrough was `issue-024`'s final round: Fortran's
+`wthr.f:589-601` applies a **universal, unconditional `NFH=4` per-hour
+substep baseline to every non-fire hour, for every layer** -- not merely the
+conditional `ICHKV` escalation layered on top of it that round 8 had already
+restored. Zig's translation was missing that universal baseline entirely,
+defaulting every hour's first attempt to `substep_count=1`. The fix was (1)
+empirically confirmed via a bounded, fully-reverted diagnostic experiment
+before being committed; (2) checked for early-hour trajectory consistency
+against the already-validated Fortran-comparison evidence (the deep layer
+changed by a negligible ~6.5e-8 relative by hour 1,000; the actively-targeted
+surface layer changed by a legitimate-looking ~3-4%); (3) verified with a
+full ~34-filter regression sweep plus the full unfiltered test suite (4362
+passed, 1 skipped, 7 failed -- the pre-existing, unrelated `issue-076` CRLF
+baseline, zero new failures); and (4) validated with a fresh-from-hour-1
+`ReleaseFast` run against the real committed binary, reproducing the
+diagnostic experiment's results bit-for-bit. It also **unexpectedly improved
+wall-clock performance** to the new, later frontier rather than worsening it
+as this session had originally flagged as a real risk -- see Section 5.
+Full evidence in `issue-024`'s "Committed fix (2026-09-21)" section.
+
+This resolves, for real, the human-reviewer decision this document's
+original Section 3 (preserved below for provenance) asked for regarding
+`issue-024`/`issue-068`: the run now clears hour 2,894 and hour 2,895
+cleanly. It does **not** resolve `issue-024`'s own separate, still-open
+core hour-1/layer-1 chronically-elevated-water root cause (rounds 1-7),
+which is unrelated to the hour-2,894 collapse this fix addresses.
+
+The run now fails at a **new frontier, hour 3,253**, on a **genuinely
+different failure class**: `RuntimeSoilPoreCapacityExceeded` (cell 0, layer
+1) -- not a solver/temperature-domain issue at all. `issue-078`'s diagnosis
+(all 3 of the contract's 3 experiments spent) root-caused this precisely to
+an architectural mismatch in how tillage soil-mixing is applied: Fortran's
+`REDIST` re-applies a small, `CORP`-fractional mix at **every substep of
+every hour of the whole tillage calendar day**, interleaved with WATSUB's
+own mechanical-displacement relief mechanism after each dose (self-correcting
+by construction, even though the mixing formula itself is just as
+capacity-unaware as Zig's); Zig's `applyDeferredTillageSoil` applies **one
+single full-strength deferred dose**, once per tillage event, with no
+equivalent repeated relief opportunity. Two candidate fixes were identified
+-- (a) make the single dose itself capacity-aware/self-limiting, or (b)
+restructure the dispatch to interleave repeated fractional applications
+across the substep loop, mirroring Fortran's actual architecture -- but both
+are genuine architecture decisions, not "restore an existing mechanism" safe
+fixes, and were correctly **not** implemented autonomously. This new
+frontier and its two open options are described in Section 3 below,
+alongside the now-resolved `issue-024`/`issue-068` pairing.
 
 Separately, this session's own `issue-069` commit had silently broken the
 full untargeted `zig test src/module_index.zig` suite (a stale test
@@ -100,9 +132,32 @@ at the end of this list.
 - **New frontier**: the run now fails at hour 3,253 with a new, distinct signature (`RuntimeSoilPoreCapacityExceeded`, `cell=0 layer=1`) -- filed as `audit/issues/issue-078-hour-3253-runtime-soil-pore-capacity-exceeded.md`, deliberately not diagnosed in the same pass that implemented this fix.
 - **What this does NOT resolve**: issue-024's own core round-1..7 hour-1/layer-1 chronically-elevated-water root cause remains open; this fix addresses the downstream hour-2,894 collapse, not that upstream cause. The new hour-3,253 frontier is a fresh, undiagnosed blocker on any further progress toward full production completion.
 
+### The current open decision: `issue-078`, hour 3,253, `RuntimeSoilPoreCapacityExceeded` (cell 0, layer 1)
+
+With the `issue-024`/`issue-068` pairing below now **RESOLVED/IMPLEMENTED**
+(the fix described above), `issue-078` is the new, and only, open
+architecture decision blocking further progress past hour 3,253. Its
+diagnosis budget is fully spent (3 of 3 experiments) and it correctly was
+**not** implemented autonomously, because both candidate fixes are genuine
+design decisions rather than "restore an existing mechanism" safe fixes:
+
+- `audit/issues/issue-078-hour-3253-runtime-soil-pore-capacity-exceeded.md`
+
+**Root cause (confirmed by source-reading Fortran's `REDIST`, `redist.f:11277-11278`/`11900-12200`, plus two fresh-from-hour-1 instrumented reruns):** legacy has no separately named tillage subroutine -- the soil-mixing action lives inside `SUBROUTINE REDIST`, gated on that day's fixed `XCORP`/`CORP` mixing fraction (set once per calendar day in `day.f`, not reset mid-day). Because `REDIST` is called from inside the per-hour, per-substep loop (`soil.f:135-223`, `CALL WATSUB` then `CALL EROSION` then `CALL REDIST`, every substep of every hour), **the tillage-mixing block re-executes at every single substep of every hour of the whole tillage calendar day** (up to `24*NFH` = 96 times at the committed `NFH=4` baseline) -- each time moving only a small, `CORP`-weighted fraction of the imbalance, and each time immediately followed by another `CALL WATSUB` that gets a fresh chance to relieve any transient per-layer overfill that small step created. Legacy's mixing formula itself is algebraically just as capacity-unaware as Zig's (confirmed by reading the full water-mixing block; no term references pore capacity), so the safety net is architectural (repetition + interleaved relief), not a capacity check.
+
+Zig's `applyDeferredTillageSoil` (`disturbance_management_dispatch`, invoked from `postScienceManagementAndGasAccounting`, confirmed by `stage_execution_census` to fire exactly twice in 3,252 hours) instead writes one single, full-strength deferred dose per tillage event, strictly after that hour's own WATSUB solve has already closed -- so there is no equivalent repeated-relief opportunity. Two fresh-from-hour-1 instrumented reruns traced the actual water movement precisely to this event at hour 3,252 (layer 0 loses ~1.81e-3 m3, layer 1 gains ~1.09e-3 m3 -- pushing it `8.6495e-4 m3` over its own capacity, matching the eventual hour-3,253 error's fields bit-for-bit; layer 2 also goes over capacity by ~2.96e-3 m3), refuting the original chronic-layer-0-overfill/relayering hypothesis directly.
+
+**Two candidate fixes identified, neither implemented (both genuine architecture decisions):**
+1. Make the single deferred dose itself capacity-aware and self-limiting (a new algorithm at the write site).
+2. Restructure `applyDeferredTillageSoil`'s dispatch to interleave repeated, smaller-fraction applications across the substep loop for the tillage event window, each followed by a WATSUB-equivalent relief call -- mirroring Fortran's actual architecture (a substantial dispatch-design change, not a one-line reorder).
+
+Moving the existing call earlier in the hour was checked and does **not** resolve this cleanly: both engines already run their mixing step after that timestep's own WATSUB-equivalent solve (matching intra-substep position), so the real mismatch is architecture/frequency, not call order. This decision is handed off for human/design review, same as the (now-resolved) pairing below was.
+
 The original section text below (2026-09-20) is preserved verbatim for provenance -- it correctly framed the decision that has now been made and acted on.
 
 ## 3. The one specific decision needed from a human reviewer
+
+**STATUS: RESOLVED/IMPLEMENTED, 2026-09-21 -- see the new Section 3 text above.** The universal `NFH=4` baseline fix was implemented, committed, and validated; the run now clears both hour 2,894 and hour 2,895 cleanly. The text immediately below is preserved verbatim for provenance only and describes the decision as it stood before that fix; it should not be treated as still-open. The current open decision is `issue-078` (above).
 
 **`issue-024` and `issue-068` should be reviewed together, as one decision** --
 per `issue-068`'s own tenth-round consolidation, which explicitly states this
@@ -289,6 +344,8 @@ does not re-derive or re-rank them.
 
 ## 5. Performance status
 
+**Note added 2026-09-21, not yet reflected in the numbers below: the universal `NFH=4` baseline fix (Section 3) unexpectedly improved wall-clock time to its new, later frontier rather than degrading it.** A single bounded, non-rigorous timing observation (not a repeated, controlled-power-state benchmark like `run-008` below) found the fix reaching hour 3,252 in ~4 min 46 s (diagnostic experiment) / ~4 min 44 s (committed-binary validation) -- 4-5x *faster* wall-clock than the ~17-25 minutes the pre-fix code needed to reach only the much-earlier hour 2,894/2,895 frontier. The likely mechanism: flooring every hour's first attempt at 4 substeps eliminates most of the costly reactive escalation-ladder retries (3 escalation events across the full 3,252-hour committed-binary run, versus 178 in the previous ~2,894-hour baseline window per `run-008` below). **This is one qualitative timing observation from the fix's own validation passes, not a rigorous re-benchmark**: no repeat runs, no logged/confirmed power-plan control, and no attempt to isolate this from other confounds. A full `run-008`-style remeasurement over the new, longer hour-1-through-3,252 window (matched Fortran-oracle window, multiple repeats, controlled power state) would be a good next step and has **not** been performed. The `run-008` numbers immediately below remain the most recent *rigorous* measurement, but they cover the old, now-superseded hour-2,894/2,895 window and should not be read as still describing the current frontier's performance.
+
 **Superseded.** Most recent measurement: `audit/runs/run-008-longer-window-remeasurement-2026-09-20.md`,
 a fresh same-day remeasurement over the **full currently-reachable window**
 (hour 1 through the natural hour-2,894/2,895 boundary), superseding
@@ -367,6 +424,11 @@ a fresh same-day remeasurement over the **full currently-reachable window**
 - `audit/issues/issue-069-*.md`, `issue-072-*.md`, `issue-073-*.md`,
   `issue-074-*.md` -- the water-carrier defect class's closing batch (see
   Section 2).
+- `audit/issues/issue-024-top-layer-water-content-divergence-oracle-vs-zig.md`'s
+  "Committed fix (2026-09-21)" section, and
+  `audit/issues/issue-078-hour-3253-runtime-soil-pore-capacity-exceeded.md` --
+  the hour-2,894->3,252 breakthrough and the new hour-3,253 frontier it now
+  blocks on (see Section 1 and Section 3).
 - `audit/runs/run-001-*.md` through `run-008-*.md` -- performance and
   diagnostic run history.
 - `ecosys-audit/PROJECT_CONTRACT.md`, `ecosys-audit/EVIDENCE_GUIDE.md` --
