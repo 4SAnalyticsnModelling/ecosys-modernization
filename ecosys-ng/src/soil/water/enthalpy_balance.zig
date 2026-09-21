@@ -576,3 +576,107 @@ test "physical acceptance defaults to unused and still rejects a negligible tole
         ),
     );
 }
+
+// `issue-024` round 11 measurement, NOT an assertion that either side is right.
+//
+// The oracle rate-limits the TOP soil layer's freezing specifically. That layer
+// is gated out of the deep-layer micropore kernel (`watsub.f:6360`'s
+// `IF(N3.GT.NUM(NY,NX))`, with `NUM=NU` at `watsub.f:125`, confirmed by
+// `:6447-6451`) and handled instead at `watsub.f:2802-2823`, where the freeze
+// branch's mass cap is `333.0*VOLW2*XNPSRX` with
+// `XNPSRX = 1/(NPH*NPS*NPRS)` (`wthr.f:622`, `NPS=20`/`NPRS=10` at `:605-606`)
+// while the thaw branch keeps `XNPXX = 1/NPH` (`:2810`). That block sits outside
+// the `MM`/`NN` inner loops (`watsub.f:1237-2599`, `:1913-2198`), so the freeze
+// fraction does not re-accumulate: it executes `NFH*NPH` times per hour.
+//
+// ecosys-ng commits, for every layer including this one, the UNCONSTRAINED
+// Dall'Amico equilibrium split that `stateAtTemperature` returns
+// (`soil/heat/solver_residual.zig:145-160` fills the phase buffers from
+// `trialState`; `soil/heat/solver_solve.zig:674-676` publishes them). No rate
+// limiter exists on that path -- independently searched from both the editor and
+// the reviewer side of the 2026-09-21 adversarial session
+// (`audit/reviews/review-pi-2026-09-21-round2.md`).
+//
+// This test pins the resulting overshoot factor so that neither side can drift
+// silently while the disposition question (is the oracle's kinetic ceiling real
+// nucleation-limited physics, or a numerical convenience?) is still open with a
+// human reviewer. It deliberately asserts only a loose bound: the exact factor
+// depends on the retention curve, and the point is the order of magnitude.
+test "issue-024: legacy top-layer freeze-rate ceiling versus unconstrained equilibrium partition" {
+    // Ottawa top soil layer, from this issue's Experiments 1-2: layer 1 spans
+    // 0.00-0.01 m over a 1 m2 footprint and starts at volumetric water 0.28
+    // (the `THW=1` field-capacity code in `f25sol98`, decoded identically by both
+    // sides).
+    const porous_medium_volume_m3: f64 = 0.01;
+    const initial_water_fraction: f64 = 0.28;
+    const total_water_m3: f64 = initial_water_fraction * porous_medium_volume_m3;
+
+    // Oracle ceiling. The mass cap binds on every execution for this state (the
+    // `XNPR`-attenuated driving term is ~25x larger), so compound it over the
+    // hour's `NFH*NPH = 4*20` executions.
+    const xnpsrx = 1.0 / (20.0 * 20.0 * 10.0);
+    var legacy_liquid_m3 = total_water_m3;
+    for (0..80) |_| legacy_liquid_m3 -= legacy_liquid_m3 * xnpsrx;
+    const legacy_converted_fraction =
+        (total_water_m3 - legacy_liquid_m3) / total_water_m3;
+    // ~2% per hour, and NPH-independent: NFH*NPH * 1/(NPH*NPS*NPRS) = NFH/200.
+    try std.testing.expect(legacy_converted_fraction > 0.019);
+    try std.testing.expect(legacy_converted_fraction < 0.021);
+
+    // ecosys-ng's committed partition for the same layer. This deck's
+    // `van_genuchten_inflection_pressure_head_m = 0` opts every layer into the
+    // generic Carsel-Parrish texture curve rather than one anchored to its own
+    // supplied FC/WP (this issue's round 10), so use that curve here.
+    const curve = try retention.carselParrishDefault(.clay_loam, null);
+    const parameters: Parameters = .{
+        .porous_medium_volume_m3 = porous_medium_volume_m3,
+        .total_water_equivalent_m3 = total_water_m3,
+        .unfrozen_pressure_head_m =
+            try curve.pressureHeadAtWaterContent(initial_water_fraction),
+        .gravitational_water_potential_mpa_per_m = 0.00980665,
+        .pure_water_melting_temperature_k = 273.15,
+        // Sensible-heat terms do not enter the partition at a fixed temperature;
+        // they only affect enthalpy bookkeeping, so the measured ice fraction is
+        // insensitive to these three values.
+        .dry_solid_heat_capacity_megajoules_per_k = 1.0752 * porous_medium_volume_m3,
+        .liquid_water_heat_capacity_megajoules_per_m3_k = 4.19,
+        .ice_water_equivalent_heat_capacity_megajoules_per_m3_k = 1.9274,
+        .latent_heat_of_fusion_megajoules_per_m3 = 333.0,
+        .mualem_van_genuchten = curve,
+    };
+
+    // The oracle's own measured hour-1 end state for this exact cell
+    // (`TEMP_1 = -21.04 degC`, recorded in this issue from Round 2/Experiment 5's
+    // read of `01998f25eh1`). Asking ecosys-ng's partition what it would do at the
+    // oracle's own temperature is the matched-state comparison both `issue-024`
+    // and `issue-079` asked for.
+    const equilibrium = try stateAtTemperature(parameters, 252.11);
+    const equilibrium_converted_fraction =
+        equilibrium.ice_water_equivalent_m3 / total_water_m3;
+
+    // Measured 2026-09-21 on this fixture (`zig test src/module_index.zig
+    // --test-filter "legacy top-layer freeze-rate ceiling"`):
+    //   legacy ceiling      = 1.9803777595356717e-2  (1.98% of liquid per hour)
+    //   equilibrium at 252.11 K = 5.812939516021001e-1  (58.1% converted)
+    //   overshoot           = 2.935268025522529e1   (29.35x)
+    //   unfrozen head       = -2.690877828681523e0 m
+    // For scale, the same formulation-class gap measured 19.17x for the LITTER
+    // layer (EXEC-002) before it was replaced there with the energy-led limiter
+    // in `surface/litter_freeze_thaw_energy_limit.zig`. The 58.1% here is also
+    // close to the ~51-53.4% conversion the production runs actually record for
+    // this cell at hour 1 (issue-024 rounds 2 and 9) -- independent support for
+    // the finding that this partition, not the energy-led kernel, is what
+    // production commits.
+    // Conservation first: the partition must not create or destroy water.
+    try std.testing.expectApproxEqAbs(
+        total_water_m3,
+        equilibrium.liquid_water_m3 + equilibrium.ice_water_equivalent_m3,
+        1.0e-15,
+    );
+    // The formulation-class gap: at the oracle's own hour-1 temperature the
+    // equilibrium partition converts more than an order of magnitude beyond the
+    // oracle's whole-hour kinetic ceiling.
+    try std.testing.expect(
+        equilibrium_converted_fraction > 10.0 * legacy_converted_fraction,
+    );
+}

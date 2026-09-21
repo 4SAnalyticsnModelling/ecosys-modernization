@@ -701,7 +701,23 @@ Note the in-code provenance trail for this question is broken and should be repa
 
 ### Next bounded action
 
-The commit-path question that this was originally meant to settle is already closed by source reading (above), so the matched-state kernel test's remaining value is **quantification, not identification**: construct the hour-1 top-layer state (`0.28` t=0 volumetric water, round-6's measured potentials and temperatures) and evaluate in one test (i) the legacy-faithful energy-led kernel carrying the surface block's `XNPR` energy fraction and `XNPSRX` freeze cap, against (ii) `enthalpy_balance.stateAtTemperature`'s unconstrained equilibrium partition at the same temperature. The expected output is a number for how far equilibrium overshoots the legacy kinetic bound for this cell -- the surface-soil analogue of EXEC-002's measured `19.17x` for the litter. That number, not a source change, is what a reviewer needs to decide the disposition question below.
+### Quantification -- DONE, measured this round (matched-state kernel test, executed)
+
+The matched-state kernel test both this issue and `issue-079` asked for is now written and run. It is **test-only**; no production behavior was changed. Added as `test "issue-024: legacy top-layer freeze-rate ceiling versus unconstrained equilibrium partition"` in `ecosys-ng/src/soil/water/enthalpy_balance.zig`, run as `zig test src/module_index.zig --test-filter "legacy top-layer freeze-rate ceiling"` from `ecosys-ng/` (52 tests, all passed), plus a `--test-filter "enthalpy"` regression sweep (87 tests, all passed -- the two `Newton-Anderson failed` warnings in that output belong to a pre-existing negative-path test, not to this addition).
+
+Fixture: the Ottawa top soil layer as established by this issue's own Experiments 1-2 (`0.00-0.01 m` over `1 m2`, so `0.01 m3`, starting at volumetric water `0.28` via the `THW=1` field-capacity code), with the generic Carsel-Parrish `clay_loam` curve this deck actually opts into (round 10's `van_genuchten_inflection_pressure_head_m=0` finding), giving `unfrozen_pressure_head_m = -2.690877828681523 m`. The equilibrium side is evaluated at **the oracle's own measured hour-1 end temperature for this cell**, `252.11 K` (`-21.04 degC`, from Round 2/Experiment 5's read of `01998f25eh1`), which is what makes it a matched-state comparison rather than two different states.
+
+**Measured result:**
+
+| quantity | value |
+|---|---|
+| legacy whole-hour freezing ceiling (`NFH*NPH` executions x `XNPSRX`) | `1.9803777595356717e-2` (**1.98%** of the layer's liquid per hour) |
+| `enthalpy_balance.stateAtTemperature` equilibrium partition at `252.11 K` | `5.812939516021001e-1` (**58.1%** converted) |
+| **overshoot factor** | `2.935268025522529e1` (**29.35x**) |
+
+Two corroborations worth recording. First, `29.35x` is the surface-soil analogue of the `19.17x` that EXEC-002 measured for the **litter** layer before that layer's energy-led limiter was introduced -- same formulation-class gap, same order of magnitude, one layer down. Second, the `58.1%` equilibrium conversion at the oracle's colder temperature sits just above the `~51%`/`53.4%` conversions the production runs actually record for this cell at hour 1 (rounds 2 and 9, where Zig's own accepted temperature was warmer at `-6.05`/`-11.04 degC`) -- consistent, and independent numerical support for the source-traced conclusion that this partition, not the energy-led kernel, is what production commits.
+
+The test also asserts the partition conserves total water to `1e-15`, so this is a rate/kinetics divergence, not a mass-balance defect: the equilibrium partition is not creating water, it is converting the layer's existing water to ice far faster than the oracle permits.
 
 **Do not implement a rate limiter in the coupled heat solve's phase partition on the strength of this round alone.** The change would sit in the same shared Newton/Anderson enthalpy-coupling core that `issue-068` and `issue-078` both escalated to human sign-off, it would alter every layer and every hour rather than the flagged cell, and the disposition question (legacy kinetic limiter as physics versus as numerical convenience) is genuinely undecided. The peer reviewer's position is that the legacy limiter represents real kinetic/nucleation rate limitation and should be honored; that is a defensible scientific argument but it is one agent's opinion, not evidence, and it is not a substitute for the human scientific-policy decision this needs.
 
