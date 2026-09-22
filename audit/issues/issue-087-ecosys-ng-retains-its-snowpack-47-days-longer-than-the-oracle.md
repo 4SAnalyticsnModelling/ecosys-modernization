@@ -66,7 +66,28 @@ This is a **hypothesis about direction, not a proven cause**, and it must not be
 
 That is a **freezing**-side finding, and this issue is a **melting**-side one, so they are not the same defect. But they are the same *class*: an energy-to-phase-change conversion at the surface whose rate ecosys-ng and the oracle disagree about. Anyone diagnosing this should read `issue-024` round 11 first, and should check whether the snow phase kernel (`soil/water/snow_phase_change.zig`) has the same unconstrained-equilibrium character that `issue-024` identified in the soil phase kernel.
 
-## Diagnosis budget: 0 of 3 experiments spent
+## Experiment 1 (read-only, same session): two legacy disappearance mechanisms identified; the threshold-reset hypothesis is REFUTED by arithmetic
+
+Budget: **1 of 3 spent.** No build, no run.
+
+**Legacy has two distinct snowpack-disappearance mechanisms, not one**, and they are in different blocks of `redist.f`:
+
+1. **Per-layer negligible-content zeroing.** `redist.f:4046-4047` gates the whole snow-layer update on `VOLSSL(L)+VOLWSL(L)+VOLISL(L) .GT. ZEROS2(NY,NX)`; the `ELSE` at `:4116-4124` hard-zeroes `VOLSSL`, `VOLWSL`, `VOLVSL`, `VOLISL`, `VOLSL`, `DLYRS` and `VHCPW` for that layer, discarding the remainder.
+2. **Warm-thin-pack transfer to the litter.** `redist.f:4259-4300`, gated by `watsub.f:6655-6670`, which moves the pack's contents into the surface litter rather than discarding them.
+
+**ecosys-ng ports mechanism 2 and cites it explicitly**: `soil/water/snowpack_litter_heat_water_transfer.zig:1-15` names "the WATSUB 6655--6670 producer" and "the REDIST 4259--4300 consumer", and carries the transfer of every phase, enthalpy, species and salt coordinate with conservation tests. Mechanism 1 has **no citation anywhere** in `ecosys-ng/src` -- a search for `redist.f:404x`/`redist.f:41xx` references returns nothing -- so it appears unported.
+
+**But that is not the explanation, and the arithmetic refutes it.** ecosys-ng's own `core/legacy_water_negligible_floor.zig` derives `ZEROS2(NY,NX) = ZERO2*DH*DV` (`starts.f:270`) and its test records the value for this deck exactly: **`ZEROS2 = 1.0e-6 m3`** for a 1 m x 1 m cell. Over that 1 m2 cell, 1.0e-6 m3 is **~0.001 mm** of water equivalent. The candidate's residual pack is **5.003 mm at hour 3,000**, about **5,000x** the floor, and it is still above 0.1 mm at hour 3,251. A threshold that triggers at 0.001 mm cannot remove a 5 mm pack, so **an unported mechanism 1 cannot account for the observed persistence.** The long asymptotic tail is genuinely slow ablation, not a missing final reset.
+
+Mechanism 1 should still be checked as a separate, minor fidelity item -- an unported negligible-content reset is a real if small difference, and it is the kind of thing that leaves a permanent dust-level pack -- but it is **not** this issue's cause and chasing it would waste an experiment.
+
+**Candidates remaining after experiment 1**, unchanged in rank:
+- **meltwater discharge** (the pack converts snow to liquid but fails to drain it; `VOLWSL(L) = VOLWSL(L) + TFLWW(L) + XWFLFS(L)` at `redist.f:3981` is the per-layer update, with `TFLWW` the water flux and `XWFLFS` the phase conversion -- so the two effects are separable at that line);
+- **melt energy or its phase partition** (the `issue-024` class, but on the melting side).
+
+The bulk of the divergence is a **rate** difference, not an endpoint difference: the oracle sheds ~123 mm between hours 2,000 and 2,200 while the candidate sheds ~37 mm over the same window. Any explanation has to account for a factor of roughly three in melt rate during the melt window, not merely for the tail.
+
+## Original diagnosis plan (budget now 1 of 3 spent)
 
 No experiment has been run against this issue. Recommended first three, cheapest first, none needing a production run:
 
