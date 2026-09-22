@@ -73,13 +73,31 @@ The legacy model computes band geometry **dynamically, per day, from the fertili
 
 So the oracle's band fraction is a **state variable driven by each application's geometry and evolving with diffusion**, while ecosys-ng's is a **constant read once from the runscript**. On a deck that never bands, the two agree trivially (both zero) -- which is why this never fired before hour 3,276, and why `issue-065`'s thirteenth addendum could correctly conclude that "this deck's phosphate band is confirmed never active". It becomes a hard failure the moment the deck bands anything.
 
-## Scope of the gap
+## Scope of the gap -- NARROWER than first filed; corrected after reading the band subsystem
 
-Three distinct pieces are missing, in increasing size:
+My first framing listed three missing pieces. **Two of the three already exist**, and the correction matters because it makes this a contained input/seeding fix rather than a subsystem port:
 
-1. **The per-application band fraction** (`hour1.f:306`, `:310`, `:316`): read the band width and row spacing from the fertilizer record and set the zone fractions from `width/row_spacing`. This alone would unblock hour 3,276.
-2. **Band widening with diffusion** (`hour1.f:4910`, `DWNH4`): the band is not static once created; it grows toward the row spacing. Omitting it means banded nutrients stay artificially concentrated.
-3. **The `IFNHB` activation flag** and its `ROWN > 0` gate (`hour1.f:4897`, `redist.f:9496`), which is how the oracle decides whether the banded path runs at all.
+- **Band widening with diffusion: ALREADY IMPLEMENTED.** `management/hourly_fertilizer_band_geometry.zig` states its own traceability as "HOUR1 (`hour1.f`) lines 4888-5151" and carries the widening, the per-layer `band_width_m / row_spacing_m` ratio (`:169`) and the validation that a live band must have positive row spacing (`:251`).
+- **The activation gate: ALREADY IMPLEMENTED.** The same module gates on `state.active and state.row_spacing_m > 0` (`:109`), which is the `IFNHB.EQ.1.AND.ROWN.GT.0.0` shape of `hour1.f:4897`. `management/fertilizer_band_state.zig:473` sets `self.active[scalar] = fraction > 0` and `:495-502` derives `band_width_m = row_spacing * fraction` plus the band/non-band volume fractions.
+
+**What is actually missing is one link: the application event carries banded AMOUNTS but no band GEOMETRY.**
+
+`management/fertilizer_nitrogen_inventory.zig`'s event carries `banded_ammonium`, `banded_ammonia`, `banded_urea`, `banded_nitrate` (`:91`, `:126-129`) and `application_depth_m` (`:85`, `:98`) -- but **no band width and no row spacing**. `management/fertilizer_management_dispatch.zig` contains no reference to either. So banded material is applied into a band whose geometry was fixed once at initialization from the runscript, and on this deck that geometry is zero.
+
+Note the direction of the relation differs between the two codebases, which is why the seeding is the natural place to fix it:
+
+| | input | derived |
+|---|---|---|
+| oracle | band **width** `WDNHB`, row spacing `ROWN` from the fertilizer file | fraction `VLNHB = WDNHB/ROWN` (`hour1.f:316`) |
+| ecosys-ng | **fraction** from the runscript, row spacing from the runscript | width `= row_spacing * fraction` (`fertilizer_band_state.zig:496`) |
+
+### The fix, precisely
+
+1. Extend the fertilizer application event with the record's **band width** and **row spacing** (fields `0.05` and `0.76` in the 17 May record).
+2. On an application with any nonzero banded amount, seed the band state for the affected families: `active = true`, `row_spacing_m = <record row spacing>`, and `band_volume_fraction = band_width / row_spacing` -- i.e. the oracle's `VLNHB = WDNHB/ROWN`, clamped by `AMIN1(0.9999, ...)` as `hour1.f:316` does.
+3. Let the existing `hourly_fertilizer_band_geometry.update` machinery take it from there; it already widens the band and already validates the invariants.
+
+That leaves the third piece genuinely outstanding but much smaller than first stated: whether the seeding must also reproduce `hour1.f:306`'s **per-day reassignment** (`ROWN(NY,NX)=ROWI(I,NY,NX)`), i.e. whether a later application with a different row spacing replaces the geometry or merges with an existing band. The oracle reassigns `ROWN` daily from the file, so a second banded application at a different spacing changes the geometry outright. Decide that explicitly rather than by accident.
 
 Do **not** "fix" this by setting the deck's `plant_nutrients` band fractions to nonzero constants. That would paper over the gap with a hand-tuned input, would be wrong for any other deck, and would still omit items 2 and 3. The deck's `f25fr98` already carries the correct geometry; the model should read it.
 
