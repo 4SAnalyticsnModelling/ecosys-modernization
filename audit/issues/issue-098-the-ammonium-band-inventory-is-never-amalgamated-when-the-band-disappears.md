@@ -1,6 +1,75 @@
 # Issue 098 -- the AMMONIUM band inventory is never amalgamated when the band disappears, stranding nitrogen in a zero-volume domain: this is the hour-3,275 frontier blocker
 
-Status: **OPEN, ROOT CAUSE OF THE FRONTIER FAILURE, CONFIRMED BY INSTRUMENTED REPRODUCTION AND SOURCE ON BOTH SIDES (filed 2026-09-22, adversarial Claude/Pi session).** Fix specified below and deliberately not applied in the same step as the diagnosis.
+Status: **OPEN, ROOT CAUSE OF THE FRONTIER FAILURE, CONFIRMED BY INSTRUMENTED REPRODUCTION AND SOURCE ON BOTH SIDES. ESCALATED SAME DAY -- ALL THREE legacy amalgamation blocks are ineffective, not just ammonium (filed 2026-09-22, adversarial Claude/Pi session).** Fix specified below and deliberately not applied in the same step as the diagnosis.
+
+> ## ESCALATION: the nitrate and phosphate amalgamations are ALSO dead -- they write to discarded scratch
+>
+> While locating the right place to add the ammonium amalgamation, the existing nitrate and
+> phosphate ones turned out to be **ineffective in production**, by a different mechanism.
+>
+> In `stages/soil_chemistry_convergence.zig`, the pool arrays handed to
+> `fertilizer_band_nitrate_phosphate.updateLayer` are **scratch**:
+>
+> ```zig
+> const nitrate_nonband_pools = try scratch_allocations.alloc(f64, active_layer_count);   // :764
+> ...
+> nitrate_nonband_pools[local_layer] = nitrate_nonband_g_n;                               // :899  filled FROM state
+> ...
+> try ecosys.fertilizer_band_nitrate_phosphate.updateLayer(.{...},
+>     &nitrate_geometry_for_update, &nitrate_pools,
+>     &phosphate_geometry_for_update, &phosphate_pools);                                  // :1016-1039  amalgamates them
+> ```
+>
+> and **no `_pools[` reference exists anywhere after `:1016`** -- the enclosing loops close at
+> `:1040-1042` and the function ends. The merged values are never written back to state.
+>
+> **The asymmetry is the damning part, and it is inside a single call.** The *geometry*
+> arguments are **live**: `nitrate_geometry = try context.fertilizer_band.geometry(...)`
+> (`:717`) is an accessor into the persistent band state, so
+> `nitrate_geometry.band_depth_m[0..active_layer_count]` (`:950`) is a live slice and
+> `updateGeometry`'s `geometry.band_volume_fraction[index] = 0.0`
+> (`fertilizer_band_nitrate_phosphate.zig:156`) **persists**. So within the same
+> `updateLayer` call:
+>
+> | half | argument | effect |
+> |---|---|---|
+> | geometry -- zeroes the band volume fraction | live state slice | **persists** |
+> | inventory -- merges band pools into non-band | scratch buffer | **discarded** |
+>
+> That is precisely the ammonium defect reproduced for nitrate and phosphate: the fraction
+> goes to zero and the inventory stays where it was.
+>
+> **So all three legacy amalgamation blocks are ineffective**: NH4 (`hour1.f:4962`) has no
+> implementation at all; NO3 (`:5057`) and PO4 (`:5148`) have one whose writes are thrown away.
+>
+> ### Why the tests did not catch it
+>
+> `fertilizer_band_nitrate_phosphate.zig:362` is a test named *"amalgamation transfers nitrate
+> and salinity phosphate pools"*, and it passes. It exercises `updateLayer` as a pure function
+> against caller-supplied arrays and correctly asserts the transfer. **The function is right;
+> the wiring is wrong.** A unit test of a pure mutator cannot see that production hands it
+> scratch memory. This is the same "unit-testable but production-dead" shape as `issue-096`'s
+> identically-false comparison, and it is worth generalising: **for any kernel that mutates
+> caller-supplied buffers, the audit needs a check that the production call site passes live
+> state.** Neither a unit test nor a conservation ledger will report it -- the ledger sees
+> nothing created or destroyed because the merge simply never happened.
+>
+> ### Consequence for the fix
+>
+> The fix is now larger than "add the ammonium mirror". It is:
+>
+> 1. Write the amalgamated nitrate/phosphate pools **back to state** after `updateLayer`, or
+>    pass live slices instead of scratch.
+> 2. Add the ammonium amalgamation (six pool pairs, `hour1.f:4970-4981`) with live wiring.
+> 3. A **production-path** test for each, asserting the merge is visible in state after the
+>    hourly stage -- not only inside the pure function.
+>
+> Also note for whoever implements it: the staging at `:875-896` converts concentrations to
+> amounts as `conc_mol_per_m3 * effective_water_volume_m3` with **no zone-fraction factor**,
+> while `mineral_nitrogen_transport.concentration()` divides by `water_m3 * fraction`. Those
+> two conventions must be reconciled before writing anything back, or the write-back will
+> introduce a mass error. **That reconciliation is unresolved here and is the first thing to
+> settle.**
 
 Genuinely new: `MineralNitrogenInZeroWaterDomain` returns **zero hits** across the 615-file reference documentation tree (`issue-097`), including the 49,801-line `discrepancy_register.md`.
 
