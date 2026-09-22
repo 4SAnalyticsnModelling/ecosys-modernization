@@ -857,3 +857,35 @@ The oracle instead derives band geometry **per day from the fertilizer file**: `
 **Next bounded action**: (1) extend the fertilizer event with the record's band width and row spacing; (2) on any nonzero banded amount seed `active=true`, `row_spacing_m`, and `band_volume_fraction = width/row_spacing` clamped by `AMIN1(0.9999,...)` per `hour1.f:316`; (3) let the existing geometry machinery widen and validate. One sub-decision to make explicitly rather than by accident: whether to reproduce `hour1.f:306`'s **per-day** reassignment, so a later banded application at a different spacing replaces the geometry rather than merging. **Do not** set the deck's `plant_nutrients` fractions to nonzero constants (papers over the gap with a hand-tuned input, wrong for other decks), and **do not** relax `requireRecipientVolume` (it is correct and is why this surfaced cleanly).
 
 Also recorded so it is not re-filed: the 1000x litter-water drop at hour 3,252 (identical mantissa, exponent shifted by three) looks exactly like a unit bug and is the intended, legacy-faithful residue-incorporation floor at `redistribution/tillage/surface_biomass_transfer.zig:77` with `XCORP=0` (`day.f:348`, `ITILL=10`). Diagnostic instrumentation from `run-016`/`run-017` is still in the tree, gated to hours 3,248-3,254, and needs re-gating or removal before it helps at hour 3,276.
+
+## Update 2026-09-22 (round 24): `issue-090` band-activation fix landed and unit-validated; production runs are now BLOCKED by `issue-091` (Windows Defender)
+
+**`issue-090` is implemented.** A banded fertilizer application now seeds its own band geometry from the record's row spacing, per `hour1.f:303-320` (NH4) and `:356-372` (NO3), instead of inheriting a static runscript constant this deck sets to zero.
+
+- `hourly_fertilizer_band_geometry.activateFromApplication` (new): the `hour1.f:303-320` seed, with `WBNDX=0.025` exported as `minimum_band_width_m` (`hour1.f:109`/`:120`). Only the application layer is seeded, every other layer explicitly zeroed (`:312-313`), and a layer thinner than `DLYRM` gets a zero fraction rather than a division (`:315`/`:319`). **The fraction is two-dimensional** -- a width ratio times a depth ratio -- so seeding it as a bare width ratio would overstate the band. Pinned by a test against hand arithmetic on this deck's own 17 May record: `(0.025/0.76)*(0.025/0.05) = 0.01644736842105263`, matched to 1e-15.
+- `fertilizer_band_state.activateBandFromApplication`: wraps it in the module's geometry-view pattern and **restricts it to the idle phase**, enforced with `FertilizerBandActivationOutsideIdlePhase` rather than assumed.
+- `fertilizer_nitrogen_inventory.applicationLayer` (new, public): `LFDPTH` plus the upper face and thickness, walking the same boundaries as the private `layerAtDepth` so the seeded layer is the one the material lands in.
+- Wired in `fertilizer_management_dispatch.applyNitrogen` with the band state and `DLYRM` supplied from `ecosys_ng.zig`. **Phase safety established, not assumed**: `advanceFertilizerManagement` is called at `ecosys_ng.zig:7745` and `executeHourlyScience` at `:7801`, sequentially, and the band coordinator's `beginHour` lives inside the water/heat stage, so the coordinator is idle at dispatch time.
+
+**One self-inflicted defect found and fixed by a real run.** `run-019` cleared `MissingFertilizerRecipientWaterVolume` (the band now has volume) but then failed `MineralNitrogenInZeroWaterDomain` at the same hour 3,276. Cause was my gate, not the model: the oracle's two gates are **deliberately asymmetric** --
+
+```
+NH4  IF((Z4B+Z3B+ZUB.GT.0.0)...       hour1.f:303
+NO3  IF((Z4B+Z3B+ZUB+ZOB.GT.0.0)...   hour1.f:356
+```
+
+-- the NO3 band activates on **any** banded nitrogen including banded ammonium alone, because banded ammonium nitrifies into the nitrate band zone. I had gated NO3 on banded nitrate only, so nitrification products arrived in a zero-fraction band. Corrected, with the asymmetry and its reason recorded inline so it is not "simplified" later.
+
+Evidence for the landed state: full suite **4376 passed / 1 skipped / 0 failed, exit 0** (baseline 4375 plus the one new activation test, zero regressions), `fertilizer` filter 161/161, `zig build` and `-Doptimize=ReleaseFast` both exit 0.
+
+### `issue-091`: production runs are blocked, and it needs the user
+
+**Windows Defender now detects the freshly built `ecosys_ng.exe` as `Trojan:Win32/Bearfoos.A!ml` (ThreatID `2147731250`) and blocks read access to it.** Three detections recorded: the staged scratchpad copy at 03:09:48 and 03:09:56 -- which killed `run-020` in flight at hour ~103 -- and the build output itself at 03:21:01. `Copy-Item`/`Get-FileHash`/`OpenRead` on it all fail with *"the file contains a virus or potentially unwanted software"*, while `Get-Item` still succeeds, so the file looks present but is unreadable.
+
+**So `issue-090`'s fix has NO production validation.** Whether hour 3,276 clears is unknown. `run-019`'s result stands (it identified the gate defect), so the diagnosis chain is sound; only the confirmation of the final fix is missing.
+
+Not worked around deliberately: a Defender exclusion, disabling real-time protection, or a quarantine restore all need elevated privileges and change the machine's security posture, which `PROJECT_CONTRACT.md` forbids doing as a side effect of an audit. Rebuilding does not help -- the detection fires on the build output directly. The `!ml` suffix marks it a machine-learning heuristic hit, the usual shape of a false positive on a freshly compiled unsigned executable.
+
+**Diagnostic signature worth remembering**: a run that stops at an arbitrary hour with a **truncated final log line and no `error:` record**, plus a missing or unreadable executable. Every genuine model failure in these run records ends with an explicit `error: <ErrorName>` and a complete stage census. If those are absent, check `Get-MpThreatDetection` before diagnosing anything else -- I initially misread this as a catastrophic regression to hour 96.
+
+**Next bounded action**: the user resolves `issue-091` (narrowest option: exclude `ecosys-ng/ecosys-ng-bin/` and the session scratchpad), then rebuild with `zig build -Doptimize=ReleaseFast` (earlier staged copies may already be quarantined) and rerun to confirm whether hour 3,276 clears. The diagnostic instrumentation from `run-016`/`run-017` is still in the tree gated to hours 3,248-3,254 and should be re-gated to the new frontier or removed.
