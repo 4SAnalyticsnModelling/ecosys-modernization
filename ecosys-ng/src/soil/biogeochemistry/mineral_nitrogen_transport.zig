@@ -118,27 +118,6 @@ pub const State = struct {
             amounts[index(.nitrate_band)] = aqueous.nitrate_band * water * fractions.nitrate_band;
             amounts[index(.nitrite_non_band)] = reactive.non_band_nitrite_g_n[cell] / nitrogen_molar_mass_g_per_mol;
             amounts[index(.nitrite_band)] = reactive.band_nitrite_g_n[cell] / nitrogen_molar_mass_g_per_mol;
-            // TEMP_DIAGNOSTIC (hour-3,275 `MineralNitrogenInZeroWaterDomain`,
-            // `issue-098`): `publishMatrix` raises for `ammonium_band` with
-            // `fraction = 0`, but this pack multiplies by that same fraction, so
-            // a zero fraction here must pack a zero amount. Either the pack saw
-            // a NONZERO band fraction that the publish did not -- a
-            // phase-dependent asymmetry, since `scienceZoneFractions`
-            // reconstructs the pair via `preConsumptionPair` outside `.idle` but
-            // returns raw `current` inside it -- or the amount is added between
-            // pack and publish. This fires only when the pack itself produces a
-            // nonzero band amount, so it is silent unless a band exists.
-            if (!builtin.is_test and amounts[index(.ammonium_band)] > 1e-12) std.log.err(
-                "TEMP_DIAGNOSTIC pack_nonzero_ammonium_band: cell={d} amount_mol={e} conc={e} water_m3={e} band_fraction={e} non_band_fraction={e}",
-                .{
-                    cell,
-                    amounts[index(.ammonium_band)],
-                    aqueous.ammonium_band,
-                    water,
-                    fractions.ammonium_band,
-                    fractions.ammonium_non_band,
-                },
-            );
         }
         try self.validate();
     }
@@ -207,7 +186,7 @@ pub const State = struct {
     /// substitution from those two fields here reproduces the exact carrier
     /// the pack side used, making the round trip symmetric.
     pub fn publishMatrix(
-        self: *const State,
+        self: *State,
         chemistry: *chemistry_module.State,
         reactive: *reactive_module.State,
         fractions_source: anytype,
@@ -223,7 +202,35 @@ pub const State = struct {
             if (!std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0)
                 return error.InvalidMineralNitrogenTransportInput;
             const water = carrierM3(self.matrix.water_volume_m3[cell], dry_reference_water_m3, negligible_water_volume_m3);
-            const amounts = try self.matrix.cellAmountsConst(cell);
+            const amounts = try self.matrix.cellAmounts(cell);
+            // `hour1.f:4970-4973` (NH4) and the `:5057` NO3 mirror: a zone with
+            // no volume cannot hold solute, so the legacy folds the band pool
+            // into its non-band counterpart and zeroes it. `issue-098`: face
+            // transport can deposit band-domain solute into a layer whose band
+            // volume fraction is zero -- a real band exists in an adjacent
+            // layer and a trace crosses the face -- and the hourly
+            // `repartitionConcentrations` cannot clear it, because that layer's
+            // fraction never CHANGES so its early return fires every hour.
+            //
+            // The fold must happen in AMOUNT space. The mass arrives by
+            // addition to `amount_mol` after `initializeMatrix` packed it, so
+            // it is not represented in any concentration; a zero-volume zone's
+            // concentration carries no mass and a concentration-space blend
+            // would silently destroy this. A plain add here is exactly
+            // mass-conserving and needs no water volume and no fraction
+            // arithmetic, which is why the legacy also works in amounts.
+            inline for (.{
+                .{ Species.ammonium_non_band, Species.ammonium_band, "ammonium_band" },
+                .{ Species.ammonia_non_band, Species.ammonia_band, "ammonium_band" },
+                .{ Species.nitrate_non_band, Species.nitrate_band, "nitrate_band" },
+                .{ Species.nitrite_non_band, Species.nitrite_band, "nitrate_band" },
+            }) |pair| {
+                const band_fraction = @field(fractions, pair[2]);
+                if (band_fraction == 0 and amounts[index(pair[1])] != 0) {
+                    amounts[index(pair[0])] += amounts[index(pair[1])];
+                    amounts[index(pair[1])] = 0;
+                }
+            }
             const nh4_non_band_conc = try concentration(amounts[index(.ammonium_non_band)], water, fractions.ammonium_non_band, "ammonium_non_band", cell);
             if (nh4_non_band_conc > 1000) std.log.warn(
                 "large ammonium from transport publish: cell={d} conc_mol_m3={e} amount_mol={e} water_m3={e}",
@@ -689,18 +696,20 @@ fn carrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_v
     return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
 }
 
-/// TEMP_DIAGNOSTIC (frontier hour 3,275 `MineralNitrogenInZeroWaterDomain`,
-/// `audit/runs/run-021-...md`): `species` and `cell` are carried solely so the
-/// raise below can say WHICH domain holds nitrogen with no water to dissolve
-/// it in. The error name alone cannot distinguish the six call sites, the
-/// `fraction == 0` case from the `water_m3 == 0` case, or which layer. Logging
-/// only, on the failure path only, so it costs nothing on the hot path.
-/// Remove once the frontier failure is diagnosed.
+/// `species` and `cell` exist so the raise below can say WHICH domain holds
+/// nitrogen with no water to dissolve it in. The error name alone cannot
+/// distinguish the six call sites, the `fraction == 0` case from the
+/// `water_m3 == 0` case, or which layer -- and that ambiguity cost a full
+/// diagnostic cycle on `issue-098`'s hour-3,275 frontier failure, where the
+/// name says "ZeroWater" but the cause was a zero zone FRACTION with healthy
+/// water. Retained deliberately: it is on the failure path only, so it costs
+/// nothing on the hot path, and it turns an opaque abort into a one-line
+/// diagnosis.
 fn concentration(amount_mol: f64, water_m3: f64, fraction: f64, species: []const u8, cell: usize) !f64 {
     if (fraction == 0 or water_m3 == 0) {
         if (amount_mol > 1e-12) {
             std.log.err(
-                "TEMP_DIAGNOSTIC MineralNitrogenInZeroWaterDomain: species={s} cell={d} amount_mol={e} water_m3={e} fraction={e} zero_cause={s}",
+                "MineralNitrogenInZeroWaterDomain: species={s} cell={d} amount_mol={e} water_m3={e} fraction={e} zero_cause={s}",
                 .{
                     species,
                     cell,
@@ -1167,4 +1176,86 @@ test "issue-065: NEW initializeMatrix/publishMatrix round trip preserves mineral
     // Live water above the floor is used unchanged (no-op substitution).
     try state.initializeMatrix(&chemistry, &reactive, &.{2}, fractions, 14, negligible_water_volume_m3);
     try std.testing.expectEqual(@as(f64, 2) * chemistry.aqueous[0].ammonium_non_band, state.matrix.amount_mol[index(.ammonium_non_band)]);
+}
+
+test "issue-098: publishMatrix folds a band amount into non-band when the band zone has no volume" {
+    // `hour1.f:4970-4973`. Face transport can deposit band-domain solute into a
+    // layer whose band volume fraction is zero, because a real band exists in an
+    // adjacent layer and a trace crosses the face. At hour 3,275 of the Ottawa
+    // deck that was layer 1 holding 1.1539999579320571e-7 mol of `ammonium_band`
+    // against `fraction = 0e0` and a healthy `water_m3 = 7.061016156018221e-3`
+    // -- the exact values this test uses. Before the fold, `publishMatrix`
+    // divided by the zero fraction and aborted the run
+    // (`audit/runs/run-021-...md`, `audit/issues/issue-098-...md`).
+    const fractions: ZoneFractions = .{
+        .ammonium_non_band = 1,
+        .ammonium_band = 0,
+        .nitrate_non_band = 1,
+        .nitrate_band = 0,
+    };
+    const water_m3: f64 = 7.061016156018221e-3;
+    const stranded_mol: f64 = 1.1539999579320571e-7;
+    var state = try State.init(std.testing.allocator, 1);
+    defer state.deinit();
+    var chemistry = try chemistry_module.State.init(std.testing.allocator, 1);
+    defer chemistry.deinit();
+    var reactive = try reactive_module.State.init(std.testing.allocator, 1, 1);
+    defer reactive.deinit();
+    chemistry.aqueous[0].ammonium_non_band = 3;
+    chemistry.dry_reference_water_m3[0] = water_m3;
+    try state.initializeMatrix(&chemistry, &reactive, &.{water_m3}, fractions, 14, 0);
+    const non_band_before = state.matrix.amount_mol[index(.ammonium_non_band)];
+    try std.testing.expect(non_band_before > 0);
+    // A zero band fraction packs a zero band amount, so the stranded mass
+    // cannot have come through the concentration path.
+    try std.testing.expectEqual(@as(f64, 0), state.matrix.amount_mol[index(.ammonium_band)]);
+
+    // Transport adds to `amount_mol` after the pack. This is the only way the
+    // mass can exist: a zero-volume zone's concentration carries none, which is
+    // why the fold has to be in amount space.
+    state.matrix.amount_mol[index(.ammonium_band)] = stranded_mol;
+    try state.publishMatrix(&chemistry, &reactive, fractions, 14, 0);
+
+    // Band emptied, mass conserved to the last bit, and the published non-band
+    // concentration reflects the combined amount.
+    try std.testing.expectEqual(@as(f64, 0), state.matrix.amount_mol[index(.ammonium_band)]);
+    try std.testing.expectEqual(non_band_before + stranded_mol, state.matrix.amount_mol[index(.ammonium_non_band)]);
+    try std.testing.expectEqual(@as(f64, 0), chemistry.aqueous[0].ammonium_band);
+    try std.testing.expectApproxEqAbs(
+        (non_band_before + stranded_mol) / water_m3,
+        chemistry.aqueous[0].ammonium_non_band,
+        1e-15,
+    );
+}
+
+test "issue-098: a band WITH volume is left untouched by the fold" {
+    // The fold must not disturb a real band. `hour1.f:4970` fires only in the
+    // band-disappeared ELSE arm; a live band keeps its own zone inventory and
+    // its own concentration contrast, which is the entire point of banding.
+    const fractions: ZoneFractions = .{
+        .ammonium_non_band = 1 - 0.01644736842105263,
+        .ammonium_band = 0.01644736842105263,
+        .nitrate_non_band = 1,
+        .nitrate_band = 0,
+    };
+    const water_m3: f64 = 2.3726722163396864e-2;
+    var state = try State.init(std.testing.allocator, 1);
+    defer state.deinit();
+    var chemistry = try chemistry_module.State.init(std.testing.allocator, 1);
+    defer chemistry.deinit();
+    var reactive = try reactive_module.State.init(std.testing.allocator, 1, 1);
+    defer reactive.deinit();
+    chemistry.aqueous[0].ammonium_non_band = 0.5;
+    chemistry.aqueous[0].ammonium_band = 1.3350007482476425;
+    chemistry.dry_reference_water_m3[0] = water_m3;
+    try state.initializeMatrix(&chemistry, &reactive, &.{water_m3}, fractions, 14, 0);
+    const band_amount = state.matrix.amount_mol[index(.ammonium_band)];
+    try std.testing.expect(band_amount > 0);
+    try state.publishMatrix(&chemistry, &reactive, fractions, 14, 0);
+    try std.testing.expectEqual(band_amount, state.matrix.amount_mol[index(.ammonium_band)]);
+    try std.testing.expectApproxEqAbs(
+        @as(f64, 1.3350007482476425),
+        chemistry.aqueous[0].ammonium_band,
+        1e-15,
+    );
 }
