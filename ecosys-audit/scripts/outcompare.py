@@ -109,6 +109,32 @@ STREAM_MAPS = {
         **{f"WTR_{k}": f"volumetric_liquid_water_fraction_layer_{k}" for k in range(1, 21)},
         **{f"ICE_{k}": f"volumetric_ice_fraction_layer_{k}" for k in range(1, 21)},
     },
+    # Hourly heat/energy, fouts.f N=25. Values outsh.f:250-288. Units verified:
+    # 277.8 = 1e6/3600 converts MJ m-2 h-1 -> W m-2 (slots 1, 6-13); TCA and
+    # TCS(k) are CELSIUS (the TC prefix, versus TK for kelvin); UA/3600 is
+    # m s-1; (PRECR+PRECW)*1000/AREA is mm; VPK is kPa. All match the
+    # candidate's declared units, so no conversion is applied.
+    #
+    # The first five columns are WEATHER FORCING, so they double as a direct
+    # input-equivalence test: they should agree to near round-off if the two
+    # decks really drive the models with the same weather.
+    "heat_hourly": {
+        "SOL_RADN": "incoming_shortwave_radiation",
+        "AIR_TEMP": "air_temperature",
+        "HUM": "atmospheric_vapor_pressure",
+        "WIND": "wind_speed",
+        "PREC": "rain_and_irrigation",
+        "SOIL_RN": "ground_surface_net_radiation",
+        "SOIL_LE": "ground_surface_latent_heat_flux",
+        "SOIL_H": "ground_surface_sensible_heat_flux",
+        "SOIL_G": "ground_surface_storage_heat_flux",
+        "ECO_RN": "ecosystem_net_radiation",
+        "ECO_LE": "ecosystem_latent_heat_flux",
+        "ECO_H": "ecosystem_sensible_heat_flux",
+        "ECO_G": "ecosystem_storage_heat_flux",
+        "TEMP_LITTER": "surface_soil_temperature",
+        **{f"TEMP_{k}": f"soil_temperature_layer_{k}" for k in range(1, 21)},
+    },
 }
 
 # Legacy columns with a recorded, cited reason for having no counterpart.
@@ -132,6 +158,12 @@ ACCOUNTED_EXCLUSIONS = {
         **{f"ICE_{k}": f"issue-085 class: deck selects soil layer {k} but the runtime profile has 12 "
                        "layers; the oracle emits a structural zero, ecosys-ng emits no column"
            for k in range(13, 21)},
+    },
+    "heat_hourly": {
+        **{f"TEMP_{k}": f"issue-085 class: deck selects soil layer {k} but the runtime profile has 12 "
+                        "layers; the oracle emits a structural value for an absent layer, ecosys-ng "
+                        "emits no column"
+           for k in range(12, 21)},
     },
 }
 

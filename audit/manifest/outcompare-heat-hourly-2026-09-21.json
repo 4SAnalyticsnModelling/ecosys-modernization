@@ -1,0 +1,469 @@
+{
+  "oracle_file": "C:\\ecosys-cmp\\oracle_eh1.txt",
+  "candidate_file": "C:\\ecosys-cmp\\zig_eh1_head.txt",
+  "stream": "heat_hourly",
+  "rule": "abs(candidate-oracle) <= 1e-12 + 1e-06*abs(oracle)",
+  "oracle_rows": 6875,
+  "candidate_rows": 3252,
+  "matched_keys": 3252,
+  "oracle_only_keys": 3623,
+  "candidate_only_keys": 0,
+  "first_matched_key": 1,
+  "last_matched_key": 3252,
+  "calendar_mismatches": 0,
+  "calendar_mismatch_examples": [],
+  "duplicate_oracle_keys": 0,
+  "duplicate_candidate_keys": 0,
+  "columns": [
+    {
+      "oracle_column": "SOL_RADN",
+      "candidate_column": "incoming_shortwave_radiation[W m-2]",
+      "pairs": 3252,
+      "max_abs_error": 38.456163999999944,
+      "max_abs_error_key": 1284,
+      "mae": 0.1778776212419954,
+      "rmse": 1.787568060014668,
+      "bias": 0.17786985801936503,
+      "exceedances": 54,
+      "exceedance_fraction": 0.016605166051660517,
+      "first_exceedance": {
+        "key": 464,
+        "oracle": 1.350341,
+        "candidate": 1.5865773817855613,
+        "abs_error": 0.23623638178556128
+      }
+    },
+    {
+      "oracle_column": "AIR_TEMP",
+      "candidate_column": "air_temperature[degC]",
+      "pairs": 3252,
+      "max_abs_error": 2.3092638912203256e-14,
+      "max_abs_error_key": 23,
+      "mae": 1.3288007430756896e-14,
+      "rmse": 1.5853078237172222e-14,
+      "bias": 1.1112472156072831e-17,
+      "exceedances": 0,
+      "exceedance_fraction": 0.0,
+      "first_exceedance": null
+    },
+    {
+      "oracle_column": "HUM",
+      "candidate_column": "atmospheric_vapor_pressure[kPa]",
+      "pairs": 3252,
+      "max_abs_error": 4.969660094555906e-07,
+      "max_abs_error_key": 3046,
+      "mae": 5.586153548516091e-08,
+      "rmse": 1.1176254562198156e-07,
+      "bias": 2.425067590696504e-09,
+      "exceedances": 0,
+      "exceedance_fraction": 0.0,
+      "first_exceedance": null
+    },
+    {
+      "oracle_column": "WIND",
+      "candidate_column": "wind_speed[m s-1]",
+      "pairs": 3252,
+      "max_abs_error": 0.0,
+      "max_abs_error_key": null,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "bias": 0.0,
+      "exceedances": 0,
+      "exceedance_fraction": 0.0,
+      "first_exceedance": null
+    },
+    {
+      "oracle_column": "PREC",
+      "candidate_column": "rain_and_irrigation[mm]",
+      "pairs": 3252,
+      "max_abs_error": 4.6,
+      "max_abs_error_key": 209,
+      "mae": 0.052982780947416895,
+      "rmse": 0.28406316536787984,
+      "bias": -0.05298277926845013,
+      "exceedances": 218,
+      "exceedance_fraction": 0.06703567035670356,
+      "first_exceedance": {
+        "key": 16,
+        "oracle": 0.2,
+        "candidate": 0.0,
+        "abs_error": 0.2
+      }
+    },
+    {
+      "oracle_column": "SOIL_RN",
+      "candidate_column": "ground_surface_net_radiation[W m-2]",
+      "pairs": 3252,
+      "max_abs_error": 354.4716089901541,
+      "max_abs_error_key": 2582,
+      "mae": 29.76764592351878,
+      "rmse": 57.03013123273814,
+      "bias": -9.833402540160712,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -92.48716,
+        "candidate": -127.89192069323104,
+        "abs_error": 35.40476069323104
+      }
+    },
+    {
+      "oracle_column": "SOIL_LE",
+      "candidate_column": "ground_surface_latent_heat_flux[W m-2]",
+      "pairs": 3252,
+      "max_abs_error": 197.07504087335434,
+      "max_abs_error_key": 3205,
+      "mae": 21.528573497093273,
+      "rmse": 44.81868573943023,
+      "bias": 10.1941678874771,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -9.818518,
+        "candidate": -19.931540982198662,
+        "abs_error": 10.113022982198663
+      }
+    },
+    {
+      "oracle_column": "SOIL_H",
+      "candidate_column": "ground_surface_sensible_heat_flux[W m-2]",
+      "pairs": 3252,
+      "max_abs_error": 470.4977774656414,
+      "max_abs_error_key": 2126,
+      "mae": 48.46751018725852,
+      "rmse": 85.17621739992975,
+      "bias": -4.05558755306592,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -309.7337,
+        "candidate": -22.460725836783997,
+        "abs_error": 287.272974163216
+      }
+    },
+    {
+      "oracle_column": "SOIL_G",
+      "candidate_column": "ground_surface_storage_heat_flux[W m-2]",
+      "pairs": 3252,
+      "max_abs_error": 853.4724458548162,
+      "max_abs_error_key": 2127,
+      "mae": 35.113289980362204,
+      "rmse": 72.89528021337965,
+      "bias": 7.872458798782093,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 412.0393,
+        "candidate": 20.40500851318656,
+        "abs_error": 391.6342914868135
+      }
+    },
+    {
+      "oracle_column": "ECO_RN",
+      "candidate_column": "ecosystem_net_radiation[W m-2]",
+      "pairs": 3252,
+      "max_abs_error": 354.4716089901541,
+      "max_abs_error_key": 2582,
+      "mae": 29.76764592351878,
+      "rmse": 57.03013123273814,
+      "bias": -9.833402540160712,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -92.48716,
+        "candidate": -127.89192069323104,
+        "abs_error": 35.40476069323104
+      }
+    },
+    {
+      "oracle_column": "ECO_LE",
+      "candidate_column": "ecosystem_latent_heat_flux[W m-2]",
+      "pairs": 3252,
+      "max_abs_error": 197.07504087335434,
+      "max_abs_error_key": 3205,
+      "mae": 21.528573497093273,
+      "rmse": 44.81868573943023,
+      "bias": 10.1941678874771,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -9.818518,
+        "candidate": -19.931540982198662,
+        "abs_error": 10.113022982198663
+      }
+    },
+    {
+      "oracle_column": "ECO_H",
+      "candidate_column": "ecosystem_sensible_heat_flux[W m-2]",
+      "pairs": 3252,
+      "max_abs_error": 470.4977774656414,
+      "max_abs_error_key": 2126,
+      "mae": 48.46751018725852,
+      "rmse": 85.17621739992975,
+      "bias": -4.05558755306592,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -309.7337,
+        "candidate": -22.460725836783997,
+        "abs_error": 287.272974163216
+      }
+    },
+    {
+      "oracle_column": "ECO_G",
+      "candidate_column": "ecosystem_storage_heat_flux[W m-2]",
+      "pairs": 3252,
+      "max_abs_error": 853.4724458548162,
+      "max_abs_error_key": 2127,
+      "mae": 35.113289980362204,
+      "rmse": 72.89528021337965,
+      "bias": 7.872458798782093,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 412.0393,
+        "candidate": 20.40500851318656,
+        "abs_error": 391.6342914868135
+      }
+    },
+    {
+      "oracle_column": "TEMP_1",
+      "candidate_column": "soil_temperature_layer_1[degC]",
+      "pairs": 3252,
+      "max_abs_error": 25.57840752341263,
+      "max_abs_error_key": 2510,
+      "mae": 2.662696344075278,
+      "rmse": 4.735800315710336,
+      "bias": 0.4068950648874518,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -21.04492,
+        "candidate": -11.040201672246042,
+        "abs_error": 10.00471832775396
+      }
+    },
+    {
+      "oracle_column": "TEMP_2",
+      "candidate_column": "soil_temperature_layer_2[degC]",
+      "pairs": 3252,
+      "max_abs_error": 13.688154381118075,
+      "max_abs_error_key": 3061,
+      "mae": 2.08857980062444,
+      "rmse": 3.613073481665439,
+      "bias": 0.2214209153890213,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -0.1489256,
+        "candidate": 0.49709468341148977,
+        "abs_error": 0.6460202834114898
+      }
+    },
+    {
+      "oracle_column": "TEMP_3",
+      "candidate_column": "soil_temperature_layer_3[degC]",
+      "pairs": 3252,
+      "max_abs_error": 12.900585713837312,
+      "max_abs_error_key": 3062,
+      "mae": 1.9210415486207149,
+      "rmse": 3.270967740014743,
+      "bias": 0.11841524741170484,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 4.873685,
+        "candidate": 3.951416556092795,
+        "abs_error": 0.9222684439072051
+      }
+    },
+    {
+      "oracle_column": "TEMP_4",
+      "candidate_column": "soil_temperature_layer_4[degC]",
+      "pairs": 3252,
+      "max_abs_error": 11.70366932991142,
+      "max_abs_error_key": 3064,
+      "mae": 1.796607169958598,
+      "rmse": 3.0480532949742214,
+      "bias": 0.10759872370056088,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 5.327163,
+        "candidate": 5.048250529707843,
+        "abs_error": 0.2789124702921564
+      }
+    },
+    {
+      "oracle_column": "TEMP_5",
+      "candidate_column": "soil_temperature_layer_5[degC]",
+      "pairs": 3252,
+      "max_abs_error": 10.679488111304755,
+      "max_abs_error_key": 3065,
+      "mae": 1.7129871125318867,
+      "rmse": 2.8872022887666566,
+      "bias": 0.0970705132780574,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 5.390452,
+        "candidate": 5.319089461156068,
+        "abs_error": 0.07136253884393184
+      }
+    },
+    {
+      "oracle_column": "TEMP_6",
+      "candidate_column": "soil_temperature_layer_6[degC]",
+      "pairs": 3252,
+      "max_abs_error": 9.891015051143075,
+      "max_abs_error_key": 3067,
+      "mae": 1.6674751584045204,
+      "rmse": 2.774028298696301,
+      "bias": 0.08843331749574487,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 5.397659,
+        "candidate": 5.381152432205113,
+        "abs_error": 0.01650656779488724
+      }
+    },
+    {
+      "oracle_column": "TEMP_7",
+      "candidate_column": "soil_temperature_layer_7[degC]",
+      "pairs": 3252,
+      "max_abs_error": 8.897390352278494,
+      "max_abs_error_key": 3164,
+      "mae": 1.560891373352125,
+      "rmse": 2.5905900112234788,
+      "bias": 0.05667082697482218,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 5.398571,
+        "candidate": 5.396461284695192,
+        "abs_error": 0.0021097153048073025
+      }
+    },
+    {
+      "oracle_column": "TEMP_8",
+      "candidate_column": "soil_temperature_layer_8[degC]",
+      "pairs": 3252,
+      "max_abs_error": 7.485642418728212,
+      "max_abs_error_key": 3168,
+      "mae": 1.3651462098032467,
+      "rmse": 2.2722837141181778,
+      "bias": 0.0027319240090115373,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 5.39876,
+        "candidate": 5.398787115384096,
+        "abs_error": 2.7115384095388606e-05
+      }
+    },
+    {
+      "oracle_column": "TEMP_9",
+      "candidate_column": "soil_temperature_layer_9[degC]",
+      "pairs": 3252,
+      "max_abs_error": 5.932390896141214,
+      "max_abs_error_key": 3196,
+      "mae": 1.09787233865874,
+      "rmse": 1.8018266923411475,
+      "bias": -0.09862351155022094,
+      "exceedances": 3251,
+      "exceedance_fraction": 0.9996924969249692,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 5.398764,
+        "candidate": 5.398848191597949,
+        "abs_error": 8.41915979492569e-05
+      }
+    },
+    {
+      "oracle_column": "TEMP_10",
+      "candidate_column": "soil_temperature_layer_10[degC]",
+      "pairs": 3252,
+      "max_abs_error": 4.217032762664452,
+      "max_abs_error_key": 3252,
+      "mae": 0.8029292754262684,
+      "rmse": 1.1980778368285636,
+      "bias": -0.28354374977152613,
+      "exceedances": 3251,
+      "exceedance_fraction": 0.9996924969249692,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 5.398767,
+        "candidate": 5.3988569167678975,
+        "abs_error": 8.991676789715797e-05
+      }
+    },
+    {
+      "oracle_column": "TEMP_11",
+      "candidate_column": "soil_temperature_layer_11[degC]",
+      "pairs": 3252,
+      "max_abs_error": 2.4593766937126906,
+      "max_abs_error_key": 3252,
+      "mae": 0.6396851809326393,
+      "rmse": 0.8231813043898745,
+      "bias": -0.4568356073626022,
+      "exceedances": 3251,
+      "exceedance_fraction": 0.9996924969249692,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 5.398773,
+        "candidate": 5.398865749863376,
+        "abs_error": 9.274986337537428e-05
+      }
+    },
+    {
+      "oracle_column": "TEMP_LITTER",
+      "candidate_column": "surface_soil_temperature[degC]",
+      "pairs": 3252,
+      "max_abs_error": 24.59475752341263,
+      "max_abs_error_key": 2510,
+      "mae": 2.7497547324316973,
+      "rmse": 4.722966109848809,
+      "bias": 0.5052531637612024,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -22.36178,
+        "candidate": -11.040201672246042,
+        "abs_error": 11.321578327753958
+      }
+    }
+  ],
+  "accounted_exclusions": [
+    {
+      "column": "TEMP_16",
+      "reason": "issue-085 class: deck selects soil layer 16 but the runtime profile has 12 layers; the oracle emits a structural value for an absent layer, ecosys-ng emits no column"
+    }
+  ],
+  "unmapped_oracle_columns": [],
+  "completion_proof": "ABSENT on both sides; see limitations",
+  "limitations": [
+    "does not prove either run reached its required end time; completion is a separate mandatory proof and neither side has it",
+    "applies no unit conversion; the column mapping must be verified unit-compatible against the legacy value producer first",
+    "the default atol/rtol is a triage rule, not a reviewed scientific acceptance threshold",
+    "no smoothing, interpolation, clipping, outlier removal or cumulative resetting is performed",
+    "columns it cannot map are reported as unmapped, and agreement on mapped columns says nothing about them"
+  ]
+}
