@@ -1,6 +1,13 @@
 # Issue 086 -- hourly water output slot 4 carries root water uptake in ecosys-ng where the legacy writes total soil water content
 
-Status: **OPEN, CONFIRMED DEFECT (filed 2026-09-21, adversarial Claude/Pi session).** A deck-selected production output column carries a **different physical quantity** in ecosys-ng than in the oracle. Both the column name and the value are the wrong quantity for that slot, there is no recorded justification anywhere in the source, and the owning module's own header comment claims to be the OUTSH translation. Found while building the first real legacy-vs-ecosys-ng output comparison (`outcompare.py`); it would have silently produced a meaningless column comparison.
+Status: **PARTIALLY FIXED 2026-09-21. Slot 4 (the wrong binding) is OPEN; the slot 27/48 label defect is FIXED.**
+
+- **Slot 27/48 -- FIXED.** The hourly catalog now publishes `surface_volumetric_liquid_water_fraction` / `surface_volumetric_ice_fraction` in `m3 m-3`, matching the values it already carried and the names the daily catalog already used. Label and unit only; no value changed. Tests: `output_catalog` 55/55, `soil.water.output` 55/55, `editor` 69/69, `output` 196/196, all exit 0. Two now-stale comments in `io/output/editor_layout.zig:882-889` were corrected in the same change.
+- **Slot 4 -- STILL OPEN**, deliberately. It needs a faithful `UVOLW` analogue, and `UVOLW` spans the snowpack, canopy, surface litter **and** the soil column (`redist.f:5445`, accumulated at `:5475`, `:5635`, `:6682`), not just soil layers. The predecessor audit's F-10 records that the existing daily `soil_water_storage` tracks the legacy daily `WATER` only "to 22%", so reusing it blindly would ship a **second** wrong quantity into a production output -- the very defect this issue is about. Specified rather than rushed.
+
+Triple corroboration for the slot-4 finding (below) stands unchanged.
+
+Prior status line: **OPEN, CONFIRMED DEFECT (filed 2026-09-21, adversarial Claude/Pi session).** A deck-selected production output column carries a **different physical quantity** in ecosys-ng than in the oracle. Both the column name and the value are the wrong quantity for that slot, there is no recorded justification anywhere in the source, and the owning module's own header comment claims to be the OUTSH translation. Found while building the first real legacy-vs-ecosys-ng output comparison (`outcompare.py`); it would have silently produced a meaningless column comparison.
 
 This is **not** the `issue-085` class (an accounted-for inventory difference). This is a wrong binding.
 
