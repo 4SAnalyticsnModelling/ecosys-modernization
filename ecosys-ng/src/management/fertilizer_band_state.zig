@@ -184,6 +184,41 @@ pub const State = struct {
         };
     }
 
+    /// ISSUE-090. Activates one family's band from a banded application's own
+    /// geometry, the `hour1.f:303-320` seed. See
+    /// `hourly_fertilizer_band_geometry.activateFromApplication` for the
+    /// equations and their citations.
+    ///
+    /// Restricted to the **idle** phase, for the same reason
+    /// `remapSoilLayerPair` is: HOUR1's prepared `FVL` values describe a
+    /// different concentration ownership and cannot be composed with a
+    /// geometry rewrite mid-hour. This is enforced rather than assumed, so a
+    /// caller that reaches here in the wrong phase fails loudly instead of
+    /// silently corrupting the band.
+    pub fn activateBandFromApplication(
+        self: *State,
+        cell: usize,
+        family: Family,
+        layer_geometry: geometry_module.LayerGeometry,
+        application_layer: usize,
+        application_depth_m: f64,
+        row_spacing_m: f64,
+        maximum_band_volume_fraction: f64,
+    ) !void {
+        if ((try self.coordinator(cell)).pendingToken() != null)
+            return error.FertilizerBandActivationOutsideIdlePhase;
+        var view = try self.geometry(cell, family);
+        try geometry_module.activateFromApplication(
+            &view,
+            layer_geometry,
+            application_layer,
+            application_depth_m,
+            row_spacing_m,
+            maximum_band_volume_fraction,
+        );
+        try self.state_updateGeometryScalars(cell, family, view);
+    }
+
     /// Copies scalar fields changed through a geometry view back to its owner.
     pub fn state_updateGeometryScalars(
         self: *State,

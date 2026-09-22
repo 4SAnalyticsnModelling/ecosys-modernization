@@ -82,6 +82,89 @@ pub const Workspace = struct {
     }
 };
 
+/// The oracle's `WBNDX`, "minimum fertilizer band width, depth (m)"
+/// (`hour1.f:109`), value `0.025` (`hour1.f:120`).
+pub const minimum_band_width_m: f64 = 0.025;
+
+/// ISSUE-090. Activates a nutrient family's band on a banded application.
+///
+/// Traceability: HOUR1 `hour1.f:303-320`. When banded material is applied the
+/// oracle sets `IFNHB(NY,NX)=1` (`:305`), takes the row spacing from THAT DAY's
+/// fertilizer record (`ROWN(NY,NX)=ROWI(I,NY,NX)`, `:306`, reassigned per day
+/// rather than accumulated), and seeds ONLY the application layer
+/// (`IF(L.EQ.LFDPTH)`, `:308`):
+///
+///   `DPNHB(L)=AMIN1(WBNDX,FDPTHF-CDPTH(L-1))`            `:309`
+///   `WDNHB(L)=AMIN1(WBNDX,ROWN)`                         `:310`
+///   `VLNHB(L)=AMIN1(0.9999,WDNHB/ROWN*DPNHB/DLYR(3,L))`  `:316-317`
+///
+/// Every other layer is explicitly zeroed (`:312-313`), and a layer thinner
+/// than `DLYRM` gets a zero fraction rather than a division (`:315`, `:319`).
+/// Note the fraction is TWO-DIMENSIONAL -- a width ratio times a depth ratio --
+/// which is why seeding it as a bare width ratio would overstate the band.
+///
+/// Before this existed ecosys-ng could only obtain a band fraction from the
+/// static `plant_nutrients` runscript record, so a deck whose record reads
+/// `0,0,0,...` had a permanently zero-volume band and its first banded
+/// application had no solvent to dissolve into. `update` below already grows
+/// the band once it is active; this is only the seed.
+pub fn activateFromApplication(
+    state: *State,
+    geometry: LayerGeometry,
+    application_layer: usize,
+    application_depth_m: f64,
+    row_spacing_m: f64,
+    maximum_band_volume_fraction: f64,
+) !void {
+    if (!std.math.isFinite(row_spacing_m) or row_spacing_m <= 0)
+        return error.InvalidFertilizerBandRowSpacing;
+    if (!std.math.isFinite(application_depth_m) or application_depth_m < 0)
+        return error.InvalidFertilizerBandApplicationDepth;
+    if (application_layer < geometry.first_active_layer or
+        application_layer > geometry.last_active_layer)
+        return error.FertilizerBandApplicationLayerOutOfRange;
+    if (state.band_depth_m.len != state.band_width_m.len or
+        state.band_volume_fraction.len != state.band_depth_m.len or
+        state.non_band_volume_fraction.len != state.band_depth_m.len or
+        geometry.thickness_m.len < state.band_depth_m.len or
+        geometry.upper_depth_m.len < state.band_depth_m.len)
+        return error.FertilizerBandGeometryDimensionMismatch;
+    if (!std.math.isFinite(maximum_band_volume_fraction) or
+        maximum_band_volume_fraction <= 0 or maximum_band_volume_fraction >= 1)
+        return error.InvalidFertilizerBandMaximumFraction;
+
+    // `FDPTHF-CDPTH(L-1)`: how much of the application depth falls inside the
+    // application layer, measured from that layer's own upper face.
+    const depth_into_layer_m = application_depth_m - geometry.upper_depth_m[application_layer];
+    const band_depth_m = @min(minimum_band_width_m, @max(0, depth_into_layer_m));
+    const band_width_m = @min(minimum_band_width_m, row_spacing_m);
+    const thickness_m = geometry.thickness_m[application_layer];
+    const fraction = if (thickness_m > geometry.minimum_active_thickness_m)
+        @min(
+            maximum_band_volume_fraction,
+            band_width_m / row_spacing_m * band_depth_m / thickness_m,
+        )
+    else
+        0;
+    inline for (.{ band_depth_m, band_width_m, fraction }) |value|
+        if (!std.math.isFinite(value) or value < 0)
+            return error.InvalidFertilizerBandActivationGeometry;
+
+    // Staged only after every value validates, so a rejected activation leaves
+    // the band exactly as it was.
+    for (0..state.band_depth_m.len) |layer| {
+        const seeded = layer == application_layer;
+        state.band_depth_m[layer] = if (seeded) band_depth_m else 0;
+        state.band_width_m[layer] = if (seeded) band_width_m else 0;
+        state.band_volume_fraction[layer] = if (seeded) fraction else 0;
+        state.non_band_volume_fraction[layer] = if (seeded) 1 - fraction else 1;
+    }
+    state.active = true;
+    state.row_spacing_m = row_spacing_m;
+    state.upper_edge_depth_m = geometry.upper_depth_m[application_layer];
+    state.lower_edge_depth_m = geometry.upper_depth_m[application_layer] + band_depth_m;
+}
+
 /// Applies the shared NH4, NO3, or PO4 band-growth equations.
 ///
 /// Traceability: HOUR1 (`hour1.f`) lines 4888-5151. The caller invokes this
@@ -318,6 +401,76 @@ fn makeState(
         .band_volume_fraction = band,
         .non_band_volume_fraction = non_band,
     };
+}
+
+test "issue-090: activation seeds only the application layer from the record row spacing" {
+    // Hand-checked against HOUR1 `hour1.f:303-320` using the Ottawa deck's own
+    // 17 May 1998 record, which is the application that exposed this gap:
+    // `application_depth_m = 0.05`, `band_row_width_m = 0.76` (maize rows).
+    // Layer faces 0.01/0.025/0.075 put depth 0.05 inside layer index 2, whose
+    // upper face is 0.025 and whose thickness is 0.05.
+    //
+    //   DPNHB = AMIN1(WBNDX, FDPTHF-CDPTH(L-1)) = min(0.025, 0.05-0.025) = 0.025
+    //   WDNHB = AMIN1(WBNDX, ROWN)              = min(0.025, 0.76)       = 0.025
+    //   VLNHB = WDNHB/ROWN * DPNHB/DLYR         = (0.025/0.76)*(0.025/0.05)
+    //                                           = 0.0328947368421...*0.5
+    //                                           = 0.01644736842105263
+    var band_depth = [_]f64{ 0, 0, 0, 0 };
+    var band_width = [_]f64{ 0, 0, 0, 0 };
+    var band_fraction = [_]f64{ 0, 0, 0, 0 };
+    var non_band_fraction = [_]f64{ 1, 1, 1, 1 };
+    var state: State = .{
+        .active = false,
+        .row_spacing_m = 0,
+        .upper_edge_depth_m = 0,
+        .lower_edge_depth_m = 0,
+        .band_depth_m = &band_depth,
+        .band_width_m = &band_width,
+        .band_volume_fraction = &band_fraction,
+        .non_band_volume_fraction = &non_band_fraction,
+    };
+    const upper = [_]f64{ 0, 0.01, 0.025, 0.075 };
+    const lower = [_]f64{ 0.01, 0.025, 0.075, 0.125 };
+    const thickness = [_]f64{ 0.01, 0.015, 0.05, 0.05 };
+    const geometry: LayerGeometry = .{
+        .upper_depth_m = &upper,
+        .lower_depth_m = &lower,
+        .thickness_m = &thickness,
+        .first_active_layer = 0,
+        .last_active_layer = 3,
+        .minimum_active_thickness_m = 1.0e-6,
+        .structural_presence_threshold = 1.0e-12,
+    };
+
+    try activateFromApplication(&state, geometry, 2, 0.05, 0.76, 0.9999);
+
+    try std.testing.expect(state.active);
+    try std.testing.expectEqual(@as(f64, 0.76), state.row_spacing_m);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.025), band_depth[2], 1.0e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.025), band_width[2], 1.0e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.01644736842105263), band_fraction[2], 1.0e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, 1 - 0.01644736842105263), non_band_fraction[2], 1.0e-15);
+    // The band fraction is NONZERO, which is the whole point: a zero fraction
+    // is what left banded fertilizer with no solvent and raised
+    // `MissingFertilizerRecipientWaterVolume` at hour 3,276.
+    try std.testing.expect(band_fraction[2] > 0);
+    // Every other layer stays empty, matching `hour1.f:312-313`.
+    for ([_]usize{ 0, 1, 3 }) |layer| {
+        try std.testing.expectEqual(@as(f64, 0), band_depth[layer]);
+        try std.testing.expectEqual(@as(f64, 0), band_width[layer]);
+        try std.testing.expectEqual(@as(f64, 0), band_fraction[layer]);
+        try std.testing.expectEqual(@as(f64, 1), non_band_fraction[layer]);
+    }
+    try std.testing.expectApproxEqAbs(@as(f64, 0.025), state.upper_edge_depth_m, 1.0e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.05), state.lower_edge_depth_m, 1.0e-15);
+
+    // A zero or negative row spacing is the oracle's "no band" state
+    // (`reads.f:788` initializes ROWN to 0 and `hour1.f:4897` gates on
+    // ROWN>0), so activating with one must fail rather than divide.
+    try std.testing.expectError(
+        error.InvalidFertilizerBandRowSpacing,
+        activateFromApplication(&state, geometry, 2, 0.05, 0, 0.9999),
+    );
 }
 
 test "diffusion grows width and depth in source operation order" {
