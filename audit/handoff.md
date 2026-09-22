@@ -1070,3 +1070,54 @@ The two resolved frontier traces in `stages/hourly_heat_water_solute.zig` were r
 5. A clean `ReleaseFast`-versus-`ReleaseSafe` comparison from the same commit, which round 27 did **not** establish.
 
 **Standing blockers requiring the user, now just one**: `issue-097` (import `docs/` + `tools/`, 1,043 files cited 307 times, including the release gate that decides v1.0.0). `issue-091` is no longer among them.
+
+---
+
+## Round 28 (2026-09-22): the hour-3,275 frontier blocker is diagnosed, and it is worse than one missing function
+
+### `issue-098`: the ammonium band inventory is never amalgamated when the band disappears
+
+Instrumented `concentration()` (`soil/biogeochemistry/mineral_nitrogen_transport.zig:671`) on its failure path only, rebuilt `ReleaseSafe`, reproduced in ~9 minutes:
+
+```
+error: TEMP_DIAGNOSTIC MineralNitrogenInZeroWaterDomain:
+  species=ammonium_band  cell=1  amount_mol=1.1539999579320571e-7
+  water_m3=7.061016156018221e-3  fraction=0e0  zero_cause=fraction
+```
+
+Three things settled at once: **it is not a water problem** (`water_m3` is healthy -- the error's name is misleading, since `concentration()` raises the same error for `fraction == 0` as for `water_m3 == 0`); it is the **ammonium band specifically**; and the stranded amount is a **trace residue** (1.154e-7 mol, just above the function's own 1e-12 tolerance).
+
+`hour1.f:4962` names the missing operation in its own words -- **"AMALGAMATE NH4 BAND WITH NON-BAND IF BAND NO LONGER EXISTS"** -- and its ELSE arm has five geometry assignments (`:4965-4969`) and **twelve inventory assignments** (`:4970-4981`) covering six band pools: aqueous NH4, aqueous NH3, exchangeable NH4, and the NH4/NH3/urea fertilizer reserves.
+
+ecosys-ng ports **the geometry half only**. `management/hourly_fertilizer_band_geometry.zig:278-284` is line-for-line faithful and raises `band_disappeared` (documented at `:36` as *"True where the inactive-band branch requires inventory amalgamation"*). For nitrate and phosphate the signal is acted on; **for ammonium there is no consumer at all** -- `amalgamateAmmonium` and every variant returns nothing tree-wide. And `fertilizer_band_nitrate_phosphate.zig:105-106` says outright *"Translates `hour1.f` lines 4992--5200... Call after the NH4 update for the same layer"*, presupposing an NH4 counterpart that does not exist.
+
+### The escalation: the nitrate and phosphate amalgamations are ALSO dead
+
+While locating where to add the ammonium mirror, the existing ones turned out to be ineffective in production. In `stages/soil_chemistry_convergence.zig` the pool arrays passed to `updateLayer` are **`scratch_allocations.alloc`** (`:764+`), filled from state (`:899+`), amalgamated (`:1016-1039`) -- and **no `_pools[` reference exists after `:1016`**. Never written back.
+
+**The asymmetry sits inside one call**: the *geometry* arguments are live (`context.fertilizer_band.geometry(...)` at `:717`, sliced at `:950`), so zeroing the band volume fraction **persists**, while the *inventory* merge goes to scratch and is **discarded**. Exactly the ammonium defect, reproduced for the other two families.
+
+**So all three legacy amalgamation blocks are ineffective.** NH4 has no implementation; NO3 and PO4 have one whose writes are thrown away.
+
+### The generalisable lesson
+
+`fertilizer_band_nitrate_phosphate.zig:362` is a test named *"amalgamation transfers nitrate and salinity phosphate pools"* and **it passes** -- it exercises `updateLayer` as a pure function against caller-supplied arrays and correctly asserts the transfer. The function is right; the wiring is wrong. Same shape as `issue-096`'s identically-false comparison: **unit-testable but production-dead.**
+
+> **For any kernel that mutates caller-supplied buffers, the audit needs a check that the production call site passes LIVE STATE.** Neither a unit test nor the conservation ledger can see this -- the ledger reports nothing created or destroyed precisely because the merge never happened.
+
+### Why the fix is not landed
+
+It is now three changes, not one, and one prerequisite is genuinely unresolved:
+
+**The staging at `soil_chemistry_convergence.zig:875-896` converts concentrations to amounts as `conc_mol_per_m3 * effective_water_volume_m3` with NO zone-fraction factor, while `mineral_nitrogen_transport.concentration()` divides by `water_m3 * fraction`.** Those two conventions must be reconciled before anything is written back, or the write-back itself introduces a nitrogen mass error -- the worst possible outcome for this audit. Settling that is step zero.
+
+Also `issue-090` is re-dispositioned **correct-but-not-causal**: it fixed band NO3 *activation*; the frontier failure is ammonium band *deactivation*, a different half of the machinery in a different family.
+
+### Next bounded action for round 29
+
+1. **Settle the concentration/amount convention** between `soil_chemistry_convergence.zig:875-896` and `mineral_nitrogen_transport.concentration()`. Nothing else in `issue-098` can proceed safely first.
+2. Then: write nitrate/phosphate pools back to live state; add the six-pair ammonium amalgamation; add a **production-path** test for each that asserts the merge is visible in state after the hourly stage.
+3. Re-run to hour 3,275 (~9 min, `ReleaseSafe`) to confirm it clears, then an output comparison -- this moves nitrogen availability from the first band closure onward, so results will shift.
+4. **Sweep for the same wiring class**: other kernels handed `scratch_allocations` buffers whose mutations are expected to persist. This is the highest-value systematic follow-up from round 28.
+
+`MineralNitrogenInZeroWaterDomain` returns **zero hits** in the 615-file reference tree, so this whole chain is genuinely new work, not rediscovery.
