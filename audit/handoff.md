@@ -1017,3 +1017,56 @@ The earlier round-26 list (instrument the gate, check the conductivity class, `A
 5. Resolve `issue-097` by importing `docs/` (the user's call; deliberately not done).
 
 **Do not** re-verify the withdrawn items. `SOL_RADN` is a print floor, and a comparable precipitation column exists and matches to machine precision.
+
+---
+
+## Round 27 (2026-09-22): `issue-091` was never a real blocker, and criterion 3 now has a number
+
+Three results, one of which reverses the session's central assumption.
+
+### 1. `issue-091` RESOLVED with no privileged change: build `ReleaseSafe`, not `ReleaseFast`
+
+```
+zig build -Doptimize=ReleaseSafe                     # exit 0
+SHA-256 4A08E227D8B524A271A4FC4BD4916D68066971724E7A4C2CC978AAD0D646F5B6   11,139 KB   READABLE
+```
+
+No new Defender detection; the latest remains 03:24:43 against the old `ReleaseFast` content. Sizes confirm the content genuinely differs: **Debug 25,956 KB, ReleaseFast 12,000 KB, ReleaseSafe 11,139 KB.**
+
+**My reasoning error, recorded because it is the reusable lesson.** `issue-091`'s own central finding was that *the detection follows the content, not the path* -- established by workaround 2 (the Zig-cache copy fails identically) and workaround 3 (the **Debug** binary is readable while ReleaseFast is not). Those two facts say plainly that changing the optimisation mode changes the detected content, and Debug had already demonstrated it. I then tested only the two modes already built and wrote **"all three non-privileged workarounds tested, all fail"**, when the obvious fourth -- the other two release modes -- was never tried. That wrong conclusion stood for several rounds and framed the entire session as blocked-on-user.
+
+Worse: `tools/production_performance_reference.json` is keyed **`strict-releasesafe-throughput-pending-v3`** and requires "a passing strict-production **ReleaseSafe** run". `ReleaseSafe` was never merely an untried workaround -- **it is the mandated build for criterion 3.** Every attempt in `issue-091` targeted a mode that could not have qualified even if readable.
+
+**No Defender exclusion is needed. No user decision is needed.** The `PROJECT_CONTRACT.md` prohibition on privileged environment changes is fully respected.
+
+### 2. `run-021`: criterion 3 measured in the qualification mode for the first time
+
+| checkpoint | elapsed | rate | vs Fortran (51.21 ms/h) |
+|---|---|---|---|
+| hour 2,208 | 194 s | **87.9 ms/h** | **1.72x slower** |
+| hour 3,240 | 393 s | **121.3 ms/h** | **2.37x slower** |
+| hour 3,275 (exit, incl. failure handling) | 556 s | 169.8 ms/h | 3.32x slower |
+
+Fortran denominator is `run-003`'s gfortran figure, cross-checked full-year 50.97 against day-108 51.21 ms/h (0.5% agreement). The model's own per-day sample (`final_hour_elapsed_ms` over 136 days) gives mean 144 ms/h, independently consistent.
+
+**The structural finding matters more than the ratio**: hours 1-2,208 run at 87.9 ms/h, hours 2,208-3,240 at **192.8 ms/h** -- per-hour cost **more than doubles** from winter into spring as vegetation and active biogeochemistry come online, while **the Fortran is essentially flat across the whole year**. So "~2x slower" understates the production-horizon problem, and no full-horizon ratio can be stated until a run completes the horizon. **That is now the binding constraint on criterion 3** -- not tooling, not Defender, not a missing baseline.
+
+Also corrected: I claimed criterion 3 "had zero measurement". Wrong -- `run-003` and `run-004` are in this repository's own `audit/runs/` and already measured ~6.43x then ~2.02x (`ReleaseFast`). I reconciled the *reference* docs without reading the *local* run records, the mirror image of `issue-097`'s mistake.
+
+### 3. `issue-090`'s fix is production-INVALIDATED
+
+`run-021` fails at **hour 3,275 with `MineralNitrogenInZeroWaterDomain`** -- the same error and hour as `run019`, which predates the fix. `issue-090`'s NO3 gate correction (`Z4B+Z3B+ZUB+ZOB`, `hour1.f:356`) is unit-validated, source-verified and regression-free, and **does not fix the frontier**. It needs re-dispositioning as **correct-but-not-causal**. Frontier unchanged at 3,275; no regression from anything landed this session.
+
+### Also landed
+
+The two resolved frontier traces in `stages/hourly_heat_water_solute.zig` were removed exactly as each trace's own comment instructed -- the `issue-067` vapor window (hours 2893-2895) and the `issue-078` water window (hours 3247-3253), both issues now closed. Hygiene, **not** a throughput fix: those windows are hour-bounded, and `run019` emitted 2.2 log lines/hour against `run-004`'s pre-fix 7.5, so logging has not regressed and the remaining performance gap is real compute.
+
+### Next bounded action for round 28
+
+1. **Diagnose `MineralNitrogenInZeroWaterDomain` at hour 3,275** -- now the single frontier blocker, and now cheaply reproducible: `ReleaseSafe` reaches it in **~9 minutes**. Check the reference `discrepancy_register.md` for the error name first (round 26's lesson).
+2. **Re-disposition `issue-090`** as correct-but-not-causal.
+3. **`issue-096`'s `solver_residual.zig:480` fix** -- the saturation-independent gate defect, now *validatable* since production runs work. `hydraulic_conductivity.zig:40-41` already computes the air-entry threshold it needs.
+4. `issue-093`'s `RC0` composition -- the one uncontested new defect from round 26.
+5. A clean `ReleaseFast`-versus-`ReleaseSafe` comparison from the same commit, which round 27 did **not** establish.
+
+**Standing blockers requiring the user, now just one**: `issue-097` (import `docs/` + `tools/`, 1,043 files cited 307 times, including the release gate that decides v1.0.0). `issue-091` is no longer among them.
