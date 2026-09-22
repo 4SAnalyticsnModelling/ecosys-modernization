@@ -27,6 +27,27 @@ Status: **OPEN, CONFIRMED BY SOURCE ON BOTH SIDES, but MUCH SMALLER THAN FIRST C
 
 The five readouts recorded in `run-014` (`ICE_1`-`ICE_5` gradient, `WTR_1` bias, `SNOWPACK` persistence, litter thickness, `PSI_SURF`) all measure litter state, and `issue-094` now explains all five. This issue is a genuine but minor defect in how litter carbon is *assembled*.
 
+> ### Novelty verified against the reference discrepancy register
+>
+> Round 26's other findings turned out to be largely already documented (`issue-097`), so this
+> one was checked properly rather than on a single keyword. Searching the reference
+> `discrepancy_register.md` (49,801 lines; absent from this repository, see `issue-097`):
+>
+> | term | hits | bearing |
+> |---|---|---|
+> | `RC0` | **0** | the legacy array at the centre of this issue |
+> | `BKRS` | **0** | the bulk-density vector |
+> | `THETRX` | **0** | the retention vector |
+> | `K.NE.4` | **0** | the exclusion that makes `RC0(4)` structural-only |
+> | `DLYR(3,0)` | **0** | the thickness expression |
+> | `surface_litter_thickness` | **0** | the ecosys-ng field |
+> | `substrateCarbon` | 1 | **a different concern** -- it records `litter_geometry.zig:69-72`'s charcoal double-counting in BKVL/dry mass, which this issue already distinguishes from the per-pool composition |
+> | `VOLWRX` | 13 | **a different site** -- the litter water holding capacity at `redist.f:8298` and the `VOLWD` analogue, not the `hour1.f:1927`/`:4350` composition |
+>
+> So the per-pool composition mismatch appears genuinely unrecorded. This remains a keyword
+> search rather than proof of novelty, but across eight terms it is reasonable evidence.
+> **This is round 26's one uncontested new defect.**
+
 ## What is already proven faithful
 
 The preceding trace (commit `933c2ac`) established that the litter-geometry **formula** is an exact term-for-term port, and that the **parameters** match the legacy `DATA` statements exactly:
