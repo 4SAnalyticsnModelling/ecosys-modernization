@@ -50,7 +50,46 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 
 **So: the day-137 banded monocalcium phosphate application books its phosphorus and calcium as external inputs but does not deposit them into cell 2's inventory.**
 
-> ## ROOT CAUSE, MEASURED: the deposit precedes the hour's conservation baseline, while its input is booked inside the window
+> ## THE ORDERING CONCLUSION IS REFUTED. The reserve is CONSUMED TO ZERO within the hour.
+>
+> The caveat above was justified. With the census diagnostic logging **unconditionally** for
+> `profile_cell == 2`, the passes the filtered version had hidden appear:
+>
+> ```
+> census_read: profile_cell=2 cell=0 layer=2 banded_mol=8.064516129032258e-2 pending_phosphate_g=5e0   <- 4 passes
+> census_read: profile_cell=2 cell=0 layer=2 banded_mol=0e0                  pending_phosphate_g=0e0   <- then 10 passes
+> ```
+>
+> So the reserve is deposited, read as 5.0 g P for several passes, and then **read as exactly
+> zero for the rest of the hour**. It is not that the baseline saw the deposit -- it is that
+> the reserve is **consumed** partway through the hour. My ordering conclusion was wrong, and
+> it was wrong for the seventh time in this issue because I again drew a conclusion the
+> instrumentation could not support. The filtered diagnostic was the flaw; flagging it before
+> the rerun was the only reason this did not become a committed seventh error.
+>
+> ### The new measured fact, and where it points
+>
+> The consumer is the dissolution path: `mineral_fertilizer_inventory.zig:183-227` moves the
+> reserve into `chemistry.band_phosphate[].monocalcium_phosphate_solid_mol_per_m3` and
+> `chemistry.phosphate_minerals.monocalcium_phosphate_mol_per_m3`. The reserve going to zero is
+> **correct behaviour** -- the mass is supposed to leave it.
+>
+> So the question is now precise and different from all seven earlier ones: **does that
+> transfer conserve mass?** The reserve is an extensive amount (mol); the destinations are
+> **per-m3 concentrations**. Converting an amount into a band concentration requires dividing
+> by the band's own volume, which for this layer is only `1.6447e-2` of the layer
+> (`run-021`). `issue-098` already established that the sibling staging in
+> `soil_chemistry_convergence.zig:875-896` performs the inverse conversion **without any zone
+> fraction**, so a matching omission here would make the deposited concentration wrong by that
+> factor, and the census -- which does apply the band volume correctly -- would recover only a
+> fraction of the 5.0 g P.
+>
+> **Next measurement, stated as a measurement and not a conclusion**: log the
+> `monocalcium_phosphate_solid_mol_per_m3` value written by `:183-227` together with the band
+> volume used, and check `amount_in == concentration_out x volume` to the last bit. That is a
+> mass-conservation identity on a single transfer, and it either holds or it does not.
+>
+> ## SUPERSEDED (refuted): the deposit precedes the hour's conservation baseline
 >
 > The census was instrumented at its own read. It reads the deposit **perfectly** -- 7 passes
 > during the failing hour, every one identical:
