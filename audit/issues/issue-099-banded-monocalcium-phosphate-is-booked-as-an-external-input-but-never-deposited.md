@@ -50,7 +50,54 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 
 **So: the day-137 banded monocalcium phosphate application books its phosphorus and calcium as external inputs but does not deposit them into cell 2's inventory.**
 
-> ## MEASURED: the deposit DOES happen, in the right hour and the right slot. The defect is in the census READ.
+> ## ROOT CAUSE, MEASURED: the deposit precedes the hour's conservation baseline, while its input is booked inside the window
+>
+> The census was instrumented at its own read. It reads the deposit **perfectly** -- 7 passes
+> during the failing hour, every one identical:
+>
+> ```
+> census_read: profile_cell=2 cell=0 layer=2 banded_mol=8.064516129032258e-2 pending_phosphate_g=5e0
+> ```
+>
+> So the complete chain is now measured end to end and **every component is correct**:
+>
+> | step | measured | correct? |
+> |---|---|---|
+> | booking (preflight) | hour 3,275, cell 0, 5.0 g P | yes |
+> | deposit | hour 3,275, `soil_index = 2`, 8.064516129032258e-2 mol | yes |
+> | booking (accumulate) | hour 3,275, cell 0, 5.0 g P, not double-counted | yes |
+> | census read | `profile_cell = 2`, 8.064516129032258e-2 mol -> **5.0 g P** | yes |
+>
+> **And yet `before = 4.1385007653583244e1` and `after = 4.138512614717944e1`.** The census
+> contributes 5.0 g P on every pass it made during that hour, including the first. Therefore
+> the 5.0 is present in **both** the before and the after snapshot -- which is only possible if
+> **the deposit executed before the hour's baseline was captured**, while its external-input
+> booking is attributed to that same hour. Hence `residual = -external_input` exactly.
+>
+> ### Why the six readings all failed
+>
+> Every one of them asked "is this component wrong?" and every component is right. The defect
+> is in the **relative order** of two correct operations, which no amount of reading a single
+> module can reveal. Note that I twice inferred ordering from **line numbers** in
+> `ecosys_ng.zig` (`:6760` baseline before `:7185` fertilizer) and was wrong both times --
+> those are calls in different functions, so source order is not execution order. The
+> measurement settled in one run what six readings could not.
+>
+> ### Fix direction
+>
+> Either capture the hour's conservation baseline **before** the fertilizer stage runs, or
+> attribute the external-input booking to the hour whose baseline precedes the deposit. The
+> first is almost certainly right, since the ledger `reset()` at `ecosys_ng.zig:6853` already
+> carries a comment scoping activity to "exactly one fixed external hour" -- the baseline
+> should share that scope.
+>
+> **Not applied.** It moves a validation baseline that all ten quantities are checked against,
+> so it needs its own review pass and a full-suite plus production cycle. **Confirm the call
+> order directly first** -- by logging the baseline capture alongside the deposit -- rather
+> than relying on the inference above, sound as it is: this issue has already had six wrong
+> mechanisms and the last thing it needs is a fix built on a seventh inference.
+>
+> ## SUPERSEDED: the deposit DOES happen, in the right hour and the right slot -- the defect is in the census READ
 >
 > Instrumented all three points of the cell-scope booking path and ran `ReleaseSafe` to the
 > frontier. Every marker fires in the **same hour**:

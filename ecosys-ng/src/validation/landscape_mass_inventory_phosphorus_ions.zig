@@ -382,10 +382,22 @@ fn aggregateProfilePhosphorusAndIonsRange(
 
             const pending = pending_fertilizer.soil[profile_cell];
             try group_support.validateFiniteNonnegativeStruct(pending);
-            result.phosphate_phosphorus_g += phosphorus_g_per_mol *
+            const pending_phosphate_g = phosphorus_g_per_mol *
                 (2 * (pending.broadcast_monocalcium_phosphate_mol +
                     pending.banded_monocalcium_phosphate_mol) +
                     3 * pending.hydroxyapatite_mol);
+            // TEMP_DIAGNOSTIC (`issue-099`): the census's own read. The deposit
+            // is confirmed to write 8.064516129032258e-2 mol of banded
+            // monocalcium phosphate to `soil[2]` at hour 3,275, and this line
+            // reads `soil[profile_cell]` with the identical index expression --
+            // yet the cell census reports scope 2's phosphorus rising by only
+            // 1.185e-4 instead of 5.0 g. Six static mechanisms were checked and
+            // all were correct, so this is the one unobserved value.
+            if (!@import("builtin").is_test and pending.banded_monocalcium_phosphate_mol != 0) std.log.err(
+                "TEMP_DIAGNOSTIC census_read: profile_cell={d} cell={d} layer={d} banded_mol={e} pending_phosphate_g={e}",
+                .{ profile_cell, cell, layer, pending.banded_monocalcium_phosphate_mol, pending_phosphate_g },
+            );
+            result.phosphate_phosphorus_g += pending_phosphate_g;
             result.ion_inventory_mol += pendingMineralIonAtoms(pending);
             try element_moles.add(pendingMineralElements(pending));
             result.carbon_dioxide_carbon_g +=
