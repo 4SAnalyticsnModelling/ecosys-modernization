@@ -29,7 +29,25 @@ Observed symptoms, in the order they appeared and were misread:
 
 The `!ml` suffix marks this a **machine-learning heuristic** detection, which is the usual signature of a false positive on a freshly compiled, unsigned executable. Nothing about the build changed in a way that would plausibly introduce malware: the binary is produced by `zig build -Doptimize=ReleaseFast` from this repository's own source, and the immediately preceding builds of the same tree ran fine (`run-013` through `run-019`).
 
-## Non-privileged workarounds: all three tested, all fail
+## Non-privileged workarounds
+
+> ### CORRECTION 2026-09-22: the claim below that "all three" were tested is OVERSTATED
+>
+> Three were tested. **A fourth and fifth were never tried: `ReleaseSafe` and `ReleaseSmall`.**
+> That is a real omission, not a quibble, because this issue's own key observation is that
+> **the detection follows the binary's *content*, not its path** -- and a different
+> optimisation mode is precisely a change of content. Workaround 3 already demonstrated the
+> principle by showing the **Debug** binary is readable while ReleaseFast is not. `ReleaseSafe`
+> sits between them in codegen and is far faster than Debug.
+>
+> It matters doubly because `tools/production_performance_reference.json` (reference tree,
+> `issue-097`) has id **`strict-releasesafe-throughput-pending-v3`** and requires "a passing
+> strict-production **ReleaseSafe** run". So `ReleaseSafe` is not merely an untested
+> workaround -- **it is the build the performance baseline is specified against**, and every
+> attempt recorded in this issue targeted the wrong optimisation mode for criterion 3.
+>
+> A `ReleaseSafe` build is under way; result recorded below when it completes. See
+> `audit/analysis/criterion-3-performance-status-reconciliation-2026-09-22.md`.
 
 Tried before escalating, so the blocker is substantiated rather than assumed. None of these changes the machine's security posture.
 
