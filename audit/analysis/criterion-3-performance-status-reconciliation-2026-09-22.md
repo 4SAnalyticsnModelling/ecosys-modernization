@@ -1,6 +1,50 @@
-# Criterion 3 (performance) -- status reconciled against the reference measurement record, 2026-09-22
+# Criterion 3 (performance) -- status reconciled, 2026-09-22
 
-Written because criterion 3 ("significantly more performant than the legacy Fortran") had **zero measurement** across every round of this session, and I had been attributing that to `issue-091`'s Defender block. That attribution was wrong in an important way, and the reference documentation's own account of the blockers is **stale in three respects**.
+> ## CORRECTION, same day: criterion 3 IS measured, in this repository, and it FAILS
+>
+> This note originally opened by saying criterion 3 "had **zero measurement** across every
+> round of this session". **That was wrong, and the data was in this repository's own
+> `audit/runs/` the whole time.** I wrote a reconciliation of the *reference* documentation
+> without first reading the local run records. That is the same mistake as `issue-097`, in
+> the opposite direction.
+>
+> **`run-003-performance-benchmark-zig-vs-fortran-2026-09-18.md`** and
+> **`run-004-logging-overhead-fix-and-remeasurement-2026-09-18.md`** are a controlled,
+> repeated, matched-workload comparison: hours 1-2,578 of the Ottawa deck, single-threaded
+> (`--threads 1`), ecosys-ng built with `zig build -Doptimize=ReleaseFast`
+> (`run-003:25`) against the independent gfortran oracle.
+>
+> | | wall (median) | rate | throughput |
+> |---|---|---|---|
+> | gfortran oracle | **131.46 s** | 0.05121 s/h | **~19.6 cell-hours/s** |
+> | ecosys-ng, `run-003` | 844.97 s | 0.3278 s/h | ~3.1 cell-hours/s |
+> | ecosys-ng, `run-004` after the logging fix | **266.05 s** | 0.1032 s/h | **~9.7 cell-hours/s** |
+>
+> The Fortran figure is internally cross-checked in `run-003:52`: the full-year rate
+> (446.50 s / 8,760 h = 0.05097 s/h) and the day-108 rate (131.46 s / 2,568 h = 0.05121 s/h)
+> agree to within 0.5%.
+>
+> **So the measured Zig/Fortran ratio is ~2.02** (`run-004`), down from ~6.43 (`run-003`)
+> after gating four leftover debug `info` call sites behind `--verbose-diagnostics` -- a
+> 68.5% wall-time reduction from logging alone, with output-neutrality verified on 197 of
+> 202 files byte-identical.
+>
+> **ecosys-ng is currently about twice as SLOW as the legacy Fortran.** `run-004`'s own
+> status line says the acceptance bar (ratio <= 1) "is still not met". The goal's wording is
+> stronger than that bar -- "significantly *more* performant" needs a ratio well below 1 --
+> so ecosys-ng needs better than a **2x speedup just to reach parity**, and more beyond it.
+>
+> **And it is worse than 2.02 for qualification purposes**, because that measurement used
+> `ReleaseFast` while `tools/production_performance_reference.json` requires **`ReleaseSafe`**,
+> which carries runtime safety checks `ReleaseFast` omits. The qualification-mode ratio has
+> never been measured. That is the gap a fresh `ReleaseSafe` measurement would close.
+>
+> Everything below about the *reference* documentation's stale blockers still stands, and the
+> conclusion "criterion 3 is now achievable" should be read as "a qualification-mode
+> measurement is now obtainable" -- **not** as any suggestion the criterion is close to
+> passing. On the evidence it is failing by a factor of two or more.
+
+Originally written because criterion 3 ("significantly more performant than the legacy Fortran") appeared to have no measurement this session, and I had been attributing that to `issue-091`'s Defender block. That attribution was wrong in an important way, and the reference documentation's own account of the blockers is **stale in three respects**.
 
 Sources are in the read-only reference tree, absent from this repository (`issue-097`): `tools/production_performance_reference.json` and `docs/solver_performance_measurement.md`.
 
