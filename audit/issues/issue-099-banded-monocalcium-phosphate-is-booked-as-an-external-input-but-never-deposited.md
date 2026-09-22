@@ -91,9 +91,44 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 > Note the booking is keyed on **grid cell 0** while the failure is reported at **scope 2**, so
 > there is a cell-to-scope mapping in the ledger that is also worth checking.
 >
-> **Not yet verified**, and this issue has already had four wrong mechanisms from me, so it is
-> stated as a suspicion: confirm by logging `profile_cell` alongside the reserve value the
-> census actually reads, next to the `soil_index` the deposit wrote.
+> **That suspicion is also refuted.**
+> `landscape_mass_inventory_phosphorus_ions.zig:260` computes
+> `const profile_cell = cell * grid.soil_layer_capacity + layer;` -- **identical** to the
+> deposit's `soil_index = cell * state.layer_capacity + layer`. Same slot.
+>
+> ### Six mechanisms checked, all refuted. Every static path is correct.
+>
+> | # | mechanism | refuted by |
+> |---|---|---|
+> | 1 | the reserve has no census `StorageOwner` | `layer_mass_inventory.zig:93-107` + `..._phosphorus_ions.zig:385-388` sum it, units reconcile `/62` and `31x2` |
+> | 2 | the staged `next_soil` deposit is never committed | `mineral_fertilizer_inventory.zig:109-110` commits after validating |
+> | 3 | deposit and booking target different layers | deposit uses `layerAtDepth(0.05)` = layer 2, the failing layer |
+> | 4 | the sidecar's event gate has no hour component | `isApplicationHour` at `:161`, identical in all four paths |
+> | 5 | the sidecar books before the deposit (ordering) | that ordering is documented as deliberate (`ecosys_ng.zig:7181-7184`), and the sidecar feeds the **layer** ledger, not the cell one |
+> | 6 | the cell census omits the reserve, unlike the layer census | `landscape_mass_balance_runtime.zig:178,187,337,347` wire `mineral_fertilizer` in |
+>
+> And the run itself confirms the application end is sound: preflight, deposit and accumulate
+> all fire at hour 3,275, at the right slot, with the right magnitude, without double-counting.
+> The baseline is also captured in the right place -- `reconstructLayerMassBalanceScopes` at
+> `ecosys_ng.zig:6760`, **before** the fertilizer stage at `:7185-7302` -- so the deposit is not
+> pre-baked into `before`.
+>
+> ### Where that leaves it
+>
+> Booking, deposit, index, gate, ordering, census wiring and baseline placement are each
+> individually correct, and yet `before = 4.1385007653583244e1` rises only to
+> `4.138512614717944e1` when 5.0 g P was deposited into the very slot the census reads.
+>
+> **So the next measurement must be on the census itself, not the application.** Log, at scope
+> 2, the census's own `pending.banded_monocalcium_phosphate_mol` reading and its
+> `phosphate_phosphorus_g` contribution, in both the before and after passes. That is the one
+> place not yet observed, and after six refutations it is the only honest way to proceed --
+> every further guess from reading has been wrong.
+>
+> **Six wrong mechanisms is itself a finding about method**: this defect sits in a path where
+> each component is locally correct, which is exactly the shape that static reading cannot
+> resolve and instrumentation can. The two instrumented runs in this issue each produced a
+> decisive fact; the six readings produced none.
 >
 > ## SUPERSEDED (but now partly rehabilitated): the reserve IS counted by the census -- the question is at WHICH INDEX
 >
