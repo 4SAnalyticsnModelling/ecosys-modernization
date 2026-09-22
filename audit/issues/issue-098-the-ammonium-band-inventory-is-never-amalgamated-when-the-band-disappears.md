@@ -42,6 +42,29 @@ Status: **OPEN, ROOT CAUSE OF THE FRONTIER FAILURE, CONFIRMED BY INSTRUMENTED RE
 > **So all three legacy amalgamation blocks are ineffective**: NH4 (`hour1.f:4962`) has no
 > implementation at all; NO3 (`:5057`) and PO4 (`:5148`) have one whose writes are thrown away.
 >
+> ### Blast radius, counted
+>
+> Every pool array reaching `updateLayer` is scratch. Enumerating
+> `const <name>_pools = try scratch_allocations.alloc(...)` in
+> `stages/soil_chemistry_convergence.zig`:
+>
+> | | count |
+> |---|---|
+> | pool arrays allocated from scratch | **46** |
+> | -- nitrogen family (nitrate, nitrite, fertilizer-nitrate x non-band/band) | 6 |
+> | -- phosphorus family (20 species x non-band/band) | 40 |
+> | reads of any `*_pools[` after the `updateLayer` call at `:1016` | **0** |
+>
+> So the discarded merge covers **23 band/non-band species pairs** -- 3 nitrogen and 20
+> phosphorus. Adding the 6 ammonium-family pairs that have no implementation at all, **29
+> band/non-band pool pairs have an ineffective amalgamation on band disappearance.**
+>
+> A sweep of the whole tree finds `scratch_allocations.alloc`/`scratch.alloc` at 76 sites in
+> only 4 files, 56 of them in this one file, so the exposure is concentrated rather than
+> systemic. The other three files (`constant_forcing_steady_state.zig` 16,
+> `hourly_heat_water_solute.zig` 3, `heat_step.zig` 1) were **not** audited for the same
+> pattern and should be.
+>
 > ### Why the tests did not catch it
 >
 > `fertilizer_band_nitrate_phosphate.zig:362` is a test named *"amalgamation transfers nitrate
