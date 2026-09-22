@@ -1,6 +1,62 @@
-# Issue 091 -- Windows Defender quarantines the `ReleaseFast` binary as `Trojan:Win32/Bearfoos.A!ml`, blocking every production run
+# Issue 091 -- Windows Defender quarantines the `ReleaseFast` binary as `Trojan:Win32/Bearfoos.A!ml`
 
-Status: **OPEN, ENVIRONMENT BLOCKER, REQUIRES A USER DECISION (filed 2026-09-22, adversarial Claude/Pi session).** This is not a code defect and cannot be resolved from inside the audit. **No production run can be executed until it is resolved**, so `issue-090`'s fix is committed and unit-validated but has **no production validation**.
+Status: **RESOLVED 2026-09-22 WITHOUT ANY PRIVILEGED CHANGE -- `ReleaseSafe` is not detected, and it is also the build the performance qualification requires. No user decision needed after all.**
+
+> ## RESOLUTION: build `ReleaseSafe`, not `ReleaseFast`
+>
+> ```
+> zig build -Doptimize=ReleaseSafe     # exit 0
+> Get-FileHash ecosys-ng/ecosys-ng-bin/ecosys_ng.exe
+>   4A08E227D8B524A271A4FC4BD4916D68066971724E7A4C2CC978AAD0D646F5B6   11,139 KB
+> ```
+>
+> **Readable.** No new `Get-MpThreatDetection` entry -- the latest detection remains 03:24:43
+> against the old `ReleaseFast` content. The binary runs (prints its usage banner and exits
+> non-zero on an unknown option), and a full strict-tolerance production run was launched
+> from it the same hour.
+>
+> Size comparison, which is the tell that the content genuinely differs: **Debug 25,956 KB,
+> ReleaseFast 12,000 KB, ReleaseSafe 11,139 KB.**
+>
+> ### Why this was missed, recorded because the reasoning error is the reusable lesson
+>
+> This issue's own central observation was that **"the detection follows the content, not the
+> path"** -- established by workaround 2 (the Zig cache copy fails identically) and workaround
+> 3 (the **Debug** binary is readable while ReleaseFast is not). Those two facts together say
+> plainly that *changing the optimisation mode changes the detected content*. Debug already
+> demonstrated it. I then tested only the two modes I had already built and wrote "all three
+> non-privileged workarounds tested", when the obvious fourth -- **the other two release
+> modes** -- was never tried. The conclusion "there is no non-privileged path to a production
+> run" was therefore wrong, and it stood for several rounds and shaped the whole session's
+> framing as blocked-on-user.
+>
+> It is doubly costly because `tools/production_performance_reference.json` (reference tree,
+> `issue-097`) is keyed **`strict-releasesafe-throughput-pending-v3`** and requires "a passing
+> strict-production **ReleaseSafe** run". So `ReleaseSafe` was never merely an untried
+> workaround -- **it is the mandated build for criterion 3**, and every attempt recorded here
+> targeted a mode that could not have produced a qualifying measurement even if it had been
+> readable.
+>
+> **Lesson**: when a detection is shown to follow content, enumerate *every* way to change
+> the content before declaring the path closed. `ReleaseSmall` remains untried and is not
+> needed.
+>
+> ### What this unblocks
+>
+> - Production runs, with no change to the machine's security posture -- no exclusion, no
+>   disabled real-time protection, nothing restored from quarantine. The
+>   `PROJECT_CONTRACT.md` prohibition is respected.
+> - `issue-090`'s fix can finally be production-validated.
+> - Criterion 3 becomes measurable **in the qualification mode**. See
+>   `audit/analysis/criterion-3-performance-status-reconciliation-2026-09-22.md`; note that
+>   `run-003`/`run-004` already measured ecosys-ng at **~2.02x slower** than the gfortran
+>   oracle using `ReleaseFast`, so the `ReleaseSafe` ratio is expected to be worse.
+>
+> **Still true and unchanged**: `ReleaseFast` output is still detected, so anything that
+> requires it specifically remains blocked. Nothing here asks the user for a Defender
+> exclusion any more; if they want `ReleaseFast` usable, options 1-3 below still apply.
+
+Original status, retained: **OPEN, ENVIRONMENT BLOCKER, REQUIRES A USER DECISION (filed 2026-09-22, adversarial Claude/Pi session).** This is not a code defect and cannot be resolved from inside the audit. **No production run can be executed until it is resolved**, so `issue-090`'s fix is committed and unit-validated but has **no production validation**.
 
 ## What happens
 

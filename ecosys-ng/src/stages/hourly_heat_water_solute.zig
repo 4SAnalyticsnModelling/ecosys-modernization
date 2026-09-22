@@ -12916,36 +12916,21 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         pre_solve_trace_totals.cumulative_heat_output_megajoules -
         pre_solve_trace_totals.cumulative_internal_heat_production_megajoules +
         pre_solve_trace_totals.cumulative_internal_heat_consumption_megajoules;
-    // TEMP_DIAGNOSTIC (issue-067): trace the vapor solver's own accepted
-    // per-cell residual for cell 0/layer 0 across the hour-2895 near-total
-    // water-fraction closure frontier. Logging only; no tolerance or
-    // scientific behavior changes. Deliberately NOT gated behind
-    // `run_support.verbose_diagnostics_enabled`: that flag also re-enables a
-    // large volume of unrelated high-frequency debug logging elsewhere in
-    // this stage (see its doc comment and
-    // `audit/runs/run-004-logging-overhead-fix-and-remeasurement-2026-09-18.md`),
-    // which made a plain hour-window trace prohibitively slow to reach this
-    // frontier. The three-hour window here is already narrow enough to be
-    // safe unconditionally. Remove this window once issue-067 is resolved.
-    const vapor_frontier_trace = !builtin.is_test and
-        context.executed_weather_hours.* >= 2893 and context.executed_weather_hours.* < 2896;
-    const vapor_diagnostic_layer_index: ?usize = if (vapor_frontier_trace)
-        (context.grid.layerIndex(0, 0) catch null)
-    else
-        null;
-    // TEMP_DIAGNOSTIC (issue-078): trace the WATSUB vertical-displacement
-    // mechanical prepass's own relief of cell 0/layer 0's hour-entry pore
-    // overfill across the hour-3253 `RuntimeSoilPoreCapacityExceeded`
-    // frontier (`audit/issues/issue-078-...md`). Same narrow-hour-window,
-    // logging-only, no-tolerance-change discipline as the issue-067 vapor
-    // trace immediately above; a distinct window/index variable so this
-    // issue's trace can be removed independently once resolved.
-    const issue078_frontier_trace = !builtin.is_test and
-        context.executed_weather_hours.* >= 3247 and context.executed_weather_hours.* < 3254;
-    const water_diagnostic_layer_index: ?usize = if (issue078_frontier_trace)
-        (context.grid.layerIndex(0, 0) catch null)
-    else
-        null;
+    // The issue-067 (hour-2893..2895) and issue-078 (hour-3247..3253) frontier
+    // traces that used to set these were removed once both issues closed --
+    // `issue-067` is "FIXED AND VALIDATED", `issue-078` is "RESOLVED AS FILED"
+    // (its successor `issue-089` is also fixed) -- which is exactly what each
+    // trace's own comment instructed. They are `null` in production, matching
+    // the `diagnostic_trace_layer_index` convention documented on
+    // `soil/water/solver_types.zig:134-138` and its vapor/heat siblings.
+    //
+    // Re-enable by hour window here, not by `verbose_diagnostics_enabled`: that
+    // flag also re-enables high-frequency debug logging elsewhere in this
+    // stage, and the per-line `flush()` in `run_support.zig:448` makes broad
+    // logging prohibitively slow to reach any frontier
+    // (`audit/runs/run-004-logging-overhead-fix-and-remeasurement-2026-09-18.md`).
+    const vapor_diagnostic_layer_index: ?usize = null;
+    const water_diagnostic_layer_index: ?usize = null;
     const temporary_profile_watsub_start = std.Io.Clock.now(.boot, context.io);
     var accepted_soil_water_heat = try ecosys.soil_water_heat_step.advanceMappedDeferred(context.allocator, context.grid, context.transport_hydrology, context.soil_transport_faces, context.soil_face_geometry, context.soil_solver_properties, context.soil_hourly_workspace, context.soil_thermal, context.soil_heat_solver_workspace, context.runscript.soil_phase_heat_parameters, .{ .heat_failure_report_io = context.io, .max_iterations = water_heat_solute_max_iterations, .picard_relaxation = context.config.picard_relaxation, .vapor_pore_tortuosity = context.runscript.soil_process_parameters.vapor_pore_tortuosity, .osmotic_reflection_coefficient = context.runscript.soil_process_parameters.osmotic_reflection_coefficient, .water_absolute_tolerance_m3 = context.config.nonlinear_tolerance.water_volume_m3, .temperature_absolute_tolerance_k = context.config.nonlinear_tolerance.temperature_k, .enthalpy_absolute_tolerance_megajoules = context.config.nonlinear_tolerance.heat_megajoules, .nonlinear_relative_tolerance = context.config.nonlinear_tolerance.relative, .water_conservation_absolute_tolerance_m = context.config.mass_balance_absolute_tolerance.water_m, .water_conservation_relative_tolerance = context.config.mass_balance_relative_tolerance, .heat_conservation_absolute_tolerance_megajoules_per_m2 = context.config.mass_balance_absolute_tolerance.heat_megajoules_m2, .heat_conservation_relative_tolerance = context.config.mass_balance_relative_tolerance / heat_layer_conservation_tolerance_divisor, .boundary_topology = context.soil_boundary_topology, .geothermal_enabled_by_cell = context.geothermal_enabled_by_cell, .mean_annual_temperature_k_by_cell = context.mean_annual_temperature_k_by_cell, .geothermal_minimum_source_depth_m = context.runscript.geothermal_controls.minimum_source_depth_m, .geothermal_source_depth_below_profile_m = context.runscript.geothermal_controls.source_depth_below_profile_m, .geothermal_conductivity_m_megajoules_per_h_k = context.runscript.geothermal_controls.conductivity_m_megajoules_per_h_k, .geothermal_flux_megajoules_per_m2_h = context.runscript.geothermal_controls.geothermal_flux_megajoules_per_m2_h, .water_table_air_fraction_threshold = context.runscript.water_table_air_fraction_threshold, .active_layer_ice_fraction_threshold = context.runscript.active_layer_ice_fraction_threshold, .dense_newton_max_components = production_dense_newton_max_components, .matrix_external_water_source_m3_per_step = context.subsurface_irrigation_water_m3, .surface_litter_liquid_water_m3 = context.surface_precipitation.litter_water_m3, .surface_litter_water_retention_capacity_m3 = context.surface_precipitation.litter_water_capacity_m3, .cell_area_m2 = context.canopy_cell_area_m2, .phase_displacement_by_layer = accepted_phase_displacement, .substep_refresh = .{ .terrain = context.terrain_hydrology, .chemistry = context.soil_chemistry, .runtime_parameters = context.runscript.soil_process_parameters, .zone_fractions_by_layer = soil_osmotic_zone_fractions }, .substep_transaction_hooks = .{ .context = @ptrCast(&coupled_substeps), .restore_schedule = CoupledHooks.restoreSchedule, .rollback_failure = CoupledHooks.rollbackFailure, .prepare_substep = CoupledHooks.prepareSubstep, .post_phase_pre_heat = CoupledHooks.postPhasePreHeat, .accept_substep = CoupledHooks.acceptSubstep, .accept_phase_displacement = CoupledHooks.acceptPhaseDisplacement }, .exact_substep_count = exact_substep_count, .temporary_profile = if (temporary_profile_active or thermal_trace_active) .{ .io = context.io, .counters = &temporary_profile_watsub_counters, .trace_thermal_stages = thermal_trace_active } else null, .diagnostic_vapor_layer_index = vapor_diagnostic_layer_index, .diagnostic_heat_layer_index = vapor_diagnostic_layer_index, .diagnostic_water_layer_index = water_diagnostic_layer_index });
     defer accepted_soil_water_heat.deinit();
