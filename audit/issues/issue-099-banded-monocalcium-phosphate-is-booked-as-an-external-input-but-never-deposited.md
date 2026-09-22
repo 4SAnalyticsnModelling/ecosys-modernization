@@ -59,6 +59,16 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 > census_read: profile_cell=2 cell=0 layer=2 banded_mol=8.064516129032258e-2 pending_phosphate_g=5e0
 > ```
 >
+> > **CAVEAT I have to flag against my own conclusion.** That diagnostic fired only when
+> > `banded_monocalcium_phosphate_mol != 0`, so **a census pass that read zero produced no
+> > line at all.** "Seven passes, all 5.0" therefore does *not* establish that the *before*
+> > pass saw 5.0 -- a zero-reading before-pass would have been silent, and that is precisely
+> > the case that would refute the ordering conclusion. The diagnostic has been changed to log
+> > unconditionally for `profile_cell == 2`, and **the ordering claim below is not established
+> > until that rerun shows no zero-reading pass.** Stated here rather than left implicit
+> > because this issue has already had six wrong mechanisms and an under-determined seventh is
+> > not an improvement.
+>
 > So the complete chain is now measured end to end and **every component is correct**:
 >
 > | step | measured | correct? |

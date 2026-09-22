@@ -393,7 +393,13 @@ fn aggregateProfilePhosphorusAndIonsRange(
             // yet the cell census reports scope 2's phosphorus rising by only
             // 1.185e-4 instead of 5.0 g. Six static mechanisms were checked and
             // all were correct, so this is the one unobserved value.
-            if (!@import("builtin").is_test and pending.banded_monocalcium_phosphate_mol != 0) std.log.err(
+            // Logged UNCONDITIONALLY for the one layer of interest. A previous
+            // version fired only when the reserve was nonzero, which cannot
+            // distinguish "every pass saw the deposit" from "the passes that
+            // saw zero were silent" -- and that distinction is the whole
+            // question, since a zero-reading BEFORE pass would mean the
+            // baseline precedes the deposit and the ordering conclusion is wrong.
+            if (!@import("builtin").is_test and profile_cell == 2) std.log.err(
                 "TEMP_DIAGNOSTIC census_read: profile_cell={d} cell={d} layer={d} banded_mol={e} pending_phosphate_g={e}",
                 .{ profile_cell, cell, layer, pending.banded_monocalcium_phosphate_mol, pending_phosphate_g },
             );
