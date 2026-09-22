@@ -889,3 +889,33 @@ Not worked around deliberately: a Defender exclusion, disabling real-time protec
 **Diagnostic signature worth remembering**: a run that stops at an arbitrary hour with a **truncated final log line and no `error:` record**, plus a missing or unreadable executable. Every genuine model failure in these run records ends with an explicit `error: <ErrorName>` and a complete stage census. If those are absent, check `Get-MpThreatDetection` before diagnosing anything else -- I initially misread this as a catastrophic regression to hour 96.
 
 **Next bounded action**: the user resolves `issue-091` (narrowest option: exclude `ecosys-ng/ecosys-ng-bin/` and the session scratchpad), then rebuild with `zig build -Doptimize=ReleaseFast` (earlier staged copies may already be quarantined) and rerun to confirm whether hour 3,276 clears. The diagnostic instrumentation from `run-016`/`run-017` is still in the tree gated to hours 3,248-3,254 and should be re-gated to the new frontier or removed.
+
+## Update 2026-09-22 (round 25): `issue-091` workarounds exhausted; `issue-092` found without a run -- daily flux columns are annual-cumulative in the oracle
+
+### `issue-091` (Defender): all three non-privileged workarounds tested, none viable
+
+Substantiated rather than asserted. (1) Alternate build output path via `zig build --prefix` -- fails, the install step cannot copy the artifact out. (2) Run the artifact directly from the Zig cache -- fails, `Get-FileHash` on `C:\zig-local-cache\ecosys-ng\o\639dd8...\ecosys_ng.exe` returns the same virus error, so the detection follows **content**, not path. (3) Build in **Debug** -- the Debug binary **IS readable** (hash `296EFE43...5C34`), so the detection is specific to the `ReleaseFast` output, but Debug measured **~87 s per simulated hour** (`elapsed_ms=87142` at `scene_weather_hours=8`), putting hour 3,276 at ~79 hours of wall clock with 63 MB of log in 7 minutes. Stopped and its log deleted.
+
+**Consequence, and the useful half of it**: full-deck production runs are blocked, so `issue-090`'s fix has no production validation. But because the Debug build is readable, **unit tests, `zig build`, and analysis of outputs already on disk all still work** -- source and comparison work can continue; only `run-*` validation cannot.
+
+### `issue-092` (new, confirmed): daily flux columns are ANNUAL CUMULATIVE in the oracle, per-day in ecosys-ng
+
+Found from `run-014`'s existing outputs, no run required. Daily water slot 1 (`PRECN` / `rainfall`), same cell and days:
+
+```
+day     1     2     3      5     10     20     40     60     90    120
+oracle  6.600 6.600 6.600 27.20  91.40 106.10 135.00 164.60 280.00 335.30
+zig     6.673 0.040 0.064 20.64   0.05   0.049   0.019  5.337 12.164  0.815
+```
+
+The oracle column is monotonically non-decreasing; ecosys-ng's tracks the weather. **The trap worth remembering: day 1 agrees to ~1%, so a comparison sampling only the first day would pass this column.**
+
+Cause is in the oracle's own words, `day.f:80` -- "RESET ANNUAL FLUX ACCUMULATORS AT START OF ANNUAL CYCLE" -- gated at `:84-85` on `I.EQ.1`. `URAIN`/`UEVAP`/`URUN`/`USEDOU`/`UVOLO` are zeroed there (`:100-104`), accumulated through the year (`redist.f:4407`), and written straight out (`outsd.f:114-118`).
+
+**The distinction that keeps it precise -- storage columns are fine.** Slot 4 (`WATER` = `1000*UVOLW/AREA`) is the counter-example: `UVOLW` is **not** in the annual reset block, it is zeroed **hourly** at `hour1.f:2412`, so it is a snapshot and ecosys-ng's `soil_water_storage[mm]` is correct there. The daily stream binds it right, which **independently corroborates `issue-086`** -- only the *hourly* slot 4 is misbound. Rule: legacy daily columns fed by an annually-reset `U*` accumulator are cumulative; those fed by an hourly-reset accumulator are snapshots.
+
+Confirmed affected: `PRECN`, `ET`, `RUNOFF`, `DISCHG`. Near-certain by the same mechanism: `TILE_DRG`, `SEDIMENT`, and the `U*` accumulators zeroed alongside at `day.f:89-106` which feed the daily carbon/nitrogen/phosphorus streams. **Not verified**: the per-column mapping for those streams -- only daily water was compared.
+
+Otherwise daily water maps cleanly (50 oracle data columns against 48, differing only by `WTR_13`/`ICE_13`, the `issue-085` class). Also noted: daily `SNOWPACK` is `1000*DPTHS`, snow **depth** in mm, whereas hourly `SNOWPACK` is water equivalent -- same header name, different quantity between cadences.
+
+**`outcompare.py` deliberately NOT extended to the daily streams**, because doing so before the cumulative-versus-per-day disposition is decided would bake in a wrong comparison. That disposition is a reviewer call: emit cumulative (cheapest route to criterion 1), or keep per-day as an approved difference **with** a rename and a cited harness exclusion. The current state -- same slot, same name, silently different accumulation window -- is the one thing that must not stand.
