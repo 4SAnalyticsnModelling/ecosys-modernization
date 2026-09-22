@@ -983,3 +983,37 @@ Five commits, no source changes, no runs. Everything below came from outputs alr
 **Still blocked on the user, unchanged**: `issue-091`. No production run, no performance measurement, and `issue-090`'s fix still has no production validation. Nothing in round 26 needed a run, but items 1-3 above do need at least a short Debug replay.
 
 **Gate status unchanged.** Nothing here moves a gate; `check_gate.py` owns that. Round 26 added three issues (093, 094, 095), corrected two of my own claims, and identified a root cause -- it did not fix anything. Criterion 3 (performance) remains entirely unmeasured.
+
+### Round 26 CORRECTION -- I filed five findings before reading the reference documentation, and it cost most of them
+
+**The single most important thing for whoever resumes**: `ecosys-ng/src` cites `docs/` paths **256 times, across 67 documents, in 168 source files**, and **there is no `docs/` directory in this repository** -- never tracked, not gitignored. The tree exists with **615 files** in the read-only reference location the user authorized (`.../OneDrive - Government of Alberta/ProjectsSymon/ecosys_modernization/ecosys-ng/docs`), including a **49,801-line `discrepancy_register.md`**. Filed as **`issue-097`**.
+
+Reading it for about an hour, after filing, produced this accounting:
+
+| round 26 finding | verdict after checking the reference docs |
+|---|---|
+| `issue-093` `RC0` per-pool carbon composition | **NEW** -- `RC0` and `DLYR(3,0)` return zero hits in the 49,801-line register |
+| `issue-096` the `IFLGD` gate's operands are the same value | **NEW, but only provably so because of the docs** -- see below |
+| `issue-096` "the feature-boundary review should have caught this" | **WRONG, WITHDRAWN.** The reconciliation record enumerates all three consumers of the air-entry pair and says they are "dead by three independent intentional replacements, not by oversight" |
+| `issue-095` `SOL_RADN` differs on 1,447/3,275 hours, "systematic", undiagnosed | **WITHDRAWN -- benign.** `discrepancy_register.md:8707` records it as agreeing "to the writer's seven-digit floor"; my `rtol=1e-6` is tighter than `E16.7E3` can express |
+| `issue-095` "no slot publishes the comparable precipitation quantity" | **WRONG, WITHDRAWN.** Daily-heat `PRECN` matches modern `total_precipitation` to **rel 3.35e-16**; the register concludes "the precipitation science is exact" |
+| `issue-095` hourly `PREC` deficit = omitted snowfall | **ALREADY REGISTERED and sharper**: "modern at zero on all 8 wet hours", so my snowfall explanation is probably wrong |
+| `issue-092` daily columns are annual-cumulative | **ALREADY REGISTERED WITH A FIX**, including the same reset-window precondition my `--cumulate-candidate` reimplements |
+
+**Why `issue-096` survives, and why this matters more than the wasted effort.** The reference docs diagnosed the `IFLGD` break on 2026-09-10 and attributed it to initial over-saturation -- `applyInitialNaturalWaterTableSaturation` called unconditionally, injecting **271.9 mm**, because it cites `hour1.f:2131-2168`, the dead ELSE arm of `hour1.f:2056` for a deck supplying FC/WP. **That cause is already fixed here**: `model_initialization.zig:230-231` guards on the `ISOIL(1)=ISOIL(2)=0` predicate, present since the initial import (`514dd68`, 2026-09-18) and therefore in `run019`'s binary. **Yet the symptom persists undiminished** -- drainage 3.91 mm against 213.51 mm, storage +411.58 against +225.37 mm.
+
+So the prior causal chain is incomplete. "Layer 10 sits at saturation *so* its potentials are equal" explains the equality by saturation clamping; with the injection gone that no longer applies. The remaining explanation is structural and **saturation-independent**: `base` is copied from `grid.matrix_liquid_water_m3` (`solver_solve.zig:854`) and `grid.matric_potential_megapascal` was computed by `state_update` from that same value (`solver_flux.zig:85-95`) through the same function (`solver_hydraulics.zig:301-321`). Saturation was sufficient for the equality, never necessary.
+
+This also revises the 1 m boundary: with the injection gone, my measured `WTR_k` bias still vanishes exactly at `WTR_11`, so the simpler explanation is the deck's own **natural water table depth `DTBLIG = 1.0 m`** (`f25si98` line 3), not the injection's layer 10/11/12 split.
+
+### Revised next bounded action for round 27
+
+The earlier round-26 list (instrument the gate, check the conductivity class, `AREAUD`, `macroporeDischarge`) is **superseded**. In order:
+
+1. **Read `discrepancy_register.md` and `production_status_2026-09-10.md` before anything else.** Grep the legacy symbol for any finding before filing it. Round 26 is the evidence: one grep would have separated the two real findings from the four that were not.
+2. **Reopen `HOUR1-006`, `SOIL-INITSAT-001`, `EXEC-INITSAT-EXTENT-001`** -- `production_status_2026-09-10.md:301-305` says they "must be reopened as 'the fix was wrong, not missing'". Note the `ISOIL` guard has since landed, so that reopening may itself be stale; **verify against today's tree rather than trusting the document**, which is exactly the trap round 26 fell into in reverse.
+3. **Fix the `solver_residual.zig:480` comparison** -- the saturation-independent defect. `hydraulic_conductivity.zig:40-41` already computes the `air_entry_water_potential_megapascal` threshold; it needs a production reader. Blocked on `issue-091` for validation.
+4. `issue-093`'s `RC0` composition -- the one uncontested new defect.
+5. Resolve `issue-097` by importing `docs/` (the user's call; deliberately not done).
+
+**Do not** re-verify the withdrawn items. `SOL_RADN` is a print floor, and a comparable precipitation column exists and matches to machine precision.
