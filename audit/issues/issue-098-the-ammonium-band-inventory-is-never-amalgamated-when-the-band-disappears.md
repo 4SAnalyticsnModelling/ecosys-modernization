@@ -87,12 +87,63 @@ Status: **OPEN, ROOT CAUSE OF THE FRONTIER FAILURE, CONFIRMED BY INSTRUMENTED RE
 > 3. A **production-path** test for each, asserting the merge is visible in state after the
 >    hourly stage -- not only inside the pure function.
 >
-> Also note for whoever implements it: the staging at `:875-896` converts concentrations to
-> amounts as `conc_mol_per_m3 * effective_water_volume_m3` with **no zone-fraction factor**,
-> while `mineral_nitrogen_transport.concentration()` divides by `water_m3 * fraction`. Those
-> two conventions must be reconciled before writing anything back, or the write-back will
-> introduce a mass error. **That reconciliation is unresolved here and is the first thing to
-> settle.**
+> ## STEP ZERO RESOLVED: the staging omits the zone fraction, and fixing the write-back alone would inject a large mass error
+>
+> The convention question is settled by the legacy, which states it six independent times
+> (`hour1.f:3826-3858`):
+>
+> ```fortran
+> IF(VLNHB(L,NY,NX).GT.ZERO)THEN
+>   CNH4B(L,NY,NX)=AMAX1(0.0,ZNH4B(L,NY,NX)/(VOLW(L,NY,NX)*VLNHB(L,NY,NX)))   ! :3846-3847
+>   CNH3B(L,NY,NX)=AMAX1(0.0,ZNH3B(L,NY,NX)/(VOLW(L,NY,NX)*VLNHB(L,NY,NX)))   ! :3848-3849
+> ELSE
+>   CNH4B(L,NY,NX)=0.0                                                         ! :3851
+>   CNH3B(L,NY,NX)=0.0
+> ENDIF
+> ```
+>
+> plus `CNO3B`/`CNO2B` over `VOLW*VLNOB` (`:3855-3858`) and `CH2P4`/`CPO4S` over `VOLW*VLPO4`
+> (`:3826-3831`). **The convention is unambiguous:**
+>
+> ```
+> concentration = amount / (TOTAL layer water x ZONE volume fraction)
+> amount        = concentration x TOTAL layer water x ZONE volume fraction
+> ```
+>
+> **So `mineral_nitrogen_transport.concentration()` is CORRECT** -- it divides by
+> `water_m3 * fraction`, exactly matching `:3846-3847`.
+>
+> **And the staging in `soil_chemistry_convergence.zig` is WRONG.** `:843-844` and `:853-896`
+> compute `amount = conc * effective_water_volume_m3`, and
+> `fertilizerBandGeometryCarrierM3` (`:111-113`) returns
+>
+> ```zig
+> return if (water_volume_m3 > floor_m3) water_volume_m3 else dry_reference_water_m3;
+> ```
+>
+> -- the **total** layer water (or a dry-reference substitute), with **no zone fraction
+> applied anywhere**. Every one of the 46 staged pool amounts is therefore short by a factor
+> of its zone fraction, i.e. too large by `1/fraction` relative to the true amount. At the
+> band fraction `issue-090` pinned for this deck (0.01644736842105263) a staged **band**
+> amount is about **61x** too large; a non-band amount at 0.98355 is about 1.7% too large.
+>
+> ### Why this is currently latent and why that makes it dangerous
+>
+> These amounts are computed into scratch and discarded, so today they harm nothing -- wrong
+> numbers, thrown away. **But they become active the instant the write-back is added**, which
+> is the obvious fix for the escalation above. Adding the write-back alone would take a 61x-too-large
+> band amount and merge it into the non-band pool, injecting a very large nitrogen and
+> phosphorus mass error across 23 species pairs. **The two defects must be fixed together, and
+> the fraction factor must be fixed first.**
+>
+> ### One more thing the legacy settles
+>
+> `:3845`/`:3850-3852` show the legacy's behaviour when the zone fraction is zero: **report a
+> zero concentration, raise nothing.** ecosys-ng's `MineralNitrogenInZeroWaterDomain` is
+> therefore **stricter than the source**. That strictness is what exposed this whole chain and
+> should be kept -- with the amalgamation working, the case should not arise at all, so a
+> guard that fires is genuine information. But it should be recorded as a deliberate
+> divergence from `hour1.f:3850`, not assumed faithful.
 
 Genuinely new: `MineralNitrogenInZeroWaterDomain` returns **zero hits** across the 615-file reference documentation tree (`issue-097`), including the 49,801-line `discrepancy_register.md`.
 
