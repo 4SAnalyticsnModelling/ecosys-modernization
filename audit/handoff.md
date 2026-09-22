@@ -795,3 +795,38 @@ The HEAD run reached hour 3,252 and failed at 3,253 with `previous_matrix_excess
 `feature-026` closed the `issue-081`-named restart coverage hole structurally: `ecosys-audit/scripts/restartalign.py` reports **568 statement pairs across six units, 0 divergences**. Unit 22's state coverage is mapped and verified (11 families, all 11 persisted; `HCBFL` lives in the geometry bundle, `soil_geometry_checkpoint.zig:46`). Units 21 and 26-29 remain unverified -- do not generalize. I also **withdrew my own filed gap** claiming no round-trip test existed: there are 102 checkpoint tests, `--test-filter "checkpoint"` gives 172 passed / 1 skipped / 0 failed.
 
 Reviewer weighting, rounds 12-21: **every file:line citation Pi gave this session was independently verified and every one held** -- including `reads.f:792`/`:902`, `day.f:347-357`, `redist.f:8397-8402`, `watsub.f:6821-6835`, `transport/hydrology.zig:484`, `hour1.f:3777-3783`, `starte.f:1419-1430`, and the F-10 audit reference. Its round-14 `INSUFFICIENT` verdict and its F-10 pointer were the two highest-value contributions of the session. Unchanged weakness, seen twice more: **sweeping completeness and precision claims** ("covers all 12 families", "275 of 275 match identically" before any tool check, `12.011` where the constant implies `12.0`). Dispositions and directions reliable; totals and completeness claims need independent verification. Note also that **my own** naive grep produced the session's worst count error (275 vs 274 from a line-prefix regex that mishandles fixed-form continuations) -- the reviewer was right and I was wrong, which is the argument for tools over greps on both sides.
+
+## Update 2026-09-21 (adversarial Claude/Pi session, rounds 22-23): the hour-3,253 GUARD FIX LANDS, and the real blocker is now localized to an unbooked soil-layer-0 -> SURFACE transfer
+
+Two runs this round, both fresh-from-hour-1 `ReleaseFast`, isolated deck copies. Full records `audit/runs/run-015-*` and the `issue-089` correction.
+
+### `run-015`: the isolated control `run-013` never had
+
+`run-013` had applied `issue-078`'s guard-domain correction **and** `issue-083`'s donor-only relief rewrite together, and regressed the frontier 3,253 -> 2,973. This round reapplied **only the guard** (`git diff --stat`: 1 file). Result:
+
+- **`RuntimeSoilPoreCapacityExceeded` is GONE.** Neither it nor the new bound message appears in the log. The guard's domain really did contradict the oracle, exactly as `issue-078`/`issue-083` argued.
+- **No regression**: frontier hour 3,253, identical to `run-014`'s baseline. So `issue-083`'s relief rewrite is now **measured**, not inferred, as the regressing half. `issue-078` is resolved-as-filed; `issue-083`'s relief half stays reverted.
+- Evidence: full suite **4375 passed / 1 skipped / 0 failed, exit 0** (identical to baseline -- the count does not rise because the new assertions went inside the existing `"accepted material refresh is atomic..."` test), `soil.profile` 142/142, `ReleaseFast` exit 0, binary `7944903E...8377`. Reviewer round 22 returned **SAFE**, matching an independent check: the clamped air carrier's range is **unchanged** (`[0, capacity]` -- a saturated layer already reads exactly zero today), and `soil/water/solver_solve.zig:2662-2666` already declares the signed negative legal in its own words, *"A negative value is an explicit displacement demand, not an invalid carrier."*
+- The frontier does **not** advance: a deeper defect sits at the same hour, previously masked.
+
+### `issue-089` (new) and its immediate self-correction
+
+Hour 3,253 now fails `HourlyLayerConservationFailure` with exactly **four** failures on exactly **two** scopes, and heat residuals equal and opposite to ~11 significant figures (`-4.2752681740391765` against `+4.2752681740404`) -- an unbooked transfer, not drift.
+
+**I first read scope 17 as an inactive soil layer and that was wrong.** `run-016` widened `stages/diagnostics.zig`'s existing hour-3,248-3,254 probe to raw grid index 17; it **never printed**, because `grid.layer_count` is 12 and the probe's own bound skipped it. The conservation report indexes the **ledger's** scope enumeration, not the grid (`layer_local_conservation.zig:217-240`):
+
+```
+scopeCount() = soilCount() + snowCount() + cell_count*2
+.surface  => soil_count + snow_count + cell
+.canopy   => soil_count + snow_count + cell_count + cell
+```
+
+With `cell_count=1`, `soil_layer_capacity=12` and `snow_layer_capacity=5`, **scope 17 is `.surface`** and 18 is `.canopy`.
+
+**Corrected finding: heat and water move from soil layer 0 into the SURFACE (litter) scope, unbooked on both sides.** That is the **`FLQR` leg** (`watsub.f:3683-3685`), which `issue-083` had *already* established has no counterpart anywhere in `ecosys-ng/src` (it has `FLQRQ`/`FLQRI` for rain and irrigation, not `FLQR`). **Two independent routes -- reading the oracle's relief legs, and measuring a production conservation failure -- now arrive at the same missing leg**, and it closes a chain that previously had a gap: top layer chronically overfilled (`issue-024`; `run-014`'s `WTR_1` bias **+0.2585 m3 m-3**, candidate wetter) -> displacement finally occurs at the day-136 tillage hour -> no ledger leg for that face -> audit fails.
+
+**This makes `issue-083`'s litter terminus the highest-value fix for the production frontier, now run-backed rather than inferred**, and it **revises `issue-083`'s own guidance**: that issue said the terminus should be ported together with the relief change, but this run indicates it is needed on its own merits, because the transfer across that face is already happening and merely goes unrecorded.
+
+**Next bounded action, cheapest first**: `stages/hourly_heat_water_solute.zig:4539-4570`'s accepted-displacement cascade **does** terminate in the surface litter and **is** the `FLQR` analogue for the phase-displacement path. If that cascade is what fires on a tillage-induced displacement, the fix is a **ledger entry**, not a new physical mechanism -- much smaller than `issue-083` assumed. Confirm by one more bounded rerun tracing the **surface** owners (`surface_precipitation.litter_water_m3`, `surface_litter_ice_m3`, `surface_heat_capacity_megajoules_per_k`, `grid.surface_temperature_k`) alongside soil layer 0, at the four existing stage boundaries plus the `applyDeferredTillageSoil` bracket added this round. The instrumentation is narrowly gated (hours 3,248-3,254) and is **left in place** for exactly that rerun.
+
+Also settled this round: the deck has **two** tillage events (`entries=2`, hours 2,532 and 3,252), which resolves the discrepancy `run-014` flagged when its census showed only the first.
