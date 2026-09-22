@@ -1,6 +1,8 @@
 # Issue 095 -- ecosys-ng's hourly and daily precipitation outputs disagree with each other by 232 mm (2.3x), while the oracle's two agree exactly
 
-Status: **OPEN, CONFIRMED, INTERNAL INCONSISTENCY IN ECOSYS-NG (filed 2026-09-22, adversarial Claude/Pi session).** Found run-free from outputs on disk while `issue-091` blocks runs. At most one of the two columns can be correct, so this is a defect regardless of which comparison one prefers -- no reading of the oracle is needed to establish that.
+Status: **OPEN, CONFIRMED, FULLY DIAGNOSED -- both slots are misbound in opposite directions; fix NOT applied while `issue-091` blocks production validation (filed 2026-09-22, adversarial Claude/Pi session).** Found run-free from outputs on disk. At most one of the two columns could have been correct, so this was a defect regardless of which comparison one preferred -- and it turns out **neither** is correct. See "RESOLVED, same day" below for the producers and the arithmetic.
+
+**It is an output-binding defect, not an input defect.** The model is very likely driven with the right water and reports it through two slots that each measure something else. Same class as `issue-086`.
 
 Discovered while checking `issue-094`'s secondary observation, which had assumed the daily figure was the reliable one. It is not safe to assume either.
 
@@ -27,11 +29,56 @@ ecosys-ng's two columns do not agree. Summing 3,275 hourly values gives 179.300 
 - **Not a window mismatch.** The hourly comparison covers 3,275 h (136.46 d) against the daily's 136 d, i.e. the hourly window is slightly *longer*, so it should if anything report *more*, not 232 mm less.
 - **Possibly a naming/content mismatch**, and this is the most likely benign explanation, but it is still a defect: if the hourly `rain_and_irrigation` excludes something the daily `rainfall` includes (snowfall, snowmelt reaching the surface, or irrigation), then the two columns are different quantities published under names that imply the hourly is the *broader* of the two. The legacy's counterparts are the same quantity, so a divergence here means ecosys-ng is not slot-comparable on at least one of the two.
 
-## What must be determined
+## RESOLVED, same day: BOTH columns are misbound, in OPPOSITE directions
 
-1. **Which column, if either, is the true precipitation input to the model.** This is the question that matters, because it decides whether ecosys-ng is being driven with the same water as the oracle at all.
-2. Whether `rain_and_irrigation` and `rainfall` are bound to different runtime quantities, and if so which legacy variable each is the analogue of.
-3. Whether the 260 differing hours cluster in time (a partition or phase defect) or scatter (a threshold defect). Not yet checked; `outcompare.py --trace PREC` will show it.
+The two columns have two different producers, and neither matches its legacy counterpart.
+
+**What the legacy publishes.** Both legacy columns are the *same* quantity, which is exactly why they agree at 351.600:
+
+```fortran
+! redist.f:4405-4407 -- the daily accumulator
+WI = (PRECQ(NY,NX) + PRECI(NY,NX)) * XNFH        ! precipitation + surface irrigation
+URAIN(NY,NX) = URAIN(NY,NX) + WI                  ! -> outsd.f:114 PRECN
+! redist.f:4422 -- the hourly carriers
+! PRECA,PRECW = rain+irrigation, SNOWFALL (m3 h-1)  -> outsh.f PREC = (PRECA+PRECW)*1000/AREA
+```
+
+So the legacy quantity is **total precipitation (rain + snowfall) plus surface irrigation, with no condensation**. Note `PRECU`, subsurface irrigation, is deliberately routed elsewhere -- into `UVOLO` at `redist.f:4413` -- and so is *not* part of `URAIN`.
+
+**What ecosys-ng publishes.**
+
+| column | producer | contents | against legacy |
+|---|---|---|---|
+| hourly `rain_and_irrigation` | `ecosys_ng.zig:1177`, `atmospheric_state.rainfall_m[cell] * canopy_cell_area_m2[cell]` | rain (and irrigation) **only** | **omits snowfall** -> 172.30 mm too low |
+| daily `rainfall` | `ecosys_ng.zig:3658-3659`, `atmospheric_state.precipitation_m[cell] * area + ground_surface_condensation_m3_per_h[cell] + canopy_atmospheric_input_m3` | precipitation **plus ground condensation plus canopy atmospheric input** | **adds two terms `URAIN` excludes** -> 59.47 mm too high |
+
+The two producers use two different atmospheric fields -- `rainfall_m` against `precipitation_m` -- and the daily one then adds condensation on top. The comment at `:3655-3657` states the intent plainly ("This legacy precipitation/condensation carrier already includes ground condensation; include canopy and standing-dead condensation on the same boundary side"), so the daily value is a deliberately-constructed *boundary-ledger* input term. It is correct for closing a water budget and **wrong for the `PRECN` output slot**, which must be `URAIN`.
+
+**The three numbers are quantitatively coherent**, which is what confirms the diagnosis rather than merely fitting it:
+
+```
+179.30  ecosys-ng hourly   = rain only
+351.60  ORACLE, both       = rain + snowfall + surface irrigation
+411.07  ecosys-ng daily    = the above + ground condensation + canopy input
+```
+
+and `351.60 - 179.30 = 172.30 mm`, which is a plausible January-to-mid-May snowfall water equivalent for Ottawa and is precisely the term the hourly column omits. The oracle's value sits between the two candidates, exactly as a correct middle term should.
+
+### Consequence: this is an output-binding defect, NOT an input defect
+
+The model is very likely being driven with the right water; it is *reporting* it through two slots that each measure something else. That is materially different from the forcing mismatch `issue-094` suspected, and it means:
+
+- **The 172.30 mm "less rain" reading is an artefact** of the hourly slot omitting snowfall. It is not evidence that ecosys-ng receives less precipitation.
+- **`issue-094`'s water-balance arithmetic must be redone** once a correct precipitation column exists. Its central findings -- artificial drainage 3.91 mm against 213.51 mm, and 186.21 mm more storage gain -- do not depend on the precipitation column at all and are unaffected.
+- This joins `issue-086` and `issue-092` as an output-slot binding defect, and it is the same *class* as `issue-086`: a slot carrying a real, correctly-computed quantity that is not the quantity the legacy slot publishes.
+
+### Fix sketch, not applied
+
+Publish `URAIN`'s analogue in both slots: rain + irrigation + snowfall water equivalent, excluding ground/canopy condensation and excluding subsurface irrigation. The daily ledger's `rainfall_m3` should keep its present composition -- it is the boundary-closure term and `ecosys_ng.zig:1425` legitimately needs it that way -- so the output slot needs its **own** accumulator rather than reusing the ledger field that `:1931` currently reads. Not applied here because `issue-091` blocks production validation and this touches an output path that the conservation ledger also consumes.
+
+### Still open
+
+Whether the 260 differing hours cluster in time (a partition or phase defect) or scatter (a threshold defect). `outcompare.py --trace PREC` will show it. This is a smaller question now that the aggregate is explained, but a clustered pattern would indicate the rain/snow partition threshold itself differs, which the aggregate cannot distinguish from a pure omission.
 
 ## Why `issue-094`'s conclusion is ROBUST to the answer either way
 
@@ -55,10 +102,10 @@ Same hourly comparison: `SOL_RADN` sums to 432,458.376 on the oracle against 433
 | `WIND` | **0.000000e+00** | bit-identical |
 | `AIR_TEMP` | 2.309e-14 | equivalent |
 | `HUM` | 4.970e-07 | equivalent for these purposes |
-| `SOL_RADN` | 3.846e+01 | **NOT equivalent** -- 54 exceedances, 1,447 differing hours |
-| `PREC` | 4.600e+00 | **NOT equivalent** -- 218 exceedances, 260 differing hours |
+| `SOL_RADN` | 3.846e+01 | **NOT equivalent** -- 54 exceedances, 1,447 differing hours; undiagnosed |
+| `PREC` | 4.600e+00 | **column not comparable** -- 218 exceedances, 260 differing hours, but now explained as the snowfall omission above, so it is NOT evidence of an input mismatch |
 
-Only wind and air temperature were ever held to the bit-level standard. Radiation and precipitation were not checked until now, and both fail. No output comparison in this project should be described as resting on proven input equivalence.
+Only wind and air temperature were ever held to the bit-level standard. Radiation and precipitation were not checked until now. Precipitation turned out to be an output-binding defect rather than a forcing difference, so the honest statement is narrower than "both fail": **`SOL_RADN` is an unexplained difference on 44% of hours, and precipitation is untested as an input because no output slot currently publishes the comparable quantity.** Either way, no output comparison in this project should be described as resting on proven input equivalence -- three of the five forcing columns are either unverified or not comparable as published.
 
 ## Reproduction
 
