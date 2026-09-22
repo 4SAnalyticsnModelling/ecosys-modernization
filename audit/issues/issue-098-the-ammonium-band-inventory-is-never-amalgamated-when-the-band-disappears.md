@@ -241,7 +241,40 @@ The crash is the *symptom that saved us*. The underlying error is worse:
 - **It biases nitrogen availability downward** over the whole run: every band closure since simulation start has been quietly discarding its band inventory from the active pools.
 - It is invisible to the conservation ledger if that ledger sums band and non-band together, because nothing is created or destroyed -- the nitrogen is merely parked where no process can reach it. That is consistent with the run reaching hour 3,275 with a green conservation record.
 
-## Fix specification, NOT applied
+## Revised fix design: a closed-form concentration blend, which avoids the mass-error trap entirely
+
+Resolving step zero yields a simpler and safer fix than the one specified further below, and it supersedes it.
+
+Because amalgamation sets the non-band fraction to exactly **1.0** and the band fraction to **0**, and because the convention is `amount = conc x VOLW x fraction` with `VOLW` common to both zones, the total water volume **cancels**:
+
+```
+amount_total      = conc_nb x VOLW x f_nb  +  conc_b x VOLW x f_b
+conc_nb_new       = amount_total / (VOLW x 1.0)
+                  = conc_nb x f_nb + conc_b x f_b        <-- VOLW cancels exactly
+conc_b_new        = 0
+```
+
+So for every **concentration-valued** band pool the entire amalgamation is a fraction-weighted blend of the two concentrations, using the fractions **as they stand before being zeroed**:
+
+```zig
+non_band = non_band * non_band_fraction + band * band_fraction;
+band     = 0;
+```
+
+This is the concentration-space equivalent of `hour1.f:4970`, it is exactly mass-conserving by construction, and **it needs no amount staging, no `effective_water_volume_m3`, and no write-back of scratch buffers.** It therefore sidesteps the 1/fraction staging defect completely rather than requiring it to be fixed first.
+
+For **amount-valued** pools (exchangeable ammonium, the three fertilizer reserves) it stays the legacy's plain add:
+
+```zig
+non_band += band;
+band = 0;
+```
+
+**Ordering requirement, now sharper:** the blend must read the fractions *before* `hourly_fertilizer_band_geometry.zig:278-284` zeroes them. That module already retains `old_non_band` for its `relative_non_band_change` computation (`:277`), so the pre-zeroing values are available at exactly the right point.
+
+**What this means for the scratch-buffer defect.** With the blend design, the 46 scratch pool arrays and their missing zone-fraction factor are **not on the fix path at all** -- the nitrate/phosphate amalgamation should be re-expressed as the same blend rather than repaired. The scratch arrays and the `1/fraction` staging error then become dead code to remove, not machinery to correct. That is a materially smaller and lower-risk change than fixing the write-back.
+
+## Original fix specification, SUPERSEDED by the blend design above
 
 Add the missing NH4 amalgamation as the mirror of `fertilizer_band_nitrate_phosphate.zig`, driven by the same `band_disappeared`/`.amalgamate` signal that already exists:
 
