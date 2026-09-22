@@ -919,3 +919,67 @@ Confirmed affected: `PRECN`, `ET`, `RUNOFF`, `DISCHG`. Near-certain by the same 
 Otherwise daily water maps cleanly (50 oracle data columns against 48, differing only by `WTR_13`/`ICE_13`, the `issue-085` class). Also noted: daily `SNOWPACK` is `1000*DPTHS`, snow **depth** in mm, whereas hourly `SNOWPACK` is water equivalent -- same header name, different quantity between cadences.
 
 **`outcompare.py` deliberately NOT extended to the daily streams**, because doing so before the cumulative-versus-per-day disposition is decided would bake in a wrong comparison. That disposition is a reviewer call: emit cumulative (cheapest route to criterion 1), or keep per-day as an approved difference **with** a rename and a cited harness exclusion. The current state -- same slot, same name, silently different accumulation window -- is the one thing that must not stand.
+
+---
+
+## Round 26 (2026-09-22): the surface/litter cluster gets a ROOT CAUSE, and two of my own claims are refuted
+
+Five commits, no source changes, no runs. Everything below came from outputs already on disk plus source reading, which is what `issue-091` leaves available. **The headline: the five "independent" surface readouts from `run-014` are one defect, and it is not the one I filed first.**
+
+### The chain, in the order it actually happened
+
+1. **Litter thickness formula: FAITHFUL** (commit `933c2ac`). `hour1.f:4353-4356`/`:4382` against `litter_geometry.zig:60-68` + `ecosys_ng.zig:1919-1921`, term for term, including the non-obvious pool set `{0,1,2,4}` skipping pool 3. Parameters match the legacy `DATA` statements exactly: `THETRX` (`hour1.f:128`) = `water_retention_m3_per_g_c` (`gas_parameters.zig:339`), `BKRS` (`starts.f:76`) = `dry_bulk_density_megagrams_per_m3` (`:340`). So the difference had to be in the carbon input.
+
+2. **`issue-093` filed**: the carbon input uses one all-inclusive total for every pool where legacy `RC0` uses a **different composition per pool**. `redist.f:5528-5599` gives each inventory its own `K` bound -- microbial `K=0,5` with `IF(K.NE.4)`, residue and the six-term DOC group `K=0,2`, structural `K=0,4` -- so `RC0(4)` (humus) receives **`OSC` only**, while `substrateCarbon_g_c` (`initialization.zig:487-499`) sums all six categories for any substrate. Deliberate, on two grounds: the arrays are dimensioned to hold the excluded slots (`redist.f:159-161`), and `starts.f:1492-1570` uses *different* bounds for the same array.
+
+3. **`issue-093`'s quantitative prediction: REFUTED, same day.** I predicted ~670 g C m-2 of spurious pool-4 carbon would explain the whole 0.0268 m. Added `outcompare.py --trace` to get the per-key trajectory, and the `SURF_ELEV` error is `<=1e-3` through day 12 (day 12: `-2.9e-6`), ~5e-4 by day 40, then **jumps at day 68 and day 90** to 1.3e-2 and 5.4e-2, ending at 8.2e-2. A composition defect accumulates smoothly; it cannot step at snowmelt. It accounts for ~2%. The composition mismatch survives; its billing as the cause does not. I should also have caught this before filing: surface substrate-4 carbon starts at **exactly zero** (`initialization.zig:640-643`, `:682`), which cannot support a near-constant offset.
+
+4. **`issue-094` filed -- the ROOT CAUSE.** Chasing the melt-locked jumps led to the water balance:
+
+   | quantity | oracle | ecosys-ng |
+   |---|---|---|
+   | `TILE_DRG` artificial drainage | **213.51 mm** | **3.91 mm** (55x) |
+   | `DISCHG` net lateral+lower | -95.26 mm | +7.30 mm |
+   | `RUNOFF` | 118.52 mm | 211.43 mm |
+   | `WATER` storage day 1 -> 136 | 805.78 -> 1031.14 (+225.37) | 801.72 -> 1213.31 (**+411.58**) |
+
+   Sign conventions settled from `redist.f:1138-1160` rather than assumed (`XN` is +1 gain / -1 loss, both accumulators *subtract* a gain-positive quantity, `FLWY/FLWHY` are explicitly "from artificial drainage"). The oracle is a coherent tile-drained field: ~309 mm in, 213.51 mm out through tile. **ecosys-ng has neither side.** It sheds 93 mm more surface runoff instead -- what a model does when its subsurface outlet is shut.
+
+   **Configuration and wiring are both faithful**: `f25si98` line 1 is `45.3 92 5.4 3` so `IDTBLG=3`, `readi.f:157` gates on `>=3`, and `site.zig:109` is the same gate; `solver_residual.zig:488-493` consumes it; `solver_solve.zig:840-842` publishes it. Implemented, parsed, wired -- the realized flux is just 55x too small, with `WTR_1` at 0.717 so there is no shortage of water to drain.
+
+   **Why it explains the cluster**: the bias attenuates with depth and **vanishes below the drain** (`WTR_1` +0.262, `WTR_2..6` ~+0.10, `WTR_10` +0.016, **`WTR_11` -0.0003**). Water backs up above the 1.5 m artificial water table. Not what a uniform retention or freezing error produces. `WTR_1` climbs monotonically 0.461 -> 0.717 and never dries while the oracle cycles and falls to 0.098.
+
+5. **Step 1 of the diagnosis done**: `watsub.f:5934-5954` against `boundary.zig:69-83` term by term. Driving potential faithful (`saturation_term` is 0 exactly when artificial, matching the legacy branch). **Eliminated**: the separation-distance handling (legacy `/(d+1)`, ecosys-ng `/d` -- ~10% and the *wrong way*), the slope term (moot, the deck's `DTBLDGG=1.0` zeroes it on both sides), and the gate's structure (all four legacy `IFLGD` conditions reproduced; the skip-vs-`break` difference is equivalent because depth is monotonic; the inequality only *looked* inverted). **Leading remaining candidate**: ecosys-ng deliberately **freezes the discharge active set at hour start** (`solver_residual.zig:504-505`) where legacy re-evaluates `PSISA1` every substep -- that can only ever *disable* drainage, and a binary gate is the only candidate here that can produce 55x.
+
+6. **`issue-095` filed and diagnosed -- both precipitation slots are misbound, in opposite directions.** Checking `issue-094`'s secondary note found ecosys-ng's own two streams disagree by 232 mm while the oracle's agree exactly:
+
+   ```
+   179.30  ecosys-ng hourly = rain only             (ecosys_ng.zig:1177, rainfall_m)
+   351.60  ORACLE, BOTH     = rain + snowfall + surface irrigation
+   411.07  ecosys-ng daily  = + ground condensation + canopy input (ecosys_ng.zig:3658-3659)
+   ```
+
+   `351.60 - 179.30 = 172.30 mm`, a plausible Ottawa snowfall SWE and exactly the omitted term. The oracle sits *between* the candidates, as a correct middle term must. Legacy: `URAIN=(PRECQ+PRECI)` (`redist.f:4405-4407`) and `PRECA,PRECW = rain+irrigation, SNOWFALL` (`:4422`) are the same quantity; `PRECU` (subsurface irrigation) is routed to `UVOLO` instead (`:4413`). **This is an output-binding defect, not an input defect** -- same class as `issue-086`.
+
+### Two corrections to standing session claims, both mine
+
+- **"Input equivalence proven" was overstated.** Only `WIND` (bit-identical) and `AIR_TEMP` (2.3e-14) were ever held to that standard. `SOL_RADN` differs on **1,447 of 3,275 hours** (0.13% aggregate, max 38.456 W m-2) and is **undiagnosed**; precipitation is **untested as an input** because no slot publishes the comparable quantity. Three of five forcing columns are unverified or not comparable as published. **No output comparison here should be described as resting on proven input equivalence.**
+- **`issue-094`'s "17% more precipitation"** was wrong-signed and is superseded by `issue-095`. `issue-094`'s core findings never involved that column and stand; its balance arithmetic must be redone once a correct column exists.
+
+### Tool work (`ecosys-audit/scripts/outcompare.py`)
+
+- `--trace COLUMN` -- per-key signed-error trajectory. This is what refuted `issue-093`; summary statistics cannot carry the shape.
+- `--cumulate-candidate COLUMN` -- running-sums the candidate and overrides the column's exclusion, giving the cumulative-against-cumulative comparison the output-comparison skill prescribes for `issue-092`. **Independently validated**: applied to the oracle's own reset window it reproduces the oracle's annual accumulator exactly (both 351.60). Documents that validity needs the keys to start at `day.f:84`'s reset, and reports but does not enforce it.
+- `read_lines()` -- handles Windows paths over `MAX_PATH` (260). The candidate path here is **284 chars**, which PowerShell resolves and CPython `open()` does not; it presented as `FileNotFoundError` on a file that demonstrably exists. Worth knowing before diagnosing anything else in this scratchpad.
+- Mapped the six previously-unmapped daily flux columns with `outsd.f` slot citations. **They remain excluded by default**; the mapping only enables the cumulative mode.
+
+### Next bounded action
+
+1. **Instrument the `IFLGD`-equivalent gate's hit rate** over a short Debug window (Debug is readable per `issue-091`). This is the affordable experiment -- *not* reproducing the divergence, which needs ~960 simulated hours (14x gap by day 40) and at the measured ~87 s/hour Debug rate is ~23 h wall clock.
+2. Compare the conductivity wetness class -- legacy `VOLW1/VOLY` against ecosys-ng's `matrix_water/matrix_bulk_volume_m3`; different denominators select different `HCND` classes.
+3. Compare `AREAUD` against `fraction_face_below_water_table`.
+4. Check `boundary.zig:113` (`macroporeDischarge`), which divides by `recharge_frequency_divisor` with **no `+1`** where the micropore sibling at `:81` has it. The legacy is itself inconsistent -- `/(RCHGFA+1.0)` at `watsub.f:5952` against `AMAX1(RCHGFA,1.0)` at `:6003` -- so check against `:6003` specifically; a zero there divides by zero.
+
+**Still blocked on the user, unchanged**: `issue-091`. No production run, no performance measurement, and `issue-090`'s fix still has no production validation. Nothing in round 26 needed a run, but items 1-3 above do need at least a short Debug replay.
+
+**Gate status unchanged.** Nothing here moves a gate; `check_gate.py` owns that. Round 26 added three issues (093, 094, 095), corrected two of my own claims, and identified a root cause -- it did not fix anything. Criterion 3 (performance) remains entirely unmeasured.
