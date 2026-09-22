@@ -50,7 +50,92 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 
 **So: the day-137 banded monocalcium phosphate application books its phosphorus and calcium as external inputs but does not deposit them into cell 2's inventory.**
 
-> ## THE ORDERING CONCLUSION IS REFUTED. The reserve is CONSUMED TO ZERO within the hour.
+> ## ROOT CAUSE, BIT-EXACT: banded phosphate is deposited into a zone of zero volume, and the census multiplies it by that zero
+>
+> Two coupled defects. Either alone loses mass; together they destroy **100%** of banded
+> phosphate, which is why the residual matched the input to fifteen digits.
+>
+> ### Defect 1: ecosys-ng has no phosphate band activation
+>
+> The legacy arms **three** fertilizer band families, one gate each:
+>
+> | family | gate | ecosys-ng |
+> |---|---|---|
+> | NH4 | `hour1.f:303-305`, sets `IFNHB=1` | ported (`issue-090`) |
+> | NO3 | `hour1.f:356`, sets `IFNOB=1` | ported (`issue-090`) |
+> | **PO4** | **`hour1.f:411-412`, sets `IFPOB=1`** -- "banded H2PO4 fertilizer flag" (`:5076`) | **NO COUNTERPART** |
+>
+> A search of `management/` for any phosphate band activation returns **nothing**. `issue-090`
+> examined the NH4-vs-NO3 gate asymmetry, called it "load-bearing", and ported both -- and the
+> third gate was never in scope. The deck sets `initial_phosphate_band_fraction = 0`
+> (`runottawa:70`, `plant_nutrients,0,0,0,1,1,1,1`, third value), so **`fractions.phosphate_band`
+> is zero for the entire run** and nothing can ever arm it.
+>
+> ### Defect 2: the deposit divides by full layer water, the census by zone water
+>
+> `mineral_fertilizer_inventory.publishSoil:207-210`:
+>
+> ```zig
+> const inverse_water = 1.0 / water_m3;                       // FULL layer water
+> chemistry.band_phosphate[index].monocalcium_phosphate_solid_mol_per_m3 +=
+>     (inventory.broadcast_monocalcium_phosphate_mol * fractions.phosphate_band +
+>      inventory.banded_monocalcium_phosphate_mol) * inverse_water;
+> ```
+>
+> `landscape_mass_inventory_phosphorus_ions.phosphateImmobileInventory`:
+>
+> ```zig
+> const water_carrier = water_m3 * zone_fraction;             // ZONE water
+> ... carrierAmount(state.monocalcium_phosphate_solid_mol_per_m3, water_carrier);  // value * carrier
+> ```
+>
+> So the round trip is
+>
+> ```
+> deposited  concentration = amount / water_m3
+> recovered  amount        = (amount / water_m3) * water_m3 * f_band  =  amount * f_band
+> ```
+>
+> The correct deposit divisor is `water_m3 * f_band`, matching the legacy convention this
+> session already established six independent times from `hour1.f:3826-3858`
+> (`CNH4B = ZNH4B/(VOLW*VLNHB)`). This is the identical class of error `issue-098` recorded in
+> the sibling staging at `soil_chemistry_convergence.zig:875-896`.
+>
+> ### Why the loss is exactly 100%
+>
+> With Defect 1 holding `f_band = 0`, Defect 2's recovery factor is `f_band = 0`:
+>
+> ```
+> recovered = amount * 0 = 0
+> ```
+>
+> **The entire banded deposit is annihilated on the transfer.** The measured numbers confirm
+> it: the logged deposit was `banded_monocalcium_mol = 8.064516129032258e-2` and the calcium
+> residual was `-8.064516129025165e-2` -- the same quantity to **eleven significant digits**,
+> with the phosphorus residual `-4.9999999999999964` against a 5.0 g booking.
+>
+> ### Fix
+>
+> Both, and Defect 1 first:
+>
+> 1. **Port `hour1.f:411-412`'s `IFPOB` gate** so a banded phosphate application arms the
+>    phosphate band geometry, as `issue-090` did for NH4 and NO3. Note `hour1.f:5081` and
+>    `redist.f:9559` both gate on `IFPOB(NY,NX).EQ.1.AND.ROWP(NY,NX).GT.0.0`, so `ROWP` (the
+>    phosphate band row spacing) is the parameter to thread through.
+> 2. **Change `publishSoil`'s band divisor to `water_m3 * fractions.phosphate_band`** (and the
+>    non-band divisor to `water_m3 * fractions.phosphate_non_band`, which currently loses a
+>    further 1.6%). Guard `f_band == 0` explicitly rather than dividing by zero -- with
+>    Defect 1 fixed the zero case should not arise, but a guard that fires is information.
+> 3. A mass-conservation regression test asserting `amount_in == concentration_out * water * f_zone`
+>    to the last bit, for both zones, which is the identity this whole investigation reduced to.
+>
+> **Not applied.** Defect 1 is a new science path (band geometry for a third family) and
+> Defect 2 changes a chemistry conversion every phosphate quantity depends on. Together that
+> is well beyond what should be landed unreviewed at the end of this session, and
+> `PROJECT_CONTRACT.md`'s shared-state rule says a chemistry-conversion change invalidates
+> every dependent process and output check.
+>
+> ## SUPERSEDED: the reserve is CONSUMED TO ZERO within the hour (true, and correct behaviour -- the loss is in the transfer, not the consumption)
 >
 > The caveat above was justified. With the census diagnostic logging **unconditionally** for
 > `profile_cell == 2`, the passes the filtered version had hidden appear:
