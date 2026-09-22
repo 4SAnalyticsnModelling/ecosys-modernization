@@ -98,9 +98,58 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 >    in one layer and a surplus in another, and the run reports only the first failure, so a
 >    compensating surplus elsewhere would not appear in the log.
 >
-> Distinguishing them is cheap: log the reserve value per layer immediately before and after
-> the application hour. **That is the next step, and no conclusion should be drawn until it is
-> done** -- this issue has now had one wrong root cause from me and it should not get a second.
+> Both were then checked and **both are refuted**:
+>
+> 1. **Not a staging failure.** `mineral_fertilizer_inventory.zig:109-110` commits it --
+>    `state.soil[soil_index] = next_soil; state.surface[cell] = next_surface;` -- after
+>    validating at `:104-105`. The `next_*` names are a validate-then-commit idiom, not a
+>    dropped write.
+> 2. **Not a layer mismatch.** The deposit resolves its layer as
+>    `layerAtDepth(active_layer_thickness_m, event.application_depth_m)` (`:72-73`) with
+>    `application_depth_m = 0.05`, which is layer 2 -- the same layer that fails, and the same
+>    layer where `run-021` measured the active band.
+>
+> ### Leading hypothesis, NOT established: the conservation sidecar has no hour gate
+>
+> `management/fertilizer_management_dispatch.zig:182-194`, inside
+> `LocalActivityState.reconstructAcceptedHour` (`:135`, with a `reset` at `:127`):
+>
+> ```zig
+> for (catalog.entries.items[schedule_index].events) |event| {
+>     if (event.date.day != date.day or event.date.month != date.month or
+>         (!event.date.isRecurring() and event.date.year != date.year)) continue;
+>     const routed = try eventRoutedActivity(event, area_m2, carbon_g_per_mol, cover_fraction, thickness);
+>     try self.surface_by_cell[cell].add(routed.surface);
+>     try self.soil_by_layer[first + routed.soil_layer].add(routed.soil);
+> }
+> ```
+>
+> **The event gate tests day, month and year -- never the hour.** So a function whose own name
+> is "reconstruct *accepted hour*" attributes a once-per-day application to **every hour of
+> that day**, while `mineral_fertilizer_inventory.applyMineral` deposits it once. The comment
+> at `:199` confirms this is "the local-conservation sidecar", i.e. an accounting path, not the
+> science path.
+>
+> ### The tension that stops this being a conclusion
+>
+> If the sidecar booked 5.0 in *every* hour of day 137, the check should fail on the **first**
+> such hour. Day 137 spans hours 3,265-3,288 and the failure is at **3,275**, ten hours in.
+> Two readings, and I cannot separate them from the runs I have:
+>
+> - the application dispatch fires at hour 3,275 specifically, so this is its first hour; or
+> - the sidecar books an event the science path has **not yet applied** -- an ordering defect.
+>   This would also explain the standing oddity that the run's own census reports
+>   `fertilizer_application entries=2 ... last_hour=3252`, i.e. no day-137 application
+>   dispatched, while `run-021` measured an **active band** at layer 2 whose fraction
+>   (1.6447e-2) can only come from day 137's `0.76` row spacing.
+>
+> ### The one measurement that settles it
+>
+> Log, for each hour of day 137: the routed fertilizer activity the sidecar books, the
+> `banded_monocalcium_phosphate_mol` reserve value, and whether the application dispatch fired.
+> One ~10-minute `ReleaseSafe` run. **No fix should be attempted before that** -- this issue
+> has already had one wrong root cause from me, and the hour-3,275-vs-3,265 gap is exactly the
+> kind of detail that distinguishes a real mechanism from a plausible one.
 >
 > The original text is retained below for the reasoning trail. Read it as refuted.
 >
