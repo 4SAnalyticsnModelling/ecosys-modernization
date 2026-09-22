@@ -43,8 +43,55 @@ Status: **REDISCOVERY -- the defect is real and confirmed, but it was ALREADY DO
 > had located the same boundary.
 >
 > The original text is retained below **unedited except this header**, because the
-> mechanism description is accurate and the reproduction steps are useful. Read it as
-> corroborating detail, not as a discovery.
+> mechanism description is accurate and the reproduction steps are useful.
+>
+> ### SECOND CORRECTION, same day: the mechanism analysis IS new after all
+>
+> Having found the prior diagnosis, I checked whether its cause had been fixed. **It has.**
+>
+> `production_status_2026-09-10.md:286-299` attributes the saturation to
+> `applyInitialNaturalWaterTableSaturation` being "called unconditionally", injecting
+> `3 x 0.5 m x (0.511278 - 0.330) =` **271.9 mm**, because it cites `hour1.f:2131-2168` which
+> is the **dead ELSE arm** of `hour1.f:2056` for a deck like Ottawa that supplies FC and WP
+> (`ISOIL(1)=ISOIL(2)=0`, `readi.f:460-471`).
+>
+> In the audited tree that is **already fixed**. `model_initialization.zig:230-231`:
+>
+> ```zig
+> // ISOIL(1)=ISOIL(2)=0 selects the THEN arm, which does not saturate.
+> if (retention_endpoints_supplied_by_layer[at]) continue;
+> ```
+>
+> fed by `suppliedRetentionEndpoints` (`:160-163`) and `fillSuppliedRetentionEndpoints`
+> (`:168-191`), wired at `ecosys_ng.zig:9691-9696`. Ottawa supplies FC/WP for all 12 layers,
+> so the saturation is skipped entirely. `git log -S` shows the guard present since the
+> initial import (`514dd68`, 2026-09-18), which is **before** `run019`'s binary was built
+> (2026-09-22), so the measured run includes it.
+>
+> **So the documented cause is fixed and the symptom persists undiminished**: tile drainage
+> 3.91 mm against 213.51 mm, storage +411.58 mm against +225.37 mm, `WTR_1` climbing
+> monotonically to 0.717 and never drying. Two consequences:
+>
+> 1. **The prior causal chain is incomplete.** "Layer 10 sits at saturation *so* its two
+>    matric potentials are equal" explains the equality via saturation clamping. With the
+>    over-saturation removed, that explanation no longer applies -- yet the gate still fails.
+> 2. **The structural explanation below is what remains, and it is saturation-independent.**
+>    `base` is copied from `grid.matrix_liquid_water_m3` (`solver_solve.zig:854`) and
+>    `grid.matric_potential_megapascal` was computed by `state_update` from that same value
+>    (`solver_flux.zig:85-95`) through the same function (`solver_hydraulics.zig:301-321`). The
+>    two operands are equal **regardless of whether the layer is saturated**. Saturation was a
+>    sufficient condition for the equality; it was never a necessary one.
+>
+> **Also revises the 1 m boundary.** The prior work attributes the `DTBLZ = 1.0 m` split to
+> the injection ("layers 10/11/12 are at porosity from hour 1"). With the injection gone, my
+> measured bias still vanishes exactly at `WTR_11`. The simpler remaining explanation is the
+> deck's own **natural water table depth `DTBLIG = 1.0 m`** (`f25si98` line 3, `readi.f:154`):
+> layers above it should drain toward it and do not; layers below it sit near equilibrium and
+> agree. That is consistent with the fix having landed and with the observed depth profile.
+>
+> **Net: this issue is restored to a genuine finding** -- not the discovery of the defect,
+> which was known, but the identification of the *remaining* mechanism after the documented
+> cause was corrected. `issue-097`'s accounting is updated accordingly.
 
 Severity high. It is not confined to drainage: the orphaned pair gates the general micropore flux and the litter-soil water exchange as well.
 
