@@ -109,7 +109,50 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 >    `application_depth_m = 0.05`, which is layer 2 -- the same layer that fails, and the same
 >    layer where `run-021` measured the active band.
 >
-> ### Leading hypothesis, NOT established: the conservation sidecar has no hour gate
+> ### THIRD hypothesis also refuted: the sidecar DOES have an hour gate, and it is the same one
+>
+> I claimed the sidecar's event loop gates on day/month/year but never the hour. **Wrong
+> again** -- I read the inner event loop and missed the enclosing gate.
+> `fertilizer_management_dispatch.zig:161-165`:
+>
+> ```zig
+> for (0..self.cell_count) |cell| {
+>     if (!try isApplicationHour(source_hour_one_through_twenty_four, solar_noon_hour_by_cell, cell)) continue;
+> ```
+>
+> and **every** path uses the identical gate -- the sidecar at `:161`, `applyNitrogen` at
+> `:439`, `applyMinerals` at `:517`, `applyOrganic` at `:546`. The hour selection is
+> consistent by construction, and `reconstructAcceptedHour` also `reset()`s first (`:159`), so
+> it does not accumulate across hours either.
+>
+> ### What the evidence now forces: an ORDERING defect within the hour
+>
+> Three mechanisms are refuted, and the remaining evidence is specific:
+>
+> - the sidecar books 5.0 g P at hour 3,275;
+> - the run's own census reports `fertilizer_application entries=2 ... last_hour=3252`, so the
+>   **deposit did not happen** at 3,275;
+> - yet both gates are identical, so if the sidecar's gate passed, the deposit's would too.
+>
+> The only way both hold is that **`applyMinerals` is not reached before the conservation check
+> runs** -- the sidecar reconstructs and books, the check evaluates, and the science path
+> deposits later in the hour (or the run aborts first). That is an ordering defect between the
+> local-conservation sidecar and the mineral application, not a gate or a wiring fault.
+>
+> It also explains why day 136 passed: that application was **broadcast urea**, a nitrogen
+> species on `applyNitrogen`'s path, which may sit at a different point in the hour than
+> `applyMinerals`. The failing quantities are phosphorus and calcium -- `applyMinerals`'
+> species exclusively.
+>
+> ### Stop hypothesising; take the measurement
+>
+> I have now had three mechanisms refuted in a row by reading one level further each time.
+> That is a signal to stop reasoning from static reading. The measurement is one ~10-minute
+> `ReleaseSafe` run logging, with the hour, a marker at: (a) the sidecar's booking, (b)
+> `applyMinerals`' deposit, (c) the hourly conservation evaluation. The **order** of those
+> three lines within hour 3,275 settles it outright.
+>
+> ### SUPERSEDED second hypothesis: the conservation sidecar has no hour gate
 >
 > `management/fertilizer_management_dispatch.zig:182-194`, inside
 > `LocalActivityState.reconstructAcceptedHour` (`:135`, with a `reset` at `:127`):
