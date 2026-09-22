@@ -106,6 +106,16 @@ pub fn applyEvent(
     const phosphorus_g_p = (p.broadcast_monocalcium_phosphate + p.banded_monocalcium_phosphate + p.broadcast_hydroxyapatite) * cell_area_m2;
     const next_daily_phosphorus = state.daily_phosphorus_input_g_p[cell] + phosphorus_g_p;
     if (!std.math.isFinite(next_daily_phosphorus)) return error.MineralFertilizerApplicationOverflow;
+    // TEMP_DIAGNOSTIC (`issue-099`): confirm the deposit actually runs, which
+    // layer it targets, and the reserve value it produces -- to compare against
+    // the cell-scope `fert_preflight`/`fert_accumulate` bookings in
+    // `ecosys_ng.zig`. The census reports no day-137 application while the
+    // ledger books 5.0 g P, so this is the line that settles whether the
+    // deposit happened at all.
+    if (!@import("builtin").is_test and phosphorus_g_p != 0) std.log.err(
+        "TEMP_DIAGNOSTIC fert_deposit: cell={d} layer={d} soil_index={d} phosphorus_g_p={e} banded_monocalcium_mol={e}",
+        .{ cell, layer, soil_index, phosphorus_g_p, next_soil.banded_monocalcium_phosphate_mol },
+    );
     state.soil[soil_index] = next_soil;
     state.surface[cell] = next_surface;
     state.daily_phosphorus_input_g_p[cell] = next_daily_phosphorus;

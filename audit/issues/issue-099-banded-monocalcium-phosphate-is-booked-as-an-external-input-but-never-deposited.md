@@ -50,7 +50,52 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 
 **So: the day-137 banded monocalcium phosphate application books its phosphorus and calcium as external inputs but does not deposit them into cell 2's inventory.**
 
-> ## THE ROOT CAUSE BELOW IS WRONG -- WITHDRAWN. The reserve IS counted by the census.
+> ## MEASURED: the deposit DOES happen, in the right hour and the right slot. The defect is in the census READ.
+>
+> Instrumented all three points of the cell-scope booking path and ran `ReleaseSafe` to the
+> frontier. Every marker fires in the **same hour**:
+>
+> ```
+> fert_preflight:  hour=3275 cell=0 phosphorus_g_p=5e0 calcium_mol=8.064516129032258e-2
+> fert_deposit:    cell=0 layer=2 soil_index=2 phosphorus_g_p=5e0
+>                  banded_monocalcium_mol=8.064516129032258e-2
+> fert_accumulate: hour=3275 cell=0 phosphorus_g_p=5e0 calcium_mol=8.064516129032258e-2
+> ```
+>
+> **What this establishes:**
+>
+> 1. **The deposit happens**, at `soil_index = 2` (= `cell 0 * layer_capacity + layer 2`), with
+>    the correct magnitude: `8.064516129032258e-2 mol x 62 g/mol = 5.0 g P` exactly. So every
+>    hypothesis about a lost, uncommitted or mis-layered deposit is dead -- including my own
+>    first one, withdrawn below.
+> 2. **The booking happens twice by design** -- `preflight` before the owners mutate and
+>    `accumulate` after they accept -- both at `cell=0`, both 5.0 g P. The ledger reports
+>    `external_inputs = 5.000454772802566`, i.e. **one** 5.0 plus a small other P source, so
+>    the two are not double-counted.
+> 3. **The hour is right.** All three at 3,275, the same hour the conservation check fails.
+>
+> **So the input arrives, the mass is deposited, and the census still reports scope 2's
+> phosphorus storage rising by only `+1.185e-4` instead of `+5.0`.** The defect is therefore in
+> the **census read path**, not in the application.
+>
+> ### The specific suspicion: an index mismatch between deposit and census
+>
+> The deposit writes `state.soil[soil_index]` with `soil_index = cell * layer_capacity + layer
+> = 0 * 12 + 2 = 2`. The census reads `pending_fertilizer.soil[profile_cell]`
+> (`landscape_mass_inventory_phosphorus_ions.zig:383`). **If `profile_cell` is not the same
+> index as `soil_index`** -- for instance if it is a profile-relative index offset by
+> `first_profile_layer`, or a scope index rather than a `cell * capacity + layer` flat index --
+> the census reads a different slot than the deposit wrote, and the 5.0 g P is invisible while
+> sitting in memory.
+>
+> Note the booking is keyed on **grid cell 0** while the failure is reported at **scope 2**, so
+> there is a cell-to-scope mapping in the ledger that is also worth checking.
+>
+> **Not yet verified**, and this issue has already had four wrong mechanisms from me, so it is
+> stated as a suspicion: confirm by logging `profile_cell` alongside the reserve value the
+> census actually reads, next to the `soil_index` the deposit wrote.
+>
+> ## SUPERSEDED (but now partly rehabilitated): the reserve IS counted by the census -- the question is at WHICH INDEX
 >
 > I concluded that the undissolved fertilizer reserve has no census `StorageOwner` and is
 > therefore invisible. **That is false**, and I reached it by reading the `StorageOwner` enum
