@@ -135,6 +135,20 @@ STREAM_MAPS = {
         "TEMP_LITTER": "surface_soil_temperature",
         **{f"TEMP_{k}": f"soil_temperature_layer_{k}" for k in range(1, 21)},
     },
+    # Hourly nitrogen, fouts.f N=23. Values outsh.f:183-196. Units verified:
+    # slots 1-3 are H*G/AREA with no multiplier (g N m-2 h-1); slots 4-5 divide
+    # by TAREA, the landscape area, not the cell area -- the same convention the
+    # water stream's RUNOFF/SEDIMENT/DISCHG use; slots 6+ are CZ2OS(k), raw,
+    # which hour1.f:3782 defines as Z2OS(L)/VOLW(L), i.e. g N m-3 water. All
+    # match the candidate's declared units. Maps 1:1 with no exclusions.
+    "nitrogen_hourly": {
+        "N2O_FLUX": "nitrous_oxide_emission",
+        "N2G_FLUX": "dinitrogen_emission",
+        "NH3_FLUX": "ammonia_emission",
+        "SURF_N_FLUX": "dissolved_inorganic_nitrogen_runoff",
+        "SUBS_N_FLUX": "dissolved_inorganic_nitrogen_drainage",
+        **{f"N2O_{k}": f"dissolved_nitrous_oxide_nitrogen_concentration_layer_{k}" for k in range(1, 16)},
+    },
 }
 
 # Legacy columns with a recorded, cited reason for having no counterpart.

@@ -1,0 +1,263 @@
+{
+  "oracle_file": "C:\\ecosys-cmp\\oracle_nh1.txt",
+  "candidate_file": "C:\\ecosys-cmp\\zig_nh1_head.txt",
+  "stream": "nitrogen_hourly",
+  "rule": "abs(candidate-oracle) <= 1e-12 + 1e-06*abs(oracle)",
+  "oracle_rows": 6875,
+  "candidate_rows": 3252,
+  "matched_keys": 3252,
+  "oracle_only_keys": 3623,
+  "candidate_only_keys": 0,
+  "first_matched_key": 1,
+  "last_matched_key": 3252,
+  "calendar_mismatches": 0,
+  "calendar_mismatch_examples": [],
+  "duplicate_oracle_keys": 0,
+  "duplicate_candidate_keys": 0,
+  "columns": [
+    {
+      "oracle_column": "N2O_FLUX",
+      "candidate_column": "nitrous_oxide_emission[g N m-2 h-1]",
+      "pairs": 3252,
+      "max_abs_error": 0.00040648602126114536,
+      "max_abs_error_key": 1,
+      "mae": 3.386457469759139e-05,
+      "rmse": 4.411769674156997e-05,
+      "bias": 3.3815548284297095e-05,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -0.0004064285,
+        "candidate": 5.7521261145383686e-08,
+        "abs_error": 0.00040648602126114536
+      }
+    },
+    {
+      "oracle_column": "N2G_FLUX",
+      "candidate_column": "dinitrogen_emission[g N m-2 h-1]",
+      "pairs": 3252,
+      "max_abs_error": 1.3329447204351534,
+      "max_abs_error_key": 1622,
+      "mae": 0.07019649038632086,
+      "rmse": 0.10113912657787198,
+      "bias": 0.05145650573330277,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -2.601519e-05,
+        "candidate": -0.14520073127852118,
+        "abs_error": 0.14517471608852117
+      }
+    },
+    {
+      "oracle_column": "NH3_FLUX",
+      "candidate_column": "ammonia_emission[g N m-2 h-1]",
+      "pairs": 3252,
+      "max_abs_error": 3.5613289298530125e-05,
+      "max_abs_error_key": 195,
+      "mae": 2.008553235988715e-06,
+      "rmse": 4.676817201769026e-06,
+      "bias": 1.6748042652186936e-07,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -8.007665e-06,
+        "candidate": -3.089193326659087e-08,
+        "abs_error": 7.97677306673341e-06
+      }
+    },
+    {
+      "oracle_column": "SURF_N_FLUX",
+      "candidate_column": "dissolved_inorganic_nitrogen_runoff[g N m-2 h-1]",
+      "pairs": 3252,
+      "max_abs_error": 0.05405897,
+      "max_abs_error_key": 2170,
+      "mae": 0.021622619075992163,
+      "rmse": 0.03292765052723522,
+      "bias": -0.021617705841460784,
+      "exceedances": 1632,
+      "exceedance_fraction": 0.5018450184501845,
+      "first_exceedance": {
+        "key": 1621,
+        "oracle": 0.0,
+        "candidate": 0.0003003220152360579,
+        "abs_error": 0.0003003220152360579
+      }
+    },
+    {
+      "oracle_column": "SUBS_N_FLUX",
+      "candidate_column": "dissolved_inorganic_nitrogen_drainage[g N m-2 h-1]",
+      "pairs": 3252,
+      "max_abs_error": 1.2464559999999998,
+      "max_abs_error_key": 3252,
+      "mae": 0.7486114057117431,
+      "rmse": 0.8002907180687879,
+      "bias": 0.289325720176222,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -0.00832362,
+        "candidate": 0.0001397244850581561,
+        "abs_error": 0.008463344485058156
+      }
+    },
+    {
+      "oracle_column": "N2O_1",
+      "candidate_column": "dissolved_nitrous_oxide_nitrogen_concentration_layer_1[g N m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 0.42629526123909295,
+      "max_abs_error_key": 485,
+      "mae": 0.051077094432367326,
+      "rmse": 0.11990098771879903,
+      "bias": -0.04984720669101358,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.001581657,
+        "candidate": 0.0006564239001392141,
+        "abs_error": 0.0009252330998607859
+      }
+    },
+    {
+      "oracle_column": "N2O_2",
+      "candidate_column": "dissolved_nitrous_oxide_nitrogen_concentration_layer_2[g N m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 0.14318253014031623,
+      "max_abs_error_key": 137,
+      "mae": 0.005614097559487145,
+      "rmse": 0.01691536304684411,
+      "bias": -0.00043850482688624344,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.001343169,
+        "candidate": 0.00020032995031606487,
+        "abs_error": 0.001142839049683935
+      }
+    },
+    {
+      "oracle_column": "N2O_3",
+      "candidate_column": "dissolved_nitrous_oxide_nitrogen_concentration_layer_3[g N m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 0.03646369026104076,
+      "max_abs_error_key": 1653,
+      "mae": 0.0029735791382472436,
+      "rmse": 0.005349541866097998,
+      "bias": 0.000838990269627629,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.002156452,
+        "candidate": 0.00020603583749697347,
+        "abs_error": 0.0019504161625030266
+      }
+    },
+    {
+      "oracle_column": "N2O_4",
+      "candidate_column": "dissolved_nitrous_oxide_nitrogen_concentration_layer_4[g N m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 0.019286484254760095,
+      "max_abs_error_key": 2156,
+      "mae": 0.00231085480547547,
+      "rmse": 0.003409374573162642,
+      "bias": 0.00044203709626591174,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.003020738,
+        "candidate": 0.0001930450206140561,
+        "abs_error": 0.0028276929793859436
+      }
+    },
+    {
+      "oracle_column": "N2O_5",
+      "candidate_column": "dissolved_nitrous_oxide_nitrogen_concentration_layer_5[g N m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 0.017813736063166948,
+      "max_abs_error_key": 2208,
+      "mae": 0.002257183884042819,
+      "rmse": 0.003768017569677463,
+      "bias": 0.0003715557455919342,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.003364695,
+        "candidate": 0.0002453854877521797,
+        "abs_error": 0.0031193095122478203
+      }
+    },
+    {
+      "oracle_column": "N2O_6",
+      "candidate_column": "dissolved_nitrous_oxide_nitrogen_concentration_layer_6[g N m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 0.008947983359659633,
+      "max_abs_error_key": 2534,
+      "mae": 0.001882539652667972,
+      "rmse": 0.0028150701119701773,
+      "bias": -6.213897566381673e-05,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.003346014,
+        "candidate": 0.00025845900565575034,
+        "abs_error": 0.0030875549943442495
+      }
+    },
+    {
+      "oracle_column": "N2O_7",
+      "candidate_column": "dissolved_nitrous_oxide_nitrogen_concentration_layer_7[g N m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 0.02177530871253649,
+      "max_abs_error_key": 2735,
+      "mae": 0.0022209953553685912,
+      "rmse": 0.003829234991591482,
+      "bias": -0.0005282999313206501,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.002912332,
+        "candidate": 0.00034714327723140803,
+        "abs_error": 0.002565188722768592
+      }
+    },
+    {
+      "oracle_column": "N2O_8",
+      "candidate_column": "dissolved_nitrous_oxide_nitrogen_concentration_layer_8[g N m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 0.04589407536649084,
+      "max_abs_error_key": 2918,
+      "mae": 0.0025515355199256374,
+      "rmse": 0.004249698494216705,
+      "bias": -0.0007155820244296296,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.00142143,
+        "candidate": 0.00036561863096534834,
+        "abs_error": 0.0010558113690346516
+      }
+    }
+  ],
+  "accounted_exclusions": [],
+  "unmapped_oracle_columns": [],
+  "completion_proof": "ABSENT on both sides; see limitations",
+  "limitations": [
+    "does not prove either run reached its required end time; completion is a separate mandatory proof and neither side has it",
+    "applies no unit conversion; the column mapping must be verified unit-compatible against the legacy value producer first",
+    "the default atol/rtol is a triage rule, not a reviewed scientific acceptance threshold",
+    "no smoothing, interpolation, clipping, outlier removal or cumulative resetting is performed",
+    "columns it cannot map are reported as unmapped, and agreement on mapped columns says nothing about them"
+  ]
+}

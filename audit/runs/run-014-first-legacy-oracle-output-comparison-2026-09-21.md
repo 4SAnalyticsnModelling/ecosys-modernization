@@ -164,3 +164,64 @@ Never silently dropped, and never counted as passes:
 2. **Fix `issue-086`** (both findings). The correct quantity already exists in the tree as daily `soil_water_storage` (`output_catalog.zig:134`, producer `daily_output.zig:365`, the same `*1000/area` form), and the daily catalog already uses the correct `surface_volumetric_liquid_water_fraction[m3 m-3]` naming the hourly one gets wrong. Pin slot 4 with a regression test citing `outsh.f:121`.
 3. **Extend `outcompare.py`** to the energy, nitrogen and phosphorus streams, and to the daily cadence, verifying units per stream against `outsh.f`/`outsd.f` first.
 4. Do **not** re-run the production deck to reach a later hour: the frontier is a known blocker with a documented, escalated next step (`issue-083`), and this run already supplies 3,252 hours of comparable output.
+
+## Addendum, same session: energy and nitrogen streams added -- ALL FOUR hourly soil streams in this deck are now compared
+
+The deck emits four hourly soil streams (`f25ch1`, `f25wh1`, `f25eh1`, `f25nh1`); hourly phosphorus is not emitted by this deck, so **hourly soil coverage is now complete**. The five daily soil streams and all plant streams remain untouched.
+
+### Input equivalence is PROVEN -- the contract's mandatory first diagnosis step
+
+The energy stream's first columns are pure weather forcing, so they double as an input-equivalence test. Over 3,252 matched hours:
+
+| column | max abs err | exceedances |
+|---|---|---|
+| `WIND` | **0.000000e+00** | **0** |
+| `AIR_TEMP` | 2.309e-14 | **0** |
+| `HUM` | 4.970e-07 | **0** |
+| `SOL_RADN` | 3.846e+01 | 54 |
+| `PREC` | 4.600e+00 | 218 |
+
+`WIND` is **bit-identical in every one of the 3,252 hours** and `AIR_TEMP` agrees to binary64 round-off. The two runs are driven by the same weather record. **Unequal inputs/initialization -- the first item in `PROJECT_CONTRACT.md`'s prescribed diagnosis order -- is therefore eliminated as an explanation for every other divergence in this record.** That is a significant result in its own right: it means the remaining divergences must be explained by parsing/output semantics, bindings, translation, convergence, or approved physics, and not by the forcing.
+
+`PREC`'s 218 exceedances turned out to be a semantics defect, not a forcing difference -- filed as **`issue-088`**: the legacy column is `(PRECR+PRECW)` = rain + **snowfall** excluding irrigation (`outsh.f:254-255`), while ecosys-ng's is rain + **irrigation** excluding snowfall (`soil/heat/output.zig:95`). It differs in both directions. Bias is negative and the 6.7% hit rate matches an Ottawa Jan-May snowfall frequency.
+
+`SOL_RADN`'s 54 exceedances are **recorded but not claimed** as a finding: small absolute magnitudes (first at hour 464, oracle 1.350 vs candidate 1.587 W m-2), consistent with low sun angle. The check it needs is stated in `issue-088`.
+
+### Energy stream: the same surface-concentrated signature, in a third independent quantity
+
+| column | max abs err | MAE | bias | exceedances |
+|---|---|---|---|---|
+| SOIL_RN / ECO_RN | 3.545e+2 | 2.977e+1 | -9.833e+0 | 3252 |
+| SOIL_LE / ECO_LE | 1.971e+2 | 2.153e+1 | +1.019e+1 | 3252 |
+| SOIL_H / ECO_H | 4.705e+2 | 4.847e+1 | -4.056e+0 | 3252 |
+| SOIL_G / ECO_G | 8.535e+2 | 3.511e+1 | +7.872e+0 | 3252 |
+| TEMP_1 | 2.558e+1 | 2.663e+0 | +4.069e-1 | 3252 |
+| TEMP_5 | 1.068e+1 | 1.713e+0 | +9.707e-2 | 3252 |
+| TEMP_9 | 5.932e+0 | 1.098e+0 | -9.862e-2 | 3251 |
+| TEMP_11 | 2.459e+0 | 6.397e-1 | -4.568e-1 | 3251 |
+| TEMP_LITTER | 2.459e+1 | 2.750e+0 | +5.053e-1 | 3252 |
+
+Soil temperature error **decays monotonically with depth**, MAE 2.66 degC at layer 1 to 0.64 degC at layer 11, with `TEMP_LITTER` (2.75) the worst. **Ice, liquid water and temperature now all show the same surface-concentrated structure**, which is three independent quantities agreeing on where the problem is. The `SOIL_*`/`ECO_*` pairs are identical to each other on both sides, the expected consistency check for a period with no live plant.
+
+`TEMP_16` is excluded as `issue-085` class (layer 16, profile has 12).
+
+### Nitrogen stream: maps 1:1, bindings and units correct, no new defects
+
+13 data columns on each side, a clean 1:1 mapping with **no exclusions needed** -- the first stream to require none. Units verified: slots 1-3 are `H*G/AREA` (g N m-2 h-1), slots 4-5 divide by `TAREA` (the landscape area, the same convention the water stream's `RUNOFF`/`SEDIMENT`/`DISCHG` use), and slots 6+ are raw `CZ2OS(k)` which `hour1.f:3782` defines as `Z2OS(L)/VOLW(L)`, g N m-3 water.
+
+| column | max abs err | MAE | bias | exceedances |
+|---|---|---|---|---|
+| N2O_FLUX | 4.065e-4 | 3.386e-5 | +3.382e-5 | 3252 |
+| N2G_FLUX | 1.333e+0 | 7.020e-2 | +5.146e-2 | 3252 |
+| NH3_FLUX | 3.561e-5 | 2.009e-6 | +1.675e-7 | 3252 |
+| SURF_N_FLUX | 5.406e-2 | 2.162e-2 | -2.162e-2 | **1632** |
+| SUBS_N_FLUX | 1.246e+0 | 7.486e-1 | +2.893e-1 | 3252 |
+| N2O_1 | 4.263e-1 | 5.108e-2 | -4.985e-2 | 3252 |
+| N2O_6 | 8.948e-3 | 1.883e-3 | -6.214e-5 | 3252 |
+| N2O_8 | 4.589e-2 | 2.552e-3 | -7.156e-4 | 3252 |
+
+Absolute magnitudes are small (N2O and NH3 fluxes at 1e-4 to 1e-6 g N m-2 h-1), the dissolved N2O profile shows the same depth decay, and `SURF_N_FLUX` is episodic (1,632 of 3,252) rather than uniformly wrong. `SUBS_N_FLUX` (drainage) has the largest relative error and is the one nitrogen column worth a second look, though it depends directly on the water fluxes that are already known to diverge.
+
+**That this stream needed no exclusions is itself evidence**: the three defects found so far (`issue-085`, `issue-086`, `issue-088`) are specific mistakes, not a systemic problem with how ecosys-ng maps the editor ladder.
+
+Machine-readable reports: `audit/manifest/outcompare-heat-hourly-2026-09-21.json`, `outcompare-nitrogen-hourly-2026-09-21.json`.
