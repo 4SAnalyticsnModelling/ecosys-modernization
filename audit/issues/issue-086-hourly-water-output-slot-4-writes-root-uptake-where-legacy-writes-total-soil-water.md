@@ -59,6 +59,23 @@ Bind slot 4 to the cell's total soil water content (the `UVOLW` analogue: sum of
 
 **Not applied in this pass** because it changes a production output file's contents, which invalidates any prior comparison evidence for that column, and because the right move is to fix it together with a regression test that pins slot 4 against `outsh.f:121`'s expression -- best done as its own scoped change rather than appended to a comparison pass. Verify before fixing that ecosys-ng actually publishes a total-soil-water accumulator; if it does not, one has to be added, which widens the change.
 
+## Second, DISTINCT finding in the same stream: slot 27 has the right value under a wrong name and wrong unit
+
+Separated deliberately, because the severity is different and conflating them would overstate the defect.
+
+| side | column | value | citation |
+|---|---|---|---|
+| legacy | `SURF_WTR` | `THETWZ(0,NY,NX)` -- surface/residue layer **volumetric** water content, dimensionless | `outsh.f:145` |
+| ecosys-ng | `surface_excess_liquid_water_depth` declared in **`m`** | `inputs.surface_volumetric_liquid_water_fraction` -- dimensionless | name `soil/diagnostics/output_catalog.zig`, value `soil/water/output.zig:14`, `:53`, `:140` |
+
+**The value is correct.** The internal field is literally named `surface_volumetric_liquid_water_fraction` and is the faithful `THETWZ(0)` analogue; `WTR_k`/`ICE_k` are likewise `THETWZ(k)`/`THETIZ(k)` (`outsh.f:125-135`, `:146-155`) and ecosys-ng's `volumetric_liquid_water_fraction_layer_k[m3 m-3]` / `volumetric_ice_fraction_layer_k[m3 m-3]` match in both quantity and unit. So this is **not** a binding defect.
+
+What is wrong is the published **name and unit**: a dimensionless volumetric fraction is advertised as a depth in metres. Anyone reading the column by its declared unit is wrong by a factor of the layer depth, and a comparison harness that trusts declared units would mis-handle it. The paired `surface_excess_ice_water_depth[m]` entry has the same shape against `SURF_ICE`.
+
+Disposition: **label/metadata defect, fix is cosmetic and safe** (rename to `surface_volumetric_liquid_water_fraction`, unit `m3 m-3`, matching the field it already carries, and the same for ice). Lower risk than the slot-4 fix because no value changes -- but it does change an output header, so it still invalidates header-keyed comparison evidence and belongs in the same scoped change.
+
+**Methodological note worth keeping.** Slot 27 looked exactly like slot 4 from the headers alone -- different name, different unit, obviously suspicious. Only reading the value producer separated them: slot 4 is a genuinely wrong quantity, slot 27 is a correct quantity with a wrong label. Judging either from the header would have produced a wrong disposition, in opposite directions. This is the same "trace the value, not the name" rule this project has already learned three times over for stale comments.
+
 ## Reproduction
 
 ```
