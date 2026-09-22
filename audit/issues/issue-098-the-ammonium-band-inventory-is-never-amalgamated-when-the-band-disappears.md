@@ -264,8 +264,64 @@ Genuinely new: `MineralNitrogenInZeroWaterDomain` returns **zero hits** across t
 > or only the application layer?) and its trigger (does it run on *any* band-volume change, or
 > only on application?).
 >
-> **Settling that needs one more instrumented run** logging layer 1's band amount before and
-> after each stage of the failing hour. That is the next step, and it is cheap (~9 min).
+> ### ROOT CAUSE, settled statically: the repartition is CONDITIONAL ON A CHANGE and works on the INCREMENT, where the legacy is UNCONDITIONAL and works on the ABSOLUTE fractions
+>
+> No further run was needed. `management/fertilizer_band_production.zig` **does** repartition
+> the aqueous pools, for every active layer, and writes them back
+> (`:191-199` computing, `:260` committing). The defect is in the kernel it calls,
+> `repartitionConcentrations`:
+>
+> ```zig
+> if (relative_non_band_change == 0)
+>     return .{ .non_band = non_band_concentration, .band = band_concentration };   // <-- passes band THROUGH
+> const retained_fraction = 1 + relative_non_band_change;
+> if (retained_fraction <= 0 or new_band_fraction <= 0) return error.InvalidBandInventoryState;
+> ...
+> const transferred = -relative_non_band_change * old_non_band_fraction * non_band_concentration;
+> const next_band = (old_band_fraction * band_concentration + transferred) / new_band_fraction;
+> ```
+>
+> against the legacy, which is three unconditional multiplications (`hour1.f:326-332`):
+>
+> ```fortran
+> ZNH4T=ZNH4S+ZNH4B
+> ZNH4S=ZNH4T*VLNH4          ! absolute non-band fraction
+> ZNH4B=ZNH4T*VLNHB          ! absolute band fraction -- VLNHB=0 gives EXACTLY 0, always
+> ```
+>
+> **Two divergences, both of which the legacy handles by plain multiplication:**
+>
+> 1. **`relative_non_band_change == 0` returns the band concentration unchanged.** A layer
+>    whose band volume did not change this hour is never re-split. Layer 1 has band fraction 0
+>    and a non-band fraction of 1 that never changes, so `FVLNH4 = 0` every hour, so the early
+>    return fires every hour, so **whatever reaches its band slot stays there permanently.**
+>    The legacy would compute `ZNH4B = ZNH4T x 0 = 0` regardless of whether anything changed.
+> 2. **`new_band_fraction <= 0` with a nonzero change raises `InvalidBandInventoryState`**
+>    rather than zeroing the band. The legacy again just multiplies by zero.
+>
+> The kernel is written as an *incremental transfer* -- it computes what moved between zones
+> this hour (`transferred`) and divides by the new band fraction. The legacy is a *stateless
+> re-derivation* from the absolute fractions. The incremental form is only equivalent to the
+> absolute form when the band pool is already consistent with the fractions; it cannot repair
+> an inconsistency, and dividing by `new_band_fraction` makes a zero band fraction a singular
+> case it has to special-case rather than a value it handles naturally.
+>
+> **This completes the causal chain for hour 3,275:**
+>
+> 1. The banded application activates a real ammonium band in layer 2 (fraction 1.6447e-2).
+> 2. Inter-layer transport moves a trace of band-domain ammonium into layer 1, which has no band.
+> 3. Layer 1's band fraction never *changes*, so `relative_non_band_change == 0`, so
+>    `repartitionConcentrations` returns early and never clears it.
+> 4. `initializeMatrix` packs `amount = conc x water x 0 = 0`, but the trace is already in the
+>    chemistry concentration, and the amount reaching `publishMatrix` is 1.154e-7 mol.
+> 5. `publishMatrix` divides by the zero fraction and raises.
+>
+> **Recommended fix**: replace `repartitionConcentrations` with the legacy's unconditional
+> absolute-fraction re-derivation -- `total = nb*f_nb_old + b*f_b_old; nb_new = total*f_nb/f_nb; ...`
+> or more directly, work in amounts as the legacy does: `total = nb + b; nb = total*f_nb;
+> b = total*f_b`. That removes both the early return and the division by `new_band_fraction`,
+> makes a zero band fraction a natural case, and is exactly `hour1.f:329-334`. It also
+> subsumes the `hour1.f:4970` amalgamation, because a disappearing band is just `f_b = 0`.
 >
 > ### What survives from this issue
 >
