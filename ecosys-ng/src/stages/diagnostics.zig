@@ -337,6 +337,23 @@ pub fn traceIssue078SoilPoreOverfill(context: anytype, comptime stage: []const u
             },
         );
     }
+    // ISSUE-089 experiment 2: the SURFACE scope is ledger index 17 for this
+    // deck (`layer_local_conservation.zig:237`, `soil_count + snow_count +
+    // cell` = 12 + 5 + 0), and experiment 1 showed the unbooked transfer runs
+    // between soil layer 0 and that scope -- not between two soil layers as
+    // this issue was first filed. Trace the surface owners themselves at the
+    // same boundaries so the mover can be named.
+    std.log.info(
+        "TEMP_DIAGNOSTIC issue-089 surface scope: stage={s} hour={d} litter_water_m3={e} litter_ice_water_equivalent_m3={e} surface_temperature_k={e} surface_heat_capacity_megajoules_per_k={e}",
+        .{
+            stage,
+            hour,
+            context.surface_precipitation.litter_water_m3[0],
+            context.surface_litter_ice_m3[0],
+            context.grid.surface_temperature_k[0],
+            context.surface_heat_capacity_megajoules_per_k[0],
+        },
+    );
 }
 
 /// ISSUE-065 (fourteenth addendum): the thirteenth addendum localized

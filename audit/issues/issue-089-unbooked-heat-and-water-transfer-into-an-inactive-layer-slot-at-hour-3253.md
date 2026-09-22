@@ -1,6 +1,49 @@
 # Issue 089 -- unbooked heat and water transfer from the top soil layer into the SURFACE (litter) scope at hour 3,253
 
-Status: **OPEN, CONFIRMED by a production run. Scope 17 IDENTIFIED as the SURFACE scope, NOT an inactive soil layer -- this issue's original framing is CORRECTED below, and the correction points directly at `issue-083`'s known-unported litter terminus.** (Filed 2026-09-21, adversarial Claude/Pi session; corrected the same session by an instrumented rerun.)
+Status: **OPEN -- ROOT CAUSE FOUND AND FULLY LOCALIZED. It is a LEDGER-WIRING defect, not a physics defect: `litter_soil_water_flux_m3` is published by the displacement cascade and has ZERO consumers, so a conservative soil-layer-0 -> surface transfer is never declared to the layer-local ledger. Fix is bookkeeping only. See "ROOT CAUSE" below.** Scope 17 is the SURFACE scope, not an inactive soil layer -- this issue's original framing is corrected below. (Filed 2026-09-21, adversarial Claude/Pi session; corrected the same session by an instrumented rerun.)
+
+## ROOT CAUSE (experiment 2, instrumented rerun `run-017`) -- the physics is right, the BOOKKEEPING is missing
+
+**This is a ledger-wiring defect, not a physics defect.** Binary SHA-256 `40D7C96A4FE140E4DCA82A8C1D566B3EF9737152BB4A41909ADC4F5AD8D88BB2`, surface-scope owners traced at all five stage boundaries. The full chain, measured:
+
+**Step 1 -- hour 3,252, tillage legitimately empties the litter.** Across `applyDeferredTillageSoil`:
+
+```
+before_apply_deferred_tillage_soil  litter_water_m3=4.414122164330099e-3  surface_heat_capacity=1.8497050528607305e-2
+after_apply_deferred_tillage_soil   litter_water_m3=4.414122164330099e-6  surface_heat_capacity=1.8497050320534597e-5
+```
+
+**Identical mantissa, exponent shifted by exactly three** -- a pure factor of 1000, with `surface_temperature_k` unchanged. That is `redistribution/tillage/surface_biomass_transfer.zig:77`:
+
+```zig
+const remaining_fraction = if (surface_heat_capacity_megajoules_k > residue_heat_capacity_threshold_megajoules_k)
+    @max(0.001, soil_mixing_remaining_fraction) else 1.0;
+```
+
+With a deep tillage event `XCORP` is ~0 (`day.f:348`: `CORP=AMIN1(1.0,AMAX1(0.05,ITILL/10.0))`, `XCORP=1.0-CORP`, so `ITILL=10` gives exactly 0), the `0.001` floor binds, and 99.9% of the surface residue is incorporated into the soil. **This is intended, legacy-faithful behaviour and is not the defect.** It does, however, leave the litter nearly empty and the top soil layer overfilled.
+
+**Step 2 -- hour 3,253, the displacement cascade correctly refills the litter.** Between `start_of_prepare_accepted_hour_storage_before_refresh` and `before_geometry_disturbance_finalize`, i.e. during hourly science:
+
+```
+litter_water_m3      4.414122164330099e-6  ->  3.1508646318483594e-3
+surface_temperature_k  3.1029112752241826e2 -> 2.9914919488515073e2
+```
+
+Those are **exactly** the `before` and `after` storage values the conservation failure reports for scope 17. The mover is the accepted upward-displacement cascade at `stages/hourly_heat_water_solute.zig:4539-4570`, which terminates in the surface litter via `routePhaseDisplacementIntoSurfaceRecipient` and is the genuine `FLQR` analogue for the displacement path. **This too is correct physics** -- relieving an overfilled column into the litter is exactly what `watsub.f:3683-3685` does.
+
+**Step 3 -- the transfer is never booked.** The cascade publishes its result: `self.litter_soil_water_flux_m3[cell] = -(carry.matrix_liquid_water_m3 + carry.macropore_liquid_water_m3)` (`:4568`), carried through the transport replay at `:2542` and `:2793-2799`. But **`litter_soil_water_flux_m3` has no consumer**: a search across `ecosys_ng.zig` and `validation/layer_local_conservation.zig` finds **zero** references. Nothing accumulates it into `hourly_layer_boundary_ledger`.
+
+So the layer-local audit sees soil layer 0 lose `4.2752681740391765` MJ and the surface scope gain `+4.2752681740404` MJ -- equal and opposite to ~11 figures, because the transfer really is conservative -- with **no boundary activity declared on either side**, and correctly aborts.
+
+### The fix, and why it is small
+
+**Accumulate the already-published `litter_soil_water_flux_m3` (and its paired enthalpy) as a layer-local boundary activity between soil layer 0 and the `.surface` scope.** No physics changes, no tolerance changes, no solver changes. The quantity is already computed, already conservative, and already stored -- it simply is not declared to the ledger.
+
+Pattern to follow: `accumulateTillageActivity` (`ecosys_ng.zig:4027`, `layer_local_conservation.accumulateTillageActivity`) is exactly this shape for the tillage transfer, which *is* booked -- which is why step 1 passes its own hour's audit and step 2 does not.
+
+Required with the fix: the enthalpy leg must be booked too, not only water (the heat residual is the larger of the two failures), and a regression test should stage an overfilled top layer with a near-empty litter, run the cascade, and assert the ledger balances on both scopes.
+
+**Do not** "fix" this by widening a tolerance or by suppressing the surface scope from the audit. The audit is right and is the only thing that caught this.
 
 ## CORRECTION (experiment 1, instrumented rerun) -- scope 17 is the SURFACE, and that changes everything
 
