@@ -7214,16 +7214,6 @@ noinline fn advanceFertilizerManagement(
                 .mineral_fertilizer_carbon_g_c = applied.mineral_carbon_g_c,
             });
             any_application = any_application or applied.hasMaterialInput();
-            // TEMP_DIAGNOSTIC (`issue-099`): hour 3,275 books ~5.0 g P and
-            // ~0.0816 mol Ca into cell 2 with no matching storage change. This
-            // is the CELL-scope producer (the layer-local sidecar is separate),
-            // and the booking is preflight -> apply -> accumulate. Log what the
-            // preflight and the post-accept accumulate each see, so the two can
-            // be compared against `applyMinerals`' deposit.
-            if (!builtin.is_test and applied.phosphorus_g_p != 0) std.log.err(
-                "TEMP_DIAGNOSTIC fert_preflight: hour={d} cell={d} phosphorus_g_p={e} calcium_mol={e}",
-                .{ driver_context.executed_weather_hours.*, cell, applied.phosphorus_g_p, applied.calcium_mol },
-            );
             try driver_context.hourly_cell_boundary_ledger.*.preflight(cell, .{
                 .carbon_input_g = applied.carbon_g_c,
                 .nitrogen_input_g = applied.nitrogen_g_n,
@@ -7297,12 +7287,6 @@ noinline fn advanceFertilizerManagement(
                 12.0,
                 cell,
             ) catch unreachable;
-            // TEMP_DIAGNOSTIC (`issue-099`): the post-accept publish. Compare
-            // against `fert_preflight` above and `applyMinerals`' deposit.
-            if (!builtin.is_test and applied.phosphorus_g_p != 0) std.log.err(
-                "TEMP_DIAGNOSTIC fert_accumulate: hour={d} cell={d} phosphorus_g_p={e} calcium_mol={e}",
-                .{ driver_context.executed_weather_hours.*, cell, applied.phosphorus_g_p, applied.calcium_mol },
-            );
             try driver_context.hourly_cell_boundary_ledger.*.accumulate(cell, .{
                 .carbon_input_g = applied.carbon_g_c,
                 .nitrogen_input_g = applied.nitrogen_g_n,
