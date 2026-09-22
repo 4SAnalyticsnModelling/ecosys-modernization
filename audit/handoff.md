@@ -1121,3 +1121,42 @@ Also `issue-090` is re-dispositioned **correct-but-not-causal**: it fixed band N
 4. **Sweep for the same wiring class**: other kernels handed `scratch_allocations` buffers whose mutations are expected to persist. This is the highest-value systematic follow-up from round 28.
 
 `MineralNitrogenInZeroWaterDomain` returns **zero hits** in the 615-file reference tree, so this whole chain is genuinely new work, not rediscovery.
+
+---
+
+## Rounds 28-29 (2026-09-22): `issue-098` fixed and validated; `issue-099` diagnosed bit-exactly, fix attempted, regressed, reverted
+
+### `issue-098` -- FIXED AND PRODUCTION-VALIDATED
+
+`publishMatrix` now folds a band amount into its non-band counterpart when the band zone has zero volume (`hour1.f:4970-4973` and the `:5057` NO3 mirror), for all four band species. The fold is in **amount space** deliberately: the stranded mass arrives by addition to `amount_mol` *after* `initializeMatrix` packs it, so it is not represented in any concentration, and a concentration-space blend would silently destroy it.
+
+`MineralNitrogenInZeroWaterDomain` is **gone**. Suite 4,378 passed / 1 skipped / 0 failed, zero regressions. Two regression tests: one pinning hour 3,275's exact values, one asserting a band *with* volume is untouched.
+
+**The frontier did not advance** -- hour 3,275 now fails on `HourlyCellConservationFailure`, which the nitrogen abort was masking (`run-022`). Same pattern as `issue-078` -> `issue-089`.
+
+### `issue-099` -- diagnosed bit-exactly, NOT fixed
+
+Banded monocalcium phosphate (`FERT(10)`/`PMB`, 5.0 g P on day 137) is booked as an external input and annihilated. Two coupled defects:
+
+1. **No phosphate band activation exists.** The legacy arms three families -- NH4 `hour1.f:303`, NO3 `:356`, **PO4 `:411-412`** (`IFPOB`). `issue-090` ported the first two and called their asymmetry load-bearing; the third has no counterpart, so `phosphate_band` is permanently 0.
+2. **`publishSoil` divides by full layer water** while the census recovers via `water_m3 * zone_fraction` (`phosphateImmobileInventory`). Round trip returns `amount * f_band`.
+
+With `f_band = 0` the recovery is exactly zero. Logged deposit `8.064516129032258e-2` mol against calcium residual `-8.064516129025165e-2` -- eleven significant digits.
+
+**The fix was landed and reverted.** It passed 4,380/1/0 including two new mass-conservation identities and two existing tests corrected against the legacy citation -- then regressed the frontier from hour 3,275 to **hour 4**, deterministically. `git revert eabb39b`; a probe run then reached hour 3,264+ in 597 s, confirming the tree is healthy again.
+
+**My attributed cause for that regression was refuted by measurement.** I blamed a vanishing-but-nonzero band fraction becoming the divisor. A probe firing only for `0 < phosphate_band < 1e-3` fired **zero times**. And the divisor cannot matter at hour 4 regardless: `State.init` zeroes the inventory and only `applyEvent` adds to it, so `publishSoil` adds zero whatever the divisor. **That leaves `validateSoilStateUpdate`** -- the third thing `eabb39b` touched, running for every layer on every publish -- as the only remaining candidate, and it is unexamined.
+
+### Method findings worth carrying
+
+- **Seven static mechanisms were refuted on `issue-099` before the right one.** Every component (booking, deposit, index, hour gate, ordering, census wiring, baseline placement) was individually correct; the defect was a conversion identity. Four instrumented runs each produced a decisive fact; the seven readings produced none. **Twice I inferred execution order from source line numbers in different functions and was wrong both times.**
+- **Twice this session a unit-validated change failed in production** (`issue-090`, then `issue-099`'s fix). A test can pin an identity without exercising the value range production produces. The suite proves arithmetic; only a run proves numerics.
+- Diagnostics are expensive: an unconditional census log cost ~140x throughput (hour 48 in 596 s) because `run_support.zig:448` flushes every line.
+
+### Next bounded action for round 30
+
+1. **Examine `validateSoilStateUpdate` as rewritten in `eabb39b`** (recoverable from git) -- the only unexplained candidate for the hour-4 regression. Do not re-land the divisor fix until it is understood.
+2. Re-land `issue-099`'s fix with a **floor** rather than a sign test, per `hour1.f:3845`'s `IF(VLNHB.GT.ZERO)` where `ZERO` is the noise-floor literal (`starts.f:94`, `ZERO2 = 1e-6`), plus the `IFPOB` port for defect 1.
+3. `issue-093`'s `RC0` per-pool composition -- still the one uncontested new defect with no attempted fix.
+
+**Standing user decision, unchanged**: `issue-097` -- import `docs/` + `tools/` (1,043 files cited 307 times, including `production_release_gate.ps1`, which is what would actually adjudicate v1.0.0).
