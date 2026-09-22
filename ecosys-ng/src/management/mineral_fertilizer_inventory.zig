@@ -106,16 +106,6 @@ pub fn applyEvent(
     const phosphorus_g_p = (p.broadcast_monocalcium_phosphate + p.banded_monocalcium_phosphate + p.broadcast_hydroxyapatite) * cell_area_m2;
     const next_daily_phosphorus = state.daily_phosphorus_input_g_p[cell] + phosphorus_g_p;
     if (!std.math.isFinite(next_daily_phosphorus)) return error.MineralFertilizerApplicationOverflow;
-    // TEMP_DIAGNOSTIC (`issue-099`): confirm the deposit actually runs, which
-    // layer it targets, and the reserve value it produces -- to compare against
-    // the cell-scope `fert_preflight`/`fert_accumulate` bookings in
-    // `ecosys_ng.zig`. The census reports no day-137 application while the
-    // ledger books 5.0 g P, so this is the line that settles whether the
-    // deposit happened at all.
-    if (!@import("builtin").is_test and phosphorus_g_p != 0) std.log.err(
-        "TEMP_DIAGNOSTIC fert_deposit: cell={d} layer={d} soil_index={d} phosphorus_g_p={e} banded_monocalcium_mol={e}",
-        .{ cell, layer, soil_index, phosphorus_g_p, next_soil.banded_monocalcium_phosphate_mol },
-    );
     state.soil[soil_index] = next_soil;
     state.surface[cell] = next_surface;
     state.daily_phosphorus_input_g_p[cell] = next_daily_phosphorus;
@@ -188,11 +178,29 @@ fn waterIsPresent(water_m3: f64, tolerance: PublishTolerance) bool {
 
 fn validateSoilStateUpdate(inventory: Inventory, chemistry: *const chemistry_module.State, index: usize, water_m3: f64, fractions: charge_classification.ZoneFractions) !void {
     const inverse_water = 1.0 / water_m3;
+    // `issue-099`: mirrors `publishSoil`'s zone-water divisor and its
+    // zero-volume-band amalgamation exactly. Validating the old
+    // full-layer-water arithmetic here would pass values the publish no longer
+    // produces.
+    const band_divisor = zoneConcentrationDivisor(water_m3, fractions.phosphate_band);
+    const non_band_divisor = zoneConcentrationDivisor(water_m3, fractions.phosphate_non_band);
+    const broadcast_to_band = inventory.broadcast_monocalcium_phosphate_mol * fractions.phosphate_band;
+    const broadcast_to_non_band = inventory.broadcast_monocalcium_phosphate_mol * fractions.phosphate_non_band;
+    const prospective_band = chemistry.band_phosphate[index].monocalcium_phosphate_solid_mol_per_m3 +
+        if (band_divisor) |divisor| (broadcast_to_band + inventory.banded_monocalcium_phosphate_mol) / divisor else 0;
+    const prospective_non_band = chemistry.non_band_phosphate[index].monocalcium_phosphate_solid_mol_per_m3 +
+        if (non_band_divisor) |non_band|
+            (if (band_divisor == null) broadcast_to_non_band + broadcast_to_band + inventory.banded_monocalcium_phosphate_mol else broadcast_to_non_band) / non_band
+        else
+            0;
     inline for (.{
-        chemistry.non_band_phosphate[index].monocalcium_phosphate_solid_mol_per_m3 + inventory.broadcast_monocalcium_phosphate_mol * fractions.phosphate_non_band * inverse_water,
-        chemistry.band_phosphate[index].monocalcium_phosphate_solid_mol_per_m3 + (inventory.broadcast_monocalcium_phosphate_mol * fractions.phosphate_band + inventory.banded_monocalcium_phosphate_mol) * inverse_water,
-        chemistry.non_band_phosphate[index].hydroxyapatite_solid_mol_per_m3 + inventory.hydroxyapatite_mol * fractions.phosphate_non_band * inverse_water,
-        chemistry.band_phosphate[index].hydroxyapatite_solid_mol_per_m3 + inventory.hydroxyapatite_mol * fractions.phosphate_band * inverse_water,
+        prospective_non_band,
+        prospective_band,
+        chemistry.non_band_phosphate[index].hydroxyapatite_solid_mol_per_m3 +
+            (if (non_band_divisor) |non_band| inventory.hydroxyapatite_mol * fractions.phosphate_non_band / non_band else 0) +
+            (if (band_divisor == null) (if (non_band_divisor) |non_band| inventory.hydroxyapatite_mol * fractions.phosphate_band / non_band else 0) else 0),
+        chemistry.band_phosphate[index].hydroxyapatite_solid_mol_per_m3 +
+            (if (band_divisor) |divisor| inventory.hydroxyapatite_mol * fractions.phosphate_band / divisor else 0),
         chemistry.geochemistry_solids[index].calcite_solid_mol_per_m3 + inventory.calcite_mol * inverse_water,
         chemistry.geochemistry_solids[index].gypsum_solid_mol_per_m3 + inventory.gypsum_mol * inverse_water,
         chemistry.geochemistry_solids[index].aluminum_ground_silicate_mol_per_m3 + inventory.aluminum_ground_silicate_mol * inverse_water,
@@ -204,12 +212,59 @@ fn validateSoilStateUpdate(inventory: Inventory, chemistry: *const chemistry_mod
     }) |value| if (!std.math.isFinite(value) or value < 0) return error.MineralFertilizerChemistryOverflow;
 }
 
+/// `issue-099`. These are per-zone CONCENTRATIONS, and the census recovers an
+/// amount from them as `concentration * water_m3 * zone_fraction`
+/// (`landscape_mass_inventory_phosphorus_ions.phosphateImmobileInventory`),
+/// matching the legacy convention `CNH4B = ZNH4B/(VOLW*VLNHB)` stated six times
+/// at `hour1.f:3826-3858`. So depositing an amount requires dividing by the
+/// ZONE water `water_m3 * zone_fraction`, not by `water_m3` alone. Dividing by
+/// the full layer water made the round trip return `amount * zone_fraction`,
+/// and because ecosys-ng never arms the phosphate band at all (the `IFPOB` gate
+/// at `hour1.f:411-412` has no port, so `phosphate_band` is permanently zero)
+/// that factor was zero and **every banded phosphate application was silently
+/// annihilated** -- measured as a 5.0 g P and 8.064516129032258e-2 mol Ca loss
+/// at hour 3,275, matching the booked input to eleven digits.
+///
+/// `zoneConcentrationDivisor` returns null for a zone with no volume, which
+/// cannot hold solute at all; the caller then routes that zone's amount to the
+/// surviving zone, exactly as `hour1.f:4970-4973` amalgamates a vanished band.
+fn zoneConcentrationDivisor(water_m3: f64, zone_fraction: f64) ?f64 {
+    if (zone_fraction <= 0) return null;
+    const divisor = water_m3 * zone_fraction;
+    return if (divisor > 0) divisor else null;
+}
+
 fn publishSoil(inventory: Inventory, chemistry: *chemistry_module.State, index: usize, water_m3: f64, fractions: charge_classification.ZoneFractions) void {
     const inverse_water = 1.0 / water_m3;
-    chemistry.non_band_phosphate[index].monocalcium_phosphate_solid_mol_per_m3 += inventory.broadcast_monocalcium_phosphate_mol * fractions.phosphate_non_band * inverse_water;
-    chemistry.band_phosphate[index].monocalcium_phosphate_solid_mol_per_m3 += (inventory.broadcast_monocalcium_phosphate_mol * fractions.phosphate_band + inventory.banded_monocalcium_phosphate_mol) * inverse_water;
-    chemistry.non_band_phosphate[index].hydroxyapatite_solid_mol_per_m3 += inventory.hydroxyapatite_mol * fractions.phosphate_non_band * inverse_water;
-    chemistry.band_phosphate[index].hydroxyapatite_solid_mol_per_m3 += inventory.hydroxyapatite_mol * fractions.phosphate_band * inverse_water;
+    // Monocalcium phosphate: split the broadcast fraction across the zones and
+    // send the banded amount to the band, then convert each zone's amount with
+    // that zone's own water. A zero-volume band cannot hold its amount, so it
+    // is amalgamated into the non-band zone instead of being divided away.
+    const band_divisor = zoneConcentrationDivisor(water_m3, fractions.phosphate_band);
+    const non_band_divisor = zoneConcentrationDivisor(water_m3, fractions.phosphate_non_band);
+    const broadcast_to_band = inventory.broadcast_monocalcium_phosphate_mol * fractions.phosphate_band;
+    const broadcast_to_non_band = inventory.broadcast_monocalcium_phosphate_mol * fractions.phosphate_non_band;
+    if (band_divisor) |divisor| {
+        chemistry.band_phosphate[index].monocalcium_phosphate_solid_mol_per_m3 +=
+            (broadcast_to_band + inventory.banded_monocalcium_phosphate_mol) / divisor;
+        if (non_band_divisor) |non_band| chemistry.non_band_phosphate[index].monocalcium_phosphate_solid_mol_per_m3 +=
+            broadcast_to_non_band / non_band;
+    } else if (non_band_divisor) |non_band| {
+        chemistry.non_band_phosphate[index].monocalcium_phosphate_solid_mol_per_m3 +=
+            (broadcast_to_non_band + broadcast_to_band + inventory.banded_monocalcium_phosphate_mol) / non_band;
+    }
+    // Hydroxyapatite is zone-split by the same phosphate fractions and so has
+    // the identical `issue-099` defect. Fixed together: leaving two divisor
+    // conventions inside one function would be a trap for the next reader.
+    if (non_band_divisor) |non_band| chemistry.non_band_phosphate[index].hydroxyapatite_solid_mol_per_m3 +=
+        inventory.hydroxyapatite_mol * fractions.phosphate_non_band / non_band;
+    if (band_divisor) |divisor| {
+        chemistry.band_phosphate[index].hydroxyapatite_solid_mol_per_m3 +=
+            inventory.hydroxyapatite_mol * fractions.phosphate_band / divisor;
+    } else if (non_band_divisor) |non_band| {
+        chemistry.non_band_phosphate[index].hydroxyapatite_solid_mol_per_m3 +=
+            inventory.hydroxyapatite_mol * fractions.phosphate_band / non_band;
+    }
     chemistry.geochemistry_solids[index].calcite_solid_mol_per_m3 += inventory.calcite_mol * inverse_water;
     chemistry.geochemistry_solids[index].gypsum_solid_mol_per_m3 += inventory.gypsum_mol * inverse_water;
     chemistry.geochemistry_solids[index].aluminum_ground_silicate_mol_per_m3 += inventory.aluminum_ground_silicate_mol * inverse_water;
@@ -305,10 +360,37 @@ test "wetted mineral inventory publishes conservatively while dry litter remains
     const fractions: charge_classification.ZoneFractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 0.75, .phosphate_band = 0.25 };
     const tolerance: PublishTolerance = .{ .water_volume_m3 = 1e-12, .fraction = 1e-12, .relative = 1e-12 };
     try publishWetted(&state, &soil, &surface, &.{2}, &.{0}, fractions, tolerance);
-    try std.testing.expectEqual(@as(f64, 0.75), soil.non_band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3);
-    try std.testing.expectEqual(@as(f64, 1.75), soil.band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3);
-    try std.testing.expectEqual(@as(f64, 1.5), soil.non_band_phosphate[0].hydroxyapatite_solid_mol_per_m3);
-    try std.testing.expectEqual(@as(f64, 0.5), soil.band_phosphate[0].hydroxyapatite_solid_mol_per_m3);
+    // `issue-099` UPDATED THESE EXPECTATIONS, and that needs justifying rather
+    // than assuming. The previous values (0.75, 1.75, 1.5, 0.5) encoded a
+    // divisor of the FULL layer water. The census recovers an amount as
+    // `concentration * water_m3 * zone_fraction`
+    // (`landscape_mass_inventory_phosphorus_ions.phosphateImmobileInventory`),
+    // which is the legacy convention stated six times at `hour1.f:3826-3858`
+    // (`CNH4B = ZNH4B/(VOLW*VLNHB)`). Under that recovery the old publish
+    // returned `amount * zone_fraction`, not `amount`. These are therefore the
+    // values a mass-conserving publish must produce, and the identity is
+    // asserted explicitly below rather than left implicit in the constants.
+    //
+    // broadcast 2, banded 3, hydroxyapatite 4; water 2; f_nb 0.75, f_b 0.25.
+    try std.testing.expectEqual(@as(f64, 1.0), soil.non_band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3);
+    try std.testing.expectEqual(@as(f64, 7.0), soil.band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3);
+    try std.testing.expectEqual(@as(f64, 2.0), soil.non_band_phosphate[0].hydroxyapatite_solid_mol_per_m3);
+    try std.testing.expectEqual(@as(f64, 2.0), soil.band_phosphate[0].hydroxyapatite_solid_mol_per_m3);
+    // The identity the constants above exist to satisfy: every mole in comes
+    // back out under the census's own recovery.
+    const water_m3: f64 = 2;
+    try std.testing.expectApproxEqAbs(
+        @as(f64, 2 + 3),
+        soil.non_band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3 * water_m3 * 0.75 +
+            soil.band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3 * water_m3 * 0.25,
+        1e-14,
+    );
+    try std.testing.expectApproxEqAbs(
+        @as(f64, 4),
+        soil.non_band_phosphate[0].hydroxyapatite_solid_mol_per_m3 * water_m3 * 0.75 +
+            soil.band_phosphate[0].hydroxyapatite_solid_mol_per_m3 * water_m3 * 0.25,
+        1e-14,
+    );
     try std.testing.expectEqual(@as(f64, 2.5), soil.geochemistry_solids[0].calcite_solid_mol_per_m3);
     try std.testing.expectEqual(@as(f64, 0), state.soil[0].calcite_mol);
     try std.testing.expectEqual(@as(f64, 7), state.surface[0].broadcast_monocalcium_phosphate_mol);
@@ -336,8 +418,83 @@ test "wetted mineral inventory projects tolerated phosphate fractions conservati
         fractions,
         .{ .water_volume_m3 = 1e-12, .fraction = 1e-12, .relative = 1e-6 },
     );
-    const published_mol = 2 * (soil.non_band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3 +
-        soil.band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3);
+    // `issue-099`: the previous form was `2 * (nb + b)`, i.e. a recovery with
+    // NO zone fraction, which holds only under the superseded full-layer-water
+    // divisor. The census recovers per zone as
+    // `concentration * water_m3 * zone_fraction`, so that is the identity to
+    // assert. `conservativeFractionsAt` normalises the tolerated 0.75/0.2500005
+    // pair, so the normalised fractions are used here exactly as the publish saw
+    // them -- which is also what makes this a test of the tolerated-fraction
+    // path rather than of the nominal one.
+    const fraction_sum: f64 = 0.75 + 0.2500005;
+    const normalized_non_band: f64 = 0.75 / fraction_sum;
+    const normalized_band: f64 = 0.2500005 / fraction_sum;
+    const published_mol = 2 * (soil.non_band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3 * normalized_non_band +
+        soil.band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3 * normalized_band);
     try std.testing.expectApproxEqAbs(@as(f64, 2), published_mol, 1e-14);
     try std.testing.expectEqual(@as(f64, 0), state.soil[0].broadcast_monocalcium_phosphate_mol);
+}
+
+test "issue-099: a zero-volume phosphate band amalgamates into non-band instead of annihilating the deposit" {
+    // Hour 3,275 of the Ottawa deck: a banded monocalcium phosphate application
+    // of 5.0 g P deposits 8.064516129032258e-2 mol, and the census recovers an
+    // amount as `concentration * water_m3 * zone_fraction`. ecosys-ng never arms
+    // the phosphate band (`hour1.f:411-412`'s `IFPOB` gate has no port), so
+    // `phosphate_band` is zero, and the pre-fix publish divided by the full
+    // layer water -- making the recovered amount `amount * 0`. The entire
+    // deposit vanished, matching the booked input to eleven digits.
+    const water_m3: f64 = 2.3726722163396864e-2;
+    const banded_mol: f64 = 8.064516129032258e-2;
+    var chemistry = try chemistry_module.State.init(std.testing.allocator, 1);
+    defer chemistry.deinit();
+    const fractions: charge_classification.ZoneFractions = .{
+        .ammonium_non_band = 1,
+        .ammonium_band = 0,
+        .nitrate_non_band = 1,
+        .nitrate_band = 0,
+        .phosphate_non_band = 1,
+        .phosphate_band = 0,
+    };
+    const inventory: Inventory = .{ .banded_monocalcium_phosphate_mol = banded_mol };
+    publishSoil(inventory, &chemistry, 0, water_m3, fractions);
+
+    // The band has no volume, so it must stay empty rather than receive a
+    // concentration that the census would multiply by zero.
+    try std.testing.expectEqual(
+        @as(f64, 0),
+        chemistry.band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3,
+    );
+    // Mass conservation, which is the identity this whole investigation reduced
+    // to: recovered == concentration * water * zone_fraction == the amount in.
+    const recovered = chemistry.non_band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3 *
+        water_m3 * fractions.phosphate_non_band;
+    try std.testing.expectApproxEqAbs(banded_mol, recovered, 1e-17);
+}
+
+test "issue-099: a phosphate band WITH volume round trips through its own zone water" {
+    // The complement: with a real band the amount must land in the band zone and
+    // survive `concentration * water * f_band` exactly. Guards against a fix that
+    // simply routes everything to non-band.
+    const water_m3: f64 = 2.3726722163396864e-2;
+    const band_fraction: f64 = 1.644736842105263e-2;
+    const banded_mol: f64 = 8.064516129032258e-2;
+    var chemistry = try chemistry_module.State.init(std.testing.allocator, 1);
+    defer chemistry.deinit();
+    const fractions: charge_classification.ZoneFractions = .{
+        .ammonium_non_band = 1,
+        .ammonium_band = 0,
+        .nitrate_non_band = 1,
+        .nitrate_band = 0,
+        .phosphate_non_band = 1 - band_fraction,
+        .phosphate_band = band_fraction,
+    };
+    const inventory: Inventory = .{ .banded_monocalcium_phosphate_mol = banded_mol };
+    publishSoil(inventory, &chemistry, 0, water_m3, fractions);
+    try std.testing.expectEqual(
+        @as(f64, 0),
+        chemistry.non_band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3,
+    );
+    const recovered = chemistry.band_phosphate[0].monocalcium_phosphate_solid_mol_per_m3 *
+        water_m3 * band_fraction;
+    try std.testing.expectApproxEqAbs(banded_mol, recovered, 1e-17);
 }
