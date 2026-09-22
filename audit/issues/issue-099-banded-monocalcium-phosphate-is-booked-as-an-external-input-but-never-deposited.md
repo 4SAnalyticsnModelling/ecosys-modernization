@@ -60,7 +60,22 @@ Checked, to keep the search honest:
 
 1. Find the code that books the phosphorus/calcium external input for a banded application, and the code that should deposit `PMB` into the layer inventory, and establish which of the two runs without the other. The booking side is the more likely place to look first, since a deposit that silently no-ops would more often show up as a plain mass loss rather than as a booked input.
 2. Check whether the **broadcast** counterpart (`PMA`, `FERT(9)`) has the same defect. This deck applies broadcast monocalcium phosphate on other dates, so if both are affected the loss has been accumulating far earlier than day 137 and simply never breached a conservation limit.
-3. Search the reference `discrepancy_register.md` for this first -- `issue-097`'s lesson. `MineralNitrogenInZeroWaterDomain` returned zero hits there, but this is a phosphorus/calcium conservation failure and may well be recorded.
+## Checked against the reference register first (`issue-097`'s lesson)
+
+The **error class has precedent; this instance and mechanism do not.**
+`discrepancy_register.md` carries 14 `HourlyCellConservationFailure` hits and 4
+`quantity=phosphorus` ones, but the recorded case is a different event:
+
+| | register entry | this issue |
+|---|---|---|
+| hour | 2,657 accepted / 2,658 attempted | **3,275** |
+| cells | 0 and 17 | **2** |
+| `external_inputs` | 2.0844784845505646e-9 (and 1.098e-4) | **5.000454772802566** |
+| signature | small storage loss against a negligible input | **residual almost exactly minus a large booked input** |
+
+So the register's phosphorus failure is a mass *leak*; this one is an input *never applied*. The 23 `monocalcium` hits are about phosphate chemistry generally, and the single `PMB` hit is `VOLPMB`, a band **air volume** in the ammonia volatilisation discussion -- unrelated to `FERT(10)`.
+
+The precedent is still useful: it shows `HourlyCellConservationFailure` on phosphorus has been reached before from a different cause, so the guard is known to be live and trustworthy rather than newly suspect.
 
 ## Reproduction
 
