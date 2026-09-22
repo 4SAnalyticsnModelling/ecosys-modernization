@@ -97,12 +97,29 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 >
 > ### Why it surfaces only now
 >
-> It needs an application whose reserve does **not** dissolve within the same hour, and large
-> enough to breach a limit that is ~5e-9. The day-137 banded monocalcium phosphate is 5.0 g
-> and dissolves slowly. **Whether the earlier broadcast applications (`PMA`, `FERT(9)`;
-> `15041998` carries 360.0) had the same problem and merely stayed under the limit, or
-> dissolved within the hour, is NOT established** and is the thing to check next -- if the
-> former, the same defect has been silently violating conservation since day 105.
+> The two earlier applications in this deck both went through **different** paths, which is why
+> neither tripped it:
+>
+> | event | field | species | path |
+> |---|---|---|---|
+> | `15041998` (hour ~2,508) | `FERT(12) = 360.0` | **CaCO3 lime**, g Ca m-2 (`hour1.f:251`, `CAC`) | books C and Ca via `dispatch:269-272`'s `calcite_mol`, **not** the phosphate reserve |
+> | `16051998` (hour ~3,252) | `FERT(3) = 13.8` | **broadcast urea** (`ZUA`, `hour1.f:229`) | a nitrogen reserve, but urea is highly soluble and clears within the application hour |
+> | `17051998` (hour ~3,275) | `FERT(10) = 5.0` | **banded monocalcium phosphate** (`PMB`) | the reserve, and it dissolves slowly |
+>
+> So my earlier guess that broadcast `PMA` had been silently violating conservation since day
+> 105 was **wrong** -- day 105 was lime, and this deck applies no broadcast monocalcium
+> phosphate at all in 1998.
+>
+> The refined statement: **the reserve is census-invisible, but the violation only surfaces
+> when the reserve persists past the application hour.** A highly soluble species clears
+> within the hour and the census never sees a gap; a sparingly soluble one like monocalcium
+> phosphate does. That makes this a **latent defect in every deck**, surfacing only on a
+> slow-dissolving application -- which is a worse property than a consistently failing one,
+> because it passes most decks.
+>
+> **Still not established**: whether the nitrogen reserves would fail the same way on a
+> slow-dissolving N species, and whether any deck in the shipped set applies one. That is the
+> generalisation to check.
 >
 > ### Fix direction
 >
