@@ -734,3 +734,64 @@ Pi's rounds 12-16 were strong: every file:line citation it gave was independentl
 
 - **Monitor the child `test.exe`, not the parent `zig` process.** During the full suite the parent `zig` sat at a frozen 213 CPU-seconds for 20+ minutes while the real work ran in a child `test.exe` that climbed 890 -> 1377 -> done. Judging liveness from the parent looks exactly like the hang this handoff already warns about killing. Use `Get-CimInstance Win32_Process` to find the child.
 - `audit/manifest/command_registry.json`'s `commands` block is **all nulls** after the 2026-09-21 rewrite -- the previously-recorded `zig_production_run` argv is gone from it. The working invocation was recovered from `audit/runs/run-008`/`run-010` instead: `zig build -Doptimize=ReleaseFast` produces `ecosys-ng/ecosys-ng-bin/ecosys_ng.exe`; `robocopy /E` the deck to scratch excluding `runottawa_output_files`, recreate it empty, then run `ecosys_ng.exe runottawa` with cwd set to the scratch deck copy. Worth re-populating the registry.
+
+## Update 2026-09-21 (adversarial Claude/Pi session, rounds 17-21): OUTPUT COMPARISON IS UNBLOCKED AND DONE FOR 3,252 HOURS -- deep profile agrees to machine precision, and a new 47-day snowmelt divergence is the biggest open finding
+
+This update opens a workstream that had been assumed blocked since `issue-002`. Read `audit/runs/run-014-*` for the full record; only the load-bearing conclusions are here.
+
+### A usable legacy oracle already existed on this host (`issue-084`)
+
+Release criterion 3 ("outputs comparable to the legacy oracle") was treated as needing a ~2h40m Fortran rebuild. It does not. A provenance-documented gfortran 16.1.0 Ottawa output set covering **hours 1-6,875** was found in a sibling agent's temp tree (`agentJ-base/validation/legacy_ottawa_gfortran_16_1/`), copied to this session's scratchpad, and **verified valid for this checkout**: 34 of 40 `source/*.f` byte-identical to `f77src/`, 5 differing in line endings only (**zero** differing lines), and `soil.f` differing by exactly one line -- the documented `EXTERNAL SPLIT` declaration. Integrity re-checked against its own `PROVENANCE.md` hash. ecosys-ng's frontier is hour 3,253, so the oracle covers the whole reachable horizon nearly twice.
+
+**Durability is unresolved and is a coordinator call**: 32 MB of generated ASCII in a temp tree that any cleanup removes, against the standing root-cleanliness rule. Treat its availability as incidental until decided.
+
+Also corrected there: that artifact's own provenance calls its day-286 stop "externally terminated... no Fortran error recorded". It is `issue-023` -- its `grosub.f:12766` supplies 7 integers where `FORMAT 8821` at `:12778` is `(A8,8I4,30E12.4)`, byte-identical to `f77src`, and `issue-023` established gfortran aborts there on the first harvest-day event. Day 286 is 14 October. Its stdout log cannot show the error because a Fortran runtime I/O error goes to stderr. That makes it independent third-party confirmation of `issue-023` from a run predating the filing by 8 days.
+
+### New tool, and two alignment traps it now encodes
+
+`ecosys-audit/scripts/outcompare.py`. Parses both raw formats unmodified, aligns on the cumulative 1-based hour of the simulated year, and reports per column: pairs, max abs error and its key, MAE, RMSE, bias, exceedance count, first exceedance. Prints its own limitations with every number.
+
+- The legacy `DATE` field is **DDMMYYYY, not MMDDYYYY** (elapsed day 2 prints `02011998`). Keying on a MMDD reading matched only 1,052 of a possible 2,972 rows **while looking superficially plausible** -- the most dangerous kind of wrong.
+- The legacy hour is 1..24 and the candidate 0..23 **for the same instant**; a convention shift, not an off-by-one.
+- The key is **validated, not trusted**: both sides independently print year/month/day/hour and the tool cross-checks every matched key. Result: **3,252/3,252 agree** on both streams, `candidate_only=0`.
+
+Units were verified against the **value producer** before any number was compared, and independently re-derived by the reviewer: `outsh.f:54-57` multiplies carbon fluxes by `23.14815 = 1e6/(12*3600)` and oxygen by `8.68056 = 1e6/(32*3600)` (g m-2 h-1 -> umol m-2 s-1, matching the candidate's declared units); `hour1.f:3778-3780` defines the dissolved concentrations as `CO2S(L)/VOLW(L)`; `WTR_k`/`ICE_k` are `THETWZ(k)`/`THETIZ(k)`, dimensionless.
+
+### The result that matters most
+
+**`run-014`: the deep soil profile agrees with the oracle to machine precision, and divergence rises monotonically toward the surface over thirteen orders of magnitude.**
+
+```
+ICE_12..ICE_8   max err 1e-17..1e-13    0 exceedances of a 1e-12 absolute rule
+ICE_7                      9.3e-11     21
+ICE_6                      1.1e-07     25
+ICE_5                      9.5e-05     32
+ICE_4                      1.1e-01    113
+ICE_1                      3.2e-01   1585   (surface)
+```
+
+Five of twelve ice layers agree to binary64 round-off with **zero** exceedances. A structurally wrong translation cannot produce that. This is independent, output-level confirmation of `issue-024` round 11's solver-side conclusion, obtained with nothing instrumented to produce it. The liquid profile carries the matching signature with the sign that matters: `WTR_1` bias **+0.2585 m3 m-3**, candidate systematically **wetter** at the surface, decaying with depth -- `issue-024`'s separately-documented "chronically-elevated-water" symptom, now quantified over 3,252 hours of production output.
+
+**Completion proof is ABSENT on both sides** (ecosys-ng 3,253 per `issue-078`, oracle 6,875 per `issue-023`), so none of this is acceptance evidence. Say so whenever quoting it.
+
+### `issue-087` (new, large, undiagnosed): ecosys-ng keeps its snowpack ~47 days too long
+
+Last hour above 0.1 mm: **oracle 2,132 (~30 March), ecosys-ng 3,251 (~16 May)** -- 1,119 hours apart, still snowing-in at the frontier. Bias +14.23 mm, max 111.61 mm. **Winter tracks within ~10%** (hours 500-2000) and they separate abruptly in the late-March melt, so the defect is in **ablation**, not accumulation. The output binding was verified faithful first (`outsh.f:123-124` vs `soil/water/output.zig:138`, term for term) -- necessary, because the neighbouring slot in the same group *is* a wrong binding. Diagnosis budget 0 of 3; the flagged first experiment is **meltwater discharge rather than melt energy**, because `VOLWS` is one of the three summed terms and `issue-083` independently established the oracle's donor-bounded surface discharge leg (`watsub.f:3683-3685`) has **no in-solver ecosys-ng counterpart**.
+
+### Two output-binding findings (`issue-086`), deliberately kept separate
+
+- **Slot 4, hourly water: WRONG BINDING.** Oracle writes total cell water storage (`UVOLW*1000/AREA`, `outsh.f:121`; `redist.f:5445` defines `UVOLW` as "grid cell water content (m3)"); ecosys-ng writes **root water uptake** (`soil/water/output.zig:136`). Both decks select the slot and agree on every slot, so it is live and not an input difference. No justifying comment exists anywhere. **Triply corroborated**: my own derivation, the reviewer lane, and the predecessor project's own `docs/output_semantics_audit_2026-09-10.md` section F-10, which classified it `SEMANTIC-DEFINITION` and records the modern value as `0.0` in all hours against the legacy's 800-1160 mm. **The fix is small and well-specified**: the correct quantity already exists as daily `soil_water_storage` (`output_catalog.zig:134`, producer `daily_output.zig:365`, same `*1000/area` form).
+- **Slot 27/48: label and unit only.** The value is the correct `THETWZ(0)`/`THETIZ(0)` analogue but is published as `surface_excess_liquid_water_depth[m]` rather than a dimensionless fraction. The daily catalog already uses the correct `surface_volumetric_liquid_water_fraction[m3 m-3]` naming.
+- **Methodological note worth keeping**: from the headers alone these two looked equally suspicious. Only reading the value producer separated them, and it separated them in **opposite directions** -- slot 4 is a wrong quantity, slot 27 a right quantity with a wrong label. Judging either by its header would have produced a wrong disposition.
+
+`issue-085` is the third, benign class: the deck selects soil layers beyond the 12-layer runtime profile (`CH4_15`, `WTR_13-20`, `ICE_13-20`), so the oracle emits structural zeros from its fixed `JZ=20` arrays and ecosys-ng emits no column. 17 columns, no science lost, needs an approved-difference record so a later comparison does not misread it.
+
+### Frontier and revert both confirmed
+
+The HEAD run reached hour 3,252 and failed at 3,253 with `previous_matrix_excess_m3=8.6494990793e-4` -- bit-for-bit `issue-078`'s documented value. So the revert restored the known-good frontier and run-013's hour-2,973 failure was a genuine regression. **Correction for `issue-083`**: its candidate fix was aimed at hour 3,253 and **never reached it**; "it never got there" is the accurate summary, not "it failed to fix it". It remains disqualified for breaking something earlier.
+
+### Restart I/O (`feature-026`) and reviewer weighting
+
+`feature-026` closed the `issue-081`-named restart coverage hole structurally: `ecosys-audit/scripts/restartalign.py` reports **568 statement pairs across six units, 0 divergences**. Unit 22's state coverage is mapped and verified (11 families, all 11 persisted; `HCBFL` lives in the geometry bundle, `soil_geometry_checkpoint.zig:46`). Units 21 and 26-29 remain unverified -- do not generalize. I also **withdrew my own filed gap** claiming no round-trip test existed: there are 102 checkpoint tests, `--test-filter "checkpoint"` gives 172 passed / 1 skipped / 0 failed.
+
+Reviewer weighting, rounds 12-21: **every file:line citation Pi gave this session was independently verified and every one held** -- including `reads.f:792`/`:902`, `day.f:347-357`, `redist.f:8397-8402`, `watsub.f:6821-6835`, `transport/hydrology.zig:484`, `hour1.f:3777-3783`, `starte.f:1419-1430`, and the F-10 audit reference. Its round-14 `INSUFFICIENT` verdict and its F-10 pointer were the two highest-value contributions of the session. Unchanged weakness, seen twice more: **sweeping completeness and precision claims** ("covers all 12 families", "275 of 275 match identically" before any tool check, `12.011` where the constant implies `12.0`). Dispositions and directions reliable; totals and completeness claims need independent verification. Note also that **my own** naive grep produced the session's worst count error (275 vs 274 from a line-prefix regex that mishandles fixed-form continuations) -- the reviewer was right and I was wrong, which is the argument for tools over greps on both sides.
