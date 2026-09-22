@@ -141,11 +141,15 @@ FLWT   = PSISWT*HCND(N,KB,N3)*AREA(N,N3)*(1.0-AREAUD(N3))/(RCHGFA+1.0)*RCHGFB*XN
 
 But ecosys-ng deliberately **freezes the active set at the hour-start state** ("so the implicit residual remains smooth", `:504-505`) where legacy re-evaluates `PSISA1` every substep. That is a documented deviation and it can only ever *disable* drainage that legacy would allow. **It is the leading remaining candidate.**
 
-### Narrowed candidate list
+### Narrowed candidate list -- then RESOLVED: candidate 1 confirmed, see `issue-096`
 
-Static reading eliminates the closed-form scaling and the gate's structure. What remains, in order of suspicion:
+> **The mechanism was found the same day and is filed as `issue-096`.** Candidate 1 was right, but for a sharper reason than "the active set is frozen": `PSISA` is **not** a previous-state snapshot at all. It is the **air-entry potential** -- the potential at which conductivity falls to `FSCNV = 0.1` of saturated -- assigned only as a by-product of building the HCND conductivity table (`hour1.f:2287-2288`). Production retired that table in favour of Mualem-van Genuchten, which **orphaned the producer**, and `solver_residual.zig:480` substituted `base_matric_megapascal > grid.matric_potential_megapascal[layer]` -- two evaluations of the same function on the same water value (`solver_solve.zig:854`, `solver_flux.zig:85-95`), so the strict `>` cannot hold. The gate fires only on staleness between two arrays, which is why drainage is 3.91 mm rather than zero.
+>
+> Blast radius is wider than this issue: the same orphaned pair gates the general inter-layer micropore flux (`watsub.f:4667-4668`, `:4689`, `:4742`) and the `THETS`-driven litter/surface water exchange (`watsub.f:3649-3651`, `:3662-3664`), neither of which has been reviewed. See `issue-096`.
 
-1. **The frozen active set** (`solver_residual.zig:504-505`). If the hour-start state fails `PSISA1 > PSISA` on most hours, drainage is gated off almost always regardless of how correct the flux is. A binary gate is the only one of these candidates that can plausibly produce 55x.
+Static reading eliminated the closed-form scaling and the gate's structure, leaving this list, recorded as it stood:
+
+1. **The frozen active set** (`solver_residual.zig:504-505`) -- **CONFIRMED as the mechanism, refined by `issue-096`.** If the hour-start state fails `PSISA1 > PSISA` on most hours, drainage is gated off almost always regardless of how correct the flux is. A binary gate is the only one of these candidates that can plausibly produce 55x.
 2. **The conductivity wetness class** -- `VOLW1/VOLY` against `matrix_water/matrix_bulk_volume_m3`.
 3. **`AREAUD` against `fraction_face_below_water_table`.**
 4. The `/(d+1)` against `/d` distance difference -- real but ~10% and of the wrong sign.
