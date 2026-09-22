@@ -84,7 +84,22 @@ Stated with the caveat that these six columns are **not** a complete budget -- s
 
 The candidate's residual is five times larger and of the opposite sign -- storage appearing that its own reported fluxes do not supply. This is **indicative, not a conservation proof**, because of the missing terms above; it should not be quoted as a mass-balance violation without closing those terms first. It is recorded because it points the same way as everything else.
 
-## Secondary observation, needs its own check: cumulative rainfall differs by 59 mm
+## Secondary observation -- SUPERSEDED BY issue-095, and it was wrong-signed here
+
+> **Correction, same day.** The paragraph below reads the daily `PRECN` column as ecosys-ng's
+> precipitation input and concludes it receives 17% **more** rain. Checking the hourly stream
+> afterwards showed that ecosys-ng's **hourly** `PREC` sums to 179.300 mm against the oracle's
+> 351.600 mm -- 172.30 mm **LESS** -- while its own daily `rainfall` sums to 411.07 mm. The
+> oracle's two columns agree exactly at 351.60; ecosys-ng's disagree with each other by
+> 231.77 mm. So the direction asserted below is not established, and the real defect is the
+> internal inconsistency. See **`issue-095`**.
+>
+> **This issue's conclusion is unaffected.** ecosys-ng gains 186.21 mm more storage than the
+> oracle and drains 3.91 mm against 213.51 mm on either reading of its rainfall. If the hourly
+> column is the correct one the picture is *worse*: 186 mm more water retained from 172 mm
+> less input. `issue-095` tabulates both cases.
+
+### Original text, retained for the record
 
 `PRECN` cumulative reaches 351.60 mm in the oracle and 411.07 mm in the candidate -- **17% more precipitation reaching ecosys-ng**, diverging mostly after day 100 (day 100: +2.9 mm; day 120: +13.8 mm; day 136: +59.5 mm). Earlier input-equivalence work in this session proved `WIND` bit-identical and `AIR_TEMP` equal to 2.3e-14, but the **precipitation** input was not verified to the same standard. `URAIN` is accumulated at `redist.f:4407` as `URAIN=URAIN+WI`, so `PRECN` is rain reaching the surface rather than the raw forcing, and the difference could be a partition (rain against snow), an irrigation inclusion, or a genuine forcing mismatch. **Do not assume it is forcing and do not assume it is benign**: 59 mm is a quarter of the storage discrepancy. This needs its own comparison against the hourly `PREC` column and the weather file.
 
