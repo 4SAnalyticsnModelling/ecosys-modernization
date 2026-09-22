@@ -50,7 +50,61 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 
 **So: the day-137 banded monocalcium phosphate application books its phosphorus and calcium as external inputs but does not deposit them into cell 2's inventory.**
 
-> ## ROOT CAUSE FOUND: the undissolved fertilizer reserve is not a census-visible storage pool
+> ## THE ROOT CAUSE BELOW IS WRONG -- WITHDRAWN. The reserve IS counted by the census.
+>
+> I concluded that the undissolved fertilizer reserve has no census `StorageOwner` and is
+> therefore invisible. **That is false**, and I reached it by reading the `StorageOwner` enum
+> and stopping there instead of following the census's actual summation.
+>
+> `validation/layer_mass_inventory.zig:93-107` passes `inputs.mineral_fertilizer` into the
+> **soil** per-layer phosphorus aggregation, and
+> `validation/landscape_mass_inventory_phosphorus_ions.zig:383-388` sums the reserve
+> explicitly:
+>
+> ```zig
+> const pending = pending_fertilizer.soil[profile_cell];
+> result.phosphate_phosphorus_g += phosphorus_g_per_mol *
+>     (2 * (pending.broadcast_monocalcium_phosphate_mol +
+>         pending.banded_monocalcium_phosphate_mol) +
+>         3 * pending.hydroxyapatite_mol);
+> ```
+>
+> **And the units reconcile exactly across all three sites**, which is the strongest evidence
+> that these are meant to be the same mass and are not mismatched:
+>
+> | site | expression | unit |
+> |---|---|---|
+> | booking, `fertilizer_management_dispatch.zig:266` | `p.banded_monocalcium_phosphate * area_m2` | g P |
+> | deposit, `mineral_fertilizer_inventory.zig:91` | `... * cell_area_m2 / 62.0` | mol Ca(H2PO4)2 |
+> | census, `..._phosphorus_ions.zig:385-388` | `31 * 2 * mol` | g P |
+>
+> `62.0` in and `31 x 2 = 62` out. Consistent. So `aqueous_and_mineral_species` does cover the
+> mineral fertilizer reserve, and my inference from the enum's member names was unfounded.
+>
+> ### Where the investigation actually stands
+>
+> Booking, deposit and census all exist and agree on units and magnitude. So the defect is in
+> **which** slot is written or read, not whether one exists. The leading candidates, neither
+> verified:
+>
+> 1. **The deposit is staged and not committed.** `mineral_fertilizer_inventory.zig:91` writes
+>    `next_soil.banded_monocalcium_phosphate_mol += ...` -- a `next_*` staged structure. If it
+>    is not committed to live state, or committed after the census snapshot, the census reads
+>    the pre-deposit value. This is the same *class* as `issue-098`'s scratch-buffer finding,
+>    and that precedent makes it the first thing to check.
+> 2. **The deposit lands in a different layer than the booking.** The booking is per cell; the
+>    deposit resolves a layer from `application_depth_m = 0.05` via
+>    `fertilizer_nitrogen_inventory.applicationLayer`. A layer mismatch would produce a deficit
+>    in one layer and a surplus in another, and the run reports only the first failure, so a
+>    compensating surplus elsewhere would not appear in the log.
+>
+> Distinguishing them is cheap: log the reserve value per layer immediately before and after
+> the application hour. **That is the next step, and no conclusion should be drawn until it is
+> done** -- this issue has now had one wrong root cause from me and it should not get a second.
+>
+> The original text is retained below for the reasoning trail. Read it as refuted.
+>
+> ## WITHDRAWN root cause: the undissolved fertilizer reserve is not a census-visible storage pool
 >
 > The title's "never deposited" is **wrong** -- it *is* deposited. It is deposited somewhere
 > the conservation census cannot see.
