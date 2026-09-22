@@ -4537,11 +4537,19 @@ fn CoupledSubstepTransaction(
                     source = shallower;
                 }
                 const old_surface_water = context.surface_precipitation.litter_water_m3[cell];
+                // ISSUE-089. Capture the surface enthalpy BEFORE the routing
+                // overwrites its owners, so the transfer can be declared to the
+                // layer-local ledger below. `run-017` measured this leg moving
+                // 3.15e-3 m3 and 4.275 MJ from soil layer 0 into the surface at
+                // hour 3,253 with nothing booked on either side, which is what
+                // `HourlyLayerConservationFailure` was reporting.
+                const old_surface_temperature_k = context.grid.surface_temperature_k[cell];
+                const old_surface_capacity = context.surface_heat_capacity_megajoules_per_k[cell];
                 const surface = try routePhaseDisplacementIntoSurfaceRecipient(.{
                     .liquid_water_m3 = old_surface_water,
                     .ice_water_equivalent_m3 = context.surface_litter_ice_m3[cell],
-                    .temperature_k = context.grid.surface_temperature_k[cell],
-                    .heat_capacity_megajoules_per_k = context.surface_heat_capacity_megajoules_per_k[cell],
+                    .temperature_k = old_surface_temperature_k,
+                    .heat_capacity_megajoules_per_k = old_surface_capacity,
                 }, carry, liquid_heat_capacity);
                 try ecosys.surface_litter_chemistry_carrier_rebase.validateCellForAcceptedWater(
                     context.surface_litter_chemistry,
@@ -4566,6 +4574,35 @@ fn CoupledSubstepTransaction(
                 context.surface_litter_geometry.air_volume_m3[cell] = @max(0, context.surface_litter_geometry.pore_volume_m3[cell] - surface.liquid_water_m3 - surface.ice_water_equivalent_m3 / ice_density);
                 context.surface_solute_transport.carrier_volume_m3[cell] = surface.liquid_water_m3;
                 self.litter_soil_water_flux_m3[cell] = -(carry.matrix_liquid_water_m3 + carry.macropore_liquid_water_m3);
+                // ISSUE-089: declare this leg to the layer-local ledger. It is
+                // the `FLQR` analogue (`watsub.f:3683-3685`) for the accepted
+                // displacement path, and it is genuinely conservative -- the
+                // audit's own heat residuals for the two scopes were equal and
+                // opposite to ~11 significant figures -- so the only thing
+                // missing was the declaration. The paired litter--topsoil
+                // producer at the transport replay already books its own
+                // transfers this way via `accumulateLitterSoilLocalTransfer`,
+                // which is why that path passes its audit and this one did not.
+                //
+                // Sign convention matches that helper: positive is surface ->
+                // topsoil, so a displacement arriving AT the surface is
+                // negative. Water is the liquid the carry delivered; heat is the
+                // surface's exact enthalpy change, which equals what the soil
+                // side gave up because `routePhaseDisplacementIntoSurfaceRecipient`
+                // conserves it.
+                const displaced_water_m3 = carry.matrix_liquid_water_m3 + carry.macropore_liquid_water_m3;
+                const surface_heat_gain_megajoules = surface.heat_capacity_megajoules_per_k * surface.temperature_k -
+                    old_surface_capacity * old_surface_temperature_k;
+                if (displaced_water_m3 != 0) try self.accumulateLitterSoilLocalTransfer(
+                    cell,
+                    -displaced_water_m3,
+                    .{ .water_m3 = @abs(displaced_water_m3) },
+                );
+                if (surface_heat_gain_megajoules != 0) try self.accumulateLitterSoilLocalTransfer(
+                    cell,
+                    -surface_heat_gain_megajoules,
+                    .{ .heat_megajoules = @abs(surface_heat_gain_megajoules) },
+                );
                 if (surface.liquid_water_m3 != old_surface_water)
                     try self.incrementWaterStorageUpdate(.{ .kind = .surface, .cell = cell }, 1);
             }
