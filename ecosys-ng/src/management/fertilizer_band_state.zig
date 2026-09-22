@@ -199,8 +199,7 @@ pub const State = struct {
         self: *State,
         cell: usize,
         family: Family,
-        layer_geometry: geometry_module.LayerGeometry,
-        application_layer: usize,
+        layer: geometry_module.ActivationLayer,
         application_depth_m: f64,
         row_spacing_m: f64,
         maximum_band_volume_fraction: f64,
@@ -210,8 +209,7 @@ pub const State = struct {
         var view = try self.geometry(cell, family);
         try geometry_module.activateFromApplication(
             &view,
-            layer_geometry,
-            application_layer,
+            layer,
             application_depth_m,
             row_spacing_m,
             maximum_band_volume_fraction,
