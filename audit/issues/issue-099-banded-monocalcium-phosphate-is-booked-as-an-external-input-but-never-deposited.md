@@ -78,11 +78,38 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 > divisor is. The deterministic stop at hour 4 therefore **cannot** come from the divisor
 > change.
 >
-> **What that leaves.** Commit `eabb39b` touched exactly three things in one file: `publishSoil`
-> (ruled out above), the two test expectations (cannot affect production), and
-> **`validateSoilStateUpdate`**, which I rewrote to mirror the new arithmetic with inline
-> `if (band_divisor == null) ... else ...` expressions and which runs for **every layer on
-> every publish**. That is the only remaining candidate and it is unexamined.
+> **What that leaves -- and the validator is now ruled out too.** Commit `eabb39b` touched
+> exactly three things in one file: `publishSoil` (ruled out above), the two test expectations
+> (cannot affect production), and `validateSoilStateUpdate`. The rewritten validator was
+> recovered from git and inspected: with an all-zero inventory every added term is `0/divisor`
+> or a literal `0`, so it reduces to the pre-existing chemistry values exactly as the old form
+> did. **At hours 1-4 it is also a no-op.**
+>
+> **Two pieces of my own reasoning about this regression were also wrong:**
+>
+> - I read the `THERMAL_PAIRED` volume as an anomaly indicating solver distress. It is not.
+>   `hourly_heat_water_solute.zig:6948` gates it on `executed_weather_hours.* < 8` and fires
+>   unconditionally, so dense tracing in hours 1-4 is **normal**; `run-022` produced the same
+>   32 lines, and 65,738 bytes covering four early hours is the expected density. There was no
+>   logging anomaly to explain.
+> - The 65,738-byte figure is not a buffer limit either (65,536 would have been), and it is
+>   byte-identical across both runs, so the stop is deterministic program behaviour.
+>
+> ### Honest state of this regression: UNEXPLAINED
+>
+> The evidence is contradictory and should be recorded as such rather than resolved by a ninth
+> guess:
+>
+> - Reverting `eabb39b` restores the frontier (probe run reached hour 3,264+ in 597 s), so the
+>   commit **is** causal.
+> - Yet every line it changed is provably a no-op at hour 4, because `State.init` zeroes the
+>   mineral inventory and only `applyEvent` adds to it, and the first application is day 105.
+>
+> Both cannot be true, so one of my two analyses is wrong and I cannot tell which from reading.
+> **The bounded experiment for round 30**: rebuild `eabb39b` exactly and confirm it reproduces
+> hour 4; if it does, rebuild with *only* the `publishSoil` change and then with *only* the
+> validator change. One build plus one run each, and it identifies the line. Do not re-land the
+> fix before that.
 >
 > The legacy floor point still stands on its own merits -- `hour1.f:3845`'s
 > `IF(VLNHB(L,NY,NX).GT.ZERO)` compares against the model's noise-floor literal
