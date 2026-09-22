@@ -95,6 +95,20 @@ STREAM_MAPS = {
         **{f"CO2_{k}": f"dissolved_carbon_dioxide_carbon_concentration_layer_{k}" for k in range(1, 15)},
         **{f"O2_{k}": f"dissolved_oxygen_concentration_layer_{k}" for k in range(1, 16)},
     },
+    # Hourly water, fouts.f N=22. Headings fouts.f:163-214, values outsh.f:118-169.
+    # WTR_k is THETWZ(k) and ICE_k is THETIZ(k), both dimensionless volumetric
+    # contents (outsh.f:125-135, :146-155), matching the candidate's declared
+    # m3 m-3. Slot 4 and the two surface entries are excluded below with
+    # citations rather than mapped.
+    "water_hourly": {
+        "EVAPN": "evapotranspiration",
+        "RUNOFF": "runoff",
+        "SEDIMENT": "sediment_discharge_water",
+        "DISCHG": "external_water_outflow",
+        "SNOWPACK": "surface_water_equivalent",
+        **{f"WTR_{k}": f"volumetric_liquid_water_fraction_layer_{k}" for k in range(1, 21)},
+        **{f"ICE_{k}": f"volumetric_ice_fraction_layer_{k}" for k in range(1, 21)},
+    },
 }
 
 # Legacy columns with a recorded, cited reason for having no counterpart.
@@ -102,6 +116,22 @@ ACCOUNTED_EXCLUSIONS = {
     "carbon_hourly": {
         "CH4_15": "issue-085: deck selects soil layer 15 but the runtime profile has 12 layers; "
                   "the oracle emits a structural zero, ecosys-ng emits no column",
+    },
+    "water_hourly": {
+        "TTL_SWC": "issue-086: WRONG BINDING, not merely absent. The oracle writes total cell water "
+                   "storage (UVOLW*1000/AREA, outsh.f:121); ecosys-ng writes root water uptake in "
+                   "the same slot (soil/water/output.zig:136). Comparing them would compare a "
+                   "storage term against a flux, so the column is excluded until the binding is fixed",
+        "SURF_WTR": "issue-086 second finding: the candidate's value is the correct THETWZ(0) analogue "
+                    "but it is published as surface_excess_liquid_water_depth in m rather than a "
+                    "dimensionless fraction, so the column cannot be matched by name/unit until renamed",
+        "SURF_ICE": "issue-086 second finding: same label/unit defect as SURF_WTR, for THETIZ(0)",
+        **{f"WTR_{k}": f"issue-085 class: deck selects soil layer {k} but the runtime profile has 12 "
+                       "layers; the oracle emits a structural zero, ecosys-ng emits no column"
+           for k in range(13, 21)},
+        **{f"ICE_{k}": f"issue-085 class: deck selects soil layer {k} but the runtime profile has 12 "
+                       "layers; the oracle emits a structural zero, ecosys-ng emits no column"
+           for k in range(13, 21)},
     },
 }
 
