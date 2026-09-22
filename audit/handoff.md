@@ -830,3 +830,30 @@ With `cell_count=1`, `soil_layer_capacity=12` and `snow_layer_capacity=5`, **sco
 **Next bounded action, cheapest first**: `stages/hourly_heat_water_solute.zig:4539-4570`'s accepted-displacement cascade **does** terminate in the surface litter and **is** the `FLQR` analogue for the phase-displacement path. If that cascade is what fires on a tillage-induced displacement, the fix is a **ledger entry**, not a new physical mechanism -- much smaller than `issue-083` assumed. Confirm by one more bounded rerun tracing the **surface** owners (`surface_precipitation.litter_water_m3`, `surface_litter_ice_m3`, `surface_heat_capacity_megajoules_per_k`, `grid.surface_temperature_k`) alongside soil layer 0, at the four existing stage boundaries plus the `applyDeferredTillageSoil` bracket added this round. The instrumentation is narrowly gated (hours 3,248-3,254) and is **left in place** for exactly that rerun.
 
 Also settled this round: the deck has **two** tillage events (`entries=2`, hours 2,532 and 3,252), which resolves the discrepancy `run-014` flagged when its census showed only the first.
+
+## Update 2026-09-22 (adversarial Claude/Pi session, round 23): HOUR 3,253 CLEARED -- first frontier advance; new blocker is `issue-090`, a confirmed fertilizer band-geometry science gap
+
+`run-018`. **The hour-3,253 blocker is resolved and the frontier advanced.**
+
+| | before | after |
+|---|---|---|
+| last accepted hour | 3,252 | **3,275** |
+| failing hour | 3,253 | **3,276** (day 137, 17 May, hour 12) |
+| failure | `HourlyLayerConservationFailure` | `MissingFertilizerRecipientWaterVolume` |
+| conservation failures in log | 4 | **0** |
+
+The fix was **bookkeeping only** -- no physics, tolerance, solver or acceptance change. `advanceAcceptedPhaseDisplacement`'s surface terminus (`stages/hourly_heat_water_solute.zig:4539-4570`) now **declares** its soil-layer-0-to-surface transfer to the layer-local ledger via two `accumulateLitterSoilLocalTransfer` calls (water and heat), mirroring `:8369-:8378`. The quantity was already computed, already conservative and already stored; `run-017` had shown the audit's two scopes disagreeing by `-4.2752681740391765` and `+4.2752681740404` MJ, equal and opposite to ~11 figures **because the transfer was conservative all along**. Full suite **4375 passed / 1 skipped / 0 failed** (zero regressions), `ReleaseFast` exit 0, binary `C653A546...BB1B`. Reviewer round 23 SOUND, independently confirming the sign and noting a reversal would have **doubled** the gap rather than cancelled it.
+
+**A four-issue chain closes**, each link having exposed the next: `issue-078` (entry guard whose domain contradicted `watsub.f:211-217`) -> fixed in `run-015` with no regression; `issue-083` (the relief-term half that regressed in `run-013`) -> stays reverted, **and its central premise is now refuted -- the `FLQR` path is NOT missing; `hourly_heat_water_solute.zig:4539-4570` IS it, and only its ledger leg was absent, so the litter-terminus port that issue escalated as a solver-architecture decision is not needed**; `issue-089` -> FIXED.
+
+### New blocker: `issue-090`, a confirmed science gap
+
+`MissingFertilizerRecipientWaterVolume` at hour 3,276. **The guard is correct** (`fertilizer_dissolution.zig:387-390` refuses to dissolve a positive amount into zero solvent); the defect is upstream. The deck's `f25fr98` third record is dated `17051998` = day 137, the failing day, with trailing geometry `0.05` and `0.76` -- a 0.05 m band in 0.76 m maize rows, the run's **first banded** application. ecosys-ng takes band fractions from one static runscript record (`driver/runscript.zig:369-377`) and the deck's is `plant_nutrients,0,0,0,1,1,1,1`, so **all three band fractions are zero for the whole run**.
+
+The oracle instead derives band geometry **per day from the fertilizer file**: `hour1.f:296` ("width of NH4 band row from fertilizer file"), `:306` `ROWN=ROWI(I,NY,NX)`, `:310` `WDNHB=AMIN1(WBNDX,ROWN)`, **`:316` `VLNHB=AMIN1(0.9999,WDNHB/ROWN...)`** (= `0.05/0.76 = 0.0658` here, not zero), gated `:4897`, widening at `:4910`.
+
+**Scope corrected after reading the subsystem -- it is one missing link, not three.** Band widening and the activation gate **already exist** (`management/hourly_fertilizer_band_geometry.zig`, self-traced to "HOUR1 lines 4888-5151", gating on `active and row_spacing_m > 0` at `:109`; `fertilizer_band_state.zig:473`/`:495-502`). What is missing: the application **event carries banded AMOUNTS but no band GEOMETRY** -- `fertilizer_nitrogen_inventory.zig` has `banded_ammonium`/`banded_urea`/etc. and `application_depth_m` but no width or row spacing, and `fertilizer_management_dispatch.zig` references neither. Note the relation runs opposite ways: the oracle inputs width and derives the fraction; ecosys-ng inputs the fraction and derives the width.
+
+**Next bounded action**: (1) extend the fertilizer event with the record's band width and row spacing; (2) on any nonzero banded amount seed `active=true`, `row_spacing_m`, and `band_volume_fraction = width/row_spacing` clamped by `AMIN1(0.9999,...)` per `hour1.f:316`; (3) let the existing geometry machinery widen and validate. One sub-decision to make explicitly rather than by accident: whether to reproduce `hour1.f:306`'s **per-day** reassignment, so a later banded application at a different spacing replaces the geometry rather than merging. **Do not** set the deck's `plant_nutrients` fractions to nonzero constants (papers over the gap with a hand-tuned input, wrong for other decks), and **do not** relax `requireRecipientVolume` (it is correct and is why this surfaced cleanly).
+
+Also recorded so it is not re-filed: the 1000x litter-water drop at hour 3,252 (identical mantissa, exponent shifted by three) looks exactly like a unit bug and is the intended, legacy-faithful residue-incorporation floor at `redistribution/tillage/surface_biomass_transfer.zig:77` with `XCORP=0` (`day.f:348`, `ITILL=10`). Diagnostic instrumentation from `run-016`/`run-017` is still in the tree, gated to hours 3,248-3,254, and needs re-gating or removal before it helps at hour 3,276.
