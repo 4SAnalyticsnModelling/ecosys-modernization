@@ -22,9 +22,18 @@ pub fn water(allocator: std.mem.Allocator, layer_count: usize) !Catalog {
     try builder.fixed("external_water_outflow", "mm");
     try builder.fixed("surface_water_equivalent", "mm");
     try builder.layers("volumetric_liquid_water_fraction", "m3 m-3", layer_count);
-    try builder.fixed("surface_excess_liquid_water_depth", "m");
+    // issue-086, second finding. These two slots carry the correct values --
+    // `soil/water/output.zig` feeds them `surface_volumetric_liquid_water_fraction`
+    // and `surface_volumetric_ice_fraction`, the faithful analogues of the
+    // source's `THETWZ(0)`/`THETIZ(0)` (`outsh.f:145` for SURF_WTR and the
+    // matching SURF_ICE slot) -- but they were published as a depth in metres.
+    // They are dimensionless volumetric fractions, exactly like the layer
+    // entries either side of them, and the DAILY catalog below already names
+    // them that way. Only the published name and unit change here; no value is
+    // touched.
+    try builder.fixed("surface_volumetric_liquid_water_fraction", "m3 m-3");
     try builder.layers("volumetric_ice_fraction", "m3 m-3", layer_count);
-    try builder.fixed("surface_excess_ice_water_depth", "m");
+    try builder.fixed("surface_volumetric_ice_fraction", "m3 m-3");
     try builder.fixed("active_layer_depth_below_surface", "m");
     try builder.fixed("water_table_depth_below_surface", "m");
     return builder.finish();

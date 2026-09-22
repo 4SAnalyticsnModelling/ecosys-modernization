@@ -879,14 +879,18 @@ test "f25wh1: the deck never selects the active layer or water table slots" {
     }, &.{ 1, 2, 3, 4, 5 });
     var resolved = try resolve(std.testing.allocator, 1, &choices, 34, 18);
     defer resolved.deinit();
-    // Catalog entries 31, 32 and 33 are `surface_excess_ice_water_depth`,
+    // Catalog entries 31, 32 and 33 are `surface_volumetric_ice_fraction`,
     // `active_layer_depth_below_surface` and `water_table_depth_below_surface`.
-    // Only the first is selected (source slot 48, SURF_ICE).
+    // Only the first is selected (source slot 48, SURF_ICE). Entries 18 and 31
+    // were named `surface_excess_liquid_water_depth`/`..._ice_water_depth`
+    // until issue-086's second finding corrected them to the dimensionless
+    // fractions they actually carry; the indices are unchanged.
     try std.testing.expect(resolved.soil_enabled[31]);
     try std.testing.expect(!resolved.soil_enabled[32]);
     try std.testing.expect(!resolved.soil_enabled[33]);
     // Source slot 27, SURF_WTR, now reaches catalog entry 18,
-    // `surface_excess_liquid_water_depth`, which the positional copy skipped.
+    // `surface_volumetric_liquid_water_fraction`, which the positional copy
+    // skipped.
     try std.testing.expect(resolved.soil_enabled[18]);
 }
 
