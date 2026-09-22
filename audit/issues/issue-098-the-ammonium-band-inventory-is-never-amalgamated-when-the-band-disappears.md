@@ -197,6 +197,76 @@ Genuinely new: `MineralNitrogenInZeroWaterDomain` returns **zero hits** across t
 > the band amount tracked across the hour, which is the next instrumentation step, not a
 > source-reading question.
 >
+> ### SECOND INSTRUMENTED RUN: a band IS active, in a DIFFERENT layer -- and my census reading above was wrong
+>
+> A second diagnostic was added to `initializeMatrix`, firing only when the **pack itself**
+> produces a nonzero band amount. It fired four times, every time for **`cell=2`**:
+>
+> ```
+> error: TEMP_DIAGNOSTIC pack_nonzero_ammonium_band: cell=2 amount_mol=5.209744774917196e-4
+>   conc=1.3350007482476425e0 water_m3=2.3726722163396864e-2 band_fraction=1.644739770155168e-2
+> ```
+>
+> `band_fraction = 1.644739770155168e-2` is `issue-090`'s pinned
+> `(0.025/0.76)*(0.025/0.05) = 0.01644736842105263` to six significant figures. **So an
+> ammonium band IS active, with exactly the deck's banded geometry, in layer 2.** The
+> conclusion in the correction above -- "no ammonium band ever existed in this run" -- is
+> therefore **wrong**, and the inference from `fertilizer_application entries=2 ... last_hour=3252`
+> was over-read: the census counts application *events*, and a band, once activated, persists
+> across hours regardless of when the last event fired.
+>
+> **The actual configuration at the failure:**
+>
+> | layer | band fraction | ammonium_band |
+> |---|---|---|
+> | `cell=2` | **1.6447e-2** (active band) | 5.21e-4 mol |
+> | `cell=1` | **0** (no band) | **1.154e-7 mol** <- raises |
+>
+> So band-domain nitrogen is present in a layer whose band volume fraction is zero, while an
+> adjacent layer carries a real band. The trace ratio (1.154e-7 against 5.21e-4, about
+> 1:4500) is consistent with a small inter-layer transfer out of layer 2.
+>
+> ### What the legacy does, and it is a THIRD missing operation
+>
+> `hour1.f:322-334` states it in its own words:
+>
+> ```fortran
+> C     REDISTRIBUTE NON-BAND, BAND SOLUBLE, EXCHANGEABLE
+> C     NH4 STATE VARIABLES WITH CHANGES IN NH4 BAND VOLUME
+>       ZNH4T=ZNH4S(L,NY,NX)+ZNH4B(L,NY,NX)      ! :326  total in the layer
+>       ZNH3T=ZNH3S(L,NY,NX)+ZNH3B(L,NY,NX)      ! :327
+>       XN4T =XN4(L,NY,NX)+XNB(L,NY,NX)          ! :328
+>       ZNH4S(L,NY,NX)=ZNH4T*VLNH4(L,NY,NX)      ! :329  re-split by NON-BAND fraction
+>       ZNH3S(L,NY,NX)=ZNH3T*VLNH4(L,NY,NX)      ! :330
+>       ZNH4B(L,NY,NX)=ZNH4T*VLNHB(L,NY,NX)      ! :331  re-split by BAND fraction
+>       ZNH3B(L,NY,NX)=ZNH3T*VLNHB(L,NY,NX)      ! :332
+>       XN4 (L,NY,NX)=XN4T*VLNH4(L,NY,NX)        ! :333
+>       XNB (L,NY,NX)=XN4T*VLNHB(L,NY,NX)        ! :334
+> ```
+>
+> and it runs **`DO 50 L=NUI(NY,NX),JZ`** (`:307`) -- **every layer from the first soil layer
+> to the bottom of the profile**, not only the application layer. Layers other than `LFDPTH`
+> get `DPNHB=0`, `WDNHB=0` (`:312-313`), hence `VLNHB=0`, hence `ZNH4B = ZNH4T x 0 = 0`.
+>
+> **So the legacy guarantees, profile-wide and on every band-volume change, that a layer with
+> no band has an empty band pool** -- its contents folded into non-band. That is a
+> *re-partition*, and it is a more general operation than the `:4970` amalgamation: the
+> amalgamation handles the band *disappearing*, the re-partition handles *any* change including
+> a band appearing elsewhere.
+>
+> ecosys-ng has a module named for exactly this -- `management/fertilizer_band_inventory_repartition.zig`,
+> with `ImmediateInventories { non_band_inventory, band_inventory }` -- and it **is** reachable
+> in production through `fertilizer_band_production.prepareHour`
+> (`stages/hourly_heat_water_solute.zig:13260`) and `consumeUndissolved`
+> (`stages/soil_chemistry_convergence.zig:1077`). So the machinery exists and runs. **The open
+> question is now narrow and specific: why layer 1's band pool is not zeroed by it.** The
+> candidates are its layer scope (does it cover every active layer, as `DO 50 L=NUI,JZ` does,
+> or only the application layer?) and its trigger (does it run on *any* band-volume change, or
+> only on application?).
+>
+> **Settling that needs one more instrumented run** logging layer 1's band amount before and
+> after each stage of the failing hour. That is the next step, and it is cheap (~9 min).
+>
 > ### What survives from this issue
 >
 > Everything except the attribution, and it is worth keeping on its own merits:

@@ -118,6 +118,27 @@ pub const State = struct {
             amounts[index(.nitrate_band)] = aqueous.nitrate_band * water * fractions.nitrate_band;
             amounts[index(.nitrite_non_band)] = reactive.non_band_nitrite_g_n[cell] / nitrogen_molar_mass_g_per_mol;
             amounts[index(.nitrite_band)] = reactive.band_nitrite_g_n[cell] / nitrogen_molar_mass_g_per_mol;
+            // TEMP_DIAGNOSTIC (hour-3,275 `MineralNitrogenInZeroWaterDomain`,
+            // `issue-098`): `publishMatrix` raises for `ammonium_band` with
+            // `fraction = 0`, but this pack multiplies by that same fraction, so
+            // a zero fraction here must pack a zero amount. Either the pack saw
+            // a NONZERO band fraction that the publish did not -- a
+            // phase-dependent asymmetry, since `scienceZoneFractions`
+            // reconstructs the pair via `preConsumptionPair` outside `.idle` but
+            // returns raw `current` inside it -- or the amount is added between
+            // pack and publish. This fires only when the pack itself produces a
+            // nonzero band amount, so it is silent unless a band exists.
+            if (!builtin.is_test and amounts[index(.ammonium_band)] > 1e-12) std.log.err(
+                "TEMP_DIAGNOSTIC pack_nonzero_ammonium_band: cell={d} amount_mol={e} conc={e} water_m3={e} band_fraction={e} non_band_fraction={e}",
+                .{
+                    cell,
+                    amounts[index(.ammonium_band)],
+                    aqueous.ammonium_band,
+                    water,
+                    fractions.ammonium_band,
+                    fractions.ammonium_non_band,
+                },
+            );
         }
         try self.validate();
     }
