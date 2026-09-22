@@ -11,6 +11,8 @@ const organic_parameters = @import("../soil/organic/parameters.zig");
 const organic_application = @import("organic_fertilizer_application.zig");
 const soil_solver_properties = @import("../soil/water/solver_properties.zig");
 const mineral_fertilizer = @import("mineral_fertilizer_inventory.zig");
+const band_state = @import("fertilizer_band_state.zig");
+const band_geometry = @import("hourly_fertilizer_band_geometry.zig");
 const execution_calendar_date = @import("../driver/execution_calendar_date.zig");
 
 /// Dense runtime lookup built once when a scene is activated. `null` denotes
@@ -422,6 +424,15 @@ pub const NitrogenApplyContext = struct {
     surface_organic: *const organic.State,
     source_hour_one_through_twenty_four: u8,
     solar_noon_hour_by_cell: []const u8,
+    /// ISSUE-090. Optional so every existing caller and test literal is
+    /// unaffected; production supplies it. When present, a banded application
+    /// seeds that family's band geometry from the record's own row spacing,
+    /// which is `hour1.f:303-320`. Without it the band fraction can only come
+    /// from the static `plant_nutrients` runscript record, and a deck whose
+    /// record reads `0,0,0,...` leaves banded fertilizer with no solvent.
+    fertilizer_band: ?*band_state.State = null,
+    /// `DLYRM`. Only read when `fertilizer_band` is supplied.
+    minimum_layer_thickness_m: f64 = 0,
 };
 
 pub fn applyNitrogen(context: *NitrogenApplyContext, cell: usize, event: *const fertilizer_schedule.Event) !void {
@@ -435,8 +446,54 @@ pub fn applyNitrogen(context: *NitrogenApplyContext, cell: usize, event: *const 
     if (!std.math.isFinite(area_m2) or area_m2 <= 0) return error.InvalidFertilizerCellArea;
     const surface_carbon_g_c = try context.surface_organic.totalCarbon_g_c(cell);
     const cover_fraction = 1.0 - @exp(-0.008 * surface_carbon_g_c / area_m2);
-    try nitrogen_inventory.applyEventNitrogen(context.soil, context.surface, context.reactive_nitrogen, cell, area_m2, context.nitrogen_molar_mass_g_per_mol, cover_fraction, context.soil_layer_thickness_m[first .. first + layer_count], event.*);
+    const layer_thickness_m = context.soil_layer_thickness_m[first .. first + layer_count];
+    try nitrogen_inventory.applyEventNitrogen(context.soil, context.surface, context.reactive_nitrogen, cell, area_m2, context.nitrogen_molar_mass_g_per_mol, cover_fraction, layer_thickness_m, event.*);
+
+    // ISSUE-090. Seed the band geometry from THIS application's own row
+    // spacing, `hour1.f:303-320`. The oracle's NH4 gate is `Z4B+Z3B+ZUB.GT.0.0`
+    // (`hour1.f:303`) -- banded ammonium, ammonia and urea together -- and the
+    // NO3 family has its own equivalent at `:362-363` with `ROWO`. ecosys-ng's
+    // record carries one shared `band_row_width_m`, so both families take it.
+    //
+    // Runs here, after the inventory application and before any hourly science,
+    // because the band coordinator is in its `idle` phase at this point in the
+    // hour; `activateBandFromApplication` enforces that rather than trusting it.
+    if (context.fertilizer_band) |band| {
+        const n = event.nitrogen_g_per_m2;
+        const banded_ammonium_family_g_n = n.banded_ammonium + n.banded_ammonia + n.banded_urea;
+        const banded_nitrate_family_g_n = n.banded_nitrate;
+        if (banded_ammonium_family_g_n > 0 or banded_nitrate_family_g_n > 0) {
+            const application = try nitrogen_inventory.applicationLayer(layer_thickness_m, event.application_depth_m);
+            const activation: band_geometry.ActivationLayer = .{
+                .index = application.index,
+                .upper_depth_m = application.upper_depth_m,
+                .thickness_m = application.thickness_m,
+                .minimum_active_thickness_m = context.minimum_layer_thickness_m,
+                .layer_count = layer_count,
+            };
+            if (banded_ammonium_family_g_n > 0) try band.activateBandFromApplication(
+                cell,
+                .ammonium,
+                activation,
+                event.application_depth_m,
+                event.band_row_width_m,
+                default_maximum_band_volume_fraction,
+            );
+            if (banded_nitrate_family_g_n > 0) try band.activateBandFromApplication(
+                cell,
+                .nitrate,
+                activation,
+                event.application_depth_m,
+                event.band_row_width_m,
+                default_maximum_band_volume_fraction,
+            );
+        }
+    }
 }
+
+/// `AMIN1(0.9999,...)` from `hour1.f:316`, matching
+/// `hourly_fertilizer_band_geometry.Forcing`'s own default.
+const default_maximum_band_volume_fraction: f64 = 0.9999;
 
 pub const MineralApplyContext = struct {
     inventory: *mineral_fertilizer.State,

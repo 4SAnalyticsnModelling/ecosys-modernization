@@ -176,6 +176,30 @@ pub fn applyEventNitrogen(
     state.daily_nitrogen_input_g_n[cell] = daily_input_next;
 }
 
+/// ISSUE-090. `LFDPTH` plus the two geometry scalars a band activation needs:
+/// the application layer's own upper face (`CDPTH(L-1)`) and its thickness
+/// (`DLYR(3,L)`). Walks exactly the same boundaries as `layerAtDepth`, so the
+/// index it returns is the one `applyEventNitrogen` places the material in.
+pub const ApplicationLayer = struct {
+    index: usize,
+    upper_depth_m: f64,
+    thickness_m: f64,
+};
+
+pub fn applicationLayer(thickness_m: []const f64, depth_m: f64) !ApplicationLayer {
+    var upper_m: f64 = 0;
+    for (thickness_m, 0..) |thickness, layer| {
+        const lower_m = upper_m + thickness;
+        if (depth_m <= lower_m) return .{
+            .index = layer,
+            .upper_depth_m = upper_m,
+            .thickness_m = thickness,
+        };
+        upper_m = lower_m;
+    }
+    return error.FertilizerApplicationBelowSoilProfile;
+}
+
 fn layerAtDepth(thickness_m: []const f64, depth_m: f64) !usize {
     var lower_boundary_m: f64 = 0;
     for (thickness_m, 0..) |thickness, layer| {

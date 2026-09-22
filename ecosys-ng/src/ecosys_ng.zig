@@ -7239,6 +7239,13 @@ noinline fn advanceFertilizerManagement(
             .surface_organic = &driver_context.surface_organic_state.*,
             .source_hour_one_through_twenty_four = fertilizer_source_hour,
             .solar_noon_hour_by_cell = advance_context.solar_noon_hour_by_cell.*,
+            // ISSUE-090. A banded application seeds its own band geometry from
+            // the record's row spacing (`hour1.f:303-320`). This dispatch runs
+            // before `executeHourlyScience`, so the band coordinator is idle
+            // here; `activateBandFromApplication` enforces that rather than
+            // assuming it.
+            .fertilizer_band = &driver_context.fertilizer_band_state.*,
+            .minimum_layer_thickness_m = driver_context.runscript.*.soil_geometry_parameters.minimum_layer_thickness_m,
         };
         _ = try ecosys.fertilizer_management_dispatch.dispatchDate(driver_context.fertilizer_schedule_maps.*[advance_context.pass.*.scene_index].?, driver_context.fertilizer_catalog.*, management_date, &fertilizer_context, ecosys.fertilizer_management_dispatch.applyNitrogen);
         var mineral_fertilizer_context: ecosys.fertilizer_management_dispatch.MineralApplyContext = .{
