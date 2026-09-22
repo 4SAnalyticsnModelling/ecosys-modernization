@@ -50,6 +50,46 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 
 **So: the day-137 banded monocalcium phosphate application books its phosphorus and calcium as external inputs but does not deposit them into cell 2's inventory.**
 
+> ## THE FIX WAS LANDED, REGRESSED THE FRONTIER FROM 3,275 TO 4, AND HAS BEEN REVERTED
+>
+> The zone-water divisor below is **correct as arithmetic** and **wrong as numerics**, and a
+> production run is what showed it.
+>
+> **What happened.** The fix passed the full suite (4,380 passed / 1 skipped / 0 failed,
+> including two new mass-conservation identities and two existing tests corrected with the
+> legacy citation). It then **regressed the frontier from hour 3,275 to hour 4**, twice,
+> deterministically -- identical 64 KB of stderr, identical final values, no error line, with
+> `THERMAL_PAIRED` substep tracing firing far more than the 32 lines `run-022` produced.
+>
+> **Why.** `fractions.phosphate_band` is not reliably either 0 or a healthy fraction. During a
+> non-idle band phase `preConsumptionPair` (`fertilizer_band_state.zig`) computes the band
+> fraction as `1 - non_band`, so a non-band fraction of `0.9999...` yields a band fraction of
+> order `1e-4`. My `zoneConcentrationDivisor` tested `zone_fraction <= 0`, so a value that
+> tiny passed the guard and became the divisor -- amplifying the deposited concentration by
+> ~1e4 and driving the chemistry solver into pathological substepping from the first hours.
+>
+> **What the legacy does that I missed.** `hour1.f:3845` is
+> `IF(VLNHB(L,NY,NX).GT.ZERO)THEN`, and `ZERO` is the model's **noise floor literal**, not
+> literal zero -- `starts.f:94` defines `ZERO2 = 1.0E-06` and the family of `ZERO*` constants
+> exists precisely so comparisons like this reject vanishing-but-nonzero values. My `<= 0`
+> test was the wrong predicate: the legacy's guard is a floor, mine was a sign test.
+>
+> **State: reverted.** `git revert eabb39b` restores the full-layer-water divisor and the
+> hour-3,275 frontier. The tree is back to a known-good state rather than a regressed one.
+>
+> **What the fix needs to be re-landed**: the same zone-water divisor, with
+> `zoneConcentrationDivisor` rejecting any `zone_fraction` below a physical floor (the
+> `ZERO`/`ZERO2` analogue already available in the runtime tolerances) and amalgamating that
+> zone's amount into the surviving zone, exactly as it already does for an exactly-zero
+> fraction. The four tests stay valid; one more is needed pinning a `1e-4`-order band fraction
+> to the amalgamation path rather than the division path.
+>
+> **Method note.** The suite passed and the production run failed. Both were necessary: the
+> suite proved the arithmetic, the run proved the numerics. This is the second time this
+> session that a unit-validated change failed in production (`issue-090` was the first), and
+> the shape is the same -- a test can pin an identity without exercising the value range
+> production actually produces.
+>
 > ## ROOT CAUSE, BIT-EXACT: banded phosphate is deposited into a zone of zero volume, and the census multiplies it by that zero
 >
 > Two coupled defects. Either alone loses mass; together they destroy **100%** of banded
