@@ -261,3 +261,36 @@ Neither is filed as a defect yet; both need their value producer read before any
 `WATER` (the `UVOLW` snapshot, correctly bound in the daily stream per `issue-092`) has max **235.7 mm**, MAE **107.3**, bias **+102.5**, all days exceeding -- yet day 1 agrees to 0.5% (oracle 805.77 against candidate 801.72). So the two profiles start together and separate, which is consistent with the `WTR_1`-`WTR_10` high bias rather than an independent storage defect. `WTR_TBL` max 0.926 m, MAE 0.373.
 
 Machine-readable report: `audit/manifest/outcompare-water-daily-2026-09-22.json`.
+
+### Candidate 1 (`PSI_SURF`) RESOLVED 2026-09-22: a downstream symptom, NOT a defect -- do not file it
+
+Both of my own hypotheses for it are refuted, and the resolution matters because it stops someone chasing a spurious defect.
+
+**Hypothesis A -- "the candidate includes an osmotic term the oracle omits" -- WRONG.** The oracle writes `PSISM(0,NY,NX)` alone (`outsd.f:160`) and ecosys-ng's daily stream writes `surface_matric_potential_megapascal` (`soil/diagnostics/daily_output.zig:326`, emitted `:392`), fed from `surface_litter_water_environment_state.matric_water_potential_megapascal` (`ecosys_ng.zig:1952`). **Both are matric-only.** The layer columns are matric-plus-osmotic on both sides (`outsd.f:148-157`; `daily_output.zig:325`). The naming and the pairing are correct.
+
+**Hypothesis B -- "ecosys-ng is missing the oracle's floor" -- ALSO WRONG.** The oracle clamps the sub-wilting branch with `AMAX1(PSISX,...)` (`hour1.f:4387`), and `PSISX` is defined at `starts.f:78`:
+
+```fortran
+DATA PSIPS,PSIHY,PSISX/-0.5E-03,-1.5E+04,-1.5E+12/
+```
+
+so `PSISX = -1.5e+12` MPa. ecosys-ng's retention curve carries `minimum_water_potential_megapascal = -1.5e12` -- **the identical value, faithfully ported**. Neither side's floor was active in the sampled days, so the clamp explains nothing here.
+
+**What it actually is.** The raw values, sampled on the correct columns (`PSI_SURF` is oracle field 49; the candidate's is index 51, `surface_water_potential[MPa]` -- an earlier ad hoc check of mine read index 52, `active_surface_depth[m]`, and produced nonsense positives):
+
+| day | oracle `PSI_SURF` (MPa) | ecosys-ng (MPa) |
+|---|---|---|
+| 1 | -7.464 | -2.1109077184563387e2 |
+| 5 | -1.295 | -2.1109077184563387e2 |
+| 20 | -0.01076 | -2.167245975419449e3 |
+| 60 | -0.005278 | -2.1688935953890094e4 |
+| 100 | -85.02 | -2.1109077184563387e2 |
+| 130 | -0.004694 | -2.1109077184563387e2 |
+
+The litter retention curve is exponential in log water content (`hour1.f:4386-4397`; `surface/litter_water_environment.zig:72-82` via `curve.waterPotentialMpa(retained_water_fraction)`), so a modest difference in litter **water content** is amplified into an orders-of-magnitude difference in **potential**. And a litter water divergence is already independently established: `WTR_1` bias **+0.2585 m3 m-3** (`run-014`), `issue-087`'s ~47-day snow persistence over the litter, and the tillage residue-incorporation step that empties the litter by 1000x.
+
+So `PSI_SURF` is a **downstream symptom of the litter/surface water divergence**, on the most sensitive diagnostic available. It is the wrong place to attack; the litter water content is the right place, and that is already tracked by `issue-087` and `issue-024`.
+
+**One observation kept, not escalated**: `-2.1109077184563387e2` repeats **bit-for-bit** on days 1, 5, 100 and 130 -- distant days with different weather. That means the candidate's litter retained-water *fraction* is pinned to a recurring value on those days, which `surface/litter_water_environment.zig:69` computes as `min(water_retention_capacity_m3, litter_water_m3) / dry_litter_volume_m3`. A recurring exact value points at the `water_retention_capacity_m3` branch binding (i.e. litter at capacity), not at a stuck carrier. Worth a look if anyone diagnoses `issue-087`, since it is a direct readout of litter wetness, but it is not itself evidence of a defect.
+
+**Candidate 2 (`SURF_ELEV`/`ACTV_LYR` paired sign symmetry) remains open and unexamined.**
