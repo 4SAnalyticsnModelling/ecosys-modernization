@@ -144,6 +144,33 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 > `applyMinerals`. The failing quantities are phosphorus and calcium -- `applyMinerals`'
 > species exclusively.
 >
+> ### FOURTH refinement: the sidecar's ordering is intentional, and it feeds a DIFFERENT scope
+>
+> The ordering hypothesis above is also not it, and the search is narrower than I had it.
+> `ecosys_ng.zig:7181-7184`, immediately above the sidecar call, states the design:
+>
+> ```
+> // Resolve every accepted event to the actual litter or
+> // depth-selected soil owner before any of the three
+> // fertilizer mutations. This producer sidecar is only
+> // published to the local ledger after all owners accept.
+> ```
+>
+> So reconstructing at `:7185` *before* the three mutations (`:7250` nitrogen, `:7260`
+> minerals, organic after) is deliberate, and publication is deferred until the owners accept.
+> Reading the line order as the failure was wrong.
+>
+> **And the scopes differ.** That sidecar publishes to the **layer-local** ledger
+> (`layer_local_conservation`). The failing error is **`HourlyCellConservationFailure`** -- the
+> **cell** scope, with its own producer. So `reconstructAcceptedHour` is very likely not the
+> booking that appears in this failure at all, and the four mechanisms I have chased were all
+> in the wrong module.
+>
+> **Narrowed target for the measurement**: find which producer supplies
+> `ExternalProducer.fertilizer` to the *cell*-scope census, and compare its hour and quantity
+> against `applyMinerals`' deposit. That is a much smaller search than the whole fertilizer
+> dispatch.
+>
 > ### Stop hypothesising; take the measurement
 >
 > I have now had three mechanisms refuted in a row by reading one level further each time.
