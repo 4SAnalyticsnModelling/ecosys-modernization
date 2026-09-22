@@ -162,6 +162,20 @@ STREAM_MAPS = {
     # osmotic, and daily `SNOWPACK` is `1000*DPTHS`, snow DEPTH, where the
     # hourly stream's same-named column is a water equivalent.
     "water_daily": {
+        # The four issue-092 accumulator columns. They stay in ACCOUNTED_EXCLUSIONS
+        # and are NOT compared by default, because the oracle reports an annual
+        # running total (day.f:84 resets only when I.EQ.1) against ecosys-ng's
+        # per-day value. The mapping is recorded here so --cumulate-candidate can
+        # do the cumulative-against-cumulative comparison the output-comparison
+        # skill prescribes; slot order and mm units are outsd.f:114-118. Note
+        # RUNOFF and DISCHG divide by TAREA (landscape area) rather than the cell
+        # area, which coincides only because this deck has a single cell.
+        "PRECN": "rainfall",
+        "ET": "evaporation",
+        "RUNOFF": "runoff",
+        "DISCHG": "water_outflow",
+        "TILE_DRG": "lateral_water_outflow",
+        "SEDIMENT": "sediment_outflow",
         "WATER": "soil_water_storage",
         "SNOWPACK": "snow_depth",
         **{f"WTR_{k}": f"volumetric_liquid_water_fraction_layer_{k}" for k in range(1, 21)},
@@ -222,7 +236,7 @@ ACCOUNTED_EXCLUSIONS = {
 
 def parse_oracle(path: Path, max_rows: int | None):
     """Legacy stream: whitespace-separated, with a leading row tag absent from the header."""
-    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    lines = read_lines(path)
     if not lines:
         raise SystemExit(f"empty oracle file: {path}")
     names = lines[0].split()
@@ -282,7 +296,7 @@ def parse_oracle(path: Path, max_rows: int | None):
 
 def parse_candidate(path: Path, max_rows: int | None, daily: bool = False):
     """ecosys-ng stream: tab-separated, hour is 0-based for the same instant."""
-    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    lines = read_lines(path)
     if not lines:
         raise SystemExit(f"empty candidate file: {path}")
     names = lines[0].split("\t")
@@ -340,6 +354,29 @@ def resolve(candidate_names, prefix):
     return None
 
 
+def read_lines(path: Path) -> list[str]:
+    """Read a text file, tolerating Windows paths longer than MAX_PATH (260).
+
+    The production decks live under a session scratchpad whose own prefix is
+    ~135 characters, and the legacy output filenames encode latitude, longitude,
+    soil, year, execution, scenario, replicate, scene, cell and population, so a
+    candidate path of 284 characters is ordinary here.  PowerShell resolves those
+    paths but the CPython open() does not, which surfaces as a FileNotFoundError
+    on a file that demonstrably exists -- a confusing failure worth handling at
+    the source rather than by copying inputs to shorter names.
+    """
+    if sys.platform == "win32":
+        resolved = path.resolve()
+        text = str(resolved)
+        if len(text) >= 260 and not text.startswith("\\\\?\\"):
+            return (
+                Path("\\\\?\\" + text)
+                .read_text(encoding="utf-8", errors="replace")
+                .splitlines()
+            )
+    return path.read_text(encoding="utf-8", errors="replace").splitlines()
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--oracle", required=True)
@@ -349,6 +386,30 @@ def main() -> int:
     ap.add_argument("--rtol", type=float, default=1e-6)
     ap.add_argument("--max-rows", type=int, default=None)
     ap.add_argument("--json")
+    ap.add_argument(
+        "--trace",
+        action="append",
+        default=[],
+        metavar="ORACLE_COLUMN",
+        help="Dump the per-key signed error (candidate-oracle) for this oracle column. "
+        "Repeatable. Use to tell an offset that is constant in time from one that "
+        "accumulates; the shape of the trajectory is evidence the summary statistics "
+        "cannot carry. Names must match the oracle header exactly.",
+    )
+    ap.add_argument(
+        "--cumulate-candidate",
+        action="append",
+        default=[],
+        metavar="ORACLE_COLUMN",
+        help="Running-sum the candidate column over the matched keys before comparing, "
+        "and override this column's recorded exclusion. For the issue-092 columns the "
+        "oracle reports an annual running total while ecosys-ng reports a per-day value, "
+        "so this is the cumulative-against-cumulative comparison the output-comparison "
+        "skill prescribes. Valid ONLY when the matched keys start at the oracle's own "
+        "reset (day.f:84, I.EQ.1) and no key is missing -- this tool reports "
+        "matched/oracle_only/candidate_only counts but does NOT enforce either "
+        "condition, so check them before believing the result.",
+    )
     args = ap.parse_args()
 
     oracle_path, candidate_path = Path(args.oracle), Path(args.candidate)
@@ -372,9 +433,25 @@ def main() -> int:
     candidate_only = sorted(set(crows) - set(orows))
 
     oracle_data_cols = [n for n in onames if n not in ("DOY", "DATE", "HOUR")]
+    trace_columns = set(args.trace)
+    unknown_trace = sorted(trace_columns - set(oracle_data_cols))
+    if unknown_trace:
+        print(
+            f"--trace names absent from the oracle header: {', '.join(unknown_trace)}",
+            file=sys.stderr,
+        )
+        return 2
+    cumulative_columns = set(args.cumulate_candidate)
+    unknown_cumulative = sorted(cumulative_columns - set(oracle_data_cols))
+    if unknown_cumulative:
+        print(
+            f"--cumulate-candidate names absent from the oracle header: {', '.join(unknown_cumulative)}",
+            file=sys.stderr,
+        )
+        return 2
     results, unmapped, excluded = [], [], []
     for col in oracle_data_cols:
-        if col in exclusions:
+        if col in exclusions and col not in cumulative_columns:
             excluded.append({"column": col, "reason": exclusions[col]})
             continue
         prefix = mapping.get(col)
@@ -387,12 +464,20 @@ def main() -> int:
         total_abs = total_sq = total_signed = 0.0
         exceed = 0
         first_exceed = None
+        trace = [] if col in trace_columns else None
+        cumulate = col in cumulative_columns
+        running = 0.0
         for key in shared:
             a, b = orows[key].get(col), crows[key].get(target)
+            if cumulate and b is not None and not math.isnan(b):
+                running += b
+                b = running
             if a is None or b is None or math.isnan(a) or math.isnan(b):
                 continue
             n += 1
             err = b - a
+            if trace is not None:
+                trace.append({"key": key, "oracle": a, "candidate": b, "signed_error": err})
             abs_err = abs(err)
             total_abs += abs_err
             total_sq += err * err
@@ -415,6 +500,8 @@ def main() -> int:
             "exceedances": exceed,
             "exceedance_fraction": (exceed / n) if n else None,
             "first_exceedance": first_exceed,
+            **({"candidate_accumulated_over_matched_keys": True} if cumulate else {}),
+            **({"signed_error_trace": trace} if trace is not None else {}),
         })
 
     report = {
@@ -469,6 +556,28 @@ def main() -> int:
             print(f"\nfirst exceedance, {r['oracle_column']}: key={fe['key']} "
                   f"oracle={fe['oracle']:.8e} candidate={fe['candidate']:.8e} abs_err={fe['abs_error']:.3e}")
             break
+    cumulated = [r["oracle_column"] for r in results if r.get("candidate_accumulated_over_matched_keys")]
+    if cumulated:
+        print(f"\nCANDIDATE RUNNING-SUMMED before comparison (issue-092 convention): {', '.join(cumulated)}")
+        print(f"  valid only if the matched keys start at the oracle's annual reset; first_matched_key={shared[0] if shared else None},"
+              f" oracle_only={len(oracle_only)}, candidate_only={len(candidate_only)}")
+    for r in results:
+        if "signed_error_trace" not in r:
+            continue
+        tr = r["signed_error_trace"]
+        print(f"\nsigned-error trace, {r['oracle_column']} -> {r['candidate_column']}  ({len(tr)} keys)")
+        print("  candidate-oracle; a flat trajectory indicates a constant offset,")
+        print("  a growing one indicates an accumulating divergence.")
+        print(f"  {'key':>8}{'oracle':>16}{'candidate':>16}{'signed_err':>15}")
+        step = max(1, len(tr) // 24)
+        for point in tr[::step]:
+            print(f"  {point['key']:>8}{point['oracle']:>16.6e}{point['candidate']:>16.6e}"
+                  f"{point['signed_error']:>15.5e}")
+        if tr and (len(tr) - 1) % step:
+            last = tr[-1]
+            print(f"  {last['key']:>8}{last['oracle']:>16.6e}{last['candidate']:>16.6e}"
+                  f"{last['signed_error']:>15.5e}")
+        print(f"  (every {step} key(s); full series in --json)")
     if excluded:
         print("\naccounted-for exclusions (reported, never passed):")
         for e in excluded:

@@ -1,8 +1,31 @@
 # Issue 093 -- the litter-geometry carbon input uses one all-inclusive total for every pool, where legacy `RC0` uses a DIFFERENT composition per pool
 
-Status: **OPEN, CONFIRMED BY SOURCE ON BOTH SIDES, behavioural fix deliberately NOT applied while `issue-091` blocks production validation (filed 2026-09-22, adversarial Claude/Pi session).** Found run-free, as the terminal step of the `run-014` litter-thickness trace.
+Status: **OPEN, CONFIRMED BY SOURCE ON BOTH SIDES, but MUCH SMALLER THAN FIRST CLAIMED -- see the correction immediately below. Behavioural fix deliberately NOT applied while `issue-091` blocks production validation (filed 2026-09-22, adversarial Claude/Pi session).** Found run-free, as the terminal step of the `run-014` litter-thickness trace.
 
-This is the **first identified cause** in the surface/litter divergence cluster rather than another readout of it. The five readouts recorded in `run-014` (`ICE_1`-`ICE_5` gradient, `WTR_1` bias, `SNOWPACK` persistence, litter thickness, `PSI_SURF`) all measure litter state; this is a defect in how litter state is *assembled*.
+> ### CORRECTION, same day: the quantitative prediction in this issue is REFUTED
+>
+> This issue was filed claiming to be "the first identified cause in the surface/litter
+> divergence cluster", and predicted that about **670 g C m-2** of spurious pool-4 carbon
+> would account for the whole 0.0268 m mean litter-thickness difference. **That prediction
+> is wrong.** A per-key trajectory of the `SURF_ELEV` signed error (obtained afterwards with
+> the new `outcompare.py --trace`) shows the error is **~1e-3 m or less through day 12**
+> (day 12: `-2.9e-6`), only ~5e-4 m by day 40, and then **jumps by more than an order of
+> magnitude at day 68 and day 90** to 1.3e-2 and 5.4e-2, ending at 8.2e-2. Those jump days
+> coincide with the snowmelt window.
+>
+> A dry-volume composition defect accumulates smoothly with humus; it cannot produce step
+> changes locked to snowmelt. So the composition mismatch documented below accounts for at
+> most the small early-season component -- roughly **2%** of the reported mean -- and the
+> bulk of the difference is the litter geometry's **excess-water** term, driven by
+> **`issue-094`** (ecosys-ng's subsurface water export is near zero, so the profile never
+> drains and the litter sits saturated).
+>
+> **What survives:** the per-pool composition mismatch is real, source-verified on both
+> sides, and still needs fixing. **What does not:** the claim that it is the cluster's cause,
+> and the 670 g C m-2 figure. Do not prioritise this issue as a root cause; `issue-094` is
+> the root cause. See `issue-094` for the trajectory evidence.
+
+The five readouts recorded in `run-014` (`ICE_1`-`ICE_5` gradient, `WTR_1` bias, `SNOWPACK` persistence, litter thickness, `PSI_SURF`) all measure litter state, and `issue-094` now explains all five. This issue is a genuine but minor defect in how litter carbon is *assembled*.
 
 ## What is already proven faithful
 
@@ -76,7 +99,9 @@ For `pool = 4`, ecosys-ng adds microbial, residue, dissolved, adsorbed and both 
 
 **The sign matches the measurement.** `run-014` reports `SURF_ELEV` bias `+2.68165e-2`, and `outcompare.py` defines `err = b - a` with `a` the oracle and `b` the candidate (`outcompare.py:391-395`), so the candidate's `SURF_ELEV` is the larger. Since `surface_litter_thickness_m` enters `SURF_ELEV` with coefficient `+1`, **ecosys-ng's litter is thicker than the oracle's by ~0.0268 m** -- the direction over-inclusion predicts.
 
-**Testable prediction, not yet measured**: per m2 of cell area, 0.0268 m of excess thickness is 0.0268 m3, requiring about `0.0268 / 4.0e-5 =` **670 g C m-2** of spurious pool-4 non-structural carbon. If an instrumented replay shows pool-4 non-structural carbon near that value, this single defect accounts for the whole thickness difference; if it is much smaller, a second contributor remains.
+**Prediction made here and SUBSEQUENTLY REFUTED**: per m2 of cell area, 0.0268 m of excess thickness is 0.0268 m3, requiring about `0.0268 / 4.0e-5 =` **670 g C m-2** of spurious pool-4 non-structural carbon, which would have made this defect the whole story. The `SURF_ELEV` trajectory refuted it the same day -- the error is ~1e-3 m through day 12 and jumps at the snowmelt, so the second contributor named as the alternative is in fact the dominant one (`issue-094`). See the correction at the top. The arithmetic above remains valid as an *upper bound* on what pool-4 carbon could contribute, which the trajectory then bounds far lower still.
+
+A further reason the strong form was implausible and should have been caught before filing: `initializeMappedSurfaceInPlace` (`soil/organic/initialization.zig:640-643`, `:682`) gives the surface layer carbon **only** in substrates 0, 1 and 2, and sets substrate-4 microbial carbon to `residue_microbial_fraction * 0 = 0`. So pool-4 non-structural carbon starts at **exactly zero** and can only grow through the hourly processes -- it cannot support a near-constant 0.0268 m offset, and the early-season agreement (day 12: `-2.9e-6`) is exactly what that zero start predicts.
 
 ### Consequence 2: pools 0,1,2 are under-included (opposite sign, smaller)
 
