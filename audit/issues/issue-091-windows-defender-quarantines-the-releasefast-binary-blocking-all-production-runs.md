@@ -29,6 +29,18 @@ Observed symptoms, in the order they appeared and were misread:
 
 The `!ml` suffix marks this a **machine-learning heuristic** detection, which is the usual signature of a false positive on a freshly compiled, unsigned executable. Nothing about the build changed in a way that would plausibly introduce malware: the binary is produced by `zig build -Doptimize=ReleaseFast` from this repository's own source, and the immediately preceding builds of the same tree ran fine (`run-013` through `run-019`).
 
+## Non-privileged workarounds: all three tested, all fail
+
+Tried before escalating, so the blocker is substantiated rather than assumed. None of these changes the machine's security posture.
+
+1. **Build to a different output path** (`zig build -Doptimize=ReleaseFast --prefix <scratchpad>/build021`). **Fails.** The install step cannot copy the artifact out: `error: unable to update file from 'C:\zig-local-cache\ecosys-ng\o\639dd8...\ecosys_ng.exe' to ...`.
+2. **Run the artifact directly from the Zig cache**, where the build put it. **Fails.** `Get-FileHash` on `C:\zig-local-cache\ecosys-ng\o\639dd8433923fcf565419de00c9bcb79\ecosys_ng.exe` returns the same virus error. So the detection follows the **content**, not the path -- an alternate location cannot help.
+3. **Build in Debug instead** (different content, so potentially under the heuristic). **The Debug binary IS readable** -- hash `296EFE4358750853CCDC5C8E88DD8FD23870BDDA9ED7E9B6050E65A2E22B5C34` -- so the detection is specific to the `ReleaseFast` output. But Debug is **far too slow to reach the frontier**: measured at **~87 s per simulated hour** (`elapsed_ms=87142` at `scene_weather_hours=8`), which puts hour 3,276 at roughly **79 hours** of wall clock, and it emitted **63 MB of log in 7 minutes**. Run stopped and its log deleted to reclaim disk.
+
+Result: the ReleaseFast binary is unusable, and the only readable build is ~1000x too slow for this frontier. There is no non-privileged path to a production run.
+
+**Useful side finding**: since the Debug build is readable, unit tests, `zig build`, and short diagnostic replays all still work. Only full-deck production runs are blocked. Source work can continue; only `run-*` validation cannot.
+
 ## Why it is not being worked around here
 
 Adding a Defender exclusion, disabling real-time protection, or restoring the file from quarantine all require elevated privileges and change the security posture of the user's machine. `PROJECT_CONTRACT.md` prohibits installing privileged tools or altering the environment as a side effect of an audit, and an antivirus exclusion is precisely that kind of change. It is the user's call, not the audit's.
