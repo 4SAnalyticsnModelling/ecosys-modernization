@@ -450,10 +450,18 @@ pub fn applyNitrogen(context: *NitrogenApplyContext, cell: usize, event: *const 
     try nitrogen_inventory.applyEventNitrogen(context.soil, context.surface, context.reactive_nitrogen, cell, area_m2, context.nitrogen_molar_mass_g_per_mol, cover_fraction, layer_thickness_m, event.*);
 
     // ISSUE-090. Seed the band geometry from THIS application's own row
-    // spacing, `hour1.f:303-320`. The oracle's NH4 gate is `Z4B+Z3B+ZUB.GT.0.0`
-    // (`hour1.f:303`) -- banded ammonium, ammonia and urea together -- and the
-    // NO3 family has its own equivalent at `:362-363` with `ROWO`. ecosys-ng's
-    // record carries one shared `band_row_width_m`, so both families take it.
+    // spacing, `hour1.f:303-320` (NH4) and `:356-372` (NO3). ecosys-ng's record
+    // carries one shared `band_row_width_m`, so both families take it.
+    //
+    // The two gates are DELIBERATELY ASYMMETRIC in the oracle and that
+    // asymmetry is load-bearing:
+    //   NH4  `IF((Z4B+Z3B+ZUB.GT.0.0)...`      `hour1.f:303`
+    //   NO3  `IF((Z4B+Z3B+ZUB+ZOB.GT.0.0)...`  `hour1.f:356`
+    // The NO3 band activates on ANY banded nitrogen, including banded ammonium
+    // alone, because banded ammonium nitrifies into the nitrate band zone. A
+    // first attempt here gated NO3 on banded nitrate only, and hour 3,276 then
+    // failed `MineralNitrogenInZeroWaterDomain` -- nitrification products
+    // arriving in a nitrate band whose volume fraction was still zero.
     //
     // Runs here, after the inventory application and before any hourly science,
     // because the band coordinator is in its `idle` phase at this point in the
@@ -461,7 +469,7 @@ pub fn applyNitrogen(context: *NitrogenApplyContext, cell: usize, event: *const 
     if (context.fertilizer_band) |band| {
         const n = event.nitrogen_g_per_m2;
         const banded_ammonium_family_g_n = n.banded_ammonium + n.banded_ammonia + n.banded_urea;
-        const banded_nitrate_family_g_n = n.banded_nitrate;
+        const banded_nitrate_family_g_n = banded_ammonium_family_g_n + n.banded_nitrate;
         if (banded_ammonium_family_g_n > 0 or banded_nitrate_family_g_n > 0) {
             const application = try nitrogen_inventory.applicationLayer(layer_thickness_m, event.application_depth_m);
             const activation: band_geometry.ActivationLayer = .{
