@@ -4018,10 +4018,17 @@ noinline fn postScienceManagementAndGasAccounting(driver_context: anytype, advan
         // call: this dispatch runs every hour, and an unconditional record
         // here reported tillage as exercised 346 times on a deck that had
         // tilled nothing -- caught by the first run that measured it.
+        // ISSUE-089 (temporary, narrowly gated): bracket the tillage writer.
+        // It is the one candidate writer for the hour-3,253 unbooked slot-0 ->
+        // slot-17 transfer that the existing issue-078 probes do not surround
+        // (`geometry_disturbance.finalize` already has before/after probes in
+        // `hourly_vegetation.zig`). A no-op outside hours 3248-3254.
+        try diagnostics.traceIssue078SoilPoreOverfill(driver_context.hourly_science_context.*, "before_apply_deferred_tillage_soil");
         const tilled_cell_count = try ecosys.disturbance_management_dispatch.applyDeferredTillageSoil(
             runtime,
             driver_context.deferred_tillage_soil_by_cell.*,
         );
+        try diagnostics.traceIssue078SoilPoreOverfill(driver_context.hourly_science_context.*, "after_apply_deferred_tillage_soil");
         if (tilled_cell_count != 0)
             driver_context.stage_census.*.recordCurrent(.tillage_soil_application);
         try ecosys.layer_local_conservation.accumulateTillageActivity(

@@ -307,22 +307,33 @@ pub fn traceIssue078SoilPoreOverfill(context: anytype, comptime stage: []const u
     const hour = context.executed_weather_hours.* + 1;
     if (hour < 3248 or hour > 3254) return;
     if (context.grid.cell_count == 0) return;
-    for ([_]usize{ 0, 1, 2 }) |layer_offset| {
-        const index = context.grid.layerIndex(0, layer_offset) catch continue;
+    // ISSUE-089: widened from layer offsets 0-2 to RAW grid indices, and
+    // extended to index 17 and a heat carrier. `run-015` caught an
+    // `HourlyLayerConservationFailure` at hour 3,253 whose heat residuals on
+    // slots 0 and 17 are equal and opposite to ~11 significant figures
+    // (-4.2752681740391765 against +4.2752681740404), i.e. an unbooked
+    // transfer between those two slots. Slot 17 is NOT an active layer -- the
+    // deck runs `layer_count=12` -- so `layerIndex(0, offset)` cannot reach it
+    // and raw indices are used instead. Printing water AND the temperature
+    // carrier at each existing stage boundary localizes which boundary moves
+    // the material, which is this issue's first experiment.
+    for ([_]usize{ 0, 1, 2, 17 }) |index| {
+        if (index >= context.grid.layer_count) continue;
         const capacity_m3 = context.grid.matrix_pore_capacity_m3[index];
         const liquid_m3 = context.grid.matrix_liquid_water_m3[index];
         const ice_m3 = context.grid.matrix_ice_water_m3[index];
         std.log.info(
-            "TEMP_DIAGNOSTIC issue-078 pore overfill stage boundary: stage={s} hour={d} cell=0 layer={d} index={d} matrix_pore_capacity_m3={e} matrix_liquid_water_m3={e} matrix_ice_water_m3={e} matrix_overfill_m3={e}",
+            "TEMP_DIAGNOSTIC issue-089 slot boundary: stage={s} hour={d} index={d} matrix_pore_capacity_m3={e} matrix_liquid_water_m3={e} matrix_ice_water_m3={e} matrix_overfill_m3={e} soil_temperature_k={e} macropore_liquid_water_m3={e}",
             .{
                 stage,
                 hour,
-                layer_offset,
                 index,
                 capacity_m3,
                 liquid_m3,
                 ice_m3,
                 liquid_m3 - capacity_m3,
+                context.grid.soil_temperature_k[index],
+                context.grid.macropore_liquid_water_m3[index],
             },
         );
     }

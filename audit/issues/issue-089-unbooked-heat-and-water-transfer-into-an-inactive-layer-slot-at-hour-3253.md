@@ -1,6 +1,62 @@
-# Issue 089 -- unbooked heat and water transfer from the top layer into an INACTIVE layer slot at hour 3,253
+# Issue 089 -- unbooked heat and water transfer from the top soil layer into the SURFACE (litter) scope at hour 3,253
 
-Status: **OPEN, CONFIRMED by a production run, cause not yet localized to a writer (filed 2026-09-21, adversarial Claude/Pi session).** This is the real hour-3,253 blocker. It was masked until now by `issue-078`'s entry-capacity guard, whose domain contradicted the oracle and which aborted first; with that guard corrected (`run-015`), this is what the run fails on. Diagnosis budget 0 of 3 spent.
+Status: **OPEN, CONFIRMED by a production run. Scope 17 IDENTIFIED as the SURFACE scope, NOT an inactive soil layer -- this issue's original framing is CORRECTED below, and the correction points directly at `issue-083`'s known-unported litter terminus.** (Filed 2026-09-21, adversarial Claude/Pi session; corrected the same session by an instrumented rerun.)
+
+## CORRECTION (experiment 1, instrumented rerun) -- scope 17 is the SURFACE, and that changes everything
+
+This issue was first filed on the assumption that `cell=17` in the conservation report was an **inactive soil layer** (the deck runs `layer_count=12`). **That assumption is refuted.** The instrumented rerun (`run-016`, binary SHA-256 `1470ACA642959B47A8752E9350B6AB52A503167368933C4255438C494B93BEC4`) widened `stages/diagnostics.zig`'s existing hour-3,248-3,254 probe to raw grid index 17 and it **never printed**, because the probe's own `index >= context.grid.layer_count` guard skipped it. `grid.layer_count` is 12. Index 17 does not exist in the grid's layer arrays at all, so it cannot be a soil layer, active or inactive.
+
+The conservation report indexes a **different** array: the layer-local ledger's own scope enumeration, whose length is `hourly_cell_conservation.zig:2305`'s `storage_before.len` = `layer_local_conservation.zig:217-220`'s
+
+```
+scopeCount() = soilCount() + snowCount() + cell_count * 2
+```
+
+and whose ordering is fixed by `layer_local_conservation.zig:222-240`:
+
+```zig
+.soil_layer => cell * soil_layer_capacity + layer,
+.snow_layer => soil_count + cell * snow_layer_capacity + layer,
+.surface    => soil_count + snow_count + cell,
+.canopy     => soil_count + snow_count + cell_count + cell,
+```
+
+With `cell_count=1` and `soil_layer_capacity=12` (confirmed: `grid.layer_count=12`, and the probe skipped 17), scope 17 is the **`.surface`** scope and scope 18 is `.canopy`. That requires `snow_layer_capacity=5`, which is the legacy `JS=5` snow extent; it is fixed by the arithmetic rather than read directly from the config, and is the only value that places `.surface` at 17.
+
+**So the corrected finding is: heat and water move from soil layer 0 into the SURFACE (litter) scope, and neither side books the transfer.**
+
+### Why the correction makes this far more important
+
+That is precisely the **`FLQR` leg** -- `watsub.f:3670-3685`, the top-soil-layer-to-litter flux which in the oracle also carries the donor-bounded mechanical excess-relief term:
+
+```fortran
+IF(VOLP1ZN.LT.0.0)THEN
+FLQR=FLQR+AMIN1(0.0,AMAX1(-VOLW1N*XNPZX,VOLP1ZN))
+ENDIF
+```
+
+`issue-083` independently established, from the solver side and before this run existed, that **ecosys-ng has no `FLQR` counterpart anywhere in `src`** -- it has `FLQRQ`/`FLQRI` (rain and irrigation to litter) but not `FLQR`. Two independent routes have now arrived at the same missing leg:
+
+1. `issue-083`, by reading the oracle's three relief legs and finding the third unported.
+2. This issue, by measuring an unbooked soil-layer-0-to-surface transfer in a production run.
+
+And it closes a chain that previously had a gap:
+
+- the top soil layer is chronically overfilled (`issue-024`; quantified by `run-014` as `WTR_1` bias **+0.2585 m3 m-3**, candidate systematically wetter);
+- at the day-136 tillage hour the displacement finally occurs, soil layer 0 -> surface;
+- ecosys-ng has no `FLQR`-analogue ledger leg for that face, so the transfer is unbooked;
+- the hour-3,253 conservation audit catches it.
+
+**This makes `issue-083`'s litter terminus the single highest-value fix for the production frontier, now backed by direct run evidence rather than inference.** It also revises `issue-083`'s own guidance: that issue concluded the terminus should be ported *together with* the donor-only relief change. This run suggests the terminus is needed **on its own merits**, independently of the relief change, because the transfer across that face is already happening and merely goes unrecorded.
+
+### What is still not established
+
+- **Which code performs the soil-0-to-surface move.** The probe fired 108 times across the four existing stage boundaries but only for grid indices 0, 1 and 2, so it did not observe the surface scope. The next rerun must trace the **surface** owners (`surface_precipitation.litter_water_m3`, `surface_litter_ice_m3`, `surface_heat_capacity_megajoules_per_k`, `grid.surface_temperature_k`) alongside soil layer 0, at the same four boundaries plus the tillage bracket added this round.
+- Whether the mover is the tillage adapter, the geometry/relayering transaction, or the accepted-displacement cascade at `stages/hourly_heat_water_solute.zig:4539-4570` -- which *does* terminate in the surface litter and *is* the `FLQR` analogue for the phase-displacement path, and which `issue-083` noted fires only for phase-change displacement. If it is that cascade firing on a tillage-induced displacement, the transfer may simply be missing its ledger entry rather than being illegitimate.
+
+The last possibility is the most likely and the cheapest to check first, and it would make the fix a **ledger** fix rather than a new physical mechanism.
+
+## Original framing, retained for provenance (scope 17 misread as an inactive soil layer) This is the real hour-3,253 blocker. It was masked until now by `issue-078`'s entry-capacity guard, whose domain contradicted the oracle and which aborted first; with that guard corrected (`run-015`), this is what the run fails on. Diagnosis budget 0 of 3 spent.
 
 ## The finding
 
