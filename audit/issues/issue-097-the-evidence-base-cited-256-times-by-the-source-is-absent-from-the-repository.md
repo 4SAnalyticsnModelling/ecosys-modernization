@@ -4,6 +4,34 @@ Status: **OPEN, CONFIRMED, PROCESS BLOCKER. Highest-priority systemic finding of
 
 This is not a science defect. It is the reason a large part of this session was wasted, and it would waste any reviewer's time identically.
 
+> ### EXTENSION, same day: `tools/` is missing too, and it contains the v1.0.0 release gate
+>
+> This repository's `ecosys-ng/` contains exactly three directories: `src`, `ecosys-ng-bin`,
+> `.zig-cache`. The reference copy additionally has **`docs/` (615 files)** and
+> **`tools/` (428 files)** -- **1,043 files**, cited **307 times** (256 `docs/` + 51 `tools/`)
+> from about 200 source files.
+>
+> `tools/` is not incidental. Per `GOAL_2026-09-13_instrument_audit.md:377-392` it holds:
+>
+> - **`tools/production_release_gate.ps1`** -- the script that decides release readiness.
+>   `:228` binds the performance manifest to the reference **including its `status` string**,
+>   `:240` re-derives the performance pass, and `:261` re-derives the acceptance pass.
+> - **`tools/production_performance_reference.json`** -- whose own `status` currently reads
+>   **`"unqualified"`**, with the interpretation field spelling out the consequence: *"No
+>   strict-production performance baseline is currently qualified. Production performance and
+>   release gates must fail closed."*
+>
+> **So the artifact that defines and checks v1.0.0 production readiness is not in the
+> repository**, and per its own recorded state it would **fail closed on criterion 3
+> (performance) even if it were**, until the performance reference is re-baselined -- which
+> that document raises as its "Decision 6 -- Re-baseline the performance reference, or drop
+> Rung B's deliverable", i.e. an explicit user decision. The same document marks producing
+> `release-v1.0.0.json` as "**impossible**" for that reason.
+>
+> This is the direct answer to why criterion 3 has no measurement in any of my rounds: there
+> is no qualified baseline to measure against and no gate script here to run. It is not
+> something further source work can resolve.
+
 ## The finding
 
 `ecosys-ng/src` contains **256 citations to `docs/` paths, across 67 distinct documents, in 168 source files**. Examples, by citation count:
