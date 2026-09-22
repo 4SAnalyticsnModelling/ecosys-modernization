@@ -147,6 +147,73 @@ Status: **OPEN, ROOT CAUSE OF THE FRONTIER FAILURE, CONFIRMED BY INSTRUMENTED RE
 
 Genuinely new: `MineralNitrogenInZeroWaterDomain` returns **zero hits** across the 615-file reference documentation tree (`issue-097`), including the 49,801-line `discrepancy_register.md`.
 
+> ## CORRECTION, same day: the amalgamation gap is REAL but it is NOT the cause of the hour-3,275 crash
+>
+> I framed this issue as "the frontier blocker is the missing ammonium amalgamation". **That
+> causal claim is wrong.** The source findings below all stand; the attribution does not.
+>
+> **The evidence that refutes it.** The instrumented run's own census reports:
+>
+> ```
+> info:     fertilizer_application entries=2 first_hour=2508 last_hour=3252
+> ```
+>
+> Only two fertilizer applications fired before the failure. The deck's `f25fr98` has three
+> events, and the **banded** one is `17051998 ... 0.05 0.76 1` -- application depth 0.05 m and
+> row spacing **0.76 m**, exactly the pair `issue-090`'s test pins as
+> `(0.025/0.76)*(0.025/0.05)`. That is **17 May = day 137 = hours 3,265-3,288**, and the
+> census's last application is hour **3,252**, so the banded event **had not fired yet** when
+> the run died at hour 3,275. The two that did fire are `15041998` (hour ~2,508) and
+> `16051998` (hour ~3,252), and the latter carries `0.0` depth and `0.00` row spacing -- i.e.
+> **broadcast**, no band.
+>
+> Independently: `runottawa:70` is `plant_nutrients,0,0,0,1,1,1,1`, so all three initial band
+> volume fractions are **zero** for this deck (`fertilizer_band_state.zig:145-148`), and
+> `DRY_CARRIER_TRACE` at hour 2,896 shows `ammonium_non_band_fraction=1e0`.
+>
+> **So no ammonium band ever existed in this run, and no amalgamation was ever due.**
+> `fraction = 0` at hour 3,275 is *correct*. The defect is that `ammonium_band` holds
+> 1.154e-7 mol **at all**.
+>
+> ### The corrected diagnosis: a transformation product arriving in a band that does not exist
+>
+> This is the **mirror of an already-recorded failure**, documented in this repository at
+> `management/fertilizer_management_dispatch.zig:460-464` (my own `issue-090` note):
+>
+> > *"The NO3 band activates on ANY banded nitrogen, including banded ammonium alone, because
+> > banded ammonium nitrifies into the nitrate band zone. A first attempt here gated NO3 on
+> > banded nitrate only, and hour 3,276 then failed `MineralNitrogenInZeroWaterDomain` --
+> > **nitrification products arriving in a nitrate band whose volume fraction was still
+> > zero**."*
+>
+> Same shape, different family: something deposits ammonium into the **ammonium** band while
+> its volume fraction is zero. The magnitude (1.154e-7 mol, about 1.6e-6 g N) is a trace,
+> which points at a proportional zone split that adds to the band without checking that the
+> band exists, rather than at a bulk mis-routing.
+>
+> **Open and unidentified: which process makes the deposit.** It is not a banded fertilizer
+> application -- none has occurred. Candidates are mineralisation or urea hydrolysis routed by
+> zone, or any per-zone split that writes the band term unconditionally. Identifying it needs
+> the band amount tracked across the hour, which is the next instrumentation step, not a
+> source-reading question.
+>
+> ### What survives from this issue
+>
+> Everything except the attribution, and it is worth keeping on its own merits:
+>
+> | finding | status |
+> |---|---|
+> | `hour1.f:4962-4982`'s NH4 amalgamation has no ecosys-ng counterpart | **stands** -- source-verified both sides |
+> | NO3/PO4 amalgamation writes to scratch and is never read back | **stands** -- 46 arrays, 0 reads after `:1016` |
+> | the staging omits the zone fraction (`1/fraction` too large) | **stands** -- settled against `hour1.f:3826-3858` |
+> | the closed-form blend fix design | **stands**, and is still the right design |
+> | ecosys-ng's guard is stricter than `hour1.f:3850` | **stands** |
+> | **this is the hour-3,275 blocker** | **WITHDRAWN** |
+>
+> These remain a genuine latent science gap: the first time a band *does* collapse -- day 137
+> onward in this deck, once the run gets that far -- the inventory will be stranded exactly as
+> described. They are simply not what stops the run today.
+
 ## The measurement
 
 `run-021` established that `issue-090`'s fix does not clear hour 3,275 and the run still dies on `MineralNitrogenInZeroWaterDomain`. The error name carries no context -- six call sites, two possible causes, no layer -- so `concentration()` (`soil/biogeochemistry/mineral_nitrogen_transport.zig:671`) was instrumented on its failure path only and the run reproduced in ~9 minutes with `ReleaseSafe`:
