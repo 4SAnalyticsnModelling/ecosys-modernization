@@ -50,6 +50,74 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 
 **So: the day-137 banded monocalcium phosphate application books its phosphorus and calcium as external inputs but does not deposit them into cell 2's inventory.**
 
+> ## ROOT CAUSE FOUND: the undissolved fertilizer reserve is not a census-visible storage pool
+>
+> The title's "never deposited" is **wrong** -- it *is* deposited. It is deposited somewhere
+> the conservation census cannot see.
+>
+> **The deposit happens.** `management/mineral_fertilizer_inventory.zig:91`:
+>
+> ```zig
+> next_soil.banded_monocalcium_phosphate_mol += p.banded_monocalcium_phosphate * cell_area_m2 / 62.0;
+> ```
+>
+> **The booking happens.** `management/fertilizer_management_dispatch.zig:266-267`:
+>
+> ```zig
+> result.soil.phosphorus_g_p += p.banded_monocalcium_phosphate * area_m2;
+> result.soil.calcium_mol += banded_monocalcium_mol;
+> ```
+>
+> and `ExternalProducer` in the census includes `fertilizer` (`validation/hourly_cell_conservation.zig`), so that input is counted.
+>
+> **But the pool it lands in has no storage owner.** The census's `StorageOwner` enum has
+> exactly ten members -- `water_phases`, `thermal_energy`, `soil_litter_gases`,
+> `aqueous_and_mineral_species`, `residue_som_and_microbes`, `surface_litter_organic`,
+> `living_plant_carbon`, `living_plant_nitrogen`, `living_plant_phosphorus`,
+> `soil_mineral_texture` -- and **none of them is the undissolved fertilizer reserve**.
+> Phosphorus storage is `storage_elements | storage_organic | storage_plant_p` (`:201`), where
+> `storage_elements = enumMask(.{StorageOwner.aqueous_and_mineral_species})` (`:155`). That
+> owner covers the *dissolved and mineral chemistry* state -- `chemistry.phosphate_minerals`
+> and `chemistry.band_phosphate` -- which is what the reserve dissolves **into**
+> (`mineral_fertilizer_inventory.zig:183-227`), not the reserve itself.
+>
+> ### The complete mechanism
+>
+> 1. The application books ~5.0 g P and ~0.0816 mol Ca as external inputs under
+>    `ExternalProducer.fertilizer`.
+> 2. The mass is deposited into `banded_monocalcium_phosphate_mol`, an **undissolved reserve**.
+> 3. That reserve has no `StorageOwner`, so the census's storage total does not include it.
+> 4. The mass becomes census-visible only later, as it dissolves into
+>    `chemistry.band_phosphate` / `phosphate_minerals`.
+> 5. **In the hour of application: input booked, storage unchanged, so
+>    `residual = -external_input` exactly.**
+>
+> That is why the residual matches the input to fifteen digits rather than approximately: the
+> entire input went somewhere the census structurally cannot count.
+>
+> ### Why it surfaces only now
+>
+> It needs an application whose reserve does **not** dissolve within the same hour, and large
+> enough to breach a limit that is ~5e-9. The day-137 banded monocalcium phosphate is 5.0 g
+> and dissolves slowly. **Whether the earlier broadcast applications (`PMA`, `FERT(9)`;
+> `15041998` carries 360.0) had the same problem and merely stayed under the limit, or
+> dissolved within the hour, is NOT established** and is the thing to check next -- if the
+> former, the same defect has been silently violating conservation since day 105.
+>
+> ### Fix direction
+>
+> **Add the undissolved fertilizer reserve as a census storage owner.** The mass is genuinely
+> in the cell from the moment it is applied, so the census should see it; the booking is
+> correct and must not be deferred to dissolution. That means a new `StorageOwner` member, its
+> inclusion in the `phosphorus`, `nitrogen` and `calcium` storage masks, and a census
+> contribution that sums the `mineral_fertilizer_inventory` and
+> `fertilizer_nitrogen_inventory` reserves.
+>
+> **Not applied.** It changes a validation invariant that every other quantity's mask is
+> checked against, so it needs its own review pass rather than being appended to this session.
+> The nitrogen reserves are in the same position and would need the same treatment, which is
+> exactly the kind of shared-state change the contract says invalidates every dependent check.
+
 ## Where it is not
 
 Checked, to keep the search honest:
