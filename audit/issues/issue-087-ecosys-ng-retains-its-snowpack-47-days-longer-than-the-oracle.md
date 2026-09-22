@@ -87,7 +87,27 @@ Mechanism 1 should still be checked as a separate, minor fidelity item -- an unp
 
 The bulk of the divergence is a **rate** difference, not an endpoint difference: the oracle sheds ~123 mm between hours 2,000 and 2,200 while the candidate sheds ~37 mm over the same window. Any explanation has to account for a factor of roughly three in melt rate during the melt window, not merely for the tail.
 
-## Original diagnosis plan (budget now 1 of 3 spent)
+## Experiment 2 (read-only, same session, PARTIAL): the discharge pathway EXISTS, so the "missing path" hypothesis is not supported
+
+Budget: **2 of 3 spent.** The pathway question is answered; the rate question is not.
+
+Experiment 1 flagged meltwater discharge as the most promising candidate, on the reasoning that `VOLWS` is one of the three summed terms and a pack that melts correctly but never drains would show exactly this signature. **That hypothesis is now weakened, and the reason is recorded here rather than left to look promising.**
+
+What was checked, on the ecosys-ng side:
+
+- `soil/water/snow_surface_discharge.zig` handles snowmelt **solute** discharge to the litter and topsoil (nitrogen, phosphorus, ions, salts) -- chemistry, **not** the water volume. On its own it would have been easy to mistake for the water path.
+- But `soil/water/snow_transport_solver.zig:12` takes **`litter_water_flux_m3`** as a declared input, and `:295` passes it into `snow.calculateFluxes` alongside `water_flux_to_lower_m3` and the soil micropore flux. So a **continuous, per-step snow-to-litter water flux is a first-class concept in the snow solver**, not something that only happens at pack disappearance.
+- `soil/water/snowpack_litter_heat_water_transfer.zig` is the separate discrete *disappearance* transaction (ported from `REDIST 4259--4300`, gated by `watsub.f:6655-6670`, per experiment 1).
+
+So ecosys-ng has **both** a continuous drainage path and a discrete disappearance transfer. A wholly absent discharge pathway is therefore **not** the explanation, and the remaining question is the **magnitude** of the continuous flux rather than its existence.
+
+That pushes the diagnosis back toward the other surviving candidate from experiment 1: **melt energy or its phase partition** -- the `issue-024` class, on the melting side. Which is consistent with the rate arithmetic: the oracle sheds ~123 mm between hours 2,000 and 2,200 while the candidate sheds ~37 mm, a factor of roughly three in melt rate, which is more naturally an energy/conversion-rate difference than a drainage-capacity one.
+
+**One genuinely open sub-question, not closed here**: ecosys-ng has no reference anywhere in `src` to the oracle's `FLQR` (`watsub.f:3670-3685`), the litter-soil flux that also carries the mechanical excess-relief term. It has `FLQRQ`/`FLQRI` (rain and irrigation to litter) but not `FLQR`. `issue-083` independently established the same absence from the solver side. That is about the **litter-to-soil** face rather than **snow-to-litter**, so it does not explain this issue directly, but a pack draining into a litter layer that cannot itself drain onward into the soil would back up -- and `run-014` measured `WTR_1` as systematically **wetter** in the candidate, which is what backing up looks like. Worth one experiment, but it belongs to `issue-083`, not here.
+
+**Recommended third and final experiment for this issue**: the matched-state snow phase kernel test from the original plan (option 3 below) -- drive both snow phase kernels from one snowpack state and one energy input and compare converted mass, in the style of `issue-024` round 11's `enthalpy_balance.zig` test. That directly measures the melt-rate factor and needs no production run. Do **not** spend it on another pathway search.
+
+## Original diagnosis plan (budget now 2 of 3 spent)
 
 No experiment has been run against this issue. Recommended first three, cheapest first, none needing a production run:
 
