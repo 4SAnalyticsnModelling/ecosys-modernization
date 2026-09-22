@@ -225,3 +225,39 @@ Absolute magnitudes are small (N2O and NH3 fluxes at 1e-4 to 1e-6 g N m-2 h-1), 
 **That this stream needed no exclusions is itself evidence**: the three defects found so far (`issue-085`, `issue-086`, `issue-088`) are specific mistakes, not a systemic problem with how ecosys-ng maps the editor ladder.
 
 Machine-readable reports: `audit/manifest/outcompare-heat-hourly-2026-09-21.json`, `outcompare-nitrogen-hourly-2026-09-21.json`.
+
+## Addendum 2026-09-22: DAILY water stream added (42 snapshot columns), obtained with no production run
+
+`issue-091` blocks all production runs, so this used `run-014`'s outputs already on disk. `outcompare.py` now detects cadence from the legacy header itself (`outsh.f` streams carry a `HOUR` column, `outsd.f` daily streams do not) and keys daily streams on day of year.
+
+**135 matched days, `candidate_only=0`, calendar cross-check 135/135 agree.** Six annual-cumulative flux columns are excluded with an `issue-092` citation rather than compared, plus `WTR_13`/`ICE_13` as `issue-085` class. 42 snapshot columns compared.
+
+### The depth gradient reproduces at daily cadence
+
+```
+ICE_12..ICE_6   max err 1e-17 .. 5.0e-13     0 exceedances
+ICE_5                      5.9e-08           2
+ICE_4                      1.1e-01           6
+ICE_3                      1.3e-01          13
+ICE_2                      1.9e-01          29
+ICE_1                      3.2e-01          65      (surface)
+```
+
+Seven of twelve daily ice layers agree to round-off with **zero** exceedances. Same structure the hourly stream showed, now independently at a different cadence and through a different writer (`outsd.f` rather than `outsh.f`).
+
+### Corroboration for the `issue-086` rename
+
+`SURF_WTR` max abs error **5.08e-3** with only 74 of 135 exceedances, and `SURF_ICE` max **5.85e-5** with **3**. These are the two quantities whose *hourly* counterparts were published as `surface_excess_*_depth` in metres until this session renamed them to the volumetric fractions they carry. The daily stream, which already used the correct names, agrees with the oracle well -- independent evidence that the quantity was right all along and only the hourly label was wrong.
+
+### Two candidate findings, recorded but NOT claimed
+
+Neither is filed as a defect yet; both need their value producer read before anyone acts.
+
+1. **`PSI_SURF` is a large outlier**: max abs error **2.178e+4**, MAE **7.675e+3**, bias **-7.675e+3**, all 135 days exceeding, against `PSI_2`-`PSI_10` whose max errors run from 1.22 down to 0.012. The oracle writes `PSISM(0,NY,NX)` **alone** (`outsd.f:160`) while the layer columns are `PSISM(k)+PSISO(k)` (`:148-157`) -- matric only at the surface, matric plus osmotic below. A magnitude near 1e4 MPa is also physically extreme for a water potential. Candidate causes, in the order the contract wants them checked: an osmotic term included on the candidate side where the oracle has none, or a unit mismatch. `PSI_1` is also elevated (max 390.2, MAE 17.2) against `PSI_2`'s 1.22, consistent with the surface-concentrated pattern rather than being separate.
+2. **`SURF_ELEV` and `ACTV_LYR` look like a paired sign or mapping issue.** Their biases are near-exactly equal and opposite -- `+2.68165e-2` against `-2.68200e-2` -- with near-identical max errors (`8.321e-2`, `8.295e-2`). That symmetry is unlikely to be two independent physical differences. Oracle `:161-165` writes `SURF_ELEV = -CDPTH(NU-1)+DLYR(3,0)`, `ACTV_LYR = -(DPTHA-CDPTH(NU-1)+DLYR(3,0))`, `WTR_TBL = -(DPTHT-CDPTH(NU-1))`; the candidate names are `active_surface_depth`, `active_layer_depth_below_surface`, `water_table_depth_below_surface`. Magnitudes are small (~0.027 m), so this is low-severity, but the symmetry is worth resolving rather than averaging away.
+
+### Storage and water-table columns
+
+`WATER` (the `UVOLW` snapshot, correctly bound in the daily stream per `issue-092`) has max **235.7 mm**, MAE **107.3**, bias **+102.5**, all days exceeding -- yet day 1 agrees to 0.5% (oracle 805.77 against candidate 801.72). So the two profiles start together and separate, which is consistent with the `WTR_1`-`WTR_10` high bias rather than an independent storage defect. `WTR_TBL` max 0.926 m, MAE 0.373.
+
+Machine-readable report: `audit/manifest/outcompare-water-daily-2026-09-22.json`.

@@ -149,6 +149,31 @@ STREAM_MAPS = {
         "SUBS_N_FLUX": "dissolved_inorganic_nitrogen_drainage",
         **{f"N2O_{k}": f"dissolved_nitrous_oxide_nitrogen_concentration_layer_{k}" for k in range(1, 16)},
     },
+    # DAILY water, values `outsd.f:114-165`. Only SNAPSHOT columns are mapped.
+    # The six annual-cumulative flux columns are excluded below with an
+    # issue-092 citation rather than compared, because the oracle accumulates
+    # them from day 1 of the year (`day.f:80-105` resets them only when
+    # `I.EQ.1`) while ecosys-ng reports a per-day value.
+    #
+    # Units verified against the producer: `1000*U*/AREA` is mm, `THETWZ`/
+    # `THETIZ` are dimensionless, `PSISM+PSISO` is MPa (`:148-157`), and the
+    # three tail columns are m (`:161-165`). Two asymmetries worth knowing:
+    # `PSI_SURF` is `PSISM(0)` ALONE (`:160`) while `PSI_1..10` are matric plus
+    # osmotic, and daily `SNOWPACK` is `1000*DPTHS`, snow DEPTH, where the
+    # hourly stream's same-named column is a water equivalent.
+    "water_daily": {
+        "WATER": "soil_water_storage",
+        "SNOWPACK": "snow_depth",
+        **{f"WTR_{k}": f"volumetric_liquid_water_fraction_layer_{k}" for k in range(1, 21)},
+        "SURF_WTR": "surface_volumetric_liquid_water_fraction",
+        **{f"ICE_{k}": f"volumetric_ice_fraction_layer_{k}" for k in range(1, 21)},
+        "SURF_ICE": "surface_volumetric_ice_fraction",
+        **{f"PSI_{k}": f"total_water_potential_layer_{k}" for k in range(1, 11)},
+        "PSI_SURF": "surface_water_potential",
+        "SURF_ELEV": "active_surface_depth",
+        "ACTV_LYR": "active_layer_depth_below_surface",
+        "WTR_TBL": "water_table_depth_below_surface",
+    },
 }
 
 # Legacy columns with a recorded, cited reason for having no counterpart.
@@ -166,6 +191,19 @@ ACCOUNTED_EXCLUSIONS = {
                     "but it is published as surface_excess_liquid_water_depth in m rather than a "
                     "dimensionless fraction, so the column cannot be matched by name/unit until renamed",
         "SURF_ICE": "issue-086 second finding: same label/unit defect as SURF_WTR, for THETIZ(0)",
+        **{f"WTR_{k}": f"issue-085 class: deck selects soil layer {k} but the runtime profile has 12 "
+                       "layers; the oracle emits a structural zero, ecosys-ng emits no column"
+           for k in range(13, 21)},
+        **{f"ICE_{k}": f"issue-085 class: deck selects soil layer {k} but the runtime profile has 12 "
+                       "layers; the oracle emits a structural zero, ecosys-ng emits no column"
+           for k in range(13, 21)},
+    },
+    "water_daily": {
+        **{name: "issue-092: the oracle accumulates this flux from day 1 of the year "
+                 "(`day.f:80-105` resets URAIN/UEVAP/URUN/USEDOU/UVOLO/UVOLY only when I.EQ.1) "
+                 "while ecosys-ng reports a per-day value. Same slot, same name, different "
+                 "accumulation window -- excluded until the disposition is decided"
+           for name in ("PRECN", "ET", "RUNOFF", "DISCHG", "TILE_DRG", "SEDIMENT")},
         **{f"WTR_{k}": f"issue-085 class: deck selects soil layer {k} but the runtime profile has 12 "
                        "layers; the oracle emits a structural zero, ecosys-ng emits no column"
            for k in range(13, 21)},
@@ -214,10 +252,18 @@ def parse_oracle(path: Path, max_rows: int | None):
         # silently turns into 1 February and which then matches almost nothing.
         # It is retained below purely as a cross-check on the DOY key.
         doy = float(values[names.index("DOY")])
-        key = int(round(doy * 24.0))
         date = values[names.index("DATE")]
-        calendar[key] = (int(date[4:8]), int(date[2:4]), int(date[0:2]),
-                         int(float(values[names.index("HOUR")])))
+        if "HOUR" in names:
+            # Hourly cadence: DOY is elapsed days, so DOY*24 is the cumulative
+            # 1-based hour of the simulated year.
+            key = int(round(doy * 24.0))
+            hour = int(float(values[names.index("HOUR")]))
+        else:
+            # Daily cadence (`outsd.f`): DOY is the integer day of year and
+            # there is no HOUR column at all.
+            key = int(round(doy))
+            hour = 0
+        calendar[key] = (int(date[4:8]), int(date[2:4]), int(date[0:2]), hour)
         record = {}
         for name, raw in zip(names, values):
             if name in ("DOY", "DATE", "HOUR"):
@@ -234,7 +280,7 @@ def parse_oracle(path: Path, max_rows: int | None):
     return names, rows, duplicates, calendar
 
 
-def parse_candidate(path: Path, max_rows: int | None):
+def parse_candidate(path: Path, max_rows: int | None, daily: bool = False):
     """ecosys-ng stream: tab-separated, hour is 0-based for the same instant."""
     lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
     if not lines:
@@ -252,15 +298,23 @@ def parse_candidate(path: Path, max_rows: int | None):
         if len(fields) != len(names):
             continue
         # +1 converts the candidate's 0-based hour to the legacy 1-based hour.
-        # Same cumulative 1-based hour-of-year as the oracle key. The candidate
-        # hour is 0-based for the instant the oracle labels 1-based, so the +1
-        # is a convention shift, not an off-by-one.
-        key = (int(float(fields[index["day_of_year"]])) - 1) * 24 + int(float(fields[index["hour"]])) + 1
+        # Hourly: same cumulative 1-based hour-of-year as the oracle key. The
+        # candidate hour is 0-based for the instant the oracle labels 1-based,
+        # so the +1 is a convention shift, not an off-by-one. Daily: the day of
+        # year, and the candidate's `hour` field (23) is the reporting instant
+        # rather than a key component, so it is not compared.
+        day_of_year = int(float(fields[index["day_of_year"]]))
+        if daily:
+            key = day_of_year
+            hour = 0
+        else:
+            key = (day_of_year - 1) * 24 + int(float(fields[index["hour"]])) + 1
+            hour = int(float(fields[index["hour"]])) + 1
         calendar[key] = (
             int(float(fields[index["year"]])),
             int(float(fields[index["month"]])),
             int(float(fields[index["day"]])),
-            int(float(fields[index["hour"]])) + 1,
+            hour,
         )
         record = {}
         for name, raw in zip(names, fields):
@@ -299,7 +353,10 @@ def main() -> int:
 
     oracle_path, candidate_path = Path(args.oracle), Path(args.candidate)
     onames, orows, odup, ocal = parse_oracle(oracle_path, args.max_rows)
-    cnames, crows, cdup, ccal = parse_candidate(candidate_path, args.max_rows)
+    # The legacy header itself decides the cadence: `outsh.f` streams carry a
+    # HOUR column, `outsd.f` daily streams do not.
+    daily = "HOUR" not in onames
+    cnames, crows, cdup, ccal = parse_candidate(candidate_path, args.max_rows, daily)
 
     mapping = STREAM_MAPS[args.stream]
     exclusions = ACCOUNTED_EXCLUSIONS.get(args.stream, {})
