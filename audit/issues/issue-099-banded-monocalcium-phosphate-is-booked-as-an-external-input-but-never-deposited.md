@@ -61,18 +61,33 @@ and the deck's day-137 banded line (`f77example/Cool Temperate Maize-Soybean ON/
 > deterministically -- identical 64 KB of stderr, identical final values, no error line, with
 > `THERMAL_PAIRED` substep tracing firing far more than the 32 lines `run-022` produced.
 >
-> **Why.** `fractions.phosphate_band` is not reliably either 0 or a healthy fraction. During a
-> non-idle band phase `preConsumptionPair` (`fertilizer_band_state.zig`) computes the band
-> fraction as `1 - non_band`, so a non-band fraction of `0.9999...` yields a band fraction of
-> order `1e-4`. My `zoneConcentrationDivisor` tested `zone_fraction <= 0`, so a value that
-> tiny passed the guard and became the divisor -- amplifying the deposited concentration by
-> ~1e4 and driving the chemistry solver into pathological substepping from the first hours.
+> **Why -- MY ATTRIBUTION WAS WRONG, refuted by measurement.** I attributed the regression to
+> a vanishing-but-nonzero `phosphate_band` becoming the divisor: `preConsumptionPair` computes
+> the band fraction as `1 - non_band`, so a non-band of `0.9999...` would yield `~1e-4`, and my
+> `zoneConcentrationDivisor` tested `zone_fraction <= 0` rather than against a floor, so such a
+> value would pass the guard and amplify the concentration by ~1e4.
 >
-> **What the legacy does that I missed.** `hour1.f:3845` is
-> `IF(VLNHB(L,NY,NX).GT.ZERO)THEN`, and `ZERO` is the model's **noise floor literal**, not
-> literal zero -- `starts.f:94` defines `ZERO2 = 1.0E-06` and the family of `ZERO*` constants
-> exists precisely so comparisons like this reject vanishing-but-nonzero values. My `<= 0`
-> test was the wrong predicate: the legacy's guard is a floor, mine was a sign test.
+> **That is not what happens.** A probe firing only for `0 < phosphate_band < 1e-3` was built
+> and run to the frontier: it fired **zero times**. There is no vanishing-but-nonzero phosphate
+> band fraction in this deck. The same run reached hour 3,264+ in 597 s, which independently
+> confirms the revert restored a healthy tree.
+>
+> **And the arithmetic cannot be responsible at hour 4 in any case.** `State.init` zeroes the
+> whole inventory (`@memset(soil, .{})`) and only `applyEvent` adds to it, on fertilizer days.
+> At hours 1-4 every mineral inventory field is zero, so `publishSoil` adds zero whatever the
+> divisor is. The deterministic stop at hour 4 therefore **cannot** come from the divisor
+> change.
+>
+> **What that leaves.** Commit `eabb39b` touched exactly three things in one file: `publishSoil`
+> (ruled out above), the two test expectations (cannot affect production), and
+> **`validateSoilStateUpdate`**, which I rewrote to mirror the new arithmetic with inline
+> `if (band_divisor == null) ... else ...` expressions and which runs for **every layer on
+> every publish**. That is the only remaining candidate and it is unexamined.
+>
+> The legacy floor point still stands on its own merits -- `hour1.f:3845`'s
+> `IF(VLNHB(L,NY,NX).GT.ZERO)` compares against the model's noise-floor literal
+> (`starts.f:94`, `ZERO2 = 1.0E-06`), not literal zero, so a re-land should use a floor rather
+> than a sign test regardless. But it is **not** the explanation for this regression.
 >
 > **State: reverted.** `git revert eabb39b` restores the full-layer-water divisor and the
 > hour-3,275 frontier. The tree is back to a known-good state rather than a regressed one.
