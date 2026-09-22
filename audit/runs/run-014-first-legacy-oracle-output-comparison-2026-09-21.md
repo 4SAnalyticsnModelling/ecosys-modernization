@@ -327,3 +327,37 @@ That routes back to the same place everything else on this surface does: litter 
 ### Both candidates resolved -- what it adds up to
 
 Neither is an output-layer defect, and in both cases the output code proved faithful to the source. `run-014`'s surviving output-layer defects remain exactly `issue-085`, `issue-086`, `issue-088` and `issue-092`. What the two resolutions add is convergence: the surface/litter region now accounts for the ice gradient, the liquid bias, the snow persistence, the surface matric potential and the litter thickness -- five independent readouts of one underlying divergence rather than five problems.
+
+### Litter thickness traced to its source 2026-09-22: the formula is a FAITHFUL port; the difference is in the litter CARBON state
+
+Following candidate 2's identification of a ~0.027 m litter-thickness difference, the derivation was traced on both sides. **The port is exact, term for term.**
+
+| | legacy | ecosys-ng |
+|---|---|---|
+| dry volume | `VOLR = 1.0E-06*AMAX1(0.0, RC0(0)/BKRS(0)+RC0(1)/BKRS(1)+RC0(2)/BKRS(2)+RC0(4)/BKRS(4))` (`hour1.f:4354-4355`) | `dry_volume = sum over pools {0,1,2,4} of 1e-6*carbon[p]/dry_bulk_density[p]` (`litter_geometry.zig:60-66`) |
+| excess water | `TVOLG0 = AMAX1(0.0, VOLW(0)+VOLI(0)-VOLWRX)` (`:4353`, named at `:4333` "litter water+ice in excess of VOLWRX") | `excess_water_and_ice = @max(0, water_m3 + ice_m3 - retention)` (`:67`) |
+| total | `VOLT(0) = TVOLG0 + VOLR` (`:4356`) | `expanded_volume = dry_volume + excess_water_and_ice` (`:68`) |
+| thickness | `DLYR(3,0) = VOLX(0)/AREA(3,0)`, with `VOLX(0)=VOLT(0)` (`:4382`, `:4358`) | `expanded_total_volume_m3 / canopy_cell_area_m2` (`ecosys_ng.zig:1919-1921`) |
+
+Even the non-obvious detail matches: legacy sums pools **0, 1, 2 and 4**, skipping pool 3, and ecosys-ng's `included = [_]usize{ 0, 1, 2, 4 }` carries a comment saying exactly that ("Pool 3 is intentionally excluded from VOLWRX/VOLR, matching RC0 indices 0,1,2,4 in the source"). The only formal difference is that legacy clamps the *sum* with `AMAX1(0.0,...)` while ecosys-ng validates each pool's carbon as non-negative on entry (`:55`), which is equivalent for non-negative inputs.
+
+**So litter thickness is not an independent defect either.** It is a readout of two already-diverging states:
+
+1. **Litter carbon by pool** (`RC0` against `carbon_by_pool_g_c`) -- the dominant term whenever the litter is at or below its retention capacity.
+2. **Ponded water and ice above retention capacity** -- contributes only when the litter is over capacity.
+
+And it connects directly to the tillage step already implicated elsewhere in this session: `redist.f:11794-11795` scales **both** `VOLR` and `VOLT(0)` by `XCORP0` on a tillage day, which is the same residue-incorporation mechanism that empties the litter by 1000x (`surface_biomass_transfer.zig:77`'s `@max(0.001, ...)` floor, recorded in `issue-089`).
+
+### Consolidated picture of the surface/litter cluster
+
+Every surface divergence measured in `run-014` now traces to litter **carbon** and litter **water**, with each output column being a different-sensitivity readout of those two:
+
+| readout | sensitivity | status |
+|---|---|---|
+| `ICE_1`-`ICE_5` gradient | high at surface, machine-precision by layer 6-8 | `issue-024` (freezing formulation) |
+| `WTR_1` bias `+0.2585 m3 m-3` | direct | `issue-087`, `issue-024` |
+| `SNOWPACK` ~47-day persistence | direct | `issue-087` |
+| litter thickness ~0.027 m | moderate; carbon-dominated | this record -- formula faithful |
+| `PSI_SURF` ~1e4 MPa | extreme; exponential in log water | resolved above -- symptom |
+
+**The actionable consequence**: the next diagnostic step on this cluster should target **litter carbon by pool** and **litter water**, not any of the five readouts. Litter carbon is the better first target of the two, because thickness depends on it linearly and because the tillage `XCORP0` scaling gives a specific, dated event (`hour1.f`/`redist.f:11794-11795`) to bracket -- whereas litter water is solver-coupled and already has two open issues on it.
