@@ -98,6 +98,47 @@ The diagnosis is now specific enough to target one computation. In order:
 
 This does **not** need a production run: the oracle is on disk, `run019`'s candidate output is on disk, and step 1 is source comparison. That matters because `issue-091` still blocks every run.
 
+## Addendum, same day: step 1 done -- the closed-form flux does NOT explain the 55x, and two of four candidates are eliminated
+
+The artificial-drainage flux was compared term by term. Legacy producer is `watsub.f:5934-5954`; ecosys-ng's is `soil/water/boundary.zig:69-83` (`matrixDischarge`), called from `solver_residual.zig:522`.
+
+```fortran
+! watsub.f:5935-5952
+PSISWD = XN*0.0049*SLOPE(N)*DLYR(N)*(1.0-DTBLDG)
+PSISWT = AMIN1(0.0, -PSISA1 + 0.0098*(DPTH-DTBLY) - 0.0098*AMAX1(0.0,DPTH-DPTHT))
+IF(PSISWT.LT.0.0) PSISWT = PSISWT - PSISWD
+FLWT   = PSISWT*HCND(N,KB,N3)*AREA(N,N3)*(1.0-AREAUD(N3))/(RCHGFA+1.0)*RCHGFB*XNPHX
+```
+
+| term | legacy | ecosys-ng | verdict |
+|---|---|---|---|
+| driving potential | `AMIN1(0, -PSISA1 + 0.0098*(DPTH-DTBLY) - 0.0098*AMAX1(0,DPTH-DPTHT))` | `@min(0, -matric + saturation_term + 0.0098*(mid-ext) - 0.0098*@max(0,mid-int))` (`:78`) | **faithful**; `saturation_term` is 0 exactly when `artificial_drain` (`:77`), matching the term's absence from the legacy artificial branch |
+| separation distance | `/(RCHGFA+1.0)`, `RCHGFA` = distance to the external table (`readi.f:141`, `reads.f:872`) | `driving /= external_separation_distance_m` (`:79`) **and** `/(recharge_frequency_divisor+1.0)` with the divisor passed as `0` (`solver_residual.zig:522`) | **differs, but the WRONG WAY.** For this deck's 10 m faces legacy divides by 11 and ecosys-ng by 10, so ecosys-ng's closed form is ~10% **larger**. Cannot explain a 55x deficit. |
+| slope term | `PSISWD = XN*0.0049*SLOPE*DLYR(N)*(1-DTBLDG)` | `slope_gradient = sign*0.0049*slope_sine*(1-water_table_slope)`, no `DLYR` (documented `GRID-INV-002`) | **moot for this deck**: `f25si98` line 5 gives the artificial table slope `DTBLDGG = 1.0`, so `(1 - slope) = 0` zeroes the term on both sides |
+| conductivity | `HCND(N,KB,N3)`, `KB` a wetness class from `THETW1 = AMAX1(THETZ, AMIN1(POROS, VOLW1/VOLY))` (`:5947-5950`) | `conductivityAt(properties, layer, axis, matrix_fraction, ice)` with `matrix_fraction = matrix_water / matrix_bulk_volume_m3` (`:462`) | **NOT ELIMINATED.** Legacy's wetness ratio is `VOLW1/VOLY`; ecosys-ng's is over `matrix_bulk_volume_m3`. Different denominators select different classes. Needs runtime values. |
+| area above table | `(1.0-AREAUD(N3))` | `(1.0-fraction_face_below_water_table)`, `fraction_below = clamp((bottom-external)/thickness, 0, 1)` (`:520`) | **NOT ELIMINATED**; the `AREAUD` producer was not compared |
+| boundary fraction, time | `*RCHGFB`, `*XNPHX` | `*recharge_time_multiplier` (= `exchange_fraction` = 1.0 here), `*time_fraction` | faithful |
+
+**Gate (`IFLGD`) is structurally faithful.** Legacy `watsub.f:5352-5378` enables discharge when `IDTBL>=3`, the midpoint is above the artificial table, `PSISA1(L) > PSISA(L)`, and no deeper layer above the table fails the same test or lies below the active layer. ecosys-ng reproduces all four (`solver_residual.zig:470`, `:521`, `:480`, `:506-519`). Two details checked rather than assumed:
+
+- Legacy *skips* layers at or below the table and continues the scan; ecosys-ng `break`s at the first such layer (`:511`). **Equivalent**, because `DPTH` increases monotonically with the layer index.
+- The inequality direction initially looked inverted. It is not: `grid.matric_potential_megapascal` is **not** the trial iterate -- `solver_residual.zig:477` recomputes the trial potential separately, which would be redundant otherwise -- so `base_matric > grid.matric_potential` maps onto `PSISA1 > PSISA` correctly.
+
+But ecosys-ng deliberately **freezes the active set at the hour-start state** ("so the implicit residual remains smooth", `:504-505`) where legacy re-evaluates `PSISA1` every substep. That is a documented deviation and it can only ever *disable* drainage that legacy would allow. **It is the leading remaining candidate.**
+
+### Narrowed candidate list
+
+Static reading eliminates the closed-form scaling and the gate's structure. What remains, in order of suspicion:
+
+1. **The frozen active set** (`solver_residual.zig:504-505`). If the hour-start state fails `PSISA1 > PSISA` on most hours, drainage is gated off almost always regardless of how correct the flux is. A binary gate is the only one of these candidates that can plausibly produce 55x.
+2. **The conductivity wetness class** -- `VOLW1/VOLY` against `matrix_water/matrix_bulk_volume_m3`.
+3. **`AREAUD` against `fraction_face_below_water_table`.**
+4. The `/(d+1)` against `/d` distance difference -- real but ~10% and of the wrong sign.
+
+Also flagged while here, not yet an issue: `boundary.zig:113` (`macroporeDischarge`) divides by `recharge_frequency_divisor` with **no `+1`**, where the sibling micropore path at `:81` uses `+1.0` and the legacy macropore line `watsub.f:6003` uses `AMAX1(RCHGFA,1.0)`. The legacy itself is inconsistent between the two paths (`/(RCHGFA+1.0)` micropore at `:5952`, `AMAX1(RCHGFA,1.0)` macropore at `:6003`), so whatever ecosys-ng passes there needs checking against `:6003` specifically, and a zero would divide by zero.
+
+**Honest status**: candidate 1 needs runtime values and cannot be settled by reading. A Debug replay is possible (`issue-091` confirms Debug is readable) but the tile-drainage gap only reaches 14x by day 40 (oracle 14.36 mm against 0.99 mm), i.e. ~960 simulated hours, which at the measured Debug rate of ~87 s/hour is ~23 hours of wall clock. So instrumenting the gate's hit rate over a short window is the affordable experiment, not reproducing the divergence.
+
 ## Reproduction
 
 ```
