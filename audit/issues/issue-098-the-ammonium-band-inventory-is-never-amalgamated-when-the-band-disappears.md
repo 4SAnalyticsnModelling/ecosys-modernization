@@ -316,12 +316,69 @@ Genuinely new: `MineralNitrogenInZeroWaterDomain` returns **zero hits** across t
 >    chemistry concentration, and the amount reaching `publishMatrix` is 1.154e-7 mol.
 > 5. `publishMatrix` divides by the zero fraction and raises.
 >
-> **Recommended fix**: replace `repartitionConcentrations` with the legacy's unconditional
-> absolute-fraction re-derivation -- `total = nb*f_nb_old + b*f_b_old; nb_new = total*f_nb/f_nb; ...`
-> or more directly, work in amounts as the legacy does: `total = nb + b; nb = total*f_nb;
-> b = total*f_b`. That removes both the early return and the division by `new_band_fraction`,
-> makes a zero band fraction a natural case, and is exactly `hour1.f:329-334`. It also
-> subsumes the `hour1.f:4970` amalgamation, because a disappearing band is just `f_b = 0`.
+> ### The fix I recommended here was WRONG -- corrected before landing
+>
+> I recommended replacing `repartitionConcentrations` with the legacy's unconditional
+> absolute-fraction re-derivation. **Checking the arithmetic before landing it showed that is
+> wrong**, and the reason is worth recording.
+>
+> Working the legacy's re-split through into concentration space, with
+> `conc_zone = amount_zone / (VOLW * f_zone)`:
+>
+> ```
+> total   = VOLW * (nb*f_nb_old + b*f_b_old)
+> nb_new  = (total * f_nb_new) / (VOLW * f_nb_new) = total/VOLW
+> b_new   = (total * f_b_new)  / (VOLW * f_b_new)  = total/VOLW      <-- identical
+> ```
+>
+> **The new fractions cancel, so both zones end up at the same concentration.** The legacy's
+> re-partition *homogenises* the two zones. That is fine where it actually sits -- inside the
+> `IF` gate at `hour1.f:303`, so `DO 50 L` (`:307-339`) runs **only when a banded application
+> (re)initialises the band**, not hourly. Applying it in ecosys-ng's *hourly*
+> `prepareHour`/`consumeUndissolved` path would erase the band's concentration contrast every
+> hour, which is the entire physical point of a band.
+>
+> The legacy therefore has **two distinct operations**, and conflating them is the trap:
+>
+> | legacy site | when | what it does |
+> |---|---|---|
+> | `hour1.f:303-342` | **only on a banded application** | homogenise and re-split all zones by the new fractions, every layer `NUI..JZ` |
+> | `hour1.f:4952-4982` | **hourly** | grow the band geometry; and *only if the band vanished*, fold band into non-band and zero the band (`:4970-4981`) |
+>
+> So the hourly path needs **amalgamation semantics, not re-split semantics**.
+>
+> ### And the blend design is also insufficient on its own
+>
+> The concentration blend proposed earlier (`nb = nb*f_nb + b*f_b; b = 0`) is correct *as a
+> conversion*, but for layer 1 it yields nothing: `f_b_old` is **also** zero, so
+> `b*f_b_old = 0` and the trace vanishes. In concentration space a zero-volume zone's
+> concentration carries **no mass**, so no blend can recover it.
+>
+> But the trace *is* real: `publishMatrix` sees **1.154e-7 mol** because inter-layer transport
+> **added to the amount after packing**, not because a concentration was carried. So the mass
+> exists in amount space and would be silently destroyed by any concentration-space fix.
+>
+> ### The correct fix: fold in AMOUNT space, at the transport boundary
+>
+> The legacy works in amounts (`ZNH4B` is g N, `:4970` is a plain add), and that is the only
+> space where this mass is representable. So the fold belongs in
+> `mineral_nitrogen_transport` -- where the amounts live and where the error is raised --
+> applied before concentrations are derived:
+>
+> ```
+> // hour1.f:4970-4973: a zone with no volume cannot hold solute. Fold it into
+> // the non-band zone before deriving concentrations. Exactly mass-conserving.
+> if (fractions.<family>_band == 0) {
+>     amounts[<family>_non_band] += amounts[<family>_band];
+>     amounts[<family>_band] = 0;
+> }
+> ```
+>
+> for each of the four band species. This conserves mass exactly, needs no water volume and
+> no fraction arithmetic, handles a zero fraction as the natural case, and leaves the hourly
+> incremental transfer untouched for layers that *do* have a band. It requires `publishMatrix`
+> to take a mutable `self` (it is currently `*const State` and reads via `cellAmountsConst`),
+> or an equivalent fold pass immediately before it.
 >
 > ### What survives from this issue
 >
