@@ -1,0 +1,340 @@
+{
+  "oracle_file": "C:\\ecosys-cmp\\oracle_ch1.txt",
+  "candidate_file": "C:\\ecosys-cmp\\zig_ch1_head.txt",
+  "stream": "carbon_hourly",
+  "rule": "abs(candidate-oracle) <= 1e-12 + 1e-06*abs(oracle)",
+  "oracle_rows": 6875,
+  "candidate_rows": 3252,
+  "matched_keys": 3252,
+  "oracle_only_keys": 3623,
+  "candidate_only_keys": 0,
+  "first_matched_key": 1,
+  "last_matched_key": 3252,
+  "calendar_mismatches": 0,
+  "calendar_mismatch_examples": [],
+  "duplicate_oracle_keys": 0,
+  "duplicate_candidate_keys": 0,
+  "columns": [
+    {
+      "oracle_column": "SOIL_CO2_FLUX",
+      "candidate_column": "carbon_dioxide_emission[umol m-2 s-1]",
+      "pairs": 3252,
+      "max_abs_error": 8.692550768156861,
+      "max_abs_error_key": 1,
+      "mae": 0.9784874892970561,
+      "rmse": 1.3657039715939412,
+      "bias": 0.8507754730860317,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -8.703152,
+        "candidate": -0.010601231843137477,
+        "abs_error": 8.692550768156861
+      }
+    },
+    {
+      "oracle_column": "ECO_CO2_FLUX",
+      "candidate_column": "net_carbon_exchange[umol m-2 s-1]",
+      "pairs": 3252,
+      "max_abs_error": 8.692550768156861,
+      "max_abs_error_key": 1,
+      "mae": 0.9784874892970561,
+      "rmse": 1.3657039715939412,
+      "bias": 0.8507754730860317,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -8.703152,
+        "candidate": -0.010601231843137477,
+        "abs_error": 8.692550768156861
+      }
+    },
+    {
+      "oracle_column": "CH4_FLUX",
+      "candidate_column": "methane_emission[umol m-2 s-1]",
+      "pairs": 3252,
+      "max_abs_error": 3.2645917132307507,
+      "max_abs_error_key": 3061,
+      "mae": 0.25479754512285563,
+      "rmse": 0.6227148237151735,
+      "bias": -0.2544069783975281,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.0003513212,
+        "candidate": -3.0498085605357637e-06,
+        "abs_error": 0.00035437100856053577
+      }
+    },
+    {
+      "oracle_column": "O2_FLUX",
+      "candidate_column": "oxygen_exchange[umol m-2 s-1]",
+      "pairs": 3252,
+      "max_abs_error": 129.68993431711968,
+      "max_abs_error_key": 1,
+      "mae": 1.6356737506345167,
+      "rmse": 3.251022059474551,
+      "bias": -1.115438830711132,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -129.6639,
+        "candidate": 0.02603431711967564,
+        "abs_error": 129.68993431711968
+      }
+    },
+    {
+      "oracle_column": "CO2_1",
+      "candidate_column": "dissolved_carbon_dioxide_carbon_concentration_layer_1[g C m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 35.723845466341004,
+      "max_abs_error_key": 2532,
+      "mae": 10.915911276864655,
+      "rmse": 12.446027818765067,
+      "bias": 6.6175564699113085,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 2.561241,
+        "candidate": 0.6044105301957954,
+        "abs_error": 1.9568304698042045
+      }
+    },
+    {
+      "oracle_column": "CO2_2",
+      "candidate_column": "dissolved_carbon_dioxide_carbon_concentration_layer_2[g C m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 53.45720974723463,
+      "max_abs_error_key": 2031,
+      "mae": 17.60587458037441,
+      "rmse": 20.41086962276052,
+      "bias": 16.461918418749114,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 3.166904,
+        "candidate": 1.8375744634147306,
+        "abs_error": 1.3293295365852695
+      }
+    },
+    {
+      "oracle_column": "CO2_3",
+      "candidate_column": "dissolved_carbon_dioxide_carbon_concentration_layer_3[g C m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 71.90250202454052,
+      "max_abs_error_key": 2031,
+      "mae": 24.595637342310873,
+      "rmse": 31.30707585247563,
+      "bias": 23.790995770560325,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 4.936234,
+        "candidate": 1.967699382851223,
+        "abs_error": 2.9685346171487765
+      }
+    },
+    {
+      "oracle_column": "CO2_4",
+      "candidate_column": "dissolved_carbon_dioxide_carbon_concentration_layer_4[g C m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 64.13395851442489,
+      "max_abs_error_key": 2139,
+      "mae": 23.695534871559676,
+      "rmse": 30.91512616637126,
+      "bias": 22.655242796922483,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 5.297841,
+        "candidate": 1.9362921917865712,
+        "abs_error": 3.3615488082134286
+      }
+    },
+    {
+      "oracle_column": "O2_1",
+      "candidate_column": "dissolved_oxygen_concentration_layer_1[g O2 m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 27.1660315581856,
+      "max_abs_error_key": 154,
+      "mae": 10.072009286579865,
+      "rmse": 12.352908090737671,
+      "bias": 5.2445317005715655,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 16.65974,
+        "candidate": 25.89411422248894,
+        "abs_error": 9.234374222488942
+      }
+    },
+    {
+      "oracle_column": "O2_2",
+      "candidate_column": "dissolved_oxygen_concentration_layer_2[g O2 m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 30.280568542924406,
+      "max_abs_error_key": 144,
+      "mae": 12.078854642752887,
+      "rmse": 13.827235107470857,
+      "bias": 3.522413089185323,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 11.90727,
+        "candidate": 19.936065860825362,
+        "abs_error": 8.028795860825362
+      }
+    },
+    {
+      "oracle_column": "O2_3",
+      "candidate_column": "dissolved_oxygen_concentration_layer_3[g O2 m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 25.757097776098867,
+      "max_abs_error_key": 455,
+      "mae": 12.6622223416434,
+      "rmse": 14.448653647588305,
+      "bias": 4.492318617437166,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 12.64551,
+        "candidate": 18.68503887965586,
+        "abs_error": 6.03952887965586
+      }
+    },
+    {
+      "oracle_column": "O2_4",
+      "candidate_column": "dissolved_oxygen_concentration_layer_4[g O2 m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 26.70551224876451,
+      "max_abs_error_key": 456,
+      "mae": 13.119027318242667,
+      "rmse": 15.251204019046746,
+      "bias": 6.691694141346356,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 14.40551,
+        "candidate": 18.44296849454294,
+        "abs_error": 4.037458494542939
+      }
+    },
+    {
+      "oracle_column": "O2_5",
+      "candidate_column": "dissolved_oxygen_concentration_layer_5[g O2 m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 27.144606161990207,
+      "max_abs_error_key": 457,
+      "mae": 14.243255374109978,
+      "rmse": 16.113196889826217,
+      "bias": 8.42854634365059,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 15.69811,
+        "candidate": 20.10993047676461,
+        "abs_error": 4.4118204767646105
+      }
+    },
+    {
+      "oracle_column": "O2_6",
+      "candidate_column": "dissolved_oxygen_concentration_layer_6[g O2 m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 27.46442696435591,
+      "max_abs_error_key": 457,
+      "mae": 14.941992801735834,
+      "rmse": 16.705845061056532,
+      "bias": 9.4883731259056,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 16.33667,
+        "candidate": 20.600203116526323,
+        "abs_error": 4.263533116526322
+      }
+    },
+    {
+      "oracle_column": "O2_7",
+      "candidate_column": "dissolved_oxygen_concentration_layer_7[g O2 m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 22.969479030656803,
+      "max_abs_error_key": 2035,
+      "mae": 16.78736533772968,
+      "rmse": 17.6860959021034,
+      "bias": 13.849726757604358,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 16.37271,
+        "candidate": 21.319281394839503,
+        "abs_error": 4.946571394839502
+      }
+    },
+    {
+      "oracle_column": "O2_8",
+      "candidate_column": "dissolved_oxygen_concentration_layer_8[g O2 m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 23.377780036065182,
+      "max_abs_error_key": 464,
+      "mae": 16.872819314837933,
+      "rmse": 17.674546463872478,
+      "bias": 14.137494637366661,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 13.33653,
+        "candidate": 21.690371587966876,
+        "abs_error": 8.353841587966876
+      }
+    },
+    {
+      "oracle_column": "O2_9",
+      "candidate_column": "dissolved_oxygen_concentration_layer_9[g O2 m-3 water]",
+      "pairs": 3252,
+      "max_abs_error": 22.106275191713998,
+      "max_abs_error_key": 466,
+      "mae": 14.577698988352063,
+      "rmse": 15.369010977686036,
+      "bias": 12.807069749590148,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 11.42405,
+        "candidate": 19.712209648835024,
+        "abs_error": 8.288159648835025
+      }
+    }
+  ],
+  "accounted_exclusions": [
+    {
+      "column": "CH4_15",
+      "reason": "issue-085: deck selects soil layer 15 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    }
+  ],
+  "unmapped_oracle_columns": [],
+  "completion_proof": "ABSENT on both sides; see limitations",
+  "limitations": [
+    "does not prove either run reached its required end time; completion is a separate mandatory proof and neither side has it",
+    "applies no unit conversion; the column mapping must be verified unit-compatible against the legacy value producer first",
+    "the default atol/rtol is a triage rule, not a reviewed scientific acceptance threshold",
+    "no smoothing, interpolation, clipping, outlier removal or cumulative resetting is performed",
+    "columns it cannot map are reported as unmapped, and agreement on mapped columns says nothing about them"
+  ]
+}

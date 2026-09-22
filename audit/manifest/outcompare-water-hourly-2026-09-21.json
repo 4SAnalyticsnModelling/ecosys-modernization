@@ -1,0 +1,599 @@
+{
+  "oracle_file": "C:\\ecosys-cmp\\oracle_wh1.txt",
+  "candidate_file": "C:\\ecosys-cmp\\zig_wh1_head.txt",
+  "stream": "water_hourly",
+  "rule": "abs(candidate-oracle) <= 1e-12 + 1e-06*abs(oracle)",
+  "oracle_rows": 6875,
+  "candidate_rows": 3252,
+  "matched_keys": 3252,
+  "oracle_only_keys": 3623,
+  "candidate_only_keys": 0,
+  "first_matched_key": 1,
+  "last_matched_key": 3252,
+  "calendar_mismatches": 0,
+  "calendar_mismatch_examples": [],
+  "duplicate_oracle_keys": 0,
+  "duplicate_candidate_keys": 0,
+  "columns": [
+    {
+      "oracle_column": "EVAPN",
+      "candidate_column": "evapotranspiration[mm]",
+      "pairs": 3252,
+      "max_abs_error": 0.5269931970078577,
+      "max_abs_error_key": 3252,
+      "mae": 0.03882450669401639,
+      "rmse": 0.08139238299346745,
+      "bias": 0.03116381081052201,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -0.01593085,
+        "candidate": 0.030400465368026965,
+        "abs_error": 0.04633131536802697
+      }
+    },
+    {
+      "oracle_column": "RUNOFF",
+      "candidate_column": "runoff[mm]",
+      "pairs": 3252,
+      "max_abs_error": 3.4318898165350618,
+      "max_abs_error_key": 2127,
+      "mae": 0.08254602228949719,
+      "rmse": 0.273454646983108,
+      "bias": 0.02856887745646757,
+      "exceedances": 675,
+      "exceedance_fraction": 0.20756457564575645,
+      "first_exceedance": {
+        "key": 1621,
+        "oracle": -0.0,
+        "candidate": 0.03962710618676205,
+        "abs_error": 0.03962710618676205
+      }
+    },
+    {
+      "oracle_column": "SEDIMENT",
+      "candidate_column": "sediment_discharge_water[mm]",
+      "pairs": 3252,
+      "max_abs_error": 0.0001470881,
+      "max_abs_error_key": 2138,
+      "mae": 5.0431498001229486e-05,
+      "rmse": 8.612707600490618e-05,
+      "bias": -5.0431498001229486e-05,
+      "exceedances": 1115,
+      "exceedance_fraction": 0.3428659286592866,
+      "first_exceedance": {
+        "key": 2138,
+        "oracle": 0.0001470881,
+        "candidate": 0.0,
+        "abs_error": 0.0001470881
+      }
+    },
+    {
+      "oracle_column": "DISCHG",
+      "candidate_column": "external_water_outflow[mm]",
+      "pairs": 3252,
+      "max_abs_error": 2.5217470821888384,
+      "max_abs_error_key": 1,
+      "mae": 0.1356512854130495,
+      "rmse": 0.3208657895491818,
+      "bias": 0.03154432240424863,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": -2.278812,
+        "candidate": 0.2429350821888383,
+        "abs_error": 2.5217470821888384
+      }
+    },
+    {
+      "oracle_column": "SNOWPACK",
+      "candidate_column": "surface_water_equivalent[mm]",
+      "pairs": 3252,
+      "max_abs_error": 111.6066291062483,
+      "max_abs_error_key": 2131,
+      "mae": 16.779715762427507,
+      "rmse": 31.021218448851826,
+      "bias": 14.225014715620976,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.0,
+        "candidate": 0.7998254414949346,
+        "abs_error": 0.7998254414949346
+      }
+    },
+    {
+      "oracle_column": "WTR_1",
+      "candidate_column": "volumetric_liquid_water_fraction_layer_1[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.7324694278927112,
+      "max_abs_error_key": 3177,
+      "mae": 0.2636220550609333,
+      "rmse": 0.3230512783179252,
+      "bias": 0.25850828323299496,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.2873841,
+        "candidate": 0.1281432661528167,
+        "abs_error": 0.15924083384718327
+      }
+    },
+    {
+      "oracle_column": "WTR_2",
+      "candidate_column": "volumetric_liquid_water_fraction_layer_2[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.29567999573557974,
+      "max_abs_error_key": 3252,
+      "mae": 0.10925481489139645,
+      "rmse": 0.12656664096351958,
+      "bias": 0.10414729240581518,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.281686,
+        "candidate": 0.2779605669298237,
+        "abs_error": 0.0037254330701763094
+      }
+    },
+    {
+      "oracle_column": "WTR_3",
+      "candidate_column": "volumetric_liquid_water_fraction_layer_3[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.28704329573557974,
+      "max_abs_error_key": 3252,
+      "mae": 0.10737844331041661,
+      "rmse": 0.12432028440629025,
+      "bias": 0.10184019757647358,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.2783326,
+        "candidate": 0.27905569803783253,
+        "abs_error": 0.000723098037832548
+      }
+    },
+    {
+      "oracle_column": "WTR_4",
+      "candidate_column": "volumetric_liquid_water_fraction_layer_4[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.24285358197689177,
+      "max_abs_error_key": 3252,
+      "mae": 0.10386043374120675,
+      "rmse": 0.12161993260757077,
+      "bias": 0.10180780971443086,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.2798953,
+        "candidate": 0.2791481073063716,
+        "abs_error": 0.0007471926936284401
+      }
+    },
+    {
+      "oracle_column": "WTR_5",
+      "candidate_column": "volumetric_liquid_water_fraction_layer_5[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.23055616458046968,
+      "max_abs_error_key": 3164,
+      "mae": 0.10107451749990529,
+      "rmse": 0.11931889325774195,
+      "bias": 0.10107289323597086,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.2799555,
+        "candidate": 0.2792143774284282,
+        "abs_error": 0.0007411225715718284
+      }
+    },
+    {
+      "oracle_column": "WTR_6",
+      "candidate_column": "volumetric_liquid_water_fraction_layer_6[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.2210759130746261,
+      "max_abs_error_key": 3175,
+      "mae": 0.09905591481814623,
+      "rmse": 0.11716265020124211,
+      "bias": 0.09905591481814623,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.2801917,
+        "candidate": 0.2803064342949754,
+        "abs_error": 0.00011473429497543819
+      }
+    },
+    {
+      "oracle_column": "WTR_7",
+      "candidate_column": "volumetric_liquid_water_fraction_layer_7[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.16094469035439285,
+      "max_abs_error_key": 3207,
+      "mae": 0.05981761095595691,
+      "rmse": 0.07891577381510444,
+      "bias": 0.053363921996553425,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.3299414,
+        "candidate": 0.328534904390992,
+        "abs_error": 0.0014064956090080183
+      }
+    },
+    {
+      "oracle_column": "WTR_8",
+      "candidate_column": "volumetric_liquid_water_fraction_layer_8[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.1498149003600064,
+      "max_abs_error_key": 3251,
+      "mae": 0.061794223708971065,
+      "rmse": 0.07937925034486533,
+      "bias": 0.06117654432707375,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.3300006,
+        "candidate": 0.33000443575184546,
+        "abs_error": 3.835751845482349e-06
+      }
+    },
+    {
+      "oracle_column": "WTR_9",
+      "candidate_column": "volumetric_liquid_water_fraction_layer_9[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.11972826907219258,
+      "max_abs_error_key": 3252,
+      "mae": 0.05638344207704613,
+      "rmse": 0.07072924800552789,
+      "bias": 0.05593277692429612,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.3299987,
+        "candidate": 0.3299995306250805,
+        "abs_error": 8.306250804945847e-07
+      }
+    },
+    {
+      "oracle_column": "WTR_10",
+      "candidate_column": "volumetric_liquid_water_fraction_layer_10[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.04449733418008095,
+      "max_abs_error_key": 171,
+      "mae": 0.015840500956799803,
+      "rmse": 0.019093884628716074,
+      "bias": 0.01568800286103747,
+      "exceedances": 3252,
+      "exceedance_fraction": 1.0,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.3307086,
+        "candidate": 0.33166739619506747,
+        "abs_error": 0.0009587961950674462
+      }
+    },
+    {
+      "oracle_column": "WTR_11",
+      "candidate_column": "volumetric_liquid_water_fraction_layer_11[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.04850605330889868,
+      "max_abs_error_key": 85,
+      "mae": 0.002603347095268161,
+      "rmse": 0.00816319438642415,
+      "bias": -0.00028489893445360814,
+      "exceedances": 2057,
+      "exceedance_fraction": 0.6325338253382534,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.3317315,
+        "candidate": 0.3331909813342192,
+        "abs_error": 0.0014594813342191926
+      }
+    },
+    {
+      "oracle_column": "WTR_12",
+      "candidate_column": "volumetric_liquid_water_fraction_layer_12[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.15430678701907624,
+      "max_abs_error_key": 86,
+      "mae": 0.009075918046263565,
+      "rmse": 0.03167018828919659,
+      "bias": -0.009072993658745277,
+      "exceedances": 1964,
+      "exceedance_fraction": 0.6039360393603936,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.3322917,
+        "candidate": 0.3336334469996988,
+        "abs_error": 0.0013417469996988007
+      }
+    },
+    {
+      "oracle_column": "ICE_1",
+      "candidate_column": "volumetric_ice_fraction_layer_1[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.3226003113514866,
+      "max_abs_error_key": 1835,
+      "mae": 0.08073561653111813,
+      "rmse": 0.13676787766446852,
+      "bias": -0.07890449837483854,
+      "exceedances": 1585,
+      "exceedance_fraction": 0.48739237392373924,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 0.006012125,
+        "candidate": 0.15929227282965486,
+        "abs_error": 0.15328014782965485
+      }
+    },
+    {
+      "oracle_column": "ICE_2",
+      "candidate_column": "volumetric_ice_fraction_layer_2[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.19450570982382687,
+      "max_abs_error_key": 125,
+      "mae": 0.010119169928258129,
+      "rmse": 0.03746413139493488,
+      "bias": -0.009216202216231161,
+      "exceedances": 686,
+      "exceedance_fraction": 0.2109471094710947,
+      "first_exceedance": {
+        "key": 1,
+        "oracle": 9.393676e-05,
+        "candidate": 0.0,
+        "abs_error": 9.393676e-05
+      }
+    },
+    {
+      "oracle_column": "ICE_3",
+      "candidate_column": "volumetric_ice_fraction_layer_3[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.143895951292419,
+      "max_abs_error_key": 18,
+      "mae": 0.003526699731555503,
+      "rmse": 0.017970425498136697,
+      "bias": 0.003526699731552305,
+      "exceedances": 299,
+      "exceedance_fraction": 0.09194341943419435,
+      "first_exceedance": {
+        "key": 3,
+        "oracle": 0.0,
+        "candidate": 0.0006818174886224253,
+        "abs_error": 0.0006818174886224253
+      }
+    },
+    {
+      "oracle_column": "ICE_4",
+      "candidate_column": "volumetric_ice_fraction_layer_4[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 0.10644299003372294,
+      "max_abs_error_key": 25,
+      "mae": 0.0013998312305660663,
+      "rmse": 0.01027970672769361,
+      "bias": 0.0013998312305657729,
+      "exceedances": 113,
+      "exceedance_fraction": 0.034747847478474786,
+      "first_exceedance": {
+        "key": 4,
+        "oracle": 0.0,
+        "candidate": 3.334543693565676e-05,
+        "abs_error": 3.334543693565676e-05
+      }
+    },
+    {
+      "oracle_column": "ICE_5",
+      "candidate_column": "volumetric_ice_fraction_layer_5[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 9.49912452731753e-05,
+      "max_abs_error_key": 20,
+      "mae": 1.6118952558148285e-07,
+      "rmse": 3.2678607571551433e-06,
+      "bias": 1.6118952548135392e-07,
+      "exceedances": 32,
+      "exceedance_fraction": 0.00984009840098401,
+      "first_exceedance": {
+        "key": 5,
+        "oracle": 0.0,
+        "candidate": 2.853413136105138e-07,
+        "abs_error": 2.853413136105138e-07
+      }
+    },
+    {
+      "oracle_column": "ICE_6",
+      "candidate_column": "volumetric_ice_fraction_layer_6[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 1.1149474614449388e-07,
+      "max_abs_error_key": 20,
+      "mae": 1.6818280962172983e-10,
+      "rmse": 3.400587927243685e-09,
+      "bias": 1.681828096202985e-10,
+      "exceedances": 25,
+      "exceedance_fraction": 0.007687576875768758,
+      "first_exceedance": {
+        "key": 6,
+        "oracle": 0.0,
+        "candidate": 1.0930647898407915e-09,
+        "abs_error": 1.0930647898407915e-09
+      }
+    },
+    {
+      "oracle_column": "ICE_7",
+      "candidate_column": "volumetric_ice_fraction_layer_7[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 9.26679031702446e-11,
+      "max_abs_error_key": 2091,
+      "mae": 1.698774570800844e-13,
+      "rmse": 3.139934593670562e-12,
+      "bias": 1.698774570800844e-13,
+      "exceedances": 21,
+      "exceedance_fraction": 0.006457564575645757,
+      "first_exceedance": {
+        "key": 7,
+        "oracle": 0.0,
+        "candidate": 2.313509083340048e-12,
+        "abs_error": 2.313509083340048e-12
+      }
+    },
+    {
+      "oracle_column": "ICE_8",
+      "candidate_column": "volumetric_ice_fraction_layer_8[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 1.5328321123953219e-13,
+      "max_abs_error_key": 2092,
+      "mae": 1.260035891993717e-16,
+      "rmse": 3.243566820300722e-15,
+      "bias": 1.260035891993717e-16,
+      "exceedances": 0,
+      "exceedance_fraction": 0.0,
+      "first_exceedance": null
+    },
+    {
+      "oracle_column": "ICE_9",
+      "candidate_column": "volumetric_ice_fraction_layer_9[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 1.0895900955781278e-16,
+      "max_abs_error_key": 2092,
+      "mae": 2.301051083711942e-17,
+      "rmse": 4.547576088553726e-17,
+      "bias": 2.301051083711942e-17,
+      "exceedances": 0,
+      "exceedance_fraction": 0.0,
+      "first_exceedance": null
+    },
+    {
+      "oracle_column": "ICE_10",
+      "candidate_column": "volumetric_ice_fraction_layer_10[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 6.053785742572007e-17,
+      "max_abs_error_key": 35,
+      "mae": 1.2734086658897832e-17,
+      "rmse": 2.776279342391392e-17,
+      "bias": 1.2734086658897832e-17,
+      "exceedances": 0,
+      "exceedance_fraction": 0.0,
+      "first_exceedance": null
+    },
+    {
+      "oracle_column": "ICE_11",
+      "candidate_column": "volumetric_ice_fraction_layer_11[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 6.053785225032788e-17,
+      "max_abs_error_key": 36,
+      "mae": 3.0900679487641965e-18,
+      "rmse": 1.3676817452373368e-17,
+      "bias": 3.0900679487641965e-18,
+      "exceedances": 0,
+      "exceedance_fraction": 0.0,
+      "first_exceedance": null
+    },
+    {
+      "oracle_column": "ICE_12",
+      "candidate_column": "volumetric_ice_fraction_layer_12[m3 m-3]",
+      "pairs": 3252,
+      "max_abs_error": 4.407404301748234e-15,
+      "max_abs_error_key": 2102,
+      "mae": 5.897552156226947e-18,
+      "rmse": 7.960689835672504e-17,
+      "bias": 5.897552156226947e-18,
+      "exceedances": 0,
+      "exceedance_fraction": 0.0,
+      "first_exceedance": null
+    }
+  ],
+  "accounted_exclusions": [
+    {
+      "column": "TTL_SWC",
+      "reason": "issue-086: WRONG BINDING, not merely absent. The oracle writes total cell water storage (UVOLW*1000/AREA, outsh.f:121); ecosys-ng writes root water uptake in the same slot (soil/water/output.zig:136). Comparing them would compare a storage term against a flux, so the column is excluded until the binding is fixed"
+    },
+    {
+      "column": "WTR_14",
+      "reason": "issue-085 class: deck selects soil layer 14 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "WTR_15",
+      "reason": "issue-085 class: deck selects soil layer 15 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "WTR_16",
+      "reason": "issue-085 class: deck selects soil layer 16 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "WTR_17",
+      "reason": "issue-085 class: deck selects soil layer 17 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "WTR_18",
+      "reason": "issue-085 class: deck selects soil layer 18 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "WTR_19",
+      "reason": "issue-085 class: deck selects soil layer 19 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "WTR_20",
+      "reason": "issue-085 class: deck selects soil layer 20 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "SURF_WTR",
+      "reason": "issue-086 second finding: the candidate's value is the correct THETWZ(0) analogue but it is published as surface_excess_liquid_water_depth in m rather than a dimensionless fraction, so the column cannot be matched by name/unit until renamed"
+    },
+    {
+      "column": "ICE_13",
+      "reason": "issue-085 class: deck selects soil layer 13 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "ICE_14",
+      "reason": "issue-085 class: deck selects soil layer 14 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "ICE_15",
+      "reason": "issue-085 class: deck selects soil layer 15 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "ICE_16",
+      "reason": "issue-085 class: deck selects soil layer 16 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "ICE_17",
+      "reason": "issue-085 class: deck selects soil layer 17 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "ICE_18",
+      "reason": "issue-085 class: deck selects soil layer 18 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "ICE_19",
+      "reason": "issue-085 class: deck selects soil layer 19 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "ICE_20",
+      "reason": "issue-085 class: deck selects soil layer 20 but the runtime profile has 12 layers; the oracle emits a structural zero, ecosys-ng emits no column"
+    },
+    {
+      "column": "SURF_ICE",
+      "reason": "issue-086 second finding: same label/unit defect as SURF_WTR, for THETIZ(0)"
+    }
+  ],
+  "unmapped_oracle_columns": [],
+  "completion_proof": "ABSENT on both sides; see limitations",
+  "limitations": [
+    "does not prove either run reached its required end time; completion is a separate mandatory proof and neither side has it",
+    "applies no unit conversion; the column mapping must be verified unit-compatible against the legacy value producer first",
+    "the default atol/rtol is a triage rule, not a reviewed scientific acceptance threshold",
+    "no smoothing, interpolation, clipping, outlier removal or cumulative resetting is performed",
+    "columns it cannot map are reported as unmapped, and agreement on mapped columns says nothing about them"
+  ]
+}
