@@ -203,17 +203,17 @@ pub const State = struct {
                 return error.InvalidMineralNitrogenTransportInput;
             const water = carrierM3(self.matrix.water_volume_m3[cell], dry_reference_water_m3, negligible_water_volume_m3);
             const amounts = try self.matrix.cellAmountsConst(cell);
-            const nh4_non_band_conc = try concentration(amounts[index(.ammonium_non_band)], water, fractions.ammonium_non_band);
+            const nh4_non_band_conc = try concentration(amounts[index(.ammonium_non_band)], water, fractions.ammonium_non_band, "ammonium_non_band", cell);
             if (nh4_non_band_conc > 1000) std.log.warn(
                 "large ammonium from transport publish: cell={d} conc_mol_m3={e} amount_mol={e} water_m3={e}",
                 .{ cell, nh4_non_band_conc, amounts[index(.ammonium_non_band)], water },
             );
             chemistry.aqueous[cell].ammonium_non_band = nh4_non_band_conc;
-            chemistry.aqueous[cell].ammonium_band = try concentration(amounts[index(.ammonium_band)], water, fractions.ammonium_band);
-            chemistry.aqueous[cell].ammonia_non_band = try concentration(amounts[index(.ammonia_non_band)], water, fractions.ammonium_non_band);
-            chemistry.aqueous[cell].ammonia_band = try concentration(amounts[index(.ammonia_band)], water, fractions.ammonium_band);
-            chemistry.aqueous[cell].nitrate_non_band = try concentration(amounts[index(.nitrate_non_band)], water, fractions.nitrate_non_band);
-            chemistry.aqueous[cell].nitrate_band = try concentration(amounts[index(.nitrate_band)], water, fractions.nitrate_band);
+            chemistry.aqueous[cell].ammonium_band = try concentration(amounts[index(.ammonium_band)], water, fractions.ammonium_band, "ammonium_band", cell);
+            chemistry.aqueous[cell].ammonia_non_band = try concentration(amounts[index(.ammonia_non_band)], water, fractions.ammonium_non_band, "ammonia_non_band", cell);
+            chemistry.aqueous[cell].ammonia_band = try concentration(amounts[index(.ammonia_band)], water, fractions.ammonium_band, "ammonia_band", cell);
+            chemistry.aqueous[cell].nitrate_non_band = try concentration(amounts[index(.nitrate_non_band)], water, fractions.nitrate_non_band, "nitrate_non_band", cell);
+            chemistry.aqueous[cell].nitrate_band = try concentration(amounts[index(.nitrate_band)], water, fractions.nitrate_band, "nitrate_band", cell);
             reactive.non_band_nitrite_g_n[cell] = amounts[index(.nitrite_non_band)] * nitrogen_molar_mass_g_per_mol;
             reactive.band_nitrite_g_n[cell] = amounts[index(.nitrite_band)] * nitrogen_molar_mass_g_per_mol;
         }
@@ -668,9 +668,29 @@ fn carrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_v
     return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
 }
 
-fn concentration(amount_mol: f64, water_m3: f64, fraction: f64) !f64 {
+/// TEMP_DIAGNOSTIC (frontier hour 3,275 `MineralNitrogenInZeroWaterDomain`,
+/// `audit/runs/run-021-...md`): `species` and `cell` are carried solely so the
+/// raise below can say WHICH domain holds nitrogen with no water to dissolve
+/// it in. The error name alone cannot distinguish the six call sites, the
+/// `fraction == 0` case from the `water_m3 == 0` case, or which layer. Logging
+/// only, on the failure path only, so it costs nothing on the hot path.
+/// Remove once the frontier failure is diagnosed.
+fn concentration(amount_mol: f64, water_m3: f64, fraction: f64, species: []const u8, cell: usize) !f64 {
     if (fraction == 0 or water_m3 == 0) {
-        if (amount_mol > 1e-12) return error.MineralNitrogenInZeroWaterDomain;
+        if (amount_mol > 1e-12) {
+            std.log.err(
+                "TEMP_DIAGNOSTIC MineralNitrogenInZeroWaterDomain: species={s} cell={d} amount_mol={e} water_m3={e} fraction={e} zero_cause={s}",
+                .{
+                    species,
+                    cell,
+                    amount_mol,
+                    water_m3,
+                    fraction,
+                    if (fraction == 0 and water_m3 == 0) "both" else if (fraction == 0) "fraction" else "water",
+                },
+            );
+            return error.MineralNitrogenInZeroWaterDomain;
+        }
         return 0;
     }
     const value = amount_mol / (water_m3 * fraction);
