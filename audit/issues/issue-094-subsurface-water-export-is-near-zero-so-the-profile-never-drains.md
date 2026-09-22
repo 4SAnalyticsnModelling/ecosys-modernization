@@ -1,6 +1,23 @@
 # Issue 094 -- ecosys-ng's subsurface water export is near zero, so the profile never drains: artificial (tile) drainage is 3.9 mm against the oracle's 213.5 mm
 
-Status: **OPEN, CONFIRMED FROM OUTPUTS ON DISK, ROOT-CAUSE CANDIDATE FOR THE ENTIRE SURFACE/LITTER DIVERGENCE CLUSTER (filed 2026-09-22, adversarial Claude/Pi session).** Found run-free while `issue-091` blocks all runs. This supersedes the framing of the cluster as five independent readouts: they are consequences of one missing water loss pathway.
+Status: **OPEN. The measurement is sound and is an INDEPENDENT CONFIRMATION of an already-documented defect, not a new discovery (filed 2026-09-22, adversarial Claude/Pi session).** Found run-free while `issue-091` blocks all runs. This supersedes the framing of the cluster as five independent readouts: they are consequences of one missing water loss pathway.
+
+> **Attribution correction, same day.** The underlying defect was documented on 2026-09-10 in
+> the reference `docs/` tree, which is absent from this repository (`issue-097`).
+> `production_status_2026-09-10.md:307` records that saturation makes layer 10's two matric
+> potentials equal, breaking the `IFLGD` chain and making micropore tile drainage identically
+> zero, and traces it upstream to **initial over-saturation** (271.9 mm, splitting at
+> `DTBLZ = 1.0 m`, layers 10/11/12 at porosity from hour 1). **That upstream cause is the real
+> target**, and the prior work states that register entries `HOUR1-006`, `SOIL-INITSAT-001`
+> and `EXEC-INITSAT-EXTENT-001` "must be reopened as 'the fix was wrong, not missing'".
+>
+> **What this issue contributes**: the same defect measured from the **output** side rather
+> than from initialization (3.91 mm against 213.51 mm; storage +411.58 against +225.37), the
+> reduction of `run-014`'s five surface readouts to it, and an **independent corroboration of
+> the 1 m boundary** -- the `WTR_k` bias attenuates with depth and vanishes exactly at
+> `WTR_11` (+0.016 at `WTR_10`, -0.0003 at `WTR_11`), which I measured without knowing the
+> prior work had located the same split. Two independent routes to the same 1 m boundary is
+> worth more than either alone.
 
 Severity is high and it is not an output-layer defect. A profile that cannot drain is wrong in the state, not in the reporting.
 

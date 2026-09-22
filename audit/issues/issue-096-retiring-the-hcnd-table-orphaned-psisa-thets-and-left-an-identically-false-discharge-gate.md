@@ -1,6 +1,50 @@
 # Issue 096 -- retiring the HCND table orphaned `PSISA`/`THETS`, leaving the micropore discharge gate comparing a value against itself
 
-Status: **OPEN, CONFIRMED BY SOURCE ON BOTH SIDES. This is the MECHANISM behind `issue-094` and it is a dangling dependency left by an approved feature replacement. Fix NOT applied while `issue-091` blocks production validation (filed 2026-09-22, adversarial Claude/Pi session).**
+Status: **REDISCOVERY -- the defect is real and confirmed, but it was ALREADY DOCUMENTED on 2026-09-10 with a deeper cause, and this issue's central accusation was WRONG. Retained as an independent corroboration, not as a new finding. See the correction below and `issue-097`.**
+
+> ### CORRECTION, same day, after consulting the reference documentation
+>
+> **1. The defect is already known, and the prior diagnosis is better than mine.**
+> `production_status_2026-09-10.md:307` (in the reference `docs/` tree, absent from this
+> repository -- `issue-097`): *"layer 10 sits at saturation so its two matric potentials are
+> equal, which breaks the `IFLGD` chain (`solver_residual.zig:432,458-471` =
+> `watsub.f:5352-5378`) and makes micropore tile drainage identically zero."* It traces the
+> cause **upstream** to initial over-saturation -- 271.9 mm excess, splitting exactly at
+> `DTBLZ = 1.0 m`, with layers 10/11/12 at porosity from hour 1 -- and quantifies the effect
+> as "~104 of the 106.6 mm tile-drainage gap". `discrepancy_register.md:43251` adds "broke
+> the IFLGD tile-drainage chain", "held the water table a metre high".
+>
+> My analysis identified *that* the two operands coincide; the prior work identified **why**
+> they coincide in practice (saturation clamps both to the same value) and what makes the
+> layer saturated in the first place. Mine is the special case, theirs is the cause.
+>
+> **2. The accusation below -- that retiring the HCND table left a dependency the
+> feature-boundary review should have caught -- is WRONG and is withdrawn.**
+> `legacy_conductivity_class_table_removal_and_air_fraction_threshold_reconciliation.md:44-61`
+> enumerates all three former consumers of the air-entry pair (the wetting-front enhancement
+> at `flux.zig:46-55`; the interior face conductivity, now the Kirchhoff interval average
+> `PR-KIRCHHOFF-001`; and the internal water-table sub-layer placement, now van Genuchten
+> effective saturation at `boundary_topology.zig:190-192`, which "needs no air-entry
+> threshold") and concludes: *"the air-entry fields are dead by **three independent
+> intentional replacements**, not by oversight."* The review did catch them. My `hour1.f:4305-4306`
+> `THETPX` "NOT REVIEWED" entry is covered by the third of those.
+>
+> **What still stands:** the defect is real, and the upstream cause the prior work names
+> (initial over-saturation) is recorded there as **needing to be reopened** --
+> `production_status_2026-09-10.md:301-305` says register entries `HOUR1-006`,
+> `SOIL-INITSAT-001` and `EXEC-INITSAT-EXTENT-001` "must be **reopened as 'the fix was wrong,
+> not missing'**". **That reopening is the real next action**, and it is upstream of
+> everything this issue and `issue-094` describe.
+>
+> **What this issue adds:** an independent confirmation from the output side rather than from
+> initialization (`issue-094`'s 3.91 mm against 213.51 mm), and an independent corroboration
+> of the `DTBLZ = 1.0 m` split -- I measured a `WTR_k` bias that attenuates with depth and
+> vanishes exactly there (`WTR_10` +0.016, `WTR_11` -0.0003) without knowing the prior work
+> had located the same boundary.
+>
+> The original text is retained below **unedited except this header**, because the
+> mechanism description is accurate and the reproduction steps are useful. Read it as
+> corroborating detail, not as a discovery.
 
 Severity high. It is not confined to drainage: the orphaned pair gates the general micropore flux and the litter-soil water exchange as well.
 

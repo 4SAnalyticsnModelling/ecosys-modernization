@@ -1,8 +1,46 @@
 # Issue 095 -- ecosys-ng's hourly and daily precipitation outputs disagree with each other by 232 mm (2.3x), while the oracle's two agree exactly
 
-Status: **OPEN, CONFIRMED, FULLY DIAGNOSED -- both slots are misbound in opposite directions; fix NOT applied while `issue-091` blocks production validation (filed 2026-09-22, adversarial Claude/Pi session).** Found run-free from outputs on disk. At most one of the two columns could have been correct, so this was a defect regardless of which comparison one preferred -- and it turns out **neither** is correct. See "RESOLVED, same day" below for the producers and the arithmetic.
+Status: **LARGELY SUPERSEDED BY EXISTING REGISTERED WORK; two of my claims here are WRONG and withdrawn. The measured 232 mm column gap is real, but the framing and two conclusions are not. See the correction below and `issue-097`.**
 
-**It is an output-binding defect, not an input defect.** The model is very likely driven with the right water and reports it through two slots that each measure something else. Same class as `issue-086`.
+> ### CORRECTION, same day, after consulting the reference documentation
+>
+> Three items, in descending order of how wrong I was. All references are to the reference
+> `docs/` tree, which is absent from this repository (`issue-097`).
+>
+> **1. WITHDRAWN -- "no output slot publishes the legacy-comparable precipitation quantity".**
+> False. `discrepancy_register.md:40163-40165` records that daily-heat `PRECN` (`= TRAI`,
+> **daily** reset, `day.f:74`) matches modern `total_precipitation` to **rel 3.35e-16**, and
+> concludes: *"the precipitation science is exact and the divergence was 100% output
+> semantics."* A comparable column exists and agrees to machine precision. I compared the two
+> wrong columns and inferred a missing quantity from it.
+>
+> **2. WITHDRAWN -- the `SOL_RADN` concern.** I reported 1,447 of 3,275 hours differing and
+> called it "systematic rather than noise" and undiagnosed. `discrepancy_register.md:8707`
+> records `SOL_RADN` at 2.4e-7 relative as agreeing **"to the writer's seven-digit floor"** --
+> it is the `E16.7E3` output format's precision, not a physical difference. My comparison rule
+> (`rtol = 1e-6`) is simply tighter than the format can express. Nothing to diagnose.
+>
+> **3. The hourly `PREC` deficit is already registered, and characterised more sharply than
+> here.** `discrepancy_register.md:8699-8712`: earliest divergence 1998 day 1 hour 16, and the
+> isolating evidence is that the column "agrees **exactly** on all 16 dry hours and fails on
+> all 8 wet hours, **always with modern at zero**", classified as "suspected translation defect
+> in weather ingestion or hour alignment, not a physics difference". **My "omits snowfall"
+> explanation does not fit "modern at zero on wet hours" and is probably wrong** -- a snowfall
+> omission would leave rain-only hours agreeing, not zero out wet hours. The register's own
+> note that "a suppressed precipitation input would also bias the water balance, so this should
+> be checked before the water-stream" analysis is exactly the connection `issue-094` needed.
+>
+> **What survives:** the measurement itself -- ecosys-ng's hourly stream sums to 179.300 mm
+> and its daily-water stream to 411.07 mm over the same window, against the oracle's 351.600
+> on both. The two ecosys-ng columns do disagree by 231.77 mm, and the daily one does add
+> ground condensation and canopy input (`ecosys_ng.zig:3658-3659`) that `URAIN` excludes. The
+> register's separate note that "`ET` does NOT improve... which independently confirms that ET
+> carries a real magnitude gap on top of the semantics -- see the condensation defect"
+> indicates the condensation term is already a tracked defect under that name.
+>
+> **Net**: this issue should be read as a corroborating measurement of two already-registered
+> defects (the hourly ingestion defect and the condensation defect), not as a new finding. The
+> arithmetic below is sound; the conclusions marked WITHDRAWN above are not.
 
 Discovered while checking `issue-094`'s secondary observation, which had assumed the daily figure was the reliable one. It is not safe to assume either.
 
