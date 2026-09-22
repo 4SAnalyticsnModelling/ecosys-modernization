@@ -294,3 +294,36 @@ So `PSI_SURF` is a **downstream symptom of the litter/surface water divergence**
 **One observation kept, not escalated**: `-2.1109077184563387e2` repeats **bit-for-bit** on days 1, 5, 100 and 130 -- distant days with different weather. That means the candidate's litter retained-water *fraction* is pinned to a recurring value on those days, which `surface/litter_water_environment.zig:69` computes as `min(water_retention_capacity_m3, litter_water_m3) / dry_litter_volume_m3`. A recurring exact value points at the `water_retention_capacity_m3` branch binding (i.e. litter at capacity), not at a stuck carrier. Worth a look if anyone diagnoses `issue-087`, since it is a direct readout of litter wetness, but it is not itself evidence of a defect.
 
 **Candidate 2 (`SURF_ELEV`/`ACTV_LYR` paired sign symmetry) remains open and unexamined.**
+
+### Candidate 2 (`SURF_ELEV`/`ACTV_LYR`) RESOLVED 2026-09-22: the formulas are faithful; one shared INPUT differs
+
+Also not a defect in the output layer, and the resolution names a specific quantity.
+
+**The formulas are exact.** `soil/diagnostics/daily_output.zig:400-408` reproduces `outsd.f:161-165` term for term, and even quotes the source expressions in its own comment at `:396-397`:
+
+```zig
+values[i] = -inputs.mineral_soil_surface_depth_m + inputs.surface_litter_thickness_m;              // SURF_ELEV
+values[i] = -(inputs.active_layer_bottom_depth_m - inputs.mineral_soil_surface_depth_m
+              + inputs.surface_litter_thickness_m);                                                // ACTV_LYR
+values[i] = -(inputs.water_table_depth_m - inputs.mineral_soil_surface_depth_m);                   // WTR_TBL
+```
+
+against
+
+```fortran
+K=48  -CDPTH(NU-1)+DLYR(3,0)
+K=49  -(DPTHA-CDPTH(NU-1)+DLYR(3,0))
+K=50  -(DPTHT-CDPTH(NU-1))
+```
+
+So the sign/mapping hypothesis is refuted: the signs, the ordering and the litter term are all correct.
+
+**What the symmetry actually means.** `surface_litter_thickness_m` enters `SURF_ELEV` with coefficient **+1** and `ACTV_LYR` with **-1**. A single difference `d` in that one input therefore produces `+d` in one column and `-d` in the other -- which is precisely the observed `+2.68165e-2` against `-2.68200e-2`, with near-identical max errors (`8.321e-2`, `8.295e-2`). The two columns are not two findings; they are **one input difference seen twice, with opposite sign**.
+
+**Identified quantity**: ecosys-ng's **surface litter thickness differs from the oracle's by about 0.027 m** (mean), up to ~0.083 m. `WTR_TBL` carries no litter term, which is why its error (MAE 0.373 m) has an unrelated structure and is not explained by this.
+
+That routes back to the same place everything else on this surface does: litter state. `issue-087` (snow persisting ~47 days over the litter), the tillage residue-incorporation step that empties the litter, and `WTR_1`'s `+0.2585 m3 m-3` bias are all the same neighbourhood. **Litter thickness is a new, concrete, low-noise handle on it** -- a geometry scalar rather than a solver-coupled quantity, so it should be considerably easier to diagnose than the water content itself.
+
+### Both candidates resolved -- what it adds up to
+
+Neither is an output-layer defect, and in both cases the output code proved faithful to the source. `run-014`'s surviving output-layer defects remain exactly `issue-085`, `issue-086`, `issue-088` and `issue-092`. What the two resolutions add is convergence: the surface/litter region now accounts for the ice gradient, the liquid bias, the snow persistence, the surface matric potential and the litter thickness -- five independent readouts of one underlying divergence rather than five problems.
