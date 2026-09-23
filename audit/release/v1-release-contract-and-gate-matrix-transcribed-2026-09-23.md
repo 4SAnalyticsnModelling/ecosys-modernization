@@ -17,21 +17,35 @@ And the file's own verdict on itself, its opening line:
 
 > **NOT PRODUCTION READY.** Full Ottawa completion, final same-candidate qualification, clean release package, and release tag remain unproven.
 
-## The nine remaining gates, verbatim (columns truncated as read)
+## The nine remaining gates: the complete "Still required" column, verbatim
 
-| Gate | Still required |
+This is the actual v1.0.0 to-do list.
+
+| Gate | Still required (verbatim) |
 |---|---|
-| Execution identity | "Fresh full scie..." |
-| Scientific ownership | "Reconcile each mandatory PR requirement once; nonzero growing-..." |
-| Hydrology | "Promote reviewed tests; full hete..." |
-| Freeze-thaw | "Run full dedicated Release..." |
-| Restart/spatial | "Active-science and calendar/repeat splits; continuous/resumed, seria..." |
-| Performance | "Complete calibration -> frozen independently evidenced reference -> separate measur..." |
-| Engineering validation | (historical: "full ReleaseSafe 4,412; current active-search candidate 254 selected library tests, four filtered roots, 11 solver guards and formatting ...") |
-| Scientific outputs/oracle | "Finite complete ordered outputs; active science; numerical comparison and a..." |
-| Reproducibility/release | "Scoped clean commit, clean-checkout ..." |
+| **Execution identity** | "Fresh full science completion and normal exit; no missing, duplicated or skipped intervals" |
+| **Scientific ownership** | "Reconcile each mandatory PR requirement once; nonzero growing-season, root uptake, management, pond and geometry fixtures; independent validation" |
+| **Hydrology** | "Promote reviewed tests; full heterogeneous-interface, grid/timestep convergence and recovering-driver evidence" |
+| **Freeze-thaw** | "Run full dedicated ReleaseSafe Appendix C benchmark and verify checkpoints" |
+| **Restart/spatial** | "Active-science and calendar/repeat splits; continuous/resumed, serial/parallel and cross-worker resumes; non-unit areas, heterogeneous layers and corruption rejection" |
+| **Performance** | "Complete calibration -> frozen independently evidenced reference -> separate measurement workflow; real passing shipping-contract measurements" |
+| **Engineering validation** | "Same final candidate: all three full modes/four roots, compiler, Linux x86_64/aarch64 compile-only, solver guards and required tool self-tests" |
+| **Scientific outputs/oracle** | "Finite complete ordered outputs; active science; numerical comparison and attribution over trustworthy Fortran interval; independent evidence for replacements" |
+| **Reproducibility/release** | "Scoped clean commit, clean-checkout package/checks, full same-candidate evidence chain, exact commands/hashes/instructions/report; annotated local tag only after every gate passes" |
 
-The right-hand column is truncated in the reading above; **the full text has not been transcribed and should be re-read before any gate is claimed.**
+### The binding constraint, stated plainly
+
+**Gate 1, Execution identity, requires "fresh full science completion and normal exit".** Combined with the contract's "Ottawa requires 262,920 accepted hours / 30 passes" and its insistence that "attempted, committed, accepted and normally completed are distinct", this means **v1.0.0 cannot be reached until the Ottawa deck runs to 262,920 hours and exits normally.** This repository's run terminates at hour 3,275 with `HourlyCellConservationFailure`. Every other gate is downstream of, or independent of, that single fact, and no amount of source auditing substitutes for it.
+
+Three further gates are unreachable for reasons already measured in this repository rather than merely unproven:
+
+- **Scientific outputs/oracle** requires "active science" and comparison "over trustworthy Fortran interval". The frontier run is **pre-emergence** -- 12 of 19 instrumented stages never execute, including photosynthesis and root uptake -- so there is no active plant science to compare (`audit/analysis/frontier-hour-3275-...md`).
+- **Scientific ownership** requires "nonzero growing-season, root uptake ... fixtures". Same cause.
+- **Performance** requires a "frozen independently evidenced reference" that the contract itself calls "explicitly unqualified", so criterion 3 has nothing qualified to be measured against yet.
+
+### `Engineering validation` also corrects something about this session's evidence
+
+The gate requires, on the **same final candidate**: "all three full modes/four roots, compiler, Linux x86_64/aarch64 compile-only, solver guards and required tool self-tests". That is **twelve test executions plus cross-platform compile checks**, not one. Every test figure this session has quoted is one root in one mode.
 
 ## What this establishes about the four criteria in the user's goal
 
