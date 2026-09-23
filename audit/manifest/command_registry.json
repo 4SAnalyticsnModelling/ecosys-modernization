@@ -125,7 +125,17 @@
     }
   },
   "commands": {
-    "note": "NOT populated in this pass. Every slot below is null because none of these commands was executed or verified on 2026-09-21. Do not infer an argv from the analysis section above; establish and record each one against real build files before use, per G0.",
+    "note": "PARTIALLY populated. Three slots were established by actually executing them on 2026-09-22 and are marked with their evidence: zig_releasesafe_build, zig_targeted_tests, zig_production_run. The remaining slots (fortran_build, fortran_run, zig_releasefast_build, zig_short_integration) are STILL null and must not be treated as verified. Do not infer an argv from the analysis section above; establish and record each one against real build files before use, per G0.",
+    "zig_releasesafe_build": {
+      "cwd": "ecosys-ng",
+      "argv": ["zig", "build", "-Doptimize=ReleaseSafe"],
+      "environment": {},
+      "source_hash": null,
+      "expected_artifacts": ["ecosys-ng/ecosys-ng-bin/ecosys_ng.exe"],
+      "completion_condition": "exit 0 and the executable exists with a fresh mtime",
+      "last_verified_evidence": "2026-09-22: exit 0; wrote ecosys-ng/ecosys-ng-bin/ecosys_ng.exe (11,408,896 bytes). NOTE the artifact is NOT under zig-out/bin -- checking zig-out/bin returns not-found even on a successful build, which cost one false 'build produced no binary' reading. Wall clock is long (single-digit minutes to over 30) and the build writes nothing to stdout until it finishes, so an empty output file is not evidence of a hang; check CPU time and working-set of the zig child instead.",
+      "note": "ReleaseSafe, not ReleaseFast, is the build used for every production run recorded in audit/runs/ from run-021 onward. It is the mandated qualification build. Verify a diagnostic's strings are present in the built binary (Select-String on the .exe) BEFORE running, so a zero-firing probe is distinguishable from a probe that was never compiled in."
+    },
     "fortran_build": {
       "cwd": null,
       "argv": [],
@@ -145,13 +155,14 @@
       "last_verified_evidence": null
     },
     "zig_targeted_tests": {
-      "cwd": null,
-      "argv": [],
+      "cwd": "ecosys-ng",
+      "argv": ["zig", "test", "src/module_index.zig"],
       "environment": {},
       "source_hash": null,
       "expected_artifacts": [],
-      "completion_condition": null,
-      "last_verified_evidence": null
+      "completion_condition": "exit 0 and zero failures",
+      "last_verified_evidence": "2026-09-22: 4380 passed / 1 skipped / 0 failed, with the issue-099 fix in tree (run-023). Add --test-filter \"<substring>\" to scope it; that form was used for the issue-098 and issue-099 regression tests.",
+      "note": "Invoke `zig test src/module_index.zig` DIRECTLY, not via `zig build test`, which has a known hang on this checkout. Do not kill a long test run on the basis of flat Get-Process CPU time -- two separate sessions independently made that mistake and killed legitimate runs; read the output log's content instead."
     },
     "zig_short_integration": {
       "cwd": null,
@@ -172,13 +183,17 @@
       "last_verified_evidence": null
     },
     "zig_production_run": {
-      "cwd": null,
-      "argv": [],
+      "cwd": "<staged deck directory containing runottawa, runottawa_input_files/, runottawa_output_files/>",
+      "argv": ["./ecosys_ng.exe", "runottawa"],
       "environment": {},
       "source_hash": null,
-      "expected_artifacts": [],
-      "completion_condition": null,
-      "last_verified_evidence": null
+      "expected_artifacts": [
+        "combined.log",
+        "<hour>.grid_and_plants.bin and the ten sibling checkpoint files, every 240 hours"
+      ],
+      "completion_condition": "the run reaches the intended hour; a clean full-horizon run would reach 262,920. As of 2026-09-22 it terminates at hour 3,275 with error HourlyCellConservationFailure (exit 1), which is the current frontier, NOT a successful completion.",
+      "last_verified_evidence": "2026-09-22 (run-024): staged from a previous run's deck into a fresh directory with NO checkpoints present, so it ran from hour 1; reached hour 3,275 in about 34 minutes wall clock and emitted the two reproducible nitrogen conservation rows plus the stage execution census. CLI shape independently confirmed by driver/cli.zig's own tests: ecosys_ng <runscript_path> [--threads N] [--survey-conservation] [--describe-timeline] [--execution-evidence <path>].",
+      "note": "Copy the freshly built ecosys_ng.exe INTO the deck directory and run it with cwd set there; the runscript's input_root/output_root resolve relative to cwd. Launch via a mechanism whose child survives the invoking shell -- PowerShell Start-Process children were killed when the tool call's job ended, which silently truncated three runs and caused a CORRECT fix to be reverted on false evidence (see run-023). Staging a fresh directory matters: leaving prior *.bin checkpoints in place risks a resume instead of a clean run."
     }
   }
 }
