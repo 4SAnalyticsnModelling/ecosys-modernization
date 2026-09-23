@@ -4,7 +4,21 @@ Status: **OPEN, MEASURED, NOT DIAGNOSED (filed 2026-09-22, adversarial Claude/Pi
 
 **The filename's "about 4% of the banded ammonium input" framing is superseded and should not be read as the characterisation.** Hour 3,275 emits **two** failure rows, indexed 0 and 2, losing the **same absolute mass** -- `0.0676655386` g N, agreeing to eleven significant figures, and byte-reproducible across two different binaries.
 
-**Superseded a second time, by `run-024` (read this before anything below).** That run measured two things that invalidate the framing in the rest of this file:
+**SUPERSEDED A THIRD TIME, BY `run-025` -- and this one explains all the others. READ THIS FIRST; the entire cell-based framing below is void.**
+
+**The two failure rows are LAYER-SCOPE rows, not grid-cell rows.** `layer_local_conservation.evaluate` (`:4325`) delegates to the cell module's `hourly.evaluateForScope` and passed the **same `.hourly` scope tag**, while the failure message hard-coded the word `cell`. So a layer/scope failure printed as `hourly cell conservation failure: cell=2` with `2` being a **layer/scope index**. Filed and fixed as **`issue-101`**.
+
+The measurement: a probe at the `evaluate` call site fired **exactly once**, with `storage_before.len=1 storage_after.len=1 cells.len=1 area.len=1` and `cell0_in=0 cell0_out=1.4674866533175493e-2` -- matching my traced ledger totals exactly, so nothing rewrites the ledger. One iteration cannot emit two rows, and neither row's terms match that call's inputs. **Both rows come from the layer evaluator, over `hourly_layer_boundary_ledger.activity`** -- a different ledger from the one I instrumented across two full build-and-run cycles.
+
+**So the correct target is the LAYER ledger at sub-scope 2**, and the index-0 row is a whole-domain scope: the six-pool nitrogen sum at the last stage checkpoint is `643.394687189585` against that row's `after` of `643.3946871895852`, a 15-digit match. That makes the eleven-figure-identical residual **one physical loss seen at two aggregation levels**, localised to sub-scope 2 -- not two independent losses of a coincidentally equal mass.
+
+**Also measured, and it re-aims the next step:** nitrogen was added to the seven-point post-NITRO stage trace, and within that whole window storage moves only `+0.0159659287160139` against the row's reported `+1.58897081620341`. **About 99% of the hour's nitrogen movement happens upstream of the trace's first checkpoint (`after_nitro`)**, so a pre-NITRO checkpoint is required before that instrument can localise anything.
+
+Full record: `audit/runs/run-025-issue-100-the-failure-rows-are-LAYER-rows-mislabelled-as-cells-2026-09-22.md`.
+
+---
+
+**Superseded a second time, by `run-024` (retained for the record; its `cells.len=1` measurement and halo withdrawal are correct, its conclusion about `evaluate` was right for the wrong reason).** That run measured two things that invalidate the framing in the rest of this file:
 
 1. **There is exactly ONE grid cell.** All 403 `BoundaryLedger.init` calls report `cells.len=1`. So rows "0" and "2" are **not two cells**, and the characterisation "a fixed quantity dropped once per affected cell" does not hold. One physical loss reported at two aggregation levels or scopes is the better-supported reading -- **not established**.
 2. **The reported terms do not come from the boundary ledger.** A probe on all three `BoundaryLedger` mutation methods traced hour 3,275's complete nitrogen booking for the only existing cell as **`input = 0`**, `output = 1.4674866533175493e-2`, while the `cell=0` row reports `external_inputs = 1.6566363548027827` and `external_outputs = 4.033074007076744e-16`. Neither term matches, and the output disagreement runs the *wrong way* -- the traced output is larger -- so this is not the probe missing a contribution.
