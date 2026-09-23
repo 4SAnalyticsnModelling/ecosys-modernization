@@ -31,6 +31,19 @@ The same timed read of the same 214 KB file, three times in one session:
 
 This is why `issue-101` is production-confirmed but **not regression-tested**: the confirming run fit in the healthy window; the test suite did not.
 
+**Four attempts at the test suite, all defeated by the fault, and the attempt budget is now spent:**
+
+| attempt | form | outcome |
+|---|---|---|
+| 1 | `zig test src/module_index.zig` | froze before compiling; 0 CPU delta over 60 s for 3+ hours |
+| 2 | same, relaunched | froze immediately, 0 CPU delta |
+| 3 | same, in the healthy window | **compiled and started running tests**, reached **1,825.8 CPU-seconds**, then froze with 0 CPU delta and never exited |
+| 4 | `--test-filter "conservation"` (reduced, to reuse the cached compile and run far fewer tests) | froze before producing output |
+
+Attempt 3 is the informative one: the suite got a long way into execution before the fault returned. **The change is very likely fine** -- it compiled cleanly twice and ran a full 35-minute production deck -- but "likely" is not "tested", and this issue does not claim otherwise. Per the orchestrator's bounded-attempt rule the problem was reduced (attempt 4) rather than retried whole, and that failed too, so no further attempts should be made until `D:` is stable.
+
+**The single outstanding action for `issue-101` is: run `zig test src/module_index.zig` once on a healthy `D:` and record the pass count.** Nothing else about this issue is open.
+
 ### The cause, measured: `D:` read latency collapses
 
 Timed single-file reads via `System.IO.File.ReadAllBytes`, same moment, same process:
