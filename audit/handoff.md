@@ -1160,3 +1160,59 @@ With `f_band = 0` the recovery is exactly zero. Logged deposit `8.06451612903225
 3. `issue-093`'s `RC0` per-pool composition -- still the one uncontested new defect with no attempted fix.
 
 **Standing user decision, unchanged**: `issue-097` -- import `docs/` + `tools/` (1,043 files cited 307 times, including `production_release_gate.ps1`, which is what would actually adjudicate v1.0.0).
+
+---
+
+## Rounds 30-32 (2026-09-22, later the same day) -- `issue-099` re-landed and VALIDATED; `issue-100` measured twice and my framing refuted twice
+
+### Candidate state
+
+Local `main` == remote at the time of writing. `ecosys-ng/src/validation/hourly_cell_conservation.zig`, `ecosys-ng/src/ecosys_ng.zig` and `ecosys-ng/src/stages/hourly_heat_water_solute.zig` carry **uncommitted TEMP_DIAGNOSTIC instrumentation** for `issue-100` (all gated on hour 3,275 and on `!builtin.is_test`); `scripts/` is untracked and predates this session. Frontier: **hour 3,275 of 262,920 (1.25%)**, unchanged.
+
+### `issue-099` -- FIXED and production-validated (`run-023`)
+
+The zone-water divisor fix was **re-landed** (`538d09a`) and is correct. Phosphorus and calcium conservation rows at hour 3,275 are **gone**; suite 4,380/1/0.
+
+**The revert was the error, not the fix.** I reverted a correct change because two runs appeared to regress the frontier to hour 4, then wrote up a mechanism for it. Rebuilding the identical code reached hour 2,184 at 180 s and ran on to 3,275. Those two runs had died *externally* -- `Start-Process` children were being killed with the PowerShell tool-call job. **Three runs were silently truncated this way.** Use a launch mechanism whose child outlives the invoking shell; this is now recorded in `command_registry.json`'s `zig_production_run` note.
+
+### `issue-100` -- the nitrogen residual: measured, NOT diagnosed, framing refuted twice
+
+Hour 3,275 emits two rows, indexed 0 and 2, both nitrogen, **byte-reproducible across two different binaries**. Both lose `0.0676655386` g N to eleven significant figures.
+
+What measurement established, in order:
+
+1. A probe on `accumulate` alone fired **zero times** -- incomplete by construction.
+2. `accumulateCells` (8 sites) and `accumulateIntercell` (4 sites) are called **only from inside `hourly_cell_conservation.zig`**. My grep "refuting" this had **excluded the file under study**. Never do that.
+3. `run-024`, with all three methods instrumented plus an unconditional `init` marker and an hour gate: **all 403 `BoundaryLedger.init` calls report `cells.len=1`**. There is exactly **one** grid cell, so rows 0 and 2 are **not two cells**, and "a fixed mass lost once per affected cell" is dead. The deck agrees (`runottawa:4`, bounds are cell *edges*); my `tile_layout` halo hypothesis is withdrawn.
+4. Same run: the ledger's **complete** nitrogen booking for that one cell at hour 3,275 is **`input = 0`**, `output = 1.4674866533175493e-2`, while its row reports `external_inputs = 1.6566363548027827`, `external_outputs = 4.033074007076744e-16`. Neither matches, and the output disagreement runs the **wrong way** (traced is larger). **`evaluate` is not reading the ledger state I instrumented.**
+
+Both of the issue's originally filed numeric leads are refuted: "residual approximates `external_outputs`" dies because row 0 has essentially no outputs and the same residual; the `FERT(5)=1.65` five-figure match is row-2-only, since row 0 books `1.6566364` and loses the same mass.
+
+**Unexplained and important:** a whole-tree search finds exactly **one** emitter of that message (`hourly_cell_conservation.zig:2412`), whose `cell` is a loop index over `0..storage_before.len` with `boundary.len` required equal, and `accumulated_cell_conservation` passes only `.accumulated`/`.accumulated_continuity` scopes. **A `cell=2` row tagged "hourly" is not constructible from a one-element ledger, yet it reproduces.** The index space of the reported rows is unidentified.
+
+### The open question, correctly posed
+
+Not "where does the missing nitrogen go" but **"what array does the hourly cell conservation report read, and in what index space?"** Until that is answered, none of `issue-100`'s `before`/`after`/`external_inputs` figures can be attributed to a producer.
+
+### Also established this round
+
+- **The frontier is one management event.** `f25fr98` has **three** application lines (day 105 lime `360.0`, day 136 `13.8`, day 137 `1.65` banded NH4 + `5.0` P). The census's recorded hours 2508 and 3252 land exactly on the first two; hour 3,275 lands on day 137. `issue-099` and `issue-100` are the same event. A one-hour discrepancy between the census and `issue-099`'s observed hour-3,275 fertilizer preflight is **unresolved**.
+- **The run has exercised ZERO plant growth.** 12 of 19 instrumented stages never executed; most are the calendar (maize is planted day 137, the run dies day 137 hour 11, pre-emergence), and `audit/analysis/frontier-hour-3275-...md` says which and why rather than banking twelve defects. **Consequence: criteria 1 and 2 are unverifiable for every plant process, and criterion 3's 1.72-2.37x slower was measured on soil-only physics in both models.** `day_of_year_reset`'s period is unclassified.
+- **The post-NITRO failure trace carried no nitrogen.** It checkpoints carbon and heat at all seven points of the hour, which is why it could not localise this loss. All six storage-side nitrogen pools are now added (uncommitted, building at time of writing).
+- **G0: three `command_registry.json` slots are now genuinely verified** (`zig_releasesafe_build`, `zig_targeted_tests`, `zig_production_run`), each with the operational trap that cost time. Four remain honestly null.
+
+### Method findings worth carrying
+
+- **Eleven mechanisms-from-reading have now been refuted across `issue-099` and `issue-100`.** The two cheapest refutations came from re-reading the run's own log and from checking call sites -- not from runs. Re-read the log before proposing anything.
+- **Verify a diagnostic's strings are present in the built binary before running it.** "Fired zero times" and "was never compiled in" produce identical logs. `run-024` did this and it removed a whole class of doubt.
+- **The ReleaseSafe artifact is at `ecosys-ng/ecosys-ng-bin/ecosys_ng.exe`, not `zig-out/bin`**, and the build prints nothing until it finishes.
+- **Do not judge build liveness from the parent `zig` process.** The shim and the `build` driver sit near zero CPU while the real `build-exe` child does the work; I nearly killed a healthy build a second time on that mistake. Sample the `build-exe` PID's CPU delta over ~20 s instead.
+
+### Next bounded action for round 33
+
+1. **Run the build now in flight** (probe at the `evaluate` call site printing `storage_before.len`/`cells.len`/`area.len`/slice **address** plus cell 0's actual terms, address printed at the three trace sites too, and nitrogen added to the seven-point post-NITRO trace). It answers the index-space question and localises the loss to a stage and a pool in one run.
+2. If a `cell=2` row still appears with `cells.len=1`, add a call-site marker to find the second emitter -- that would be a real structural defect in the conservation reporting, independent of the nitrogen.
+3. `issue-093`'s `RC0` per-pool composition -- still the one uncontested new defect with no attempted fix.
+4. `issue-099` defect 1 remains: port `hour1.f:411-412`'s `IFPOB` phosphate band activation.
+
+**Standing user decision, unchanged**: `issue-097` -- import `docs/` + `tools/` (1,043 files cited 307 times, including `production_release_gate.ps1`, which is what would actually adjudicate v1.0.0).
