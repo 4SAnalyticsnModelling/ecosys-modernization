@@ -2,11 +2,30 @@
 
 Status: **FIX WRITTEN 2026-09-22, NOT YET COMPILED. Do not treat this as verified.** A diagnostics-only defect with no effect on computed science, but it directly caused three wrong committed conclusions on `issue-100` and cost two `ReleaseSafe` build-and-run cycles (roughly two hours) chasing the wrong ledger.
 
-**Verification is blocked by a host-environment fault, not by the change.** Neither `zig test src/module_index.zig` nor `zig build -Doptimize=ReleaseSafe` will make progress on this host as of 2026-09-22 22:00 onward: both sit with live processes at **exactly zero CPU-seconds delta over 60 s**, write nothing to the global zig cache, and never ramp a `build-exe` child past ~0.5 CPU-seconds, where a healthy build of this project reaches **745 CPU-seconds and a 2.3 GB working set**. The same toolchain compiled and ran a trivial one-test file in **25.5 s** during the stall, so zig is not broken. Memory and disk are not the constraint (36 GB of 64 GB free, 395 GB free on C:). The host is broadly I/O-degraded: plain `Get-Process` and `Get-CimInstance` calls began taking over five minutes each.
+**Verification is blocked by a host-environment fault, not by the change.** Neither `zig test src/module_index.zig` nor `zig build -Doptimize=ReleaseSafe` will make progress on this host as of 2026-09-22 22:00 onward: both sit with live processes at **exactly zero CPU-seconds delta over 60 s**, write nothing to the global zig cache, and never ramp a `build-exe` child past ~0.5 CPU-seconds, where a healthy build of this project reaches **745 CPU-seconds and a 2.3 GB working set**. The same toolchain compiled and ran a trivial one-test file in **25.5 s** during the stall, so zig is not broken. Memory and disk are not the constraint (36 GB of 64 GB free, 395 GB free on C:). ### The cause, now measured: `D:` read latency has collapsed
 
-**The cause is NOT established.** I suspected the `issue-091` failure class (Defender interfering with this project's builds) because `MsMpEng` was resident at 1.2 GB, but `Get-MpComputerStatus` refutes an active scan -- the last quick scan ended 2026-09-22 02:15:09 and the last full scan on 2026-09-16, so only ordinary real-time protection is running. That attribution is withdrawn. Memory, disk and the toolchain are all individually fine, and I stopped probing the host rather than spend more of the session on it, so **the fault is recorded as observed and uncharacterised.**
+Timed single-file reads via `System.IO.File.ReadAllBytes`, same moment, same process:
 
-No workaround was applied. The one I had in mind -- a Defender path exclusion -- is both a privileged environment change the project contract forbids as an audit side effect, and unjustified now that the scan hypothesis is refuted. The fix therefore stands as written and unverified until the host recovers.
+| file | size | elapsed | per KB |
+|---|---|---|---|
+| `D:\ecosys-modernization\ecosys-ng\src\validation\hourly_cell_conservation.zig` | 214 KB | **5,875 ms** | ~27 ms |
+| `C:\...\OneDrive\...\docs\v1_release_checklist.md` | 46 KB | **26 ms** | ~0.57 ms |
+
+**`D:` is roughly 50x slower per byte than `C:`, and 5.9 seconds to read one 214 KB local file is pathological.** That single measurement explains every symptom:
+
+- `zig build-exe` must open several hundred source files on `D:`, so it sits **I/O-blocked at process startup** -- which is exactly why it shows near-zero CPU and a 17 MB working set while never ramping. It is not hung on a computation; it is waiting on the disk.
+- `git` operations on `D:` took over five minutes.
+- The **trivial test that compiled in 25.5 s was in the scratchpad on `C:`**, not on `D:`. That is the whole difference.
+- Reading the 3.28 MB reference register on `C:` worked normally throughout.
+
+**Hypotheses now refuted, each by measurement:**
+
+- *A wedged zig cache from my five force-kills.* Retried with `--global-cache-dir` pointed at a brand-new directory: `build-exe` still sat at 0.3 CPU with **zero delta over 30 s** and wrote **zero** files into the fresh cache.
+- *The `issue-091` Defender class.* `MsMpEng` was resident at 1.2 GB, but `Get-MpComputerStatus` shows no scan running -- last quick scan ended 2026-09-22 02:15:09, last full scan 2026-09-16. Withdrawn.
+- *Memory or disk exhaustion.* 36 GB of 64 GB free; 395 GB free on `C:`, 449 GB on `D:`.
+- *A compiler bug from this issue's own edit.* The stall reproduces identically for `zig test`, and the successful 18:35 build of this same project shows the toolchain handles this code path; the change was additionally simplified (hoisting `scope.domain()` out of the `inline for`) and the stall was unaffected.
+
+**This is a host storage fault on `D:`, not an audit problem and not something this session caused.** No workaround was applied: a Defender exclusion is a privileged environment change the contract forbids as an audit side effect, and is unjustified anyway now that the scan hypothesis is refuted; relocating the repository off `D:` would be a far larger environment change than an audit should make unilaterally. **The fix therefore stands as written and unverified until `D:` is healthy.** The first thing a resuming session should do is re-run the timed read above -- if `D:` still reads at ~27 ms/KB, no build will complete and nothing else should be attempted.
 
 **Compilation status of the committed source, stated precisely:** the `issue-100` instrumentation in this tree **was** compiled and executed -- it is the binary behind `run-025`, built 18:35 and run to hour 3,275. The `issue-101` change below (the `EvaluationScope` domain variants, the three message format strings, and the four `layer_local_conservation` call sites) was written **after** that build and **has never been through a compiler**. It is mechanical and `scope` was verified to drive no logic, but it is unverified.
 
@@ -48,6 +67,18 @@ The same hard-coded `cell=` appears in the sibling carbon-components and heat-co
 The measurement that exposed it was a probe at the `evaluate` call site itself, which fired **exactly once** with every array length 1 while **two** rows were emitted -- proof the rows came from elsewhere. Full record: `audit/runs/run-025-issue-100-the-failure-rows-are-LAYER-rows-mislabelled-as-cells-2026-09-22.md`.
 
 **This is a diagnostics defect that produced real, repeated audit error.** A conservation failure row is the primary evidence artefact at this frontier; a row whose index space is unstated is not evidence, it is a trap.
+
+## Independent corroboration from the reference docs, and a check that this is not a duplicate
+
+Per standing practice, the OneDrive reference docs (read-only) were searched before treating this as a new finding. The 3.28 MB, ~49,800-line `docs/discrepancy_register.md` **does not document the cell/layer message mislabeling**, so this entry is not a duplicate. But it contains two things that bear on it directly.
+
+**1. The same ambiguity already cost an earlier pass time.** The register's 2026-09-04 amendment records that the owner of `HourlyLayerConservationFailure` was, in the preceding entry, "**not yet identified by file**" and had to be hunted down:
+
+> "Found the owner of `HourlyLayerConservationFailure`: `src/validation/layer_local_conservation.zig:4172`, called from `ecosys_ng.zig:5621` ... passed to this one `evaluate()` call"
+
+A whole amendment was needed to establish which module owned a layer conservation failure. That is the same difficulty this issue describes, hit independently by a different pass roughly three weeks earlier. **The defect is recurrent, not a one-off confusion of mine** -- which is the argument for fixing the label rather than just noting it.
+
+**2. It confirms `run-025`'s deduction from an independent source.** `run-025` identified `layer_local_conservation.evaluate` as the emitter of both hour-3,275 rows by deduction -- the call-site probe firing once with length-1 arrays, plus the delegation at `:4325` -- and listed as a limitation that no probe had confirmed it from inside the layer call. The register independently records that `layer_local_conservation`'s `evaluate()` is a **distinct call site** owning the layer conservation check, invoked from `ecosys_ng.zig` with its own tolerance copy. The line numbers differ (`:4172` / `:5621` then, `:4325` / `:6055` now) because the files have grown, but the structure is the same. The deduction stands on two independent legs now.
 
 ## The fix
 
