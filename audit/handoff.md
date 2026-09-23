@@ -1216,3 +1216,48 @@ Not "where does the missing nitrogen go" but **"what array does the hourly cell 
 4. `issue-099` defect 1 remains: port `hour1.f:411-412`'s `IFPOB` phosphate band activation.
 
 **Standing user decision, unchanged**: `issue-097` -- import `docs/` + `tools/` (1,043 files cited 307 times, including `production_release_gate.ps1`, which is what would actually adjudicate v1.0.0).
+
+---
+
+## Round 33 (2026-09-23) -- v1.0.0 finally has a DEFINITION in this repository, and it identifies the binding constraint
+
+### The most consequential finding of the session
+
+`docs/v1_release_checklist.md` in the reference tree defines v1.0.0, and **this repository had no copy, so no gate could be adjudicated at all.** Its criteria are now transcribed with provenance at `audit/release/v1-release-contract-and-gate-matrix-transcribed-2026-09-23.md`. Decided autonomously, per the standing instruction that no one will answer: transcribe **the criteria only**, not the 1,043 files of `issue-097`, because copying unverified files wholesale changes the audited corpus but leaving the definition of the release out of the repo makes every gate unadjudicable.
+
+**The binding constraint is Gate 1, Execution identity: "Fresh full science completion and normal exit; no missing, duplicated or skipped intervals",** against a horizon the contract fixes at **262,920 accepted hours / 30 passes**. This repo terminates at hour 3,275. **No amount of source auditing substitutes for that**, and it is the honest answer to why v1.0.0 is not achieved.
+
+Three further gates are unreachable for reasons already **measured** here, not merely unproven:
+
+- **Scientific outputs/oracle** needs "active science" and comparison "over trustworthy Fortran interval" -- the frontier run is **pre-emergence**, 12 of 19 instrumented stages never execute including photosynthesis and root uptake.
+- **Scientific ownership** needs "nonzero growing-season, root uptake ... fixtures" -- same cause.
+- **Performance** needs a "frozen independently evidenced reference" that the contract itself calls **"explicitly unqualified"**. So **criterion 3 is not merely unmet; it is not yet measurable in the contract's terms**, and `run-021`'s 1.72-2.37x slower has nothing qualified to be compared against.
+
+### Two corrections to this session's own evidence standards
+
+- **Engineering validation requires the same final candidate to pass "all three full modes/four roots, compiler, Linux x86_64/aarch64 compile-only, solver guards and required tool self-tests"** -- twelve test executions plus cross-platform compiles. Every test figure quoted in this session (`4380 passed / 1 skipped / 0 failed`) is **one root in one mode**, roughly a twelfth of the matrix. No record here should be read as engineering-validation evidence.
+- On the contract's own distinction that "attempted, committed, accepted and normally completed are distinct", this repo's **accepted** hour count is **3,274**, not 3,275 -- 3,275 is the hour that *fails*.
+
+### Context that cuts both ways
+
+The reference tree's own best recorded frontier was **hour 2,649** (failing attempt 2650 on `InvalidLitterSoilInterfacePhysicalState`, 2026-09-14). **This repository is 626 hours ahead of it** and fails at a later, different event. That is real evidence the work here is not behind the reference -- and equally, evidence that a project with far more history had **also** not achieved v1.0.0, and that the reference hit distinct blocking failures at hours 2,534, 2,645, 2,646, 2,649 and 2,650. The remaining 98.75% is not a formality.
+
+### Delivered this round
+
+- **`issue-101` RESOLVED and production-confirmed** (`run-026`): the row now reads `hourly_layer layer_scope conservation failure: layer_scope=2`. Compiled (`BUILD_EXIT=0`), strings verified in the binary, relabelled row observed at hour 3,275. **Not regression-tested** -- see the blocker.
+- **`issue-100` re-posed on measurement**: two distinct ledger allocations (`accumulateCells` writes `0x1ef8266a800`, `evaluate` reads `0x1ef804f0c00`), and at the cell evaluate the ledger holds nitrogen `input=0` against a reported `1.6566`. **No mechanism proposed** -- inferring call order from log-line position has been wrong at least three times on this issue.
+- **`issue-102` filed and then quantified without a compiler**: 62 clamp events totalling `7.0924e-5` g C (546x the register's stated basis), but **all 62 inside the single failing hour** and a relative `1.2e-8` of system carbon -- so the register's clamp-over-strict-guards judgement is **robust** and I withdrew my own concern. New `issue-100` lead offered explicitly as one-hour co-occurrence, not a mechanism.
+- **G0 command registry**: three slots verified, one earlier claim of mine corrected.
+
+### The blocker, characterised
+
+`D:` read latency fluctuates: the same 214 KB file measured **5,875 -> 427 -> 9,376 -> 1,302 -> 467 -> 1,772 ms** across the session. It presents as a **compiler hang, not slowness** -- `build-exe` sits near 0.3 CPU-seconds where a healthy build reaches 714. A healthy window fit exactly one build and one 35-minute run; **six test-suite attempts were defeated**, including a reduced `--test-filter` run and a direct-file-redirection run that tested (and refuted) a pipe-buffer hypothesis. Non-privileged options are exhausted; a Defender exclusion is privileged and its scan hypothesis was refuted, and relocating the repo is beyond an audit's remit.
+
+### Next bounded action for round 34
+
+1. **Re-time the `D:` read first.** If it is not near 430 ms, stop -- nothing will build. Full guidance: `issue-101`.
+2. In the first sustained healthy window, **`zig test src/module_index.zig` once** and record the pass count. That is `issue-101`'s only outstanding item.
+3. `issue-100`: instrument `evaluateForScope` with a per-call counter and call-site identifier to settle how many calls occur per hour and which emits the cell row. **Do not infer it from log ordering.**
+4. Read the four unread sections of the release checklist (lines 236-463, 464-527, 567-658, 659+) -- the gate matrix came from one section and the rest is unexamined.
+
+**`issue-097` is now partly resolved by decision**: the release criteria are transcribed. The remaining question -- whether to import `docs/` and `tools/` wholesale, including `production_release_gate.ps1` -- is still open, and `issue-102` is evidence the reference docs contain live work items this repo has no record of.
