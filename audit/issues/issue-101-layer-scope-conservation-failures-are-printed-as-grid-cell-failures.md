@@ -1,6 +1,14 @@
 # Issue 101 -- layer-scope conservation failures are printed as grid-cell failures, and the printed index is meaningless without the domain
 
-Status: **FIX COMPILES (2026-09-23 06:28, `ReleaseSafe`, exit 0); production confirmation in progress.** A diagnostics-only defect with no effect on computed science, but it directly caused three wrong committed conclusions on `issue-100` and cost two `ReleaseSafe` build-and-run cycles (roughly two hours) chasing the wrong ledger.
+Status: **RESOLVED and CONFIRMED IN PRODUCTION (2026-09-23, `run-026`).** The relabelled row was observed at hour 3,275:
+
+```
+error: hourly_layer layer_scope conservation failure: layer_scope=2 quantity=nitrogen ...
+```
+
+where before the fix it read `hourly cell conservation failure: cell=2`. The sibling row is a genuine grid-cell row and is still correctly labelled `hourly cell ... cell=0`, so the two index spaces are now distinguishable in the log. Fix written, `BUILD_EXIT=0`, all four new strings verified present in the binary, relabelled row observed. **Outstanding: the test suite has not been re-run since the `D:` fault**, so this is production-confirmed but not regression-tested.
+
+Earlier status line, retained: **FIX COMPILES (2026-09-23 06:28, `ReleaseSafe`, exit 0).** A diagnostics-only defect with no effect on computed science, but it directly caused three wrong committed conclusions on `issue-100` and cost two `ReleaseSafe` build-and-run cycles (roughly two hours) chasing the wrong ledger.
 
 **Update 2026-09-23: the `D:` fault cleared on its own and the build then succeeded, which confirms the diagnosis below and clears this change of suspicion.** The same tree that would not build for hours compiled in one go once `D:` read latency returned to normal: the timed read went from **5,875 ms to 427 ms** for the same 214 KB file, and `build-exe` then ran the healthy profile -- **714 CPU-seconds and a 2.29 GB working set**, against the 0.3 CPU-seconds and 17 MB it showed while `D:` was faulted. `BUILD_EXIT=0`, binary written 06:28:34, and all four new strings (`layer_scope`, `hourly_layer`, plus the probes) verified present in it. **So the change was never the cause, and the "never been through a compiler" caveat recorded in commit `8df913d` is now discharged.** The test suite has not yet been re-run, and the relabelled row has not yet appeared in a production log -- that run is in flight.
 
