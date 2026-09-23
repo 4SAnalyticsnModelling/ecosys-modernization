@@ -14,7 +14,24 @@ Earlier status line, retained: **FIX COMPILES (2026-09-23 06:28, `ReleaseSafe`, 
 
 **The history below is retained because the failure mode is worth keeping: a faulted disk presents as a compiler hang, not as slowness.**
 
-**Verification was blocked by a host-environment fault, not by the change.** Neither `zig test src/module_index.zig` nor `zig build -Doptimize=ReleaseSafe` will make progress on this host as of 2026-09-22 22:00 onward: both sit with live processes at **exactly zero CPU-seconds delta over 60 s**, write nothing to the global zig cache, and never ramp a `build-exe` child past ~0.5 CPU-seconds, where a healthy build of this project reaches **745 CPU-seconds and a 2.3 GB working set**. The same toolchain compiled and ran a trivial one-test file in **25.5 s** during the stall, so zig is not broken. Memory and disk are not the constraint (36 GB of 64 GB free, 395 GB free on C:). ### The cause, now measured: `D:` read latency has collapsed
+**Verification was blocked by a host-environment fault, not by the change.** Neither `zig test src/module_index.zig` nor `zig build -Doptimize=ReleaseSafe` will make progress on this host as of 2026-09-22 22:00 onward: both sit with live processes at **exactly zero CPU-seconds delta over 60 s**, write nothing to the global zig cache, and never ramp a `build-exe` child past ~0.5 CPU-seconds, where a healthy build of this project reaches **745 CPU-seconds and a 2.3 GB working set**. The same toolchain compiled and ran a trivial one-test file in **25.5 s** during the stall, so zig is not broken. Memory and disk are not the constraint (36 GB of 64 GB free, 395 GB free on C:). ### The `D:` fault is INTERMITTENT, and that is the operationally important part
+
+The same timed read of the same 214 KB file, three times in one session:
+
+| when | elapsed | state |
+|---|---|---|
+| 2026-09-22 late | **5,875 ms** | faulted -- no build completes |
+| 2026-09-23 ~06:00 | **427 ms** | healthy -- one `ReleaseSafe` build (`BUILD_EXIT=0`) and one full 35-minute production run to hour 3,275 both succeeded |
+| 2026-09-23, during the follow-up test suite | **9,376 ms** | faulted again -- the test suite froze at **227.3 CPU-seconds with zero delta over 40 s** |
+
+**The healthy window was long enough for exactly one build and one run.** The test suite started in that window, got through compilation, and was killed mid-flight when the fault returned. So:
+
+- **Re-time the read after a long job, not only before it.** A job that starts healthy can still freeze, and the freeze looks like a plausible CPU total rather than an obvious fault.
+- **Do not attribute a mid-job freeze to the job.** Check the drive first. Reverting code to chase this wastes hours; the source change suspected here was innocent, as the successful 06:28 build proved.
+
+This is why `issue-101` is production-confirmed but **not regression-tested**: the confirming run fit in the healthy window; the test suite did not.
+
+### The cause, measured: `D:` read latency collapses
 
 Timed single-file reads via `System.IO.File.ReadAllBytes`, same moment, same process:
 
