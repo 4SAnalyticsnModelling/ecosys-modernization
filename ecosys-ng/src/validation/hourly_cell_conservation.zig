@@ -822,6 +822,14 @@ pub fn surfaceEndpointReferenceHeatMegajoules(
     return signed_heat_megajoules;
 }
 
+/// TEMP_DIAGNOSTIC (`issue-100`): the hour the nitrogen trace below is allowed
+/// to speak on. The ledger has no access to the clock, and the booking helpers
+/// run many times per hour, so an ungated trace would flush tens of thousands
+/// of lines (`run_support.zig:448` flushes every line -- an unconditional
+/// census trace previously cost about 140x throughput). Set once per hour by
+/// the driver next to `reset()`; zero means silent.
+pub var diagnostic_nitrogen_trace_hour: usize = 0;
+
 pub const BoundaryLedger = struct {
     allocator: std.mem.Allocator,
     cells: []BoundaryActivity,
@@ -830,6 +838,15 @@ pub const BoundaryLedger = struct {
         if (cell_count == 0) return error.ZeroHourlyCellBoundaryExtent;
         const cells = try allocator.alloc(BoundaryActivity, cell_count);
         @memset(cells, .{});
+        // TEMP_DIAGNOSTIC (`issue-100`): a presence marker, so that "the probe
+        // below fired zero times" is distinguishable from "the probe was not
+        // in the binary I ran". Also reports the ledger extent, which decides
+        // whether the failing row's `cell=2` can be an index into this slice
+        // at all.
+        if (!@import("builtin").is_test) std.log.err(
+            "TEMP_DIAGNOSTIC n_ledger[init]: cells.len={d}",
+            .{cell_count},
+        );
         return .{ .allocator = allocator, .cells = cells };
     }
 
@@ -842,9 +859,54 @@ pub const BoundaryLedger = struct {
         @memset(self.cells, .{});
     }
 
+    // TEMP_DIAGNOSTIC (`issue-100`): hour 3,275 cell 2 reports
+    // `external_inputs=1.7186002174175976`, `external_outputs=6.85290171591924e-2`
+    // and `residual=-6.766553859959434e-2` -- 0.0677 g N that never reaches
+    // storage. Logging every nitrogen contribution as the ledger books it
+    // splits the two possibilities outright: if these sum to the reported
+    // external terms then the LEDGER is right and the STORAGE census is short,
+    // which is a state problem rather than an accounting one.
+    //
+    // The first attempt instrumented `accumulate` alone and fired ZERO times
+    // while cell 2 still reached 1.7186, which proved the booking arrives by
+    // one of the other two mutation paths. This helper is called from all
+    // three so the measurement cannot be incomplete the same way twice.
+    // Scoped to cell 2 and nonzero nitrogen so the volume stays small.
+    fn traceNitrogen(
+        site: []const u8,
+        cells_ptr: usize,
+        cell: usize,
+        activity: BoundaryActivity,
+        next: BoundaryActivity,
+    ) void {
+        if (@import("builtin").is_test) return;
+        if (diagnostic_nitrogen_trace_hour != 3275) return;
+        // Every cell, not just cell 2. The run that motivated this probe logged
+        // TWO failing nitrogen rows -- cell 0 and cell 2 -- losing the same
+        // 0.0676655386 g N to eleven digits despite storage differing 12.7x
+        // (641.81 vs 50.41) and cell 0's external_outputs being 4.03e-16
+        // against cell 2's 6.85e-2. Cell 0 is the cleaner experiment because
+        // its outputs are effectively zero, and the first probe filtered it
+        // out. The hour gate keeps the volume trivial either way.
+        if (activity.nitrogen_input_g == 0 and activity.nitrogen_output_g == 0) return;
+        std.log.err(
+            "TEMP_DIAGNOSTIC n_ledger[{s}]: cells_ptr=0x{x} cell={d} in={e} out={e} running_in={e} running_out={e}",
+            .{
+                site,
+                cells_ptr,
+                cell,
+                activity.nitrogen_input_g,
+                activity.nitrogen_output_g,
+                next.nitrogen_input_g,
+                next.nitrogen_output_g,
+            },
+        );
+    }
+
     pub fn accumulate(self: *BoundaryLedger, cell: usize, activity: BoundaryActivity) !void {
         try self.preflight(cell, activity);
         const next = try addBoundary(self.cells[cell], activity);
+        traceNitrogen("accumulate", @intFromPtr(self.cells.ptr), cell, activity, next);
         self.cells[cell] = next;
     }
 
@@ -855,8 +917,11 @@ pub const BoundaryLedger = struct {
         if (activities.len != self.cells.len)
             return error.HourlyCellBoundaryDimensionMismatch;
         for (activities, 0..) |activity, cell| try self.preflight(cell, activity);
-        for (activities, 0..) |activity, cell|
-            self.cells[cell] = addBoundary(self.cells[cell], activity) catch unreachable;
+        for (activities, 0..) |activity, cell| {
+            const next = addBoundary(self.cells[cell], activity) catch unreachable;
+            traceNitrogen("accumulateCells", @intFromPtr(self.cells.ptr), cell, activity, next);
+            self.cells[cell] = next;
+        }
     }
 
     pub fn preflight(self: *const BoundaryLedger, cell: usize, activity: BoundaryActivity) !void {
@@ -878,8 +943,12 @@ pub const BoundaryLedger = struct {
         if (donor_cell == recipient_cell)
             return error.InvalidHourlyCellIntercellTransfer;
         try validateIntercellTransfer(transfer);
-        const donor_next = try addBoundary(self.cells[donor_cell], transferBoundary(transfer, .output));
-        const recipient_next = try addBoundary(self.cells[recipient_cell], transferBoundary(transfer, .input));
+        const donor_activity = transferBoundary(transfer, .output);
+        const recipient_activity = transferBoundary(transfer, .input);
+        const donor_next = try addBoundary(self.cells[donor_cell], donor_activity);
+        const recipient_next = try addBoundary(self.cells[recipient_cell], recipient_activity);
+        traceNitrogen("intercell_donor", @intFromPtr(self.cells.ptr), donor_cell, donor_activity, donor_next);
+        traceNitrogen("intercell_recipient", @intFromPtr(self.cells.ptr), recipient_cell, recipient_activity, recipient_next);
         self.cells[donor_cell] = donor_next;
         self.cells[recipient_cell] = recipient_next;
     }
@@ -2264,10 +2333,35 @@ pub const Report = struct {
     }
 };
 
+/// Identifies BOTH the accumulation window and the DOMAIN whose index space
+/// the report is indexed by, because this evaluator is shared by two callers
+/// over two different index spaces: `hourly_cell_conservation` indexes grid
+/// cells, and `layer_local_conservation.evaluate` (`:4325`) delegates here
+/// with layer/scope arrays.
+///
+/// `issue-101`: the layer variants exist because all six (domain, window)
+/// combinations previously collapsed onto the three window tags, and the
+/// failure message additionally hard-coded the word "cell". A layer-scope
+/// failure therefore printed as `hourly cell conservation failure: cell=2`
+/// with `2` being a layer index. That cost two build-and-run cycles and three
+/// wrong committed conclusions on `issue-100`. The tag must name the index
+/// space, because the number beside it is meaningless without it.
 pub const EvaluationScope = enum {
     hourly,
     accumulated_continuity,
     accumulated,
+    hourly_layer,
+    accumulated_layer_continuity,
+    accumulated_layer,
+
+    /// The domain word used in diagnostics, so a reader can tell what the
+    /// printed index counts without knowing which module called.
+    pub fn domain(self: EvaluationScope) []const u8 {
+        return switch (self) {
+            .hourly, .accumulated_continuity, .accumulated => "cell",
+            .hourly_layer, .accumulated_layer_continuity, .accumulated_layer => "layer_scope",
+        };
+    }
 };
 
 /// Evaluates every cell before any domain reduction. The report owns its cell
@@ -2313,6 +2407,10 @@ pub fn evaluateForScope(
         .maximum_normalized_relative = @splat(0),
         .failing_cell_count = @splat(0),
     };
+    // `issue-101`: resolved once, not inside the loops. The diagnostics below
+    // sit in an `inline for` over every `Quantity`, so anything evaluated in
+    // their argument lists is duplicated per quantity per message.
+    const domain_word = scope.domain();
     for (0..cell_count) |cell| {
         try storage_before[cell].validate();
         try storage_after[cell].validate();
@@ -2342,13 +2440,15 @@ pub fn evaluateForScope(
             result.maximum_normalized_relative[index] = @max(result.maximum_normalized_relative[index], closure.normalized_relative);
             result.failing_cell_count[index] += @intFromBool(!closure.accepted);
             if (!closure.accepted and !builtin.is_test) std.log.err(
-                "{s} cell conservation failure: cell={d} quantity={s} before={e} after={e} external_inputs={e} external_outputs={e} internal_production={e} internal_consumption={e} residual={e} absolute={e} normalized_relative={e} physical_limit={e} arithmetic_roundoff_allowance={e} effective_limit={e}",
-                .{ @tagName(scope), cell, field.name, terms.storage_before, terms.storage_after, terms.external_inputs, terms.external_outputs, terms.internal_production, terms.internal_consumption, closure.residual, closure.absolute, closure.normalized_relative, closure.acceptance_limit, closure.arithmetic_roundoff_allowance, closure.effective_acceptance_limit },
+                "{s} {s} conservation failure: {s}={d} quantity={s} before={e} after={e} external_inputs={e} external_outputs={e} internal_production={e} internal_consumption={e} residual={e} absolute={e} normalized_relative={e} physical_limit={e} arithmetic_roundoff_allowance={e} effective_limit={e}",
+                .{ @tagName(scope), domain_word, domain_word, cell, field.name, terms.storage_before, terms.storage_after, terms.external_inputs, terms.external_outputs, terms.internal_production, terms.internal_consumption, closure.residual, closure.absolute, closure.normalized_relative, closure.acceptance_limit, closure.arithmetic_roundoff_allowance, closure.effective_acceptance_limit },
             );
             if (!closure.accepted and !builtin.is_test and quantity == .carbon) std.log.err(
-                "{s} cell carbon storage components: cell={d} residue_before={e} residue_after={e} organic_before={e} organic_after={e} inorganic_and_gas_before={e} inorganic_and_gas_after={e} soil_gas_before={e} soil_gas_after={e} surface_gas_before={e} surface_gas_after={e} other_inorganic_before={e} other_inorganic_after={e} plant_before={e} plant_after={e}",
+                "{s} {s} carbon storage components: {s}={d} residue_before={e} residue_after={e} organic_before={e} organic_after={e} inorganic_and_gas_before={e} inorganic_and_gas_after={e} soil_gas_before={e} soil_gas_after={e} surface_gas_before={e} surface_gas_after={e} other_inorganic_before={e} other_inorganic_after={e} plant_before={e} plant_after={e}",
                 .{
                     @tagName(scope),
+                    domain_word,
+                    domain_word,
                     cell,
                     storage_before[cell].residue_carbon_g,
                     storage_after[cell].residue_carbon_g,
@@ -2367,9 +2467,11 @@ pub fn evaluateForScope(
                 },
             );
             if (!closure.accepted and !builtin.is_test and quantity == .heat) std.log.err(
-                "{s} cell heat storage components: cell={d} snow_before={e} snow_after={e} soil_before={e} soil_after={e} surface_before={e} surface_after={e} canopy_before={e} canopy_after={e} surface_organic_carbon_before={e} surface_organic_carbon_after={e}",
+                "{s} {s} heat storage components: {s}={d} snow_before={e} snow_after={e} soil_before={e} soil_after={e} surface_before={e} surface_after={e} canopy_before={e} canopy_after={e} surface_organic_carbon_before={e} surface_organic_carbon_after={e}",
                 .{
                     @tagName(scope),
+                    domain_word,
+                    domain_word,
                     cell,
                     storage_before[cell].diagnostic_snow_heat_megajoules,
                     storage_after[cell].diagnostic_snow_heat_megajoules,

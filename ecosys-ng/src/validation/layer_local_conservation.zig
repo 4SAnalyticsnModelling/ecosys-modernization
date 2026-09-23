@@ -4330,6 +4330,12 @@ pub fn evaluate(
     scope_area_m2: []const f64,
     tolerances: hourly.Tolerances,
 ) !hourly.Report {
+    // `issue-101`: `.hourly_layer`, NOT `.hourly`. This evaluator is shared
+    // with the cell module, and the scope tag is what names the index space
+    // the failure row prints. Passing `.hourly` here made layer-scope rows
+    // render identically to grid-cell rows -- `hourly cell conservation
+    // failure: cell=2` for layer/scope 2 -- which sent `issue-100` chasing the
+    // wrong ledger through two build-and-run cycles.
     return hourly.evaluateForScope(
         allocator,
         storage_before,
@@ -4337,7 +4343,7 @@ pub fn evaluate(
         activity,
         scope_area_m2,
         tolerances,
-        .hourly,
+        .hourly_layer,
     );
 }
 
@@ -4892,7 +4898,7 @@ pub fn evaluateAndCommitAccumulated(
             candidate_activity,
             scope_area_m2,
             tolerances,
-            .accumulated_continuity,
+            .accumulated_layer_continuity,
         );
         defer continuity.deinit(scratch_allocator);
         if (!continuity.accepted())
@@ -4906,7 +4912,7 @@ pub fn evaluateAndCommitAccumulated(
             candidate_activity,
             scope_area_m2,
             tolerances,
-            .accumulated,
+            .accumulated_layer,
         );
         if (!report.accepted()) {
             report.deinit(scratch_allocator);
@@ -4934,7 +4940,7 @@ pub fn evaluateAndCommitAccumulated(
         candidate.cumulative_activity,
         scope_area_m2,
         tolerances,
-        .accumulated,
+        .accumulated_layer,
     );
     if (!report.accepted()) {
         report.deinit(scratch_allocator);

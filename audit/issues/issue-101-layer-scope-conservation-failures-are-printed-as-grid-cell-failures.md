@@ -1,6 +1,14 @@
 # Issue 101 -- layer-scope conservation failures are printed as grid-cell failures, and the printed index is meaningless without the domain
 
-Status: **FIXED 2026-09-22 (same day as filed), pending test and production verification.** A diagnostics-only defect with no effect on computed science, but it directly caused three wrong committed conclusions on `issue-100` and cost two `ReleaseSafe` build-and-run cycles (roughly two hours) chasing the wrong ledger.
+Status: **FIX WRITTEN 2026-09-22, NOT YET COMPILED. Do not treat this as verified.** A diagnostics-only defect with no effect on computed science, but it directly caused three wrong committed conclusions on `issue-100` and cost two `ReleaseSafe` build-and-run cycles (roughly two hours) chasing the wrong ledger.
+
+**Verification is blocked by a host-environment fault, not by the change.** Neither `zig test src/module_index.zig` nor `zig build -Doptimize=ReleaseSafe` will make progress on this host as of 2026-09-22 22:00 onward: both sit with live processes at **exactly zero CPU-seconds delta over 60 s**, write nothing to the global zig cache, and never ramp a `build-exe` child past ~0.5 CPU-seconds, where a healthy build of this project reaches **745 CPU-seconds and a 2.3 GB working set**. The same toolchain compiled and ran a trivial one-test file in **25.5 s** during the stall, so zig is not broken. Memory and disk are not the constraint (36 GB of 64 GB free, 395 GB free on C:). The host is broadly I/O-degraded: plain `Get-Process` and `Get-CimInstance` calls began taking over five minutes each.
+
+**The cause is NOT established.** I suspected the `issue-091` failure class (Defender interfering with this project's builds) because `MsMpEng` was resident at 1.2 GB, but `Get-MpComputerStatus` refutes an active scan -- the last quick scan ended 2026-09-22 02:15:09 and the last full scan on 2026-09-16, so only ordinary real-time protection is running. That attribution is withdrawn. Memory, disk and the toolchain are all individually fine, and I stopped probing the host rather than spend more of the session on it, so **the fault is recorded as observed and uncharacterised.**
+
+No workaround was applied. The one I had in mind -- a Defender path exclusion -- is both a privileged environment change the project contract forbids as an audit side effect, and unjustified now that the scan hypothesis is refuted. The fix therefore stands as written and unverified until the host recovers.
+
+**Compilation status of the committed source, stated precisely:** the `issue-100` instrumentation in this tree **was** compiled and executed -- it is the binary behind `run-025`, built 18:35 and run to hour 3,275. The `issue-101` change below (the `EvaluationScope` domain variants, the three message format strings, and the four `layer_local_conservation` call sites) was written **after** that build and **has never been through a compiler**. It is mechanical and `scope` was verified to drive no logic, but it is unverified.
 
 ## The defect
 

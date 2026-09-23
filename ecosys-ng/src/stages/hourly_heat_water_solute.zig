@@ -94,6 +94,13 @@ fn captureFailureConservationTrace(context: anytype, point: usize) !void {
         context.diagnostic_inorganic_carbon_trace_g_c,
         context.diagnostic_plant_carbon_trace_g_c,
         context.diagnostic_soil_gas_carbon_trace_g_c,
+        // TEMP_DIAGNOSTIC (`issue-100`): see the declarations in `ecosys_ng.zig`.
+        context.diagnostic_residue_nitrogen_trace_g,
+        context.diagnostic_organic_nitrogen_trace_g,
+        context.diagnostic_dinitrogen_nitrogen_trace_g,
+        context.diagnostic_ammonium_nitrogen_trace_g,
+        context.diagnostic_nitrate_nitrogen_trace_g,
+        context.diagnostic_plant_nitrogen_trace_g,
         context.diagnostic_heat_storage_trace_megajoules,
         context.diagnostic_heat_closed_trace_megajoules,
         context.diagnostic_heat_production_trace_megajoules,
@@ -111,6 +118,17 @@ fn captureFailureConservationTrace(context: anytype, point: usize) !void {
     context.diagnostic_organic_carbon_trace_g_c[point] = totals.organic_carbon_g;
     context.diagnostic_inorganic_carbon_trace_g_c[point] = totals.carbon_dioxide_carbon_g;
     context.diagnostic_plant_carbon_trace_g_c[point] = totals.plant_carbon_g;
+    // TEMP_DIAGNOSTIC (`issue-100`): the six storage-side nitrogen pools that
+    // `mass_balance_audit.zig:262` sums for the nitrogen closure. Their total
+    // is what the hourly cell census compares against the booked boundary, so
+    // a step in any one of them between two adjacent points localises the
+    // 0.0676655386 g N loss to a stage and a pool at once.
+    context.diagnostic_residue_nitrogen_trace_g[point] = totals.residue_nitrogen_g;
+    context.diagnostic_organic_nitrogen_trace_g[point] = totals.organic_nitrogen_g;
+    context.diagnostic_dinitrogen_nitrogen_trace_g[point] = totals.dinitrogen_nitrogen_g;
+    context.diagnostic_ammonium_nitrogen_trace_g[point] = totals.ammonium_nitrogen_g;
+    context.diagnostic_nitrate_nitrogen_trace_g[point] = totals.nitrate_nitrogen_g;
+    context.diagnostic_plant_nitrogen_trace_g[point] = totals.plant_nitrogen_g;
     context.diagnostic_heat_storage_trace_megajoules[point] = totals.heat_storage_megajoules;
     context.diagnostic_heat_closed_trace_megajoules[point] =
         totals.heat_storage_megajoules - totals.cumulative_heat_input_megajoules +

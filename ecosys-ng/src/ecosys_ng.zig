@@ -5869,6 +5869,30 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
         driver_context.hourly_cell_boundary_ledger,
         driver_context.hourly_layer_boundary_ledger,
     );
+    // TEMP_DIAGNOSTIC (`issue-100`): identify what `evaluate` actually reads.
+    // A probe on all three `BoundaryLedger` mutation methods traced hour
+    // 3,275's complete nitrogen booking for cell 0 as `input=0`,
+    // `output=1.4674866533175493e-2`, yet the row this call emits reports
+    // `external_inputs=1.6566363548027827` and `external_outputs=4.03e-16`.
+    // Neither term matches, so the array read here is not the state the probe
+    // watched. This prints the extents and the actual values at the moment of
+    // the call, plus the slice address, so "different array" and "same array,
+    // rewritten later" are distinguishable.
+    if (ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_hour == 3275) {
+        const cells = driver_context.hourly_cell_boundary_ledger.*.cells;
+        std.log.err(
+            "TEMP_DIAGNOSTIC n_ledger[at_evaluate]: storage_before.len={d} storage_after.len={d} cells.len={d} area.len={d} cells_ptr=0x{x} cell0_in={e} cell0_out={e}",
+            .{
+                driver_context.hourly_cell_storage_before.*.len,
+                driver_context.hourly_cell_storage_after.*.len,
+                cells.len,
+                driver_context.canopy_cell_area_m2.*.len,
+                @intFromPtr(cells.ptr),
+                cells[0].nitrogen_input_g,
+                cells[0].nitrogen_output_g,
+            },
+        );
+    }
     var hourly_cell_conservation_report = try ecosys.hourly_cell_conservation.evaluate(
         driver_context.allocator.*,
         driver_context.hourly_cell_storage_before.*,
@@ -5899,13 +5923,19 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
             .{ surface_carbon_dioxide_production_g_c, soil_carbon_dioxide_production_g_c, surface_signed_heterotrophic_respiration_g_c, soil_signed_heterotrophic_respiration_g_c },
         );
         std.log.err(
-            "hourly post-NITRO conservation trace: points=after_nitro,after_post_watsub,after_uptake,after_chemistry,after_transport,after_interface_heat,after_surface_gas residue_carbon_g_c={any} organic_carbon_g_c={any} inorganic_and_gas_carbon_g_c={any} plant_carbon_g_c={any} soil_gas_carbon_g_c={any} heat_storage_megajoules={any} heat_closed_megajoules={any} heat_internal_production_megajoules={any} heat_internal_consumption_megajoules={any} litter_soil_organic_heat_rebase_megajoules={e}",
+            "hourly post-NITRO conservation trace: points=after_nitro,after_post_watsub,after_uptake,after_chemistry,after_transport,after_interface_heat,after_surface_gas residue_carbon_g_c={any} organic_carbon_g_c={any} inorganic_and_gas_carbon_g_c={any} plant_carbon_g_c={any} soil_gas_carbon_g_c={any} residue_nitrogen_g={any} organic_nitrogen_g={any} dinitrogen_nitrogen_g={any} ammonium_nitrogen_g={any} nitrate_nitrogen_g={any} plant_nitrogen_g={any} heat_storage_megajoules={any} heat_closed_megajoules={any} heat_internal_production_megajoules={any} heat_internal_consumption_megajoules={any} litter_soil_organic_heat_rebase_megajoules={e}",
             .{
                 driver_context.hourly_science_context.*.diagnostic_residue_carbon_trace_g_c.*,
                 driver_context.hourly_science_context.*.diagnostic_organic_carbon_trace_g_c.*,
                 driver_context.hourly_science_context.*.diagnostic_inorganic_carbon_trace_g_c.*,
                 driver_context.hourly_science_context.*.diagnostic_plant_carbon_trace_g_c.*,
                 driver_context.hourly_science_context.*.diagnostic_soil_gas_carbon_trace_g_c.*,
+                driver_context.hourly_science_context.*.diagnostic_residue_nitrogen_trace_g.*,
+                driver_context.hourly_science_context.*.diagnostic_organic_nitrogen_trace_g.*,
+                driver_context.hourly_science_context.*.diagnostic_dinitrogen_nitrogen_trace_g.*,
+                driver_context.hourly_science_context.*.diagnostic_ammonium_nitrogen_trace_g.*,
+                driver_context.hourly_science_context.*.diagnostic_nitrate_nitrogen_trace_g.*,
+                driver_context.hourly_science_context.*.diagnostic_plant_nitrogen_trace_g.*,
                 driver_context.hourly_science_context.*.diagnostic_heat_storage_trace_megajoules.*,
                 driver_context.hourly_science_context.*.diagnostic_heat_closed_trace_megajoules.*,
                 driver_context.hourly_science_context.*.diagnostic_heat_production_trace_megajoules.*,
@@ -6852,6 +6882,11 @@ noinline fn prepareAcceptedHourStorageAndLedgers(driver_context: anytype, advanc
     // diagnostic activity can leak into the next hour.
     driver_context.hourly_cell_boundary_ledger.*.reset();
     driver_context.hourly_layer_boundary_ledger.*.reset();
+    // TEMP_DIAGNOSTIC (`issue-100`): publish the hour to the boundary ledger's
+    // nitrogen trace, which has no clock of its own. Set here so it names the
+    // same hour the ledger is about to accumulate.
+    ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_hour =
+        driver_context.executed_weather_hours.* + 1;
     for (0..driver_context.state.*.cell_count) |cell| {
         const cec_delta = driver_context.charcoal_cation_exchange_capacity_delta_mol_by_cell.*[cell];
         const aec_delta = driver_context.charcoal_anion_exchange_capacity_delta_mol_by_cell.*[cell];
@@ -13587,6 +13622,17 @@ pub fn main(init: std.process.Init) !void {
     var diagnostic_inorganic_carbon_trace_g_c: [7]f64 = @splat(0);
     var diagnostic_plant_carbon_trace_g_c: [7]f64 = @splat(0);
     var diagnostic_soil_gas_carbon_trace_g_c: [7]f64 = @splat(0);
+    // TEMP_DIAGNOSTIC (`issue-100`): the nitrogen counterparts of the carbon
+    // traces above. The post-NITRO failure trace already checkpoints carbon
+    // and heat at all seven points of the hour but carries no nitrogen, so it
+    // could not localise hour 3,275's fixed 0.0676655386 g N loss. One pool
+    // per array so the run reports which stage AND which pool loses it.
+    var diagnostic_residue_nitrogen_trace_g: [7]f64 = @splat(0);
+    var diagnostic_organic_nitrogen_trace_g: [7]f64 = @splat(0);
+    var diagnostic_dinitrogen_nitrogen_trace_g: [7]f64 = @splat(0);
+    var diagnostic_ammonium_nitrogen_trace_g: [7]f64 = @splat(0);
+    var diagnostic_nitrate_nitrogen_trace_g: [7]f64 = @splat(0);
+    var diagnostic_plant_nitrogen_trace_g: [7]f64 = @splat(0);
     var diagnostic_heat_storage_trace_megajoules: [7]f64 = @splat(0);
     var diagnostic_heat_closed_trace_megajoules: [7]f64 = @splat(0);
     var diagnostic_heat_production_trace_megajoules: [7]f64 = @splat(0);
@@ -13666,6 +13712,12 @@ pub fn main(init: std.process.Init) !void {
         .diagnostic_inorganic_carbon_trace_g_c = &diagnostic_inorganic_carbon_trace_g_c,
         .diagnostic_plant_carbon_trace_g_c = &diagnostic_plant_carbon_trace_g_c,
         .diagnostic_soil_gas_carbon_trace_g_c = &diagnostic_soil_gas_carbon_trace_g_c,
+        .diagnostic_residue_nitrogen_trace_g = &diagnostic_residue_nitrogen_trace_g,
+        .diagnostic_organic_nitrogen_trace_g = &diagnostic_organic_nitrogen_trace_g,
+        .diagnostic_dinitrogen_nitrogen_trace_g = &diagnostic_dinitrogen_nitrogen_trace_g,
+        .diagnostic_ammonium_nitrogen_trace_g = &diagnostic_ammonium_nitrogen_trace_g,
+        .diagnostic_nitrate_nitrogen_trace_g = &diagnostic_nitrate_nitrogen_trace_g,
+        .diagnostic_plant_nitrogen_trace_g = &diagnostic_plant_nitrogen_trace_g,
         .diagnostic_heat_storage_trace_megajoules = &diagnostic_heat_storage_trace_megajoules,
         .diagnostic_heat_closed_trace_megajoules = &diagnostic_heat_closed_trace_megajoules,
         .diagnostic_heat_production_trace_megajoules = &diagnostic_heat_production_trace_megajoules,
