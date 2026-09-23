@@ -2,7 +2,16 @@
 
 Status: **OPEN, MEASURED, NOT DIAGNOSED (filed 2026-09-22, adversarial Claude/Pi session; sharpened later the same day).** This is the frontier blocker exposed once `issue-099`'s fix restored phosphorus and calcium conservation (`run-023`). Filed with the measurement and two numeric leads, deliberately **without** a proposed mechanism -- `issue-099` cost eight wrong mechanisms proposed from source reading, and the discipline this round is to measure first.
 
-**The filename's "about 4% of the banded ammonium input" framing is superseded and should not be read as the characterisation.** Hour 3,275 fails on **two** cells, 0 and 2, which lose the **same absolute mass** -- `0.0676655386` g N, agreeing to eleven significant figures -- despite differing 12.7x in storage and fourteen orders of magnitude in `external_outputs`. The defect is a **fixed quantity dropped once per affected cell**, not a percentage of anything. The "4%" is simply that mass divided by one of the two different inputs (4.084% for cell 0, 3.786% for cell 2). See "The decisive fact" below; both originally filed leads are now refuted or downgraded.
+**The filename's "about 4% of the banded ammonium input" framing is superseded and should not be read as the characterisation.** Hour 3,275 emits **two** failure rows, indexed 0 and 2, losing the **same absolute mass** -- `0.0676655386` g N, agreeing to eleven significant figures, and byte-reproducible across two different binaries.
+
+**Superseded a second time, by `run-024` (read this before anything below).** That run measured two things that invalidate the framing in the rest of this file:
+
+1. **There is exactly ONE grid cell.** All 403 `BoundaryLedger.init` calls report `cells.len=1`. So rows "0" and "2" are **not two cells**, and the characterisation "a fixed quantity dropped once per affected cell" does not hold. One physical loss reported at two aggregation levels or scopes is the better-supported reading -- **not established**.
+2. **The reported terms do not come from the boundary ledger.** A probe on all three `BoundaryLedger` mutation methods traced hour 3,275's complete nitrogen booking for the only existing cell as **`input = 0`**, `output = 1.4674866533175493e-2`, while the `cell=0` row reports `external_inputs = 1.6566363548027827` and `external_outputs = 4.033074007076744e-16`. Neither term matches, and the output disagreement runs the *wrong way* -- the traced output is larger -- so this is not the probe missing a contribution.
+
+**The open question is therefore no longer "where does the missing nitrogen go" but "what array does the hourly cell conservation report read, and in what index space".** Until that is answered, none of the `before`/`after`/`external_inputs` figures below can be attributed to a producer, and the mechanism discussion further down is built on an index space that has not been identified. Full record: `audit/runs/run-024-issue-100-ledger-probe-the-reported-terms-do-not-come-from-the-ledger-2026-09-22.md`.
+
+Both originally filed leads were already refuted or downgraded before this; see "The decisive fact" below, which remains correct **as data** (the rows and the identical residual reproduce exactly) and wrong **as interpretation** (they are not two cells).
 
 ## The measurement
 
@@ -38,7 +47,11 @@ residual                  = 1.5824056616588 - 1.6500712002584 = -0.0676655385996
                         ^^^^ field 5 = Z4B = banded NH4 (hour1.f:231)
 ```
 
-`1.65` against `1.65007` -- five significant figures. The same line's `0.05`/`0.76` are the depth and row spacing whose band fraction `run-021` measured at 1.6447e-2 in **cell 2**, the cell that fails here. So the failing hour is the banded NH4 application hour, in the application layer.
+`1.65` against `1.65007` -- five significant figures. The same line's `0.05`/`0.76` are the depth and row spacing whose band fraction `run-021` measured at 1.6447e-2 in **cell 2**, the cell that fails here.
+
+**Correction (same day):** the sentence that stood here said "the failing hour is the banded NH4 application hour, in the application layer." The **day and the event are right, the hour is not established.** The deck has **three** application lines, not one -- day 105 (lime `360.0`), day 136 (`13.8`) and day 137 (this one) -- and the run's own census records `fertilizer_application entries=2 first_hour=2508 last_hour=3252`, i.e. only the first two, at day 105 hour 12 and day 136 hour 12. Hour 3,275 is day 137 hour 11 under the same convention. The accurate statement is that **hour 3,275 falls on day 137, the banded application's date**, and that this single management event is the frontier for both this issue and `issue-099`. Full derivation, plus a one-hour discrepancy between the census and `issue-099`'s observed hour-3,275 fertilizer preflight that is **not** resolved: `audit/analysis/frontier-hour-3275-is-the-day-137-banded-fertilizer-application-2026-09-22.md`.
+
+Note also that the five-figure `1.65007` match is cell 2's alone and is downgraded to coincidence below -- cell 0 loses the identical mass while booking `1.6566364`.
 
 **This is NOT the shape of `issue-099`'s defect.** That one lost **100%** of the banded input (`residual` equal to `-external_inputs` to fifteen digits). This loses **about 4%** of it. A partial discrepancy and a total annihilation should not be assumed to share a cause.
 
