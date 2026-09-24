@@ -1,0 +1,1 @@
+Registered 2026-09-24 before run issue-100-fix-run completed: publish-step unbooked ~0; hour 3276 still fails with residual ~ -5.19e-4 g N (publish->prepare -5.171e-4 + chemistry -1.55e-6).

@@ -1,0 +1,26 @@
+{
+  "candidate_sha256": "8b0945130add8c8b6930d94b67f7046837574a056cd11eee09d7436b9bb013a2",
+  "evidence": [
+    "audit/reviews/review-pi-20260924-021525-7f4d4a24.md",
+    "audit/reviews/carry-forward.md"
+  ],
+  "findings": [],
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "open_processes": [],
+  "packet_sha256": "deb5779b47b2561eb8229805b36de90674597f32d9b39b76943e4520a7ea35df",
+  "review_artifacts": [
+    {
+      "path": "audit/reviews/review-pi-20260924-021525-7f4d4a24.md",
+      "sha256": "83e6585e9edea5bdfe4c2ced39d3f95de368a13a4545c75f2276a8c5f3432a19"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "reviewer_session": "01a0d12d-e2da-70b5-9b38-839925044cf9",
+  "revision": 1,
+  "summary": "Bounded exchangeable NH4 redistribution at band activation per hour1.f:328,333-334 accurately implemented and verified. Unit tests 4383 passed / 1 skipped / 0 failed; pre-registered run confirms 99.23% reduction of hour-3,276 residual without unverified claims of frontier advance.",
+  "task": "20260924-021525-7f4d4a24",
+  "verdict": "PASS"
+}

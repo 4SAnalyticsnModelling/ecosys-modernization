@@ -7293,6 +7293,9 @@ noinline fn advanceFertilizerManagement(
             // assuming it.
             .fertilizer_band = &driver_context.fertilizer_band_state.*,
             .minimum_layer_thickness_m = driver_context.runscript.*.soil_geometry_parameters.minimum_layer_thickness_m,
+            // ISSUE-100. Activation redistributes exchangeable NH4 onto the new
+            // zone fractions (`hour1.f:328,333-334`).
+            .soil_cation_exchange_mol_per_megagram = driver_context.initial_chemistry_state.*.cation_exchange_mol_per_megagram,
         };
         _ = try ecosys.fertilizer_management_dispatch.dispatchDate(driver_context.fertilizer_schedule_maps.*[advance_context.pass.*.scene_index].?, driver_context.fertilizer_catalog.*, management_date, &fertilizer_context, ecosys.fertilizer_management_dispatch.applyNitrogen);
         var mineral_fertilizer_context: ecosys.fertilizer_management_dispatch.MineralApplyContext = .{

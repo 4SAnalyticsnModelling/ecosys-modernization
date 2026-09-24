@@ -13,6 +13,7 @@ const soil_solver_properties = @import("../soil/water/solver_properties.zig");
 const mineral_fertilizer = @import("mineral_fertilizer_inventory.zig");
 const band_state = @import("fertilizer_band_state.zig");
 const band_geometry = @import("hourly_fertilizer_band_geometry.zig");
+const cation_exchange = @import("../soil/solute/cation_exchange.zig");
 const execution_calendar_date = @import("../driver/execution_calendar_date.zig");
 
 /// Dense runtime lookup built once when a scene is activated. `null` denotes
@@ -433,7 +434,39 @@ pub const NitrogenApplyContext = struct {
     fertilizer_band: ?*band_state.State = null,
     /// `DLYRM`. Only read when `fertilizer_band` is supplied.
     minimum_layer_thickness_m: f64 = 0,
+    /// ISSUE-100. Exchangeable NH4 per Mg of each zone's soil, flat
+    /// `cell * layer_capacity + layer`. When supplied with `fertilizer_band`,
+    /// an NH4-band activation redistributes it onto the new zone fractions,
+    /// `hour1.f:328,333-334`. Without it the activation moves the zone
+    /// fractions under unchanged per-zone concentrations, and the
+    /// fraction-weighted inventory loses `c_nb * (f_nb_old - f_nb_new)` per Mg.
+    soil_cation_exchange_mol_per_megagram: ?[]cation_exchange.Cations = null,
 };
+
+/// `hour1.f:326-334` for the exchangeable-NH4 pair (`XN4T=XN4+XNB`,
+/// `XN4=XN4T*VLNH4`, `XNB=XN4T*VLNHB`). ecosys-ng stores exchange per Mg of
+/// the zone's own soil, so the legacy extensive split is the same per-Mg
+/// concentration in both zones, and zero in a band that no longer exists.
+/// Conserves `c_nb * f_nb + c_b * f_b` exactly.
+fn redistributeExchangeAmmoniumOnBandChange(
+    exchange: *cation_exchange.Cations,
+    old_non_band_fraction: f64,
+    old_band_fraction: f64,
+    new_non_band_fraction: f64,
+    new_band_fraction: f64,
+) !void {
+    inline for (.{ exchange.ammonium_non_band, exchange.ammonium_band, old_non_band_fraction, old_band_fraction, new_non_band_fraction, new_band_fraction }) |value|
+        if (!std.math.isFinite(value) or value < 0) return error.InvalidBandInventoryState;
+    if (@abs(old_non_band_fraction + old_band_fraction - 1) > 1.0e-12 or
+        @abs(new_non_band_fraction + new_band_fraction - 1) > 1.0e-12 or
+        new_non_band_fraction <= 0)
+        return error.InvalidBandInventoryState;
+    const layer_mean_mol_per_megagram =
+        exchange.ammonium_non_band * old_non_band_fraction +
+        exchange.ammonium_band * old_band_fraction;
+    exchange.ammonium_non_band = layer_mean_mol_per_megagram;
+    exchange.ammonium_band = if (new_band_fraction > 0) layer_mean_mol_per_megagram else 0;
+}
 
 pub fn applyNitrogen(context: *NitrogenApplyContext, cell: usize, event: *const fertilizer_schedule.Event) !void {
     if (!try isApplicationHour(context.source_hour_one_through_twenty_four, context.solar_noon_hour_by_cell, cell)) return;
@@ -479,14 +512,40 @@ pub fn applyNitrogen(context: *NitrogenApplyContext, cell: usize, event: *const 
                 .minimum_active_thickness_m = context.minimum_layer_thickness_m,
                 .layer_count = layer_count,
             };
-            if (banded_ammonium_family_g_n > 0) try band.activateBandFromApplication(
-                cell,
-                .ammonium,
-                activation,
-                event.application_depth_m,
-                event.band_row_width_m,
-                default_maximum_band_volume_fraction,
-            );
+            if (banded_ammonium_family_g_n > 0) {
+                const capacity = context.soil.layer_capacity;
+                var old_non_band: [max_redistributed_layers]f64 = undefined;
+                var old_band: [max_redistributed_layers]f64 = undefined;
+                if (context.soil_cation_exchange_mol_per_megagram != null) {
+                    if (capacity > max_redistributed_layers) return error.FertilizerDispatchLayerExtentMismatch;
+                    for (0..capacity) |layer| {
+                        const fractions = try band.zoneFractions(cell, layer);
+                        old_non_band[layer] = fractions.ammonium_non_band;
+                        old_band[layer] = fractions.ammonium_band;
+                    }
+                }
+                try band.activateBandFromApplication(
+                    cell,
+                    .ammonium,
+                    activation,
+                    event.application_depth_m,
+                    event.band_row_width_m,
+                    default_maximum_band_volume_fraction,
+                );
+                if (context.soil_cation_exchange_mol_per_megagram) |exchange| {
+                    if (first + capacity > exchange.len) return error.FertilizerDispatchLayerExtentMismatch;
+                    for (0..capacity) |layer| {
+                        const next = try band.zoneFractions(cell, layer);
+                        try redistributeExchangeAmmoniumOnBandChange(
+                            &exchange[first + layer],
+                            old_non_band[layer],
+                            old_band[layer],
+                            next.ammonium_non_band,
+                            next.ammonium_band,
+                        );
+                    }
+                }
+            }
             if (banded_nitrate_family_g_n > 0) try band.activateBandFromApplication(
                 cell,
                 .nitrate,
@@ -502,6 +561,8 @@ pub fn applyNitrogen(context: *NitrogenApplyContext, cell: usize, event: *const 
 /// `AMIN1(0.9999,...)` from `hour1.f:316`, matching
 /// `hourly_fertilizer_band_geometry.Forcing`'s own default.
 const default_maximum_band_volume_fraction: f64 = 0.9999;
+/// Stack bound for the ISSUE-100 pre-activation fraction snapshot.
+const max_redistributed_layers = 512;
 
 pub const MineralApplyContext = struct {
     inventory: *mineral_fertilizer.State,
@@ -659,6 +720,48 @@ fn organicLayerAtDepth(thickness_m: []const f64, depth_m: f64) !usize {
         if (depth_m <= lower_boundary_m) return layer;
     }
     return error.FertilizerApplicationBelowSoilProfile;
+}
+
+test "ISSUE-100: NH4 band creation redistributes exchangeable NH4 and conserves the zone-weighted inventory" {
+    // Ottawa hour 3,276, layer 2, measured in run-029: the activation moved
+    // f_nb 1 -> 0.98355260229844832 under an unchanged 4.6024195228413856
+    // mol/Mg, and the census lost exactly c * m * (f_nb_new - 1) * 14.
+    const soil_mass_megagrams = 0.063359887203285684;
+    const molar_mass = 14.0;
+    const new_band = 0.016447397701551677;
+    const new_non_band = 1 - new_band;
+    var exchange = std.mem.zeroes(cation_exchange.Cations);
+    exchange.ammonium_non_band = 4.6024195228413856;
+    exchange.ammonium_band = 0;
+    const before_g = (exchange.ammonium_non_band * 1 + exchange.ammonium_band * 0) * soil_mass_megagrams * molar_mass;
+    const unrepartitioned_loss_g = exchange.ammonium_non_band * soil_mass_megagrams * (new_non_band - 1) * molar_mass;
+    try std.testing.expectApproxEqAbs(@as(f64, -0.0671468785121912), unrepartitioned_loss_g, 1.0e-15);
+
+    try redistributeExchangeAmmoniumOnBandChange(&exchange, 1, 0, new_non_band, new_band);
+    const after_g = (exchange.ammonium_non_band * new_non_band + exchange.ammonium_band * new_band) * soil_mass_megagrams * molar_mass;
+    try std.testing.expectApproxEqAbs(before_g, after_g, 1.0e-14);
+    // Legacy XNB=XN4T*VLNHB: a new band starts at the layer-mean concentration.
+    try std.testing.expectEqual(@as(f64, 4.6024195228413856), exchange.ammonium_band);
+    try std.testing.expectEqual(@as(f64, 4.6024195228413856), exchange.ammonium_non_band);
+}
+
+test "ISSUE-100: a band that disappears merges its exchangeable NH4 into the non-band zone" {
+    var exchange = std.mem.zeroes(cation_exchange.Cations);
+    exchange.ammonium_non_band = 2.0;
+    exchange.ammonium_band = 9.0;
+    const old_band = 0.25;
+    const before = exchange.ammonium_non_band * (1 - old_band) + exchange.ammonium_band * old_band;
+    try redistributeExchangeAmmoniumOnBandChange(&exchange, 1 - old_band, old_band, 1, 0);
+    try std.testing.expectEqual(@as(f64, 0), exchange.ammonium_band);
+    try std.testing.expectApproxEqAbs(before, exchange.ammonium_non_band * 1, 1.0e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, 3.75), exchange.ammonium_non_band, 1.0e-15);
+}
+
+test "ISSUE-100: exchange redistribution rejects fractions that do not partition the layer" {
+    var exchange = std.mem.zeroes(cation_exchange.Cations);
+    exchange.ammonium_non_band = 1.0;
+    try std.testing.expectError(error.InvalidBandInventoryState, redistributeExchangeAmmoniumOnBandChange(&exchange, 1, 0, 0.9, 0.2));
+    try std.testing.expectError(error.InvalidBandInventoryState, redistributeExchangeAmmoniumOnBandChange(&exchange, 1, 0, 0, 1));
 }
 
 test "fertilizer dispatch handles recurring dates and case-insensitive NO" {

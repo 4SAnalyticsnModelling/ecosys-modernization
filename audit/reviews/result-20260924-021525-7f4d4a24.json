@@ -1,0 +1,11 @@
+{
+  "packet_sha256": "deb5779b47b2561eb8229805b36de90674597f32d9b39b76943e4520a7ea35df",
+  "verdict": "PASS",
+  "summary": "Bounded exchangeable NH4 redistribution at band activation per hour1.f:328,333-334 accurately implemented and verified. Unit tests 4383 passed / 1 skipped / 0 failed; pre-registered run confirms 99.23% reduction of hour-3,276 residual without unverified claims of frontier advance.",
+  "findings": [],
+  "evidence": [
+    "audit/reviews/review-pi-20260924-021525-7f4d4a24.md",
+    "audit/reviews/carry-forward.md"
+  ],
+  "open_processes": []
+}
