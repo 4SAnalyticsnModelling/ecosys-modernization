@@ -1,0 +1,82 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/runs/run-031-issue-100-aqueous-band-redistribution-frontier-moves-to-3277-2026-09-24.md",
+      "sha256": "d6e851a6ab13b8d90e2048edac00eb3269c4ecc301525e08d5b8efbfc95c986f"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-tests/receipt.json",
+      "sha256": "d5e513ddcbd88a3a710bc49f3c23168c653da441ae5f6eb5e53b7260448cf417"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-tests/stderr.log",
+      "sha256": "b55cbc07be8317eeb6662e9394de12694a84cd05b9d8fe881a9306b5b4bc5d9b"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-build/receipt.json",
+      "sha256": "eeb20219d24dfb86614f50530f1de0ff4f27ace2729a2c1d0ac0a969d76cb875"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-run-log/receipt.json",
+      "sha256": "c7a74df14f70d8729a73d4164f6cd5cdbf7f6ff2dbe5b445a7c6085585676cc7"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-run-log/stderr.log",
+      "sha256": "e2354056d128778557ccb57d7869748e8b75f9d074982fc36e79a093512ec99f"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-run/prediction-registered-before-run.txt",
+      "sha256": "170b942add129935514df91241287c0f03d767b359f04ad12c60bbb3331e89c7"
+    },
+    {
+      "path": "audit/runs/issue-100-fix-run/stderr.log",
+      "sha256": "3293cb534181e016811f23448faa643e5b83b988da98e82c4ae1c7351b1b41ac"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "author_session": "72faab61-e064-413a-8a61-676e4e97a80a",
+  "author_sessions": [
+    "72faab61-e064-413a-8a61-676e4e97a80a"
+  ],
+  "base_sha256": "8b0945130add8c8b6930d94b67f7046837574a056cd11eee09d7436b9bb013a2",
+  "candidate_sha256": "4c4b70884f34d169f5d28cdb1ab8cf0fdd75faed3989b89f0f32ea54173281ab",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "576d3529a46ad90a3d67cb1d80e505ff38b2dbe4a24cbc074208b70d1db41db9"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/runs/run-031-issue-100-aqueous-band-redistribution-frontier-moves-to-3277-2026-09-24.md",
+      "audit/runs/issue-100-fix2-tests/receipt.json",
+      "audit/runs/issue-100-fix2-tests/stderr.log",
+      "audit/runs/issue-100-fix2-build/receipt.json",
+      "audit/runs/issue-100-fix2-run-log/receipt.json",
+      "audit/runs/issue-100-fix2-run-log/stderr.log",
+      "audit/runs/issue-100-fix2-run/prediction-registered-before-run.txt",
+      "audit/runs/issue-100-fix-run/stderr.log",
+      "audit/reviews/carry-forward.md"
+    ],
+    "next_action": "Re-gate TEMP_DIAGNOSTIC N probes to hour 3,277 (plus layer 1), pre-register a prediction, one ReleaseSafe prod-deck run to localize the -1.04e-6 g N residual.",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "issue-100 completion: NH4-band activation now also redistributes the aqueous NH4/NH3 concentrations (hour1.f:326-332), and NO3-band activation redistributes nitrate (layer-mean rule) and extensive nitrite (split by new fractions) per hour1.f:376-384. Motivated by run-030's measured exact (1-f_nb_new) drop of aq NH4/NH3 non-band amounts rebuilt by captureHourStartMatrix. Two regressions; full suite 4385 passed / 1 skipped / 0 failed (one root, Debug). Prod-deck run-031: hour 3,276 ACCEPTED (census 3276, third fertilizer entry at 3276); new frontier fails attempted hour 3,277 with N residual -1.0368e-6 g (99% layer 1). The pre-registered prediction that 3,276 would still fail was refuted and is recorded as such. No gate promoted."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "Legacy-cited change plus focused regressions; full unit-suite result; ONE ReleaseSafe prod-deck run with a pre-registered prediction; Pi review",
+    "issue": "issue-100",
+    "question": "Does adding the aqueous halves of the band-activation redistribution (hour1.f:326-332 NH4/NH3; hour1.f:379-384 NO3/NO2) remove the remaining -5.19e-4 g N hour-3,276 residual, and does the frontier move?",
+    "scope": [
+      "ecosys-ng/src/management/fertilizer_management_dispatch.zig",
+      "ecosys-ng/src/ecosys_ng.zig",
+      "ecosys-ng/src/soil/biogeochemistry/mineral_nitrogen_transport.zig",
+      "ecosys-ng/src/management/fertilizer_band_state.zig"
+    ],
+    "stop_condition": "Suite or frontier regression; a D: fault; no repeat of an unchanged failure"
+  },
+  "task": "20260924-040425-db7ece4d"
+}

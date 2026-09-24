@@ -7296,6 +7296,8 @@ noinline fn advanceFertilizerManagement(
             // ISSUE-100. Activation redistributes exchangeable NH4 onto the new
             // zone fractions (`hour1.f:328,333-334`).
             .soil_cation_exchange_mol_per_megagram = driver_context.initial_chemistry_state.*.cation_exchange_mol_per_megagram,
+            // ISSUE-100. The aqueous halves, `hour1.f:329-332` and `:379-384`.
+            .soil_aqueous = driver_context.initial_chemistry_state.*.aqueous,
         };
         _ = try ecosys.fertilizer_management_dispatch.dispatchDate(driver_context.fertilizer_schedule_maps.*[advance_context.pass.*.scene_index].?, driver_context.fertilizer_catalog.*, management_date, &fertilizer_context, ecosys.fertilizer_management_dispatch.applyNitrogen);
         var mineral_fertilizer_context: ecosys.fertilizer_management_dispatch.MineralApplyContext = .{

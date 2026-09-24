@@ -1,0 +1,56 @@
+{
+  "candidate_sha256": "4c4b70884f34d169f5d28cdb1ab8cf0fdd75faed3989b89f0f32ea54173281ab",
+  "evidence": [
+    "audit/reviews/carry-forward.md",
+    "audit/reviews/review-pi-20260924-040425-db7ece4d.md",
+    "audit/runs/run-031-issue-100-aqueous-band-redistribution-frontier-moves-to-3277-2026-09-24.md",
+    "audit/runs/issue-100-fix2-tests/receipt.json",
+    "audit/runs/issue-100-fix2-tests/stderr.log",
+    "audit/runs/issue-100-fix2-build/receipt.json",
+    "audit/runs/issue-100-fix2-run-log/receipt.json",
+    "audit/runs/issue-100-fix2-run-log/stderr.log"
+  ],
+  "findings": [],
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "open_processes": [],
+  "packet_sha256": "8494a842ed9a1210c8a17b502be567b9db4cd4d0678b5822bce92ff00151e449",
+  "review_artifacts": [
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    },
+    {
+      "path": "audit/reviews/review-pi-20260924-040425-db7ece4d.md",
+      "sha256": "54bc6d039dd8cedde7d31737d7531c321e43008d0fdeb9349ea3ba1d06290b26"
+    },
+    {
+      "path": "audit/runs/run-031-issue-100-aqueous-band-redistribution-frontier-moves-to-3277-2026-09-24.md",
+      "sha256": "d6e851a6ab13b8d90e2048edac00eb3269c4ecc301525e08d5b8efbfc95c986f"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-tests/receipt.json",
+      "sha256": "d5e513ddcbd88a3a710bc49f3c23168c653da441ae5f6eb5e53b7260448cf417"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-tests/stderr.log",
+      "sha256": "b55cbc07be8317eeb6662e9394de12694a84cd05b9d8fe881a9306b5b4bc5d9b"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-build/receipt.json",
+      "sha256": "eeb20219d24dfb86614f50530f1de0ff4f27ace2729a2c1d0ac0a969d76cb875"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-run-log/receipt.json",
+      "sha256": "c7a74df14f70d8729a73d4164f6cd5cdbf7f6ff2dbe5b445a7c6085585676cc7"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-run-log/stderr.log",
+      "sha256": "e2354056d128778557ccb57d7869748e8b75f9d074982fc36e79a093512ec99f"
+    }
+  ],
+  "reviewer_session": "01a0d194-ed09-70b5-9b38-839bb4aa466f",
+  "revision": 1,
+  "summary": "Independent review of task 20260924-040425-db7ece4d (issue-100 aqueous band redistribution). Implementation exactly mirrors hour1.f:326-332 and :379-384. Unit test suite passes 4385/1/0. Ottawa prod deck accepts hour 3,276 with committed census entry and advances frontier to hour 3,277.",
+  "task": "20260924-040425-db7ece4d",
+  "verdict": "PASS"
+}

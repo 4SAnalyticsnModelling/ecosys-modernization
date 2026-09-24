@@ -1,0 +1,1 @@
+Registered 2026-09-24 before the issue-100-fix2 build/run: publish->prepareHour unbooked step goes from -5.171e-4 to ~0 (aq NH4/NH3 non-band and the ~-1.8e-5 non-NH4 part, predicted to be NO3). The hour-3276 cell N residual falls to about -1.55e-6 (the chemistry step), so hour 3276 STILL fails (limit ~1.66e-9); frontier unchanged unless the chemistry step is also a band re-base.
