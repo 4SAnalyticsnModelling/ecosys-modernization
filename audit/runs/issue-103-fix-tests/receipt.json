@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "zig",
+    "test",
+    "src/module_index.zig"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 2338.401,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 20728,
+  "pid": 24380,
+  "started_unix": 1790233359.1033657,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/issue-103-fix-tests/stderr.log",
+    "sha256": "f74ff21565c0f5a8c10bc5ad55cd138d536f44f415d080e3fd01c2c779a44954"
+  },
+  "stdout": {
+    "path": "audit/runs/issue-103-fix-tests/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 5400.0
+}

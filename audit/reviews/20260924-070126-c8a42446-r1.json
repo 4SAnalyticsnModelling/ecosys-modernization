@@ -1,0 +1,46 @@
+{
+  "candidate_sha256": "95bb342e365801f9942cd0b123f5c9e3b27dff4d54a051842976cfc132501dc3",
+  "evidence": [
+    "audit/reviews/review-pi-20260924-070126-c8a42446.md",
+    "audit/reviews/carry-forward.md",
+    "audit/reviews/test-issue103-verify/receipt.json",
+    "audit/runs/issue-103-fix-prediction/prediction-registered-before-run.txt",
+    "audit/runs/issue-103-fix-run/receipt.json",
+    "audit/runs/issue-103-fix-tests/receipt.json"
+  ],
+  "findings": [],
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "open_processes": [],
+  "packet_sha256": "de124067d268e358c5482c6d8958a5601d87af71eb4c490bfdd937b759dbe22d",
+  "review_artifacts": [
+    {
+      "path": "audit/reviews/review-pi-20260924-070126-c8a42446.md",
+      "sha256": "10fe1d87900100a905ea12e0dbaf28d6c3d943258aafb09e0195d691af83576b"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    },
+    {
+      "path": "audit/reviews/test-issue103-verify/receipt.json",
+      "sha256": "12413129f65ce3dde4a8162e50f487135fe57a0a6b9bc16d0ddf48fbf8146cbe"
+    },
+    {
+      "path": "audit/runs/issue-103-fix-prediction/prediction-registered-before-run.txt",
+      "sha256": "edbd4e6587bfe013e804a7e12ebca002b44b5f834058b8ef975b9ac817c6c385"
+    },
+    {
+      "path": "audit/runs/issue-103-fix-run/receipt.json",
+      "sha256": "3a206f9e70d50b79195b58ce26a3fab71516327dd0ed6f56ef4f83f805dc5aa3"
+    },
+    {
+      "path": "audit/runs/issue-103-fix-tests/receipt.json",
+      "sha256": "9c83a6e0a5a8ba01872399516e31b1c041dd68aaf712b4aaf40711f74fb85f64"
+    }
+  ],
+  "reviewer_session": "01a0d236-c120-70b5-9b38-839e0bb96ce5",
+  "revision": 1,
+  "summary": "Independent review of task 20260924-070126-c8a42446 (issue-103, revision 1). Verified removal of spurious duplicate band growth in soil_chemistry_convergence.zig against legacy hour1.f:4888-5155 and solute.f. Structural regression passes (4/4 via zig test --test-filter ISSUE-103; receipt audit/reviews/test-issue103-verify/receipt.json). Module test suite 4385 passed, 1 skipped, 0 failed. Production run confirms pre-registered prediction: hour 3,277 and day 137 accepted, frontier moved to hour 3,289.",
+  "task": "20260924-070126-c8a42446",
+  "verdict": "PASS"
+}

@@ -1,0 +1,10 @@
+src\ecosys_ng.zig:7295:48: error: no field named 'fertilizer_band_state' in struct 'driver.fertilizer_production_fixture.verifyApplication__anon_111999__struct_113779'
+            .fertilizer_band = &driver_context.fertilizer_band_state.*,
+                                               ^~~~~~~~~~~~~~~~~~~~~
+src\driver\fertilizer_production_fixture.zig:76:21: note: struct declared here
+    const driver = .{
+                   ~^
+referenced by:
+    verifyApplication__anon_111999: src\driver\fertilizer_production_fixture.zig:113:20
+    verifyLimeOnly__anon_121777: src\driver\fertilizer_production_fixture.zig:7:26
+    1 reference(s) hidden; use '-freference-trace=3' to see all references

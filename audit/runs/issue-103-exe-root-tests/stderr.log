@@ -1,0 +1,1 @@
+error: found another zig file '.zig' after root source file '.zig'

@@ -1,0 +1,19 @@
+{
+  "candidate_sha256": "95bb342e365801f9942cd0b123f5c9e3b27dff4d54a051842976cfc132501dc3",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "b23d91958ddd4b9687f4925652c5084f49995400598adb62ed45e68cd3960708"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "release_status": "NOT_ASSESSED",
+  "review": {
+    "path": "audit/reviews/20260924-070126-c8a42446-r1.json",
+    "sha256": "6b4d0b5dd46de65c6b699116c3775eb6c7eb3da671a023fbadd795bd112573fe"
+  },
+  "sessions": {
+    "editor": "72faab61-e064-413a-8a61-676e4e97a80a",
+    "reviewer": "01a0d236-c120-70b5-9b38-839e0bb96ce5"
+  },
+  "task": "20260924-070126-c8a42446",
+  "verdict": "PASS"
+}

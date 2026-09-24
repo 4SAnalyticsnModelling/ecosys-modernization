@@ -1,6 +1,6 @@
 # Issue 103 -- hour 3,277: 1.0368e-6 g N of nitrate is lost in the after_uptake -> after_chemistry interval
 
-Status: **OPEN -- LOCALIZED** (run-032, task `20260924-055505-f4a901f5`). The loss is a fraction re-base at `refreshMatrixFromReactionState`, caused by a SECOND NO3/PO4 band growth (`soil_chemistry_convergence.updateFertilizerBandGeometry` -> `fertilizer_band_nitrate_phosphate.updateLayer`, "hour1.f 4992-5200") that runs outside the band coordinator and discards its repartitioned pools. `prepareHour` already ports the single legacy `DO 9986` growth (`hour1.f:4888-5151`). Next: adjudicate the faithful pass against legacy and remove or merge the duplicate. See `audit/runs/run-032-issue-103-duplicate-no3-band-growth-in-chemistry-stage-rebases-nitrate-2026-09-24.md`.
+Status: **FIXED in production (run-033, task `20260924-070126-c8a42446`)**: the duplicate chemistry-stage NO3/PO4 band growth was removed, hours 3,277-3,288 are accepted, and the frontier moved to 3,289 (issue-105). Localized in run-032.
 
 ## Observation (run-031, `audit/runs/issue-100-fix2-run-log/stderr.log`, SHA256 `E2354056...`)
 

@@ -1,0 +1,107 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/runs/run-033-issue-103-duplicate-band-growth-removed-frontier-moves-to-3289-2026-09-24.md",
+      "sha256": "89b30c29bd6ce4b93a5acb311e4eaf76f6ea20e64fc1dd18b7f7a754bb7bbcc6"
+    },
+    {
+      "path": "audit/issues/issue-103-hour-3277-nitrate-lost-in-the-chemistry-interval.md",
+      "sha256": "2ba5880a95f7ef10f40e9cfd4cf76f467c7c368179666b424aedb13c53d34eaa"
+    },
+    {
+      "path": "audit/issues/issue-104-executable-test-root-does-not-compile.md",
+      "sha256": "2d6eb8210fe41907d1a56338e8980576a5ce419dd5e5005f68a414a1b689893e"
+    },
+    {
+      "path": "audit/runs/issue-103-fix-prediction/prediction-registered-before-run.txt",
+      "sha256": "edbd4e6587bfe013e804a7e12ebca002b44b5f834058b8ef975b9ac817c6c385"
+    },
+    {
+      "path": "audit/runs/issue-103-fix-tests/receipt.json",
+      "sha256": "9c83a6e0a5a8ba01872399516e31b1c041dd68aaf712b4aaf40711f74fb85f64"
+    },
+    {
+      "path": "audit/runs/issue-103-fix-tests/stderr.log",
+      "sha256": "f74ff21565c0f5a8c10bc5ad55cd138d536f44f415d080e3fd01c2c779a44954"
+    },
+    {
+      "path": "audit/runs/issue-103-exe-root-tests2/receipt.json",
+      "sha256": "5e08065ab43eccd77477575446b261bbedeefbd24dca294ce3495f0d5b09dd8b"
+    },
+    {
+      "path": "audit/runs/issue-103-exe-root-tests2/stderr.log",
+      "sha256": "ae17240c667a717984a1778a9e667fd029110c1ac10311a6511f3141b35a3c86"
+    },
+    {
+      "path": "audit/runs/issue-103-exe-root-full/receipt.json",
+      "sha256": "9252e4fb04e93e03640fdd77b302893800840f7e2f79be24ab332907a4f4b6b1"
+    },
+    {
+      "path": "audit/runs/issue-103-exe-root-full/stderr.log",
+      "sha256": "90359b14e73cbb96986d4084b3c3cadd0ff53eb29b886a6e696b8f4dd42e1952"
+    },
+    {
+      "path": "audit/runs/issue-103-fix-build/receipt.json",
+      "sha256": "ca891565f11cfa3d307a60e66a4f2562ba8e60585108d898371e46545386eb71"
+    },
+    {
+      "path": "audit/runs/issue-103-fix-run/receipt.json",
+      "sha256": "3a206f9e70d50b79195b58ce26a3fab71516327dd0ed6f56ef4f83f805dc5aa3"
+    },
+    {
+      "path": "audit/runs/issue-103-fix-run/stderr.log",
+      "sha256": "dd57cdef32ed8e9670424288673b471c791c88693369bda76796558b94198a7d"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "author_session": "72faab61-e064-413a-8a61-676e4e97a80a",
+  "author_sessions": [
+    "72faab61-e064-413a-8a61-676e4e97a80a"
+  ],
+  "base_sha256": "81618ddf5ff731ee8e0e300c6a0fe8984dc11d6c234c49b39d247c3562e31e6d",
+  "candidate_sha256": "95bb342e365801f9942cd0b123f5c9e3b27dff4d54a051842976cfc132501dc3",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "0c989a2adc14cb91365aed5ecab4eeede89c8ec96f209b72f97e027402c6ab8b"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/runs/run-033-issue-103-duplicate-band-growth-removed-frontier-moves-to-3289-2026-09-24.md",
+      "audit/issues/issue-103-hour-3277-nitrate-lost-in-the-chemistry-interval.md",
+      "audit/issues/issue-104-executable-test-root-does-not-compile.md",
+      "audit/runs/issue-103-fix-prediction/prediction-registered-before-run.txt",
+      "audit/runs/issue-103-fix-tests/receipt.json",
+      "audit/runs/issue-103-fix-tests/stderr.log",
+      "audit/runs/issue-103-exe-root-tests2/receipt.json",
+      "audit/runs/issue-103-exe-root-tests2/stderr.log",
+      "audit/runs/issue-103-exe-root-full/receipt.json",
+      "audit/runs/issue-103-exe-root-full/stderr.log",
+      "audit/runs/issue-103-fix-build/receipt.json",
+      "audit/runs/issue-103-fix-run/receipt.json",
+      "audit/runs/issue-103-fix-run/stderr.log",
+      "audit/reviews/carry-forward.md"
+    ],
+    "next_action": "issue-104: remove the fertilizer-dispatch TEMP probes, fix the executable-root fixture, compile and count the second test root.",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "issue-103 fix: removed the duplicate, out-of-coordinator NO3/PO4 band growth (soil_chemistry_convergence.updateFertilizerBandGeometry call plus the dead 343-line function). Legacy grows each band once per hour in hour1.f DO 9986 (4888-5155), already ported by prepareHour for all three families. Structural regression added (passes 4/4 via the executable test root, filtered). Module suite 4385/1/0. Found issue-104: the executable test root does not compile unfiltered (pre-existing ISSUE-090 fixture defect), so those tests are NOT_ASSESSED. Prod-deck run: both pre-registered predictions confirmed (3,277 accepted; layer-1 NO3 band stays 0 that hour). Frontier moves to 3,288 accepted, failing at 3,289 with InvalidRootAqueousDiffusionInput (issue-105, root_uptake_geometry now executes). No gate promoted."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "Duplicate call removed with a legacy citation; structural regression; full unit-suite result; ONE ReleaseSafe prod-deck run with a pre-registered prediction; Pi review",
+    "issue": "issue-103",
+    "question": "Does removing the duplicate, out-of-coordinator NO3/PO4 band growth (soil_chemistry_convergence.updateFertilizerBandGeometry), leaving prepareHour's single hour1.f:4888-5155 growth, remove the hour-3,277 nitrate loss and move the frontier?",
+    "scope": [
+      "ecosys-ng/src/stages/soil_chemistry_convergence.zig",
+      "ecosys-ng/src/management/fertilizer_band_production.zig",
+      "ecosys-ng/src/management/fertilizer_band_nitrate_phosphate.zig",
+      "ecosys-ng/src/management/hourly_fertilizer_band_geometry.zig"
+    ],
+    "stop_condition": "Suite or frontier regression (then revert); a D: fault"
+  },
+  "task": "20260924-070126-c8a42446"
+}
