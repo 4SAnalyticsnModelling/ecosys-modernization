@@ -1,0 +1,26 @@
+{
+  "candidate_sha256": "6d239e74c6dad807c800ba24cb7afbca9e3c7cdb336dbd096972b21495aa4d83",
+  "evidence": [
+    "audit/reviews/review-pi-20260924-104044-3fc27a08.md",
+    "audit/reviews/carry-forward.md"
+  ],
+  "findings": [],
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "open_processes": [],
+  "packet_sha256": "98951b3c258d66006d49352b9630a8ac6d13a53972a191a7902c6af1d054d9a2",
+  "review_artifacts": [
+    {
+      "path": "audit/reviews/review-pi-20260924-104044-3fc27a08.md",
+      "sha256": "98bfbeb8c083a4be32ac800802a45c5ec8877a2619fb4bc2c96740d09a5675e1"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "reviewer_session": "01a0d2ff-7125-70b5-9b38-83a4354f0083",
+  "revision": 1,
+  "summary": "Independent review of task 20260924-104044-3fc27a08 (issue-105 fix): rootUptakeGeometry is now evaluated before hydraulic guards in water_balance.zig per uptake.f:526-538; 4387 module tests pass; InvalidRootAqueousDiffusionInput at hour 3,289 is eliminated. Subsequent conservation failure at hour 3,289 cleanly isolated as issue-108.",
+  "task": "20260924-104044-3fc27a08",
+  "verdict": "PASS"
+}

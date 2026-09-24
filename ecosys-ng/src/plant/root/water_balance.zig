@@ -293,8 +293,30 @@ pub fn refreshRootWorkspace(workspace: *Workspace, roots: *PlantRootState, canop
                 const topology = try roots.refreshLayerMorphologySourceOrder(plant, domain, layer, population, thickness, minimum_layer_thickness_m, workspace.woody_root_fraction[plant], porosity, volume_per_carbon, root_geometry_pi, workspace.vascular_growth_habit[plant], morphology_parameters);
                 const rooted_fraction = try rootedLayerFraction(layer == 0, layer_top_depth_m, thickness, deepest_primary_root_m, workspace.seeding_depth_m[plant], 0);
                 layer_top_depth_m += thickness;
-                if (topology.root_length_density_m_per_m3 <= 0 or topology.primary_axis_count <= 0 or topology.secondary_axis_count <= 0 or rooted_fraction <= 0 or grid.matrix_liquid_water_m3[soil] <= 0) continue;
                 const matrix_volume = properties.matrix_bulk_volume_m3[soil];
+                // ISSUE-105. `uptake.f:526-538` defines RRADL, PATH and RTARR
+                // for every root layer: the full expressions when RTDNP and
+                // FRTDPX are positive, otherwise RRAD2M, DLYR and 6.283*RTLGP.
+                // That block is not gated on soil water or conductivity, and
+                // root gas exchange (`uptake.f:2056-2058,2134-2135`) consumes
+                // it. Computing it only after the hydraulic guards below left
+                // skipped layers at radius 0 (Ottawa hour 3,289, run-035).
+                const layer_volume_m3 = properties.layer_volume_m3[soil];
+                const geometry = try rootUptakeGeometry(
+                    topology.root_length_density_m_per_m3,
+                    rooted_fraction,
+                    if (layer_volume_m3 > 0) matrix_volume / layer_volume_m3 else 0,
+                    roots.aqueous_volume_m3[try roots.layerIndex(plant, domain, layer)],
+                    porosity,
+                    population,
+                    topology.root_length_m_per_plant,
+                    roots.secondary_radius_m[try roots.layerIndex(plant, domain, layer)],
+                    thickness,
+                );
+                workspace.soil_path_length_m[root] = geometry.soil_path_length_m;
+                workspace.root_cylinder_radius_m[root] = geometry.effective_radius_m;
+                workspace.root_surface_area_per_radius_m[root] = geometry.surface_area_per_radius_m;
+                if (topology.root_length_density_m_per_m3 <= 0 or topology.primary_axis_count <= 0 or topology.secondary_axis_count <= 0 or rooted_fraction <= 0 or grid.matrix_liquid_water_m3[soil] <= 0) continue;
                 if (matrix_volume <= 0) continue;
                 const water_fraction = grid.matrix_liquid_water_m3[soil] / matrix_volume;
                 // Root uptake resistance must see the same unsaturated
@@ -314,10 +336,6 @@ pub fn refreshRootWorkspace(workspace: *Workspace, roots: *PlantRootState, canop
                     .gravitational_water_potential_mpa_per_m = gravitational_water_potential_mpa_per_m,
                 });
                 if (conductivity <= 0) continue;
-                const geometry = try rootUptakeGeometry(topology.root_length_density_m_per_m3, rooted_fraction, matrix_volume / properties.layer_volume_m3[soil], roots.aqueous_volume_m3[try roots.layerIndex(plant, domain, layer)], porosity, population, topology.root_length_m_per_plant, roots.secondary_radius_m[try roots.layerIndex(plant, domain, layer)], thickness);
-                workspace.soil_path_length_m[root] = geometry.soil_path_length_m;
-                workspace.root_cylinder_radius_m[root] = geometry.effective_radius_m;
-                workspace.root_surface_area_per_radius_m[root] = geometry.surface_area_per_radius_m;
                 const resistance = try hydraulicResistance(.{
                     .soil_path_length_m = geometry.soil_path_length_m,
                     .root_cylinder_radius_m = geometry.effective_radius_m,
@@ -1291,4 +1309,27 @@ test "hourly workspace builds live root and mycorrhizal conductance without allo
     try std.testing.expect(workspace.root_conductance_m_per_h_megapascal[1] > 0);
     try std.testing.expect(workspace.maximum_uptake_m[0] > 0);
     try std.testing.expect(workspace.root_conductance_m_per_h_megapascal[0] != workspace.root_conductance_m_per_h_megapascal[1]);
+}
+
+test "ISSUE-105: root uptake geometry is defined for every layer before the hydraulic guards" {
+    // `uptake.f:526-538` defines RRADL/PATH/RTARR independently of soil water
+    // and conductivity; root gas exchange reads them for any root with volume.
+    const source = @embedFile("water_balance.zig");
+    const geometry = std.mem.indexOf(u8, source, "const geometry = try rootUptakeGeometry(") orelse return error.MissingRootUptakeGeometry;
+    const radius_write = std.mem.indexOfPos(u8, source, geometry, "workspace.root_cylinder_radius_m[root] = geometry.effective_radius_m;") orelse return error.MissingRootRadiusPublication;
+    const water_guard = std.mem.indexOfPos(u8, source, geometry, "grid.matrix_liquid_water_m3[soil] <= 0) continue;") orelse return error.MissingRootWaterGuard;
+    const conductivity_guard = std.mem.indexOfPos(u8, source, geometry, "if (conductivity <= 0) continue;") orelse return error.MissingRootConductivityGuard;
+    try std.testing.expect(radius_write < water_guard);
+    try std.testing.expect(radius_write < conductivity_guard);
+    // Exactly one geometry evaluation per layer in the production loop: search
+    // only up to the first test block (tests, including this one, quote it).
+    const tests_begin = std.mem.indexOfPos(u8, source, geometry, "\ntest \"") orelse return error.MissingTestBlocks;
+    try std.testing.expect(std.mem.indexOfPos(u8, source[0..tests_begin], geometry + 1, "const geometry = try rootUptakeGeometry(") == null);
+}
+
+test "ISSUE-105: an unrooted layer gets the legacy RRAD2M, DLYR and 6.283*RTLGP defaults" {
+    const geometry = try rootUptakeGeometry(0, 0, 0, 5.28e-6, 0.1, 10, 0.3, 5.0e-5, 0.05);
+    try std.testing.expectEqual(@as(f64, 5.0e-5), geometry.effective_radius_m);
+    try std.testing.expectEqual(@as(f64, 0.05), geometry.soil_path_length_m);
+    try std.testing.expectApproxEqAbs(@as(f64, 6.283 * 0.3), geometry.surface_area_per_radius_m, 1e-15);
 }

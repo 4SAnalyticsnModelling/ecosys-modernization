@@ -1,6 +1,6 @@
 # Issue 105 -- hour 3,289: root gas exchange reads a zero root radius for a layer whose uptake geometry was skipped
 
-Status: **OPEN -- LOCALIZED** (run-035, task `20260924-094040-06b7c6f6`). This is the frontier failure after issue-103 (3,288 accepted).
+Status: **FIXED (run-036, task `20260924-104044-3fc27a08`)**: root geometry is now defined for every layer and the error is gone. Hour 3,289 still fails, now on C/Ca/Na/K closure (issue-108). Localized in run-035.
 
 ## Measurement (run-035)
 

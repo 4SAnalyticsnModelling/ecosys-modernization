@@ -1,0 +1,85 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/runs/run-036-issue-105-root-geometry-fix-clears-the-error-and-exposes-conservation-at-3289-2026-09-24.md",
+      "sha256": "77f7d345a88fc42ee9dadf0229ce01b413fb1d2873222d4668eeaf6d67d03930"
+    },
+    {
+      "path": "audit/issues/issue-105-hour-3289-root-geometry-unset-for-skipped-layers.md",
+      "sha256": "4a0faf3e0f2b6d08a5a246c2b1350cd585ee51cd63c12a8f92cf4deb110f55f9"
+    },
+    {
+      "path": "audit/issues/issue-108-hour-3289-carbon-and-cation-closure-after-root-geometry-fix.md",
+      "sha256": "1cfc3c002eb0a0139f3902e0c83bbcdaf2417cef303dd980e07f5aa6aa57f7bf"
+    },
+    {
+      "path": "audit/runs/issue-105-fix-prediction/prediction-registered-before-run.txt",
+      "sha256": "c1c482d7a3ea2ea80468811888413e2ee43d9c6c4ec6737dfd985a184342515b"
+    },
+    {
+      "path": "audit/runs/issue-105-fix-tests/receipt.json",
+      "sha256": "09b30dcd8ae93144f10032dacd41010e4e015624b9c43034e542cc0793954973"
+    },
+    {
+      "path": "audit/runs/issue-105-fix-tests/stderr.log",
+      "sha256": "673ce1164df7196d6e486b336bedb038564f0bc2c77a61a404300d9cfe94cb8b"
+    },
+    {
+      "path": "audit/runs/issue-105-fix-build/receipt.json",
+      "sha256": "c84a8cb13688ece135dc9bc61c72ae12ebefce337570539e700d4ad021b7d990"
+    },
+    {
+      "path": "audit/runs/issue-105-fix-run/receipt.json",
+      "sha256": "ed99a50352d90d5b8ab487540187ef33c65d3f9e108ea7beadf667732f5072cc"
+    },
+    {
+      "path": "audit/runs/issue-105-fix-run/stderr.log",
+      "sha256": "3108d56df4c5532180e84cdd12703fd25034a456b3ed9d8c8bd8c17d48294607"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "author_session": "72faab61-e064-413a-8a61-676e4e97a80a",
+  "author_sessions": [
+    "72faab61-e064-413a-8a61-676e4e97a80a"
+  ],
+  "base_sha256": "0a8d5781eaec76767e751bb9a4b98cc807cf4d4681b99ac120a01c69304a7ab1",
+  "candidate_sha256": "6d239e74c6dad807c800ba24cb7afbca9e3c7cdb336dbd096972b21495aa4d83",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "7a4135988d82f6f210966e93b6f2aa825bf78b3ae8e0b4db029d5460be2ae176"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/runs/run-036-issue-105-root-geometry-fix-clears-the-error-and-exposes-conservation-at-3289-2026-09-24.md",
+      "audit/issues/issue-105-hour-3289-root-geometry-unset-for-skipped-layers.md",
+      "audit/issues/issue-108-hour-3289-carbon-and-cation-closure-after-root-geometry-fix.md",
+      "audit/runs/issue-105-fix-prediction/prediction-registered-before-run.txt",
+      "audit/runs/issue-105-fix-tests/receipt.json",
+      "audit/runs/issue-105-fix-tests/stderr.log",
+      "audit/runs/issue-105-fix-build/receipt.json",
+      "audit/runs/issue-105-fix-run/receipt.json",
+      "audit/runs/issue-105-fix-run/stderr.log",
+      "audit/reviews/carry-forward.md"
+    ],
+    "next_action": "issue-108: decompose the hour-3,289 carbon/cation trace from the run-036 log; localize; probe.",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "issue-105 fix: water_balance.zig now evaluates the existing uptake.f:526-538 rootUptakeGeometry (including its RRAD2M/DLYR/6.283*RTLGP else-branch) and publishes radius/path/area-per-radius for every root layer before the six hydraulic continue guards, instead of after them. Two regressions; module suite 4387 passed / 1 skipped / 0 failed. Prod-deck run: the pre-registered prediction's first half is confirmed (no InvalidRootAqueousDiffusionInput, issue-105 error-path log silent); its second half is REFUTED: hour 3,289 still fails, now HourlyCellConservationFailure (C -2.15e-6, Ca +9.19e-8, Na +2.9e-10, K +1.5e-10; cations all in layer 2), filed as issue-108. Frontier unchanged at 3,288 accepted. No gate promoted."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "Call moved with legacy citation; regression; module suite and executable-root filter results; ONE ReleaseSafe prod-deck run with a pre-registered prediction; Pi review",
+    "issue": "issue-105",
+    "question": "Does defining root uptake geometry for every root layer before the water/conductivity guards (uptake.f:526-538, via the existing rootUptakeGeometry) remove the hour-3,289 zero-radius failure and move the frontier?",
+    "scope": [
+      "ecosys-ng/src/plant/root/water_balance.zig",
+      "ecosys-ng/src/plant/root/plant_root_gas_transport.zig"
+    ],
+    "stop_condition": "Suite or frontier regression (then revert); a D: fault"
+  },
+  "task": "20260924-104044-3fc27a08"
+}
