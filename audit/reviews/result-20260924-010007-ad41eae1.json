@@ -1,0 +1,11 @@
+{
+  "packet_sha256": "4da5da0f03a0d14085ad2cc7ad37865215b4cb838f05b86c4b52cc9d8c4bd710",
+  "verdict": "PASS",
+  "summary": "Independent review of task 20260924-010007-ad41eae1 (issue-100, revision 1). Verified exact decomposition of hour-3,276 nitrogen residual into stage intervals using run-028 post-NITRO pool trace: -0.0769951 g N between hour start and after_nitro (4.666% of single banded NH4 application in f25fr98), and +0.0093311 g N between after_post_watsub and after_uptake. Recomputed sum matches reported failure residual (-0.0676655 g N) to 4e-13. All packet artifact hashes match.",
+  "findings": [],
+  "evidence": [
+    "audit/reviews/review-pi-20260924-010007-ad41eae1.md",
+    "audit/reviews/carry-forward.md"
+  ],
+  "open_processes": []
+}

@@ -1,0 +1,65 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/analysis/issue-100-hour-3276-residual-decomposed-by-stage-interval-2026-09-24.md",
+      "sha256": "59da2229588fcacd42be090ddb90fd79ebb9ab71fe43ca440f26eb22f20e2309"
+    },
+    {
+      "path": "audit/runs/issue-100-n100f-run/stderr.log",
+      "sha256": "b547c3a872c351367eb80223f5cb28787dde2127fb40562cfeb48a88b6d8d6c6"
+    },
+    {
+      "path": "audit/runs/run-028-issue-100-hour-3276-ledger-reconciles-exactly-storage-census-is-short-2026-09-23.md",
+      "sha256": "e874ee7a236444b7ccbd9fe6c543cd2d80db2c7e4c17c9ded2994c46e042f5cc"
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/soil/fertilizer/f25fr98",
+      "sha256": "d3a078372fc5514483a8ba124b4f9dc40dc2b7e8a7e9feb9c3d7c40916bd24af"
+    },
+    {
+      "path": "ecosys-ng/src/management/fertilizer_schedule.zig",
+      "sha256": "459a614ae296c292b7c79f65e043ec1d99fbc3228c5bdf0b8969122dc0df334e"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "author_session": "72faab61-e064-413a-8a61-676e4e97a80a",
+  "author_sessions": [
+    "72faab61-e064-413a-8a61-676e4e97a80a"
+  ],
+  "base_sha256": "d1dd08ff919b0ae1c6e6859455df867d4df3ed49de455428bd0fa81df5196dae",
+  "candidate_sha256": "d1dd08ff919b0ae1c6e6859455df867d4df3ed49de455428bd0fa81df5196dae",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "566c5b2984c44f3e884138e0152e99b7cf9e0bc8ae0e2a20b3eda64729fb7e5b"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/analysis/issue-100-hour-3276-residual-decomposed-by-stage-interval-2026-09-24.md",
+      "audit/runs/issue-100-n100f-run/stderr.log",
+      "audit/runs/run-028-issue-100-hour-3276-ledger-reconciles-exactly-storage-census-is-short-2026-09-23.md",
+      "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/soil/fertilizer/f25fr98",
+      "ecosys-ng/src/management/fertilizer_schedule.zig",
+      "audit/reviews/carry-forward.md"
+    ],
+    "next_action": "Add hour-start and post-fertilizer-publish N trace points with layer-2 band/non-band NH4/NH3/urea split; one ReleaseSafe prod-deck run.",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "issue-100 hour-3,276 N residual decomposed exactly from the existing run-028 post-NITRO six-pool trace (Fraction arithmetic; script embedded in the record). Unbooked -0.0769951 g N from hour start to after_nitro (4.666% of the single 1.65 g banded-NH4 application, f25fr98 17051998, field order fertilizer_schedule.zig:74-84), and +0.0093311 g N in post_watsub->uptake (NH4 +0.01027, NO3 -0.00094, plant N constant), -1.55e-6 chemistry; sum = reported residual to 4e-13. The six-pool sum matches the row's after to 4e-13. No source change, no run. Band-species census omission is recorded as a hypothesis only. No release claim."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "Exact decomposition of the residual into stage-interval components, computed from raw log values with a script, recorded; Pi review",
+    "issue": "issue-100",
+    "question": "Using the existing run-028 post-NITRO pool trace, which stage intervals of hour 3,276 carry the -0.0676655 g N residual, and by which pools?",
+    "scope": [
+      "ecosys-ng/src/stages/hourly_heat_water_solute.zig",
+      "ecosys-ng/src/ecosys_ng.zig"
+    ],
+    "stop_condition": "Trace insufficient to localize without a new run (then record the gap and stop)"
+  },
+  "task": "20260924-010007-ad41eae1"
+}
