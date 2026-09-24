@@ -54,11 +54,20 @@ pub fn traceSurfaceFrontier(context: anytype, stage: []const u8, dt_hours: f64) 
         ) catch continue;
         const surface_activity = context.hourly_layer_boundary_ledger.activity[surface_scope];
         std.log.info("SURFACE_FRONTIER stage={s} hour={d} dt_hours={e} cell={d} temperature_k={e} cached_capacity_megajoules_per_k={e} liquid_m3={e} ice_we_m3={e} vapor_mol={e} organic_carbon_g_c={e} oxygen_gaseous_g={e} oxygen_dissolved_g={e} oxygen_macro_g={e} oxygen_band_g={e} pending_snow_oxygen_g={e} air_m3={e} booked_phosphorus_input_g={e} booked_phosphorus_output_g={e}", .{
-            stage,                                     context.executed_weather_hours.* + 1,                 dt_hours,                                              cell,
-            context.grid.surface_temperature_k[cell],  context.surface_heat_capacity_megajoules_per_k[cell], context.surface_precipitation.litter_water_m3[cell],   context.surface_litter_ice_m3[cell],
-            gas.water_vapor_mol[cell],                 organic,                                              gas.gaseous_mass_g[component],                         gas.dissolved_mass_g[component],
-            gas.macropore_dissolved_mass_g[component], gas.band_dissolved_mass_g[component],                 context.snow_surface_discharge[cell].litter_g[oxygen], gas.air_volume_m3[cell],
-            surface_activity.phosphorus_input_g,       surface_activity.phosphorus_output_g,
+            stage,
+            context.executed_weather_hours.* + 1,
+            dt_hours,
+            cell,
+            context.grid.surface_temperature_k[cell],  context.surface_heat_capacity_megajoules_per_k[cell], context.surface_precipitation.litter_water_m3[cell],
+            context.surface_litter_ice_m3[cell],
+            gas.water_vapor_mol[cell],
+            organic,
+            gas.gaseous_mass_g[component],
+            gas.dissolved_mass_g[component],
+            gas.macropore_dissolved_mass_g[component], gas.band_dissolved_mass_g[component],
+            context.snow_surface_discharge[cell].litter_g[oxygen], gas.air_volume_m3[cell],
+            surface_activity.phosphorus_input_g,
+            surface_activity.phosphorus_output_g,
         });
     }
 }
@@ -898,6 +907,60 @@ pub fn waterScaledPhosphateForLayer(context: anytype, layer: usize, carrier_m3: 
     return total_g;
 }
 
+/// TEMP_DIAGNOSTIC (`issue-100`): the hour-3,276 cell census loses 0.0770 g N
+/// between the hour-start snapshot and `after_nitro` (run-028 decomposition).
+/// Prints every term the soil-layer-2 ammonium census sums
+/// (`landscape_mass_inventory_nitrogen.zig:147-186`), including the zone
+/// fractions and soil mass that weight the per-Mg exchange concentrations, so
+/// a fraction re-base with no mass transfer is distinguishable from a real
+/// loss. Silent except at the target hour passed by the caller.
+pub fn traceIssue100LayerAmmonium(context: anytype, label: []const u8, hour: usize) !void {
+    if (@import("builtin").is_test) return;
+    if (hour != ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_target_hour) return;
+    const totals = try reconstructLandscapeMassBalance(context);
+    const n = context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol;
+    const layer: usize = 2;
+    const matrix = try context.mineral_nitrogen_transport.matrix.cellAmountsConst(layer);
+    const macro = try context.mineral_nitrogen_transport.macropore.cellAmountsConst(layer);
+    const S = ecosys.mineral_nitrogen_transport.Species;
+    const aq = struct {
+        fn get(m: anytype, p: anytype, s: S) f64 {
+            return m[@intFromEnum(s)] + p[@intFromEnum(s)];
+        }
+    };
+    const fractions = try context.fertilizer_band.scienceZoneFractionsForFlatIndex(layer);
+    const mass = context.landscape_soil_mass_megagrams_scratch[layer];
+    const exchange = context.soil_chemistry.cation_exchange_mol_per_megagram[layer];
+    const pending = context.soil_chemistry.pending_cation_exchange_mol[layer];
+    const dry = context.soil_fertilizer_inventory.soil[layer];
+    std.log.err(
+        "TEMP_DIAGNOSTIC n_layer2[{s}]: hour={d} total_n_g={e} census_nh4_g={e} aq_nh4_nb_g={e} aq_nh4_b_g={e} aq_nh3_nb_g={e} aq_nh3_b_g={e} frac_nh4_nb={e} frac_nh4_b={e} soil_mass_mg={e} exch_nh4_nb_mol_per_mg={e} exch_nh4_b_mol_per_mg={e} exch_nh4_nb_g={e} exch_nh4_b_g={e} pending_nh4_nb_g={e} pending_nh4_b_g={e} dry_banded_nh4_g={e} dry_other_nh_g={e}",
+        .{
+            label,
+            hour,
+            totals.residue_nitrogen_g + totals.organic_nitrogen_g + totals.dinitrogen_nitrogen_g +
+                totals.ammonium_nitrogen_g + totals.nitrate_nitrogen_g + totals.plant_nitrogen_g,
+            totals.ammonium_nitrogen_g,
+            aq.get(matrix, macro, .ammonium_non_band) * n,
+            aq.get(matrix, macro, .ammonium_band) * n,
+            aq.get(matrix, macro, .ammonia_non_band) * n,
+            aq.get(matrix, macro, .ammonia_band) * n,
+            fractions.ammonium_non_band,
+            fractions.ammonium_band,
+            mass,
+            exchange.ammonium_non_band,
+            exchange.ammonium_band,
+            exchange.ammonium_non_band * mass * fractions.ammonium_non_band * n,
+            exchange.ammonium_band * mass * fractions.ammonium_band * n,
+            pending.ammonium_non_band * n,
+            pending.ammonium_band * n,
+            dry.banded_ammonium_mol_n * n,
+            (dry.broadcast_ammonium_mol_n + dry.broadcast_ammonia_mol_n + dry.broadcast_urea_mol_n +
+                dry.banded_ammonia_mol_n + dry.banded_urea_mol_n) * n,
+        },
+    );
+}
+
 pub fn diagnosticAmmoniumOwners_g_n(context: anytype) ![6]f64 {
     const molar_mass = context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol;
     var result: [6]f64 = @splat(0);
@@ -1009,7 +1072,9 @@ fn debugCarbonComponents(context: anytype, totals: ecosys.mass_balance_audit.Tot
         for (so.microbial[first .. first + mpop * mfrac]) |p| surf_microbial_sub4 += p.carbon_g_c;
     }
     std.log.debug("{s} surf subpools: microbial={e} residue_fracs={e} structural={e} excluded_resid={e} excluded_micro4={e}", .{
-        label,                      surf_microbial / area,      surf_residue / area, surf_structural / area,
+        label,
+            surf_microbial / area,
+            surf_residue / area, surf_structural / area,
         surf_excluded_resid / area, surf_microbial_sub4 / area,
     });
     // Fine-grained soil microbial by substrate category (active layers only)
@@ -1125,7 +1190,10 @@ fn debugCarbonComponents(context: anytype, totals: ecosys.mass_balance_audit.Tot
         }
     }
     std.log.debug("{s} co2 split: gas_co2={e} gas_ch4={e} bicarbonate={e} chem_co2={e} chem_bicarb={e} litter_chem_co2={e} litter_chem_bicarb={e} litter_gas_co2={e}", .{
-        label,                    gas_co2_g / area,            gas_ch4_g / area,        bicarbonate_g / area, chem_co2_g / area, chem_bicarb_g / area,
+        label,
+            gas_co2_g / area,
+            gas_ch4_g / area,
+            bicarbonate_g / area, chem_co2_g / area, chem_bicarb_g / area,
         litter_chem_co2_g / area, litter_chem_bicarb_g / area, litter_gas_co2_g / area,
     });
 }

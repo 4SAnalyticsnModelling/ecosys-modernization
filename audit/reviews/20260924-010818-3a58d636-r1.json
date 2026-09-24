@@ -1,0 +1,56 @@
+{
+  "candidate_sha256": "605152a4018e39267571a2e7e6dc270d6f01596b125fa3a221527d26396e15a8",
+  "evidence": [
+    "audit/runs/run-029-issue-100-fertilizer-band-creation-rebases-non-band-exchange-ammonium-2026-09-24.md",
+    "audit/runs/issue-100-n100g-run/receipt.json",
+    "audit/runs/issue-100-n100g-run/stderr.log",
+    "audit/runs/issue-100-n100g-build/receipt.json",
+    "ecosys-ng/src/stages/diagnostics.zig",
+    "ecosys-ng/src/ecosys_ng.zig",
+    "audit/reviews/carry-forward.md",
+    "audit/reviews/review-pi-20260924-010818-3a58d636.md"
+  ],
+  "findings": [],
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "open_processes": [],
+  "packet_sha256": "9354a2088e4252b3b8035be335d97d26db293a37addfec4c68ecd5d7a9c171cf",
+  "review_artifacts": [
+    {
+      "path": "audit/runs/run-029-issue-100-fertilizer-band-creation-rebases-non-band-exchange-ammonium-2026-09-24.md",
+      "sha256": "2d629a4be66510430c5720e56eec6f8701ed5955354f680ca0299cc911d3062e"
+    },
+    {
+      "path": "audit/runs/issue-100-n100g-run/receipt.json",
+      "sha256": "a1d16c90b13211182eb8c1ff34f4f418439b7781f546b4c130af1c0ff105e3c4"
+    },
+    {
+      "path": "audit/runs/issue-100-n100g-run/stderr.log",
+      "sha256": "ea7e4c64ecba09c1c026b93b4675adf6fa0ee57f2068efa23ac6d6cf0b076543"
+    },
+    {
+      "path": "audit/runs/issue-100-n100g-build/receipt.json",
+      "sha256": "9160b8b6544a75869f673a15f25c7bdac7daad9f8b6c8481bc68ce6e53c7dd6a"
+    },
+    {
+      "path": "ecosys-ng/src/stages/diagnostics.zig",
+      "sha256": "0cc1346c735bc05da49c1292bee40d8f1064cbc900e61bfa0516c6ade1de6b01"
+    },
+    {
+      "path": "ecosys-ng/src/ecosys_ng.zig",
+      "sha256": "1518fcec5cbcdbbaed36f5b98b74d50837a220198113bc4f68de7429e52b3d10"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    },
+    {
+      "path": "audit/reviews/review-pi-20260924-010818-3a58d636.md",
+      "sha256": "e5b8537499f1e358a99235a62bda7ec8239d2b1c8057193078bf0019fdedbf60"
+    }
+  ],
+  "reviewer_session": "01a0d0f0-53fc-70b5-9b38-83972cae30c2",
+  "revision": 1,
+  "summary": "Independent review of task 20260924-010818-3a58d636 (issue-100, revision 1). Verified diagnostic run-029 raw logs (issue-100-n100g-run/stderr.log, SHA256 ea7e4c64...). At hour 3,276, the shortfall (-0.0671468785 g N, 99.2% of total residual -0.0676655386 g N) occurs exactly at the fertilizer publish step via non-band exchangeable NH4 fraction re-basing (frac_nh4_nb moves 1.0 -> 0.983552602 with invariant concentration). Subsequent brackets confirm prepareHour is zero and NITRO/uptake transient cancels to < 1e-13. Scope candidate hash 605152a4018e39267571a2e7e6dc270d6f01596b125fa3a221527d26396e15a8 intact. Logging-only probes, no science perturbation.",
+  "task": "20260924-010818-3a58d636",
+  "verdict": "PASS"
+}

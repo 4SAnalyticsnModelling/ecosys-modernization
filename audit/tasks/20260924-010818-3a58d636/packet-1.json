@@ -1,0 +1,73 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/runs/run-029-issue-100-fertilizer-band-creation-rebases-non-band-exchange-ammonium-2026-09-24.md",
+      "sha256": "2d629a4be66510430c5720e56eec6f8701ed5955354f680ca0299cc911d3062e"
+    },
+    {
+      "path": "audit/runs/issue-100-n100g-run/receipt.json",
+      "sha256": "a1d16c90b13211182eb8c1ff34f4f418439b7781f546b4c130af1c0ff105e3c4"
+    },
+    {
+      "path": "audit/runs/issue-100-n100g-run/stderr.log",
+      "sha256": "ea7e4c64ecba09c1c026b93b4675adf6fa0ee57f2068efa23ac6d6cf0b076543"
+    },
+    {
+      "path": "audit/runs/issue-100-n100g-build/receipt.json",
+      "sha256": "9160b8b6544a75869f673a15f25c7bdac7daad9f8b6c8481bc68ce6e53c7dd6a"
+    },
+    {
+      "path": "ecosys-ng/src/stages/diagnostics.zig",
+      "sha256": "0cc1346c735bc05da49c1292bee40d8f1064cbc900e61bfa0516c6ade1de6b01"
+    },
+    {
+      "path": "ecosys-ng/src/validation/landscape_mass_inventory_nitrogen.zig",
+      "sha256": "43e748ce2585a22911bccd0ce0aca83b269db138370cc69778c35061e2e42c20"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "author_session": "72faab61-e064-413a-8a61-676e4e97a80a",
+  "author_sessions": [
+    "72faab61-e064-413a-8a61-676e4e97a80a"
+  ],
+  "base_sha256": "605152a4018e39267571a2e7e6dc270d6f01596b125fa3a221527d26396e15a8",
+  "candidate_sha256": "605152a4018e39267571a2e7e6dc270d6f01596b125fa3a221527d26396e15a8",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "ad8067fc82a06229a80e6b56a9ea8b4953e82b44c17bd2254301399774499c21"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/runs/run-029-issue-100-fertilizer-band-creation-rebases-non-band-exchange-ammonium-2026-09-24.md",
+      "audit/runs/issue-100-n100g-run/receipt.json",
+      "audit/runs/issue-100-n100g-run/stderr.log",
+      "audit/runs/issue-100-n100g-build/receipt.json",
+      "ecosys-ng/src/stages/diagnostics.zig",
+      "ecosys-ng/src/validation/landscape_mass_inventory_nitrogen.zig",
+      "audit/reviews/carry-forward.md"
+    ],
+    "next_action": "Find the legacy band-creation rule for exchangeable NH4 (XN4/XNB) and the Zig repartition path at the publish; decide state vs census; fix with citation and regression.",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "issue-100: new layer-2 NH4 census probe (TEMP_DIAGNOSTIC, logging only; frontier row reproduced bit-identically) brackets hour 3,276. 99.2% of the residual (-0.0671468785 g N) is at the fertilizer publish and is a pure zone-fraction re-base of non-band exchangeable NH4. Per-Mg conc and soil mass are bit-identical, frac_nh4_nb goes 1 -> 0.98355, pending exchange stays 0, and predicted exch_nb*(f_after/f_before-1) = observed to 1e-16. All bracket steps sum to the residual. State-vs-census attribution is explicitly left open. No release claim."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "One ReleaseSafe prod-deck run with layer-2 NH4 census probes at hour 3,276; the step localized to a bracket and term; recorded; Pi review",
+    "issue": "issue-100",
+    "question": "Between the hour-3,276 start snapshot and after_nitro, at which bracketed point (fertilizer publish, band prepareHour, before NITRO, NITRO) does the -0.0770 g N census shortfall appear, and in which layer-2 ammonium census term (aqueous, fraction-weighted exchange, pending, dry)?",
+    "scope": [
+      "ecosys-ng/src/stages/diagnostics.zig",
+      "ecosys-ng/src/stages/hourly_heat_water_solute.zig",
+      "ecosys-ng/src/ecosys_ng.zig",
+      "ecosys-ng/src/validation/landscape_mass_inventory_nitrogen.zig",
+      "ecosys-ng/src/management/fertilizer_band_state.zig"
+    ],
+    "stop_condition": "Three distinct failed experiments, or a D: fault"
+  },
+  "task": "20260924-010818-3a58d636"
+}

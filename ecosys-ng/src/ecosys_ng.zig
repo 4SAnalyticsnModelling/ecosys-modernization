@@ -6799,6 +6799,12 @@ noinline fn prepareAcceptedHourStorageAndLedgers(driver_context: anytype, advanc
         driver_context.hourly_layer_storage_before.*,
         driver_context.hourly_cell_storage_before.*,
     );
+    // TEMP_DIAGNOSTIC (`issue-100`): the census terms at the hour-start snapshot.
+    try diagnostics.traceIssue100LayerAmmonium(
+        driver_context.hourly_science_context.*,
+        "hour_start_snapshot",
+        driver_context.executed_weather_hours.* + 1,
+    );
     // ISSUE-065 DRY_CARRIER_TRACE (census side): see the `census_after` site
     // in `acceptHourAndPublish` for rationale. This is the matching
     // hour-start "before" capture.
@@ -7369,6 +7375,11 @@ noinline fn advanceFertilizerManagement(
                     driver_context.hourly_cell_boundary_ledger.*.cells[0].nitrogen_input_g,
                 },
             );
+        try diagnostics.traceIssue100LayerAmmonium(
+            driver_context.hourly_science_context.*,
+            "after_fertilizer_publish",
+            driver_context.executed_weather_hours.* + 1,
+        );
     }
 }
 

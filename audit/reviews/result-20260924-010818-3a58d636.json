@@ -1,0 +1,17 @@
+{
+  "packet_sha256": "9354a2088e4252b3b8035be335d97d26db293a37addfec4c68ecd5d7a9c171cf",
+  "verdict": "PASS",
+  "summary": "Independent review of task 20260924-010818-3a58d636 (issue-100, revision 1). Verified diagnostic run-029 raw logs (issue-100-n100g-run/stderr.log, SHA256 ea7e4c64...). At hour 3,276, the shortfall (-0.0671468785 g N, 99.2% of total residual -0.0676655386 g N) occurs exactly at the fertilizer publish step via non-band exchangeable NH4 fraction re-basing (frac_nh4_nb moves 1.0 -> 0.983552602 with invariant concentration). Subsequent brackets confirm prepareHour is zero and NITRO/uptake transient cancels to < 1e-13. Scope candidate hash 605152a4018e39267571a2e7e6dc270d6f01596b125fa3a221527d26396e15a8 intact. Logging-only probes, no science perturbation.",
+  "findings": [],
+  "evidence": [
+    "audit/runs/run-029-issue-100-fertilizer-band-creation-rebases-non-band-exchange-ammonium-2026-09-24.md",
+    "audit/runs/issue-100-n100g-run/receipt.json",
+    "audit/runs/issue-100-n100g-run/stderr.log",
+    "audit/runs/issue-100-n100g-build/receipt.json",
+    "ecosys-ng/src/stages/diagnostics.zig",
+    "ecosys-ng/src/ecosys_ng.zig",
+    "audit/reviews/carry-forward.md",
+    "audit/reviews/review-pi-20260924-010818-3a58d636.md"
+  ],
+  "open_processes": []
+}
