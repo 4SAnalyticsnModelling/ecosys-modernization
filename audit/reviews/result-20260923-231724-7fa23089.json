@@ -1,0 +1,11 @@
+{
+  "packet_sha256": "82b7413f2ee7772d7ac0a39945dd3037f504596d310054600613e4634a6b2cd5",
+  "verdict": "PASS",
+  "summary": "Independent review of task 20260923-231724-7fa23089 (issue-100, revision 1). Verified hour-3,276 diagnostic probes confirm prediction bit-for-bit: cell0_in=1.6566363548027827e0, reconciled by 1.65 g N fertilizer + 6.6363548e-3 g N second producer. Boundary ledger balances completely. Shortfall of 0.0676655 g N sits in soil layer 2 storage. Stage census lack of application at 3,276 resolved (accepted-hour commit rule). All packet artifact hashes match.",
+  "findings": [],
+  "evidence": [
+    "audit/reviews/review-pi-20260923-231724-7fa23089.md",
+    "audit/reviews/carry-forward.md"
+  ],
+  "open_processes": []
+}

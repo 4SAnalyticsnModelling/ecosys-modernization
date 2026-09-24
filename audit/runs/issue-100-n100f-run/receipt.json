@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "D:\\ecosys-modernization\\audit\\runs\\issue-100-n100f-deck\\ecosys_ng.exe",
+    "runottawa"
+  ],
+  "cwd": "D:\\ecosys-modernization\\audit\\runs\\issue-100-n100f-deck",
+  "elapsed_seconds": 2045.43,
+  "exit_code": 1,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 31532,
+  "pid": 10172,
+  "started_unix": 1790209086.6347744,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/issue-100-n100f-run/stderr.log",
+    "sha256": "b547c3a872c351367eb80223f5cb28787dde2127fb40562cfeb48a88b6d8d6c6"
+  },
+  "stdout": {
+    "path": "audit/runs/issue-100-n100f-run/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 4200.0
+}

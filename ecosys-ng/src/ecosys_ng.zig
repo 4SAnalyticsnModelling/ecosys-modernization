@@ -5878,11 +5878,17 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
     // watched. This prints the extents and the actual values at the moment of
     // the call, plus the slice address, so "different array" and "same array,
     // rewritten later" are distinguishable.
-    if (ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_hour == 3275) {
+    if (ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_hour ==
+        ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_target_hour)
+    {
+        ecosys.hourly_cell_conservation.diagnostic_at_evaluate_invocations += 1;
         const cells = driver_context.hourly_cell_boundary_ledger.*.cells;
         std.log.err(
-            "TEMP_DIAGNOSTIC n_ledger[at_evaluate]: storage_before.len={d} storage_after.len={d} cells.len={d} area.len={d} cells_ptr=0x{x} cell0_in={e} cell0_out={e}",
+            "TEMP_DIAGNOSTIC n_ledger[at_evaluate]: site=accept_hour_evaluate invocation={d} executed_weather_hours={d} trace_hour={d} storage_before.len={d} storage_after.len={d} cells.len={d} area.len={d} cells_ptr=0x{x} cell0_in={e} cell0_out={e}",
             .{
+                ecosys.hourly_cell_conservation.diagnostic_at_evaluate_invocations,
+                driver_context.executed_weather_hours.*,
+                ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_hour,
                 driver_context.hourly_cell_storage_before.*.len,
                 driver_context.hourly_cell_storage_after.*.len,
                 cells.len,
@@ -7351,6 +7357,18 @@ noinline fn advanceFertilizerManagement(
         // Count actual accepted owner input, including lime/gypsum/rock-only
         // amendments, not daily dispatches or zero-valued schedule records.
         if (any_application) driver_context.stage_census.*.recordCurrent(.fertilizer_application);
+        // TEMP_DIAGNOSTIC (`issue-100`): whether the failing hour dispatches
+        // fertilizer at all; the census shows no third application at 3,276.
+        if (ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_hour ==
+            ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_target_hour)
+            std.log.err(
+                "TEMP_DIAGNOSTIC n_ledger[fertilizer_dispatch]: site=fertilizer_dispatch executed_weather_hours={d} any_application={} cell0_ledger_in={e}",
+                .{
+                    driver_context.executed_weather_hours.*,
+                    any_application,
+                    driver_context.hourly_cell_boundary_ledger.*.cells[0].nitrogen_input_g,
+                },
+            );
     }
 }
 

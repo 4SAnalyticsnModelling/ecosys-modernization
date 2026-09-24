@@ -1,0 +1,75 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/runs/run-028-issue-100-hour-3276-ledger-reconciles-exactly-storage-census-is-short-2026-09-23.md",
+      "sha256": "e874ee7a236444b7ccbd9fe6c543cd2d80db2c7e4c17c9ded2994c46e042f5cc"
+    },
+    {
+      "path": "audit/runs/run-027-issue-100-fixture-deck-stops-at-3162-and-the-frontier-depends-on-two-deck-edits-2026-09-23.md",
+      "sha256": "038210e88b76d75843047d7c1e494ef5a52ffe7f015a00282c0217b5f2d09eba"
+    },
+    {
+      "path": "audit/runs/issue-100-n100f-run/receipt.json",
+      "sha256": "dc928a93199eb43b019203359ee3d9c2e79e82b8e5bf18545f9a20c123718a58"
+    },
+    {
+      "path": "audit/runs/issue-100-n100f-run/stderr.log",
+      "sha256": "b547c3a872c351367eb80223f5cb28787dde2127fb40562cfeb48a88b6d8d6c6"
+    },
+    {
+      "path": "audit/runs/issue-100-n100e-run2/receipt.json",
+      "sha256": "23d4c557ce764d4569957c5f12294e147ea0c9c233faa6baa18faa4a7f25b63f"
+    },
+    {
+      "path": "audit/runs/issue-100-n100e-run2/stderr.log",
+      "sha256": "4ae77832a2e68973db9d184887804dcacf4d5a89308dde625810633a25dbd8a6"
+    },
+    {
+      "path": "audit/runs/issue-100-n100e-build/receipt.json",
+      "sha256": "218239e9ff0288beb6a4edba26e7a70c090b2773866cf85bedc4d3594c79d988"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "author_session": "72faab61-e064-413a-8a61-676e4e97a80a",
+  "author_sessions": [
+    "72faab61-e064-413a-8a61-676e4e97a80a"
+  ],
+  "base_sha256": "d1dd08ff919b0ae1c6e6859455df867d4df3ed49de455428bd0fa81df5196dae",
+  "candidate_sha256": "d1dd08ff919b0ae1c6e6859455df867d4df3ed49de455428bd0fa81df5196dae",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "922a4d21ca27e2415ea0f981851ac2fd03328fdb391e00d3e5f655f2f6d86b3a"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/runs/run-028-issue-100-hour-3276-ledger-reconciles-exactly-storage-census-is-short-2026-09-23.md",
+      "audit/runs/run-027-issue-100-fixture-deck-stops-at-3162-and-the-frontier-depends-on-two-deck-edits-2026-09-23.md",
+      "audit/runs/issue-100-n100f-run/receipt.json",
+      "audit/runs/issue-100-n100f-run/stderr.log",
+      "audit/runs/issue-100-n100e-run2/receipt.json",
+      "audit/runs/issue-100-n100e-run2/stderr.log",
+      "audit/runs/issue-100-n100e-build/receipt.json",
+      "audit/reviews/carry-forward.md"
+    ],
+    "next_action": "Locate the soil-layer-2 nitrogen pool(s) receiving the hour-3,276 application that the hour-end cell storage census omits or under-reads (0.0677 g N).",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "issue-100 probes re-gated to attempted hour 3,276 (TEMP_DIAGNOSTIC logging only). On the required prod deck (run-028), the frontier reproduces and the prediction is CONFIRMED: one at_evaluate invocation with cell0_in=1.6566363548027827, reconciled exactly by fertilizer 1.65 + second producer 6.63635480278274e-3. The ledger is correct; storage is short 0.0677 g N in layer_scope 2. The fertilizer-census counter-observation is resolved (accepted-hour-only commit). run-027: my mis-staged run from the testdata fixture stopped at 3,162 and exposed two audit-era deck edits the frontier depends on. No release claim."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "One ReleaseSafe diagnostic run to the frontier with probes gated on 3,276; raw log recorded; prediction confirmed or refuted; Pi review",
+    "issue": "issue-100",
+    "question": "At the failing attempted hour 3,276, does the at_evaluate probe report cell0_in=1.6566363548027827, and does that hour dispatch fertilizer?",
+    "scope": [
+      "ecosys-ng/src/ecosys_ng.zig",
+      "ecosys-ng/src/validation/hourly_cell_conservation.zig"
+    ],
+    "stop_condition": "Three distinct failed experiments, or a D: fault; no repeat of unchanged failure"
+  },
+  "task": "20260923-231724-7fa23089"
+}

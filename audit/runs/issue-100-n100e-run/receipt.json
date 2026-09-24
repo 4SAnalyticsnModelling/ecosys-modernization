@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "./ecosys_ng.exe",
+    "runottawa"
+  ],
+  "cwd": "D:\\ecosys-modernization\\audit\\runs\\issue-100-n100e-deck",
+  "elapsed_seconds": 0.012,
+  "exit_code": 127,
+  "launch_error": "[WinError 2] The system cannot find the file specified",
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 33628,
+  "started_unix": 1790206616.11257,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/issue-100-n100e-run/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/issue-100-n100e-run/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 4200.0
+}
