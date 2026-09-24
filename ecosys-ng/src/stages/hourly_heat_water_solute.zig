@@ -118,6 +118,7 @@ fn captureFailureConservationTrace(context: anytype, point: usize) !void {
     const issue100_labels = [_][]const u8{ "trace0_after_nitro", "trace1_after_post_watsub", "trace2_after_uptake", "trace3_after_chemistry", "trace4_after_transport", "trace5_after_interface_heat", "trace6_after_surface_gas" };
     try diagnostics.traceIssue100LayerAmmonium(context, if (point < issue100_labels.len) issue100_labels[point] else "trace_other", context.executed_weather_hours.* + 1);
     try diagnostics.traceIssue103LayerNitrate(context, if (point < issue100_labels.len) issue100_labels[point] else "trace_other", context.executed_weather_hours.* + 1);
+    try diagnostics.traceIssue108Carbon(context, if (point < issue100_labels.len) issue100_labels[point] else "trace_other", context.executed_weather_hours.* + 1);
     context.diagnostic_residue_carbon_trace_g_c[point] = totals.residue_carbon_g;
     context.diagnostic_organic_carbon_trace_g_c[point] = totals.organic_carbon_g;
     context.diagnostic_inorganic_carbon_trace_g_c[point] = totals.carbon_dioxide_carbon_g;

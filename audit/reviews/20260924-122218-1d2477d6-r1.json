@@ -1,0 +1,56 @@
+{
+  "candidate_sha256": "fd8c0c256ce6324eac785bcdf173fec560a27f4ee971e66c465aca843aca2305",
+  "evidence": [
+    "audit/runs/run-037-issue-108-root-gas-venting-is-the-carbon-residual-2026-09-24.md",
+    "audit/issues/issue-108-hour-3289-carbon-and-cation-closure-after-root-geometry-fix.md",
+    "audit/runs/issue-108-probe-prediction/prediction-registered-before-run.txt",
+    "audit/runs/issue-108-probe-build/receipt.json",
+    "audit/runs/issue-108-probe-run/receipt.json",
+    "audit/runs/issue-108-probe-run/stderr.log",
+    "audit/runs/issue-105-fix-run/stderr.log",
+    "audit/reviews/carry-forward.md"
+  ],
+  "findings": [],
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "open_processes": [],
+  "packet_sha256": "b3f77c123983cc08d3d2178215a131c2c212e7c25f739c9eacd20ce5d8fe522f",
+  "review_artifacts": [
+    {
+      "path": "audit/runs/run-037-issue-108-root-gas-venting-is-the-carbon-residual-2026-09-24.md",
+      "sha256": "0baf9c36d1b964915781de4f00c591b56b58bb86fef031e7eaf6d6a66f596749"
+    },
+    {
+      "path": "audit/issues/issue-108-hour-3289-carbon-and-cation-closure-after-root-geometry-fix.md",
+      "sha256": "5b052dafc0307f60b665e16e07aa8f91c916bab1fcb8ebf2a3357a737802d734"
+    },
+    {
+      "path": "audit/runs/issue-108-probe-prediction/prediction-registered-before-run.txt",
+      "sha256": "3e284a33a517d2f386cfab387c76f1fe6ac5f81ebb8a902c01eac6397a6dbd51"
+    },
+    {
+      "path": "audit/runs/issue-108-probe-build/receipt.json",
+      "sha256": "25cdc12b3f8a87b7aff7ca25ce4f6d15f0b49ae388e64e29de1328c6af4ac89d"
+    },
+    {
+      "path": "audit/runs/issue-108-probe-run/receipt.json",
+      "sha256": "4a3faf330fe5be59954a8346ee148252c51ebc1fc681b3dbe2d8aa00ec6e22d5"
+    },
+    {
+      "path": "audit/runs/issue-108-probe-run/stderr.log",
+      "sha256": "53080731017ced32ea082fdc269c906a3260572bd30cd190c33c4c46fca2a2f1"
+    },
+    {
+      "path": "audit/runs/issue-105-fix-run/stderr.log",
+      "sha256": "3108d56df4c5532180e84cdd12703fd25034a456b3ed9d8c8bd8c17d48294607"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "reviewer_session": "01a0d35d-9a22-70b5-9b38-83a6c0713f0b",
+  "revision": 1,
+  "summary": "Independent review confirms package results for issue-108 carbon localization at hour 3,289: existing-log decomposition and non-perturbing TEMP_DIAGNOSTIC probe (run-037) verify that exactly half the -2.1516e-6 g C residual arises from root CO2/CH4 vented to the atmosphere in plant_root_gas_transport.advance (atmosphere_to_root_c = -1.07581e-6 g C). Probe lines did not perturb run (failure row identical). Remaining booking shortfall and Ca/Na/K cations properly documented as open follow-ups. No gate promoted.",
+  "task": "20260924-122218-1d2477d6",
+  "verdict": "PASS"
+}

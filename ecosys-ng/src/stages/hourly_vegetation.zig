@@ -158,6 +158,7 @@ noinline fn advanceAcceptedRootUptake(context: anytype) !void {
     // its own pass over the same cell/layer/species/domain nest and must
     // precede both `advance` (called below) and `applyRootMetabolism`.
     if (context.plant_roots.*) |*roots| if (context.plant_water_workspace.*) |*water| if (context.plant_phenology.*) |phenology| {
+        try diagnostics.traceIssue108Carbon(context, "before_root_oxygen", context.executed_weather_hours.* + 1);
         _ = try ecosys.plant_root_gas_transport.advanceOxygen(
             context.allocator,
             roots,
@@ -194,6 +195,7 @@ noinline fn advanceAcceptedRootUptake(context: anytype) !void {
             context.gas_transport,
             context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol,
         );
+        try diagnostics.traceIssue108Carbon(context, "before_root_gas_advance", context.executed_weather_hours.* + 1);
         try ecosys.plant_root_gas_transport.advance(
             roots,
             water,
@@ -234,6 +236,7 @@ noinline fn advanceAcceptedRootUptake(context: anytype) !void {
                 .maximum_iterations = context.iteration_limits.gas_max_iterations,
             },
         );
+        try diagnostics.traceIssue108Carbon(context, "after_root_gas_advance", context.executed_weather_hours.* + 1);
         try ecosys.soil_ammonia_phase_bridge.publishTransientToMineral(
             context.mineral_nitrogen_transport,
             context.gas_transport,

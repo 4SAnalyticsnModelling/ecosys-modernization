@@ -832,7 +832,7 @@ pub var diagnostic_nitrogen_trace_hour: usize = 0;
 /// TEMP_DIAGNOSTIC (`issue-100`, re-gated for `issue-103` to the new failing hour 3,277): the failing `acceptHourAndPublish` was
 /// attempted hour 3,276 (`executed_weather_hours + 1`); earlier probes gated on
 /// 3,275 described the last ACCEPTED hour instead.
-pub const diagnostic_nitrogen_trace_target_hour: usize = 3277;
+pub const diagnostic_nitrogen_trace_target_hour: usize = 3289;
 /// TEMP_DIAGNOSTIC (`issue-100`): counts `at_evaluate` invocations in the
 /// target hour, so a retried hour is distinguishable from a single call.
 pub var diagnostic_at_evaluate_invocations: usize = 0;

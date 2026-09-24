@@ -1013,6 +1013,35 @@ pub fn traceIssue103LayerNitrate(context: anytype, label: []const u8, hour: usiz
     }
 }
 
+/// TEMP_DIAGNOSTIC (`issue-108`): hour 3,289 loses 2.15e-6 g C, split into two
+/// equal halves: an unbooked inorganic-C drop in the uptake interval, and a
+/// transport/surface storage drop that exceeds booked outputs by the same
+/// amount. Prints the census C pools, root gas C, the signed
+/// atmosphere->root C exchange (CO2 + CH4 slots), and cell 0's running ledger
+/// carbon in/out, so each root-gas step can be matched to its booking.
+pub fn traceIssue108Carbon(context: anytype, label: []const u8, hour: usize) !void {
+    if (@import("builtin").is_test) return;
+    if (hour != ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_target_hour) return;
+    const totals = try reconstructLandscapeMassBalance(context);
+    var root_gas_c: f64 = 0;
+    var atmosphere_to_root_c: f64 = 0;
+    var soil_to_root_c: f64 = 0;
+    if (context.plant_roots.*) |*roots| {
+        for (roots.gaseous_carbon_dioxide_g_c, roots.aqueous_carbon_dioxide_g_c, roots.gaseous_methane_g_c, roots.aqueous_methane_g_c) |a, b, c, d| root_gas_c += a + b + c + d;
+        const count = ecosys.plant_root_system.transported_root_gas_count;
+        var slot: usize = 0;
+        while (slot + count <= roots.atmosphere_to_root_gas_exchange_g_per_h.len) : (slot += count) {
+            atmosphere_to_root_c += roots.atmosphere_to_root_gas_exchange_g_per_h[slot] + roots.atmosphere_to_root_gas_exchange_g_per_h[slot + 1];
+            soil_to_root_c += roots.soil_to_root_gas_exchange_g_per_h[slot] + roots.soil_to_root_gas_exchange_g_per_h[slot + 1];
+        }
+    }
+    const cell0 = context.hourly_cell_boundary_ledger.cells[0];
+    std.log.err(
+        "TEMP_DIAGNOSTIC c108[{s}]: hour={d} residue_c={e} organic_c={e} inorganic_gas_c={e} plant_c={e} root_gas_c={e} atmosphere_to_root_c={e} soil_to_root_c={e} ledger_c_in={e} ledger_c_out={e}",
+        .{ label, hour, totals.residue_carbon_g, totals.organic_carbon_g, totals.carbon_dioxide_carbon_g, totals.plant_carbon_g, root_gas_c, atmosphere_to_root_c, soil_to_root_c, cell0.carbon_input_g, cell0.carbon_output_g },
+    );
+}
+
 pub fn diagnosticAmmoniumOwners_g_n(context: anytype) ![6]f64 {
     const molar_mass = context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol;
     var result: [6]f64 = @splat(0);

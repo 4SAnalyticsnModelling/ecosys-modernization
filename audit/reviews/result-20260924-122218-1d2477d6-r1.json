@@ -1,0 +1,17 @@
+{
+  "packet_sha256": "b3f77c123983cc08d3d2178215a131c2c212e7c25f739c9eacd20ce5d8fe522f",
+  "verdict": "PASS",
+  "summary": "Independent review confirms package results for issue-108 carbon localization at hour 3,289: existing-log decomposition and non-perturbing TEMP_DIAGNOSTIC probe (run-037) verify that exactly half the -2.1516e-6 g C residual arises from root CO2/CH4 vented to the atmosphere in plant_root_gas_transport.advance (atmosphere_to_root_c = -1.07581e-6 g C). Probe lines did not perturb run (failure row identical). Remaining booking shortfall and Ca/Na/K cations properly documented as open follow-ups. No gate promoted.",
+  "findings": [],
+  "evidence": [
+    "audit/runs/run-037-issue-108-root-gas-venting-is-the-carbon-residual-2026-09-24.md",
+    "audit/issues/issue-108-hour-3289-carbon-and-cation-closure-after-root-geometry-fix.md",
+    "audit/runs/issue-108-probe-prediction/prediction-registered-before-run.txt",
+    "audit/runs/issue-108-probe-build/receipt.json",
+    "audit/runs/issue-108-probe-run/receipt.json",
+    "audit/runs/issue-108-probe-run/stderr.log",
+    "audit/runs/issue-105-fix-run/stderr.log",
+    "audit/reviews/carry-forward.md"
+  ],
+  "open_processes": []
+}
