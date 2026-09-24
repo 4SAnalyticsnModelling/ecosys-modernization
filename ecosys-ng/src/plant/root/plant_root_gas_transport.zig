@@ -286,7 +286,11 @@ pub fn advanceOxygen(
                     // and root-internal (DIFOP) conductances; only the
                     // tortuosity multiplier differs (`plant_root_gas_exchange.zig`
                     // Finding 4: DIFOP carries no soil-tortuosity factor).
-                    const soil_to_surface_transport_m3_per_step = try root_exchange.radialAqueousConductanceM3PerH(
+                    const soil_to_surface_transport_m3_per_step = try issue105Conductance(
+                        "oxygen_soil_to_surface",
+                        root,
+                        soil,
+                        roots,
                         environment.aqueous_diffusivity_m2_per_h,
                         tortuosity,
                         water.root_surface_area_per_radius_m[root],
@@ -296,7 +300,11 @@ pub fn advanceOxygen(
                     // Source gates DIFOP (root-internal O2 transport) to the
                     // primary axis only, matching the non-oxygen restriction
                     // to domain 0 above.
-                    const root_internal_transport_m3_per_step = if (domain == 0) try root_exchange.radialAqueousConductanceM3PerH(
+                    const root_internal_transport_m3_per_step = if (domain == 0) try issue105Conductance(
+                        "oxygen_root_internal",
+                        root,
+                        soil,
+                        roots,
                         environment.aqueous_diffusivity_m2_per_h,
                         1.0,
                         water.root_surface_area_per_radius_m[root],
@@ -379,6 +387,36 @@ const non_oxygen_gases = [_]root_exchange.TransportedGas{
     .hydrogen,
 };
 
+/// TEMP_DIAGNOSTIC (`issue-105`): Ottawa hour 3,289 fails with
+/// `InvalidRootAqueousDiffusionInput` in the first hour root uptake geometry
+/// executes. This names the call site, the root/soil indices and every input,
+/// on the error path only (no cost when the call succeeds).
+fn issue105Conductance(
+    comptime site: []const u8,
+    root: usize,
+    soil: usize,
+    roots: *const root_system.State,
+    aqueous_diffusivity_m2_per_h: f64,
+    tortuosity_water_fraction: f64,
+    root_surface_area_per_radius_m: f64,
+    root_radius_m: f64,
+    water_film_thickness_m: f64,
+) !f64 {
+    return root_exchange.radialAqueousConductanceM3PerH(
+        aqueous_diffusivity_m2_per_h,
+        tortuosity_water_fraction,
+        root_surface_area_per_radius_m,
+        root_radius_m,
+        water_film_thickness_m,
+    ) catch |err| {
+        std.log.err(
+            "TEMP_DIAGNOSTIC issue-105 site={s} err={s} root={d} soil={d} diffusivity_m2_per_h={e} tortuosity={e} area_per_radius_m={e} radius_m={e} film_m={e} root_aqueous_volume_m3={e} root_surface_area_m2_per_plant={e}",
+            .{ site, @errorName(err), root, soil, aqueous_diffusivity_m2_per_h, tortuosity_water_fraction, root_surface_area_per_radius_m, root_radius_m, water_film_thickness_m, roots.aqueous_volume_m3[root], roots.root_surface_area_m2_per_plant[root] },
+        );
+        return err;
+    };
+}
+
 fn exchangeSoilAqueous(
     roots: *root_system.State,
     water: *const plant_water.Workspace,
@@ -401,7 +439,11 @@ fn exchangeSoilAqueous(
     const biome_fraction = water.root_biome_fraction[root];
     if (biome_fraction <= 0 or soil_pool.* <= 0 and root_pool.* <= 0) return;
     const environment = try root_exchange.gasEnvironment(parameters, gas, grid.soil_temperature_k[soil], 0);
-    const conductance = try root_exchange.radialAqueousConductanceM3PerH(
+    const conductance = try issue105Conductance(
+        "soil_aqueous_exchange",
+        root,
+        soil,
+        roots,
         environment.aqueous_diffusivity_m2_per_h,
         tortuosity,
         water.root_surface_area_per_radius_m[root],

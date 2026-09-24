@@ -1,0 +1,16 @@
+{
+  "packet_sha256": "bdd26717d4d7ab5cec3019a4c4cfe456ae2df51e9c08c73e9f0613a514df0064",
+  "verdict": "PASS",
+  "summary": "Independent review of packet-1 for task 20260924-094040-06b7c6f6 (localization of issue-105). Verified probe logs, prediction confirmation, and source root-cause analysis against uptake.f:526-538 and water_balance.zig:288-320. No gates promoted; frontier remains 3,288.",
+  "findings": [],
+  "evidence": [
+    "audit/tasks/20260924-094040-06b7c6f6/packet-1.json",
+    "audit/reviews/carry-forward.md",
+    "audit/issues/issue-105-hour-3289-root-geometry-unset-for-skipped-layers.md",
+    "audit/runs/issue-105-probe-prediction/prediction-registered-before-run.txt",
+    "audit/runs/issue-105-probe-build/receipt.json",
+    "audit/runs/issue-105-probe-run/receipt.json",
+    "audit/runs/issue-105-probe-run/stderr.log"
+  ],
+  "open_processes": []
+}

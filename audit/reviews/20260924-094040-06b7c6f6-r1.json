@@ -1,0 +1,51 @@
+{
+  "candidate_sha256": "0a8d5781eaec76767e751bb9a4b98cc807cf4d4681b99ac120a01c69304a7ab1",
+  "evidence": [
+    "audit/tasks/20260924-094040-06b7c6f6/packet-1.json",
+    "audit/reviews/carry-forward.md",
+    "audit/issues/issue-105-hour-3289-root-geometry-unset-for-skipped-layers.md",
+    "audit/runs/issue-105-probe-prediction/prediction-registered-before-run.txt",
+    "audit/runs/issue-105-probe-build/receipt.json",
+    "audit/runs/issue-105-probe-run/receipt.json",
+    "audit/runs/issue-105-probe-run/stderr.log"
+  ],
+  "findings": [],
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "open_processes": [],
+  "packet_sha256": "bdd26717d4d7ab5cec3019a4c4cfe456ae2df51e9c08c73e9f0613a514df0064",
+  "review_artifacts": [
+    {
+      "path": "audit/tasks/20260924-094040-06b7c6f6/packet-1.json",
+      "sha256": "bdd26717d4d7ab5cec3019a4c4cfe456ae2df51e9c08c73e9f0613a514df0064"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    },
+    {
+      "path": "audit/issues/issue-105-hour-3289-root-geometry-unset-for-skipped-layers.md",
+      "sha256": "40e1d7cc0ec79bd126672699e6e4e385bd25579e9c2e3a2a153f14657dfaeb62"
+    },
+    {
+      "path": "audit/runs/issue-105-probe-prediction/prediction-registered-before-run.txt",
+      "sha256": "35e049cb3048fcb30ebff410fde95cb0b60d7d66a5f4bf5b6ed1c04d48adc18c"
+    },
+    {
+      "path": "audit/runs/issue-105-probe-build/receipt.json",
+      "sha256": "3bda6fafc91dd1f7356b69adebf0a6cd88707eb8d1a8d00f960c0aa4e73b60d1"
+    },
+    {
+      "path": "audit/runs/issue-105-probe-run/receipt.json",
+      "sha256": "219c9cabe6d7aedae1b04f575400718135af14576fd4b3fad61b3b19d93fe6ce"
+    },
+    {
+      "path": "audit/runs/issue-105-probe-run/stderr.log",
+      "sha256": "6931e6e1863caf912fe616d8787f0f0bd07e7872aa97f51f8650cba9516a6928"
+    }
+  ],
+  "reviewer_session": "01a0d2c9-3417-70b5-9b38-83a34e94687c",
+  "revision": 1,
+  "summary": "Independent review of packet-1 for task 20260924-094040-06b7c6f6 (localization of issue-105). Verified probe logs, prediction confirmation, and source root-cause analysis against uptake.f:526-538 and water_balance.zig:288-320. No gates promoted; frontier remains 3,288.",
+  "task": "20260924-094040-06b7c6f6",
+  "verdict": "PASS"
+}

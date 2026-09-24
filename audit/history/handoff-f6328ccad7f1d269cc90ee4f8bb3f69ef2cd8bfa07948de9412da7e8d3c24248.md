@@ -1,12 +1,12 @@
 # Current ecosys audit checkpoint
 
-Operational checkpoint, updated 2026-09-24 at closure of task `20260924-094040-06b7c6f6` (issue-105 localization; Pi PASS, `audit/reviews/20260924-094040-06b7c6f6-r1.json`). Previous task `20260924-085645-5b125e5c` CLOSED, Pi PASS; committed `1ce33c5`.
+Operational checkpoint, updated 2026-09-24 at closure of task `20260924-085645-5b125e5c` (issue-104 executable test root; Pi PASS, `audit/reviews/20260924-085645-5b125e5c-r1.json`). Previous task `20260924-070126-c8a42446` CLOSED, Pi PASS; committed `c37e56d`.
 
 **Autonomy mode: lead-driven.** The lead runs `begin/seal`, then `herdr_cycle.py peer`, `checkpoint/close`, then `herdr_cycle.py next`. Do not also run `ensure`. See `ecosys-audit/WORKFLOW.md` "Two autonomy modes". The user asked (2026-09-23) for Pi to collaborate on every task until project end, via this reviewer cycle. Older claims remain evidence to verify, not fresh passes. Commits are local only: the user said never push, which conflicts with "keep online in sync" (flagged to the user).
 
 ## Candidate
 
-Outer Git HEAD `1ce33c5`, plus this task's TEMP_DIAGNOSTIC error-path wrapper in `plant/root/plant_root_gas_transport.zig`. Other TEMP probes are logging only, gated on 3,277. Obtain source/input hashes before any gate claim. Never commit `audit/runs/*-deck/`.
+Outer Git HEAD `c37e56d`, plus this task's edits (fixture, fertilizer-dispatch TEMP probe removal, registry). The remaining TEMP_DIAGNOSTIC probes are logging only, gated on 3,277. Obtain source/input hashes before any gate claim. Never commit `audit/runs/*-deck/`.
 
 ## Gates
 
@@ -25,7 +25,7 @@ Lead: Claude `editor` (w3:p2). Pi `reviewer` (w3:p4) writes only under `audit/re
 - **issue-100** (hour-3,276 N closure): **resolved in production by two legacy-cited fixes**. Band activation now redistributes all `hour1.f:322-334` (NH4: XN4/XNB, ZNH4S/B, ZNH3S/B) and `:376-384` (NO3: ZNO3S/B, ZNO2S/B) state onto the new zone fractions. ISSUE-090 had ported only the geometry. Chain of evidence: run-028 (the ledger is exact) -> analysis decomposition -> run-029 (exchange re-base 99.2%) -> run-030 (exchange fix, residual -5.19e-4) -> run-031 (aqueous fix, hour 3,276 accepted). Suite 4385/1/0. The pre-registered run-031 prediction that 3,276 would still fail was REFUTED favorably. Records: `audit/runs/run-028*` to `run-031*`.
   - Open: the NITRO/uptake ±0.00933 g N transient (cancels within the hour); TEMP_DIAGNOSTIC probe cleanup.
 - **issue-103**: FIXED in production (run-033). The duplicate chemistry-stage NO3/PO4 band growth was removed; prepareHour is the single `hour1.f:4888-5155` growth. Module suite 4385/1/0; ISSUE-103 structural test 4/4 (exe root, filtered). Record: `audit/runs/run-033-issue-103-duplicate-band-growth-removed-frontier-moves-to-3289-2026-09-24.md`.
-- **issue-105 (frontier, hour 3,289)**: LOCALIZED (run-035, prediction confirmed). Root 2 / soil layer 2 has radius 0 and area-per-radius 0 with positive volume and area, because `water_balance.zig:288-320` writes the geometry only after six water/conductivity/density `continue` guards. Legacy `uptake.f:526-538` always defines `RRADL`/`PATH`/`RTARR` (else-branch `RRAD2M`, `DLYR`, `6.283*RTLGP`). Record: `audit/issues/issue-105-hour-3289-root-geometry-unset-for-skipped-layers.md`.
+- **issue-105 (frontier, hour 3,289)**: `InvalidRootAqueousDiffusionInput` at day 138 hour 1; not yet filed in detail.
 - **issue-104**: compile defect FIXED (run-034); the root still fails via issue-106/107. Record: `audit/runs/run-034-issue-104-executable-test-root-compiles-107-of-115-pass-2026-09-24.md`.
 - **issue-106**: test 71 expects ladder {1,20,32,64} vs {4,...} after `99234f1` (wthr.f NFH=4). Adjudicate from legacy; do not relax.
 - **issue-107**: test 109 `OutputTree` spins (non-reentrant `lockActiveRunLog`, `run_support.zig:322-331`); isolate with a filter.
@@ -38,7 +38,7 @@ Rejected approaches: inferring execution order from log position; treating exter
 
 ## Next action
 
-issue-105 fix: in `water_balance.zig`, define the root geometry for every root layer per `uptake.f:526-538`, with the water/conductivity gates kept on the hydraulic path only. Map `RRAD2M`/`RTLGP`/`FRTDPX` to Zig first. Add a regression, run the module suite and the executable-root filter, then ONE prod-deck run with a pre-registered prediction. Queue: issue-107, issue-106.
+issue-105 (frontier, hour 3,289, `InvalidRootAqueousDiffusionInput`): rg the raise site, capture its inputs at hour 3,289 with ONE probe run, and compare with the legacy root uptake diffusion code (f77query). In parallel queue: issue-107 (isolate test 109 with a filter), then issue-106.
 
 Use `audit/manifest/command_registry.json` for argv and `run_logged.py` for logs. Time a D: read before and after long jobs (6 ms healthy 2026-09-24). A task PASS is not a release PASS.
 

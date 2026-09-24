@@ -1,0 +1,65 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/issues/issue-105-hour-3289-root-geometry-unset-for-skipped-layers.md",
+      "sha256": "40e1d7cc0ec79bd126672699e6e4e385bd25579e9c2e3a2a153f14657dfaeb62"
+    },
+    {
+      "path": "audit/runs/issue-105-probe-prediction/prediction-registered-before-run.txt",
+      "sha256": "35e049cb3048fcb30ebff410fde95cb0b60d7d66a5f4bf5b6ed1c04d48adc18c"
+    },
+    {
+      "path": "audit/runs/issue-105-probe-build/receipt.json",
+      "sha256": "3bda6fafc91dd1f7356b69adebf0a6cd88707eb8d1a8d00f960c0aa4e73b60d1"
+    },
+    {
+      "path": "audit/runs/issue-105-probe-run/receipt.json",
+      "sha256": "219c9cabe6d7aedae1b04f575400718135af14576fd4b3fad61b3b19d93fe6ce"
+    },
+    {
+      "path": "audit/runs/issue-105-probe-run/stderr.log",
+      "sha256": "6931e6e1863caf912fe616d8787f0f0bd07e7872aa97f51f8650cba9516a6928"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "author_session": "72faab61-e064-413a-8a61-676e4e97a80a",
+  "author_sessions": [
+    "72faab61-e064-413a-8a61-676e4e97a80a"
+  ],
+  "base_sha256": "06133b7737a565a120b0f9fcb594714d34bd36164a84f1b39e256c2c6da69965",
+  "candidate_sha256": "0a8d5781eaec76767e751bb9a4b98cc807cf4d4681b99ac120a01c69304a7ab1",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "ce495ef100936d6278dd0a3120acdfddcae1de9f6116e5fdf77c65f1bbcd5350"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/issues/issue-105-hour-3289-root-geometry-unset-for-skipped-layers.md",
+      "audit/runs/issue-105-probe-prediction/prediction-registered-before-run.txt",
+      "audit/runs/issue-105-probe-build/receipt.json",
+      "audit/runs/issue-105-probe-run/receipt.json",
+      "audit/runs/issue-105-probe-run/stderr.log",
+      "audit/reviews/carry-forward.md"
+    ],
+    "next_action": "Define root geometry for every layer per uptake.f:526-538 in water_balance.zig; regression; suites; one prod-deck run.",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "issue-105 localized: an error-path-only TEMP_DIAGNOSTIC wrapper around radialAqueousConductanceM3PerH shows the hour-3,289 failure at site oxygen_soil_to_surface, root 2 / soil layer 2, with radius_m=0 and area_per_radius_m=0 while root aqueous volume (5.28e-6) and surface area (5.35e-4) are positive. The pre-registered prediction is confirmed. Cause: water_balance.zig writes root geometry only after six continue guards (density, axes, rooted fraction, water, matrix volume, conductivity), but the gas consumer visits any root with volume and area. Legacy uptake.f:526-538 always defines RRADL/PATH/RTARR (else RRAD2M, DLYR, 6.283*RTLGP), ungated by water or conductivity. No fix yet. Frontier unchanged (3,288). No gate promoted."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "Error-path diagnostics identify the offending input and indices in ONE ReleaseSafe prod-deck run; the producer of that input located; recorded; Pi review",
+    "issue": "issue-105",
+    "question": "At attempted hour 3,289, which input to radialAqueousConductanceM3PerH (diffusivity, tortuosity, surface area per radius, root radius, water film) is invalid, for which root/layer/domain, and why?",
+    "scope": [
+      "ecosys-ng/src/plant/root/plant_root_gas_transport.zig",
+      "ecosys-ng/src/plant/root/plant_root_gas_exchange.zig"
+    ],
+    "stop_condition": "Three distinct failed experiments, or a D: fault"
+  },
+  "task": "20260924-094040-06b7c6f6"
+}
