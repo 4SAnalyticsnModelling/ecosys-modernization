@@ -29,7 +29,33 @@ fn verifyApplication(comptime advance: anytype, comptime Hour: type, application
     var grid = .{ .cell_count = cells, .active_soil_layer_count = active_layers };
     var properties = .{ .layer_thickness_m = @as([]const f64, &.{ 0.2, 0.3, 0.1, 0.2, 0.4, 0.5 }) };
     var config = .{ .soil_layers = layers };
-    var runscript = .{ .fertilizer_nitrogen_molar_mass_g_per_mol = @as(f64, 14) };
+    var runscript = .{
+        .fertilizer_nitrogen_molar_mass_g_per_mol = @as(f64, 14),
+        // ISSUE-090 band activation reads `DLYRM` from here.
+        .soil_geometry_parameters = .{ .minimum_layer_thickness_m = @as(f64, 0.01) },
+    };
+    // ISSUE-104. Owners the fertilizer phase has read since ISSUE-090 (band
+    // geometry) and ISSUE-100 (exchange/aqueous redistribution on activation).
+    // No banded application occurs on these fixture dates, so the band stays
+    // inactive; the owners must still exist for the phase to compile.
+    var band = try ecosys.fertilizer_band_state.State.init(allocator, .{
+        .cell_count = cells,
+        .layer_capacity = layers,
+        .active_layer_count_by_cell = active_layers,
+        .layer_upper_depth_m = &.{ 0, 0.2, 0, 0.1, 0, 0.4 },
+        .layer_lower_depth_m = &.{ 0.2, 0.5, 0.1, 0.3, 0.4, 0.9 },
+        .layer_thickness_m = properties.layer_thickness_m,
+        .initial_band_fraction_by_family = .{ 0, 0, 0 },
+        // Init requires a positive row spacing; 1 m as in the band-state tests.
+        .row_spacing_m_by_cell_family = &(.{@as(f64, 1)} ** (cells * 3)),
+    });
+    defer band.deinit();
+    var exchange = [_]ecosys.solute_cation_exchange.Cations{std.mem.zeroes(ecosys.solute_cation_exchange.Cations)} ** (cells * layers);
+    var aqueous = [_]ecosys.solute_aqueous_network.State{std.mem.zeroes(ecosys.solute_aqueous_network.State)} ** (cells * layers);
+    var chemistry = .{
+        .cation_exchange_mol_per_megagram = @as([]ecosys.solute_cation_exchange.Cations, &exchange),
+        .aqueous = @as([]ecosys.solute_aqueous_network.State, &aqueous),
+    };
     var pass = .{ .scene_index = @as(usize, 0) };
     var catalog = ecosys.fertilizer_schedule.Catalog.init(allocator);
     defer catalog.deinit();
@@ -97,6 +123,8 @@ fn verifyApplication(comptime advance: anytype, comptime Hour: type, application
         .hourly_layer_boundary_ledger = &layer_ledger,
         .landscape_mass_balance_state = &landscape,
         .stage_census = &census,
+        .fertilizer_band_state = &band,
+        .initial_chemistry_state = &chemistry,
     };
     const advancing = .{ .pass = &pass, .solar_noon_hour_by_cell = &noon };
     const audit = ecosys.mass_balance_audit;

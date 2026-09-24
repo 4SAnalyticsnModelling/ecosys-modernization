@@ -7369,24 +7369,6 @@ noinline fn advanceFertilizerManagement(
         // Count actual accepted owner input, including lime/gypsum/rock-only
         // amendments, not daily dispatches or zero-valued schedule records.
         if (any_application) driver_context.stage_census.*.recordCurrent(.fertilizer_application);
-        // TEMP_DIAGNOSTIC (`issue-100`): whether the failing hour dispatches
-        // fertilizer at all; the census shows no third application at 3,276.
-        if (ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_hour ==
-            ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_target_hour)
-            std.log.err(
-                "TEMP_DIAGNOSTIC n_ledger[fertilizer_dispatch]: site=fertilizer_dispatch executed_weather_hours={d} any_application={} cell0_ledger_in={e}",
-                .{
-                    driver_context.executed_weather_hours.*,
-                    any_application,
-                    driver_context.hourly_cell_boundary_ledger.*.cells[0].nitrogen_input_g,
-                },
-            );
-        try diagnostics.traceIssue100LayerAmmonium(
-            driver_context.hourly_science_context.*,
-            "after_fertilizer_publish",
-            driver_context.executed_weather_hours.* + 1,
-        );
-        try diagnostics.traceIssue103LayerNitrate(driver_context.hourly_science_context.*, "after_fertilizer_publish", driver_context.executed_weather_hours.* + 1);
     }
 }
 

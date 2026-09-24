@@ -1,0 +1,210 @@
+1/115 ecosys_ng.test.MainResources retargets tracked cleanup to the live moved owner...OK
+2/115 ecosys_ng.test.STARTE chemistry transport synchronization is initial-scene only...OK
+3/115 ecosys_ng.test.lime-only production management closes the landscape carbon boundary...FAIL (InvalidInitialFertilizerBandRowSpacing)
+D:\ecosys-modernization\ecosys-ng\src\management\fertilizer_band_state.zig:804:13: 0x7ff7ef836973 in validateInitialization (root_zcu.obj)
+            return error.InvalidInitialFertilizerBandRowSpacing;
+            ^
+D:\ecosys-modernization\ecosys-ng\src\management\fertilizer_band_state.zig:51:9: 0x7ff7ef836e2c in init (root_zcu.obj)
+        try validateInitialization(initialization);
+        ^
+D:\ecosys-modernization\ecosys-ng\src\driver\fertilizer_production_fixture.zig:41:16: 0x7ff7ef86c926 in verifyApplication__anon_111999 (root_zcu.obj)
+    var band = try ecosys.fertilizer_band_state.State.init(allocator, .{
+               ^
+D:\ecosys-modernization\ecosys-ng\src\driver\fertilizer_production_fixture.zig:7:5: 0x7ff7ef893497 in verifyLimeOnly__anon_124585 (root_zcu.obj)
+    try verifyApplication(advance, Hour, .lime);
+    ^
+D:\ecosys-modernization\ecosys-ng\src\ecosys_ng.zig:7206:5: 0x7ff7ef8934e5 in test.lime-only production management closes the landscape carbon boundary (root_zcu.obj)
+    try @import("driver/fertilizer_production_fixture.zig").verifyLimeOnly(advanceFertilizerManagement, HourIdentity);
+    ^
+4/115 ecosys_ng.test.gypsum-only production management records real mineral input without carbon...FAIL (InvalidInitialFertilizerBandRowSpacing)
+D:\ecosys-modernization\ecosys-ng\src\management\fertilizer_band_state.zig:804:13: 0x7ff7ef836973 in validateInitialization (root_zcu.obj)
+            return error.InvalidInitialFertilizerBandRowSpacing;
+            ^
+D:\ecosys-modernization\ecosys-ng\src\management\fertilizer_band_state.zig:51:9: 0x7ff7ef836e2c in init (root_zcu.obj)
+        try validateInitialization(initialization);
+        ^
+D:\ecosys-modernization\ecosys-ng\src\driver\fertilizer_production_fixture.zig:41:16: 0x7ff7ef86c926 in verifyApplication__anon_111999 (root_zcu.obj)
+    var band = try ecosys.fertilizer_band_state.State.init(allocator, .{
+               ^
+D:\ecosys-modernization\ecosys-ng\src\driver\fertilizer_production_fixture.zig:11:5: 0x7ff7ef8933fa in verifyGypsumOnly__anon_124385 (root_zcu.obj)
+    try verifyApplication(advance, Hour, .gypsum);
+    ^
+D:\ecosys-modernization\ecosys-ng\src\ecosys_ng.zig:7210:5: 0x7ff7ef893445 in test.gypsum-only production management records real mineral input without carbon (root_zcu.obj)
+    try @import("driver/fertilizer_production_fixture.zig").verifyGypsumOnly(advanceFertilizerManagement, HourIdentity);
+    ^
+5/115 ecosys_ng.test.organic fertilizer production management credits physical carbon once...FAIL (InvalidInitialFertilizerBandRowSpacing)
+D:\ecosys-modernization\ecosys-ng\src\management\fertilizer_band_state.zig:804:13: 0x7ff7ef836973 in validateInitialization (root_zcu.obj)
+            return error.InvalidInitialFertilizerBandRowSpacing;
+            ^
+D:\ecosys-modernization\ecosys-ng\src\management\fertilizer_band_state.zig:51:9: 0x7ff7ef836e2c in init (root_zcu.obj)
+        try validateInitialization(initialization);
+        ^
+D:\ecosys-modernization\ecosys-ng\src\driver\fertilizer_production_fixture.zig:41:16: 0x7ff7ef86c926 in verifyApplication__anon_111999 (root_zcu.obj)
+    var band = try ecosys.fertilizer_band_state.State.init(allocator, .{
+               ^
+D:\ecosys-modernization\ecosys-ng\src\driver\fertilizer_production_fixture.zig:15:5: 0x7ff7ef87098c in verifyOrganic__anon_111986 (root_zcu.obj)
+    try verifyApplication(advance, Hour, .organic_surface);
+    ^
+D:\ecosys-modernization\ecosys-ng\src\ecosys_ng.zig:7214:5: 0x7ff7ef870a05 in test.organic fertilizer production management credits physical carbon once (root_zcu.obj)
+    try @import("driver/fertilizer_production_fixture.zig").verifyOrganic(advanceFertilizerManagement, HourIdentity);
+    ^
+6/115 ecosys_ng.test.accounting output initialization dispatches ordered noinline phases...OK
+7/115 ecosys_ng.test.accounting output phase ownership follows allocation order exactly...OK
+8/115 ecosys_ng.test.runtime environment workspace ownership follows source order and final address...OK
+9/115 ecosys_ng.test_0...OK
+10/115 stages.tile_kernels.test.tile driver preserves serial plan order...OK
+11/115 stages.tile_kernels.test.serial tile driver stops before the next tile after an error...OK
+12/115 stages.tile_kernels.test.production threading stays inside canonical grid-column dispatch...OK
+13/115 stages.plant_daily.test.nonWoodyLitterfallFraction: herbaceous turnover type (IBTYP==0) forces 100% fine-residue regardless of sapwood ratio...OK
+14/115 stages.plant_daily.test.nonWoodyLitterfallFraction: shallow root profile (IGTYP<=1) forces 100% fine-residue regardless of turnover type...OK
+15/115 stages.plant_daily.test.nonWoodyLitterfallFraction: woody, deep-rooted plant uses the true sapwood ratio...OK
+16/115 stages.plant_daily.test.nonWoodyLitterfallFraction: woody plant with zero stalk carbon still defaults to 100% fine-residue...OK
+17/115 stages.plant_daily.test.nonWoodyLitterfallFraction: sapwood ratio is clamped to [0, 1] even if inputs are inconsistent...OK
+18/115 stages.soil_chemistry_convergence.test.issue-073 Finding C: fertilizerBandGeometryCarrierM3 substitutes the dry reference below the floor, passes the live carrier through above it...OK
+19/115 stages.soil_chemistry_convergence.test.hourly chemistry scratch releases partial allocation prefixes...OK
+20/115 stages.soil_chemistry_convergence.test.hourly chemistry scratch releases cell scope and owner scope in reverse order...OK
+21/115 stages.soil_chemistry_convergence.test.hourly chemistry reaches source-volume fallback while per-mass owners remain pending...OK
+22/115 stages.soil_chemistry_convergence.test.root ammonium uptake rejects overdraw instead of clipping...OK
+23/115 stages.soil_chemistry_convergence.test.dissolved carbon dioxide rejects invalid mass instead of clipping...OK
+24/115 stages.soil_chemistry_convergence.test.ISSUE-103: the SOLUTE chemistry hour grows no fertilizer band outside the HOUR1 coordinator...OK
+25/115 stages.hourly_process_pipeline.test_0...OK
+26/115 stages.hourly_geometry_disturbance.test.hourly geometry preserves zero-density open-water slots and selects mineral receiver...OK
+27/115 stages.hourly_geometry_disturbance.test.production owner follows DORGC publication and excludes pond from geometry transaction...OK
+28/115 stages.hourly_geometry_disturbance.test.geometry rollback restores selected state and owned buffers byte exactly...OK
+29/115 stages.hourly_geometry_disturbance.test.geometry rollback restores fertilizer band geometry and coordinator phase...OK
+30/115 stages.hourly_heat_water_solute.test.signed interface accumulation retains gross directional activity...OK
+31/115 stages.hourly_heat_water_solute.test.surface residual budget rejects same-sign accumulation and hidden cancellation...OK
+32/115 stages.hourly_heat_water_solute.test.surface residual budget uses hourly net activity after substep reversal...OK
+33/115 stages.hourly_heat_water_solute.test.accepted substep water and topsoil atmospheric heat close the first hourly cell...OK
+34/115 stages.hourly_heat_water_solute.test.ground air full-hour geometry is seeded once across substeps and retry reset...OK
+35/115 stages.hourly_heat_water_solute.test.WATSUB phase displacement credits an unsaturated recipient with exact water and enthalpy...OK
+36/115 stages.hourly_heat_water_solute.test.WATSUB phase displacement cascades through a saturated recipient without loss...OK
+37/115 stages.hourly_heat_water_solute.test.MATRIX-ENTRY-OVERFILL-DOMAIN-001 an already-overfilled recipient retains nothing and cascades the whole credit...OK
+38/115 stages.hourly_heat_water_solute.test.MATRIX-ENTRY-OVERFILL-DOMAIN-001 non-finite and negative recipient state stay fatal...OK
+39/115 stages.hourly_heat_water_solute.test.WATSUB top phase displacement credits the canonical surface carrier exactly...OK
+40/115 stages.hourly_heat_water_solute.test.topsoil sensible exchange preserves WATSUB capacity bound in both directions...OK
+41/115 stages.hourly_heat_water_solute.test.ground air surface source owns direct sensible heat only...OK
+42/115 stages.hourly_heat_water_solute.test.ground air dry-air source cannot regain water carrier enthalpy...OK
+43/115 stages.hourly_heat_water_solute.test.transaction scratch arena remains valid after return move and repeated teardown...OK
+44/115 stages.hourly_heat_water_solute.test.transaction scratch arena cleans up pointer owner after backing allocation failure...OK
+45/115 stages.hourly_heat_water_solute.test.accepted ground air energy budget rejects accumulated cancellation and storage defects...OK
+46/115 stages.hourly_heat_water_solute.test.transport replay keeps pending retries private and certificates M-entry carriers...OK
+47/115 stages.hourly_heat_water_solute.test.maximum_transport_replay_substeps is genuinely ladder-derived, not a hardcoded duplicate (issue-059)...OK
+48/115 stages.hourly_heat_water_solute.test.transport replay substep buffer scales safely past today's committed maximum (extensibility, issue-059)...OK
+49/115 stages.hourly_heat_water_solute.test.temporary PSISO carrier rebase is restored before the accepted soil carrier commit...OK
+50/115 stages.hourly_heat_water_solute.test.stage transaction rolls bare-surface expulsion owners back byte exactly...OK
+51/115 stages.hourly_heat_water_solute.test.stage transaction restores resized soil gas step owner exactly...OK
+52/115 stages.hourly_heat_water_solute.test.production-shaped litter soil interface accepts only canonical transport width...OK
+53/115 stages.hourly_heat_water_solute.test.foldDelayedHeatSource retains the exact producer until accepted booking...OK
+54/115 stages.hourly_heat_water_solute.test.foldDelayedHeatSource rejects a non-finite result...OK
+55/115 stages.hourly_heat_water_solute.test.bounded recovery chooses only deliberate fallback schedules...OK
+56/115 stages.hourly_heat_water_solute.test.boundedInitialRecoverySubstepCount: ICHKV proactive floor (issue-024/issue-068/issue-077)...OK
+57/115 stages.hourly_heat_water_solute.test.boundedInitialRecoverySubstepCount: universal NFH=4 baseline floors every hour's first attempt (issue-024, 2026-09-21 committed fix)...OK
+58/115 stages.hourly_heat_water_solute.test.boundedRecoveryFallback matches the old hardcoded 20/32/64 chain across the full u8 domain (before/after equivalence, issue-058)...OK
+59/115 stages.hourly_heat_water_solute.test.fallbackWithinLadder escalates to a new tier beyond today's committed maximum (extensibility, issue-058)...OK
+60/115 stages.hourly_heat_water_solute.test.isRecoverySubstepCountMember distinguishes true ladder rungs from drifted values (guards issue-058 comptime assertions)...OK
+61/115 stages.hourly_heat_water_solute.test.accepted schedule duration uses bounded floating point accumulation...OK
+62/115 stages.hourly_heat_water_solute.test.accepted phase activity owns the freeze flow floor...OK
+63/115 stages.hourly_heat_water_solute.test.fixed external hour recovery rolls back before its single bounded fallback...OK
+64/115 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery escalates through the full fallback chain to the secondary rescue (parent: stopped at one fallback and failed)...OK
+65/115 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery escalates past the secondary rescue to the true ladder maximum (parent: hardcoded ceiling at 32 reproduced the hour-2,604 defect one rung later)...OK
+66/115 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery still terminates and reports failure when even the ladder maximum fails...OK
+67/115 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery retains a successful gas fallback...OK
+68/115 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery skips sub-quarter-hour rung after phase requirement...OK
+69/115 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery jumps directly from stiff whole-hour heat...OK
+70/115 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery reports its bounded terminal failure...OK
+71/115 stages.hourly_heat_water_solute.test.fixed external hour recovery escalates through the full chain and stops on hard defects...slices differ. first difference occurs at index 0 (0x0)
+
+============ expected this output: =============  len: 4 (0x4)
+
+01 14 20 40                                       .. @
+
+============= instead found this: ==============  len: 4 (0x4)
+
+04 14 20 40                                       .. @
+
+================================================
+
+FAIL (TestExpectedEqual)
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:379:5: 0x7ff7ef7465e8 in expectEqualSlices__anon_80190 (root_zcu.obj)
+    return error.TestExpectedEqual;
+    ^
+D:\ecosys-modernization\ecosys-ng\src\stages\hourly_heat_water_solute.zig:10575:5: 0x7ff7ef7ce4ad in test.fixed external hour recovery escalates through the full chain and stops on hard defects (root_zcu.obj)
+    try std.testing.expectEqualSlices(
+    ^
+72/115 stages.hourly_heat_water_solute.test.fixed external hour gives every dt-recoverable WATSUB candidate one bounded fallback...OK
+73/115 stages.hourly_heat_water_solute.test.phenology aliases rebind after each forced recovery owner swap...OK
+74/115 stages.hourly_heat_water_solute.test.production preserves soil source order and same-hour biology transport coupling...OK
+75/115 stages.hourly_heat_water_solute.test.physical litter soil publication is single owned and deferred biology rollback is owner safe...OK
+76/115 stages.hourly_heat_water_solute.test.direct precipitation heat is bound once at the current substep recipient...OK
+77/115 stages.hourly_heat_water_solute.test.production consumes legacy delayed heat once after accepted publication...OK
+78/115 stages.hourly_heat_water_solute.test.live surface albedo is source ordered and publishes only after accepted schedule...OK
+79/115 stages.hourly_heat_water_solute.test.live litter excess converts ice WE before both conductance refreshes...OK
+80/115 stages.hourly_heat_water_solute.test.snow surface ledger publishes the frozen reference remainder exactly once...OK
+81/115 stages.hourly_heat_water_solute.test.ground vapor gross local owners survive accepted substeps and retry reset...OK
+82/115 stages.hourly_heat_water_solute.test.dual ground vapor producers bind water heat ground air and rollback owners...OK
+83/115 stages.hourly_heat_water_solute.test.snow canopy longwave binding reads accepted temperatures and source view factors before ledger publication...OK
+84/115 stages.hourly_heat_water_solute.test.all mutating snow physics are schedule-owned in source order with no one-shot owner...OK
+85/115 stages.hourly_phenology_preparation.test.HFUNC preparation is unique and precedes final STOMATE production...OK
+86/115 stages.hourly_process_driver.test.rainIonsGPerM3 binds the eight precipitation ion fields to Species order (PRECIP-ION-FEED-001)...OK
+87/115 stages.hourly_process_driver.test.rainIonsGPerM3 output feeds atmosphericInputG's rain channel, matching the irrigation channel it mirrors...OK
+88/115 stages.hourly_process_driver.test.WTHR precipitation nitrogen multipliers apply to baselines before speciation...OK
+89/115 stages.hourly_process_driver.test.WTHR precipitation nitrogen scaling rejects invalid climate carriers...OK
+90/115 stages.hourly_process_driver.test.production layered canopy never lets the compact owner overwrite burial transmission...OK
+91/115 stages.hourly_process_driver.test.production publishes source ZS before every aerodynamic consumer...OK
+92/115 stages.hourly_process_driver.test.production refreshes the site boundary mask before snow drift can run...OK
+93/115 stages.hourly_process_driver.test.surface boundary mask is rebuilt from site edges without prior runtime state...OK
+94/115 stages.hourly_process_driver.test.topographicDownhillGate matches starts.f:274-303's four aspect quadrants exactly...OK
+95/115 stages.hourly_process_driver.test.surface boundary mask closes an uphill direction even when the user-set fraction permits it...OK
+96/115 stages.hourly_process_driver.test.production suppresses first-day forensic landscape scans when debug logging is disabled...OK
+97/115 stages.hourly_sediment.test.pond settling uses expanded surface-layer depth rather than free water depth...OK
+98/115 stages.hourly_sediment.test.accepted hourly hydrogen transformations bind active soil and surface owners once...OK
+99/115 stages.hourly_sediment.test.hourly production publishes accepted surface K5 hydrogen uptake once...OK
+100/115 stages.hourly_snow_energy.test.production binds one post-WATSUB living canopy root solve before transport and downstream biochemistry...OK
+101/115 stages.hourly_snow_energy.test.living canopy nonlinear work dispatches grid columns while commit remains serial...OK
+102/115 stages.hourly_snow_energy.test.living canopy grid dispatch selects canonical error and never advances the next tile...OK
+103/115 stages.hourly_vegetation.test_0...OK
+104/115 stages.run_support.test.weather year fallback makes a resumed timestamp self-contained...OK
+105/115 stages.run_support.test.log router preserves exact run-log and stderr bytes...info: integer=42 text='exact'
+error(soil_water): hex=0x12ab
+OK
+106/115 stages.run_support.test.concurrent log routing writes complete uniquely owned lines...info: thread=3 line=0 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=0 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=0 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=1 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=1 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=2 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=2 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=0 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=3 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=1 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=3 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=4 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=4 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=5 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=5 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=2 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=6 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=6 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=7 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=1 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=7 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=3 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=2 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=3 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=4 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=4 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=5 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=5 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=6 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=6 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=7 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=7 payload=abcdefghijklmnopqrstuvwxyz0123456789
+OK
+107/115 stages.run_support.test.parallel grid failures reach run log in canonical serial order...error(grid_test): worker=0
+error(grid_test): worker=1
+OK
+108/115 stages.run_support.test.second active run-log writer is rejected without stealing ownership...warning: first-owner-still-active
+OK
+109/115 stages.run_support.test.OutputTree creates the full structured layout under a fresh output root...error: the following test command failed with exit code 255:
+C:\zig-local-cache\ecosys-ng\o\eea6f8dfb832b9345f32efc16a6dbe09\root.exe --seed=0xc2e87464

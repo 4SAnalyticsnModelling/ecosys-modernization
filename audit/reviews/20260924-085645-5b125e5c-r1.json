@@ -1,0 +1,31 @@
+{
+  "candidate_sha256": "0db004c1b4e7a7eb5d34d1db656b7eb1774eb882077f1d66a85c39850e98d613",
+  "evidence": [
+    "audit/reviews/review-pi-20260924-085645-5b125e5c.md",
+    "audit/reviews/carry-forward.md",
+    "audit/reviews/test-issue104-verify/receipt.json"
+  ],
+  "findings": [],
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "open_processes": [],
+  "packet_sha256": "b8d65d82203410c89f9c4f1b1e48172f378c4686d748366409b15af85db940b4",
+  "review_artifacts": [
+    {
+      "path": "audit/reviews/review-pi-20260924-085645-5b125e5c.md",
+      "sha256": "47b46b7f48b12d60977cf7a822b56bdc41290af60fc55861c3b74d0fa61eb9b0"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    },
+    {
+      "path": "audit/reviews/test-issue104-verify/receipt.json",
+      "sha256": "3ea7270377d791faaabd1e75d51920b9ceef4346a7c0bdcb80d5cce7a5694f9f"
+    }
+  ],
+  "reviewer_session": "01a0d2a1-6797-70b5-9b38-83a07ec0e7c7",
+  "revision": 1,
+  "summary": "Independent review of task 20260924-085645-5b125e5c (issue-104): executable test root compilation restored by removing obsolete diagnostic probes and completing the fertilizer fixture context with required band and chemistry owners. Clean compile verified independently. Raw unfiltered outcomes honestly cataloged (107 OK, 1 FAIL, 1 spin, 6 unrun) and segregated into issue-106 and issue-107 without weakening tests or claiming overall suite pass.",
+  "task": "20260924-085645-5b125e5c",
+  "verdict": "PASS"
+}

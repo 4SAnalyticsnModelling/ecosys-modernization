@@ -1,6 +1,6 @@
 # Issue 104 -- the executable test root (`src/ecosys_ng.zig`) does not compile; its tests have not been running
 
-Status: **OPEN** (found 2026-09-24 during task `20260924-070126-c8a42446`). Blocks the Engineering-validation gate, which needs every test root to pass.
+Status: **COMPILE DEFECT FIXED (run-034, task `20260924-085645-5b125e5c`); ROOT STILL NOT PASSING.** 107/115 OK, 1 FAIL (issue-106), 1 hang (issue-107), 6 not run. Blocks the Engineering-validation gate, which needs every test root to pass.
 
 ## Facts
 

@@ -1,0 +1,87 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/runs/run-034-issue-104-executable-test-root-compiles-107-of-115-pass-2026-09-24.md",
+      "sha256": "84631a9b9bed26ba8b30ba65ade2583d63a355099c21ba05344068df6ed280a1"
+    },
+    {
+      "path": "audit/issues/issue-104-executable-test-root-does-not-compile.md",
+      "sha256": "8e78d1011768bf87a1440102ede530fcfe61156e1db357c8ac7e10d77390b988"
+    },
+    {
+      "path": "audit/issues/issue-106-substep-ladder-test-expects-1-where-nfh4-baseline-gives-4.md",
+      "sha256": "18e81640641cb5b18438d97c69eebcbc6803db79501ae7d7e95f8ce5b3a35002"
+    },
+    {
+      "path": "audit/issues/issue-107-outputtree-test-spins-in-run-log-lock.md",
+      "sha256": "f85e3647310f6803a0ee25e76e6e84c1418541f27787394a4b6c6bd8166a8c01"
+    },
+    {
+      "path": "audit/runs/issue-104-exe-root-full/receipt.json",
+      "sha256": "05ad8597bde562c7a4571ede8f20ba40c5fb6de05d4939c37ace46c7f4701be2"
+    },
+    {
+      "path": "audit/runs/issue-104-exe-root-full/stderr-snapshot-before-stop.log",
+      "sha256": "6c333831d1e9d2f0c274ecc7de78a9b056da165707db2623170f55b84130cc2d"
+    },
+    {
+      "path": "audit/runs/issue-104-exe-root-full2/receipt.json",
+      "sha256": "1350a364d3c11b7831b2a41241f3173522878533aca3257dea2c01234f9a6f0d"
+    },
+    {
+      "path": "audit/runs/issue-104-exe-root-full2/stderr-snapshot-before-stop.log",
+      "sha256": "8e2096ff8b1ca75584fcc95dcbd521a8cba11ae062a11bd818f83f3a577f9021"
+    },
+    {
+      "path": "audit/manifest/command_registry.json",
+      "sha256": "e5ce8f4221bd2db199f3178450c65e4ec9743e2a052a30f7c6e1b89d6b8332c9"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "author_session": "72faab61-e064-413a-8a61-676e4e97a80a",
+  "author_sessions": [
+    "72faab61-e064-413a-8a61-676e4e97a80a"
+  ],
+  "base_sha256": "397397cf7e7af8933ffcdfd4ef2ce3a54b0cc062e64ac8cbc083624af31f40db",
+  "candidate_sha256": "0db004c1b4e7a7eb5d34d1db656b7eb1774eb882077f1d66a85c39850e98d613",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "c1f3460b3b3bf2d4d974b763753de1bb83120836ae8c6d5d8202a9965b37b1a3"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/runs/run-034-issue-104-executable-test-root-compiles-107-of-115-pass-2026-09-24.md",
+      "audit/issues/issue-104-executable-test-root-does-not-compile.md",
+      "audit/issues/issue-106-substep-ladder-test-expects-1-where-nfh4-baseline-gives-4.md",
+      "audit/issues/issue-107-outputtree-test-spins-in-run-log-lock.md",
+      "audit/runs/issue-104-exe-root-full/receipt.json",
+      "audit/runs/issue-104-exe-root-full/stderr-snapshot-before-stop.log",
+      "audit/runs/issue-104-exe-root-full2/receipt.json",
+      "audit/runs/issue-104-exe-root-full2/stderr-snapshot-before-stop.log",
+      "audit/manifest/command_registry.json",
+      "audit/reviews/carry-forward.md"
+    ],
+    "next_action": "issue-105: locate InvalidRootAqueousDiffusionInput raise site and capture its inputs at hour 3,289.",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "issue-104: the executable test root (src/ecosys_ng.zig, every stage-file test block) compiles again after completing the fertilizer production fixture (band state, chemistry owners, DLYRM) and removing the obsolete issue-100 fertilizer-dispatch TEMP probes. Measured for the first time since at least ISSUE-090: 109/115 started, 107 OK, test 71 FAIL (stale-looking {1,20,32,64} vs NFH=4 {4,...}; filed issue-106, test NOT changed), test 109 spins in the run-log lock (stopped deliberately after snapshot; filed issue-107), 110-115 not run. The root is NOT passing. Working argv recorded in command_registry.json (semantically identical apart from the new key). No science code changed. No gate promoted."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "Unfiltered executable root compiles; its raw pass/skip/fail count recorded (failures preserved, not weakened); argv recorded in the registry; Pi review",
+    "issue": "issue-104",
+    "question": "Can the executable test root (src/ecosys_ng.zig) be made to compile and run unfiltered by removing the obsolete issue-100 fertilizer-dispatch probes and completing the fertilizer production fixture, and what is its pass/fail count?",
+    "scope": [
+      "ecosys-ng/src/driver/fertilizer_production_fixture.zig",
+      "ecosys-ng/src/ecosys_ng.zig",
+      "ecosys-ng/src/management/fertilizer_band_state.zig",
+      "audit/manifest/command_registry.json"
+    ],
+    "stop_condition": "A failure needing a science change is filed separately, not fixed here; three distinct failed compiles"
+  },
+  "task": "20260924-085645-5b125e5c"
+}

@@ -35,16 +35,32 @@
     "note": "Read-only navigation and audit tooling. Safe at every gate including G0. Run from the project root.",
     "f77_index_build": {
       "cwd": ".",
-      "argv": ["uv", "run", "ecosys-audit/scripts/f77index.py", "--root", ".", "--out", "audit/manifest/f77index.json"],
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/f77index.py",
+        "--root",
+        ".",
+        "--out",
+        "audit/manifest/f77index.json"
+      ],
       "environment": {},
-      "expected_artifacts": ["audit/manifest/f77index.json"],
+      "expected_artifacts": [
+        "audit/manifest/f77index.json"
+      ],
       "completion_condition": "exit 0 and totals.unclosed_loops == 0",
       "last_verified_evidence": "2026-09-21: 95 files, 95 units, 53 COMMON blocks, 1520 loops, 0 unclosed, 53803 executable statements. All 41 program units re-extract by recorded line ranges and compile standalone under the oracle flags.",
       "note": "Refuses to overwrite an existing output; delete or choose a new path to rebuild."
     },
     "f77_query": {
       "cwd": ".",
-      "argv": ["uv", "run", "ecosys-audit/scripts/f77query.py", "<subcommand>", "..."],
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/f77query.py",
+        "<subcommand>",
+        "..."
+      ],
       "environment": {},
       "expected_artifacts": [],
       "completion_condition": "exit 0",
@@ -61,23 +77,52 @@
     },
     "traceability_coverage": {
       "cwd": ".",
-      "argv": ["uv", "run", "ecosys-audit/scripts/tracecov.py", "--root", ".", "--out", "audit/traceability/coverage-<date>.json"],
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/tracecov.py",
+        "--root",
+        ".",
+        "--out",
+        "audit/traceability/coverage-<date>.json"
+      ],
       "environment": {},
-      "expected_artifacts": ["audit/traceability/coverage-<date>.json"],
+      "expected_artifacts": [
+        "audit/traceability/coverage-<date>.json"
+      ],
       "completion_condition": "exit 0 means no problems and no blocking dispositions; exit 1 means a report was produced but something blocks a gate",
       "last_verified_evidence": "audit/traceability/coverage-2026-09-21.json: 66.53% statement coverage (31095/46739 in-build executable statements), 80 unresolved dispositions, 149 problems (117 stale zig_sha256, 20 path/hash count mismatches, 8 missing zig paths, 3 unknown fortran paths, 1 unusable zig path)."
     },
     "binding_state_audit": {
       "cwd": ".",
-      "argv": ["uv", "run", "ecosys-audit/scripts/bindcheck.py", "--root", ".", "--out", "audit/manifest/bindcheck-<date>.json"],
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/bindcheck.py",
+        "--root",
+        ".",
+        "--out",
+        "audit/manifest/bindcheck-<date>.json"
+      ],
       "environment": {},
-      "expected_artifacts": ["audit/manifest/bindcheck-<date>.json"],
+      "expected_artifacts": [
+        "audit/manifest/bindcheck-<date>.json"
+      ],
       "completion_condition": "exit 0 means no register contradictions; exit 1 means a declared binding contradicts the index",
       "last_verified_evidence": "audit/manifest/bindcheck-2026-09-21.json: 2970 COMMON members across 53 blocks; 214 names occur in Zig code, 1067 comment-only, 1689 absent; 553 named in traceability.csv. audit/traceability/bindings.csv has no usable rows, so shape validation was skipped."
     },
     "kernel_oracle_generate": {
       "cwd": ".",
-      "argv": ["uv", "run", "ecosys-audit/scripts/kernelgen.py", "<ROUTINE>", "--root", ".", "--scope", "referenced"],
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/kernelgen.py",
+        "<ROUTINE>",
+        "--root",
+        ".",
+        "--scope",
+        "referenced"
+      ],
       "environment": {},
       "expected_artifacts": [
         "audit/tests/kernels/kernel_<routine>.f",
@@ -90,24 +135,53 @@
     },
     "kernel_oracle_build": {
       "cwd": ".",
-      "argv": ["pwsh", "-NoProfile", "-File", "audit/tests/kernels/kernel_<routine>.build.ps1"],
+      "argv": [
+        "pwsh",
+        "-NoProfile",
+        "-File",
+        "audit/tests/kernels/kernel_<routine>.build.ps1"
+      ],
       "environment": {},
-      "expected_artifacts": ["audit/tests/kernels/build/kernel_<routine>.exe"],
+      "expected_artifacts": [
+        "audit/tests/kernels/build/kernel_<routine>.exe"
+      ],
       "completion_condition": "exit 0 and the executable exists",
       "last_verified_evidence": "2026-09-21: kernel_stomate.exe built and linked.",
       "note": "The driver and the legacy unit are separate translation units on purpose. The driver needs ACCESS='STREAM' (Fortran 2003, rejected by -std=legacy); the legacy unit needs -std=legacy. Both carry identical precision flags."
     },
     "legacy_unit_compile_check": {
       "cwd": ".",
-      "argv": ["gfortran", "-c", "-ffixed-form", "-ffixed-line-length-72", "-fdefault-real-8", "-fdefault-double-8", "-std=legacy", "-fallow-argument-mismatch", "-I", "f77src", "-o", "<tmp>/<unit>.o", "f77src/<unit>.f"],
+      "argv": [
+        "gfortran",
+        "-c",
+        "-ffixed-form",
+        "-ffixed-line-length-72",
+        "-fdefault-real-8",
+        "-fdefault-double-8",
+        "-std=legacy",
+        "-fallow-argument-mismatch",
+        "-I",
+        "f77src",
+        "-o",
+        "<tmp>/<unit>.o",
+        "f77src/<unit>.f"
+      ],
       "environment": {},
-      "expected_artifacts": ["<tmp>/<unit>.o"],
+      "expected_artifacts": [
+        "<tmp>/<unit>.o"
+      ],
       "completion_condition": "exit 0",
       "last_verified_evidence": "2026-09-21: 40 of 41 units compile directly; soil.f additionally needs EXTERNAL split or -std=f95, after which all 41 pass."
     },
     "loc_denominator": {
       "cwd": ".",
-      "argv": ["tokei", "--output", "json", "f77src", "ecosys-ng/src"],
+      "argv": [
+        "tokei",
+        "--output",
+        "json",
+        "f77src",
+        "ecosys-ng/src"
+      ],
       "environment": {},
       "expected_artifacts": [],
       "completion_condition": "exit 0",
@@ -116,7 +190,14 @@
     },
     "benchmark": {
       "cwd": ".",
-      "argv": ["hyperfine", "--warmup", "1", "--runs", "<n>", "<command>"],
+      "argv": [
+        "hyperfine",
+        "--warmup",
+        "1",
+        "--runs",
+        "<n>",
+        "<command>"
+      ],
       "environment": {},
       "expected_artifacts": [],
       "completion_condition": "exit 0",
@@ -128,10 +209,16 @@
     "note": "PARTIALLY populated. Three slots were established by actually executing them on 2026-09-22 and are marked with their evidence: zig_releasesafe_build, zig_targeted_tests, zig_production_run. The remaining slots (fortran_build, fortran_run, zig_releasefast_build, zig_short_integration) are STILL null and must not be treated as verified. Do not infer an argv from the analysis section above; establish and record each one against real build files before use, per G0.",
     "zig_releasesafe_build": {
       "cwd": "ecosys-ng",
-      "argv": ["zig", "build", "-Doptimize=ReleaseSafe"],
+      "argv": [
+        "zig",
+        "build",
+        "-Doptimize=ReleaseSafe"
+      ],
       "environment": {},
       "source_hash": null,
-      "expected_artifacts": ["ecosys-ng/ecosys-ng-bin/ecosys_ng.exe"],
+      "expected_artifacts": [
+        "ecosys-ng/ecosys-ng-bin/ecosys_ng.exe"
+      ],
       "completion_condition": "exit 0 and the executable exists with a fresh mtime",
       "last_verified_evidence": "2026-09-22: exit 0; wrote ecosys-ng/ecosys-ng-bin/ecosys_ng.exe (11,408,896 bytes). NOTE the artifact is NOT under zig-out/bin -- checking zig-out/bin returns not-found even on a successful build, which cost one false 'build produced no binary' reading. Wall clock is long (single-digit minutes to over 30) and the build writes nothing to stdout until it finishes, so an empty output file is not evidence of a hang; check CPU time and working-set of the zig child instead.",
       "note": "ReleaseSafe, not ReleaseFast, is the build used for every production run recorded in audit/runs/ from run-021 onward. It is the mandated qualification build. Verify a diagnostic's strings are present in the built binary (Select-String on the .exe) BEFORE running, so a zero-firing probe is distinguishable from a probe that was never compiled in."
@@ -156,7 +243,11 @@
     },
     "zig_targeted_tests": {
       "cwd": "ecosys-ng",
-      "argv": ["zig", "test", "src/module_index.zig"],
+      "argv": [
+        "zig",
+        "test",
+        "src/module_index.zig"
+      ],
       "environment": {},
       "source_hash": null,
       "expected_artifacts": [],
@@ -185,7 +276,10 @@
     },
     "zig_production_run": {
       "cwd": "<staged deck directory containing runottawa, runottawa_input_files/, runottawa_output_files/>",
-      "argv": ["./ecosys_ng.exe", "runottawa"],
+      "argv": [
+        "./ecosys_ng.exe",
+        "runottawa"
+      ],
       "environment": {},
       "source_hash": null,
       "expected_artifacts": [
@@ -195,6 +289,23 @@
       "completion_condition": "the run reaches the intended hour; a clean full-horizon run would reach 262,920. As of 2026-09-22 it terminates at hour 3,275 with error HourlyCellConservationFailure (exit 1), which is the current frontier, NOT a successful completion.",
       "last_verified_evidence": "2026-09-22 (run-024): staged from a previous run's deck into a fresh directory with NO checkpoints present, so it ran from hour 1; reached hour 3,275 in about 34 minutes wall clock and emitted the two reproducible nitrogen conservation rows plus the stage execution census. CLI shape independently confirmed by driver/cli.zig's own tests: ecosys_ng <runscript_path> [--threads N] [--survey-conservation] [--describe-timeline] [--execution-evidence <path>].",
       "note": "Copy the freshly built ecosys_ng.exe INTO the deck directory and run it with cwd set there; the runscript's input_root/output_root resolve relative to cwd. Launch via a mechanism whose child survives the invoking shell -- PowerShell Start-Process children were killed when the tool call's job ended, which silently truncated three runs and caused a CORRECT fix to be reverted on false evidence (see run-023). Staging a fresh directory matters: leaving prior *.bin checkpoints in place risks a resume instead of a clean run."
+    },
+    "zig_executable_root_tests": {
+      "cwd": "ecosys-ng",
+      "argv": [
+        "zig",
+        "test",
+        "--dep",
+        "ecosys_ng",
+        "-Mroot=src\\ecosys_ng.zig",
+        "-Mecosys_ng=src\\module_index.zig"
+      ],
+      "environment": {},
+      "source_hash": null,
+      "expected_artifacts": [],
+      "completion_condition": "exit 0 and zero failures across all 115 tests",
+      "last_verified_evidence": "2026-09-24 (issue-104, audit/runs/issue-104-exe-root-full2/): compiles after the fixture fix; 109 of 115 started, 107 OK, 1 FAIL (test 71, stale NFH=4 expectation, issue-106), test 109 spins in the run-log lock and was stopped (issue-107); tests 110-115 NOT RUN. NOT a pass.",
+      "note": "Second test root from build.zig:39 (src/ecosys_ng.zig; every stages/*.zig test block). The module-index root never runs these. BACKSLASH module paths are required on this host: forward slashes fail with \"found another zig file '.zig' after root source file\". The test binary is a child process named root.exe; judge liveness from it, not from zig.exe. Add --test-filter <substring> to scope."
     }
   }
 }
