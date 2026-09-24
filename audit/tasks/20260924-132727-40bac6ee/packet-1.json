@@ -1,0 +1,86 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/runs/run-038-issue-108-root-atmosphere-gas-booked-with-legacy-sign-carbon-closes-2026-09-24.md",
+      "sha256": "e574a412786ce6d7b7317d5ec111415362effde3f45f88bb9a57b24d43fbe499"
+    },
+    {
+      "path": "audit/issues/issue-108-hour-3289-carbon-and-cation-closure-after-root-geometry-fix.md",
+      "sha256": "0152a4ab6650a0ac5d515c1e165169049f4da6472613148e057dc9c73fe98418"
+    },
+    {
+      "path": "audit/runs/issue-108-fix-prediction/prediction-registered-before-run.txt",
+      "sha256": "e2214551d59588cf2b7083537221208c246679eb1527bef0dd2b35c82207f940"
+    },
+    {
+      "path": "audit/runs/issue-108-fix-tests/receipt.json",
+      "sha256": "736395997911f7599504c0f13c3c62075072f71f8a3231a5702b05238435c0bf"
+    },
+    {
+      "path": "audit/runs/issue-108-fix-tests/stderr.log",
+      "sha256": "eb2548c5a6ed0b1024402eff10338761a8c465bb96e80531dc9d10ce52d31135"
+    },
+    {
+      "path": "audit/runs/issue-108-fix-build/receipt.json",
+      "sha256": "aa24d60b45c96ae24bd416c26154c5e0c0433d436edbd45a34d284a8b1d93bd2"
+    },
+    {
+      "path": "audit/runs/issue-108-fix-run/receipt.json",
+      "sha256": "8a1a3d7d2ca21f278362301c42f3a7002e8fe58a58a4916dede7cd5455806348"
+    },
+    {
+      "path": "audit/runs/issue-108-fix-run/stderr.log",
+      "sha256": "827426d0b2d6c1e7442c827775c18436ff59e0e7c9b8d2fc9ba5a2fc2eeae239"
+    },
+    {
+      "path": "audit/runs/run-037-issue-108-root-gas-venting-is-the-carbon-residual-2026-09-24.md",
+      "sha256": "0baf9c36d1b964915781de4f00c591b56b58bb86fef031e7eaf6d6a66f596749"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "author_session": "72faab61-e064-413a-8a61-676e4e97a80a",
+  "author_sessions": [
+    "72faab61-e064-413a-8a61-676e4e97a80a"
+  ],
+  "base_sha256": "fd8c0c256ce6324eac785bcdf173fec560a27f4ee971e66c465aca843aca2305",
+  "candidate_sha256": "f4891ce064ab7b2ea247967dde02419ea1a2fffa1981c40e353da5b6414b6170",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "4e72dccebea6ee240621274a3fe91989b9bdd23c9379c1990e6c69cbb4e92156"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/runs/run-038-issue-108-root-atmosphere-gas-booked-with-legacy-sign-carbon-closes-2026-09-24.md",
+      "audit/issues/issue-108-hour-3289-carbon-and-cation-closure-after-root-geometry-fix.md",
+      "audit/runs/issue-108-fix-prediction/prediction-registered-before-run.txt",
+      "audit/runs/issue-108-fix-tests/receipt.json",
+      "audit/runs/issue-108-fix-tests/stderr.log",
+      "audit/runs/issue-108-fix-build/receipt.json",
+      "audit/runs/issue-108-fix-run/receipt.json",
+      "audit/runs/issue-108-fix-run/stderr.log",
+      "audit/runs/run-037-issue-108-root-gas-venting-is-the-carbon-residual-2026-09-24.md",
+      "audit/reviews/carry-forward.md"
+    ],
+    "next_action": "issue-108 cations: probe layer-2 Ca/Na/K census terms and root salt exchange at hour 3,289.",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "issue-108 carbon fix: daily_gas_flux.combinedHourIncrement and HourlySpeciesActivity.signedComponentSumG subtracted the root atmosphere->root gas exchange from an otherwise input-signed net; legacy adds it (extract.f:714 CO2A+=RCOFLA; redist.f:6530,6568,6573-6574 CIB=TCOFLA added to CO2GIN/HCO2G/UCO2G), the layer sidecar already books it as a gain, and run-037 measured it as inward-positive. Sign corrected; three tests encoding the old algebra reconciled with legacy-cited recomputed values (not relaxed). Module suite 4387/1/0. Prod-deck run: the pre-registered prediction is confirmed in full (carbon row gone; Ca/Na/K rows bit-identical; frontier unchanged 3,288). DAY gas outputs change wherever root venting is nonzero (intended). No gate promoted."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "Sign corrected with legacy citation; existing tests reconciled only where they encode the old sign (legacy-cited); module suite; ONE prod-deck run with a pre-registered prediction; Pi review",
+    "issue": "issue-108",
+    "question": "Does booking root-atmosphere gas exchange with legacy's sign (redist.f:6530,6568,6573-6574: CIB=TCOFLA added as input) in daily_gas_flux.combinedHourIncrement remove the hour-3,289 carbon residual?",
+    "scope": [
+      "ecosys-ng/src/soil/diagnostics/daily_gas_flux.zig",
+      "ecosys-ng/src/plant/root/plant_root_gas_transport.zig",
+      "ecosys-ng/src/ecosys_ng.zig"
+    ],
+    "stop_condition": "Suite or frontier regression (then revert); a D: fault"
+  },
+  "task": "20260924-132727-40bac6ee"
+}

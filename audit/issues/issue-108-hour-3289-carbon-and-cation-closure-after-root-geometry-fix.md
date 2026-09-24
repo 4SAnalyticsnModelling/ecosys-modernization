@@ -1,6 +1,6 @@
 # Issue 108 -- hour 3,289: carbon (-2.15e-6 g) and Ca/Na/K (+9.2e-8, +2.9e-10, +1.5e-10) closure failures once root geometry is defined
 
-Status: **OPEN -- carbon half LOCALIZED** (run-037, task `20260924-122218-1d2477d6`). The residual is 2 x 1.0758e-6 g C: root CO2/CH4 vented by `plant_root_gas_transport.advance` (`atmosphere_to_root_c` = -1.07581e-6), unbooked at that step, plus an equal shortfall in booked outputs. Which booking carries it is still to find. Cations not yet addressed.
+Status: **OPEN -- carbon FIXED (run-038, task `20260924-132727-40bac6ee`)**: root-atmosphere gas is now booked with legacy's input sign (`redist.f:6530,6568,6573-6574`), and the hour-3,289 carbon row is gone. **Ca/Na/K layer-2 excess remains** (+9.19e-8 / +2.9e-10 / +1.5e-10, unchanged) and is the frontier. Carbon localized in run-037.
 
 - Evidence: `audit/runs/issue-105-fix-run/stderr.log` (SHA256 `3108D56D...`) and `audit/runs/run-036-issue-105-root-geometry-fix-clears-the-error-and-exposes-conservation-at-3289-2026-09-24.md`.
 - The cations are positive (storage gained more than was booked) and sit entirely in soil layer 2. The carbon row is negative and has no layer split printed.

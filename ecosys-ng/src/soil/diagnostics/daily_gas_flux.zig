@@ -50,7 +50,9 @@ pub const HourlySpeciesActivity = struct {
             self.litter_boundary_exchange_g,
         );
         total = try addFinite(total, self.root_withdrawal_exchange_g);
-        return addFinite(total, -self.root_atmosphere_to_root_exchange_g);
+        // ISSUE-108: input-signed like the other components; see
+        // `combinedHourIncrement`.
+        return addFinite(total, self.root_atmosphere_to_root_exchange_g);
     }
 
     /// Normally zero. A nonzero finite value can only be the f64 reduction-
@@ -621,9 +623,15 @@ fn rootWithdrawalForSpecies(
 
 fn combinedHourIncrement(species: gas.Species, withdrawal: root_disturbance.CellRootGasWithdrawal, root_atmosphere_exchange_g_per_h: f64, boundary: f64) !f64 {
     const root_flux = rootWithdrawalForSpecies(species, withdrawal);
-    // Accepted root flux is positive atmosphere -> root, whereas DAY gas
-    // output is positive ecosystem -> atmosphere.
-    const result = boundary + root_flux - root_atmosphere_exchange_g_per_h;
+    // ISSUE-108. Every term here is signed as net input to the ecosystem: the
+    // soil/litter boundary exchange, the non-positive GROSUB withdrawal, and the
+    // root-atmosphere exchange, which is positive atmosphere -> root
+    // (`extract.f:714`, `CO2A += RCOFLA`). Legacy adds it to the same
+    // input-signed budget (`redist.f:6530,6568,6573-6574`: CIB = TCOFLA;
+    // CO2GIN, HCO2G, UCO2G += CIB), and the layer sidecar books it as an
+    // external gain. Subtracting it doubled every root vent's error. At Ottawa
+    // hour 3,289 that was 2 x 1.0758e-6 g C (run-037).
+    const result = boundary + root_flux + root_atmosphere_exchange_g_per_h;
     if (!std.math.isFinite(result)) return error.NonFiniteDailyGasFlux;
     return result;
 }
@@ -673,8 +681,10 @@ test "DAY gas accumulator combines boundaries and runtime root species" {
     try state.accumulateHour(&roots, 7, 2, &soil, &litter);
     try std.testing.expectEqual(@as(f64, 8), try state.getSoilLitterBoundary(0, .carbon_dioxide));
     try std.testing.expectEqual(@as(f64, 3), try state.getSoilLitterBoundary(0, .hydrogen));
-    try std.testing.expectEqual(@as(f64, 2.5), try state.get(0, .carbon_dioxide));
-    try std.testing.expectEqual(@as(f64, 1.5), try state.get(0, .hydrogen));
+    // ISSUE-108: two hours of 3 + 1 (boundary) - 2 (withdrawal) + 0.75
+    // (atmosphere -> root, an input per `redist.f:6568,6573-6574`).
+    try std.testing.expectEqual(@as(f64, 5.5), try state.get(0, .carbon_dioxide));
+    try std.testing.expectEqual(@as(f64, 2.5), try state.get(0, .hydrogen));
     state.reset();
     try std.testing.expectEqual(@as(f64, 0), try state.getSoilLitterBoundary(0, .carbon_dioxide));
     try std.testing.expectEqual(@as(f64, 0), try state.get(0, .carbon_dioxide));
@@ -705,8 +715,9 @@ test "current-hour gas activity is cell local and matches producer sign algebra"
         &litter,
         0,
     );
-    try std.testing.expectEqual(@as(f64, 1.25), activity.carbon_net_input_g_c);
-    try std.testing.expectEqual(@as(f64, 0.75), activity.hydrogen_net_input_g_h);
+    // ISSUE-108: 4 - 2 + 0.75 and 1.5 - 0.5 + 0.25 (atmosphere -> root is input).
+    try std.testing.expectEqual(@as(f64, 2.75), activity.carbon_net_input_g_c);
+    try std.testing.expectEqual(@as(f64, 1.25), activity.hydrogen_net_input_g_h);
     try std.testing.expectEqual(@as(f64, 0), activity.oxygen_net_input_g_o);
     try std.testing.expectEqual(@as(f64, 0), activity.nitrogen_net_input_g_n);
 }
@@ -755,8 +766,9 @@ test "componentwise hourly ammonia accounting closes locally and matches nitroge
     try std.testing.expectEqual(@as(f64, 0.5), ammonia_activity.litter_boundary_exchange_g);
     try std.testing.expectEqual(@as(f64, -0.25), ammonia_activity.root_withdrawal_exchange_g);
     try std.testing.expectEqual(@as(f64, 0.125), ammonia_activity.root_atmosphere_to_root_exchange_g);
-    try std.testing.expectEqual(@as(f64, 1.375), ammonia_activity.net_exchange_g);
-    try std.testing.expectEqual(@as(f64, 1.375), try ammonia_activity.signedComponentSumG());
+    // ISSUE-108: 1.25 + 0.5 - 0.25 + 0.125 (atmosphere -> root is input).
+    try std.testing.expectEqual(@as(f64, 1.625), ammonia_activity.net_exchange_g);
+    try std.testing.expectEqual(@as(f64, 1.625), try ammonia_activity.signedComponentSumG());
     try std.testing.expectEqual(@as(f64, 0), try ammonia_activity.componentClosureResidualG());
 
     const hourly = try state.currentHourElementActivityForCell(
@@ -767,7 +779,7 @@ test "componentwise hourly ammonia accounting closes locally and matches nitroge
         &litter,
         0,
     );
-    try std.testing.expectEqual(@as(f64, 3.625), hourly.nitrogen_net_input_g_n);
+    try std.testing.expectEqual(@as(f64, 3.875), hourly.nitrogen_net_input_g_n);
 
     try state.accumulateHour(&roots, 1, 2, &soil, &litter);
     try std.testing.expectEqual(
