@@ -1,0 +1,18 @@
+{
+  "packet_sha256": "34121ae8ff6481595609ecf24dfb98a5d4ba80dfe198e3f16889f18bba3120a9",
+  "verdict": "PASS",
+  "summary": "Verified issue-103 probe findings: -1.0368e-6 g N loss at hour 3,277 localized to refreshMatrixFromReactionState due to duplicate out-of-coordinator band growth in soil_chemistry_convergence. Pre-registered prediction confirmed; diagnostic logging only; PASS.",
+  "findings": [],
+  "evidence": [
+    "audit/reviews/carry-forward.md",
+    "audit/reviews/review-pi-20260924-055505-f4a901f5.md",
+    "audit/runs/run-032-issue-103-duplicate-no3-band-growth-in-chemistry-stage-rebases-nitrate-2026-09-24.md",
+    "audit/issues/issue-103-hour-3277-nitrate-lost-in-the-chemistry-interval.md",
+    "audit/runs/issue-103-probe-prediction/prediction-registered-before-run.txt",
+    "audit/runs/issue-103-probe-build/receipt.json",
+    "audit/runs/issue-103-probe-run/receipt.json",
+    "audit/runs/issue-103-probe-run/stderr.log",
+    "audit/runs/issue-100-fix2-run-log/stderr.log"
+  ],
+  "open_processes": []
+}

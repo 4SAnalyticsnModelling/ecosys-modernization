@@ -1051,6 +1051,7 @@ noinline fn publishHourlyChemistry(
     // proof that the entire hour-2,894 phosphorus residual must live here if
     // it is inside this function at all.
     try diagnostics.tracePhosphateAqueousTransportTermLayer0(context, "before_validate_carrier_volumes");
+    try diagnostics.traceIssue103LayerNitrate(context, "chem_before_validate_carrier_volumes", context.executed_weather_hours.* + 1);
     try ecosys.soil_aqueous_transport_bridge.validateCarrierVolumesScaled(
         context.micropore_solute_state,
         context.grid.matrix_liquid_water_m3,
@@ -1058,6 +1059,7 @@ noinline fn publishHourlyChemistry(
         context.config.physical_tolerance.relative,
     );
     try diagnostics.tracePhosphateAqueousTransportTermLayer0(context, "after_validate_carrier_volumes");
+    try diagnostics.traceIssue103LayerNitrate(context, "chem_after_validate_carrier_volumes", context.executed_weather_hours.* + 1);
     try context.mineral_nitrogen_transport.refreshMatrixFromReactionState(
         context.soil_chemistry,
         context.soil_reactive_nitrogen,
@@ -1067,6 +1069,7 @@ noinline fn publishHourlyChemistry(
         context.config.physical_tolerance.water_volume_m3,
     );
     try diagnostics.tracePhosphateAqueousTransportTermLayer0(context, "after_refresh_matrix_from_reaction_state");
+    try diagnostics.traceIssue103LayerNitrate(context, "chem_after_refresh_matrix_from_reaction_state", context.executed_weather_hours.* + 1);
     try ecosys.soil_aqueous_transport_bridge.exportChemistry(
         context.soil_chemistry,
         context.micropore_solute_state,
@@ -1074,6 +1077,7 @@ noinline fn publishHourlyChemistry(
         context.config.physical_tolerance.water_volume_m3,
     );
     try diagnostics.tracePhosphateAqueousTransportTermLayer0(context, "after_export_chemistry");
+    try diagnostics.traceIssue103LayerNitrate(context, "chem_after_export_chemistry", context.executed_weather_hours.* + 1);
     try ecosys.fertilizer_band_production.consumeUndissolved(
         context.allocator,
         context.fertilizer_band,
@@ -1085,6 +1089,7 @@ noinline fn publishHourlyChemistry(
         context.salinity_enabled_by_cell,
     );
     try diagnostics.tracePhosphateAqueousTransportTermLayer0(context, "after_consume_undissolved");
+    try diagnostics.traceIssue103LayerNitrate(context, "chem_after_consume_undissolved", context.executed_weather_hours.* + 1);
 }
 
 fn diagnosticPositiveRootNitrogenUptake_g(state_update: anytype) f64 {

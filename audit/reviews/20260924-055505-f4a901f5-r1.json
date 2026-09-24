@@ -1,0 +1,61 @@
+{
+  "candidate_sha256": "81618ddf5ff731ee8e0e300c6a0fe8984dc11d6c234c49b39d247c3562e31e6d",
+  "evidence": [
+    "audit/reviews/carry-forward.md",
+    "audit/reviews/review-pi-20260924-055505-f4a901f5.md",
+    "audit/runs/run-032-issue-103-duplicate-no3-band-growth-in-chemistry-stage-rebases-nitrate-2026-09-24.md",
+    "audit/issues/issue-103-hour-3277-nitrate-lost-in-the-chemistry-interval.md",
+    "audit/runs/issue-103-probe-prediction/prediction-registered-before-run.txt",
+    "audit/runs/issue-103-probe-build/receipt.json",
+    "audit/runs/issue-103-probe-run/receipt.json",
+    "audit/runs/issue-103-probe-run/stderr.log",
+    "audit/runs/issue-100-fix2-run-log/stderr.log"
+  ],
+  "findings": [],
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "open_processes": [],
+  "packet_sha256": "34121ae8ff6481595609ecf24dfb98a5d4ba80dfe198e3f16889f18bba3120a9",
+  "review_artifacts": [
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    },
+    {
+      "path": "audit/reviews/review-pi-20260924-055505-f4a901f5.md",
+      "sha256": "72511fcea8a4a92099394a55f0c0acf6c50d63d6e5afd8af197cb100c4a97682"
+    },
+    {
+      "path": "audit/runs/run-032-issue-103-duplicate-no3-band-growth-in-chemistry-stage-rebases-nitrate-2026-09-24.md",
+      "sha256": "e7edfd68358bd54a208b615d7390f52e97bcd9ba879d52525cd97aeb4c15fd70"
+    },
+    {
+      "path": "audit/issues/issue-103-hour-3277-nitrate-lost-in-the-chemistry-interval.md",
+      "sha256": "f8212f5e966eb2c33dbc912f8b4b84fb776a4e6aa270a3239abd36a515df8237"
+    },
+    {
+      "path": "audit/runs/issue-103-probe-prediction/prediction-registered-before-run.txt",
+      "sha256": "6c6364ad9886f4470006db1f03bc160d07a7babae2139958b032c55a3cd99738"
+    },
+    {
+      "path": "audit/runs/issue-103-probe-build/receipt.json",
+      "sha256": "9f6be3e667ce4872dfae98961f79094f43101f125ec63adabf2dfcd27ed5eeae"
+    },
+    {
+      "path": "audit/runs/issue-103-probe-run/receipt.json",
+      "sha256": "4522f8da883b7a02ee6c258ddb4ef3e83fe9c2d2537524dfe6d87cdc962438c3"
+    },
+    {
+      "path": "audit/runs/issue-103-probe-run/stderr.log",
+      "sha256": "ff525a29241608bcab2f78087037e220cfc5637dc5c6fe4e6f20fd9f1a436849"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-run-log/stderr.log",
+      "sha256": "e2354056d128778557ccb57d7869748e8b75f9d074982fc36e79a093512ec99f"
+    }
+  ],
+  "reviewer_session": "01a0d1fa-be3a-70b5-9b38-839c10f72094",
+  "revision": 1,
+  "summary": "Verified issue-103 probe findings: -1.0368e-6 g N loss at hour 3,277 localized to refreshMatrixFromReactionState due to duplicate out-of-coordinator band growth in soil_chemistry_convergence. Pre-registered prediction confirmed; diagnostic logging only; PASS.",
+  "task": "20260924-055505-f4a901f5",
+  "verdict": "PASS"
+}

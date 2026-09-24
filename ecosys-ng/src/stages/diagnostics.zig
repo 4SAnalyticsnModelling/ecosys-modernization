@@ -961,6 +961,58 @@ pub fn traceIssue100LayerAmmonium(context: anytype, label: []const u8, hour: usi
     );
 }
 
+/// TEMP_DIAGNOSTIC (`issue-103`): hour 3,277 loses 1.0368e-6 g N of nitrate
+/// in the `after_uptake -> after_chemistry` interval, 99% in soil layer 1.
+/// For layers 1 and 2 this prints the census's nitrate terms (transport-matrix
+/// amounts plus dry fertilizer nitrate, `landscape_mass_inventory_nitrogen.zig`)
+/// beside the concentration view `C * water * f` that
+/// `refreshMatrixFromReactionState` would rebuild from, and nitrite in both of
+/// its stores, so a representation mismatch is distinguishable from a real loss.
+pub fn traceIssue103LayerNitrate(context: anytype, label: []const u8, hour: usize) !void {
+    if (@import("builtin").is_test) return;
+    if (hour != ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_target_hour) return;
+    const totals = try reconstructLandscapeMassBalance(context);
+    const n = context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol;
+    const S = ecosys.mineral_nitrogen_transport.Species;
+    inline for (.{ 1, 2 }) |layer| {
+        const matrix = try context.mineral_nitrogen_transport.matrix.cellAmountsConst(layer);
+        const macro = try context.mineral_nitrogen_transport.macropore.cellAmountsConst(layer);
+        const fractions = try context.fertilizer_band.scienceZoneFractionsForFlatIndex(layer);
+        const aqueous = context.soil_chemistry.aqueous[layer];
+        const live_water = context.grid.matrix_liquid_water_m3[layer];
+        const dry_water = context.soil_chemistry.dry_reference_water_m3[layer];
+        const water = if (live_water > context.config.physical_tolerance.water_volume_m3) live_water else dry_water;
+        const dry = context.soil_fertilizer_inventory.soil[layer];
+        std.log.err(
+            "TEMP_DIAGNOSTIC n103_layer{d}[{s}]: hour={d} total_n_g={e} census_no3_g={e} mx_no3_nb_g={e} mx_no3_b_g={e} mx_no2_nb_g={e} mx_no2_b_g={e} mp_no3_nb_g={e} mp_no3_b_g={e} frac_no3_nb={e} frac_no3_b={e} water_m3={e} conc_no3_nb={e} conc_no3_b={e} cview_no3_nb_g={e} cview_no3_b_g={e} rn_no2_nb_g={e} rn_no2_b_g={e} dry_no3_g={e}",
+            .{
+                layer,
+                label,
+                hour,
+                totals.residue_nitrogen_g + totals.organic_nitrogen_g + totals.dinitrogen_nitrogen_g +
+                    totals.ammonium_nitrogen_g + totals.nitrate_nitrogen_g + totals.plant_nitrogen_g,
+                totals.nitrate_nitrogen_g,
+                matrix[@intFromEnum(S.nitrate_non_band)] * n,
+                matrix[@intFromEnum(S.nitrate_band)] * n,
+                matrix[@intFromEnum(S.nitrite_non_band)] * n,
+                matrix[@intFromEnum(S.nitrite_band)] * n,
+                macro[@intFromEnum(S.nitrate_non_band)] * n,
+                macro[@intFromEnum(S.nitrate_band)] * n,
+                fractions.nitrate_non_band,
+                fractions.nitrate_band,
+                water,
+                aqueous.nitrate_non_band,
+                aqueous.nitrate_band,
+                aqueous.nitrate_non_band * water * fractions.nitrate_non_band * n,
+                aqueous.nitrate_band * water * fractions.nitrate_band * n,
+                context.soil_reactive_nitrogen.non_band_nitrite_g_n[layer],
+                context.soil_reactive_nitrogen.band_nitrite_g_n[layer],
+                (dry.broadcast_nitrate_mol_n + dry.banded_nitrate_mol_n) * n,
+            },
+        );
+    }
+}
+
 pub fn diagnosticAmmoniumOwners_g_n(context: anytype) ![6]f64 {
     const molar_mass = context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol;
     var result: [6]f64 = @splat(0);

@@ -117,6 +117,7 @@ fn captureFailureConservationTrace(context: anytype, point: usize) !void {
     // TEMP_DIAGNOSTIC (`issue-100`): same point order as the post-NITRO trace.
     const issue100_labels = [_][]const u8{ "trace0_after_nitro", "trace1_after_post_watsub", "trace2_after_uptake", "trace3_after_chemistry", "trace4_after_transport", "trace5_after_interface_heat", "trace6_after_surface_gas" };
     try diagnostics.traceIssue100LayerAmmonium(context, if (point < issue100_labels.len) issue100_labels[point] else "trace_other", context.executed_weather_hours.* + 1);
+    try diagnostics.traceIssue103LayerNitrate(context, if (point < issue100_labels.len) issue100_labels[point] else "trace_other", context.executed_weather_hours.* + 1);
     context.diagnostic_residue_carbon_trace_g_c[point] = totals.residue_carbon_g;
     context.diagnostic_organic_carbon_trace_g_c[point] = totals.organic_carbon_g;
     context.diagnostic_inorganic_carbon_trace_g_c[point] = totals.carbon_dioxide_carbon_g;
@@ -13279,6 +13280,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
     // named from code structure and every one was refuted by measurement.
     if (diagnostic_first_hour) try diagnostics.logPhosphorusRepresentation(context, "before_fertilizer_band_prepare_hour");
     try diagnostics.traceIssue100LayerAmmonium(context, "before_band_prepare", context.executed_weather_hours.* + 1);
+    try diagnostics.traceIssue103LayerNitrate(context, "before_band_prepare", context.executed_weather_hours.* + 1);
     try ecosys.fertilizer_band_production.prepareHour(
         context.fertilizer_band,
         fertilizer_band_hour,
@@ -13293,6 +13295,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
     );
     if (diagnostic_first_hour) try diagnostics.logPhosphorusRepresentation(context, "after_fertilizer_band_prepare_hour");
     try diagnostics.traceIssue100LayerAmmonium(context, "after_band_prepare", context.executed_weather_hours.* + 1);
+    try diagnostics.traceIssue103LayerNitrate(context, "after_band_prepare", context.executed_weather_hours.* + 1);
     // Certificate the exact accepted WATSUB physical carriers and accumulated
     // face/boundary flux buffers before NITRO/HFUNC/UPTAKE/SOLUTE mutate any
     // downstream scientific owner. Late per-M TRNSFR replay temporarily
@@ -13309,6 +13312,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
     // owner carrier mirrors published atomically by each WATSUB acceptance.
     try diagnostics.traceStageBoundaryLayer0Carbon(context, "before_nitro");
     try diagnostics.traceIssue100LayerAmmonium(context, "before_nitro", context.executed_weather_hours.* + 1);
+    try diagnostics.traceIssue103LayerNitrate(context, "before_nitro", context.executed_weather_hours.* + 1);
     // ISSUE-065 (eighteenth pass): directly test the seventeenth addendum's
     // timing-gap hypothesis by tracing the IMPLIED aqueous phosphate export
     // (concentration/carrier/zone-fraction recompute, independent of the

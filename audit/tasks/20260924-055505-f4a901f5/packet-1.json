@@ -1,0 +1,78 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/runs/run-032-issue-103-duplicate-no3-band-growth-in-chemistry-stage-rebases-nitrate-2026-09-24.md",
+      "sha256": "e7edfd68358bd54a208b615d7390f52e97bcd9ba879d52525cd97aeb4c15fd70"
+    },
+    {
+      "path": "audit/issues/issue-103-hour-3277-nitrate-lost-in-the-chemistry-interval.md",
+      "sha256": "f8212f5e966eb2c33dbc912f8b4b84fb776a4e6aa270a3239abd36a515df8237"
+    },
+    {
+      "path": "audit/runs/issue-103-probe-prediction/prediction-registered-before-run.txt",
+      "sha256": "6c6364ad9886f4470006db1f03bc160d07a7babae2139958b032c55a3cd99738"
+    },
+    {
+      "path": "audit/runs/issue-103-probe-build/receipt.json",
+      "sha256": "9f6be3e667ce4872dfae98961f79094f43101f125ec63adabf2dfcd27ed5eeae"
+    },
+    {
+      "path": "audit/runs/issue-103-probe-run/receipt.json",
+      "sha256": "4522f8da883b7a02ee6c258ddb4ef3e83fe9c2d2537524dfe6d87cdc962438c3"
+    },
+    {
+      "path": "audit/runs/issue-103-probe-run/stderr.log",
+      "sha256": "ff525a29241608bcab2f78087037e220cfc5637dc5c6fe4e6f20fd9f1a436849"
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-run-log/stderr.log",
+      "sha256": "e2354056d128778557ccb57d7869748e8b75f9d074982fc36e79a093512ec99f"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "author_session": "72faab61-e064-413a-8a61-676e4e97a80a",
+  "author_sessions": [
+    "72faab61-e064-413a-8a61-676e4e97a80a"
+  ],
+  "base_sha256": "4c4b70884f34d169f5d28cdb1ab8cf0fdd75faed3989b89f0f32ea54173281ab",
+  "candidate_sha256": "81618ddf5ff731ee8e0e300c6a0fe8984dc11d6c234c49b39d247c3562e31e6d",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "b4e8d0522586900c4d740c2a76790daa6fbc437993ebbaa03c3aeff04f9141b6"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/runs/run-032-issue-103-duplicate-no3-band-growth-in-chemistry-stage-rebases-nitrate-2026-09-24.md",
+      "audit/issues/issue-103-hour-3277-nitrate-lost-in-the-chemistry-interval.md",
+      "audit/runs/issue-103-probe-prediction/prediction-registered-before-run.txt",
+      "audit/runs/issue-103-probe-build/receipt.json",
+      "audit/runs/issue-103-probe-run/receipt.json",
+      "audit/runs/issue-103-probe-run/stderr.log",
+      "audit/runs/issue-100-fix2-run-log/stderr.log",
+      "audit/reviews/carry-forward.md"
+    ],
+    "next_action": "Adjudicate the two Zig NO3/PO4 band-growth passes against hour1.f:4888-5151; remove or merge the duplicate; regression; suite; one prod-deck run.",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "issue-103 (new frontier, hour 3,277, -1.0368e-6 g N): the existing-log decomposition puts the whole residual in the chemistry interval as nitrate. A new layer-1/2 nitrate probe (TEMP_DIAGNOSTIC, logging only, frontier row reproduced) confirms the pre-registered prediction: the loss is at refreshMatrixFromReactionState (layer 1 -1.0266e-6, layer 2 net -1.03e-8). Cause: science NO3 fractions shift after uptake with no concentration repartition, because soil_chemistry_convergence.updateFertilizerBandGeometry -> fertilizer_band_nitrate_phosphate.updateLayer ('hour1.f 4992-5200') grows the NO3/PO4 band in place a second time per hour, outside the coordinator, discarding its scratch pools. prepareHour already ports the single legacy DO 9986 growth (f77query finds one NO3 growth site). No fix yet. No release claim."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "Existing-log decomposition recorded; probes re-gated to 3,277 with nitrate terms for layers 1-2 bracketing band consumption; ONE ReleaseSafe prod-deck run; localized; Pi review",
+    "issue": "issue-103",
+    "question": "At attempted hour 3,277, where inside the after_uptake->after_chemistry interval is -1.0368e-6 g N of nitrate lost, and in which layer-1/2 nitrate term (aqueous band/non-band concentration x fraction, nitrite, dry nitrate)?",
+    "scope": [
+      "ecosys-ng/src/stages/diagnostics.zig",
+      "ecosys-ng/src/validation/hourly_cell_conservation.zig",
+      "ecosys-ng/src/management/fertilizer_band_production.zig",
+      "ecosys-ng/src/management/fertilizer_band_state.zig",
+      "ecosys-ng/src/stages/soil_chemistry_convergence.zig"
+    ],
+    "stop_condition": "Three distinct failed experiments, or a D: fault"
+  },
+  "task": "20260924-055505-f4a901f5"
+}

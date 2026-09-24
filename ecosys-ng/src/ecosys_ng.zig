@@ -6805,6 +6805,7 @@ noinline fn prepareAcceptedHourStorageAndLedgers(driver_context: anytype, advanc
         "hour_start_snapshot",
         driver_context.executed_weather_hours.* + 1,
     );
+    try diagnostics.traceIssue103LayerNitrate(driver_context.hourly_science_context.*, "hour_start_snapshot", driver_context.executed_weather_hours.* + 1);
     // ISSUE-065 DRY_CARRIER_TRACE (census side): see the `census_after` site
     // in `acceptHourAndPublish` for rationale. This is the matching
     // hour-start "before" capture.
@@ -7385,6 +7386,7 @@ noinline fn advanceFertilizerManagement(
             "after_fertilizer_publish",
             driver_context.executed_weather_hours.* + 1,
         );
+        try diagnostics.traceIssue103LayerNitrate(driver_context.hourly_science_context.*, "after_fertilizer_publish", driver_context.executed_weather_hours.* + 1);
     }
 }
 

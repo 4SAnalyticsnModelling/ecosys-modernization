@@ -829,10 +829,10 @@ pub fn surfaceEndpointReferenceHeatMegajoules(
 /// census trace previously cost about 140x throughput). Set once per hour by
 /// the driver next to `reset()`; zero means silent.
 pub var diagnostic_nitrogen_trace_hour: usize = 0;
-/// TEMP_DIAGNOSTIC (`issue-100`): the failing `acceptHourAndPublish` is
+/// TEMP_DIAGNOSTIC (`issue-100`, re-gated for `issue-103` to the new failing hour 3,277): the failing `acceptHourAndPublish` was
 /// attempted hour 3,276 (`executed_weather_hours + 1`); earlier probes gated on
 /// 3,275 described the last ACCEPTED hour instead.
-pub const diagnostic_nitrogen_trace_target_hour: usize = 3276;
+pub const diagnostic_nitrogen_trace_target_hour: usize = 3277;
 /// TEMP_DIAGNOSTIC (`issue-100`): counts `at_evaluate` invocations in the
 /// target hour, so a retried hour is distinguishable from a single call.
 pub var diagnostic_at_evaluate_invocations: usize = 0;
