@@ -34,22 +34,18 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-Control plane installed and the Claude-lead / Pi-reviewer workflow retired (`3a5011b`).
-SAGE review of that migration diff is pending (`audit/workflow/p1.6-protocol-migration-inventory.md`).
+- T-00001 PATHFINDER DONE: proposed Status lines for the 13 issues needing normalization.
+- T-00002 SAGE DONE: P1.6 migration diff accepted; no ecosys-ng/src or reference file changed.
+- T-00003 SAGE DONE (VERDICT REVISE): 7 of 13 lines approved as proposed, 6 replaced; edit task may proceed with the amended set.
+- T-00004 CANCELLED: duplicate of T-00002, caused by a stale "Next expected operation" (fixed: SENTINEL now maintains this file).
+- Controller now commits and pushes after every cycle (decision D8).
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: sign the D6 list.
-2. GP1: launch approval (`swarm_wrapper.py approve`), after the supervised trial turn.
-3. D8 push policy (default: never push).
-
-## Supervised trial (2026-09-25) -- PASSED
-T-00001 (P0.6 proposal): SENTINEL routed it in 52 s with a valid dispatch. PATHFINDER finished in 64 s and wrote
-only its result; 4/4 spot-checked quotes are verbatim. Reset verified. Live permission probes: PATHFINDER's
-disallowed write was DENIED, and SENTINEL's bash was DENIED. Observed: SENTINEL used ~13 tool calls (budget 8;
-only time is enforced); its dispatch listed a skill its task said "none".
+2. Push access: GitHub returned 403 for this machine's credential on origin; commits stay local until fixed.
 
 ## Next expected operation
-SAGE reviews the P1.6 migration diff (`git show 3a5011b`, plus `audit/workflow/p1.6-protocol-migration-inventory.md`):
-confirm no `ecosys-ng/src` or reference file changed, and that no active entry point still directs
-agents to the retired workflow. Skill: `ecosys-process-science-parity`. Then T-00001's 13 proposed Status
-lines need SAGE or user approval before a separate edit task applies them.
+FORGE (documentation-only): apply T-00003's amended Status set and the three relabels (024:13, 078:67, 079:72)
+exactly as written in `.agent/results/T-00003.md`, to the named `audit/issues/` files only; then rerun
+`uv run ecosys-audit/scripts/issue_status.py --summary` and report. ALLOWED FILES = those issue files +
+the result file. No hypothesis file is needed (no production source).

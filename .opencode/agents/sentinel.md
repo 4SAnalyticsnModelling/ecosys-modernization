@@ -7,6 +7,7 @@ permission:
     "*": deny
     ".agent/dispatch.json": allow
     ".agent/current_task.md": allow
+    ".agent/state.md": allow
     ".agent/tasks/*": allow
   bash:
     "*": deny

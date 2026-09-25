@@ -1,1 +1,1 @@
-T-00002, SAGE, Review P1.6 migration diff and control-plane workflow references for the retired protocol.
+T-00004 SAGE Review the P1.6 migration diff to confirm the retired workflow is fully removed and only the control plane remains active.

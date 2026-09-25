@@ -1,0 +1,33 @@
+{
+  "changed": [
+    ".agent/results/T-00003.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "SAGE must approve the T-00001 Status-line normalization set before any edit task can apply it; no unblocked production-science work exists.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00003.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-process-science-parity"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00003.md",
+    "task_id": "T-00003"
+  },
+  "ended": 1790374379.337903,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": "f1c2c97a-aa32-49bc-9b8e-3b33b60eff51",
+    "old": "bc10cec7-6430-4f14-aba0-f0e496c29f93",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "violations": []
+}

@@ -12,7 +12,7 @@ The previous Claude-lead / Pi-reviewer workflow (`WORKFLOW.md`, `herdr_cycle.py`
 Its scientific records (`audit/issues/`, `audit/runs/`, `audit/analysis/`) remain
 evidence to re-verify, not fresh passes.
 
-Use `run_logged.py` for builds/tests/verbose commands. Agents never commit or push.
+Use `run_logged.py` for builds/tests/verbose commands. Agents never commit or push; the controller commits and pushes after every cycle (decision D8, `.agent/README.md`).
 No gate or frontier claim without `check_gate.py` / `update_frontier.py`. User decisions
 are listed in plan section 8; never presume them.
 

@@ -1,0 +1,23 @@
+{
+  "changed": [],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "SAGE review of the P1.6 migration diff is the next unblocked, bounded gate; no active production-science work is approved.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00004.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-process-science-parity"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00004.md",
+    "task_id": "T-00004"
+  },
+  "ended": 1790374684.2937214,
+  "outcome": "cancelled-by-operator",
+  "reason": "Duplicate of T-00002 (P1.6 migration review, DONE). SENTINEL followed a stale state.md 'Next expected operation'; fixed by letting SENTINEL maintain state.md and requiring it to read the 3 newest results.",
+  "result_status": "CANCELLED",
+  "violations": []
+}

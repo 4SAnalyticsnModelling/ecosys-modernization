@@ -2,3 +2,7 @@ task_id,role,model,status,started_unix,ended_unix,wall_seconds,input_tokens,outp
 T-00001,SENTINEL,github-copilot/mai-code-1.1-flash,PENDING,1790373541,1790373593,52,,,,5,false,0,0
 T-00001,PATHFINDER,github-copilot/mai-code-1.1-flash,DONE,1790373609,1790373673,64,,,,30,false,0,0
 T-00002,SENTINEL,github-copilot/mai-code-1.1-flash,PENDING,1790374012,1790374048,36,,,,5,false,0,0
+T-00002,SAGE,claude-opus-5-5,DONE,1790374114,1790374195,81,,,,45,false,0,0
+T-00003,SENTINEL,github-copilot/mai-code-1.1-flash,PENDING,1790374195,1790374250,55,,,,5,false,0,0
+T-00003,SAGE,claude-opus-5-5,DONE,1790374250,1790374379,129,,,,45,false,0,0
+T-00004,SENTINEL,github-copilot/mai-code-1.1-flash,PENDING,1790374379,1790374448,69,,,,5,false,0,0

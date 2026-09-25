@@ -157,9 +157,14 @@ class SwarmTests(unittest.TestCase):
         (root / "ecosys-ng/src/a.zig").write_text("const a = 1;\n")
         (root / "f77src").mkdir()
         (root / "f77src/x.f").write_text("      END\n")
-        self.git("init", "-q")
+        roster = w.load(root / ".agent/roster.json")
+        roster["git"].update({"commit": True, "push": False})  # push is exercised by its own tests
+        w.atomic(root / ".agent/roster.json", w.encoded(roster))
+        self.git("init", "-q", "-b", "main")
+        self.git("config", "user.name", "t")
+        self.git("config", "user.email", "t@t")
         self.git("add", "-A")
-        self.git("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "init")
+        self.git("commit", "-qm", "init")
         self.herdr = FakeHerdr()
         self.runs = []
         self.now = 1_000_000.0
@@ -239,6 +244,74 @@ class SwarmTests(unittest.TestCase):
         self.assertEqual(sum(1 for n, t in self.herdr.prompts if t == "/new"), 5)
         self.assertEqual(sum(1 for n, t in self.herdr.prompts if t == "/clear"), 1)
         self.assertEqual(len((self.root / ".agent/metrics.csv").read_text().splitlines()), 1 + 6)
+
+    def enable_push(self, url):
+        self.git("remote", "add", "origin", url)
+        roster = w.load(self.root / ".agent/roster.json")
+        roster["git"].update({"push": True, "remote": "origin", "branch": "main"})
+        w.atomic(self.root / ".agent/roster.json", w.encoded(roster))
+        self.git("commit", "-qam", "enable push")
+        self.swarm = sw.Swarm(self.root, self.herdr, runner=self.fake_runner, clock=lambda: self.now,
+                              sleep=self.swarm.sleep)
+
+    def out(self, *args):
+        return subprocess.run(["git", *args], cwd=self.root, check=True, capture_output=True, text=True).stdout.strip()
+
+    def test_every_cycle_commits_and_pushes_and_unreviewed_source_waits_for_sage(self):
+        remote = self.root.parent / (self.root.name + "-remote.git")
+        subprocess.run(["git", "init", "-q", "--bare", "-b", "main", str(remote)], check=True, capture_output=True)
+        self.addCleanup(shutil.rmtree, remote, True)
+        self.enable_push(str(remote))
+        self.git("push", "-q", "origin", "main")
+        start = int(self.out("rev-list", "--count", "HEAD"))
+        seen = []
+        orig_step = self.swarm.step
+
+        def step_and_check():
+            r = orig_step()
+            seen.append(r)
+            return r
+        self.swarm.step = step_and_check
+        self.test_happy_path_sentinel_pathfinder_forge_sage_sentinel()
+        self.assertEqual([r["git"]["push"] for r in seen], ["ok"] * 6)
+        self.assertEqual(int(self.out("rev-list", "--count", "HEAD")) - start, 6)
+        self.assertEqual(self.out("rev-parse", "HEAD"),
+                         subprocess.run(["git", "--git-dir", str(remote), "rev-parse", "main"],
+                                        capture_output=True, text=True).stdout.strip())
+        forge_cycle, sage_cycle = seen[3], seen[4]
+        self.assertEqual(forge_cycle["git"]["withheld_unreviewed_source"], ["ecosys-ng/src/a.zig"])
+        self.assertEqual(sage_cycle["git"]["withheld_unreviewed_source"], [])
+        # a.zig entered history exactly in the SAGE-approved cycle, and the tree is clean afterwards.
+        self.assertEqual(self.out("log", "--format=%s", "-n", "1", "--", "ecosys-ng/src/a.zig"), "swarm: T-00003 DONE COLLECTED")
+        self.assertEqual(self.out("status", "--porcelain"), "")
+
+    def test_push_failure_escalates_after_three_cycles_and_keeps_commits(self):
+        self.enable_push(str(self.root.parent / "no-such-remote.git"))
+        n = [0]
+
+        def idle(_t):
+            n[0] += 1
+            w.atomic(self.root / ".agent/dispatch.json", w.encoded({"schema_version": 1, "status": "IDLE", "reason": f"r{n[0]}"}))
+        self.herdr.behaviors["sentinel"] = idle
+        first, second = self.swarm.step(), self.swarm.step()
+        self.assertEqual((first["git"]["push"], second["git"]["consecutive_push_failures"]), ("failed", 2))
+        third = self.swarm.step()
+        self.assertEqual(third["status"], "HUMAN_REVIEW_REQUIRED")
+        self.assertIn("git push failed 3 cycles in a row", third["reason"])
+        self.assertEqual(self.out("log", "-n", "3", "--format=%s").splitlines(), ["swarm: IDLE"] * 3)
+
+    def test_no_commit_when_a_cycle_is_halted(self):
+        self.dispatch_pending("T-00001", "PATHFINDER")
+        self.git("add", "-A")
+        self.git("commit", "-qm", "dispatch")
+        head = self.out("rev-parse", "HEAD")
+
+        def edit(_t):
+            (self.root / "ecosys-ng/src/a.zig").write_text("const a = 9;\n")
+            self.write_result("T-00001")
+        self.herdr.behaviors["pathfinder"] = edit
+        self.assertEqual(self.swarm.step()["status"], "HUMAN_REVIEW_REQUIRED")
+        self.assertEqual(self.out("rev-parse", "HEAD"), head)
 
     def test_source_change_after_review_invalidates_it(self):
         self.test_happy_path_sentinel_pathfinder_forge_sage_sentinel()

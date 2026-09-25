@@ -3,6 +3,16 @@
   "note": "Single source of truth for the 4-agent swarm (execution plan section 2). swarm_wrapper.py reads this; edit here, not in code. Budgets: minutes are enforced by the wrapper; tokens are recorded only when the harness reports them.",
   "herdr_session": "ecosys-ng",
   "controller": {"tab_label": "CONTROLLER", "pane_label": "CONTROLLER", "command": "scripts/start-swarm.sh [--resume]"},
+  "git": {
+    "note": "Decision D8 (user, 2026-09-25): autonomous commit AND push after every cycle. The controller commits only the paths the cycle changed; production source is withheld until a SAGE APPROVE matches the current diff; never force-push, pull, rebase or merge.",
+    "commit": true,
+    "push": true,
+    "remote": "origin",
+    "branch": "main",
+    "max_consecutive_push_failures": 3,
+    "authorized_by": "symon.mezbahuddin",
+    "authorized_on": "2026-09-25"
+  },
   "roles": {
     "SENTINEL": {
       "agent_name": "sentinel",
@@ -15,7 +25,7 @@
       "prompt_file": ".agent/roles/sentinel.md",
       "skills": [],
       "budget": {"minutes": 5, "tool_calls": 8, "input_tokens": 40000},
-      "may_write": [".agent/dispatch.json", ".agent/current_task.md", ".agent/tasks/"],
+      "may_write": [".agent/dispatch.json", ".agent/current_task.md", ".agent/tasks/", ".agent/state.md"],
       "may_edit_production_source": false
     },
     "PATHFINDER": {
@@ -43,7 +53,7 @@
       "prompt_file": ".agent/roles/forge.md",
       "skills": ["ecosys-zig-safety-design", "ecosys-validation-tests"],
       "budget": {"minutes": 60, "tool_calls": null, "input_tokens": 250000},
-      "may_write": ["ecosys-ng/src/", "ecosys-ng/build.zig", ".agent/results/", ".agent/tasks/T-*.hypothesis.md", "audit/runs/", "ecosys-audit/scripts/", "ecosys-audit/tests/"],
+      "may_write": ["ecosys-ng/src/", "ecosys-ng/build.zig", ".agent/results/", ".agent/tasks/T-*.hypothesis.md", "audit/runs/", "audit/issues/", "ecosys-audit/scripts/", "ecosys-audit/tests/"],
       "may_edit_production_source": true
     },
     "SAGE": {

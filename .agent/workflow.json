@@ -10,6 +10,14 @@
     "survey": 0,
     "zig": 0
   },
+  "halts": [
+    {
+      "cleared_by": "claude (planning session), user-requested launch",
+      "reason": "SENTINEL wrote outside its lane: .gitignore: outside SENTINEL may_write; audit/runs/swarm-controller-20260925.log: outside SENTINEL may_write",
+      "resolution": "Operator error, not an agent violation: the operator (Claude, planning session) tee-d the controller console into a Git-visible log and then edited .gitignore during SENTINEL turn 1. SENTINEL only wrote its task + dispatch (validated). .gitignore fix committed; halt cleared with the user present.",
+      "time": 1790374102
+    }
+  ],
   "last_advance_unix": null,
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
@@ -17,17 +25,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
-  "status_reason": "SENTINEL routed T-00002 (SAGE: P1.6 migration review).",
-  "task_id": "T-00002",
-  "worker": "SAGE",
-  "halts": [
-    {
-      "time": 1790374102,
-      "cleared_by": "claude (planning session), user-requested launch",
-      "resolution": "Operator error, not an agent violation: the operator (Claude, planning session) tee-d the controller console into a Git-visible log and then edited .gitignore during SENTINEL turn 1. SENTINEL only wrote its task + dispatch (validated). .gitignore fix committed; halt cleared with the user present.",
-      "reason": "SENTINEL wrote outside its lane: .gitignore: outside SENTINEL may_write; audit/runs/swarm-controller-20260925.log: outside SENTINEL may_write"
-    }
-  ]
+  "status": "ROUTING",
+  "status_reason": "T-00004 cancelled as a duplicate",
+  "task_id": "T-00004",
+  "worker": null
 }
-

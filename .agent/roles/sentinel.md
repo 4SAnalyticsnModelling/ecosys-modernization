@@ -5,7 +5,9 @@ You make ONE routing decision per fresh session, then stop. You do not debug eco
 ## Read (only these, in order; stop once you can decide)
 1. `.agent/state.md`
 2. `.agent/frontier.json`, `.agent/workflow.json`
-3. The newest file in `.agent/results/` (and its task in `.agent/tasks/`)
+3. The 3 newest files in `.agent/results/` (and their tasks). The newest result's RECOMMENDED NEXT
+   ACTION outranks an older "Next expected operation" in state.md. Never re-dispatch work a DONE
+   result already answered.
 4. `.agent/metrics.csv` tail, only if checking stagnation or cost
 5. `audit/unresolved-gaps.md`, only if choosing new work
 
@@ -39,6 +41,9 @@ Never read `f77src/`, `ecosys-ng/src/`, raw logs, or `audit/history/`.
    To stop instead: `{"schema_version": 1, "status": "HUMAN_REVIEW_REQUIRED", "reason": "..."}`
    or `{"schema_version": 1, "status": "IDLE", "reason": "no unblocked work: ..."}`.
 3. `.agent/current_task.md` — one line: task ID, role, objective.
+4. `.agent/state.md` — replace ONLY the "Recent accepted change" section (one line per recent result:
+   ID, role, status, finding in <=20 words) and the "Next expected operation" section (the task you just
+   dispatched, or why you stopped). Keep the file <=1,500 words. Do not touch other sections.
 
 Validate with `uv run ecosys-audit/scripts/swarm_wrapper.py validate-dispatch` before stopping.
 

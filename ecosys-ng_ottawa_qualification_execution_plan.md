@@ -56,7 +56,7 @@ session. The plan changes three things:
 | D5 | Scope = **Ottawa milestone first**; remaining v1 gate-matrix items move to P8. |
 | D6 | Deck edits (`9253d3b` runtime ceiling 100→200; `5add7de` starte.f:189) and the Zig solute iteration ceiling 60→200 (issue-015) are **kept only if justified from legacy**; otherwise reverted and root-caused. The user signs the final list. |
 | D7 | Build an **hourly legacy state oracle** (instrumented copy outside `f77src/`). |
-| D8 (pending) | Push policy. The standing instruction is **never push**; that stays the default until the user decides. |
+| D8 | Push policy (user, 2026-09-25): **autonomous commit and push after every cycle** by the controller; production source only after a diff-bound SAGE APPROVE; never force. |
 
 ---
 

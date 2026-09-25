@@ -374,7 +374,8 @@ class Swarm:
         r = self.role(role)
         if role == "SENTINEL":
             return (f"ROLE SENTINEL. Read {r['prompt_file']} and follow it exactly. Make ONE routing decision, "
-                    "write .agent/dispatch.json (and the task file), validate it, then stop.")
+                    "write .agent/dispatch.json (and the task file), update the two state.md sections, "
+                    "validate the dispatch, then stop.")
         skills = ", ".join(f".agents/skills/{s}/SKILL.md" for s in d.get("skills", [])) or "none"
         return (f"ROLE {role}. Read {r['prompt_file']} and follow it exactly. Task: {d['task_file']}. "
                 f"Skills to load: {skills}. Write ONLY {d['result_file']} (contract: .agent/templates/result.md). "
@@ -460,11 +461,14 @@ class Swarm:
             try:
                 inflight = self.rt / "inflight.json"
                 if inflight.exists():
-                    return self.recover(load(inflight))
-                d = self.dispatch()
-                if d.get("status") == "PENDING":
-                    return self.deliver(d)
-                return self.route()
+                    out = self.recover(load(inflight))
+                else:
+                    d = self.dispatch()
+                    out = self.deliver(d) if d.get("status") == "PENDING" else self.route()
+                if out.get("status") in ("ROUTED", "IDLE", "COLLECTED", "ROUTE_INVALID"):
+                    label = " ".join(str(out[k]) for k in ("task_id", "role", "result_status", "status") if out.get(k))
+                    out["git"] = self.commit_cycle(label)
+                return out
             except HumanReview as e:
                 return self.halt(str(e))
 
@@ -590,6 +594,71 @@ class Swarm:
             q = self.queue_review(d, dirty_source_digest(self.root)["sha256"])
             return {"status": "COLLECTED", "task_id": tid, "result_status": status, "review_queued": q["task_id"]}
         return {"status": "COLLECTED", "task_id": tid, "result_status": status, "failure_packet": packet}
+
+    # --- git (decision D8: commit and push after every cycle)
+    def git(self, *args: str, timeout: float = 300) -> subprocess.CompletedProcess:
+        env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}  # never block on a credential prompt
+        return subprocess.run(["git", *args], cwd=self.root, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace", timeout=timeout, env=env)
+
+    def commit_cycle(self, label: str) -> dict:
+        """Commit exactly what this cycle changed, then push. Unapproved production source is withheld."""
+        pol = self.roster.get("git", {})
+        if not pol.get("commit"):
+            return {"commit": "disabled"}
+        before = load(self.rt / "before.json") if (self.rt / "before.json").exists() else {}
+        now = git_dirty(self.root)
+        paths = changed_paths(before, now)
+        prod_dirty = [p for p in now if any(matches(p, x) for x in self.roster["production_source_prefixes"])]
+        approved = bool(prod_dirty) and self.precommit()["status"] == "PASS"
+        if approved:
+            paths = sorted(set(paths) | set(prod_dirty))  # the reviewed diff, even if edited in an earlier cycle
+            withheld = []
+        else:
+            withheld = [p for p in paths if p in prod_dirty]
+            paths = [p for p in paths if p not in prod_dirty]
+        out = {"withheld_unreviewed_source": withheld}
+        if paths:
+            listing = self.rt / "commit-paths.txt"
+            atomic(listing, ("\n".join(paths) + "\n").encode("utf-8"))
+            add = self.git("add", "-A", f"--pathspec-from-file={listing}")
+            if add.returncode:
+                raise HumanReview(f"git add failed: {add.stderr[:300]}")
+            msg = (f"swarm: {label}\n\nAutomated cycle commit by swarm_wrapper.py (decision D8). "
+                   f"{len(paths)} path(s)." + (f" Production source approved by SAGE (precommit PASS)." if approved else "")
+                   + (f"\nWithheld pending SAGE approval: {', '.join(withheld)}" if withheld else ""))
+            c = self.git("commit", "-m", msg)
+            if c.returncode == 0:
+                out["commit"] = self.git("rev-parse", "--short", "HEAD").stdout.strip()
+            elif "nothing to commit" in (c.stdout + c.stderr):
+                out["commit"] = "nothing"
+            else:
+                raise HumanReview(f"git commit failed: {(c.stderr or c.stdout)[:300]}")
+        else:
+            out["commit"] = "nothing"
+        if pol.get("push"):
+            out.update(self.push(pol))
+        return out
+
+    def push(self, pol: dict) -> dict:
+        state_path = self.rt / "git.json"
+        st = load(state_path) if state_path.exists() else {"consecutive_push_failures": 0}
+        ahead = self.git("rev-list", "--count", f"{pol['remote']}/{pol['branch']}..HEAD")
+        if ahead.returncode == 0 and ahead.stdout.strip() == "0":
+            return {"push": "up-to-date"}
+        # Plain fast-forward push only: never --force, never pull/rebase/merge on the agents' behalf.
+        p = self.git("push", pol["remote"], f"HEAD:{pol['branch']}", timeout=600)
+        if p.returncode == 0:
+            st.update({"consecutive_push_failures": 0, "last_push_ok": self.clock()})
+            atomic(state_path, encoded(st))
+            return {"push": "ok"}
+        st["consecutive_push_failures"] = st.get("consecutive_push_failures", 0) + 1
+        st["last_push_error"] = (p.stderr or p.stdout)[-400:]
+        atomic(state_path, encoded(st))
+        if st["consecutive_push_failures"] >= pol.get("max_consecutive_push_failures", 3):
+            raise HumanReview(f"git push failed {st['consecutive_push_failures']} cycles in a row "
+                              f"(commits are kept locally): {st['last_push_error'][-240:]}")
+        return {"push": "failed", "consecutive_push_failures": st["consecutive_push_failures"]}
 
     # --- gates
     def precommit(self) -> dict:

@@ -1,13 +1,16 @@
 {
-  "schema_version": 1,
-  "status": "PENDING",
-  "task_id": "T-00002",
-  "role": "SAGE",
-  "task_file": ".agent/tasks/T-00002.md",
-  "result_file": ".agent/results/T-00002.md",
-  "skills": ["ecosys-process-science-parity"],
-  "t1_argv": null,
-  "requires_sage_review": false,
   "full_run_justification": null,
-  "reason": "SAGE is the next required reviewer for the P1.6 migration diff and workflow reference audit; no unblocked production-science work exists."
+  "reason": "SAGE review of the P1.6 migration diff is the next unblocked, bounded gate; no active production-science work is approved.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00004.md",
+  "result_status": "CANCELLED",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00004.md",
+  "task_id": "T-00004"
 }

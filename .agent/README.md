@@ -64,9 +64,19 @@ its task. Then deterministic hooks: scope check, `zig fmt` + T1 (FORGE), failure
 automatic SAGE review of any production-source change, archive and metrics. The loop stops on IDLE,
 HUMAN_REVIEW_REQUIRED, WAITING, or a refused approval.
 
+## Commit and push (decision D8, user, 2026-09-25)
+After every successfully collected cycle, the controller commits exactly the paths that cycle changed
+(message `swarm: <task> <status>`) and pushes `HEAD:main` to `origin` (settings: `roster.json` `git`).
+- Production source is withheld from commits until a SAGE APPROVE matches the current diff
+  (`precommit` PASS); it is then committed in the SAGE cycle.
+- A halted cycle (violation, blocked agent, invalid dispatch) is never committed.
+- Plain fast-forward push only: never force, pull, rebase or merge. A failed push keeps the commit local
+  and is retried next cycle; after 3 consecutive failures the swarm stops for the user.
+- Agents themselves still never commit or push.
+
 ## What the wrapper never does
 Answer a permission dialog; re-prompt a task whose delivery was interrupted; revert an agent's edit
-(scope violations are left in place and escalated); commit; push; promote the frontier.
+(scope violations are left in place and escalated); force-push; promote the frontier.
 
 ## Resume after a crash
 Run `swarm_wrapper.py run --resume`. An inflight task is collected from its result file if one exists, else
