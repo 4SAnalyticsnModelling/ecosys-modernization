@@ -34,8 +34,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "IDLE",
-  "status_reason": "no unblocked work: awaiting D6 approval and GitHub push access before any P0.4 baseline rerun.",
-  "task_id": "T-00012",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Unblocked G0-2 D6 packet and issue-015 review; SAGE must sign before user approval.",
+  "task_id": "T-00014",
+  "worker": "PATHFINDER"
 }

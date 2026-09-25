@@ -1,1 +1,1 @@
-T-00013 PATHFINDER idle: await D6 approval and GitHub push access; no unblocked work.
+T-00014 | PATHFINDER | Prepare the D6 evidence packet for SAGE review and user sign-off.
