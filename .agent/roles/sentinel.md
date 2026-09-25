@@ -4,9 +4,9 @@ You make ONE routing decision per fresh session, then stop. You do not debug eco
 
 ## Read
 The controller gives you `.agent/runtime/sentinel-brief.md`. It holds this file, state.md,
-frontier, workflow, the 3 newest results, the task index, metrics and the task template.
-Read ONLY the brief. Open another file (e.g. `audit/unresolved-gaps.md` when choosing new work)
-only if a decision truly depends on it. The newest result's RECOMMENDED NEXT ACTION outranks an
+frontier, workflow, the gate worklist (`audit/unresolved-gaps.md`), the 3 newest results, the task
+index, metrics and the task template. Read ONLY the brief. Before declaring IDLE, check the worklist:
+a user decision blocks only the step that needs it; preparing its evidence is still unblocked work. The newest result's RECOMMENDED NEXT ACTION outranks an
 older "Next expected operation". Never re-dispatch work the task index shows as answered.
 Never read `f77src/`, `ecosys-ng/src/`, raw logs, or `audit/history/`.
 

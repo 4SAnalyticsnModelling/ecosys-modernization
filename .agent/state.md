@@ -7,8 +7,8 @@ Spec: `ecosys-ng_ottawa_autonomous_qualification_plan.md`. How the swarm works: 
 Phase P0 (freeze, adjudicate inputs, baseline; exit gate G0).
 
 ## Current candidate commit
-`3a5011b` on `main` (clean tree). `fe3c489` = pre-plan work parked (P0.1 DONE, user-approved 2026-09-25;
-branch `wip/pre-plan-2026-09-25`, local only). The 3 Zig stage edits of the old issue-108 work are in
+`main` (clean tree, pushed every cycle). `fe3c489` = pre-plan work parked (P0.1 DONE, user-approved
+2026-09-25; branch `wip/pre-plan-2026-09-25`). The 3 Zig stage edits of the old issue-108 work are in
 `fe3c489`, unreviewed.
 
 ## Verified frontier
@@ -20,26 +20,31 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 (issue-108 cation half). Not being chased serially; feeds P3/P4.
 
 ## Confirmed facts
-- The full 30-yr legacy output (run-002) lived only in an old session scratchpad and was not found on
-  2026-09-25. A partial gfortran legacy output set (hours 1-6,875) survives in a temp directory:
-  `C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\tmp\claude\agentJ-base\validation\legacy_ottawa_gfortran_16_1\`
-  (with `PROVENANCE.md`; temp = at risk). P0.3 must preserve it into `evidence/legacy/` with a manifest;
-  P0.4 must rebuild/rerun legacy from the run-002 recipe.
-- Deck edits `9253d3b` (runtime ceiling 100->200) and `5add7de` (starte.f:189) plus the Zig solute
-  iteration ceiling 60->200 (issue-015) await D6 adjudication (P0.2; user signs).
+- Legacy baseline (P0.3), verified by file count 2026-09-25: `evidence/legacy/` holds the PARTIAL legacy
+  Ottawa output set (hours 1-6,875 / day 286; 199 files, 110 MB; manifest `evidence/legacy/manifest/sha256.txt`)
+  plus the rebuilt source and a copy of the run-002 write-up. The full 30-yr output (run-002: 1,138 files,
+  1.33 GB) is NOT in the repo. The run-002 document describes a past run; it is not the outputs.
+  CORRECTION: the T-00011/T-00012 findings calling this "the authoritative full 30-year baseline" are wrong.
+  P0.4 needs a full legacy rerun from the run-002 recipe, which waits only on D6 (the deck).
+- D6: deck edits `9253d3b` (runtime ceiling 100->200) and `5add7de` (starte.f:189) plus the Zig solute
+  iteration ceiling 60->200 (issue-015). Only the user's SIGNATURE is blocked: the evidence packet
+  (PATHFINDER) and the SAGE verdict can and should be prepared now.
+- GitHub push works; the controller commits and pushes every cycle.
 - Second test root: 107/115 OK; test 71 FAIL (issue-106); test 109 hangs (issue-107).
-- Issue census 2026-09-25 (`issue_status.py --summary`): 105 files; 13 need Status normalization.
+- Issue Status lines normalized (T-00005): 105 files, 0 need normalization.
 
 ## Current diagnosis
 none active.
 
 ## Recent accepted change
-- T-00011 PATHFINDER DONE: Archived full-run gfortran Ottawa baseline is retained under `evidence/legacy/` and manifest-backed.
-- T-00012 PATHFINDER DONE: The retained `evidence/legacy/` set is the authoritative full 30-year baseline; no rerun is allowed until the archive and current Zig outputs are aligned.
+- T-00010 PATHFINDER BLOCKED: the legacy archive is partial; no full 30-yr output exists in the repo.
+- T-00011/T-00012 PATHFINDER DONE, but their "full 30-year baseline" claim is WRONG (see Confirmed facts).
 
 ## Open blockers (user decisions, plan section 8)
-1. P0.2: sign the D6 list.
-2. Push access: GitHub returned 403 for this machine's credential on origin; commits stay local until fixed.
+1. P0.2: the user signs the D6 list (after the PATHFINDER packet and SAGE verdict exist).
 
 ## Next expected operation
-IDLE: no unblocked work while D6 approval and GitHub push access remain unresolved; resume only after the user clears P0.2 and repo access is restored.
+Unblocked G0 work (see `audit/unresolved-gaps.md`):
+- G0-2: a PATHFINDER evidence packet on the three D6 items (legacy citation, what each edit changes,
+  which runs depend on it), for a SAGE verdict.
+- G0-5: a PATHFINDER `tracecov.py` stale-hash report (report only; do not refresh hashes).

@@ -419,6 +419,9 @@ class Swarm:
                  "## Workflow", json.dumps({k: wf.get(k) for k in ("phase", "status", "status_reason", "campaigns",
                                                                   "campaigns_without_advance", "failure_signatures",
                                                                   "route_failures", "full_runs")})]
+        gaps = read("audit/unresolved-gaps.md")
+        if gaps:
+            parts += ["## audit/unresolved-gaps.md (the gate worklist: pick unblocked items from here)", clip(gaps, 4000)]
         results = sorted((self.dir / "results").glob("T-*.md"), key=lambda p: p.name, reverse=True)[:3]
         parts.append("## The 3 newest results (newest first)")
         for p in results:

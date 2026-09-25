@@ -502,6 +502,8 @@ class SwarmTests(unittest.TestCase):
         (self.root / ".agent/templates").mkdir(parents=True, exist_ok=True)
         (self.root / ".agent/templates/task.md").write_text("TEMPLATE MARKER\n")
         (self.root / ".agent/state.md").write_text("STATE MARKER\n")
+        (self.root / "audit").mkdir(exist_ok=True)
+        (self.root / "audit/unresolved-gaps.md").write_text("GAPS MARKER\n")
         (self.root / ".agent/tasks/T-00001.md").write_text(TASK.format(tid="T-00001", role="PATHFINDER", allowed="- none"))
         self.write_result("T-00001", finding="FINDING MARKER")
         w.atomic(self.root / ".agent/archive/T-00001.json", w.encoded({"result_status": "DONE"}))
@@ -514,7 +516,7 @@ class SwarmTests(unittest.TestCase):
         self.herdr.behaviors["sentinel"] = sentinel
         self.assertEqual(self.swarm.step()["status"], "IDLE")
         self.assertIn(".agent/runtime/sentinel-brief.md", seen["prompt"])
-        for marker in ("next free task ID: T-00002", "ROLE RULES MARKER", "STATE MARKER", "FINDING MARKER",
+        for marker in ("next free task ID: T-00002", "ROLE RULES MARKER", "STATE MARKER", "GAPS MARKER", "FINDING MARKER",
                        "- T-00001 PATHFINDER [DONE]: test objective", "TEMPLATE MARKER"):
             self.assertIn(marker, seen["brief"])
 
