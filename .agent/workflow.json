@@ -34,8 +34,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Obtain or document the missing full 30-year legacy output set and verify the archive manifest before any P0.4 rerun.",
   "task_id": "T-00009",
-  "worker": "PATHFINDER"
+  "worker": null
 }

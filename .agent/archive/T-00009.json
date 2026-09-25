@@ -1,0 +1,40 @@
+{
+  "changed": [
+    ".agent/results/T-00009.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Obtain or document the missing full 30-year legacy output set and verify the archive manifest before any P0.4 rerun.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00009.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00009.md",
+    "task_id": "T-00009"
+  },
+  "ended": 1790378114.658512,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "recovered",
+  "reset": {
+    "reset": "recovered"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 243456,
+    "cache_write": 0,
+    "cost": 0.019959719999999997,
+    "input": 31803,
+    "llm_calls": 10,
+    "output": 7275,
+    "tool_calls": 20
+  },
+  "violations": []
+}
