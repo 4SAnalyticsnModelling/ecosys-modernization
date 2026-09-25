@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "node",
+    "--test",
+    "ecosys-audit/tests/pi-workflow.test.mjs"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.22,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 27052,
+  "pid": 17368,
+  "started_unix": 1790185960.4251363,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/workflow-selftest-20260923-r3-pi/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/workflow-selftest-20260923-r3-pi/stdout.log",
+    "sha256": "05b0776ad33fedccdd3ec83eeeea84ca3b5e5cea28e78d3f8b8a974277f6daf9"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 30.0
+}

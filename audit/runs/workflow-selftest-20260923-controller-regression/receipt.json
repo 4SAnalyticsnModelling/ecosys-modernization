@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "ecosys-audit/tests/test_workflow.py",
+    "ControllerTests",
+    "-v"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 31.208,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 15952,
+  "pid": 20660,
+  "started_unix": 1790187884.613329,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/workflow-selftest-20260923-controller-regression/stderr.log",
+    "sha256": "db74b1aa34483608735d6f2b2e6ecfedcf7152561865e6762b6cc9f88498440b"
+  },
+  "stdout": {
+    "path": "audit/runs/workflow-selftest-20260923-controller-regression/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 90.0
+}

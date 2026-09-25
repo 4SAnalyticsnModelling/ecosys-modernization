@@ -1,0 +1,88 @@
+
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:45:45/4381 
+management.disturbance_management_dispatch.test.no matching event on a date leaves the dispatch [7mskip [0m[7m[0mpath [0m[7m[0mwith [0m[7m[0mnothing [0m
+[7m[0mto [0m[7m[0mselect...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:421:418/4381 
+redistribution.tillage.salt_incorporation.test.REDIST disabled salt simulation preserves legacy [7mskip [0m[7m[0msemantics...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:426:423/4381 
+redistribution.tillage.fixation_normalization.test.REDIST fixation normalization [7mskip[0ms [0m[7m[0msoil [0m[7m[0mrescaling [0m[7m[0mat [0m[7m[0mlegacy [0m[7m[0mZERO [0m
+[7m[0mthreshold...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:513:510/4381 
+validation.hourly_cell_conservation.test.gas face transfers preserve tracked-element species and [7mskip [0m[7m[0mvertical [0m
+[7m[0mfaces...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:646:643/4381 io.input.delimited_input.test.record 
+iterator [7mskip[0ms [0m[7m[0mblank [0m[7m[0mand [0m[7m[0mcomment-only [0m[7m[0mlines [0m[7m[0mwithout [0m[7m[0mjoining [0m[7m[0mschemas...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:884:865/4381 core.source_scan.test.searching from a 
+position [7mskip[0ms [0m[7m[0mearlier [0m[7m[0moccurrences...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:906:887/4381 
+validation.plant_root_metabolism_test_part1.test.GROSUB next lower root layer [7mskip[0ms [0m[7m[0mthin [0m[7m[0mlayers [0m[7m[0mbut [0m[7m[0mretains [0m[7m[0mthe [0m
+[7m[0mbottom...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:914:895/4381 
+validation.plant_root_metabolism_test_part2.test.GROSUB primary crossing [7mskip[0ms [0m[7m[0ma [0m[7m[0mthin [0m[7m[0mintermediate [0m[7m[0mruntime [0m[7m[0mlayer...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:999:980/4381 
+validation.canopy_photosynthesis_test_part3.test.GROSUB top-down grazing node selector characterizes source [7mskip[0m...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:1014:995/4381 
+plant.growth.reserve_maintenance_respiration.test.active shoot remobilization [7mskip[0ms [0m[7m[0mreserve [0m[7m[0moxidation...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:1928:1790/4381 
+surface.topsoil_mineral_exchange_step.test.issue-073 Finding B: a near-zero-but-nonzero topsoil water is [7mskip[0mped [0m
+[7m[0minstead [0m[7m[0mof [0m[7m[0mfeeding [0m[7m[0man [0m[7m[0munfloored [0m[7m[0mexchange...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:1998:1860/4381 
+soil.water.snow_surface_atmosphere_exchange.test.snow surface atmosphere [7mskip[0ms [0m[7m[0mcanonical [0m[7m[0msnow [0m[7m[0mbelow [0m[7m[0mstrict [0m[7m[0mVHCPWX [0m
+[7m[0mactivation...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:2134:1982/4381 soil.profile.erosion.test.inactive 
+EROSION guard [7mskip[0ms [0m[7m[0mdormant [0m[7m[0mlocal [0m[7m[0minputs [0m[7m[0mbefore [0m[7m[0mvalidation...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:2255:2103/4381 
+soil.gas.methane_step.test.SOIL-METHANE-DRY-LAYER-001 nitro.f:1398 [7mskip[0ms [0m[7m[0mCH4 [0m[7m[0moxidation [0m[7m[0mwhen [0m[7m[0mVOLW [0m[7m[0mis [0m[7m[0mzero [0m[7m[0minstead [0m[7m[0mof [0m
+[7m[0mfatal...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:2483:2328/4381 
+soil.solute.cation_exchange_test.test.source cation state update is unfloored and [7mskip[0mped [0m[7m[0mat [0m[7m[0mceiling...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:2913:2748/4381 
+validation.production_freezing_column_validation.test.production dual-phase heat residual passes Appendix C 
+checkpoints...[7mSKIP[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:3004:2839/4381 
+transport.pore_flux_neighbor_layer.test.connection code three [7mskip[0ms [0m[7m[0mnonvertical [0m[7m[0mpore [0m[7m[0mflux...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:3060:2895/4381 surface.litter_chemistry_step.test.dry 
+litter cells [7mskip [0m[7m[0mwithout [0m[7m[0mmutating [0m[7m[0mchemistry...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:3198:3033/4381 
+redistribution.pond.particulate_settling.test.zero-thickness layers are [7mskip[0mped [0m[7m[0mwhen [0m[7m[0mselecting [0m[7m[0mreceiver...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:3465:3292/4381 
+soil.profile.geometry_change_assembly.test.REDIST SOC assembly [7mskip[0ms [0m[7m[0munchanged [0m[7m[0mzero-density [0m[7m[0mopen-water [0m[7m[0mlayer...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:3520:3347/4381 
+soil.microbial.nitrogen_exchange_step.test.issue-073 Finding B: a near-zero-but-nonzero layer water_m3 is [7mskip[0mped [0m
+[7m[0minstead [0m[7m[0mof [0m[7m[0mfeeding [0m[7m[0man [0m[7m[0munfloored [0m[7m[0mavailable_g_n...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:3522:3349/4381 
+soil.microbial.phosphorus_exchange_step.test.issue-073 Finding B: a near-zero-but-nonzero layer water_m3 is [7mskip[0mped [0m
+[7m[0minstead [0m[7m[0mof [0m[7m[0mfeeding [0m[7m[0man [0m[7m[0munfloored [0m[7m[0mexchangePair...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:3548:3374/4381 
+soil.microbial.nonsymbiotic_nitrogen_fixation_step.test.SOIL-N2FIX-DRY-LAYER-001 a vanished carrier [7mskip[0ms [0m[7m[0mfixation [0m
+[7m[0minstead [0m[7m[0mof [0m[7m[0mfatal...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:3648:3471/4381 
+soil.solute.thin_layer_pore_solute_reset.test.two thick layers and [7mskip[0mped [0m[7m[0mouter [0m[7m[0mblock [0m[7m[0mdo [0m[7m[0mnot [0m[7m[0mreset...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:3824:3608/4381 
+soil.solute.reaction_solver_tests.test.raw mineral owner [7mskip[0ms [0m[7m[0monly [0m[7m[0mfractions [0m[7m[0mproven [0m[7m[0mnegative...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:4153:3815/4381 
+plant.initialization.admission.test.continuation and preserve modes [7mskip [0m[7m[0mthe [0m[7m[0mentire [0m[7m[0mouter [0m[7m[0mblock...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:4220:3882/4381 plant.root.water_balance.test.hourly 
+hydraulic workspace [7mskip[0ms [0m[7m[0mplants [0m[7m[0mwithout [0m[7m[0mlive [0m[7m[0mroot [0m[7m[0mconductance...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:4329:3990/4381 
+management.irrigation_management_dispatch.test.automatic irrigation leap-day windows are [7mskip[0mped [0m[7m[0min [0m[7m[0mnon-leap [0m[7m[0myears...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:4393:4054/4381 
+io.checkpoint.checkpoint_resume.test.resume cursor [7mskip[0ms [0m[7m[0mthrough [0m[7m[0mexact [0m[7m[0mcheckpoint [0m[7m[0mand [0m[7m[0maccepts [0m[7m[0mfollowing [0m[7m[0mhour...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:4422:4082/4381 
+validation.production_input_layout_test.test.missing required Ottawa input is an error instead of a [7mskip[0mped [0m
+[7m[0massertion...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:4564:4187/4381 core.execution_evidence.test.execution 
+evidence cannot complete after a missing repeat or [7mskip[0mped [0m[7m[0mhour...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:4566:4189/4381 core.execution_evidence.test.model hour 
+journal still rejects duplicated and [7mskip[0mped [0m[7m[0mmidnight [0m[7m[0mendpoints...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:4574:4197/4381 
+erosion.backward_flux_mapping.test.EROSION backward mapping inactive guards [7mskip [0m[7m[0mdormant [0m[7m[0minvalid [0m[7m[0minputs...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:4577:4200/4381 
+erosion.backward_flux_mapping.test.EROSION non-backward face [7mskip[0ms [0m[7m[0mabsent-neighbor [0m[7m[0mreset [0m[7m[0mbefore [0m[7m[0mvalidation...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:4587:4210/4381 
+erosion.external_boundary_selection.test.EROSION external selector [7mskip[0ms [0m[7m[0minactive [0m[7m[0mand [0m[7m[0minterior [0m[7m[0mfaces [0m[7m[0mbefore [0m[7m[0mdormant [0m
+[7m[0mvalidation...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:4732:4353/4381 
+canopy.energy.substep_initialization.test.strict heat and radiation gates [7mskip [0m[7m[0mcombustion [0m[7m[0madjustment...OK[0m
+audit\runs\issue-101-regression-20260923-healthy-d\stderr.log:4761:4380 passed; 1 [7mskip[0mped; 0 failed.
+

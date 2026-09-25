@@ -119,6 +119,7 @@ fn captureFailureConservationTrace(context: anytype, point: usize) !void {
     try diagnostics.traceIssue100LayerAmmonium(context, if (point < issue100_labels.len) issue100_labels[point] else "trace_other", context.executed_weather_hours.* + 1);
     try diagnostics.traceIssue103LayerNitrate(context, if (point < issue100_labels.len) issue100_labels[point] else "trace_other", context.executed_weather_hours.* + 1);
     try diagnostics.traceIssue108Carbon(context, if (point < issue100_labels.len) issue100_labels[point] else "trace_other", context.executed_weather_hours.* + 1);
+    try diagnostics.traceIssue108Cation(context, if (point < issue100_labels.len) issue100_labels[point] else "trace_other", 2, context.executed_weather_hours.* + 1);
     context.diagnostic_residue_carbon_trace_g_c[point] = totals.residue_carbon_g;
     context.diagnostic_organic_carbon_trace_g_c[point] = totals.organic_carbon_g;
     context.diagnostic_inorganic_carbon_trace_g_c[point] = totals.carbon_dioxide_carbon_g;

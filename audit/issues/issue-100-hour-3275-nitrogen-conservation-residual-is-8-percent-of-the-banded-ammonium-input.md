@@ -1,6 +1,11 @@
 # Issue 100 -- hour 3,275 nitrogen conservation residual: 0.0677 g N unaccounted, about 4% of the banded ammonium application
 
-Status: **OPEN, MEASURED, NOT DIAGNOSED (filed 2026-09-22, adversarial Claude/Pi session; sharpened later the same day).** This is the frontier blocker exposed once `issue-099`'s fix restored phosphorus and calcium conservation (`run-023`). Filed with the measurement and two numeric leads, deliberately **without** a proposed mechanism -- `issue-099` cost eight wrong mechanisms proposed from source reading, and the discipline this round is to measure first.
+Status: **OPEN, NOT DIAGNOSED -- and the failing hour is re-identified (2026-09-23, task `20260923-203925-5f8b9e80`, pending Pi review).**
+- **The failure is on attempted hour 3,276, with 3,275 accepted** (1-based census / `executed_weather_hours+1` numbering), not 3,275.
+- **Every `== 3275`-gated probe in run-024, run-025 and run-026 therefore observed the last *accepted* hour.** Their ledger/pointer figures are not evidence about the failing hour.
+- Deduced from source structure and log counts, not log order: `audit/analysis/issue-100-failing-invocation-is-hour-3276-not-the-probed-hour-3275-2026-09-23.md`. Read that before the rest of this file.
+
+Earlier status, retained: OPEN, MEASURED, NOT DIAGNOSED (filed 2026-09-22, adversarial Claude/Pi session; sharpened later the same day). This is the frontier blocker exposed once `issue-099`'s fix restored phosphorus and calcium conservation (`run-023`). Filed with the measurement and two numeric leads, deliberately **without** a proposed mechanism -- `issue-099` cost eight wrong mechanisms proposed from source reading, and the discipline this round is to measure first.
 
 **The filename's "about 4% of the banded ammonium input" framing is superseded and should not be read as the characterisation.** Hour 3,275 emits **two** failure rows, indexed 0 and 2, losing the **same absolute mass** -- `0.0676655386` g N, agreeing to eleven significant figures, and byte-reproducible across two different binaries.
 

@@ -1,0 +1,132 @@
+ M .agents/skills/ecosys-multi-agent-coordination/SKILL.md
+ M .agents/skills/ecosys-release-orchestrator/SKILL.md
+ M .claude/skills/ecosys-multi-agent-coordination/SKILL.md
+ M .claude/skills/ecosys-release-orchestrator/SKILL.md
+ M .gitattributes
+ M .gitignore
+ M AGENTS.md
+ M CLAUDE.md
+ M audit/handoff.md
+ M audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md
+ M audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md
+ M audit/issues/issue-102-fifteen-microbial-pool-guards-remain-relaxed-to-finiteness-only-after-their-reason-was-removed.md
+ M ecosys-audit/EVIDENCE_GUIDE.md
+ M ecosys-audit/START_PROMPT.md
+ M ecosys-ng/src/ecosys_ng.zig
+ M ecosys-ng/src/stages/diagnostics.zig
+ M ecosys-ng/src/stages/hourly_heat_water_solute.zig
+ M ecosys-ng/src/stages/soil_chemistry_convergence.zig
+ M ecosys-ng/src/validation/hourly_cell_conservation.zig
+?? .claude/settings.json
+?? .pi/
+?? audit/analysis/issue-100-failing-invocation-is-hour-3276-not-the-probed-hour-3275-2026-09-23.md
+?? audit/analysis/issue-102-clamp-events-span-many-hours-not-the-failing-hour-2026-09-23.md
+?? audit/history/INDEX.md
+?? audit/history/handoff-04cf9ae999cb34026c9286aaca1c2ac81a8fbdc4525d9bbce58e490d853bf1c3.md
+?? audit/history/handoff-20b474e26df9cc4f2f512b8dfcd2a60f1e8096a1979d5a54f89625dd7e75035e.md
+?? audit/history/handoff-52128c22d5122c9c7708f71019a1600bffd252f2c965b4de4f6d48ee884066a9.md
+?? audit/history/handoff-86b367e4e6ea135fc475f9ca33e102144699fa12a0487a99acb8fa1abe33430d.md
+?? audit/history/handoff-8b3fc0d1fcf27b3b6e36902da984071f11680bfb4ed29f9dda6bac9eb5cabebc.md
+?? audit/history/handoff-9c194136dac28aa1454ce4e2be72791fd599107cc413ee126c215c8a5528aca5.md
+?? audit/history/handoff-d8a2f3cb03a0fe7a5e344833e9c588aceda2330aa0a76d8e1c680bc1e1f456c1.md
+?? audit/history/handoff-d978b41a37be77732fe26450df438d84f6ffdc59e923d75796a5c8c36d65a789.md
+?? audit/history/handoff-de7309aeffe3444d63786c42ad7c8447edbca8916168e4574899d1d5524b143c.md
+?? audit/history/handoff-e0cdecc2e63b105829757aeba79096a3dc62041abc25671635a6d36e86372aee.md
+?? audit/history/handoff-f7b67a2b593126b3be6eda580c0514684ed7abd80da352e29d93c8d9816b769a.md
+?? audit/history/handoff-fa9f27a596b0050057aedb49d91453149a3af6660e7388842e2e8e3315a87b06.md
+?? audit/history/workflow-before-2026-09-23/
+?? audit/issues/issue-103-hour-3277-nitrate-lost-in-the-chemistry-interval.md
+?? audit/issues/workflow-001-herdr-readiness-field.md
+?? audit/issues/workflow-002-handoff-as-sealed-evidence-makes-close-unsatisfiable.md
+?? audit/issues/workflow-003-goal-held-lead-never-idles-so-controller-never-dispatches.md
+?? audit/reviews/20260923-184059-9b086122-r1.json
+?? audit/reviews/20260923-203925-5f8b9e80-r1.json
+?? audit/reviews/20260923-205755-0455a53b-r1.json
+?? audit/reviews/20260923-225940-8ace44ed-r1.json
+?? audit/reviews/captured-tool-results/
+?? audit/reviews/result-20260923-184059-9b086122.json
+?? audit/reviews/result-20260923-203925-5f8b9e80.json
+?? audit/reviews/result-20260923-205755-0455a53b.json
+?? audit/reviews/result-20260923-225940-8ace44ed.json
+?? audit/reviews/review-pi-20260923-184059-9b086122.md
+?? audit/reviews/review-pi-20260923-203925-5f8b9e80.md
+?? audit/reviews/review-pi-20260923-205755-0455a53b.md
+?? audit/reviews/review-pi-20260923-225940-8ace44ed.md
+?? audit/runs/issue-100-fix-deck/
+?? audit/runs/issue-100-fix2-deck/
+?? audit/runs/issue-100-n100e-deck/
+?? audit/runs/issue-100-n100f-deck/
+?? audit/runs/issue-100-n100g-deck/
+?? audit/runs/issue-101-regression-20260923-healthy-d/
+?? audit/runs/issue-103-probe-build/
+?? audit/runs/issue-103-probe-deck/
+?? audit/runs/issue-103-probe-prediction/
+?? audit/runs/issue-103-probe-run/
+?? audit/runs/run-025-n100d-raw/
+?? audit/runs/run-032-issue-103-duplicate-no3-band-growth-in-chemistry-stage-rebases-nitrate-2026-09-24.md
+?? audit/runs/workflow-002-selftest-20260923-adapter/
+?? audit/runs/workflow-002-selftest-20260923-after/
+?? audit/runs/workflow-003-diff-20260923/
+?? audit/runs/workflow-003-hookfix-selftest-20260923/
+?? audit/runs/workflow-lead-driven-selftest-20260923/
+?? audit/runs/workflow-selftest-20260923-agent-status-after/
+?? audit/runs/workflow-selftest-20260923-agent-status-before/
+?? audit/runs/workflow-selftest-20260923-controller-regression/
+?? audit/runs/workflow-selftest-20260923-r1/
+?? audit/runs/workflow-selftest-20260923-r2-pi/
+?? audit/runs/workflow-selftest-20260923-r2-python/
+?? audit/runs/workflow-selftest-20260923-r3-pi/
+?? audit/runs/workflow-selftest-20260923-r3-python/
+?? audit/runs/workflow-selftest-20260923-r4-python/
+?? audit/runs/workflow-selftest-20260923-r5-python/
+?? audit/tasks/20260923-184059-9b086122/
+?? audit/tasks/20260923-203925-5f8b9e80/
+?? audit/tasks/20260923-205755-0455a53b/
+?? audit/tasks/20260923-225940-8ace44ed/
+?? audit/tasks/20260924-055505-f4a901f5/
+?? audit/tests/workflow-cost-controls-2026-09-23-manifest.json
+?? audit/tests/workflow-cost-controls-2026-09-23.md
+?? ecosys-audit/WORKFLOW.md
+?? ecosys-audit/scripts/herdr_cycle.py
+?? ecosys-audit/scripts/run_logged.py
+?? ecosys-audit/scripts/workflow.py
+?? ecosys-audit/scripts/workflow_hook.py
+?? ecosys-audit/tests/
+?? scripts/
+warning: in the working copy of '.agents/skills/ecosys-multi-agent-coordination/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.agents/skills/ecosys-release-orchestrator/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/ecosys-multi-agent-coordination/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.claude/skills/ecosys-release-orchestrator/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.gitattributes', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'AGENTS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CLAUDE.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'audit/issues/issue-102-fifteen-microbial-pool-guards-remain-relaxed-to-finiteness-only-after-their-reason-was-removed.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ecosys-audit/EVIDENCE_GUIDE.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ecosys-audit/START_PROMPT.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ecosys-ng/src/stages/diagnostics.zig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ecosys-ng/src/stages/soil_chemistry_convergence.zig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ecosys-ng/src/validation/hourly_cell_conservation.zig', LF will be replaced by CRLF the next time Git touches it
+ .../ecosys-multi-agent-coordination/SKILL.md       | 14 +++++-
+ .../skills/ecosys-release-orchestrator/SKILL.md    | 29 +++++++++++-
+ .../ecosys-multi-agent-coordination/SKILL.md       | 14 +++++-
+ .../skills/ecosys-release-orchestrator/SKILL.md    | 29 +++++++++++-
+ .gitattributes                                     | 16 +++++++
+ .gitignore                                         |  7 +++
+ AGENTS.md                                          | 16 +++++++
+ CLAUDE.md                                          | 16 +++++++
+ audit/handoff.md                                   |  8 ++--
+ ...al-is-8-percent-of-the-banded-ammonium-input.md |  7 ++-
+ ...n-failures-are-printed-as-grid-cell-failures.md | 16 ++++++-
+ ...niteness-only-after-their-reason-was-removed.md | 10 +++--
+ ecosys-audit/EVIDENCE_GUIDE.md                     |  8 ++++
+ ecosys-audit/START_PROMPT.md                       |  9 +++-
+ ecosys-ng/src/ecosys_ng.zig                        |  2 +
+ ecosys-ng/src/stages/diagnostics.zig               | 52 ++++++++++++++++++++++
+ ecosys-ng/src/stages/hourly_heat_water_solute.zig  |  4 ++
+ .../src/stages/soil_chemistry_convergence.zig      |  5 +++
+ .../src/validation/hourly_cell_conservation.zig    |  4 +-
+ 19 files changed, 247 insertions(+), 19 deletions(-)

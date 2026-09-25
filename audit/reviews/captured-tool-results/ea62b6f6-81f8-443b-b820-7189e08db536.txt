@@ -1,0 +1,76 @@
+
+  audit\runs\issue-105-fix-run\stderr.log:12149:info: microbial nonstructural carbon clamped to zero, debited from 
+CO2: layer=4 substrate=3 population=5 clamped_g_c=1.8083175505852892e-6 carbon_gain=-5.868115374503006e-6
+  audit\runs\issue-105-fix-run\stderr.log:12150:error: TEMP_DIAGNOSTIC n_ledger[init]: cells.len=1
+> audit\runs\issue-105-fix-run\stderr.log:12151:error: hourly [7mcell [0m[7mconservation [0m[7mfailure: [0m[7mcell=0 [0m[7mquantity=carbon [0m
+[7m[0mbefore=6.055976747352601e3 [0m[7m[0mafter=6.055853800583099e3 [0m[7m[0mexternal_inputs=1.9809049569734592e-10 [0m
+[7m[0mexternal_outputs=1.2294461808102626e-1 [0m[7m[0minternal_production=0e0 [0m[7m[0minternal_consumption=0e0 [0m
+[7m[0mresidual=-2.1516191145432018e-6 [0m[7m[0mabsolute=2.1516191145432018e-6 [0m[7m[0mnormalized_relative=1.750041195272984e-5 [0m
+[7m[0mphysical_limit=1.229467695020503e-10 [0m[7m[0marithmetic_roundoff_allowance=1.3521091184928954e-11 [0m
+[7m[0meffective_limit=1.3646786068697926e-10[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12152:error: [0m[7m[0mhourly [0m[7m[0mcell [0m[7m[0mcarbon [0m[7m[0mstorage [0m[7m[0mcomponents: [0m[7m[0mcell=0 [0m
+[7m[0mresidue_before=1.3923587148949969e3 [0m[7m[0mresidue_after=1.392183652292858e3 [0m[7m[0morganic_before=4.516633953447331e3 [0m
+[7m[0morganic_after=4.516634259804204e3 [0m[7m[0minorganic_and_gas_before=1.4566407901027287e2 [0m
+[7m[0minorganic_and_gas_after=1.4571588831050812e2 [0m[7m[0msoil_gas_before=2.3769943991470765e1 [0m[7m[0msoil_gas_after=2.423782966646562e1 [0m
+[7m[0msurface_gas_before=5.616402095751552e-5 [0m[7m[0msurface_gas_after=5.3119905047234155e-5 [0m
+[7m[0mother_inorganic_before=1.2189407885478114e2 [0m[7m[0mother_inorganic_after=1.2147800552413746e2 [0m[7m[0mplant_before=1.32e0 [0m
+[7m[0mplant_after=1.320000175529312e0[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12153:error: [0m[7m[0mhourly [0m[7m[0mcell [0m[7m[0mconservation [0m[7m[0mfailure: [0m[7m[0mcell=0 [0m[7m[0mquantity=calcium [0m
+[7m[0mbefore=9.342564013161273e3 [0m[7m[0mafter=9.342564013253259e3 [0m[7m[0mexternal_inputs=3.798510422424488e-11 [0m
+[7m[0mexternal_outputs=8.552237666074265e-18 [0m[7m[0minternal_production=0e0 [0m[7m[0minternal_consumption=0e0 [0m[7m[0mresidual=9.194830904164196e-8 [0m
+[7m[0mabsolute=9.194830904164196e-8 [0m[7m[0mnormalized_relative=9.995870570063916e-1 [0m[7m[0mphysical_limit=9.198629413731397e-17 [0m
+[7m[0marithmetic_roundoff_allowance=2.4030132683000203e-11 [0m[7m[0meffective_limit=2.4030224669294342e-11[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12154:error: [0m[7m[0mhourly [0m[7m[0mcell [0m[7m[0mconservation [0m[7m[0mfailure: [0m[7m[0mcell=0 [0m[7m[0mquantity=sodium [0m
+[7m[0mbefore=9.052366337457956e3 [0m[7m[0mafter=9.052366337458247e3 [0m[7m[0mexternal_inputs=2.3329222928325128e-17 [0m
+[7m[0mexternal_outputs=3.0799736780798564e-20 [0m[7m[0minternal_production=0e0 [0m[7m[0minternal_consumption=0e0 [0m
+[7m[0mresidual=2.9103828126891383e-10 [0m[7m[0mabsolute=2.9103828126891383e-10 [0m[7m[0mnormalized_relative=9.999999199472274e-1 [0m
+[7m[0mphysical_limit=2.9103830456733704e-19 [0m[7m[0marithmetic_roundoff_allowance=2.4590757415356495e-11 [0m
+[7m[0meffective_limit=2.45907577063948e-11[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12155:error: [0m[7m[0mhourly [0m[7m[0mcell [0m[7m[0mconservation [0m[7m[0mfailure: [0m[7m[0mcell=0 [0m[7m[0mquantity=potassium [0m
+[7m[0mbefore=9.052366349013822e3 [0m[7m[0mafter=9.052366349013972e3 [0m[7m[0mexternal_inputs=1.1678349355137576e-17 [0m
+[7m[0mexternal_outputs=1.5458250543125272e-20 [0m[7m[0minternal_production=0e0 [0m[7m[0minternal_consumption=0e0 [0m
+[7m[0mresidual=1.4915711942786913e-10 [0m[7m[0mabsolute=1.4915711942786913e-10 [0m[7m[0mnormalized_relative=9.999999218080221e-1 [0m
+[7m[0mphysical_limit=1.4915713109076024e-19 [0m[7m[0marithmetic_roundoff_allowance=2.4590757439031467e-11 [0m
+[7m[0meffective_limit=2.4590757588188598e-11[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12156:error: [0m[7m[0mhourly [0m[7m[0mcarbon [0m[7m[0mrespiration [0m[7m[0mdiagnostics: [0m
+[7m[0msurface_co2_production_g_c=4.8497326285120525e-5 [0m[7m[0msoil_co2_production_g_c=1.3443209798555034e-1 [0m
+[7m[0msurface_signed_co2_plus_methane_delta_g_c=-4.8497326285120525e-5 [0m
+[7m[0msoil_signed_co2_plus_methane_delta_g_c=-8.59162530231403e-2[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12157:error: [0m[7m[0mhourly [0m[7m[0mpost-NITRO [0m[7m[0mconservation [0m[7m[0mtrace: [0m[7m[0mpoints=after_nitro,after_p[0m
+[7m[0most_watsub,after_uptake,after_chemistry,after_transport,after_interface_heat,after_surface_gas [0m[7m[0mresidue_carbon_g_c={ [0m
+[7m[0m1392.1836524657504, [0m[7m[0m1392.1836524657504, [0m[7m[0m1392.1836522928602, [0m[7m[0m1392.1836522928602, [0m[7m[0m1392.18365229286, [0m[7m[0m1392.18365229286, [0m
+[7m[0m1392.18365229286 [0m[7m[0m} [0m[7m[0morganic_carbon_g_c={ [0m[7m[0m4516.634259806844, [0m[7m[0m4516.634259806844, [0m[7m[0m4516.634259804205, [0m[7m[0m4516.634259804205, [0m
+[7m[0m4516.634259804206, [0m[7m[0m4516.634259804206, [0m[7m[0m4516.634259804206 [0m[7m[0m} [0m[7m[0minorganic_and_gas_carbon_g_c={ [0m[7m[0m145.83883508000787, [0m
+[7m[0m145.83883508000787, [0m[7m[0m145.83883400419947, [0m[7m[0m145.83883400419944, [0m[7m[0m145.71594143041315, [0m[7m[0m145.71594143041315, [0m[7m[0m145.71588831050812 [0m
+[7m[0m} [0m[7m[0mplant_carbon_g_c={ [0m[7m[0m1.32, [0m[7m[0m1.32, [0m[7m[0m1.320000175529312, [0m[7m[0m1.320000175529312, [0m[7m[0m1.320000175529312, [0m[7m[0m1.320000175529312, [0m
+[7m[0m1.320000175529312 [0m[7m[0m} [0m[7m[0msoil_gas_carbon_g_c={ [0m[7m[0m23.944637466469317, [0m[7m[0m23.944637466469317, [0m[7m[0m23.944604903492085, [0m[7m[0m24.36072224045, [0m
+[7m[0m24.237829666465622, [0m[7m[0m24.237829666465622, [0m[7m[0m24.237829666465622 [0m[7m[0m} [0m[7m[0mresidue_nitrogen_g={ [0m[7m[0m72.5714106661895, [0m[7m[0m72.5714106661895, [0m
+[7m[0m72.5714106661895, [0m[7m[0m72.5714106661895, [0m[7m[0m72.57141066618951, [0m[7m[0m72.57141066618951, [0m[7m[0m72.57141066618951 [0m[7m[0m} [0m[7m[0morganic_nitrogen_g={ [0m
+[7m[0m427.3252121538518, [0m[7m[0m427.3252121538518, [0m[7m[0m427.3252121538518, [0m[7m[0m427.3252121538518, [0m[7m[0m427.3252121538518, [0m[7m[0m427.3252121538518, [0m
+[7m[0m427.3252121538518 [0m[7m[0m} [0m[7m[0mdinitrogen_nitrogen_g={ [0m[7m[0m30.515714201550917, [0m[7m[0m30.515714201550917, [0m[7m[0m30.51571420155092, [0m
+[7m[0m30.51571420155092, [0m[7m[0m30.52341664051185, [0m[7m[0m30.52341664051185, [0m[7m[0m30.52341664051185 [0m[7m[0m} [0m[7m[0mammonium_nitrogen_g={ [0m[7m[0m110.46132541315814, [0m
+[7m[0m110.46132541315814, [0m[7m[0m110.47082981366526, [0m[7m[0m110.47082981366523, [0m[7m[0m110.4708294177178, [0m[7m[0m110.4708294177178, [0m[7m[0m110.4708294177178 [0m[7m[0m} [0m
+[7m[0mnitrate_nitrogen_g={ [0m[7m[0m3.0740700645439456, [0m[7m[0m3.0740700645439456, [0m[7m[0m3.0727289458661073, [0m[7m[0m3.0727289458661073, [0m
+[7m[0m3.072728945866108, [0m[7m[0m3.072728945866108, [0m[7m[0m3.072728945866108 [0m[7m[0m} [0m[7m[0mplant_nitrogen_g={ [0m[7m[0m0.05280000000000001, [0m[7m[0m0.05280000000000001, [0m
+[7m[0m0.05280000000000001, [0m[7m[0m0.05280000000000001, [0m[7m[0m0.05280000000000001, [0m[7m[0m0.05280000000000001, [0m[7m[0m0.05280000000000001 [0m[7m[0m} [0m
+[7m[0mheat_storage_megajoules={ [0m[7m[0m2196.0763389634308, [0m[7m[0m2196.0763389634308, [0m[7m[0m2196.0763389634308, [0m[7m[0m2196.0763389634308, [0m
+[7m[0m2196.076338957642, [0m[7m[0m2196.076338957642, [0m[7m[0m2196.076338957642 [0m[7m[0m} [0m[7m[0mheat_closed_megajoules={ [0m[7m[0m1594.585190681264, [0m
+[7m[0m1594.585190681264, [0m[7m[0m1594.585190681264, [0m[7m[0m1594.585190681264, [0m[7m[0m1594.5851906754751, [0m[7m[0m1594.585190681264, [0m[7m[0m1594.585190681264 [0m[7m[0m} [0m
+[7m[0mheat_internal_production_megajoules={ [0m[7m[0m0.0000046297188811466495, [0m[7m[0m0.0000046297188811466495, [0m[7m[0m0.0000046297188811466495, [0m
+[7m[0m0.0000046297188811466495, [0m[7m[0m0.0000046297188811466495, [0m[7m[0m0.0000046297188811466495, [0m[7m[0m0.0000046297188811466495 [0m[7m[0m} [0m
+[7m[0mheat_internal_consumption_megajoules={ [0m[7m[0m0, [0m[7m[0m0, [0m[7m[0m0, [0m[7m[0m0, [0m[7m[0m0, [0m[7m[0m0.000000005788879824388293, [0m[7m[0m0.000000005788879824388293 [0m[7m[0m} [0m
+[7m[0mlitter_soil_organic_heat_rebase_megajoules=-5.788879824388293e-9[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12158:error: [0m[7m[0mhourly [0m[7m[0msurface [0m[7m[0mcensus [0m[7m[0minputs: [0m
+[7m[0morganic_carbon_g_c=3.8189680165589324e-1->3.88264638091241e-1 [0m
+[7m[0mlitter_water_m3=3.7713115572714133e-3->3.8378734545644368e-3 [0m[7m[0mwater_vapor_mol=1.635318068364049e0->1.6495649255506708e0 [0m
+[7m[0mice_water_equivalent_m3=0e0->0e0 [0m[7m[0msurface_temperature_k=2.9169510457686084e2->2.90920798144038e2[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12159:error: [0m[7m[0mhourly [0m[7m[0mlitter-soil [0m[7m[0mrebase [0m[7m[0mdrift: [0m[7m[0msubsteps=4e0 [0m
+[7m[0mcross_term_megajoules=9.638606826825386e-10 [0m[7m[0mbooked_over_c_org=-1.8010556917272824e-3 [0m
+[7m[0mlast_temperature_k=2.9097510643243453e2 [0m[7m[0mcarbon_step_total_g_c=-7.972144875689757e-6 [0m
+[7m[0mcensus_temperature_gap_megajoules=1.293444817836997e-9[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12160:error: [0m[7m[0mhourly [0m[7m[0msurface [0m[7m[0mrespiration [0m[7m[0mrebase: [0m
+[7m[0mcarbon_g_c=3.8189680165589324e-1->3.882726102361167e-1 [0m[7m[0mtemperature_used_k=2.90920798144038e2 [0m
+[7m[0mbooked_rebase_megajoules=4.6297188811466495e-6[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12161:error: [0m[7m[0mhourly [0m[7m[0msurface [0m[7m[0msolver [0m[7m[0mresidual: [0m
+[7m[0msigned_total_megajoules=-1.2578882380154255e-11 [0m[7m[0mabsolute_total_megajoules=1.2578882380154255e-11[0m
+

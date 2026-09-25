@@ -1,0 +1,20 @@
+test_actual_shape_reaches_first_dispatch_without_model_calls (__main__.AdapterTests.test_actual_shape_reaches_first_dispatch_without_model_calls) ... ok
+test_blocked_dialog_never_becomes_ready (__main__.AdapterTests.test_blocked_dialog_never_becomes_ready) ... ok
+test_done_is_also_ready (__main__.AdapterTests.test_done_is_also_ready) ... ok
+test_incidental_nested_state_does_not_override_actual_agent_status (__main__.AdapterTests.test_incidental_nested_state_does_not_override_actual_agent_status) ... ok
+test_missing_agent_status_is_an_error_not_an_hour_of_silent_polling (__main__.AdapterTests.test_missing_agent_status_is_an_error_not_an_hour_of_silent_polling) ... ok
+test_native_working_registration_still_blocks_dispatch (__main__.AdapterTests.test_native_working_registration_still_blocks_dispatch) ... ok
+test_pi_path_session_reference_is_verified (__main__.AdapterTests.test_pi_path_session_reference_is_verified) ... ok
+test_recorded_agent_status_idle_is_ready (__main__.AdapterTests.test_recorded_agent_status_idle_is_ready) ... ok
+test_stale_native_session_rejected (__main__.AdapterTests.test_stale_native_session_rejected) ... ok
+test_unknown_state_gets_short_bounded_grace (__main__.AdapterTests.test_unknown_state_gets_short_bounded_grace) ... ok
+test_unsupported_status_and_envelope_fail_closed (__main__.AdapterTests.test_unsupported_status_and_envelope_fail_closed) ... ok
+test_wait_diagnostics_do_not_print_on_every_poll (__main__.AdapterTests.test_wait_diagnostics_do_not_print_on_every_poll) ... ok
+test_working_is_not_ready_and_wait_reason_is_persisted (__main__.AdapterTests.test_working_is_not_ready_and_wait_reason_is_persisted) ... ok
+test_wrong_harness_or_project_rejected (__main__.AdapterTests.test_wrong_harness_or_project_rejected) ... ok
+test_wrong_named_pane_rejected (__main__.AdapterTests.test_wrong_named_pane_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.372s
+
+OK

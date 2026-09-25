@@ -1,0 +1,785 @@
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.Name : The term '.Name' is not recognized as the name of a cmdlet, function, script file, or operable program. Check 
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Get-CimInstance Win32_Process | Where-Object { .Name -match 'python|u ...
++                                                ~~~~~
+    + CategoryInfo          : ObjectNotFound: (.Name:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+
+[Showing lines 2218-3000 of 3000 (50.0KB limit). Full output: C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\tmp\pi-powershell-cdf0d3c79f01076d.log]

@@ -1,0 +1,435 @@
+layer=4 carbon_before=7.193370291613619e2 carbon_after=7.192824853889178e2 
+carbon_dioxide_carbon_g_before=1.888982734346659e1 carbon_dioxide_carbon_g_after=1.8891581141183003e1 
+nitrogen_before=6.1300866263348695e1 nitrogen_after=6.129569967657167e1 phosphorus_before=4.726866950123618e1 
+phosphorus_after=4.726856690783838e1 aluminum_mol_before=1.8305735336345052e2 aluminum_mol_after=1.8305730585284792e2 
+iron_mol_before=1.704541102833201e2 iron_mol_after=1.7045406745974978e2 calcium_mol_before=1.6578573506410092e2 
+calcium_mol_after=1.657856660497561e2 magnesium_mol_before=1.5875987348220474e2 
+magnesium_mol_after=1.5875983496349562e2 sodium_mol_before=1.5875986725520272e2 sodium_mol_after=1.5875982869721773e2 
+potassium_mol_before=1.5875987036894506e2 potassium_mol_after=1.5875983183037738e2 
+silicon_mol_before=4.762762452447681e2 silicon_mol_after=4.7627612915769237e2 live_water_m3=2.3858104996973363e-2 
+dry_reference_water_m3=0e0
+> audit\runs\issue-105-fix-run\stderr.log:10863:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=4 [7mquantity=carbon [0m[7m[0mresidual=2.0959622926142174e-13 [0m[7m[0mabsolute=2.0959622926142174e-13 [0m
+[7m[0macceptance_limit=1.1154326015824569e-10 [0m[7m[0marithmetic_roundoff_allowance=1.6106593663371319e-12 [0m
+[7m[0meffective_acceptance_limit=1.1315391952458282e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10864:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=4 [0m[7m[0mquantity=nitrogen [0m[7m[0mresidual=-5.509481759702339e-15 [0m[7m[0mabsolute=5.509481759702339e-15 [0m
+[7m[0macceptance_limit=5.4908712664675767e-11 [0m[7m[0marithmetic_roundoff_allowance=1.361762272271274e-13 [0m
+[7m[0meffective_acceptance_limit=5.5044888891902896e-11 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10865:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=4 [0m[7m[0mquantity=phosphorus [0m[7m[0mresidual=-2.3575325719393803e-14 [0m[7m[0mabsolute=2.3575325719393803e-14 [0m
+[7m[0macceptance_limit=2.0988395615144984e-12 [0m[7m[0marithmetic_roundoff_allowance=1.3143770358207843e-13 [0m
+[7m[0meffective_acceptance_limit=2.230277265096577e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10866:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=4 [0m[7m[0mquantity=aluminum [0m[7m[0mresidual=-6.047159301081351e-14 [0m[7m[0mabsolute=6.047159301081351e-14 [0m
+[7m[0macceptance_limit=2.824861809583275e-12 [0m[7m[0marithmetic_roundoff_allowance=5.705759562763507e-13 [0m
+[7m[0meffective_acceptance_limit=3.395437765859626e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10867:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=4 [0m[7m[0mquantity=iron [0m[7m[0mresidual=-5.3324315449354565e-14 [0m[7m[0mabsolute=5.3324315449354565e-14 [0m
+[7m[0macceptance_limit=2.6315953781310123e-12 [0m[7m[0marithmetic_roundoff_allowance=5.736331674843591e-13 [0m
+[7m[0meffective_acceptance_limit=3.2052285456153713e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10868:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=4 [0m[7m[0mquantity=calcium [0m[7m[0mresidual=-3.046347896162871e-14 [0m[7m[0mabsolute=3.046347896162871e-14 [0m
+[7m[0macceptance_limit=2.5908079774247963e-12 [0m[7m[0marithmetic_roundoff_allowance=5.100097322719699e-13 [0m
+[7m[0meffective_acceptance_limit=3.1008177096967665e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+  audit\runs\issue-105-fix-run\stderr.log:10869:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=4 quantity=magnesium residual=8.670364773366579e-15 absolute=8.670364773366579e-15 
+acceptance_limit=2.4524179837112194e-12 arithmetic_roundoff_allowance=4.966688434278298e-13 
+effective_acceptance_limit=2.949086827139049e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10870:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=4 quantity=sodium residual=-3.3569284504930685e-14 absolute=3.3569284504930685e-14 
+acceptance_limit=2.452551615497329e-12 arithmetic_roundoff_allowance=4.966688297494688e-13 
+effective_acceptance_limit=2.949220445246798e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10871:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=4 quantity=potassium residual=-3.810363483069956e-14 absolute=3.810363483069956e-14 
+acceptance_limit=2.452485079589406e-12 arithmetic_roundoff_allowance=4.96668836589496e-13 
+effective_acceptance_limit=2.949153916178902e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10872:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=4 quantity=silicon residual=-1.2627919543373167e-13 absolute=1.2627919543373167e-13 
+acceptance_limit=7.375425304385113e-12 arithmetic_roundoff_allowance=1.6815856545831867e-12 
+effective_acceptance_limit=9.0570109589683e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10873:info: DRY_CARRIER_TRACE site=per_layer_storage hour=2896 cell=0 
+layer=5 carbon_before=8.775218423376654e2 carbon_after=8.774923284506131e2 
+carbon_dioxide_carbon_g_before=1.137285837312082e0 carbon_dioxide_carbon_g_after=1.138305861406299e0 
+nitrogen_before=7.576389262637387e1 nitrogen_after=7.57663622653782e1 phosphorus_before=5.17732249970308e1 
+phosphorus_after=5.177286535727133e1 aluminum_mol_before=1.8315708498139549e2 aluminum_mol_after=1.8315728682408204e2 
+iron_mol_before=1.70731475902199e2 iron_mol_after=1.7073168277484012e2 calcium_mol_before=1.6472353342617706e2 
+calcium_mol_after=1.647237382496872e2 magnesium_mol_before=1.5919850431983897e2 
+magnesium_mol_after=1.5919871486575929e2 sodium_mol_before=1.5919851235570604e2 sodium_mol_after=1.59198722867388e2 
+potassium_mol_before=1.5919850838230087e2 potassium_mol_after=1.5919871891100087e2 
+silicon_mol_before=4.775936688833507e2 silicon_mol_after=4.775942975543328e2 live_water_m3=2.4148464348835677e-2 
+dry_reference_water_m3=0e0
+> audit\runs\issue-105-fix-run\stderr.log:10874:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=5 [7mquantity=carbon [0m[7m[0mresidual=-9.943434964299058e-15 [0m[7m[0mabsolute=9.943434964299058e-15 [0m
+[7m[0macceptance_limit=9.07365147112679e-11 [0m[7m[0marithmetic_roundoff_allowance=1.948590645717334e-12 [0m
+[7m[0meffective_acceptance_limit=9.268510535698524e-11 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10875:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=5 [0m[7m[0mquantity=nitrogen [0m[7m[0mresidual=-2.985459102156085e-14 [0m[7m[0mabsolute=2.985459102156085e-14 [0m
+[7m[0macceptance_limit=3.026172204163738e-11 [0m[7m[0marithmetic_roundoff_allowance=1.6826871701880265e-13 [0m
+[7m[0meffective_acceptance_limit=3.042999075865619e-11 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10876:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=5 [0m[7m[0mquantity=phosphorus [0m[7m[0mresidual=-1.5048617733881553e-14 [0m[7m[0mabsolute=1.5048617733881553e-14 [0m
+[7m[0macceptance_limit=1.7631137144018929e-12 [0m[7m[0marithmetic_roundoff_allowance=1.37913195797894e-13 [0m
+[7m[0meffective_acceptance_limit=1.9010269101997867e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10877:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=5 [0m[7m[0mquantity=aluminum [0m[7m[0mresidual=-7.682765014449533e-14 [0m[7m[0mabsolute=7.682765014449533e-14 [0m
+[7m[0macceptance_limit=2.9791938936722333e-12 [0m[7m[0marithmetic_roundoff_allowance=6.012150868897155e-13 [0m
+[7m[0meffective_acceptance_limit=3.5804089805619486e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10878:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=5 [0m[7m[0mquantity=iron [0m[7m[0mresidual=-1.1288279339050078e-13 [0m[7m[0mabsolute=1.1288279339050078e-13 [0m
+[7m[0macceptance_limit=2.795644449101359e-12 [0m[7m[0marithmetic_roundoff_allowance=5.466597384981629e-13 [0m
+[7m[0meffective_acceptance_limit=3.3423041875995218e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10879:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=5 [0m[7m[0mquantity=calcium [0m[7m[0mresidual=-8.414319588312402e-14 [0m[7m[0mabsolute=8.414319588312402e-14 [0m
+[7m[0macceptance_limit=2.726617142839741e-12 [0m[7m[0marithmetic_roundoff_allowance=5.067297800303161e-13 [0m
+[7m[0meffective_acceptance_limit=3.233346922870057e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+  audit\runs\issue-105-fix-run\stderr.log:10880:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=5 quantity=magnesium residual=-3.2296214313998206e-14 absolute=3.2296214313998206e-14 
+acceptance_limit=2.624445194927317e-12 arithmetic_roundoff_allowance=4.86656634624879e-13 
+effective_acceptance_limit=3.111101829552196e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10881:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=5 quantity=sodium residual=-4.872990032322999e-14 absolute=4.872990032322999e-14 
+acceptance_limit=2.624505312542729e-12 arithmetic_roundoff_allowance=4.866566524588078e-13 
+effective_acceptance_limit=3.1111619650015365e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10882:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=5 quantity=potassium residual=-2.964815892791961e-14 absolute=2.964815892791961e-14 
+acceptance_limit=2.6244752119727715e-12 arithmetic_roundoff_allowance=4.866566436404453e-13 
+effective_acceptance_limit=3.1111318556132167e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10883:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=5 quantity=silicon residual=-2.358009620895274e-13 absolute=2.358009620895274e-13 
+acceptance_limit=7.888009211103875e-12 arithmetic_roundoff_allowance=1.4990765232348605e-12 
+effective_acceptance_limit=9.387085734338735e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10884:info: DRY_CARRIER_TRACE site=per_layer_storage hour=2896 cell=0 
+layer=6 carbon_before=1.0242603619327135e3 carbon_after=1.0242423041621441e3 
+carbon_dioxide_carbon_g_before=3.35881072147658e0 carbon_dioxide_carbon_g_after=3.3509543283400283e0 
+nitrogen_before=8.966860491293782e1 nitrogen_after=8.967883785745904e1 phosphorus_before=6.691572103232308e1 
+phosphorus_after=6.691554304433261e1 aluminum_mol_before=3.3329438932824473e2 aluminum_mol_after=3.332942757922665e2 
+iron_mol_before=3.14648331624675e2 iron_mol_after=3.1464822491382216e2 calcium_mol_before=3.0629063910712364e2 
+calcium_mol_after=3.062905305701818e2 magnesium_mol_before=2.970925025174573e2 magnesium_mol_after=2.970924019911642e2 
+sodium_mol_before=2.970925412078089e2 sodium_mol_after=2.9709244066765996e2 potassium_mol_before=2.970925220088189e2 
+potassium_mol_after=2.9709242147567477e2 silicon_mol_before=8.91280763771136e2 silicon_mol_after=8.912804561645427e2 
+live_water_m3=3.662114729197729e-2 dry_reference_water_m3=0e0
+> audit\runs\issue-105-fix-run\stderr.log:10885:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=6 [7mquantity=carbon [0m[7m[0mresidual=-6.159343868272771e-13 [0m[7m[0mabsolute=6.159343868272771e-13 [0m
+[7m[0macceptance_limit=5.835388563187187e-11 [0m[7m[0marithmetic_roundoff_allowance=2.2743796598845967e-12 [0m
+[7m[0meffective_acceptance_limit=6.062826529175647e-11 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10886:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=6 [0m[7m[0mquantity=nitrogen [0m[7m[0mresidual=1.1143863609675009e-14 [0m[7m[0mabsolute=1.1143863609675009e-14 [0m
+[7m[0macceptance_limit=1.9267829257070828e-11 [0m[7m[0marithmetic_roundoff_allowance=1.991484128096303e-13 [0m
+[7m[0meffective_acceptance_limit=1.946697766988046e-11 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10887:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=6 [0m[7m[0mquantity=phosphorus [0m[7m[0mresidual=-3.275450657230783e-14 [0m[7m[0mabsolute=3.275450657230783e-14 [0m
+[7m[0macceptance_limit=9.491544119467395e-13 [0m[7m[0marithmetic_roundoff_allowance=1.7398725802884573e-13 [0m
+[7m[0meffective_acceptance_limit=1.1231416699755852e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10888:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=6 [0m[7m[0mquantity=aluminum [0m[7m[0mresidual=-1.1918873006611097e-13 [0m[7m[0mabsolute=1.1918873006611097e-13 [0m
+[7m[0macceptance_limit=3.067500643307804e-12 [0m[7m[0marithmetic_roundoff_allowance=9.416689317064552e-13 [0m
+[7m[0meffective_acceptance_limit=4.009169575014259e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10889:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=6 [0m[7m[0mquantity=iron [0m[7m[0mresidual=5.957625885677498e-14 [0m[7m[0mabsolute=5.957625885677498e-14 [0m
+[7m[0macceptance_limit=2.895806237454635e-12 [0m[7m[0marithmetic_roundoff_allowance=8.315698347646169e-13 [0m
+[7m[0meffective_acceptance_limit=3.727376072219252e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10890:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=6 [0m[7m[0mquantity=calcium [0m[7m[0mresidual=-7.47433798881092e-14 [0m[7m[0mabsolute=7.47433798881092e-14 [0m
+[7m[0macceptance_limit=2.823623929582772e-12 [0m[7m[0marithmetic_roundoff_allowance=8.612088496742424e-13 [0m
+[7m[0meffective_acceptance_limit=3.684832779257014e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+  audit\runs\issue-105-fix-run\stderr.log:10891:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=6 quantity=magnesium residual=-1.5806041371579926e-13 absolute=1.5806041371579926e-13 
+acceptance_limit=2.7344648224368133e-12 arithmetic_roundoff_allowance=8.389755570928304e-13 
+effective_acceptance_limit=3.5734403795296434e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10892:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=6 quantity=sodium residual=-2.755022772416016e-14 absolute=2.755022772416016e-14 
+acceptance_limit=2.7344787231706585e-12 arithmetic_roundoff_allowance=8.389801644365203e-13 
+effective_acceptance_limit=3.5734588876071786e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10893:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=6 quantity=potassium residual=-1.1184391086882517e-13 absolute=1.1184391086882517e-13 
+acceptance_limit=2.7344716957618645e-12 arithmetic_roundoff_allowance=8.389801217983969e-13 
+effective_acceptance_limit=3.5734518175602614e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10894:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=6 quantity=silicon residual=-3.427032962965981e-14 absolute=3.427032962965981e-14 
+acceptance_limit=8.20944481901035e-12 arithmetic_roundoff_allowance=2.55939543841486e-12 
+effective_acceptance_limit=1.0768840257425209e-11 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10895:info: DRY_CARRIER_TRACE site=per_layer_storage hour=2896 cell=0 
+layer=7 carbon_before=1.0171615938919495e3 carbon_after=1.0171574304452123e3 
+carbon_dioxide_carbon_g_before=6.521746078042014e0 carbon_dioxide_carbon_g_after=6.520851793798988e0 
+nitrogen_before=9.381061096063499e1 nitrogen_after=9.380160602023638e1 phosphorus_before=1.2873847614393412e2 
+phosphorus_after=1.2873848808681385e2 aluminum_mol_before=9.001006108866345e2 aluminum_mol_after=9.001004709562203e2 
+iron_mol_before=8.498831235344722e2 iron_mol_after=8.498829915141656e2 calcium_mol_before=8.273315609563564e2 
+calcium_mol_after=8.273314327197241e2 magnesium_mol_before=8.026042941682393e2 magnesium_mol_after=8.026041695824329e2 
+sodium_mol_before=8.026043079147825e2 sodium_mol_after=8.026041833296999e2 potassium_mol_before=8.026043009900987e2 
+potassium_mol_after=8.026041764046496e2 silicon_mol_before=2.4078197806591565e3 silicon_mol_after=2.4078194069594324e3 
+live_water_m3=1.0190064596796958e-1 dry_reference_water_m3=0e0
+> audit\runs\issue-105-fix-run\stderr.log:10896:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=7 [7mquantity=carbon [0m[7m[0mresidual=-9.43021702393132e-14 [0m[7m[0mabsolute=9.43021702393132e-14 [0m
+[7m[0macceptance_limit=1.6306941605869074e-11 [0m[7m[0marithmetic_roundoff_allowance=2.2585705469485647e-12 [0m
+[7m[0meffective_acceptance_limit=1.8565512152817638e-11 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10897:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=7 [0m[7m[0mquantity=nitrogen [0m[7m[0mresidual=-2.148801969692471e-14 [0m[7m[0mabsolute=2.148801969692471e-14 [0m
+[7m[0macceptance_limit=1.0305573495678461e-11 [0m[7m[0marithmetic_roundoff_allowance=2.083128419702772e-13 [0m
+[7m[0meffective_acceptance_limit=1.0513886337648738e-11 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10898:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=7 [0m[7m[0mquantity=phosphorus [0m[7m[0mresidual=2.273002749561548e-14 [0m[7m[0mabsolute=2.273002749561548e-14 [0m
+[7m[0macceptance_limit=4.381765234472395e-13 [0m[7m[0marithmetic_roundoff_allowance=3.863887127672551e-13 [0m
+[7m[0meffective_acceptance_limit=8.245652362144946e-13 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10899:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=7 [0m[7m[0mquantity=aluminum [0m[7m[0mresidual=-4.83402380624387e-14 [0m[7m[0mabsolute=4.83402380624387e-14 [0m
+[7m[0macceptance_limit=2.8140344697727816e-12 [0m[7m[0marithmetic_roundoff_allowance=2.722738360042427e-12 [0m
+[7m[0meffective_acceptance_limit=5.536772829815209e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10900:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=7 [0m[7m[0mquantity=iron [0m[7m[0mresidual=-7.995427236950903e-14 [0m[7m[0mabsolute=7.995427236950903e-14 [0m
+[7m[0macceptance_limit=2.6570750781548873e-12 [0m[7m[0marithmetic_roundoff_allowance=2.7569913113673824e-12 [0m
+[7m[0meffective_acceptance_limit=5.41406638952227e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10901:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=7 [0m[7m[0mquantity=calcium [0m[7m[0mresidual=9.512594704996769e-14 [0m[7m[0mabsolute=9.512594704996769e-14 [0m
+[7m[0macceptance_limit=2.5870850038434495e-12 [0m[7m[0marithmetic_roundoff_allowance=2.1528261148498913e-12 [0m
+[7m[0meffective_acceptance_limit=4.739911118693341e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+  audit\runs\issue-105-fix-run\stderr.log:10902:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=7 quantity=magnesium residual=5.84825157051716e-14 absolute=5.84825157051716e-14 
+acceptance_limit=2.5093527229594464e-12 arithmetic_roundoff_allowance=2.343358324361858e-12 
+effective_acceptance_limit=4.852711047321304e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10903:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=7 quantity=sodium residual=-2.1194331012441836e-13 absolute=2.1194331012441836e-13 
+acceptance_limit=2.509353892499746e-12 arithmetic_roundoff_allowance=2.390878278183306e-12 
+effective_acceptance_limit=4.900232170683052e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10904:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=7 quantity=potassium residual=-2.504749879728152e-13 absolute=2.504749879728152e-13 
+acceptance_limit=2.5093533016134734e-12 arithmetic_roundoff_allowance=2.390878262806763e-12 
+effective_acceptance_limit=4.9002315644202365e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10905:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=7 quantity=silicon residual=6.283168429987995e-14 absolute=6.283168429987995e-14 
+acceptance_limit=7.528378622279481e-12 arithmetic_roundoff_allowance=7.556341288812035e-12 
+effective_acceptance_limit=1.5084719911091518e-11 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10906:info: DRY_CARRIER_TRACE site=per_layer_storage hour=2896 cell=0 
+layer=8 carbon_before=5.573662271666562e2 carbon_after=5.5736593676566e2 
+carbon_dioxide_carbon_g_before=3.3804991524474586e0 carbon_dioxide_carbon_g_after=3.3826657031398195e0 
+nitrogen_before=6.571873889848798e1 nitrogen_after=6.571868507827065e1 phosphorus_before=1.675114321328775e2 
+phosphorus_after=1.6751140950772972e2 aluminum_mol_before=1.3517920571669645e3 aluminum_mol_after=1.351791933689758e3 
+iron_mol_before=1.276465192112808e3 iron_mol_after=1.27646507558991e3 calcium_mol_before=1.2426324712783753e3 
+calcium_mol_after=1.242632357982879e3 magnesium_mol_before=1.2055469131330547e3 
+magnesium_mol_after=1.205546803138548e3 sodium_mol_before=1.2055469212528508e3 sodium_mol_after=1.2055468112586482e3 
+potassium_mol_before=1.2055469171914183e3 potassium_mol_after=1.2055468071970636e3 
+silicon_mol_before=3.6166442429072904e3 silicon_mol_after=3.616643913026644e3 live_water_m3=1.5318925507518172e-1 
+dry_reference_water_m3=0e0
+> audit\runs\issue-105-fix-run\stderr.log:10907:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=8 [7mquantity=carbon [0m[7m[0mresidual=-8.74957658408837e-14 [0m[7m[0mabsolute=8.74957658408837e-14 [0m
+[7m[0macceptance_limit=9.317343433042648e-13 [0m[7m[0marithmetic_roundoff_allowance=1.2376026715306767e-12 [0m
+[7m[0meffective_acceptance_limit=2.1693370148349415e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10908:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=8 [0m[7m[0mquantity=nitrogen [0m[7m[0mresidual=2.956107038841471e-14 [0m[7m[0mabsolute=2.956107038841471e-14 [0m
+[7m[0macceptance_limit=1.7435559963430487e-13 [0m[7m[0marithmetic_roundoff_allowance=1.459251077224618e-13 [0m
+[7m[0meffective_acceptance_limit=3.202807073567667e-13 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10909:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=8 [0m[7m[0mquantity=phosphorus [0m[7m[0mresidual=2.2026570021052572e-14 [0m[7m[0mabsolute=2.2026570021052572e-14 [0m
+[7m[0macceptance_limit=3.1352328574389257e-13 [0m[7m[0marithmetic_roundoff_allowance=5.694458638049892e-13 [0m
+[7m[0meffective_acceptance_limit=8.829691495488818e-13 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10910:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=8 [0m[7m[0mquantity=aluminum [0m[7m[0mresidual=5.173025636323603e-13 [0m[7m[0mabsolute=5.173025636323603e-13 [0m
+[7m[0macceptance_limit=2.5506288183799327e-12 [0m[7m[0marithmetic_roundoff_allowance=3.3634317306470588e-12 [0m
+[7m[0meffective_acceptance_limit=5.914060549026992e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10911:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=8 [0m[7m[0mquantity=iron [0m[7m[0mresidual=1.733309676343886e-13 [0m[7m[0mabsolute=1.733309676343886e-13 [0m
+[7m[0macceptance_limit=2.408531874430228e-12 [0m[7m[0marithmetic_roundoff_allowance=3.0684564924943162e-12 [0m
+[7m[0meffective_acceptance_limit=5.476988366924544e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10912:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=8 [0m[7m[0mquantity=calcium [0m[7m[0mresidual=-1.286039417319751e-13 [0m[7m[0mabsolute=1.286039417319751e-13 [0m
+[7m[0macceptance_limit=2.344843810765142e-12 [0m[7m[0marithmetic_roundoff_allowance=3.121146021379725e-12 [0m
+[7m[0meffective_acceptance_limit=5.465989832144867e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+  audit\runs\issue-105-fix-run\stderr.log:10913:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=8 quantity=magnesium residual=-2.4380692777159485e-13 absolute=2.4380692777159485e-13 
+acceptance_limit=2.2747724099356773e-12 arithmetic_roundoff_allowance=3.3693476383167227e-12 
+effective_acceptance_limit=5.6441200482524e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10914:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=8 quantity=sodium residual=-8.749164587262825e-14 absolute=8.749164587262825e-14 
+acceptance_limit=2.274772731004809e-12 arithmetic_roundoff_allowance=3.761652548459886e-12 
+effective_acceptance_limit=6.036425279464695e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10915:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=8 quantity=potassium residual=2.0547192419728688e-13 absolute=2.0547192419728688e-13 
+acceptance_limit=2.274772570011993e-12 arithmetic_roundoff_allowance=3.761652539441515e-12 
+effective_acceptance_limit=6.036425109453508e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10916:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=8 quantity=silicon residual=-9.060560461626732e-13 absolute=9.060560461626732e-13 
+acceptance_limit=6.8244529584893956e-12 arithmetic_roundoff_allowance=1.0252374111336059e-11 
+effective_acceptance_limit=1.7076827069825454e-11 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10917:info: DRY_CARRIER_TRACE site=per_layer_storage hour=2896 cell=0 
+layer=9 carbon_before=3.9149224781724524e2 carbon_after=3.914921299685462e2 
+carbon_dioxide_carbon_g_before=8.123500552454848e0 carbon_dioxide_carbon_g_after=8.12507573678462e0 
+nitrogen_before=6.457747552678221e1 nitrogen_after=6.457749102589945e1 phosphorus_before=2.70219762005464e2 
+phosphorus_after=2.7021975212591053e2 aluminum_mol_before=2.2548138709846294e3 aluminum_mol_after=2.2548137893731673e3 
+iron_mol_before=2.129267384332384e3 iron_mol_after=2.1292673072984935e3 calcium_mol_before=2.072873186159873e3 
+calcium_mol_after=2.0728731111729826e3 magnesium_mol_before=2.0110702156509253e3 
+magnesium_mol_after=2.0110701429313735e3 sodium_mol_before=2.011070206251808e3 sodium_mol_after=2.011070133532056e3 
+potassium_mol_before=2.01107021093894e3 potassium_mol_after=2.0110701382192874e3 
+silicon_mol_before=6.0332092354140705e3 silicon_mol_after=6.033209017258837e3 live_water_m3=2.5550477612157296e-1 
+dry_reference_water_m3=0e0
+> audit\runs\issue-105-fix-run\stderr.log:10918:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=9 [7mquantity=carbon [0m[7m[0mresidual=-2.4365795839309534e-13 [0m[7m[0mabsolute=2.4365795839309534e-13 [0m
+[7m[0macceptance_limit=3.116577043855244e-13 [0m[7m[0marithmetic_roundoff_allowance=8.692877609874869e-13 [0m
+[7m[0meffective_acceptance_limit=1.1809454653730113e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10919:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=9 [0m[7m[0mquantity=nitrogen [0m[7m[0mresidual=-5.403880468102251e-15 [0m[7m[0mabsolute=5.403880468102251e-15 [0m
+[7m[0macceptance_limit=9.04677619381282e-14 [0m[7m[0marithmetic_roundoff_allowance=1.433909352583484e-13 [0m
+[7m[0meffective_acceptance_limit=2.3385869719647663e-13 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10920:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=9 [0m[7m[0mquantity=phosphorus [0m[7m[0mresidual=1.6512109062873093e-13 [0m[7m[0mabsolute=1.6512109062873093e-13 [0m
+[7m[0macceptance_limit=2.8101996548221383e-13 [0m[7m[0marithmetic_roundoff_allowance=7.867400143282565e-13 [0m
+[7m[0meffective_acceptance_limit=1.0677599798104703e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10921:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=9 [0m[7m[0mquantity=aluminum [0m[7m[0mresidual=4.064225084948747e-13 [0m[7m[0mabsolute=4.064225084948747e-13 [0m
+[7m[0macceptance_limit=2.3455400502591573e-12 [0m[7m[0marithmetic_roundoff_allowance=6.702432975479754e-12 [0m
+[7m[0meffective_acceptance_limit=9.04797302573891e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10922:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=9 [0m[7m[0mquantity=iron [0m[7m[0mresidual=4.2499706011389637e-13 [0m[7m[0mabsolute=4.2499706011389637e-13 [0m
+[7m[0macceptance_limit=2.214975085120718e-12 [0m[7m[0marithmetic_roundoff_allowance=5.7787712500002075e-12 [0m
+[7m[0meffective_acceptance_limit=7.993746335120926e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10923:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=9 [0m[7m[0mquantity=calcium [0m[7m[0mresidual=-7.965637698059691e-13 [0m[7m[0mabsolute=7.965637698059691e-13 [0m
+[7m[0macceptance_limit=2.1563548204414005e-12 [0m[7m[0marithmetic_roundoff_allowance=5.804293960435133e-12 [0m
+[7m[0meffective_acceptance_limit=7.960648780876533e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+  audit\runs\issue-105-fix-run\stderr.log:10924:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=9 quantity=magnesium residual=9.596707109538194e-15 absolute=9.596707109538194e-15 
+acceptance_limit=2.092058351773443e-12 arithmetic_roundoff_allowance=5.517843140804379e-12 
+effective_acceptance_limit=7.609901492577823e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10925:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=9 quantity=sodium residual=-6.225575610585565e-14 absolute=6.225575610585565e-14 
+acceptance_limit=2.0920585542380028e-12 arithmetic_roundoff_allowance=5.517961706024444e-12 
+effective_acceptance_limit=7.610020260262446e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10926:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=9 quantity=potassium residual=1.7129418543315733e-13 absolute=1.7129418543315733e-13 
+acceptance_limit=2.092058453116218e-12 arithmetic_roundoff_allowance=5.517961716431854e-12 
+effective_acceptance_limit=7.610020169548072e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10927:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=9 quantity=silicon residual=9.307450643536441e-13 absolute=9.307450643536441e-13 
+acceptance_limit=6.276197372813734e-12 arithmetic_roundoff_allowance=1.7332987916965412e-11 
+effective_acceptance_limit=2.3609185289779144e-11 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10928:info: DRY_CARRIER_TRACE site=per_layer_storage hour=2896 cell=0 
+layer=10 carbon_before=1.2039014236210224e2 carbon_after=1.2039009946180114e2 
+carbon_dioxide_carbon_g_before=2.428002689120931e0 carbon_dioxide_carbon_g_after=2.42846891862203e0 
+nitrogen_before=3.581192279618898e1 nitrogen_after=3.5811918489251084e1 phosphorus_before=2.670837676495404e2 
+phosphorus_after=2.67083744375211e2 aluminum_mol_before=2.256103838084258e3 aluminum_mol_after=2.2561036477642288e3 
+iron_mol_before=2.1305626034358374e3 iron_mol_after=2.1305624237175475e3 calcium_mol_before=2.07417343965336e3 
+calcium_mol_after=2.074173264708145e3 magnesium_mol_before=2.0123695420215988e3 
+magnesium_mol_after=2.0123693722811092e3 sodium_mol_before=2.0123695433167807e3 sodium_mol_after=2.0123693735763857e3 
+potassium_mol_before=2.012369542670774e3 potassium_mol_after=2.0123693729303325e3 
+silicon_mol_before=6.03710843875525e3 silicon_mol_after=6.037107929544452e3 live_water_m3=2.555976968035536e-1 
+dry_reference_water_m3=0e0
+> audit\runs\issue-105-fix-run\stderr.log:10929:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=10 [7mquantity=carbon [0m[7m[0mresidual=-4.3542914499733465e-15 [0m[7m[0mabsolute=4.3542914499733465e-15 [0m
+[7m[0macceptance_limit=8.114772471488623e-14 [0m[7m[0marithmetic_roundoff_allowance=2.6731990606868534e-13 [0m
+[7m[0meffective_acceptance_limit=3.484676307835716e-13 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10930:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=10 [0m[7m[0mquantity=nitrogen [0m[7m[0mresidual=2.290929354857238e-15 [0m[7m[0mabsolute=2.290929354857238e-15 [0m
+[7m[0macceptance_limit=3.618467792233785e-14 [0m[7m[0marithmetic_roundoff_allowance=7.95184826619177e-14 [0m
+[7m[0meffective_acceptance_limit=1.1570316058425557e-13 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10931:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=10 [0m[7m[0mquantity=phosphorus [0m[7m[0mresidual=1.158411880959262e-13 [0m[7m[0mabsolute=1.158411880959262e-13 [0m
+[7m[0macceptance_limit=2.4603727118710584e-13 [0m[7m[0marithmetic_roundoff_allowance=7.244467976934546e-13 [0m
+[7m[0meffective_acceptance_limit=9.704840688805605e-13 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10932:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=10 [0m[7m[0mquantity=aluminum [0m[7m[0mresidual=-7.080038595327909e-13 [0m[7m[0mabsolute=7.080038595327909e-13 [0m
+[7m[0macceptance_limit=2.073606545929158e-12 [0m[7m[0marithmetic_roundoff_allowance=6.6712909624576035e-12 [0m
+[7m[0meffective_acceptance_limit=8.744897508386762e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10933:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=10 [0m[7m[0mquantity=iron [0m[7m[0mresidual=-2.0378046038799225e-13 [0m[7m[0mabsolute=2.0378046038799225e-13 [0m
+[7m[0macceptance_limit=1.958222903305131e-12 [0m[7m[0marithmetic_roundoff_allowance=5.705155931241507e-12 [0m
+[7m[0meffective_acceptance_limit=7.663378834546637e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10934:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=10 [0m[7m[0mquantity=calcium [0m[7m[0mresidual=-2.729542937160434e-13 [0m[7m[0mabsolute=2.729542937160434e-13 [0m
+[7m[0macceptance_limit=1.9064150104907107e-12 [0m[7m[0marithmetic_roundoff_allowance=6.202009304033911e-12 [0m
+[7m[0meffective_acceptance_limit=8.108424314524623e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+  audit\runs\issue-105-fix-run\stderr.log:10935:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=10 quantity=magnesium residual=-6.86395818655372e-13 absolute=6.86395818655372e-13 
+acceptance_limit=1.849598311086863e-12 arithmetic_roundoff_allowance=5.047342331425955e-12 
+effective_acceptance_limit=6.896940642512818e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10936:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=10 quantity=sodium residual=2.1997497139797373e-13 absolute=2.1997497139797373e-13 
+acceptance_limit=1.849598406195597e-12 arithmetic_roundoff_allowance=5.771232854322257e-12 
+effective_acceptance_limit=7.620831260517854e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10937:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=10 quantity=potassium residual=4.313389923016331e-14 absolute=4.313389923016331e-14 
+acceptance_limit=1.8495983587877834e-12 arithmetic_roundoff_allowance=5.77123285288778e-12 
+effective_acceptance_limit=7.620831211675564e-12 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10938:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=10 quantity=silicon residual=-6.040953327846044e-13 absolute=6.040953327846044e-13 
+acceptance_limit=5.5488069965513224e-12 arithmetic_roundoff_allowance=1.7323497721006198e-11 
+effective_acceptance_limit=2.287230471755752e-11 physical_accepted=true accepted=true
+  audit\runs\issue-105-fix-run\stderr.log:10939:info: DRY_CARRIER_TRACE site=per_layer_storage hour=2896 cell=0 
+layer=11 carbon_before=3.607766469734892e1 carbon_after=3.6077651216724796e1 
+carbon_dioxide_carbon_g_before=6.279617335375124e-1 carbon_dioxide_carbon_g_after=6.280099131446998e-1 
+nitrogen_before=2.856962415779023e1 nitrogen_after=2.8569611497489586e1 phosphorus_before=2.657809021725795e2 
+phosphorus_after=2.657807908072599e2 aluminum_mol_before=2.249655336219446e3 aluminum_mol_after=2.2496543945762605e3 
+iron_mol_before=2.124490813469625e3 iron_mol_after=2.1244899242173187e3 calcium_mol_before=2.0682724380098684e3 
+calcium_mol_after=2.068271572290743e3 magnesium_mol_before=2.0066535025771673e3 
+magnesium_mol_after=2.0066526626482564e3 sodium_mol_before=2.006653512122413e3 sodium_mol_after=2.0066526721934968e3 
+potassium_mol_before=2.0066535073584491e3 potassium_mol_after=2.0066526674295355e3 
+silicon_mol_before=6.0199632765709e3 silicon_mol_after=6.019960756783798e3 live_water_m3=2.9363797324820223e-1 
+dry_reference_water_m3=0e0
+> audit\runs\issue-105-fix-run\stderr.log:10940:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 
+layer=11 [7mquantity=carbon [0m[7m[0mresidual=1.5328162323397995e-14 [0m[7m[0mabsolute=1.5328162323397995e-14 [0m
+[7m[0macceptance_limit=1.672157508480334e-14 [0m[7m[0marithmetic_roundoff_allowance=8.010852660808366e-14 [0m
+[7m[0meffective_acceptance_limit=9.6830101692887e-14 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10941:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=11 [0m[7m[0mquantity=nitrogen [0m[7m[0mresidual=1.1950818345997025e-14 [0m[7m[0mabsolute=1.1950818345997025e-14 [0m
+[7m[0macceptance_limit=1.577821760214097e-14 [0m[7m[0marithmetic_roundoff_allowance=6.343732660707216e-14 [0m
+[7m[0meffective_acceptance_limit=7.921554420921313e-14 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10942:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=11 [0m[7m[0mquantity=phosphorus [0m[7m[0mresidual=8.557065646341844e-15 [0m[7m[0mabsolute=8.557065646341844e-15 [0m
+[7m[0macceptance_limit=1.113689335364009e-13 [0m[7m[0marithmetic_roundoff_allowance=6.786502640405019e-13 [0m
+[7m[0meffective_acceptance_limit=7.900191975769028e-13 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10943:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=11 [0m[7m[0mquantity=aluminum [0m[7m[0mresidual=5.06200008125457e-13 [0m[7m[0mabsolute=5.06200008125457e-13 [0m
+[7m[0macceptance_limit=9.416432057067647e-13 [0m[7m[0marithmetic_roundoff_allowance=6.148464851148508e-12 [0m
+[7m[0meffective_acceptance_limit=7.090108056855273e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10944:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=11 [0m[7m[0mquantity=iron [0m[7m[0mresidual=2.613423800285064e-13 [0m[7m[0mabsolute=2.613423800285064e-13 [0m
+[7m[0macceptance_limit=8.892523067538562e-13 [0m[7m[0marithmetic_roundoff_allowance=5.1381272553724735e-12 [0m
+[7m[0meffective_acceptance_limit=6.02737956212633e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:10945:info: [0m[7m[0mDRY_CARRIER_TRACE [0m[7m[0msite=per_layer_closure [0m[7m[0mhour=2896 [0m[7m[0mcell=0 [0m
+[7m[0mlayer=11 [0m[7m[0mquantity=calcium [0m[7m[0mresidual=4.92434109981843e-13 [0m[7m[0mabsolute=4.92434109981843e-13 [0m
+[7m[0macceptance_limit=8.657226148521323e-13 [0m[7m[0marithmetic_roundoff_allowance=5.276941405916027e-12 [0m
+[7m[0meffective_acceptance_limit=6.142664020768159e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+  audit\runs\issue-105-fix-run\stderr.log:12146:info: microbial nonstructural carbon clamped to zero, debited from 
+CO2: layer=1 substrate=3 population=5 clamped_g_c=5.561083259925156e-7 carbon_gain=-1.5611394040780126e-6
+  audit\runs\issue-105-fix-run\stderr.log:12147:info: microbial nonstructural carbon clamped to zero, debited from 
+CO2: layer=2 substrate=3 population=5 clamped_g_c=2.0301972876580638e-6 carbon_gain=-5.642508988011215e-6
+  audit\runs\issue-105-fix-run\stderr.log:12148:info: microbial nonstructural carbon clamped to zero, debited from 
+CO2: layer=3 substrate=3 population=5 clamped_g_c=1.960323671240464e-6 carbon_gain=-5.824247678602788e-6
+  audit\runs\issue-105-fix-run\stderr.log:12149:info: microbial nonstructural carbon clamped to zero, debited from 
+CO2: layer=4 substrate=3 population=5 clamped_g_c=1.8083175505852892e-6 carbon_gain=-5.868115374503006e-6
+  audit\runs\issue-105-fix-run\stderr.log:12150:error: TEMP_DIAGNOSTIC n_ledger[init]: cells.len=1
+> audit\runs\issue-105-fix-run\stderr.log:12151:error: hourly cell conservation failure: cell=0 [7mquantity=carbon [0m
+[7m[0mbefore=6.055976747352601e3 [0m[7m[0mafter=6.055853800583099e3 [0m[7m[0mexternal_inputs=1.9809049569734592e-10 [0m
+[7m[0mexternal_outputs=1.2294461808102626e-1 [0m[7m[0minternal_production=0e0 [0m[7m[0minternal_consumption=0e0 [0m
+[7m[0mresidual=-2.1516191145432018e-6 [0m[7m[0mabsolute=2.1516191145432018e-6 [0m[7m[0mnormalized_relative=1.750041195272984e-5 [0m
+[7m[0mphysical_limit=1.229467695020503e-10 [0m[7m[0marithmetic_roundoff_allowance=1.3521091184928954e-11 [0m
+[7m[0meffective_limit=1.3646786068697926e-10[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12152:error: [0m[7m[0mhourly [0m[7m[0mcell [0m[7m[0mcarbon [0m[7m[0mstorage [0m[7m[0mcomponents: [0m[7m[0mcell=0 [0m
+[7m[0mresidue_before=1.3923587148949969e3 [0m[7m[0mresidue_after=1.392183652292858e3 [0m[7m[0morganic_before=4.516633953447331e3 [0m
+[7m[0morganic_after=4.516634259804204e3 [0m[7m[0minorganic_and_gas_before=1.4566407901027287e2 [0m
+[7m[0minorganic_and_gas_after=1.4571588831050812e2 [0m[7m[0msoil_gas_before=2.3769943991470765e1 [0m[7m[0msoil_gas_after=2.423782966646562e1 [0m
+[7m[0msurface_gas_before=5.616402095751552e-5 [0m[7m[0msurface_gas_after=5.3119905047234155e-5 [0m
+[7m[0mother_inorganic_before=1.2189407885478114e2 [0m[7m[0mother_inorganic_after=1.2147800552413746e2 [0m[7m[0mplant_before=1.32e0 [0m
+[7m[0mplant_after=1.320000175529312e0[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12153:error: [0m[7m[0mhourly [0m[7m[0mcell [0m[7m[0mconservation [0m[7m[0mfailure: [0m[7m[0mcell=0 [0m[7m[0mquantity=calcium [0m
+[7m[0mbefore=9.342564013161273e3 [0m[7m[0mafter=9.342564013253259e3 [0m[7m[0mexternal_inputs=3.798510422424488e-11 [0m
+[7m[0mexternal_outputs=8.552237666074265e-18 [0m[7m[0minternal_production=0e0 [0m[7m[0minternal_consumption=0e0 [0m[7m[0mresidual=9.194830904164196e-8 [0m
+[7m[0mabsolute=9.194830904164196e-8 [0m[7m[0mnormalized_relative=9.995870570063916e-1 [0m[7m[0mphysical_limit=9.198629413731397e-17 [0m
+[7m[0marithmetic_roundoff_allowance=2.4030132683000203e-11 [0m[7m[0meffective_limit=2.4030224669294342e-11[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12154:error: [0m[7m[0mhourly [0m[7m[0mcell [0m[7m[0mconservation [0m[7m[0mfailure: [0m[7m[0mcell=0 [0m[7m[0mquantity=sodium [0m
+[7m[0mbefore=9.052366337457956e3 [0m[7m[0mafter=9.052366337458247e3 [0m[7m[0mexternal_inputs=2.3329222928325128e-17 [0m
+[7m[0mexternal_outputs=3.0799736780798564e-20 [0m[7m[0minternal_production=0e0 [0m[7m[0minternal_consumption=0e0 [0m
+[7m[0mresidual=2.9103828126891383e-10 [0m[7m[0mabsolute=2.9103828126891383e-10 [0m[7m[0mnormalized_relative=9.999999199472274e-1 [0m
+[7m[0mphysical_limit=2.9103830456733704e-19 [0m[7m[0marithmetic_roundoff_allowance=2.4590757415356495e-11 [0m
+[7m[0meffective_limit=2.45907577063948e-11[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12155:error: [0m[7m[0mhourly [0m[7m[0mcell [0m[7m[0mconservation [0m[7m[0mfailure: [0m[7m[0mcell=0 [0m[7m[0mquantity=potassium [0m
+[7m[0mbefore=9.052366349013822e3 [0m[7m[0mafter=9.052366349013972e3 [0m[7m[0mexternal_inputs=1.1678349355137576e-17 [0m
+[7m[0mexternal_outputs=1.5458250543125272e-20 [0m[7m[0minternal_production=0e0 [0m[7m[0minternal_consumption=0e0 [0m
+[7m[0mresidual=1.4915711942786913e-10 [0m[7m[0mabsolute=1.4915711942786913e-10 [0m[7m[0mnormalized_relative=9.999999218080221e-1 [0m
+[7m[0mphysical_limit=1.4915713109076024e-19 [0m[7m[0marithmetic_roundoff_allowance=2.4590757439031467e-11 [0m
+[7m[0meffective_limit=2.4590757588188598e-11[0m
+[7m [0m[7m [0m[7m[0maudit\runs\issue-105-fix-run\stderr.log:12156:error: [0m[7m[0mhourly [0m[7m[0mcarbon [0m[7m[0mrespiration [0m[7m[0mdiagnostics: [0m
+[7m[0msurface_co2_production_g_c=4.8497326285120525e-5 [0m[7m[0msoil_co2_production_g_c=1.3443209798555034e-1 [0m
+[7m[0msurface_signed_co2_plus_methane_delta_g_c=-4.8497326285120525e-5 [0m
+[7m[0msoil_signed_co2_plus_methane_delta_g_c=-8.59162530231403e-2[0m
+
+
+[Showing lines 4461-4893 of 4893 (50.0KB limit). Full output: C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\tmp\pi-powershell-d17511d53603b3b3.log]

@@ -1,6 +1,6 @@
 # Issue 101 -- layer-scope conservation failures are printed as grid-cell failures, and the printed index is meaningless without the domain
 
-Status: **RESOLVED and CONFIRMED IN PRODUCTION (2026-09-23, `run-026`).** The relabelled row was observed at hour 3,275:
+Status: **RESOLVED, CONFIRMED IN PRODUCTION (`run-026`) and REGRESSION-TESTED (2026-09-23, task `20260923-184059-9b086122`): `zig test src/module_index.zig` -> 4380 passed; 1 skipped; 0 failed, exit 0, 339.0 s.** Pending independent review of that task packet; see "Regression test on a healthy D:" below. Earlier status, retained: RESOLVED and CONFIRMED IN PRODUCTION (2026-09-23, `run-026`). The relabelled row was observed at hour 3,275:
 
 ```
 error: hourly_layer layer_scope conservation failure: layer_scope=2 quantity=nitrogen ...
@@ -42,7 +42,19 @@ This is why `issue-101` is production-confirmed but **not regression-tested**: t
 
 Attempt 3 is the informative one: the suite got a long way into execution before the fault returned. **The change is very likely fine** -- it compiled cleanly twice and ran a full 35-minute production deck -- but "likely" is not "tested", and this issue does not claim otherwise. Per the orchestrator's bounded-attempt rule the problem was reduced (attempt 4) rather than retried whole, and that failed too, so no further attempts should be made until `D:` is stable.
 
-**The single outstanding action for `issue-101` is: run `zig test src/module_index.zig` once on a healthy `D:` and record the pass count.** Nothing else about this issue is open.
+**The single outstanding action for `issue-101` is: run `zig test src/module_index.zig` once on a healthy `D:` and record the pass count.** Nothing else about this issue is open. *(Done 2026-09-23 as attempt 5; see next section.)*
+
+### Regression test on a healthy D: (attempt 5, task `20260923-184059-9b086122`)
+
+Changed condition versus attempts 1-4: `D:` timed healthy immediately before (438 ms for a small two-file `ReadAllBytes` probe) and after (1 ms re-read of the 214 KB `hourly_cell_conservation.zig`) the job. One attempt, no retry.
+
+- Command (registry `zig_targeted_tests`): `uv run ecosys-audit/scripts/run_logged.py --cwd ecosys-ng --out audit/runs/issue-101-regression-20260923-healthy-d --timeout 5400 -- zig test src/module_index.zig`; Zig 0.16.0; from outer root `D:/ecosys-modernization`, outer HEAD `6944efe15be5e149158166e1e279f0e3c55e813f`.
+- Result, from the raw runner output (last line of `stderr.log`): **`4380 passed; 1 skipped; 0 failed.`** 4381 tests enumerated; exit 0; wrapper elapsed 339.009 s (compile was cached; test binary ran from 12:41:25 local).
+- The single SKIP is `2748/4381 validation.production_freezing_column_validation.test.production dual-phase heat residual passes Appendix C checkpoints` -- unrelated to issue-101, and the same 4380/1/0 shape as the 2026-09-22 registry evidence (`run-023`).
+- Raw evidence: `audit/runs/issue-101-regression-20260923-healthy-d/receipt.json`; `stderr.log` SHA-256 `4064dbcdf4530d7297ac07b95d97ce69cba6aed3b0ef6700a24692758bde7ee5`; `stdout.log` empty (`e3b0c442...b855`).
+- Tested source (unmodified vs Git; fix present at `hourly_cell_conservation.zig:2359` `EvaluationScope.domain()` and `:2413` use): `module_index.zig` `2e1f50f28cfca22d11e7fe4eba78b5c130708745e0fd7038a24607160cc8e846`; `validation/hourly_cell_conservation.zig` `a539abe98e733f039fe29785ec01e53b3f756de3cf4400816725f074285d4524`; `validation/layer_local_conservation.zig` `af5f33d1c44d19ea032022f78b989b60f7887299c6d6b02750a89af015cd03f1`.
+
+Limitations: one root (`module_index.zig`) in one mode (Debug default of `zig test`) -- about a twelfth of the release contract's four-root x three-mode matrix, and not an engineering-validation gate pass. No test asserts the relabelled message text (see "Why this was safe to change"), so this suite shows the change broke nothing; the relabelling itself remains confirmed by the `run-026` production row. It does not show that D: is fixed; it shows one healthy window.
 
 ### The cause, measured: `D:` read latency collapses
 

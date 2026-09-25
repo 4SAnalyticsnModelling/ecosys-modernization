@@ -1,0 +1,14 @@
+{
+  "packet_sha256": "d7e9117ca010f900fe68718307d9c561dc483810fde052728f382a3161ed31ad",
+  "summary": "Verified source-structural deduction and log counts: hour-3275 probe observed accepted hour 3275; failing invocation is attempted hour 3276. Log line order was not used as evidence.",
+  "verdict": "PASS",
+  "findings": [],
+  "evidence": [
+    "audit/analysis/issue-100-failing-invocation-is-hour-3276-not-the-probed-hour-3275-2026-09-23.md",
+    "audit/runs/run-025-n100d-raw/combined.log",
+    "audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md",
+    "audit/reviews/review-pi-20260923-203925-5f8b9e80.md",
+    "audit/reviews/carry-forward.md"
+  ],
+  "open_processes": []
+}

@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "D:\\ecosys-modernization\\audit\\runs\\issue-108-ca-probe-deck\\ecosys_ng.exe",
+    "runottawa"
+  ],
+  "cwd": "D:\\ecosys-modernization\\audit\\runs\\issue-108-ca-probe-deck",
+  "parent_pid": 15512,
+  "pid": 17868,
+  "started_unix": 1790263748.500737,
+  "status": "RUNNING",
+  "timeout_seconds": 9000.0
+}

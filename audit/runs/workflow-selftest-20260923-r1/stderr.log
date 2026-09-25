@@ -1,0 +1,75 @@
+test_archive_is_byte_identical_and_replacement_is_bounded (__main__.CheckpointTests.test_archive_is_byte_identical_and_replacement_is_bounded) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_immutable_evidence_cannot_be_overwritten (__main__.CheckpointTests.test_immutable_evidence_cannot_be_overwritten) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_oversized_or_missing_fields_rejected (__main__.CheckpointTests.test_oversized_or_missing_fields_rejected) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_path_escape_rejected (__main__.CheckpointTests.test_path_escape_rejected) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_stale_writer_does_not_replace_handoff (__main__.CheckpointTests.test_stale_writer_does_not_replace_handoff) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_ambiguous_dispatch_is_not_replayed (__main__.ControllerTests.test_ambiguous_dispatch_is_not_replayed) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_complete_cycle_rotates_both_after_closure (__main__.ControllerTests.test_complete_cycle_rotates_both_after_closure) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_external_herdr_control_refused_without_cli_call (__main__.ControllerTests.test_external_herdr_control_refused_without_cli_call) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_missing_seal_does_not_reset_or_approve (__main__.ControllerTests.test_missing_seal_does_not_reset_or_approve) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_reset_requires_new_native_session_id (__main__.ControllerTests.test_reset_requires_new_native_session_id) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_direct_handoff_write_denied (__main__.HookTests.test_direct_handoff_write_denied) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_startup_is_context_only_no_controller_or_model_call (__main__.HookTests.test_startup_is_context_only_no_controller_or_model_call) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_stop_reminder_is_assigned_and_one_shot (__main__.HookTests.test_stop_reminder_is_assigned_and_one_shot) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_verbose_build_requires_raw_log_wrapper (__main__.HookTests.test_verbose_build_requires_raw_log_wrapper) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_launch_failure_has_receipt (__main__.LogTests.test_launch_failure_has_receipt) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_raw_streams_preserved_and_preview_bounded (__main__.LogTests.test_raw_streams_preserved_and_preview_bounded) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_timeout_not_success (__main__.LogTests.test_timeout_not_success) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_author_identity_rejected (__main__.ProtocolTests.test_author_identity_rejected) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_blocked_editor_cannot_become_pass (__main__.ProtocolTests.test_blocked_editor_cannot_become_pass) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_changed_source_invalidates_review (__main__.ProtocolTests.test_changed_source_invalidates_review) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_checkpoint_must_name_task_and_review (__main__.ProtocolTests.test_checkpoint_must_name_task_and_review) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_complete_task_does_not_approve_release (__main__.ProtocolTests.test_complete_task_does_not_approve_release) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_deleted_tracked_source_invalidates_review (__main__.ProtocolTests.test_deleted_tracked_source_invalidates_review) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_modified_packet_rejected (__main__.ProtocolTests.test_modified_packet_rejected) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_new_source_outside_declared_scope_invalidates_review (__main__.ProtocolTests.test_new_source_outside_declared_scope_invalidates_review) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_pass_with_unresolved_findings_rejected (__main__.ProtocolTests.test_pass_with_unresolved_findings_rejected) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_pending_process_cannot_seal (__main__.ProtocolTests.test_pending_process_cannot_seal) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_same_evidence_cannot_repeat_review (__main__.ProtocolTests.test_same_evidence_cannot_repeat_review) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_same_question_and_candidate_cannot_restart_under_new_id (__main__.ProtocolTests.test_same_question_and_candidate_cannot_restart_under_new_id) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_self_review_rejected (__main__.ProtocolTests.test_self_review_rejected) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_source_edit_after_review_prevents_closure (__main__.ProtocolTests.test_source_edit_after_review_prevents_closure) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_stale_raw_evidence_rejected (__main__.ProtocolTests.test_stale_raw_evidence_rejected) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_two_failed_reviews_finalize_without_third_round (__main__.ProtocolTests.test_two_failed_reviews_finalize_without_third_round) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_unknown_result_fields_cannot_override_identity (__main__.ProtocolTests.test_unknown_result_fields_cannot_override_identity) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+test_wrong_packet_digest_rejected (__main__.ProtocolTests.test_wrong_packet_digest_rejected) ... warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+ok
+
+----------------------------------------------------------------------
+Ran 35 tests in 37.134s
+
+OK

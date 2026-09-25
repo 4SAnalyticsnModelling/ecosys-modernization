@@ -1,0 +1,13 @@
+{
+  "candidate_sha256": "255a045d4b880de8baa693da2546ba6535e3bb88d47a57030da03acd12c87432",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "86b367e4e6ea135fc475f9ca33e102144699fa12a0487a99acb8fa1abe33430d"
+  },
+  "new_session": "8d69d16e-8609-43aa-afac-106c88d279af",
+  "previous_sessions": [
+    "5d6b8109-3ecf-45bc-aed9-9162b87db21d"
+  ],
+  "reason": "Finalization-only recovery: prior editor session 5d6b8109 ended after sealing; new editor session 8d69d16e resumed in pane w3:p2. Pi PASS r1 already recorded; no findings. No task-owned processes (task ran no build/test/run). Dirty work is pre-existing workflow/skill/audit infrastructure, preserved untouched; no ecosys-ng source edited. Handoff updated via checkpoint naming task and review path.",
+  "task": "20260923-203925-5f8b9e80"
+}

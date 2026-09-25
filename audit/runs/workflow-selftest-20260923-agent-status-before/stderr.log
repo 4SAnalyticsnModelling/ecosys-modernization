@@ -1,0 +1,14 @@
+test_recorded_agent_status_idle_is_ready (__main__.AdapterTests.test_recorded_agent_status_idle_is_ready) ... FAIL
+
+======================================================================
+FAIL: test_recorded_agent_status_idle_is_ready (__main__.AdapterTests.test_recorded_agent_status_idle_is_ready)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\ecosys-modernization\ecosys-audit\tests\test_herdr_adapter.py", line 56, in test_recorded_agent_status_idle_is_ready
+    self.assertTrue(self.idle())
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 1 test in 0.031s
+
+FAILED (failures=1)

@@ -1,0 +1,62 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md",
+      "sha256": "63042111779d90bab1331eea5eb780975dfcaa0f299f8def7935b487dd2c10fe"
+    },
+    {
+      "path": "audit/runs/issue-101-regression-20260923-healthy-d/receipt.json",
+      "sha256": "44b24a520595807333ca7b7de79fb8b9f1265bb4120f09225eb708e10823c948"
+    },
+    {
+      "path": "audit/runs/issue-101-regression-20260923-healthy-d/stderr.log",
+      "sha256": "4064dbcdf4530d7297ac07b95d97ce69cba6aed3b0ef6700a24692758bde7ee5"
+    },
+    {
+      "path": "audit/runs/issue-101-regression-20260923-healthy-d/stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "audit/handoff.md",
+      "sha256": "20b474e26df9cc4f2f512b8dfcd2a60f1e8096a1979d5a54f89625dd7e75035e"
+    }
+  ],
+  "author_session": "c65623db-4ceb-4168-8b2e-cc87f47744e8",
+  "author_sessions": [
+    "c65623db-4ceb-4168-8b2e-cc87f47744e8"
+  ],
+  "base_sha256": "f4754492ec424bf4758931e4ced7d6b043f35d528630711eb8f099084899b4e2",
+  "candidate_sha256": "fe82bf40673cfb30276a0fcc81ad6f282056bbb158053a634577b38b9caf83be",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "20b474e26df9cc4f2f512b8dfcd2a60f1e8096a1979d5a54f89625dd7e75035e"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md",
+      "audit/runs/issue-101-regression-20260923-healthy-d/receipt.json",
+      "audit/runs/issue-101-regression-20260923-healthy-d/stderr.log",
+      "audit/runs/issue-101-regression-20260923-healthy-d/stdout.log",
+      "audit/handoff.md"
+    ],
+    "next_action": "After review closure, trace issue-100's layer-scope nitrogen ledger (hourly_layer_boundary_ledger.activity) call sites and index space.",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "issue-101 regression test executed once on a healthy D: (changed condition vs failed attempts 1-4). Registry argv `zig test src/module_index.zig` (Zig 0.16.0, Debug default, cwd ecosys-ng) exited 0 in 339.0 s; raw runner summary line: '4380 passed; 1 skipped; 0 failed.' (4381 enumerated; the SKIP is validation.production_freezing_column_validation 'production dual-phase heat residual passes Appendix C checkpoints', unrelated). Tested files are unmodified vs Git and contain the EvaluationScope.domain() fix (hourly_cell_conservation.zig:2359/:2413). No source was changed by this task. One root, one mode only; no gate or release claim."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "One run of the registry argv via run_logged.py completes; raw runner output shows the summary counts; the counts (or failures) are recorded in the issue-101 record with raw-log hashes; independent Pi review of the packet.",
+    "issue": "issue-101",
+    "question": "With D: read latency now healthy (438 ms timed read at 2026-09-23 12:4x vs 5,875/9,376 ms when faulted), does the registered targeted suite `zig test src/module_index.zig` exit 0 with zero failures on the current tree containing the issue-101 EvaluationScope.domain() relabelling, and what are the exact pass/skip/fail counts?",
+    "scope": [
+      "ecosys-ng/src/module_index.zig",
+      "ecosys-ng/src/validation/hourly_cell_conservation.zig",
+      "ecosys-ng/src/validation/layer_local_conservation.zig",
+      "audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md"
+    ],
+    "stop_condition": "Single attempt only (changed condition: healthy D:). If the run times out or freezes (flat CPU corroborated by no log growth and no zig-cache writes), record BLOCKED with the D: latency re-timed after the job; do not retry in this task. Any test failure is recorded as FAIL, not re-run."
+  },
+  "task": "20260923-184059-9b086122"
+}

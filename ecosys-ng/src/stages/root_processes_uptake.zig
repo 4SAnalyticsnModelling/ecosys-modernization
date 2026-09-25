@@ -6,6 +6,8 @@
 
 const std = @import("std");
 const ecosys = @import("ecosys_ng");
+// TEMP_DIAGNOSTIC (`issue-108`): cation probe only.
+const diagnostics = @import("diagnostics.zig");
 
 pub fn applyRootNutrientUptake(context: anytype) !void {
     if (context.plant_roots.* == null or context.plant_water_workspace.* == null or context.plant_root_nutrient_workspace.* == null or context.plant_root_exudation_workspace.* == null) return;
@@ -188,6 +190,7 @@ pub fn applyRootNutrientUptake(context: anytype) !void {
                     std.math.clamp(context.grid.matrix_liquid_water_m3[soil] / context.soil_solver_properties.matrix_bulk_volume_m3[soil], 0, 1)
                 else
                     0;
+                try diagnostics.traceIssue108Cation(context, "before_root_salt", soil, context.executed_weather_hours.* + 1);
                 var soil_salt_content_mol = [ecosys.plant_root_salt_exchange.species_count]f64{
                     context.soil_chemistry.aqueous[soil].aluminum * context.grid.matrix_liquid_water_m3[soil],
                     context.soil_chemistry.aqueous[soil].iron * context.grid.matrix_liquid_water_m3[soil],
@@ -256,6 +259,7 @@ pub fn applyRootNutrientUptake(context: anytype) !void {
                 context.soil_chemistry.aqueous[soil].potassium = soil_salt_content_mol[5] * inverse_water;
                 context.soil_chemistry.aqueous[soil].sulfate = soil_salt_content_mol[6] * inverse_water;
                 context.soil_chemistry.aqueous[soil].chloride = soil_salt_content_mol[7] * inverse_water;
+                try diagnostics.traceIssue108Cation(context, "after_root_salt_writeback", soil, context.executed_weather_hours.* + 1);
             }
             if (competitor_count > 0) {
                 try workspace.stage(roots, soil_pools, competitor_count);

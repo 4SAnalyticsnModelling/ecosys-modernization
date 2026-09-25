@@ -1,0 +1,14 @@
+{
+  "packet_sha256": "1638515993d7a525d9d00cd12e4403aa7497687295cf75a187714722132f75e3",
+  "verdict": "PASS",
+  "summary": "Verified issue-101 regression test run: module_index.zig passed with 4380 passed, 1 skipped, 0 failed (exit 0) in 339.0s. Source tree is clean, EvaluationScope.domain() logic intact, carry-forward documented with no unresolved findings.",
+  "evidence": [
+    "audit/reviews/carry-forward.md",
+    "audit/reviews/review-pi-20260923-184059-9b086122.md",
+    "audit/runs/issue-101-regression-20260923-healthy-d/receipt.json",
+    "audit/runs/issue-101-regression-20260923-healthy-d/stderr.log",
+    "audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md"
+  ],
+  "findings": [],
+  "open_processes": []
+}

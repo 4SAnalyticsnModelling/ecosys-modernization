@@ -1,0 +1,17 @@
+✔ stable bootstrap section works with omitted sections and adds no model request (1.7639ms)
+✔ native registration reports session identity and settled state (7.0328ms)
+✔ reviewer direct file writes stay in lane (6.3994ms)
+✔ handoff writes require checkpoint helper (1.1072ms)
+✔ raw commands route to log wrapper without blocking source search (0.2662ms)
+✔ oversized shell output persists losslessly but response is bounded (3.6958ms)
+✔ source reads and non-text content are never silently shortened (0.676ms)
+✔ missing review gets only one assigned continuation, never an endless loop (6.4888ms)
+✔ valid receipt needs no reminder or extra model turn (6.1774ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 131.1945

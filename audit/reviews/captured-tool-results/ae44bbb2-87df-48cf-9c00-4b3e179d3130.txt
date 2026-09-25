@@ -1,0 +1,183 @@
+warning: in the working copy of 'ecosys-ng/src/stages/diagnostics.zig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ecosys-ng/src/stages/soil_chemistry_convergence.zig', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ecosys-ng/src/validation/hourly_cell_conservation.zig', LF will be replaced by CRLF the next time Git touches it
+diff --git a/ecosys-ng/src/ecosys_ng.zig b/ecosys-ng/src/ecosys_ng.zig
+index bc8f954..59acdc1 100644
+--- a/ecosys-ng/src/ecosys_ng.zig
++++ b/ecosys-ng/src/ecosys_ng.zig
+@@ -6805,6 +6805,7 @@ noinline fn prepareAcceptedHourStorageAndLedgers(driver_context: anytype, advanc
+         "hour_start_snapshot",
+         driver_context.executed_weather_hours.* + 1,
+     );
++    try diagnostics.traceIssue103LayerNitrate(driver_context.hourly_science_context.*, "hour_start_snapshot", driver_context.executed_weather_hours.* + 1);
+     // ISSUE-065 DRY_CARRIER_TRACE (census side): see the `census_after` site
+     // in `acceptHourAndPublish` for rationale. This is the matching
+     // hour-start "before" capture.
+@@ -7385,6 +7386,7 @@ noinline fn advanceFertilizerManagement(
+             "after_fertilizer_publish",
+             driver_context.executed_weather_hours.* + 1,
+         );
++        try diagnostics.traceIssue103LayerNitrate(driver_context.hourly_science_context.*, "after_fertilizer_publish", driver_context.executed_weather_hours.* + 1);
+     }
+ }
+ 
+diff --git a/ecosys-ng/src/stages/diagnostics.zig b/ecosys-ng/src/stages/diagnostics.zig
+index 6bc8df3..22fb37a 100644
+--- a/ecosys-ng/src/stages/diagnostics.zig
++++ b/ecosys-ng/src/stages/diagnostics.zig
+@@ -961,6 +961,58 @@ pub fn traceIssue100LayerAmmonium(context: anytype, label: []const u8, hour: usi
+     );
+ }
+ 
++/// TEMP_DIAGNOSTIC (`issue-103`): hour 3,277 loses 1.0368e-6 g N of nitrate
++/// in the `after_uptake -> after_chemistry` interval, 99% in soil layer 1.
++/// For layers 1 and 2 this prints the census's nitrate terms (transport-matrix
++/// amounts plus dry fertilizer nitrate, `landscape_mass_inventory_nitrogen.zig`)
++/// beside the concentration view `C * water * f` that
++/// `refreshMatrixFromReactionState` would rebuild from, and nitrite in both of
++/// its stores, so a representation mismatch is distinguishable from a real loss.
++pub fn traceIssue103LayerNitrate(context: anytype, label: []const u8, hour: usize) !void {
++    if (@import("builtin").is_test) return;
++    if (hour != ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_target_hour) return;
++    const totals = try reconstructLandscapeMassBalance(context);
++    const n = context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol;
++    const S = ecosys.mineral_nitrogen_transport.Species;
++    inline for (.{ 1, 2 }) |layer| {
++        const matrix = try context.mineral_nitrogen_transport.matrix.cellAmountsConst(layer);
++        const macro = try context.mineral_nitrogen_transport.macropore.cellAmountsConst(layer);
++        const fractions = try context.fertilizer_band.scienceZoneFractionsForFlatIndex(layer);
++        const aqueous = context.soil_chemistry.aqueous[layer];
++        const live_water = context.grid.matrix_liquid_water_m3[layer];
++        const dry_water = context.soil_chemistry.dry_reference_water_m3[layer];
++        const water = if (live_water > context.config.physical_tolerance.water_volume_m3) live_water else dry_water;
++        const dry = context.soil_fertilizer_inventory.soil[layer];
++        std.log.err(
++            "TEMP_DIAGNOSTIC n103_layer{d}[{s}]: hour={d} total_n_g={e} census_no3_g={e} mx_no3_nb_g={e} mx_no3_b_g={e} mx_no2_nb_g={e} mx_no2_b_g={e} mp_no3_nb_g={e} mp_no3_b_g={e} frac_no3_nb={e} frac_no3_b={e} water_m3={e} conc_no3_nb={e} conc_no3_b={e} cview_no3_nb_g={e} cview_no3_b_g={e} rn_no2_nb_g={e} rn_no2_b_g={e} dry_no3_g={e}",
++            .{
++                layer,
++                label,
++                hour,
++                totals.residue_nitrogen_g + totals.organic_nitrogen_g + totals.dinitrogen_nitrogen_g +
++                    totals.ammonium_nitrogen_g + totals.nitrate_nitrogen_g + totals.plant_nitrogen_g,
++                totals.nitrate_nitrogen_g,
++                matrix[@intFromEnum(S.nitrate_non_band)] * n,
++                matrix[@intFromEnum(S.nitrate_band)] * n,
++                matrix[@intFromEnum(S.nitrite_non_band)] * n,
++                matrix[@intFromEnum(S.nitrite_band)] * n,
++                macro[@intFromEnum(S.nitrate_non_band)] * n,
++                macro[@intFromEnum(S.nitrate_band)] * n,
++                fractions.nitrate_non_band,
++                fractions.nitrate_band,
++                water,
++                aqueous.nitrate_non_band,
++                aqueous.nitrate_band,
++                aqueous.nitrate_non_band * water * fractions.nitrate_non_band * n,
++                aqueous.nitrate_band * water * fractions.nitrate_band * n,
++                context.soil_reactive_nitrogen.non_band_nitrite_g_n[layer],
++                context.soil_reactive_nitrogen.band_nitrite_g_n[layer],
++                (dry.broadcast_nitrate_mol_n + dry.banded_nitrate_mol_n) * n,
++            },
++        );
++    }
++}
++
+ pub fn diagnosticAmmoniumOwners_g_n(context: anytype) ![6]f64 {
+     const molar_mass = context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol;
+     var result: [6]f64 = @splat(0);
+diff --git a/ecosys-ng/src/stages/hourly_heat_water_solute.zig b/ecosys-ng/src/stages/hourly_heat_water_solute.zig
+index 166572d..2236071 100644
+--- a/ecosys-ng/src/stages/hourly_heat_water_solute.zig
++++ b/ecosys-ng/src/stages/hourly_heat_water_solute.zig
+@@ -117,6 +117,7 @@ fn captureFailureConservationTrace(context: anytype, point: usize) !void {
+     // TEMP_DIAGNOSTIC (`issue-100`): same point order as the post-NITRO trace.
+     const issue100_labels = [_][]const u8{ "trace0_after_nitro", "trace1_after_post_watsub", "trace2_after_uptake", "trace3_after_chemistry", "trace4_after_transport", "trace5_after_interface_heat", "trace6_after_surface_gas" };
+     try diagnostics.traceIssue100LayerAmmonium(context, if (point < issue100_labels.len) issue100_labels[point] else "trace_other", context.executed_weather_hours.* + 1);
++    try diagnostics.traceIssue103LayerNitrate(context, if (point < issue100_labels.len) issue100_labels[point] else "trace_other", context.executed_weather_hours.* + 1);
+     context.diagnostic_residue_carbon_trace_g_c[point] = totals.residue_carbon_g;
+     context.diagnostic_organic_carbon_trace_g_c[point] = totals.organic_carbon_g;
+     context.diagnostic_inorganic_carbon_trace_g_c[point] = totals.carbon_dioxide_carbon_g;
+@@ -13279,6 +13280,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
+     // named from code structure and every one was refuted by measurement.
+     if (diagnostic_first_hour) try diagnostics.logPhosphorusRepresentation(context, "before_fertilizer_band_prepare_hour");
+     try diagnostics.traceIssue100LayerAmmonium(context, "before_band_prepare", context.executed_weather_hours.* + 1);
++    try diagnostics.traceIssue103LayerNitrate(context, "before_band_prepare", context.executed_weather_hours.* + 1);
+     try ecosys.fertilizer_band_production.prepareHour(
+         context.fertilizer_band,
+         fertilizer_band_hour,
+@@ -13293,6 +13295,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
+     );
+     if (diagnostic_first_hour) try diagnostics.logPhosphorusRepresentation(context, "after_fertilizer_band_prepare_hour");
+     try diagnostics.traceIssue100LayerAmmonium(context, "after_band_prepare", context.executed_weather_hours.* + 1);
++    try diagnostics.traceIssue103LayerNitrate(context, "after_band_prepare", context.executed_weather_hours.* + 1);
+     // Certificate the exact accepted WATSUB physical carriers and accumulated
+     // face/boundary flux buffers before NITRO/HFUNC/UPTAKE/SOLUTE mutate any
+     // downstream scientific owner. Late per-M TRNSFR replay temporarily
+@@ -13309,6 +13312,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
+     // owner carrier mirrors published atomically by each WATSUB acceptance.
+     try diagnostics.traceStageBoundaryLayer0Carbon(context, "before_nitro");
+     try diagnostics.traceIssue100LayerAmmonium(context, "before_nitro", context.executed_weather_hours.* + 1);
++    try diagnostics.traceIssue103LayerNitrate(context, "before_nitro", context.executed_weather_hours.* + 1);
+     // ISSUE-065 (eighteenth pass): directly test the seventeenth addendum's
+     // timing-gap hypothesis by tracing the IMPLIED aqueous phosphate export
+     // (concentration/carrier/zone-fraction recompute, independent of the
+diff --git a/ecosys-ng/src/stages/soil_chemistry_convergence.zig b/ecosys-ng/src/stages/soil_chemistry_convergence.zig
+index 1c39cd6..df539f5 100644
+--- a/ecosys-ng/src/stages/soil_chemistry_convergence.zig
++++ b/ecosys-ng/src/stages/soil_chemistry_convergence.zig
+@@ -1051,6 +1051,7 @@ noinline fn publishHourlyChemistry(
+     // proof that the entire hour-2,894 phosphorus residual must live here if
+     // it is inside this function at all.
+     try diagnostics.tracePhosphateAqueousTransportTermLayer0(context, "before_validate_carrier_volumes");
++    try diagnostics.traceIssue103LayerNitrate(context, "chem_before_validate_carrier_volumes", context.executed_weather_hours.* + 1);
+     try ecosys.soil_aqueous_transport_bridge.validateCarrierVolumesScaled(
+         context.micropore_solute_state,
+         context.grid.matrix_liquid_water_m3,
+@@ -1058,6 +1059,7 @@ noinline fn publishHourlyChemistry(
+         context.config.physical_tolerance.relative,
+     );
+     try diagnostics.tracePhosphateAqueousTransportTermLayer0(context, "after_validate_carrier_volumes");
++    try diagnostics.traceIssue103LayerNitrate(context, "chem_after_validate_carrier_volumes", context.executed_weather_hours.* + 1);
+     try context.mineral_nitrogen_transport.refreshMatrixFromReactionState(
+         context.soil_chemistry,
+         context.soil_reactive_nitrogen,
+@@ -1067,6 +1069,7 @@ noinline fn publishHourlyChemistry(
+         context.config.physical_tolerance.water_volume_m3,
+     );
+     try diagnostics.tracePhosphateAqueousTransportTermLayer0(context, "after_refresh_matrix_from_reaction_state");
++    try diagnostics.traceIssue103LayerNitrate(context, "chem_after_refresh_matrix_from_reaction_state", context.executed_weather_hours.* + 1);
+     try ecosys.soil_aqueous_transport_bridge.exportChemistry(
+         context.soil_chemistry,
+         context.micropore_solute_state,
+@@ -1074,6 +1077,7 @@ noinline fn publishHourlyChemistry(
+         context.config.physical_tolerance.water_volume_m3,
+     );
+     try diagnostics.tracePhosphateAqueousTransportTermLayer0(context, "after_export_chemistry");
++    try diagnostics.traceIssue103LayerNitrate(context, "chem_after_export_chemistry", context.executed_weather_hours.* + 1);
+     try ecosys.fertilizer_band_production.consumeUndissolved(
+         context.allocator,
+         context.fertilizer_band,
+@@ -1085,6 +1089,7 @@ noinline fn publishHourlyChemistry(
+         context.salinity_enabled_by_cell,
+     );
+     try diagnostics.tracePhosphateAqueousTransportTermLayer0(context, "after_consume_undissolved");
++    try diagnostics.traceIssue103LayerNitrate(context, "chem_after_consume_undissolved", context.executed_weather_hours.* + 1);
+ }
+ 
+ fn diagnosticPositiveRootNitrogenUptake_g(state_update: anytype) f64 {
+diff --git a/ecosys-ng/src/validation/hourly_cell_conservation.zig b/ecosys-ng/src/validation/hourly_cell_conservation.zig
+index 92c7150..4e8ddaa 100644
+--- a/ecosys-ng/src/validation/hourly_cell_conservation.zig
++++ b/ecosys-ng/src/validation/hourly_cell_conservation.zig
+@@ -829,10 +829,10 @@ pub fn surfaceEndpointReferenceHeatMegajoules(
+ /// census trace previously cost about 140x throughput). Set once per hour by
+ /// the driver next to `reset()`; zero means silent.
+ pub var diagnostic_nitrogen_trace_hour: usize = 0;
+-/// TEMP_DIAGNOSTIC (`issue-100`): the failing `acceptHourAndPublish` is
++/// TEMP_DIAGNOSTIC (`issue-100`, re-gated for `issue-103` to the new failing hour 3,277): the failing `acceptHourAndPublish` was
+ /// attempted hour 3,276 (`executed_weather_hours + 1`); earlier probes gated on
+ /// 3,275 described the last ACCEPTED hour instead.
+-pub const diagnostic_nitrogen_trace_target_hour: usize = 3276;
++pub const diagnostic_nitrogen_trace_target_hour: usize = 3277;
+ /// TEMP_DIAGNOSTIC (`issue-100`): counts `at_evaluate` invocations in the
+ /// target hour, so a retried hour is distinguishable from a single call.
+ pub var diagnostic_at_evaluate_invocations: usize = 0;

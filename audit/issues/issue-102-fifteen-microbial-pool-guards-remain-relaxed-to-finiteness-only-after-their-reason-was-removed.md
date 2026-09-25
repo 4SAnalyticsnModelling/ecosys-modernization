@@ -1,6 +1,6 @@
 # Issue 102 -- fifteen microbial-pool guards remain relaxed to finiteness-only after the defect that motivated them was fixed another way
 
-Status: **OPEN, NOT INVESTIGATED IN THIS REPO (filed 2026-09-23).** Identified by reading the reference `docs/discrepancy_register.md`, which records this cleanup as explicitly **not done**. The six named modules all still exist in this tree (verified). **Nothing here has been confirmed against the current source** -- this is a worklist item with a precise citation, not a measurement.
+Status: **OPEN (filed 2026-09-23; distribution claim CORRECTED 2026-09-23 by task `20260923-205755-0455a53b`).** The 62 clamp events are NOT confined to the failing hour. They span at least 17 invocations of the hourly biogeochemistry stage, and only 6 fall in the failing attempt (hour 3,276). See `audit/analysis/issue-102-clamp-events-span-many-hours-not-the-failing-hour-2026-09-23.md`. The magnitudes and the clamp-over-strict conclusion stand. Identified by reading the reference `docs/discrepancy_register.md`, which records this cleanup as explicitly **not done**. The six named modules all still exist in this tree (verified). **Nothing here has been confirmed against the current source** -- this is a worklist item with a precise citation, not a measurement.
 
 ## Why this is a criterion-2 item, not housekeeping
 
@@ -62,15 +62,19 @@ Summed from `run-026`'s log (`n101a/combined.log`, 12,048 lines), which needs no
 | largest single event | **3.57077119241048e-6 g C** | `1.3e-7` g C | **27x** |
 | mean event | `1.14393682555586e-6 g C` | -- | -- |
 
-**But the distribution is the real finding: all 62 events fall inside the single failing hour.** They occupy log lines **11911-12011**, immediately before the hour-3,275 conservation rows at 12013 and 12022. **Zero clamp events occur in the preceding 3,274 hours.**
+> **CORRECTED 2026-09-23 (task `20260923-205755-0455a53b`). The paragraph below is WRONG and is kept only for the record.** Key `layer=1 substrate=3 population=5` occurs 17 times. The emitter logs each key at most once per invocation of the serial single-cell hourly stage. So the events span at least 17 invocations, not one hour. Under same-stream log order, 10 events fall on or before the end of day 136 (line 11931, `scene_weather_hours=3264`), 46 in hours 3,265-3,275, and **6 in the failing attempt, hour 3,276**. The conservation rows at 12013/12022 belong to hour 3,276, not 3,275. Full argument: `audit/analysis/issue-102-clamp-events-span-many-hours-not-the-failing-hour-2026-09-23.md`. Provenance: the `n101a/combined.log` cited above is absent from the repo. The preserved `audit/runs/run-025-n100d-raw/combined.log` reproduces 62 events and 7.0924083184463e-5 g C exactly.
+
+~~**But the distribution is the real finding: all 62 events fall inside the single failing hour.** They occupy log lines **11911-12011**, immediately before the hour-3,275 conservation rows at 12013 and 12022. **Zero clamp events occur in the preceding 3,274 hours.**~~
 
 ### What that does and does not change
 
 **It does NOT overturn the register's A-versus-B judgement.** The deciding argument was that a bounded, logged, fully-booked deviation beats permanently widening the accepted state space. Against the run's own carbon inventory -- `organic_carbon_g_c = 4516.65` plus `residue_carbon_g_c = 1394.74`, about `5,911` g C -- the total clamped mass is a relative **`1.2e-8`**. That is negligible, the deviation is booked to CO2 so carbon conservation stays exact, and every event is logged. **The conclusion is robust even though its stated basis was understated by two and a half orders of magnitude.** I am not recommending revisiting the choice, which reverses the concern I raised when filing this issue.
 
-**What it does change** is the characterisation. "`1.3e-7` g C once in 2,677 hours" described a different regime -- the register's frontier was hour 2,677, *before* the day-137 event this tree now reaches. At hour 3,275 the behaviour is qualitatively different: not a rare rounding artefact but **62 negative-carbon events concentrated in one hour**. So the quantity in the register is not wrong for its era; it is simply no longer the operative number, and anyone citing it to justify the clamp today should cite these figures instead.
+**What it does change** is the characterisation. "`1.3e-7` g C once in 2,677 hours" described a different regime -- the register's frontier was hour 2,677, *before* the day-137 event this tree now reaches. Near the frontier the behaviour is qualitatively different: not a rare rounding artefact but **62 negative-carbon events recurring over at least 17 hourly invocations from day 136 onward** (corrected 2026-09-23; this previously read "concentrated in one hour"). So the quantity in the register is not wrong for its era; it is simply no longer the operative number, and anyone citing it to justify the clamp today should cite these figures instead.
 
 ### A lead for `issue-100`, offered as correlation only
+
+> **WEAKENED 2026-09-23 (task `20260923-205755-0455a53b`).** The premise that the clamps and the failure share one hour is refuted. Under same-stream order, only 6 of 62 events (`9.19e-6` g C) fall in the failing attempt, hour 3,276. The clamp also fires in accepted hours that close nitrogen successfully, so co-occurrence does not single out the failing hour. The text below is retained unedited for the record.
 
 **The 62 clamp events and the nitrogen conservation failure occur in the same hour** -- hour 3,275, the deck's day-137 banded NH4 + phosphate application, which `audit/analysis/frontier-hour-3275-...md` establishes is the frontier event for `issue-099` and `issue-100` alike. Microbial nonstructural carbon going negative 62 times in exactly the hour whose nitrogen closure fails is worth knowing.
 

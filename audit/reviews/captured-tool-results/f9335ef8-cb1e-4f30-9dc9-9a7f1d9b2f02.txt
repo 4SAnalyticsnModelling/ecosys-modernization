@@ -1,0 +1,156 @@
+warning: in the working copy of 'audit/handoff.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'audit/issues/issue-102-fifteen-microbial-pool-guards-remain-relaxed-to-finiteness-only-after-their-reason-was-removed.md', LF will be replaced by CRLF the next time Git touches it
+diff --git a/audit/handoff.md b/audit/handoff.md
+index a87b474..a9c0454 100644
+--- a/audit/handoff.md
++++ b/audit/handoff.md
+@@ -1,20 +1,20 @@
+ # Current ecosys audit checkpoint
+ 
+-Operational checkpoint, updated 2026-09-24 at closure of task `20260924-021525-7f4d4a24` (issue-100 FIX: exchange NH4 redistribution on band activation; Pi PASS, `audit/reviews/20260924-021525-7f4d4a24-r1.json`). Previous task `20260924-010818-3a58d636` CLOSED, Pi PASS; committed `e8056dd`.
++Operational checkpoint, updated 2026-09-24 during task `20260924-040425-db7ece4d` (issue-100 aqueous band redistribution; READY_FOR_REVIEW, Pi review pending). Previous task `20260924-021525-7f4d4a24` CLOSED, Pi PASS; committed `a6ce032`.
+ 
+-**Autonomy mode: lead-driven.** The lead runs `begin/seal`, then `herdr_cycle.py peer`, `checkpoint/close`, then `herdr_cycle.py next`. Do not also run `ensure`. See `ecosys-audit/WORKFLOW.md` "Two autonomy modes". The user asked (2026-09-23) for Pi to collaborate on every task until project end, via this reviewer cycle. Older claims remain evidence to verify, not fresh passes.
++**Autonomy mode: lead-driven.** The lead runs `begin/seal`, then `herdr_cycle.py peer`, `checkpoint/close`, then `herdr_cycle.py next`. Do not also run `ensure`. See `ecosys-audit/WORKFLOW.md` "Two autonomy modes". The user asked (2026-09-23) for Pi to collaborate on every task until project end, via this reviewer cycle. Older claims remain evidence to verify, not fresh passes. Commits are local only: the user said never push, which conflicts with "keep online in sync" (flagged to the user).
+ 
+ ## Candidate
+ 
+-Outer Git HEAD `6944efe`, plus uncommitted TEMP_DIAGNOSTIC edits in `ecosys-ng/src/ecosys_ng.zig` and `ecosys-ng/src/validation/hourly_cell_conservation.zig` (logging only, gated on hour 3,276). Obtain current source/input hashes before any gate claim. The staged `audit/runs/*-deck/` copies are untracked scratch and must not be committed.
++Outer Git HEAD `a6ce032`, plus this task's uncommitted edits in `ecosys-ng/src/management/fertilizer_management_dispatch.zig` and `ecosys-ng/src/ecosys_ng.zig`. TEMP_DIAGNOSTIC probes are still in tree (logging only, gated on hour 3,276). Obtain source/input hashes before any gate claim. The `audit/runs/*-deck/` copies are untracked scratch; never commit them.
+ 
+ ## Gates
+ 
+ No gate is promoted. Release remains NOT_ASSESSED / not production-ready. Criteria: `audit/release/v1-release-contract-and-gate-matrix-transcribed-2026-09-23.md`. Horizon 262,920 accepted hours / 30 passes.
+ 
+-**Frontier (reproduced in run-028):** on the required deck `ecosys-ng-prod-examples/`, 3,275 hours accepted, with the failure on attempted hour **3,276**. The release transcription still says 3,274/3,275 and needs a separately scoped correction.
++**Frontier (run-031, required deck `ecosys-ng-prod-examples/`): 3,276 accepted, failing on attempted hour 3,277** (`HourlyCellConservationFailure`, N residual -1.0368e-6 g, limit 2.80e-11, 99% in soil layer 1). This supersedes 3,275/3,276. The release transcription still says 3,274/3,275 and needs a scoped correction.
+ 
+-**Deck finding (run-027):** the frontier depends on two audit-era edits to the contract-protected deck: `9253d3b` (runtime ceiling 100->200, issue-015) and `5add7de` (NH4 extract multiplier, oracle-cited `starte.f:189`). The pre-audit fixture `ecosys-ng/src/validation/testdata/ottawa/` (PROVENANCE-exact) stops at hour 3,162 on `SoilWaterSolverStagnated`. Gate 1 input equivalence must name the release deck and justify both edits. The 100->200 edit may need a user science-policy decision.
++**Deck finding (run-027):** the frontier depends on two audit-era edits to the protected deck: `9253d3b` (runtime ceiling 100->200, issue-015) and `5add7de` (oracle-cited `starte.f:189`). The PROVENANCE-exact fixture `ecosys-ng/src/validation/testdata/ottawa/` stops at hour 3,162 (`SoilWaterSolverStagnated`). Gate 1 must name the release deck and justify both edits; the 100->200 edit may need a user science-policy decision.
+ 
+ Engineering validation needs four roots x three modes plus cross-platform compiles; every test figure here is one root, one mode.
+ 
+@@ -22,25 +22,22 @@ Engineering validation needs four roots x three modes plus cross-platform compil
+ 
+ Lead: Claude `editor` (w3:p2). Pi `reviewer` (w3:p4) writes only under `audit/reviews/`.
+ 
+-- **issue-100** (task `20260923-231724-7fa23089` CLOSED, Pi PASS; issue itself open). run-028: prediction CONFIRMED. At hour 3,276 there is one `at_evaluate` invocation with `cell0_in=1.6566363548027827`. The ledger reconciles exactly: fertilizer 1.65 + second producer 6.63635e-3 = 1.6566364. **The ledger is right; storage is short 0.0677 g N** (4.1% of the application), in layer_scope 2. The "no third fertilizer census" puzzle is resolved: hour 3,276 dispatches, and the census commits only accepted hours. Record: `audit/runs/run-028-issue-100-hour-3276-ledger-reconciles-exactly-storage-census-is-short-2026-09-23.md`.
+-  - Decomposition (task `20260924-010007-ad41eae1`): residual = **-0.0769951 g N from hour start to after_nitro** (4.666% of the single banded-NH4 1.65 g application, `f25fr98` 17051998) **+0.0093311 g N in the post_watsub->uptake interval** (NH4 +0.01027, NO3 -0.00094, plant N unchanged) - 1.55e-6 chemistry; sum = residual to 4e-13. Record: `audit/analysis/issue-100-hour-3276-residual-decomposed-by-stage-interval-2026-09-24.md`.
+-  - **Localized (run-029, task `20260924-010818-3a58d636`): -0.0671468785 g N (99.2%) is a zone-fraction RE-BASE at the fertilizer publish.** Non-band exchange NH4 per-Mg conc (4.60242) and soil mass are bit-identical, frac_nh4_nb goes 1 -> 0.98355, no pending band transfer is queued, and predicted = observed to 1e-16. Remaining: -5.17e-4 publish->prepare; NITRO/uptake +-0.009331 cancels. Record: `audit/runs/run-029-issue-100-fertilizer-band-creation-rebases-non-band-exchange-ammonium-2026-09-24.md`.
+-  - **FIX (run-030, task `20260924-021525-7f4d4a24`):** `hour1.f:322-334` XN4T redistribution added at NH4-band activation (`fertilizer_management_dispatch.redistributeExchangeAmmoniumOnBandChange`). Suite 4383/1/0 (one root, Debug). Publish step goes to -1e-13 and the residual from -0.06767 to **-5.1866e-4** (as predicted); **frontier unchanged, fail 3,276**. Queued: aqueous ZNH4S/B and NO3-band halves of the same legacy block. Record: `audit/runs/run-030-issue-100-band-activation-exchange-redistribution-removes-99pct-of-residual-2026-09-24.md`.
+-- **issue-099**: zone-water divisor fix validated in run-023; phosphate activation still open.
+-- **issue-093**: queued source question on per-pool litter-carbon composition.
+-- **issue-097**: bulk import of reference docs unresolved. Do not copy 1,043 files.
+-- **issue-102**: CLOSED (Pi PASS). The clamp events span many hours; 6 fall in hour 3,276.
+-- **issue-101**: CLOSED (Pi PASS).
+-- Queued: reconcile the fixture/prod-deck divergence and find the authorization record for the `9253d3b` deck edit.
++- **issue-100** (hour-3,276 N closure): **resolved in production by two legacy-cited fixes**. Band activation now redistributes all `hour1.f:322-334` (NH4: XN4/XNB, ZNH4S/B, ZNH3S/B) and `:376-384` (NO3: ZNO3S/B, ZNO2S/B) state onto the new zone fractions. ISSUE-090 had ported only the geometry. Chain of evidence: run-028 (the ledger is exact) -> analysis decomposition -> run-029 (exchange re-base 99.2%) -> run-030 (exchange fix, residual -5.19e-4) -> run-031 (aqueous fix, hour 3,276 accepted). Suite 4385/1/0. The pre-registered run-031 prediction that 3,276 would still fail was REFUTED favorably. Records: `audit/runs/run-028*` to `run-031*`.
++  - Open: the NITRO/uptake ±0.00933 g N transient (cancels within the hour); TEMP_DIAGNOSTIC probe cleanup.
++- **new frontier question (hour 3,277)**: -1.0368e-6 g N, layer 1 -1.0266e-6, layer 2 -1.02e-8. Not assumed to share the issue-100 mechanism.
++- **issue-099**: phosphate activation still open (PO4 band activation is not in `activateBandFromApplication`; compare `hour1.f:390+`).
++- **issue-093**: litter-carbon composition. **issue-097**: reference-doc import unresolved (do not copy 1,043 files).
++- **issue-101/102**: CLOSED (Pi PASS).
++- Queued: fixture/prod-deck divergence and an authorization record for the `9253d3b` deck edit.
+ 
+-Rejected approaches: inferring execution order from log position; treating externally killed processes as regressions; repeating compiles during a filesystem fault; treating unit checks as production evidence; reading `== 3275`-gated probe output as failing-hour evidence; staging production runs from the testdata fixture (use `ecosys-ng-prod-examples/`); a relative exe path under `run_logged.py` (WinError 2; use an absolute path).
++Rejected approaches: inferring execution order from log position; treating externally killed processes as regressions; compiling during a D: fault; unit checks as production evidence; reading probes gated on an accepted hour as failing-hour evidence; staging runs from the testdata fixture; a relative exe path under `run_logged.py` (use absolute); an existing `--out` directory (`run_logged.py` refuses it with WinError 183).
+ 
+ ## Next action
+ 
+-Explain the remaining -5.171e-4 g N between the fertilizer publish and `prepareHour` (mostly `aq_nh4_nb_g` -4.986e-4). First read what runs in that interval (rg/excerpts between the publish and `prepareHour` in `hourly_heat_water_solute.zig`) before any run. The aqueous half of `hour1.f:326-332` (ZNH4S/B, ZNH3S/B) is the prime legacy candidate.
++Hour 3,277: re-gate the TEMP_DIAGNOSTIC N probes (`diagnostic_nitrogen_trace_target_hour`) to 3,277 and add layer 1 to the layer probe. Pre-register a prediction and run ONE ReleaseSafe prod-deck run to localize the -1.04e-6 g N to a bracket and pool. First check with rg whether hour 3,277 has a management event or a PO4 band change.
+ 
+-Use `audit/manifest/command_registry.json` for argv and `run_logged.py` for durable logs. Time a D: read before and after each long job (24 ms healthy at 2026-09-23 17:00). A task PASS is not a release PASS.
++Use `audit/manifest/command_registry.json` for argv and `run_logged.py` for logs. Time a D: read before and after long jobs (6 ms healthy 2026-09-24). A task PASS is not a release PASS.
+ 
+ ## Recovery
+ 
+-No task-owned processes (run-027/028 exited). No detached controller (lead-driven). Pi `audit/reviews/carry-forward.md`: no pending assignments. History: `audit/history/INDEX.md`. Do not load the archive on startup.
++No task-owned processes (run-031 exited). No detached controller (lead-driven). Pi `audit/reviews/carry-forward.md`: no pending assignments. History: `audit/history/INDEX.md`. Do not load the archive on startup.
+diff --git a/audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md b/audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md
+index acd783b..2711535 100644
+--- a/audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md
++++ b/audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md
+@@ -1,6 +1,11 @@
+ # Issue 100 -- hour 3,275 nitrogen conservation residual: 0.0677 g N unaccounted, about 4% of the banded ammonium application
+ 
+-Status: **OPEN, MEASURED, NOT DIAGNOSED (filed 2026-09-22, adversarial Claude/Pi session; sharpened later the same day).** This is the frontier blocker exposed once `issue-099`'s fix restored phosphorus and calcium conservation (`run-023`). Filed with the measurement and two numeric leads, deliberately **without** a proposed mechanism -- `issue-099` cost eight wrong mechanisms proposed from source reading, and the discipline this round is to measure first.
++Status: **OPEN, NOT DIAGNOSED -- and the failing hour is re-identified (2026-09-23, task `20260923-203925-5f8b9e80`, pending Pi review).**
++- **The failure is on attempted hour 3,276, with 3,275 accepted** (1-based census / `executed_weather_hours+1` numbering), not 3,275.
++- **Every `== 3275`-gated probe in run-024, run-025 and run-026 therefore observed the last *accepted* hour.** Their ledger/pointer figures are not evidence about the failing hour.
++- Deduced from source structure and log counts, not log order: `audit/analysis/issue-100-failing-invocation-is-hour-3276-not-the-probed-hour-3275-2026-09-23.md`. Read that before the rest of this file.
++
++Earlier status, retained: OPEN, MEASURED, NOT DIAGNOSED (filed 2026-09-22, adversarial Claude/Pi session; sharpened later the same day). This is the frontier blocker exposed once `issue-099`'s fix restored phosphorus and calcium conservation (`run-023`). Filed with the measurement and two numeric leads, deliberately **without** a proposed mechanism -- `issue-099` cost eight wrong mechanisms proposed from source reading, and the discipline this round is to measure first.
+ 
+ **The filename's "about 4% of the banded ammonium input" framing is superseded and should not be read as the characterisation.** Hour 3,275 emits **two** failure rows, indexed 0 and 2, losing the **same absolute mass** -- `0.0676655386` g N, agreeing to eleven significant figures, and byte-reproducible across two different binaries.
+ 
+diff --git a/audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md b/audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md
+index 9dfe1b5..69f1a4a 100644
+--- a/audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md
++++ b/audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md
+@@ -1,6 +1,6 @@
+ # Issue 101 -- layer-scope conservation failures are printed as grid-cell failures, and the printed index is meaningless without the domain
+ 
+-Status: **RESOLVED and CONFIRMED IN PRODUCTION (2026-09-23, `run-026`).** The relabelled row was observed at hour 3,275:
++Status: **RESOLVED, CONFIRMED IN PRODUCTION (`run-026`) and REGRESSION-TESTED (2026-09-23, task `20260923-184059-9b086122`): `zig test src/module_index.zig` -> 4380 passed; 1 skipped; 0 failed, exit 0, 339.0 s.** Pending independent review of that task packet; see "Regression test on a healthy D:" below. Earlier status, retained: RESOLVED and CONFIRMED IN PRODUCTION (2026-09-23, `run-026`). The relabelled row was observed at hour 3,275:
+ 
+ ```
+ error: hourly_layer layer_scope conservation failure: layer_scope=2 quantity=nitrogen ...
+@@ -42,7 +42,19 @@ This is why `issue-101` is production-confirmed but **not regression-tested**: t
+ 
+ Attempt 3 is the informative one: the suite got a long way into execution before the fault returned. **The change is very likely fine** -- it compiled cleanly twice and ran a full 35-minute production deck -- but "likely" is not "tested", and this issue does not claim otherwise. Per the orchestrator's bounded-attempt rule the problem was reduced (attempt 4) rather than retried whole, and that failed too, so no further attempts should be made until `D:` is stable.
+ 
+-**The single outstanding action for `issue-101` is: run `zig test src/module_index.zig` once on a healthy `D:` and record the pass count.** Nothing else about this issue is open.
++**The single outstanding action for `issue-101` is: run `zig test src/module_index.zig` once on a healthy `D:` and record the pass count.** Nothing else about this issue is open. *(Done 2026-09-23 as attempt 5; see next section.)*
++
++### Regression test on a healthy D: (attempt 5, task `20260923-184059-9b086122`)
++
++Changed condition versus attempts 1-4: `D:` timed healthy immediately before (438 ms for a small two-file `ReadAllBytes` probe) and after (1 ms re-read of the 214 KB `hourly_cell_conservation.zig`) the job. One attempt, no retry.
++
++- Command (registry `zig_targeted_tests`): `uv run ecosys-audit/scripts/run_logged.py --cwd ecosys-ng --out audit/runs/issue-101-regression-20260923-healthy-d --timeout 5400 -- zig test src/module_index.zig`; Zig 0.16.0; from outer root `D:/ecosys-modernization`, outer HEAD `6944efe15be5e149158166e1e279f0e3c55e813f`.
++- Result, from the raw runner output (last line of `stderr.log`): **`4380 passed; 1 skipped; 0 failed.`** 4381 tests enumerated; exit 0; wrapper elapsed 339.009 s (compile was cached; test binary ran from 12:41:25 local).
++- The single SKIP is `2748/4381 validation.production_freezing_column_validation.test.production dual-phase heat residual passes Appendix C checkpoints` -- unrelated to issue-101, and the same 4380/1/0 shape as the 2026-09-22 registry evidence (`run-023`).
++- Raw evidence: `audit/runs/issue-101-regression-20260923-healthy-d/receipt.json`; `stderr.log` SHA-256 `4064dbcdf4530d7297ac07b95d97ce69cba6aed3b0ef6700a24692758bde7ee5`; `stdout.log` empty (`e3b0c442...b855`).
++- Tested source (unmodified vs Git; fix present at `hourly_cell_conservation.zig:2359` `EvaluationScope.domain()` and `:2413` use): `module_index.zig` `2e1f50f28cfca22d11e7fe4eba78b5c130708745e0fd7038a24607160cc8e846`; `validation/hourly_cell_conservation.zig` `a539abe98e733f039fe29785ec01e53b3f756de3cf4400816725f074285d4524`; `validation/layer_local_conservation.zig` `af5f33d1c44d19ea032022f78b989b60f7887299c6d6b02750a89af015cd03f1`.
++
++Limitations: one root (`module_index.zig`) in one mode (Debug default of `zig test`) -- about a twelfth of the release contract's four-root x three-mode matrix, and not an engineering-validation gate pass. No test asserts the relabelled message text (see "Why this was safe to change"), so this suite shows the change broke nothing; the relabelling itself remains confirmed by the `run-026` production row. It does not show that D: is fixed; it shows one healthy window.
+ 
+ ### The cause, measured: `D:` read latency collapses
+ 
+diff --git a/audit/issues/issue-102-fifteen-microbial-pool-guards-remain-relaxed-to-finiteness-only-after-their-reason-was-removed.md b/audit/issues/issue-102-fifteen-microbial-pool-guards-remain-relaxed-to-finiteness-only-after-their-reason-was-removed.md
+index 42d26a2..e926321 100644
+--- a/audit/issues/issue-102-fifteen-microbial-pool-guards-remain-relaxed-to-finiteness-only-after-their-reason-was-removed.md
++++ b/audit/issues/issue-102-fifteen-microbial-pool-guards-remain-relaxed-to-finiteness-only-after-their-reason-was-removed.md
+@@ -1,6 +1,6 @@
+ # Issue 102 -- fifteen microbial-pool guards remain relaxed to finiteness-only after the defect that motivated them was fixed another way
+ 
+-Status: **OPEN, NOT INVESTIGATED IN THIS REPO (filed 2026-09-23).** Identified by reading the reference `docs/discrepancy_register.md`, which records this cleanup as explicitly **not done**. The six named modules all still exist in this tree (verified). **Nothing here has been confirmed against the current source** -- this is a worklist item with a precise citation, not a measurement.
++Status: **OPEN (filed 2026-09-23; distribution claim CORRECTED 2026-09-23 by task `20260923-205755-0455a53b`).** The 62 clamp events are NOT confined to the failing hour. They span at least 17 invocations of the hourly biogeochemistry stage, and only 6 fall in the failing attempt (hour 3,276). See `audit/analysis/issue-102-clamp-events-span-many-hours-not-the-failing-hour-2026-09-23.md`. The magnitudes and the clamp-over-strict conclusion stand. Identified by reading the reference `docs/discrepancy_register.md`, which records this cleanup as explicitly **not done**. The six named modules all still exist in this tree (verified). **Nothing here has been confirmed against the current source** -- this is a worklist item with a precise citation, not a measurement.
+ 
+ ## Why this is a criterion-2 item, not housekeeping
+ 
+@@ -62,16 +62,20 @@ Summed from `run-026`'s log (`n101a/combined.log`, 12,048 lines), which needs no
+ | largest single event | **3.57077119241048e-6 g C** | `1.3e-7` g C | **27x** |
+ | mean event | `1.14393682555586e-6 g C` | -- | -- |
+ 
+-**But the distribution is the real finding: all 62 events fall inside the single failing hour.** They occupy log lines **11911-12011**, immediately before the hour-3,275 conservation rows at 12013 and 12022. **Zero clamp events occur in the preceding 3,274 hours.**
++> **CORRECTED 2026-09-23 (task `20260923-205755-0455a53b`). The paragraph below is WRONG and is kept only for the record.** Key `layer=1 substrate=3 population=5` occurs 17 times. The emitter logs each key at most once per invocation of the serial single-cell hourly stage. So the events span at least 17 invocations, not one hour. Under same-stream log order, 10 events fall on or before the end of day 136 (line 11931, `scene_weather_hours=3264`), 46 in hours 3,265-3,275, and **6 in the failing attempt, hour 3,276**. The conservation rows at 12013/12022 belong to hour 3,276, not 3,275. Full argument: `audit/analysis/issue-102-clamp-events-span-many-hours-not-the-failing-hour-2026-09-23.md`. Provenance: the `n101a/combined.log` cited above is absent from the repo. The preserved `audit/runs/run-025-n100d-raw/combined.log` reproduces 62 events and 7.0924083184463e-5 g C exactly.
++
++~~**But the distribution is the real finding: all 62 events fall inside the single failing hour.** They occupy log lines **11911-12011**, immediately before the hour-3,275 conservation rows at 12013 and 12022. **Zero clamp events occur in the preceding 3,274 hours.**~~
+ 
+ ### What that does and does not change
+ 
+ **It does NOT overturn the register's A-versus-B judgement.** The deciding argument was that a bounded, logged, fully-booked deviation beats permanently widening the accepted state space. Against the run's own carbon inventory -- `organic_carbon_g_c = 4516.65` plus `residue_carbon_g_c = 1394.74`, about `5,911` g C -- the total clamped mass is a relative **`1.2e-8`**. That is negligible, the deviation is booked to CO2 so carbon conservation stays exact, and every event is logged. **The conclusion is robust even though its stated basis was understated by two and a half orders of magnitude.** I am not recommending revisiting the choice, which reverses the concern I raised when filing this issue.
+ 
+-**What it does change** is the characterisation. "`1.3e-7` g C once in 2,677 hours" described a different regime -- the register's frontier was hour 2,677, *before* the day-137 event this tree now reaches. At hour 3,275 the behaviour is qualitatively different: not a rare rounding artefact but **62 negative-carbon events concentrated in one hour**. So the quantity in the register is not wrong for its era; it is simply no longer the operative number, and anyone citing it to justify the clamp today should cite these figures instead.
++**What it does change** is the characterisation. "`1.3e-7` g C once in 2,677 hours" described a different regime -- the register's frontier was hour 2,677, *before* the day-137 event this tree now reaches. Near the frontier the behaviour is qualitatively different: not a rare rounding artefact but **62 negative-carbon events recurring over at least 17 hourly invocations from day 136 onward** (corrected 2026-09-23; this previously read "concentrated in one hour"). So the quantity in the register is not wrong for its era; it is simply no longer the operative number, and anyone citing it to justify the clamp today should cite these figures instead.
+ 
+ ### A lead for `issue-100`, offered as correlation only
+ 
++> **WEAKENED 2026-09-23 (task `20260923-205755-0455a53b`).** The premise that the clamps and the failure share one hour is refuted. Under same-stream order, only 6 of 62 events (`9.19e-6` g C) fall in the failing attempt, hour 3,276. The clamp also fires in accepted hours that close nitrogen successfully, so co-occurrence does not single out the failing hour. The text below is retained unedited for the record.
++
+ **The 62 clamp events and the nitrogen conservation failure occur in the same hour** -- hour 3,275, the deck's day-137 banded NH4 + phosphate application, which `audit/analysis/frontier-hour-3275-...md` establishes is the frontier event for `issue-099` and `issue-100` alike. Microbial nonstructural carbon going negative 62 times in exactly the hour whose nitrogen closure fails is worth knowing.
+ 
+ **This is co-occurrence in a single hour, not a mechanism.** The clamp is on **carbon** and the residual is in **nitrogen**; the clamp is fully booked so it cannot itself be the nitrogen leak; and one hour is one sample. It is recorded as a lead because `issue-100` currently has none, not because it is evidence.

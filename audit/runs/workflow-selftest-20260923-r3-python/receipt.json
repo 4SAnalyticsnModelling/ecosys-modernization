@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "ecosys-audit/tests/test_workflow.py",
+    "-v"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 99.259,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 15888,
+  "pid": 27944,
+  "started_unix": 1790185960.427699,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/workflow-selftest-20260923-r3-python/stderr.log",
+    "sha256": "bd8ded81c98a6538069eb651557cc77c63e34ae4975e1aa3d7c81fa29c34d8f3"
+  },
+  "stdout": {
+    "path": "audit/runs/workflow-selftest-20260923-r3-python/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

@@ -1,0 +1,41 @@
+{
+  "candidate_sha256": "fe82bf40673cfb30276a0fcc81ad6f282056bbb158053a634577b38b9caf83be",
+  "evidence": [
+    "audit/reviews/carry-forward.md",
+    "audit/reviews/review-pi-20260923-184059-9b086122.md",
+    "audit/runs/issue-101-regression-20260923-healthy-d/receipt.json",
+    "audit/runs/issue-101-regression-20260923-healthy-d/stderr.log",
+    "audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md"
+  ],
+  "findings": [],
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "open_processes": [],
+  "packet_sha256": "1638515993d7a525d9d00cd12e4403aa7497687295cf75a187714722132f75e3",
+  "review_artifacts": [
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    },
+    {
+      "path": "audit/reviews/review-pi-20260923-184059-9b086122.md",
+      "sha256": "262696c633d9472128a42e9e2efec4fb9163c463ff4e54a1ec3f24827087ee8f"
+    },
+    {
+      "path": "audit/runs/issue-101-regression-20260923-healthy-d/receipt.json",
+      "sha256": "44b24a520595807333ca7b7de79fb8b9f1265bb4120f09225eb708e10823c948"
+    },
+    {
+      "path": "audit/runs/issue-101-regression-20260923-healthy-d/stderr.log",
+      "sha256": "4064dbcdf4530d7297ac07b95d97ce69cba6aed3b0ef6700a24692758bde7ee5"
+    },
+    {
+      "path": "audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md",
+      "sha256": "63042111779d90bab1331eea5eb780975dfcaa0f299f8def7935b487dd2c10fe"
+    }
+  ],
+  "reviewer_session": "01a0cf87-f7b7-7106-93f9-a3e8f62132d1",
+  "revision": 1,
+  "summary": "Verified issue-101 regression test run: module_index.zig passed with 4380 passed, 1 skipped, 0 failed (exit 0) in 339.0s. Source tree is clean, EvaluationScope.domain() logic intact, carry-forward documented with no unresolved findings.",
+  "task": "20260923-184059-9b086122",
+  "verdict": "PASS"
+}

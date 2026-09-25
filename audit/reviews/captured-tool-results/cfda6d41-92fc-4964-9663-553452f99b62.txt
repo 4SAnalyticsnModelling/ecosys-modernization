@@ -1,0 +1,386 @@
+
+audit\runs\issue-108-fix-run\stderr.log:9026:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2889 cell=0 layer=0 
+[7mquantity=carbon [0m[7m[0mresidual=3.497202527569243e-15 [0m[7m[0mabsolute=3.497202527569243e-15 [0m[7m[0macceptance_limit=9.821294130808082e-10 [0m
+[7m[0marithmetic_roundoff_allowance=8.132226164966297e-14 [0m[7m[0meffective_acceptance_limit=9.822107353424579e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9037:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2889 cell=0 layer=1 
+[7mquantity=carbon [0m[7m[0mresidual=1.5355772209346696e-14 [0m[7m[0mabsolute=1.5355772209346696e-14 [0m
+[7m[0macceptance_limit=1.3605211249510085e-10 [0m[7m[0marithmetic_roundoff_allowance=2.944497273836706e-13 [0m
+[7m[0meffective_acceptance_limit=1.363465622224845e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9048:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2889 cell=0 layer=2 
+[7mquantity=carbon [0m[7m[0mresidual=5.2458037913538647e-14 [0m[7m[0mabsolute=5.2458037913538647e-14 [0m
+[7m[0macceptance_limit=1.4028215950300583e-10 [0m[7m[0marithmetic_roundoff_allowance=1.371901598520239e-12 [0m
+[7m[0meffective_acceptance_limit=1.4165406110152606e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9059:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2889 cell=0 layer=3 
+[7mquantity=carbon [0m[7m[0mresidual=-1.32463484625589e-13 [0m[7m[0mabsolute=1.32463484625589e-13 [0m[7m[0macceptance_limit=1.1064880512297329e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.4169116734295144e-12 [0m[7m[0meffective_acceptance_limit=1.120657167964028e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9070:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2889 cell=0 layer=4 
+[7mquantity=carbon [0m[7m[0mresidual=1.232555724151041e-13 [0m[7m[0mabsolute=1.232555724151041e-13 [0m[7m[0macceptance_limit=9.732166003758522e-11 [0m
+[7m[0marithmetic_roundoff_allowance=1.6133260882826045e-12 [0m[7m[0meffective_acceptance_limit=9.893498612586783e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9081:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2889 cell=0 layer=5 
+[7mquantity=carbon [0m[7m[0mresidual=2.39717967698283e-13 [0m[7m[0mabsolute=2.39717967698283e-13 [0m[7m[0macceptance_limit=7.892881866778695e-11 [0m
+[7m[0marithmetic_roundoff_allowance=1.9490683442107456e-12 [0m[7m[0meffective_acceptance_limit=8.08778870119977e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9092:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2889 cell=0 layer=6 
+[7mquantity=carbon [0m[7m[0mresidual=7.632783294297951e-15 [0m[7m[0mabsolute=7.632783294297951e-15 [0m[7m[0macceptance_limit=4.736284257186485e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.274628906218705e-12 [0m[7m[0meffective_acceptance_limit=4.963747147808356e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9103:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2889 cell=0 layer=7 
+[7mquantity=carbon [0m[7m[0mresidual=4.29248650513081e-14 [0m[7m[0mabsolute=4.29248650513081e-14 [0m[7m[0macceptance_limit=1.23170034831601e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.2585942205037507e-12 [0m[7m[0meffective_acceptance_limit=1.4575597703663852e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9114:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2889 cell=0 layer=8 
+[7mquantity=carbon [0m[7m[0mresidual=2.2780822367396425e-14 [0m[7m[0mabsolute=2.2780822367396425e-14 [0m[7m[0macceptance_limit=8.704844956414643e-13 [0m
+[7m[0marithmetic_roundoff_allowance=1.237606056050302e-12 [0m[7m[0meffective_acceptance_limit=2.108090551691766e-12 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9125:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2889 cell=0 layer=9 
+[7mquantity=carbon [0m[7m[0mresidual=-1.2673556323318513e-13 [0m[7m[0mabsolute=1.2673556323318513e-13 [0m
+[7m[0macceptance_limit=3.2231971883925955e-13 [0m[7m[0marithmetic_roundoff_allowance=8.692893191133776e-13 [0m
+[7m[0meffective_acceptance_limit=1.191609037952637e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9136:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2889 cell=0 layer=10 
+[7mquantity=carbon [0m[7m[0mresidual=7.065436560468874e-14 [0m[7m[0mabsolute=7.065436560468874e-14 [0m[7m[0macceptance_limit=8.91109191058279e-14 [0m
+[7m[0marithmetic_roundoff_allowance=2.6732058647023264e-13 [0m[7m[0meffective_acceptance_limit=3.5643150557606054e-13 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9147:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2889 cell=0 layer=11 
+[7mquantity=carbon [0m[7m[0mresidual=-1.8524820620622467e-14 [0m[7m[0mabsolute=1.8524820620622467e-14 [0m
+[7m[0macceptance_limit=1.9407428912360998e-14 [0m[7m[0marithmetic_roundoff_allowance=8.010876392623877e-14 [0m
+[7m[0meffective_acceptance_limit=9.951619283859978e-14 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9282:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2890 cell=0 layer=0 
+[7mquantity=carbon [0m[7m[0mresidual=8.826273045769994e-15 [0m[7m[0mabsolute=8.826273045769994e-15 [0m[7m[0macceptance_limit=9.764772790604568e-10 [0m
+[7m[0marithmetic_roundoff_allowance=8.34676947012362e-14 [0m[7m[0meffective_acceptance_limit=9.76560746755158e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9293:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2890 cell=0 layer=1 
+[7mquantity=carbon [0m[7m[0mresidual=-5.576095141179849e-14 [0m[7m[0mabsolute=5.576095141179849e-14 [0m[7m[0macceptance_limit=1.3992456071141163e-10 [0m
+[7m[0marithmetic_roundoff_allowance=2.9078716863045084e-13 [0m[7m[0meffective_acceptance_limit=1.402153478800421e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9304:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2890 cell=0 layer=2 
+[7mquantity=carbon [0m[7m[0mresidual=-1.214306433183765e-14 [0m[7m[0mabsolute=1.214306433183765e-14 [0m[7m[0macceptance_limit=1.5017328561824501e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.369658800216814e-12 [0m[7m[0meffective_acceptance_limit=1.5154294441846183e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9315:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2890 cell=0 layer=3 
+[7mquantity=carbon [0m[7m[0mresidual=-1.33809630042947e-13 [0m[7m[0mabsolute=1.33809630042947e-13 [0m[7m[0macceptance_limit=1.1871622439415102e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.4057913687131927e-12 [0m[7m[0meffective_acceptance_limit=1.2012201576286422e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9326:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2890 cell=0 layer=4 
+[7mquantity=carbon [0m[7m[0mresidual=-3.108624468950438e-14 [0m[7m[0mabsolute=3.108624468950438e-14 [0m[7m[0macceptance_limit=1.0232994559850212e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.6137784409683595e-12 [0m[7m[0meffective_acceptance_limit=1.0394372403947048e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9337:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2890 cell=0 layer=5 
+[7mquantity=carbon [0m[7m[0mresidual=1.9729703981674618e-13 [0m[7m[0mabsolute=1.9729703981674618e-13 [0m[7m[0macceptance_limit=8.1396876116305e-11 [0m
+[7m[0marithmetic_roundoff_allowance=1.9490083677265252e-12 [0m[7m[0meffective_acceptance_limit=8.334588448403152e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9348:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2890 cell=0 layer=6 
+[7mquantity=carbon [0m[7m[0mresidual=2.0698026625964872e-13 [0m[7m[0mabsolute=2.0698026625964872e-13 [0m[7m[0macceptance_limit=4.840252051963997e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.2746070426073617e-12 [0m[7m[0meffective_acceptance_limit=5.067712756224733e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9359:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2890 cell=0 layer=7 
+[7mquantity=carbon [0m[7m[0mresidual=-5.1780628396169703e-14 [0m[7m[0mabsolute=5.1780628396169703e-14 [0m
+[7m[0macceptance_limit=1.2246131682322093e-11 [0m[7m[0marithmetic_roundoff_allowance=2.2585913611342246e-12 [0m
+[7m[0meffective_acceptance_limit=1.4504723043456317e-11 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9370:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2890 cell=0 layer=8 
+[7mquantity=carbon [0m[7m[0mresidual=1.0938396455967281e-13 [0m[7m[0mabsolute=1.0938396455967281e-13 [0m[7m[0macceptance_limit=8.450974516232734e-13 [0m
+[7m[0marithmetic_roundoff_allowance=1.237605521805642e-12 [0m[7m[0meffective_acceptance_limit=2.0827029734289155e-12 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9381:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2890 cell=0 layer=9 
+[7mquantity=carbon [0m[7m[0mresidual=-3.751637672397279e-15 [0m[7m[0mabsolute=3.751637672397279e-15 [0m[7m[0macceptance_limit=3.1127910979741273e-13 [0m
+[7m[0marithmetic_roundoff_allowance=8.692890729817063e-13 [0m[7m[0meffective_acceptance_limit=1.180568182779119e-12 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9392:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2890 cell=0 layer=10 
+[7mquantity=carbon [0m[7m[0mresidual=3.7782182439084766e-14 [0m[7m[0mabsolute=3.7782182439084766e-14 [0m[7m[0macceptance_limit=8.640673630590239e-14 [0m
+[7m[0marithmetic_roundoff_allowance=2.673204774627542e-13 [0m[7m[0meffective_acceptance_limit=3.537272137686566e-13 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9403:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2890 cell=0 layer=11 
+[7mquantity=carbon [0m[7m[0mresidual=2.531949530679839e-14 [0m[7m[0mabsolute=2.531949530679839e-14 [0m[7m[0macceptance_limit=1.8828366306616026e-14 [0m
+[7m[0marithmetic_roundoff_allowance=8.010872519111798e-14 [0m[7m[0meffective_acceptance_limit=9.8937091497734e-14 [0m
+[7m[0mphysical_accepted=false [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9539:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2891 cell=0 layer=0 
+[7mquantity=carbon [0m[7m[0mresidual=2.1094237467877974e-15 [0m[7m[0mabsolute=2.1094237467877974e-15 [0m[7m[0macceptance_limit=9.639316672787789e-10 [0m
+[7m[0marithmetic_roundoff_allowance=7.809149727704298e-14 [0m[7m[0meffective_acceptance_limit=9.640097587760558e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9550:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2891 cell=0 layer=1 
+[7mquantity=carbon [0m[7m[0mresidual=5.728750807065808e-14 [0m[7m[0mabsolute=5.728750807065808e-14 [0m[7m[0macceptance_limit=1.4210962057322283e-10 [0m
+[7m[0marithmetic_roundoff_allowance=2.896903858441213e-13 [0m[7m[0meffective_acceptance_limit=1.4239931095906696e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9561:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2891 cell=0 layer=2 
+[7mquantity=carbon [0m[7m[0mresidual=1.5355772209346696e-13 [0m[7m[0mabsolute=1.5355772209346696e-13 [0m[7m[0macceptance_limit=1.578512110130106e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.3745708353257006e-12 [0m[7m[0meffective_acceptance_limit=1.5922578184833632e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9572:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2891 cell=0 layer=3 
+[7mquantity=carbon [0m[7m[0mresidual=1.162542284660617e-13 [0m[7m[0mabsolute=1.162542284660617e-13 [0m[7m[0macceptance_limit=1.2565945388616252e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.414569888536158e-12 [0m[7m[0meffective_acceptance_limit=1.2707402377469867e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9583:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2891 cell=0 layer=4 
+[7mquantity=carbon [0m[7m[0mresidual=-2.6439961331448103e-13 [0m[7m[0mabsolute=2.6439961331448103e-13 [0m
+[7m[0macceptance_limit=1.0806557080215977e-10 [0m[7m[0marithmetic_roundoff_allowance=1.6079217039528048e-12 [0m
+[7m[0meffective_acceptance_limit=1.0967349250611257e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9594:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2891 cell=0 layer=5 
+[7mquantity=carbon [0m[7m[0mresidual=8.617412339262387e-14 [0m[7m[0mabsolute=8.617412339262387e-14 [0m[7m[0macceptance_limit=8.465119287728721e-11 [0m
+[7m[0marithmetic_roundoff_allowance=1.948946007461957e-12 [0m[7m[0meffective_acceptance_limit=8.660013888474917e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9605:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2891 cell=0 layer=6 
+[7mquantity=carbon [0m[7m[0mresidual=4.2988182458181257e-13 [0m[7m[0mabsolute=4.2988182458181257e-13 [0m[7m[0macceptance_limit=5.025670362404103e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.2745817305302775e-12 [0m[7m[0meffective_acceptance_limit=5.25312853545713e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9616:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2891 cell=0 layer=7 
+[7mquantity=carbon [0m[7m[0mresidual=2.318423231173483e-13 [0m[7m[0mabsolute=2.318423231173483e-13 [0m[7m[0macceptance_limit=1.2395136437509887e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.2585891460751886e-12 [0m[7m[0meffective_acceptance_limit=1.4653725583585077e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9627:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2891 cell=0 layer=8 
+[7mquantity=carbon [0m[7m[0mresidual=2.0427778392451135e-14 [0m[7m[0mabsolute=2.0427778392451135e-14 [0m[7m[0macceptance_limit=8.221150312198539e-13 [0m
+[7m[0marithmetic_roundoff_allowance=1.2376050127950938e-12 [0m[7m[0meffective_acceptance_limit=2.0597200440149477e-12 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9638:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2891 cell=0 layer=9 
+[7mquantity=carbon [0m[7m[0mresidual=-6.347415540224055e-14 [0m[7m[0mabsolute=6.347415540224055e-14 [0m[7m[0macceptance_limit=3.0133672019199006e-13 [0m
+[7m[0marithmetic_roundoff_allowance=8.69288836911286e-13 [0m[7m[0meffective_acceptance_limit=1.170625557103276e-12 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9649:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2891 cell=0 layer=10 
+[7mquantity=carbon [0m[7m[0mresidual=2.403897800219365e-14 [0m[7m[0mabsolute=2.403897800219365e-14 [0m[7m[0macceptance_limit=8.383188825302588e-14 [0m
+[7m[0marithmetic_roundoff_allowance=2.673203719794514e-13 [0m[7m[0meffective_acceptance_limit=3.511522602324773e-13 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9660:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2891 cell=0 layer=11 
+[7mquantity=carbon [0m[7m[0mresidual=-1.7347438047675412e-15 [0m[7m[0mabsolute=1.7347438047675412e-15 [0m
+[7m[0macceptance_limit=1.8332988341154843e-14 [0m[7m[0marithmetic_roundoff_allowance=8.010868848149362e-14 [0m
+[7m[0meffective_acceptance_limit=9.844167682264846e-14 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9795:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2892 cell=0 layer=0 
+[7mquantity=carbon [0m[7m[0mresidual=-5.9396931817445875e-15 [0m[7m[0mabsolute=5.9396931817445875e-15 [0m
+[7m[0macceptance_limit=9.540239416306374e-10 [0m[7m[0marithmetic_roundoff_allowance=8.46726609091701e-14 [0m
+[7m[0meffective_acceptance_limit=9.541086142915465e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9806:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2892 cell=0 layer=1 
+[7mquantity=carbon [0m[7m[0mresidual=-2.5632274081033302e-14 [0m[7m[0mabsolute=2.5632274081033302e-14 [0m
+[7m[0macceptance_limit=1.415558961314693e-10 [0m[7m[0marithmetic_roundoff_allowance=2.859434327620771e-13 [0m
+[7m[0meffective_acceptance_limit=1.4184183956423138e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9817:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2892 cell=0 layer=2 
+[7mquantity=carbon [0m[7m[0mresidual=9.500733533229777e-14 [0m[7m[0mabsolute=9.500733533229777e-14 [0m[7m[0macceptance_limit=1.615565958356316e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.3728735730989592e-12 [0m[7m[0meffective_acceptance_limit=1.6292946940873057e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9828:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2892 cell=0 layer=3 
+[7mquantity=carbon [0m[7m[0mresidual=-1.7219559111936178e-13 [0m[7m[0mabsolute=1.7219559111936178e-13 [0m
+[7m[0macceptance_limit=1.3047642090001953e-10 [0m[7m[0marithmetic_roundoff_allowance=1.4100044802979109e-12 [0m
+[7m[0meffective_acceptance_limit=1.3188642538031743e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9839:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2892 cell=0 layer=4 
+[7mquantity=carbon [0m[7m[0mresidual=2.3975266216780255e-13 [0m[7m[0mabsolute=2.3975266216780255e-13 [0m
+[7m[0macceptance_limit=1.1327562111088808e-10 [0m[7m[0marithmetic_roundoff_allowance=1.6098968761199026e-12 [0m
+[7m[0meffective_acceptance_limit=1.1488551798700798e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9850:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2892 cell=0 layer=5 
+[7mquantity=carbon [0m[7m[0mresidual=9.169748294013402e-14 [0m[7m[0mabsolute=9.169748294013402e-14 [0m[7m[0macceptance_limit=8.842644884418666e-11 [0m
+[7m[0marithmetic_roundoff_allowance=1.948880234781005e-12 [0m[7m[0meffective_acceptance_limit=9.037532907896766e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9861:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2892 cell=0 layer=6 
+[7mquantity=carbon [0m[7m[0mresidual=9.097236852717572e-14 [0m[7m[0mabsolute=9.097236852717572e-14 [0m[7m[0macceptance_limit=5.280833636692996e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.274551321549268e-12 [0m[7m[0meffective_acceptance_limit=5.5082887688479224e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9872:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2892 cell=0 layer=7 
+[7mquantity=carbon [0m[7m[0mresidual=-5.016924375933485e-13 [0m[7m[0mabsolute=5.016924375933485e-13 [0m[7m[0macceptance_limit=1.2798800955149244e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.2585871388768913e-12 [0m[7m[0meffective_acceptance_limit=1.5057388094026136e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9883:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2892 cell=0 layer=8 
+[7mquantity=carbon [0m[7m[0mresidual=2.7370412793853438e-14 [0m[7m[0mabsolute=2.7370412793853438e-14 [0m[7m[0macceptance_limit=8.078468593029299e-13 [0m
+[7m[0marithmetic_roundoff_allowance=1.23760453373994e-12 [0m[7m[0meffective_acceptance_limit=2.0454513930428698e-12 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9894:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2892 cell=0 layer=9 
+[7mquantity=carbon [0m[7m[0mresidual=-1.0944314844576336e-13 [0m[7m[0mabsolute=1.0944314844576336e-13 [0m
+[7m[0macceptance_limit=2.9246315180555494e-13 [0m[7m[0marithmetic_roundoff_allowance=8.692886095410303e-13 [0m
+[7m[0meffective_acceptance_limit=1.1617517613465853e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9905:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2892 cell=0 layer=10 
+[7mquantity=carbon [0m[7m[0mresidual=3.269192777816468e-14 [0m[7m[0mabsolute=3.269192777816468e-14 [0m[7m[0macceptance_limit=8.141180562947344e-14 [0m
+[7m[0marithmetic_roundoff_allowance=2.6732027106659763e-13 [0m[7m[0meffective_acceptance_limit=3.487320766960711e-13 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:9916:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2892 cell=0 layer=11 
+[7mquantity=carbon [0m[7m[0mresidual=-1.7022494186252034e-14 [0m[7m[0mabsolute=1.7022494186252034e-14 [0m
+[7m[0macceptance_limit=1.7772332423318658e-14 [0m[7m[0marithmetic_roundoff_allowance=8.010865321389515e-14 [0m
+[7m[0meffective_acceptance_limit=9.788098563721381e-14 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10051:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2893 cell=0 layer=0 
+[7mquantity=carbon [0m[7m[0mresidual=4.718447854656915e-15 [0m[7m[0mabsolute=4.718447854656915e-15 [0m[7m[0macceptance_limit=9.516624256952208e-10 [0m
+[7m[0marithmetic_roundoff_allowance=8.058718156638882e-14 [0m[7m[0meffective_acceptance_limit=9.517430128767872e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10062:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2893 cell=0 layer=1 
+[7mquantity=carbon [0m[7m[0mresidual=-5.592748486549226e-14 [0m[7m[0mabsolute=5.592748486549226e-14 [0m[7m[0macceptance_limit=1.4054264385168937e-10 [0m
+[7m[0marithmetic_roundoff_allowance=2.8952165330248225e-13 [0m[7m[0meffective_acceptance_limit=1.4083216550499185e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10073:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2893 cell=0 layer=2 
+[7mquantity=carbon [0m[7m[0mresidual=8.511247262532606e-14 [0m[7m[0mabsolute=8.511247262532606e-14 [0m[7m[0macceptance_limit=1.6327118564746097e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.360049530052084e-12 [0m[7m[0meffective_acceptance_limit=1.6463123517751306e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10084:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2893 cell=0 layer=3 
+[7mquantity=carbon [0m[7m[0mresidual=-6.36435348866371e-14 [0m[7m[0mabsolute=6.36435348866371e-14 [0m[7m[0macceptance_limit=1.3365011733932035e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.4054841282198645e-12 [0m[7m[0meffective_acceptance_limit=1.3505560146754022e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10095:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2893 cell=0 layer=4 
+[7mquantity=carbon [0m[7m[0mresidual=2.3488155864725968e-14 [0m[7m[0mabsolute=2.3488155864725968e-14 [0m
+[7m[0macceptance_limit=1.1744982789732522e-10 [0m[7m[0marithmetic_roundoff_allowance=1.60801686844912e-12 [0m
+[7m[0meffective_acceptance_limit=1.1905784476577434e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10106:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2893 cell=0 layer=5 
+[7mquantity=carbon [0m[7m[0mresidual=1.9954871088856407e-13 [0m[7m[0mabsolute=1.9954871088856407e-13 [0m[7m[0macceptance_limit=9.229515638916677e-11 [0m
+[7m[0marithmetic_roundoff_allowance=1.948811074267217e-12 [0m[7m[0meffective_acceptance_limit=9.424396746343399e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10117:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2893 cell=0 layer=6 
+[7mquantity=carbon [0m[7m[0mresidual=-4.125623453976601e-13 [0m[7m[0mabsolute=4.125623453976601e-13 [0m[7m[0macceptance_limit=5.552087443953058e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.2745143943371287e-12 [0m[7m[0meffective_acceptance_limit=5.7795388833867706e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10128:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2893 cell=0 layer=7 
+[7mquantity=carbon [0m[7m[0mresidual=-1.8281817032450576e-13 [0m[7m[0mabsolute=1.8281817032450576e-13 [0m
+[7m[0macceptance_limit=1.3459930433990905e-11 [0m[7m[0marithmetic_roundoff_allowance=2.2585848077944456e-12 [0m
+[7m[0meffective_acceptance_limit=1.571851524178535e-11 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10139:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2893 cell=0 layer=8 
+[7mquantity=carbon [0m[7m[0mresidual=1.4805588395908065e-13 [0m[7m[0mabsolute=1.4805588395908065e-13 [0m[7m[0macceptance_limit=8.05845042289253e-13 [0m
+[7m[0marithmetic_roundoff_allowance=1.237604072040502e-12 [0m[7m[0meffective_acceptance_limit=2.043449114329755e-12 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10150:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2893 cell=0 layer=9 
+[7mquantity=carbon [0m[7m[0mresidual=-5.357877769923691e-14 [0m[7m[0mabsolute=5.357877769923691e-14 [0m[7m[0macceptance_limit=2.872236115655631e-13 [0m
+[7m[0marithmetic_roundoff_allowance=8.692883932952545e-13 [0m[7m[0meffective_acceptance_limit=1.1565120048608176e-12 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10161:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2893 cell=0 layer=10 
+[7mquantity=carbon [0m[7m[0mresidual=-2.3364990497931615e-14 [0m[7m[0mabsolute=2.3364990497931615e-14 [0m
+[7m[0macceptance_limit=7.921236236828647e-14 [0m[7m[0marithmetic_roundoff_allowance=2.673201742856083e-13 [0m
+[7m[0meffective_acceptance_limit=3.4653253665389474e-13 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10172:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2893 cell=0 layer=11 
+[7mquantity=carbon [0m[7m[0mresidual=-9.867849132217874e-15 [0m[7m[0mabsolute=9.867849132217874e-15 [0m[7m[0macceptance_limit=1.7259553113366988e-14 [0m
+[7m[0marithmetic_roundoff_allowance=8.010861949906383e-14 [0m[7m[0meffective_acceptance_limit=9.736817261243082e-14 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10307:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2894 cell=0 layer=0 
+[7mquantity=carbon [0m[7m[0mresidual=-5.162537064506978e-15 [0m[7m[0mabsolute=5.162537064506978e-15 [0m[7m[0macceptance_limit=9.510556118314686e-10 [0m
+[7m[0marithmetic_roundoff_allowance=8.285156505309633e-14 [0m[7m[0meffective_acceptance_limit=9.511384633965217e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10318:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2894 cell=0 layer=1 
+[7mquantity=carbon [0m[7m[0mresidual=-2.6222080062865416e-14 [0m[7m[0mabsolute=2.6222080062865416e-14 [0m
+[7m[0macceptance_limit=1.390079753120449e-10 [0m[7m[0marithmetic_roundoff_allowance=2.884226208294232e-13 [0m
+[7m[0meffective_acceptance_limit=1.3929639793287435e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10329:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2894 cell=0 layer=2 
+[7mquantity=carbon [0m[7m[0mresidual=1.4432899320127035e-15 [0m[7m[0mabsolute=1.4432899320127035e-15 [0m[7m[0macceptance_limit=1.642453215032942e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.356117140056266e-12 [0m[7m[0meffective_acceptance_limit=1.6560143864335047e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10340:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2894 cell=0 layer=3 
+[7mquantity=carbon [0m[7m[0mresidual=-3.6769198796804403e-13 [0m[7m[0mabsolute=3.6769198796804403e-13 [0m
+[7m[0macceptance_limit=1.3560372393761733e-10 [0m[7m[0marithmetic_roundoff_allowance=1.4002040485075234e-12 [0m
+[7m[0meffective_acceptance_limit=1.3700392798612486e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10351:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2894 cell=0 layer=4 
+[7mquantity=carbon [0m[7m[0mresidual=-1.348782197041487e-13 [0m[7m[0mabsolute=1.348782197041487e-13 [0m[7m[0macceptance_limit=1.205553584578132e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.6123688434154358e-12 [0m[7m[0meffective_acceptance_limit=1.2216772730122864e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10362:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2894 cell=0 layer=5 
+[7mquantity=carbon [0m[7m[0mresidual=-5.2111093218343285e-15 [0m[7m[0mabsolute=5.2111093218343285e-15 [0m
+[7m[0macceptance_limit=9.577921321501729e-11 [0m[7m[0marithmetic_roundoff_allowance=1.9487388056085896e-12 [0m
+[7m[0meffective_acceptance_limit=9.772795202062588e-11 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10373:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2894 cell=0 layer=6 
+[7mquantity=carbon [0m[7m[0mresidual=9.805004030916109e-14 [0m[7m[0mabsolute=9.805004030916109e-14 [0m[7m[0macceptance_limit=5.815597451974769e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.2744709996649295e-12 [0m[7m[0meffective_acceptance_limit=6.043044551941262e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10384:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2894 cell=0 layer=7 
+[7mquantity=carbon [0m[7m[0mresidual=-8.219813718568503e-14 [0m[7m[0mabsolute=8.219813718568503e-14 [0m[7m[0macceptance_limit=1.4317207654861362e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.2585815424771174e-12 [0m[7m[0meffective_acceptance_limit=1.657578919733848e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10395:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2894 cell=0 layer=8 
+[7mquantity=carbon [0m[7m[0mresidual=2.7480784575012462e-14 [0m[7m[0mabsolute=2.7480784575012462e-14 [0m[7m[0macceptance_limit=8.253112699271896e-13 [0m
+[7m[0marithmetic_roundoff_allowance=1.2376036254160286e-12 [0m[7m[0meffective_acceptance_limit=2.062914895343218e-12 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10406:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2894 cell=0 layer=9 
+[7mquantity=carbon [0m[7m[0mresidual=3.1113132903382024e-14 [0m[7m[0mabsolute=3.1113132903382024e-14 [0m
+[7m[0macceptance_limit=2.8679448318014724e-13 [0m[7m[0marithmetic_roundoff_allowance=8.692881828749195e-13 [0m
+[7m[0meffective_acceptance_limit=1.1560826660550668e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10417:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2894 cell=0 layer=10 
+[7mquantity=carbon [0m[7m[0mresidual=2.0799524212342102e-14 [0m[7m[0mabsolute=2.0799524212342102e-14 [0m[7m[0macceptance_limit=7.806652897957643e-14 [0m
+[7m[0marithmetic_roundoff_allowance=2.6732008222289936e-13 [0m[7m[0meffective_acceptance_limit=3.453866112024758e-13 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10428:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2894 cell=0 layer=11 
+[7mquantity=carbon [0m[7m[0mresidual=-2.2029903942732965e-15 [0m[7m[0mabsolute=2.2029903942732965e-15 [0m
+[7m[0macceptance_limit=1.6800251163555968e-14 [0m[7m[0marithmetic_roundoff_allowance=8.010858718727296e-14 [0m
+[7m[0meffective_acceptance_limit=9.690883835082893e-14 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10563:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2895 cell=0 layer=0 
+[7mquantity=carbon [0m[7m[0mresidual=0e0 [0m[7m[0mabsolute=0e0 [0m[7m[0macceptance_limit=9.531547402734541e-10 [0m
+[7m[0marithmetic_roundoff_allowance=8.082677490516837e-14 [0m[7m[0meffective_acceptance_limit=9.532355670483592e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10574:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2895 cell=0 layer=1 
+[7mquantity=carbon [0m[7m[0mresidual=1.0769163338864018e-14 [0m[7m[0mabsolute=1.0769163338864018e-14 [0m[7m[0macceptance_limit=1.396163013785458e-10 [0m
+[7m[0marithmetic_roundoff_allowance=2.9241772084940724e-13 [0m[7m[0meffective_acceptance_limit=1.3990871909939521e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10585:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2895 cell=0 layer=2 
+[7mquantity=carbon [0m[7m[0mresidual=-4.0967229608668276e-14 [0m[7m[0mabsolute=4.0967229608668276e-14 [0m
+[7m[0macceptance_limit=1.5360285720477593e-10 [0m[7m[0marithmetic_roundoff_allowance=1.3607222433359306e-12 [0m
+[7m[0meffective_acceptance_limit=1.5496357944811187e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10596:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2895 cell=0 layer=3 
+[7mquantity=carbon [0m[7m[0mresidual=1.0036416142611415e-13 [0m[7m[0mabsolute=1.0036416142611415e-13 [0m
+[7m[0macceptance_limit=1.2459816278967562e-10 [0m[7m[0marithmetic_roundoff_allowance=1.3926801338191494e-12 [0m
+[7m[0meffective_acceptance_limit=1.2599084292349476e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10607:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2895 cell=0 layer=4 
+[7mquantity=carbon [0m[7m[0mresidual=-3.053390873475337e-13 [0m[7m[0mabsolute=3.053390873475337e-13 [0m[7m[0macceptance_limit=1.119418871261139e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.6087427061768012e-12 [0m[7m[0meffective_acceptance_limit=1.135506298322907e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10618:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2895 cell=0 layer=5 
+[7mquantity=carbon [0m[7m[0mresidual=-5.6180754492984875e-14 [0m[7m[0mabsolute=5.6180754492984875e-14 [0m
+[7m[0macceptance_limit=9.043511750793626e-11 [0m[7m[0marithmetic_roundoff_allowance=1.9486550109117654e-12 [0m
+[7m[0meffective_acceptance_limit=9.238377251884802e-11 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10629:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2895 cell=0 layer=6 
+[7mquantity=carbon [0m[7m[0mresidual=-1.0085682289329156e-14 [0m[7m[0mabsolute=1.0085682289329156e-14 [0m
+[7m[0macceptance_limit=5.725453530106518e-11 [0m[7m[0marithmetic_roundoff_allowance=2.2744183128311935e-12 [0m
+[7m[0meffective_acceptance_limit=5.952895361389638e-11 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10640:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2895 cell=0 layer=7 
+[7mquantity=carbon [0m[7m[0mresidual=-4.940934814068321e-13 [0m[7m[0mabsolute=4.940934814068321e-13 [0m[7m[0macceptance_limit=1.5301945967123077e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.258576902402609e-12 [0m[7m[0meffective_acceptance_limit=1.7560522869525687e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10651:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2895 cell=0 layer=8 
+[7mquantity=carbon [0m[7m[0mresidual=-1.4646167308465796e-13 [0m[7m[0mabsolute=1.4646167308465796e-13 [0m[7m[0macceptance_limit=8.66738529963599e-13 [0m
+[7m[0marithmetic_roundoff_allowance=1.2376031632167687e-12 [0m[7m[0meffective_acceptance_limit=2.1043416931803677e-12 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10662:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2895 cell=0 layer=9 
+[7mquantity=carbon [0m[7m[0mresidual=3.0582028337673706e-13 [0m[7m[0mabsolute=3.0582028337673706e-13 [0m
+[7m[0macceptance_limit=2.9501558513107546e-13 [0m[7m[0marithmetic_roundoff_allowance=8.692879768010649e-13 [0m
+[7m[0meffective_acceptance_limit=1.1643035619321403e-12 [0m[7m[0mphysical_accepted=false [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10673:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2895 cell=0 layer=10 
+[7mquantity=carbon [0m[7m[0mresidual=5.521286010855275e-14 [0m[7m[0mabsolute=5.521286010855275e-14 [0m[7m[0macceptance_limit=7.831479068405929e-14 [0m
+[7m[0marithmetic_roundoff_allowance=2.67319993041118e-13 [0m[7m[0meffective_acceptance_limit=3.456347837251773e-13 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10684:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2895 cell=0 layer=11 
+[7mquantity=carbon [0m[7m[0mresidual=8.560057366711546e-15 [0m[7m[0mabsolute=8.560057366711546e-15 [0m[7m[0macceptance_limit=1.660787680567409e-14 [0m
+[7m[0marithmetic_roundoff_allowance=8.010855640726809e-14 [0m[7m[0meffective_acceptance_limit=9.671643321294218e-14 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10819:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 layer=0 
+[7mquantity=carbon [0m[7m[0mresidual=2.886579864025407e-15 [0m[7m[0mabsolute=2.886579864025407e-15 [0m[7m[0macceptance_limit=9.516987563035217e-10 [0m
+[7m[0marithmetic_roundoff_allowance=8.395895982093371e-14 [0m[7m[0meffective_acceptance_limit=9.517827152633427e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10830:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 layer=1 
+[7mquantity=carbon [0m[7m[0mresidual=4.6129766673175254e-14 [0m[7m[0mabsolute=4.6129766673175254e-14 [0m
+[7m[0macceptance_limit=1.3687540505885124e-10 [0m[7m[0marithmetic_roundoff_allowance=2.8660559088766504e-13 [0m
+[7m[0meffective_acceptance_limit=1.371620106497389e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10841:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 layer=2 
+[7mquantity=carbon [0m[7m[0mresidual=1.4166445794216997e-13 [0m[7m[0mabsolute=1.4166445794216997e-13 [0m
+[7m[0macceptance_limit=1.5285211033150567e-10 [0m[7m[0marithmetic_roundoff_allowance=1.3692891611806205e-12 [0m
+[7m[0meffective_acceptance_limit=1.542213994926863e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10852:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 layer=3 
+[7mquantity=carbon [0m[7m[0mresidual=-4.638650574761982e-13 [0m[7m[0mabsolute=4.638650574761982e-13 [0m[7m[0macceptance_limit=1.2423767912299813e-10 [0m
+[7m[0marithmetic_roundoff_allowance=1.3915329563103187e-12 [0m[7m[0meffective_acceptance_limit=1.2562921207930844e-10 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10863:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 layer=4 
+[7mquantity=carbon [0m[7m[0mresidual=2.0959622926142174e-13 [0m[7m[0mabsolute=2.0959622926142174e-13 [0m
+[7m[0macceptance_limit=1.1154326015824569e-10 [0m[7m[0marithmetic_roundoff_allowance=1.6106593663371319e-12 [0m
+[7m[0meffective_acceptance_limit=1.1315391952458282e-10 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10874:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 layer=5 
+[7mquantity=carbon [0m[7m[0mresidual=-9.943434964299058e-15 [0m[7m[0mabsolute=9.943434964299058e-15 [0m[7m[0macceptance_limit=9.07365147112679e-11 [0m
+[7m[0marithmetic_roundoff_allowance=1.948590645717334e-12 [0m[7m[0meffective_acceptance_limit=9.268510535698524e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10885:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 layer=6 
+[7mquantity=carbon [0m[7m[0mresidual=-6.159343868272771e-13 [0m[7m[0mabsolute=6.159343868272771e-13 [0m[7m[0macceptance_limit=5.835388563187187e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.2743796598845967e-12 [0m[7m[0meffective_acceptance_limit=6.062826529175647e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10896:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 layer=7 
+[7mquantity=carbon [0m[7m[0mresidual=-9.43021702393132e-14 [0m[7m[0mabsolute=9.43021702393132e-14 [0m[7m[0macceptance_limit=1.6306941605869074e-11 [0m
+[7m[0marithmetic_roundoff_allowance=2.2585705469485647e-12 [0m[7m[0meffective_acceptance_limit=1.8565512152817638e-11 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10907:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 layer=8 
+[7mquantity=carbon [0m[7m[0mresidual=-8.74957658408837e-14 [0m[7m[0mabsolute=8.74957658408837e-14 [0m[7m[0macceptance_limit=9.317343433042648e-13 [0m
+[7m[0marithmetic_roundoff_allowance=1.2376026715306767e-12 [0m[7m[0meffective_acceptance_limit=2.1693370148349415e-12 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10918:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 layer=9 
+[7mquantity=carbon [0m[7m[0mresidual=-2.4365795839309534e-13 [0m[7m[0mabsolute=2.4365795839309534e-13 [0m
+[7m[0macceptance_limit=3.116577043855244e-13 [0m[7m[0marithmetic_roundoff_allowance=8.692877609874869e-13 [0m
+[7m[0meffective_acceptance_limit=1.1809454653730113e-12 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10929:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 layer=10 
+[7mquantity=carbon [0m[7m[0mresidual=-4.3542914499733465e-15 [0m[7m[0mabsolute=4.3542914499733465e-15 [0m
+[7m[0macceptance_limit=8.114772471488623e-14 [0m[7m[0marithmetic_roundoff_allowance=2.6731990606868534e-13 [0m
+[7m[0meffective_acceptance_limit=3.484676307835716e-13 [0m[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+audit\runs\issue-108-fix-run\stderr.log:10940:info: DRY_CARRIER_TRACE site=per_layer_closure hour=2896 cell=0 layer=11 
+[7mquantity=carbon [0m[7m[0mresidual=1.5328162323397995e-14 [0m[7m[0mabsolute=1.5328162323397995e-14 [0m[7m[0macceptance_limit=1.672157508480334e-14 [0m
+[7m[0marithmetic_roundoff_allowance=8.010852660808366e-14 [0m[7m[0meffective_acceptance_limit=9.6830101692887e-14 [0m
+[7m[0mphysical_accepted=true [0m[7m[0maccepted=true[0m
+

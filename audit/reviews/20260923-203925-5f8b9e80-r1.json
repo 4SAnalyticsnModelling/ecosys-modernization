@@ -1,0 +1,41 @@
+{
+  "candidate_sha256": "255a045d4b880de8baa693da2546ba6535e3bb88d47a57030da03acd12c87432",
+  "evidence": [
+    "audit/analysis/issue-100-failing-invocation-is-hour-3276-not-the-probed-hour-3275-2026-09-23.md",
+    "audit/runs/run-025-n100d-raw/combined.log",
+    "audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md",
+    "audit/reviews/review-pi-20260923-203925-5f8b9e80.md",
+    "audit/reviews/carry-forward.md"
+  ],
+  "findings": [],
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "open_processes": [],
+  "packet_sha256": "d7e9117ca010f900fe68718307d9c561dc483810fde052728f382a3161ed31ad",
+  "review_artifacts": [
+    {
+      "path": "audit/analysis/issue-100-failing-invocation-is-hour-3276-not-the-probed-hour-3275-2026-09-23.md",
+      "sha256": "64f908f3eafbffd64bad01e29a79a2f78022e53b171840b0b3297ae3196ba094"
+    },
+    {
+      "path": "audit/runs/run-025-n100d-raw/combined.log",
+      "sha256": "c9d110f1c9b3e734023e99f43ee3d989a7f178469637e4496b1381406a09cfbb"
+    },
+    {
+      "path": "audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md",
+      "sha256": "89cebd9d594062a0cf95513be6d47da65f7200f054eef2ece75f25acd7d3d520"
+    },
+    {
+      "path": "audit/reviews/review-pi-20260923-203925-5f8b9e80.md",
+      "sha256": "9fb1080a722884f22d366e2b11b3ca8844e0fe3738b5faf5ef516fe0a775a3f2"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "reviewer_session": "01a0cff2-7115-76a3-9feb-47716e0d9082",
+  "revision": 1,
+  "summary": "Verified source-structural deduction and log counts: hour-3275 probe observed accepted hour 3275; failing invocation is attempted hour 3276. Log line order was not used as evidence.",
+  "task": "20260923-203925-5f8b9e80",
+  "verdict": "PASS"
+}

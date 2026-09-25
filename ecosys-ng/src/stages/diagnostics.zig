@@ -1042,6 +1042,29 @@ pub fn traceIssue108Carbon(context: anytype, label: []const u8, hour: usize) !vo
     );
 }
 
+/// TEMP_DIAGNOSTIC (`issue-108`, cations): hour 3,289 gains +9.19e-8 mol Ca
+/// (and Na/K) in soil layer 2 with nothing booked, the first hour layer-2
+/// roots have geometry. Prints census Ca/Na/K, layer-2 aqueous Ca on the
+/// live-water basis the root salt exchange reads and writes, total root salt
+/// Ca (species slot 2), and cell 0's running Ca in/out.
+pub fn traceIssue108Cation(context: anytype, label: []const u8, soil: usize, hour: usize) !void {
+    if (@import("builtin").is_test) return;
+    if (hour != ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_target_hour) return;
+    const totals = try reconstructLandscapeMassBalance(context);
+    var root_salt_calcium_mol: f64 = 0;
+    if (context.plant_roots.*) |*roots| {
+        const count = ecosys.plant_root_salt_exchange.species_count;
+        var slot: usize = 2;
+        while (slot < roots.salt_content_mol.len) : (slot += count) root_salt_calcium_mol += roots.salt_content_mol[slot];
+    }
+    const layer: usize = 2;
+    const cell0 = context.hourly_cell_boundary_ledger.cells[0];
+    std.log.err(
+        "TEMP_DIAGNOSTIC ca108[{s}]: hour={d} soil={d} census_ca_mol={e} census_na_mol={e} census_k_mol={e} layer2_aq_ca_mol={e} root_salt_ca_mol={e} ledger_ca_in={e} ledger_ca_out={e}",
+        .{ label, hour, soil, totals.calcium_storage_mol, totals.sodium_storage_mol, totals.potassium_storage_mol, context.soil_chemistry.aqueous[layer].calcium * context.grid.matrix_liquid_water_m3[layer], root_salt_calcium_mol, cell0.calcium_input_mol, cell0.calcium_output_mol },
+    );
+}
+
 pub fn diagnosticAmmoniumOwners_g_n(context: anytype) ![6]f64 {
     const molar_mass = context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol;
     var result: [6]f64 = @splat(0);

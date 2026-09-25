@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "ecosys-audit/tests/test_herdr_adapter.py",
+    "-v"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.867,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 33280,
+  "pid": 20792,
+  "started_unix": 1790191511.1741447,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/workflow-002-selftest-20260923-adapter/stderr.log",
+    "sha256": "cc56474099c37c9f0c99412a6e81d65aa490855ff249e55b9fd340020e9930ac"
+  },
+  "stdout": {
+    "path": "audit/runs/workflow-002-selftest-20260923-adapter/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

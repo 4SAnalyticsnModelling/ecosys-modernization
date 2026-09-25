@@ -1,0 +1,72 @@
+diff --git a/.agents/skills/ecosys-multi-agent-coordination/SKILL.md b/.agents/skills/ecosys-multi-agent-coordination/SKILL.md
+index f9e5f3d..582c96e 100644
+--- a/.agents/skills/ecosys-multi-agent-coordination/SKILL.md
++++ b/.agents/skills/ecosys-multi-agent-coordination/SKILL.md
+@@ -25,7 +25,19 @@ Workers return patch/commit identity, exact source mappings, minimal reproducer,
+ The coordinator integrates one coherent change set at a time, checks for shared state/interface conflicts, resolves imports/build definitions, reruns affected tests and updates the candidate manifest. Merge order matters for numerical/state changes; do not reuse branch-level success as final integrated success. The final production, output and performance evidence must concern the same integrated candidate.
+ 
+ ## Communication and resource control
+-Maintain a compact `audit/handoff.md` and issue ownership ledger, with artifact pointers rather than enormous pasted context. Do not have multiple agents edit the global ledger simultaneously. Record actual available RAM and limit concurrent model builds/runs accordingly; a shared local inference model and code-build processes still compete for resources. Never assume a local model can truly evaluate all worker prompts concurrently.
++Follow `ecosys-audit/WORKFLOW.md` for the installed Claude editor / Pi reviewer workflow.
++Peer dispatch is model-free: either the detached controller (`ensure`, lead yields) or, when
++the lead is held in-turn, the lead's own blocking `herdr_cycle.py peer` / `next` calls. Never
++both; never hand-typed `herdr agent prompt`. No terminal scraping or approval-string matching. One bounded question per packet, one initial
++review plus one changed-evidence re-review; further work needs a new falsifiable question,
++not a renamed repeat. Finalize FAIL/BLOCKED honestly and select unrelated safe work.
++
++The lead alone maintains the current `audit/handoff.md` through `workflow.py checkpoint`
++(6,500-byte ceiling, prior bytes archived) and owns the issue queue. Pi writes review evidence
++only under `audit/reviews/`; task-scoped PASS never approves a release. This project's durable
++artifact-first protocol intentionally overrides the generic Herdr skill's terminal-first
++response preference. Use `run_logged.py` for full command logs and pass paths/hashes plus
++short findings, not full reports or terminal transcripts. No concurrent ledger edits. Record actual available RAM and limit concurrent model builds/runs accordingly; a shared local inference model and code-build processes still compete for resources. Never assume a local model can truly evaluate all worker prompts concurrently.
+ 
+ ## Done
+ All owned work is merged or explicitly deferred, independent review concerns are resolved and the coordinator has reproducible integrated evidence. No overlapping untracked edits, orphan runs or unverified "all agents passed" claims remain.
+diff --git a/.agents/skills/ecosys-release-orchestrator/SKILL.md b/.agents/skills/ecosys-release-orchestrator/SKILL.md
+index 25ce103..9aee6db 100644
+--- a/.agents/skills/ecosys-release-orchestrator/SKILL.md
++++ b/.agents/skills/ecosys-release-orchestrator/SKILL.md
+@@ -13,7 +13,25 @@ Use current source/input hashes in evidence. Never claim a test, review, build o
+ # Coordinate the migration, not an endless run/fix loop
+ 
+ ## Start or resume
+-Read the shared project contract and evidence guide. Inspect current Git status, prior handoff, failing evidence and actual paths. Do not restart completed work or overwrite pre-existing edits. Create an issue/dependency board and a command registry. Use `ecosys-repository-baseline` first when source/input/toolchain provenance is missing or stale.
++Read the shared project contract and evidence guide if not already present in this context.
++Follow `ecosys-audit/WORKFLOW.md` for bounded autonomous tasks, artifact exchange and session
++rotation. Start with the small current `audit/handoff.md`; do not read historical summaries
++or archives without a specific question. Inspect actual Git state and relevant failing
++evidence, preserving pre-existing work. Reuse the issue board and command registry rather
++than recreating them. Use `ecosys-repository-baseline` when provenance is missing/stale.
++Inside Herdr, pick ONE autonomy mode (WORKFLOW.md "Two autonomy modes"):
++- **Lead-driven (default when the lead cannot idle, e.g. a `/goal` stop hook):** loop
++  `begin -> work -> checkpoint -> seal -> herdr_cycle.py peer -> (FAIL: fix, reseal, peer once
++  more) -> checkpoint -> close -> herdr_cycle.py next -> begin ...` inside the lead's own turns.
++  `peer` blocks model-free until Pi's receipt; re-run on PENDING (it never re-sends).
++- **Controller:** `herdr_cycle.py ensure` once, then yield; it dispatches both roles.
++Never run both. Pi reviews its assigned packet only; it does not re-plan or edit the handoff.
++No autonomy for questions/plan-only requests or outside Herdr.
++
++Token discipline (every task): read handoff + one issue + the `f77query`/`rg` hits you need,
++never whole `.f`/Zig files or logs; `run_logged.py` for any verbose command; one-line progress
++notes; evidence written once and cited by path. Park (`workflow.py park`) instead of looping
++when every remaining task is blocked by the same external fault (e.g. D: I/O).
+ 
+ Divide the legacy inventory into auditable process/interface units, not arbitrary equal line counts. Assign each unit a source owner and separate reviewer. Use `ecosys-multi-agent-coordination` when concurrency is available; sequentially perform the same roles otherwise. Limit expensive compiles/runs to one coordinator-owned lane unless independent resources are demonstrated.
+ 
+@@ -32,7 +50,14 @@ Before a build/run, state its hypothesis, expected diagnostic value, stop condit
+ Make source fixes within the agreed migration scope autonomously; stop only dependent work when a genuine permission, scientific-policy or environment blocker cannot be resolved from local evidence. Continue unrelated safe work. Never convert `BLOCKED` to `PASS` to maintain momentum.
+ 
+ ## Required handoff
+-Update `audit/handoff.md` with candidate digest, gates passed/pending, audited coverage denominator, unresolved issues, last useful experiment, next bounded action, file ownership and commands already proven. Distinguish actual results from proposed tests. Report only evidence-backed progress, not percentage confidence or assurances of perfection.
++The lead updates `audit/handoff.md` through `workflow.py checkpoint` (6,500 UTF-8 bytes;
++prior bytes archived), naming candidate digest, gate status, coverage evidence pointer,
++active issues, last useful experiment, next bounded action, ownership/dirty work and owned
++process status. Detailed history belongs in issue/evidence files. Seal one candidate-bound
++packet for Pi; finalize its review and `workflow.py close` before the controller (or
++`herdr_cycle.py next`) starts a new Pi session. No reset while a task/process is incomplete. Reviewers
++write only their independent review lane. Distinguish actual results from proposed tests;
++short terminal summaries link evidence rather than restating it. A task PASS is not a gate.
+ 
+ ## Done
+ All required release checks pass for one source/input/toolchain snapshot; the coordinator has an independently reviewed dossier. Otherwise deliver the exact blockers and the preserved work without claiming production readiness.

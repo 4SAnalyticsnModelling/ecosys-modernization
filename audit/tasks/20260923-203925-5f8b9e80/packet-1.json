@@ -1,0 +1,62 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/analysis/issue-100-failing-invocation-is-hour-3276-not-the-probed-hour-3275-2026-09-23.md",
+      "sha256": "64f908f3eafbffd64bad01e29a79a2f78022e53b171840b0b3297ae3196ba094"
+    },
+    {
+      "path": "audit/runs/run-025-n100d-raw/combined.log",
+      "sha256": "c9d110f1c9b3e734023e99f43ee3d989a7f178469637e4496b1381406a09cfbb"
+    },
+    {
+      "path": "audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md",
+      "sha256": "89cebd9d594062a0cf95513be6d47da65f7200f054eef2ece75f25acd7d3d520"
+    },
+    {
+      "path": "audit/runs/run-026-issue-101-CONFIRMED-in-production-and-two-distinct-ledger-allocations-measured-2026-09-23.md",
+      "sha256": "a86f70283ae92870389ebee02ac891f034eae70a613bd1de9b6fc3225a24b1a9"
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "sha256": "9d3a9c4776143fe5310ab49342ed6b71c3ce054d26fad95d6d87c1e1a836cb31"
+    }
+  ],
+  "author_session": "5d6b8109-3ecf-45bc-aed9-9162b87db21d",
+  "author_sessions": [
+    "5d6b8109-3ecf-45bc-aed9-9162b87db21d"
+  ],
+  "base_sha256": "dc8ef5f0a22a43f01ef383aebabfe8ee89ddfe88ef2c9d3ec8fbd0f2bd662fca",
+  "candidate_sha256": "255a045d4b880de8baa693da2546ba6535e3bb88d47a57030da03acd12c87432",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "9c194136dac28aa1454ce4e2be72791fd599107cc413ee126c215c8a5528aca5"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/analysis/issue-100-failing-invocation-is-hour-3276-not-the-probed-hour-3275-2026-09-23.md",
+      "audit/runs/run-025-n100d-raw/combined.log",
+      "audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md",
+      "audit/runs/run-026-issue-101-CONFIRMED-in-production-and-two-distinct-ledger-allocations-measured-2026-09-23.md",
+      "audit/reviews/carry-forward.md"
+    ],
+    "next_action": "If PASS: re-gate issue-100 probes to hour 3,276 with call-site/counter/hour fields and run one ReleaseSafe diagnostic; prediction at_evaluate cell0_in=1.6566363548027827.",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "Source/evidence deduction (no source change, build or run): the failing hour-3,275 conservation invocation is not the acceptHourAndPublish invocation observed by the ==3275-gated issue-100 probes. The at_evaluate probe (cell0_in=0) and the sole production cell evaluate read the same slice in one invocation, yet row 0 reports external_inputs=1.6566. The probe fired once, the gate is executed_weather_hours+1 and the counter advances only on acceptance, so the probed hour was accepted and the failure is on attempted hour 3,276 (3,275 accepted), corroborated by census counts. Consequence: run-024/025/026 probe figures describe the last accepted hour. One unresolved counter-observation (no third fertilizer census entry) is recorded, not explained. No release claim."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "Analysis record with source anchors (path:symbol:lines + source hash) and raw-log hash; preserved raw log; issue-100 status line updated; independent Pi review of the deduction.",
+    "issue": "issue-100",
+    "question": "Is the failing hour-3,275 conservation invocation the same acceptHourAndPublish invocation that the hour-3275-gated issue-100 probes observed, or a later hour? Establish from source structure and the retained run-025 raw log, without log-line-order inference.",
+    "scope": [
+      "audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md",
+      "ecosys-ng/src/ecosys_ng.zig",
+      "ecosys-ng/src/validation/hourly_cell_conservation.zig",
+      "ecosys-ng/src/validation/layer_local_conservation.zig"
+    ],
+    "stop_condition": "No source change and no build/run in this task. If the deduction depends on log order or an unverified binary/source equivalence, record it as a hypothesis and stop."
+  },
+  "task": "20260923-203925-5f8b9e80"
+}

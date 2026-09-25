@@ -1,0 +1,61 @@
+{
+  "artifacts": [
+    {
+      "path": "audit/issues/workflow-003-goal-held-lead-never-idles-so-controller-never-dispatches.md",
+      "sha256": "34590fc37dd6bfcce5c9f8cfeed61d5bccb2c64b645888f9bbedc9d8aa3e0464"
+    },
+    {
+      "path": "audit/runs/workflow-lead-driven-selftest-20260923/receipt.json",
+      "sha256": "bbca5ef63c7ccf4cb06f78f0c3ec9fd2efff5d76bd8bab5ff37249b22479a245"
+    },
+    {
+      "path": "audit/runs/workflow-lead-driven-selftest-20260923/stderr.log",
+      "sha256": "57ed688d6b59d1fc7e24198b640457a08faed2a5ffb0bc824d9f35f04df775b2"
+    },
+    {
+      "path": "audit/runs/workflow-003-diff-20260923/scope.diff",
+      "sha256": "b57f870a488c6e736ef21a8b9730bad5781f8897407e22875069ed93ce52ff96"
+    }
+  ],
+  "author_session": "43e904b2-2fc8-4743-87bb-dd9b74baeb75",
+  "author_sessions": [
+    "43e904b2-2fc8-4743-87bb-dd9b74baeb75"
+  ],
+  "base_sha256": "5d40f255625862bdfe42d2b0ed41778f2ae33a122f592b4f845d3f316898844d",
+  "candidate_sha256": "5d40f255625862bdfe42d2b0ed41778f2ae33a122f592b4f845d3f316898844d",
+  "handoff": {
+    "path": "audit/handoff.md",
+    "sha256": "d8a2f3cb03a0fe7a5e344833e9c588aceda2330aa0a76d8e1c680bc1e1f456c1"
+  },
+  "limitations": "Bookkeeping and hash freshness only; not scientific approval or an OS security sandbox.",
+  "result": {
+    "evidence": [
+      "audit/issues/workflow-003-goal-held-lead-never-idles-so-controller-never-dispatches.md",
+      "audit/runs/workflow-lead-driven-selftest-20260923/receipt.json",
+      "audit/runs/workflow-lead-driven-selftest-20260923/stderr.log",
+      "audit/runs/workflow-003-diff-20260923/scope.diff"
+    ],
+    "next_action": "After review: close, herdr_cycle.py next, then the handoff's science next action (issue-100 re-gate to hour 3,276, or the no-build frontier-count correction if D: is faulted).",
+    "open_processes": [],
+    "status": "READY_FOR_REVIEW",
+    "summary": "Added lead-driven autonomy mode (herdr_cycle.py peer/next) so a /goal-held lead that never idles can run the Claude-edit/Pi-review cycle without hand-typed dispatch; hardened controller identity checks (lost pane names, lagging Herdr session refs after /clear or Pi /new, Pi 'unknown' status). Docs/skills updated. Offline suite exit 0 (67 tests). This review itself is being delivered by peer. No science or gate change."
+  },
+  "revision": 1,
+  "spec": {
+    "done_condition": "Offline suite passes; independent Pi review of the diff finds no protocol weakening; this very review is delivered by herdr_cycle.py peer.",
+    "issue": "workflow-003",
+    "question": "Does lead-driven herdr_cycle.py peer/next let a lead that never idles (a /goal stop hook) complete a bounded Claude-edit / Pi-review cycle without hand-typed dispatch, without weakening at-most-once dispatch, dialog fail-closed, or review identity binding?",
+    "scope": [
+      "ecosys-audit/scripts/herdr_cycle.py",
+      "ecosys-audit/scripts/workflow.py",
+      "ecosys-audit/scripts/workflow_hook.py",
+      "ecosys-audit/tests/test_herdr_adapter.py",
+      "ecosys-audit/WORKFLOW.md",
+      ".agents/skills/ecosys-release-orchestrator/SKILL.md",
+      ".agents/skills/ecosys-multi-agent-coordination/SKILL.md",
+      ".pi/extensions/ecosys-workflow.ts"
+    ],
+    "stop_condition": "Second FAIL, or peer cannot deliver a receipt twice with distinct causes."
+  },
+  "task": "20260923-225940-8ace44ed"
+}

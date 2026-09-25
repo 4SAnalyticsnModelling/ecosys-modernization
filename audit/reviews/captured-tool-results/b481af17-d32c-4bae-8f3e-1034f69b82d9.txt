@@ -1,0 +1,771 @@
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+.ProcessName : The term '.ProcessName' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:30
++ Get-Process | Where-Object { .ProcessName -match 'python|uv|zig' } |  ...
++                              ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (.ProcessName:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+
+[Showing lines 2240-3008 of 3008 (50.0KB limit). Full output: C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\tmp\pi-powershell-c9a1132f2a976391.log]

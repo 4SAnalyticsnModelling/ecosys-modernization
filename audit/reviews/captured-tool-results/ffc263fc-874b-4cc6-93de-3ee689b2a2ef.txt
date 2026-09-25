@@ -1,0 +1,131 @@
+
+[32;1mName                          [0m[32;1m Value[0m
+[32;1m----                          [0m [32;1m-----[0m
+_                              C:/Program Files/nodejs/node
+AI_AGENT                       pi
+alacritty                      C:\Users\symon.mezbahuddin\AppData\Local\Alacritty
+ALLUSERSPROFILE                C:\ProgramData
+APPDATA                        C:\Users\symon.mezbahuddin\AppData\Roaming
+az                             C:\Users\symon.mezbahuddin\azure-cli-2.83.0-x64\bin
+CLICOLOR                       1
+COLORTERM                      truecolor
+COMMONPROGRAMFILES             C:\Program Files\Common Files
+CommonProgramFiles(x86)        C:\Program Files (x86)\Common Files
+CommonProgramW6432             C:\Program Files\Common Files
+COMPUTERNAME                   L-142656
+COMSPEC                        C:\WINDOWS\system32\cmd.exe
+CONFIG_SITE                    C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/etc/config.site
+COPYFILE_DISABLE               1
+databricks                     C:\Users\symon.mezbahuddin\databricks_cli_0.271.0_windows_amd64
+DriverData                     C:\Windows\System32\Drivers\DriverData
+EFC_17836_1262719628           1
+EFC_17836_1592913036           1
+EFC_17836_2283032206           0
+EFC_17836_2775293581           1
+EFC_17836_3789132940           1
+EFC_17836_4126798990           0
+FPS_BROWSER_APP_PROFILE_STRING Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRI… Default
+gcc                            C:\Users\symon.mezbahuddin\mingw64\bin
+gfortran                       C:\Users\symon.mezbahuddin\mingw64\bin
+GIT_INSTALL_ROOT               C:\Users\symon.mezbahuddin\scoop\apps\git\current
+HERDR_BIN_PATH                 C:\Users\symon.mezbahuddin\.herdr\packages\standalone\releases\0.9.1-x86_64-pc-windows-…
+HERDR_ENV                      1
+HERDR_PANE_ID                  w3:p4
+HERDR_SESSION                  ecosys-modernization
+HERDR_SOCKET_PATH              C:\Users\symon.mezbahuddin\AppData\Roaming\herdr\sessions\ecosys-modernization\herdr.so…
+HERDR_TAB_ID                   w3:t1
+HERDR_WORKSPACE_ID             w3
+HERMES_GIT_BASH_PATH           C:\Users\symon.mezbahuddin\AppData\Local\Programs\Git\bin\bash.exe
+HERMES_HOME                    C:\Users\symon.mezbahuddin\AppData\Local\hermes
+HOME                           C:\Users\symon.mezbahuddin
+HOMEDRIVE                      C:
+HOMEPATH                       \Users\symon.mezbahuddin
+HOSTNAME                       L-142656
+INFOPATH                       C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\usr\local\info;C:\Users\symon.me…
+java                           C:\Users\symon.mezbahuddin\jdk-25.0.2\bin
+JAVA_HOME                      C:\Program Files\Java\jre1.8.0_191
+LANG                           en_US.UTF-8
+LAVISH_AXI_HTML_APP_API_URL    http://127.0.0.1:9
+LESS                           -R
+LOCALAPPDATA                   C:\Users\symon.mezbahuddin\AppData\Local
+LOGNAME                        symon.mezbahuddin
+LOGONSERVER                    \\EDM-GOA-DC-3
+LS_COLORS                      rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;3…
+LSCOLORS                       Gxfxcxdxbxegedabagacad
+MANPATH                        C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\usr\local\man;C:\Users\symon.mez…
+MSYS2_PATH_TYPE                inherit
+MSYSTEM                        MSYS
+MSYSTEM_CARCH                  x86_64
+MSYSTEM_CHOST                  x86_64-pc-msys
+MSYSTEM_PREFIX                 C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/usr
+NUMBER_OF_PROCESSORS           32
+OLDPWD                         D:/ecosys-modernization
+OLLAMA_API_BASE                http://127.0.0.1:11434
+OneDrive                       C:\Users\symon.mezbahuddin\OneDrive - Government of Alberta
+OneDriveCommercial             C:\Users\symon.mezbahuddin\OneDrive - Government of Alberta
+OneDriveLocation               C:\Users\symon.mezbahuddin\OneDrive - Government of Alberta
+ORIGINAL_PATH                  C:\Program Files\Python315\Scripts;C:\Program Files\Python315;C:\Program Files (x86)\Co…
+ORIGINAL_TEMP                  C:/Users/symon.mezbahuddin/AppData/Local/Temp
+ORIGINAL_TMP                   C:/Users/symon.mezbahuddin/AppData/Local/Temp
+OS                             Windows_NT
+PAGER                          less
+PATH                           C:\Program Files\PowerShell\7;C:\Users\symon.mezbahuddin\.pi\agent\bin;C:\Users\symon.m…
+PATHEXT                        .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.PY;.PYW;.CPL
+PI_CODING_AGENT                true
+PI_MODEL                       gemini-3.8-flash
+PI_PROVIDER                    github-copilot
+PI_REASONING_LEVEL             high
+PI_SESSION_FILE                C:\Users\symon.mezbahuddin\.pi\agent\sessions\--D--ecosys-modernization--\2026-09-24T04…
+PI_SESSION_ID                  01a0d194-ed09-70b5-9b38-839bb4aa466f
+PKG_CONFIG_PATH                C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\usr\lib\pkgconfig;C:\Users\symon…
+POWERSHELL_DISTRIBUTION_CHANN… MSI:Windows 10 Enterprise
+POWERSHELL_TELEMETRY_OPTOUT    1
+PRINTER                        \\prt-xerox4\mfc-edtn-comm_place-rm_1118-xe8245-714761
+PROCESSOR_ARCHITECTURE         AMD64
+PROCESSOR_IDENTIFIER           Intel64 Family 6 Model 183 Stepping 1, GenuineIntel
+PROCESSOR_LEVEL                6
+PROCESSOR_REVISION             b701
+ProgramData                    C:\ProgramData
+PROGRAMFILES                   C:\Program Files
+ProgramFiles(x86)              C:\Program Files (x86)
+ProgramW6432                   C:\Program Files
+PS1                            (%n@%m)[%h] %~ %% 
+PSExecutionPolicyPreference    Bypass
+PSModulePath                   C:\Users\symon.mezbahuddin\OneDrive - Government of Alberta\Documents\PowerShell\Module…
+PUBLIC                         C:\Users\Public
+PWD                            D:/ecosys-modernization
+pwsh                           C:\Users\symon.mezbahuddin\PowerShell-7.4.5-win-x64
+SESSIONNAME                    Console
+SHELL                          C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\usr\bin\zsh.exe
+SHLVL                          2
+SNOW_AGENT                     C:\Program Files\Snow Software\Inventory\Agent\
+sqlcmd                         C:\tools\sqlcmdwrap
+SYSTEMDRIVE                    C:
+SYSTEMROOT                     C:\WINDOWS
+TEMP                           C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\tmp
+TERM                           xterm-256color
+TERM_PROGRAM                   WezTerm
+TERM_PROGRAM_VERSION           20240203-110809-5046fc22
+TMP                            C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\tmp
+UATDATA                        C:\WINDOWS\CCM\UATData\D9F8C395-CAB8-491d-B8AC-179A1FE1BE77
+USER                           symon.mezbahuddin
+USERDNSDOMAIN                  GOA.DS.GOV.AB.CA
+USERDOMAIN                     GOA
+USERDOMAIN_ROAMINGPROFILE      GOA
+USERNAME                       symon.mezbahuddin
+USERPROFILE                    C:\Users\symon.mezbahuddin
+WEZTERM_CONFIG_DIR             C:\Users\symon.mezbahuddin
+WEZTERM_CONFIG_FILE            C:\Users\symon.mezbahuddin\.wezterm.lua
+WEZTERM_EXECUTABLE             C:\Users\symon.mezbahuddin\scoop\apps\wezterm\20240203-110809-5046fc22\wezterm-gui.exe
+WEZTERM_EXECUTABLE_DIR         C:\Users\symon.mezbahuddin\scoop\apps\wezterm\20240203-110809-5046fc22
+WEZTERM_PANE                   0
+WEZTERM_UNIX_SOCKET            C:\Users\symon.mezbahuddin\.local/share/wezterm\gui-sock-3580
+WINDIR                         C:\WINDOWS
+WSLENV                         TERM:COLORTERM:TERM_PROGRAM:TERM_PROGRAM_VERSION
+ZES_ENABLE_SYSMAN              1
+zig                            C:\Users\symon.mezbahuddin\zig-x86_64-windows-0.15.2
+ZIG_LOCAL_CACHE_DIR            C:\zig-local-cache\ecosys-ng
+zls                            C:\Users\symon.mezbahuddin\zls-x86_64-windows
+ZSH                            C:/Users/symon.mezbahuddin/.oh-my-zsh
+

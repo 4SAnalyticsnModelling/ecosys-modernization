@@ -1,0 +1,13 @@
+test_ambiguous_dispatch_is_not_replayed (__main__.ControllerTests.test_ambiguous_dispatch_is_not_replayed) ... ok
+test_changed_candidate_after_closure_prevents_rotation (__main__.ControllerTests.test_changed_candidate_after_closure_prevents_rotation) ... ok
+test_complete_cycle_rotates_both_after_closure (__main__.ControllerTests.test_complete_cycle_rotates_both_after_closure) ... ok
+test_completed_reset_intent_not_replayed_after_crash (__main__.ControllerTests.test_completed_reset_intent_not_replayed_after_crash) ... ok
+test_external_herdr_control_refused_without_cli_call (__main__.ControllerTests.test_external_herdr_control_refused_without_cli_call) ... ok
+test_missing_seal_does_not_reset_or_approve (__main__.ControllerTests.test_missing_seal_does_not_reset_or_approve) ... ok
+test_reset_requires_new_native_session_id (__main__.ControllerTests.test_reset_requires_new_native_session_id) ... ok
+test_unrelated_new_conversation_never_cleared (__main__.ControllerTests.test_unrelated_new_conversation_never_cleared) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 29.265s
+
+OK

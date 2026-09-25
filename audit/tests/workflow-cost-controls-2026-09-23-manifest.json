@@ -1,0 +1,23 @@
+{
+  "scope": "Autonomous cost controls, stages 2-4 only; not model science",
+  "baseline_git_head": "6944efe15be5e149158166e1e279f0e3c55e813f",
+  "files": [
+    {"path":"ecosys-audit/scripts/workflow.py","sha256":"dbadc8189bc05e4311691bdc1deaf0b732f811e0fbc35fa8d25a7c253c009dd7"},
+    {"path":"ecosys-audit/scripts/herdr_cycle.py","sha256":"c95f5168b73e27d5833dbb562a78721dd32fdbbd4aaad98f49c3500a520bb8ca"},
+    {"path":"ecosys-audit/scripts/run_logged.py","sha256":"b3c918e67f19829233ae66745f675ac37b335b2747e3031dbd1497b3d4f4fe26"},
+    {"path":"ecosys-audit/scripts/workflow_hook.py","sha256":"23d6d5c166741c3a0a2535bbad42c646db5fb2cae854961c0ba37852e4160f82"},
+    {"path":".pi/extensions/ecosys-workflow.ts","sha256":"e39bbc1cf503a5f1d16c7e1302e60c2a8273139d6d080afa0e9ab40236c9fa07"},
+    {"path":".claude/settings.json","sha256":"b49f770c379d5997481dfbc1358a57bb783586ffe0aa0739e960347acc1da7cd"},
+    {"path":"ecosys-audit/tests/test_workflow.py","sha256":"e13224b5387bd5c42a0062776663cfe5d91b01dad4518cd094fc9a7aaadc8080"},
+    {"path":"ecosys-audit/tests/pi-workflow.test.mjs","sha256":"44cf14c7c5d1ab673bbcd6aac60a8a714c53f580c36b4e63289600b194bf712a"}
+  ],
+  "tests": [
+    {"suite":"Python protocol/controller/hooks/logging","status":"PASS","executed":45,"failed":0,"receipt":"audit/runs/workflow-selftest-20260923-r5-python/receipt.json","raw_log":"audit/runs/workflow-selftest-20260923-r5-python/stderr.log","raw_sha256":"6592787549311ad3349239b29d6d0b02bb6c93a30b76bcabb049b1337fe26e58"},
+    {"suite":"Pi extension fake-harness tests","status":"PASS","executed":9,"failed":0,"receipt":"audit/runs/workflow-selftest-20260923-r3-pi/receipt.json","raw_log":"audit/runs/workflow-selftest-20260923-r3-pi/stdout.log","raw_sha256":"05b0776ad33fedccdd3ec83eeeea84ca3b5e5cea28e78d3f8b8a974277f6daf9"}
+  ],
+  "live_herdr_cycle": "NOT_ASSESSED",
+  "independent_workflow_review": "NOT_ASSESSED",
+  "measured_cost_savings": "NOT_ASSESSED",
+  "scientific_gate_status": "UNCHANGED",
+  "limitations": "Temporary repositories and fake agents, not live model/Herdr end-to-end testing. Hash/structure checks do not establish scientific correctness or authenticate reviewers. Shell access is not an OS sandbox."
+}
