@@ -1,0 +1,42 @@
+{
+  "changed": [
+    ".agent/results/T-00014.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Unblocked G0-2 D6 packet and issue-015 review; SAGE must sign before user approval.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00014.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00014.md",
+    "task_id": "T-00014"
+  },
+  "ended": 1790378733.1196795,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": "ses_f2522a679ffe0oyJZyhwq5Vk8d",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 474752,
+    "cache_write": 0,
+    "cost": 0.03678904,
+    "input": 74754,
+    "llm_calls": 10,
+    "output": 10286,
+    "tool_calls": 21
+  },
+  "violations": []
+}

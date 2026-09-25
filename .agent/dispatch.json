@@ -1,1 +1,16 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00014", "role": "PATHFINDER", "task_file": ".agent/tasks/T-00014.md", "result_file": ".agent/results/T-00014.md", "skills": ["ecosys-source-navigation"], "t1_argv": null, "requires_sage_review": true, "full_run_justification": null, "reason": "Unblocked G0-2 D6 packet and issue-015 review; SAGE must sign before user approval."}
+{
+  "full_run_justification": null,
+  "reason": "Unblocked G0-2 D6 packet and issue-015 review; SAGE must sign before user approval.",
+  "requires_sage_review": true,
+  "result_file": ".agent/results/T-00014.md",
+  "result_status": "DONE",
+  "role": "PATHFINDER",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-source-navigation"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00014.md",
+  "task_id": "T-00014"
+}
