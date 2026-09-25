@@ -34,8 +34,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "PATHFINDER: compare archived full-run Ottawa outputs against Zig and confirm the evidence set before any P0.4 rerun.",
+  "status": "IDLE",
+  "status_reason": "no unblocked work: awaiting D6 approval and GitHub push access before any P0.4 baseline rerun.",
   "task_id": "T-00012",
   "worker": null
 }

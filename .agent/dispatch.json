@@ -1,16 +1,1 @@
-{
-  "full_run_justification": null,
-  "reason": "PATHFINDER: compare archived full-run Ottawa outputs against Zig and confirm the evidence set before any P0.4 rerun.",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00012.md",
-  "result_status": "DONE",
-  "role": "PATHFINDER",
-  "schema_version": 1,
-  "skills": [
-    "ecosys-source-navigation"
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00012.md",
-  "task_id": "T-00012"
-}
+{"schema_version": 1, "status": "IDLE", "reason": "no unblocked work: awaiting D6 approval and GitHub push access before any P0.4 baseline rerun."}

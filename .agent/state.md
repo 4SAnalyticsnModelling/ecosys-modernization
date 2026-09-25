@@ -34,14 +34,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00008 PATHFINDER DONE: Legacy evidence archived under `evidence/legacy/` with SHA manifest.
-- T-00009 PATHFINDER DONE: Surviving artifact is partial and not a trusted full baseline.
-- T-00010 PATHFINDER BLOCKED: Missing durable full legacy output/archive or fresh run blocks P0.4.
 - T-00011 PATHFINDER DONE: Archived full-run gfortran Ottawa baseline is retained under `evidence/legacy/` and manifest-backed.
+- T-00012 PATHFINDER DONE: The retained `evidence/legacy/` set is the authoritative full 30-year baseline; no rerun is allowed until the archive and current Zig outputs are aligned.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: sign the D6 list.
 2. Push access: GitHub returned 403 for this machine's credential on origin; commits stay local until fixed.
 
 ## Next expected operation
-T-00012: PATHFINDER to compare the archived full-run Ottawa legacy outputs against current Zig outputs and confirm the exact retained `evidence/legacy/manifest/sha256.txt` set before any P0.4 rerun.
+IDLE: no unblocked work while D6 approval and GitHub push access remain unresolved; resume only after the user clears P0.2 and repo access is restored.
