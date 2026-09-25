@@ -34,8 +34,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Obtain or document the missing full 30-year legacy output set and verify the archive manifest before any P0.4 rerun.",
-  "task_id": "T-00009",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Need the durable full 30-year Ottawa legacy archive or fresh run before any P0.4 rerun; current evidence is partial and not a trusted baseline.",
+  "task_id": "T-00010",
+  "worker": "PATHFINDER"
 }
