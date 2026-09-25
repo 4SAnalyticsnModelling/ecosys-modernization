@@ -4,17 +4,20 @@ Plan: `ecosys-ng_ottawa_qualification_execution_plan.md` (v4, reviewed). Spec: `
 Everything the swarm needs lives in this repository: state here, large evidence in `evidence/` (git-ignored,
 manifests committed), tools in `ecosys-audit/scripts/`.
 
-## Herdr session `ecosys-ng` (workspace w1, one tab)
+## Herdr session `ecosys-ng` (workspace w1, five tabs, one pane each)
 
-| Pane label | Herdr agent name | Harness / model | Role file |
+Tabs: 1 SAGE, 2 CONTROLLER, 3 FORGE, 4 SENTINEL, 5 PATHFINDER. Tab label = pane label = role.
+Herdr agent names follow the pane, so moving panes between tabs does not break the wrapper.
+
+| Pane / tab label | Herdr agent name | Harness / model | Role file |
 |---|---|---|---|
 | SAGE | `sage` | Claude Code, Opus 5.5 (`--dangerously-skip-permissions`) | `roles/sage.md` |
 | FORGE | `forge` | OpenCode `--agent forge`, `github-copilot/gemini-3.8-flash`, `--auto` | `roles/forge.md` |
 | PATHFINDER | `pathfinder` | OpenCode `--agent pathfinder`, `github-copilot/mai-code-1.1-flash`, `--auto` | `roles/pathfinder.md` |
 | SENTINEL | `sentinel` | OpenCode `--agent sentinel`, `github-copilot/mai-code-1.1-flash`, `--auto` | `roles/sentinel.md` |
 
-A second tab, `CONTROLLER` (pane label `CONTROLLER`), runs the deterministic controller
-(`scripts/start-swarm.sh`), so the four agent panes stay untouched.
+The `CONTROLLER` tab runs the deterministic controller (`scripts/start-swarm.sh`); the four agent
+tabs are only driven by it.
 
 Each pane's shell exports `ECOSYS_SWARM_ROLE=<role>` before the harness starts. For SAGE, the project
 Claude hook then injects the SAGE role bootstrap. The former Claude-lead / Pi-reviewer workflow is
