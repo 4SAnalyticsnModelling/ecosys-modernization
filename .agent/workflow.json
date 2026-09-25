@@ -34,8 +34,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "PATHFINDER: obtain durable full legacy evidence or a fresh run before any P0.4 rerun; T-00010 is blocked.",
   "task_id": "T-00011",
-  "worker": "PATHFINDER"
+  "worker": null
 }

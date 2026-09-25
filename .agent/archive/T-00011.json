@@ -1,0 +1,42 @@
+{
+  "changed": [
+    ".agent/results/T-00011.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "PATHFINDER: obtain durable full legacy evidence or a fresh run before any P0.4 rerun; T-00010 is blocked.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00011.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00011.md",
+    "task_id": "T-00011"
+  },
+  "ended": 1790378295.1844816,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": "ses_f25253a86ffe3l2gCfGO1fI42k",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 107776,
+    "cache_write": 0,
+    "cost": 0.01447772,
+    "input": 27261,
+    "llm_calls": 6,
+    "output": 5725,
+    "tool_calls": 13
+  },
+  "violations": []
+}
