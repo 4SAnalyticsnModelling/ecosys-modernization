@@ -34,13 +34,13 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00005 FORGE DONE: amended Status set and relabels applied; `needs_normalization` is empty.
-- T-00006 PATHFINDER DONE: surviving Ottawa legacy evidence and run-002 recipe were identified but not yet archived.
-- T-00007 PATHFINDER PENDING: create durable `evidence/legacy/` archive and manifest before any P0.4 rerun.
+- T-00005 FORGE DONE: Status normalization completed; issue_status summary is clean.
+- T-00006 PATHFINDER DONE: Ottawa legacy evidence and run-002 recipe identified, not yet archived.
+- T-00008 PATHFINDER DONE: legacy evidence and recipe archived with manifest; full 30-year set remains missing.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: sign the D6 list.
 2. Push access: GitHub returned 403 for this machine's credential on origin; commits stay local until fixed.
 
 ## Next expected operation
-T-00008: PATHFINDER to archive the surviving Ottawa legacy evidence and run-002 recipe under `evidence/legacy/` with a SHA-256 manifest; no full simulation.
+T-00009: PATHFINDER to document or obtain the missing full 30-year legacy output set and verify the archive manifest before any P0.4 rerun.

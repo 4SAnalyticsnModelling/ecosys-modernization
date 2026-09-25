@@ -34,8 +34,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "review cleared by claude-planning-session (user-requested fixes): Halt was correct: SENTINEL wrote a T-00007 result after PATHFINDER was cut off at 75 s by a controller bug (fixed 67d01fa). The fabricated result was moved to .",
-  "task_id": "T-00008",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Obtain or document the missing full 30-year legacy output set and verify the archive manifest before any P0.4 rerun.",
+  "task_id": "T-00009",
+  "worker": "PATHFINDER"
 }
