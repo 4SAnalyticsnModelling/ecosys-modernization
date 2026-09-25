@@ -19,6 +19,12 @@
       "reason": "SENTINEL wrote outside its lane: .gitignore: outside SENTINEL may_write; audit/runs/swarm-controller-20260925.log: outside SENTINEL may_write",
       "resolution": "Operator error, not an agent violation: the operator (Claude, planning session) tee-d the controller console into a Git-visible log and then edited .gitignore during SENTINEL turn 1. SENTINEL only wrote its task + dispatch (validated). .gitignore fix committed; halt cleared with the user present.",
       "time": 1790374102
+    },
+    {
+      "cleared_by": "claude-planning-session (user-requested fixes)",
+      "note": "Halt was correct: SENTINEL wrote a T-00007 result after PATHFINDER was cut off at 75 s by a controller bug (fixed 67d01fa). The fabricated result was moved to .agent/failures/F-00001/sentinel-unauthorized-result.md; T-00007 stays STAGNATED. T-00008 (retry of the evidence archiving) is a valid dispatch.",
+      "reason": "SENTINEL wrote outside its lane: .agent/results/T-00007.md: outside SENTINEL may_write",
+      "time": 1790377870.5053802
     }
   ],
   "last_advance_unix": null,
@@ -28,8 +34,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Next evidence task: preserve Ottawa legacy artifacts and recipe with manifest before P0.4 rerun; no full run.",
+  "status": "DISPATCHED",
+  "status_reason": "review cleared by claude-planning-session (user-requested fixes): Halt was correct: SENTINEL wrote a T-00007 result after PATHFINDER was cut off at 75 s by a controller bug (fixed 67d01fa). The fabricated result was moved to .",
   "task_id": "T-00007",
   "worker": null
 }

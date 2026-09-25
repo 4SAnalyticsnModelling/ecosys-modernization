@@ -34,17 +34,13 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00001 PATHFINDER DONE: proposed Status lines for the 13 issues needing normalization.
-- T-00002 SAGE DONE: P1.6 migration diff accepted; no ecosys-ng/src or reference file changed.
-- T-00003 SAGE DONE (VERDICT REVISE): 7 of 13 lines approved; 6 were replaced and approved.
-- T-00004 CANCELLED: stale duplicate of T-00002; SENTINEL now maintains the operation state.
-- T-00005 FORGE DONE: amended Status set and relabels applied; needs_normalization is empty.
-- T-00006 PATHFINDER DONE: surviving legacy Ottawa evidence and recipe were identified, but not yet archived.
-- T-00007 PATHFINDER PENDING: create durable evidence/legacy archive and manifest before any P0.4 rerun.
+- T-00005 FORGE DONE: amended Status set and relabels applied; `needs_normalization` is empty.
+- T-00006 PATHFINDER DONE: surviving Ottawa legacy evidence and run-002 recipe were identified but not yet archived.
+- T-00007 PATHFINDER PENDING: create durable `evidence/legacy/` archive and manifest before any P0.4 rerun.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: sign the D6 list.
 2. Push access: GitHub returned 403 for this machine's credential on origin; commits stay local until fixed.
 
 ## Next expected operation
-T-00007: PATHFINDER to archive surviving Ottawa legacy evidence and the run-002 recipe under `evidence/legacy/` with a SHA-256 manifest; no full simulation.
+T-00008: PATHFINDER to archive the surviving Ottawa legacy evidence and run-002 recipe under `evidence/legacy/` with a SHA-256 manifest; no full simulation.
