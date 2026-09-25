@@ -8,7 +8,7 @@
   "verified_frontier_note": "Only update_frontier.py promote may change this, from a strict campaign under a single recorded binding (plan P5.5).",
   "current_failure_hour": 3289,
   "last_checkpoint_key": null,
-  "candidate_commit": "fd07795",
+  "candidate_commit": "3a5011b",
   "evidence_binding": null,
   "history": []
 }

@@ -13,6 +13,9 @@ manifests committed), tools in `ecosys-audit/scripts/`.
 | PATHFINDER | `pathfinder` | OpenCode `--agent pathfinder`, `github-copilot/mai-code-1.1-flash`, `--auto` | `roles/pathfinder.md` |
 | SENTINEL | `sentinel` | OpenCode `--agent sentinel`, `github-copilot/mai-code-1.1-flash`, `--auto` | `roles/sentinel.md` |
 
+A second tab, `CONTROLLER` (pane label `CONTROLLER`), runs the deterministic controller
+(`scripts/start-swarm.sh`), so the four agent panes stay untouched.
+
 Each pane's shell exports `ECOSYS_SWARM_ROLE=<role>` before the harness starts. For SAGE, the project
 Claude hook then injects the SAGE role bootstrap. The former Claude-lead / Pi-reviewer workflow is
 retired and archived in `archive/pre-swarm-workflow/`. OpenCode per-role permissions (edit/bash allowlists, no webfetch, no git mutation)

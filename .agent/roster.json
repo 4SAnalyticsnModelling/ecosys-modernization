@@ -2,6 +2,7 @@
   "schema_version": 1,
   "note": "Single source of truth for the 4-agent swarm (execution plan section 2). swarm_wrapper.py reads this; edit here, not in code. Budgets: minutes are enforced by the wrapper; tokens are recorded only when the harness reports them.",
   "herdr_session": "ecosys-ng",
+  "controller": {"tab_label": "CONTROLLER", "pane_label": "CONTROLLER", "command": "scripts/start-swarm.sh [--resume]"},
   "roles": {
     "SENTINEL": {
       "agent_name": "sentinel",
