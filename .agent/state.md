@@ -42,8 +42,14 @@ SAGE review of that migration diff is pending (`audit/workflow/p1.6-protocol-mig
 2. GP1: launch approval (`swarm_wrapper.py approve`), after the supervised trial turn.
 3. D8 push policy (default: never push).
 
+## Supervised trial (2026-09-25) -- PASSED
+T-00001 (P0.6 proposal): SENTINEL routed it in 52 s with a valid dispatch. PATHFINDER finished in 64 s and wrote
+only its result; 4/4 spot-checked quotes are verbatim. Reset verified. Live permission probes: PATHFINDER's
+disallowed write was DENIED, and SENTINEL's bash was DENIED. Observed: SENTINEL used ~13 tool calls (budget 8;
+only time is enforced); its dispatch listed a skill its task said "none".
+
 ## Next expected operation
-SUPERVISED TRIAL (user-watched, one task): route ONE read-only PATHFINDER task for P0.6. Run
-`uv run ecosys-audit/scripts/issue_status.py` and write, for each of the 13 files in `needs_normalization`,
-the proposed top `Status:` line with a one-line justification quoted from that issue file. Report only;
-edit no issue file. Skills: `ecosys-source-navigation` is not needed; use none.
+SAGE reviews the P1.6 migration diff (`git show 3a5011b`, plus `audit/workflow/p1.6-protocol-migration-inventory.md`):
+confirm no `ecosys-ng/src` or reference file changed, and that no active entry point still directs
+agents to the retired workflow. Skill: `ecosys-process-science-parity`. Then T-00001's 13 proposed Status
+lines need SAGE or user approval before a separate edit task applies them.

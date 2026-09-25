@@ -1,1 +1,1 @@
-none — control plane installed 2026-09-25; awaiting user approval (P0.1, GP1).
+T-00001 | PATHFINDER | supervised P0.6 issue-status normalization report

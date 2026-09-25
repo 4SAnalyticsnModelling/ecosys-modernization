@@ -1,5 +1,16 @@
 {
+  "full_run_justification": null,
+  "reason": "Supervised P0.6 read-only issue-status normalization task; no production-science work.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00001.md",
+  "result_status": "DONE",
+  "role": "PATHFINDER",
   "schema_version": 1,
-  "status": "IDLE",
-  "reason": "No task dispatched yet; control plane just installed."
+  "skills": [
+    "ecosys-source-navigation"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00001.md",
+  "task_id": "T-00001"
 }
