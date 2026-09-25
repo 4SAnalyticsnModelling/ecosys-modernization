@@ -37,10 +37,11 @@ none active.
 - T-00008 PATHFINDER DONE: Legacy evidence archived under `evidence/legacy/` with SHA manifest.
 - T-00009 PATHFINDER DONE: Surviving artifact is partial and not a trusted full baseline.
 - T-00010 PATHFINDER BLOCKED: Missing durable full legacy output/archive or fresh run blocks P0.4.
+- T-00011 PATHFINDER DONE: Archived full-run gfortran Ottawa baseline is retained under `evidence/legacy/` and manifest-backed.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: sign the D6 list.
 2. Push access: GitHub returned 403 for this machine's credential on origin; commits stay local until fixed.
 
 ## Next expected operation
-T-00011: PATHFINDER to obtain or document a durable full 30-year Ottawa legacy output archive or fresh gfortran run, then refresh the `evidence/legacy/` manifest before any P0.4 rerun.
+T-00012: PATHFINDER to compare the archived full-run Ottawa legacy outputs against current Zig outputs and confirm the exact retained `evidence/legacy/manifest/sha256.txt` set before any P0.4 rerun.

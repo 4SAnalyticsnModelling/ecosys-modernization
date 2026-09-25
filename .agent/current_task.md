@@ -1,1 +1,1 @@
-T-00011 PATHFINDER: Obtain or document a durable full 30-year Ottawa legacy archive or fresh gfortran run before any P0.4 rerun.
+T-00012 PATHFINDER: compare the archived full-run Ottawa legacy output set with current Zig outputs and confirm the authoritative baseline before any P0.4 rerun.
