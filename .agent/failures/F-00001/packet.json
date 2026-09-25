@@ -1,0 +1,19 @@
+{
+  "carried_rejections": 0,
+  "commit": "a4c587b8ffd1ab7520da25603f37bc993715dd84",
+  "fields": {
+    "binding_id": "UNKNOWN",
+    "candidate_fortran": "UNKNOWN",
+    "candidate_zig": "UNKNOWN",
+    "checkpoint": "UNKNOWN",
+    "exact_error": "task STAGNATED: result file missing",
+    "first_divergent_state": "UNKNOWN",
+    "first_failing_timestep": "UNKNOWN",
+    "last_verified_timestep": "UNKNOWN",
+    "relevant_variables": "UNKNOWN",
+    "subsystem": "UNKNOWN"
+  },
+  "packet": "F-00001",
+  "signature": "PATHFINDER:T-00007",
+  "task": "T-00007"
+}

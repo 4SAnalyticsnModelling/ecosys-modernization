@@ -1,0 +1,44 @@
+{
+  "changed": [
+    "evidence/manifest/legacy-ottawa-gfortran-16.1-20260925.json"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Next evidence task: preserve Ottawa legacy artifacts and recipe with manifest before P0.4 rerun; no full run.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00007.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00007.md",
+    "task_id": "T-00007"
+  },
+  "ended": 1790376924.4802825,
+  "failure_packet": ".agent/failures/F-00001",
+  "hooks": {},
+  "outcome": "timeout",
+  "reset": {
+    "new": null,
+    "old": "ses_f253ac5e9ffegcSFcZ8aMFJWIU",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [
+    "result file missing"
+  ],
+  "result_status": "STAGNATED",
+  "review": null,
+  "usage": {
+    "cache_read": 176512,
+    "cache_write": 0,
+    "cost": 0.01924164,
+    "input": 16877,
+    "llm_calls": 10,
+    "output": 10280,
+    "tool_calls": 18
+  },
+  "violations": []
+}

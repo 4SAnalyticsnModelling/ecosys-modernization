@@ -4,6 +4,9 @@
   "autonomy_approved": true,
   "campaigns": 0,
   "campaigns_without_advance": 0,
+  "failure_signatures": {
+    "PATHFINDER:T-00007": 1
+  },
   "full_run_justifications": [],
   "full_runs": {
     "legacy": 0,
@@ -25,8 +28,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Next evidence task: preserve Ottawa legacy artifacts and recipe with manifest before P0.4 rerun; no full run.",
   "task_id": "T-00007",
-  "worker": "PATHFINDER"
+  "worker": null
 }
