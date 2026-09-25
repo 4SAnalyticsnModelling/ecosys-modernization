@@ -37,14 +37,14 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00010 PATHFINDER BLOCKED: the legacy archive is partial; no full 30-yr output exists in the repo.
-- T-00011/T-00012 PATHFINDER DONE, but their "full 30-year baseline" claim is WRONG (see Confirmed facts).
+- T-00014 PATHFINDER DONE: D6 packet ties runtime change `9253d3b`, chemistry edit `5add7de`, and issue-015 to observed effects.
+- T-00012 PATHFINDER DONE: retained legacy evidence remains partial; full 30-yr baseline still needs D6-gated rerun, not claimed.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: the user signs the D6 list (after the PATHFINDER packet and SAGE verdict exist).
 
 ## Next expected operation
-T-00014 PATHFINDER: prepare the D6 packet (`9253d3b`, `5add7de`, issue-015) with provenance, exact effects, and dependent runs for SAGE review before the user signs.
+T-00015 SAGE: adjudicate the D6 packet (`9253d3b`, `5add7de`, issue-015) for DEV-004..006 and approve or reject before the user signs.
 
 
 ## Frontier

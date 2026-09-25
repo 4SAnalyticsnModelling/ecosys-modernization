@@ -1,16 +1,1 @@
-{
-  "full_run_justification": null,
-  "reason": "Unblocked G0-2 D6 packet and issue-015 review; SAGE must sign before user approval.",
-  "requires_sage_review": true,
-  "result_file": ".agent/results/T-00014.md",
-  "result_status": "DONE",
-  "role": "PATHFINDER",
-  "schema_version": 1,
-  "skills": [
-    "ecosys-source-navigation"
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00014.md",
-  "task_id": "T-00014"
-}
+{"schema_version": 1, "status": "PENDING", "task_id": "T-00015", "role": "SAGE", "task_file": ".agent/tasks/T-00015.md", "result_file": ".agent/results/T-00015.md", "skills": ["ecosys-release-verification", "ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "G0-2 is unblocked: T-00014 prepared the D6 packet, and SAGE must approve DEV-004..006 before the user can sign."}

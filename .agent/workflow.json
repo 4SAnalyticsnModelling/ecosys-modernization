@@ -32,7 +32,7 @@
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "Unblocked G0-2 D6 packet and issue-015 review; SAGE must sign before user approval.",
