@@ -1,0 +1,42 @@
+{
+  "changed": [
+    ".agent/results/T-00008.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Preserve Ottawa legacy evidence and run-002 recipe under evidence/legacy before any rerun; no full simulation.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00008.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00008.md",
+    "task_id": "T-00008"
+  },
+  "ended": 1790378005.9461558,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": "ses_f2539468bffek22lQuy9i5Xthh",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 582528,
+    "cache_write": 0,
+    "cost": 0.03914516,
+    "input": 45637,
+    "llm_calls": 20,
+    "output": 15306,
+    "tool_calls": 29
+  },
+  "violations": []
+}
