@@ -24,7 +24,7 @@
       "reset_marker": "Ask anything",
       "prompt_file": ".agent/roles/sentinel.md",
       "skills": [],
-      "budget": {"minutes": 5, "tool_calls": 8, "input_tokens": 40000},
+      "budget": {"minutes": 5, "tool_calls": 6, "input_tokens": 40000},
       "may_write": [".agent/dispatch.json", ".agent/current_task.md", ".agent/tasks/", ".agent/state.md"],
       "may_edit_production_source": false
     },
@@ -61,7 +61,7 @@
       "pane_label": "SAGE",
       "kind": "claude",
       "model": "claude-opus-5-5",
-      "launch_args": ["--dangerously-skip-permissions"],
+      "launch_args": ["--dangerously-skip-permissions", "--strict-mcp-config"],
       "reset_command": "/clear",
       "prompt_file": ".agent/roles/sage.md",
       "skills_one_of": ["ecosys-process-science-parity", "ecosys-conservation-audit", "ecosys-nonlinear-solver-audit", "ecosys-feature-attribution"],
