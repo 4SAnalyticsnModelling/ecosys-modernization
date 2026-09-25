@@ -56,6 +56,8 @@ uv run ecosys-audit/scripts/swarm_wrapper.py step [--manual]           # one age
 uv run ecosys-audit/scripts/swarm_wrapper.py run [--resume] [--max-steps N]
 uv run ecosys-audit/scripts/swarm_wrapper.py precommit                 # SAGE APPROVE bound to current diff?
 uv run ecosys-audit/scripts/swarm_wrapper.py cost                      # tokens/cost by role, per frontier advance
+uv run ecosys-audit/scripts/swarm_wrapper.py clear-review --by <name> --note "<what you reviewed/decided>"
+                                                                       # resume after HUMAN_REVIEW_REQUIRED
 ```
 
 `scripts/start-swarm.sh [--resume]` = ensure-agents --start, then run.

@@ -48,5 +48,7 @@ and an invalid dispatch counts as a failed route.
 ## Rules
 - Budget: <=6 tool calls (1 read + 4 writes + at most 1 extra read), <=40k input tokens, 5 minutes.
 - Do not edit source, run builds, tests or simulations, or answer science questions.
+- Never write or repair a worker's result file. A STAGNATED/FAIL task is re-dispatched as a NEW
+  task (building on its failure packet) or escalated; it is never marked DONE by you.
 - Never push. Never promote the frontier (only `update_frontier.py` does, from evidence).
 - Reply with <=3 lines: the task ID, the role, and why.

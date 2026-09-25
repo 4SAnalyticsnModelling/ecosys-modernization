@@ -40,10 +40,30 @@ class FakeHerdr:
         self.prompts, self.keys, self.behaviors, self.seq = [], [], {}, 0
         self.screens = {n: "previous conversation" for n in kinds}
         self.reset_works = True
+        self.countdown, self.on_done = {}, {}
+        self.pane_screen, self.pane_typed, self.pane_log, self.variant_works = {}, {}, [], True
 
     def agent(self, name):
+        if name in self.countdown:
+            self.countdown[name] -= 1
+            if self.countdown[name] <= 0:
+                del self.countdown[name]
+                self.agents[name]["agent_status"] = "idle"
+                self.on_done.pop(name, lambda: None)()
         a = self.agents.get(name)
         return dict(a) if a else None
+
+    def pane_read(self, pane):
+        return self.pane_screen.get(pane, "")
+
+    def pane_send_text(self, pane, text):
+        self.pane_log.append(("text", pane, text))
+        self.pane_typed[pane] = text
+
+    def pane_keys(self, pane, *keys):
+        self.pane_log.append(("keys", pane, keys))
+        if keys == ("enter",) and self.variant_works and self.pane_typed.get(pane) in ("low", "medium", "high"):
+            self.pane_screen[pane] = f"Forge auto · Gemini 3.8 Flash GitHub Copilot · {self.pane_typed[pane]}"
 
     def read(self, name):
         return self.screens[name]
@@ -435,6 +455,7 @@ class SwarmTests(unittest.TestCase):
         self.dispatch_pending("T-00001", "PATHFINDER")
 
         def slow(_t):
+            self.herdr.agents["pathfinder"]["agent_status"] = "working"  # never finishes
             raise sw.HerdrError("timed out", "timeout")
         self.herdr.behaviors["pathfinder"] = slow
         out = self.swarm.step()
@@ -535,6 +556,54 @@ class SwarmTests(unittest.TestCase):
         self.assertNotIn("chained", out)
         self.assertIn("production/protected", out["chain_note"])
         self.assertEqual(w.load(self.root / ".agent/dispatch.json")["status"], "COMPLETE")
+
+    def test_early_prompt_return_does_not_cut_a_working_agent_short(self):
+        # T-00007 regression: prompt --wait returned while PATHFINDER was still working.
+        self.dispatch_pending("T-00001", "PATHFINDER")
+
+        def long_task(_t):
+            self.herdr.agents["pathfinder"]["agent_status"] = "working"
+            self.herdr.countdown["pathfinder"] = 200  # ~10 simulated minutes of polling
+            self.herdr.on_done["pathfinder"] = lambda: self.write_result("T-00001")
+        self.herdr.behaviors["pathfinder"] = long_task
+        out = self.swarm.step()
+        self.assertEqual((out["status"], out["result_status"]), ("COLLECTED", "DONE"))
+        self.assertEqual(self.herdr.keys, [])  # never interrupted
+
+    def test_launch_variant_is_selected_and_verified(self):
+        self.herdr.pane_screen["w1:p2"] = "Forge auto · Gemini 3.8 Flash GitHub Copilot"
+        self.swarm.set_variant("FORGE", "w1:p2")
+        self.assertIn("· high", self.herdr.pane_screen["w1:p2"])
+        self.assertEqual([e[2] for e in self.herdr.pane_log if e[0] == "text"], ["/variants", "high"])
+        self.herdr.pane_log.clear()
+        self.swarm.set_variant("FORGE", "w1:p2")  # already set: no keystrokes
+        self.assertEqual(self.herdr.pane_log, [])
+
+    def test_launch_variant_that_never_shows_is_an_error(self):
+        self.herdr.variant_works = False
+        self.herdr.pane_screen["w1:p2"] = "Forge auto · Gemini 3.8 Flash GitHub Copilot"
+        with self.assertRaises(w.ProtocolError):
+            self.swarm.set_variant("FORGE", "w1:p2")
+
+    def test_clear_review_records_decision_commits_leftovers_and_resumes(self):
+        self.dispatch_pending("T-00001", "PATHFINDER")
+        self.write_result("T-00001")  # stale result -> halt
+        self.assertEqual(self.swarm.step()["status"], "HUMAN_REVIEW_REQUIRED")
+        with self.assertRaises(w.ProtocolError):
+            self.swarm.clear_review("user", "short")
+        out = self.swarm.clear_review("user", "stale result was a leftover test file; keep it as evidence")
+        self.assertEqual((out["status"], out["next"], out["git"]["commit"] != "nothing"), ("CLEARED", "deliver pending dispatch", True))
+        wf = self.wf()
+        self.assertEqual((wf["status"], wf["halts"][-1]["cleared_by"]), ("DISPATCHED", "user"))
+        self.assertEqual(subprocess.run(["git", "status", "--porcelain"], cwd=self.root, capture_output=True, text=True).stdout, "")
+        with self.assertRaises(w.ProtocolError):
+            self.swarm.clear_review("user", "not halted any more, must refuse")
+
+    def test_clear_review_refuses_while_protected_reference_is_modified(self):
+        (self.root / "f77src/x.f").write_text("      STOP\n")
+        self.swarm.halt("test halt")
+        with self.assertRaises(w.ProtocolError):
+            self.swarm.clear_review("user", "trying to clear with f77src modified")
 
     def test_invalid_sage_skill_rejected(self):
         self.dispatch_pending("T-00001", "SAGE", skills=["ecosys-source-navigation"])

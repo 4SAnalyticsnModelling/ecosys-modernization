@@ -118,6 +118,21 @@ class Herdr:
     def pane_run(self, pane: str, command: str):
         self.call("pane", "run", pane, command)
 
+    def pane_send_text(self, pane: str, text: str):
+        self.call("pane", "send-text", pane, text)
+
+    def pane_keys(self, pane: str, *keys: str):
+        self.call("pane", "send-keys", pane, *keys)
+
+    def pane_read(self, pane: str) -> str:
+        if os.environ.get("HERDR_ENV") != "1":
+            raise ProtocolError("swarm_wrapper must run inside a Herdr pane (HERDR_ENV=1)")
+        p = subprocess.run(["herdr", "--session", self.session, "pane", "read", pane, "--source", "visible"],
+                           cwd=self.root, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
+        if p.returncode:
+            raise HerdrError(f"herdr pane read: exit {p.returncode}")
+        return p.stdout
+
     def start(self, name: str, kind: str, pane: str, args: list[str], timeout_s: float = 150):
         self.call("agent", "start", name, "--kind", kind, "--pane", pane, "--timeout", str(int(timeout_s * 1000)),
                   "--", *args, timeout=timeout_s + 60)
@@ -354,22 +369,39 @@ class Swarm:
         raise HumanReview(f"{name} did not acknowledge {r['reset_command']} with a new session")
 
     def turn(self, role: str, text: str) -> str:
+        """Deliver one prompt and wait until the agent is REALLY done, up to the role's full budget.
+
+        `agent prompt --wait` can return at a transient idle between tool steps, so completion
+        needs two consecutive settled observations. Only the full budget, not a short grace
+        period, may end a turn early (T-00007, 2026-09-25, was interrupted at 75 s this way).
+        """
         r = self.role(role)
+        name = r["agent_name"]
         budget = float(r["budget"]["minutes"]) * 60
+        deadline = self.clock() + budget
         try:
-            self.herdr.prompt(r["agent_name"], text, wait=True, timeout_s=budget)
-            self.wait_settled(r["agent_name"], 60)
-            return "settled"
-        except (TimeoutError, HerdrError, subprocess.TimeoutExpired) as e:
+            self.herdr.prompt(name, text, wait=True, timeout_s=budget)
+        except (HerdrError, subprocess.TimeoutExpired) as e:
             if isinstance(e, HerdrError) and e.code == "agent_blocked":
-                raise HumanReview(f"{r['agent_name']} is at a permission/question dialog") from e
+                raise HumanReview(f"{name} is at a permission/question dialog") from e
             if isinstance(e, HerdrError) and e.code not in ("timeout", "agent_prompt_stalled"):
                 raise
-            try:  # interrupt generation; never kill the harness
-                self.herdr.send_keys(r["agent_name"], "esc")
-            except HerdrError:
-                pass
-            return "timeout"
+        settled = 0
+        while self.clock() < deadline:
+            a = self.herdr.agent(name)
+            if a is None:
+                raise HumanReview(f"agent {name} is not live in Herdr")
+            if a["agent_status"] == "blocked":
+                raise HumanReview(f"{name} is at a permission/question dialog; never answered automatically")
+            settled = settled + 1 if a["agent_status"] in ("idle", "done") else 0
+            if settled >= 2:
+                return "settled"
+            self.sleep(3)
+        try:  # budget exhausted: interrupt generation; never kill the harness
+            self.herdr.send_keys(name, "esc")
+        except HerdrError:
+            pass
+        return "timeout"
 
     def sentinel_brief(self) -> str:
         """Everything SENTINEL routes on, pre-digested into ONE file (token economy: one read, not ~8)."""
@@ -858,6 +890,35 @@ class Swarm:
                               f"(commits are kept locally): {st['last_push_error'][-240:]}")
         return {"push": "failed", "consecutive_push_failures": st["consecutive_push_failures"]}
 
+    def clear_review(self, by: str, note: str, commit: bool = True) -> dict:
+        """Resume after HUMAN_REVIEW_REQUIRED: record who reviewed what, then (optionally) commit the
+        halted cycle's leftovers (unreviewed production source stays withheld)."""
+        with lock(self.dir / "locks" / "swarm.lock"):
+            wf = self.workflow()
+            if wf.get("status") != "HUMAN_REVIEW_REQUIRED":
+                raise ProtocolError(f"swarm is not halted for review (status {wf.get('status')})")
+            if (self.rt / "inflight.json").exists():
+                raise ProtocolError("an inflight turn exists; resolve it with `run --resume` first")
+            if len(note.strip()) < 10:
+                raise ProtocolError("--note must say what was reviewed and decided")
+            protected = [p for p in git_dirty(self.root) if any(matches(p, x) for x in self.roster["protected_prefixes"])]
+            if protected:
+                raise ProtocolError(f"protected reference paths are modified; restore them first: {protected}")
+            wf.setdefault("halts", []).append({"time": self.clock(), "reason": wf.get("status_reason"),
+                                               "cleared_by": by, "note": note})
+            pending = self.dispatch().get("status") == "PENDING"
+            wf.update({"status": "DISPATCHED" if pending else "ROUTING", "route_failures": 0,
+                       "status_reason": f"review cleared by {by}: {note[:160]}"})
+            self.save_workflow(wf)
+            out = {"status": "CLEARED", "by": by, "next": "deliver pending dispatch" if pending else "route"}
+            if commit:
+                atomic(self.rt / "before.json", encoded({}))  # everything left by the halted cycle
+                try:
+                    out["git"] = self.commit_cycle(f"review cleared by {by}")
+                except HumanReview as e:
+                    return self.halt(str(e))
+            return out
+
     # --- gates
     def precommit(self) -> dict:
         cur = dirty_source_digest(self.root)
@@ -883,6 +944,9 @@ class Swarm:
             a = self.herdr.agent(r["agent_name"])
             if a and a.get("pane_id") == pane["pane_id"] and a.get("agent") == r["kind"]:
                 report[role] = "OK"
+                if r["kind"] == "opencode" and r.get("variant") and a.get("agent_status") in ("idle", "done"):
+                    self.set_variant(role, pane["pane_id"])
+                    report[role] = f"OK (variant {r['variant']})"
             elif pane.get("agent") == r["kind"]:
                 self.herdr.rename(pane["pane_id"], r["agent_name"])
                 report[role] = "RENAMED"
@@ -903,10 +967,35 @@ class Swarm:
             self.sleep(1 + attempt * 0.5)
             try:
                 self.herdr.start(r["agent_name"], r["kind"], pane, r["launch_args"])
-                return
+                break
             except HerdrError as e:
                 if e.code != "agent_pane_busy" or attempt == 14:
                     raise
+        if r["kind"] == "opencode" and r.get("variant"):
+            self.set_variant(role, pane)
+
+    def set_variant(self, role: str, pane: str):
+        """Select the roster variant with OpenCode's /variants picker, then verify the status line.
+
+        OpenCode keeps variants in one user-wide state file that every running instance rewrites
+        with its own copy, so a variant stored there does not survive; set it at every launch.
+        /new keeps the variant for the life of the process.
+        """
+        variant = self.role(role)["variant"]
+        mark = re.compile(rf"·\s*{re.escape(variant)}\b")
+        for _ in range(2):
+            if mark.search(self.herdr.pane_read(pane)):
+                return
+            self.herdr.pane_send_text(pane, "/variants")
+            self.sleep(1)
+            self.herdr.pane_keys(pane, "enter")
+            self.sleep(2)
+            self.herdr.pane_send_text(pane, variant)  # the picker's search box
+            self.sleep(1)
+            self.herdr.pane_keys(pane, "enter")
+            self.sleep(2)
+        if not mark.search(self.herdr.pane_read(pane)):
+            raise ProtocolError(f"{role}: could not confirm variant '{variant}' on the status line")
 
     def relaunch(self, role: str) -> dict:
         r = self.role(role)
@@ -949,6 +1038,10 @@ def main():
     dh.add_argument("--task", help="informational; the hash covers the whole production-source diff")
     sub.add_parser("precommit")
     sub.add_parser("cost", help="token/cost totals by role and per verified-frontier advance")
+    cr = sub.add_parser("clear-review", help="resume after HUMAN_REVIEW_REQUIRED (records who and why)")
+    cr.add_argument("--by", required=True)
+    cr.add_argument("--note", required=True, help="what was reviewed and decided")
+    cr.add_argument("--no-commit", action="store_true", help="do not commit the halted cycle's leftovers")
     st = sub.add_parser("step")
     st.add_argument("--manual", action="store_true", help="one user-supervised step without autonomy approval")
     rn = sub.add_parser("run")
@@ -983,6 +1076,8 @@ def main():
             out = sw.precommit()
         elif a.cmd == "cost":
             out = sw.cost_report()
+        elif a.cmd == "clear-review":
+            out = sw.clear_review(a.by, a.note, commit=not a.no_commit)
         elif a.cmd == "approve":
             wf = sw.workflow()
             wf.update({"autonomy_approved": True, "approved_by": a.by, "approved_unix": time.time()})
