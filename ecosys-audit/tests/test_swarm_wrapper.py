@@ -42,6 +42,7 @@ class FakeHerdr:
         self.reset_works = True
         self.countdown, self.on_done = {}, {}
         self.pane_screen, self.pane_typed, self.pane_log, self.variant_works = {}, {}, [], True
+        self.picker_open, self.chat_messages = {}, []
 
     def agent(self, name):
         if name in self.countdown:
@@ -62,8 +63,14 @@ class FakeHerdr:
 
     def pane_keys(self, pane, *keys):
         self.pane_log.append(("keys", pane, keys))
-        if keys == ("enter",) and self.variant_works and self.pane_typed.get(pane) in ("low", "medium", "high"):
-            self.pane_screen[pane] = f"Forge auto · Gemini 3.8 Flash GitHub Copilot · {self.pane_typed[pane]}"
+        typed = self.pane_typed.pop(pane, None)
+        if keys == ("enter",) and typed == "/variants" and self.variant_works:
+            self.picker_open[pane] = True
+            self.pane_screen[pane] = self.pane_screen.get(pane, "") + "\nSelect variant"
+        elif keys == ("enter",) and self.picker_open.pop(pane, False) and typed in ("low", "medium", "high"):
+            self.pane_screen[pane] = f"Forge auto · Gemini 3.8 Flash GitHub Copilot · {typed}"
+        elif keys == ("enter",) and typed and not typed.startswith("/"):
+            self.chat_messages.append((pane, typed))  # plain text submitted as a prompt: must never happen
 
     def read(self, name):
         return self.screens[name]
@@ -584,6 +591,9 @@ class SwarmTests(unittest.TestCase):
         self.herdr.pane_screen["w1:p2"] = "Forge auto · Gemini 3.8 Flash GitHub Copilot"
         with self.assertRaises(w.ProtocolError):
             self.swarm.set_variant("FORGE", "w1:p2")
+        # The picker never opened, so the variant name was never typed into the chat.
+        self.assertEqual([e[2] for e in self.herdr.pane_log if e[0] == "text"], ["/variants"] * 3)
+        self.assertEqual(self.herdr.chat_messages, [])
 
     def test_clear_review_records_decision_commits_leftovers_and_resumes(self):
         self.dispatch_pending("T-00001", "PATHFINDER")

@@ -981,15 +981,28 @@ class Swarm:
         with its own copy, so a variant stored there does not survive; set it at every launch.
         /new keeps the variant for the life of the process.
         """
-        variant = self.role(role)["variant"]
+        r = self.role(role)
+        variant = r["variant"]
         mark = re.compile(rf"·\s*{re.escape(variant)}\b")
-        for _ in range(2):
+        # The TUI must be ready, or keystrokes land in the chat as a prompt (2026-09-25: "high"
+        # reached FORGE as a message). Type the variant ONLY after the picker is on screen.
+        self.wait_settled(r["agent_name"], 60)
+        for _ in range(3):
             if mark.search(self.herdr.pane_read(pane)):
                 return
             self.herdr.pane_send_text(pane, "/variants")
             self.sleep(1)
             self.herdr.pane_keys(pane, "enter")
-            self.sleep(2)
+            opened = False
+            for _ in range(5):
+                self.sleep(1)
+                if "Select variant" in self.herdr.pane_read(pane):
+                    opened = True
+                    break
+            if not opened:
+                self.herdr.pane_keys(pane, "esc")  # close whatever opened (NOT ctrl+c: on empty input it quits OpenCode)
+                self.sleep(2)
+                continue
             self.herdr.pane_send_text(pane, variant)  # the picker's search box
             self.sleep(1)
             self.herdr.pane_keys(pane, "enter")
