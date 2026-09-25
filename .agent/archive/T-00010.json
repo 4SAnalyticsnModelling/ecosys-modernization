@@ -1,0 +1,42 @@
+{
+  "changed": [
+    ".agent/results/T-00010.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Need the durable full 30-year Ottawa legacy archive or fresh run before any P0.4 rerun; current evidence is partial and not a trusted baseline.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00010.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00010.md",
+    "task_id": "T-00010"
+  },
+  "ended": 1790378217.4644473,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": "ses_f2526eea8ffelxrCH6zzOXuVvf",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "BLOCKED",
+  "review": null,
+  "usage": {
+    "cache_read": 182272,
+    "cache_write": 0,
+    "cost": 0.018104239999999997,
+    "input": 37758,
+    "llm_calls": 7,
+    "output": 5756,
+    "tool_calls": 14
+  },
+  "violations": []
+}

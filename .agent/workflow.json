@@ -34,8 +34,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Need the durable full 30-year Ottawa legacy archive or fresh run before any P0.4 rerun; current evidence is partial and not a trusted baseline.",
   "task_id": "T-00010",
-  "worker": "PATHFINDER"
+  "worker": null
 }
