@@ -6,7 +6,8 @@ manifests committed), tools in `ecosys-audit/scripts/`.
 
 ## Herdr session `ecosys-ng` (workspace w1, five tabs, one pane each)
 
-Tabs: 1 SAGE, 2 CONTROLLER, 3 FORGE, 4 SENTINEL, 5 PATHFINDER. Tab label = pane label = role.
+Tabs, in order: CONTROLLER, SAGE, FORGE, SENTINEL, PATHFINDER. (Herdr cannot reorder tabs; a pane
+moved with `pane move --new-tab` is appended last.) Tab label = pane label = role.
 Herdr agent names follow the pane, so moving panes between tabs does not break the wrapper.
 
 | Pane / tab label | Herdr agent name | Harness / model | Role file |
