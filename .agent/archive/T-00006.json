@@ -1,0 +1,42 @@
+{
+  "changed": [
+    ".agent/results/T-00006.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Next unblocked evidence task: verify P0 legacy baseline artifacts and recipe before any rerun; search-only, no full run.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00006.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00006.md",
+    "task_id": "T-00006"
+  },
+  "ended": 1790376815.824524,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": "ses_f256ab8deffe3BO2pzjrNTYGNx",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 207744,
+    "cache_write": 0,
+    "cost": 0.021420279999999996,
+    "input": 49643,
+    "llm_calls": 8,
+    "output": 6114,
+    "tool_calls": 16
+  },
+  "violations": []
+}
