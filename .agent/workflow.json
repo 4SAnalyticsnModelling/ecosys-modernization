@@ -25,17 +25,26 @@
       "note": "Halt was correct: SENTINEL wrote a T-00007 result after PATHFINDER was cut off at 75 s by a controller bug (fixed 67d01fa). The fabricated result was moved to .agent/failures/F-00001/sentinel-unauthorized-result.md; T-00007 stays STAGNATED. T-00008 (retry of the evidence archiving) is a valid dispatch.",
       "reason": "SENTINEL wrote outside its lane: .agent/results/T-00007.md: outside SENTINEL may_write",
       "time": 1790377870.5053802
+    },
+    {
+      "cleared_by": "claude-planning-session (user-requested 5-cycle test)",
+      "note": "Halt was a controller defect: a rejected SENTINEL dispatch (two SAGE skills) was left PENDING and then delivered. Fixed: rejected dispatches become REJECTED and their errors reach the next brief. Also repaired state.md, which SENTINEL had filled with its brief; SENTINEL no longer edits it.",
+      "reason": "invalid pending dispatch T-00015: SAGE tasks name exactly one of its skills_one_of",
+      "time": 1790379098.5215757
     }
   ],
   "last_advance_unix": null,
+  "last_route_errors": [
+    "SAGE tasks name exactly one of its skills_one_of (you gave ecosys-release-verification + ecosys-feature-attribution)"
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
   "status": "ROUTING",
-  "status_reason": "Unblocked G0-2 D6 packet and issue-015 review; SAGE must sign before user approval.",
+  "status_reason": "review cleared by claude-planning-session (user-requested 5-cycle test): Halt was a controller defect: a rejected SENTINEL dispatch (two SAGE skills) was left PENDING and then delivered. Fixed: rejected dispatches become REJECTED and",
   "task_id": "T-00014",
   "worker": null
 }
