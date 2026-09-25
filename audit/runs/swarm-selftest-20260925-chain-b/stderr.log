@@ -1,0 +1,30 @@
+test_autonomy_requires_user_approval (__main__.SwarmTests.test_autonomy_requires_user_approval) ... ok
+test_budget_timeout_interrupts_and_stagnates (__main__.SwarmTests.test_budget_timeout_interrupts_and_stagnates) ... ok
+test_chain_naming_production_source_is_ignored (__main__.SwarmTests.test_chain_naming_production_source_is_ignored) ... ok
+test_concurrent_dispatch_refused_by_lock (__main__.SwarmTests.test_concurrent_dispatch_refused_by_lock) ... ok
+test_duplicate_delivery_refused_while_agent_still_working (__main__.SwarmTests.test_duplicate_delivery_refused_while_agent_still_working) ... ok
+test_every_cycle_commits_and_pushes_and_unreviewed_source_waits_for_sage (__main__.SwarmTests.test_every_cycle_commits_and_pushes_and_unreviewed_source_waits_for_sage) ... ok
+test_forge_cannot_widen_its_own_task (__main__.SwarmTests.test_forge_cannot_widen_its_own_task) ... ok
+test_forge_source_edit_without_hypothesis_is_rejected (__main__.SwarmTests.test_forge_source_edit_without_hypothesis_is_rejected) ... ok
+test_happy_path_sentinel_pathfinder_forge_sage_sentinel (__main__.SwarmTests.test_happy_path_sentinel_pathfinder_forge_sage_sentinel) ... ok
+test_invalid_sage_skill_rejected (__main__.SwarmTests.test_invalid_sage_skill_rejected) ... ok
+test_killed_controller_resume_never_reprompts (__main__.SwarmTests.test_killed_controller_resume_never_reprompts) ... ok
+test_metrics_record_tokens_and_cost_report (__main__.SwarmTests.test_metrics_record_tokens_and_cost_report) ... ok
+test_no_commit_when_a_cycle_is_halted (__main__.SwarmTests.test_no_commit_when_a_cycle_is_halted) ... ok
+test_pathfinder_editing_source_is_a_scope_violation_left_in_place (__main__.SwarmTests.test_pathfinder_editing_source_is_a_scope_violation_left_in_place) ... ok
+test_permission_blocked_agent_is_never_answered (__main__.SwarmTests.test_permission_blocked_agent_is_never_answered) ... ok
+test_protected_reference_edit_is_a_violation (__main__.SwarmTests.test_protected_reference_edit_is_a_violation) ... ok
+test_push_failure_escalates_after_three_cycles_and_keeps_commits (__main__.SwarmTests.test_push_failure_escalates_after_three_cycles_and_keeps_commits) ... ok
+test_reset_that_does_not_land_blocks_the_task (__main__.SwarmTests.test_reset_that_does_not_land_blocks_the_task) ... ok
+test_resume_collects_result_written_before_crash (__main__.SwarmTests.test_resume_collects_result_written_before_crash) ... ok
+test_sage_chain_dispatches_a_mechanical_followup_without_sentinel (__main__.SwarmTests.test_sage_chain_dispatches_a_mechanical_followup_without_sentinel) ... ok
+test_sentinel_gets_one_self_contained_brief (__main__.SwarmTests.test_sentinel_gets_one_self_contained_brief) ... ok
+test_sentinel_without_decision_twice_escalates (__main__.SwarmTests.test_sentinel_without_decision_twice_escalates) ... ok
+test_sentinel_writing_source_is_a_violation (__main__.SwarmTests.test_sentinel_writing_source_is_a_violation) ... ok
+test_source_change_after_review_invalidates_it (__main__.SwarmTests.test_source_change_after_review_invalidates_it) ... ok
+test_stale_result_blocks_delivery (__main__.SwarmTests.test_stale_result_blocks_delivery) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 63.665s
+
+OK

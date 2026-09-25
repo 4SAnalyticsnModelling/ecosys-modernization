@@ -171,10 +171,15 @@ class SwarmTests(unittest.TestCase):
 
         def advance(seconds):
             self.now += seconds
-        self.swarm = sw.Swarm(root, self.herdr, runner=self.fake_runner, clock=lambda: self.now, sleep=advance)
+        self.swarm = sw.Swarm(root, self.herdr, runner=self.fake_runner, clock=lambda: self.now, sleep=advance,
+                              usage=self.fake_usage)
 
     def git(self, *args):
         subprocess.run(["git", *args], cwd=self.root, check=True, capture_output=True)
+
+    def fake_usage(self, kind, sid):
+        return {"input": 1000, "cache_read": 9000, "cache_write": 0, "output": 200, "tool_calls": 4,
+                "llm_calls": 2, "cost": 0.01 if kind == "opencode" else None} if sid else None
 
     def fake_runner(self, argv, cwd, label, timeout):
         self.runs.append((argv, cwd, label))
@@ -252,7 +257,7 @@ class SwarmTests(unittest.TestCase):
         w.atomic(self.root / ".agent/roster.json", w.encoded(roster))
         self.git("commit", "-qam", "enable push")
         self.swarm = sw.Swarm(self.root, self.herdr, runner=self.fake_runner, clock=lambda: self.now,
-                              sleep=self.swarm.sleep)
+                              sleep=self.swarm.sleep, usage=self.fake_usage)
 
     def out(self, *args):
         return subprocess.run(["git", *args], cwd=self.root, check=True, capture_output=True, text=True).stdout.strip()
@@ -484,6 +489,52 @@ class SwarmTests(unittest.TestCase):
         for marker in ("next free task ID: T-00002", "ROLE RULES MARKER", "STATE MARKER", "FINDING MARKER",
                        "- T-00001 PATHFINDER [DONE]: test objective", "TEMPLATE MARKER"):
             self.assertIn(marker, seen["brief"])
+
+    def test_metrics_record_tokens_and_cost_report(self):
+        self.dispatch_pending("T-00001", "PATHFINDER")
+        self.herdr.behaviors["pathfinder"] = lambda t: self.write_result("T-00001")
+        self.swarm.step()
+        lines = (self.root / ".agent/metrics.csv").read_text().splitlines()
+        self.assertEqual(lines[0], sw.Swarm.METRICS_HEADER)
+        row = dict(zip(lines[0].split(","), lines[-1].split(",")))
+        self.assertEqual((row["input_tokens"], row["output_tokens"], row["tool_calls"], row["cache_read_tokens"],
+                          row["cost_usd_estimate"]), ("10000", "200", "4", "9000", "0.0100"))
+        rep = self.swarm.cost_report()
+        self.assertEqual(rep["by_role"]["PATHFINDER"]["tokens_in"], 10000)
+        self.assertIsNone(rep["tokens_in_per_advance"])
+
+    def sage_chain_result(self, allowed):
+        self.dispatch_pending("T-00001", "SAGE", skills=["ecosys-process-science-parity"])
+
+        def sage(_t):
+            self.write_result("T-00001")
+            with (self.root / ".agent/results/T-00001.md").open("a") as f:
+                f.write(f"\n## CHAIN\nROLE: FORGE            (or PATHFINDER)\nOBJECTIVE: apply the approved lines\n"
+                        f"ALLOWED: {allowed}\nSKILLS: none           (or skill names)\n")
+        self.herdr.behaviors["sage"] = sage
+        return self.swarm.step()
+
+    def test_sage_chain_dispatches_a_mechanical_followup_without_sentinel(self):
+        out = self.sage_chain_result("audit/issues/issue-001.md, audit/issues/issue-002.md")
+        self.assertEqual(out["chained"], "T-00002")
+        d = w.load(self.root / ".agent/dispatch.json")
+        self.assertEqual((d["status"], d["role"], d["chained_from"], d["skills"]), ("PENDING", "FORGE", "T-00001", []))
+        task = (self.root / ".agent/tasks/T-00002.md").read_text()
+        self.assertIn("- `audit/issues/issue-002.md`", task)
+
+        def forge(_t):
+            (self.root / "audit/issues").mkdir(parents=True, exist_ok=True)
+            (self.root / "audit/issues/issue-001.md").write_text("Status: CLOSED\n")
+            self.write_result("T-00002")
+        self.herdr.behaviors["forge"] = forge
+        self.assertEqual(self.swarm.step()["result_status"], "DONE")
+        self.assertEqual(self.herdr.task_prompts("sentinel"), [])  # no routing turn was spent
+
+    def test_chain_naming_production_source_is_ignored(self):
+        out = self.sage_chain_result("ecosys-ng/src/a.zig")
+        self.assertNotIn("chained", out)
+        self.assertIn("production/protected", out["chain_note"])
+        self.assertEqual(w.load(self.root / ".agent/dispatch.json")["status"], "COMPLETE")
 
     def test_invalid_sage_skill_rejected(self):
         self.dispatch_pending("T-00001", "SAGE", skills=["ecosys-source-navigation"])

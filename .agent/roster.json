@@ -47,6 +47,8 @@
       "pane_label": "FORGE",
       "kind": "opencode",
       "model": "github-copilot/gemini-3.8-flash",
+      "variant": "high",
+      "variant_note": "Set with OpenCode's /variants picker; persisted per model in ~/.local/state/opencode/model.json (user-wide). MAI-Code Flash (SENTINEL, PATHFINDER) is also 'high' there.",
       "launch_args": ["--agent", "forge", "-m", "github-copilot/gemini-3.8-flash", "--auto"],
       "reset_command": "/new",
       "reset_marker": "Ask anything",

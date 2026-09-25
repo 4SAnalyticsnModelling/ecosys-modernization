@@ -191,10 +191,11 @@ def matches(path: str, pattern: str) -> bool:
 # ------------------------------------------------------------------ the swarm
 
 class Swarm:
-    def __init__(self, root: Path, herdr, runner=None, clock=time.time, sleep=time.sleep):
+    def __init__(self, root: Path, herdr, runner=None, clock=time.time, sleep=time.sleep, usage=None):
         self.root, self.herdr = root.resolve(), herdr
         self.clock, self.sleep = clock, sleep
         self.runner = runner or self._run_logged
+        self.usage = usage or self._usage
         self.dir = self.root / AGENT
         self.roster = load(self.dir / "roster.json")
         self.rt = self.dir / "runtime"
@@ -467,6 +468,56 @@ class Swarm:
         self.save_dispatch(d)
         return d
 
+    def chain_from(self, d: dict) -> tuple[dict | None, str | None]:
+        """A SAGE result's optional `## CHAIN` block -> one mechanical follow-up, skipping a SENTINEL route.
+
+        Deterministic guard rails: only after a DONE SAGE result that was not itself chained; role
+        PATHFINDER or FORGE; no production source or protected path in ALLOWED; the chained task can
+        never chain again. Anything else is ignored and SENTINEL routes as usual.
+        """
+        secs = sections((self.root / d["result_file"]).read_text(encoding="utf-8", errors="replace"))
+        if "CHAIN" not in secs:
+            return None, None
+        f = {}
+        for line in secs["CHAIN"].splitlines():
+            m = re.match(r"^\s*[-*]?\s*([A-Z ]+):\s*(.+?)\s*$", line)
+            if m:
+                f[m.group(1).strip()] = re.sub(r"\s*\([^)]*\)\s*$", "", m.group(2)).strip()  # drop "(or ...)" hints
+        role = (f.get("ROLE", "").split() or [""])[0].upper()
+        allowed = [x.strip().strip("`") for x in f.get("ALLOWED", "").split(",") if x.strip()]
+        skills = [x.strip().strip("`") for x in f.get("SKILLS", "").split(",")
+                  if x.strip() and x.strip().lower() not in ("none", "n/a")]
+        if role not in ("PATHFINDER", "FORGE") or not f.get("OBJECTIVE"):
+            return None, "CHAIN ignored: needs ROLE PATHFINDER|FORGE and an OBJECTIVE"
+        risky = [p for p in allowed if any(matches(p, x) or x.startswith(p.rstrip("*"))
+                                            for x in self.roster["production_source_prefixes"] + self.roster["protected_prefixes"])]
+        if risky:
+            return None, f"CHAIN ignored: production/protected paths need SENTINEL routing: {risky}"
+        tid = self.next_task_id()
+        inputs = [x.strip() for x in f.get("INPUTS", "").split(",") if x.strip()] + [d["result_file"]]
+        text = (f"# TASK: {tid}\n\n## ROLE\n{role}\n\n## OBJECTIVE\n{f['OBJECTIVE']}\n\n## INPUTS\n"
+                + "".join(f"- `{x}`\n" for x in dict.fromkeys(inputs))
+                + "\n## ALLOWED FILES\n" + ("".join(f"- `{x}`\n" for x in allowed) or "- none (read-only)\n")
+                + f"- `.agent/results/{tid}.md`\n\n## DO NOT\n- Change anything outside ALLOWED FILES.\n"
+                  "- Run a full Ottawa simulation.\n\n## RELEVANT SKILLS\n"
+                + ("".join(f"- `.agents/skills/{s}`\n" for s in skills) or "- none\n")
+                + f"\n## KNOWN FACTS\n- Chained by the controller from {d['task_id']} (SAGE, DONE); the exact "
+                  f"instructions are in `{d['result_file']}`.\n\n## HYPOTHESIS\nn/a (no production source)\n\n"
+                  "## SUCCESS CONDITION\nThe OBJECTIVE is met exactly as the SAGE result specifies.\n\n"
+                  "## STOP CONDITIONS\nRole budget; stop and report BLOCKED if the SAGE instructions are ambiguous.\n\n"
+                  f"## OUTPUT FILE\n.agent/results/{tid}.md\n")
+        atomic(self.dir / "tasks" / f"{tid}.md", text.encode("utf-8"))
+        nd = {"schema_version": 1, "status": "PENDING", "task_id": tid, "role": role,
+              "task_file": f"{AGENT}/tasks/{tid}.md", "result_file": f"{AGENT}/results/{tid}.md",
+              "skills": skills, "t1_argv": None, "requires_sage_review": False, "full_run_justification": None,
+              "chained_from": d["task_id"], "reason": f"chained from {d['task_id']} (SAGE CHAIN block)"}
+        errs = self.validate_dispatch(nd)
+        if errs:
+            (self.dir / "tasks" / f"{tid}.md").unlink(missing_ok=True)
+            return None, "CHAIN ignored: " + "; ".join(errs)
+        self.save_dispatch(nd)
+        return nd, None
+
     def read_review(self, d: dict) -> dict:
         text = (self.root / d["result_file"]).read_text(encoding="utf-8", errors="replace")
         v = re.search(r"VERDICT:\s*(APPROVE|REVISE|REJECT)\b", text)
@@ -477,13 +528,110 @@ class Swarm:
                 "valid": bool(v and bound and bound == d.get("diff_sha256") == current)}
 
     # --- metrics / archive
-    def metric(self, d: dict, role: str, status: str, started: float, over: bool, fr: tuple):
+    METRICS_HEADER = ("task_id,role,model,status,started_unix,ended_unix,wall_seconds,input_tokens,output_tokens,"
+                      "tool_calls,budget_minutes,over_budget,frontier_before,frontier_after,cache_read_tokens,"
+                      "llm_calls,cost_usd_estimate")
+
+    def _usage(self, kind: str, sid: str | None) -> dict | None:
+        """Token usage of one agent session, read from the harness's own records. Fail-soft (None)."""
+        if not sid:
+            return None
+        try:
+            u = {"input": 0, "cache_read": 0, "cache_write": 0, "output": 0, "tool_calls": 0, "llm_calls": 0, "cost": None}
+            if kind == "opencode":
+                p = subprocess.run(["opencode", "export", sid], cwd=self.root, capture_output=True, text=True,
+                                   encoding="utf-8", errors="replace", timeout=120, shell=(os.name == "nt"))
+                data = json.loads(p.stdout[p.stdout.index("{"):])
+                u["cost"] = 0.0
+                for m in data.get("messages", []):
+                    info = m.get("info", {})
+                    if info.get("role") == "assistant":
+                        t = info.get("tokens", {})
+                        u["llm_calls"] += 1
+                        u["input"] += t.get("input", 0)
+                        u["output"] += t.get("output", 0) + t.get("reasoning", 0)
+                        u["cache_read"] += t.get("cache", {}).get("read", 0)
+                        u["cache_write"] += t.get("cache", {}).get("write", 0)
+                        u["cost"] += info.get("cost", 0) or 0
+                    u["tool_calls"] += sum(1 for part in m.get("parts", []) if part.get("type") == "tool")
+            elif kind == "claude":
+                slug = re.sub(r"[:\\/]", "-", str(self.root))
+                path = Path(os.path.expanduser("~")) / ".claude" / "projects" / slug / f"{sid}.jsonl"
+                seen = set()
+                for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+                    if '"usage"' not in line:
+                        continue
+                    msg = json.loads(line).get("message", {})
+                    if not msg.get("usage") or msg.get("id") in seen:
+                        continue
+                    seen.add(msg.get("id"))
+                    t = msg["usage"]
+                    u["llm_calls"] += 1
+                    u["input"] += t.get("input_tokens", 0)
+                    u["cache_write"] += t.get("cache_creation_input_tokens", 0)
+                    u["cache_read"] += t.get("cache_read_input_tokens", 0)
+                    u["output"] += t.get("output_tokens", 0)
+                    u["tool_calls"] += sum(1 for c in msg.get("content", []) if isinstance(c, dict) and c.get("type") == "tool_use")
+            else:
+                return None
+            return u
+        except (OSError, ValueError, KeyError, subprocess.SubprocessError):
+            return None
+
+    def turn_usage(self, role: str) -> dict | None:
         r = self.role(role)
+        try:
+            a = self.herdr.agent(r["agent_name"])
+        except ProtocolError:
+            return None
+        return self.usage(r["kind"], session_id(a))
+
+    def metric(self, d: dict, role: str, status: str, started: float, over: bool, fr: tuple, usage: dict | None = None):
+        r = self.role(role)
+        u = usage or {}
+        tool_budget = r["budget"].get("tool_calls")
+        over = over or bool(u and tool_budget and u["tool_calls"] > tool_budget)
+        total_in = (u["input"] + u["cache_read"] + u["cache_write"]) if u else ""
         row = [d.get("task_id") or "route", role, r["model"], status, f"{started:.0f}", f"{self.clock():.0f}",
-               f"{self.clock() - started:.0f}", "", "", "", str(r["budget"]["minutes"]), str(over).lower(),
-               str(fr[0]), str(fr[1])]
-        with (self.dir / "metrics.csv").open("a", encoding="utf-8", newline="") as f:
+               f"{self.clock() - started:.0f}", str(total_in), str(u.get("output", "")), str(u.get("tool_calls", "")),
+               str(r["budget"]["minutes"]), str(over).lower(), str(fr[0]), str(fr[1]), str(u.get("cache_read", "")),
+               str(u.get("llm_calls", "")), "" if u.get("cost") is None else f"{u['cost']:.4f}"]
+        path = self.dir / "metrics.csv"
+        lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+        if not lines or lines[0] != self.METRICS_HEADER:
+            atomic(path, ("\n".join([self.METRICS_HEADER] + lines[1:]) + "\n").encode("utf-8"))
+        with path.open("a", encoding="utf-8", newline="") as f:
             f.write(",".join(row) + "\n")
+
+    def cost_report(self) -> dict:
+        rows = []
+        path = self.dir / "metrics.csv"
+        text = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+        cols = text[0].split(",") if text else []
+        for line in text[1:]:
+            vals = line.split(",")
+            rows.append(dict(zip(cols, vals + [""] * (len(cols) - len(vals)))))
+        num = lambda v: float(v) if v not in ("", None) else 0.0
+        by_role = {}
+        for row in rows:
+            b = by_role.setdefault(row["role"], {"turns": 0, "measured_turns": 0, "tokens_in": 0, "tokens_out": 0,
+                                                 "wall_seconds": 0, "cost_usd_estimate": 0.0})
+            b["turns"] += 1
+            b["measured_turns"] += 1 if row.get("input_tokens") else 0
+            b["tokens_in"] += int(num(row.get("input_tokens")))
+            b["tokens_out"] += int(num(row.get("output_tokens")))
+            b["wall_seconds"] += int(num(row.get("wall_seconds")))
+            b["cost_usd_estimate"] = round(b["cost_usd_estimate"] + num(row.get("cost_usd_estimate")), 4)
+        fr = load(self.dir / "frontier.json")
+        advances = sum(1 for h in fr.get("history", []) if h.get("op") == "promote" and h.get("to", 0) > h.get("from", 0))
+        total_in = sum(b["tokens_in"] for b in by_role.values())
+        return {"by_role": by_role, "total_tokens_in": total_in,
+                "total_tokens_out": sum(b["tokens_out"] for b in by_role.values()),
+                "verified_frontier_advances": advances,
+                "tokens_in_per_advance": (total_in // advances) if advances else None,
+                "note": "tokens_in = fresh input + cache reads + cache writes. cost_usd_estimate is OpenCode's list-price "
+                        "estimate (Flash roles only); Claude (SAGE) turns have tokens but no dollar figure. Turns before "
+                        "2026-09-25 were not measured."}
 
     def frontier(self) -> int:
         return load(self.dir / "frontier.json").get("verified_frontier", 0)
@@ -533,7 +681,7 @@ class Swarm:
         errs = self.validate_dispatch(d)
         fr = (self.frontier(), self.frontier())
         self.metric(d, "SENTINEL", "timeout" if outcome == "timeout" else d.get("status", "?"), started,
-                    outcome == "timeout", fr)
+                    outcome == "timeout", fr, self.turn_usage("SENTINEL"))
         (self.rt / "inflight.json").unlink(missing_ok=True)
         if violations:
             raise HumanReview("SENTINEL wrote outside its lane: " + "; ".join(violations))
@@ -615,12 +763,13 @@ class Swarm:
         sig = d.get("signature") or f"{role}:{tid}"
         if status in ("FAIL", "STAGNATED"):
             wf.setdefault("failure_signatures", {})[sig] = wf.get("failure_signatures", {}).get(sig, 0) + 1
+        usage = self.turn_usage(role)
         record = {"dispatch": d, "outcome": outcome, "reset": reset, "result_status": status, "result_errors": rerrs,
                   "changed": changed, "violations": violations, "hooks": hooks, "review": review,
-                  "failure_packet": packet, "ended": self.clock()}
+                  "failure_packet": packet, "usage": usage, "ended": self.clock()}
         atomic(self.dir / "archive" / f"{tid}.json", encoded(record))
         self.metric(d, role, status, started, outcome == "timeout",
-                    (inflight.get("frontier_before", self.frontier()), self.frontier()))
+                    (inflight.get("frontier_before", self.frontier()), self.frontier()), usage)
         self.save_dispatch({**d, "status": "COMPLETE", "result_status": status})
         wf.update({"status": "ROUTING", "task_id": tid, "worker": None})
         self.save_workflow(wf)
@@ -631,7 +780,18 @@ class Swarm:
         if role == "FORGE" and prod and status == "DONE":
             q = self.queue_review(d, dirty_source_digest(self.root)["sha256"])
             return {"status": "COLLECTED", "task_id": tid, "result_status": status, "review_queued": q["task_id"]}
-        return {"status": "COLLECTED", "task_id": tid, "result_status": status, "failure_packet": packet}
+        out = {"status": "COLLECTED", "task_id": tid, "result_status": status, "failure_packet": packet}
+        if role == "SAGE" and status == "DONE" and not d.get("chained_from"):
+            nd, why = self.chain_from(d)
+            if nd:
+                wf = self.workflow()
+                wf.update({"status": "DISPATCHED", "task_id": nd["task_id"], "worker": nd["role"],
+                           "status_reason": nd["reason"]})
+                self.save_workflow(wf)
+                out["chained"] = nd["task_id"]
+            elif why:
+                out["chain_note"] = why
+        return out
 
     # --- git (decision D8: commit and push after every cycle)
     def git(self, *args: str, timeout: float = 300) -> subprocess.CompletedProcess:
@@ -758,11 +918,18 @@ class Swarm:
             # Keypresses, not "/exit": they work even if slash commands are unavailable (a double
             # ctrl+c in one write exits Claude Code; one exits OpenCode).
             self.herdr.send_keys(r["agent_name"], *(("ctrl+c", "ctrl+c") if r["kind"] == "claude" else ("ctrl+c",)))
-        end = self.clock() + 30
+        end, nudges = self.clock() + 30, 0
         while not any(s in SHELLS for s in self.herdr.foreground(pane)):
             if self.clock() > end:
                 raise ProtocolError(f"{role}: shell did not return in pane {pane}")
             self.sleep(1)
+            # A first ctrl+c may only clear a non-empty input box; press again (bounded).
+            if a and nudges < 3 and self.clock() > end - 30 + 4 * (nudges + 1):
+                nudges += 1
+                try:
+                    self.herdr.send_keys(r["agent_name"], "ctrl+c")
+                except HerdrError:
+                    pass  # the agent already exited between checks
         self.launch(role, pane)
         return {"status": "RELAUNCHED", "role": role, "pane": pane}
 
@@ -781,6 +948,7 @@ def main():
     dh = sub.add_parser("diff-hash")
     dh.add_argument("--task", help="informational; the hash covers the whole production-source diff")
     sub.add_parser("precommit")
+    sub.add_parser("cost", help="token/cost totals by role and per verified-frontier advance")
     st = sub.add_parser("step")
     st.add_argument("--manual", action="store_true", help="one user-supervised step without autonomy approval")
     rn = sub.add_parser("run")
@@ -813,6 +981,8 @@ def main():
             out = {"diff_sha256": dirty_source_digest(root)["sha256"], **dirty_source_digest(root)}
         elif a.cmd == "precommit":
             out = sw.precommit()
+        elif a.cmd == "cost":
+            out = sw.cost_report()
         elif a.cmd == "approve":
             wf = sw.workflow()
             wf.update({"autonomy_approved": True, "approved_by": a.by, "approved_unix": time.time()})

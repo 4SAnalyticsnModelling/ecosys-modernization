@@ -35,6 +35,18 @@ One high-value question per fresh session: bounded reading, one conclusion, then
 - A deviation (D2/D6), rule-table entry or survey policy needs sign-off
   (plan section 8). You approve drafts; the user signs.
 
+## Optional: chain one mechanical follow-up (saves a routing turn)
+If your verdict leaves exactly one mechanical next step that touches NO production source and NO
+reference data (e.g. apply approved Status lines, write a ledger row), add to your result:
+```
+## CHAIN
+ROLE: FORGE            (or PATHFINDER)
+OBJECTIVE: one sentence
+ALLOWED: comma-separated exact paths
+SKILLS: none           (or skill names)
+```
+The controller dispatches it directly; otherwise SENTINEL routes. Never chain source changes.
+
 ## Output
 Write ONLY the result file the task names, from `.agent/templates/result.md`. Keep it
 to 600 words or fewer. Separate verified facts from inference. Cite `file:line` and artifact

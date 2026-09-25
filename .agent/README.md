@@ -55,6 +55,7 @@ uv run ecosys-audit/scripts/swarm_wrapper.py approve --by <user>       # USER ON
 uv run ecosys-audit/scripts/swarm_wrapper.py step [--manual]           # one agent turn
 uv run ecosys-audit/scripts/swarm_wrapper.py run [--resume] [--max-steps N]
 uv run ecosys-audit/scripts/swarm_wrapper.py precommit                 # SAGE APPROVE bound to current diff?
+uv run ecosys-audit/scripts/swarm_wrapper.py cost                      # tokens/cost by role, per frontier advance
 ```
 
 `scripts/start-swarm.sh [--resume]` = ensure-agents --start, then run.
@@ -73,6 +74,19 @@ After every successfully collected cycle, the controller commits exactly the pat
 - Plain fast-forward push only: never force, pull, rebase or merge. A failed push keeps the commit local
   and is retried next cycle; after 3 consecutive failures the swarm stops for the user.
 - Agents themselves still never commit or push.
+
+## Token economy (2026-09-25)
+- SENTINEL reads one controller-built brief (`.agent/runtime/sentinel-brief.md`) instead of ~8 files:
+  3 model calls / 42k tokens per route, measured, versus 7-12 calls / 115-175k before.
+- A SAGE result may carry a `## CHAIN` block with one mechanical follow-up (no production source, no
+  reference data). The controller dispatches it directly, skipping a routing turn. Chains never chain.
+- Every turn's tokens are read from the harness's own records (OpenCode session export; Claude
+  session log) into `metrics.csv` (`input_tokens` = fresh + cache read + cache write).
+  `swarm_wrapper.py cost` reports totals and tokens per verified-frontier advance.
+- SAGE runs with `--strict-mcp-config` (no MCP servers). Do NOT add `--disable-slash-commands`:
+  it breaks `/clear`, the reset between tasks. FORGE uses Gemini 3.8 Flash in the `high` variant
+  (set with OpenCode's `/variants`).
+- Keep interactive supervisor sessions short. Watch with `status` / `cost`, not a long chat.
 
 ## What the wrapper never does
 Answer a permission dialog; re-prompt a task whose delivery was interrupted; revert an agent's edit
