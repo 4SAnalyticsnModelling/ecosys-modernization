@@ -34,13 +34,13 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00008 PATHFINDER DONE: Legacy evidence + recipe archived; retained set remains partial, not trusted baseline.
-- T-00009 PATHFINDER DONE: Full 30-year legacy output not found; surviving artifact is partial and untrusted.
-- T-00010 PATHFINDER PENDING: Obtain full run or fresh archive; refresh manifest before any P0.4 rerun.
+- T-00008 PATHFINDER DONE: Legacy evidence archived under `evidence/legacy/` with SHA manifest.
+- T-00009 PATHFINDER DONE: Surviving artifact is partial and not a trusted full baseline.
+- T-00010 PATHFINDER BLOCKED: Missing durable full legacy output/archive or fresh run blocks P0.4.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: sign the D6 list.
 2. Push access: GitHub returned 403 for this machine's credential on origin; commits stay local until fixed.
 
 ## Next expected operation
-T-00010: PATHFINDER to obtain or document the missing full 30-year legacy output set or a fresh run, then refresh `evidence/legacy/` manifest before any P0.4 rerun.
+T-00011: PATHFINDER to obtain or document a durable full 30-year Ottawa legacy output archive or fresh gfortran run, then refresh the `evidence/legacy/` manifest before any P0.4 rerun.
