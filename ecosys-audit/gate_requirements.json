@@ -31,5 +31,74 @@
     "memory-and-build-report",
     "independent-release-review",
     "reproducibility-and-scope-documentation"
+  ],
+  "ottawa-G0": [
+    "git-state-discovered-and-dirty-work-parked",
+    "d6-deck-edits-adjudicated-and-signed",
+    "legacy-oracle-hashed-in-evidence-store",
+    "toolchain-recorded",
+    "legacy-o2-timing-median-of-3",
+    "legacy-output-horizon-inventory",
+    "tracecov-stale-hash-report",
+    "issue-status-normalized",
+    "evidence-binding-recorded"
+  ],
+  "ottawa-GP1": [
+    "agent-layout-and-state-files",
+    "wrapper-launch-reset-timeouts-locks-resume",
+    "harness-flags-and-models-verified",
+    "wrapper-hooks",
+    "role-prompts-and-skill-map",
+    "wrapper-test-suite",
+    "protocol-migration-reviewed",
+    "user-launch-approval"
+  ],
+  "ottawa-GP2": [
+    "legacy-state-oracle-non-perturbation",
+    "zig-state-dump-option",
+    "divcheck-selftest",
+    "ottawa-execution-path-map",
+    "survey-extension-approved",
+    "positive-controls",
+    "rule-table-approved",
+    "qualification-validators-tested",
+    "restart-validator-tested",
+    "run-and-packet-tools",
+    "test-tiering-measured"
+  ],
+  "ottawa-G1": [
+    "execution-map-worklist-complete",
+    "every-executed-pathway-disposed",
+    "zero-unresolved-map-items",
+    "ambiguous-gcov-lines-resolved"
+  ],
+  "ottawa-G2": [
+    "initialization-reconciled-hour0",
+    "first-30-days-within-rules",
+    "coupling-and-output-semantics",
+    "restart-on-readiness-windows",
+    "positive-controls-still-pass",
+    "historical-failure-hour-replays"
+  ],
+  "ottawa-G3": [
+    "strict-30-year-campaign-complete",
+    "divcheck-within-rules-or-attributed",
+    "no-breach-no-fatal-event",
+    "d2-deviations-attributed"
+  ],
+  "ottawa-GP": [
+    "hotspot-profile",
+    "performance-changes-bit-identical-or-approved",
+    "last-campaign-still-passes"
+  ],
+  "ottawa-GQ": [
+    "frozen-candidate-clean-build",
+    "strict-continuous-run",
+    "restart-run-bundle-diff",
+    "releasefast-timing-median-of-3",
+    "validators-rules-balances-events",
+    "d4-median-vs-median",
+    "scientific-qualification-report",
+    "user-acceptance"
   ]
 }

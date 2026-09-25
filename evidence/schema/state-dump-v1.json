@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "format": "evidence/schema/state-dump-v1.md",
+  "status": "EMPTY - to be filled in P2.1 from f77query evidence; do not guess mappings",
+  "groups": ["water", "ice", "heat", "carbon", "nitrogen", "phosphorus", "salts", "gases", "roots", "plants", "snow", "surface"],
+  "variables_example_shape": {
+    "VARNAME": {"units": "g m-2", "dims": ["L", "NY", "NX"], "lower_bounds": [0, 1, 1], "group": "nitrogen",
+                "zig_field": "path.to.field", "legacy_common": "BLKNAME", "evidence": "f77query.py common BLKNAME --users"}
+  },
+  "variables": {}
+}

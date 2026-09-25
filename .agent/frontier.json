@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "case": "Ottawa",
+  "horizon_hours": 262920,
+  "simulation_frontier": 3288,
+  "simulation_frontier_note": "Provisional (run-038, required deck, pre-plan binding). Not evidence under the plan's evidence binding; P0 re-verifies.",
+  "verified_frontier": 0,
+  "verified_frontier_note": "Only update_frontier.py promote may change this, from a strict campaign under a single recorded binding (plan P5.5).",
+  "current_failure_hour": 3289,
+  "last_checkpoint_key": null,
+  "candidate_commit": "fd07795",
+  "evidence_binding": null,
+  "history": []
+}

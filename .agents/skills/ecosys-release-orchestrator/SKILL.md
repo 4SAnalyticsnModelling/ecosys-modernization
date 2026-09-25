@@ -13,7 +13,21 @@ Use current source/input hashes in evidence. Never claim a test, review, build o
 # Coordinate the migration, not an endless run/fix loop
 
 ## Start or resume
-Read the shared project contract and evidence guide. Inspect current Git status, prior handoff, failing evidence and actual paths. Do not restart completed work or overwrite pre-existing edits. Create an issue/dependency board and a command registry. Use `ecosys-repository-baseline` first when source/input/toolchain provenance is missing or stale.
+Read the shared project contract and evidence guide if not already present in this context.
+Autonomous work runs through the 4-agent swarm (SENTINEL, PATHFINDER, FORGE, SAGE): state in
+`.agent/state.md`, operation in `.agent/README.md`, plan in
+`ecosys-ng_ottawa_qualification_execution_plan.md`, controller `swarm_wrapper.py`. In a swarm
+role session, follow `.agent/roles/<role>.md` and the task file instead of this section. The
+former Claude-lead / Pi-reviewer workflow and `audit/handoff.md` are retired
+(`archive/pre-swarm-workflow/`); do not resume from them. Inspect actual Git state and relevant
+failing evidence, preserving pre-existing work. Reuse the issue board and command registry
+rather than recreating them. Use `ecosys-repository-baseline` when provenance is missing/stale.
+No autonomy for questions/plan-only requests or outside Herdr.
+
+Token discipline (every task): read the task + one packet/issue + the `f77query`/`rg` hits you
+need, never whole `.f`/Zig files or logs; `run_logged.py` for any verbose command; one-line
+progress notes; evidence written once and cited by path. Stop and report instead of looping
+when every remaining task is blocked by the same external fault (e.g. D: I/O).
 
 Divide the legacy inventory into auditable process/interface units, not arbitrary equal line counts. Assign each unit a source owner and separate reviewer. Use `ecosys-multi-agent-coordination` when concurrency is available; sequentially perform the same roles otherwise. Limit expensive compiles/runs to one coordinator-owned lane unless independent resources are demonstrated.
 
@@ -32,7 +46,12 @@ Before a build/run, state its hypothesis, expected diagnostic value, stop condit
 Make source fixes within the agreed migration scope autonomously; stop only dependent work when a genuine permission, scientific-policy or environment blocker cannot be resolved from local evidence. Continue unrelated safe work. Never convert `BLOCKED` to `PASS` to maintain momentum.
 
 ## Required handoff
-Update `audit/handoff.md` with candidate digest, gates passed/pending, audited coverage denominator, unresolved issues, last useful experiment, next bounded action, file ownership and commands already proven. Distinguish actual results from proposed tests. Report only evidence-backed progress, not percentage confidence or assurances of perfection.
+`.agent/state.md` (<=1,500 words, replaced not appended) names the candidate commit, verified
+frontier, current failure, confirmed facts, blockers and next expected operation. Detailed
+history belongs in issue/evidence files, task results and `.agent/archive/`. Every worker writes
+only its task's result file; production-science changes need a SAGE verdict bound to the diff
+hash (`swarm_wrapper.py precommit`). Distinguish actual results from proposed tests; short
+terminal summaries link evidence rather than restating it. A task DONE is not a gate.
 
 ## Done
 All required release checks pass for one source/input/toolchain snapshot; the coordinator has an independently reviewed dossier. Otherwise deliver the exact blockers and the preserved work without claiming production readiness.

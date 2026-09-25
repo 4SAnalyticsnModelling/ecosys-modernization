@@ -307,5 +307,143 @@
       "last_verified_evidence": "2026-09-24 (issue-104, audit/runs/issue-104-exe-root-full2/): compiles after the fixture fix; 109 of 115 started, 107 OK, 1 FAIL (test 71, stale NFH=4 expectation, issue-106), test 109 spins in the run-log lock and was stopped (issue-107); tests 110-115 NOT RUN. NOT a pass.",
       "note": "Second test root from build.zig:39 (src/ecosys_ng.zig; every stages/*.zig test block). The module-index root never runs these. BACKSLASH module paths are required on this host: forward slashes fail with \"found another zig file '.zig' after root source file\". The test binary is a child process named root.exe; judge liveness from it, not from zig.exe. Add --test-filter <substring> to scope."
     }
+  },
+  "swarm": {
+    "note": "4-agent Ottawa qualification swarm (ecosys-ng_ottawa_qualification_execution_plan.md). Run from the project root inside a Herdr pane. Evidence paths are in-repo (evidence/). Added 2026-09-25.",
+    "swarm_wrapper": {
+      "cwd": ".",
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/swarm_wrapper.py",
+        "<subcommand>"
+      ],
+      "subcommands": {
+        "status": "status",
+        "ensure_agents": "ensure-agents [--start]",
+        "relaunch": "relaunch <ROLE>",
+        "validate_dispatch": "validate-dispatch",
+        "diff_hash": "diff-hash",
+        "precommit": "precommit",
+        "approve": "approve --by <user>  (USER ONLY; GP1)",
+        "step": "step [--manual]",
+        "run": "run [--resume] [--max-steps N]"
+      },
+      "completion_condition": "JSON on stdout; exit 0 unless FAIL/INVALID/HUMAN_REVIEW_REQUIRED (1) or BLOCKED (2)",
+      "last_verified_evidence": "2026-09-25: relaunch of all four roles and ensure-agents OK against live session ecosys-ng; fresh_session verified live (SAGE new session id; OpenCode welcome-screen marker, because Herdr keeps the old OpenCode session id after /new)."
+    },
+    "swarm_wrapper_tests": {
+      "cwd": ".",
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/tests/test_swarm_wrapper.py"
+      ],
+      "completion_condition": "exit 0 and 'OK' with 18 tests in the raw log",
+      "last_verified_evidence": "2026-09-25: audit/runs/swarm-selftest-20260925-e (18/18 OK); -c,-d 17/17 OK before the reset-marker test was added; -b had one transient WinError 5 on os.replace, fixed by a bounded retry in workflow.atomic. test_workflow.py 48/48, test_herdr_adapter.py 19/19 after that change (-wf, -hd).",
+      "limitations": "Fake Herdr and temporary Git repo; no real model turns; orphaned-child cleanup is run_logged.py's, not tested here."
+    },
+    "divcheck_selftest": {
+      "cwd": ".",
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/divcheck.py",
+        "selftest"
+      ],
+      "completion_condition": "exit 0 and status PASS",
+      "last_verified_evidence": "2026-09-25: audit/runs/divcheck-selftest-20260925-a exit 0 (7/7 cases: clean, hour and init perturbation located exactly, below-tolerance, last hour, missing record, out-of-order rejected).",
+      "limitations": "Synthetic dumps; proves the comparator, not either model's writer."
+    },
+    "divcheck_compare": {
+      "cwd": ".",
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/divcheck.py",
+        "compare",
+        "--legacy",
+        "<dump dir|file>",
+        "--zig",
+        "<dump dir|file>",
+        "--out",
+        "<report.json>"
+      ],
+      "completion_condition": "exit 0 WITHIN_RULES, 1 DIVERGENT, 2 error",
+      "last_verified_evidence": null
+    },
+    "make_failure_packet": {
+      "cwd": ".",
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/make_failure_packet.py",
+        "--signature",
+        "<sig>",
+        "--task",
+        "<T-NNNNN>",
+        "[--summary summary.json] [--zig path:N-M] [--fortran file.f:N-M]"
+      ],
+      "completion_condition": "exit 0; prints packet path",
+      "last_verified_evidence": "2026-09-25: exercised via swarm_wrapper_tests (STAGNATED paths create packets in the temp repo)."
+    },
+    "update_frontier": {
+      "cwd": ".",
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/update_frontier.py",
+        "show|record --summary <s>|promote --summary <s> --divcheck <d> --restart <r>"
+      ],
+      "completion_condition": "exit 0; promote exits 1 REFUSED unless every P5.5 condition holds under one binding",
+      "last_verified_evidence": null
+    },
+    "evidence_binding": {
+      "cwd": ".",
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/evidence_binding.py",
+        "--deck",
+        "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON",
+        "--build-mode",
+        "<mode>",
+        "[--option X] [--out f.json]"
+      ],
+      "completion_condition": "exit 0; binding_id is sha256 of the canonical binding",
+      "last_verified_evidence": "2026-09-25: exercised by run_ottawa smoke run (staging/lock/binding/summary path; exe stand-in, artifacts removed)."
+    },
+    "issue_status": {
+      "cwd": ".",
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/issue_status.py",
+        "--summary"
+      ],
+      "completion_condition": "exit 0",
+      "last_verified_evidence": "2026-09-25: 105 issue files; 51 closed, 43 open, 7 missing, 4 unclear; 13 need normalization.",
+      "limitations": "Keyword classification; report only."
+    },
+    "run_ottawa": {
+      "cwd": ".",
+      "argv": [
+        "uv",
+        "run",
+        "ecosys-audit/scripts/run_ottawa.py",
+        "--mode",
+        "strict|survey",
+        "--exe",
+        "<abs ecosys_ng.exe>",
+        "--build-mode",
+        "<mode>",
+        "--timeout",
+        "<s>",
+        "[--restart-from <run-id>:<hour>] [--full-run-justification TEXT]"
+      ],
+      "completion_condition": "exit 0 COMPLETE, 1 FAIL/TIMED_OUT, 2 refused; summary.json under audit/runs/ottawa/<run-id>/",
+      "last_verified_evidence": "2026-09-25: dump mode refused as designed; staging+lock+summary smoke with a stand-in exe (no model run yet).",
+      "limitations": "failure_hour/error are heuristic parses; breach/fallback counts stay null until validators exist, so a summary alone cannot promote."
+    }
   }
 }

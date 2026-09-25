@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "status": "DRAFT - SAGE drafts per variable (plan P2.6); the user approves before any full Zig comparison",
+  "approved_by": null,
+  "approved_on": null,
+  "default": {"abs": 0.0, "rel": 0.0},
+  "variables": {},
+  "groups": {},
+  "note": "A divcheck PASS under approved_by=null is provisional. Each tolerance entry should cite why it is not zero (precision contract, intentional deviation D2, or output rounding)."
+}

@@ -1,0 +1,7 @@
+{
+  "issue": "issue-108",
+  "question": "At hour 3,289, at which step does layer-2 calcium (and Na/K) storage gain +9.19e-8 mol-equivalent without booking: the root salt exchange write-back, another root path, or a later stage?",
+  "scope": ["ecosys-ng/src/stages/root_processes_uptake.zig", "ecosys-ng/src/stages/diagnostics.zig", "ecosys-ng/src/plant/root/plant_root_salt_exchange.zig", "ecosys-ng/src/validation/landscape_mass_inventory_plant.zig"],
+  "done_condition": "A calcium census probe bracketing the root salt exchange and the post-NITRO trace points; ONE run; step localized; recorded; Pi review",
+  "stop_condition": "Three distinct failed experiments, or a D: fault"
+}

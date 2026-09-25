@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact|fork",
+        "hooks": [{ "type": "command", "command": "uv", "args": ["run", "${CLAUDE_PROJECT_DIR}/ecosys-audit/scripts/workflow_hook.py"], "timeout": 30 }]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|Bash|PowerShell",
+        "hooks": [{ "type": "command", "command": "uv", "args": ["run", "${CLAUDE_PROJECT_DIR}/ecosys-audit/scripts/workflow_hook.py"], "timeout": 30 }]
+      }
+    ]
+  }
+}

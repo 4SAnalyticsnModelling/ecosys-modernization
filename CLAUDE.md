@@ -1,8 +1,26 @@
+## Workflow: 4-agent swarm (since 2026-09-25) -- read first
+Work runs through the swarm: SENTINEL routes, PATHFINDER investigates, FORGE implements,
+SAGE adjudicates science and reviews every production-science change. Current state:
+`.agent/state.md`. Frontier: `.agent/frontier.json` (only `update_frontier.py` writes it).
+How it operates: `.agent/README.md`. Plan: `ecosys-ng_ottawa_qualification_execution_plan.md`.
+If your prompt names a role or `ECOSYS_SWARM_ROLE` is set, follow `.agent/roles/<role>.md`
+and your task file only; do not load skills, memory or files your task does not name.
+
+The previous Claude-lead / Pi-reviewer workflow (`WORKFLOW.md`, `herdr_cycle.py`,
+`audit/handoff.md` checkpoints, `.pi/`) is retired and archived in
+`archive/pre-swarm-workflow/`. Do not resume from it or act on its "next action".
+Its scientific records (`audit/issues/`, `audit/runs/`, `audit/analysis/`) remain
+evidence to re-verify, not fresh passes.
+
+Use `run_logged.py` for builds/tests/verbose commands. Agents never commit or push.
+No gate or frontier claim without `check_gate.py` / `update_frontier.py`. User decisions
+are listed in plan section 8; never presume them.
+
 <!-- ecosys-audit-skill-pack:begin -->
 ## ecosys Fortran-to-Zig audit
 For this project, read `ecosys-audit/PROJECT_CONTRACT.md` and
 `ecosys-audit/EVIDENCE_GUIDE.md` before source changes or scientific claims.
-Start or resume with the `ecosys-release-orchestrator` skill.
+Start or resume from `.agent/README.md` and `.agent/state.md`.
 Canonical portable skills are in `.agents/skills/`; shared resources are in
 `ecosys-audit/`. Preserve the four authoritative directories in the contract.
 Run focused tests during source audit; do not enter repetitive full production
@@ -39,3 +57,4 @@ precision contract only, and its Fortran 2023 `SPLIT` intrinsic shadows this pro
 These tools parse text. They do not compile the model, prove equivalence, or decide a
 gate; `check_gate.py` owns gate status and a coverage percentage is not a pass. Quote each
 tool's own `limitations` field alongside any number you report.
+

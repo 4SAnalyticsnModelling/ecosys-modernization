@@ -2,3 +2,17 @@
 *.exe binary
 *.pdb binary
 *.o binary
+
+# Preserve exact archived/hashed workflow evidence across core.autocrlf settings.
+audit/history/** -text
+audit/tasks/** -text
+audit/runs/workflow-selftest-*/** -text
+audit/reviews/*-r*.json -text
+scripts/*.sh text eol=lf
+# Keep the tested workflow implementation hashes portable across checkouts.
+ecosys-audit/scripts/workflow*.py text eol=lf
+ecosys-audit/scripts/run_logged.py text eol=lf
+ecosys-audit/tests/test_workflow.py text eol=lf
+.claude/settings.json text eol=lf
+# Retired Claude-lead / Pi-reviewer workflow, kept byte-stable as history.
+archive/pre-swarm-workflow/** text eol=lf

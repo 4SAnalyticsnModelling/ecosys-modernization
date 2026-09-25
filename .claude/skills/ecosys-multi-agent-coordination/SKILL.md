@@ -1,6 +1,6 @@
 ---
 name: ecosys-multi-agent-coordination
-description: "Coordinate Claude Code, Pi and Codex on the same ecosys audit without conflicting edits or duplicate full runs. Use for parallel reviews, subsystem ownership, independent verification and cross-harness handoffs."
+description: "Coordinate the 4-agent ecosys swarm (SENTINEL, PATHFINDER, FORGE, SAGE) without conflicting edits or duplicate full runs. Use for subsystem ownership, independent verification and cross-harness handoffs."
 ---
 
 
@@ -25,7 +25,18 @@ Workers return patch/commit identity, exact source mappings, minimal reproducer,
 The coordinator integrates one coherent change set at a time, checks for shared state/interface conflicts, resolves imports/build definitions, reruns affected tests and updates the candidate manifest. Merge order matters for numerical/state changes; do not reuse branch-level success as final integrated success. The final production, output and performance evidence must concern the same integrated candidate.
 
 ## Communication and resource control
-Maintain a compact `audit/handoff.md` and issue ownership ledger, with artifact pointers rather than enormous pasted context. Do not have multiple agents edit the global ledger simultaneously. Record actual available RAM and limit concurrent model builds/runs accordingly; a shared local inference model and code-build processes still compete for resources. Never assume a local model can truly evaluate all worker prompts concurrently.
+The installed team is the 4-agent swarm in Herdr session `ecosys-ng` (`.agent/README.md`).
+Roles, models, write lanes and budgets are defined once in `.agent/roster.json`; dispatch is
+model-free through `swarm_wrapper.py` (never hand-typed `herdr agent prompt`, no terminal
+scraping, no answering permission dialogs). One bounded question per task; further work needs
+a new falsifiable question, not a renamed repeat. Finalize FAIL/STAGNATED/BLOCKED honestly.
+The former Claude-lead / Pi-reviewer lane is retired (`archive/pre-swarm-workflow/`).
+
+`.agent/state.md` is the single current-state file; each worker writes only its task's result
+file; task-scoped DONE never approves a release. This project's durable artifact-first protocol
+intentionally overrides the generic Herdr skill's terminal-first response preference. Use
+`run_logged.py` for full command logs and pass paths/hashes plus
+short findings, not full reports or terminal transcripts. No concurrent ledger edits. Record actual available RAM and limit concurrent model builds/runs accordingly; a shared local inference model and code-build processes still compete for resources. Never assume a local model can truly evaluate all worker prompts concurrently.
 
 ## Done
 All owned work is merged or explicitly deferred, independent review concerns are resolved and the coordinator has reproducible integrated evidence. No overlapping untracked edits, orphan runs or unverified "all agents passed" claims remain.

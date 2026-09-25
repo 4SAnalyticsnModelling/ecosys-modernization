@@ -1,0 +1,18 @@
+{
+  "status": "READY_FOR_REVIEW",
+  "summary": "issue-108 carbon fix: daily_gas_flux.combinedHourIncrement and HourlySpeciesActivity.signedComponentSumG subtracted the root atmosphere->root gas exchange from an otherwise input-signed net; legacy adds it (extract.f:714 CO2A+=RCOFLA; redist.f:6530,6568,6573-6574 CIB=TCOFLA added to CO2GIN/HCO2G/UCO2G), the layer sidecar already books it as a gain, and run-037 measured it as inward-positive. Sign corrected; three tests encoding the old algebra reconciled with legacy-cited recomputed values (not relaxed). Module suite 4387/1/0. Prod-deck run: the pre-registered prediction is confirmed in full (carbon row gone; Ca/Na/K rows bit-identical; frontier unchanged 3,288). DAY gas outputs change wherever root venting is nonzero (intended). No gate promoted.",
+  "evidence": [
+    "audit/runs/run-038-issue-108-root-atmosphere-gas-booked-with-legacy-sign-carbon-closes-2026-09-24.md",
+    "audit/issues/issue-108-hour-3289-carbon-and-cation-closure-after-root-geometry-fix.md",
+    "audit/runs/issue-108-fix-prediction/prediction-registered-before-run.txt",
+    "audit/runs/issue-108-fix-tests/receipt.json",
+    "audit/runs/issue-108-fix-tests/stderr.log",
+    "audit/runs/issue-108-fix-build/receipt.json",
+    "audit/runs/issue-108-fix-run/receipt.json",
+    "audit/runs/issue-108-fix-run/stderr.log",
+    "audit/runs/run-037-issue-108-root-gas-venting-is-the-carbon-residual-2026-09-24.md",
+    "audit/reviews/carry-forward.md"
+  ],
+  "open_processes": [],
+  "next_action": "issue-108 cations: probe layer-2 Ca/Na/K census terms and root salt exchange at hour 3,289."
+}

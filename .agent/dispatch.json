@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "status": "IDLE",
+  "reason": "No task dispatched yet; control plane just installed."
+}

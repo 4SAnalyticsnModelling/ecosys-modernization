@@ -15,8 +15,16 @@ audit/
   runs/              staged decks, immutable run metadata, logs, final-time proof
   reviews/           independent review records
   gates/             gate records for one candidate source snapshot
-  handoff.md         current stage, blockers, owner and next bounded action
+  handoff.md         RETIRED 2026-09-25: historical pointer only
 ```
+
+Current state lives in `.agent/state.md` and the frontier in `.agent/frontier.json` (4-agent
+swarm, `.agent/README.md`). Swarm tasks, results, failure packets and per-task archive records
+live under `.agent/`; large binary evidence under `evidence/` with committed manifests. The
+former handoff/task/review protocol (`audit/handoff.md`, `audit/tasks/`, `audit/reviews/`
+receipts) is retired (`archive/pre-swarm-workflow/`); its records stay as history. Task
+approval never substitutes for scientific gate evidence. Save full command streams with
+`scripts/run_logged.py`; excerpts are navigation only, not completeness or acceptance proof.
 
 Every claim names a candidate/source digest, source locations, exact command, working directory, tool versions, input hashes, elapsed time, exit status, produced artifacts and reviewer where applicable. Do not paste full large source files or logs into handoffs; reference them. Evidence paths in gate records are relative to the outer project root, and each artifact has a SHA-256 digest. A source location needs path, symbol, line span and source hash because line numbers drift.
 

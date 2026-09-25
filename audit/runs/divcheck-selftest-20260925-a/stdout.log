@@ -1,0 +1,77 @@
+{
+  "status": "PASS",
+  "cases": [
+    {
+      "case": "clean",
+      "expected": "WITHIN_RULES",
+      "status": "WITHIN_RULES",
+      "ok": true,
+      "first_divergence": null
+    },
+    {
+      "case": "hour_perturbation",
+      "expected": "DIVERGENT",
+      "status": "DIVERGENT",
+      "ok": true,
+      "first_divergence": {
+        "key": "1.1.1.17.9",
+        "var": "ZNH4S",
+        "index": "5",
+        "kind": "value",
+        "legacy": -416.20432031914976,
+        "zig": -416.20431931914976,
+        "abs": 9.999999974752427e-07,
+        "rel": 2.402666067253777e-09
+      }
+    },
+    {
+      "case": "init_perturbation",
+      "expected": "DIVERGENT",
+      "status": "DIVERGENT",
+      "ok": true,
+      "first_divergence": {
+        "key": "init",
+        "var": "CA",
+        "index": "0",
+        "kind": "value",
+        "legacy": 458.89057887843524,
+        "zig": 458.8915788784352,
+        "abs": 0.0009999999999763531,
+        "rel": 2.179163981218454e-06
+      }
+    },
+    {
+      "case": "below_tolerance",
+      "expected": "WITHIN_RULES",
+      "status": "WITHIN_RULES",
+      "ok": true,
+      "first_divergence": null
+    },
+    {
+      "case": "last_hour",
+      "expected": "DIVERGENT",
+      "status": "DIVERGENT",
+      "ok": true,
+      "first_divergence": {
+        "key": "1.1.1.30.24",
+        "var": "THETA",
+        "index": "11",
+        "kind": "value",
+        "legacy": -877.5112993907534,
+        "zig": -877.5112993897534,
+        "abs": 9.999894245993346e-10,
+        "rel": 1.139574413792297e-12
+      }
+    },
+    {
+      "case": "missing_record",
+      "ok": true
+    },
+    {
+      "case": "out_of_order_rejected",
+      "ok": true
+    }
+  ],
+  "window": "30 simulated days x 24 h + init (bounded synthetic)",
+  "limitations": "Synthetic dumps only; proves the comparator, not either model's writer."
+}

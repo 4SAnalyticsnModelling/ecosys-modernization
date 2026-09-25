@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "ecosys-audit/scripts/divcheck.py",
+    "selftest"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 1.661,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 22644,
+  "pid": 21816,
+  "started_unix": 1790371642.0732813,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/divcheck-selftest-20260925-a/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/divcheck-selftest-20260925-a/stdout.log",
+    "sha256": "8f2963d5f24309ad6554292348d4699ff88fec4dc4f5f9453b5e0e3fc0ba51a5"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 300.0
+}

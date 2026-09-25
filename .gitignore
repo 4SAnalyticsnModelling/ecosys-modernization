@@ -14,3 +14,28 @@ ecosys-ng/ecosys-ng-bin/
 __pycache__/
 audit/manifest/f77index.json
 audit/manifest/bindcheck-2026-09-21.json
+
+# Local controller locks, delivery intents, session IDs and temporary drafts.
+# Immutable tasks/reviews/history and raw scientific evidence are NOT ignored.
+audit/workflow/runtime/
+archive/pre-swarm-workflow/audit/workflow/runtime/
+**/.workflow-publish.lock
+audit/workflow/*-next.json
+audit/workflow/checkpoint-next.md
+
+# Staged copies of the production deck used by probe/fix runs (~420 files each).
+# Their run records (receipts, logs, run-0NN.md) are committed; the decks never are.
+audit/runs/*-deck/
+
+# Ottawa qualification swarm (ecosys-ng_ottawa_qualification_execution_plan.md).
+# Large binary evidence stays inside this repository but out of Git; its committed
+# manifests (sha256, argv, binding) under evidence/manifest/ are the citable record.
+evidence/*
+!evidence/README.md
+!evidence/manifest/
+!evidence/schema/
+# Swarm runtime: locks and per-dispatch scratch are local. Tasks, results,
+# failure packets and archive are durable evidence and ARE committed.
+.agent/locks/*
+!.agent/locks/.gitkeep
+.agent/runtime/

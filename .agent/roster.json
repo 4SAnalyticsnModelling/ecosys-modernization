@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "note": "Single source of truth for the 4-agent swarm (execution plan section 2). swarm_wrapper.py reads this; edit here, not in code. Budgets: minutes are enforced by the wrapper; tokens are recorded only when the harness reports them.",
+  "herdr_session": "ecosys-ng",
+  "roles": {
+    "SENTINEL": {
+      "agent_name": "sentinel",
+      "pane_label": "SENTINEL",
+      "kind": "opencode",
+      "model": "github-copilot/mai-code-1.1-flash",
+      "launch_args": ["--agent", "sentinel", "-m", "github-copilot/mai-code-1.1-flash", "--auto"],
+      "reset_command": "/new",
+      "reset_marker": "Ask anything",
+      "prompt_file": ".agent/roles/sentinel.md",
+      "skills": [],
+      "budget": {"minutes": 5, "tool_calls": 8, "input_tokens": 40000},
+      "may_write": [".agent/dispatch.json", ".agent/current_task.md", ".agent/tasks/"],
+      "may_edit_production_source": false
+    },
+    "PATHFINDER": {
+      "agent_name": "pathfinder",
+      "pane_label": "PATHFINDER",
+      "kind": "opencode",
+      "model": "github-copilot/mai-code-1.1-flash",
+      "launch_args": ["--agent", "pathfinder", "-m", "github-copilot/mai-code-1.1-flash", "--auto"],
+      "reset_command": "/new",
+      "reset_marker": "Ask anything",
+      "prompt_file": ".agent/roles/pathfinder.md",
+      "skills": ["ecosys-source-navigation", "ecosys-divergence-diagnosis", "ecosys-fortran-zig-traceability"],
+      "budget": {"minutes": 30, "tool_calls": 20, "input_tokens": 150000},
+      "may_write": [".agent/results/", ".agent/failures/", "audit/analysis/", "audit/runs/", "evidence/"],
+      "may_edit_production_source": false
+    },
+    "FORGE": {
+      "agent_name": "forge",
+      "pane_label": "FORGE",
+      "kind": "opencode",
+      "model": "github-copilot/gemini-3.8-flash",
+      "launch_args": ["--agent", "forge", "-m", "github-copilot/gemini-3.8-flash", "--auto"],
+      "reset_command": "/new",
+      "reset_marker": "Ask anything",
+      "prompt_file": ".agent/roles/forge.md",
+      "skills": ["ecosys-zig-safety-design", "ecosys-validation-tests"],
+      "budget": {"minutes": 60, "tool_calls": null, "input_tokens": 250000},
+      "may_write": ["ecosys-ng/src/", "ecosys-ng/build.zig", ".agent/results/", ".agent/tasks/T-*.hypothesis.md", "audit/runs/", "ecosys-audit/scripts/", "ecosys-audit/tests/"],
+      "may_edit_production_source": true
+    },
+    "SAGE": {
+      "agent_name": "sage",
+      "pane_label": "SAGE",
+      "kind": "claude",
+      "model": "claude-opus-5-5",
+      "launch_args": ["--dangerously-skip-permissions"],
+      "reset_command": "/clear",
+      "prompt_file": ".agent/roles/sage.md",
+      "skills_one_of": ["ecosys-process-science-parity", "ecosys-conservation-audit", "ecosys-nonlinear-solver-audit", "ecosys-feature-attribution"],
+      "budget": {"minutes": 45, "tool_calls": null, "input_tokens": 200000},
+      "may_write": [".agent/results/", "audit/intentional-deviations.md", "audit/output-provenance.csv", "audit/science-invariants.md", "audit/unresolved-gaps.md"],
+      "may_edit_production_source": false
+    }
+  },
+  "always_writable": [".agent/archive/", ".agent/metrics.csv", ".agent/runtime/", ".agent/locks/"],
+  "production_source_prefixes": ["ecosys-ng/src/", "ecosys-ng/build.zig"],
+  "protected_prefixes": ["f77src/", "f77example/", "ecosys-ng-prod-examples/", "audit/handoff.md"]
+}

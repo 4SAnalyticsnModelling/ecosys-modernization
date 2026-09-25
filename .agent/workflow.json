@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "project": "ottawa-qualification",
+  "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
+  "phase": "P0",
+  "status": "AWAITING_USER",
+  "status_reason": "Plan section 8: P0.1 branch parking and the GP1 launch approval are user decisions. Set autonomy_approved=true to let swarm_wrapper.py run.",
+  "autonomy_approved": false,
+  "task_id": null,
+  "worker": null,
+  "campaigns": 0,
+  "campaigns_without_advance": 0,
+  "last_advance_unix": null,
+  "full_runs": {"legacy": 0, "zig": 0, "survey": 0},
+  "full_run_justifications": [],
+  "resume_safe": true
+}
