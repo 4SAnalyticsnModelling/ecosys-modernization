@@ -1,0 +1,42 @@
+{
+  "changed": [
+    ".agent/results/T-00012.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "PATHFINDER: compare archived full-run Ottawa outputs against Zig and confirm the evidence set before any P0.4 rerun.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00012.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00012.md",
+    "task_id": "T-00012"
+  },
+  "ended": 1790378373.7702522,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": "ses_f2523df05ffe5bgyFVZGj4RjQO",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 108416,
+    "cache_write": 0,
+    "cost": 0.013666719999999999,
+    "input": 25020,
+    "llm_calls": 6,
+    "output": 5412,
+    "tool_calls": 11
+  },
+  "violations": []
+}
