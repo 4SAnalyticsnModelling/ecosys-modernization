@@ -38,16 +38,12 @@ none active.
 - T-00002 SAGE DONE: P1.6 migration diff accepted; no ecosys-ng/src or reference file changed.
 - T-00003 SAGE DONE (VERDICT REVISE): 7 of 13 lines approved as proposed, 6 replaced; edit task may proceed with the amended set.
 - T-00004 CANCELLED: duplicate of T-00002, caused by a stale "Next expected operation" (fixed: SENTINEL now maintains this file).
-- Controller now commits and pushes after every cycle (decision D8).
+- T-00005 FORGE DONE: applied the amended issue Status set and relabels; `issue_status.py --summary` now shows `needs_normalization` empty.
+- T-00006 PATHFINDER PENDING: locate and verify the surviving legacy Ottawa evidence and run-002 recipe for P0.3/P0.4 baseline preservation and rerun planning.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: sign the D6 list.
 2. Push access: GitHub returned 403 for this machine's credential on origin; commits stay local until fixed.
 
 ## Next expected operation
-FORGE (documentation-only): apply T-00003's amended Status set and the three relabels (024:13, 078:67, 079:72)
-exactly as written in `.agent/results/T-00003.md`, to the named `audit/issues/` files only; then rerun
-`uv run ecosys-audit/scripts/issue_status.py --summary` and report. ALLOWED FILES = those issue files +
-the result file. No hypothesis file is needed (no production source).
-
-This task is now T-00005.
+T-00006: PATHFINDER to verify surviving legacy Ottawa baseline evidence and the run-002 recipe before any P0.3/P0.4 evidence preservation or rerun work; no full simulation allowed.

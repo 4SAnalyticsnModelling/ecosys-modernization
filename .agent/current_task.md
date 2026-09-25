@@ -1,1 +1,1 @@
-T-00005 | FORGE | Apply the amended issue Status set and relabels, then rerun issue_status.py.
+T-00006 | PATHFINDER | Locate and verify Ottawa legacy baseline evidence and run-002 recipe for P0.3/P0.4.
