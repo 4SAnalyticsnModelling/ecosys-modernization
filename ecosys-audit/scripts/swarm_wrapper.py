@@ -252,8 +252,14 @@ class Swarm:
         if d.get("schema_version") != 1:
             errs.append("schema_version must be 1")
         st = d.get("status")
-        if st not in ("PENDING", "IDLE", "HUMAN_REVIEW_REQUIRED", "COMPLETE"):
+        if st not in ("PENDING", "IDLE", "HUMAN_REVIEW_REQUIRED", "COMPLETE", "REJECTED"):
             return errs + [f"invalid status {st!r}"]
+        recent, nxt = d.get("state_recent"), d.get("state_next")
+        if recent is not None and (not isinstance(recent, list) or len(recent) > 8 or
+                                   not all(isinstance(x, str) and 0 < len(x) <= 240 for x in recent)):
+            errs.append("state_recent must be a list of <=8 one-line strings (<=240 chars each)")
+        if nxt is not None and (not isinstance(nxt, str) or not 0 < len(nxt) <= 600):
+            errs.append("state_next must be one string of <=600 chars")
         if st != "PENDING":
             return errs
         tid, role = d.get("task_id", ""), d.get("role")
@@ -403,6 +409,27 @@ class Swarm:
             pass
         return "timeout"
 
+    def apply_state_update(self, d: dict):
+        """Write SENTINEL's state_recent / state_next into the two state.md sections it owns.
+
+        SENTINEL no longer edits state.md itself: a Flash model once pasted its whole brief into it.
+        """
+        recent, nxt = d.get("state_recent"), d.get("state_next")
+        if recent is None and nxt is None:
+            return
+        path = self.dir / "state.md"
+        text = path.read_text(encoding="utf-8") if path.exists() else "# Swarm state\n"
+
+        def put(text: str, heading: str, body: str) -> str:
+            block = f"## {heading}\n{body.rstrip()}\n\n"
+            m = re.search(rf"^## {re.escape(heading)}\s*\n.*?(?=^## |\Z)", text, re.M | re.S)
+            return text[:m.start()] + block + text[m.end():] if m else text.rstrip() + "\n\n" + block
+        if recent is not None:
+            text = put(text, "Recent accepted change", "\n".join(f"- {x}" for x in recent))
+        if nxt is not None:
+            text = put(text, "Next expected operation", nxt)
+        atomic(path, (text.rstrip() + "\n").encode("utf-8"))
+
     def sentinel_brief(self) -> str:
         """Everything SENTINEL routes on, pre-digested into ONE file (token economy: one read, not ~8)."""
         def clip(text: str, n: int) -> str:
@@ -419,6 +446,9 @@ class Swarm:
                  "## Workflow", json.dumps({k: wf.get(k) for k in ("phase", "status", "status_reason", "campaigns",
                                                                   "campaigns_without_advance", "failure_signatures",
                                                                   "route_failures", "full_runs")})]
+        if wf.get("last_route_errors"):
+            parts += ["## YOUR PREVIOUS ROUTING ATTEMPT WAS REJECTED -- fix exactly this",
+                      "\n".join(f"- {e}" for e in wf["last_route_errors"])]
         gaps = read("audit/unresolved-gaps.md")
         if gaps:
             parts += ["## audit/unresolved-gaps.md (the gate worklist: pick unblocked items from here)", clip(gaps, 4000)]
@@ -721,13 +751,20 @@ class Swarm:
         if violations:
             raise HumanReview("SENTINEL wrote outside its lane: " + "; ".join(violations))
         wf = self.workflow()
-        if errs or d.get("status") == "COMPLETE":
+        if errs or d.get("status") in ("COMPLETE", "REJECTED"):
+            errs = errs or ["no new dispatch was written"]
             wf["route_failures"] = wf.get("route_failures", 0) + 1
+            wf["last_route_errors"] = errs
             self.save_workflow(wf)
+            # Never leave an invalid PENDING dispatch behind: the next step must route again, not deliver it.
+            if d.get("status") == "PENDING":
+                self.save_dispatch({"schema_version": 1, "status": "REJECTED", "errors": errs, "rejected": d})
             if wf["route_failures"] >= 2:
-                raise HumanReview("SENTINEL produced no valid dispatch twice: " + "; ".join(errs or ["unchanged"]))
-            return {"status": "ROUTE_INVALID", "errors": errs or ["dispatch unchanged"]}
+                raise HumanReview("SENTINEL produced no valid dispatch twice: " + "; ".join(errs))
+            return {"status": "ROUTE_INVALID", "errors": errs}
         wf["route_failures"] = 0
+        wf.pop("last_route_errors", None)
+        self.apply_state_update(d)
         if d["status"] == "HUMAN_REVIEW_REQUIRED":
             self.save_workflow(wf)
             raise HumanReview(f"SENTINEL: {d.get('reason')}")

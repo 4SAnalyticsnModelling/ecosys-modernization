@@ -617,6 +617,43 @@ class SwarmTests(unittest.TestCase):
         with self.assertRaises(w.ProtocolError):
             self.swarm.clear_review("user", "trying to clear with f77src modified")
 
+    def test_rejected_route_is_not_delivered_and_errors_reach_the_next_brief(self):
+        (self.root / ".agent/tasks/T-00001.md").write_text(TASK.format(tid="T-00001", role="SAGE", allowed="- none"))
+        briefs = []
+
+        def sentinel(_t):
+            briefs.append((self.root / ".agent/runtime/sentinel-brief.md").read_text())
+            if len(briefs) == 1:  # first attempt: two SAGE skills (the T-00015 mistake)
+                w.atomic(self.root / ".agent/dispatch.json", w.encoded({
+                    "schema_version": 1, "status": "PENDING", "task_id": "T-00001", "role": "SAGE",
+                    "task_file": ".agent/tasks/T-00001.md", "result_file": ".agent/results/T-00001.md",
+                    "skills": ["ecosys-process-science-parity", "ecosys-source-navigation"]}))
+            else:
+                w.atomic(self.root / ".agent/dispatch.json", w.encoded({"schema_version": 1, "status": "IDLE", "reason": "fixed"}))
+        self.herdr.behaviors["sentinel"] = sentinel
+        self.assertEqual(self.swarm.step()["status"], "ROUTE_INVALID")
+        self.assertEqual(w.load(self.root / ".agent/dispatch.json")["status"], "REJECTED")
+        self.assertEqual(self.swarm.step()["status"], "IDLE")  # routed again, never delivered to SAGE
+        self.assertIn("PREVIOUS ROUTING ATTEMPT WAS REJECTED", briefs[1])
+        self.assertIn("SAGE tasks name exactly one", briefs[1])
+        self.assertEqual(self.herdr.task_prompts("sage"), [])
+
+    def test_controller_writes_state_sections_from_the_dispatch(self):
+        (self.root / ".agent/state.md").write_text("# S\n\n## Confirmed facts\n- keep me\n\n## Recent accepted change\n- old\n\n"
+                                                   "## Next expected operation\nold next\n")
+
+        def sentinel(_t):
+            w.atomic(self.root / ".agent/dispatch.json", w.encoded({
+                "schema_version": 1, "status": "IDLE", "reason": "r",
+                "state_recent": ["T-00009 PATHFINDER DONE: thing"], "state_next": "wait for the user"}))
+        self.herdr.behaviors["sentinel"] = sentinel
+        self.swarm.step()
+        s = (self.root / ".agent/state.md").read_text()
+        self.assertIn("- keep me", s)
+        self.assertIn("## Recent accepted change\n- T-00009 PATHFINDER DONE: thing\n", s)
+        self.assertIn("## Next expected operation\nwait for the user\n", s)
+        self.assertNotIn("old next", s)
+
     def test_invalid_sage_skill_rejected(self):
         self.dispatch_pending("T-00001", "SAGE", skills=["ecosys-source-navigation"])
         self.assertIn("SAGE tasks name exactly one", self.swarm.step()["reason"])

@@ -25,7 +25,10 @@ Never read `f77src/`, `ecosys-ng/src/`, raw logs, or `audit/history/`.
 - A full 30-year run needs `full_run_justification` saying why a bounded replay cannot answer.
 - Flag in the task if SAGE has handled >25% of recent tasks (metrics.csv).
 
-## Write (only these)
+- Skills: SAGE tasks name EXACTLY ONE of `ecosys-process-science-parity`, `ecosys-conservation-audit`,
+  `ecosys-nonlinear-solver-audit`, `ecosys-feature-attribution`. Other roles: only skills the task needs.
+
+## Write (only these three files; never state.md -- the controller writes it from your dispatch)
 1. `.agent/tasks/T-NNNNN.md` — fill every section of the task template in the brief.
    Use the "next free task ID" the brief states.
 2. `.agent/dispatch.json`:
@@ -33,20 +36,20 @@ Never read `f77src/`, `ecosys-ng/src/`, raw logs, or `audit/history/`.
 {"schema_version": 1, "status": "PENDING", "task_id": "T-NNNNN", "role": "PATHFINDER",
  "task_file": ".agent/tasks/T-NNNNN.md", "result_file": ".agent/results/T-NNNNN.md",
  "skills": ["ecosys-source-navigation"], "t1_argv": null,
- "requires_sage_review": false, "full_run_justification": null, "reason": "<=40 words"}
+ "requires_sage_review": false, "full_run_justification": null, "reason": "<=40 words",
+ "state_recent": ["T-NNNNN ROLE STATUS: finding in <=20 words", "..."],
+ "state_next": "the task you just dispatched, in one line"}
 ```
-   To stop instead: `{"schema_version": 1, "status": "HUMAN_REVIEW_REQUIRED", "reason": "..."}`
-   or `{"schema_version": 1, "status": "IDLE", "reason": "no unblocked work: ..."}`.
+   `state_recent`: one line per newest result (<=8 lines). To stop instead:
+   `{"schema_version": 1, "status": "HUMAN_REVIEW_REQUIRED", "reason": "...", "state_next": "..."}`
+   or `{"schema_version": 1, "status": "IDLE", "reason": "no unblocked work: ...", "state_next": "..."}`.
 3. `.agent/current_task.md` — one line: task ID, role, objective.
-4. `.agent/state.md` — replace ONLY the "Recent accepted change" section (one line per recent result:
-   ID, role, status, finding in <=20 words) and the "Next expected operation" section (the task you just
-   dispatched, or why you stopped). Keep the file <=1,500 words. Do not touch other sections.
 
-Issue the four writes together in one step. Do not run validate-dispatch: the controller validates,
-and an invalid dispatch counts as a failed route.
+Issue the writes together in one step. Do not run validate-dispatch: the controller validates, and a
+rejected dispatch comes back to you in the next brief with its exact errors.
 
 ## Rules
-- Budget: <=6 tool calls (1 read + 4 writes + at most 1 extra read), <=40k input tokens, 5 minutes.
+- Budget: <=5 tool calls (1 read + 3 writes + at most 1 extra read), <=40k input tokens, 5 minutes.
 - Do not edit source, run builds, tests or simulations, or answer science questions.
 - Never write or repair a worker's result file. A STAGNATED/FAIL task is re-dispatched as a NEW
   task (building on its failure packet) or escalated; it is never marked DONE by you.
