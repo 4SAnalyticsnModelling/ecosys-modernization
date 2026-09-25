@@ -49,3 +49,5 @@ FORGE (documentation-only): apply T-00003's amended Status set and the three rel
 exactly as written in `.agent/results/T-00003.md`, to the named `audit/issues/` files only; then rerun
 `uv run ecosys-audit/scripts/issue_status.py --summary` and report. ALLOWED FILES = those issue files +
 the result file. No hypothesis file is needed (no production source).
+
+This task is now T-00005.
