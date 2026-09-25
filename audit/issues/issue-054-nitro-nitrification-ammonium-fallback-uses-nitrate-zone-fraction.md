@@ -1,6 +1,6 @@
 # Issue 054: nitrification.zig's ammonium competition fallback reuses the nitrate-zone volume fraction instead of the ammonium-zone fraction
 
-## Status: RESOLVED (fixed and regression-tested; disposition `legacy-defect-corrected`)
+Status: RESOLVED (fixed and regression-tested; disposition `legacy-defect-corrected`)
 
 ## Impact / severity
 

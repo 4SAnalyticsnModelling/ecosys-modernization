@@ -1,5 +1,7 @@
 # Issue 049: domain-boundary snow drift is dead code in legacy WATSUB but wired live in Zig
 
+Status: OPEN -- requires a deck-specific site-boundary check before a scientific disposition.
+
 ## Impact/severity
 
 Moderate, scope-dependent. Affects mass/energy/solute conservation and output

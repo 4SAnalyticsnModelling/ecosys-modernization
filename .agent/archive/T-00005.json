@@ -1,0 +1,44 @@
+{
+  "changed": [
+    ".agent/results/T-00005.md",
+    "audit/issues/issue-024-top-layer-water-content-divergence-oracle-vs-zig.md",
+    "audit/issues/issue-044-trnsfr-subsurface-irrigation-gas-flux-h2-zeroed-and-zig-gas-species-gap.md",
+    "audit/issues/issue-047-grosub-annual-root-reserve-phosphorus-cap-uses-nitrogen-pool.md",
+    "audit/issues/issue-049-watsub-domain-boundary-snow-drift-legacy-disabled-zig-enabled.md",
+    "audit/issues/issue-051-watsub-macropore-freeze-thaw-uses-micropore-depressed-freezing-point.md",
+    "audit/issues/issue-052-hour1-zs-surface-roughness-update-frequency-gated-by-disturbance-flag.md",
+    "audit/issues/issue-054-nitro-nitrification-ammonium-fallback-uses-nitrate-zone-fraction.md",
+    "audit/issues/issue-060-067-independent-review-2026-09-20.md",
+    "audit/issues/issue-066-litter-ammonia-phase-bridge-exact-zero-carrier-round-trip.md",
+    "audit/issues/issue-076-crlf-checkout-breaks-hardcoded-lf-multiline-source-scan-tests-seven-failures.md",
+    "audit/issues/issue-078-hour-3253-runtime-soil-pore-capacity-exceeded.md",
+    "audit/issues/issue-079-winter-multi-layer-soil-water-creep-no-runoff-or-evap-accounting.md",
+    "audit/issues/issue-096-retiring-the-hcnd-table-orphaned-psisa-thets-and-left-an-identically-false-discharge-gate.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Per T-00003, apply the amended issue Status set and relabels, then rerun issue_status.py; this is the next bounded doc edit.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00005.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00005.md",
+    "task_id": "T-00005"
+  },
+  "ended": 1790376122.8536062,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "recovered",
+  "reset": {
+    "reset": "recovered"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "violations": []
+}

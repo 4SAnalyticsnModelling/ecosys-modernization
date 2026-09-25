@@ -1,5 +1,7 @@
 # Issue 047: GROSUB annual root->stalk-reserve phosphorus transfer is capped by the nitrogen pool, not the phosphorus pool
 
+Status: UNRESOLVED at the formula level (legacy defect confirmed, not yet reviewed for correction).
+
 ## Impact / severity
 
 Low-to-moderate, narrow scope. Affects only annual determinate/indeterminate
@@ -144,4 +146,4 @@ this specific 5086-5089 substitution is a localized, not systemic, defect.
 
 Author: this session's audit fork, 2026-09-19 (feature-007 follow-up pass,
 carboxylation + storage-remobilization ranges). Independent reviewer: not
-yet done. Status: OPEN.
+yet done. Disposition: OPEN.

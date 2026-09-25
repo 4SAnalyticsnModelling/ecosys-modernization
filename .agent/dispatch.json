@@ -1,1 +1,16 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00005", "role": "FORGE", "task_file": ".agent/tasks/T-00005.md", "result_file": ".agent/results/T-00005.md", "skills": ["ecosys-source-navigation"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Per T-00003, apply the amended issue Status set and relabels, then rerun issue_status.py; this is the next bounded doc edit."}
+{
+  "full_run_justification": null,
+  "reason": "Per T-00003, apply the amended issue Status set and relabels, then rerun issue_status.py; this is the next bounded doc edit.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00005.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-source-navigation"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00005.md",
+  "task_id": "T-00005"
+}

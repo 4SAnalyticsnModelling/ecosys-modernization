@@ -1,6 +1,8 @@
 # Issue 044: `trnsfr.f` subsurface-irrigation gas flux hardcodes H2 to zero while five sibling gases compute real values; Zig irrigation-chemistry schema carries no gas species at all
 
-## Status: unresolved (flagged for reviewer judgment, not autonomously dispositioned). **Follow-up (2026-09-19): CONFIRMED NOT REACHABLE for the Ottawa deck** -- every year's land-management manifest (`f25m98`..`f25m03`) gives `NO` in the irrigation-file slot, so `FLU` (the driver of this entire six-gas block) is zero every hour of the deck's full forcing cycle. See "Follow-up resolution (2026-09-19)" near the end of this file. Deprioritized accordingly; not closed.
+Status: UNRESOLVED -- confirmed NOT REACHABLE for the Ottawa deck (2026-09-19; no irrigation scheduled in f25m98..f25m03); mechanism/scope questions remain open for any future irrigated deck.
+
+## Historical status: unresolved (flagged for reviewer judgment, not autonomously dispositioned). **Follow-up (2026-09-19): CONFIRMED NOT REACHABLE for the Ottawa deck** -- every year's land-management manifest (`f25m98`..`f25m03`) gives `NO` in the irrigation-file slot, so `FLU` (the driver of this entire six-gas block) is zero every hour of the deck's full forcing cycle. See "Follow-up resolution (2026-09-19)" near the end of this file. Deprioritized accordingly; not closed.
 
 ## Location
 

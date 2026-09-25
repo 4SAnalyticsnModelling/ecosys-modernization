@@ -1,6 +1,6 @@
 # Issue 096 -- retiring the HCND table orphaned `PSISA`/`THETS`, leaving the micropore discharge gate comparing a value against itself
 
-Status: **REDISCOVERY -- the defect is real and confirmed, but it was ALREADY DOCUMENTED on 2026-09-10 with a deeper cause, and this issue's central accusation was WRONG. Retained as an independent corroboration, not as a new finding. See the correction below and `issue-097`.**
+Status: DUPLICATE -- rediscovery of a defect already documented 2026-09-10 with a deeper cause; this issue's central accusation was wrong; kept as corroboration (see issue-097).
 
 > ### CORRECTION, same day, after consulting the reference documentation
 >

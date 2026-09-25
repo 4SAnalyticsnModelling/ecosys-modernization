@@ -1,5 +1,7 @@
 # Issue 051: macropore freeze-thaw eligibility gate uses pure-water 273.15 K but its own driving-force formula relaxes toward the micropore's matric-depressed `TFREEZ` -- faithfully reproduced in Zig, undocumented either side
 
+Status: OPEN -- genuine internal inconsistency, not yet quantified against a live run.
+
 ## Impact/severity
 
 Medium -- a genuine legacy internal inconsistency (the macropore block's own

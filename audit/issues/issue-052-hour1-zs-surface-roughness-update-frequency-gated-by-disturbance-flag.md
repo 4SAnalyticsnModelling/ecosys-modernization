@@ -1,5 +1,7 @@
 # Issue 052: legacy `ZS` ground/snow/water surface roughness is only recomputed on a rare disturbance/restart event, but Zig recomputes it from live state every hour -- revises `feature-006` item 2 from `preserved`
 
+Status: OPEN -- unresolved update-frequency mismatch pending a reviewer decision.
+
 ## Impact/severity
 
 Medium-to-high, pending materiality review. `ZS` feeds directly into the
