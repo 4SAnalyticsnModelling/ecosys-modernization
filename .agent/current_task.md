@@ -1,1 +1,1 @@
-T-00006 | PATHFINDER | Locate and verify Ottawa legacy baseline evidence and run-002 recipe for P0.3/P0.4.
+T-00007 PATHFINDER: Preserve the surviving Ottawa legacy evidence and recipe into a durable evidence archive and manifest before any P0.4 rerun.
