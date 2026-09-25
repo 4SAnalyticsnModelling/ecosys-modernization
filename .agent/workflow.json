@@ -1,5 +1,7 @@
 {
-  "autonomy_approved": false,
+  "approved_by": "symon.mezbahuddin",
+  "approved_unix": 1790374001.3064854,
+  "autonomy_approved": true,
   "campaigns": 0,
   "campaigns_without_advance": 0,
   "full_run_justifications": [],
