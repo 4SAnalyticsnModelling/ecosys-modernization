@@ -1,1 +1,1 @@
-T-00001 | PATHFINDER | supervised P0.6 issue-status normalization report
+T-00002, SAGE, Review P1.6 migration diff and control-plane workflow references for the retired protocol.

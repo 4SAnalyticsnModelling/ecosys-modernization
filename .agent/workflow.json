@@ -17,8 +17,17 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Supervised P0.6 read-only issue-status normalization task; no production-science work.",
-  "task_id": "T-00001",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SENTINEL routed T-00002 (SAGE: P1.6 migration review).",
+  "task_id": "T-00002",
+  "worker": "SAGE",
+  "halts": [
+    {
+      "time": 1790374102,
+      "cleared_by": "claude (planning session), user-requested launch",
+      "resolution": "Operator error, not an agent violation: the operator (Claude, planning session) tee-d the controller console into a Git-visible log and then edited .gitignore during SENTINEL turn 1. SENTINEL only wrote its task + dispatch (validated). .gitignore fix committed; halt cleared with the user present.",
+      "reason": "SENTINEL wrote outside its lane: .gitignore: outside SENTINEL may_write; audit/runs/swarm-controller-20260925.log: outside SENTINEL may_write"
+    }
+  ]
 }
+

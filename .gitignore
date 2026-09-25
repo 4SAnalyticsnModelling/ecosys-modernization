@@ -39,3 +39,6 @@ evidence/*
 .agent/locks/*
 !.agent/locks/.gitkeep
 .agent/runtime/
+
+# Controller console transcript (tee'd by the operator; not agent output).
+audit/runs/swarm-controller-*.log
