@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00141 FORGE DONE: warmup manifest drafted; G0-4 may reopen only after SAGE approval.
-- T-00140 SAGE DONE: fresh legacy P0.4 is the only valid route to reopen G0-4.
-- T-00139 PATHFINDER BLOCKED: no authoritative archive exists; only a fresh legacy run can satisfy G0-4.
+- T-00142 SAGE DONE: manifest revisions and driver prep are required before P0.4 launch.
+- T-00141 FORGE DONE: bounded warmup succeeded; manifest draft is ready.
+- T-00140 SAGE DONE: fresh legacy rerun is the only valid G0-4 path.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE approves or revises the P0.4 provenance manifest before authorizing the legacy full-run baseline.
+FORGE will revise the P0.4 provenance manifest and write the full-run driver before launching the legacy gfortran timing run.
