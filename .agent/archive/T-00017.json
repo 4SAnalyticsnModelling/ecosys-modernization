@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00017.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "DEV-004 was rejected; the restored 100-deck failure still needs a root-cause trace to find the load-bearing hard_max_iterations consumer before any follow-up change.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00017.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation",
+      "ecosys-nonlinear-solver-audit"
+    ],
+    "state_next": "PATHFINDER root-causes the restored 100-deck hour-3,162 solver stagnation and identifies the hard_max_iterations consumer.",
+    "state_recent": [
+      "T-00016 SAGE DONE: DEV-004 rejected; DEV-005/006 approved with conditions.",
+      "T-00014 PATHFINDER DONE: D6 packet ties each deck edit to effect and provenance.",
+      "T-00012 PATHFINDER DONE: partial legacy archive; full 30-year baseline remains unverified."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00017.md",
+    "task_id": "T-00017"
+  },
+  "ended": 1790385463.6749773,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": null,
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 485120,
+    "cache_write": 0,
+    "cost": 0.036031799999999996,
+    "input": 62539,
+    "llm_calls": 13,
+    "output": 11518,
+    "tool_calls": 20
+  },
+  "violations": []
+}

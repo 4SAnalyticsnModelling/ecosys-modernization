@@ -46,8 +46,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "DEV-004 was rejected; the restored 100-deck failure still needs a root-cause trace to find the load-bearing hard_max_iterations consumer before any follow-up change.",
   "task_id": "T-00017",
-  "worker": "PATHFINDER"
+  "worker": null
 }
