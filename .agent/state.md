@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00146 FORGE BLOCKED: full-run launch exceeds 60-minute session budget; needs SAGE approval.
-- T-00143 FORGE DONE: legacy provenance manifest and full-run driver are ready.
-- T-00142 SAGE DONE: full legacy P0.4 rerun is authorized without further science gate.
+- T-00154 FORGE DONE: legacy campaign failed at DOY 286 on issue-023.
+- T-00153 SAGE DONE: detached launch was authorized and relaunch awaits fix.
+- T-00151 FORGE DONE: detached driver and lock harness passed tests.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-controller launches the detached legacy campaign and L5 collection is routed only after the run receipt is present
+FORGE will rebuild the scratch legacy oracle, smoke-test through DOY 287, and relaunch the detached P0.4 campaign.
