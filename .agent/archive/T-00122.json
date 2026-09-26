@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00122.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Unblocked legacy-row binding remains open; newest evidence nails the exact ZEROS guards, so PATHFINDER must record precise anchors before any ledger rewrite.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00122.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER records TRC-331..335, 337, and 338 legacy anchors in audit/analysis/ before any ledger rewrite.",
+    "state_recent": [
+      "T-00121 PATHFINDER DONE: exact legacy ZEROS anchors for TRC-331..335, 337, 338",
+      "T-00120 PATHFINDER DONE: ZEROS vs ZEROS2 binding in hour1.f",
+      "T-00119 SAGE DONE: rejected signed matrix; four rows remain unresolved"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00122.md",
+    "task_id": "T-00122"
+  },
+  "ended": 1790458790.7937582,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20592ff6ffevxOuY0q5J55EAJ",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 119808,
+    "cache_write": 0,
+    "cost": 0.01490436,
+    "input": 28047,
+    "llm_calls": 6,
+    "output": 5749,
+    "tool_calls": 10
+  },
+  "violations": []
+}
