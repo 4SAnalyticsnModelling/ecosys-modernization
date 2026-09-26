@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00073.md"
+  ],
+  "dispatch": {
+    "diff_sha256": "2de6128d5114abec7da78af62ea9708c7f8c05cca63881c463d6d8b39f5ab987",
+    "full_run_justification": null,
+    "reason": "automatic review of production-source change",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00073.md",
+    "review_of": "T-00072",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-process-science-parity"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00073.md",
+    "task_id": "T-00073"
+  },
+  "ended": 1790449235.7453756,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "98673d52-e07a-4d51-9c16-f0c1bd974c64",
+    "old": "8dcdabbe-b0dd-4c6e-85f5-becc92e1141a",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": {
+    "bound_sha256": "2de6128d5114abec7da78af62ea9708c7f8c05cca63881c463d6d8b39f5ab987",
+    "queued_sha256": "2de6128d5114abec7da78af62ea9708c7f8c05cca63881c463d6d8b39f5ab987",
+    "valid": true,
+    "verdict": "REVISE"
+  },
+  "usage": {
+    "cache_read": 1675560,
+    "cache_write": 103711,
+    "cost": null,
+    "input": 40,
+    "llm_calls": 20,
+    "output": 16416,
+    "tool_calls": 3
+  },
+  "violations": []
+}
