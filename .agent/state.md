@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00119 SAGE DONE: final TRC matrix rejected; four rows may proceed.
-- T-00118 PATHFINDER DONE: signed matrix complete for all unresolved rows.
-- T-00117 PATHFINDER DONE: unresolved TRC cluster split by evidence class.
+- T-00120 PATHFINDER DONE: exact legacy ZEROS binding for rows 331..335, 337, 338
+- T-00119 SAGE DONE: reject the signed matrix; row-by-row legacy bind remains pending
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER finds exact legacy ZEROS or ZEROS2 anchors for TRC-331..335, 337, 338.
+PATHFINDER to bind TRC-331..335, 337, and 338 to exact legacy ZEROS/ZEROS2 anchors and record them in audit/analysis/.
