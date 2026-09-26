@@ -29,6 +29,10 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   T-00078: UNBLOCKED. G0-2 is signed, and no D6 item changes legacy inputs (legacy reads no runtime f6, `reads.f:126`
   per T-00045; legacy hardcodes `CN4X=0.1*CNH4` at `starte.f:189`), so the legacy rerun need not wait for G0-2a
 - G0-5 | PATHFINDER | P0.5 `tracecov.py` stale-hash report (report only, do not refresh) | issue-081
+  T-00085 DECISION: all P0.5 outputs go to `audit/analysis/` (PATHFINDER lane); `audit/traceability/` is
+  read-only for G0. Deliverable: fresh tracecov report + per-row classification of every stale-zig-sha256 row
+  (UNCHANGED-RANGE / CHANGED-RANGE / NO-MATCHING-BLOB) by locating the git blob whose sha256 the row cites.
+  Hash refresh of the ledger is NOT a G0 exit item; it is a later re-review step | `.agent/results/T-00085.md`
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)
