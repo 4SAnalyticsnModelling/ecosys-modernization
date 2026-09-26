@@ -52,11 +52,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
+  "last_route_errors": [
+    "you wrote outside your lane (undone, copy in .agent/failures/route-1790442405/): .agent/results/T-00060.md: outside SENTINEL may_write"
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "FORGE must fix SAGE R1-R4 in the T-00058 fixed-pH speciation before any Ottawa evidence counts.",

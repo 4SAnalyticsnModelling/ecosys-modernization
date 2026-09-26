@@ -1,0 +1,13 @@
+{
+  "not_restored": [],
+  "note": "Agent's version of each file is under files/; the working tree was restored.",
+  "problems": [
+    ".agent/results/T-00060.md: outside SENTINEL may_write"
+  ],
+  "restored": [
+    ".agent/results/T-00060.md"
+  ],
+  "role": "SENTINEL",
+  "tag": "route-1790442405",
+  "time": 1790442440.2127006
+}
