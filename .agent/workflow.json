@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Latest SAGE verdict is REVISE; the next bounded step is a FORGE revision of T-00060 to close R1/R3 before any Ottawa evidence counts.",
-  "task_id": "T-00067",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Latest SAGE verdict is REVISE; T-00066 needs DEV-008 re-review before any Ottawa evidence counts.",
+  "task_id": "T-00068",
+  "worker": "SAGE"
 }

@@ -1,1 +1,1 @@
-T-00066 FORGE Revise the quarantined T-00060 fixed-pH dynamic-input patch to satisfy R1/R3 before any new Ottawa evidence.
+T-00068 SAGE: review the revised T-00060 DEV-008 patch and decide whether R1/R3 are closed without new Ottawa evidence.
