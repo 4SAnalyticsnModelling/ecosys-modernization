@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00082.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Unblocked G0-5 evidence task: revalidate stale tracecov rows before any ledger rewrite; no source edits or full run.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00082.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER to revalidate stale tracecov zig_sha256 rows against cited Zig ranges without modifying evidence.",
+    "state_recent": [
+      "T-00080 PATHFINDER DONE: stale ledger is evidence-only; report no hash refresh.",
+      "T-00078 SAGE DONE: D6 list signed; G0-2a/3/4/5 remain open.",
+      "T-00076 SAGE DONE: DEV-008 accepted; no further SAGE work."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00082.md",
+    "task_id": "T-00082"
+  },
+  "ended": 1790451230.9942415,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20cf43b9ffeZTtDLLgE7TbvrT",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 295808,
+    "cache_write": 0,
+    "cost": 0.035937359999999995,
+    "input": 28612,
+    "llm_calls": 13,
+    "output": 20249,
+    "tool_calls": 18
+  },
+  "violations": []
+}

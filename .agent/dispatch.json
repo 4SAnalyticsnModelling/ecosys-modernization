@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00082", "role": "PATHFINDER", "task_file": ".agent/tasks/T-00082.md", "result_file": ".agent/results/T-00082.md", "skills": ["ecosys-source-navigation"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Unblocked G0-5 evidence task: revalidate stale tracecov rows before any ledger rewrite; no source edits or full run.", "state_recent": ["T-00080 PATHFINDER DONE: stale ledger is evidence-only; report no hash refresh.", "T-00078 SAGE DONE: D6 list signed; G0-2a/3/4/5 remain open.", "T-00076 SAGE DONE: DEV-008 accepted; no further SAGE work."], "state_next": "PATHFINDER to revalidate stale tracecov zig_sha256 rows against cited Zig ranges without modifying evidence."}
+{
+  "full_run_justification": null,
+  "reason": "Unblocked G0-5 evidence task: revalidate stale tracecov rows before any ledger rewrite; no source edits or full run.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00082.md",
+  "result_status": "DONE",
+  "role": "PATHFINDER",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-source-navigation"
+  ],
+  "state_next": "PATHFINDER to revalidate stale tracecov zig_sha256 rows against cited Zig ranges without modifying evidence.",
+  "state_recent": [
+    "T-00080 PATHFINDER DONE: stale ledger is evidence-only; report no hash refresh.",
+    "T-00078 SAGE DONE: D6 list signed; G0-2a/3/4/5 remain open.",
+    "T-00076 SAGE DONE: DEV-008 accepted; no further SAGE work."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00082.md",
+  "task_id": "T-00082"
+}
