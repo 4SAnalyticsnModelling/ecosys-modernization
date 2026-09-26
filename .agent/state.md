@@ -40,11 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00088 FORGE DONE: refreshes only 62 rows and excludes quarantine entries.
-- T-00087 PATHFINDER DONE: stale rows classified into refresh, quarantine, or no-action.
+- T-00090 PATHFINDER DONE: 7 safe rows refreshed; 62 changed rows excluded.
+- T-00089 SAGE DONE: reject 62-row refresh and order re-review.
+- T-00088 FORGE DONE: 62-row patch produced but excluded from ledger.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE reviews the T-00088 traceability patch before any ledger application.
+PATHFINDER re-reviews 62 CHANGED-RANGE traceability rows in <=15-row batches before any refresh.

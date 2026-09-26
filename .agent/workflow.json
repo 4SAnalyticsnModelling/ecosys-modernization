@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "chained from T-00089 (SAGE CHAIN block)",
-  "task_id": "T-00090",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Route to PATHFINDER: re-review 62 CHANGED-RANGE traceability rows before ledger refresh; newest result requires this evidence gate.",
+  "task_id": "T-00091",
+  "worker": "PATHFINDER"
 }
