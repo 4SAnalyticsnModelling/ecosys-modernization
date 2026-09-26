@@ -52,11 +52,14 @@
   ],
   "idle_check": true,
   "last_advance_unix": null,
+  "last_route_errors": [
+    "ALLOWED FILES `ecosys-ng-prod-examples/Cool` is a protected reference path"
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "SAGE decision (idle-check) from SENTINEL",

@@ -1,1 +1,1 @@
-T-00077 IDLE No unblocked work after DEV-008 acceptance
+T-00079 FORGE: revert the deck half of 9253d3b to legacy-safe f6=100 and run focused iteration-control checks.

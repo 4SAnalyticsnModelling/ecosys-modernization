@@ -1,18 +1,28 @@
 {
-  "decision_kind": "idle-check",
-  "decision_of": "SENTINEL",
-  "full_run_justification": null,
-  "reason": "SAGE decision (idle-check) from SENTINEL",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00078.md",
-  "result_status": "DONE",
-  "role": "SAGE",
-  "schema_version": 1,
-  "skills": [
-    "ecosys-feature-attribution"
+  "errors": [
+    "ALLOWED FILES `ecosys-ng-prod-examples/Cool` is a protected reference path"
   ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00078.md",
-  "task_id": "T-00078"
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "Latest SAGE ruling says the deck half of 9253d3b is still un-applied; FORGE should restore the legacy-safe f6=100 bound and test it.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00079.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-build-reproducibility"
+    ],
+    "state_next": "FORGE reverts the deck half of 9253d3b and runs the focused iteration-control checks.",
+    "state_recent": [
+      "T-00078 SAGE DONE: D6 list signed; deck half revert remains open",
+      "T-00076 SAGE DONE: DEV-008 accepted",
+      "T-00075 SAGE DONE: DEV-008 approved"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00079.md",
+    "task_id": "T-00079"
+  },
+  "schema_version": 1,
+  "status": "REJECTED"
 }
