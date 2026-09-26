@@ -1,0 +1,48 @@
+{
+  "changed": [
+    ".agent/results/T-00020.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "The newest result narrows the failure to cell-0 soil-water stagnation and points PATHFINDER at matrix potential, conductivity, and DEV-005 effects before any fix.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00020.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER: diagnose the cell-0 soil-water stagnation at hour 3,162 under the restored deck and DEV-005 effects.",
+    "state_recent": [
+      "T-00019 FORGE DONE: diagnostic replay disproved the 100-deck cap as load-bearing.",
+      "T-00018 PATHFINDER DONE: exact hard_max_iterations soil-water consumer confirmed.",
+      "T-00017 PATHFINDER DONE: load-bearing cap path rooted to the soil-water solver rejection."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00020.md",
+    "task_id": "T-00020"
+  },
+  "ended": 1790386858.7426884,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": "ses_f24abd619ffeXJAoL3a7GU0gE6",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 451968,
+    "cache_write": 0,
+    "cost": 0.03452996,
+    "input": 79363,
+    "llm_calls": 10,
+    "output": 8015,
+    "tool_calls": 20
+  },
+  "violations": []
+}

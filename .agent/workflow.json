@@ -46,8 +46,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "The newest result narrows the failure to cell-0 soil-water stagnation and points PATHFINDER at matrix potential, conductivity, and DEV-005 effects before any fix.",
   "task_id": "T-00020",
-  "worker": "PATHFINDER"
+  "worker": null
 }
