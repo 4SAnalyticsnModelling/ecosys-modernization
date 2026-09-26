@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00133.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "G0-4 is unblocked and PATHFINDER owns the legacy evidence packet and run-002 recipe validation; this is the bounded next step without a full Ottawa run.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00133.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-repository-baseline"
+    ],
+    "state_next": "PATHFINDER packages the G0-4 legacy rerun evidence packet and missing-archive checklist without running a full Ottawa simulation.",
+    "state_recent": [
+      "T-00132 PATHFINDER DONE: bounded G0-4 evidence packet; no full Ottawa rerun.",
+      "T-00131 FORGE DONE: seven-row ZEROS ledger packet finalized and verified.",
+      "T-00130 SAGE DONE: final reviewer update approved; no science change."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00133.md",
+    "task_id": "T-00133"
+  },
+  "ended": 1790461457.4448726,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20311268ffeixwpaiMOL7T7rh",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 153600,
+    "cache_write": 0,
+    "cost": 0.019598599999999997,
+    "input": 50995,
+    "llm_calls": 6,
+    "output": 5273,
+    "tool_calls": 16
+  },
+  "violations": []
+}
