@@ -1,1 +1,17 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00037", "role": "FORGE", "task_file": ".agent/tasks/T-00037.md", "result_file": ".agent/results/T-00037.md", "skills": ["ecosys-zig-safety-design"], "t1_argv": null, "requires_sage_review": true, "full_run_justification": null, "reason": "SAGE finalized the rejection of DEV-004; the next bounded action is to revert the 200 cap and keep the diff review explicit.", "state_recent": ["T-00036 SAGE STATUS: final rejection of DEV-004 and revert path.", "T-00035 SAGE STATUS: DEV-004 was rejected; revert needed.", "T-00034 PATHFINDER STATUS: first preserved divergence at hour 9 in f25wh1.txt"], "state_next": "FORGE reverts the rejected 200 cap and records a diff-bound hypothesis before the root-cause packet."}
+{
+  "diff_sha256": "5da7d0eed0ad4395ada744146f016751c4ebe6641d9f02020400db3d955e9071",
+  "full_run_justification": null,
+  "reason": "automatic review of production-source change",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00038.md",
+  "review_of": "T-00037",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00038.md",
+  "task_id": "T-00038"
+}

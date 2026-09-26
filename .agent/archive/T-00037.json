@@ -1,0 +1,65 @@
+{
+  "changed": [
+    ".agent/results/T-00037.md",
+    ".agent/tasks/T-00037.hypothesis.md",
+    "audit/runs/t-00037-all-iteration-control-tests/receipt.json",
+    "audit/runs/t-00037-all-iteration-control-tests/stderr.log",
+    "audit/runs/t-00037-all-iteration-control-tests/stdout.log",
+    "audit/runs/t-00037-standing-dead-tests/receipt.json",
+    "audit/runs/t-00037-standing-dead-tests/stderr.log",
+    "audit/runs/t-00037-standing-dead-tests/stdout.log",
+    "audit/runs/t-00037-targeted-tests/receipt.json",
+    "audit/runs/t-00037-targeted-tests/stderr.log",
+    "audit/runs/t-00037-targeted-tests/stdout.log",
+    "ecosys-ng/src/core/iteration_control.zig"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "SAGE finalized the rejection of DEV-004; the next bounded action is to revert the 200 cap and keep the diff review explicit.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00037.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-zig-safety-design"
+    ],
+    "state_next": "FORGE reverts the rejected 200 cap and records a diff-bound hypothesis before the root-cause packet.",
+    "state_recent": [
+      "T-00036 SAGE STATUS: final rejection of DEV-004 and revert path.",
+      "T-00035 SAGE STATUS: DEV-004 was rejected; revert needed.",
+      "T-00034 PATHFINDER STATUS: first preserved divergence at hour 9 in f25wh1.txt"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00037.md",
+    "task_id": "T-00037"
+  },
+  "ended": 1790399351.9288983,
+  "failure_packet": null,
+  "hooks": {
+    "zig_fmt": {
+      "exit_code": 0,
+      "receipt": "audit/runs/swarm/20260925-230908-T-00037-fmt/receipt.json"
+    }
+  },
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f2455a2f6ffewR02QyckC7aqU7",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 5024033,
+    "cache_write": 0,
+    "cost": 0.7655867250000001,
+    "input": 487764,
+    "llm_calls": 68,
+    "output": 6123,
+    "tool_calls": 70
+  },
+  "violations": []
+}

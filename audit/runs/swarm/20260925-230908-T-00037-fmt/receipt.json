@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "zig",
+    "fmt",
+    "D:\\ecosys-modernization\\ecosys-ng\\src\\core\\iteration_control.zig"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.635,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 19928,
+  "pid": 27332,
+  "started_unix": 1790399348.2481964,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/swarm/20260925-230908-T-00037-fmt/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/swarm/20260925-230908-T-00037-fmt/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 300.0
+}

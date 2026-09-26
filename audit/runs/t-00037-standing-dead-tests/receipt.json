@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/apps/zig/current/zig.exe",
+    "test",
+    "src/module_index.zig",
+    "--test-filter",
+    "standing-dead energy ceiling"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 3.959,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 5380,
+  "pid": 15772,
+  "started_unix": 1790399098.933904,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00037-standing-dead-tests/stderr.log",
+    "sha256": "a56cfe36a86d3f4478be4e249a4dc0e5abad0b0f410ac5c8ba42d21a29d11fb5"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00037-standing-dead-tests/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 180.0
+}
