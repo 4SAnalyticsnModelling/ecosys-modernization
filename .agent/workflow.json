@@ -40,17 +40,14 @@
     }
   ],
   "last_advance_unix": null,
-  "last_route_errors": [
-    "task file missing sections ['SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Latest evidence narrows DEV-005 to an indirect trajectory modifier; the next unlocked action is SAGE review of the D6 attribution packet before user approval.",
-  "task_id": "T-00024",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Latest result says DEV-005 is legacy-parity; DEV-004 attribution is still unbounded. PATHFINDER should locate the legacy runtime ceiling and first divergence hour from preserved outputs.",
+  "task_id": "T-00026",
+  "worker": "PATHFINDER"
 }
