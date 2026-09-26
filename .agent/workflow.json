@@ -52,11 +52,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
+  "last_route_errors": [
+    "ALLOWED FILES `audit/traceability/coverage-2026-09-21.json` is outside PATHFINDER may_write"
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "Unblocked G0-5 report task: stale tracecov hashes, no protected-path edits, no full run.",

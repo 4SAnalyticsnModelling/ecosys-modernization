@@ -1,22 +1,28 @@
 {
-  "full_run_justification": null,
-  "reason": "Unblocked G0-5 report task: stale tracecov hashes, no protected-path edits, no full run.",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00080.md",
-  "result_status": "DONE",
-  "role": "PATHFINDER",
+  "errors": [
+    "ALLOWED FILES `audit/traceability/coverage-2026-09-21.json` is outside PATHFINDER may_write"
+  ],
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "Stale tracecov ledger blocks evidence confidence; PATHFINDER can revalidate cited Zig ranges without any production change.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00081.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER revalidates stale tracecov rows against cited Zig ranges before any hash update.",
+    "state_recent": [
+      "T-00080 PATHFINDER DONE: 117 stale zig_sha256 rows remain, report-only G0-5.",
+      "T-00078 SAGE DONE: D6 signed; G0-5 and G0-4 still open.",
+      "T-00076 SAGE DONE: DEV-008 accepted and signed."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00081.md",
+    "task_id": "T-00081"
+  },
   "schema_version": 1,
-  "skills": [
-    "ecosys-source-navigation"
-  ],
-  "state_next": "PATHFINDER to audit stale tracecov hashes and write the G0-5 report without refreshing them.",
-  "state_recent": [
-    "T-00078 SAGE DONE: D6 list signed; deck revert and G0-5 remain open.",
-    "T-00076 SAGE DONE: DEV-008 accepted after confirmation.",
-    "T-00075 SAGE DONE: DEV-008 approved under legacy-derived bounds."
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00080.md",
-  "task_id": "T-00080"
+  "status": "REJECTED"
 }
