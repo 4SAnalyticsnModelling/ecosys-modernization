@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00125", "role": "FORGE", "task_file": ".agent/tasks/T-00125.md", "result_file": ".agent/results/T-00125.md", "skills": ["ecosys-source-navigation"], "t1_argv": null, "requires_sage_review": true, "full_run_justification": null, "reason": "Latest evidence confirms the unresolved rows bind to the shared ZEROS guard; this is a bounded FORGE rewrite requiring SAGE review.", "state_recent": ["T-00123 PATHFINDER DONE: exact ZEROS guard evidence for TRC-331..338.", "T-00122 PATHFINDER DONE: row-by-row ZEROS binding classified.", "T-00121 PATHFINDER DONE: legacy ZEROS vs ZEROS2 gate semantics narrowed."], "state_next": "FORGE rewrites the approved TRC rows to the shared legacy ZEROS guard and leaves ZEROS2 untouched."}
+{
+  "full_run_justification": null,
+  "reason": "Latest evidence confirms the unresolved rows bind to the shared ZEROS guard; this is a bounded FORGE rewrite requiring SAGE review.",
+  "requires_sage_review": true,
+  "result_file": ".agent/results/T-00125.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-source-navigation"
+  ],
+  "state_next": "FORGE rewrites the approved TRC rows to the shared legacy ZEROS guard and leaves ZEROS2 untouched.",
+  "state_recent": [
+    "T-00123 PATHFINDER DONE: exact ZEROS guard evidence for TRC-331..338.",
+    "T-00122 PATHFINDER DONE: row-by-row ZEROS binding classified.",
+    "T-00121 PATHFINDER DONE: legacy ZEROS vs ZEROS2 gate semantics narrowed."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00125.md",
+  "task_id": "T-00125"
+}

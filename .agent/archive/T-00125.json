@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00125.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Latest evidence confirms the unresolved rows bind to the shared ZEROS guard; this is a bounded FORGE rewrite requiring SAGE review.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00125.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "FORGE rewrites the approved TRC rows to the shared legacy ZEROS guard and leaves ZEROS2 untouched.",
+    "state_recent": [
+      "T-00123 PATHFINDER DONE: exact ZEROS guard evidence for TRC-331..338.",
+      "T-00122 PATHFINDER DONE: row-by-row ZEROS binding classified.",
+      "T-00121 PATHFINDER DONE: legacy ZEROS vs ZEROS2 gate semantics narrowed."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00125.md",
+    "task_id": "T-00125"
+  },
+  "ended": 1790459563.1964715,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20539682ffefjz8NzTqkqbOno",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 444349,
+    "cache_write": 0,
+    "cost": 2.7449774249999996,
+    "input": 3571115,
+    "llm_calls": 50,
+    "output": 8884,
+    "tool_calls": 56
+  },
+  "violations": []
+}

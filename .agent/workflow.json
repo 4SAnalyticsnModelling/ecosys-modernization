@@ -60,8 +60,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Latest evidence confirms the unresolved rows bind to the shared ZEROS guard; this is a bounded FORGE rewrite requiring SAGE review.",
   "task_id": "T-00125",
-  "worker": "FORGE"
+  "worker": null
 }
