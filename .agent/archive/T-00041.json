@@ -1,0 +1,78 @@
+{
+  "changed": [
+    ".agent/results/T-00041.md",
+    ".agent/tasks/T-00041.hypothesis.md",
+    "audit/runs/t-00041-all-iteration-control-tests-postfmt/receipt.json",
+    "audit/runs/t-00041-all-iteration-control-tests-postfmt/stderr.log",
+    "audit/runs/t-00041-all-iteration-control-tests-postfmt/stdout.log",
+    "audit/runs/t-00041-all-iteration-control-tests/receipt.json",
+    "audit/runs/t-00041-all-iteration-control-tests/stderr.log",
+    "audit/runs/t-00041-all-iteration-control-tests/stdout.log",
+    "audit/runs/t-00041-baseline-tests/receipt.json",
+    "audit/runs/t-00041-baseline-tests/stderr.log",
+    "audit/runs/t-00041-baseline-tests/stdout.log",
+    "audit/runs/t-00041-staged-deck-budget-test/receipt.json",
+    "audit/runs/t-00041-staged-deck-budget-test/stderr.log",
+    "audit/runs/t-00041-staged-deck-budget-test/stdout.log",
+    "audit/runs/t-00041-zig-fmt-apply/receipt.json",
+    "audit/runs/t-00041-zig-fmt-apply/stderr.log",
+    "audit/runs/t-00041-zig-fmt-apply/stdout.log",
+    "audit/runs/t-00041-zig-fmt-check-2/receipt.json",
+    "audit/runs/t-00041-zig-fmt-check-2/stderr.log",
+    "audit/runs/t-00041-zig-fmt-check-2/stdout.log",
+    "audit/runs/t-00041-zig-fmt-check/receipt.json",
+    "audit/runs/t-00041-zig-fmt-check/stderr.log",
+    "audit/runs/t-00041-zig-fmt-check/stdout.log",
+    "ecosys-ng/src/core/iteration_control.zig"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "New evidence narrows root cause to staged deck solver caps; bounded FORGE validation is the next unblocked, non-full-run action.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00041.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation",
+      "ecosys-validation-tests"
+    ],
+    "state_next": "FORGE validates the exact SOLUTE and STARTE budget mutation under the staged deck and compares it to legacy MRXN values.",
+    "state_recent": [
+      "T-00039 PATHFINDER DONE: root cause narrowed to staged-deck SOLUTE/STARTE cap path.",
+      "T-00038 SAGE DONE: revert diff approved; deck cap remains staged and unresolved.",
+      "T-00037 FORGE DONE: reverted unprincipled 200 cap to legacy-safe 100 bound."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00041.md",
+    "task_id": "T-00041"
+  },
+  "ended": 1790400113.358176,
+  "failure_packet": null,
+  "hooks": {
+    "zig_fmt": {
+      "exit_code": 0,
+      "receipt": "audit/runs/swarm/20260925-232150-T-00041-fmt/receipt.json"
+    }
+  },
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f23ea933cffewRk5CSCewrW6n6",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 4288852,
+    "cache_write": 0,
+    "cost": 0.6619539000000001,
+    "input": 408930,
+    "llm_calls": 70,
+    "output": 8958,
+    "tool_calls": 74
+  },
+  "violations": []
+}

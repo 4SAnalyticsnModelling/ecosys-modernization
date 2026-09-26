@@ -1,1 +1,17 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00041", "role": "FORGE", "task_file": ".agent/tasks/T-00041.md", "result_file": ".agent/results/T-00041.md", "skills": ["ecosys-source-navigation", "ecosys-validation-tests"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "New evidence narrows root cause to staged deck solver caps; bounded FORGE validation is the next unblocked, non-full-run action.", "state_recent": ["T-00039 PATHFINDER DONE: root cause narrowed to staged-deck SOLUTE/STARTE cap path.", "T-00038 SAGE DONE: revert diff approved; deck cap remains staged and unresolved.", "T-00037 FORGE DONE: reverted unprincipled 200 cap to legacy-safe 100 bound."], "state_next": "FORGE validates the exact SOLUTE and STARTE budget mutation under the staged deck and compares it to legacy MRXN values."}
+{
+  "diff_sha256": "a0d4f97a205c10c075e3854cdfd3b656d3ddaefbf3017f1a748900110d92159b",
+  "full_run_justification": null,
+  "reason": "automatic review of production-source change",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00042.md",
+  "review_of": "T-00041",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00042.md",
+  "task_id": "T-00042"
+}
