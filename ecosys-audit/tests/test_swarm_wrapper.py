@@ -43,6 +43,10 @@ class FakeHerdr:
         self.countdown, self.on_done = {}, {}
         self.pane_screen, self.pane_typed, self.pane_log, self.variant_works = {}, {}, [], True
         self.picker_open, self.chat_messages = {}, []
+        self.pane_list = []
+
+    def panes(self):
+        return list(self.pane_list)
 
     def agent(self, name):
         if name in self.countdown:
@@ -495,6 +499,35 @@ class SwarmTests(unittest.TestCase):
         self.assertEqual(out["status"], "HUMAN_REVIEW_REQUIRED")
         self.assertIn("did not acknowledge /new", out["reason"])
         self.assertEqual(self.herdr.task_prompts("pathfinder"), [])
+        # 2026-09-25: the task was never sent, so no inflight record may block clear-review, and
+        # the same dispatch is delivered (not closed STAGNATED) once the user clears the halt.
+        self.assertFalse((self.root / ".agent/runtime/inflight.json").exists())
+        self.assertEqual(self.swarm.clear_review("user", "reset fixed; task was never delivered")["next"],
+                         "deliver pending dispatch")
+        self.herdr.reset_works = True
+        self.herdr.behaviors["pathfinder"] = lambda _t: self.write_result("T-00001")
+        self.assertEqual(self.swarm.step()["result_status"], "DONE")
+
+    def test_name_dropped_by_herdr_after_clear_is_rebound_to_the_labelled_pane(self):
+        # 2026-09-25: a directly launched Claude lost its Herdr name at /clear (new session).
+        h = self.herdr
+        self.dispatch_pending("T-00001", "SAGE", skills=["ecosys-process-science-parity"])
+        h.pane_list = [{"pane_id": "w1:p4", "label": "SAGE", "agent": "claude"}]
+        real_prompt = h.prompt
+
+        def prompt(name, text, wait, timeout_s=None):
+            real_prompt(name, text, wait, timeout_s)
+            if text == "/clear":
+                h.dropped = h.agents.pop("sage")
+        h.prompt = prompt
+
+        def rename(pane, name):
+            h.agents[name] = {**h.dropped, "pane_id": pane, "name": name}
+        h.rename = rename
+        h.behaviors["sage"] = lambda _t: self.write_result("T-00001")
+        out = self.swarm.step()
+        self.assertEqual((out["status"], out["result_status"]), ("COLLECTED", "DONE"))
+        self.assertEqual(len(h.task_prompts("sage")), 1)
 
     def test_sentinel_gets_one_self_contained_brief(self):
         (self.root / ".agent/roles").mkdir(parents=True, exist_ok=True)

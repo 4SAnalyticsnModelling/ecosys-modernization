@@ -338,10 +338,29 @@ class Swarm:
         return out
 
     # --- agent turns
+    def live(self, name: str) -> dict | None:
+        """The named agent; if Herdr dropped the name, re-bind it to the role's labelled pane.
+
+        Herdr clears the name of an agent it detected (not `agent start`-ed) when the agent is
+        replaced, and Claude's /clear starts a new session (2026-09-25: `sage` vanished after
+        /clear). The pane label is the durable identity; the kind must still match.
+        """
+        a = self.herdr.agent(name)
+        if a is not None:
+            return a
+        r = next((v for v in self.roster["roles"].values() if v["agent_name"] == name), None)
+        if r is None:
+            return None
+        for p in self.herdr.panes():
+            if p.get("label") == r["pane_label"] and p.get("agent") == r["kind"] and not p.get("name"):
+                self.herdr.rename(p["pane_id"], name)
+                return self.herdr.agent(name)
+        return None
+
     def wait_settled(self, name: str, timeout_s: float) -> dict:
         end = self.clock() + timeout_s
         while True:
-            a = self.herdr.agent(name)
+            a = self.live(name)
             if a is None:
                 raise HumanReview(f"agent {name} is not live in Herdr")
             if a["agent_status"] == "blocked":
@@ -364,7 +383,7 @@ class Swarm:
         end = self.clock() + 90
         while self.clock() < end:
             self.sleep(1)
-            a = self.herdr.agent(name)
+            a = self.live(name)
             if a and a["agent_status"] in ("idle", "done"):
                 sid = session_id(a)
                 if marker:
@@ -398,7 +417,7 @@ class Swarm:
                 raise
         settled = 0
         while self.clock() < deadline:
-            a = self.herdr.agent(name)
+            a = self.live(name)
             if a is None:
                 raise HumanReview(f"agent {name} is not live in Herdr")
             if a["agent_status"] == "blocked":
@@ -650,7 +669,7 @@ class Swarm:
     def turn_usage(self, role: str) -> dict | None:
         r = self.role(role)
         try:
-            a = self.herdr.agent(r["agent_name"])
+            a = self.live(r["agent_name"])
         except ProtocolError:
             return None
         return self.usage(r["kind"], session_id(a))
@@ -791,10 +810,12 @@ class Swarm:
         atomic(self.rt / "before.json", encoded(git_dirty(self.root)))
         # Scope is judged against the task AS DISPATCHED; an agent cannot widen it mid-turn.
         atomic(self.rt / "task.md", (self.root / d["task_file"]).read_bytes())
-        # At-most-once: the intent is durable BEFORE any keystroke reaches the agent.
+        reset = self.fresh_session(role)
+        # At-most-once: the intent is durable BEFORE the task prompt reaches the agent. It is written
+        # after the reset, so a failed reset halts with the task still PENDING (never sent) instead
+        # of leaving an inflight record that blocks clear-review and would close the task STAGNATED.
         atomic(self.rt / "inflight.json", encoded({"kind": "task", "task_id": d["task_id"], "role": role,
                                                    "started": started, "frontier_before": self.frontier()}))
-        reset = self.fresh_session(role)
         outcome = self.turn(role, self.prompt_text(role, d))
         return self.collect(d, outcome, started, reset)
 
@@ -804,7 +825,7 @@ class Swarm:
         d = self.dispatch()
         if d.get("task_id") != inflight["task_id"]:
             raise HumanReview("inflight record and dispatch.json disagree; inspect before resuming")
-        a = self.herdr.agent(self.role(d["role"])["agent_name"])
+        a = self.live(self.role(d["role"])["agent_name"])
         if a and a["agent_status"] == "working":
             return {"status": "WAITING", "task_id": d["task_id"], "reason": "agent still working; no duplicate prompt"}
         # Never re-prompt: either the result exists, or the task ends STAGNATED.
