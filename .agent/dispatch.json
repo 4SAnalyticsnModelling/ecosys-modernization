@@ -1,22 +1,28 @@
 {
-  "full_run_justification": null,
-  "reason": "Latest evidence narrows DEV-005 to an indirect trajectory modifier; the next unlocked action is SAGE review of the D6 attribution packet before user approval.",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00024.md",
-  "result_status": "DONE",
-  "role": "SAGE",
+  "errors": [
+    "task file missing sections ['SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
+  ],
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "Latest T-00024 says DEV-004 lacks a legacy anchor; PATHFINDER must locate the runtime ceiling and first divergence hour.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00025.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER traces the legacy runtime ceiling and the first DEV-004 divergence hour from preserved Ottawa outputs.",
+    "state_recent": [
+      "T-00024 SAGE DONE: DEV-005 is legacy parity; DEV-004 remains unanchored.",
+      "T-00023 FORGE DONE: chemistry drift does not cause the matrix-water stall.",
+      "T-00022 PATHFINDER DONE: matrix-water failure is intrinsic, not ammonium-driven."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00025.md",
+    "task_id": "T-00025"
+  },
   "schema_version": 1,
-  "skills": [
-    "ecosys-feature-attribution"
-  ],
-  "state_next": "SAGE adjudicates D6 DEV-005 attribution evidence and advises whether the user may sign.",
-  "state_recent": [
-    "T-00023 FORGE DONE: DEV-005 compare isolates matrix-water stall from chemistry drift.",
-    "T-00022 PATHFINDER DONE: matrix-water non-improvement, not DEV-005, drives the stall.",
-    "T-00021 PATHFINDER DONE: matrix residual, not ammonium multiplier, causes the failure."
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00024.md",
-  "task_id": "T-00024"
+  "status": "REJECTED"
 }

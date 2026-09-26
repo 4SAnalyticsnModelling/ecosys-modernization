@@ -1,1 +1,1 @@
-T-00024 SAGE: adjudicate DEV-005 attribution and decide whether D6 can be signed.
+T-00025 PATHFINDER: find the legacy runtime ceiling and first DEV-004 divergence hour in preserved Ottawa outputs.

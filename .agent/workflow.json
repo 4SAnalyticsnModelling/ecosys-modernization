@@ -40,11 +40,14 @@
     }
   ],
   "last_advance_unix": null,
+  "last_route_errors": [
+    "task file missing sections ['SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "Latest evidence narrows DEV-005 to an indirect trajectory modifier; the next unlocked action is SAGE review of the D6 attribution packet before user approval.",
