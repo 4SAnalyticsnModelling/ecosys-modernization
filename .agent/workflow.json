@@ -56,8 +56,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Latest accepted result mandates a read-only deck trace to locate NPH/NPG and the first preserved n100e/n100f divergence.",
-  "task_id": "T-00033",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Latest accepted result directs a read-only PATHFINDER trace to find the Ottawa deck's NPH/NPG and the first preserved n100e/n100f divergence hour across all files.",
+  "task_id": "T-00034",
+  "worker": "PATHFINDER"
 }
