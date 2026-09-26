@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/apps/zig/current/zig.exe",
+    "test",
+    "--dep",
+    "ecosys_ng",
+    "-Mroot=src/ecosys_ng.zig",
+    "-Mecosys_ng=src/module_index.zig",
+    "--test-filter",
+    "topsoil hydrogen"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 13.521,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 37268,
+  "pid": 38056,
+  "started_unix": 1790450150.8558679,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00074-t1-driver-topsoil/stderr.log",
+    "sha256": "dbf28a6ccf7c9a622c462006b53997f0a4380c53d4e3204804008b0650f8e95f"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00074-t1-driver-topsoil/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

@@ -95,12 +95,24 @@ C      408-483, 838-858, 860-1182, 1234-1284, 1291-1341
       CCLZ=0.05D0
       ENDIF
 
-      DO 8000 IPERT=0,2
+      DO 8000 IPERT=0,8
       CHY1=10.0D0**(-(PH_SRC-3.0D0))
       IF(IPERT.EQ.1)THEN
       CHY1=CHY1+SPACING(CHY1)
       ELSEIF(IPERT.EQ.2)THEN
       CHY1=CHY1-SPACING(CHY1)
+      ELSEIF(IPERT.EQ.3)THEN
+      CHY1=CHY1+2.0D0*SPACING(CHY1)
+      ELSEIF(IPERT.EQ.4)THEN
+      CHY1=CHY1-2.0D0*SPACING(CHY1)
+      ELSEIF(IPERT.EQ.5)THEN
+      CHY1=CHY1+3.0D0*SPACING(CHY1)
+      ELSEIF(IPERT.EQ.6)THEN
+      CHY1=CHY1-3.0D0*SPACING(CHY1)
+      ELSEIF(IPERT.EQ.7)THEN
+      CHY1=CHY1+4.0D0*SPACING(CHY1)
+      ELSEIF(IPERT.EQ.8)THEN
+      CHY1=CHY1-4.0D0*SPACING(CHY1)
       ENDIF
       COH1=DPH2O/CHY1
       CCO2M=CCO2EI/12.0D0
@@ -597,6 +609,19 @@ C      408-483, 838-858, 860-1182, 1234-1284, 1291-1341
      3 'TRAJ K=', K, ' P=', IPERT, ' M=', M,
      4 ' AL=', CAL1, ' CA=', CCA1, ' MG=', CMG1,
      5 ' NA=', CNA1, ' KA=', CKA1, ' SO4=', CSO41
+      WRITE(*,'(A,I1,A,I1,A,I4,47(A,ES25.17))') 'TRAJ,', K, ',',
+     1 IPERT, ',', M,
+     2 ',', CHY1, ',', COH1, ',', CAL1, ',', CFE1, ',', CCA1,
+     3 ',', CMG1, ',', CNA1, ',', CKA1, ',', CSO41, ',', CCL1,
+     4 ',', CCO31, ',', CHCO31, ',', CALO1, ',', CALO2, ',', CALO3,
+     5 ',', CALO4, ',', CALS1, ',', CFEO1, ',', CFEO2, ',', CFEO3,
+     6 ',', CFEO4, ',', CFES1, ',', CCAO1, ',', CCAC1, ',', CCAH1,
+     7 ',', CCAS1, ',', CMGO1, ',', CMGC1, ',', CMGH1, ',', CMGS1,
+     8 ',', CNAC1, ',', CNAS1, ',', CKAS1, ',', CH0P1, ',', CH3P1,
+     9 ',', CF1P1, ',', CF2P1, ',', CC0P1, ',', CC1P1, ',', CC2P1,
+     1 ',', CM1P1, ',', CN41*14.0D0, ',', CN31*14.0D0, ',',
+     2 CNO1*14.0D0, ',', CH1P1*31.0D0, ',', CH2P1*31.0D0, ',',
+     3 CCO21*12.0D0
       ENDIF
 
       IF(M.EQ.1000)THEN

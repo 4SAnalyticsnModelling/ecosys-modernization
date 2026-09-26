@@ -1,0 +1,86 @@
+{
+  "changed": [
+    ".agent/results/T-00074.md",
+    ".agent/tasks/T-00074.hypothesis.md",
+    "audit/runs/t-00074-fmt-check/receipt.json",
+    "audit/runs/t-00074-fmt-check/stderr.log",
+    "audit/runs/t-00074-fmt-check/stdout.log",
+    "audit/runs/t-00074-fmt/receipt.json",
+    "audit/runs/t-00074-fmt/stderr.log",
+    "audit/runs/t-00074-fmt/stdout.log",
+    "audit/runs/t-00074-oracle-compile/receipt.json",
+    "audit/runs/t-00074-oracle-compile/stderr.log",
+    "audit/runs/t-00074-oracle-compile/stdout.log",
+    "audit/runs/t-00074-oracle-run/receipt.json",
+    "audit/runs/t-00074-oracle-run/stderr.log",
+    "audit/runs/t-00074-oracle-run/stdout.log",
+    "audit/runs/t-00074-t1-driver-dynamic/receipt.json",
+    "audit/runs/t-00074-t1-driver-dynamic/stderr.log",
+    "audit/runs/t-00074-t1-driver-dynamic/stdout.log",
+    "audit/runs/t-00074-t1-driver-resolve/receipt.json",
+    "audit/runs/t-00074-t1-driver-resolve/stderr.log",
+    "audit/runs/t-00074-t1-driver-resolve/stdout.log",
+    "audit/runs/t-00074-t1-driver-topsoil/receipt.json",
+    "audit/runs/t-00074-t1-driver-topsoil/stderr.log",
+    "audit/runs/t-00074-t1-driver-topsoil/stdout.log",
+    "audit/runs/t-00074-t1-oracle/receipt.json",
+    "audit/runs/t-00074-t1-oracle/stderr.log",
+    "audit/runs/t-00074-t1-oracle/stdout.log",
+    "audit/runs/t-00074-t1-snow/receipt.json",
+    "audit/runs/t-00074-t1-snow/stderr.log",
+    "audit/runs/t-00074-t1-snow/stdout.log",
+    "ecosys-audit/tests/starte_mloop_oracle.f",
+    "ecosys-ng/src/soil/chemistry/snow_initialization.zig",
+    "ecosys-ng/src/stages/hourly_process_driver.zig"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Latest T-00073 verdict mandates a bounded FORGE revision of T-00060 before SAGE re-review; no user decision or answered work remains.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00074.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation",
+      "ecosys-validation-tests"
+    ],
+    "state_next": "FORGE revises T-00060 in place on a new diff hash and prepares SAGE re-review.",
+    "state_recent": [
+      "T-00073 SAGE STATUS: REVISE T-00060; criterion 2 remains open",
+      "T-00072 FORGE STATUS: revised T-00060; SAGE re-review pending",
+      "T-00071 SAGE STATUS: REVISE T-00060; R1 remains open"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00074.md",
+    "task_id": "T-00074"
+  },
+  "ended": 1790450315.1929464,
+  "failure_packet": null,
+  "hooks": {
+    "zig_fmt": {
+      "exit_code": 0,
+      "receipt": "audit/runs/swarm/20260926-131831-T-00074-fmt/receipt.json"
+    }
+  },
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20fc139effefBxtrdw81t0xXP",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 12054308,
+    "cache_write": 0,
+    "cost": 1.55083635,
+    "input": 730861,
+    "llm_calls": 100,
+    "output": 26298,
+    "tool_calls": 103
+  },
+  "violations": []
+}

@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "zig",
+    "fmt",
+    "D:\\ecosys-modernization\\ecosys-ng\\src\\soil\\chemistry\\snow_initialization.zig",
+    "D:\\ecosys-modernization\\ecosys-ng\\src\\stages\\hourly_process_driver.zig"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.545,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 20812,
+  "pid": 40116,
+  "started_unix": 1790450311.3730102,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/swarm/20260926-131831-T-00074-fmt/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/swarm/20260926-131831-T-00074-fmt/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 300.0
+}
