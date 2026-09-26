@@ -40,14 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00029 FORGE DONE: encoded DEV-004 as a legacy-equivalent 100-ceiling bound; hour-9 onset preserved.
-- T-00027 PATHFINDER DONE: n100e/n100f preserve the 100 vs 200 ceiling and first divergence at hour 9.
-- T-00024 SAGE DONE: DEV-005 is legacy parity; DEV-004 remains the material deviation.
+- T-00031 FORGE DONE: DEV-004 row updated.
+- T-00030 SAGE DONE: hour-9 divergence verified.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER (read-only, preserved outputs): the Ottawa deck's NPH/NPG, and the first hour where any
-preserved n100e/n100f output file differs (T-00030 recommendation), for the merged DEV-004 dossier. Then
-SAGE signs or rejects D6 (DEV-004 merged, DEV-005) under the D6 rule.
+PATHFINDER to identify Ottawa deck NPH/NPG and the first divergent preserved n100e/n100f output hour.
