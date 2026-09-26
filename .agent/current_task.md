@@ -1,1 +1,1 @@
-T-00035 SAGE: adjudicate DEV-004 in the D6 packet and finalize the legacy-equivalent runtime ceiling decision.
+T-00036 SAGE: confirm DEV-004 rejection and finalize the D6 decision packet.

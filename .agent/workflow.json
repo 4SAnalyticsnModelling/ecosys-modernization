@@ -56,8 +56,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Latest accepted result instructs SAGE to adjudicate DEV-004 and finalize D6; no user decision remains and the evidence packet is already preserved.",
-  "task_id": "T-00035",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Latest accepted result directs SAGE to confirm the D6 DEV-004 rejection before FORGE reverts the cap.",
+  "task_id": "T-00036",
+  "worker": "SAGE"
 }
