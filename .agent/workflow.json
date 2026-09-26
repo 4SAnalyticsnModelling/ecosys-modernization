@@ -46,8 +46,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "review cleared by claude-operator-session (user goal: 5-cycle run): Controller defect, not an agent fault: sage lost its Herdr name at its session reset after a direct launch. Fixed in 984912d (name re-bind; inflight written aft",
-  "task_id": "T-00016",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "DEV-004 was rejected; the restored 100-deck failure still needs a root-cause trace to find the load-bearing hard_max_iterations consumer before any follow-up change.",
+  "task_id": "T-00017",
+  "worker": "PATHFINDER"
 }

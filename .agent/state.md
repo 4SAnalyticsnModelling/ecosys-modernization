@@ -38,12 +38,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00014 PATHFINDER DONE: D6 packet ties the three edits to their effects.
-- T-00012 PATHFINDER DONE: legacy archive is partial; full baseline remains unverified.
-- T-00011 PATHFINDER DONE: no durable full 30-year legacy baseline exists in repo.
+- T-00016 SAGE DONE: DEV-004 rejected; DEV-005/006 approved with conditions.
+- T-00014 PATHFINDER DONE: D6 packet ties each deck edit to effect and provenance.
+- T-00012 PATHFINDER DONE: partial legacy archive; full 30-year baseline remains unverified.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: the user signs the D6 list (after the SAGE verdict exists).
 
 ## Next expected operation
-SAGE adjudicates DEV-004..006 against the D6 packet before user signature.
+PATHFINDER root-causes the restored 100-deck hour-3,162 solver stagnation and identifies the hard_max_iterations consumer.

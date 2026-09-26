@@ -1,1 +1,1 @@
-T-00016 | SAGE | Adjudicate the D6 evidence packet for DEV-004..006 before the user signs.
+T-00017 PATHFINDER: Root-cause the hour-3,162 SoilWaterSolverStagnated failure under the restored 100 deck and identify the load-bearing hard_max_iterations consumer.
