@@ -1,1 +1,1 @@
-T-00114 PATHFINDER: prepare the approved ledger-row evidence packet for unresolved TRC entries without changing the ledger until SAGE review.
+T-00115 PATHFINDER: prepare the verified TRC ledger evidence packet without mutating the ledger.
