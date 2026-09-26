@@ -38,14 +38,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00014 PATHFINDER DONE: D6 packet ties runtime change `9253d3b`, chemistry edit `5add7de`, and issue-015 to observed effects.
-- T-00010 PATHFINDER BLOCKED: the legacy archive is partial; no full 30-yr output exists in the repo.
-- T-00011/T-00012 PATHFINDER DONE, but their "full 30-year baseline" claim is WRONG (see Confirmed facts).
+- T-00014 PATHFINDER DONE: D6 packet ties the three edits to their effects.
+- T-00012 PATHFINDER DONE: legacy archive is partial; full baseline remains unverified.
+- T-00011 PATHFINDER DONE: no durable full 30-year legacy baseline exists in repo.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: the user signs the D6 list (after the SAGE verdict exists).
 
 ## Next expected operation
-SAGE adjudicates the T-00014 D6 packet (`9253d3b`, `5add7de`, issue-015; DEV-004..006) with exactly ONE skill
-(`ecosys-feature-attribution`), approving or rejecting each item before the user signs. Then G0-5
-(PATHFINDER `tracecov.py` stale-hash report).
+SAGE adjudicates DEV-004..006 against the D6 packet before user signature.

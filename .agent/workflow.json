@@ -34,17 +34,14 @@
     }
   ],
   "last_advance_unix": null,
-  "last_route_errors": [
-    "SAGE tasks name exactly one of its skills_one_of (you gave ecosys-release-verification + ecosys-feature-attribution)"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "review cleared by claude-planning-session (user-requested 5-cycle test): Halt was a controller defect: a rejected SENTINEL dispatch (two SAGE skills) was left PENDING and then delivered. Fixed: rejected dispatches become REJECTED and",
-  "task_id": "T-00014",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "The D6 evidence packet is ready for SAGE adjudication; only the user signature is blocked, and science approval must precede it.",
+  "task_id": "T-00016",
+  "worker": "SAGE"
 }
