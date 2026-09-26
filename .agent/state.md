@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00043 PATHFINDER DONE: ceiling-vs-fixed-count semantics confirmed; divisor still open.
-- T-00042 SAGE DONE: test-only change approved; science remains untouched.
-- T-00041 FORGE DONE: staged deck clamps SOLUTE and STARTE budgets identically.
+- T-00044 FORGE DONE: hard_max_iterations is a convergence ceiling, not legacy MRXN divisor.
+- T-00043 PATHFINDER DONE: legacy MRXN is a fixed sub-cycle divisor; Zig limits are ceilings.
+- T-00042 SAGE DONE: characterization test approved; no science changed.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE will confirm the exact reaction-path mapping and staged-deck mutation semantics before any science change.
+SAGE adjudicates whether hard_max_iterations must be decoupled from legacy MRXN semantics and the solver ceilings.
