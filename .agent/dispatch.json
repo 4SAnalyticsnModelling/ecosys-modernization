@@ -1,29 +1,17 @@
 {
-  "errors": [
-    "you wrote outside your lane (undone, copy in .agent/failures/route-1790442405/): .agent/results/T-00060.md: outside SENTINEL may_write"
-  ],
-  "rejected": {
-    "full_run_justification": null,
-    "reason": "SAGE revised T-00058 for R1-R4 and directed FORGE to fix the fixed-pH per-source STARTE semantics and oracle before any Ottawa evidence counts.",
-    "requires_sage_review": true,
-    "result_file": ".agent/results/T-00061.md",
-    "role": "FORGE",
-    "schema_version": 1,
-    "skills": [
-      "ecosys-source-navigation",
-      "ecosys-process-science-parity"
-    ],
-    "state_next": "FORGE revises the fixed-pH STARTE dynamic-input speciation and oracle to close SAGE R1-R4.",
-    "state_recent": [
-      "T-00059 SAGE STATUS: revise T-00058; R1-R4 remain open",
-      "T-00058 FORGE STATUS: fixed-pH speciation implemented; SAGE review pending",
-      "T-00057 SAGE STATUS: fixed-pH dynamic-input semantics confirmed"
-    ],
-    "status": "PENDING",
-    "t1_argv": null,
-    "task_file": ".agent/tasks/T-00061.md",
-    "task_id": "T-00061"
-  },
+  "decision_kind": "routing-failure",
+  "decision_of": "SENTINEL",
+  "full_run_justification": null,
+  "reason": "SAGE decision (routing-failure) from SENTINEL",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00063.md",
+  "role": "SAGE",
   "schema_version": 1,
-  "status": "REJECTED"
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00063.md",
+  "task_id": "T-00063"
 }
