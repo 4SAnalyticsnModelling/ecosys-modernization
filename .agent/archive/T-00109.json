@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00109.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Follow the newest live-anchor evidence: classify TRC-313..340 refreshable rows from unresolved cases without ledger mutation.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00109.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER re-reviews TRC-313..340 live anchors and classifies refreshable versus unresolved rows without ledger mutation.",
+    "state_recent": [
+      "T-00108 SAGE DONE: next batch verified; ledger action withheld.",
+      "T-00107 PATHFINDER DONE: live anchors superseded stale rows without mutation.",
+      "T-00106 PATHFINDER DONE: exact anchors bound live Zig source."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00109.md",
+    "task_id": "T-00109"
+  },
+  "ended": 1790456794.0933208,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f207aa52cffeJeHl56Pbu2CSUK",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 86912,
+    "cache_write": 0,
+    "cost": 0.01365044,
+    "input": 21689,
+    "llm_calls": 5,
+    "output": 6312,
+    "tool_calls": 10
+  },
+  "violations": []
+}

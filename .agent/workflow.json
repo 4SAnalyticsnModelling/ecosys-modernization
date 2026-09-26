@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Follow the newest live-anchor evidence: classify TRC-313..340 refreshable rows from unresolved cases without ledger mutation.",
   "task_id": "T-00109",
-  "worker": "PATHFINDER"
+  "worker": null
 }
