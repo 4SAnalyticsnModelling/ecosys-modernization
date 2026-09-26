@@ -1,1 +1,1 @@
-T-00099 PATHFINDER: revise and batch the remaining CHANGED-RANGE traceability rows with anchor-based live-source mappings before any ledger rewrite.
+T-00100 PATHFINDER Re-map the next CHANGED-RANGE traceability batch with anchor-based live-source evidence.

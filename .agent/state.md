@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00098 SAGE DONE: CHANGED-RANGE rows require joint lines+sha256 refresh after mapping proof.
-- T-00097 PATHFINDER DONE: first batch confirms moved ranges and invalid hash-only refresh.
-- T-00096 SAGE DONE: hash-only refresh rejected; per-row line mapping required.
+- T-00099 PATHFINDER DONE: moved ranges need anchor mapping before refresh
+- T-00098 SAGE DONE: hash-only refresh rejected; joint map+sha256 proof required
+- T-00097 PATHFINDER DONE: stale cited ranges still live but shifted
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER to revise the next CHANGED-RANGE row batches with anchor-based live-source mappings.
+PATHFINDER to revise the next CHANGED-RANGE row batch with anchor-based live-source mappings.

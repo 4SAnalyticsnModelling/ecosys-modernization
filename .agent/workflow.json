@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "The newest batch review says CHANGED-RANGE rows moved; PATHFINDER must re-map them with anchors before any ledger rewrite.",
-  "task_id": "T-00099",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Need the next CHANGED-RANGE batch mapped to live source before ledger rewrite.",
+  "task_id": "T-00100",
+  "worker": "PATHFINDER"
 }
