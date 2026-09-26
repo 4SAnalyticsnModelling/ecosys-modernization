@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00036 SAGE STATUS: final rejection of DEV-004 and revert path.
-- T-00035 SAGE STATUS: DEV-004 was rejected; revert needed.
-- T-00034 PATHFINDER STATUS: first preserved divergence at hour 9 in f25wh1.txt
+- T-00038 SAGE STATUS: APPROVED the T-00037 revert diff.
+- T-00038 RECOMMENDED NEXT ACTION: PATHFINDER opens the root-cause packet.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE reverts the rejected 200 cap and records a diff-bound hypothesis before the root-cause packet.
+PATHFINDER opens the root-cause packet for hour-2,589 SOLUTE exhaustion and the STARTE cap under the staged deck.
