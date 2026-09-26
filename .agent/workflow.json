@@ -50,11 +50,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
+  "last_route_errors": [
+    "task file missing sections ['INPUTS', 'ALLOWED FILES', 'RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "Next unblocked task is a narrow legacy-equivalence trace for the hourly SOLUTE equilibration path; PATHFINDER is the correct role, and T-00050 explicitly recommends it.",

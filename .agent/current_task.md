@@ -1,1 +1,1 @@
-T-00051 PATHFINDER: trace the missing legacy hourly input-equilibration semantics for the Ottawa hour-2,589 SOLUTE failure.
+T-00052 FORGE: build the matched-state replay packet for the legacy hourly precipitation/irrigation chemistry equilibration branch.
