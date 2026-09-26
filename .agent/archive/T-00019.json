@@ -1,0 +1,57 @@
+{
+  "changed": [
+    ".agent/results/T-00019.md",
+    "audit/runs/T-00019-hard-ceiling-test/receipt.json",
+    "audit/runs/T-00019-hard-ceiling-test/stderr.log",
+    "audit/runs/T-00019-hard-ceiling-test/stdout.log",
+    "audit/runs/T-00019-iteration-ceiling-test/receipt.json",
+    "audit/runs/T-00019-iteration-ceiling-test/stderr.log",
+    "audit/runs/T-00019-iteration-ceiling-test/stdout.log",
+    "audit/runs/T-00019-test/receipt.json",
+    "audit/runs/T-00019-test/stderr.log",
+    "audit/runs/T-00019-test/stdout.log"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "T-00018 confirms the restored 100-deck failure is a load-bearing soil-water iteration cap, so FORGE should do one bounded diagnostic replay.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00019.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-nonlinear-solver-audit"
+    ],
+    "state_next": "FORGE adds the single diagnostic replay around hour-3,162 to log final water_heat_solute iterations and residuals before any cap fix.",
+    "state_recent": [
+      "T-00018 PATHFINDER DONE: traced hour-3,162 soil-water cap to the load-bearing hard_max_iterations path.",
+      "T-00017 PATHFINDER DONE: confirmed the exact hour-level iteration ceiling consumer in the soil-water solver.",
+      "T-00016 SAGE DONE: DEV-004 rejected; DEV-005/006 approved with conditions."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00019.md",
+    "task_id": "T-00019"
+  },
+  "ended": 1790386738.5736065,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": null,
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 6492409,
+    "cache_write": 0,
+    "cost": 1.0291829249999997,
+    "input": 693043,
+    "llm_calls": 72,
+    "output": 5992,
+    "tool_calls": 77
+  },
+  "violations": []
+}

@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/shims/zig.exe",
+    "test",
+    "src/module_index.zig",
+    "--test-filter",
+    "runtime maximum is a hard ceiling"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 13.446,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 11844,
+  "pid": 3636,
+  "started_unix": 1790386632.693127,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/T-00019-hard-ceiling-test/stderr.log",
+    "sha256": "9fca808e2b426aebfd06015defec8b06ea0a7c17da1187ea0bd34f359a7f446a"
+  },
+  "stdout": {
+    "path": "audit/runs/T-00019-hard-ceiling-test/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

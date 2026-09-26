@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00019", "role": "FORGE", "task_file": ".agent/tasks/T-00019.md", "result_file": ".agent/results/T-00019.md", "skills": ["ecosys-nonlinear-solver-audit"], "t1_argv": null, "requires_sage_review": true, "full_run_justification": null, "reason": "T-00018 confirms the restored 100-deck failure is a load-bearing soil-water iteration cap, so FORGE should do one bounded diagnostic replay.", "state_recent": ["T-00018 PATHFINDER DONE: traced hour-3,162 soil-water cap to the load-bearing hard_max_iterations path.", "T-00017 PATHFINDER DONE: confirmed the exact hour-level iteration ceiling consumer in the soil-water solver.", "T-00016 SAGE DONE: DEV-004 rejected; DEV-005/006 approved with conditions."], "state_next": "FORGE adds the single diagnostic replay around hour-3,162 to log final water_heat_solute iterations and residuals before any cap fix."}
+{
+  "full_run_justification": null,
+  "reason": "T-00018 confirms the restored 100-deck failure is a load-bearing soil-water iteration cap, so FORGE should do one bounded diagnostic replay.",
+  "requires_sage_review": true,
+  "result_file": ".agent/results/T-00019.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-nonlinear-solver-audit"
+  ],
+  "state_next": "FORGE adds the single diagnostic replay around hour-3,162 to log final water_heat_solute iterations and residuals before any cap fix.",
+  "state_recent": [
+    "T-00018 PATHFINDER DONE: traced hour-3,162 soil-water cap to the load-bearing hard_max_iterations path.",
+    "T-00017 PATHFINDER DONE: confirmed the exact hour-level iteration ceiling consumer in the soil-water solver.",
+    "T-00016 SAGE DONE: DEV-004 rejected; DEV-005/006 approved with conditions."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00019.md",
+  "task_id": "T-00019"
+}

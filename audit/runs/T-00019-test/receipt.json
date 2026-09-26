@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/shims/zig.exe",
+    "test",
+    "src/module_index.zig",
+    "--test-filter",
+    "soil water forced Newton failure"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 19.183,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 2552,
+  "pid": 40348,
+  "started_unix": 1790386553.1024883,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/T-00019-test/stderr.log",
+    "sha256": "6327f980b2492b01a30be14f80f90a998db7a594d9e6b0b7dba480c1876dba0f"
+  },
+  "stdout": {
+    "path": "audit/runs/T-00019-test/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}
