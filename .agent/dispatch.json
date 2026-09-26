@@ -1,22 +1,28 @@
 {
-  "full_run_justification": null,
-  "reason": "T-00142 explicitly directs FORGE to revise the P0.4 manifest and write the full-run driver under the authorized legacy gfortran protocol, without changing science.",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00143.md",
-  "result_status": "DONE",
-  "role": "FORGE",
+  "errors": [
+    "ALLOWED FILES `evidence/legacy/` is outside FORGE may_write (writable by PATHFINDER)"
+  ],
+  "rejected": {
+    "full_run_justification": "The repo has no durable 30-year Ottawa legacy archive; only the approved fresh gfortran rerun can produce the evidence-bound baseline needed to reopen G0-4 without changing science.",
+    "reason": "Fresh legacy baseline needs execution; SAGE already authorized the run and the driver is ready.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00144.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-build-reproducibility"
+    ],
+    "state_next": "FORGE launches the authorized P0.4 legacy gfortran 3x timing run under the machine lock and records the fresh evidence-bound baseline.",
+    "state_recent": [
+      "T-00143 FORGE DONE: full-run driver and manifest are ready for launch.",
+      "T-00142 SAGE DONE: provenance manifest revisions approved for launch.",
+      "T-00141 FORGE DONE: warmup and deck staging were validated under lock."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00144.md",
+    "task_id": "T-00144"
+  },
   "schema_version": 1,
-  "skills": [
-    "ecosys-build-reproducibility"
-  ],
-  "state_next": "FORGE will revise the P0.4 provenance manifest and write the full-run driver before launching the legacy gfortran timing run.",
-  "state_recent": [
-    "T-00142 SAGE DONE: manifest revisions and driver prep are required before P0.4 launch.",
-    "T-00141 FORGE DONE: bounded warmup succeeded; manifest draft is ready.",
-    "T-00140 SAGE DONE: fresh legacy rerun is the only valid G0-4 path."
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00143.md",
-  "task_id": "T-00143"
+  "status": "REJECTED"
 }
