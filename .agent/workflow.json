@@ -59,8 +59,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Verified next step is PATHFINDER evidence mapping for unresolved TRC rows before any ledger or code change; newest result recommends this bounded task.",
   "task_id": "T-00117",
-  "worker": "PATHFINDER"
+  "worker": null
 }

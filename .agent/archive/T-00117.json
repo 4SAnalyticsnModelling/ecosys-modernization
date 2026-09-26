@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00117.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Verified next step is PATHFINDER evidence mapping for unresolved TRC rows before any ledger or code change; newest result recommends this bounded task.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00117.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER maps each unresolved TRC gate to exact legacy f77src file:line evidence and prepares the signed matrix for rebind review.",
+    "state_recent": [
+      "T-00116 PATHFINDER DONE: verified TRC ledger evidence packet and approved refresh set.",
+      "T-00113 FORGE DONE: unresolved TRC rows rewritten with shared ZEROS/ZEROS2 semantics.",
+      "T-00112 PATHFINDER DONE: legacy ZEROS/ZEROS2 gate semantics mapped to file:line evidence."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00117.md",
+    "task_id": "T-00117"
+  },
+  "ended": 1790458227.985634,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20624c87ffexnMz7kJ50Kpn42",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 159232,
+    "cache_write": 0,
+    "cost": 0.01974264,
+    "input": 34994,
+    "llm_calls": 6,
+    "output": 7966,
+    "tool_calls": 8
+  },
+  "violations": []
+}
