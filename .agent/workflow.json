@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Newest result recommends SAGE review of the next live-anchor batch; this is the next unblocked evidence check and keeps the ledger unchanged.",
   "task_id": "T-00108",
-  "worker": "SAGE"
+  "worker": null
 }

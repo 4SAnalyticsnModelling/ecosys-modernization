@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00108", "role": "SAGE", "task_file": ".agent/tasks/T-00108.md", "result_file": ".agent/results/T-00108.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Newest result recommends SAGE review of the next live-anchor batch; this is the next unblocked evidence check and keeps the ledger unchanged.", "state_recent": ["T-00107 PATHFINDER DONE: next stale batch re-anchored to live Zig rows with no ledger mutation.", "T-00106 PATHFINDER DONE: live Zig anchors recorded for TRC-313 through TRC-340.", "T-00105 PATHFINDER DONE: unresolved rows were quarantined; ledger left untouched."], "state_next": "SAGE will verify the next stale CHANGED-RANGE batch against live Zig anchors without mutating the ledger."}
+{
+  "full_run_justification": null,
+  "reason": "Newest result recommends SAGE review of the next live-anchor batch; this is the next unblocked evidence check and keeps the ledger unchanged.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00108.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE will verify the next stale CHANGED-RANGE batch against live Zig anchors without mutating the ledger.",
+  "state_recent": [
+    "T-00107 PATHFINDER DONE: next stale batch re-anchored to live Zig rows with no ledger mutation.",
+    "T-00106 PATHFINDER DONE: live Zig anchors recorded for TRC-313 through TRC-340.",
+    "T-00105 PATHFINDER DONE: unresolved rows were quarantined; ledger left untouched."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00108.md",
+  "task_id": "T-00108"
+}

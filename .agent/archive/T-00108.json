@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00108.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Newest result recommends SAGE review of the next live-anchor batch; this is the next unblocked evidence check and keeps the ledger unchanged.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00108.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE will verify the next stale CHANGED-RANGE batch against live Zig anchors without mutating the ledger.",
+    "state_recent": [
+      "T-00107 PATHFINDER DONE: next stale batch re-anchored to live Zig rows with no ledger mutation.",
+      "T-00106 PATHFINDER DONE: live Zig anchors recorded for TRC-313 through TRC-340.",
+      "T-00105 PATHFINDER DONE: unresolved rows were quarantined; ledger left untouched."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00108.md",
+    "task_id": "T-00108"
+  },
+  "ended": 1790456690.065826,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "a24f092b-334b-4801-9f7f-5f6c45f1c9ca",
+    "old": "fbc02f8b-2d7b-4c3f-aca8-c2a44dc4ac7a",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 801025,
+    "cache_write": 59402,
+    "cost": null,
+    "input": 30,
+    "llm_calls": 15,
+    "output": 9579,
+    "tool_calls": 3
+  },
+  "violations": []
+}

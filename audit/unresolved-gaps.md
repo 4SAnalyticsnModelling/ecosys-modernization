@@ -33,6 +33,12 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   read-only for G0. Deliverable: fresh tracecov report + per-row classification of every stale-zig-sha256 row
   (UNCHANGED-RANGE / CHANGED-RANGE / NO-MATCHING-BLOB) by locating the git blob whose sha256 the row cites.
   Hash refresh of the ledger is NOT a G0 exit item; it is a later re-review step | `.agent/results/T-00085.md`
+- G0-5a | open, write-authorized ledger task (not a G0 exit item) | T-00108 DECISION: TRC-313..340 live
+  anchors are valid (13 file sha256 match T-00106), BUT the REFRESH-LEDGER hash-only disposition is REJECTED for
+  TRC-331..340: live code now holds the ZEROS2 floor fixes (issue-072/073) those rows call "unresolved, not
+  fixed", so a hash refresh would re-certify false text. TRC-336's subject `updateFertilizerBandGeometry` was
+  removed (ISSUE-103; anchor is a caller-less helper): re-scope or retire. TRC-313 disposition to be cross-checked
+  against DEV-004/007. TRC-315/318/321/326: hash+lines refresh only | `.agent/results/T-00108.md`
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)
