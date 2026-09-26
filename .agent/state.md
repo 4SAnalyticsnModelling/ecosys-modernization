@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00116 PATHFINDER DONE: verified TRC ledger evidence packet and approved refresh set.
-- T-00113 FORGE DONE: unresolved TRC rows rewritten with shared ZEROS/ZEROS2 semantics.
-- T-00112 PATHFINDER DONE: legacy ZEROS/ZEROS2 gate semantics mapped to file:line evidence.
+- T-00117 PATHFINDER DONE: exact TRC-313/331..340 legacy mapping leaves no unresolved row unbound.
+- T-00116 PATHFINDER DONE: approved TRC refresh packet and unresolved dispositions are locked without ledger mutation.
+- T-00115 PATHFINDER FAIL: evidence packet for approved TRC refreshes was not completed as a valid bounded packet.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER maps each unresolved TRC gate to exact legacy f77src file:line evidence and prepares the signed matrix for rebind review.
+PATHFINDER to map each unresolved TRC gate to exact legacy file:line evidence and produce the signed matrix.
