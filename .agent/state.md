@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00099 PATHFINDER DONE: moved ranges need anchor mapping before refresh
-- T-00098 SAGE DONE: hash-only refresh rejected; joint map+sha256 proof required
-- T-00097 PATHFINDER DONE: stale cited ranges still live but shifted
+- T-00100 PATHFINDER DONE: next batch re-bound to live anchors before ledger rewrite
+- T-00099 PATHFINDER DONE: stale citations are MOVED, not hash-fixable
+- T-00098 SAGE DONE: hash-only refresh rejected; need zig_lines + zig_sha256
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER to revise the next CHANGED-RANGE row batch with anchor-based live-source mappings.
+FORGE remaps the next CHANGED-RANGE batch to verified live anchors and pairs each zig_lines update with a matching zig_sha256 refresh.

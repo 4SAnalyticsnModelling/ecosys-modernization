@@ -1,1 +1,1 @@
-T-00100 PATHFINDER Re-map the next CHANGED-RANGE traceability batch with anchor-based live-source evidence.
+T-00101 FORGE: remap the next CHANGED-RANGE traceability batch to live anchors and update paired zig_lines + zig_sha256 values.

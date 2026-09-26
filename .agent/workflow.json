@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Need the next CHANGED-RANGE batch mapped to live source before ledger rewrite.",
-  "task_id": "T-00100",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Next unblocked work is the FORGE remap of the next CHANGED-RANGE batch using verified anchors; the newest result explicitly directs this task.",
+  "task_id": "T-00101",
+  "worker": "FORGE"
 }
