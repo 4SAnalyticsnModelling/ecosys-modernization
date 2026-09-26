@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00056 SAGE STATUS: fixed-pH legacy speciation is source-equivalent for dynamic inputs
-- T-00055 FORGE STATUS: replay pins mismatch to fixed-pH legacy chemistry vs coupled H+ solve
-- T-00054 SAGE STATUS: revised packet still needs decisive parity decision
+- T-00057 SAGE STATUS: fixed-pH dynamic-input speciation is final and source-equivalent.
+- T-00056 SAGE STATUS: dynamic rain/irrigation must use per-source fixed-pH mixing.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE confirms the legacy fixed-pH dynamic-input equilibration semantics and resolves whether FORGE should replace equilibratedDynamicInput.
+FORGE replaces equilibratedDynamicInput with legacy fixed-pH per-source speciation and a matched-state STARTE oracle test.

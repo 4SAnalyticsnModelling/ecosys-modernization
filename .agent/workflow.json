@@ -57,8 +57,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Newest result requires fresh SAGE parity review for fixed-pH dynamic input chemistry before any FORGE edit; older routing is superseded.",
-  "task_id": "T-00057",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE finalized fixed-pH per-source dynamic-input semantics; FORGE must replace the coupled equilibrium and add the matched-state oracle test.",
+  "task_id": "T-00058",
+  "worker": "FORGE"
 }
