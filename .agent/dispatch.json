@@ -4,12 +4,13 @@
   "reason": "chained from T-00153 (SAGE CHAIN block)",
   "requires_sage_review": false,
   "result_file": ".agent/results/T-00154.md",
+  "result_status": "DONE",
   "role": "FORGE",
   "schema_version": 1,
   "skills": [
     "ecosys-build-reproducibility"
   ],
-  "status": "PENDING",
+  "status": "COMPLETE",
   "t1_argv": null,
   "task_file": ".agent/tasks/T-00154.md",
   "task_id": "T-00154"
