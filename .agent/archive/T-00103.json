@@ -1,0 +1,48 @@
+{
+  "changed": [
+    ".agent/results/T-00103.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Next review batch needs live anchors before any ledger rewrite; PATHFINDER is the only unblocked role.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00103.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER: review the next CHANGED-RANGE batch with anchor-based offsets and quarantine unresolved rows",
+    "state_recent": [
+      "T-00102 PATHFINDER DONE: prior CHANGED-RANGE batch re-bound to live anchors without ledger mutation",
+      "T-00101 FORGE DONE: verified zig_lines + zig_sha256 remap prepared without premature ledger rewrite"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00103.md",
+    "task_id": "T-00103"
+  },
+  "ended": 1790456057.966219,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20839e21ffeqhA2khZzZwc0tS",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 222592,
+    "cache_write": 0,
+    "cost": 0.028209839999999996,
+    "input": 48446,
+    "llm_calls": 8,
+    "output": 11724,
+    "tool_calls": 17
+  },
+  "violations": []
+}

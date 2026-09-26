@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Next review batch needs live anchors before any ledger rewrite; PATHFINDER is the only unblocked role.",
   "task_id": "T-00103",
-  "worker": "PATHFINDER"
+  "worker": null
 }
