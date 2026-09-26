@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00087 PATHFINDER DONE: revalidated stale zig_sha256 rows into REFRESH-LEDGER vs QUARANTINE dispositions without touching the ledger.
-- T-00086 PATHFINDER DONE: report and revalidation table were written to audit/analysis/ for 133 stale rows.
-- T-00085 SAGE DONE: re-routed stale-hash work to PATHFINDER and kept audit/traceability read-only.
+- T-00088 FORGE DONE: refreshes only 62 rows and excludes quarantine entries.
+- T-00087 PATHFINDER DONE: stale rows classified into refresh, quarantine, or no-action.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE to draft a constrained ledger-update patch that refreshes only REFRESH-LEDGER rows and excludes QUARANTINE entries from the write set.
+SAGE reviews the T-00088 traceability patch before any ledger application.

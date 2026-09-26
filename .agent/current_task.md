@@ -1,1 +1,1 @@
-T-00088 FORGE: constrain traceability ledger refresh to REFRESH-LEDGER rows and exclude QUARANTINE rows.
+T-00089 SAGE: Review the T-00088 traceability patch before any ledger application.

@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "T-00087 resolved the stale rows; only a bounded ledger refresh patch remains, and FORGE is the correct implementation lane.",
-  "task_id": "T-00088",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Newest result recommends SAGE review of the bounded traceability patch; this is the direct next unblocked gate action and SAGE is >25% of recent turns.",
+  "task_id": "T-00089",
+  "worker": "SAGE"
 }
