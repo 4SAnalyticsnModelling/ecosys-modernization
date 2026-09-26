@@ -926,3 +926,113 @@ test "ISSUE-103: the SOLUTE chemistry hour grows no fertilizer band outside the 
         try std.testing.expect(std.mem.indexOf(u8, body, forbidden) == null);
     }
 }
+
+test "STARTE initial solute reaction equilibrium is bit-identical across solver ceilings 1000 and 2000" {
+    // SAGE decision T-00045 (DEV-007): solute_reaction_max_iterations and
+    // initial_solute_reaction_max_iterations are pure convergence ceilings, not
+    // legacy MRXN sub-cycling divisors. A converged solve must terminate upon
+    // reaching tolerance and produce bit-identical state regardless of whether the
+    // ceiling is 1000 or 2000.
+    const encoded_starte = @embedFile("../soil/solute/testdata/ottawa_starte_layer0_20260909.b64");
+    const decoder = std.base64.standard.decoderWithIgnore(" \r\n\t");
+    const bytes = try std.testing.allocator.alloc(u8, decoder.calcSizeUpperBound(encoded_starte.len));
+    defer std.testing.allocator.free(bytes);
+    const decoded_len = try decoder.decode(bytes, encoded_starte);
+    var reader: std.Io.Reader = .fixed(bytes[0..decoded_len]);
+    var replay_case = try ecosys.solute_failure_snapshot.read(std.testing.allocator, &reader);
+    defer replay_case.deinit();
+
+    var workspace = try ecosys.solute_reaction_solver.Workspace.init(std.testing.allocator);
+    defer workspace.deinit();
+
+    var suppression = ecosys.solute_reaction_solver.suppressDiagnostics();
+    defer suppression.restore();
+
+    const packed_count = comptime ecosys.solute_chemistry_state.State.packedComponentCount();
+    var initial_packed: [packed_count]f64 = undefined;
+    try replay_case.state.packCell(0, &initial_packed);
+
+    var parameters = replay_case.parameters;
+    parameters.carboxyl_exchange_parameters.use_starte_hydrogen_substrate_cap = true;
+
+    // Solve at ceiling 1000 (standard initial_solute_reaction_max_iterations)
+    var options_1000 = replay_case.options;
+    options_1000.max_iterations = 1000;
+    const res_1000 = try ecosys.solute_reaction_solver.solveCellWithWorkspace(
+        &workspace,
+        &replay_case.state,
+        0,
+        parameters,
+        options_1000,
+    );
+    try std.testing.expect(res_1000.converged);
+    try std.testing.expect(res_1000.iterations <= 1000);
+    var state_1000: [packed_count]f64 = undefined;
+    try replay_case.state.packCell(0, &state_1000);
+
+    // Reset to initial un-equilibrated state
+    try replay_case.state.unpackCell(0, &initial_packed);
+
+    // Solve at doubled ceiling 2000
+    var options_2000 = replay_case.options;
+    options_2000.max_iterations = 2000;
+    const res_2000 = try ecosys.solute_reaction_solver.solveCellWithWorkspace(
+        &workspace,
+        &replay_case.state,
+        0,
+        parameters,
+        options_2000,
+    );
+    try std.testing.expect(res_2000.converged);
+    var state_2000: [packed_count]f64 = undefined;
+    try replay_case.state.packCell(0, &state_2000);
+
+    // Convergence must be ceiling-invariant and bit-identical:
+    try std.testing.expectEqual(res_1000.iterations, res_2000.iterations);
+    try std.testing.expectEqual(res_1000.maximum_scaled_residual, res_2000.maximum_scaled_residual);
+    try std.testing.expectEqualSlices(f64, &state_1000, &state_2000);
+}
+
+test "solute reaction solver returns explicit error on exhaustion and rolls back state without truncation" {
+    // SAGE decision T-00045 (DEV-007): when the iteration budget is exhausted,
+    // the solver must return an explicit error (SoluteReactionSolverDidNotConverge)
+    // rather than committing partially-converged or truncated state.
+    const encoded_starte = @embedFile("../soil/solute/testdata/ottawa_starte_layer0_20260909.b64");
+    const decoder = std.base64.standard.decoderWithIgnore(" \r\n\t");
+    const bytes = try std.testing.allocator.alloc(u8, decoder.calcSizeUpperBound(encoded_starte.len));
+    defer std.testing.allocator.free(bytes);
+    const decoded_len = try decoder.decode(bytes, encoded_starte);
+    var reader: std.Io.Reader = .fixed(bytes[0..decoded_len]);
+    var replay_case = try ecosys.solute_failure_snapshot.read(std.testing.allocator, &reader);
+    defer replay_case.deinit();
+
+    var workspace = try ecosys.solute_reaction_solver.Workspace.init(std.testing.allocator);
+    defer workspace.deinit();
+
+    var suppression = ecosys.solute_reaction_solver.suppressDiagnostics();
+    defer suppression.restore();
+
+    const packed_count = comptime ecosys.solute_chemistry_state.State.packedComponentCount();
+    var initial_packed: [packed_count]f64 = undefined;
+    try replay_case.state.packCell(0, &initial_packed);
+
+    var parameters = replay_case.parameters;
+    parameters.carboxyl_exchange_parameters.use_starte_hydrogen_substrate_cap = true;
+
+    // With a starved budget of 1 iteration, the non-equilibrium entry state cannot converge:
+    var options_exhausted = replay_case.options;
+    options_exhausted.max_iterations = 1;
+    const result = ecosys.solute_reaction_solver.solveCellWithWorkspace(
+        &workspace,
+        &replay_case.state,
+        0,
+        parameters,
+        options_exhausted,
+    );
+    try std.testing.expectError(error.SoluteReactionSolverDidNotConverge, result);
+
+    // Verify cell state was restored/rolled back bit-identically to initial entry state:
+    var state_after_failure: [packed_count]f64 = undefined;
+    try replay_case.state.packCell(0, &state_after_failure);
+    try std.testing.expectEqualSlices(f64, &initial_packed, &state_after_failure);
+}

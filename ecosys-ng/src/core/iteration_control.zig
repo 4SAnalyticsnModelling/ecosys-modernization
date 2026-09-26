@@ -5,8 +5,10 @@ const SceneOptions = @import("options.zig").SceneOptions;
 /// record. They are convergence budgets only: ecosys-ng never repeats a full
 /// model cycle to consume the budget.
 pub const Limits = struct {
-    /// User runtime ceiling. Every process-specific/legacy budget is clamped to
-    /// this value; it is never raised by a legacy minimum or derived product.
+    /// User runtime ceiling. Process-specific nonlinear budgets derived from
+    /// legacy sub-hour cycling options are clamped to this value. Solute reaction
+    /// solver ceilings (solute_reaction_max_iterations, initial_solute_reaction_max_iterations)
+    /// are pure convergence ceilings decoupled from this deck parameter per DEV-007 (T-00045).
     hard_max_iterations: u16,
     water_heat_solute_max_iterations: u16,
     /// EROSION NPH: local suspended-sediment convergence.
@@ -128,8 +130,12 @@ pub const Limits = struct {
             .litter_water_heat_max_iterations = @min(hard_max_iterations, 30),
             .snowpack_max_iterations = @min(hard_max_iterations, 20),
             .litter_under_snow_max_iterations = @min(hard_max_iterations, 10),
-            .solute_reaction_max_iterations = @min(hard_max_iterations, 100),
-            .initial_solute_reaction_max_iterations = @min(hard_max_iterations, 1000),
+            // Solute reaction solver ceilings are pure numerical convergence ceilings
+            // decoupled from the deck's hard_max_iterations (DEV-007, SAGE T-00045).
+            // Legacy reads no runtime hard ceiling (reads.f:126), and MRXN (solute.f:111,
+            // starte.f:101) is a fixed sub-cycle count rather than a runtime convergence cap.
+            .solute_reaction_max_iterations = 100,
+            .initial_solute_reaction_max_iterations = 1000,
             .canopy_energy_water_max_iterations = @min(hard_max_iterations, 100),
             .leaf_co2_max_iterations = @min(hard_max_iterations, 100),
         };
@@ -291,46 +297,38 @@ test "runtime maximum is a hard ceiling for every process budget" {
     options.gas_iterations_per_water_heat_solute_iteration = 4;
     const limits = try Limits.fromSceneOptions(options, 7);
     inline for (@typeInfo(Limits).@"struct".fields) |field| {
-        if (field.type == u16) try std.testing.expect(@field(limits, field.name) <= 7);
+        if (comptime !std.mem.eql(u8, field.name, "solute_reaction_max_iterations") and
+            !std.mem.eql(u8, field.name, "initial_solute_reaction_max_iterations"))
+        {
+            if (field.type == u16) try std.testing.expect(@field(limits, field.name) <= 7);
+        }
     }
+    // Decoupled solver ceilings remain at their invariant convergence bounds:
+    try std.testing.expectEqual(@as(u16, 100), limits.solute_reaction_max_iterations);
+    try std.testing.expectEqual(@as(u16, 1000), limits.initial_solute_reaction_max_iterations);
     try std.testing.expectEqual(@as(u16, 7), try limits.standingDeadEnergyMaxIterations());
     try std.testing.expectEqual(@as(u16, 7), try waterHeatSoluteCeilingForCurrentState(7, 7, &.{0.001}, &.{1.0}, &.{true}));
 }
 
-test "staged deck hard_max_iterations clamps SOLUTE and STARTE reaction budgets relative to legacy MRXN" {
-    // Staged Ottawa deck (runottawa line 6) configures hard_max_iterations = 100.
-    // Legacy Fortran definitions:
-    //   solute.f:111: PARAMETER (MRXN=60)
-    //   starte.f:101: PARAMETER (MRXN=1000)
-    // Legacy reads.f:126 reads no runtime hard ceiling; MRXN is fixed at compile time.
+test "SOLUTE and STARTE reaction budgets are pure convergence ceilings decoupled from hard_max_iterations" {
+    // SAGE decision T-00045 (DEV-007): solute_reaction_max_iterations (100) and
+    // initial_solute_reaction_max_iterations (1000) are decoupled from the deck's
+    // runtime hard_max_iterations. Legacy reads.f:126 reads no runtime cap, and legacy
+    // MRXN values (solute.f:111 MRXN=60, starte.f:101 MRXN=1000) are fixed sub-cycle
+    // counts, not runtime convergence ceilings.
     const options = try @import("options.zig").parse(@import("test_fixtures.zig").scene_options_source);
-    const legacy_solute_mrxn: u16 = 60;
-    const legacy_starte_mrxn: u16 = 1000;
 
-    // 1. Under staged deck configuration (hard_max_iterations = 100):
+    // 1. Under staged Ottawa deck configuration (hard_max_iterations = 100):
+    // solute_reaction_max_iterations resolves to 100 and initial_solute_reaction_max_iterations
+    // resolves to 1000 (not clamped down to 100):
     const staged_limits = try Limits.fromSceneOptions(options, 100);
-    // Hourly SOLUTE reaction resolves to exactly 100 (@min(100, 100)):
     try std.testing.expectEqual(@as(u16, 100), staged_limits.solute_reaction_max_iterations);
-    try std.testing.expect(staged_limits.solute_reaction_max_iterations > legacy_solute_mrxn);
+    try std.testing.expectEqual(@as(u16, 1000), staged_limits.initial_solute_reaction_max_iterations);
 
-    // Initial STARTE reaction is clamped to 100 (@min(100, 1000)), reducing legacy budget by 10x:
-    try std.testing.expectEqual(@as(u16, 100), staged_limits.initial_solute_reaction_max_iterations);
-    try std.testing.expect(staged_limits.initial_solute_reaction_max_iterations < legacy_starte_mrxn);
-
-    // 2. Controlled mutations of hard_max_iterations demonstrate budget coupling:
-    // At legacy SOLUTE MRXN (60), both budgets are clamped to 60:
-    const limits_at_legacy_solute = try Limits.fromSceneOptions(options, legacy_solute_mrxn);
-    try std.testing.expectEqual(legacy_solute_mrxn, limits_at_legacy_solute.solute_reaction_max_iterations);
-    try std.testing.expectEqual(legacy_solute_mrxn, limits_at_legacy_solute.initial_solute_reaction_max_iterations);
-
-    // At 200 (the rejected 9253d3b proposal), SOLUTE remains capped at 100 by the T-00037 revert,
-    // while STARTE increases to 200:
-    const limits_at_200 = try Limits.fromSceneOptions(options, 200);
-    try std.testing.expectEqual(@as(u16, 100), limits_at_200.solute_reaction_max_iterations);
-    try std.testing.expectEqual(@as(u16, 200), limits_at_200.initial_solute_reaction_max_iterations);
-
-    // At legacy STARTE MRXN (1000), STARTE achieves legacy 1000 while SOLUTE remains capped at 100:
-    const limits_at_legacy_starte = try Limits.fromSceneOptions(options, legacy_starte_mrxn);
-    try std.testing.expectEqual(@as(u16, 100), limits_at_legacy_starte.solute_reaction_max_iterations);
-    try std.testing.expectEqual(legacy_starte_mrxn, limits_at_legacy_starte.initial_solute_reaction_max_iterations);
+    // 2. Both ceilings remain invariant across arbitrary hard_max_iterations values:
+    for ([_]u16{ 7, 60, 100, 200, 1000 }) |hard_max| {
+        const limits = try Limits.fromSceneOptions(options, hard_max);
+        try std.testing.expectEqual(@as(u16, 100), limits.solute_reaction_max_iterations);
+        try std.testing.expectEqual(@as(u16, 1000), limits.initial_solute_reaction_max_iterations);
+    }
 }

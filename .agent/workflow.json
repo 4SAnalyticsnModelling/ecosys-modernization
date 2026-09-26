@@ -58,6 +58,6 @@
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "New frontier evidence shows hard_max_iterations is a ceiling, not MRXN. Forge should remove the clamp and add invariant tests before SAGE's confirming review.",
-  "task_id": "T-00046",
+  "task_id": "T-00047",
   "worker": null
 }
