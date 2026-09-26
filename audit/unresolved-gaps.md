@@ -11,8 +11,11 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   PATHFINDER packet + SAGE verdict now; only the user signature waits | `audit/intentional-deviations.md` DEV-004..006
 - G0-2a | SAGE confirm -> FORGE | T-00035 D6 decision on DEV-004: REJECTED-REVERT (revert deck f6 200->100 and
   `iteration_control.zig:150` 200->100 of `9253d3b`; hour-2,589 SOLUTE exhaustion becomes a defect to root-cause).
-  Also open: deck `hard_max_iterations` clamps STARTE budget 1000->100/200 (`:151`) vs legacy `starte.f:101` MRXN=1000,
-  an unlisted Zig-only deviation | `.agent/results/T-00035.md`
+  The STARTE clamp is now listed as DEV-007 and decided in T-00045: decouple SOLUTE/STARTE ceilings from f6 (FORGE) | `.agent/results/T-00035.md`, `.agent/results/T-00045.md`
+- G0-2b | PATHFINDER->SAGE | Legacy MRXN semantics not reproduced by any Zig ceiling: per-sub-cycle kinetic rates /MRXN
+  (`solute.f:112-118,368-402`) vs Zig single closure with relaxation caps unbounded (`reaction_solve.zig:73-129`), and
+  hourly rain/irrigation input equilibration using the STARTE ceiling (`hourly_process_driver.zig:634,670`) needs its
+  legacy counterpart identified. Unlisted; not a D6 approval | `.agent/results/T-00044.md`, `.agent/results/T-00045.md`
 - G0-3 | PARTIAL | P0.3 partial legacy set (hours 1-6,875) preserved in `evidence/legacy/` with manifest
   (T-00007/8); the full 30-yr outputs do not exist and come from the P0.4 rerun
 - G0-4 | PATHFINDER | P0.4 full legacy rerun + -O2 timing x3 from the run-002 recipe (after G0-2 is signed) | plan P0.4

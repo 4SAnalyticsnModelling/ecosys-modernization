@@ -1,0 +1,51 @@
+{
+  "changed": [
+    ".agent/results/T-00045.md",
+    "audit/intentional-deviations.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "SAGE must adjudicate legacy-equivalent solver semantics before any production-science change; this is a numerical-science decision.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00045.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE adjudicates whether hard_max_iterations must be decoupled from legacy MRXN semantics and the solver ceilings.",
+    "state_recent": [
+      "T-00044 FORGE DONE: hard_max_iterations is a convergence ceiling, not legacy MRXN divisor.",
+      "T-00043 PATHFINDER DONE: legacy MRXN is a fixed sub-cycle divisor; Zig limits are ceilings.",
+      "T-00042 SAGE DONE: characterization test approved; no science changed."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00045.md",
+    "task_id": "T-00045"
+  },
+  "ended": 1790401016.6534793,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "59464d07-9afe-4e77-a63e-6d9201a7c7a1",
+    "old": "a9570e36-0fe7-43e5-abec-758e38edc536",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 567105,
+    "cache_write": 47119,
+    "cost": null,
+    "input": 22,
+    "llm_calls": 11,
+    "output": 9415,
+    "tool_calls": 4
+  },
+  "violations": []
+}
