@@ -1,22 +1,28 @@
 {
-  "full_run_justification": null,
-  "reason": "The full legacy Ottawa rerun is blocked by the 60-minute FORGE session budget; SAGE must authorize the continuation path before launch.",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00147.md",
-  "result_status": "DONE",
-  "role": "SAGE",
+  "errors": [
+    "ALLOWED FILES `evidence/legacy/**` is outside FORGE may_write (writable by PATHFINDER)"
+  ],
+  "rejected": {
+    "full_run_justification": "Required to establish the authoritative 30-year legacy Ottawa baseline; the partial legacy evidence is insufficient for G0-4 and no bounded replay can substitute for the full output set.",
+    "reason": "The newest result authorizes the controller-run out-of-band launch; the blocked 60-minute FORGE budget prevented a direct in-turn run, so this FORGE task collects the approved evidence.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00148.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-build-reproducibility"
+    ],
+    "state_next": "Collect and verify the controller-managed P0.4 legacy gfortran 3x run receipt and output inventory for G0-4.",
+    "state_recent": [
+      "T-00147 SAGE DONE: controller-managed P0.4 legacy run authorized after in-turn launch showed a 60-minute budget failure.",
+      "T-00146 FORGE BLOCKED: full legacy run exceeds the FORGE session budget and requires out-of-band launch under the machine lock.",
+      "T-00143 FORGE DONE: legacy provenance manifest and full-run driver are ready and validated for the P0.4 rerun."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00148.md",
+    "task_id": "T-00148"
+  },
   "schema_version": 1,
-  "skills": [
-    "ecosys-feature-attribution"
-  ],
-  "state_next": "SAGE decides whether to authorize the full legacy rerun under a controller-managed execution budget.",
-  "state_recent": [
-    "T-00146 FORGE BLOCKED: full-run launch exceeds 60-minute session budget; needs SAGE approval.",
-    "T-00143 FORGE DONE: legacy provenance manifest and full-run driver are ready.",
-    "T-00142 SAGE DONE: full legacy P0.4 rerun is authorized without further science gate."
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00147.md",
-  "task_id": "T-00147"
+  "status": "REJECTED"
 }

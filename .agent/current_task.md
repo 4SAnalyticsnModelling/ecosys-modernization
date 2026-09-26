@@ -1,1 +1,1 @@
-T-00147 | SAGE | Authorize the continuation path for the blocked P0.4 full legacy Ottawa rerun under a viable execution harness.
+T-00148 FORGE: collect and verify the controller-managed P0.4 legacy Ottawa rerun evidence.
