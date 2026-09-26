@@ -47,8 +47,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Need the legacy runtime ceiling and first divergence hour to bound DEV-004 before any deck signature; this is the newest unblocked PATHFINDER task.",
   "task_id": "T-00027",
-  "worker": "PATHFINDER"
+  "worker": null
 }
