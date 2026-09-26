@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00139.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Need authoritative Ottawa archive or fresh verified full-run artifact before G0-4; partial evidence is not a trusted baseline.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00139.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER obtains the authoritative Ottawa archive or fresh full-run artifact and records exact SHA-256 provenance before reopening G0-4.",
+    "state_recent": [
+      "T-00137 PATHFINDER BLOCKED: no authoritative full archive or verified full-run artifact exists in repo evidence.",
+      "T-00136 PATHFINDER BLOCKED: partial legacy evidence remains incomplete; manifest is not enough for G0-4.",
+      "T-00135 PATHFINDER BLOCKED: evidence/legacy is partial and not a trusted baseline."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00139.md",
+    "task_id": "T-00139"
+  },
+  "ended": 1790462047.9509795,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20287325ffeamJIo0x0TBMufL",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "BLOCKED",
+  "review": null,
+  "usage": {
+    "cache_read": 89600,
+    "cache_write": 0,
+    "cost": 0.010118,
+    "input": 18254,
+    "llm_calls": 5,
+    "output": 3896,
+    "tool_calls": 9
+  },
+  "violations": []
+}
