@@ -40,7 +40,7 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00123 PATHFINDER DONE: exact ZEROS guard evidence for TRC-331..335, 337, 338.
+- T-00123 PATHFINDER DONE: exact ZEROS guard evidence for TRC-331..338.
 - T-00122 PATHFINDER DONE: row-by-row ZEROS binding classified.
 - T-00121 PATHFINDER DONE: legacy ZEROS vs ZEROS2 gate semantics narrowed.
 
@@ -48,4 +48,4 @@ none active.
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE rewrites only the approved TRC-331..335, 337, and 338 row text to the shared ZEROS guard while leaving the separate ZEROS2 guard untouched.
+FORGE rewrites the approved TRC rows to the shared legacy ZEROS guard and leaves ZEROS2 untouched.

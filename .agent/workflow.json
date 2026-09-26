@@ -60,8 +60,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Latest evidence pins TRC-331..335, 337, and 338 to the shared ZEROS guard in hour1.f; FORGE can implement the narrow row-text fix without touching unrelated ZEROS2 logic.",
-  "task_id": "T-00124",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Latest evidence confirms the unresolved rows bind to the shared ZEROS guard; this is a bounded FORGE rewrite requiring SAGE review.",
+  "task_id": "T-00125",
+  "worker": "FORGE"
 }
