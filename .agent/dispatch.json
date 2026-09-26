@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00057", "role": "SAGE", "task_file": ".agent/tasks/T-00057.md", "result_file": ".agent/results/T-00057.md", "skills": ["ecosys-process-science-parity"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Newest result requires fresh SAGE parity review for fixed-pH dynamic input chemistry before any FORGE edit; older routing is superseded.", "state_recent": ["T-00056 SAGE STATUS: fixed-pH legacy speciation is source-equivalent for dynamic inputs", "T-00055 FORGE STATUS: replay pins mismatch to fixed-pH legacy chemistry vs coupled H+ solve", "T-00054 SAGE STATUS: revised packet still needs decisive parity decision"], "state_next": "SAGE confirms the legacy fixed-pH dynamic-input equilibration semantics and resolves whether FORGE should replace equilibratedDynamicInput."}
+{
+  "full_run_justification": null,
+  "reason": "Newest result requires fresh SAGE parity review for fixed-pH dynamic input chemistry before any FORGE edit; older routing is superseded.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00057.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "state_next": "SAGE confirms the legacy fixed-pH dynamic-input equilibration semantics and resolves whether FORGE should replace equilibratedDynamicInput.",
+  "state_recent": [
+    "T-00056 SAGE STATUS: fixed-pH legacy speciation is source-equivalent for dynamic inputs",
+    "T-00055 FORGE STATUS: replay pins mismatch to fixed-pH legacy chemistry vs coupled H+ solve",
+    "T-00054 SAGE STATUS: revised packet still needs decisive parity decision"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00057.md",
+  "task_id": "T-00057"
+}
