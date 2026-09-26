@@ -1,1 +1,1 @@
-T-00135 PATHFINDER: obtain authoritative Ottawa legacy archive provenance or a verified fresh full-run artifact for G0-4.
+T-00136 PATHFINDER: obtain the authoritative Ottawa legacy archive or a verified fresh full-run artifact and record exact SHA-256 provenance before any rerun.
