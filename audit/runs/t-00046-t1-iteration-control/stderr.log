@@ -1,0 +1,62 @@
+1/61 module_index.test_0...OK
+2/61 index.atmosphere_test_index.test_0...OK
+3/61 index.canopy_test_index.test_0...OK
+4/61 index.chemistry_test_index.test_0...OK
+5/61 index.core_test_index.test_0...OK
+6/61 index.driver_test_index.test_0...OK
+7/61 index.erosion_test_index.test_0...OK
+8/61 index.grid_cell_test_index.test_0...OK
+9/61 index.io_test_index.test_0...OK
+10/61 index.management_test_index.test_0...OK
+11/61 index.plant_test_index.test_0...OK
+12/61 index.redistribution_test_index.test_0...OK
+13/61 index.soil_test_index.test_0...OK
+14/61 index.state_test_index.test_0...OK
+15/61 index.surface_test_index.test_0...OK
+16/61 index.transport_test_index.test_0...OK
+17/61 index.validation_test_index.test_0...OK
+18/61 validation.landscape_boundary_balance.test_0...OK
+19/61 validation.landscape_mass_inventory.test_0...OK
+20/61 validation.mass_balance_audit.test_0...OK
+21/61 validation.soil_water_retention_validation.test_0...OK
+22/61 surface.litter_chemistry.test_0...OK
+23/61 state.grid_environment.test_0...OK
+24/61 state.plant_assignment.test_0...OK
+25/61 state.topography.test_0...OK
+26/61 soil.gas.coupled_gas_solver.test_0...OK
+27/61 soil.organic.combustion.test_0...OK
+28/61 soil.nutrients.fertilizer_dissolution.test_0...OK
+29/61 soil.heat.solver.test_0...OK
+30/61 soil.profile.relayering.test_0...OK
+31/61 soil.water.solver.test_0...OK
+32/61 soil.solute.carboxyl_exchange.test_0...OK
+33/61 soil.solute.cation_exchange.test_0...OK
+34/61 soil.solute.reaction_solver.test_0...OK
+35/61 soil.solute.water_equilibrium.test_0...OK
+36/61 soil.solute.reaction_solver_tests.test_0...OK
+37/61 soil.gas.coupled_gas_solver_tests.test_0...OK
+38/61 plant.root.plant_root_disturbance.test_0...OK
+39/61 plant.root.plant_root_metabolism.test_0...OK
+40/61 plant.root.plant_root_nutrient_uptake.test_0...OK
+41/61 plant.root.plant_root_system.test_0...OK
+42/61 plant.growth.storage_remobilization.test_0...OK
+43/61 plant.growth.shoot_growth_runtime.test_0...OK
+44/61 validation.plant_root_metabolism_test.test_0...OK
+45/61 management.land_management.test_0...OK
+46/61 management.plant_harvest_runtime.test_0...OK
+47/61 io.input.cell_grid_file.test_0...OK
+48/61 validation.plant_harvest_runtime_test.test_0...OK
+49/61 driver.runscript.test_0...OK
+50/61 core.iteration_control.test.legacy option controls become convergence ceilings...OK
+51/61 core.iteration_control.test.standing-dead energy ceiling is flat and independent of the legacy sub-step count...OK
+52/61 core.iteration_control.test.gas ceiling floors at 100 and still honours a larger NPH times NPG...OK
+53/61 core.iteration_control.test.low top-layer heat capacity never raises the requested ceiling...OK
+54/61 core.iteration_control.test.low heat-capacity threshold is strict and only triggers on top layers...OK
+55/61 core.iteration_control.test.water-heat ceiling rejects non-top-layer heat-capacity changes and dimensional mismatch...OK
+56/61 core.iteration_control.test.water-heat ceiling rejects invalid thermal control state...OK
+57/61 core.iteration_control.test.from-scene limits rejects invalid iteration-option combinations...OK
+58/61 core.iteration_control.test.runtime maximum is a hard ceiling for every process budget...OK
+59/61 core.iteration_control.test.SOLUTE and STARTE reaction budgets are pure convergence ceilings decoupled from hard_max_iterations...OK
+60/61 canopy.photosynthesis.photosynthesis.test_0...OK
+61/61 validation.canopy_photosynthesis_test.test_0...OK
+All 61 tests passed.

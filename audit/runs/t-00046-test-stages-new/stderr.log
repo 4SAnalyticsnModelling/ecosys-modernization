@@ -1,0 +1,7 @@
+src\stages\soil_chemistry_convergence.zig:952:26: error: unable to resolve comptime value
+    var initial_packed: [packed_count]f64 = undefined;
+                         ^~~~~~~~~~~~
+src\stages\soil_chemistry_convergence.zig:952:26: note: types must be comptime-known
+referenced by:
+    soil_chemistry_convergence: src\ecosys_ng.zig:14:44
+    test_0: src\ecosys_ng.zig:14464:9

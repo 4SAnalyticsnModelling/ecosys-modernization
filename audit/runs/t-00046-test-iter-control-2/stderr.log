@@ -1,0 +1,10 @@
+src\core\iteration_control.zig:303:13: error: comptime control flow inside runtime block
+            continue;
+            ^~~~~~~~
+src\core\iteration_control.zig:300:75: note: runtime control flow here
+        if (std.mem.eql(u8, field.name, "solute_reaction_max_iterations") or
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+referenced by:
+    iteration_control: src\module_index.zig:15:39
+    test_0: src\index\core_test_index.zig:54:15
+    1 reference(s) hidden; use '-freference-trace=3' to see all references

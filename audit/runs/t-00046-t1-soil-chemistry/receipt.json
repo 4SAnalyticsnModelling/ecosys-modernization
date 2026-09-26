@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/apps/zig/current/zig.exe",
+    "test",
+    "--dep",
+    "ecosys_ng",
+    "-Mroot=src\\ecosys_ng.zig",
+    "-Mecosys_ng=src\\module_index.zig",
+    "--test-filter",
+    "stages.soil_chemistry_convergence"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 8.541,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 29720,
+  "pid": 28180,
+  "started_unix": 1790401749.3987532,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00046-t1-soil-chemistry/stderr.log",
+    "sha256": "6f2eb69189edf6074e1dab0c57a607d33766ab64e19350e4a475eba58241b246"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00046-t1-soil-chemistry/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

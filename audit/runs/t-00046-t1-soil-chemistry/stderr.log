@@ -1,0 +1,13 @@
+1/12 ecosys_ng.test_0...OK
+2/12 stages.soil_chemistry_convergence.test.issue-073 Finding C: fertilizerBandGeometryCarrierM3 substitutes the dry reference below the floor, passes the live carrier through above it...OK
+3/12 stages.soil_chemistry_convergence.test.hourly chemistry scratch releases partial allocation prefixes...OK
+4/12 stages.soil_chemistry_convergence.test.hourly chemistry scratch releases cell scope and owner scope in reverse order...OK
+5/12 stages.soil_chemistry_convergence.test.hourly chemistry reaches source-volume fallback while per-mass owners remain pending...OK
+6/12 stages.soil_chemistry_convergence.test.root ammonium uptake rejects overdraw instead of clipping...OK
+7/12 stages.soil_chemistry_convergence.test.dissolved carbon dioxide rejects invalid mass instead of clipping...OK
+8/12 stages.soil_chemistry_convergence.test.ISSUE-103: the SOLUTE chemistry hour grows no fertilizer band outside the HOUR1 coordinator...OK
+9/12 stages.soil_chemistry_convergence.test.STARTE initial solute reaction equilibrium is bit-identical across solver ceilings 1000 and 2000...OK
+10/12 stages.soil_chemistry_convergence.test.solute reaction solver returns explicit error on exhaustion and rolls back state without truncation...OK
+11/12 stages.hourly_process_pipeline.test_0...OK
+12/12 stages.hourly_vegetation.test_0...OK
+All 12 tests passed.

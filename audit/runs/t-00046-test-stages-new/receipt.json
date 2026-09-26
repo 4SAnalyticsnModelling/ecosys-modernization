@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/apps/zig/current/zig.exe",
+    "test",
+    "--dep",
+    "ecosys_ng",
+    "-Mroot=src\\ecosys_ng.zig",
+    "-Mecosys_ng=src\\module_index.zig",
+    "--test-filter",
+    "STARTE initial solute reaction equilibrium"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 1.512,
+  "exit_code": 1,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 27084,
+  "pid": 16412,
+  "started_unix": 1790401655.5101132,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00046-test-stages-new/stderr.log",
+    "sha256": "451905e8688f07202cf4112b7e0d334dd361c6e04cf7d84c9426a112a0a162dd"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00046-test-stages-new/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

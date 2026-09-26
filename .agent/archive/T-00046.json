@@ -1,0 +1,99 @@
+{
+  "changed": [
+    ".agent/results/T-00046.md",
+    ".agent/tasks/T-00046.hypothesis.md",
+    "audit/runs/t-00046-probe/receipt.json",
+    "audit/runs/t-00046-probe/stderr.log",
+    "audit/runs/t-00046-probe/stdout.log",
+    "audit/runs/t-00046-t1-iteration-control/receipt.json",
+    "audit/runs/t-00046-t1-iteration-control/stderr.log",
+    "audit/runs/t-00046-t1-iteration-control/stdout.log",
+    "audit/runs/t-00046-t1-soil-chemistry/receipt.json",
+    "audit/runs/t-00046-t1-soil-chemistry/stderr.log",
+    "audit/runs/t-00046-t1-soil-chemistry/stdout.log",
+    "audit/runs/t-00046-test-all-iter/receipt.json",
+    "audit/runs/t-00046-test-all-iter/stderr.log",
+    "audit/runs/t-00046-test-all-iter/stdout.log",
+    "audit/runs/t-00046-test-iter-control-2/receipt.json",
+    "audit/runs/t-00046-test-iter-control-2/stderr.log",
+    "audit/runs/t-00046-test-iter-control-2/stdout.log",
+    "audit/runs/t-00046-test-iter-control-3/receipt.json",
+    "audit/runs/t-00046-test-iter-control-3/stderr.log",
+    "audit/runs/t-00046-test-iter-control-3/stdout.log",
+    "audit/runs/t-00046-test-iter-control/receipt.json",
+    "audit/runs/t-00046-test-iter-control/stderr.log",
+    "audit/runs/t-00046-test-iter-control/stdout.log",
+    "audit/runs/t-00046-test-stages-2/receipt.json",
+    "audit/runs/t-00046-test-stages-2/stderr.log",
+    "audit/runs/t-00046-test-stages-2/stdout.log",
+    "audit/runs/t-00046-test-stages-3/receipt.json",
+    "audit/runs/t-00046-test-stages-3/stderr.log",
+    "audit/runs/t-00046-test-stages-3/stdout.log",
+    "audit/runs/t-00046-test-stages-all/receipt.json",
+    "audit/runs/t-00046-test-stages-all/stderr.log",
+    "audit/runs/t-00046-test-stages-all/stdout.log",
+    "audit/runs/t-00046-test-stages-exhaust/receipt.json",
+    "audit/runs/t-00046-test-stages-exhaust/stderr.log",
+    "audit/runs/t-00046-test-stages-exhaust/stdout.log",
+    "audit/runs/t-00046-test-stages-new-2/receipt.json",
+    "audit/runs/t-00046-test-stages-new-2/stderr.log",
+    "audit/runs/t-00046-test-stages-new-2/stdout.log",
+    "audit/runs/t-00046-test-stages-new/receipt.json",
+    "audit/runs/t-00046-test-stages-new/stderr.log",
+    "audit/runs/t-00046-test-stages-new/stdout.log",
+    "audit/runs/t-00046-test-stages/receipt.json",
+    "audit/runs/t-00046-test-stages/stderr.log",
+    "audit/runs/t-00046-test-stages/stdout.log",
+    "ecosys-ng/src/core/iteration_control.zig",
+    "ecosys-ng/src/stages/soil_chemistry_convergence.zig"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "New frontier evidence shows hard_max_iterations is a ceiling, not MRXN. Forge should remove the clamp and add invariant tests before SAGE's confirming review.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00046.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-zig-safety-design"
+    ],
+    "state_next": "FORGE removes the hard_max_iterations clamp from SOLUTE/STARTE and adds invariant tests for convergence ceilings.",
+    "state_recent": [
+      "T-00045 SAGE DONE: decoupling solver ceilings from deck cap is approved.",
+      "T-00044 FORGE DONE: hard_max_iterations is a ceiling, not an MRXN divisor.",
+      "T-00043 PATHFINDER DONE: legacy MRXN is a fixed sub-cycle divisor."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00046.md",
+    "task_id": "T-00046"
+  },
+  "ended": 1790401828.793507,
+  "failure_packet": null,
+  "hooks": {
+    "zig_fmt": {
+      "exit_code": 0,
+      "receipt": "audit/runs/swarm/20260925-235023-T-00046-fmt/receipt.json"
+    }
+  },
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f23d2fdccffe31HnrzT7x7wtvh",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 7420406,
+    "cache_write": 0,
+    "cost": 1.3812597000000004,
+    "input": 1034844,
+    "llm_calls": 95,
+    "output": 12959,
+    "tool_calls": 101
+  },
+  "violations": []
+}

@@ -1,1 +1,17 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00046", "role": "FORGE", "task_file": ".agent/tasks/T-00046.md", "result_file": ".agent/results/T-00046.md", "skills": ["ecosys-zig-safety-design"], "t1_argv": null, "requires_sage_review": true, "full_run_justification": null, "reason": "New frontier evidence shows hard_max_iterations is a ceiling, not MRXN. Forge should remove the clamp and add invariant tests before SAGE's confirming review.", "state_recent": ["T-00045 SAGE DONE: decoupling solver ceilings from deck cap is approved.", "T-00044 FORGE DONE: hard_max_iterations is a ceiling, not an MRXN divisor.", "T-00043 PATHFINDER DONE: legacy MRXN is a fixed sub-cycle divisor."], "state_next": "FORGE removes the hard_max_iterations clamp from SOLUTE/STARTE and adds invariant tests for convergence ceilings."}
+{
+  "diff_sha256": "3cc890adf2ff929c81b98515207eab5bc926f0dde487a17fa2da7cdcfcf69c80",
+  "full_run_justification": null,
+  "reason": "automatic review of production-source change",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00047.md",
+  "review_of": "T-00046",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00047.md",
+  "task_id": "T-00047"
+}
