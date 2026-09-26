@@ -54,11 +54,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
+  "last_route_errors": [
+    "ALLOWED FILES `audit/traceability/traceability.csv` is outside SAGE may_write"
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "Newest result directs a bounded ledger-text rewrite: fix the three residual anchor defects before final inclusion and keep the ZEROS binding unchanged.",

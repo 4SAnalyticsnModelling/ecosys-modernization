@@ -1,1 +1,1 @@
-T-00127 FORGE: fix the three remaining TRC anchor defects and prepare the corrected seven-row ZEROS ledger packet for SAGE review.
+T-00128 SAGE: approve corrected seven-row ZEROS ledger packet and finalize traceability ledger inclusion.
