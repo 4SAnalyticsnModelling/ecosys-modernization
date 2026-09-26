@@ -38,12 +38,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00021 PATHFINDER DONE: cell-0 failure is matrix water residual, not DEV-005
-- T-00020 PATHFINDER DONE: water stagnation is matrix non-improvement
-- T-00019 FORGE DONE: cap was not load-bearing
+- T-00022 PATHFINDER DONE: cell-0 matrix-water state remains pinned near state_m3 ≈ 7.74e-3; DEV-005 not direct cause
+- T-00021 PATHFINDER DONE: matrix residual, not ammonium multiplier, drives cell-0 stall
+- T-00020 PATHFINDER DONE: water stagnation is soil-water matrix non-improvement
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: the user signs the D6 list (after the SAGE verdict exists).
 
 ## Next expected operation
-PATHFINDER: isolate the hour-3,161->3,162 cell-0 soil-water state under the restored deck and compare DEV-005 vs baseline before any fix.
+FORGE: run the bounded cell-0, hour 3,161→3,162 DEV-005 on/off compare and log matrix water state, residual, and conductivity before the failing iteration.
