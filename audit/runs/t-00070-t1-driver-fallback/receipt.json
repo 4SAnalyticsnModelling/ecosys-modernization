@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/apps/zig/current/zig.exe",
+    "test",
+    "--dep",
+    "ecosys_ng",
+    "-Mroot=src/ecosys_ng.zig",
+    "-Mecosys_ng=src/module_index.zig",
+    "--test-filter",
+    "zero or invalid event hydrogen"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 1.216,
+  "exit_code": 1,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 30700,
+  "pid": 27844,
+  "started_unix": 1790447574.9328623,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00070-t1-driver-fallback/stderr.log",
+    "sha256": "2da5c1064c76164dca504cbbfd6db8850846ad822a41525e359bda483f7ab1b7"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00070-t1-driver-fallback/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

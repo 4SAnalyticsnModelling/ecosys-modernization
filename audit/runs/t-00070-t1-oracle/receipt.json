@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/apps/zig/current/zig.exe",
+    "test",
+    "src/module_index.zig",
+    "--test-filter",
+    "T-00060"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 29.941,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 28208,
+  "pid": 36428,
+  "started_unix": 1790447501.6880405,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00070-t1-oracle/stderr.log",
+    "sha256": "31eb1848f965050a76d304b3a99d3fede7a4ee770f326e6d20d0782b47ed42ab"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00070-t1-oracle/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

@@ -1,0 +1,7 @@
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:63:9: error: expected error union type, found 'error{InvalidTopsoilHydrogenForDynamicInput,UnexpectedSuccess}'
+    if (actual_error_union) |actual_payload| {
+        ^~~~~~~~~~~~~~~~~~
+referenced by:
+    test.zero or invalid event hydrogen rejects with error instead of silent live fallback: src\stages\hourly_process_driver.zig:1185:32
+    hourly_process_driver: src\ecosys_ng.zig:21:39
+    1 reference(s) hidden; use '-freference-trace=3' to see all references

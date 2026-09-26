@@ -1,0 +1,85 @@
+{
+  "changed": [
+    ".agent/results/T-00070.md",
+    ".agent/tasks/T-00070.hypothesis.md",
+    "audit/runs/t-00070-fmt/receipt.json",
+    "audit/runs/t-00070-fmt/stderr.log",
+    "audit/runs/t-00070-fmt/stdout.log",
+    "audit/runs/t-00070-oracle-compile/receipt.json",
+    "audit/runs/t-00070-oracle-compile/stderr.log",
+    "audit/runs/t-00070-oracle-compile/stdout.log",
+    "audit/runs/t-00070-oracle-run/receipt.json",
+    "audit/runs/t-00070-oracle-run/stderr.log",
+    "audit/runs/t-00070-oracle-run/stdout.log",
+    "audit/runs/t-00070-t1-driver-dynamic/receipt.json",
+    "audit/runs/t-00070-t1-driver-dynamic/stderr.log",
+    "audit/runs/t-00070-t1-driver-dynamic/stdout.log",
+    "audit/runs/t-00070-t1-driver-fallback-02/receipt.json",
+    "audit/runs/t-00070-t1-driver-fallback-02/stderr.log",
+    "audit/runs/t-00070-t1-driver-fallback-02/stdout.log",
+    "audit/runs/t-00070-t1-driver-fallback/receipt.json",
+    "audit/runs/t-00070-t1-driver-fallback/stderr.log",
+    "audit/runs/t-00070-t1-driver-fallback/stdout.log",
+    "audit/runs/t-00070-t1-driver-r3/receipt.json",
+    "audit/runs/t-00070-t1-driver-r3/stderr.log",
+    "audit/runs/t-00070-t1-driver-r3/stdout.log",
+    "audit/runs/t-00070-t1-oracle/receipt.json",
+    "audit/runs/t-00070-t1-oracle/stderr.log",
+    "audit/runs/t-00070-t1-oracle/stdout.log",
+    "audit/runs/t-00070-t1-snow/receipt.json",
+    "audit/runs/t-00070-t1-snow/stderr.log",
+    "audit/runs/t-00070-t1-snow/stdout.log",
+    "ecosys-audit/tests/starte_mloop_oracle.f",
+    "ecosys-ng/src/soil/chemistry/snow_initialization.zig",
+    "ecosys-ng/src/stages/hourly_process_driver.zig"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "FORGE task: revise the quarantined T-00060 patch in place to close SAGE's remaining R1/R3 defects before any Ottawa evidence counts.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00070.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "FORGE revises T-00060 in place, produces a new diff hash, and prepares the packet for SAGE re-review.",
+    "state_recent": [
+      "T-00068 SAGE STATUS: REVISE T-00060; R1 and R3 remain open",
+      "T-00067 SAGE STATUS: REVISE T-00060; R1 and R3 remain open",
+      "T-00066 FORGE STATUS: revised T-00060 in place; SAGE re-review pending"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00070.md",
+    "task_id": "T-00070"
+  },
+  "ended": 1790447748.4972165,
+  "failure_packet": null,
+  "hooks": {
+    "zig_fmt": {
+      "exit_code": 0,
+      "receipt": "audit/runs/swarm/20260926-123545-T-00070-fmt/receipt.json"
+    }
+  },
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f21463b7dffegK5Wqx9xFDgYVk",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 15169042,
+    "cache_write": 0,
+    "cost": 1.8549541499999993,
+    "input": 813043,
+    "llm_calls": 119,
+    "output": 28665,
+    "tool_calls": 122
+  },
+  "violations": []
+}
