@@ -1,1 +1,1 @@
-T-00027 PATHFINDER: find the legacy runtime ceiling and first divergence hour for DEV-004 in preserved outputs.
+T-00028 FORGE: encode DEV-004 as legacy-equivalent runtime ceiling bound using preserved evidence.

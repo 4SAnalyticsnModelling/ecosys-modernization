@@ -1,23 +1,26 @@
 {
-  "full_run_justification": null,
-  "reason": "Need the legacy runtime ceiling and first divergence hour to bound DEV-004 before any deck signature; this is the newest unblocked PATHFINDER task.",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00027.md",
-  "result_status": "DONE",
-  "role": "PATHFINDER",
+  "errors": [
+    "task file missing sections ['KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
+  ],
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "T-00027 bounds DEV-004 to the legacy runtime ceiling and hour-9 divergence; FORGE should encode that bounded evidence before D6 review.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00028.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [],
+    "state_next": "FORGE: encode DEV-004 as the legacy-equivalent runtime ceiling bound using the preserved hour-9 onset.",
+    "state_recent": [
+      "T-00027 PATHFINDER DONE: legacy ceiling and hour-9 onset found.",
+      "T-00024 SAGE DONE: DEV-005 is legacy parity.",
+      "T-00023 FORGE DONE: matrix-water cause isolated from chemistry."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00028.md",
+    "task_id": "T-00028"
+  },
   "schema_version": 1,
-  "skills": [
-    "ecosys-source-navigation",
-    "ecosys-output-comparison"
-  ],
-  "state_next": "PATHFINDER: locate the legacy runtime ceiling and first divergence hour for DEV-004 in preserved outputs.",
-  "state_recent": [
-    "T-00024 SAGE DONE: DEV-005 is legacy parity; only DEV-004 remains open.",
-    "T-00023 FORGE DONE: bounded compare isolates chemistry from the water stall.",
-    "T-00022 PATHFINDER DONE: matrix-water direct cause remains, not the ammonium multiplier."
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00027.md",
-  "task_id": "T-00027"
+  "status": "REJECTED"
 }

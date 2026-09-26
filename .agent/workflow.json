@@ -41,11 +41,14 @@
     }
   ],
   "last_advance_unix": null,
+  "last_route_errors": [
+    "task file missing sections ['KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "Need the legacy runtime ceiling and first divergence hour to bound DEV-004 before any deck signature; this is the newest unblocked PATHFINDER task.",
