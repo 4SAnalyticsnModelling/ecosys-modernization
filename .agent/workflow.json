@@ -60,8 +60,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Unblocked G0-4 legacy rerun prep is PATHFINDER work: verify the run-002 recipe and archive evidence before any fresh full-run decision.",
-  "task_id": "T-00132",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "G0-4 is unblocked and PATHFINDER owns the legacy evidence packet and run-002 recipe validation; this is the bounded next step without a full Ottawa run.",
+  "task_id": "T-00133",
+  "worker": "PATHFINDER"
 }

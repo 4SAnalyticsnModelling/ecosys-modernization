@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00131 FORGE DONE: seven-row packet finalized and verified.
+- T-00132 PATHFINDER DONE: bounded G0-4 evidence packet; no full Ottawa rerun.
+- T-00131 FORGE DONE: seven-row ZEROS ledger packet finalized and verified.
 - T-00130 SAGE DONE: final reviewer update approved; no science change.
-- T-00129 SAGE DONE: residual anchor defects fixed; packet approved.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER prepares the G0-4 legacy rerun evidence packet and run-002 recipe check.
+PATHFINDER packages the G0-4 legacy rerun evidence packet and missing-archive checklist without running a full Ottawa simulation.

@@ -1,1 +1,1 @@
-T-00132 PATHFINDER: prepare the G0-4 legacy rerun evidence packet and run-002 recipe check.
+T-00133 PATHFINDER: package the legacy Ottawa G0-4 evidence packet and run-002 recipe checklist without a full simulation.
