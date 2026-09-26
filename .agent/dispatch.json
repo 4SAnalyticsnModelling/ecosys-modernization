@@ -1,1 +1,21 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00113", "role": "FORGE", "task_file": ".agent/tasks/T-00113.md", "result_file": ".agent/results/T-00113.md", "skills": ["ecosys-source-navigation"], "t1_argv": null, "requires_sage_review": true, "full_run_justification": null, "reason": "Bounded ledger rewrite for unresolved TRC rows using confirmed legacy ZEROS/ZEROS2 semantics; no full run or science change.", "state_recent": ["T-00112 PATHFINDER DONE: legacy ZEROS/ZEROS2 per-layer guard semantics mapped for TRC-331..340.", "T-00111 SAGE DONE: unresolved TRC-313 and TRC-331..340 final dispositions set; no hash refresh."], "state_next": "FORGE: rewrite the unresolved ledger text for TRC-331..335 and TRC-337..340 to the shared legacy ZEROS/ZEROS2 guard semantics; leave TRC-313 unresolved and retire TRC-336 with explicit scope approval."}
+{
+  "full_run_justification": null,
+  "reason": "Bounded ledger rewrite for unresolved TRC rows using confirmed legacy ZEROS/ZEROS2 semantics; no full run or science change.",
+  "requires_sage_review": true,
+  "result_file": ".agent/results/T-00113.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-source-navigation"
+  ],
+  "state_next": "FORGE: rewrite the unresolved ledger text for TRC-331..335 and TRC-337..340 to the shared legacy ZEROS/ZEROS2 guard semantics; leave TRC-313 unresolved and retire TRC-336 with explicit scope approval.",
+  "state_recent": [
+    "T-00112 PATHFINDER DONE: legacy ZEROS/ZEROS2 per-layer guard semantics mapped for TRC-331..340.",
+    "T-00111 SAGE DONE: unresolved TRC-313 and TRC-331..340 final dispositions set; no hash refresh."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00113.md",
+  "task_id": "T-00113"
+}
