@@ -1,1 +1,1 @@
-T-00123 PATHFINDER: record exact legacy ZEROS anchors for TRC-331..335, 337, and 338 in audit/analysis/ before any ledger rewrite.
+T-00124 FORGE: rewrite the approved TRC-331..335, 337, 338 row text to the shared ZEROS guard while leaving the separate ZEROS2 gate untouched.
