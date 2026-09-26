@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00093 SAGE DONE: patch rejected; new evidence packet required
-- T-00092 FORGE DONE: 62-row patch prepared and quarantined rows stayed excluded
-- T-00091 PATHFINDER DONE: CHANGED-RANGE rows still map live to Zig implementations
+- T-00094 PATHFINDER DONE: CHANGED-RANGE rows still map live to Zig implementations.
+- T-00093 SAGE DONE: rejected the prior refresh for missing per-row evidence.
+- T-00092 FORGE DONE: patch prepared but remains pending SAGE review.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER re-reviews the 62 CHANGED-RANGE rows in batches and records each current zig_lines mapping status.
+FORGE writes the bounded traceability refresh patch for the 62 live CHANGED-RANGE rows only.

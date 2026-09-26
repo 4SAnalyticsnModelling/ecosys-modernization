@@ -1,1 +1,1 @@
-T-00094 PATHFINDER: re-review 62 stale CHANGED-RANGE traceability rows and record current live Zig mappings before any ledger refresh.
+T-00095 FORGE: prepare the write-only traceability refresh patch for the 62 live CHANGED-RANGE rows while quarantining unresolved entries.
