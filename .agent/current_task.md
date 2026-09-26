@@ -1,1 +1,1 @@
-T-00098 SAGE: Review CHANGED-RANGE traceability batch packet and approve or reject the line+hash replacement patch before any ledger rewrite.
+T-00099 PATHFINDER: revise and batch the remaining CHANGED-RANGE traceability rows with anchor-based live-source mappings before any ledger rewrite.
