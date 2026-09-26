@@ -1,1 +1,1 @@
-T-00125 FORGE: rewrite approved TRC-331..335, 337, 338 row text to the shared legacy ZEROS guard.
+T-00126 | SAGE | adjudicate corrected ZEROS binding for TRC-331..335,337,338 and finalize ledger inclusion.
