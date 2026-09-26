@@ -48,4 +48,4 @@ none active.
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE confirms T-00075 and signs DEV-008 as accepted.
+idle: wait for new evidence or a new frontier item

@@ -1,22 +1,17 @@
 {
+  "decision_kind": "idle-check",
+  "decision_of": "SENTINEL",
   "full_run_justification": null,
-  "reason": "SAGE confirms final DEV-008 acceptance following the T-00075 approval packet; no new work remains unreviewed.",
+  "reason": "SAGE decision (idle-check) from SENTINEL",
   "requires_sage_review": false,
-  "result_file": ".agent/results/T-00076.md",
-  "result_status": "DONE",
+  "result_file": ".agent/results/T-00078.md",
   "role": "SAGE",
   "schema_version": 1,
   "skills": [
     "ecosys-feature-attribution"
   ],
-  "state_next": "SAGE confirms T-00075 and signs DEV-008 as accepted.",
-  "state_recent": [
-    "T-00075 SAGE STATUS: approval packet for DEV-008 is ready",
-    "T-00074 FORGE STATUS: final T-00060 revision closes criteria 2/3",
-    "T-00073 SAGE STATUS: revise patch; criterion 2 remains open"
-  ],
-  "status": "COMPLETE",
+  "status": "PENDING",
   "t1_argv": null,
-  "task_file": ".agent/tasks/T-00076.md",
-  "task_id": "T-00076"
+  "task_file": ".agent/tasks/T-00078.md",
+  "task_id": "T-00078"
 }
