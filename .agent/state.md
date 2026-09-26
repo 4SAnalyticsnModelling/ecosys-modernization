@@ -38,12 +38,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
+- T-00017 PATHFINDER DONE: restored-100 deck failure tied to hard_max_iterations in soil-water path.
 - T-00016 SAGE DONE: DEV-004 rejected; DEV-005/006 approved with conditions.
-- T-00014 PATHFINDER DONE: D6 packet ties each deck edit to effect and provenance.
-- T-00012 PATHFINDER DONE: partial legacy archive; full 30-year baseline remains unverified.
+- T-00014 PATHFINDER DONE: D6 packet ties each deck edit to provenance and effect.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: the user signs the D6 list (after the SAGE verdict exists).
 
 ## Next expected operation
-PATHFINDER root-causes the restored 100-deck hour-3,162 solver stagnation and identifies the hard_max_iterations consumer.
+Trace the restored-100 deck hour-3,162 solver stagnation to the exact hard_max_iterations consumer and confirm whether the cap is load-bearing or a false lead.
