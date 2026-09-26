@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/apps/zig/current/zig.exe",
+    "test",
+    "src/module_index.zig",
+    "--test-filter",
+    "carrier-free analytical equilibrium"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 6.119,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 15452,
+  "pid": 26148,
+  "started_unix": 1790403235.4958029,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00053-test-carrier-free/stderr.log",
+    "sha256": "b2518870080d00438f51f5553ecd990fbc69a296a90f04ee007f65596d5cb971"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00053-test-carrier-free/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

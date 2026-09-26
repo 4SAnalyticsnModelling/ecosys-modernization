@@ -1,0 +1,63 @@
+1/55 module_index.test_0...OK
+2/55 index.atmosphere_test_index.test_0...OK
+3/55 index.canopy_test_index.test_0...OK
+4/55 index.chemistry_test_index.test_0...OK
+5/55 index.core_test_index.test_0...OK
+6/55 index.driver_test_index.test_0...OK
+7/55 index.erosion_test_index.test_0...OK
+8/55 index.grid_cell_test_index.test_0...OK
+9/55 index.io_test_index.test_0...OK
+10/55 index.management_test_index.test_0...OK
+11/55 index.plant_test_index.test_0...OK
+12/55 index.redistribution_test_index.test_0...OK
+13/55 index.soil_test_index.test_0...OK
+14/55 index.state_test_index.test_0...OK
+15/55 index.surface_test_index.test_0...OK
+16/55 index.transport_test_index.test_0...OK
+17/55 index.validation_test_index.test_0...OK
+18/55 validation.landscape_boundary_balance.test_0...OK
+19/55 validation.landscape_mass_inventory.test_0...OK
+20/55 validation.mass_balance_audit.test_0...OK
+21/55 validation.soil_water_retention_validation.test_0...OK
+22/55 surface.litter_chemistry.test_0...OK
+23/55 state.grid_environment.test_0...OK
+24/55 state.plant_assignment.test_0...OK
+25/55 state.topography.test_0...OK
+26/55 soil.gas.coupled_gas_solver.test_0...OK
+27/55 soil.chemistry.snow_initialization.test.acidic phosphate-bearing precipitation reaches carrier-free equilibrium...OK
+28/55 soil.chemistry.snow_initialization.test.carrier-free analytical equilibrium matches generic solver and conserves invariants...SNOW_EQUILIBRIUM_ACCEPTED ph=7 carbon=2.669585201498312e-1 iterations=2 physical_quality=2.263494042232116e-10 search_metric=.{ .component = 44, .maximum = 0.0000023128063743814598, .rms = 0.00000031479585370026784 }
+SNOW_EQUILIBRIUM_ACCEPTED ph=7 carbon=2.6698521600184616e-1 iterations=2 physical_quality=8.696566750335105e-10 search_metric=.{ .component = 43, .maximum = 0.000008888639798002184, .rms = 0.0000012100954026298928 }
+SNOW_EQUILIBRIUM_ACCEPTED ph=4 carbon=2.669585201498312e-1 iterations=2 physical_quality=7.99355274829354e-13 search_metric=.{ .component = 43, .maximum = 0.000000013584552448018341, .rms = 0.0000000021428086969995665 }
+OK
+29/55 soil.chemistry.snow_initialization.test.carrier-free analytical equilibrium satisfies every network zero-flux condition...OK
+30/55 soil.chemistry.snow_initialization.test.carrier-free precipitation equilibrium cost...PRECIP_EQUILIBRIUM_COST label=deck_ph7 ph=7 repetitions=20 total_ms=9 per_call_ms=0
+PRECIP_EQUILIBRIUM_COST label=deck_ph7_perturbed ph=7 repetitions=20 total_ms=10 per_call_ms=0
+PRECIP_EQUILIBRIUM_COST label=acidic_ph4 ph=4 repetitions=20 total_ms=7 per_call_ms=0
+PRECIP_EQUILIBRIUM_COST total_calls=60 checksum=1.3987563606136801e1
+OK
+31/55 soil.organic.combustion.test_0...OK
+32/55 soil.nutrients.fertilizer_dissolution.test_0...OK
+33/55 soil.heat.solver.test_0...OK
+34/55 soil.profile.relayering.test_0...OK
+35/55 soil.water.solver.test_0...OK
+36/55 soil.solute.carboxyl_exchange.test_0...OK
+37/55 soil.solute.cation_exchange.test_0...OK
+38/55 soil.solute.reaction_solver.test_0...OK
+39/55 soil.solute.water_equilibrium.test_0...OK
+40/55 soil.solute.reaction_solver_tests.test_0...OK
+41/55 soil.gas.coupled_gas_solver_tests.test_0...OK
+42/55 plant.root.plant_root_disturbance.test_0...OK
+43/55 plant.root.plant_root_metabolism.test_0...OK
+44/55 plant.root.plant_root_nutrient_uptake.test_0...OK
+45/55 plant.root.plant_root_system.test_0...OK
+46/55 plant.growth.storage_remobilization.test_0...OK
+47/55 plant.growth.shoot_growth_runtime.test_0...OK
+48/55 management.land_management.test_0...OK
+49/55 management.plant_harvest_runtime.test_0...OK
+50/55 validation.plant_harvest_runtime_test.test_0...OK
+51/55 validation.plant_root_metabolism_test.test_0...OK
+52/55 io.input.cell_grid_file.test_0...OK
+53/55 driver.runscript.test_0...OK
+54/55 canopy.photosynthesis.photosynthesis.test_0...OK
+55/55 validation.canopy_photosynthesis_test.test_0...OK
+All 55 tests passed.

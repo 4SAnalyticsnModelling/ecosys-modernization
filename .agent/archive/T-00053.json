@@ -1,0 +1,83 @@
+{
+  "changed": [
+    ".agent/results/T-00053.md",
+    ".agent/tasks/T-00053.hypothesis.md",
+    "audit/runs/t-00053-t1-carrier-free-check/receipt.json",
+    "audit/runs/t-00053-t1-carrier-free-check/stderr.log",
+    "audit/runs/t-00053-t1-carrier-free-check/stdout.log",
+    "audit/runs/t-00053-t1-matched-state-2/receipt.json",
+    "audit/runs/t-00053-t1-matched-state-2/stderr.log",
+    "audit/runs/t-00053-t1-matched-state-2/stdout.log",
+    "audit/runs/t-00053-t1-matched-state-3/receipt.json",
+    "audit/runs/t-00053-t1-matched-state-3/stderr.log",
+    "audit/runs/t-00053-t1-matched-state-3/stdout.log",
+    "audit/runs/t-00053-t1-matched-state-debug/receipt.json",
+    "audit/runs/t-00053-t1-matched-state-debug/stderr.log",
+    "audit/runs/t-00053-t1-matched-state-debug/stdout.log",
+    "audit/runs/t-00053-t1-matched-state-final/receipt.json",
+    "audit/runs/t-00053-t1-matched-state-final/stderr.log",
+    "audit/runs/t-00053-t1-matched-state-final/stdout.log",
+    "audit/runs/t-00053-t1-matched-state/receipt.json",
+    "audit/runs/t-00053-t1-matched-state/stderr.log",
+    "audit/runs/t-00053-t1-matched-state/stdout.log",
+    "audit/runs/t-00053-t1-snow-chem-full/receipt.json",
+    "audit/runs/t-00053-t1-snow-chem-full/stderr.log",
+    "audit/runs/t-00053-t1-snow-chem-full/stdout.log",
+    "audit/runs/t-00053-test-baseline/receipt.json",
+    "audit/runs/t-00053-test-baseline/stderr.log",
+    "audit/runs/t-00053-test-baseline/stdout.log",
+    "audit/runs/t-00053-test-carrier-free/receipt.json",
+    "audit/runs/t-00053-test-carrier-free/stderr.log",
+    "audit/runs/t-00053-test-carrier-free/stdout.log",
+    "ecosys-ng/src/soil/chemistry/snow_initialization.zig"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "FORGE should produce the bounded matched-state replay packet for the legacy reads.f → starte.f hourly precipitation/irrigation equilibration branch, resolving whether the mismatch is state initialization or reaction residual logic.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00053.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-fortran-zig-traceability"
+    ],
+    "state_next": "FORGE: build the bounded matched-state replay for the hourly input-equilibration chemistry branch and compare it to the Zig hourly update sequence.",
+    "state_recent": [
+      "T-00051 PATHFINDER DONE: legacy hourly equilibration uses fixed-point loop; no hidden cap",
+      "T-00050 PATHFINDER DONE: dynamic-input path isolated to hourly equilibration path",
+      "T-00049 SAGE DONE: solver-budget closure confirmed; no more evidence required"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00053.md",
+    "task_id": "T-00053"
+  },
+  "ended": 1790403678.6378264,
+  "failure_packet": null,
+  "hooks": {
+    "zig_fmt": {
+      "exit_code": 0,
+      "receipt": "audit/runs/swarm/20260926-002114-T-00053-fmt/receipt.json"
+    }
+  },
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f23c7dd40ffe5ESc0wxzI9gZBl",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 21053145,
+    "cache_write": 0,
+    "cost": 2.811905625000001,
+    "input": 1572723,
+    "llm_calls": 133,
+    "output": 14234,
+    "tool_calls": 142
+  },
+  "violations": []
+}
