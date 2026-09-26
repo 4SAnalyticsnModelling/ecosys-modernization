@@ -8,6 +8,7 @@
     "FORGE:T-00055": 1,
     "FORGE:T-00060": 1,
     "FORGE:T-00124": 1,
+    "FORGE:T-00145": 1,
     "PATHFINDER:T-00007": 1,
     "PATHFINDER:T-00026": 1,
     "PATHFINDER:T-00032": 1,
@@ -65,8 +66,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "P0.4 legacy full-run evidence is the only remaining gate; bounded warmup cannot produce the 30-year baseline or verify the oracle outputs.",
   "task_id": "T-00145",
-  "worker": "FORGE"
+  "worker": null
 }

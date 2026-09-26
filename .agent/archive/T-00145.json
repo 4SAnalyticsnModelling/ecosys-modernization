@@ -1,0 +1,49 @@
+{
+  "changed": [],
+  "dispatch": {
+    "full_run_justification": "Fresh legacy 30-year rerun required; bounded warmup cannot produce the missing evidence-bound Ottawa baseline or validate the oracle outputs.",
+    "reason": "P0.4 legacy full-run evidence is the only remaining gate; bounded warmup cannot produce the 30-year baseline or verify the oracle outputs.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00145.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-build-reproducibility"
+    ],
+    "state_next": "FORGE launches the legacy gfortran P0.4 full timing run under the machine lock.",
+    "state_recent": [
+      "T-00143 FORGE DONE: driver and manifest are ready for the legacy full run.",
+      "T-00142 SAGE DONE: full legacy rerun is authorized without another science gate.",
+      "T-00141 FORGE DONE: warmup proved build and deck provenance for G0-4."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00145.md",
+    "task_id": "T-00145"
+  },
+  "ended": 1790464547.4987583,
+  "failure_packet": ".agent/failures/F-00009",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f2009d7b2ffezKmu4LIDjpTTCu",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [
+    "result file missing"
+  ],
+  "result_status": "FAIL",
+  "review": null,
+  "usage": {
+    "cache_read": 15717,
+    "cache_write": 0,
+    "cost": 0.008619525,
+    "input": 9361,
+    "llm_calls": 2,
+    "output": 112,
+    "tool_calls": 4
+  },
+  "violations": []
+}
