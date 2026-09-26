@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00096 SAGE DONE: rejected hash-only 62-row refresh; per-row mapping is still required.
-- T-00095 FORGE DONE: staged write-only 62-row patch remains unaccepted.
-- T-00094 PATHFINDER DONE: 62 CHANGED-RANGE rows remain live; no ledger refresh yet.
+- T-00097 PATHFINDER DONE: first batch confirms live CHANGED-RANGE mappings need line+hash refresh together.
+- T-00096 SAGE DONE: hash-only refresh rejected; per-row line-level mapping is still required.
+- T-00095 FORGE DONE: write-only patch exists but remains unaccepted without mapping proof.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER re-reviews the 62 CHANGED-RANGE traceability rows in batches and writes the evidence packet to audit/analysis/.
+SAGE reviews the CHANGED-RANGE batch packet and decides whether the replacement patch may update both zig_lines and zig_sha256 before any ledger write.

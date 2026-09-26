@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Newest evidence rejects hash-only refresh; the next task is a bounded PATHFINDER row-by-row source audit before any ledger write.",
-  "task_id": "T-00097",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Newest evidence says the CHANGED-RANGE batch still maps to live Zig ranges; SAGE must approve a joint line+hash replacement before any ledger write.",
+  "task_id": "T-00098",
+  "worker": "SAGE"
 }
