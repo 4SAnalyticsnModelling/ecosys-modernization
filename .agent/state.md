@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00105 PATHFINDER DONE: live CHANGED-RANGE batch remains quarantined and ledger-safe.
-- T-00103 PATHFINDER DONE: unresolved rows stay live and no ledger mutation is allowed.
-- T-00102 PATHFINDER DONE: prior batch preserved only live anchors and left unresolved rows quarantined.
+- T-00106 PATHFINDER DONE: live anchors recorded; no ledger mutation was performed.
+- T-00105 PATHFINDER DONE: unresolved rows remain live and were quarantined.
+- T-00103 PATHFINDER DONE: stale citations remain active; unresolved rows quarantined.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER: bind TRC-313 through TRC-340 to live anchors or quarantine unresolved rows without ledger mutation.
+PATHFINDER will bind unresolved CHANGED-RANGE rows to live anchors or quarantine them without ledger mutation.

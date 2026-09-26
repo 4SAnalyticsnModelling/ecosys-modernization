@@ -1,1 +1,1 @@
-T-00106 PATHFINDER: bind TRC-313 through TRC-340 to live-source anchors or quarantine unresolved rows without ledger mutation.
+T-00107 PATHFINDER: rebind unresolved CHANGED-RANGE traceability rows to live Zig anchors or quarantine them without ledger mutation.
