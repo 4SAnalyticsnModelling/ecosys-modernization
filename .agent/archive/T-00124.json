@@ -1,0 +1,49 @@
+{
+  "changed": [],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Latest evidence pins TRC-331..335, 337, and 338 to the shared ZEROS guard in hour1.f; FORGE can implement the narrow row-text fix without touching unrelated ZEROS2 logic.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00124.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "FORGE rewrites only the approved TRC-331..335, 337, and 338 row text to the shared ZEROS guard while leaving the separate ZEROS2 guard untouched.",
+    "state_recent": [
+      "T-00123 PATHFINDER DONE: exact ZEROS guard evidence for TRC-331..335, 337, 338.",
+      "T-00122 PATHFINDER DONE: row-by-row ZEROS binding classified.",
+      "T-00121 PATHFINDER DONE: legacy ZEROS vs ZEROS2 gate semantics narrowed."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00124.md",
+    "task_id": "T-00124"
+  },
+  "ended": 1790459032.4774072,
+  "failure_packet": ".agent/failures/F-00008",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f206ddd45ffe4DCpJ8L6BdBjnu",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [
+    "result file missing"
+  ],
+  "result_status": "FAIL",
+  "review": null,
+  "usage": {
+    "cache_read": 7890,
+    "cache_write": 0,
+    "cost": 0.014595,
+    "input": 18126,
+    "llm_calls": 2,
+    "output": 109,
+    "tool_calls": 4
+  },
+  "violations": []
+}

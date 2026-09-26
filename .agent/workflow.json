@@ -7,6 +7,7 @@
   "failure_signatures": {
     "FORGE:T-00055": 1,
     "FORGE:T-00060": 1,
+    "FORGE:T-00124": 1,
     "PATHFINDER:T-00007": 1,
     "PATHFINDER:T-00026": 1,
     "PATHFINDER:T-00032": 1,
@@ -59,8 +60,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Latest evidence pins TRC-331..335, 337, and 338 to the shared ZEROS guard in hour1.f; FORGE can implement the narrow row-text fix without touching unrelated ZEROS2 logic.",
   "task_id": "T-00124",
-  "worker": "FORGE"
+  "worker": null
 }
