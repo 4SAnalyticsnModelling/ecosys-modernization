@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00108 SAGE DONE: next batch verified; ledger action withheld.
-- T-00107 PATHFINDER DONE: live anchors superseded stale rows without mutation.
-- T-00106 PATHFINDER DONE: exact anchors bound live Zig source.
+- T-00109 PATHFINDER DONE: live-source review leaves TRC-313 and TRC-331..340 unresolved for SAGE.
+- T-00108 SAGE DONE: hash-only refresh rejected; stale ledger text remains false.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER re-reviews TRC-313..340 live anchors and classifies refreshable versus unresolved rows without ledger mutation.
+SAGE adjudicates the final ledger disposition for unresolved TRC rows and records the decision.
