@@ -1,1 +1,1 @@
-T-00133 PATHFINDER: package the legacy Ottawa G0-4 evidence packet and run-002 recipe checklist without a full simulation.
+T-00134 PATHFINDER: obtain the authoritative Ottawa legacy archive or fresh full-run artifact and document provenance before any gated rerun.
