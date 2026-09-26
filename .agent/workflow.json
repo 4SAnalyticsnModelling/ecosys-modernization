@@ -19,6 +19,10 @@
     {
       "task_id": "T-00145",
       "text": "Fresh legacy 30-year rerun required; bounded warmup cannot produce the missing evidence-bound Ottawa baseline or validate the oracle outputs."
+    },
+    {
+      "task_id": "T-00146",
+      "text": "G0-4 requires the fresh 30-year legacy Ottawa baseline; bounded warmup cannot produce the required evidence, and no archived full output set exists."
     }
   ],
   "full_runs": {
@@ -66,8 +70,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "P0.4 legacy full-run evidence is the only remaining gate; bounded warmup cannot produce the 30-year baseline or verify the oracle outputs.",
-  "task_id": "T-00145",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Only remaining gate is the fresh 30-year legacy Ottawa baseline; FORGE must launch the authorized run under lock.",
+  "task_id": "T-00146",
+  "worker": "FORGE"
 }
