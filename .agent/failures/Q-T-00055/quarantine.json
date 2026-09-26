@@ -1,0 +1,13 @@
+{
+  "not_restored": [],
+  "note": "Agent's version of each file is under files/; the working tree was restored.",
+  "problems": [
+    "ecosys-ng/src/soil/chemistry/snow_initialization.zig: production source changed without .agent/tasks/<task>.hypothesis.md (spec section 15)"
+  ],
+  "restored": [
+    "ecosys-ng/src/soil/chemistry/snow_initialization.zig"
+  ],
+  "role": "FORGE",
+  "tag": "T-00055",
+  "time": 1790404554.8049839
+}

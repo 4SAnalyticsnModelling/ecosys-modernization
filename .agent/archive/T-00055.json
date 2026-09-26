@@ -1,0 +1,91 @@
+{
+  "changed": [
+    ".agent/failures/Q-T-00055/files/ecosys-ng/src/soil/chemistry/snow_initialization.zig",
+    ".agent/failures/Q-T-00055/quarantine.json",
+    ".agent/results/T-00055.md",
+    "audit/runs/t-00055-fmt-clean/receipt.json",
+    "audit/runs/t-00055-fmt-clean/stderr.log",
+    "audit/runs/t-00055-fmt-clean/stdout.log",
+    "audit/runs/t-00055-fmt/receipt.json",
+    "audit/runs/t-00055-fmt/stderr.log",
+    "audit/runs/t-00055-fmt/stdout.log",
+    "audit/runs/t-00055-t1-carrier-free/receipt.json",
+    "audit/runs/t-00055-t1-carrier-free/stderr.log",
+    "audit/runs/t-00055-t1-carrier-free/stdout.log",
+    "audit/runs/t-00055-t1-final/receipt.json",
+    "audit/runs/t-00055-t1-final/stderr.log",
+    "audit/runs/t-00055-t1-final/stdout.log",
+    "audit/runs/t-00055-t1-test/receipt.json",
+    "audit/runs/t-00055-t1-test/stderr.log",
+    "audit/runs/t-00055-t1-test/stdout.log",
+    "audit/runs/t-00055-test-carrier-free/receipt.json",
+    "audit/runs/t-00055-test-carrier-free/stderr.log",
+    "audit/runs/t-00055-test-carrier-free/stdout.log",
+    "audit/runs/t-00055-test-print/receipt.json",
+    "audit/runs/t-00055-test-print/stderr.log",
+    "audit/runs/t-00055-test-print/stdout.log",
+    "audit/runs/t-00055-test-t00053/receipt.json",
+    "audit/runs/t-00055-test-t00053/stderr.log",
+    "audit/runs/t-00055-test-t00053/stdout.log",
+    "audit/runs/t-00055-test-trace/receipt.json",
+    "audit/runs/t-00055-test-trace/stderr.log",
+    "audit/runs/t-00055-test-trace/stdout.log"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Revise the T-00053 bounded chemistry test to isolate fixed-pH legacy semantics and re-submit for SAGE review.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00055.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-validation-tests"
+    ],
+    "state_next": "FORGE: revise the bounded T-00053 chemistry test and prepare the SAGE review packet.",
+    "state_recent": [
+      "T-00054 SAGE DONE: T-00053 test needs revision to isolate fixed-pH semantics",
+      "T-00053 FORGE DONE: matched-state replay isolates residual update mismatch"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00055.md",
+    "task_id": "T-00055"
+  },
+  "ended": 1790404557.3101015,
+  "failure_packet": ".agent/failures/F-00005",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": {
+    "not_restored": [],
+    "note": "Agent's version of each file is under files/; the working tree was restored.",
+    "problems": [
+      "ecosys-ng/src/soil/chemistry/snow_initialization.zig: production source changed without .agent/tasks/<task>.hypothesis.md (spec section 15)"
+    ],
+    "restored": [
+      "ecosys-ng/src/soil/chemistry/snow_initialization.zig"
+    ],
+    "role": "FORGE",
+    "tag": "T-00055",
+    "time": 1790404554.8049839
+  },
+  "reset": {
+    "new": null,
+    "old": "ses_f23b16e9effeAAxzSzG3djASDx",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "FAIL",
+  "review": null,
+  "usage": {
+    "cache_read": 6388164,
+    "cache_write": 0,
+    "cost": 1.3228563000000002,
+    "input": 1042647,
+    "llm_calls": 73,
+    "output": 16469,
+    "tool_calls": 77
+  },
+  "violations": [
+    "ecosys-ng/src/soil/chemistry/snow_initialization.zig: production source changed without .agent/tasks/<task>.hypothesis.md (spec section 15)"
+  ]
+}

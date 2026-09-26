@@ -5,6 +5,7 @@
   "campaigns": 0,
   "campaigns_without_advance": 0,
   "failure_signatures": {
+    "FORGE:T-00055": 1,
     "PATHFINDER:T-00007": 1,
     "PATHFINDER:T-00026": 1,
     "PATHFINDER:T-00032": 1,
@@ -56,8 +57,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Revise the T-00053 bounded chemistry test to isolate fixed-pH legacy semantics and re-submit for SAGE review.",
   "task_id": "T-00055",
-  "worker": "FORGE"
+  "worker": null
 }

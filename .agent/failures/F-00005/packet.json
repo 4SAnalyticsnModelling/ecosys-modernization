@@ -1,0 +1,19 @@
+{
+  "carried_rejections": 0,
+  "commit": "7247d60babdcdee6233362532c5a46fe313eb108",
+  "fields": {
+    "binding_id": "UNKNOWN",
+    "candidate_fortran": "UNKNOWN",
+    "candidate_zig": "UNKNOWN",
+    "checkpoint": "UNKNOWN",
+    "exact_error": "task FAIL: scope violation, undone (copy in .agent/failures/Q-T-00055/): ecosys-ng/src/soil/chemistry/snow_initialization.zig: production source changed without .agent/tasks/<task>.hypothesis.md (spec section 15)",
+    "first_divergent_state": "UNKNOWN",
+    "first_failing_timestep": "UNKNOWN",
+    "last_verified_timestep": "UNKNOWN",
+    "relevant_variables": "UNKNOWN",
+    "subsystem": "UNKNOWN"
+  },
+  "packet": "F-00005",
+  "signature": "FORGE:T-00055",
+  "task": "T-00055"
+}

@@ -1,1 +1,21 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00055", "role": "FORGE", "task_file": ".agent/tasks/T-00055.md", "result_file": ".agent/results/T-00055.md", "skills": ["ecosys-validation-tests"], "t1_argv": null, "requires_sage_review": true, "full_run_justification": null, "reason": "Revise the T-00053 bounded chemistry test to isolate fixed-pH legacy semantics and re-submit for SAGE review.", "state_recent": ["T-00054 SAGE DONE: T-00053 test needs revision to isolate fixed-pH semantics", "T-00053 FORGE DONE: matched-state replay isolates residual update mismatch"], "state_next": "FORGE: revise the bounded T-00053 chemistry test and prepare the SAGE review packet."}
+{
+  "full_run_justification": null,
+  "reason": "Revise the T-00053 bounded chemistry test to isolate fixed-pH legacy semantics and re-submit for SAGE review.",
+  "requires_sage_review": true,
+  "result_file": ".agent/results/T-00055.md",
+  "result_status": "FAIL",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-validation-tests"
+  ],
+  "state_next": "FORGE: revise the bounded T-00053 chemistry test and prepare the SAGE review packet.",
+  "state_recent": [
+    "T-00054 SAGE DONE: T-00053 test needs revision to isolate fixed-pH semantics",
+    "T-00053 FORGE DONE: matched-state replay isolates residual update mismatch"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00055.md",
+  "task_id": "T-00055"
+}
