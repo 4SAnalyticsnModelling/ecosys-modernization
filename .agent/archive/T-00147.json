@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00147.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "The full legacy Ottawa rerun is blocked by the 60-minute FORGE session budget; SAGE must authorize the continuation path before launch.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00147.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE decides whether to authorize the full legacy rerun under a controller-managed execution budget.",
+    "state_recent": [
+      "T-00146 FORGE BLOCKED: full-run launch exceeds 60-minute session budget; needs SAGE approval.",
+      "T-00143 FORGE DONE: legacy provenance manifest and full-run driver are ready.",
+      "T-00142 SAGE DONE: full legacy P0.4 rerun is authorized without further science gate."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00147.md",
+    "task_id": "T-00147"
+  },
+  "ended": 1790465470.2833195,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "9b75dd94-8a6e-4e00-b2b9-5c70e0bd83f3",
+    "old": "18c16501-ae1b-4ac9-9c6b-d6b2cae67b60",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 368205,
+    "cache_write": 37793,
+    "cost": null,
+    "input": 16,
+    "llm_calls": 8,
+    "output": 5201,
+    "tool_calls": 3
+  },
+  "violations": []
+}

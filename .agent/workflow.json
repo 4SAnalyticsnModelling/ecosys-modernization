@@ -70,8 +70,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "The full legacy Ottawa rerun is blocked by the 60-minute FORGE session budget; SAGE must authorize the continuation path before launch.",
   "task_id": "T-00147",
-  "worker": "SAGE"
+  "worker": null
 }
