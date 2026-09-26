@@ -3,6 +3,11 @@
   "note": "Single source of truth for the 4-agent swarm (execution plan section 2). swarm_wrapper.py reads this; edit here, not in code. Budgets: minutes are enforced by the wrapper; tokens are recorded only when the harness reports them.",
   "herdr_session": "ecosys-ng",
   "controller": {"tab_label": "CONTROLLER", "pane_label": "CONTROLLER", "command": "scripts/start-swarm.sh [--resume]"},
+  "executables": {
+    "note": "Launched directly with a short `pane run`, then detected and named (2026-09-25). `herdr agent start` types a ~1.5k-char PowerShell shim into the zsh pane at 1-6 chars/s and times out; the npm `opencode` shell shim is not detected by Herdr. Use forward slashes (valid in zsh, bash and pwsh).",
+    "opencode": "C:/Users/symon.mezbahuddin/AppData/Roaming/npm/node_modules/opencode-ai/bin/opencode.exe",
+    "claude": "C:/Users/symon.mezbahuddin/.local/bin/claude.exe"
+  },
   "git": {
     "note": "Decision D8 (user, 2026-09-25): autonomous commit AND push after every cycle. The controller commits only the paths the cycle changed; production source is withheld until a SAGE APPROVE matches the current diff; never force-push, pull, rebase or merge.",
     "commit": true,

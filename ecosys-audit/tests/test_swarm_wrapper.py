@@ -588,6 +588,30 @@ class SwarmTests(unittest.TestCase):
         self.swarm.set_variant("FORGE", "w1:p2")  # already set: no keystrokes
         self.assertEqual(self.herdr.pane_log, [])
 
+    def test_launch_runs_executable_directly_and_names_the_detected_agent(self):
+        # 2026-09-25: `herdr agent start` typed its long shim at 1-6 chars/s and timed out.
+        h = self.herdr
+        del h.agents["forge"]
+        runs, detected = [], {"n": 0}
+        h.foreground = lambda pane: ["zsh"]
+        h.pane_run = lambda pane, cmd: runs.append((pane, cmd))
+
+        def pane(p):
+            detected["n"] += 1
+            return {"pane_id": p, "agent": "opencode" if detected["n"] >= 3 else None}
+        h.pane = pane
+
+        def rename(p, name):
+            h.agents[name] = {"agent": "opencode", "agent_status": "idle", "pane_id": p, "name": name}
+        h.rename = rename
+        h.start = lambda *a, **k: self.fail("agent start must not be used when an executable is configured")
+        self.swarm.roster["executables"] = {"opencode": "C:/x/opencode.exe"}
+        self.swarm.roster["roles"]["FORGE"].pop("variant", None)
+        self.swarm.launch("FORGE", "w1:p9")
+        self.assertEqual(runs, [("w1:p9", "export ECOSYS_SWARM_ROLE=forge && C:/x/opencode.exe --agent forge -m "
+                                          "github-copilot/gemini-3.8-flash --auto")])
+        self.assertEqual(h.agents["forge"]["pane_id"], "w1:p9")
+
     def test_launch_variant_that_never_shows_is_an_error(self):
         self.herdr.variant_works = False
         self.herdr.pane_screen["w1:p2"] = "Forge auto · Gemini 3.8 Flash GitHub Copilot"

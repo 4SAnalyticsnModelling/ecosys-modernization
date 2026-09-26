@@ -23,6 +23,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import sys
 import time
@@ -88,6 +89,9 @@ class Herdr:
 
     def panes(self) -> list[dict]:
         return self.call("pane", "list")["result"]["panes"]
+
+    def pane(self, pane: str) -> dict:
+        return self.call("pane", "get", pane)["result"]["pane"]
 
     def foreground(self, pane: str) -> list[str]:
         info = self.call("pane", "process-info", "--pane", pane)["result"]["process_info"]
@@ -987,6 +991,10 @@ class Swarm:
                 if r["kind"] == "opencode" and r.get("variant") and a.get("agent_status") in ("idle", "done"):
                     self.set_variant(role, pane["pane_id"])
                     report[role] = f"OK (variant {r['variant']})"
+            elif a and not a.get("agent"):
+                # A Herdr server restart restores names onto panes whose agent it can no longer detect;
+                # such a name cannot be cleared or reused (agent_name_taken). Replace the pane.
+                report[role] = f"STALE_NAME on {a.get('pane_id')}: split a fresh pane in the tab, close the old one, label it"
             elif pane.get("agent") == r["kind"]:
                 self.herdr.rename(pane["pane_id"], r["agent_name"])
                 report[role] = "RENAMED"
@@ -1000,9 +1008,39 @@ class Swarm:
     def launch(self, role: str, pane: str):
         r = self.role(role)
         fg = self.herdr.foreground(pane)
-        env = (f"$env:ECOSYS_SWARM_ROLE='{role.lower()}'" if any(s in ("pwsh", "powershell") for s in fg)
-               else f"export ECOSYS_SWARM_ROLE={role.lower()}")
-        self.herdr.pane_run(pane, env)
+        pwsh = any(s in ("pwsh", "powershell") for s in fg)
+        exe = self.roster.get("executables", {}).get(r["kind"])
+        if exe:
+            self.launch_direct(role, pane, exe, pwsh)
+        else:
+            self.herdr.pane_run(pane, f"$env:ECOSYS_SWARM_ROLE='{role.lower()}'" if pwsh
+                                else f"export ECOSYS_SWARM_ROLE={role.lower()}")
+            self.launch_via_agent_start(role, pane)
+        if r["kind"] == "opencode" and r.get("variant"):
+            self.set_variant(role, pane)
+
+    def launch_direct(self, role: str, pane: str, exe: str, pwsh: bool):
+        """Run the harness executable with one short `pane run`, wait for Herdr to detect it, name it.
+
+        `herdr agent start` types a ~1.5k-char PowerShell shim that reaches a zsh pane at 1-6
+        chars/s, so it timed out at 150 s (2026-09-25); a direct launch is detected in ~17 s.
+        """
+        r = self.role(role)
+        if pwsh:
+            cmd = f"$env:ECOSYS_SWARM_ROLE='{role.lower()}'; & '{exe}' " + " ".join(f"'{a}'" for a in r["launch_args"])
+        else:
+            cmd = f"export ECOSYS_SWARM_ROLE={role.lower()} && {shlex.quote(exe)} " + " ".join(map(shlex.quote, r["launch_args"]))
+        self.herdr.pane_run(pane, cmd)
+        end = self.clock() + 240
+        while self.herdr.pane(pane).get("agent") != r["kind"]:
+            if self.clock() > end:
+                raise ProtocolError(f"{role}: {r['kind']} was not detected in pane {pane} within 240 s")
+            self.sleep(2)
+        self.herdr.rename(pane, r["agent_name"])
+        self.wait_settled(r["agent_name"], 120)
+
+    def launch_via_agent_start(self, role: str, pane: str):
+        r = self.role(role)
         for attempt in range(15):  # the shell is briefly "busy" right after running the export
             self.sleep(1 + attempt * 0.5)
             try:
@@ -1011,8 +1049,6 @@ class Swarm:
             except HerdrError as e:
                 if e.code != "agent_pane_busy" or attempt == 14:
                     raise
-        if r["kind"] == "opencode" and r.get("variant"):
-            self.set_variant(role, pane)
 
     def set_variant(self, role: str, pane: str):
         """Select the roster variant with OpenCode's /variants picker, then verify the status line.
