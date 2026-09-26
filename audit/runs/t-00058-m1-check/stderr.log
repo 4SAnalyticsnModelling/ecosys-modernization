@@ -1,0 +1,6 @@
+src\soil\chemistry\snow_initialization.zig:1177:59: error: expected ',' after field
+    result.primary_g_per_m3[0] = dissolved_gas_g_per_m3[0];
+                                                          ^
+src\soil\chemistry\snow_initialization.zig:1177:5: note: use 'var' or 'const' to declare variable
+    result.primary_g_per_m3[0] = dissolved_gas_g_per_m3[0];
+    ^~~~~~

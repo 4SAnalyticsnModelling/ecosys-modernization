@@ -1,0 +1,6 @@
+1/5 ecosys_ng.test_0...OK
+2/5 stages.hourly_process_pipeline.test_0...OK
+3/5 stages.hourly_process_driver.test.rainIonsGPerM3 binds the eight precipitation ion fields to Species order (PRECIP-ION-FEED-001)...OK
+4/5 stages.hourly_process_driver.test.rainIonsGPerM3 output feeds atmosphericInputG's rain channel, matching the irrigation channel it mirrors...OK
+5/5 stages.hourly_vegetation.test_0...OK
+All 5 tests passed.

@@ -1,0 +1,267 @@
+1/52 module_index.test_0...OK
+2/52 index.atmosphere_test_index.test_0...OK
+3/52 index.canopy_test_index.test_0...OK
+4/52 index.chemistry_test_index.test_0...OK
+5/52 index.core_test_index.test_0...OK
+6/52 index.driver_test_index.test_0...OK
+7/52 index.erosion_test_index.test_0...OK
+8/52 index.grid_cell_test_index.test_0...OK
+9/52 index.io_test_index.test_0...OK
+10/52 index.management_test_index.test_0...OK
+11/52 index.plant_test_index.test_0...OK
+12/52 index.redistribution_test_index.test_0...OK
+13/52 index.soil_test_index.test_0...OK
+14/52 index.state_test_index.test_0...OK
+15/52 index.surface_test_index.test_0...OK
+16/52 index.transport_test_index.test_0...OK
+17/52 index.validation_test_index.test_0...OK
+18/52 validation.landscape_boundary_balance.test_0...OK
+19/52 validation.landscape_mass_inventory.test_0...OK
+20/52 validation.mass_balance_audit.test_0...OK
+21/52 validation.soil_water_retention_validation.test_0...OK
+22/52 surface.litter_chemistry.test_0...OK
+23/52 state.grid_environment.test_0...OK
+24/52 state.plant_assignment.test_0...OK
+25/52 state.topography.test_0...OK
+26/52 soil.gas.coupled_gas_solver.test_0...OK
+27/52 soil.chemistry.snow_initialization.test.T-00058 matched-state STARTE oracle test for K=1 and K=2 dynamic inputs...
+M=1 ZIG: CSTR1=3.4604744479489134e-4 A1S=9.789027591563697e-1 A2S=9.182442351759716e-1 A3S=8.253838626469563e-1 CAL1=1.9000000000000005e-9 CFE1=6.300000000000002e-14 CCA1=5e-2 CH1P1=2.4691109447201025e-3
+
+DEBUG_ORACLE CAL1=1.7159312493490274e-7 expected=1.73458e-7
+DEBUG_ORACLE CFE1=8.723768256410747e-12 expected=8.85951e-11
+DEBUG_ORACLE CCA1=4.319434809569885e-2 expected=4.63759e-2
+DEBUG_ORACLE CMG1=1.8115084674997225e-2 expected=1.64885e-2
+DEBUG_ORACLE CNA1=2.7676537839133077e-2 expected=2.99871e-2
+DEBUG_ORACLE CKA1=9.947066472327374e-3 expected=9.99373e-3
+DEBUG_ORACLE CSO41=3.525526251672002e-2 expected=3.55373e-2
+DEBUG_ORACLE CH1P1=2.3639331710122022e-5 expected=1.14650e-3
+DEBUG_ORACLE CCO31=5.2323869949366905e-5 expected=5.23238e-5
+DEBUG_ORACLE CHCO31=9.343548205244091e-2 expected=9.34354e-2
+actual 0.00000017159312493490274, not within relative tolerance 0.01 of expected 0.00000017345820944249552
+FAIL (TestExpectedApproxEqRel)
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:336:13: 0x7ff649f49b44 in expectApproxEqRelInner__anon_68514 (test_zcu.obj)
+            return error.TestExpectedApproxEqRel;
+            ^
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\testing.zig:329: 0x7ff649f49f29 in expectApproxEqRel (test_zcu.obj)
+    return expectApproxEqRelInner(T, expected, actual, tolerance);
+
+D:\ecosys-modernization\ecosys-ng\src\soil\chemistry\snow_initialization.zig:1966:5: 0x7ff649f49fa3 in test.T-00058 matched-state STARTE oracle test for K=1 and K=2 dynamic inputs (test_zcu.obj)
+    try std.testing.expectApproxEqRel(@as(f64, 0.17345820944249552e-06), k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum)], tol);
+    ^
+28/52 soil.organic.combustion.test_0...OK
+29/52 soil.nutrients.fertilizer_dissolution.test_0...OK
+30/52 soil.heat.solver.test_0...OK
+31/52 soil.profile.relayering.test_0...OK
+32/52 soil.water.solver.test_0...OK
+33/52 soil.solute.carboxyl_exchange.test_0...OK
+34/52 soil.solute.cation_exchange.test_0...OK
+35/52 soil.solute.reaction_solver.test_0...OK
+36/52 soil.solute.water_equilibrium.test_0...OK
+37/52 soil.solute.reaction_solver_tests.test_0...OK
+38/52 soil.gas.coupled_gas_solver_tests.test_0...OK
+39/52 plant.root.plant_root_disturbance.test_0...OK
+40/52 plant.root.plant_root_metabolism.test_0...OK
+41/52 plant.root.plant_root_nutrient_uptake.test_0...OK
+42/52 plant.root.plant_root_system.test_0...OK
+43/52 plant.growth.storage_remobilization.test_0...OK
+44/52 plant.growth.shoot_growth_runtime.test_0...OK
+45/52 validation.plant_root_metabolism_test.test_0...OK
+46/52 management.land_management.test_0...OK
+47/52 management.plant_harvest_runtime.test_0...OK
+48/52 io.input.cell_grid_file.test_0...OK
+49/52 validation.plant_harvest_runtime_test.test_0...OK
+50/52 driver.runscript.test_0...OK
+51/52 canopy.photosynthesis.photosynthesis.test_0...OK
+52/52 validation.canopy_photosynthesis_test.test_0...OK
+51 passed; 0 skipped; 1 failed.
+error: the following test command failed with exit code 1:
+C:\zig-local-cache\ecosys-ng\o\27af7ae52b8d0797ba6f5ae1e1d6f62b\test.exe --seed=0xf6e8de

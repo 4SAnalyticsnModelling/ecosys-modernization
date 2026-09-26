@@ -1,0 +1,6 @@
+src\soil\chemistry\snow_initialization.zig:891:20: error: unused capture
+    for (0..MRXN) |cycle| {
+                   ^~~~~
+src\soil\chemistry\snow_initialization.zig:2005:146: error: use of undeclared identifier 'tol'
+    try std.testing.expectApproxEqRel(@as(f64, 0.32856865015259688e-11), k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_sulfate)], tol);
+                                                                                                                                                 ^~~

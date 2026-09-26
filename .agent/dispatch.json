@@ -1,1 +1,17 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00058", "role": "FORGE", "task_file": ".agent/tasks/T-00058.md", "result_file": ".agent/results/T-00058.md", "skills": ["ecosys-source-navigation", "ecosys-zig-safety-design"], "t1_argv": null, "requires_sage_review": true, "full_run_justification": null, "reason": "SAGE finalized fixed-pH per-source dynamic-input semantics; FORGE must replace the coupled equilibrium and add the matched-state oracle test.", "state_recent": ["T-00057 SAGE STATUS: fixed-pH dynamic-input speciation is final and source-equivalent.", "T-00056 SAGE STATUS: dynamic rain/irrigation must use per-source fixed-pH mixing."], "state_next": "FORGE replaces equilibratedDynamicInput with legacy fixed-pH per-source speciation and a matched-state STARTE oracle test."}
+{
+  "diff_sha256": "0e471a64dc299f5ed50039bf179c1bf62e8ad83bc042d87f17672faf76db0482",
+  "full_run_justification": null,
+  "reason": "automatic review of production-source change",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00059.md",
+  "review_of": "T-00058",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00059.md",
+  "task_id": "T-00059"
+}
