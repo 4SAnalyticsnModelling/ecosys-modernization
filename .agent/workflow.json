@@ -59,6 +59,6 @@
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "SAGE finalized fixed-pH per-source dynamic-input semantics; FORGE must replace the coupled equilibrium and add the matched-state oracle test.",
-  "task_id": "T-00058",
+  "task_id": "T-00059",
   "worker": null
 }
