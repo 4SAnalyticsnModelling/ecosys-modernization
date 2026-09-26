@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00064 SAGE STATUS: REVISE T-00060; R3 and the 1000-cycle discrepancy remain open
-- T-00063 SAGE STATUS: review quarantined T-00060 diff directly; no reimplementation
-- T-00059 SAGE STATUS: R1-R4 remain open; fixed-pH design stays
+- T-00065 SAGE STATUS: REVISE T-00060; R1 and R3 remain open
+- T-00064 SAGE STATUS: REVISE T-00060; R3 and 1000-cycle discrepancy remain open
+- T-00063 SAGE STATUS: no reimplementation; review the quarantined diff directly
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE reviews the T-00060 diff against T-00059 R1-R4 and emits VERDICT: APPROVE|REVISE|REJECT.
+FORGE revises T-00060 in place to resolve R1/R3 before any new Ottawa evidence.

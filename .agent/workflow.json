@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "SAGE must adjudicate the quarantined T-00060 diff before any new implementation overwrites the working tree; T-00064 explicitly requires a verdict.",
-  "task_id": "T-00065",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Latest SAGE verdict is REVISE; the next bounded step is a FORGE revision of T-00060 to close R1/R3 before any Ottawa evidence counts.",
+  "task_id": "T-00066",
+  "worker": "FORGE"
 }
