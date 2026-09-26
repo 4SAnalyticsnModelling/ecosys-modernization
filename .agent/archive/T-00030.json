@@ -1,0 +1,48 @@
+{
+  "changed": [
+    ".agent/results/T-00030.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Latest evidence marks DEV-004 as a bounded runtime-ceiling deviation; SAGE must adjudicate the D6 packet before user signature.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00030.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE adjudicates DEV-004 in the D6 packet and prepares the final user-signature decision.",
+    "state_recent": [
+      "T-00029 FORGE DONE: encoded DEV-004 as a legacy-equivalent 100-ceiling bound; hour-9 onset preserved.",
+      "T-00027 PATHFINDER DONE: n100e/n100f preserve the 100 vs 200 ceiling and first divergence at hour 9.",
+      "T-00024 SAGE DONE: DEV-005 is legacy parity; DEV-004 remains the material deviation."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00030.md",
+    "task_id": "T-00030"
+  },
+  "ended": 1790391764.8419914,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": "649eae8d-0947-4fb2-932c-eacb5bbd71bd",
+    "old": "f335171d-5acf-4aa9-be65-df403f4337c9",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 419400,
+    "cache_write": 40620,
+    "cost": null,
+    "input": 18,
+    "llm_calls": 9,
+    "output": 5885,
+    "tool_calls": 3
+  },
+  "violations": []
+}

@@ -1,1 +1,14 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00030", "role": "SAGE", "task_file": ".agent/tasks/T-00030.md", "result_file": ".agent/results/T-00030.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Latest evidence marks DEV-004 as a bounded runtime-ceiling deviation; SAGE must adjudicate the D6 packet before user signature.", "state_recent": ["T-00029 FORGE DONE: encoded DEV-004 as a legacy-equivalent 100-ceiling bound; hour-9 onset preserved.", "T-00027 PATHFINDER DONE: n100e/n100f preserve the 100 vs 200 ceiling and first divergence at hour 9.", "T-00024 SAGE DONE: DEV-005 is legacy parity; DEV-004 remains the material deviation."], "state_next": "SAGE adjudicates DEV-004 in the D6 packet and prepares the final user-signature decision."}
+{
+  "chained_from": "T-00030",
+  "full_run_justification": null,
+  "reason": "chained from T-00030 (SAGE CHAIN block)",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00031.md",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00031.md",
+  "task_id": "T-00031"
+}

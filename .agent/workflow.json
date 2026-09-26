@@ -48,7 +48,7 @@
   "route_failures": 0,
   "schema_version": 1,
   "status": "DISPATCHED",
-  "status_reason": "Latest evidence marks DEV-004 as a bounded runtime-ceiling deviation; SAGE must adjudicate the D6 packet before user signature.",
-  "task_id": "T-00030",
-  "worker": "SAGE"
+  "status_reason": "chained from T-00030 (SAGE CHAIN block)",
+  "task_id": "T-00031",
+  "worker": "FORGE"
 }
