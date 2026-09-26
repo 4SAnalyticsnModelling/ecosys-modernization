@@ -1,21 +1,32 @@
 {
-  "full_run_justification": null,
-  "reason": "Bounded ledger rewrite for unresolved TRC rows using confirmed legacy ZEROS/ZEROS2 semantics; no full run or science change.",
-  "requires_sage_review": true,
-  "result_file": ".agent/results/T-00113.md",
-  "result_status": "DONE",
-  "role": "FORGE",
+  "errors": [
+    "task file missing sections ['ROLE', 'INPUTS', 'RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']",
+    "ALLOWED FILES `audit/traceability/traceability.csv` is outside PATHFINDER may_write",
+    "ALLOWED FILES `ecosys-ng/src/` is outside PATHFINDER may_write (writable by FORGE)",
+    "ALLOWED FILES `f77src/` is a protected reference path",
+    "ALLOWED FILES `raw` is outside PATHFINDER may_write"
+  ],
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "Newest result directs a PATHFINDER evidence packet for the verified unresolved-row ledger set; no science change or full run.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00114.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER: prepare the approved ledger-row evidence packet for SAGE review without touching the ledger itself.",
+    "state_recent": [
+      "T-00113 PATHFINDER DONE: verified 11 rows and four approved refreshes for the unresolved TRC cluster.",
+      "T-00112 FORGE DONE: shared legacy ZEROS/ZEROS2 guard semantics mapped for those rows.",
+      "T-00111 SAGE DONE: final TRC dispositions set and TRC-336 retired."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00114.md",
+    "task_id": "T-00114"
+  },
   "schema_version": 1,
-  "skills": [
-    "ecosys-source-navigation"
-  ],
-  "state_next": "FORGE: rewrite the unresolved ledger text for TRC-331..335 and TRC-337..340 to the shared legacy ZEROS/ZEROS2 guard semantics; leave TRC-313 unresolved and retire TRC-336 with explicit scope approval.",
-  "state_recent": [
-    "T-00112 PATHFINDER DONE: legacy ZEROS/ZEROS2 per-layer guard semantics mapped for TRC-331..340.",
-    "T-00111 SAGE DONE: unresolved TRC-313 and TRC-331..340 final dispositions set; no hash refresh."
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00113.md",
-  "task_id": "T-00113"
+  "status": "REJECTED"
 }
