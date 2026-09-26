@@ -78,66 +78,70 @@ const DynamicSnowInput = struct {
     salt_mol: [ecosys.snow_solute_transport.salt_species_count]f64 = @splat(0),
 };
 
-fn equilibratedDynamicInput(
-    allocator: std.mem.Allocator,
-    workspace: *ecosys.solute_reaction_solver.Workspace,
+fn starteDynamicInput(
+    cache: ?*ecosys.snow_chemistry_initialization.SpeciationCache,
     rain: EquilibriumSource,
     irrigation: EquilibriumSource,
     molar_mass_g_per_mol: ecosys.soil_chemistry_initialization.ElementMolarMassesGPerMol,
-    global_parameters: ecosys.soil_chemistry_parameters.Parameters,
-    options: ecosys.solute_reaction_solver.Options,
-    failure_report: ?ecosys.solute_failure_reporter.Request,
-    global_cell_id: usize,
+    soil_hydrogen_mol_per_m3: f64,
+    atca: f64,
+    cco2ei: f64,
 ) !DynamicSnowInput {
     const total_water_m3 = rain.water_m3 + irrigation.water_m3;
     if (!std.math.isFinite(total_water_m3) or total_water_m3 < 0)
         return error.InvalidSnowAtmosphericInput;
     if (total_water_m3 == 0) return .{};
-    inline for (.{ rain, irrigation }) |source| {
-        if (!std.math.isFinite(source.water_m3) or source.water_m3 < 0 or
-            !std.math.isFinite(source.ph) or source.ph < 0 or source.ph > 14)
-            return error.InvalidSnowAtmosphericInput;
-    }
-    const rain_fraction = rain.water_m3 / total_water_m3;
-    const irrigation_fraction = irrigation.water_m3 / total_water_m3;
-    const hydrogen_mol_per_m3 = rain_fraction * 1000 * std.math.pow(f64, 10, -rain.ph) +
-        irrigation_fraction * 1000 * std.math.pow(f64, 10, -irrigation.ph);
-    if (!std.math.isFinite(hydrogen_mol_per_m3) or hydrogen_mol_per_m3 <= 0)
-        return error.InvalidSnowAtmosphericInput;
-    var gas_g_per_m3: [5]f64 = undefined;
-    var ions_g_per_m3: [8]f64 = undefined;
-    for (&gas_g_per_m3, rain.dissolved_gas_g_per_m3, irrigation.dissolved_gas_g_per_m3) |*result, rain_value, irrigation_value|
-        result.* = rain_fraction * rain_value + irrigation_fraction * irrigation_value;
-    for (&ions_g_per_m3, rain.free_ion_g_per_m3, irrigation.free_ion_g_per_m3) |*result, rain_value, irrigation_value|
-        result.* = rain_fraction * rain_value + irrigation_fraction * irrigation_value;
-    const equilibrium_inputs: ecosys.snow_chemistry_initialization.Inputs = .{
-        .precipitation_ph = -std.math.log10(hydrogen_mol_per_m3 / 1000),
-        .dissolved_gas_g_per_m3 = gas_g_per_m3,
-        .ammonium_g_n_per_m3 = rain_fraction * rain.ammonium_g_n_per_m3 + irrigation_fraction * irrigation.ammonium_g_n_per_m3,
-        .nitrate_g_n_per_m3 = rain_fraction * rain.nitrate_g_n_per_m3 + irrigation_fraction * irrigation.nitrate_g_n_per_m3,
-        .phosphate_g_p_per_m3 = rain_fraction * rain.phosphate_g_p_per_m3 + irrigation_fraction * irrigation.phosphate_g_p_per_m3,
-        .free_ion_g_per_m3 = ions_g_per_m3,
-        .molar_mass_g_per_mol = molar_mass_g_per_mol,
-    };
-    var contextual_failure_report = failure_report;
-    if (contextual_failure_report) |*report| {
-        report.context.global_cell_id = @intCast(global_cell_id);
-        report.context.soil_layer_id = 0;
-        report.context.packed_cell_index = 0;
-    }
-    const concentrations = try ecosys.snow_chemistry_initialization.equilibrateWithWorkspaceAndFailureReport(
-        allocator,
-        workspace,
-        equilibrium_inputs,
-        global_parameters,
-        options,
-        contextual_failure_report,
-    );
+
     var result: DynamicSnowInput = .{};
-    for (concentrations.primary_g_per_m3, 0..) |concentration, species|
-        result.primary_g[species] = concentration * total_water_m3;
-    for (concentrations.salt_mol_per_m3, 0..) |concentration, species|
-        result.salt_mol[species] = concentration * total_water_m3;
+
+    if (rain.water_m3 > 0) {
+        if (!std.math.isFinite(rain.water_m3) or !std.math.isFinite(rain.ph) or rain.ph < 0 or rain.ph > 14)
+            return error.InvalidSnowAtmosphericInput;
+        const rain_spec = try ecosys.snow_chemistry_initialization.speciateFixedPhSourceCached(
+            cache,
+            rain.ph,
+            rain.dissolved_gas_g_per_m3,
+            rain.ammonium_g_n_per_m3,
+            rain.nitrate_g_n_per_m3,
+            rain.phosphate_g_p_per_m3,
+            rain.free_ion_g_per_m3,
+            molar_mass_g_per_mol,
+            soil_hydrogen_mol_per_m3,
+            atca,
+            cco2ei,
+        );
+        for (rain_spec.primary_g_per_m3, 0..) |conc, species| {
+            result.primary_g[species] += conc * rain.water_m3;
+        }
+        for (rain_spec.salt_mol_per_m3, 0..) |conc, species| {
+            result.salt_mol[species] += conc * rain.water_m3;
+        }
+    }
+
+    if (irrigation.water_m3 > 0) {
+        if (!std.math.isFinite(irrigation.water_m3) or !std.math.isFinite(irrigation.ph) or irrigation.ph < 0 or irrigation.ph > 14)
+            return error.InvalidSnowAtmosphericInput;
+        const irr_spec = try ecosys.snow_chemistry_initialization.speciateFixedPhSourceCached(
+            cache,
+            irrigation.ph,
+            irrigation.dissolved_gas_g_per_m3,
+            irrigation.ammonium_g_n_per_m3,
+            irrigation.nitrate_g_n_per_m3,
+            irrigation.phosphate_g_p_per_m3,
+            irrigation.free_ion_g_per_m3,
+            molar_mass_g_per_mol,
+            soil_hydrogen_mol_per_m3,
+            atca,
+            cco2ei,
+        );
+        for (irr_spec.primary_g_per_m3, 0..) |conc, species| {
+            result.primary_g[species] += conc * irrigation.water_m3;
+        }
+        for (irr_spec.salt_mol_per_m3, 0..) |conc, species| {
+            result.salt_mol[species] += conc * irrigation.water_m3;
+        }
+    }
+
     return result;
 }
 const group_snow_energy = @import("hourly_snow_energy.zig");
@@ -187,6 +191,58 @@ fn scaledPrecipitationNitrogen(
         .ammonium_g_n_per_m3 = forcing.precipitation_ammonium_g_n_per_m3,
         .nitrate_g_n_per_m3 = forcing.precipitation_nitrate_g_n_per_m3,
     };
+}
+
+/// Evaluates and updates the STARTE-equivalent daily input speciation state (soil.f:106-109).
+/// Evaluates topsoil activity hydrogen AHY1 per cell at layerIndex(cell, 0) (starte.f:439).
+pub fn triggerDailySpeciation(
+    speciation_state: *ecosys.snow_chemistry_initialization.DynamicInputSpeciationState,
+    current_day: u16,
+    is_restart: bool,
+    cell_count: usize,
+    grid: anytype,
+    soil_chemistry: anytype,
+    fertilizer_band: anytype,
+) !void {
+    if (speciation_state.last_starte_day == null or speciation_state.last_starte_day.? != current_day or is_restart) {
+        speciation_state.invalidate();
+        speciation_state.last_starte_day = current_day;
+        for (0..cell_count) |cell| {
+            if (cell >= ecosys.snow_chemistry_initialization.DynamicInputSpeciationState.max_cells)
+                return error.GridCellCountExceedsDynamicSpeciationCapacity;
+            const topsoil_cell = try grid.layerIndex(cell, 0);
+            const topsoil_hydrogen = soil_chemistry.aqueous[topsoil_cell].hydrogen;
+            if (std.math.isFinite(topsoil_hydrogen) and topsoil_hydrogen > 0) {
+                const fractions = if (fertilizer_band) |fb|
+                    try fb.scienceZoneFractions(cell, 0)
+                else
+                    .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 };
+                const activity = try soil_chemistry.activityCoefficients(topsoil_cell, fractions);
+                const ahy_raw = topsoil_hydrogen * activity.monovalent_activity_coefficient;
+                const ph = -std.math.log10(ahy_raw * 1.0e-3);
+                const ahy1 = std.math.pow(f64, 10.0, -(ph - 3.0));
+                speciation_state.event_topsoil_ph[cell] = ph;
+                speciation_state.event_topsoil_activity_hydrogen[cell] = ahy1;
+            }
+        }
+    }
+}
+
+/// Resolves topsoil activity hydrogen for dynamic input speciation (starte.f:439).
+/// When event speciation state is active, uses the cell's daily-latched event AHY1 without
+/// inspecting intra-day live soil hydrogen. Dynamic input speciation requires valid event state;
+/// null state rejects with error.MissingDynamicInputSpeciationState (fallback removed per T-00073/T-00074).
+pub fn resolveDynamicInputSoilHydrogen(
+    speciation_state: ?*const ecosys.snow_chemistry_initialization.DynamicInputSpeciationState,
+    cell: usize,
+) !f64 {
+    const state = speciation_state orelse return error.MissingDynamicInputSpeciationState;
+    if (cell >= state.event_topsoil_activity_hydrogen.len)
+        return error.GridCellCountExceedsDynamicSpeciationCapacity;
+    const ahy1 = state.event_topsoil_activity_hydrogen[cell];
+    if (!std.math.isFinite(ahy1) or ahy1 <= 0)
+        return error.InvalidTopsoilHydrogenForDynamicInput;
+    return ahy1;
 }
 
 pub fn executeHourlyScience(
@@ -249,6 +305,19 @@ pub fn executeHourlyScience(
         try diagnostics.diagnosticRelayerPhosphateOwners_g(context)
     else
         @as([3]f64, @splat(0));
+
+    const speciation_state: ?*ecosys.snow_chemistry_initialization.DynamicInputSpeciationState =
+        if (@hasField(@TypeOf(context), "dynamic_input_speciation_state"))
+            context.dynamic_input_speciation_state
+        else
+            null;
+    const current_day: u16 = plant_calendar.day_of_year;
+    const is_restart: bool = if (@hasField(@TypeOf(context), "restoring_checkpoint")) context.restoring_checkpoint else false;
+    if (speciation_state) |state| {
+        const fert = if (@hasField(@TypeOf(context), "fertilizer_band")) &context.fertilizer_band else null;
+        try triggerDailySpeciation(state, current_day, is_restart, context.grid.cell_count, context.grid, context.soil_chemistry, fert);
+    }
+
     context.plant_available_nutrients.resetHourlyChanges();
     try ecosys.soil_organic_carbon_change.captureHourStart(context.soil_organic, context.soil_organic_carbon_at_hour_start_g_c);
     // Derive restart-sensitive surface state from the checkpointed snow owner.
@@ -601,9 +670,17 @@ pub fn executeHourlyScience(
         }
         var input = try ecosys.snow_solute_transport.atmosphericInputG(rain_to_snow_m3, irrigation_to_snow_m3, rain_gas_concentration, [_]f64{0} ** 5, nutrients, irrigation_nutrients, rain_ions_g_per_m3, irrigation_ions_g_per_m3);
         if (context.snow_transport.dynamic_salts_by_cell[cell] and rain_to_snow_m3 + irrigation_to_snow_m3 > 0) {
-            const dynamic = try equilibratedDynamicInput(
-                context.allocator,
-                context.soil_chemistry_solver_workspace,
+            const effective_soil_hydrogen = try resolveDynamicInputSoilHydrogen(
+                speciation_state,
+                cell,
+            );
+            const atca = context.mean_annual_temperature_c_by_cell[cell];
+            const co2_ppm = context.site_by_cell[cell].atmospheric_co2_umol_mol;
+            const cco2ei = co2_ppm * 5.36e-4 * 273.15 / (atca + 273.15);
+            const cache_ptr = if (speciation_state) |state| &state.cache else null;
+
+            const dynamic = try starteDynamicInput(
+                cache_ptr,
                 .{
                     .water_m3 = rain_to_snow_m3,
                     .ph = weather_header.precipitation_ph,
@@ -623,18 +700,9 @@ pub fn executeHourlyScience(
                     .free_ion_g_per_m3 = irrigation_ions_g_per_m3,
                 },
                 context.runscript.chemistry_primary_initialization.molar_mass_g_per_mol,
-                reaction_parameters,
-                .{
-                    .absolute_tolerance_mol_per_m3 = context.config.nonlinear_tolerance.reaction_mol_per_m3,
-                    .absolute_tolerance_mol_per_megagram = context.config.nonlinear_tolerance.reaction_mol_per_megagram,
-                    .relative_tolerance = context.config.nonlinear_tolerance.relative,
-                    .picard_relaxation = context.config.picard_relaxation,
-                    .include_zero_rate_full_network_axes = false,
-                    .rate_ranked_coordinate_head_maximum_norm = 1.0e8,
-                    .max_iterations = context.iteration_limits.initial_solute_reaction_max_iterations,
-                },
-                solute_failure_report,
-                cell,
+                effective_soil_hydrogen,
+                atca,
+                cco2ei,
             );
             input = dynamic.primary_g;
             @memcpy(context.snow_atmospheric_input_salt_mol[cell * ecosys.snow_solute_transport.salt_species_count ..][0..ecosys.snow_solute_transport.salt_species_count], &dynamic.salt_mol);
@@ -660,16 +728,23 @@ pub fn executeHourlyScience(
             var direct_input = try ecosys.snow_solute_transport.atmosphericInputG(direct_rain_m3, direct_irrigation_m3, rain_gas_concentration, [_]f64{0} ** 5, nutrients, irrigation_nutrients, rain_ions_g_per_m3, irrigation_ions_g_per_m3);
             var direct_salt_mol = [_]f64{0} ** ecosys.snow_solute_transport.salt_species_count;
             if (context.snow_transport.dynamic_salts_by_cell[cell]) {
-                const dynamic = try equilibratedDynamicInput(
-                    context.allocator,
-                    context.soil_chemistry_solver_workspace,
+                const effective_soil_hydrogen = try resolveDynamicInputSoilHydrogen(
+                    speciation_state,
+                    cell,
+                );
+                const atca = context.mean_annual_temperature_c_by_cell[cell];
+                const co2_ppm = context.site_by_cell[cell].atmospheric_co2_umol_mol;
+                const cco2ei = co2_ppm * 5.36e-4 * 273.15 / (atca + 273.15);
+                const cache_ptr = if (speciation_state) |state| &state.cache else null;
+
+                const dynamic = try starteDynamicInput(
+                    cache_ptr,
                     .{ .water_m3 = direct_rain_m3, .ph = weather_header.precipitation_ph, .dissolved_gas_g_per_m3 = rain_gas_concentration, .ammonium_g_n_per_m3 = precipitation_nitrogen.ammonium_g_n_per_m3, .nitrate_g_n_per_m3 = precipitation_nitrogen.nitrate_g_n_per_m3, .phosphate_g_p_per_m3 = weather_header.precipitation_phosphate_g_per_m3, .free_ion_g_per_m3 = rain_ions_g_per_m3 },
                     .{ .water_m3 = direct_irrigation_m3, .ph = irrigation_ph, .dissolved_gas_g_per_m3 = @splat(0), .ammonium_g_n_per_m3 = irrigation_ammonium_g_n_per_m3, .nitrate_g_n_per_m3 = irrigation_nitrate_g_n_per_m3, .phosphate_g_p_per_m3 = irrigation_phosphate_g_p_per_m3, .free_ion_g_per_m3 = irrigation_ions_g_per_m3 },
                     context.runscript.chemistry_primary_initialization.molar_mass_g_per_mol,
-                    reaction_parameters,
-                    .{ .absolute_tolerance_mol_per_m3 = context.config.nonlinear_tolerance.reaction_mol_per_m3, .absolute_tolerance_mol_per_megagram = context.config.nonlinear_tolerance.reaction_mol_per_megagram, .relative_tolerance = context.config.nonlinear_tolerance.relative, .picard_relaxation = context.config.picard_relaxation, .include_zero_rate_full_network_axes = false, .rate_ranked_coordinate_head_maximum_norm = 1.0e8, .max_iterations = context.iteration_limits.initial_solute_reaction_max_iterations },
-                    solute_failure_report,
-                    cell,
+                    effective_soil_hydrogen,
+                    atca,
+                    cco2ei,
                 );
                 direct_input = dynamic.primary_g;
                 direct_salt_mol = dynamic.salt_mol;
@@ -868,6 +943,268 @@ test "rainIonsGPerM3 output feeds atmosphericInputG's rain channel, matching the
     );
     const aluminum_species: usize = @intFromEnum(ecosys.snow_solute_transport.Species.aluminum);
     try std.testing.expectApproxEqAbs(@as(f64, 2), output[aluminum_species], 1e-12);
+}
+
+test "starteDynamicInput speciates rain and irrigation at fixed pH and linearly mixes fluxes without re-equilibration" {
+    const masses: ecosys.soil_chemistry_initialization.ElementMolarMassesGPerMol = .{
+        .nitrogen = 14,
+        .phosphorus = 31,
+        .aluminum = 27,
+        .iron = 56,
+        .calcium = 40,
+        .magnesium = 24.3,
+        .sodium = 23,
+        .potassium = 39.1,
+        .sulfur = 32,
+        .chloride = 35.5,
+    };
+    const rain_m3: f64 = 0.005;
+    const irr_m3: f64 = 0.002;
+    const soil_hydrogen: f64 = std.math.pow(f64, 10.0, -(6.5 - 3.0));
+    const atca: f64 = 5.4;
+    const cco2ei: f64 = 370.0 * 5.36e-4 * 273.15 / (5.4 + 273.15);
+
+    const rain: EquilibriumSource = .{
+        .water_m3 = rain_m3,
+        .ph = 7.0,
+        .dissolved_gas_g_per_m3 = .{ 0.2669585201498312, 0, 0, 0, 0 },
+        .ammonium_g_n_per_m3 = 0.25,
+        .nitrate_g_n_per_m3 = 0.75,
+        .phosphate_g_p_per_m3 = 0.20,
+        .free_ion_g_per_m3 = .{ 0.01 * 27, 0.005 * 56, 0.05 * 40, 0.02 * 24.3, 0.03 * 23, 0.01 * 39.1, 0.04 * 32, 0.03 * 35.5 },
+    };
+    const irrigation: EquilibriumSource = .{
+        .water_m3 = irr_m3,
+        .ph = 7.5,
+        .dissolved_gas_g_per_m3 = @splat(0),
+        .ammonium_g_n_per_m3 = 1.0,
+        .nitrate_g_n_per_m3 = 2.0,
+        .phosphate_g_p_per_m3 = 0.5,
+        .free_ion_g_per_m3 = .{ 0, 0, 0.1 * 40, 0.05 * 24.3, 0.08 * 23, 0.02 * 39.1, 0.06 * 32, 0.05 * 35.5 },
+    };
+
+    var cache: ecosys.snow_chemistry_initialization.SpeciationCache = .{};
+    const dynamic = try starteDynamicInput(&cache, rain, irrigation, masses, soil_hydrogen, atca, cco2ei);
+
+    // Verify uncoupled linear flux superposition of hydrogen (fixed pH, no blending solve):
+    const expected_h_mol = rain_m3 * std.math.pow(f64, 10.0, -(7.0 - 3.0)) +
+        irr_m3 * std.math.pow(f64, 10.0, -(7.5 - 3.0));
+    try std.testing.expectEqual(expected_h_mol, dynamic.salt_mol[@intFromEnum(ecosys.snow_solute_transport.SaltSpecies.hydrogen)]);
+
+    // Verify linear chloride flux:
+    const expected_cl_mol = rain_m3 * 0.03 + irr_m3 * 0.05;
+    try std.testing.expectEqual(expected_cl_mol, dynamic.salt_mol[@intFromEnum(ecosys.snow_solute_transport.SaltSpecies.chloride)]);
+
+    // Verify irrigation now seeds carbonate and bicarbonate pairs (R2):
+    try std.testing.expect(dynamic.salt_mol[@intFromEnum(ecosys.snow_solute_transport.SaltSpecies.calcium_bicarbonate)] > 0);
+    try std.testing.expect(dynamic.salt_mol[@intFromEnum(ecosys.snow_solute_transport.SaltSpecies.carbonate)] > 0);
+
+    // Verify zero total water returns empty:
+    const empty = try starteDynamicInput(
+        &cache,
+        .{ .water_m3 = 0, .ph = 7, .dissolved_gas_g_per_m3 = @splat(0), .ammonium_g_n_per_m3 = 0, .nitrate_g_n_per_m3 = 0, .phosphate_g_p_per_m3 = 0, .free_ion_g_per_m3 = @splat(0) },
+        .{ .water_m3 = 0, .ph = 7, .dissolved_gas_g_per_m3 = @splat(0), .ammonium_g_n_per_m3 = 0, .nitrate_g_n_per_m3 = 0, .phosphate_g_p_per_m3 = 0, .free_ion_g_per_m3 = @splat(0) },
+        masses,
+        soil_hydrogen,
+        atca,
+        cco2ei,
+    );
+    try std.testing.expectEqualSlices(f64, &([_]f64{0} ** ecosys.snow_solute_transport.species_count), &empty.primary_g);
+    try std.testing.expectEqualSlices(f64, &([_]f64{0} ** ecosys.snow_solute_transport.salt_species_count), &empty.salt_mol);
+}
+
+test "hourly change in topsoil hydrogen on the same day does not re-speciate" {
+    const masses: ecosys.soil_chemistry_initialization.ElementMolarMassesGPerMol = .{
+        .nitrogen = 14,
+        .phosphorus = 31,
+        .aluminum = 27,
+        .iron = 56,
+        .calcium = 40,
+        .magnesium = 24.3,
+        .sodium = 23,
+        .potassium = 39.1,
+        .sulfur = 32,
+        .chloride = 35.5,
+    };
+    const atca: f64 = 5.4;
+    const cco2ei: f64 = 370.0 * 5.36e-4 * 273.15 / (5.4 + 273.15);
+
+    const rain: EquilibriumSource = .{
+        .water_m3 = 0.005,
+        .ph = 7.0,
+        .dissolved_gas_g_per_m3 = .{ 0.2669585201498312, 0, 0, 0, 0 },
+        .ammonium_g_n_per_m3 = 0.25,
+        .nitrate_g_n_per_m3 = 0.75,
+        .phosphate_g_p_per_m3 = 0.20,
+        .free_ion_g_per_m3 = .{ 0.01 * 27, 0.005 * 56, 0.05 * 40, 0.02 * 24.3, 0.03 * 23, 0.01 * 39.1, 0.04 * 32, 0.03 * 35.5 },
+    };
+    const irrigation: EquilibriumSource = .{
+        .water_m3 = 0.002,
+        .ph = 7.5,
+        .dissolved_gas_g_per_m3 = @splat(0),
+        .ammonium_g_n_per_m3 = 1.0,
+        .nitrate_g_n_per_m3 = 2.0,
+        .phosphate_g_p_per_m3 = 0.5,
+        .free_ion_g_per_m3 = .{ 0, 0, 0.1 * 40, 0.05 * 24.3, 0.08 * 23, 0.02 * 39.1, 0.06 * 32, 0.05 * 35.5 },
+    };
+
+    var speciation_state: ecosys.snow_chemistry_initialization.DynamicInputSpeciationState = .{};
+
+    // Construct mock grid and mock soil chemistry with 2 cells to verify cell-scoped AHY1 (R3):
+    const MockGrid = struct {
+        pub fn layerIndex(_: @This(), cell: usize, layer: usize) !usize {
+            if (cell >= 2 or layer >= 1) return error.GridIndexOutOfBounds;
+            return cell;
+        }
+    };
+    const MockSoilChemistry = struct {
+        aqueous: [2]struct { hydrogen: f64 },
+        pub fn activityCoefficients(_: @This(), cell: usize, _: anytype) !struct { monovalent_activity_coefficient: f64 } {
+            _ = cell;
+            return .{ .monovalent_activity_coefficient = 1.0 };
+        }
+    };
+
+    var mock_soil: MockSoilChemistry = .{
+        .aqueous = .{
+            .{ .hydrogen = std.math.pow(f64, 10.0, -(6.5 - 3.0)) }, // Cell 0: pH 6.5
+            .{ .hydrogen = std.math.pow(f64, 10.0, -(6.2 - 3.0)) }, // Cell 1: pH 6.2
+        },
+    };
+    const mock_grid: MockGrid = .{};
+
+    // Hour 1: Day 100 startup STARTE trigger evaluates topsoil AHY1 per cell:
+    try triggerDailySpeciation(&speciation_state, 100, false, 2, mock_grid, mock_soil, null);
+
+    // Verify cell-scoped event AHY1 stored per cell (R3 defect 1):
+    const initial_cell0_h = speciation_state.event_topsoil_activity_hydrogen[0];
+    const initial_cell1_h = speciation_state.event_topsoil_activity_hydrogen[1];
+    try std.testing.expectApproxEqRel(std.math.pow(f64, 10.0, -(6.5 - 3.0)), initial_cell0_h, 1e-12);
+    try std.testing.expectApproxEqRel(std.math.pow(f64, 10.0, -(6.2 - 3.0)), initial_cell1_h, 1e-12);
+    try std.testing.expect(initial_cell0_h != initial_cell1_h);
+
+    const hour1_cell0_out = try starteDynamicInput(
+        &speciation_state.cache,
+        rain,
+        irrigation,
+        masses,
+        speciation_state.event_topsoil_activity_hydrogen[0],
+        atca,
+        cco2ei,
+    );
+    const hour1_cell1_out = try starteDynamicInput(
+        &speciation_state.cache,
+        rain,
+        irrigation,
+        masses,
+        speciation_state.event_topsoil_activity_hydrogen[1],
+        atca,
+        cco2ei,
+    );
+    // Distinct cell pH values yield distinct speciation solutions:
+    try std.testing.expect(hour1_cell0_out.salt_mol[0] != hour1_cell1_out.salt_mol[0]);
+
+    // Hour 2: Same Day 100. Intra-day soil processes perturb live topsoil hydrogen by +50% and -30%:
+    mock_soil.aqueous[0].hydrogen *= 1.5;
+    mock_soil.aqueous[1].hydrogen *= 0.7;
+
+    // Drive the trigger function with the perturbed live hydrogen on the SAME day (R3 defect 3):
+    try triggerDailySpeciation(&speciation_state, 100, false, 2, mock_grid, mock_soil, null);
+
+    // Assert that the trigger function strictly preserves the event AHY1 on the same day:
+    try std.testing.expectEqual(initial_cell0_h, speciation_state.event_topsoil_activity_hydrogen[0]);
+    try std.testing.expectEqual(initial_cell1_h, speciation_state.event_topsoil_activity_hydrogen[1]);
+
+    // Re-run speciation in Hour 2: results are bit-identical cache hits:
+    const hour2_cell0_out = try starteDynamicInput(
+        &speciation_state.cache,
+        rain,
+        irrigation,
+        masses,
+        speciation_state.event_topsoil_activity_hydrogen[0],
+        atca,
+        cco2ei,
+    );
+    const hour2_cell1_out = try starteDynamicInput(
+        &speciation_state.cache,
+        rain,
+        irrigation,
+        masses,
+        speciation_state.event_topsoil_activity_hydrogen[1],
+        atca,
+        cco2ei,
+    );
+    try std.testing.expectEqualSlices(f64, &hour1_cell0_out.salt_mol, &hour2_cell0_out.salt_mol);
+    try std.testing.expectEqualSlices(f64, &hour1_cell0_out.primary_g, &hour2_cell0_out.primary_g);
+    try std.testing.expectEqualSlices(f64, &hour1_cell1_out.salt_mol, &hour2_cell1_out.salt_mol);
+    try std.testing.expectEqualSlices(f64, &hour1_cell1_out.primary_g, &hour2_cell1_out.primary_g);
+
+    // Day 101: New day (IDAYR != IOLD per soil.f:106-109). STARTE trigger fires:
+    try triggerDailySpeciation(&speciation_state, 101, false, 2, mock_grid, mock_soil, null);
+
+    // Verify event AHY1 has now updated to reflect Day 101 morning topsoil state:
+    try std.testing.expectApproxEqRel(mock_soil.aqueous[0].hydrogen, speciation_state.event_topsoil_activity_hydrogen[0], 1e-12);
+    try std.testing.expectApproxEqRel(mock_soil.aqueous[1].hydrogen, speciation_state.event_topsoil_activity_hydrogen[1], 1e-12);
+
+    // Verify cache was cleared on day transition:
+    for (speciation_state.cache.slots) |slot| {
+        try std.testing.expect(!slot.valid);
+    }
+
+    const day101_cell0_out = try starteDynamicInput(
+        &speciation_state.cache,
+        rain,
+        irrigation,
+        masses,
+        speciation_state.event_topsoil_activity_hydrogen[0],
+        atca,
+        cco2ei,
+    );
+    // Verify re-speciation occurred for Day 101:
+    try std.testing.expect(speciation_state.cache.slots[0].valid);
+    try std.testing.expect(day101_cell0_out.salt_mol[0] != hour1_cell0_out.salt_mol[0]);
+}
+
+test "resolveDynamicInputSoilHydrogen exercises production error paths and verifies event state requirement" {
+    var state: ecosys.snow_chemistry_initialization.DynamicInputSpeciationState = .{};
+
+    // 1. Uninitialized / zero event hydrogen rejects through production helper:
+    state.event_topsoil_activity_hydrogen[0] = 0.0;
+    try std.testing.expectError(
+        error.InvalidTopsoilHydrogenForDynamicInput,
+        resolveDynamicInputSoilHydrogen(&state, 0),
+    );
+
+    // 2. Negative event hydrogen rejects through production helper:
+    state.event_topsoil_activity_hydrogen[0] = -1.0e-4;
+    try std.testing.expectError(
+        error.InvalidTopsoilHydrogenForDynamicInput,
+        resolveDynamicInputSoilHydrogen(&state, 0),
+    );
+
+    // 3. NaN event hydrogen rejects through production helper:
+    state.event_topsoil_activity_hydrogen[0] = std.math.nan(f64);
+    try std.testing.expectError(
+        error.InvalidTopsoilHydrogenForDynamicInput,
+        resolveDynamicInputSoilHydrogen(&state, 0),
+    );
+
+    // 4. Valid event hydrogen succeeds:
+    state.event_topsoil_activity_hydrogen[0] = 1.0e-4;
+    const resolved_event = try resolveDynamicInputSoilHydrogen(&state, 0);
+    try std.testing.expectEqual(@as(f64, 1.0e-4), resolved_event);
+
+    // 5. Without event state (null), rejects (null-state fallback removed per T-00073/T-00074):
+    try std.testing.expectError(
+        error.MissingDynamicInputSpeciationState,
+        resolveDynamicInputSoilHydrogen(null, 0),
+    );
+
+    // 6. Cell index out of capacity rejects:
+    try std.testing.expectError(
+        error.GridCellCountExceedsDynamicSpeciationCapacity,
+        resolveDynamicInputSoilHydrogen(&state, ecosys.snow_chemistry_initialization.DynamicInputSpeciationState.max_cells),
+    );
 }
 
 test "WTHR precipitation nitrogen multipliers apply to baselines before speciation" {

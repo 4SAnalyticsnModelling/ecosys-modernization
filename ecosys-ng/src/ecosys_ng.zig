@@ -6110,8 +6110,8 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
         driver_context.executed_weather_hours.* < 2896)
     {
         const per_layer_quantities = [_]ecosys.hourly_cell_conservation.Quantity{
-            .carbon,    .nitrogen,  .phosphorus, .aluminum,  .iron,
-            .calcium,   .magnesium, .sodium,     .potassium, .silicon,
+            .carbon,  .nitrogen,  .phosphorus, .aluminum,  .iron,
+            .calcium, .magnesium, .sodium,     .potassium, .silicon,
         };
         for (hourly_layer_conservation_report.cells, 0..) |scope_report, index| {
             const address = try driver_context.layer_conservation_layout.*.address(index);
@@ -13635,6 +13635,7 @@ pub fn main(init: std.process.Init) !void {
             lateral_contribution_path,
         );
     resources.ownDeinit(&lateral_contribution_workspace);
+    var dynamic_input_speciation_state: ecosys.snow_chemistry_initialization.DynamicInputSpeciationState = .{};
     var diagnostic_residue_carbon_trace_g_c: [7]f64 = @splat(0);
     var diagnostic_organic_carbon_trace_g_c: [7]f64 = @splat(0);
     var diagnostic_inorganic_carbon_trace_g_c: [7]f64 = @splat(0);
@@ -13750,6 +13751,7 @@ pub fn main(init: std.process.Init) !void {
         .restoring_checkpoint = scene_options[0].resume_from_checkpoint,
         .fire_active_this_hour = plant_canopy_runtime_owners.fire_active_this_hour,
         .symbiotic_inoculum_input_by_cell = plant_canopy_runtime_owners.symbiotic_inoculum_input_by_cell,
+        .dynamic_input_speciation_state = &dynamic_input_speciation_state,
         .lateral_contribution_workspace = &lateral_contribution_workspace,
         .fixed_hour_recovery_workspace = @as(*anyopaque, @ptrCast(&fixed_hour_recovery_workspace)),
         .landscape_boundary_ledger = &landscape_mass_balance_state.boundary_ledger,
@@ -14228,6 +14230,7 @@ pub fn main(init: std.process.Init) !void {
         .iteration_limits = &iteration_limits,
         .land_management_assignments = &land_management_assignments,
         .landscape_mass_balance_state = landscape_mass_balance_state,
+        .dynamic_input_speciation_state = &dynamic_input_speciation_state,
         .lateral_contribution_workspace = &lateral_contribution_workspace,
         .latitude_degrees_north_by_cell = &latitude_degrees_north_by_cell,
         .layer_conservation_layout = &layer_conservation_layout,
