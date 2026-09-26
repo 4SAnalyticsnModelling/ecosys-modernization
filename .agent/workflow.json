@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Review and decide the unresolved TRC-313/TRC-331..340 ledger disposition against live Zig evidence and D6 rules.",
-  "task_id": "T-00111",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Map the legacy ZEROS/ZEROS2 semantics for unresolved TRC rows to exact file:lines before any FORGE fix.",
+  "task_id": "T-00112",
+  "worker": "PATHFINDER"
 }

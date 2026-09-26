@@ -40,11 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00109 PATHFINDER DONE: live-source review leaves TRC-313 and TRC-331..340 unresolved for SAGE.
-- T-00108 SAGE DONE: hash-only refresh rejected; stale ledger text remains false.
+- T-00111 SAGE DONE: final TRC dispositions set, no hash refresh.
+- T-00109 PATHFINDER DONE: only four rows remain refreshable.
+- T-00108 SAGE DONE: hash-only refresh rejected.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE adjudicates the final ledger disposition for unresolved TRC rows and records the decision.
+Map the legacy ZEROS/ZEROS2 gate for TRC-313 and TRC-331..340 to exact legacy files and lines.
