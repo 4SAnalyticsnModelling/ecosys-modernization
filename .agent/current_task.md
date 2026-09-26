@@ -1,1 +1,1 @@
-T-00096 | SAGE | Review the staged write-only traceability refresh patch and decide whether hash-only refresh is valid without a line-level mapping pass.
+T-00097 PATHFINDER: re-review the 62 live CHANGED-RANGE traceability rows and record whether each cited Zig range still maps to live source before any ledger refresh.

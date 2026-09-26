@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Newest evidence requires SAGE adjudication before any traceability ledger refresh; the latest recommendation overrides the older FORGE expectation.",
-  "task_id": "T-00096",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Newest evidence rejects hash-only refresh; the next task is a bounded PATHFINDER row-by-row source audit before any ledger write.",
+  "task_id": "T-00097",
+  "worker": "PATHFINDER"
 }
