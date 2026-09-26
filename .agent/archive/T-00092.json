@@ -1,0 +1,60 @@
+{
+  "changed": [
+    ".agent/results/T-00092.md",
+    "audit/runs/T-00092-patch/patch_report.json",
+    "audit/runs/T-00092-patch/receipt.json",
+    "audit/runs/T-00092-patch/stderr.log",
+    "audit/runs/T-00092-patch/stdout.log",
+    "audit/runs/T-00092-patch/traceability_refresh.patch",
+    "audit/runs/T-00092-patch/traceability_staged.csv",
+    "audit/runs/T-00092-tests/receipt.json",
+    "audit/runs/T-00092-tests/stderr.log",
+    "audit/runs/T-00092-tests/stdout.log",
+    "ecosys-audit/scripts/traceability_patch.py",
+    "ecosys-audit/tests/test_traceability_patch.py"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "T-00091 revalidated the 62 CHANGED-RANGE rows; all still map live to Zig, so the next bounded step is the approved FORGE refresh batch after reopen.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00092.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-zig-safety-design"
+    ],
+    "state_next": "FORGE prepares the approved write-once refresh for the 62 CHANGED-RANGE rows and leaves quarantined rows untouched.",
+    "state_recent": [
+      "T-00091 PATHFINDER DONE: 62 CHANGED-RANGE rows still map to live Zig ranges; no range moves.",
+      "T-00090 FORGE DONE: only seven UNCHANGED-RANGE rows are safe for mechanical refresh.",
+      "T-00089 SAGE DONE: reject 62-row refresh before re-review; quarantine NO-MATCHING-BLOB rows."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00092.md",
+    "task_id": "T-00092"
+  },
+  "ended": 1790453999.608004,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20b2cda0ffewfW40Bz0obmm2P",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 5177292,
+    "cache_write": 0,
+    "cost": 0.7638234000000002,
+    "input": 404672,
+    "llm_calls": 65,
+    "output": 19206,
+    "tool_calls": 68
+  },
+  "violations": []
+}

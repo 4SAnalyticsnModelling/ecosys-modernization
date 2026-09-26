@@ -5,10 +5,11 @@
 # ///
 """Generate and verify a bounded patch for audit/traceability/traceability.csv.
 
-Refreshes ONLY rows classified as UNCHANGED-RANGE in the stale-row revalidation
-(audit/analysis/tracecov-stale-row-disposition-2026-09-26.md), per SAGE T-00089 ruling.
-Explicitly excludes all CHANGED-RANGE rows (62 entries) and all NO-MATCHING-BLOB /
-QUARANTINE rows (64 entries, 44 unique unit_ids).
+Refreshes approved stale rows from the stale-row revalidation and disposition
+(audit/analysis/tracecov-stale-row-disposition-2026-09-26.md).
+Defaults to the approved 62-row CHANGED-RANGE batch (all re-reviewed in T-00091
+and confirmed 'mapping holds'), while keeping all 64 NO-MATCHING-BLOB / QUARANTINE
+rows strictly quarantined and excluded.
 Leaves the canonical ledger untouched while producing auditable patch artifacts
 for SAGE review.
 """
@@ -80,15 +81,39 @@ def compute_file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest().upper()
 
 
+EXPECTED_UNCHANGED_RANGE_UIDS = {
+    "TRC-028", "TRC-029", "TRC-055", "TRC-056", "TRC-075", "TRC-109", "TRC-189"
+}
+
+EXPECTED_CHANGED_RANGE_UIDS = {
+    "TRC-007", "TRC-008", "TRC-009", "TRC-011", "TRC-013", "TRC-027", "TRC-038",
+    "TRC-059", "TRC-060", "TRC-062", "TRC-072", "TRC-073", "TRC-074", "TRC-082",
+    "TRC-088", "TRC-089", "TRC-100", "TRC-108", "TRC-116", "TRC-123", "TRC-136",
+    "TRC-138", "TRC-153", "TRC-160", "TRC-162", "TRC-172", "TRC-175", "TRC-176",
+    "TRC-178", "TRC-183", "TRC-184", "TRC-188", "TRC-196", "TRC-220", "TRC-225",
+    "TRC-231", "TRC-237", "TRC-258", "TRC-293", "TRC-313", "TRC-315", "TRC-318",
+    "TRC-321", "TRC-326", "TRC-331", "TRC-332", "TRC-333", "TRC-334", "TRC-335",
+    "TRC-336", "TRC-337", "TRC-338", "TRC-339", "TRC-340", "TRC-351", "TRC-352",
+    "TRC-353", "TRC-354", "TRC-355", "TRC-356", "TRC-357", "TRC-358",
+}
+
+
 def generate_traceability_patch(
     root: Path,
     csv_path: Path,
     disposition_path: Path,
+    target: str = "changed-range",
 ) -> dict:
     """Build the bounded ledger patch and audit evidence without modifying the input CSV.
 
-    Refreshes ONLY the 7 UNCHANGED-RANGE rows per SAGE T-00089 ruling.
-    Excludes all 62 CHANGED-RANGE and all 64 NO-MATCHING-BLOB rows.
+    When target='changed-range' (default):
+      Refreshes the approved 62 CHANGED-RANGE rows re-reviewed in T-00091.
+      Explicitly excludes all 64 NO-MATCHING-BLOB / QUARANTINE rows and all
+      7 UNCHANGED-RANGE rows.
+
+    When target='unchanged-range':
+      Refreshes ONLY the 7 UNCHANGED-RANGE rows per SAGE T-00089 ruling.
+      Explicitly excludes all 62 CHANGED-RANGE and all 64 NO-MATCHING-BLOB rows.
 
     Returns a dictionary containing:
     - original_content: str
@@ -98,39 +123,59 @@ def generate_traceability_patch(
     """
     groups = parse_disposition_table(disposition_path)
 
-    refresh_entries = groups["UNCHANGED-RANGE"]
+    unchanged_range_entries = groups["UNCHANGED-RANGE"]
     changed_range_entries = groups["CHANGED-RANGE"]
     quarantine_entries = groups["NO-MATCHING-BLOB"]
 
-    # Enforce expected counts per SAGE T-00089 ruling
-    if len(refresh_entries) != 7:
-        raise ValueError(f"Expected 7 UNCHANGED-RANGE rows, found {len(refresh_entries)}")
+    # Enforce expected counts from revalidation
+    if len(unchanged_range_entries) != 7:
+        raise ValueError(f"Expected 7 UNCHANGED-RANGE rows, found {len(unchanged_range_entries)}")
     if len(changed_range_entries) != 62:
         raise ValueError(f"Expected 62 CHANGED-RANGE rows, found {len(changed_range_entries)}")
     if len(quarantine_entries) != 64:
         raise ValueError(f"Expected 64 NO-MATCHING-BLOB rows, found {len(quarantine_entries)}")
 
-    EXPECTED_REFRESH_UIDS = {
-        "TRC-028", "TRC-029", "TRC-055", "TRC-056", "TRC-075", "TRC-109", "TRC-189"
-    }
-    actual_refresh_uids = set(e["unit_id"] for e in refresh_entries)
-    if actual_refresh_uids != EXPECTED_REFRESH_UIDS:
-        raise ValueError(f"Unexpected UNCHANGED-RANGE unit IDs: {actual_refresh_uids} vs {EXPECTED_REFRESH_UIDS}")
+    actual_unchanged_uids = set(e["unit_id"] for e in unchanged_range_entries)
+    if actual_unchanged_uids != EXPECTED_UNCHANGED_RANGE_UIDS:
+        raise ValueError(f"Unexpected UNCHANGED-RANGE unit IDs: {actual_unchanged_uids} vs {EXPECTED_UNCHANGED_RANGE_UIDS}")
 
-    refresh_map: dict[str, dict] = {e["unit_id"]: e for e in refresh_entries}
-    changed_range_uids = sorted(set(e["unit_id"] for e in changed_range_entries))
+    actual_changed_uids = set(e["unit_id"] for e in changed_range_entries)
+    if actual_changed_uids != EXPECTED_CHANGED_RANGE_UIDS:
+        raise ValueError(f"Unexpected CHANGED-RANGE unit IDs: {actual_changed_uids} vs {EXPECTED_CHANGED_RANGE_UIDS}")
+
+    unchanged_range_uids = sorted(actual_unchanged_uids)
+    changed_range_uids = sorted(actual_changed_uids)
     quarantine_uids = sorted(set(e["unit_id"] for e in quarantine_entries))
 
     # Strict disjointness assertions
-    overlap_rc = set(refresh_map.keys()) & set(changed_range_uids)
-    if overlap_rc:
-        raise ValueError(f"Fatal overlap between UNCHANGED-RANGE and CHANGED-RANGE: {overlap_rc}")
-    overlap_rq = set(refresh_map.keys()) & set(quarantine_uids)
-    if overlap_rq:
-        raise ValueError(f"Fatal overlap between UNCHANGED-RANGE and NO-MATCHING-BLOB: {overlap_rq}")
+    overlap_uc = set(unchanged_range_uids) & set(changed_range_uids)
+    if overlap_uc:
+        raise ValueError(f"Fatal overlap between UNCHANGED-RANGE and CHANGED-RANGE: {overlap_uc}")
+    overlap_uq = set(unchanged_range_uids) & set(quarantine_uids)
+    if overlap_uq:
+        raise ValueError(f"Fatal overlap between UNCHANGED-RANGE and NO-MATCHING-BLOB: {overlap_uq}")
     overlap_cq = set(changed_range_uids) & set(quarantine_uids)
     if overlap_cq:
         raise ValueError(f"Fatal overlap between CHANGED-RANGE and NO-MATCHING-BLOB: {overlap_cq}")
+
+    if target == "changed-range":
+        refresh_entries = changed_range_entries
+        excluded_other_uids = set(unchanged_range_uids)
+        expected_patch_count = 62
+        mapping_classification = (
+            "mapping-holds (all 62 rows re-reviewed in T-00091; 0 range-moved, 0 mapping-broken)"
+        )
+    elif target == "unchanged-range":
+        refresh_entries = unchanged_range_entries
+        excluded_other_uids = set(changed_range_uids)
+        expected_patch_count = 7
+        mapping_classification = (
+            "byte-identical cited code range (7 rows reviewed in T-00089)"
+        )
+    else:
+        raise ValueError(f"Unsupported target: {target}. Must be 'changed-range' or 'unchanged-range'.")
+
+    refresh_map: dict[str, dict] = {e["unit_id"]: e for e in refresh_entries}
 
     with csv_path.open("r", encoding="utf-8", newline="") as f:
         original_lines = f.readlines()
@@ -148,11 +193,11 @@ def generate_traceability_patch(
 
         unit_id = parsed_row[0].strip()
 
-        # Guard: Quarantine and Changed-Range rows MUST NOT be altered
+        # Guard: Quarantine and other-target rows MUST NOT be altered
         if unit_id in quarantine_uids:
             patched_lines.append(line)
             continue
-        if unit_id in changed_range_uids:
+        if unit_id in excluded_other_uids:
             patched_lines.append(line)
             continue
 
@@ -198,12 +243,13 @@ def generate_traceability_patch(
                 "zig_path": zig_rel,
                 "old_sha256": old_sha,
                 "new_sha256": cur_sha,
+                "mapping_classification": "mapping-holds" if target == "changed-range" else "unchanged-range",
             })
         else:
             patched_lines.append(line)
 
-    if len(modified_indices) != 7:
-        raise ValueError(f"Expected exactly 7 modified lines, got {len(modified_indices)}")
+    if len(modified_indices) != expected_patch_count:
+        raise ValueError(f"Expected exactly {expected_patch_count} modified lines, got {len(modified_indices)}")
 
     original_text = "".join(original_lines)
     patched_text = "".join(patched_lines)
@@ -229,6 +275,8 @@ def generate_traceability_patch(
     audit_report = {
         "schema_version": 1,
         "created_utc": datetime.now(timezone.utc).isoformat(),
+        "target_batch": target,
+        "mapping_classification": mapping_classification,
         "input_traceability_csv": {
             "path": str(csv_path.as_posix()),
             "sha256": orig_sha,
@@ -237,11 +285,12 @@ def generate_traceability_patch(
         "input_disposition": {
             "path": str(disposition_path.as_posix()),
             "sha256": disp_sha,
-            "total_stale_rows": len(refresh_entries) + len(changed_range_entries) + len(quarantine_entries),
+            "total_stale_rows": len(unchanged_range_entries) + len(changed_range_entries) + len(quarantine_entries),
         },
         "summary": {
+            "target_batch": target,
             "refresh_ledger_count": len(refresh_entries),
-            "unchanged_range_count": len(refresh_entries),
+            "unchanged_range_count": len(unchanged_range_entries),
             "changed_range_count": len(changed_range_entries),
             "quarantine_count": len(quarantine_entries),
             "patched_rows_count": len(refreshed_details),
@@ -252,8 +301,10 @@ def generate_traceability_patch(
         "exclusions": {
             "quarantine_rows_excluded": len(quarantine_entries),
             "quarantine_unique_unit_ids": quarantine_uids,
-            "changed_range_rows_excluded": len(changed_range_entries),
-            "changed_range_unique_unit_ids": changed_range_uids,
+            "unchanged_range_rows_excluded": len(unchanged_range_entries) if target == "changed-range" else 0,
+            "unchanged_range_unique_unit_ids": unchanged_range_uids if target == "changed-range" else [],
+            "changed_range_rows_excluded": len(changed_range_entries) if target == "unchanged-range" else 0,
+            "changed_range_unique_unit_ids": changed_range_uids if target == "unchanged-range" else [],
         },
         "patched_traceability_csv": {
             "sha256": patched_sha,
@@ -278,6 +329,8 @@ def main() -> int:
                         help="Path to traceability.csv")
     parser.add_argument("--disposition", type=Path, default=None,
                         help="Path to disposition markdown")
+    parser.add_argument("--target", choices=["changed-range", "unchanged-range"], default="changed-range",
+                        help="Target batch to refresh (default: changed-range)")
     parser.add_argument("--out-patch", type=Path, default=None,
                         help="Path to write unified diff patch")
     parser.add_argument("--out-csv", type=Path, default=None,
@@ -295,16 +348,21 @@ def main() -> int:
     )
 
     try:
-        result = generate_traceability_patch(root, csv_path, disposition_path)
+        result = generate_traceability_patch(root, csv_path, disposition_path, target=args.target)
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
     summary = result["audit_report"]["summary"]
+    exclusions = result["audit_report"]["exclusions"]
     print("Traceability patch generated and verified successfully:")
+    print(f"  Target batch: {args.target}")
     print(f"  Total stale rows classified: {result['audit_report']['input_disposition']['total_stale_rows']}")
-    print(f"  Rows refreshed (UNCHANGED-RANGE): {summary['unchanged_range_count']}")
-    print(f"  Rows excluded (CHANGED-RANGE): {summary['changed_range_count']}")
+    print(f"  Rows refreshed ({args.target.upper()}): {summary['patched_rows_count']}")
+    if args.target == "changed-range":
+        print(f"  Rows excluded (UNCHANGED-RANGE): {exclusions['unchanged_range_rows_excluded']}")
+    else:
+        print(f"  Rows excluded (CHANGED-RANGE): {exclusions['changed_range_rows_excluded']}")
     print(f"  Rows excluded (QUARANTINE / NO-MATCHING-BLOB): {summary['quarantine_count']}")
     print(f"  Diff lines: -{summary['diff_removals']} / +{summary['diff_additions']}")
     print(f"  Patched CSV SHA-256: {result['audit_report']['patched_traceability_csv']['sha256']}")

@@ -35,6 +35,17 @@ class TraceabilityPatchTestCase(unittest.TestCase):
         self.expected_unchanged_uids = {
             "TRC-028", "TRC-029", "TRC-055", "TRC-056", "TRC-075", "TRC-109", "TRC-189"
         }
+        self.expected_changed_uids = {
+            "TRC-007", "TRC-008", "TRC-009", "TRC-011", "TRC-013", "TRC-027", "TRC-038",
+            "TRC-059", "TRC-060", "TRC-062", "TRC-072", "TRC-073", "TRC-074", "TRC-082",
+            "TRC-088", "TRC-089", "TRC-100", "TRC-108", "TRC-116", "TRC-123", "TRC-136",
+            "TRC-138", "TRC-153", "TRC-160", "TRC-162", "TRC-172", "TRC-175", "TRC-176",
+            "TRC-178", "TRC-183", "TRC-184", "TRC-188", "TRC-196", "TRC-220", "TRC-225",
+            "TRC-231", "TRC-237", "TRC-258", "TRC-293", "TRC-313", "TRC-315", "TRC-318",
+            "TRC-321", "TRC-326", "TRC-331", "TRC-332", "TRC-333", "TRC-334", "TRC-335",
+            "TRC-336", "TRC-337", "TRC-338", "TRC-339", "TRC-340", "TRC-351", "TRC-352",
+            "TRC-353", "TRC-354", "TRC-355", "TRC-356", "TRC-357", "TRC-358",
+        }
 
     def test_canonical_csv_unmodified(self):
         """Canonical ledger must remain read-only and match recorded hash."""
@@ -57,6 +68,7 @@ class TraceabilityPatchTestCase(unittest.TestCase):
 
         self.assertEqual(unchanged, self.expected_unchanged_uids)
         self.assertEqual(len(unchanged), 7)
+        self.assertEqual(changed, self.expected_changed_uids)
         self.assertEqual(len(changed), 62)
         self.assertEqual(len(quarantine), 44)  # 64 entries across 44 distinct unit_ids
 
@@ -64,9 +76,9 @@ class TraceabilityPatchTestCase(unittest.TestCase):
         self.assertEqual(unchanged & quarantine, set())
         self.assertEqual(changed & quarantine, set())
 
-    def test_patch_generation_and_constraints(self):
-        """Generated patch must strictly alter only the 7 UNCHANGED-RANGE rows and only column index 8."""
-        result = generate_traceability_patch(self.root, self.csv_path, self.disposition_path)
+    def test_patch_generation_and_constraints_changed_range(self):
+        """Generated patch for target='changed-range' must strictly alter only the 62 CHANGED-RANGE rows."""
+        result = generate_traceability_patch(self.root, self.csv_path, self.disposition_path, target="changed-range")
 
         orig_lines = result["original_content"].splitlines(keepends=True)
         patched_lines = result["patched_content"].splitlines(keepends=True)
@@ -74,7 +86,88 @@ class TraceabilityPatchTestCase(unittest.TestCase):
         self.assertEqual(len(orig_lines), 374)  # 1 header + 373 data rows
 
         groups = parse_disposition_table(self.disposition_path)
-        changed_range_uids = set(e["unit_id"] for e in groups["CHANGED-RANGE"])
+        quarantine_uids = set(e["unit_id"] for e in groups["NO-MATCHING-BLOB"])
+
+        modified_uids = set()
+        for orig, patched in zip(orig_lines, patched_lines):
+            orig_parsed = list(csv.reader([orig]))[0]
+            patched_parsed = list(csv.reader([patched]))[0]
+            uid = orig_parsed[0].strip()
+
+            if orig != patched:
+                modified_uids.add(uid)
+                self.assertIn(uid, self.expected_changed_uids, f"Row {uid} was modified but is not in CHANGED-RANGE")
+                self.assertNotIn(uid, quarantine_uids, f"Quarantine row {uid} was modified!")
+                self.assertNotIn(uid, self.expected_unchanged_uids, f"Unchanged-range row {uid} was modified!")
+
+                # Verify only column 8 (zig_sha256) is modified
+                self.assertEqual(orig_parsed[:8], patched_parsed[:8])
+                self.assertEqual(orig_parsed[9:], patched_parsed[9:])
+                self.assertNotEqual(orig_parsed[8], patched_parsed[8])
+
+                # Verify new hash matches disk
+                zig_path = orig_parsed[5].strip()
+                expected_sha = compute_file_sha256(self.root / zig_path)
+                self.assertEqual(patched_parsed[8].strip(), expected_sha)
+            else:
+                self.assertNotIn(uid, self.expected_changed_uids, f"Changed row {uid} was not modified!")
+
+        self.assertEqual(len(modified_uids), 62)
+        self.assertEqual(modified_uids, self.expected_changed_uids)
+
+        # Verify CRLF line endings throughout
+        for line in patched_lines:
+            self.assertTrue(line.endswith("\r\n"), f"Line did not end with CRLF: {line[:50]}")
+
+        # Verify diff stats
+        report = result["audit_report"]
+        self.assertEqual(report["summary"]["diff_removals"], 62)
+        self.assertEqual(report["summary"]["diff_additions"], 62)
+        self.assertEqual(report["summary"]["patched_rows_count"], 62)
+        self.assertEqual(report["summary"]["unmodified_rows_count"], 311)
+        self.assertEqual(report["exclusions"]["quarantine_rows_excluded"], 64)
+        self.assertEqual(report["exclusions"]["unchanged_range_rows_excluded"], 7)
+
+        # Check git apply --check cleanly passes
+        with tempfile.TemporaryDirectory() as tmpdir:
+            patch_file = Path(tmpdir) / "test.patch"
+            patch_file.write_text(result["patch_diff"], encoding="utf-8")
+            proc = subprocess.run(
+                ["git", "apply", "--check", str(patch_file)],
+                cwd=str(self.root),
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(proc.returncode, 0, f"git apply --check failed: {proc.stderr}")
+
+        # Check tracecov integration
+        from tracecov import collect
+        with tempfile.TemporaryDirectory() as tmpdir:
+            staged_csv = Path(tmpdir) / "traceability.csv"
+            staged_csv.write_text(result["patched_content"], encoding="utf-8", newline="")
+
+            index_path = self.root / "audit" / "manifest" / "f77index.json"
+            index = json.loads(index_path.read_text(encoding="utf-8"))
+
+            cov_data = collect(self.root, index, staged_csv, 20)
+
+            stale_problems = [p for p in cov_data.get("problems", []) if p["kind"] == "stale-zig-sha256"]
+            # Originally 133 stale problems; 62 refreshed => exactly 71 remain
+            self.assertEqual(len(stale_problems), 71)
+
+            remaining_stale_uids = set(p["unit_id"] for p in stale_problems)
+            # Assert zero refreshed rows remain stale
+            self.assertEqual(remaining_stale_uids & self.expected_changed_uids, set())
+
+    def test_patch_generation_and_constraints_unchanged_range(self):
+        """Generated patch for target='unchanged-range' must strictly alter only the 7 UNCHANGED-RANGE rows."""
+        result = generate_traceability_patch(self.root, self.csv_path, self.disposition_path, target="unchanged-range")
+
+        orig_lines = result["original_content"].splitlines(keepends=True)
+        patched_lines = result["patched_content"].splitlines(keepends=True)
+        self.assertEqual(len(orig_lines), len(patched_lines))
+
+        groups = parse_disposition_table(self.disposition_path)
         quarantine_uids = set(e["unit_id"] for e in groups["NO-MATCHING-BLOB"])
 
         modified_uids = set()
@@ -87,14 +180,12 @@ class TraceabilityPatchTestCase(unittest.TestCase):
                 modified_uids.add(uid)
                 self.assertIn(uid, self.expected_unchanged_uids, f"Row {uid} was modified but is not in UNCHANGED-RANGE")
                 self.assertNotIn(uid, quarantine_uids, f"Quarantine row {uid} was modified!")
-                self.assertNotIn(uid, changed_range_uids, f"Changed-range row {uid} was modified!")
+                self.assertNotIn(uid, self.expected_changed_uids, f"Changed-range row {uid} was modified!")
 
-                # Verify only column 8 (zig_sha256) is modified
                 self.assertEqual(orig_parsed[:8], patched_parsed[:8])
                 self.assertEqual(orig_parsed[9:], patched_parsed[9:])
                 self.assertNotEqual(orig_parsed[8], patched_parsed[8])
 
-                # Verify new hash matches disk
                 zig_path = orig_parsed[5].strip()
                 expected_sha = compute_file_sha256(self.root / zig_path)
                 self.assertEqual(patched_parsed[8].strip(), expected_sha)
@@ -104,11 +195,6 @@ class TraceabilityPatchTestCase(unittest.TestCase):
         self.assertEqual(len(modified_uids), 7)
         self.assertEqual(modified_uids, self.expected_unchanged_uids)
 
-        # Verify CRLF line endings throughout
-        for line in patched_lines:
-            self.assertTrue(line.endswith("\r\n"), f"Line did not end with CRLF: {line[:50]}")
-
-        # Verify diff stats
         report = result["audit_report"]
         self.assertEqual(report["summary"]["diff_removals"], 7)
         self.assertEqual(report["summary"]["diff_additions"], 7)
@@ -117,9 +203,7 @@ class TraceabilityPatchTestCase(unittest.TestCase):
         self.assertEqual(report["exclusions"]["quarantine_rows_excluded"], 64)
         self.assertEqual(report["exclusions"]["changed_range_rows_excluded"], 62)
 
-    def test_git_apply_check_clean(self):
-        """Generated unified diff must pass git apply --check cleanly."""
-        result = generate_traceability_patch(self.root, self.csv_path, self.disposition_path)
+        # Check git apply --check cleanly passes
         with tempfile.TemporaryDirectory() as tmpdir:
             patch_file = Path(tmpdir) / "test.patch"
             patch_file.write_text(result["patch_diff"], encoding="utf-8")
@@ -131,12 +215,8 @@ class TraceabilityPatchTestCase(unittest.TestCase):
             )
             self.assertEqual(proc.returncode, 0, f"git apply --check failed: {proc.stderr}")
 
-    def test_tracecov_integration_on_staged_csv(self):
-        """Running tracecov collect against the patched CSV must eliminate exactly the 7 refreshed stale problems."""
+        # Check tracecov integration
         from tracecov import collect
-
-        result = generate_traceability_patch(self.root, self.csv_path, self.disposition_path)
-
         with tempfile.TemporaryDirectory() as tmpdir:
             staged_csv = Path(tmpdir) / "traceability.csv"
             staged_csv.write_text(result["patched_content"], encoding="utf-8", newline="")
@@ -147,13 +227,17 @@ class TraceabilityPatchTestCase(unittest.TestCase):
             cov_data = collect(self.root, index, staged_csv, 20)
 
             stale_problems = [p for p in cov_data.get("problems", []) if p["kind"] == "stale-zig-sha256"]
-            # Originally 133 stale problems; 7 refreshed => exactly 126 remain
             self.assertEqual(len(stale_problems), 126)
 
             remaining_stale_uids = set(p["unit_id"] for p in stale_problems)
-
-            # Assert zero refreshed rows remain stale
             self.assertEqual(remaining_stale_uids & self.expected_unchanged_uids, set())
+
+    def test_invalid_target_rejected(self):
+        """Passing an invalid target batch must raise ValueError."""
+        with self.assertRaises(ValueError):
+            generate_traceability_patch(
+                self.root, self.csv_path, self.disposition_path, target="invalid-batch"
+            )
 
 
 if __name__ == "__main__":

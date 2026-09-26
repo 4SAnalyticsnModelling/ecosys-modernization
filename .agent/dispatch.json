@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00092", "role": "FORGE", "task_file": ".agent/tasks/T-00092.md", "result_file": ".agent/results/T-00092.md", "skills": ["ecosys-zig-safety-design"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "T-00091 revalidated the 62 CHANGED-RANGE rows; all still map live to Zig, so the next bounded step is the approved FORGE refresh batch after reopen.", "state_recent": ["T-00091 PATHFINDER DONE: 62 CHANGED-RANGE rows still map to live Zig ranges; no range moves.", "T-00090 FORGE DONE: only seven UNCHANGED-RANGE rows are safe for mechanical refresh.", "T-00089 SAGE DONE: reject 62-row refresh before re-review; quarantine NO-MATCHING-BLOB rows."], "state_next": "FORGE prepares the approved write-once refresh for the 62 CHANGED-RANGE rows and leaves quarantined rows untouched."}
+{
+  "full_run_justification": null,
+  "reason": "T-00091 revalidated the 62 CHANGED-RANGE rows; all still map live to Zig, so the next bounded step is the approved FORGE refresh batch after reopen.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00092.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-zig-safety-design"
+  ],
+  "state_next": "FORGE prepares the approved write-once refresh for the 62 CHANGED-RANGE rows and leaves quarantined rows untouched.",
+  "state_recent": [
+    "T-00091 PATHFINDER DONE: 62 CHANGED-RANGE rows still map to live Zig ranges; no range moves.",
+    "T-00090 FORGE DONE: only seven UNCHANGED-RANGE rows are safe for mechanical refresh.",
+    "T-00089 SAGE DONE: reject 62-row refresh before re-review; quarantine NO-MATCHING-BLOB rows."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00092.md",
+  "task_id": "T-00092"
+}
