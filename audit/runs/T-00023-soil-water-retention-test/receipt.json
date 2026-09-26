@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/shims/zig.exe",
+    "test",
+    "src/module_index.zig",
+    "--test-filter",
+    "original Mualem van Genuchten retention is invertible and monotone"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 16.721,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 26560,
+  "pid": 20388,
+  "started_unix": 1790387688.4210308,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/T-00023-soil-water-retention-test/stderr.log",
+    "sha256": "d1edd9889f1aa79c2fb8754f8ed57d6a282165b1ab3accd13962f4ed01a6b3fa"
+  },
+  "stdout": {
+    "path": "audit/runs/T-00023-soil-water-retention-test/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

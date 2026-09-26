@@ -1,0 +1,51 @@
+{
+  "changed": [
+    ".agent/results/T-00023.md",
+    "audit/runs/T-00023-soil-water-retention-test/receipt.json",
+    "audit/runs/T-00023-soil-water-retention-test/stderr.log",
+    "audit/runs/T-00023-soil-water-retention-test/stdout.log"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Newest result explicitly recommends a bounded DEV-005 on/off cell-0 matrix-water compare, which is the next unblocked FORGE diagnostic.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00023.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "FORGE: run the bounded cell-0, hour 3,161→3,162 DEV-005 on/off compare and log matrix water state, residual, and conductivity before the failing iteration.",
+    "state_recent": [
+      "T-00022 PATHFINDER DONE: cell-0 matrix-water state remains pinned near state_m3 ≈ 7.74e-3; DEV-005 not direct cause",
+      "T-00021 PATHFINDER DONE: matrix residual, not ammonium multiplier, drives cell-0 stall",
+      "T-00020 PATHFINDER DONE: water stagnation is soil-water matrix non-improvement"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00023.md",
+    "task_id": "T-00023"
+  },
+  "ended": 1790387881.8384836,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": "ses_f24aa47ffffeY6Vs55GJdj5Krd",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 17434685,
+    "cache_write": 0,
+    "cost": 2.7607826249999996,
+    "input": 1870235,
+    "llm_calls": 114,
+    "output": 13468,
+    "tool_calls": 125
+  },
+  "violations": []
+}

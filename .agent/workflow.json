@@ -46,8 +46,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Newest result explicitly recommends a bounded DEV-005 on/off cell-0 matrix-water compare, which is the next unblocked FORGE diagnostic.",
   "task_id": "T-00023",
-  "worker": "FORGE"
+  "worker": null
 }

@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00023", "role": "FORGE", "task_file": ".agent/tasks/T-00023.md", "result_file": ".agent/results/T-00023.md", "skills": ["ecosys-source-navigation"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Newest result explicitly recommends a bounded DEV-005 on/off cell-0 matrix-water compare, which is the next unblocked FORGE diagnostic.", "state_recent": ["T-00022 PATHFINDER DONE: cell-0 matrix-water state remains pinned near state_m3 ≈ 7.74e-3; DEV-005 not direct cause", "T-00021 PATHFINDER DONE: matrix residual, not ammonium multiplier, drives cell-0 stall", "T-00020 PATHFINDER DONE: water stagnation is soil-water matrix non-improvement"], "state_next": "FORGE: run the bounded cell-0, hour 3,161→3,162 DEV-005 on/off compare and log matrix water state, residual, and conductivity before the failing iteration."}
+{
+  "full_run_justification": null,
+  "reason": "Newest result explicitly recommends a bounded DEV-005 on/off cell-0 matrix-water compare, which is the next unblocked FORGE diagnostic.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00023.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-source-navigation"
+  ],
+  "state_next": "FORGE: run the bounded cell-0, hour 3,161→3,162 DEV-005 on/off compare and log matrix water state, residual, and conductivity before the failing iteration.",
+  "state_recent": [
+    "T-00022 PATHFINDER DONE: cell-0 matrix-water state remains pinned near state_m3 ≈ 7.74e-3; DEV-005 not direct cause",
+    "T-00021 PATHFINDER DONE: matrix residual, not ammonium multiplier, drives cell-0 stall",
+    "T-00020 PATHFINDER DONE: water stagnation is soil-water matrix non-improvement"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00023.md",
+  "task_id": "T-00023"
+}
