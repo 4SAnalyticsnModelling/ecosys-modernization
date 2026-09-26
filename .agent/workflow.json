@@ -52,17 +52,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "ALLOWED FILES `.agent/tasks/T-00069.md` is outside FORGE may_write (writable by SENTINEL)"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Latest SAGE verdict is REVISE; T-00066 needs DEV-008 re-review before any Ottawa evidence counts.",
-  "task_id": "T-00068",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "FORGE task: revise the quarantined T-00060 patch in place to close SAGE's remaining R1/R3 defects before any Ottawa evidence counts.",
+  "task_id": "T-00070",
+  "worker": "FORGE"
 }
