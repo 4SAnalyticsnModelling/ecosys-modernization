@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Newest evidence shows the 62 CHANGED-RANGE rows remain live, so FORGE must generate the write-only refresh patch while keeping quarantined rows excluded.",
-  "task_id": "T-00095",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Newest evidence requires SAGE adjudication before any traceability ledger refresh; the latest recommendation overrides the older FORGE expectation.",
+  "task_id": "T-00096",
+  "worker": "SAGE"
 }

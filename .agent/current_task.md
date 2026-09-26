@@ -1,1 +1,1 @@
-T-00095 FORGE: prepare the write-only traceability refresh patch for the 62 live CHANGED-RANGE rows while quarantining unresolved entries.
+T-00096 | SAGE | Review the staged write-only traceability refresh patch and decide whether hash-only refresh is valid without a line-level mapping pass.
