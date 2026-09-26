@@ -1,1 +1,1 @@
-T-00023 FORGE: bounded DEV-005 on/off cell-0 matrix-water compare at hour 3,161→3,162
+T-00024 SAGE: adjudicate DEV-005 attribution and decide whether D6 can be signed.
