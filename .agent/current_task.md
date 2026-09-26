@@ -1,1 +1,1 @@
-T-00129 SAGE: review the corrected TRC legacy ZEROS packet and decide final ledger disposition.
+T-00130 SAGE: approve the corrected seven-row legacy ZEROS ledger packet and close TRC-331..335, 337, 338.
