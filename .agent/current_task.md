@@ -1,1 +1,1 @@
-T-00049 SAGE: review the T-00048 bounded trace against the T-00046/T-00047 approvals and decide whether any further evidence is required before closing the issue.
+T-00050 PATHFINDER: Trace the Ottawa hour-2,589 SOLUTE exhaustion path to bound the legacy-equivalent closure.

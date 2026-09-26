@@ -56,8 +56,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "SAGE review of the bounded trace is the next unblocked gate: confirm closure or specify missing evidence, with recent SAGE load already high.",
-  "task_id": "T-00049",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Next unblocked gate: bound the hour-2,589 SOLUTE exhaustion call path and missing legacy-equivalent evidence before any wider Ottawa work.",
+  "task_id": "T-00050",
+  "worker": "PATHFINDER"
 }
