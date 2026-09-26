@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00078 SAGE DONE: D6 list signed; deck revert and G0-5 remain open.
-- T-00076 SAGE DONE: DEV-008 accepted after confirmation.
-- T-00075 SAGE DONE: DEV-008 approved under legacy-derived bounds.
+- T-00080 PATHFINDER DONE: stale ledger is evidence-only; report no hash refresh.
+- T-00078 SAGE DONE: D6 list signed; G0-2a/3/4/5 remain open.
+- T-00076 SAGE DONE: DEV-008 accepted; no further SAGE work.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER to audit stale tracecov hashes and write the G0-5 report without refreshing them.
+PATHFINDER to revalidate stale tracecov zig_sha256 rows against cited Zig ranges without modifying evidence.

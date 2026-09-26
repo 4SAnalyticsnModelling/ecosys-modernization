@@ -1,1 +1,1 @@
-T-00081 PATHFINDER: revalidate stale zig_sha256 tracecov rows against cited Zig ranges before any hash update.
+T-00082 PATHFINDER: revalidate stale tracecov zig_sha256 rows against cited Zig ranges before any ledger rewrite.
