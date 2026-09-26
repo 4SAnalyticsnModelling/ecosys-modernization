@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00129.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Newest result requires SAGE adjudication of the corrected seven-row ZEROS ledger packet before acceptance; no unblocked work remains for PATHFINDER or FORGE.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00129.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-process-science-parity"
+    ],
+    "state_next": "SAGE approves or revises the corrected legacy ZEROS ledger packet and closes TRC-331..335, 337, 338.",
+    "state_recent": [
+      "T-00127 FORGE DONE: corrected seven-row packet ready for SAGE review",
+      "T-00126 SAGE DONE: revise three anchor defects before final ledger inclusion",
+      "T-00125 FORGE DONE: approved ZEROS row text"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00129.md",
+    "task_id": "T-00129"
+  },
+  "ended": 1790460417.2698064,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "3417c9fd-3b31-4231-932b-7658ec42a84c",
+    "old": "0a963e22-d1c7-41d6-b22f-ce7812f873bc",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 281048,
+    "cache_write": 44611,
+    "cost": null,
+    "input": 12,
+    "llm_calls": 6,
+    "output": 4419,
+    "tool_calls": 2
+  },
+  "violations": []
+}
