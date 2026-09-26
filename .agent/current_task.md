@@ -1,1 +1,1 @@
-T-00036 SAGE: confirm DEV-004 rejection and finalize the D6 decision packet.
+T-00037 FORGE: revert the rejected 9253d3b 200 cap and preserve a diff-bound review.

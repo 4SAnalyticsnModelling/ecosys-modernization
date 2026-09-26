@@ -56,8 +56,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Latest accepted result directs SAGE to confirm the D6 DEV-004 rejection before FORGE reverts the cap.",
-  "task_id": "T-00036",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE finalized the rejection of DEV-004; the next bounded action is to revert the 200 cap and keep the diff review explicit.",
+  "task_id": "T-00037",
+  "worker": "FORGE"
 }
