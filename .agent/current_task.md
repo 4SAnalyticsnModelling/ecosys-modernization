@@ -1,1 +1,1 @@
-T-00109 PATHFINDER: re-review TRC-313..340 live Zig anchors and classify refreshable versus unresolved traceability rows without ledger mutation.
+T-00110 SAGE: decide the final ledger disposition for unresolved TRC-313 and TRC-331..340 rows using live Zig floor-fix evidence.
