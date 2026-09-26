@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00050.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Next unblocked gate: bound the hour-2,589 SOLUTE exhaustion call path and missing legacy-equivalent evidence before any wider Ottawa work.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00050.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "T-00050 PATHFINDER: trace the hour-2,589 SOLUTE exhaustion path and bound the legacy-equivalent closure.",
+    "state_recent": [
+      "T-00049 SAGE DONE: solver-budget closure confirmed; no more evidence needed",
+      "T-00048 PATHFINDER DONE: bounded trace proves no silent state commit",
+      "T-00047 SAGE DONE: approved DEV-007 removal and solver ceiling change"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00050.md",
+    "task_id": "T-00050"
+  },
+  "ended": 1790402316.4767816,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f23ba5696ffedxBocWj2u3OFjV",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 317312,
+    "cache_write": 0,
+    "cost": 0.02437384,
+    "input": 48318,
+    "llm_calls": 10,
+    "output": 6970,
+    "tool_calls": 18
+  },
+  "violations": []
+}
