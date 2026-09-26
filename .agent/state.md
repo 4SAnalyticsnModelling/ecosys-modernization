@@ -40,11 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00047 SAGE DONE: confirming review of T-00046 approved the ceiling-decoupling fix.
+- T-00048 PATHFINDER DONE: bounded trace shows SoluteReactionSolverDidNotConverge is rethrown unchanged and rolled back.
+- T-00047 SAGE DONE: approved the ceiling-decoupling fix after the confirming review.
 - T-00046 FORGE DONE: removed the hard_max_iterations clamp and added invariant tests.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER traces the SoluteReactionSolverDidNotConverge call chain and rollback behavior.
+SAGE reviews the T-00048 bounded trace against the T-00046/T-00047 approvals to decide whether more evidence is required before closing the issue.
