@@ -1,0 +1,5 @@
+[Detached Mode] Child process spawned successfully.
+  PID: 38300
+  Heartbeat path: D:\ecosys-modernization\audit\runs\p04-detach-dryrun\verification-detached\heartbeat.json
+  Campaign ID: p04-verif-detach-dry
+  Driver log: D:\ecosys-modernization\audit\runs\p04-detach-dryrun\verification-detached\driver.log

@@ -27,16 +27,22 @@ import json
 import os
 from pathlib import Path
 import shutil
+import signal
 import subprocess
 import sys
+import threading
 import time
 
 from workflow import ROOT, ProtocolError, file_digest, lock
 
 RUN_002_EXPECTED_FILES = 1138
 RUN_002_EXPECTED_BYTES_APPROX = 1428000000  # ~1.33 GB
+DEFAULT_HEARTBEAT_PATH = Path("audit/runs/p04-full-campaign/heartbeat.json")
+DEFAULT_LOCK_PATH = Path(".agent/locks/machine.lock")
+MAX_HEARTBEAT_STALE_SECONDS = 600.0  # 10 minutes per T-00150 C3
+DEFAULT_HEARTBEAT_INTERVAL_SECONDS = 30.0  # At least every 60s per T-00150 C2
 
-# Win32 affinity support via standard library ctypes
+# Win32 affinity and process support via standard library ctypes
 if os.name == "nt":
     k32 = ctypes.WinDLL("kernel32", use_last_error=True)
     PDWORD_PTR = ctypes.POINTER(ctypes.c_size_t)
@@ -48,9 +54,496 @@ if os.name == "nt":
     k32.SetProcessAffinityMask.restype = wintypes.BOOL
     k32.CloseHandle.argtypes = [wintypes.HANDLE]
     k32.CloseHandle.restype = wintypes.BOOL
+    k32.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+    k32.GetExitCodeProcess.restype = wintypes.BOOL
+
+    class MEMORYSTATUSEX(ctypes.Structure):
+        _fields_ = [
+            ("dwLength", wintypes.DWORD),
+            ("dwMemoryLoad", wintypes.DWORD),
+            ("ullTotalPhys", ctypes.c_uint64),
+            ("ullAvailPhys", ctypes.c_uint64),
+            ("ullTotalPageFile", ctypes.c_uint64),
+            ("ullAvailPageFile", ctypes.c_uint64),
+            ("ullTotalVirtual", ctypes.c_uint64),
+            ("ullAvailVirtual", ctypes.c_uint64),
+            ("ullAvailExtendedVirtual", ctypes.c_uint64),
+        ]
+
+    k32.GlobalMemoryStatusEx.argtypes = [ctypes.POINTER(MEMORYSTATUSEX)]
+    k32.GlobalMemoryStatusEx.restype = wintypes.BOOL
+
+    class FILETIME(ctypes.Structure):
+        _fields_ = [("dwLowDateTime", wintypes.DWORD), ("dwHighDateTime", wintypes.DWORD)]
+
+    k32.GetSystemTimes.argtypes = [ctypes.POINTER(FILETIME), ctypes.POINTER(FILETIME), ctypes.POINTER(FILETIME)]
+    k32.GetSystemTimes.restype = wintypes.BOOL
 
     PROCESS_SET_INFORMATION = 0x0200
     PROCESS_QUERY_INFORMATION = 0x0400
+    PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+    STILL_ACTIVE = 259
+
+
+def is_pid_alive(pid: int) -> bool:
+    """Check if process with given PID is currently alive."""
+    if pid <= 0:
+        return False
+    if os.name == "nt":
+        h = k32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+        if not h:
+            err = ctypes.get_last_error()
+            return err == 5  # ERROR_ACCESS_DENIED implies process exists
+        try:
+            exit_code = wintypes.DWORD()
+            if k32.GetExitCodeProcess(h, ctypes.byref(exit_code)):
+                return exit_code.value == STILL_ACTIVE
+            return False
+        finally:
+            k32.CloseHandle(h)
+    else:
+        try:
+            os.kill(pid, 0)
+            return True
+        except ProcessLookupError:
+            return False
+        except PermissionError:
+            return True
+
+
+def stop_process_by_pid(pid: int, timeout: float = 10.0):
+    """Terminate a process tree by PID."""
+    if pid <= 0 or not is_pid_alive(pid):
+        return
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"], capture_output=True, timeout=timeout)
+    else:
+        try:
+            os.kill(pid, signal.SIGTERM)
+            time.sleep(0.5)
+            if is_pid_alive(pid):
+                os.kill(pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    deadline = time.time() + 5.0
+    while time.time() < deadline and is_pid_alive(pid):
+        time.sleep(0.1)
+
+
+def get_system_load() -> dict:
+    """Collect current system load and resource metrics (T-00147 L3 / T-00150 C4)."""
+    res = {
+        "timestamp": time.time(),
+        "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    if os.name == "nt":
+        try:
+            mem = MEMORYSTATUSEX()
+            mem.dwLength = ctypes.sizeof(MEMORYSTATUSEX)
+            if k32.GlobalMemoryStatusEx(ctypes.byref(mem)):
+                res["memory_load_percent"] = mem.dwMemoryLoad
+                res["total_phys_mb"] = round(mem.ullTotalPhys / (1024 * 1024), 1)
+                res["avail_phys_mb"] = round(mem.ullAvailPhys / (1024 * 1024), 1)
+            idle, kernel, user = FILETIME(), FILETIME(), FILETIME()
+            if k32.GetSystemTimes(ctypes.byref(idle), ctypes.byref(kernel), ctypes.byref(user)):
+                def to_int(ft):
+                    return (ft.dwHighDateTime << 32) | ft.dwLowDateTime
+                res["cpu_times_raw"] = {
+                    "idle": to_int(idle),
+                    "kernel": to_int(kernel),
+                    "user": to_int(user),
+                }
+        except Exception as e:
+            res["metrics_error"] = str(e)
+    if hasattr(os, "getloadavg"):
+        try:
+            res["load_avg"] = list(os.getloadavg())
+        except OSError:
+            pass
+    return res
+
+
+def read_lock_info(lock_path: Path) -> dict | None:
+    """Read structured lock info from lock file, handling byte 0 locking."""
+    if not lock_path.exists():
+        return None
+    raw = b""
+    try:
+        with lock_path.open("rb") as f:
+            try:
+                raw = f.read()
+            except PermissionError:
+                # Byte 0 is kernel-locked by an active process; seek past byte 0
+                f.seek(1)
+                raw = f.read()
+    except (OSError, PermissionError):
+        return None
+    raw = raw.strip()
+    if raw.startswith(b"0"):
+        raw = raw[1:].strip()
+    if not raw:
+        return None
+    try:
+        data = json.loads(raw.decode("utf-8", errors="replace"))
+        return data if isinstance(data, dict) else None
+    except Exception:
+        return None
+
+
+def inspect_lock_status(
+    lock_path: Path,
+    heartbeat_path: Path | None = None,
+    max_heartbeat_age: float = MAX_HEARTBEAT_STALE_SECONDS,
+) -> dict:
+    """Inspect lock file liveness per T-00150 C3:
+    - Dead PID or heartbeat older than 10 min -> reclaimable.
+    - Live PID with fresh heartbeat -> live lock (never stolen).
+    """
+    if not lock_path.exists():
+        return {
+            "locked": False,
+            "reclaimable": True,
+            "reason": "NO_LOCK",
+            "pid": None,
+            "heartbeat_age": None,
+            "heartbeat_path": None,
+        }
+
+    info = read_lock_info(lock_path)
+    if not info or not info.get("pid"):
+        return {
+            "locked": True,
+            "reclaimable": True,
+            "reason": "UNOWNED_LOCK",
+            "pid": None,
+            "heartbeat_age": None,
+            "heartbeat_path": None,
+        }
+
+    pid = int(info["pid"])
+    hb_path_str = info.get("heartbeat_path")
+
+    if not is_pid_alive(pid):
+        return {
+            "locked": True,
+            "reclaimable": True,
+            "reason": "DEAD_PID",
+            "pid": pid,
+            "heartbeat_age": None,
+            "heartbeat_path": hb_path_str,
+        }
+
+    now = time.time()
+    hb_candidate = (
+        heartbeat_path
+        if (heartbeat_path and heartbeat_path.exists())
+        else (Path(hb_path_str) if (hb_path_str and Path(hb_path_str).exists()) else None)
+    )
+
+    hb_timestamp = None
+    if hb_candidate and hb_candidate.is_file():
+        try:
+            hb_data = json.loads(hb_candidate.read_text(encoding="utf-8"))
+            if isinstance(hb_data, dict) and "heartbeat_unix" in hb_data:
+                hb_timestamp = float(hb_data["heartbeat_unix"])
+        except Exception:
+            pass
+        if hb_timestamp is None:
+            try:
+                hb_timestamp = hb_candidate.stat().st_mtime
+            except Exception:
+                pass
+
+    if hb_timestamp is None:
+        if "last_heartbeat" in info:
+            hb_timestamp = float(info["last_heartbeat"])
+        elif "acquired_at" in info:
+            hb_timestamp = float(info["acquired_at"])
+        else:
+            try:
+                hb_timestamp = lock_path.stat().st_mtime
+            except Exception:
+                hb_timestamp = 0.0
+
+    heartbeat_age = max(0.0, now - hb_timestamp)
+    if heartbeat_age > max_heartbeat_age:
+        return {
+            "locked": True,
+            "reclaimable": True,
+            "reason": "STALE_HEARTBEAT",
+            "pid": pid,
+            "heartbeat_age": heartbeat_age,
+            "heartbeat_path": hb_path_str,
+        }
+
+    return {
+        "locked": True,
+        "reclaimable": False,
+        "reason": "LIVE_LOCK",
+        "pid": pid,
+        "heartbeat_age": heartbeat_age,
+        "heartbeat_path": hb_path_str,
+    }
+
+
+class HeartbeatDaemon:
+    """Background thread that writes PID + heartbeat file at regular intervals (T-00150 C2)."""
+
+    def __init__(
+        self,
+        heartbeat_path: Path,
+        campaign_id: str,
+        interval: float = DEFAULT_HEARTBEAT_INTERVAL_SECONDS,
+        lock_handle=None,
+        lock_record: dict | None = None,
+    ):
+        self.heartbeat_path = heartbeat_path.resolve()
+        self.campaign_id = campaign_id
+        self.interval = interval
+        self.lock_handle = lock_handle
+        self.lock_record = lock_record or {}
+        self.stop_event = threading.Event()
+        self._write_lock = threading.Lock()
+        self.status = "INITIALIZING"
+        self.current_run = 0
+        self.total_runs = 0
+        self.start_time = time.time()
+        self.thread = None
+
+    def set_status(self, status: str, current_run: int = 0, total_runs: int = 0):
+        self.status = status
+        self.current_run = current_run
+        self.total_runs = total_runs
+        self.write_heartbeat()
+
+    def start(self):
+        self.write_heartbeat()
+        self.thread = threading.Thread(target=self._run, daemon=True, name="HeartbeatDaemon")
+        self.thread.start()
+
+    def stop(self, final_status: str | None = None):
+        if final_status:
+            self.status = final_status
+        self.stop_event.set()
+        if self.thread and self.thread.is_alive():
+            self.thread.join(timeout=3.0)
+        self.write_heartbeat()
+
+    def _run(self):
+        while not self.stop_event.wait(self.interval):
+            try:
+                self.write_heartbeat()
+            except Exception:
+                pass
+
+    def write_heartbeat(self):
+        with self._write_lock:
+            now = time.time()
+            now_utc = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now))
+            payload = {
+                "pid": os.getpid(),
+                "campaign_id": self.campaign_id,
+                "status": self.status,
+                "heartbeat_unix": now,
+                "heartbeat_utc": now_utc,
+                "elapsed_seconds": round(now - self.start_time, 2),
+                "current_run": self.current_run,
+                "total_runs": self.total_runs,
+                "system_load": get_system_load(),
+            }
+            data = (json.dumps(payload, indent=2) + "\n").encode("utf-8")
+
+            self.heartbeat_path.parent.mkdir(parents=True, exist_ok=True)
+            tmp_path = self.heartbeat_path.with_suffix(f".tmp.{os.getpid()}.{threading.get_ident()}.{time.time_ns()}")
+            try:
+                with tmp_path.open("wb") as f:
+                    f.write(data)
+                    f.flush()
+                for attempt in range(10):
+                    try:
+                        os.replace(tmp_path, self.heartbeat_path)
+                        break
+                    except PermissionError:
+                        time.sleep(0.05)
+            finally:
+                if tmp_path.exists():
+                    try:
+                        tmp_path.unlink()
+                    except OSError:
+                        pass
+
+            if self.lock_handle and not self.lock_handle.closed:
+                try:
+                    self.lock_record["last_heartbeat"] = now
+                    self.lock_handle.seek(1)
+                    self.lock_handle.truncate(1)
+                    self.lock_handle.write(
+                        b"\n" + json.dumps(self.lock_record, indent=2).encode("utf-8") + b"\n"
+                    )
+                    self.lock_handle.flush()
+                except Exception:
+                    pass
+
+
+class MachineLock:
+    """Exclusive machine lock with kernel byte-lock, PID metadata, heartbeat, and stale recovery."""
+
+    def __init__(
+        self,
+        lock_path: Path,
+        heartbeat_path: Path,
+        campaign_id: str,
+        heartbeat_interval: float = DEFAULT_HEARTBEAT_INTERVAL_SECONDS,
+        max_heartbeat_age: float = MAX_HEARTBEAT_STALE_SECONDS,
+    ):
+        self.lock_path = lock_path.resolve()
+        self.heartbeat_path = heartbeat_path.resolve()
+        self.campaign_id = campaign_id
+        self.heartbeat_interval = heartbeat_interval
+        self.max_heartbeat_age = max_heartbeat_age
+        self.lock_file_handle = None
+        self.heartbeat_daemon = None
+        self.acquired = False
+
+    def acquire(self):
+        status = inspect_lock_status(self.lock_path, self.heartbeat_path, self.max_heartbeat_age)
+        if status["locked"] and not status["reclaimable"]:
+            raise ProtocolError(
+                f"Live machine lock held by PID {status['pid']} "
+                f"(heartbeat age: {status['heartbeat_age']:.1f}s, path: {status['heartbeat_path']}); "
+                "live lock cannot be stolen"
+            )
+
+        if status["locked"] and status["reclaimable"]:
+            print(f"[Lock] Reclaiming stale lock: reason={status['reason']}, stale_pid={status['pid']}")
+            if (
+                status["reason"] == "STALE_HEARTBEAT"
+                and status["pid"]
+                and status["pid"] != os.getpid()
+                and is_pid_alive(status["pid"])
+            ):
+                print(f"[Lock] Terminating hung process with stale heartbeat: PID={status['pid']}")
+                stop_process_by_pid(status["pid"])
+
+        self.lock_path.parent.mkdir(parents=True, exist_ok=True)
+        f = None
+        for attempt in range(20):
+            try:
+                f = self.lock_path.open("r+b" if self.lock_path.exists() else "w+b")
+                break
+            except (OSError, PermissionError):
+                time.sleep(0.05 * (attempt + 1))
+
+        if f is None:
+            raise ProtocolError(f"Could not open machine lock file: {self.lock_path}")
+
+        try:
+            f.seek(0, 2)
+            if f.tell() < 1:
+                f.write(b"0")
+                f.flush()
+            f.seek(0)
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError as e:
+            f.close()
+            raise ProtocolError(f"Failed to acquire kernel byte lock on {self.lock_path}") from e
+
+        lock_record = {
+            "pid": os.getpid(),
+            "campaign_id": self.campaign_id,
+            "heartbeat_path": str(self.heartbeat_path),
+            "acquired_at": time.time(),
+            "last_heartbeat": time.time(),
+        }
+        f.seek(1)
+        f.truncate(1)
+        f.write(b"\n" + json.dumps(lock_record, indent=2).encode("utf-8") + b"\n")
+        f.flush()
+
+        self.lock_file_handle = f
+        self.acquired = True
+
+        self.heartbeat_daemon = HeartbeatDaemon(
+            self.heartbeat_path,
+            self.campaign_id,
+            interval=self.heartbeat_interval,
+            lock_handle=f,
+            lock_record=lock_record,
+        )
+        self.heartbeat_daemon.start()
+
+    def release(self):
+        if not self.acquired:
+            return
+        try:
+            if self.heartbeat_daemon:
+                self.heartbeat_daemon.stop()
+        except Exception:
+            pass
+
+        try:
+            if self.lock_file_handle and not self.lock_file_handle.closed:
+                f = self.lock_file_handle
+                f.seek(0)
+                f.truncate(0)
+                f.write(b"0\n")
+                f.flush()
+                f.seek(0)
+                if os.name == "nt":
+                    import msvcrt
+                    msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+                else:
+                    import fcntl
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+                f.close()
+        except Exception:
+            pass
+        finally:
+            self.lock_file_handle = None
+            self.acquired = False
+
+    def __enter__(self):
+        self.acquire()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.release()
+
+
+def spawn_detached_child(child_argv: list[str], log_file: Path) -> subprocess.Popen:
+    """Spawn a detached child process that outlives the invoking process (T-00150 C1)."""
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+    flags = 0
+    if os.name == "nt":
+        DETACHED_PROCESS = 0x00000008
+        CREATE_NEW_PROCESS_GROUP = 0x00000200
+        flags = DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
+
+    with log_file.open("ab") as log_f:
+        if os.name == "nt":
+            p = subprocess.Popen(
+                child_argv,
+                stdin=subprocess.DEVNULL,
+                stdout=log_f,
+                stderr=subprocess.STDOUT,
+                creationflags=flags,
+                close_fds=True,
+            )
+        else:
+            p = subprocess.Popen(
+                child_argv,
+                stdin=subprocess.DEVNULL,
+                stdout=log_f,
+                stderr=subprocess.STDOUT,
+                start_new_session=True,
+                close_fds=True,
+            )
+    return p
 
 
 def set_process_affinity(pid: int, mask: int) -> bool:
@@ -166,6 +659,7 @@ def stage_run_directory(deck_src: Path, exe_src: Path, target_dir: Path) -> dict
 def run_1day_warmup(deck_src: Path, exe_src: Path, warmup_dir: Path, affinity_mask: int, timeout: float) -> dict:
     """Execute a 1-day warmup run, terminating upon Day 2 marker; discard outputs."""
     print(f"  [Warmup] Staging warmup directory: {warmup_dir}")
+    load_start = get_system_load()
     input_files = stage_run_directory(deck_src, exe_src, warmup_dir)
     run_exe = warmup_dir / "ecosys_oracle.exe"
     log_file = warmup_dir / "log98f25"
@@ -211,6 +705,8 @@ def run_1day_warmup(deck_src: Path, exe_src: Path, warmup_dir: Path, affinity_ma
     if not day1_completed:
         raise RuntimeError(f"Warmup failed to reach Day 2 marker within {timeout}s (elapsed: {elapsed}s)")
 
+    load_end = get_system_load()
+
     # Discard warmup artifacts
     safe_rmtree(warmup_dir)
     print(f"  [Warmup] Completed in {elapsed}s; discarded warmup directory.")
@@ -218,7 +714,8 @@ def run_1day_warmup(deck_src: Path, exe_src: Path, warmup_dir: Path, affinity_ma
         "status": "WARMUP_DISCARDED",
         "elapsed_seconds": elapsed,
         "termination_marker": "NOW EXECUTING DAY     2",
-        "affinity_mask": hex(affinity_mask)
+        "affinity_mask": hex(affinity_mask),
+        "system_load": {"start": load_start, "end": load_end}
     }
 
 
@@ -233,6 +730,7 @@ def execute_single_full_run(
 ) -> dict:
     """Execute one full timed production run to normal exit code 0."""
     print(f"  [Timed Run {run_id}] Staging run directory: {run_dir}")
+    load_start = get_system_load()
     input_files = stage_run_directory(deck_src, exe_src, run_dir)
     run_exe = run_dir / "ecosys_oracle.exe"
     log_file = run_dir / "log98f25"
@@ -294,6 +792,8 @@ def execute_single_full_run(
             f"Run {run_id} failed: exit_code={exit_code}, timed_out={timed_out}, elapsed={elapsed}s"
         )
 
+    load_end = get_system_load()
+
     # Inventory and hash all output files
     output_files = {}
     total_bytes = 0
@@ -330,6 +830,7 @@ def execute_single_full_run(
         "total_output_files": len(output_files),
         "total_output_bytes": total_bytes,
         "horizon_check": horizon_check,
+        "system_load": {"start": load_start, "end": load_end},
         "outputs": output_files
     }
 
@@ -452,10 +953,14 @@ def main():
     ap.add_argument("--campaign-id", type=str, default=None)
     ap.add_argument("--runs", type=int, default=3)
     ap.add_argument("--core-affinity", type=int, default=1, help="Core affinity mask (default: 1 for Core 0)")
-    ap.add_argument("--timeout-per-run", type=float, default=14400.0, help="Per-run timeout in seconds (default: 4h)")
+    ap.add_argument("--timeout-per-run", type=float, default=21600.0, help="Per-run timeout in seconds (default: 6h / 21600s)")
     ap.add_argument("--warmup-timeout", type=float, default=180.0, help="Per-warmup timeout in seconds")
     ap.add_argument("--max-simulated-days", type=int, default=None, help="Bounded test simulation days (optional)")
     ap.add_argument("--dry-run", action="store_true", help="Validate configuration and exit without running simulation")
+    ap.add_argument("--detach", action="store_true", help="Spawn detached background process and return immediately")
+    ap.add_argument("--lock-file", type=Path, default=None, help="Machine lock path (default: .agent/locks/machine.lock)")
+    ap.add_argument("--heartbeat-file", type=Path, default=None, help="Path for child heartbeat file (default: audit/runs/p04-full-campaign/heartbeat.json)")
+    ap.add_argument("--heartbeat-interval", type=float, default=DEFAULT_HEARTBEAT_INTERVAL_SECONDS, help="Heartbeat update interval in seconds (default: 30s)")
     ap.add_argument("--out", type=Path, default=Path("audit/runs/p04_full_run_receipt.json"))
     a = ap.parse_args()
 
@@ -470,6 +975,50 @@ def main():
 
     cid = a.campaign_id or f"p04-{int(time.time())}"
     campaign_dir = output_base / cid
+    lock_path = (a.lock_file or (ROOT / DEFAULT_LOCK_PATH)).resolve()
+    heartbeat_path = (a.heartbeat_file or (ROOT / DEFAULT_HEARTBEAT_PATH)).resolve()
+
+    if a.detach:
+        # C1: Detached mode spawns a child that outlives the turn and returns within a few seconds.
+        # Parent prints PID, heartbeat path, and campaign ID.
+        child_argv = [
+            sys.executable,
+            str(Path(__file__).resolve()),
+            "--staged-deck", str(deck_src),
+            "--exe", str(exe_src),
+            "--output-base", str(output_base),
+            "--campaign-id", cid,
+            "--runs", str(a.runs),
+            "--core-affinity", str(a.core_affinity),
+            "--timeout-per-run", str(a.timeout_per_run),
+            "--warmup-timeout", str(a.warmup_timeout),
+            "--out", str(out_receipt),
+            "--lock-file", str(lock_path),
+            "--heartbeat-file", str(heartbeat_path),
+            "--heartbeat-interval", str(a.heartbeat_interval),
+        ]
+        if a.max_simulated_days is not None:
+            child_argv.extend(["--max-simulated-days", str(a.max_simulated_days)])
+        if a.dry_run:
+            child_argv.append("--dry-run")
+
+        child_log = heartbeat_path.parent / "driver.log"
+        child_p = spawn_detached_child(child_argv, child_log)
+
+        time.sleep(0.3)
+        poll_res = child_p.poll()
+        if poll_res is not None:
+            err_tail = ""
+            if child_log.exists():
+                err_tail = child_log.read_text(encoding="latin-1", errors="replace")[-500:]
+            raise RuntimeError(f"Detached child failed to launch (exit {poll_res}): {err_tail}")
+
+        print(f"[Detached Mode] Child process spawned successfully.")
+        print(f"  PID: {child_p.pid}")
+        print(f"  Heartbeat path: {heartbeat_path}")
+        print(f"  Campaign ID: {cid}")
+        print(f"  Driver log: {child_log}")
+        return
 
     print(f"=== ECOSYS P0.4 LEGACY GFORTRAN FULL-RUN DRIVER ===")
     print(f"  Deck source: {deck_src}")
@@ -477,7 +1026,10 @@ def main():
     print(f"  Output directory base: {campaign_dir}")
     print(f"  Core affinity mask: {hex(a.core_affinity)}")
     print(f"  Runs requested: {a.runs}")
+    print(f"  Timeout per run: {a.timeout_per_run}s")
     print(f"  Dry-run: {a.dry_run}")
+    print(f"  Machine lock path: {lock_path}")
+    print(f"  Heartbeat path: {heartbeat_path}")
 
     if a.dry_run:
         # Dry-run validation of configuration and requirements
@@ -509,13 +1061,17 @@ def main():
                     "expected_files": RUN_002_EXPECTED_FILES,
                     "expected_size_approx_bytes": RUN_002_EXPECTED_BYTES_APPROX
                 },
-                "machine_lock_path": str(ROOT / ".agent/locks/machine.lock"),
+                "machine_lock_path": str(lock_path),
+                "heartbeat_path": str(heartbeat_path),
+                "stale_lock_recovery": "Enabled (dead PID check + 600s heartbeat timeout)",
+                "detached_mode_supported": True,
                 "core_affinity_mask": hex(a.core_affinity),
                 "core_affinity_verified": hex(verif_aff) if verif_aff is not None else "UNAVAILABLE",
                 "checkpoint_policy": "No *.bin checkpoints; legacy Fortran 77 does not implement Zig checkpointing",
                 "warmup_policy": "Fresh discarded 1-day warmup immediately before each timed run",
                 "reporting": "Median and spread of elapsed seconds across runs",
-                "determinism_check": "Byte-for-byte SHA-256 cross-run equality check"
+                "determinism_check": "Byte-for-byte SHA-256 cross-run equality check",
+                "system_load_recording": "Enabled (L3 system load recorded per run and in heartbeat)"
             },
             "configuration": {
                 "deck_source": str(deck_src),
@@ -532,105 +1088,155 @@ def main():
         print(f"Dry-run receipt successfully written to {out_receipt}")
         return
 
-    # Full execution under exclusive machine lock
-    lock_path = ROOT / ".agent/locks/machine.lock"
+    # Child execution under MachineLock
+    mlock = MachineLock(
+        lock_path=lock_path,
+        heartbeat_path=heartbeat_path,
+        campaign_id=cid,
+        heartbeat_interval=a.heartbeat_interval,
+        max_heartbeat_age=MAX_HEARTBEAT_STALE_SECONDS,
+    )
     print(f"Acquiring exclusive machine lock: {lock_path}")
+    print(f"Heartbeat path: {heartbeat_path}")
 
-    with lock(lock_path):
-        campaign_dir.mkdir(parents=True, exist_ok=True)
-        runs_data = []
-        warmups_data = []
+    campaign_dir.mkdir(parents=True, exist_ok=True)
+    runs_data = []
+    warmups_data = []
+    execution_error = None
 
-        for run_idx in range(1, a.runs + 1):
-            run_name = f"run_{run_idx}"
-            run_target_dir = campaign_dir / run_name
-            warmup_target_dir = campaign_dir / f"warmup_{run_idx}"
+    try:
+        with mlock:
+            for run_idx in range(1, a.runs + 1):
+                if mlock.heartbeat_daemon:
+                    mlock.heartbeat_daemon.set_status(f"WARMUP_{run_idx}", current_run=run_idx, total_runs=a.runs)
+                run_name = f"run_{run_idx}"
+                run_target_dir = campaign_dir / run_name
+                warmup_target_dir = campaign_dir / f"warmup_{run_idx}"
 
-            print(f"\n--- [Iteration {run_idx}/{a.runs}] Starting Warmup ---")
-            warmup_res = run_1day_warmup(
-                deck_src, exe_src, warmup_target_dir, a.core_affinity, a.warmup_timeout
-            )
-            warmups_data.append(warmup_res)
+                print(f"\n--- [Iteration {run_idx}/{a.runs}] Starting Warmup ---")
+                warmup_res = run_1day_warmup(
+                    deck_src, exe_src, warmup_target_dir, a.core_affinity, a.warmup_timeout
+                )
+                warmups_data.append(warmup_res)
 
-            print(f"--- [Iteration {run_idx}/{a.runs}] Starting Timed Run ---")
-            run_res = execute_single_full_run(
-                run_name,
-                deck_src,
-                exe_src,
-                run_target_dir,
-                a.core_affinity,
-                a.timeout_per_run,
-                a.max_simulated_days
-            )
-            runs_data.append(run_res)
-            print(f"  Run {run_idx} completed in {run_res['elapsed_seconds']}s")
+                if mlock.heartbeat_daemon:
+                    mlock.heartbeat_daemon.set_status(f"RUN_{run_idx}", current_run=run_idx, total_runs=a.runs)
+                print(f"--- [Iteration {run_idx}/{a.runs}] Starting Timed Run ---")
+                run_res = execute_single_full_run(
+                    run_name,
+                    deck_src,
+                    exe_src,
+                    run_target_dir,
+                    a.core_affinity,
+                    a.timeout_per_run,
+                    a.max_simulated_days
+                )
+                runs_data.append(run_res)
+                print(f"  Run {run_idx} completed in {run_res['elapsed_seconds']}s")
 
-        # Compute median and spread
-        elapsed_times = sorted([r["elapsed_seconds"] for r in runs_data])
-        median_time = elapsed_times[len(elapsed_times) // 2]
-        spread_time = round(elapsed_times[-1] - elapsed_times[0], 3)
-        spread_pct = round((spread_time / median_time) * 100, 2) if median_time > 0 else 0.0
+            # Compute median and spread
+            elapsed_times = sorted([r["elapsed_seconds"] for r in runs_data])
+            median_time = elapsed_times[len(elapsed_times) // 2]
+            spread_time = round(elapsed_times[-1] - elapsed_times[0], 3)
+            spread_pct = round((spread_time / median_time) * 100, 2) if median_time > 0 else 0.0
 
-        # Determinism check
-        determinism = compare_determinism(runs_data)
+            # Determinism check
+            determinism = compare_determinism(runs_data)
 
-        # Inventory comparison against run-002
-        ref_run = runs_data[0]
-        actual_files = ref_run["total_output_files"]
-        actual_bytes = ref_run["total_output_bytes"]
-        file_diff = actual_files - RUN_002_EXPECTED_FILES
-        size_diff = actual_bytes - RUN_002_EXPECTED_BYTES_APPROX
+            # Inventory comparison against run-002
+            ref_run = runs_data[0]
+            actual_files = ref_run["total_output_files"]
+            actual_bytes = ref_run["total_output_bytes"]
+            file_diff = actual_files - RUN_002_EXPECTED_FILES
+            size_diff = actual_bytes - RUN_002_EXPECTED_BYTES_APPROX
 
-        inventory_audit = {
-            "run_002_baseline_files": RUN_002_EXPECTED_FILES,
-            "actual_output_files": actual_files,
-            "file_count_difference": file_diff,
-            "run_002_baseline_approx_bytes": RUN_002_EXPECTED_BYTES_APPROX,
-            "actual_total_bytes": actual_bytes,
-            "size_difference_bytes": size_diff,
-            "explanation": (
-                "Matches run-002 output stream structure exactly."
-                if file_diff == 0 else
-                f"File count difference of {file_diff} files relative to run-002 inventory."
-            )
-        }
+            inventory_audit = {
+                "run_002_baseline_files": RUN_002_EXPECTED_FILES,
+                "actual_output_files": actual_files,
+                "file_count_difference": file_diff,
+                "run_002_baseline_approx_bytes": RUN_002_EXPECTED_BYTES_APPROX,
+                "actual_total_bytes": actual_bytes,
+                "size_difference_bytes": size_diff,
+                "explanation": (
+                    "Matches run-002 output stream structure exactly."
+                    if file_diff == 0 else
+                    f"File count difference of {file_diff} files relative to run-002 inventory."
+                )
+            }
 
-        # Assemble full receipt
-        receipt = {
-            "status": "ALL_RUNS_COMPLETED",
+            # Assemble full receipt
+            receipt = {
+                "status": "ALL_RUNS_COMPLETED",
+                "protocol": "plan §5 P0.4 / SAGE T-00140 / SAGE T-00142 R5",
+                "campaign_id": cid,
+                "campaign_directory": str(campaign_dir),
+                "runs_count": len(runs_data),
+                "timing_statistics": {
+                    "elapsed_seconds_all_runs": [r["elapsed_seconds"] for r in runs_data],
+                    "sorted_elapsed_seconds": elapsed_times,
+                    "median_seconds": median_time,
+                    "spread_seconds": spread_time,
+                    "relative_spread_percent": spread_pct
+                },
+                "determinism_audit": determinism,
+                "inventory_audit": inventory_audit,
+                "machine_and_environment": {
+                    "machine_lock": str(lock_path),
+                    "heartbeat_path": str(heartbeat_path),
+                    "core_affinity_mask": hex(a.core_affinity),
+                    "checkpoints_policy": "No *.bin checkpoints; legacy Fortran 77 does not implement Zig checkpointing",
+                    "system_load_summary": {
+                        "warmups": [w.get("system_load") for w in warmups_data],
+                        "runs": [r.get("system_load") for r in runs_data]
+                    }
+                },
+                "warmups": warmups_data,
+                "runs": runs_data
+            }
+
+            out_receipt.parent.mkdir(parents=True, exist_ok=True)
+            out_receipt.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
+            print(f"\nFull execution receipt written to {out_receipt}")
+            print(json.dumps({
+                "status": receipt["status"],
+                "runs_completed": len(runs_data),
+                "median_seconds": median_time,
+                "spread_seconds": spread_time,
+                "deterministic": determinism["byte_for_byte_identical"],
+                "output_files_per_run": actual_files
+            }, indent=2))
+            if mlock.heartbeat_daemon:
+                mlock.heartbeat_daemon.set_status("COMPLETED", current_run=a.runs, total_runs=a.runs)
+
+    except Exception as e:
+        execution_error = str(e)
+        print(f"\n[Execution Failure] {execution_error}", file=sys.stderr)
+        fail_receipt = {
+            "status": "RUN_FAILED",
             "protocol": "plan §5 P0.4 / SAGE T-00140 / SAGE T-00142 R5",
             "campaign_id": cid,
             "campaign_directory": str(campaign_dir),
-            "runs_count": len(runs_data),
-            "timing_statistics": {
-                "elapsed_seconds_all_runs": [r["elapsed_seconds"] for r in runs_data],
-                "sorted_elapsed_seconds": elapsed_times,
-                "median_seconds": median_time,
-                "spread_seconds": spread_time,
-                "relative_spread_percent": spread_pct
-            },
-            "determinism_audit": determinism,
-            "inventory_audit": inventory_audit,
+            "error": execution_error,
+            "runs_completed": len(runs_data),
             "machine_and_environment": {
                 "machine_lock": str(lock_path),
+                "heartbeat_path": str(heartbeat_path),
                 "core_affinity_mask": hex(a.core_affinity),
-                "checkpoints_policy": "No *.bin checkpoints; legacy Fortran 77 does not implement Zig checkpointing"
+                "checkpoints_policy": "No *.bin checkpoints; legacy Fortran 77 does not implement Zig checkpointing",
+                "system_load_summary": {
+                    "warmups": [w.get("system_load") for w in warmups_data],
+                    "runs": [r.get("system_load") for r in runs_data]
+                }
             },
             "warmups": warmups_data,
             "runs": runs_data
         }
-
         out_receipt.parent.mkdir(parents=True, exist_ok=True)
-        out_receipt.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
-        print(f"\nFull execution receipt written to {out_receipt}")
-        print(json.dumps({
-            "status": receipt["status"],
-            "runs_completed": len(runs_data),
-            "median_seconds": median_time,
-            "spread_seconds": spread_time,
-            "deterministic": determinism["byte_for_byte_identical"],
-            "output_files_per_run": actual_files
-        }, indent=2))
+        out_receipt.write_text(json.dumps(fail_receipt, indent=2), encoding="utf-8")
+        print(f"Failure receipt successfully written to {out_receipt}", file=sys.stderr)
+        if mlock.heartbeat_daemon:
+            mlock.heartbeat_daemon.set_status("FAILED", current_run=len(runs_data), total_runs=a.runs)
+        raise
 
 
 if __name__ == "__main__":

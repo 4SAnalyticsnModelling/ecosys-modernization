@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "python",
+    "-m",
+    "unittest",
+    "ecosys-audit/tests/test_run_legacy_p04_full.py"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 1.068,
+  "exit_code": 1,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 33436,
+  "pid": 17720,
+  "started_unix": 1790466238.6255732,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/p04-detach-tests/run-01/stderr.log",
+    "sha256": "2971a68c60afb60f5962bfc2b34766ae632d9dbfeef5a924350002643c0fe902"
+  },
+  "stdout": {
+    "path": "audit/runs/p04-detach-tests/run-01/stdout.log",
+    "sha256": "440aff08031de423fb028646c523e66b5711595a891063f24918b015ee617b69"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

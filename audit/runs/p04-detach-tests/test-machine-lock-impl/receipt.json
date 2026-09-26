@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "python",
+    "-c",
+    "\nimport os, sys, time, json, tempfile, msvcrt\n\nclass TestLock:\n    def __init__(self, p):\n        self.p = p\n        self.f = None\n        \n    def acquire(self):\n        f = open(self.p, 'r+b' if os.path.exists(self.p) else 'w+b')\n        f.seek(0, 2)\n        if f.tell() < 1:\n            f.write(b'0')\n            f.flush()\n        f.seek(0)\n        msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)\n        f.seek(1)\n        f.truncate(1)\n        data = {'pid': os.getpid(), 'time': time.time()}\n        f.write(b'\\n' + json.dumps(data).encode() + b'\\n')\n        f.flush()\n        self.f = f\n        \n    def release(self):\n        if self.f:\n            self.f.seek(0)\n            self.f.truncate(0)\n            self.f.write(b'0\\n')\n            self.f.flush()\n            self.f.seek(0)\n            msvcrt.locking(self.f.fileno(), msvcrt.LK_UNLCK, 1)\n            self.f.close()\n            self.f = None\n\ndef read_lock(p):\n    with open(p, 'rb') as f:\n        try:\n            raw = f.read()\n        except PermissionError:\n            f.seek(1)\n            raw = f.read()\n    raw = raw.strip()\n    if raw.startswith(b'0'):\n        raw = raw[1:].strip()\n    return json.loads(raw) if raw else None\n\nwith tempfile.NamedTemporaryFile(delete=False) as tf:\n    p = tf.name\n\ntry:\n    tl = TestLock(p)\n    tl.acquire()\n    info = read_lock(p)\n    print('Read lock info while held:', info)\n    tl.release()\n    after = open(p, 'rb').read()\n    print('After release content:', after)\nfinally:\n    os.unlink(p)\n"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.149,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 37864,
+  "pid": 9836,
+  "started_unix": 1790465943.8792088,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/p04-detach-tests/test-machine-lock-impl/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/p04-detach-tests/test-machine-lock-impl/stdout.log",
+    "sha256": "e315dfa3e85af307421591497c89b7da87b10323c8480b870d8beab9081d01f3"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

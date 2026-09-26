@@ -1,0 +1,35 @@
+{
+  "status": "DRY_RUN_PASSED",
+  "protocol": "plan \u00a75 P0.4 / SAGE T-00140 / SAGE T-00142 R5",
+  "r5_compliance_audit": {
+    "exit_code_zero_required": true,
+    "outputs_destination": "D:\\ecosys-evidence\\legacy\\p04-detach-dryrun-campaign",
+    "outputs_outside_audit_runs": true,
+    "output_hashing_and_size_recording": "Enabled (SHA-256 + size + line count)",
+    "horizon_check_implementation": "Enabled (Year 2027 DOY 365 / log completion check)",
+    "inventory_comparison_reference": {
+      "expected_files": 1138,
+      "expected_size_approx_bytes": 1428000000
+    },
+    "machine_lock_path": "D:\\ecosys-modernization\\.agent\\locks\\machine.lock",
+    "heartbeat_path": "D:\\ecosys-modernization\\audit\\runs\\p04-detach-dryrun\\heartbeat.json",
+    "stale_lock_recovery": "Enabled (dead PID check + 600s heartbeat timeout)",
+    "detached_mode_supported": true,
+    "core_affinity_mask": "0x1",
+    "core_affinity_verified": "0x1",
+    "checkpoint_policy": "No *.bin checkpoints; legacy Fortran 77 does not implement Zig checkpointing",
+    "warmup_policy": "Fresh discarded 1-day warmup immediately before each timed run",
+    "reporting": "Median and spread of elapsed seconds across runs",
+    "determinism_check": "Byte-for-byte SHA-256 cross-run equality check",
+    "system_load_recording": "Enabled (L3 system load recorded per run and in heartbeat)"
+  },
+  "configuration": {
+    "deck_source": "D:\\ecosys-evidence\\legacy\\staged_deck",
+    "deck_file_count": 66,
+    "exe_path": "D:\\ecosys-evidence\\legacy\\ecosys_oracle.exe",
+    "exe_sha256": "273630BEAD10306D7E55B8EC87BF8B58C8E4BB4422ADD5CD5B94BA3FD742F319",
+    "runs_planned": 3,
+    "timeout_per_run_s": 21600.0,
+    "warmup_timeout_s": 180.0
+  }
+}

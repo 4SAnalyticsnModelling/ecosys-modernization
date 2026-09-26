@@ -1,0 +1,12 @@
+=== ECOSYS P0.4 LEGACY GFORTRAN FULL-RUN DRIVER ===
+  Deck source: D:\ecosys-evidence\legacy\staged_deck
+  Executable: D:\ecosys-evidence\legacy\ecosys_oracle.exe
+  Output directory base: D:\ecosys-evidence\legacy\p04-verification-dryrun
+  Core affinity mask: 0x1
+  Runs requested: 3
+  Timeout per run: 21600.0s
+  Dry-run: True
+  Machine lock path: D:\ecosys-modernization\.agent\locks\machine.lock
+  Heartbeat path: D:\ecosys-modernization\audit\runs\p04-full-campaign\heartbeat.json
+Executing dry-run validation against R5 specifications...
+Dry-run receipt successfully written to D:\ecosys-modernization\audit\runs\p04-detach-dryrun\verification\dry_receipt.json

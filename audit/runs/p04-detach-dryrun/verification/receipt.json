@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "ecosys-audit/scripts/run_legacy_p04_full.py",
+    "--dry-run",
+    "--campaign-id",
+    "p04-verification-dryrun",
+    "--out",
+    "audit/runs/p04-detach-dryrun/verification/dry_receipt.json"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.21,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 38712,
+  "pid": 10020,
+  "started_unix": 1790466414.5505834,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/p04-detach-dryrun/verification/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/p04-detach-dryrun/verification/stdout.log",
+    "sha256": "38db3ede42473618fbb0b6be643a225f801c0faca51e5538a4cbea784da388fe"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

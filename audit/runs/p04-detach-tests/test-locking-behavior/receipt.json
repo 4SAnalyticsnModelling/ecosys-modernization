@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "python",
+    "-c",
+    "\nimport msvcrt, os, tempfile, json\n\nwith tempfile.NamedTemporaryFile(delete=False) as tf:\n    p = tf.name\n\ntry:\n    with open(p, 'w+b') as f1:\n        f1.write(json.dumps({'pid': 1234, 'time': 5678}).encode())\n        f1.flush()\n        f1.seek(0)\n        msvcrt.locking(f1.fileno(), msvcrt.LK_NBLCK, 1)\n        \n        # Now try to read from f2\n        with open(p, 'rb') as f2:\n            data = f2.read()\n            print('Read under lock:', data)\n            \n        # Try to lock from f2\n        with open(p, 'r+b') as f3:\n            try:\n                msvcrt.locking(f3.fileno(), msvcrt.LK_NBLCK, 1)\n                print('Lock succeeded unexpectedly!')\n            except OSError as e:\n                print('Lock correctly blocked:', e)\n        \n        f1.seek(0)\n        msvcrt.locking(f1.fileno(), msvcrt.LK_UNLCK, 1)\nfinally:\n    os.unlink(p)\n"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.154,
+  "exit_code": 1,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 16640,
+  "pid": 36664,
+  "started_unix": 1790465860.050617,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/p04-detach-tests/test-locking-behavior/stderr.log",
+    "sha256": "085467332a44b840360685e2fce4a022b278d7e5fd5b8c309ab86d79886b4ff9"
+  },
+  "stdout": {
+    "path": "audit/runs/p04-detach-tests/test-locking-behavior/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

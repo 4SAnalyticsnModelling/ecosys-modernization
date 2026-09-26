@@ -1,0 +1,2 @@
+Read lock info while held: {'pid': 33412, 'time': 1790465943.9920046}
+After release content: b'0\n'

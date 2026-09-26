@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "python",
+    "-c",
+    "\nimport os, ctypes\nfrom ctypes import wintypes\n\nk32 = ctypes.WinDLL('kernel32', use_last_error=True)\nSTILL_ACTIVE = 259\nPROCESS_QUERY_LIMITED_INFORMATION = 0x1000\n\nk32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]\nk32.OpenProcess.restype = wintypes.HANDLE\nk32.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]\nk32.GetExitCodeProcess.restype = wintypes.BOOL\nk32.CloseHandle.argtypes = [wintypes.HANDLE]\nk32.CloseHandle.restype = wintypes.BOOL\n\ndef is_pid_alive(pid: int) -> bool:\n    if pid <= 0:\n        return False\n    h = k32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)\n    if not h:\n        err = ctypes.get_last_error()\n        return err == 5  # ERROR_ACCESS_DENIED means process exists\n    try:\n        exit_code = wintypes.DWORD()\n        if k32.GetExitCodeProcess(h, ctypes.byref(exit_code)):\n            return exit_code.value == STILL_ACTIVE\n        return False\n    finally:\n        k32.CloseHandle(h)\n\nmy_pid = os.getpid()\nprint('Self PID alive:', is_pid_alive(my_pid))\nfake_pid = 999999\nprint('Fake PID alive:', is_pid_alive(fake_pid))\n"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.32,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 22224,
+  "pid": 32496,
+  "started_unix": 1790465891.591772,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/p04-detach-tests/test-is-pid-alive/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/p04-detach-tests/test-is-pid-alive/stdout.log",
+    "sha256": "e4bf0ef0c09dd4375a8e18a5a4cf8046ef1b407e1b0d322f8dd5504d244aa0a2"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

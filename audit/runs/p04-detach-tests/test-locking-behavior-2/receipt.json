@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "python",
+    "-c",
+    "\nimport msvcrt, os, tempfile, json\n\nwith tempfile.NamedTemporaryFile(delete=False) as tf:\n    p = tf.name\n\ntry:\n    with open(p, 'w+b') as f1:\n        f1.write(b' ' + json.dumps({'pid': 1234, 'time': 5678}).encode())\n        f1.flush()\n        f1.seek(0)\n        msvcrt.locking(f1.fileno(), msvcrt.LK_NBLCK, 1)\n        \n        # Now try to read from f2 starting at byte 1\n        with open(p, 'rb') as f2:\n            f2.seek(1)\n            data = f2.read()\n            print('Read under lock byte 1:', data)\n            \n        f1.seek(0)\n        msvcrt.locking(f1.fileno(), msvcrt.LK_UNLCK, 1)\nfinally:\n    os.unlink(p)\n"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.159,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 7620,
+  "pid": 37188,
+  "started_unix": 1790465869.3002524,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/p04-detach-tests/test-locking-behavior-2/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/p04-detach-tests/test-locking-behavior-2/stdout.log",
+    "sha256": "5b881175b9227c32b3fd9f04f7097218ce1c912cbf5434318311afd9d5e6483a"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

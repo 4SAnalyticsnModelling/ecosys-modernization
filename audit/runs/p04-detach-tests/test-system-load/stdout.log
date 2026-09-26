@@ -1,0 +1,1 @@
+{'memory_load_percent': 42, 'total_phys_mb': 65192.1, 'avail_phys_mb': 37413.7, 'cpu_times_raw': {'idle': 61527178125000, 'kernel': 65533405156250, 'user': 4690886875000}}

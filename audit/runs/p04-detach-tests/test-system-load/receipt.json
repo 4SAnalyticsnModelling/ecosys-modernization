@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "python",
+    "-c",
+    "\nimport os, ctypes\nfrom ctypes import wintypes\n\nk32 = ctypes.WinDLL('kernel32', use_last_error=True)\n\nclass MEMORYSTATUSEX(ctypes.Structure):\n    _fields_ = [\n        ('dwLength', wintypes.DWORD),\n        ('dwMemoryLoad', wintypes.DWORD),\n        ('ullTotalPhys', ctypes.c_uint64),\n        ('ullAvailPhys', ctypes.c_uint64),\n        ('ullTotalPageFile', ctypes.c_uint64),\n        ('ullAvailPageFile', ctypes.c_uint64),\n        ('ullTotalVirtual', ctypes.c_uint64),\n        ('ullAvailVirtual', ctypes.c_uint64),\n        ('ullAvailExtendedVirtual', ctypes.c_uint64),\n    ]\n\nk32.GlobalMemoryStatusEx.argtypes = [ctypes.POINTER(MEMORYSTATUSEX)]\nk32.GlobalMemoryStatusEx.restype = wintypes.BOOL\n\nclass FILETIME(ctypes.Structure):\n    _fields_ = [('dwLowDateTime', wintypes.DWORD), ('dwHighDateTime', wintypes.DWORD)]\n\nk32.GetSystemTimes.argtypes = [ctypes.POINTER(FILETIME), ctypes.POINTER(FILETIME), ctypes.POINTER(FILETIME)]\nk32.GetSystemTimes.restype = wintypes.BOOL\n\ndef get_system_load():\n    res = {}\n    if os.name == 'nt':\n        mem = MEMORYSTATUSEX()\n        mem.dwLength = ctypes.sizeof(MEMORYSTATUSEX)\n        if k32.GlobalMemoryStatusEx(ctypes.byref(mem)):\n            res['memory_load_percent'] = mem.dwMemoryLoad\n            res['total_phys_mb'] = round(mem.ullTotalPhys / (1024 * 1024), 1)\n            res['avail_phys_mb'] = round(mem.ullAvailPhys / (1024 * 1024), 1)\n        idle, kernel, user = FILETIME(), FILETIME(), FILETIME()\n        if k32.GetSystemTimes(ctypes.byref(idle), ctypes.byref(kernel), ctypes.byref(user)):\n            def to_int(ft):\n                return (ft.dwHighDateTime << 32) | ft.dwLowDateTime\n            res['cpu_times_raw'] = {\n                'idle': to_int(idle),\n                'kernel': to_int(kernel),\n                'user': to_int(user)\n            }\n    if hasattr(os, 'getloadavg'):\n        try:\n            res['load_avg'] = list(os.getloadavg())\n        except OSError:\n            pass\n    return res\n\nprint(get_system_load())\n"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.124,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 30852,
+  "pid": 22240,
+  "started_unix": 1790465900.945981,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/p04-detach-tests/test-system-load/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/p04-detach-tests/test-system-load/stdout.log",
+    "sha256": "ef300ee30fda5e703bb829093f0b090301a98604b196a478f084b75dd4fd463f"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

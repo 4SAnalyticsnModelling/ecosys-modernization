@@ -1,0 +1,22 @@
+....E..........
+======================================================================
+ERROR: test_heartbeat_daemon_lifecycle (ecosys-audit.tests.test_run_legacy_p04_full.TestRunLegacyP04Full.test_heartbeat_daemon_lifecycle)
+T-00150 C2: Heartbeat writes structured JSON with PID and system load.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\ecosys-modernization\ecosys-audit\tests\test_run_legacy_p04_full.py", line 246, in test_heartbeat_daemon_lifecycle
+    daemon.set_status("WARMUP_1", current_run=1, total_runs=3)
+  File "D:\ecosys-modernization\ecosys-audit\scripts\run_legacy_p04_full.py", line 316, in set_status
+    self.write_heartbeat()
+  File "D:\ecosys-modernization\ecosys-audit\scripts\run_legacy_p04_full.py", line 357, in write_heartbeat
+    with tmp_path.open("wb") as f:
+         ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\symon.mezbahuddin\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: 'C:\\Users\\symon.mezbahuddin\\scoop\\apps\\msys2\\2025-02-21\\tmp\\tmp2y85mcqf\\heartbeat.tmp.40780'
+
+----------------------------------------------------------------------
+Ran 15 tests in 1.417s
+
+FAILED (errors=1)
