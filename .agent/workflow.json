@@ -57,8 +57,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Revise the T-00053 bounded chemistry test to isolate fixed-pH legacy semantics and re-submit for SAGE review.",
-  "task_id": "T-00055",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Newest result recommends SAGE adjudication of the fixed-pH precipitation replay; earlier next steps are superseded. This is a science parity review, not a code change.",
+  "task_id": "T-00056",
+  "worker": "SAGE"
 }

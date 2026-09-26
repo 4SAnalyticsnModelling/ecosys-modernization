@@ -1,1 +1,1 @@
-T-00055 FORGE: revise the bounded T-00053 chemistry test to isolate fixed-pH hourly input-equilibration semantics and prepare SAGE review.
+T-00056 SAGE: determine whether legacy fixed-pH hourly precipitation/irrigation equilibration should govern Zig dynamic inputs.

@@ -40,11 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00054 SAGE DONE: T-00053 test needs revision to isolate fixed-pH semantics
-- T-00053 FORGE DONE: matched-state replay isolates residual update mismatch
+- T-00055 FORGE DONE: revised fixed-pH replay packet isolates legacy vs Zig chemistry split.
+- T-00054 SAGE DONE: test revision keeps only discriminating fixed-pH assertions.
+- T-00053 FORGE DONE: residual-update mismatch remains the decisive divergence.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE: revise the bounded T-00053 chemistry test and prepare the SAGE review packet.
+SAGE adjudicating whether fixed-pH legacy speciation should govern hourly precipitation input equilibration.
