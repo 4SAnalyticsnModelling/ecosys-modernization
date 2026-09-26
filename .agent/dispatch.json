@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00051", "role": "PATHFINDER", "task_file": ".agent/tasks/T-00051.md", "result_file": ".agent/results/T-00051.md", "skills": ["ecosys-source-navigation"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Next unblocked task is a narrow legacy-equivalence trace for the hourly SOLUTE equilibration path; PATHFINDER is the correct role, and T-00050 explicitly recommends it.", "state_recent": ["T-00050 PATHFINDER DONE: hourly SOLUTE failure isolated to dynamic input equilibration", "T-00049 SAGE DONE: solver-budget closure confirmed; no more evidence needed", "T-00048 PATHFINDER DONE: no silent state commit in STARTE or wet-hour callers"], "state_next": "PATHFINDER: add the missing legacy hourly input-equilibration trace for G0-2b."}
+{
+  "full_run_justification": null,
+  "reason": "Next unblocked task is a narrow legacy-equivalence trace for the hourly SOLUTE equilibration path; PATHFINDER is the correct role, and T-00050 explicitly recommends it.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00051.md",
+  "result_status": "DONE",
+  "role": "PATHFINDER",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-source-navigation"
+  ],
+  "state_next": "PATHFINDER: add the missing legacy hourly input-equilibration trace for G0-2b.",
+  "state_recent": [
+    "T-00050 PATHFINDER DONE: hourly SOLUTE failure isolated to dynamic input equilibration",
+    "T-00049 SAGE DONE: solver-budget closure confirmed; no more evidence needed",
+    "T-00048 PATHFINDER DONE: no silent state commit in STARTE or wet-hour callers"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00051.md",
+  "task_id": "T-00051"
+}
