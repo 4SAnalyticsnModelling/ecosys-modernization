@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00139 PATHFINDER BLOCKED: no authoritative archive or fresh artifact is present in repo evidence.
-- T-00137 PATHFINDER BLOCKED: no full archive or fresh verified artifact; G0-4 cannot reopen.
-- T-00136 PATHFINDER BLOCKED: archive absent; record SHA-256 provenance before any rerun.
+- T-00140 SAGE DONE: archive search stops; only fresh legacy P0.4 run can reopen G0-4.
+- T-00139 PATHFINDER BLOCKED: no authoritative archive or fresh artifact exists in repo evidence.
+- T-00137 PATHFINDER BLOCKED: G0-4 cannot reopen without a verified full-run artifact.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE decides how to obtain the authoritative Ottawa archive or a fresh verified full-run artifact before G0-4 reopens.
+FORGE builds the legacy gfortran oracle and records the P0.4 provenance manifest.
