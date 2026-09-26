@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "PATHFINDER will bind the next unresolved CHANGED-RANGE batch to live anchors or quarantine stale rows without ledger mutation.",
-  "task_id": "T-00107",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Newest result recommends SAGE review of the next live-anchor batch; this is the next unblocked evidence check and keeps the ledger unchanged.",
+  "task_id": "T-00108",
+  "worker": "SAGE"
 }

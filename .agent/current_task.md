@@ -1,1 +1,1 @@
-T-00107 PATHFINDER: rebind unresolved CHANGED-RANGE traceability rows to live Zig anchors or quarantine them without ledger mutation.
+T-00108 SAGE: verify the next stale CHANGED-RANGE batch against live Zig anchors before any ledger action.
