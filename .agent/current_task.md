@@ -1,1 +1,1 @@
-T-00087 PATHFINDER: classify stale zig_sha256 rows into refresh or quarantine dispositions and record the decision table under audit/analysis/.
+T-00088 FORGE: constrain traceability ledger refresh to REFRESH-LEDGER rows and exclude QUARANTINE rows.

@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Next unblocked work is PATHFINDER evidence triage: classify stale zig_sha256 rows and recommend refresh versus quarantine before any ledger rewrite.",
-  "task_id": "T-00087",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "T-00087 resolved the stale rows; only a bounded ledger refresh patch remains, and FORGE is the correct implementation lane.",
+  "task_id": "T-00088",
+  "worker": "FORGE"
 }
