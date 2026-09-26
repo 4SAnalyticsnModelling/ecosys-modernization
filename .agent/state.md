@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00140 SAGE DONE: archive search stops; only fresh legacy P0.4 run can reopen G0-4.
-- T-00139 PATHFINDER BLOCKED: no authoritative archive or fresh artifact exists in repo evidence.
-- T-00137 PATHFINDER BLOCKED: G0-4 cannot reopen without a verified full-run artifact.
+- T-00141 FORGE DONE: warmup manifest drafted; G0-4 may reopen only after SAGE approval.
+- T-00140 SAGE DONE: fresh legacy P0.4 is the only valid route to reopen G0-4.
+- T-00139 PATHFINDER BLOCKED: no authoritative archive exists; only a fresh legacy run can satisfy G0-4.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE builds the legacy gfortran oracle and records the P0.4 provenance manifest.
+SAGE approves or revises the P0.4 provenance manifest before authorizing the legacy full-run baseline.

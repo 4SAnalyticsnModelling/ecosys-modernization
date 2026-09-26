@@ -1,1 +1,1 @@
-T-00141 FORGE: build the legacy gfortran P0.4 warmup and record the provenance manifest.
+T-00142 | SAGE | Review and approve the P0.4 legacy provenance manifest before authorizing the full legacy Ottawa run.
