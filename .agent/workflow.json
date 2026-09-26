@@ -55,8 +55,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "T-00030 recommends a read-only deck trace to find NPH/NPG and the first preserved n100e/n100f divergence.",
-  "task_id": "T-00032",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Latest accepted result mandates a read-only deck trace to locate NPH/NPG and the first preserved n100e/n100f divergence.",
+  "task_id": "T-00033",
+  "worker": "PATHFINDER"
 }
