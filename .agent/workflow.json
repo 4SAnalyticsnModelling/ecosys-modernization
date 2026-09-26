@@ -59,8 +59,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Unblocked legacy-row binding: exact ZEROS/ZEROS2 anchors are still missing for TRC-331..335, 337, and 338, so pathfinder must classify and record them before any ledger rewrite.",
   "task_id": "T-00121",
-  "worker": "PATHFINDER"
+  "worker": null
 }
