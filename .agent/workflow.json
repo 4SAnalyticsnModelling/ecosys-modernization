@@ -60,6 +60,6 @@
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "FORGE task: revise the quarantined T-00060 patch in place to close SAGE's remaining R1/R3 defects before any Ottawa evidence counts.",
-  "task_id": "T-00070",
+  "task_id": "T-00071",
   "worker": null
 }
