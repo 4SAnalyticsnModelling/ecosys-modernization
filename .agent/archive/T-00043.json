@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00043.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "T-00042 closed with a precise legacy/Zig budget gap; PATHFINDER must resolve semantics before any science fix.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00043.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER verifies the legacy-vs-Zig SOLUTE and STARTE iteration semantics before any science change.",
+    "state_recent": [
+      "T-00042 SAGE DONE: the characterization test is approved; budget semantics remain unresolved.",
+      "T-00041 FORGE DONE: deck cap clamps SOLUTE and STARTE budgets under the staged deck.",
+      "T-00039 PATHFINDER DONE: root cause is the deck-to-source iteration cap path."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00043.md",
+    "task_id": "T-00043"
+  },
+  "ended": 1790400288.2484956,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f23dfc35fffeiUgWJU2ZdB7uh0",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 248704,
+    "cache_write": 0,
+    "cost": 0.024838080000000002,
+    "input": 54758,
+    "llm_calls": 8,
+    "output": 7427,
+    "tool_calls": 16
+  },
+  "violations": []
+}
