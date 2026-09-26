@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Unblocked G0-5 report task: stale tracecov hashes, no protected-path edits, no full run.",
   "task_id": "T-00080",
-  "worker": "PATHFINDER"
+  "worker": null
 }
