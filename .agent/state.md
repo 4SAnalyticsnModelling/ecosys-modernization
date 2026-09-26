@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00111 SAGE DONE: final TRC dispositions set, no hash refresh.
-- T-00109 PATHFINDER DONE: only four rows remain refreshable.
-- T-00108 SAGE DONE: hash-only refresh rejected.
+- T-00112 PATHFINDER DONE: legacy ZEROS/ZEROS2 per-layer guard semantics mapped for TRC-331..340.
+- T-00111 SAGE DONE: unresolved TRC-313 and TRC-331..340 final dispositions set; no hash refresh.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-Map the legacy ZEROS/ZEROS2 gate for TRC-313 and TRC-331..340 to exact legacy files and lines.
+FORGE: rewrite the unresolved ledger text for TRC-331..335 and TRC-337..340 to the shared legacy ZEROS/ZEROS2 guard semantics; leave TRC-313 unresolved and retire TRC-336 with explicit scope approval.

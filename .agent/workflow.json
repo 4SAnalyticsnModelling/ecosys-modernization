@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Map the legacy ZEROS/ZEROS2 semantics for unresolved TRC rows to exact file:lines before any FORGE fix.",
-  "task_id": "T-00112",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Bounded ledger rewrite for unresolved TRC rows using confirmed legacy ZEROS/ZEROS2 semantics; no full run or science change.",
+  "task_id": "T-00113",
+  "worker": "FORGE"
 }
