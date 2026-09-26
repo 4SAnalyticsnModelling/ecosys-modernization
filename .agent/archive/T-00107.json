@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00107.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "PATHFINDER will bind the next unresolved CHANGED-RANGE batch to live anchors or quarantine stale rows without ledger mutation.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00107.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER will bind unresolved CHANGED-RANGE rows to live anchors or quarantine them without ledger mutation.",
+    "state_recent": [
+      "T-00106 PATHFINDER DONE: live anchors recorded; no ledger mutation was performed.",
+      "T-00105 PATHFINDER DONE: unresolved rows remain live and were quarantined.",
+      "T-00103 PATHFINDER DONE: stale citations remain active; unresolved rows quarantined."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00107.md",
+    "task_id": "T-00107"
+  },
+  "ended": 1790456498.0258627,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f207dcc7fffeqPN1Vg6na3jGHN",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 67456,
+    "cache_write": 0,
+    "cost": 0.00917952,
+    "input": 6644,
+    "llm_calls": 5,
+    "output": 5418,
+    "tool_calls": 8
+  },
+  "violations": []
+}

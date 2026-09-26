@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "PATHFINDER will bind the next unresolved CHANGED-RANGE batch to live anchors or quarantine stale rows without ledger mutation.",
   "task_id": "T-00107",
-  "worker": "PATHFINDER"
+  "worker": null
 }
