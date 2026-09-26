@@ -1,1 +1,1 @@
-T-00137 PATHFINDER: obtain the authoritative Ottawa archive or verified full-run artifact and record SHA-256 provenance for G0-4.
+T-00138 SAGE Decide the evidence-acquisition path to obtain the authoritative Ottawa archive or verified fresh full-run artifact before G0-4 can reopen.
