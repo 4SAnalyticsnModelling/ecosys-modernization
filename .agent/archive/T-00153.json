@@ -1,0 +1,45 @@
+{
+  "changed": [
+    ".agent/results/T-00153.md"
+  ],
+  "dispatch": {
+    "decision_kind": "idle-check",
+    "decision_of": "SENTINEL",
+    "full_run_justification": null,
+    "reason": "SAGE decision (idle-check) from SENTINEL",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00153.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00153.md",
+    "task_id": "T-00153"
+  },
+  "ended": 1790466618.936208,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "b0503d16-49fd-4c23-a350-465e80b5a049",
+    "old": "82f94f8f-4124-4f5c-ae59-61e132c81160",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 384770,
+    "cache_write": 35519,
+    "cost": null,
+    "input": 18,
+    "llm_calls": 9,
+    "output": 5133,
+    "tool_calls": 3
+  },
+  "violations": []
+}

@@ -1,17 +1,16 @@
 {
-  "decision_kind": "idle-check",
-  "decision_of": "SENTINEL",
+  "chained_from": "T-00153",
   "full_run_justification": null,
-  "reason": "SAGE decision (idle-check) from SENTINEL",
+  "reason": "chained from T-00153 (SAGE CHAIN block)",
   "requires_sage_review": false,
-  "result_file": ".agent/results/T-00153.md",
-  "role": "SAGE",
+  "result_file": ".agent/results/T-00154.md",
+  "role": "FORGE",
   "schema_version": 1,
   "skills": [
-    "ecosys-feature-attribution"
+    "ecosys-build-reproducibility"
   ],
   "status": "PENDING",
   "t1_argv": null,
-  "task_file": ".agent/tasks/T-00153.md",
-  "task_id": "T-00153"
+  "task_file": ".agent/tasks/T-00154.md",
+  "task_id": "T-00154"
 }
