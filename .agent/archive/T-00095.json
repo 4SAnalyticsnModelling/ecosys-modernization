@@ -1,0 +1,56 @@
+{
+  "changed": [
+    ".agent/results/T-00095.md",
+    "audit/runs/T-00095-patch/patch_report.json",
+    "audit/runs/T-00095-patch/receipt.json",
+    "audit/runs/T-00095-patch/stderr.log",
+    "audit/runs/T-00095-patch/stdout.log",
+    "audit/runs/T-00095-patch/traceability_refresh.patch",
+    "audit/runs/T-00095-patch/traceability_staged.csv",
+    "audit/runs/T-00095-tests/receipt.json",
+    "audit/runs/T-00095-tests/stderr.log",
+    "audit/runs/T-00095-tests/stdout.log"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Newest evidence shows the 62 CHANGED-RANGE rows remain live, so FORGE must generate the write-only refresh patch while keeping quarantined rows excluded.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00095.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [],
+    "state_next": "FORGE writes the bounded traceability refresh patch for the 62 live CHANGED-RANGE rows only.",
+    "state_recent": [
+      "T-00094 PATHFINDER DONE: CHANGED-RANGE rows still map live to Zig implementations.",
+      "T-00093 SAGE DONE: rejected the prior refresh for missing per-row evidence.",
+      "T-00092 FORGE DONE: patch prepared but remains pending SAGE review."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00095.md",
+    "task_id": "T-00095"
+  },
+  "ended": 1790454771.7667346,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20a9c087ffe2SuPcAp58ev0j0",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 1064777,
+    "cache_write": 0,
+    "cost": 1.6427967749999999,
+    "input": 2063838,
+    "llm_calls": 60,
+    "output": 4016,
+    "tool_calls": 59
+  },
+  "violations": []
+}

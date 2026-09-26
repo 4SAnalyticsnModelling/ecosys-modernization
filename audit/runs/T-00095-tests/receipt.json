@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "python",
+    "-m",
+    "unittest",
+    "ecosys-audit/tests/test_traceability_patch.py"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 2.788,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 7200,
+  "pid": 11652,
+  "started_unix": 1790454655.4565587,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/T-00095-tests/stderr.log",
+    "sha256": "a2d725ec067236f2245c747dcfe092e7f1f4fc831aeb961805de2c28512cef77"
+  },
+  "stdout": {
+    "path": "audit/runs/T-00095-tests/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 300.0
+}

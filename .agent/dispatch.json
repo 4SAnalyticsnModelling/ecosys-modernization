@@ -1,1 +1,20 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00095", "role": "FORGE", "task_file": ".agent/tasks/T-00095.md", "result_file": ".agent/results/T-00095.md", "skills": [], "t1_argv": null, "requires_sage_review": true, "full_run_justification": null, "reason": "Newest evidence shows the 62 CHANGED-RANGE rows remain live, so FORGE must generate the write-only refresh patch while keeping quarantined rows excluded.", "state_recent": ["T-00094 PATHFINDER DONE: CHANGED-RANGE rows still map live to Zig implementations.", "T-00093 SAGE DONE: rejected the prior refresh for missing per-row evidence.", "T-00092 FORGE DONE: patch prepared but remains pending SAGE review."], "state_next": "FORGE writes the bounded traceability refresh patch for the 62 live CHANGED-RANGE rows only."}
+{
+  "full_run_justification": null,
+  "reason": "Newest evidence shows the 62 CHANGED-RANGE rows remain live, so FORGE must generate the write-only refresh patch while keeping quarantined rows excluded.",
+  "requires_sage_review": true,
+  "result_file": ".agent/results/T-00095.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [],
+  "state_next": "FORGE writes the bounded traceability refresh patch for the 62 live CHANGED-RANGE rows only.",
+  "state_recent": [
+    "T-00094 PATHFINDER DONE: CHANGED-RANGE rows still map live to Zig implementations.",
+    "T-00093 SAGE DONE: rejected the prior refresh for missing per-row evidence.",
+    "T-00092 FORGE DONE: patch prepared but remains pending SAGE review."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00095.md",
+  "task_id": "T-00095"
+}

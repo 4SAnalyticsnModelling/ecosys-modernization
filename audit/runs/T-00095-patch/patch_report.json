@@ -1,0 +1,589 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-09-26T20:30:48.993321+00:00",
+  "target_batch": "changed-range",
+  "mapping_classification": "mapping-holds (all 62 rows re-reviewed in T-00091; 0 range-moved, 0 mapping-broken)",
+  "input_traceability_csv": {
+    "path": "D:/ecosys-modernization/audit/traceability/traceability.csv",
+    "sha256": "9dee3fbb29d8ae182021f2ac07f1cb728cc669473674223c3e18bc035bdfd24a",
+    "total_rows": 373
+  },
+  "input_disposition": {
+    "path": "D:/ecosys-modernization/audit/analysis/tracecov-stale-row-disposition-2026-09-26.md",
+    "sha256": "4138c1362d7a936d61b73dd5538994d56252ae87af6a3f63a879f0e4451f895c",
+    "total_stale_rows": 133
+  },
+  "summary": {
+    "target_batch": "changed-range",
+    "refresh_ledger_count": 62,
+    "unchanged_range_count": 7,
+    "changed_range_count": 62,
+    "quarantine_count": 64,
+    "patched_rows_count": 62,
+    "unmodified_rows_count": 311,
+    "diff_removals": 62,
+    "diff_additions": 62
+  },
+  "exclusions": {
+    "quarantine_rows_excluded": 64,
+    "quarantine_unique_unit_ids": [
+      "TRC-053",
+      "TRC-107",
+      "TRC-120",
+      "TRC-129",
+      "TRC-130",
+      "TRC-131",
+      "TRC-132",
+      "TRC-133",
+      "TRC-134",
+      "TRC-135",
+      "TRC-137",
+      "TRC-139",
+      "TRC-141",
+      "TRC-145",
+      "TRC-146",
+      "TRC-147",
+      "TRC-148",
+      "TRC-149",
+      "TRC-161",
+      "TRC-167",
+      "TRC-174",
+      "TRC-177",
+      "TRC-179",
+      "TRC-180",
+      "TRC-190",
+      "TRC-197",
+      "TRC-202",
+      "TRC-221",
+      "TRC-222",
+      "TRC-224",
+      "TRC-228",
+      "TRC-234",
+      "TRC-247",
+      "TRC-250",
+      "TRC-279",
+      "TRC-280",
+      "TRC-286",
+      "TRC-287",
+      "TRC-288",
+      "TRC-298",
+      "TRC-308",
+      "TRC-309",
+      "TRC-310",
+      "TRC-311"
+    ],
+    "unchanged_range_rows_excluded": 7,
+    "unchanged_range_unique_unit_ids": [
+      "TRC-028",
+      "TRC-029",
+      "TRC-055",
+      "TRC-056",
+      "TRC-075",
+      "TRC-109",
+      "TRC-189"
+    ],
+    "changed_range_rows_excluded": 0,
+    "changed_range_unique_unit_ids": []
+  },
+  "patched_traceability_csv": {
+    "sha256": "d59d44cc3fabc1741bc500ddfe8037af644b8234b4be6bce31ea642ebbfc17a9",
+    "refreshed_rows": [
+      {
+        "line_number": 8,
+        "unit_id": "TRC-007",
+        "zig_path": "ecosys-ng/src/soil/solute/reaction_solve.zig",
+        "old_sha256": "623AE7178CBCCDC7DCD312F3D5191E7F692C81D0BDA60CDBC229C7BAFFFF52F0",
+        "new_sha256": "F3B3C0BF621C27B48599E1A26209B64DD4BE08C958F3D5929F907846A7B6F177",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 9,
+        "unit_id": "TRC-008",
+        "zig_path": "ecosys-ng/src/stages/hourly_heat_water_solute.zig",
+        "old_sha256": "FCE767AD491FDE83A4B67B77AAA992978689C54DC6E6CE9B33BF018A1150AB18",
+        "new_sha256": "BC30F807A2502EC6D32FEEA927B3EF80A2DC97ECF418DADA019369877D936669",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 10,
+        "unit_id": "TRC-009",
+        "zig_path": "ecosys-ng/src/plant/root/water_balance.zig",
+        "old_sha256": "D324AE80966B1F02D629AB102981A3EBDF4812EEA3CF59A92AF20A14D8F65405",
+        "new_sha256": "10E55A5D6BA69454279DE89ECDCAD1D81B24AF0539E8E0028B0BB1C4701F0A57",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 12,
+        "unit_id": "TRC-011",
+        "zig_path": "ecosys-ng/src/soil/microbial/nitrification.zig",
+        "old_sha256": "7EE3EA8DDE00EDC65536C211112E980CD754A725B25E6A5ECBA4862B065C80D5",
+        "new_sha256": "ACBA979487386FE7948824A6EF4E31DDDE556434A8DEEC12874BC8121BECFDD8",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 14,
+        "unit_id": "TRC-013",
+        "zig_path": "ecosys-ng/src/soil/microbial/nitrogen_exchange_step.zig",
+        "old_sha256": "CB2EF6ADE6358D2131FE6C18113B516E1E82C909B0D3DF3EBF71B4EDB0885BD3",
+        "new_sha256": "F11FF5CD871DBC5CE9E3395C7287D6834675031427988F68252AE74175374E9F",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 28,
+        "unit_id": "TRC-027",
+        "zig_path": "ecosys-ng/src/stages/hourly_heat_water_solute.zig",
+        "old_sha256": "FCE767AD491FDE83A4B67B77AAA992978689C54DC6E6CE9B33BF018A1150AB18",
+        "new_sha256": "BC30F807A2502EC6D32FEEA927B3EF80A2DC97ECF418DADA019369877D936669",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 36,
+        "unit_id": "TRC-038",
+        "zig_path": "ecosys-ng/src/erosion/eroded_constituents.zig",
+        "old_sha256": "7FC00DA0105DEC93BA3C6BC1DFDDD005BBFA9E871C78332FBE64F4EF833A36F6",
+        "new_sha256": "4357D5573089642A8224D4D76A8B363ED2105EAF72F92FA2D470A9027AB5CCC8",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 57,
+        "unit_id": "TRC-059",
+        "zig_path": "ecosys-ng/src/soil/gas/aqueous_extensive_transport.zig",
+        "old_sha256": "012702E6DCCEA82DF4CC19CF6A4A37E82FF2FF320A99D2F2EEA9D1EDE0EC54BC",
+        "new_sha256": "96082DF59C9490B406D8C4CF5EF243E936715AACCDB918C44B4F7428644BC9F9",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 58,
+        "unit_id": "TRC-060",
+        "zig_path": "ecosys-ng/src/soil/solute/cation_exchange.zig",
+        "old_sha256": "7E9D3B2C6FCBBEB926A3762BC52EBB067CBE175FDF8FAB0CCBE9A439DACE0EF5",
+        "new_sha256": "A74051DCCB6F4BBDD3E591DC0AE53E0F9E15D89A2FCAC26C52C2652D23D65746",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 60,
+        "unit_id": "TRC-062",
+        "zig_path": "ecosys-ng/src/soil/solute/ion_pairing.zig",
+        "old_sha256": "8734F803FF49E60572ABD90AAE8CCBE4EB9EC3C9D676965296808F369CECDA56",
+        "new_sha256": "D3D86ED210A8EDAB0EB929155E224DE1A16AD6C227791A6BBE1C714E0EA6EFBD",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 70,
+        "unit_id": "TRC-072",
+        "zig_path": "ecosys-ng/src/surface/microbial_mineral_exchange_step.zig",
+        "old_sha256": "877DE675C756553527C7DDDE3DFE1DDEDC6AEF7E27F43B4D04CEDAB03DBE45C2",
+        "new_sha256": "88FD7E7A0FFFCD247A8B3A527BB28430003D791328F2285C38EB0A5073BD3C6A",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 71,
+        "unit_id": "TRC-073",
+        "zig_path": "ecosys-ng/src/soil/solute/cation_exchange.zig",
+        "old_sha256": "7E9D3B2C6FCBBEB926A3762BC52EBB067CBE175FDF8FAB0CCBE9A439DACE0EF5",
+        "new_sha256": "A74051DCCB6F4BBDD3E591DC0AE53E0F9E15D89A2FCAC26C52C2652D23D65746",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 72,
+        "unit_id": "TRC-074",
+        "zig_path": "ecosys-ng/src/soil/solute/ion_pairing.zig",
+        "old_sha256": "8734F803FF49E60572ABD90AAE8CCBE4EB9EC3C9D676965296808F369CECDA56",
+        "new_sha256": "D3D86ED210A8EDAB0EB929155E224DE1A16AD6C227791A6BBE1C714E0EA6EFBD",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 81,
+        "unit_id": "TRC-172",
+        "zig_path": "ecosys-ng/src/soil/diagnostics/output_catalog.zig",
+        "old_sha256": "3C1FD58E23222BBF1968714D133D50D9032183CA4A20B65D0B5CB4037ECA7845",
+        "new_sha256": "08F50D508EF224A0B95DBE4622089A6DB80ADF3ABF274EAFEA2965426F5DEBAC",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 89,
+        "unit_id": "TRC-082",
+        "zig_path": "ecosys-ng/src/plant/salt/harvest.zig",
+        "old_sha256": "C0597BD21DED0AE69E693725F7766CE0559F48572493D1D8D6FFA7121BECE1E7",
+        "new_sha256": "8C7B8C25F2DCBA7C41409E2BAD7A50E4DA127B1ED14EBCCACAE51029C0ADA068",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 95,
+        "unit_id": "TRC-088",
+        "zig_path": "ecosys-ng/src/soil/water/heat_step.zig",
+        "old_sha256": "62B0C39BC494BAB7273DEA1FF08FFA135E7EC5691345CA1319E9866CB5AA1168",
+        "new_sha256": "24B0E04A8C3B4C7E480B469131A2DA1A6BBD0E44C3A100D6AC1964BA17E585E1",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 96,
+        "unit_id": "TRC-089",
+        "zig_path": "ecosys-ng/src/surface/ground_vapor_exchange.zig",
+        "old_sha256": "39C8B66A59375ED571279DAB83DE6C526B2B900B42B50346DC6EC21A57A1CF60",
+        "new_sha256": "3DA031B65B53CEB993B021134BEF969C6A1B2E1BEC67F705CDB4646FDD1542D6",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 107,
+        "unit_id": "TRC-100",
+        "zig_path": "ecosys-ng/src/stages/hourly_process_driver.zig",
+        "old_sha256": "AA346D425C9BEB4CD129765FB6CB7E526D902AB4C275B484798651CAC059E9CB",
+        "new_sha256": "721EFCA64489908192FE67C8FE3824D6B9D42935E55A442BBE503EE2724FB6D4",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 115,
+        "unit_id": "TRC-108",
+        "zig_path": "ecosys-ng/src/ecosys_ng.zig",
+        "old_sha256": "98F15D0CA238A8D2F5020C7871210C2B56A074DA330708003714351C86B6DECE",
+        "new_sha256": "2A37ABB69532B25DD51CEC8C6F400E0CFD53310775AB1D62ADF51599E01ABD8C",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 123,
+        "unit_id": "TRC-116",
+        "zig_path": "ecosys-ng/src/soil/heat/solver_residual.zig",
+        "old_sha256": "F40CF48A8E9BCEDCE1104C01E8EA6124C9396FDE284482AA1A1CAFEBEE94A15F",
+        "new_sha256": "2F2624B16700D67E8A7A988A46D7600ED34D969742889E6061D23419843160C3",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 130,
+        "unit_id": "TRC-123",
+        "zig_path": "ecosys-ng/src/redistribution/tillage/runtime_adapter.zig",
+        "old_sha256": "DA8BD3FAC47A833C3590FF96BFB29B006691934E7246BBA6D348336FF36E3BFA",
+        "new_sha256": "9A60CF9CD1A3575FC254B6CA08B72255F38BB270A77F516B129E0B32AE5C8153",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 143,
+        "unit_id": "TRC-136",
+        "zig_path": "ecosys-ng/src/soil/profile/geometry_change_assembly.zig",
+        "old_sha256": "B6A5E13D1916EB6A8F13D915E86406644299903D23B2988D644ED7F4A3E7ED7E",
+        "new_sha256": "507724E8B62F14DDC2026E91225EC5230EB8235406AEFC720D932665F2A65939",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 145,
+        "unit_id": "TRC-138",
+        "zig_path": "ecosys-ng/src/soil/solute/aqueous_reaction_rates.zig",
+        "old_sha256": "BC6E1581D8F1CC4EBC012919BF92BAA490CEA9ECCFCE13E5DAF13DD9E8811418",
+        "new_sha256": "12EFC673029FAC0A40211B4EAA8C61A2A590C5AD0633C3A0B3A5AF1322FE14C7",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 160,
+        "unit_id": "TRC-153",
+        "zig_path": "ecosys-ng/src/core/iteration_control.zig",
+        "old_sha256": "89A021A65E4AB519F01E0A38363378E7CC364A16D5D0BB7EB0E663D9B8760E2C",
+        "new_sha256": "62693B0E36BAD5B1C5169E871359E5351E4BD3C9DEDB45F77E44E584751C9CDD",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 171,
+        "unit_id": "TRC-160",
+        "zig_path": "ecosys-ng/src/stages/root_processes_uptake.zig",
+        "old_sha256": "59A97E7ADA35FD62332D3D81AD0A66F048F99E44EF45982130FFB7067E9F81A2",
+        "new_sha256": "1247F6F9C6B1C41537C0ADBBAA8291C0A2DC67C305C1099076C57A05BE310ED0",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 173,
+        "unit_id": "TRC-162",
+        "zig_path": "ecosys-ng/src/plant/root/water_balance.zig",
+        "old_sha256": "D324AE80966B1F02D629AB102981A3EBDF4812EEA3CF59A92AF20A14D8F65405",
+        "new_sha256": "10E55A5D6BA69454279DE89ECDCAD1D81B24AF0539E8E0028B0BB1C4701F0A57",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 176,
+        "unit_id": "TRC-175",
+        "zig_path": "ecosys-ng/src/soil/gas/dissolved_gas_face_parameters.zig",
+        "old_sha256": "BDAC133847F460DA1D117B3B9ADC5E1C28E6C62B2C9CD7880F53C86D4F52547B",
+        "new_sha256": "DA8A0DC5000C84662F4FA77DA95137B931C578F08006AB81D77CC9D0C2FE9682",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 177,
+        "unit_id": "TRC-176",
+        "zig_path": "ecosys-ng/src/soil/solute/external_boundaries.zig",
+        "old_sha256": "83CF613B4F490989902634562E042E87D073775C615A5ED2C000876F739CF7F4",
+        "new_sha256": "89D53FD97586E7427EF970BAEA609B8894C1FF17523DD7B4CE4C4AA0816B0E07",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 179,
+        "unit_id": "TRC-178",
+        "zig_path": "ecosys-ng/src/soil/solute/external_boundaries.zig",
+        "old_sha256": "83CF613B4F490989902634562E042E87D073775C615A5ED2C000876F739CF7F4",
+        "new_sha256": "89D53FD97586E7427EF970BAEA609B8894C1FF17523DD7B4CE4C4AA0816B0E07",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 184,
+        "unit_id": "TRC-183",
+        "zig_path": "ecosys-ng/src/soil/solute/external_boundaries.zig",
+        "old_sha256": "83CF613B4F490989902634562E042E87D073775C615A5ED2C000876F739CF7F4",
+        "new_sha256": "89D53FD97586E7427EF970BAEA609B8894C1FF17523DD7B4CE4C4AA0816B0E07",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 185,
+        "unit_id": "TRC-184",
+        "zig_path": "ecosys-ng/src/soil/solute/external_boundaries.zig",
+        "old_sha256": "83CF613B4F490989902634562E042E87D073775C615A5ED2C000876F739CF7F4",
+        "new_sha256": "89D53FD97586E7427EF970BAEA609B8894C1FF17523DD7B4CE4C4AA0816B0E07",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 189,
+        "unit_id": "TRC-188",
+        "zig_path": "ecosys-ng/src/soil/solute/phosphate_reaction_rates.zig",
+        "old_sha256": "EA0C72F21CE112EEE8C5C63951586895ED50170EAB71189475B970E59C16E10A",
+        "new_sha256": "5664431BD83601B6893242D694239241575EBE29178872FB1813B3B79BB1DBA3",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 197,
+        "unit_id": "TRC-196",
+        "zig_path": "ecosys-ng/src/surface/litter_reaction_rates.zig",
+        "old_sha256": "84303EB46E1A6AD04631A4F9A38DD8B3E6C0B94C358E275E2E08F5B6E1CB262B",
+        "new_sha256": "BE3867A35B031DDE114FCBAFBD0E004BB905D94F8AFA02D8C32034972E37DD32",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 221,
+        "unit_id": "TRC-220",
+        "zig_path": "ecosys-ng/src/soil/water/solver_residual.zig",
+        "old_sha256": "F7C4EC006DAE315D0E9C162D2B580C8A5292343BC3975470146396D0616072E6",
+        "new_sha256": "6CB782DC6DD9D31FC730956244AC798FBD28000736F9C92C60705BB78B0A36E9",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 226,
+        "unit_id": "TRC-225",
+        "zig_path": "ecosys-ng/src/soil/water/phase_solver.zig",
+        "old_sha256": "9EDA9CD994559FDC6DE189FD8565192BCE41266AAAD6282BFD7A66BC9E82C300",
+        "new_sha256": "FBC8B6943CAFEF7ACD0B8969AC243E209650ECF6864D055A9FD39B29B63F2538",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 232,
+        "unit_id": "TRC-231",
+        "zig_path": "ecosys-ng/src/soil/water/phase_solver.zig",
+        "old_sha256": "9EDA9CD994559FDC6DE189FD8565192BCE41266AAAD6282BFD7A66BC9E82C300",
+        "new_sha256": "FBC8B6943CAFEF7ACD0B8969AC243E209650ECF6864D055A9FD39B29B63F2538",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 235,
+        "unit_id": "TRC-237",
+        "zig_path": "ecosys-ng/src/management/hourly_fertilizer_band_geometry.zig",
+        "old_sha256": "7136099BC70B0E65076E52F4D7B216822AB4A89B5E05A4A9027223C623AC644F",
+        "new_sha256": "AA56C7A10BF7E634618E20272CA18B02A191D80C755C3E9DC2AFA69BF95A0BB7",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 259,
+        "unit_id": "TRC-258",
+        "zig_path": "ecosys-ng/src/soil/nutrients/nitrogen_state_update.zig",
+        "old_sha256": "1361840AFEE930EBF90511E500E509E721578BFB38F962DB676AEFDD04787383",
+        "new_sha256": "EFFDFD4EF1CCB41A29B39E9162C93733CCAA638EE0E396363CF8485750F4CD8B",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 294,
+        "unit_id": "TRC-293",
+        "zig_path": "ecosys-ng/src/soil/water/solver_residual.zig",
+        "old_sha256": "F7C4EC006DAE315D0E9C162D2B580C8A5292343BC3975470146396D0616072E6",
+        "new_sha256": "6CB782DC6DD9D31FC730956244AC798FBD28000736F9C92C60705BB78B0A36E9",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 314,
+        "unit_id": "TRC-313",
+        "zig_path": "ecosys-ng/src/core/iteration_control.zig",
+        "old_sha256": "5978F49A5C85FB1AFD8DC80729C07121E75DEF2E2B0184CADE3D60A3CD3C9A29",
+        "new_sha256": "62693B0E36BAD5B1C5169E871359E5351E4BD3C9DEDB45F77E44E584751C9CDD",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 316,
+        "unit_id": "TRC-315",
+        "zig_path": "ecosys-ng/src/validation/landscape_mass_inventory_phosphorus_ions.zig",
+        "old_sha256": "EC5318DD900F531388B6BD826D6B82FC8B933ADCDEF361BA4066FB732C9A04D6",
+        "new_sha256": "4543D80B74970B3F5F0F47C5206E4A1A49004D99285BBB905FD98DA675A7D64D",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 319,
+        "unit_id": "TRC-318",
+        "zig_path": "ecosys-ng/src/surface/metabolism_state_update.zig",
+        "old_sha256": "842BAB0921A8C09BF5BAB8F9A153D6307F97E3AB6E98C602BA5C4A1DC3D6C680",
+        "new_sha256": "306B895EC5932ED8F8A385A794EFBB9542E989BCA4FAEB6E60F983DDAD2AE572",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 322,
+        "unit_id": "TRC-321",
+        "zig_path": "ecosys-ng/src/soil/profile/relayering.zig",
+        "old_sha256": "9701EC1A03BECE95B71D144F3DA88CC585E1EE9367D748188F19B60189407E19",
+        "new_sha256": "F48D7FDA3F37FA80670BA86A4DE2F358E3E824329E9DAA5A19E08D6440BE3342",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 327,
+        "unit_id": "TRC-326",
+        "zig_path": "ecosys-ng/src/redistribution/tillage/runtime_adapter.zig",
+        "old_sha256": "C9176C7DC0616DAEC6A057EDF947F4F1871F096020D3B08959A771382F97EECC",
+        "new_sha256": "9A60CF9CD1A3575FC254B6CA08B72255F38BB270A77F516B129E0B32AE5C8153",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 332,
+        "unit_id": "TRC-331",
+        "zig_path": "ecosys-ng/src/surface/metabolism_state_update.zig",
+        "old_sha256": "842BAB0921A8C09BF5BAB8F9A153D6307F97E3AB6E98C602BA5C4A1DC3D6C680",
+        "new_sha256": "306B895EC5932ED8F8A385A794EFBB9542E989BCA4FAEB6E60F983DDAD2AE572",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 333,
+        "unit_id": "TRC-332",
+        "zig_path": "ecosys-ng/src/soil/microbial/nitrification_step.zig",
+        "old_sha256": "8E6F1640148EEF37C899E3162720387C090D9EC310D4FE6E14B5205BFCA01CAA",
+        "new_sha256": "57B5F018D5204BA22E299C153E0FC9AD77C0F5390E9C4D5B7E066F88B2711EDF",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 334,
+        "unit_id": "TRC-333",
+        "zig_path": "ecosys-ng/src/soil/microbial/nitrogen_exchange_step.zig",
+        "old_sha256": "CB2EF6ADE6358D2131FE6C18113B516E1E82C909B0D3DF3EBF71B4EDB0885BD3",
+        "new_sha256": "F11FF5CD871DBC5CE9E3395C7287D6834675031427988F68252AE74175374E9F",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 335,
+        "unit_id": "TRC-334",
+        "zig_path": "ecosys-ng/src/soil/microbial/phosphorus_exchange_step.zig",
+        "old_sha256": "5A6316D6C303BA238230F2F7EFF5E496FB2641C731CBFCA6029715EE8CDB62A9",
+        "new_sha256": "05EB1D3D861A407B6E863F0FF29908315048BB6B084330141E2BBD699AEF413A",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 336,
+        "unit_id": "TRC-335",
+        "zig_path": "ecosys-ng/src/surface/topsoil_mineral_exchange_step.zig",
+        "old_sha256": "0413F8AB6E36DF14C56856ADE6780D950F0CED76F74F5267F6A6D94DD3D67E4C",
+        "new_sha256": "C83868B7A9CE6EE675D13A21D09EFEC05FD14F365C6BB72122595B4E843FC812",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 337,
+        "unit_id": "TRC-336",
+        "zig_path": "ecosys-ng/src/stages/soil_chemistry_convergence.zig",
+        "old_sha256": "D0391BC5AF536370C1573BED1CF02EEDFF0F0EB07EBD3AB7CC17E8D5B6164B7D",
+        "new_sha256": "05F26137DBCEA2D2A614D861AD1A095D7B527BBADD54FF78DC24BAC89A3D903A",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 338,
+        "unit_id": "TRC-337",
+        "zig_path": "ecosys-ng/src/soil/microbial/nitrifier_environment_step.zig",
+        "old_sha256": "3B4528F2E5DEE3619E1757B0F50E0B4FFBA56D69B7769F810B1359C55C488338",
+        "new_sha256": "E30C0437B79B33B33D7AB8C54A3102D7BC4EA043489B71A1291AECB5C34C3B6B",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 339,
+        "unit_id": "TRC-338",
+        "zig_path": "ecosys-ng/src/soil/microbial/autotrophic_denitrification_step.zig",
+        "old_sha256": "1BF33EA979E1407A97901ED620489178D20FD408A7AF228009F9D7AD2012C936",
+        "new_sha256": "CF5D95FFB7E2AB42C03E2E4585A6DF5C2E74215ADFBE2BC28C44BBCD0F97A626",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 340,
+        "unit_id": "TRC-339",
+        "zig_path": "ecosys-ng/src/soil/microbial/nitrification_step.zig",
+        "old_sha256": "8E6F1640148EEF37C899E3162720387C090D9EC310D4FE6E14B5205BFCA01CAA",
+        "new_sha256": "57B5F018D5204BA22E299C153E0FC9AD77C0F5390E9C4D5B7E066F88B2711EDF",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 341,
+        "unit_id": "TRC-340",
+        "zig_path": "ecosys-ng/src/soil/microbial/chemodenitrification_step.zig",
+        "old_sha256": "2382A23BE44D8F337085297149C22C0C4A2DCDBDEE07844AD52CA9660FC467B4",
+        "new_sha256": "F3AB85E3E74D170907C83FC64E157B62321E70610E6CD837C71ACF11908FBB72",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 352,
+        "unit_id": "TRC-351",
+        "zig_path": "ecosys-ng/src/stages/soil_chemistry_convergence.zig",
+        "old_sha256": "051AC5702BE2B8E3A3CE0995F631475A6036696B21B45583A1406F66A644BDC4",
+        "new_sha256": "05F26137DBCEA2D2A614D861AD1A095D7B527BBADD54FF78DC24BAC89A3D903A",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 353,
+        "unit_id": "TRC-352",
+        "zig_path": "ecosys-ng/src/canopy/symbiosis/plant_symbiotic_fixation.zig",
+        "old_sha256": "E1E086AEDBC42BE4871F46853CC320A37B0E510E456038757C3D812143A13898",
+        "new_sha256": "7977E30843A2C0AC1066079296EF73712E636DB5187B6707F085DD9FC4045BFB",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 354,
+        "unit_id": "TRC-353",
+        "zig_path": "ecosys-ng/src/driver/outer_hour_transaction.zig",
+        "old_sha256": "C21D76C72B43DEF3AFA6F3627A49ABB2615A644FEF4830847C19EEB3E26BEC48",
+        "new_sha256": "F03531C1DC74DE8A7D16EFAA88CD86F9B443E557FB6ADB22A7A1946CB4728670",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 355,
+        "unit_id": "TRC-354",
+        "zig_path": "ecosys-ng/src/io/output/production_integration_test.zig",
+        "old_sha256": "070F7F5D2EC3A48493DAF47B9CF3BD5C1B49701E4D13E02C52585794843C32C8",
+        "new_sha256": "2970552F2F317CFFB0A808AF642BDF769357309316A84F9E1C589EAE5F024E46",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 356,
+        "unit_id": "TRC-355",
+        "zig_path": "ecosys-ng/src/soil/heat/solver_tests.zig",
+        "old_sha256": "CCF7FEDBB09F2BB49ED97E53DEEF43F85D054AFA4329B4F9669E18A448C86446",
+        "new_sha256": "E14A92F2B78584792888E2476EC29E3EE19F6C92B47861022A1321386B29C1CD",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 357,
+        "unit_id": "TRC-356",
+        "zig_path": "ecosys-ng/src/soil/heat/solver_tests.zig",
+        "old_sha256": "CCF7FEDBB09F2BB49ED97E53DEEF43F85D054AFA4329B4F9669E18A448C86446",
+        "new_sha256": "E14A92F2B78584792888E2476EC29E3EE19F6C92B47861022A1321386B29C1CD",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 358,
+        "unit_id": "TRC-357",
+        "zig_path": "ecosys-ng/src/soil/heat/solver_tests.zig",
+        "old_sha256": "CCF7FEDBB09F2BB49ED97E53DEEF43F85D054AFA4329B4F9669E18A448C86446",
+        "new_sha256": "E14A92F2B78584792888E2476EC29E3EE19F6C92B47861022A1321386B29C1CD",
+        "mapping_classification": "mapping-holds"
+      },
+      {
+        "line_number": 359,
+        "unit_id": "TRC-358",
+        "zig_path": "ecosys-ng/src/soil/heat/solver_tests.zig",
+        "old_sha256": "CCF7FEDBB09F2BB49ED97E53DEEF43F85D054AFA4329B4F9669E18A448C86446",
+        "new_sha256": "E14A92F2B78584792888E2476EC29E3EE19F6C92B47861022A1321386B29C1CD",
+        "mapping_classification": "mapping-holds"
+      }
+    ]
+  }
+}

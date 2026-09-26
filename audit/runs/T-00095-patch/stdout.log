@@ -1,0 +1,11 @@
+Traceability patch generated and verified successfully:
+  Target batch: changed-range
+  Total stale rows classified: 133
+  Rows refreshed (CHANGED-RANGE): 62
+  Rows excluded (UNCHANGED-RANGE): 7
+  Rows excluded (QUARANTINE / NO-MATCHING-BLOB): 64
+  Diff lines: -62 / +62
+  Patched CSV SHA-256: d59d44cc3fabc1741bc500ddfe8037af644b8234b4be6bce31ea642ebbfc17a9
+  Wrote patch diff: audit\runs\T-00095-patch\traceability_refresh.patch
+  Wrote staged CSV: audit\runs\T-00095-patch\traceability_staged.csv
+  Wrote audit report: audit\runs\T-00095-patch\patch_report.json

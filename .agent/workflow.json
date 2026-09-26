@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Newest evidence shows the 62 CHANGED-RANGE rows remain live, so FORGE must generate the write-only refresh patch while keeping quarantined rows excluded.",
   "task_id": "T-00095",
-  "worker": "FORGE"
+  "worker": null
 }
