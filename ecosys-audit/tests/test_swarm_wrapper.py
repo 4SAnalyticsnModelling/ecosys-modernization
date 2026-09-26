@@ -9,8 +9,10 @@ role would. A temporary Git repository stands in for the project. Covered: happy
 S->P->F->SAGE->S, killed pane + resume, stale result, duplicate delivery, permission-blocked
 agent, concurrent dispatch refused by lock, review invalidated by a later source change,
 scope violations, task widening, missing hypothesis, budget timeout, unapproved autonomy,
-SENTINEL making no decision. NOT covered: orphaned child processes (run_logged.py owns
-process-tree cleanup; see its own taskkill path), real Herdr timing.
+SENTINEL making no decision. Autonomy (2026-09-25, no human decisions): every former halt is
+resolved in place -- quarantine + restore, pre-delivery lane checks, agent relaunch, SAGE
+decision tasks, git failures retried -- and one regression per recorded halt. NOT covered:
+orphaned child processes (run_logged.py owns process-tree cleanup), real Herdr timing.
 """
 import json
 from pathlib import Path
@@ -176,7 +178,8 @@ class SwarmTests(unittest.TestCase):
         for d in ("tasks", "results", "failures", "locks", "archive"):
             (root / ".agent" / d).mkdir()
             (root / ".agent" / d / ".gitkeep").write_text("")
-        for s in ("ecosys-source-navigation", "ecosys-zig-safety-design", "ecosys-process-science-parity"):
+        for s in ("ecosys-source-navigation", "ecosys-zig-safety-design", "ecosys-process-science-parity",
+                  "ecosys-feature-attribution"):
             (root / ".agents/skills" / s).mkdir(parents=True)
             (root / ".agents/skills" / s / "SKILL.md").write_text("x")
         w.atomic(root / ".agent/workflow.json", w.encoded({"schema_version": 1, "status": "ROUTING", "autonomy_approved": True}))
@@ -269,7 +272,8 @@ class SwarmTests(unittest.TestCase):
         self.herdr.behaviors["sage"] = sage
 
         seen = [self.swarm.step()["status"] for _ in range(6)]
-        self.assertEqual(seen, ["ROUTED", "COLLECTED", "ROUTED", "COLLECTED", "COLLECTED", "IDLE"])
+        # SENTINEL's IDLE is not final until SAGE has been asked (no human decides it).
+        self.assertEqual(seen, ["ROUTED", "COLLECTED", "ROUTED", "COLLECTED", "COLLECTED", "ESCALATED"])
         arch = w.load(self.root / ".agent/archive/T-00002.json")
         self.assertEqual(arch["changed"], [".agent/results/T-00002.md", ".agent/tasks/T-00002.hypothesis.md", "ecosys-ng/src/a.zig"])
         self.assertEqual([r[2] for r in self.runs], ["T-00002-fmt", "T-00002-t1"])
@@ -321,33 +325,37 @@ class SwarmTests(unittest.TestCase):
         self.assertEqual(self.out("log", "--format=%s", "-n", "1", "--", "ecosys-ng/src/a.zig"), "swarm: T-00003 DONE COLLECTED")
         self.assertEqual(self.out("status", "--porcelain"), "")
 
-    def test_push_failure_escalates_after_three_cycles_and_keeps_commits(self):
+    def test_push_failure_never_stops_the_swarm_and_keeps_commits(self):
         self.enable_push(str(self.root.parent / "no-such-remote.git"))
+        start = int(self.out("rev-list", "--count", "HEAD"))
         n = [0]
 
         def idle(_t):
             n[0] += 1
             w.atomic(self.root / ".agent/dispatch.json", w.encoded({"schema_version": 1, "status": "IDLE", "reason": f"r{n[0]}"}))
         self.herdr.behaviors["sentinel"] = idle
-        first, second = self.swarm.step(), self.swarm.step()
-        self.assertEqual((first["git"]["push"], second["git"]["consecutive_push_failures"]), ("failed", 2))
-        third = self.swarm.step()
-        self.assertEqual(third["status"], "HUMAN_REVIEW_REQUIRED")
-        self.assertIn("git push failed 3 cycles in a row", third["reason"])
-        self.assertEqual(self.out("log", "-n", "3", "--format=%s").splitlines(), ["swarm: IDLE"] * 3)
+        self.herdr.behaviors["sage"] = lambda t: self.write_result("T-00001", finding="DECISION: phase work is finished")
+        seen = [self.swarm.step() for _ in range(3)]
+        # IDLE -> SAGE idle check -> SAGE decides -> IDLE again is final. Push failed every cycle, no stop.
+        self.assertEqual([s["status"] for s in seen], ["ESCALATED", "COLLECTED", "IDLE"])
+        self.assertEqual([s["git"]["consecutive_push_failures"] for s in seen], [1, 2, 3])
+        self.assertEqual(int(self.out("rev-list", "--count", "HEAD")) - start, 3)
 
-    def test_no_commit_when_a_cycle_is_halted(self):
+    def test_out_of_lane_source_edit_is_undone_and_never_committed(self):
         self.dispatch_pending("T-00001", "PATHFINDER")
         self.git("add", "-A")
         self.git("commit", "-qm", "dispatch")
-        head = self.out("rev-parse", "HEAD")
 
         def edit(_t):
             (self.root / "ecosys-ng/src/a.zig").write_text("const a = 9;\n")
             self.write_result("T-00001")
         self.herdr.behaviors["pathfinder"] = edit
-        self.assertEqual(self.swarm.step()["status"], "HUMAN_REVIEW_REQUIRED")
-        self.assertEqual(self.out("rev-parse", "HEAD"), head)
+        out = self.swarm.step()
+        self.assertEqual((out["status"], out["result_status"], out["quarantined"]), ("COLLECTED", "FAIL", "Q-T-00001"))
+        self.assertEqual((self.root / "ecosys-ng/src/a.zig").read_text(), "const a = 1;\n")
+        self.assertEqual((self.root / ".agent/failures/Q-T-00001/files/ecosys-ng/src/a.zig").read_text(), "const a = 9;\n")
+        self.assertNotIn("ecosys-ng/src/a.zig", self.out("show", "--name-only", "--format=", "HEAD").splitlines())
+        self.assertEqual(self.out("status", "--porcelain"), "")
 
     def test_source_change_after_review_invalidates_it(self):
         self.test_happy_path_sentinel_pathfinder_forge_sage_sentinel()
@@ -394,22 +402,44 @@ class SwarmTests(unittest.TestCase):
         self.assertEqual(self.swarm.step()["status"], "WAITING")
         self.assertEqual(len(self.herdr.task_prompts("pathfinder")), 1)
 
-    def test_stale_result_blocks_delivery(self):
+    def test_stale_result_blocks_delivery_and_routes_again(self):
         self.dispatch_pending("T-00001", "PATHFINDER")
         self.write_result("T-00001")
         out = self.swarm.step()
-        self.assertEqual(out["status"], "HUMAN_REVIEW_REQUIRED")
-        self.assertIn("stale result", out["reason"])
+        self.assertEqual(out["status"], "ROUTE_INVALID")
+        self.assertIn("stale result", out["errors"][0])
         self.assertEqual(self.herdr.prompts, [])
+        self.assertEqual(w.load(self.root / ".agent/dispatch.json")["status"], "REJECTED")
 
-    def test_permission_blocked_agent_is_never_answered(self):
+    def test_blocked_agent_is_declined_relaunched_and_task_delivered_later(self):
         self.dispatch_pending("T-00001", "PATHFINDER")
         self.herdr.agents["pathfinder"]["agent_status"] = "blocked"
         out = self.swarm.step()
-        self.assertEqual(out["status"], "HUMAN_REVIEW_REQUIRED")
-        self.assertEqual(self.herdr.prompts, [])
-        self.assertEqual(self.herdr.keys, [])
-        self.assertEqual(self.swarm.step()["status"], "STOPPED")
+        self.assertEqual(out["status"], "AGENT_RECOVERY")
+        self.assertEqual(self.herdr.task_prompts("pathfinder"), [])
+        self.assertTrue(all(k in (("esc",), ("ctrl+c",)) for _, k in self.herdr.keys))  # declined, never approved
+        self.assertEqual(w.load(self.root / ".agent/dispatch.json")["status"], "PENDING")
+        self.herdr.agents["pathfinder"]["agent_status"] = "idle"
+        self.herdr.behaviors["pathfinder"] = lambda _t: self.write_result("T-00001")
+        self.assertEqual(self.swarm.step()["result_status"], "DONE")
+        self.assertEqual(len(self.herdr.task_prompts("pathfinder")), 1)
+
+    def test_dialog_mid_turn_is_declined_and_the_turn_continues(self):
+        self.dispatch_pending("T-00001", "PATHFINDER")
+
+        def ask(_t):
+            self.herdr.agents["pathfinder"]["agent_status"] = "blocked"
+            real = self.herdr.send_keys
+
+            def esc(name, *keys):
+                real(name, *keys)
+                self.herdr.agents[name]["agent_status"] = "idle"
+                self.write_result("T-00001")
+            self.herdr.send_keys = esc
+        self.herdr.behaviors["pathfinder"] = ask
+        out = self.swarm.step()
+        self.assertEqual((out["status"], out["result_status"]), ("COLLECTED", "DONE"))
+        self.assertEqual(self.herdr.keys, [("pathfinder", ("esc",))])
 
     def test_concurrent_dispatch_refused_by_lock(self):
         with w.lock(self.root / ".agent/locks/swarm.lock"):
@@ -417,7 +447,10 @@ class SwarmTests(unittest.TestCase):
                 self.swarm.step()
         self.assertEqual(self.herdr.prompts, [])
 
-    def test_pathfinder_editing_source_is_a_scope_violation_left_in_place(self):
+    def archive(self, tid):
+        return w.load(self.root / f".agent/archive/{tid}.json")
+
+    def test_pathfinder_editing_source_is_quarantined(self):
         self.dispatch_pending("T-00001", "PATHFINDER")
 
         def edit(_t):
@@ -425,21 +458,45 @@ class SwarmTests(unittest.TestCase):
             self.write_result("T-00001")
         self.herdr.behaviors["pathfinder"] = edit
         out = self.swarm.step()
-        self.assertEqual(out["status"], "HUMAN_REVIEW_REQUIRED")
-        self.assertIn("ecosys-ng/src/a.zig: outside PATHFINDER may_write", out["reason"])
-        self.assertEqual((self.root / "ecosys-ng/src/a.zig").read_text(), "const a = 9;\n")  # never auto-reverted
+        self.assertEqual(out["result_status"], "FAIL")
+        self.assertIn("ecosys-ng/src/a.zig: outside PATHFINDER may_write", self.archive("T-00001")["violations"])
+        self.assertEqual((self.root / "ecosys-ng/src/a.zig").read_text(), "const a = 1;\n")
 
-    def test_protected_reference_edit_is_a_violation(self):
+    def test_protected_reference_in_allowed_files_is_refused_before_delivery(self):
         self.dispatch_pending("T-00001", "FORGE", allowed="- `f77src/x.f`")
+        out = self.swarm.step()
+        self.assertEqual(out["status"], "ROUTE_INVALID")
+        self.assertIn("protected reference", out["errors"][0])
+        self.assertEqual(self.herdr.task_prompts("forge"), [])
+
+    def test_protected_reference_edit_is_restored_from_head(self):
+        self.dispatch_pending("T-00001", "PATHFINDER")
+        original = (self.root / "f77src/x.f").read_bytes()
 
         def edit(_t):
             (self.root / "f77src/x.f").write_text("      STOP\n")
             self.write_result("T-00001")
-        self.herdr.behaviors["forge"] = edit
-        self.assertIn("protected reference", self.swarm.step()["reason"])
+        self.herdr.behaviors["pathfinder"] = edit
+        self.swarm.step()
+        self.assertIn("f77src/x.f: protected reference path", self.archive("T-00001")["violations"])
+        self.assertEqual((self.root / "f77src/x.f").read_bytes(), original)  # byte-exact (eol conversion kept)
+
+    def test_out_of_lane_edit_restores_pre_turn_content_not_head(self):
+        (self.root / "ecosys-ng/src/a.zig").write_text("const a = 7; // edited before the turn\n")
+        self.dispatch_pending("T-00001", "PATHFINDER")
+
+        def edit(_t):
+            (self.root / "ecosys-ng/src/a.zig").write_text("const a = 9;\n")
+            (self.root / "ecosys-ng/src/new.zig").write_text("new\n")
+            self.write_result("T-00001")
+        self.herdr.behaviors["pathfinder"] = edit
+        self.swarm.step()
+        self.assertEqual((self.root / "ecosys-ng/src/a.zig").read_text(), "const a = 7; // edited before the turn\n")
+        self.assertFalse((self.root / "ecosys-ng/src/new.zig").exists())
 
     def test_forge_cannot_widen_its_own_task(self):
         self.dispatch_pending("T-00001", "FORGE", allowed="- none")
+        original = (self.root / ".agent/tasks/T-00001.md").read_text()
 
         def widen(_t):
             p = self.root / ".agent/tasks/T-00001.md"
@@ -449,8 +506,10 @@ class SwarmTests(unittest.TestCase):
             self.write_result("T-00001")
         self.herdr.behaviors["forge"] = widen
         out = self.swarm.step()
-        self.assertEqual(out["status"], "HUMAN_REVIEW_REQUIRED")
-        self.assertIn("not in the task's ALLOWED FILES", out["reason"])
+        self.assertEqual(out["result_status"], "FAIL")
+        self.assertTrue(any("not in the task's ALLOWED FILES" in v for v in self.archive("T-00001")["violations"]))
+        self.assertEqual((self.root / ".agent/tasks/T-00001.md").read_text(), original)
+        self.assertEqual((self.root / "ecosys-ng/src/a.zig").read_text(), "const a = 1;\n")
 
     def test_forge_source_edit_without_hypothesis_is_rejected(self):
         self.dispatch_pending("T-00001", "FORGE", allowed="- `ecosys-ng/src/a.zig`")
@@ -459,8 +518,10 @@ class SwarmTests(unittest.TestCase):
             (self.root / "ecosys-ng/src/a.zig").write_text("const a = 4;\n")
             self.write_result("T-00001")
         self.herdr.behaviors["forge"] = edit
-        self.assertIn("hypothesis", self.swarm.step()["reason"])
+        self.swarm.step()
+        self.assertTrue(any("hypothesis" in v for v in self.archive("T-00001")["violations"]))
         self.assertEqual(self.runs, [])  # hooks do not run on a rejected change
+        self.assertEqual((self.root / "ecosys-ng/src/a.zig").read_text(), "const a = 1;\n")
 
     def test_budget_timeout_interrupts_and_stagnates(self):
         self.dispatch_pending("T-00001", "PATHFINDER")
@@ -481,29 +542,58 @@ class SwarmTests(unittest.TestCase):
         self.assertEqual(self.swarm.step()["status"], "REFUSED")
         self.assertEqual(self.herdr.prompts, [])
 
-    def test_sentinel_without_decision_twice_escalates(self):
+    def test_sentinel_without_decision_twice_escalates_to_sage(self):
         self.herdr.behaviors["sentinel"] = lambda t: None
         self.assertEqual(self.swarm.step()["status"], "ROUTE_INVALID")
-        self.assertEqual(self.swarm.step()["status"], "HUMAN_REVIEW_REQUIRED")
+        out = self.swarm.step()
+        self.assertEqual((out["status"], out["role"]), ("ESCALATED", "SAGE"))
+        d = w.load(self.root / ".agent/dispatch.json")
+        self.assertEqual((d["status"], d["role"], d["decision_kind"]), ("PENDING", "SAGE", "routing-failure"))
+        self.assertEqual(self.wf()["route_failures"], 0)
 
-    def test_sentinel_writing_source_is_a_violation(self):
+    def test_sentinel_writing_source_is_undone_and_rerouted(self):
         def bad(_t):
             (self.root / "ecosys-ng/src/a.zig").write_text("x\n")
         self.herdr.behaviors["sentinel"] = bad
-        self.assertIn("SENTINEL wrote outside its lane", self.swarm.step()["reason"])
+        out = self.swarm.step()
+        self.assertEqual(out["status"], "ROUTE_INVALID")
+        self.assertIn("you wrote outside your lane", out["errors"][0])
+        self.assertEqual((self.root / "ecosys-ng/src/a.zig").read_text(), "const a = 1;\n")
 
-    def test_reset_that_does_not_land_blocks_the_task(self):
+    def test_sentinel_asking_for_a_human_gets_a_sage_decision(self):
+        self.herdr.behaviors["sentinel"] = lambda t: w.atomic(self.root / ".agent/dispatch.json", w.encoded(
+            {"schema_version": 1, "status": "HUMAN_REVIEW_REQUIRED", "reason": "2 campaigns without advance"}))
+        out = self.swarm.step()
+        self.assertEqual((out["status"], out["role"]), ("ESCALATED", "SAGE"))
+        task = (self.root / f".agent/tasks/{out['task_id']}.md").read_text()
+        self.assertIn("DECIDE (sentinel-escalation, from SENTINEL): 2 campaigns without advance", task)
+        self.assertIn("there is no human reviewer", task)
+
+    def test_result_asking_for_a_human_becomes_a_sage_decision(self):
+        self.dispatch_pending("T-00001", "PATHFINDER")
+        self.herdr.behaviors["pathfinder"] = lambda t: self.write_result(
+            "T-00001", finding="x\n\nHUMAN_REVIEW_REQUIRED: the user should decide whether DEV-004 and DEV-006 merge.")
+        out = self.swarm.step()
+        self.assertEqual(out["decision_queued"], "T-00002")
+        d = w.load(self.root / ".agent/dispatch.json")
+        self.assertEqual((d["role"], d["decision_of"], d["skills"]), ("SAGE", "T-00001", [sw.DECISION_SKILL]))
+        self.assertIn("whether DEV-004 and DEV-006 merge", (self.root / ".agent/tasks/T-00002.md").read_text())
+        # SAGE decides; a decision result that defers again is not re-escalated (no loop).
+        self.herdr.behaviors["sage"] = lambda t: self.write_result("T-00002", finding="HUMAN_REVIEW_REQUIRED: still unsure")
+        out = self.swarm.step()
+        self.assertEqual(out["result_status"], "FAIL")  # no DECISION: line
+        self.assertNotIn("decision_queued", out)
+
+    def test_reset_that_does_not_land_relaunches_and_task_stays_pending(self):
         self.dispatch_pending("T-00001", "PATHFINDER")
         self.herdr.reset_works = False
         out = self.swarm.step()
-        self.assertEqual(out["status"], "HUMAN_REVIEW_REQUIRED")
-        self.assertIn("did not acknowledge /new", out["reason"])
+        self.assertEqual(out["status"], "AGENT_RECOVERY")
+        self.assertIn("did not acknowledge /new", out["fault"])
         self.assertEqual(self.herdr.task_prompts("pathfinder"), [])
-        # 2026-09-25: the task was never sent, so no inflight record may block clear-review, and
-        # the same dispatch is delivered (not closed STAGNATED) once the user clears the halt.
+        # 2026-09-25: the task was never sent, so it stays PENDING and is delivered after recovery.
         self.assertFalse((self.root / ".agent/runtime/inflight.json").exists())
-        self.assertEqual(self.swarm.clear_review("user", "reset fixed; task was never delivered")["next"],
-                         "deliver pending dispatch")
+        self.assertEqual(w.load(self.root / ".agent/dispatch.json")["status"], "PENDING")
         self.herdr.reset_works = True
         self.herdr.behaviors["pathfinder"] = lambda _t: self.write_result("T-00001")
         self.assertEqual(self.swarm.step()["result_status"], "DONE")
@@ -570,10 +660,11 @@ class SwarmTests(unittest.TestCase):
             seen["brief"] = (self.root / ".agent/runtime/sentinel-brief.md").read_text()
             w.atomic(self.root / ".agent/dispatch.json", w.encoded({"schema_version": 1, "status": "IDLE", "reason": "x"}))
         self.herdr.behaviors["sentinel"] = sentinel
-        self.assertEqual(self.swarm.step()["status"], "IDLE")
+        self.assertEqual(self.swarm.step()["status"], "ESCALATED")
         self.assertIn(".agent/runtime/sentinel-brief.md", seen["prompt"])
         for marker in ("next free task ID: T-00002", "ROLE RULES MARKER", "STATE MARKER", "GAPS MARKER", "FINDING MARKER",
-                       "- T-00001 PATHFINDER [DONE]: test objective", "TEMPLATE MARKER"):
+                       "- T-00001 PATHFINDER [DONE]: test objective", "TEMPLATE MARKER",
+                       "- FORGE: ecosys-ng/src/", "- SAGE: .agent/results/, audit/intentional-deviations.md"):
             self.assertIn(marker, seen["brief"])
 
     def test_metrics_record_tokens_and_cost_report(self):
@@ -615,6 +706,13 @@ class SwarmTests(unittest.TestCase):
         self.herdr.behaviors["forge"] = forge
         self.assertEqual(self.swarm.step()["result_status"], "DONE")
         self.assertEqual(self.herdr.task_prompts("sentinel"), [])  # no routing turn was spent
+
+    def test_chain_outside_the_chained_roles_lane_is_not_dispatched(self):
+        # 2026-09-25 T-00031 regression: SAGE chained FORGE onto SAGE's own ledger file.
+        out = self.sage_chain_result("audit/intentional-deviations.md")
+        self.assertNotIn("chained", out)
+        self.assertIn("`audit/intentional-deviations.md` is outside FORGE may_write (writable by SAGE)", out["chain_note"])
+        self.assertEqual(self.herdr.task_prompts("forge"), [])
 
     def test_chain_naming_production_source_is_ignored(self):
         out = self.sage_chain_result("ecosys-ng/src/a.zig")
@@ -677,10 +775,40 @@ class SwarmTests(unittest.TestCase):
         self.assertEqual([e[2] for e in self.herdr.pane_log if e[0] == "text"], ["/variants"] * 3)
         self.assertEqual(self.herdr.chat_messages, [])
 
+    def test_legacy_halt_is_cleared_automatically_and_its_leftovers_committed(self):
+        # The T-00031 halt as left by the pre-autonomy controller.
+        (self.root / "audit").mkdir(exist_ok=True)
+        (self.root / "audit/intentional-deviations.md").write_text("merged row\n")
+        (self.root / "f77src/x.f").write_text("      STOP\n")
+        self.swarm.halt("T-00031 (FORGE) scope violation, left in place for the user")
+        out = self.swarm.step()
+        self.assertEqual((out["status"], out["next"]), ("RECOVERED", "route"))
+        self.assertEqual(self.wf()["halts"][-1]["cleared_by"], "swarm_wrapper (autonomous)")
+        self.assertEqual((self.root / "f77src/x.f").read_text(), "      END\n")  # protected edit undone
+        self.assertEqual(self.out("status", "--porcelain"), "")
+        self.assertIn("audit/intentional-deviations.md", self.out("show", "--name-only", "--format=", "HEAD"))
+
+    def test_run_loop_retries_errors_and_waits_and_stops_only_when_idle(self):
+        results = iter([w.ProtocolError("herdr call failed"), {"status": "WAITING"}, {"status": "AGENT_RECOVERY"},
+                        {"status": "COLLECTED"}, {"status": "IDLE"}])
+
+        def step():
+            r = next(results)
+            if isinstance(r, Exception):
+                raise r
+            return r
+        self.swarm.step = step
+        out = self.swarm.run()
+        self.assertEqual((out["status"], out["steps"]), ("IDLE", 5))
+
+    def test_run_loop_refuses_when_another_controller_holds_the_lock(self):
+        with w.lock(self.root / ".agent/locks/swarm.lock"):
+            self.assertEqual(self.swarm.run()["status"], "REFUSED")
+
     def test_clear_review_records_decision_commits_leftovers_and_resumes(self):
         self.dispatch_pending("T-00001", "PATHFINDER")
-        self.write_result("T-00001")  # stale result -> halt
-        self.assertEqual(self.swarm.step()["status"], "HUMAN_REVIEW_REQUIRED")
+        self.write_result("T-00001")
+        self.swarm.halt("operator halt")
         with self.assertRaises(w.ProtocolError):
             self.swarm.clear_review("user", "short")
         out = self.swarm.clear_review("user", "stale result was a leftover test file; keep it as evidence")
@@ -713,7 +841,7 @@ class SwarmTests(unittest.TestCase):
         self.herdr.behaviors["sentinel"] = sentinel
         self.assertEqual(self.swarm.step()["status"], "ROUTE_INVALID")
         self.assertEqual(w.load(self.root / ".agent/dispatch.json")["status"], "REJECTED")
-        self.assertEqual(self.swarm.step()["status"], "IDLE")  # routed again, never delivered to SAGE
+        self.assertEqual(self.swarm.step()["status"], "ESCALATED")  # routed again, the bad one never delivered
         self.assertIn("PREVIOUS ROUTING ATTEMPT WAS REJECTED", briefs[1])
         self.assertIn("SAGE tasks name exactly one", briefs[1])
         self.assertEqual(self.herdr.task_prompts("sage"), [])
@@ -736,7 +864,12 @@ class SwarmTests(unittest.TestCase):
 
     def test_invalid_sage_skill_rejected(self):
         self.dispatch_pending("T-00001", "SAGE", skills=["ecosys-source-navigation"])
-        self.assertIn("SAGE tasks name exactly one", self.swarm.step()["reason"])
+        self.assertIn("SAGE tasks name exactly one", self.swarm.step()["errors"][0])
+
+    def test_no_code_path_raises_a_human_halt(self):
+        src = (REPO / "ecosys-audit/scripts/swarm_wrapper.py").read_text(encoding="utf-8")
+        self.assertNotIn("HumanReview", src)
+        self.assertEqual(src.count("self.halt("), 0)  # halt() survives only for the operator override tests
 
 
 if __name__ == "__main__":

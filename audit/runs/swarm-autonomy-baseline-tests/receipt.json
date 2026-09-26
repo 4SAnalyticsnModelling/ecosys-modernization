@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "ecosys-audit/tests/test_swarm_wrapper.py"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 76.109,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 2176,
+  "pid": 37188,
+  "started_unix": 1790397027.1886501,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/swarm-autonomy-baseline-tests/stderr.log",
+    "sha256": "feacacf5b0295d5f4fb862c7b508b6a79a150580c561d2e575581c5e5ebf4494"
+  },
+  "stdout": {
+    "path": "audit/runs/swarm-autonomy-baseline-tests/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 600.0
+}

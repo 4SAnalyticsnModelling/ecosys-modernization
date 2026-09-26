@@ -11,7 +11,13 @@ marked "spec §N"). Where this plan is silent, the spec governs. Date: 2026-09-2
 > **Addendum 2026-09-25 (user: the repository must be standalone).** Every `D:\ecosys-evidence\X` below
 > means `evidence/X` inside this repository (git-ignored; manifests and schemas committed). See
 > `evidence/README.md`. The P1 control plane and the P2 tool scaffolds are installed (`.agent/README.md`);
-> this is preparation, not gate evidence. No phase gate has passed and no user decision in §8 is presumed.
+> this is preparation, not gate evidence. No phase gate has passed.
+>
+> **Addendum 2026-09-25 (user decision D9: "SAGE will make the decision for everything, no human
+> intervention at all").** Every "user approves / user signs / HUMAN_REVIEW_REQUIRED / user replan" in this
+> plan now reads "SAGE decides". §8 lists the former human review points and who decides each now. The
+> controller never stops for a person (`.agent/README.md`). Qualification is **agent-qualified**, not
+> human-signed; release notes must say so.
 
 ---
 
@@ -54,9 +60,10 @@ session. The plan changes three things:
 | D3 | Execution uses the **spec's 4-agent Herdr workflow** (SENTINEL, PATHFINDER, FORGE, SAGE). Claude and GPT only author and review this plan. |
 | D4 | Performance = **full 30-yr Ottawa wall time**: ecosys-ng ReleaseFast < legacy gfortran `-O2`, same machine, median of 3 each side, outputs still passing parity. |
 | D5 | Scope = **Ottawa milestone first**; remaining v1 gate-matrix items move to P8. |
-| D6 | Deck edits (`9253d3b` runtime ceiling 100→200; `5add7de` starte.f:189) and the Zig solute iteration ceiling 60→200 (issue-015) are **kept only if justified from legacy**; otherwise reverted and root-caused. The user signs the final list. |
+| D6 | Deck edits (`9253d3b` runtime ceiling 100→200; `5add7de` starte.f:189) and the Zig solute iteration ceiling 60→200 (issue-015) are **kept only if justified from legacy**; otherwise reverted and root-caused. ~~The user signs the final list.~~ SAGE signs the final list (D9). |
 | D7 | Build an **hourly legacy state oracle** (instrumented copy outside `f77src/`). |
 | D8 | Push policy (user, 2026-09-25): **autonomous commit and push after every cycle** by the controller; production source only after a diff-bound SAGE APPROVE; never force. |
+| D9 | Authority (user, 2026-09-25): **SAGE makes every decision; no human intervention at all.** Former human review points (§8) are SAGE decision tasks, decided by the rules D1–D8. A decision that changes accepted science or declares legacy inconsistent is final only after a second, independent SAGE session confirms it. |
 
 ---
 
@@ -64,7 +71,7 @@ session. The plan changes three things:
 
 | Role | Harness / model | Owns | Never | Budget per task |
 |---|---|---|---|---|
-| SENTINEL | OpenCode, MAI-Code Flash | reads `.agent/state.md`, `frontier.json`, the latest result; writes one `dispatch.json` + task; escalation; HUMAN_REVIEW_REQUIRED | reads source, edits, runs jobs | ≤8 tool calls, ≤40k input tokens, 5 min |
+| SENTINEL | OpenCode, MAI-Code Flash | reads `.agent/state.md`, `frontier.json`, the latest result; writes one `dispatch.json` + task; escalation to SAGE (D9) | reads source, edits, runs jobs | ≤8 tool calls, ≤40k input tokens, 5 min |
 | PATHFINDER | OpenCode, MAI-Code Flash | localization, `f77query.py`, divcheck reports, failure packets, trace triage, mechanical-change review | edits production source | ≤20 calls, ≤150k tokens, 30 min |
 | FORGE | OpenCode, Gemini Flash | one bounded Zig change with a recorded hypothesis; T0–T1 | alters science semantics without SAGE; runs full Ottawa | one fix + targeted tests, ≤250k tokens, 60 min |
 | SAGE | Claude Code, Claude Opus | science/numerics adjudication; **review gate for every production-science change before commit**; approves deviations, D6, rule table | broad repo search, builds, raw-log summarizing | one question; packet ≤25k tokens + targeted source/raw-evidence reads (spec §8); ≤200k total |
@@ -123,7 +130,7 @@ session. The plan changes three things:
 ### P0 — Freeze, adjudicate inputs, baseline (G0)
 1. Discover the actual Git state; do not assume `main` = `fd07795`. Preserve all dirty work on branch
    `wip/pre-plan-2026-09-25` (local, no push). **Needs user approval.**
-2. **D6 deck adjudication first** (PATHFINDER packet, SAGE verdict, user signature). These edits change
+2. **D6 deck adjudication first** (PATHFINDER packet, SAGE verdict and signature, D9). These edits change
    legacy inputs too, so every reference run waits for them. The Zig iteration ceiling (issue-015) is
    Zig-only; it is adjudicated here too, but only the deck result gates P0.4.
 3. Move the legacy oracle binary and outputs into a hashed, git-ignored store `D:\ecosys-evidence\legacy\`,
@@ -202,13 +209,13 @@ session. The plan changes three things:
    - Output: the set of legacy routines, branches and statements Ottawa executes.
 5. **Survey extension.**
    - Record solver non-convergence (continue with the last iterate, tally it, flag the run as
-     non-evidence). **SAGE approves, then the user.**
+     non-evidence). **SAGE approves (D9).**
    - **Positive controls:** each conservation sentinel and solver guard must fire on an injected fault in a
      bounded test. Zero breaches is meaningless without them (`conservation_survey.zig:63-69`).
 6. **Output provenance and rule table** (`audit/output-provenance.csv`, spec §25–26):
    - drafted by SAGE per variable, covering structural exact fields, continuous metrics,
      event/seasonal/annual/cumulative rules and balance rules including active salts;
-   - **approved by the user before any full Zig comparison.**
+   - **approved by SAGE (D9) before any full Zig comparison**, and hash-bound so it cannot change after results are seen.
 7. **Qualification validators:**
    - raw-output adapters for every legacy and Zig output file;
    - an expected-horizon and key inventory (no missing, duplicate or non-finite values);
@@ -302,12 +309,12 @@ fatal event or runs to the end. Steps:
    ranks later breaches; its results are hints, never evidence.
 
 Caps:
-- Two consecutive campaigns without verified-frontier advance → HUMAN_REVIEW_REQUIRED.
+- Two consecutive campaigns without verified-frontier advance → SAGE decides a change of strategy (D9).
 - The same failure signature twice → SAGE escalation.
-- Hard cap 12 campaigns before a mandatory user replan.
+- Hard cap 12 campaigns before a mandatory SAGE replan (D9).
 - Survey runs: at most 1 per 3 campaigns.
-- Elapsed-time cap: 5 wall-clock days without a verified-frontier advance → HUMAN_REVIEW_REQUIRED,
-  regardless of campaign count.
+- Elapsed-time cap: 5 wall-clock days without a verified-frontier advance → SAGE decides a change of
+  strategy (D9), regardless of campaign count.
 - D2 divergences are attributed by A/B over the local window (`ecosys-feature-attribution`) and recorded in
   `intentional-deviations.md`.
 - **Exit G3:** one strict campaign completes 30 years with divcheck within rules or attributed, no breach
@@ -381,16 +388,18 @@ All of this lives under `D:\ecosys-evidence\` (git-ignored, manifest-hashed). Th
 
 ---
 
-## 8. Human review points
-1. P0.1: branch parking.
-2. P0.2: D6 list.
-3. P1: launch approval.
-4. P2.5: survey continuation policy.
-5. P2.6: rule table.
-6. P5 caps triggered.
-7. Any SAGE finding that legacy is internally inconsistent or that a change alters accepted science.
-8. D8 push policy.
-9. P7: final acceptance.
+## 8. Decision points (formerly "Human review points"; all SAGE since D9, 2026-09-25)
+| # | Point | Decided by |
+|---|---|---|
+| 1 | P0.1: branch parking | done (user, 2026-09-25) |
+| 2 | P0.2: D6 list | SAGE signs, by the D6 rule (keep only if justified from legacy, else revert and root-cause) |
+| 3 | P1: launch approval | done (user, 2026-09-25; `autonomy_approved`) |
+| 4 | P2.5: survey continuation policy | SAGE, within the §6 survey caps |
+| 5 | P2.6: rule table | SAGE, fixed and hash-bound before any comparison (D1) |
+| 6 | P5 caps triggered | SAGE decides the change of strategy; the swarm never waits |
+| 7 | Legacy internally inconsistent / change alters accepted science | SAGE, confirmed by a second independent SAGE session |
+| 8 | D8 push policy | done (user, 2026-09-25) |
+| 9 | P7: final acceptance | SAGE, only when `check_gate.py` passes every gate; labelled agent-qualified |
 
 ---
 

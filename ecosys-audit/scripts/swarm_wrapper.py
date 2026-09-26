@@ -11,9 +11,18 @@ then deterministic hooks: scope check of every changed path against the roster a
 ALLOWED FILES, `zig fmt` + T1 after FORGE, failure packet on failure, automatic SAGE review of any
 production-source change (bound to the source-diff hash), archive + metrics.
 
-Safety: at-most-once delivery (a crash mid-turn is never re-prompted), one global lock, blocked
-agents are never answered, out-of-scope edits are never reverted automatically (HUMAN_REVIEW_REQUIRED),
-no commit, no push. Autonomous `run` requires .agent/workflow.json autonomy_approved=true.
+Safety: at-most-once delivery (a crash mid-turn is never re-prompted), one global lock.
+
+Fully autonomous (user, 2026-09-25: "SAGE will make the decision for everything, no human
+intervention at all"). Nothing waits for a person:
+  - out-of-lane / protected / unreviewed edits are quarantined (copied to .agent/failures/Q-<task>/)
+    and the files restored to their pre-turn content; the task closes FAIL and SENTINEL re-routes
+  - dispatches whose ALLOWED FILES exceed the role's lane are rejected before delivery
+  - a missing, mis-typed, blocked or unresponsive agent is interrupted (esc) or relaunched
+  - every question that used to go to the user (HUMAN_REVIEW_REQUIRED, repeated routing failure,
+    SENTINEL reporting no work) becomes a SAGE decision task; SAGE is the final authority
+  - git commit/push failures are recorded and retried next cycle
+The controller commits and pushes (decision D8). Autonomous `run` requires autonomy_approved=true.
 """
 from __future__ import annotations
 
@@ -24,6 +33,7 @@ import os
 from pathlib import Path
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -49,8 +59,22 @@ LIMITATIONS = ("Process management only. Scope checks see Git-visible files (ign
                "are not attributed); concurrent human edits during a turn are attributed to the agent.")
 
 
-class HumanReview(Exception):
-    """Stop the swarm and ask the user; never resolved automatically."""
+class AgentFault(Exception):
+    """A role's agent is missing, of the wrong kind, stuck at a dialog or ignored its reset.
+    Resolved by relaunching that role, never by asking anyone."""
+
+    def __init__(self, role: str, message: str):
+        super().__init__(message)
+        self.role = role
+
+
+class NotDelivered(AgentFault):
+    """The task prompt provably never reached the agent: the dispatch stays PENDING for re-delivery."""
+
+
+DECISION_SKILL = "ecosys-feature-attribution"  # default SAGE skill for decision tasks
+SNAPSHOT_MAX_BYTES = 50 * 1024 * 1024  # pre-turn copies of already-dirty files, for restoring
+HRR_RE = re.compile(r"^\s*\**HUMAN_REVIEW_REQUIRED\**\s*:?\s*(.*)$", re.M)
 
 
 # ------------------------------------------------------------------ Herdr client
@@ -280,10 +304,13 @@ class Swarm:
         elif not (self.root / d["task_file"]).exists():
             errs.append("task_file does not exist")
         else:
-            secs = sections((self.root / d["task_file"]).read_text(encoding="utf-8", errors="replace"))
+            task_text = (self.root / d["task_file"]).read_text(encoding="utf-8", errors="replace")
+            secs = sections(task_text)
             missing = [s for s in TASK_SECTIONS if s not in secs]
             if missing:
                 errs.append(f"task file missing sections {missing}")
+            if role in WORKER_ROLES:
+                errs += self.lane_errors(role, allowed_globs(task_text))
         if d.get("result_file") != f"{AGENT}/results/{tid}.md":
             errs.append("result_file must be .agent/results/<task_id>.md")
         elif (self.root / d["result_file"]).exists():
@@ -324,22 +351,128 @@ class Swarm:
             status = None
         return status, errs
 
-    def scope_violations(self, role: str, changed: list[str], task_text: str) -> list[str]:
+    def lane_errors(self, role: str, globs: list[str]) -> list[str]:
+        """ALLOWED FILES the role could never write: refuse the task instead of halting after it
+        (2026-09-25, T-00031: a SAGE CHAIN gave FORGE `audit/intentional-deviations.md`, SAGE's file)."""
+        writable = self.role(role)["may_write"] + self.roster["always_writable"]
+        errs = []
+        for g in globs:
+            if any(matches(g, x) or g.startswith(x.rstrip("*")) for x in self.roster["protected_prefixes"]):
+                errs.append(f"ALLOWED FILES `{g}` is a protected reference path")
+            elif not any(matches(g, x) for x in writable):
+                owners = [n for n, r in self.roster["roles"].items() if any(matches(g, x) for x in r["may_write"])]
+                errs.append(f"ALLOWED FILES `{g}` is outside {role} may_write"
+                            + (f" (writable by {', '.join(owners)})" if owners else ""))
+        return errs
+
+    def scope_problems(self, role: str, changed: list[str], task_text: str) -> list[tuple[str, str]]:
         r = self.role(role)
         writable = r["may_write"] + self.roster["always_writable"]
         task_globs = allowed_globs(task_text)
         out = []
         for p in changed:
             if any(matches(p, x) for x in self.roster["protected_prefixes"]):
-                out.append(f"{p}: protected reference path")
+                out.append((p, f"{p}: protected reference path"))
             elif not any(matches(p, x) for x in writable):
-                out.append(f"{p}: outside {role} may_write")
+                out.append((p, f"{p}: outside {role} may_write"))
             elif any(matches(p, x) for x in self.roster["production_source_prefixes"]):
                 if not r["may_edit_production_source"]:
-                    out.append(f"{p}: {role} may not edit production source")
+                    out.append((p, f"{p}: {role} may not edit production source"))
                 elif not any(matches(p, g) for g in task_globs):
-                    out.append(f"{p}: not in the task's ALLOWED FILES")
+                    out.append((p, f"{p}: not in the task's ALLOWED FILES"))
         return out
+
+    def scope_violations(self, role: str, changed: list[str], task_text: str) -> list[str]:
+        return [why for _, why in self.scope_problems(role, changed, task_text)]
+
+    # --- quarantine instead of halting
+    def begin_turn(self):
+        """Record what is dirty before a turn and keep a copy of each such file, so an out-of-lane
+        edit can be undone exactly (not just back to HEAD)."""
+        before = git_dirty(self.root)
+        atomic(self.rt / "before.json", encoded(before))
+        snap = self.rt / "pre"
+        if snap.exists():
+            shutil.rmtree(snap)
+        for rel, st in before.items():
+            if st and st[0] <= SNAPSHOT_MAX_BYTES:
+                dst = snap / rel
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(self.root / rel, dst)
+
+    def restore_from_head(self, rel: str) -> bool:
+        """Worktree-only restore with Git's own eol/filter conversion (core.autocrlf=true here), so
+        the bytes match a normal checkout -- reference files are sha256-manifested. Index untouched."""
+        if subprocess.run(["git", "cat-file", "-e", f"HEAD:{rel}"], cwd=self.root, capture_output=True,
+                          timeout=120).returncode:
+            return False
+        p = subprocess.run(["git", "restore", "--source=HEAD", "--worktree", "--", rel], cwd=self.root,
+                           capture_output=True, timeout=300)
+        if p.returncode:
+            raise OSError(p.stderr.decode(errors="replace")[:200])
+        return True
+
+    def quarantine(self, tag: str, role: str, problems: list[tuple[str, str]]) -> dict:
+        """Copy each offending file to .agent/failures/Q-<tag>/ and restore its pre-turn content."""
+        qdir = self.dir / "failures" / f"Q-{tag}"
+        before = load(self.rt / "before.json") if (self.rt / "before.json").exists() else {}
+        restored, left = [], []
+        for rel in dict.fromkeys(p for p, _ in problems):  # once per file, or the copy is overwritten
+            f = self.root / rel
+            if f.exists():
+                dst = qdir / "files" / rel
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(f, dst)
+            snap = self.rt / "pre" / rel
+            try:
+                if snap.exists():
+                    shutil.copy2(snap, f)
+                elif rel in before and before[rel] is None:
+                    f.unlink(missing_ok=True)  # it was already deleted before the turn
+                elif rel in before:
+                    left.append(f"{rel} (dirty before the turn and too large to snapshot)")
+                    continue
+                elif self.restore_from_head(rel):
+                    pass
+                else:
+                    f.unlink(missing_ok=True)  # created during the turn
+                restored.append(rel)
+            except OSError as e:
+                left.append(f"{rel} ({e})")
+        rec = {"tag": tag, "role": role, "time": self.clock(), "problems": [w for _, w in problems],
+               "restored": restored, "not_restored": left,
+               "note": "Agent's version of each file is under files/; the working tree was restored."}
+        qdir.mkdir(parents=True, exist_ok=True)
+        atomic(qdir / "quarantine.json", encoded(rec))
+        return rec
+
+    def queue_decision(self, question: str, source: str, kind: str, skill: str = DECISION_SKILL) -> dict:
+        """Everything that used to stop for the user becomes one SAGE decision task."""
+        tid = self.next_task_id()
+        sage_files = self.role("SAGE")["may_write"]
+        text = (f"# TASK: {tid}\n\n## ROLE\nSAGE\n\n## OBJECTIVE\nDECIDE ({kind}, from {source}): {question.strip()}\n\n"
+                f"## INPUTS\n" + (f"- `.agent/results/{source}.md`\n" if (self.dir / "results" / f"{source}.md").exists() else "")
+                + f"- `.agent/state.md`\n- `ecosys-ng_ottawa_qualification_execution_plan.md` sections 1 and 8\n\n"
+                "## ALLOWED FILES\n" + "".join(f"- `{x}`\n" for x in sage_files if x != ".agent/results/")
+                + f"- `.agent/results/{tid}.md`\n\n## DO NOT\n- Defer to the user or write HUMAN_REVIEW_REQUIRED: "
+                "there is no human reviewer; you are the final decision authority.\n- Edit source. Run builds or simulations.\n\n"
+                f"## RELEVANT SKILLS\n- `.agents/skills/{skill}`\n\n## KNOWN FACTS\n- Queued by the controller ({kind}).\n\n"
+                "## HYPOTHESIS\nn/a\n\n## SUCCESS CONDITION\nFINDING contains one line `DECISION: <what is decided and why>`, "
+                "grounded in the plan's rules (D1-D8) and the evidence. Record the decision in the ledger file it "
+                "affects. If exactly one mechanical follow-up is needed, add a CHAIN block.\n\n"
+                "## STOP CONDITIONS\nSAGE budget. If evidence is insufficient, DECIDE which evidence to gather next "
+                "(that is itself the decision).\n\n"
+                f"## OUTPUT FILE\n.agent/results/{tid}.md\n")
+        atomic(self.dir / "tasks" / f"{tid}.md", text.encode("utf-8"))
+        d = {"schema_version": 1, "status": "PENDING", "task_id": tid, "role": "SAGE",
+             "task_file": f"{AGENT}/tasks/{tid}.md", "result_file": f"{AGENT}/results/{tid}.md",
+             "skills": [skill], "t1_argv": None, "requires_sage_review": False, "full_run_justification": None,
+             "decision_of": source, "decision_kind": kind, "reason": f"SAGE decision ({kind}) from {source}"}
+        self.save_dispatch(d)
+        wf = self.workflow()
+        wf.update({"status": "DISPATCHED", "task_id": tid, "worker": "SAGE", "status_reason": d["reason"]})
+        self.save_workflow(wf)
+        return d
 
     # --- agent turns
     def live(self, name: str) -> dict | None:
@@ -370,8 +503,25 @@ class Swarm:
         if absent_since[0] is None:
             absent_since[0] = self.clock()
         if self.clock() - absent_since[0] >= ABSENT_GRACE_S:
-            raise HumanReview(f"agent {name} is not live in Herdr")
+            raise AgentFault(self.role_of(name), f"agent {name} is not live in Herdr")
         return None
+
+    def role_of(self, name: str) -> str:
+        return next((k for k, v in self.roster["roles"].items() if v["agent_name"] == name), name.upper())
+
+    def dismiss(self, name: str) -> bool:
+        """Press esc at a permission/question dialog (declines it; no dialog is ever approved).
+        True once the agent is no longer blocked."""
+        for _ in range(3):
+            try:
+                self.herdr.send_keys(name, "esc")
+            except HerdrError:
+                pass
+            self.sleep(3)
+            a = self.live(name)
+            if a is None or a["agent_status"] != "blocked":
+                return True
+        return False
 
     def wait_settled(self, name: str, timeout_s: float) -> dict:
         end = self.clock() + timeout_s
@@ -382,11 +532,13 @@ class Swarm:
                 self.sleep(2)
                 continue
             if a["agent_status"] == "blocked":
-                raise HumanReview(f"agent {name} is at a permission/question dialog; never answered automatically")
+                if not self.dismiss(name):
+                    raise AgentFault(self.role_of(name), f"agent {name} stays at a dialog after esc")
+                continue
             if a["agent_status"] in ("idle", "done"):
                 return a
             if self.clock() >= end:
-                raise TimeoutError(name)
+                raise AgentFault(self.role_of(name), f"agent {name} did not settle within {timeout_s:.0f} s")
             self.sleep(2)
 
     def fresh_session(self, role: str) -> dict:
@@ -394,7 +546,7 @@ class Swarm:
         name = r["agent_name"]
         before = self.wait_settled(name, 120)
         if before.get("agent") != r["kind"]:
-            raise HumanReview(f"{name} hosts {before.get('agent')}, roster expects {r['kind']}")
+            raise AgentFault(role, f"{name} hosts {before.get('agent')}, roster expects {r['kind']}")
         old = session_id(before)
         marker = r.get("reset_marker")
         for attempt in range(5):  # a reset command is safe to resend; a task prompt never is
@@ -419,9 +571,9 @@ class Swarm:
                         return {"reset": "verified-welcome-screen", "old": old, "new": None}
                 elif old is None or (sid and sid != old):
                     return {"reset": "verified" if old else "unverified-no-session-id", "old": old, "new": sid}
-            if a and a["agent_status"] == "blocked":
-                raise HumanReview(f"{name} blocked during session reset")
-        raise HumanReview(f"{name} did not acknowledge {r['reset_command']} with a new session")
+            if a and a["agent_status"] == "blocked" and not self.dismiss(name):
+                raise AgentFault(role, f"{name} blocked during session reset")
+        raise AgentFault(role, f"{name} did not acknowledge {r['reset_command']} with a new session")
 
     def turn(self, role: str, text: str) -> str:
         """Deliver one prompt and wait until the agent is REALLY done, up to the role's full budget.
@@ -435,11 +587,15 @@ class Swarm:
         budget = float(r["budget"]["minutes"]) * 60
         deadline = self.clock() + budget
         need = 2  # consecutive settled observations, 3 s apart
+        dismissals = 0
         try:
             self.herdr.prompt(name, text, wait=True, timeout_s=budget)
         except (HerdrError, subprocess.TimeoutExpired) as e:
             if isinstance(e, HerdrError) and e.code == "agent_blocked":
-                raise HumanReview(f"{name} is at a permission/question dialog") from e
+                # Blocked BEFORE the text was sent: the prompt never landed. Clear the dialog and
+                # hand back to the controller, which relaunches and re-delivers (never duplicated).
+                self.dismiss(name)
+                raise NotDelivered(role, f"{name} was at a dialog; the task prompt was not delivered") from e
             if isinstance(e, HerdrError) and e.code in TRANSIENT:
                 # The text may or may not have landed (T-00018: it did). Never resend; watch longer
                 # before calling an idle agent finished, since it may not have started yet.
@@ -454,7 +610,13 @@ class Swarm:
                 self.sleep(3)
                 continue
             if a["agent_status"] == "blocked":
-                raise HumanReview(f"{name} is at a permission/question dialog; never answered automatically")
+                # Mid-turn dialog: decline it (esc) and let the agent continue without it. After
+                # three, end the turn; the result (or its absence) is collected as usual.
+                dismissals += 1
+                if dismissals > 3 or not self.dismiss(name):
+                    break
+                settled = 0
+                continue
             if a["agent_status"] == "working":
                 need = 2
             settled = settled + 1 if a["agent_status"] in ("idle", "done") else 0
@@ -504,6 +666,9 @@ class Swarm:
                  "## Workflow", json.dumps({k: wf.get(k) for k in ("phase", "status", "status_reason", "campaigns",
                                                                   "campaigns_without_advance", "failure_signatures",
                                                                   "route_failures", "full_runs")})]
+        parts += ["## Write lanes (a task's ALLOWED FILES must lie inside its role's lane, or it is rejected)",
+                  "\n".join(f"- {n}: {', '.join(r['may_write'])}" for n, r in self.roster["roles"].items()
+                            if n in WORKER_ROLES)]
         if wf.get("last_route_errors"):
             parts += ["## YOUR PREVIOUS ROUTING ATTEMPT WAS REJECTED -- fix exactly this",
                       "\n".join(f"- {e}" for e in wf["last_route_errors"])]
@@ -612,6 +777,9 @@ class Swarm:
                   if x.strip() and x.strip().lower() not in ("none", "n/a")]
         if role not in ("PATHFINDER", "FORGE") or not f.get("OBJECTIVE"):
             return None, "CHAIN ignored: needs ROLE PATHFINDER|FORGE and an OBJECTIVE"
+        lane = self.lane_errors(role, allowed)
+        if lane:
+            return None, "CHAIN ignored (SENTINEL routes it): " + "; ".join(lane)
         risky = [p for p in allowed if any(matches(p, x) or x.startswith(p.rstrip("*"))
                                             for x in self.roster["production_source_prefixes"] + self.roster["protected_prefixes"])]
         if risky:
@@ -765,26 +933,67 @@ class Swarm:
             wf = self.workflow()
             if require_approval and not wf.get("autonomy_approved"):
                 return {"status": "REFUSED", "reason": "autonomy_approved is false in .agent/workflow.json (plan GP1)"}
-            if wf.get("status") == "HUMAN_REVIEW_REQUIRED":
-                return {"status": "STOPPED", "reason": wf.get("status_reason")}
             try:
                 inflight = self.rt / "inflight.json"
-                if inflight.exists():
+                if wf.get("status") == "HUMAN_REVIEW_REQUIRED":
+                    out = self.auto_clear(wf)  # a halt left by the pre-autonomy controller
+                elif inflight.exists():
                     out = self.recover(load(inflight))
                 else:
                     d = self.dispatch()
                     out = self.deliver(d) if d.get("status") == "PENDING" else self.route()
-                if out.get("status") in ("ROUTED", "IDLE", "COLLECTED", "ROUTE_INVALID"):
-                    label = " ".join(str(out[k]) for k in ("task_id", "role", "result_status", "status") if out.get(k))
-                    out["git"] = self.commit_cycle(label)
-                return out
-            except HumanReview as e:
-                return self.halt(str(e))
+            except AgentFault as e:
+                out = self.recover_agent(e)
+            if out.get("status") in ("ROUTED", "IDLE", "COLLECTED", "ROUTE_INVALID", "ESCALATED", "RECOVERED"):
+                label = " ".join(str(out[k]) for k in ("task_id", "role", "result_status", "status") if out.get(k))
+                out["git"] = self.commit_cycle(label)
+            return out
+
+    def recover_agent(self, e: AgentFault) -> dict:
+        """Relaunch the faulty role with backoff. The dispatch is untouched: a task never sent stays
+        PENDING; one that was sent is collected (never re-prompted) on the next step."""
+        wf = self.workflow()
+        faults = wf.setdefault("agent_faults", {})
+        n = faults.get(e.role, 0) + 1
+        faults[e.role] = n
+        wf.setdefault("recoveries", []).append({"time": self.clock(), "role": e.role, "fault": str(e)[:300], "n": n})
+        wf["recoveries"] = wf["recoveries"][-50:]
+        self.save_workflow(wf)
+        action = "relaunched"
+        try:
+            if e.role in self.roster["roles"]:
+                self.relaunch(e.role)
+        except Exception as err:  # noqa: BLE001 -- any launch failure is retried on the next step
+            action = f"relaunch failed ({type(err).__name__}: {str(err)[:160]}); retried next step"
+        self.sleep(min(30 * 2 ** (n - 1), 900))
+        return {"status": "AGENT_RECOVERY", "role": e.role, "fault": str(e), "action": action, "attempt": n}
+
+    def auto_clear(self, wf: dict) -> dict:
+        """Resume from a halt written before autonomy: record it, quarantine protected edits, go on."""
+        if (self.rt / "inflight.json").exists():
+            wf["status"] = "ROUTING"
+            self.save_workflow(wf)
+            return {"status": "RECOVERED", "reason": "cleared legacy halt; inflight turn is collected next"}
+        protected = [p for p in git_dirty(self.root) if any(matches(p, x) for x in self.roster["protected_prefixes"])]
+        q = None
+        if protected:
+            atomic(self.rt / "before.json", encoded({}))
+            shutil.rmtree(self.rt / "pre", ignore_errors=True)  # restore from HEAD, not an old snapshot
+            q = self.quarantine(f"halt-{int(self.clock())}", "UNKNOWN",
+                                [(p, f"{p}: protected reference path") for p in protected])
+        wf.setdefault("halts", []).append({"time": self.clock(), "reason": wf.get("status_reason"),
+                                           "cleared_by": "swarm_wrapper (autonomous)", "quarantine": q and q["tag"]})
+        pending = self.dispatch().get("status") == "PENDING"
+        wf.update({"status": "DISPATCHED" if pending else "ROUTING", "route_failures": 0,
+                   "status_reason": "legacy halt cleared automatically"})
+        self.save_workflow(wf)
+        atomic(self.rt / "before.json", encoded({}))  # commit everything the halted cycle left
+        return {"status": "RECOVERED", "reason": "cleared legacy halt", "next": "deliver" if pending else "route"}
 
     def route(self) -> dict:
         prev_sha = digest(encoded(self.dispatch()))
         started = self.clock()
-        atomic(self.rt / "before.json", encoded(git_dirty(self.root)))
+        self.begin_turn()
         atomic(self.rt / "inflight.json", encoded({"kind": "route", "started": started,
                                                    "prev_dispatch_sha256": prev_sha}))
         self.fresh_session("SENTINEL")
@@ -800,58 +1009,88 @@ class Swarm:
         task_text = ""
         if d.get("task_file") and (self.root / d["task_file"]).exists():
             task_text = (self.root / d["task_file"]).read_text(encoding="utf-8", errors="replace")
-        violations = self.scope_violations("SENTINEL", changed, task_text)
+        problems = self.scope_problems("SENTINEL", changed, task_text)
         errs = self.validate_dispatch(d)
         fr = (self.frontier(), self.frontier())
         self.metric(d, "SENTINEL", "timeout" if outcome == "timeout" else d.get("status", "?"), started,
                     outcome == "timeout", fr, self.turn_usage("SENTINEL"))
         (self.rt / "inflight.json").unlink(missing_ok=True)
-        if violations:
-            raise HumanReview("SENTINEL wrote outside its lane: " + "; ".join(violations))
+        if problems:
+            q = self.quarantine(f"route-{int(started)}", "SENTINEL", problems)
+            errs = [f"you wrote outside your lane (undone, copy in .agent/failures/{q['tag']}/): "
+                    + "; ".join(w for _, w in problems)] + errs
+            if d.get("status") != "PENDING":
+                d = {**d, "status": "REJECTED"}
         wf = self.workflow()
         if errs or d.get("status") in ("COMPLETE", "REJECTED"):
             errs = errs or ["no new dispatch was written"]
-            wf["route_failures"] = wf.get("route_failures", 0) + 1
-            wf["last_route_errors"] = errs
-            self.save_workflow(wf)
-            # Never leave an invalid PENDING dispatch behind: the next step must route again, not deliver it.
-            if d.get("status") == "PENDING":
-                self.save_dispatch({"schema_version": 1, "status": "REJECTED", "errors": errs, "rejected": d})
-            if wf["route_failures"] >= 2:
-                raise HumanReview("SENTINEL produced no valid dispatch twice: " + "; ".join(errs))
-            return {"status": "ROUTE_INVALID", "errors": errs}
+            return self.route_failed(wf, d, errs)
         wf["route_failures"] = 0
         wf.pop("last_route_errors", None)
         self.apply_state_update(d)
-        if d["status"] == "HUMAN_REVIEW_REQUIRED":
+        if d["status"] == "HUMAN_REVIEW_REQUIRED":  # no human reviews this workflow: SAGE decides
             self.save_workflow(wf)
-            raise HumanReview(f"SENTINEL: {d.get('reason')}")
+            nd = self.queue_decision(d.get("reason") or "SENTINEL requested a decision", "SENTINEL", "sentinel-escalation")
+            return {"status": "ESCALATED", "task_id": nd["task_id"], "role": "SAGE"}
         if d["status"] == "IDLE":
-            wf.update({"status": "IDLE", "status_reason": d.get("reason")})
+            if wf.get("idle_check"):  # SAGE has already been asked since the last real work: stop
+                wf.update({"status": "IDLE", "status_reason": d.get("reason")})
+                self.save_workflow(wf)
+                return {"status": "IDLE", "reason": d.get("reason")}
+            wf["idle_check"] = True
             self.save_workflow(wf)
-            return {"status": "IDLE", "reason": d.get("reason")}
+            nd = self.queue_decision(
+                f"SENTINEL reports no unblocked work: {d.get('reason')}. Decide whether the current phase "
+                "objective is truly finished (say so), or name the next task and its role.",
+                "SENTINEL", "idle-check")
+            return {"status": "ESCALATED", "task_id": nd["task_id"], "role": "SAGE"}
         if d.get("full_run_justification"):
             wf.setdefault("full_run_justifications", []).append({"task_id": d["task_id"], "text": d["full_run_justification"]})
-        wf.update({"status": "DISPATCHED", "task_id": d["task_id"], "worker": d["role"], "status_reason": d.get("reason")})
+        wf.update({"status": "DISPATCHED", "task_id": d["task_id"], "worker": d["role"], "status_reason": d.get("reason"),
+                   "idle_check": False})
         self.save_workflow(wf)
         return {"status": "ROUTED", "task_id": d["task_id"], "role": d["role"]}
 
+    def route_failed(self, wf: dict, d: dict, errs: list[str]) -> dict:
+        """An unusable dispatch: never delivered; its errors go into the next brief. Two in a row -> SAGE."""
+        wf["route_failures"] = wf.get("route_failures", 0) + 1
+        wf["last_route_errors"] = errs
+        self.save_workflow(wf)
+        # Never leave an invalid PENDING dispatch behind: the next step must route again, not deliver it.
+        if d.get("status") in ("PENDING", "REJECTED"):
+            self.save_dispatch({"schema_version": 1, "status": "REJECTED", "errors": errs,
+                                "rejected": d.get("rejected", d)})
+        if wf["route_failures"] >= 2:
+            wf["route_failures"] = 0
+            self.save_workflow(wf)
+            nd = self.queue_decision(
+                "SENTINEL produced no valid dispatch twice. Errors: " + "; ".join(errs)[:900]
+                + ". Decide the next task: give it as a CHAIN block (PATHFINDER/FORGE, no production source), "
+                "or state the task precisely in RECOMMENDED NEXT ACTION for SENTINEL.", "SENTINEL", "routing-failure",
+                skill="ecosys-process-science-parity")
+            return {"status": "ESCALATED", "task_id": nd["task_id"], "role": "SAGE", "errors": errs}
+        return {"status": "ROUTE_INVALID", "errors": errs}
+
     def deliver(self, d: dict) -> dict:
         errs = self.validate_dispatch(d)
-        if errs:
-            raise HumanReview(f"invalid pending dispatch {d.get('task_id')}: " + "; ".join(errs))
+        if errs:  # e.g. a stale result or an out-of-lane ALLOWED FILES: refuse it, route again
+            return self.route_failed(self.workflow(), d, [f"dispatch {d.get('task_id')} refused: " + "; ".join(errs)])
         role = d["role"]
         started = self.clock()
-        atomic(self.rt / "before.json", encoded(git_dirty(self.root)))
+        self.begin_turn()
         # Scope is judged against the task AS DISPATCHED; an agent cannot widen it mid-turn.
         atomic(self.rt / "task.md", (self.root / d["task_file"]).read_bytes())
         reset = self.fresh_session(role)
         # At-most-once: the intent is durable BEFORE the task prompt reaches the agent. It is written
-        # after the reset, so a failed reset halts with the task still PENDING (never sent) instead
-        # of leaving an inflight record that blocks clear-review and would close the task STAGNATED.
+        # after the reset, so a failed reset leaves the task PENDING (never sent) for re-delivery
+        # after the agent is relaunched, instead of closing it STAGNATED.
         atomic(self.rt / "inflight.json", encoded({"kind": "task", "task_id": d["task_id"], "role": role,
                                                    "started": started, "frontier_before": self.frontier()}))
-        outcome = self.turn(role, self.prompt_text(role, d))
+        try:
+            outcome = self.turn(role, self.prompt_text(role, d))
+        except NotDelivered:
+            (self.rt / "inflight.json").unlink(missing_ok=True)
+            raise
         return self.collect(d, outcome, started, reset)
 
     def recover(self, inflight: dict) -> dict:
@@ -859,7 +1098,11 @@ class Swarm:
             return self.finish_route("recovered", inflight["started"], inflight["prev_dispatch_sha256"])
         d = self.dispatch()
         if d.get("task_id") != inflight["task_id"]:
-            raise HumanReview("inflight record and dispatch.json disagree; inspect before resuming")
+            # Keep the orphan record as evidence, drop it, and let the current dispatch proceed.
+            orphan = self.dir / "failures" / f"orphan-inflight-{inflight.get('task_id')}.json"
+            atomic(orphan, encoded({"inflight": inflight, "dispatch": d, "time": self.clock()}))
+            (self.rt / "inflight.json").unlink(missing_ok=True)
+            return {"status": "RECOVERED", "reason": "orphan inflight record archived", "path": self.rel(orphan)}
         a = self.live(self.role(d["role"])["agent_name"])
         if a and a["agent_status"] == "working":
             return {"status": "WAITING", "task_id": d["task_id"], "reason": "agent still working; no duplicate prompt"}
@@ -873,16 +1116,33 @@ class Swarm:
         task_bytes = frozen.read_bytes() if frozen.exists() else (self.root / d["task_file"]).read_bytes()
         task_text = task_bytes.decode("utf-8", errors="replace")
         changed = changed_paths(load(self.rt / "before.json"), git_dirty(self.root))
-        violations = self.scope_violations(role, changed, task_text)
-        if (self.root / d["task_file"]).read_bytes() != task_bytes:
-            violations.append(f"{d['task_file']}: task file changed during its own execution")
+        problems = self.scope_problems(role, changed, task_text)
+        task_widened = (self.root / d["task_file"]).read_bytes() != task_bytes
+        if task_widened:
+            problems.append((d["task_file"], f"{d['task_file']}: task file changed during its own execution"))
         status, rerrs = self.validate_result(d)
         notes = list(rerrs)
         if status is None:
             status = "STAGNATED" if outcome in ("timeout", "recovered") else "FAIL"
         prod = [p for p in changed if any(matches(p, x) for x in self.roster["production_source_prefixes"])]
         if prod and not (self.dir / "tasks" / f"{tid}.hypothesis.md").exists():
-            violations.append("production source changed without .agent/tasks/<task>.hypothesis.md (spec section 15)")
+            problems += [(p, f"{p}: production source changed without .agent/tasks/<task>.hypothesis.md (spec section 15)")
+                         for p in prod if p not in {x for x, _ in problems}]
+        violations = [w for _, w in problems]
+        quarantine = None
+        if problems:
+            # Undo exactly the offending files (the frozen task copy restores a widened task file),
+            # keep the agent's versions as evidence, and close the task FAIL so it is re-routed.
+            if task_widened:
+                atomic(self.rt / "pre" / d["task_file"], task_bytes)
+            quarantine = self.quarantine(tid, role, problems)
+            status = "FAIL"
+            notes.append(f"scope violation, undone (copy in .agent/failures/Q-{tid}/): " + "; ".join(violations))
+            changed = changed_paths(load(self.rt / "before.json"), git_dirty(self.root))
+            prod = [p for p in changed if any(matches(p, x) for x in self.roster["production_source_prefixes"])]
+        if role == "SAGE" and d.get("decision_of") and status == "DONE" and (self.root / d["result_file"]).exists() \
+                and "DECISION:" not in (self.root / d["result_file"]).read_text(encoding="utf-8", errors="replace"):
+            status, notes = "FAIL", notes + ["decision task result has no `DECISION:` line"]
         hooks, review = {}, None
         if role == "FORGE" and changed and not violations:
             hooks = self.forge_hooks(d, changed)
@@ -897,22 +1157,35 @@ class Swarm:
             wf.setdefault("failure_signatures", {})[sig] = wf.get("failure_signatures", {}).get(sig, 0) + 1
         usage = self.turn_usage(role)
         record = {"dispatch": d, "outcome": outcome, "reset": reset, "result_status": status, "result_errors": rerrs,
-                  "changed": changed, "violations": violations, "hooks": hooks, "review": review,
-                  "failure_packet": packet, "usage": usage, "ended": self.clock()}
+                  "changed": changed, "violations": violations, "quarantine": quarantine, "hooks": hooks,
+                  "review": review, "failure_packet": packet, "usage": usage, "ended": self.clock()}
         atomic(self.dir / "archive" / f"{tid}.json", encoded(record))
         self.metric(d, role, status, started, outcome == "timeout",
                     (inflight.get("frontier_before", self.frontier()), self.frontier()), usage)
         self.save_dispatch({**d, "status": "COMPLETE", "result_status": status})
         wf.update({"status": "ROUTING", "task_id": tid, "worker": None})
+        wf.get("agent_faults", {}).pop(role, None)  # the role completed a turn: its fault backoff resets
+        if not d.get("decision_of"):
+            wf["idle_check"] = False  # real work happened since SAGE was last asked about idleness
         self.save_workflow(wf)
         (self.rt / "inflight.json").unlink(missing_ok=True)
         frozen.unlink(missing_ok=True)
-        if violations:
-            raise HumanReview(f"{tid} ({role}) scope violation, left in place for the user: " + "; ".join(violations))
+        out = {"status": "COLLECTED", "task_id": tid, "result_status": status, "failure_packet": packet}
+        if quarantine:
+            out["quarantined"] = f"Q-{tid}"
+            return out
         if role == "FORGE" and prod and status == "DONE":
             q = self.queue_review(d, dirty_source_digest(self.root)["sha256"])
             return {"status": "COLLECTED", "task_id": tid, "result_status": status, "review_queued": q["task_id"]}
-        out = {"status": "COLLECTED", "task_id": tid, "result_status": status, "failure_packet": packet}
+        # A result that still asks for a human (older role prompts, habit) goes to SAGE instead.
+        rtext = (self.root / d["result_file"]).read_text(encoding="utf-8", errors="replace") \
+            if (self.root / d["result_file"]).exists() else ""
+        ask = HRR_RE.search(rtext)
+        if ask and not d.get("decision_of"):
+            nd = self.queue_decision(ask.group(1) or f"{tid} asked for a human decision; decide it.", tid,
+                                     "result-escalation")
+            out["decision_queued"] = nd["task_id"]
+            return out
         if role == "SAGE" and status == "DONE" and not d.get("chained_from"):
             nd, why = self.chain_from(d)
             if nd:
@@ -953,7 +1226,8 @@ class Swarm:
             atomic(listing, ("\n".join(paths) + "\n").encode("utf-8"))
             add = self.git("add", "-A", f"--pathspec-from-file={listing}")
             if add.returncode:
-                raise HumanReview(f"git add failed: {add.stderr[:300]}")
+                # Recorded, not fatal: the paths stay dirty and are picked up by a later cycle's commit.
+                return {**out, "commit": "failed", "error": f"git add: {add.stderr[:300]}"}
             msg = (f"swarm: {label}\n\nAutomated cycle commit by swarm_wrapper.py (decision D8). "
                    f"{len(paths)} path(s)." + (f" Production source approved by SAGE (precommit PASS)." if approved else "")
                    + (f"\nWithheld pending SAGE approval: {', '.join(withheld)}" if withheld else ""))
@@ -963,7 +1237,7 @@ class Swarm:
             elif "nothing to commit" in (c.stdout + c.stderr):
                 out["commit"] = "nothing"
             else:
-                raise HumanReview(f"git commit failed: {(c.stderr or c.stdout)[:300]}")
+                return {**out, "commit": "failed", "error": f"git commit: {(c.stderr or c.stdout)[:300]}"}
         else:
             out["commit"] = "nothing"
         if pol.get("push"):
@@ -985,9 +1259,7 @@ class Swarm:
         st["consecutive_push_failures"] = st.get("consecutive_push_failures", 0) + 1
         st["last_push_error"] = (p.stderr or p.stdout)[-400:]
         atomic(state_path, encoded(st))
-        if st["consecutive_push_failures"] >= pol.get("max_consecutive_push_failures", 3):
-            raise HumanReview(f"git push failed {st['consecutive_push_failures']} cycles in a row "
-                              f"(commits are kept locally): {st['last_push_error'][-240:]}")
+        # Never a stop: commits stay local and every later cycle retries the push.
         return {"push": "failed", "consecutive_push_failures": st["consecutive_push_failures"]}
 
     def clear_review(self, by: str, note: str, commit: bool = True) -> dict:
@@ -1013,11 +1285,33 @@ class Swarm:
             out = {"status": "CLEARED", "by": by, "next": "deliver pending dispatch" if pending else "route"}
             if commit:
                 atomic(self.rt / "before.json", encoded({}))  # everything left by the halted cycle
-                try:
-                    out["git"] = self.commit_cycle(f"review cleared by {by}")
-                except HumanReview as e:
-                    return self.halt(str(e))
+                out["git"] = self.commit_cycle(f"review cleared by {by}")
             return out
+
+    def run(self, max_steps: int = 0) -> dict:
+        """Loop until SAGE-confirmed IDLE. Errors and waits are retried with backoff, not surfaced
+        as stops. Exits only on IDLE, missing autonomy approval, or another controller holding the lock."""
+        steps, errors, out = 0, 0, {}
+        while not max_steps or steps < max_steps:
+            try:
+                out = self.step()
+                errors = 0
+            except ProtocolError as e:
+                if "owns this lane" in str(e):
+                    return {"status": "REFUSED", "reason": "another controller is running", "steps": steps}
+                out = {"status": "RETRY", "error": str(e)[:400]}
+            except (OSError, ValueError, KeyError, subprocess.SubprocessError) as e:
+                out = {"status": "RETRY", "error": f"{type(e).__name__}: {str(e)[:400]}"}
+            steps += 1
+            print(json.dumps(out, separators=(",", ":")), flush=True)
+            if out.get("status") in ("REFUSED", "IDLE"):
+                break
+            if out.get("status") == "RETRY":
+                errors += 1
+                self.sleep(min(60 * errors, 900))
+            elif out.get("status") == "WAITING":
+                self.sleep(60)
+        return {"status": out.get("status"), "steps": steps}
 
     # --- gates
     def precommit(self) -> dict:
@@ -1183,14 +1477,14 @@ def main():
     dh.add_argument("--task", help="informational; the hash covers the whole production-source diff")
     sub.add_parser("precommit")
     sub.add_parser("cost", help="token/cost totals by role and per verified-frontier advance")
-    cr = sub.add_parser("clear-review", help="resume after HUMAN_REVIEW_REQUIRED (records who and why)")
+    cr = sub.add_parser("clear-review", help="optional operator override; `run` also clears a legacy halt by itself")
     cr.add_argument("--by", required=True)
     cr.add_argument("--note", required=True, help="what was reviewed and decided")
     cr.add_argument("--no-commit", action="store_true", help="do not commit the halted cycle's leftovers")
     st = sub.add_parser("step")
     st.add_argument("--manual", action="store_true", help="one user-supervised step without autonomy approval")
     rn = sub.add_parser("run")
-    rn.add_argument("--max-steps", type=int, default=50)
+    rn.add_argument("--max-steps", type=int, default=0, help="0 = until IDLE (confirmed by SAGE)")
     rn.add_argument("--resume", action="store_true", help="required when an inflight turn exists")
     ap_ = sub.add_parser("approve")
     ap_.add_argument("--by", required=True)
@@ -1233,16 +1527,8 @@ def main():
         elif a.cmd == "step":
             out = sw.step(require_approval=not a.manual)
         else:
-            if (sw.rt / "inflight.json").exists() and not a.resume:
-                raise ProtocolError("an inflight turn exists; rerun with --resume (it is never re-prompted)")
-            out, steps = {}, []
-            for _ in range(a.max_steps):
-                out = sw.step()
-                steps.append(out)
-                print(json.dumps(out, separators=(",", ":")), flush=True)
-                if out["status"] in ("REFUSED", "STOPPED", "HUMAN_REVIEW_REQUIRED", "IDLE", "WAITING"):
-                    break
-            out = {"status": out.get("status"), "steps": len(steps)}
+            # --resume is kept for compatibility: an inflight turn is always collected, never re-sent.
+            out = sw.run(a.max_steps)
         out = out if isinstance(out, dict) else {"result": out}
         out.setdefault("limitations", LIMITATIONS)
         print(json.dumps(out, indent=2))

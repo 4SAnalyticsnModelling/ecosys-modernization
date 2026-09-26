@@ -13,8 +13,9 @@ Its scientific records (`audit/issues/`, `audit/runs/`, `audit/analysis/`) remai
 evidence to re-verify, not fresh passes.
 
 Use `run_logged.py` for builds/tests/verbose commands. Agents never commit or push; the controller commits and pushes after every cycle (decision D8, `.agent/README.md`).
-No gate or frontier claim without `check_gate.py` / `update_frontier.py`. User decisions
-are listed in plan section 8; never presume them.
+No gate or frontier claim without `check_gate.py` / `update_frontier.py`. Decision D9
+(user, 2026-09-25): SAGE makes every decision and the swarm never waits for a human; plan
+section 8 lists the former human review points and how SAGE decides each.
 
 <!-- ecosys-audit-skill-pack:begin -->
 ## ecosys Fortran-to-Zig audit

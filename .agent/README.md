@@ -30,7 +30,7 @@ truth for names, models, launch args, budgets and write lanes.
 
 | Path | Writer | Purpose |
 |---|---|---|
-| `state.md` | SAGE/user (<=1,500 words, replace not append) | current objective, blockers, next operation |
+| `state.md` | controller (from SENTINEL's dispatch) and SAGE (<=1,500 words, replace not append) | current objective, blockers, next operation |
 | `frontier.json` | `update_frontier.py` only | simulation vs verified frontier + evidence binding |
 | `workflow.json` | wrapper (user sets approval) | durable process state; `autonomy_approved` gate |
 | `dispatch.json` | SENTINEL (wrapper marks COMPLETE) | the one pending task |
@@ -39,6 +39,7 @@ truth for names, models, launch args, budgets and write lanes.
 | `tasks/T-NNNNN.hypothesis.md` | FORGE | required before any production-science edit |
 | `results/T-NNNNN.md` | the worker | result contract (`templates/result.md`) |
 | `failures/F-NNNNN/` | `make_failure_packet.py` | spec section 18 packet |
+| `failures/Q-<task>/` | wrapper | quarantined out-of-lane edit: the agent's files + `quarantine.json` |
 | `archive/T-NNNNN.json` | wrapper | dispatch, changed paths, violations, hooks, review binding |
 | `metrics.csv` | wrapper | per-turn wall time vs budget; tokens when the harness reports them |
 | `locks/`, `runtime/` | wrapper (git-ignored) | swarm/machine locks, inflight intent, frozen task copy |
@@ -51,30 +52,49 @@ All commands are run from the project root, inside a Herdr pane (any session; th
 uv run ecosys-audit/scripts/swarm_wrapper.py status
 uv run ecosys-audit/scripts/swarm_wrapper.py ensure-agents [--start]   # check/rename/start the 4 agents
 uv run ecosys-audit/scripts/swarm_wrapper.py relaunch FORGE            # restart one role with roster args
-uv run ecosys-audit/scripts/swarm_wrapper.py approve --by <user>       # USER ONLY: GP1 launch approval
+uv run ecosys-audit/scripts/swarm_wrapper.py approve --by <user>       # GP1 launch approval (given 2026-09-25)
 uv run ecosys-audit/scripts/swarm_wrapper.py step [--manual]           # one agent turn
-uv run ecosys-audit/scripts/swarm_wrapper.py run [--resume] [--max-steps N]
+uv run ecosys-audit/scripts/swarm_wrapper.py run [--max-steps N]       # default: until SAGE-confirmed IDLE
 uv run ecosys-audit/scripts/swarm_wrapper.py precommit                 # SAGE APPROVE bound to current diff?
 uv run ecosys-audit/scripts/swarm_wrapper.py cost                      # tokens/cost by role, per frontier advance
-uv run ecosys-audit/scripts/swarm_wrapper.py clear-review --by <name> --note "<what you reviewed/decided>"
-                                                                       # resume after HUMAN_REVIEW_REQUIRED
+uv run ecosys-audit/scripts/swarm_wrapper.py clear-review --by <name> --note "..."  # optional; run clears halts itself
 ```
 
-`scripts/start-swarm.sh [--resume]` = ensure-agents --start, then run.
+`scripts/start-swarm.sh` = ensure-agents --start, then run.
 
 One `step` = one fresh-session turn: SENTINEL routes when nothing is pending; otherwise the named role runs
 its task. Then deterministic hooks: scope check, `zig fmt` + T1 (FORGE), failure packet (FAIL/STAGNATED),
-automatic SAGE review of any production-source change, archive and metrics. The loop stops on IDLE,
-HUMAN_REVIEW_REQUIRED, WAITING, or a refused approval.
+automatic SAGE review of any production-source change, archive and metrics.
+
+## No human in the loop (decision D9, user, 2026-09-25)
+SAGE makes every decision. The controller never stops for a person; each former halt is handled in place:
+
+| Event | Automatic response |
+|---|---|
+| ALLOWED FILES outside the role's lane (or protected) | dispatch refused before delivery; errors go to SENTINEL's next brief |
+| Agent edits outside its lane / protected path / source without hypothesis / widens its task | files copied to `failures/Q-<task>/`, restored to pre-turn content; task FAIL; SENTINEL re-routes |
+| SAGE CHAIN into a file the chained role cannot write | chain ignored; SENTINEL routes (SAGE writes its own ledger files) |
+| Agent at a permission/question dialog | declined with esc (never approved); if it persists, the role is relaunched |
+| Agent missing, wrong kind, or ignores its reset | role relaunched with backoff; a never-sent task stays PENDING |
+| SENTINEL writes HUMAN_REVIEW_REQUIRED, or a result asks for a human | SAGE decision task (`DECISION:` line required) |
+| SENTINEL fails to route twice | SAGE decision task names the next task |
+| SENTINEL reports IDLE | SAGE confirms or names work; only a second IDLE after that ends `run` |
+| git add/commit/push failure | recorded; retried next cycle |
+| Controller error (Herdr, I/O) | `run` retries with backoff (max 15 min) |
+| A halt left by the pre-D9 controller | cleared automatically on the next step, leftovers committed |
+
+`run` exits only on SAGE-confirmed IDLE, missing autonomy approval, or another controller holding the lock.
+A machine outage (e.g. a faulted D: drive) still stops everything; that is not a decision.
 
 ## Commit and push (decision D8, user, 2026-09-25)
 After every successfully collected cycle, the controller commits exactly the paths that cycle changed
 (message `swarm: <task> <status>`) and pushes `HEAD:main` to `origin` (settings: `roster.json` `git`).
 - Production source is withheld from commits until a SAGE APPROVE matches the current diff
   (`precommit` PASS); it is then committed in the SAGE cycle.
-- A halted cycle (violation, blocked agent, invalid dispatch) is never committed.
+- Quarantined edits are restored before the commit, so an out-of-lane change is never committed
+  (its copy under `failures/Q-<task>/` is).
 - Plain fast-forward push only: never force, pull, rebase or merge. A failed push keeps the commit local
-  and is retried next cycle; after 3 consecutive failures the swarm stops for the user.
+  and is retried every cycle; it never stops the swarm.
 - Agents themselves still never commit or push.
 
 ## Token economy (2026-09-25)
@@ -91,9 +111,9 @@ After every successfully collected cycle, the controller commits exactly the pat
 - Keep interactive supervisor sessions short. Watch with `status` / `cost`, not a long chat.
 
 ## What the wrapper never does
-Answer a permission dialog; re-prompt a task whose delivery was interrupted; revert an agent's edit
-(scope violations are left in place and escalated); force-push; promote the frontier.
+Approve a permission dialog (it only declines); re-prompt a task whose delivery was interrupted; discard an
+agent's edit without keeping a copy; force-push; promote the frontier.
 
 ## Resume after a crash
-Run `swarm_wrapper.py run --resume`. An inflight task is collected from its result file if one exists, else
-closed STAGNATED with a failure packet. It is never re-sent. An agent still `working` returns WAITING.
+Run `scripts/start-swarm.sh` again. An inflight task is collected from its result file if one exists, else
+closed STAGNATED with a failure packet. It is never re-sent. While an agent is still `working`, `run` waits.

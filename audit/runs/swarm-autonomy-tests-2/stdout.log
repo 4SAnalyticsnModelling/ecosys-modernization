@@ -1,0 +1,5 @@
+{"status":"RETRY","error":"herdr call failed"}
+{"status":"WAITING"}
+{"status":"AGENT_RECOVERY"}
+{"status":"COLLECTED"}
+{"status":"IDLE"}
