@@ -56,8 +56,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "The deck-cap revert is approved, and the remaining gap is a bounded PATHFINDER root-cause packet for the SOLUTE exhaustion and STARTE clamp under the staged deck.",
   "task_id": "T-00039",
-  "worker": "PATHFINDER"
+  "worker": null
 }
