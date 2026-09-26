@@ -56,8 +56,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Latest accepted result instructs SAGE to adjudicate DEV-004 and finalize D6; no user decision remains and the evidence packet is already preserved.",
   "task_id": "T-00035",
-  "worker": "SAGE"
+  "worker": null
 }

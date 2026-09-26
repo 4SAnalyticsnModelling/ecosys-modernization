@@ -1,1 +1,21 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00035", "role": "SAGE", "task_file": ".agent/tasks/T-00035.md", "result_file": ".agent/results/T-00035.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Latest accepted result instructs SAGE to adjudicate DEV-004 and finalize D6; no user decision remains and the evidence packet is already preserved.", "state_recent": ["T-00034 PATHFINDER DONE: NPH=20 NPG=80; first preserved divergence at hour 9.", "T-00031 FORGE DONE: DEV-004 row updated after SAGE review."], "state_next": "SAGE adjudicates DEV-004 and finalizes the D6 packet using the verified hour-9 evidence."}
+{
+  "full_run_justification": null,
+  "reason": "Latest accepted result instructs SAGE to adjudicate DEV-004 and finalize D6; no user decision remains and the evidence packet is already preserved.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00035.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE adjudicates DEV-004 and finalizes the D6 packet using the verified hour-9 evidence.",
+  "state_recent": [
+    "T-00034 PATHFINDER DONE: NPH=20 NPG=80; first preserved divergence at hour 9.",
+    "T-00031 FORGE DONE: DEV-004 row updated after SAGE review."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00035.md",
+  "task_id": "T-00035"
+}
