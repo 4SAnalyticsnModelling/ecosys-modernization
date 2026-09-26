@@ -1,1 +1,1 @@
-T-00064 SAGE: adjudicate the quarantined T-00060 fixed-pH dynamic-input revision against T-00059 R1-R4 and settle the 20-cycle vs 1000-cycle falsification before any implementation overwrites the working tree.
+T-00065 SAGE: review the quarantined T-00060 fixed-pH dynamic-input diff against T-00059 R1-R4 and issue VERDICT: APPROVE|REVISE|REJECT.
