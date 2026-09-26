@@ -6,7 +6,8 @@
   "campaigns_without_advance": 0,
   "failure_signatures": {
     "PATHFINDER:T-00007": 1,
-    "PATHFINDER:T-00026": 1
+    "PATHFINDER:T-00026": 1,
+    "PATHFINDER:T-00032": 1
   },
   "full_run_justifications": [],
   "full_runs": {
@@ -54,8 +55,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "T-00030 recommends a read-only deck trace to find NPH/NPG and the first preserved n100e/n100f divergence.",
   "task_id": "T-00032",
-  "worker": "PATHFINDER"
+  "worker": null
 }

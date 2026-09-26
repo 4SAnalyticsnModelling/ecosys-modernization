@@ -1,0 +1,48 @@
+{
+  "changed": [],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "T-00030 recommends a read-only deck trace to find NPH/NPG and the first preserved n100e/n100f divergence.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00032.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER to identify Ottawa deck NPH/NPG and the first divergent preserved n100e/n100f output hour.",
+    "state_recent": [
+      "T-00031 FORGE DONE: DEV-004 row updated.",
+      "T-00030 SAGE DONE: hour-9 divergence verified."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00032.md",
+    "task_id": "T-00032"
+  },
+  "ended": 1790398115.4456863,
+  "failure_packet": ".agent/failures/F-00003",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f24648739ffeJ3wiTYAtO63Drx",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [
+    "result file missing"
+  ],
+  "result_status": "FAIL",
+  "review": null,
+  "usage": {
+    "cache_read": 734976,
+    "cache_write": 0,
+    "cost": 0.05583712,
+    "input": 131822,
+    "llm_calls": 16,
+    "output": 12311,
+    "tool_calls": 31
+  },
+  "violations": []
+}
