@@ -41,17 +41,14 @@
     }
   ],
   "last_advance_unix": null,
-  "last_route_errors": [
-    "task file missing sections ['KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Need the legacy runtime ceiling and first divergence hour to bound DEV-004 before any deck signature; this is the newest unblocked PATHFINDER task.",
-  "task_id": "T-00027",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Newest evidence pins DEV-004 to a bounded runtime-ceiling effect; FORGE should encode the legacy-equivalent bound with the preserved hour-9 onset.",
+  "task_id": "T-00029",
+  "worker": "FORGE"
 }
