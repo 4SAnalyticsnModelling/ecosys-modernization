@@ -1,1 +1,1 @@
-T-00056 SAGE: determine whether legacy fixed-pH hourly precipitation/irrigation equilibration should govern Zig dynamic inputs.
+T-00057 SAGE: confirm legacy fixed-pH dynamic input speciation and its hourly precipitation/irrigation equilibration semantics.

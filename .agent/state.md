@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00055 FORGE DONE: revised fixed-pH replay packet isolates legacy vs Zig chemistry split.
-- T-00054 SAGE DONE: test revision keeps only discriminating fixed-pH assertions.
-- T-00053 FORGE DONE: residual-update mismatch remains the decisive divergence.
+- T-00056 SAGE STATUS: fixed-pH legacy speciation is source-equivalent for dynamic inputs
+- T-00055 FORGE STATUS: replay pins mismatch to fixed-pH legacy chemistry vs coupled H+ solve
+- T-00054 SAGE STATUS: revised packet still needs decisive parity decision
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE adjudicating whether fixed-pH legacy speciation should govern hourly precipitation input equilibration.
+SAGE confirms the legacy fixed-pH dynamic-input equilibration semantics and resolves whether FORGE should replace equilibratedDynamicInput.
