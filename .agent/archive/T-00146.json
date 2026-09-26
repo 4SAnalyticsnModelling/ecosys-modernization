@@ -1,0 +1,65 @@
+{
+  "changed": [
+    ".agent/results/T-00146.md",
+    "audit/runs/p04-driver-tests-final/receipt.json",
+    "audit/runs/p04-driver-tests-final/stderr.log",
+    "audit/runs/p04-driver-tests-final/stdout.log",
+    "audit/runs/p04-rate-probe-2-log/receipt.json",
+    "audit/runs/p04-rate-probe-2-log/stderr.log",
+    "audit/runs/p04-rate-probe-2-log/stdout.log",
+    "audit/runs/p04-timing-probe/receipt.json",
+    "audit/runs/p04-timing-probe/stderr.log",
+    "audit/runs/p04-timing-probe/stdout.log",
+    "audit/runs/p04-workflow-tests-60/receipt.json",
+    "audit/runs/p04-workflow-tests-60/stderr.log",
+    "audit/runs/p04-workflow-tests-60/stdout.log",
+    "audit/runs/p04_probe_receipt.json",
+    "audit/runs/p04_rate_probe_2_receipt.json",
+    "ecosys-audit/scripts/run_legacy_p04_full.py",
+    "ecosys-audit/tests/test_run_legacy_p04_full.py"
+  ],
+  "dispatch": {
+    "full_run_justification": "G0-4 requires the fresh 30-year legacy Ottawa baseline; bounded warmup cannot produce the required evidence, and no archived full output set exists.",
+    "reason": "Only remaining gate is the fresh 30-year legacy Ottawa baseline; FORGE must launch the authorized run under lock.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00146.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-build-reproducibility"
+    ],
+    "state_next": "FORGE launches the authorized P0.4 legacy gfortran 3x timing run under the machine lock.",
+    "state_recent": [
+      "T-00143 FORGE DONE: P0.4 manifest and driver ready for launch.",
+      "T-00142 SAGE DONE: full legacy run authorized with no further gate.",
+      "T-00141 FORGE DONE: bounded warmup proved build and deck provenance."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00146.md",
+    "task_id": "T-00146"
+  },
+  "ended": 1790465354.8447688,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1fff6dbdffeU0rZc0pnxntAol",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "BLOCKED",
+  "review": null,
+  "usage": {
+    "cache_read": 9166534,
+    "cache_write": 0,
+    "cost": 1.3363300500000002,
+    "input": 832730,
+    "llm_calls": 86,
+    "output": 6478,
+    "tool_calls": 93
+  },
+  "violations": []
+}

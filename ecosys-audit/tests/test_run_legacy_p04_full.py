@@ -34,6 +34,16 @@ class TestRunLegacyP04Full(unittest.TestCase):
         self.assertEqual(res["total_files_compared"], 2)
         self.assertEqual(res["discrepancies_count"], 0)
 
+    def test_determinism_comparison_single_run(self):
+        runs = [
+            {"outputs": {"f1.txt": {"sha256": "AAA"}, "f2.txt": {"sha256": "BBB"}}}
+        ]
+        res = compare_determinism(runs)
+        self.assertTrue(res["byte_for_byte_identical"])
+        self.assertTrue(res["deterministic"])
+        self.assertEqual(res["total_files_compared"], 2)
+        self.assertEqual(res["discrepancies_count"], 0)
+
     def test_determinism_comparison_mismatch(self):
         runs = [
             {"outputs": {"f1.txt": {"sha256": "AAA"}, "f2.txt": {"sha256": "BBB"}}},

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "D:\ecosys-modernization\ecosys-audit\scripts\run_legacy_p04_full.py", line 630, in <module>
+    main()
+  File "D:\ecosys-modernization\ecosys-audit\scripts\run_legacy_p04_full.py", line 624, in main
+    "deterministic": determinism["byte_for_byte_identical"],
+                     ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'byte_for_byte_identical'

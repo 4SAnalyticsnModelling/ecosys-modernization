@@ -1,0 +1,17 @@
+=== ECOSYS P0.4 LEGACY GFORTRAN FULL-RUN DRIVER ===
+  Deck source: D:\ecosys-evidence\legacy\staged_deck
+  Executable: D:\ecosys-evidence\legacy\ecosys_oracle.exe
+  Output directory base: D:\ecosys-evidence\legacy\p04-rate-probe-2
+  Core affinity mask: 0x1
+  Runs requested: 1
+  Dry-run: False
+Acquiring exclusive machine lock: D:\ecosys-modernization\.agent\locks\machine.lock
+
+--- [Iteration 1/1] Starting Warmup ---
+  [Warmup] Staging warmup directory: D:\ecosys-evidence\legacy\p04-rate-probe-2\warmup_1
+  [Warmup] Completed in 12.026s; discarded warmup directory.
+--- [Iteration 1/1] Starting Timed Run ---
+  [Timed Run run_1] Staging run directory: D:\ecosys-evidence\legacy\p04-rate-probe-2\run_1
+  Run 1 completed in 12.762s
+
+Full execution receipt written to D:\ecosys-modernization\audit\runs\p04_rate_probe_2_receipt.json

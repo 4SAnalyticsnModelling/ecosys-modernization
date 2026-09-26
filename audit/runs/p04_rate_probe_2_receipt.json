@@ -1,0 +1,210 @@
+{
+  "status": "ALL_RUNS_COMPLETED",
+  "protocol": "plan \u00a75 P0.4 / SAGE T-00140 / SAGE T-00142 R5",
+  "campaign_id": "p04-rate-probe-2",
+  "campaign_directory": "D:\\ecosys-evidence\\legacy\\p04-rate-probe-2",
+  "runs_count": 1,
+  "timing_statistics": {
+    "elapsed_seconds_all_runs": [
+      12.762
+    ],
+    "sorted_elapsed_seconds": [
+      12.762
+    ],
+    "median_seconds": 12.762,
+    "spread_seconds": 0.0,
+    "relative_spread_percent": 0.0
+  },
+  "determinism_audit": {
+    "deterministic": true,
+    "note": "Single run evaluated; cross-run comparison requires >=2 runs."
+  },
+  "inventory_audit": {
+    "run_002_baseline_files": 1138,
+    "actual_output_files": 29,
+    "file_count_difference": -1109,
+    "run_002_baseline_approx_bytes": 1428000000,
+    "actual_total_bytes": 3107500,
+    "size_difference_bytes": -1424892500,
+    "explanation": "File count difference of -1109 files relative to run-002 inventory."
+  },
+  "machine_and_environment": {
+    "machine_lock": "D:\\ecosys-modernization\\.agent\\locks\\machine.lock",
+    "core_affinity_mask": "0x1",
+    "checkpoints_policy": "No *.bin checkpoints; legacy Fortran 77 does not implement Zig checkpointing"
+  },
+  "warmups": [
+    {
+      "status": "WARMUP_DISCARDED",
+      "elapsed_seconds": 12.026,
+      "termination_marker": "NOW EXECUTING DAY     2",
+      "affinity_mask": "0x1"
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "run_1",
+      "status": "RUN_COMPLETED_SUCCESS",
+      "exit_code": 0,
+      "elapsed_seconds": 12.762,
+      "core_affinity_mask_applied": "0x1",
+      "core_affinity_mask_verified": "0x1",
+      "run_directory": "D:\\ecosys-evidence\\legacy\\p04-rate-probe-2\\run_1",
+      "total_output_files": 29,
+      "total_output_bytes": 3107500,
+      "horizon_check": {
+        "verified": true,
+        "horizon_type": "BOUNDED_TEST",
+        "simulated_days_target": 2,
+        "note": "Bounded test mode verified reaching day 2"
+      },
+      "outputs": {
+        "01998f25cd1": {
+          "size_bytes": 16560,
+          "sha256": "D5D670B88AF24B09761B9C4F7626EDA9ECE026DD4C08D4F1ACC0D8DBFD6892C6",
+          "lines": 32
+        },
+        "01998f25ch1": {
+          "size_bytes": 247478,
+          "sha256": "22A9469E95BDE0721C1CF2C8192FC0729DF8093BCB33B74A3D4408B5C289D44C",
+          "lines": 741
+        },
+        "01998f25ed1": {
+          "size_bytes": 25124,
+          "sha256": "C38DD20E3BC838EC053E09D3BD6A42ED74F4DA3B7D692BA574B9471EECC86095",
+          "lines": 30
+        },
+        "01998f25eh1": {
+          "size_bytes": 345098,
+          "sha256": "5F96E6636AE7CC0D3AACCBB03C935A62E291E159F8F2D3FBE83CE9D389B7E1BC",
+          "lines": 747
+        },
+        "01998f25nd1": {
+          "size_bytes": 18520,
+          "sha256": "4FDD26D74897424F1E2654CB36E36D66E6116C4D61565F98C4F25EC1C0F2C170",
+          "lines": 28
+        },
+        "01998f25nh1": {
+          "size_bytes": 189976,
+          "sha256": "335BBE11983056567C96B42AC22936B204CFE1C6915EE8F17E9E983203DF6416",
+          "lines": 748
+        },
+        "01998f25pd1": {
+          "size_bytes": 12674,
+          "sha256": "25D259D8A74EA42C37D7A277043AE46F0D18F905918C87256B7E690DCF034D6E",
+          "lines": 27
+        },
+        "01998f25wd1": {
+          "size_bytes": 25124,
+          "sha256": "114A8BBFC3F3AE411470527E39264220A43891F30EC6CE4F1C5C38071D39A422",
+          "lines": 30
+        },
+        "01998f25wh1": {
+          "size_bytes": 593696,
+          "sha256": "BA0D73B4726B4A5506C2EAFC4D741DD2421178D6E14935DD940F6EFAFDA305D4",
+          "lines": 744
+        },
+        "11998f25cd1": {
+          "size_bytes": 16728,
+          "sha256": "7F2BF4304803B2871AC43A02935F8D5E9BC9C6C43C781CAAA8BAB36D1343782D",
+          "lines": 28
+        },
+        "11998f25ch1": {
+          "size_bytes": 102934,
+          "sha256": "62C21EBA8940D9ABD3ED4A2755AC2C2D05AE5FE1AC3683E30E44BB9AE22C82B5",
+          "lines": 725
+        },
+        "11998f25ed1": {
+          "size_bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "lines": 0
+        },
+        "11998f25eh1": {
+          "size_bytes": 102934,
+          "sha256": "D56E59ECC8CFFE9DB36F65D383D8D543820E3BC2297A7C04B7854AACB68B35AF",
+          "lines": 725
+        },
+        "11998f25nd1": {
+          "size_bytes": 8212,
+          "sha256": "6881A153A846BA3674A94F48CFDE7C52278CB4C4D4B04ECF91DA65A8149B8353",
+          "lines": 22
+        },
+        "11998f25nh1": {
+          "size_bytes": 33104,
+          "sha256": "9743DEEBC353362BBCBD0D6DB3E78F832CEAE322C4D7D3EDFE238FD0E272331A",
+          "lines": 720
+        },
+        "11998f25pd1": {
+          "size_bytes": 8460,
+          "sha256": "83BD4E7CCE4590851C5006EDDB6831EA3A182495E55C92C45CCC59A2F04BA6FE",
+          "lines": 26
+        },
+        "11998f25wd1": {
+          "size_bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "lines": 0
+        },
+        "11998f25wh1": {
+          "size_bytes": 91460,
+          "sha256": "7E66A9AEB7F41B14C1D45FA88AFFE3CC9A750976DA300C0801D7DB939B60411E",
+          "lines": 726
+        },
+        "Cf21998": {
+          "size_bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "lines": 0
+        },
+        "log98f25": {
+          "size_bytes": 198233,
+          "sha256": "C926E1AFA5CCFFA8074E6FF8E909F57F7F9172BA3B149E4760687FD95074B5D7",
+          "lines": 919
+        },
+        "logfile1": {
+          "size_bytes": 4107,
+          "sha256": "2AB637DA65EE13CDF2FD1BF90F0C0898E39AE2DF7F0958E205A6DA8AB5D8F603",
+          "lines": 40
+        },
+        "logfile2": {
+          "size_bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "lines": 0
+        },
+        "logfile3": {
+          "size_bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "lines": 0
+        },
+        "Mf21998": {
+          "size_bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "lines": 0
+        },
+        "Nf21998": {
+          "size_bytes": 893796,
+          "sha256": "E2B85533F12B43E02C2351E586E5C7FE17FACB13C666F9829123E22EC235CCB9",
+          "lines": 4213
+        },
+        "Pf21998": {
+          "size_bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "lines": 0
+        },
+        "Qf21998": {
+          "size_bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "lines": 0
+        },
+        "Rf21998": {
+          "size_bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "lines": 0
+        },
+        "Wf21998": {
+          "size_bytes": 173282,
+          "sha256": "D90B249ECF9C0066DBF96B6350E55DE014CD27F1C8AA7C3C43831969D9E41E05",
+          "lines": 877
+        }
+      }
+    }
+  ]
+}

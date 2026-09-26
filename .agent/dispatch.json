@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00146", "role": "FORGE", "task_file": ".agent/tasks/T-00146.md", "result_file": ".agent/results/T-00146.md", "skills": ["ecosys-build-reproducibility"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": "G0-4 requires the fresh 30-year legacy Ottawa baseline; bounded warmup cannot produce the required evidence, and no archived full output set exists.", "reason": "Only remaining gate is the fresh 30-year legacy Ottawa baseline; FORGE must launch the authorized run under lock.", "state_recent": ["T-00143 FORGE DONE: P0.4 manifest and driver ready for launch.", "T-00142 SAGE DONE: full legacy run authorized with no further gate.", "T-00141 FORGE DONE: bounded warmup proved build and deck provenance."], "state_next": "FORGE launches the authorized P0.4 legacy gfortran 3x timing run under the machine lock."}
+{
+  "full_run_justification": "G0-4 requires the fresh 30-year legacy Ottawa baseline; bounded warmup cannot produce the required evidence, and no archived full output set exists.",
+  "reason": "Only remaining gate is the fresh 30-year legacy Ottawa baseline; FORGE must launch the authorized run under lock.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00146.md",
+  "result_status": "BLOCKED",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-build-reproducibility"
+  ],
+  "state_next": "FORGE launches the authorized P0.4 legacy gfortran 3x timing run under the machine lock.",
+  "state_recent": [
+    "T-00143 FORGE DONE: P0.4 manifest and driver ready for launch.",
+    "T-00142 SAGE DONE: full legacy run authorized with no further gate.",
+    "T-00141 FORGE DONE: bounded warmup proved build and deck provenance."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00146.md",
+  "task_id": "T-00146"
+}
