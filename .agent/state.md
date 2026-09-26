@@ -38,12 +38,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00018 PATHFINDER DONE: traced hour-3,162 soil-water cap to the load-bearing hard_max_iterations path.
-- T-00017 PATHFINDER DONE: confirmed the exact hour-level iteration ceiling consumer in the soil-water solver.
-- T-00016 SAGE DONE: DEV-004 rejected; DEV-005/006 approved with conditions.
+- T-00019 FORGE DONE: diagnostic replay disproved the 100-deck cap as load-bearing.
+- T-00018 PATHFINDER DONE: exact hard_max_iterations soil-water consumer confirmed.
+- T-00017 PATHFINDER DONE: load-bearing cap path rooted to the soil-water solver rejection.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: the user signs the D6 list (after the SAGE verdict exists).
 
 ## Next expected operation
-FORGE adds the single diagnostic replay around hour-3,162 to log final water_heat_solute iterations and residuals before any cap fix.
+PATHFINDER: diagnose the cell-0 soil-water stagnation at hour 3,162 under the restored deck and DEV-005 effects.
