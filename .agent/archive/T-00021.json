@@ -1,0 +1,47 @@
+{
+  "changed": [
+    ".agent/results/T-00021.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Next unblocked PATHFINDER task: isolate hour-3,162 cell-0 soil-water stagnation under the restored deck and DEV-005 effects before any fix.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00021.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER: inspect the hour-3,161->3,162 soil-water state at cell 0 under the restored deck and compare DEV-005 vs baseline before any fix.",
+    "state_recent": [
+      "T-00020 PATHFINDER DONE: cell-0 matrix stagnation isolated at hour 3,162",
+      "T-00019 FORGE DONE: 100-cap is not load-bearing; stagnation happens before exhaustion"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00021.md",
+    "task_id": "T-00021"
+  },
+  "ended": 1790386957.9665372,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": "ses_f24a1c112ffediQEsOZqxS9FQB",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 190336,
+    "cache_write": 0,
+    "cost": 0.01685732,
+    "input": 28119,
+    "llm_calls": 9,
+    "output": 6189,
+    "tool_calls": 13
+  },
+  "violations": []
+}

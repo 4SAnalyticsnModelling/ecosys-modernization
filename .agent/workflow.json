@@ -46,8 +46,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Next unblocked PATHFINDER task: isolate hour-3,162 cell-0 soil-water stagnation under the restored deck and DEV-005 effects before any fix.",
   "task_id": "T-00021",
-  "worker": "PATHFINDER"
+  "worker": null
 }
