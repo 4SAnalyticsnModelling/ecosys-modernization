@@ -1,1 +1,1 @@
-T-00034 PATHFINDER: determine Ottawa deck NPH/NPG and first preserved n100e/n100f divergence hour.
+T-00035 SAGE: adjudicate DEV-004 in the D6 packet and finalize the legacy-equivalent runtime ceiling decision.

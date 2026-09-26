@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00031 FORGE DONE: DEV-004 row updated after SAGE adjudication.
-- T-00030 SAGE DONE: rejected DEV-004 as not legacy-equivalent.
-- T-00029 FORGE DONE: hour-9 divergence onset is verified in f25wh1.
+- T-00034 PATHFINDER DONE: NPH=20 NPG=80; first preserved divergence at hour 9.
+- T-00031 FORGE DONE: DEV-004 row updated after SAGE review.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER to determine Ottawa deck NPH/NPG and the first preserved n100e/n100f divergence hour.
+SAGE adjudicates DEV-004 and finalizes the D6 packet using the verified hour-9 evidence.
