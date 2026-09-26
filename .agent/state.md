@@ -40,11 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00038 SAGE STATUS: APPROVED the T-00037 revert diff.
-- T-00038 RECOMMENDED NEXT ACTION: PATHFINDER opens the root-cause packet.
+- T-00039 PATHFINDER DONE: root cause narrowed to staged-deck SOLUTE/STARTE cap path.
+- T-00038 SAGE DONE: revert diff approved; deck cap remains staged and unresolved.
+- T-00037 FORGE DONE: reverted unprincipled 200 cap to legacy-safe 100 bound.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER opens the root-cause packet for hour-2,589 SOLUTE exhaustion and the STARTE cap under the staged deck.
+FORGE validates the exact SOLUTE and STARTE budget mutation under the staged deck and compares it to legacy MRXN values.
