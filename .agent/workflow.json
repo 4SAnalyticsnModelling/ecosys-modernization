@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Next batch remains unresolved and the only legal write lane for the required evidence packet is PATHFINDER.",
-  "task_id": "T-00105",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Next batch is live and unresolved; PATHFINDER owns the evidence packet in audit/analysis with no ledger mutation.",
+  "task_id": "T-00106",
+  "worker": "PATHFINDER"
 }
