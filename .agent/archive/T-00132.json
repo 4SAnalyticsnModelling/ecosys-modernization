@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00132.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Unblocked G0-4 legacy rerun prep is PATHFINDER work: verify the run-002 recipe and archive evidence before any fresh full-run decision.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00132.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER prepares the G0-4 legacy rerun evidence packet and run-002 recipe check.",
+    "state_recent": [
+      "T-00131 FORGE DONE: seven-row packet finalized and verified.",
+      "T-00130 SAGE DONE: final reviewer update approved; no science change.",
+      "T-00129 SAGE DONE: residual anchor defects fixed; packet approved."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00132.md",
+    "task_id": "T-00132"
+  },
+  "ended": 1790461349.6156101,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20564c45ffenHPKKYvaU0CVSa",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 244864,
+    "cache_write": 0,
+    "cost": 0.02498808,
+    "input": 45710,
+    "llm_calls": 8,
+    "output": 9124,
+    "tool_calls": 17
+  },
+  "violations": []
+}
