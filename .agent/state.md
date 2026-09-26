@@ -38,11 +38,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00020 PATHFINDER DONE: cell-0 matrix stagnation isolated at hour 3,162
-- T-00019 FORGE DONE: 100-cap is not load-bearing; stagnation happens before exhaustion
+- T-00021 PATHFINDER DONE: cell-0 failure is matrix water residual, not DEV-005
+- T-00020 PATHFINDER DONE: water stagnation is matrix non-improvement
+- T-00019 FORGE DONE: cap was not load-bearing
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: the user signs the D6 list (after the SAGE verdict exists).
 
 ## Next expected operation
-PATHFINDER: inspect the hour-3,161->3,162 soil-water state at cell 0 under the restored deck and compare DEV-005 vs baseline before any fix.
+PATHFINDER: isolate the hour-3,161->3,162 cell-0 soil-water state under the restored deck and compare DEV-005 vs baseline before any fix.

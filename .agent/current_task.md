@@ -1,1 +1,1 @@
-T-00021 PATHFINDER: isolate the restored-deck cell-0 soil-water stagnation at hour 3,162 and determine whether the DEV-005 multiplier is causal.
+T-00022 | PATHFINDER | Isolate the hour-3,162 cell-0 soil-water stagnation under the restored deck and compare DEV-005 vs baseline before any fix.
