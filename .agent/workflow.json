@@ -54,17 +54,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "ALLOWED FILES `evidence/legacy/manifest/sha256.txt` is outside SAGE may_write (writable by PATHFINDER)"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "G0-4 remains blocked by missing authoritative Ottawa legacy archive provenance; PATHFINDER must obtain and record it.",
-  "task_id": "T-00137",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Need authoritative Ottawa archive or fresh verified full-run artifact before G0-4; partial evidence is not a trusted baseline.",
+  "task_id": "T-00139",
+  "worker": "PATHFINDER"
 }
