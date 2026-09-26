@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00134.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Need authoritative legacy archive provenance before any Ottawa rerun; bounded evidence gathering avoids a full simulation and resolves the G0-4 blocker.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00134.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER obtains the authoritative legacy Ottawa archive or confirms a fresh full-run artifact and records its SHA-256 provenance.",
+    "state_recent": [
+      "T-00133 PATHFINDER DONE: G0-4 evidence packet prepared; archive provenance still missing",
+      "T-00132 PATHFINDER DONE: run-002 recipe and legacy packet ready; no full rerun launched",
+      "T-00131 FORGE DONE: approved seven-row ZEROS ledger packet verified and finalized"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00134.md",
+    "task_id": "T-00134"
+  },
+  "ended": 1790461544.862969,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f202f19e0ffe2oqWPfgMAlEh5F",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "BLOCKED",
+  "review": null,
+  "usage": {
+    "cache_read": 88064,
+    "cache_write": 0,
+    "cost": 0.01058628,
+    "input": 24697,
+    "llm_calls": 5,
+    "output": 3238,
+    "tool_calls": 9
+  },
+  "violations": []
+}

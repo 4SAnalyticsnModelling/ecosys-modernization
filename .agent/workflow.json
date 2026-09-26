@@ -60,8 +60,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Need authoritative legacy archive provenance before any Ottawa rerun; bounded evidence gathering avoids a full simulation and resolves the G0-4 blocker.",
   "task_id": "T-00134",
-  "worker": "PATHFINDER"
+  "worker": null
 }
