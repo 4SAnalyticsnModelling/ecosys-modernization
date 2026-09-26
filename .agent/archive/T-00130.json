@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00130.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Latest T-00129 approval completes the corrected seven-row ZEROS packet; SAGE must close the remaining ledger provenance decision.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00130.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE approves the final seven-row ZEROS packet and closes TRC-331..335, 337, and 338.",
+    "state_recent": [
+      "T-00129 SAGE DONE: final packet approval for corrected seven-row legacy ZEROS rows",
+      "T-00127 FORGE DONE: fixed the residual TRC anchor defects in the packet"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00130.md",
+    "task_id": "T-00130"
+  },
+  "ended": 1790460550.0835102,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "81b13f34-624a-499d-be52-f3d5f99dde65",
+    "old": "3417c9fd-3b31-4231-932b-7658ec42a84c",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 376236,
+    "cache_write": 39153,
+    "cost": null,
+    "input": 16,
+    "llm_calls": 8,
+    "output": 4842,
+    "tool_calls": 4
+  },
+  "violations": []
+}

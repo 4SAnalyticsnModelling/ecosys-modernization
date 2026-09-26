@@ -1,1 +1,21 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00130", "role": "SAGE", "task_file": ".agent/tasks/T-00130.md", "result_file": ".agent/results/T-00130.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Latest T-00129 approval completes the corrected seven-row ZEROS packet; SAGE must close the remaining ledger provenance decision.", "state_recent": ["T-00129 SAGE DONE: final packet approval for corrected seven-row legacy ZEROS rows", "T-00127 FORGE DONE: fixed the residual TRC anchor defects in the packet"], "state_next": "SAGE approves the final seven-row ZEROS packet and closes TRC-331..335, 337, and 338."}
+{
+  "full_run_justification": null,
+  "reason": "Latest T-00129 approval completes the corrected seven-row ZEROS packet; SAGE must close the remaining ledger provenance decision.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00130.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE approves the final seven-row ZEROS packet and closes TRC-331..335, 337, and 338.",
+  "state_recent": [
+    "T-00129 SAGE DONE: final packet approval for corrected seven-row legacy ZEROS rows",
+    "T-00127 FORGE DONE: fixed the residual TRC anchor defects in the packet"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00130.md",
+  "task_id": "T-00130"
+}

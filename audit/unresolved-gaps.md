@@ -55,6 +55,11 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   (`hour1.f:3804-3836`; L=0: `hour1.f:4605`). `solute.f:610` is the ZEROS2 gate on the solute-equilibrium
   sub-cycle, not a concentration carrier. The ledger may be rewritten now only for TRC-313, 336, 339 and 340.
   TRC-331..335/337/338 need a row-by-row ZEROS-vs-ZEROS2 re-derivation first | `.agent/results/T-00119.md`
+  CLOSED 2026-09-26 T-00130 (SAGE): the row-by-row re-derivation is done and final (T-00125 -> T-00126 REVISE ->
+  T-00127 -> T-00129 APPROVE; T-00130 re-confirmed that all 10 anchor sha256 values are unchanged). All seven rows bind ZEROS
+  (`hour1.f:3777-3791`/`3804-3836`, `starts.f:93,269`), and the T-00127 packet is final with reviewer `SAGE T-00129`.
+  The disposition stays `unresolved`: production uses 1e-14 m3 where legacy uses 1e-15*DH*DV (G0-5b). The only remaining step is
+  the FORGE write to traceability.csv, which is still pending: the T-00129 chain was not applied.
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)
