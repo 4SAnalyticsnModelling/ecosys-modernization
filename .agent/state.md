@@ -38,12 +38,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00027 PATHFINDER DONE: preserved n100e/n100f evidence fixes DEV-004 to a runtime ceiling bound with a first divergence at hour 9.
+- T-00029 FORGE DONE: encoded DEV-004 as a legacy-equivalent 100-ceiling bound; hour-9 onset preserved.
+- T-00027 PATHFINDER DONE: n100e/n100f preserve the 100 vs 200 ceiling and first divergence at hour 9.
 - T-00024 SAGE DONE: DEV-005 is legacy parity; DEV-004 remains the material deviation.
-- T-00023 FORGE DONE: bounded compare isolated chemistry from the water stall.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: the user signs the D6 list (after the SAGE verdict exists).
 
 ## Next expected operation
-FORGE: encode DEV-004 as a legacy-equivalent runtime ceiling bound using the preserved hour-9 divergence onset.
+SAGE adjudicates DEV-004 in the D6 packet and prepares the final user-signature decision.
