@@ -52,11 +52,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
+  "last_route_errors": [
+    "ALLOWED FILES `.agent/tasks/T-00069.md` is outside FORGE may_write (writable by SENTINEL)"
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "Latest SAGE verdict is REVISE; T-00066 needs DEV-008 re-review before any Ottawa evidence counts.",
