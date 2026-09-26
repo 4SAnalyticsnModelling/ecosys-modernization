@@ -58,6 +58,6 @@
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "New evidence narrows root cause to staged deck solver caps; bounded FORGE validation is the next unblocked, non-full-run action.",
-  "task_id": "T-00041",
+  "task_id": "T-00042",
   "worker": null
 }
