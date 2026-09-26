@@ -14,7 +14,12 @@
     "PATHFINDER:T-00033": 1,
     "PATHFINDER:T-00115": 1
   },
-  "full_run_justifications": [],
+  "full_run_justifications": [
+    {
+      "task_id": "T-00145",
+      "text": "Fresh legacy 30-year rerun required; bounded warmup cannot produce the missing evidence-bound Ottawa baseline or validate the oracle outputs."
+    }
+  ],
   "full_runs": {
     "legacy": 0,
     "survey": 0,
@@ -54,17 +59,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "ALLOWED FILES `evidence/legacy/` is outside FORGE may_write (writable by PATHFINDER)"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "T-00142 explicitly directs FORGE to revise the P0.4 manifest and write the full-run driver under the authorized legacy gfortran protocol, without changing science.",
-  "task_id": "T-00143",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "P0.4 legacy full-run evidence is the only remaining gate; bounded warmup cannot produce the 30-year baseline or verify the oracle outputs.",
+  "task_id": "T-00145",
+  "worker": "FORGE"
 }
