@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00056", "role": "SAGE", "task_file": ".agent/tasks/T-00056.md", "result_file": ".agent/results/T-00056.md", "skills": ["ecosys-process-science-parity"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Newest result recommends SAGE adjudication of the fixed-pH precipitation replay; earlier next steps are superseded. This is a science parity review, not a code change.", "state_recent": ["T-00055 FORGE DONE: revised fixed-pH replay packet isolates legacy vs Zig chemistry split.", "T-00054 SAGE DONE: test revision keeps only discriminating fixed-pH assertions.", "T-00053 FORGE DONE: residual-update mismatch remains the decisive divergence."], "state_next": "SAGE adjudicating whether fixed-pH legacy speciation should govern hourly precipitation input equilibration."}
+{
+  "full_run_justification": null,
+  "reason": "Newest result recommends SAGE adjudication of the fixed-pH precipitation replay; earlier next steps are superseded. This is a science parity review, not a code change.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00056.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "state_next": "SAGE adjudicating whether fixed-pH legacy speciation should govern hourly precipitation input equilibration.",
+  "state_recent": [
+    "T-00055 FORGE DONE: revised fixed-pH replay packet isolates legacy vs Zig chemistry split.",
+    "T-00054 SAGE DONE: test revision keeps only discriminating fixed-pH assertions.",
+    "T-00053 FORGE DONE: residual-update mismatch remains the decisive divergence."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00056.md",
+  "task_id": "T-00056"
+}

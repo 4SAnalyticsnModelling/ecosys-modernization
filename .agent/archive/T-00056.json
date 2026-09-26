@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00056.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Newest result recommends SAGE adjudication of the fixed-pH precipitation replay; earlier next steps are superseded. This is a science parity review, not a code change.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00056.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-process-science-parity"
+    ],
+    "state_next": "SAGE adjudicating whether fixed-pH legacy speciation should govern hourly precipitation input equilibration.",
+    "state_recent": [
+      "T-00055 FORGE DONE: revised fixed-pH replay packet isolates legacy vs Zig chemistry split.",
+      "T-00054 SAGE DONE: test revision keeps only discriminating fixed-pH assertions.",
+      "T-00053 FORGE DONE: residual-update mismatch remains the decisive divergence."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00056.md",
+    "task_id": "T-00056"
+  },
+  "ended": 1790404699.1740649,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "234465d1-ee5b-4bbe-bd47-d97ca7d87e04",
+    "old": "076d4278-858a-43a3-89be-aae5387342be",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 487285,
+    "cache_write": 43214,
+    "cost": null,
+    "input": 20,
+    "llm_calls": 10,
+    "output": 5654,
+    "tool_calls": 3
+  },
+  "violations": []
+}

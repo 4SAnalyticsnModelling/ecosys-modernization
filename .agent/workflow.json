@@ -57,8 +57,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Newest result recommends SAGE adjudication of the fixed-pH precipitation replay; earlier next steps are superseded. This is a science parity review, not a code change.",
   "task_id": "T-00056",
-  "worker": "SAGE"
+  "worker": null
 }
