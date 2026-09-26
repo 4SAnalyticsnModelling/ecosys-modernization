@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00044 FORGE DONE: hard_max_iterations is a convergence ceiling, not legacy MRXN divisor.
-- T-00043 PATHFINDER DONE: legacy MRXN is a fixed sub-cycle divisor; Zig limits are ceilings.
-- T-00042 SAGE DONE: characterization test approved; no science changed.
+- T-00045 SAGE DONE: decoupling solver ceilings from deck cap is approved.
+- T-00044 FORGE DONE: hard_max_iterations is a ceiling, not an MRXN divisor.
+- T-00043 PATHFINDER DONE: legacy MRXN is a fixed sub-cycle divisor.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE adjudicates whether hard_max_iterations must be decoupled from legacy MRXN semantics and the solver ceilings.
+FORGE removes the hard_max_iterations clamp from SOLUTE/STARTE and adds invariant tests for convergence ceilings.

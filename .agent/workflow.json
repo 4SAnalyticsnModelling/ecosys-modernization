@@ -56,8 +56,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "SAGE must adjudicate legacy-equivalent solver semantics before any production-science change; this is a numerical-science decision.",
-  "task_id": "T-00045",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "New frontier evidence shows hard_max_iterations is a ceiling, not MRXN. Forge should remove the clamp and add invariant tests before SAGE's confirming review.",
+  "task_id": "T-00046",
+  "worker": "FORGE"
 }
