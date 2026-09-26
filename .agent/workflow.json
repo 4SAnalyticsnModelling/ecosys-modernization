@@ -65,16 +65,16 @@
   "idle_check": false,
   "last_advance_unix": null,
   "last_route_errors": [
-    "ALLOWED FILES `evidence/legacy/**` is outside FORGE may_write (writable by PATHFINDER)"
+    "result_file must be .agent/results/<task_id>.md"
   ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "The full legacy Ottawa rerun is blocked by the 60-minute FORGE session budget; SAGE must authorize the continuation path before launch.",
-  "task_id": "T-00147",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE decision (routing-failure) from SENTINEL",
+  "task_id": "T-00150",
+  "worker": "SAGE"
 }

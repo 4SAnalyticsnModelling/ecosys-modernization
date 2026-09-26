@@ -1,28 +1,17 @@
 {
-  "errors": [
-    "ALLOWED FILES `evidence/legacy/**` is outside FORGE may_write (writable by PATHFINDER)"
-  ],
-  "rejected": {
-    "full_run_justification": "Required to establish the authoritative 30-year legacy Ottawa baseline; the partial legacy evidence is insufficient for G0-4 and no bounded replay can substitute for the full output set.",
-    "reason": "The newest result authorizes the controller-run out-of-band launch; the blocked 60-minute FORGE budget prevented a direct in-turn run, so this FORGE task collects the approved evidence.",
-    "requires_sage_review": false,
-    "result_file": ".agent/results/T-00148.md",
-    "role": "FORGE",
-    "schema_version": 1,
-    "skills": [
-      "ecosys-build-reproducibility"
-    ],
-    "state_next": "Collect and verify the controller-managed P0.4 legacy gfortran 3x run receipt and output inventory for G0-4.",
-    "state_recent": [
-      "T-00147 SAGE DONE: controller-managed P0.4 legacy run authorized after in-turn launch showed a 60-minute budget failure.",
-      "T-00146 FORGE BLOCKED: full legacy run exceeds the FORGE session budget and requires out-of-band launch under the machine lock.",
-      "T-00143 FORGE DONE: legacy provenance manifest and full-run driver are ready and validated for the P0.4 rerun."
-    ],
-    "status": "PENDING",
-    "t1_argv": null,
-    "task_file": ".agent/tasks/T-00148.md",
-    "task_id": "T-00148"
-  },
+  "decision_kind": "routing-failure",
+  "decision_of": "SENTINEL",
+  "full_run_justification": null,
+  "reason": "SAGE decision (routing-failure) from SENTINEL",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00150.md",
+  "role": "SAGE",
   "schema_version": 1,
-  "status": "REJECTED"
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00150.md",
+  "task_id": "T-00150"
 }

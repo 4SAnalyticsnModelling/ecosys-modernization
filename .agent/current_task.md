@@ -1,1 +1,1 @@
-T-00148 FORGE: collect and verify the controller-managed P0.4 legacy Ottawa rerun evidence.
+T-00149 FORGE: collect and verify the controller-managed legacy Ottawa full-run evidence after the authorized out-of-band launch.
