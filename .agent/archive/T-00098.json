@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00098.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Newest evidence says the CHANGED-RANGE batch still maps to live Zig ranges; SAGE must approve a joint line+hash replacement before any ledger write.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00098.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE reviews the CHANGED-RANGE batch packet and decides whether the replacement patch may update both zig_lines and zig_sha256 before any ledger write.",
+    "state_recent": [
+      "T-00097 PATHFINDER DONE: first batch confirms live CHANGED-RANGE mappings need line+hash refresh together.",
+      "T-00096 SAGE DONE: hash-only refresh rejected; per-row line-level mapping is still required.",
+      "T-00095 FORGE DONE: write-only patch exists but remains unaccepted without mapping proof."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00098.md",
+    "task_id": "T-00098"
+  },
+  "ended": 1790455167.49947,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "fbc02f8b-2d7b-4c3f-aca8-c2a44dc4ac7a",
+    "old": "8d9c7d71-633c-45bf-9558-76aac8ab755e",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 556322,
+    "cache_write": 39097,
+    "cost": null,
+    "input": 24,
+    "llm_calls": 12,
+    "output": 7272,
+    "tool_calls": 3
+  },
+  "violations": []
+}

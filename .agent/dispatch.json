@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00098", "role": "SAGE", "task_file": ".agent/tasks/T-00098.md", "result_file": ".agent/results/T-00098.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Newest evidence says the CHANGED-RANGE batch still maps to live Zig ranges; SAGE must approve a joint line+hash replacement before any ledger write.", "state_recent": ["T-00097 PATHFINDER DONE: first batch confirms live CHANGED-RANGE mappings need line+hash refresh together.", "T-00096 SAGE DONE: hash-only refresh rejected; per-row line-level mapping is still required.", "T-00095 FORGE DONE: write-only patch exists but remains unaccepted without mapping proof."], "state_next": "SAGE reviews the CHANGED-RANGE batch packet and decides whether the replacement patch may update both zig_lines and zig_sha256 before any ledger write."}
+{
+  "full_run_justification": null,
+  "reason": "Newest evidence says the CHANGED-RANGE batch still maps to live Zig ranges; SAGE must approve a joint line+hash replacement before any ledger write.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00098.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE reviews the CHANGED-RANGE batch packet and decides whether the replacement patch may update both zig_lines and zig_sha256 before any ledger write.",
+  "state_recent": [
+    "T-00097 PATHFINDER DONE: first batch confirms live CHANGED-RANGE mappings need line+hash refresh together.",
+    "T-00096 SAGE DONE: hash-only refresh rejected; per-row line-level mapping is still required.",
+    "T-00095 FORGE DONE: write-only patch exists but remains unaccepted without mapping proof."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00098.md",
+  "task_id": "T-00098"
+}

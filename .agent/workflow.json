@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Newest evidence says the CHANGED-RANGE batch still maps to live Zig ranges; SAGE must approve a joint line+hash replacement before any ledger write.",
   "task_id": "T-00098",
-  "worker": "SAGE"
+  "worker": null
 }
