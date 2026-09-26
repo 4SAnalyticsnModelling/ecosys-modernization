@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "SAGE must adjudicate the quarantined T-00060 diff before any new implementation overwrites the working tree; T-00064 explicitly requires a verdict.",
   "task_id": "T-00065",
-  "worker": "SAGE"
+  "worker": null
 }

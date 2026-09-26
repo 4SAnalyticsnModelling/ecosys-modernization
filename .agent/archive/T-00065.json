@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00065.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "SAGE must adjudicate the quarantined T-00060 diff before any new implementation overwrites the working tree; T-00064 explicitly requires a verdict.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00065.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-process-science-parity"
+    ],
+    "state_next": "SAGE reviews the T-00060 diff against T-00059 R1-R4 and emits VERDICT: APPROVE|REVISE|REJECT.",
+    "state_recent": [
+      "T-00064 SAGE STATUS: REVISE T-00060; R3 and the 1000-cycle discrepancy remain open",
+      "T-00063 SAGE STATUS: review quarantined T-00060 diff directly; no reimplementation",
+      "T-00059 SAGE STATUS: R1-R4 remain open; fixed-pH design stays"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00065.md",
+    "task_id": "T-00065"
+  },
+  "ended": 1790443063.5706394,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "e42037cb-594b-4ec1-bbc9-7b019381226a",
+    "old": "e06c20b9-5630-451f-b024-2a52e7b2261a",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 307179,
+    "cache_write": 35935,
+    "cost": null,
+    "input": 14,
+    "llm_calls": 7,
+    "output": 4122,
+    "tool_calls": 3
+  },
+  "violations": []
+}
