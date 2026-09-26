@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00143 FORGE DONE: P0.4 manifest and driver ready for launch.
-- T-00142 SAGE DONE: full legacy run authorized with no further gate.
-- T-00141 FORGE DONE: bounded warmup proved build and deck provenance.
+- T-00146 FORGE BLOCKED: full-run launch exceeds 60-minute session budget; needs SAGE approval.
+- T-00143 FORGE DONE: legacy provenance manifest and full-run driver are ready.
+- T-00142 SAGE DONE: full legacy P0.4 rerun is authorized without further science gate.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE launches the authorized P0.4 legacy gfortran 3x timing run under the machine lock.
+SAGE decides whether to authorize the full legacy rerun under a controller-managed execution budget.

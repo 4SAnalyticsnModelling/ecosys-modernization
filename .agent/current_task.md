@@ -1,1 +1,1 @@
-T-00146 FORGE Launch the authorized P0.4 legacy gfortran 3x timing run under the machine lock and record the evidence.
+T-00147 | SAGE | Authorize the continuation path for the blocked P0.4 full legacy Ottawa rerun under a viable execution harness.
