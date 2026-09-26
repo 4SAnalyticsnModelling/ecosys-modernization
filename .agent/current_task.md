@@ -1,1 +1,1 @@
-T-00041 FORGE: validate SOLUTE/STARTE budget behavior under staged deck against legacy MRXN values
+T-00043 PATHFINDER: verify legacy/Zig SOLUTE and STARTE budget semantics under the staged deck cap.
