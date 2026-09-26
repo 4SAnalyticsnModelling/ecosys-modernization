@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00087.md",
+    "audit/analysis/tracecov-stale-row-disposition-2026-09-26.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Next unblocked work is PATHFINDER evidence triage: classify stale zig_sha256 rows and recommend refresh versus quarantine before any ledger rewrite.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00087.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER to classify each stale zig_sha256 row into refresh, quarantine, or no-action disposition before any ledger rewrite.",
+    "state_recent": [
+      "T-00086 PATHFINDER DONE: stale zig_sha256 rows were revalidated and classified; 133 stale rows remain open.",
+      "T-00085 SAGE DONE: routed the stale-hash report to PATHFINDER; audit/traceability stays read-only until re-review.",
+      "T-00082 PATHFINDER DONE: 117 stale rows remain untrusted; no ledger rewrite allowed."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00087.md",
+    "task_id": "T-00087"
+  },
+  "ended": 1790452007.3396761,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20c7a2fdffeFqRu8IapNLXk6J",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 210048,
+    "cache_write": 0,
+    "cost": 0.04282956,
+    "input": 50595,
+    "llm_calls": 7,
+    "output": 23758,
+    "tool_calls": 12
+  },
+  "violations": []
+}
