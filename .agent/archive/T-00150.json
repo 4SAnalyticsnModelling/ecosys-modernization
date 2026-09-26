@@ -1,0 +1,45 @@
+{
+  "changed": [
+    ".agent/results/T-00150.md"
+  ],
+  "dispatch": {
+    "decision_kind": "routing-failure",
+    "decision_of": "SENTINEL",
+    "full_run_justification": null,
+    "reason": "SAGE decision (routing-failure) from SENTINEL",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00150.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-process-science-parity"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00150.md",
+    "task_id": "T-00150"
+  },
+  "ended": 1790465627.9531987,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "82f94f8f-4124-4f5c-ae59-61e132c81160",
+    "old": "9b75dd94-8a6e-4e00-b2b9-5c70e0bd83f3",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 381202,
+    "cache_write": 34314,
+    "cost": null,
+    "input": 18,
+    "llm_calls": 9,
+    "output": 4539,
+    "tool_calls": 4
+  },
+  "violations": []
+}
