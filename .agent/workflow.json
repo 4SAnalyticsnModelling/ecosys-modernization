@@ -38,6 +38,12 @@
       "note": "Controller defect, not an agent fault: sage lost its Herdr name at its session reset after a direct launch. Fixed in 984912d (name re-bind; inflight written after reset). The T-00016 prompt was never delivered (SAGE screen showed only the reset command), so its inflight record was removed and the dispatch stays PENDING.",
       "reason": "sage did not acknowledge /clear with a new session",
       "time": 1790385163.5920098
+    },
+    {
+      "cleared_by": "swarm_wrapper (autonomous)",
+      "quarantine": null,
+      "reason": "T-00031 (FORGE) scope violation, left in place for the user: audit/intentional-deviations.md: outside FORGE may_write",
+      "time": 1790397956.3815045
     }
   ],
   "last_advance_unix": null,
@@ -47,8 +53,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
-  "status_reason": "chained from T-00030 (SAGE CHAIN block)",
+  "status": "ROUTING",
+  "status_reason": "legacy halt cleared automatically",
   "task_id": "T-00031",
-  "worker": "FORGE"
+  "worker": null
 }

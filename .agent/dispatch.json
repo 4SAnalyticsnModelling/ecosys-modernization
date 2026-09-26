@@ -4,10 +4,11 @@
   "reason": "chained from T-00030 (SAGE CHAIN block)",
   "requires_sage_review": false,
   "result_file": ".agent/results/T-00031.md",
+  "result_status": "DONE",
   "role": "FORGE",
   "schema_version": 1,
   "skills": [],
-  "status": "PENDING",
+  "status": "COMPLETE",
   "t1_argv": null,
   "task_file": ".agent/tasks/T-00031.md",
   "task_id": "T-00031"

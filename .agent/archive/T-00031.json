@@ -1,0 +1,44 @@
+{
+  "changed": [
+    ".agent/results/T-00031.md",
+    "audit/intentional-deviations.md"
+  ],
+  "dispatch": {
+    "chained_from": "T-00030",
+    "full_run_justification": null,
+    "reason": "chained from T-00030 (SAGE CHAIN block)",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00031.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00031.md",
+    "task_id": "T-00031"
+  },
+  "ended": 1790391851.065363,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": "ses_f24619aafffempy1i7XfqHvB8O",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 142122,
+    "cache_write": 0,
+    "cost": 0.052230900000000004,
+    "input": 50299,
+    "llm_calls": 11,
+    "output": 1026,
+    "tool_calls": 13
+  },
+  "violations": [
+    "audit/intentional-deviations.md: outside FORGE may_write"
+  ]
+}
