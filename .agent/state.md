@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00050 PATHFINDER DONE: hourly SOLUTE failure isolated to dynamic input equilibration
-- T-00049 SAGE DONE: solver-budget closure confirmed; no more evidence needed
-- T-00048 PATHFINDER DONE: no silent state commit in STARTE or wet-hour callers
+- T-00051 PATHFINDER DONE: legacy hourly equilibration uses fixed-point loop; no hidden cap
+- T-00050 PATHFINDER DONE: dynamic-input path isolated to hourly equilibration path
+- T-00049 SAGE DONE: solver-budget closure confirmed; no more evidence required
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER: add the missing legacy hourly input-equilibration trace for G0-2b.
+FORGE: build the bounded matched-state replay for the hourly input-equilibration chemistry branch and compare it to the Zig hourly update sequence.

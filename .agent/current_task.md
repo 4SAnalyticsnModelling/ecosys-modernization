@@ -1,1 +1,1 @@
-T-00052 FORGE: build the matched-state replay packet for the legacy hourly precipitation/irrigation chemistry equilibration branch.
+T-00053 FORGE: build the bounded matched-state replay for the legacy hourly input-equilibration chemistry branch and compare it to the Zig hourly update sequence.
