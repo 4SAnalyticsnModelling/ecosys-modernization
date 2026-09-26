@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00140.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Newest result requires a SAGE decision: without a verified full-run archive or fresh artifact, G0-4 cannot reopen; the task decides the evidence path.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00140.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE decides how to obtain the authoritative Ottawa archive or a fresh verified full-run artifact before G0-4 reopens.",
+    "state_recent": [
+      "T-00139 PATHFINDER BLOCKED: no authoritative archive or fresh artifact is present in repo evidence.",
+      "T-00137 PATHFINDER BLOCKED: no full archive or fresh verified artifact; G0-4 cannot reopen.",
+      "T-00136 PATHFINDER BLOCKED: archive absent; record SHA-256 provenance before any rerun."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00140.md",
+    "task_id": "T-00140"
+  },
+  "ended": 1790462265.8622005,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "4e732998-39c2-4d50-932a-d58990a919b6",
+    "old": "81b13f34-624a-499d-be52-f3d5f99dde65",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 1274158,
+    "cache_write": 52736,
+    "cost": null,
+    "input": 46,
+    "llm_calls": 23,
+    "output": 10780,
+    "tool_calls": 7
+  },
+  "violations": []
+}

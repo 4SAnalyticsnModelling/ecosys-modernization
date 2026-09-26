@@ -60,8 +60,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Newest result requires a SAGE decision: without a verified full-run archive or fresh artifact, G0-4 cannot reopen; the task decides the evidence path.",
   "task_id": "T-00140",
-  "worker": "SAGE"
+  "worker": null
 }

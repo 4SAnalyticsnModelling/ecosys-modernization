@@ -28,6 +28,11 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
 - G0-4 | PATHFINDER | P0.4 full legacy rerun + -O2 timing x3 from the run-002 recipe (after G0-2 is signed) | plan P0.4
   T-00078: UNBLOCKED. G0-2 is signed, and no D6 item changes legacy inputs (legacy reads no runtime f6, `reads.f:126`
   per T-00045; legacy hardcodes `CN4X=0.1*CNH4` at `starte.f:189`), so the legacy rerun need not wait for G0-2a
+  T-00140 DECISION (SAGE): external-archive search CLOSED (T-00134..T-00139 all BLOCKED; run-002 outputs were never
+  hashed, plan §0 row "Legacy oracle binary", so no recovered copy could be evidence-bound). Sole path = fresh P0.4
+  legacy ▲ (budgeted, plan §5 row P0). Owner FORGE, task-authorized for legacy gfortran runs only (no Zig ▲).
+  Step 1 bounded: build + exe sha256 + staged deck hashes + 1-day warmup. Step 2: ▲ to full horizon. Reopen condition
+  in `.agent/results/T-00140.md` | `.agent/results/T-00140.md`
 - G0-5 | PATHFINDER | P0.5 `tracecov.py` stale-hash report (report only, do not refresh) | issue-081
   T-00085 DECISION: all P0.5 outputs go to `audit/analysis/` (PATHFINDER lane); `audit/traceability/` is
   read-only for G0. Deliverable: fresh tracecov report + per-row classification of every stale-zig-sha256 row

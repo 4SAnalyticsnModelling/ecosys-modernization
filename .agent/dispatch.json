@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00140", "role": "SAGE", "task_file": ".agent/tasks/T-00140.md", "result_file": ".agent/results/T-00140.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Newest result requires a SAGE decision: without a verified full-run archive or fresh artifact, G0-4 cannot reopen; the task decides the evidence path.", "state_recent": ["T-00139 PATHFINDER BLOCKED: no authoritative archive or fresh artifact is present in repo evidence.", "T-00137 PATHFINDER BLOCKED: no full archive or fresh verified artifact; G0-4 cannot reopen.", "T-00136 PATHFINDER BLOCKED: archive absent; record SHA-256 provenance before any rerun."], "state_next": "SAGE decides how to obtain the authoritative Ottawa archive or a fresh verified full-run artifact before G0-4 reopens."}
+{
+  "full_run_justification": null,
+  "reason": "Newest result requires a SAGE decision: without a verified full-run archive or fresh artifact, G0-4 cannot reopen; the task decides the evidence path.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00140.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE decides how to obtain the authoritative Ottawa archive or a fresh verified full-run artifact before G0-4 reopens.",
+  "state_recent": [
+    "T-00139 PATHFINDER BLOCKED: no authoritative archive or fresh artifact is present in repo evidence.",
+    "T-00137 PATHFINDER BLOCKED: no full archive or fresh verified artifact; G0-4 cannot reopen.",
+    "T-00136 PATHFINDER BLOCKED: archive absent; record SHA-256 provenance before any rerun."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00140.md",
+  "task_id": "T-00140"
+}
