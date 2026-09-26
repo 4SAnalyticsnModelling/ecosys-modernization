@@ -38,12 +38,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00024 SAGE DONE: DEV-005 is a legacy-parity input correction, not a deviation.
-- T-00023 FORGE DONE: bounded compare isolates chemistry trajectory from matrix-water stall.
-- T-00022 PATHFINDER DONE: matrix-water non-improvement remains the direct cause.
+- T-00024 SAGE DONE: DEV-005 is legacy parity; only DEV-004 remains open.
+- T-00023 FORGE DONE: bounded compare isolates chemistry from the water stall.
+- T-00022 PATHFINDER DONE: matrix-water direct cause remains, not the ammonium multiplier.
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: the user signs the D6 list (after the SAGE verdict exists).
 
 ## Next expected operation
-PATHFINDER: find the legacy runtime ceiling and first divergence hour in preserved outputs for DEV-004 attribution.
+PATHFINDER: locate the legacy runtime ceiling and first divergence hour for DEV-004 in preserved outputs.
