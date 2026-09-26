@@ -1,0 +1,3 @@
+GetProcessAffinityMask res=1, err=0, proc=0xffffffff, sys=0xffffffff
+SetProcessAffinityMask res=1, err=0
+After set: proc=0x1

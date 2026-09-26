@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "python",
+    "C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/tmp/opencode/test_affinity.py"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.25,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 5600,
+  "pid": 33772,
+  "started_unix": 1790464223.609373,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/p04-affinity-test/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/p04-affinity-test/stdout.log",
+    "sha256": "7d191c6f1a6b2eb3c88cea6b6bad0c94151c93ce6837e90d48811757addcf6ac"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 30.0
+}

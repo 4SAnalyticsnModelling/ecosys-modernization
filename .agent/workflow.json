@@ -60,8 +60,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "T-00142 explicitly directs FORGE to revise the P0.4 manifest and write the full-run driver under the authorized legacy gfortran protocol, without changing science.",
   "task_id": "T-00143",
-  "worker": "FORGE"
+  "worker": null
 }

@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "python",
+    "C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/tmp/opencode/calc_p04_hashes.py"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.176,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 5640,
+  "pid": 34140,
+  "started_unix": 1790464110.670158,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/p04-hash-calc/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/p04-hash-calc/stdout.log",
+    "sha256": "adffe613b2f5a9019df4ae09f49b010e1319308759aa92caf1516ee7ecf815be"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

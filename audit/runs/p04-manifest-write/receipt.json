@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "python",
+    "C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/tmp/opencode/write_revised_manifest.py"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.203,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 40584,
+  "pid": 26648,
+  "started_unix": 1790464161.6131604,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/p04-manifest-write/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/p04-manifest-write/stdout.log",
+    "sha256": "b94e5add3e27205f1d3c4d9fce2a27bae5bbf65ff50e75d26bb3a284df06973e"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

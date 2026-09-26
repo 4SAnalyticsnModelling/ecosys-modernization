@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "python",
+    "-c",
+    "import psutil; print('psutil affinity:', psutil.Process().cpu_affinity())"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.104,
+  "exit_code": 1,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 10476,
+  "pid": 21256,
+  "started_unix": 1790464231.3093057,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/p04-psutil-test/stderr.log",
+    "sha256": "87b8ba08326a43b26797be0980225a628941bfee97e8acb707ae21087a10ddbd"
+  },
+  "stdout": {
+    "path": "audit/runs/p04-psutil-test/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 30.0
+}

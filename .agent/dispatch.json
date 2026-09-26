@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00143", "role": "FORGE", "task_file": ".agent/tasks/T-00143.md", "result_file": ".agent/results/T-00143.md", "skills": ["ecosys-build-reproducibility"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "T-00142 explicitly directs FORGE to revise the P0.4 manifest and write the full-run driver under the authorized legacy gfortran protocol, without changing science.", "state_recent": ["T-00142 SAGE DONE: manifest revisions and driver prep are required before P0.4 launch.", "T-00141 FORGE DONE: bounded warmup succeeded; manifest draft is ready.", "T-00140 SAGE DONE: fresh legacy rerun is the only valid G0-4 path."], "state_next": "FORGE will revise the P0.4 provenance manifest and write the full-run driver before launching the legacy gfortran timing run."}
+{
+  "full_run_justification": null,
+  "reason": "T-00142 explicitly directs FORGE to revise the P0.4 manifest and write the full-run driver under the authorized legacy gfortran protocol, without changing science.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00143.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-build-reproducibility"
+  ],
+  "state_next": "FORGE will revise the P0.4 provenance manifest and write the full-run driver before launching the legacy gfortran timing run.",
+  "state_recent": [
+    "T-00142 SAGE DONE: manifest revisions and driver prep are required before P0.4 launch.",
+    "T-00141 FORGE DONE: bounded warmup succeeded; manifest draft is ready.",
+    "T-00140 SAGE DONE: fresh legacy rerun is the only valid G0-4 path."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00143.md",
+  "task_id": "T-00143"
+}

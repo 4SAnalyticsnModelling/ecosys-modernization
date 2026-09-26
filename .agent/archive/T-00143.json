@@ -1,0 +1,81 @@
+{
+  "changed": [
+    ".agent/results/T-00143.md",
+    ".agent/tasks/T-00143.hypothesis.md",
+    "audit/runs/p04-affinity-child-test/receipt.json",
+    "audit/runs/p04-affinity-child-test/stderr.log",
+    "audit/runs/p04-affinity-child-test/stdout.log",
+    "audit/runs/p04-affinity-test/receipt.json",
+    "audit/runs/p04-affinity-test/stderr.log",
+    "audit/runs/p04-affinity-test/stdout.log",
+    "audit/runs/p04-affinity-test2/receipt.json",
+    "audit/runs/p04-affinity-test2/stderr.log",
+    "audit/runs/p04-affinity-test2/stdout.log",
+    "audit/runs/p04-driver-dryrun/receipt.json",
+    "audit/runs/p04-driver-dryrun/stderr.log",
+    "audit/runs/p04-driver-dryrun/stdout.log",
+    "audit/runs/p04-driver-syntax-check/receipt.json",
+    "audit/runs/p04-driver-syntax-check/stderr.log",
+    "audit/runs/p04-driver-syntax-check/stdout.log",
+    "audit/runs/p04-driver-unit-tests/receipt.json",
+    "audit/runs/p04-driver-unit-tests/stderr.log",
+    "audit/runs/p04-driver-unit-tests/stdout.log",
+    "audit/runs/p04-hash-calc/receipt.json",
+    "audit/runs/p04-hash-calc/stderr.log",
+    "audit/runs/p04-hash-calc/stdout.log",
+    "audit/runs/p04-manifest-write/receipt.json",
+    "audit/runs/p04-manifest-write/stderr.log",
+    "audit/runs/p04-manifest-write/stdout.log",
+    "audit/runs/p04-psutil-test/receipt.json",
+    "audit/runs/p04-psutil-test/stderr.log",
+    "audit/runs/p04-psutil-test/stdout.log",
+    "audit/runs/p04_full_run_dryrun_receipt.json",
+    "audit/runs/p04_provenance_manifest.json",
+    "ecosys-audit/scripts/run_legacy_p04_full.py",
+    "ecosys-audit/tests/test_run_legacy_p04_full.py"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "T-00142 explicitly directs FORGE to revise the P0.4 manifest and write the full-run driver under the authorized legacy gfortran protocol, without changing science.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00143.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-build-reproducibility"
+    ],
+    "state_next": "FORGE will revise the P0.4 provenance manifest and write the full-run driver before launching the legacy gfortran timing run.",
+    "state_recent": [
+      "T-00142 SAGE DONE: manifest revisions and driver prep are required before P0.4 launch.",
+      "T-00141 FORGE DONE: bounded warmup succeeded; manifest draft is ready.",
+      "T-00140 SAGE DONE: fresh legacy rerun is the only valid G0-4 path."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00143.md",
+    "task_id": "T-00143"
+  },
+  "ended": 1790464434.552671,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f2020b91dffeJYVRH46BsuyRTM",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 6089918,
+    "cache_write": 0,
+    "cost": 0.8072421000000001,
+    "input": 360881,
+    "llm_calls": 67,
+    "output": 21290,
+    "tool_calls": 70
+  },
+  "violations": []
+}
