@@ -52,18 +52,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "task file missing sections ['RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']",
-    "ALLOWED FILES `audit/analysis/` is outside FORGE may_write (writable by PATHFINDER)"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Next review batch needs live anchors before any ledger rewrite; PATHFINDER is the only unblocked role.",
-  "task_id": "T-00103",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Next batch remains unresolved and the only legal write lane for the required evidence packet is PATHFINDER.",
+  "task_id": "T-00105",
+  "worker": "PATHFINDER"
 }

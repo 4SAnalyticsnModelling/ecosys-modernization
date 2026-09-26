@@ -1,29 +1,19 @@
 {
-  "errors": [
-    "task file missing sections ['RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']",
-    "ALLOWED FILES `audit/analysis/` is outside FORGE may_write (writable by PATHFINDER)"
-  ],
-  "rejected": {
-    "full_run_justification": null,
-    "reason": "The newest result explicitly assigns the next CHANGED-RANGE batch to FORGE and requires live zig_lines + sha256 evidence before any ledger update.",
-    "requires_sage_review": false,
-    "result_file": ".agent/results/T-00104.md",
-    "role": "FORGE",
-    "schema_version": 1,
-    "skills": [
-      "ecosys-source-navigation"
-    ],
-    "state_next": "FORGE: produce the next CHANGED-RANGE batch packet with exact live zig_lines + sha256 anchors and quarantine any unresolved rows.",
-    "state_recent": [
-      "T-00103 FORGE DONE: unresolved rows remain live and quarantined until anchors are recorded.",
-      "T-00102 PATHFINDER DONE: prior batch rebound to live anchors without ledger mutation.",
-      "T-00101 FORGE DONE: live-code remap prepared for TRC-088/220/293."
-    ],
-    "status": "PENDING",
-    "t1_argv": null,
-    "task_file": ".agent/tasks/T-00104.md",
-    "task_id": "T-00104"
-  },
   "schema_version": 1,
-  "status": "REJECTED"
+  "status": "PENDING",
+  "task_id": "T-00105",
+  "role": "PATHFINDER",
+  "task_file": ".agent/tasks/T-00105.md",
+  "result_file": ".agent/results/T-00105.md",
+  "skills": ["ecosys-source-navigation"],
+  "t1_argv": null,
+  "requires_sage_review": false,
+  "full_run_justification": null,
+  "reason": "Next batch remains unresolved and the only legal write lane for the required evidence packet is PATHFINDER.",
+  "state_recent": [
+    "T-00103 PATHFINDER DONE: next CHANGED-RANGE batch is live but unresolved across cited rows and must stay quarantined.",
+    "T-00102 PATHFINDER DONE: prior CHANGED-RANGE batch preserved only live anchors; no ledger mutation.",
+    "T-00101 FORGE DONE: prepared the live zig_lines + zig_sha256 remap for the prior batch."
+  ],
+  "state_next": "PATHFINDER: review the next CHANGED-RANGE batch with live anchor evidence and quarantine unresolved rows without ledger mutation."
 }

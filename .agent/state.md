@@ -40,11 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00102 PATHFINDER DONE: prior CHANGED-RANGE batch re-bound to live anchors without ledger mutation
-- T-00101 FORGE DONE: verified zig_lines + zig_sha256 remap prepared without premature ledger rewrite
+- T-00103 PATHFINDER DONE: next CHANGED-RANGE batch is live but unresolved across cited rows and must stay quarantined.
+- T-00102 PATHFINDER DONE: prior CHANGED-RANGE batch preserved only live anchors; no ledger mutation.
+- T-00101 FORGE DONE: prepared the live zig_lines + zig_sha256 remap for the prior batch.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER: review the next CHANGED-RANGE batch with anchor-based offsets and quarantine unresolved rows
+PATHFINDER: review the next CHANGED-RANGE batch with live anchor evidence and quarantine unresolved rows without ledger mutation.
