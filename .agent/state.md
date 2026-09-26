@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00135 PATHFINDER BLOCKED: missing archive provenance and no fresh full-run artifact exists.
-- T-00134 PATHFINDER BLOCKED: G0-4 remains unresolved with partial legacy evidence only.
-- T-00133 PATHFINDER DONE: G0-4 evidence packet and recipe provenance are ready.
+- T-00136 PATHFINDER BLOCKED: missing full Ottawa archive; G0-4 remains unresolved.
+- T-00135 PATHFINDER BLOCKED: partial legacy evidence is not a trusted baseline.
+- T-00134 PATHFINDER BLOCKED: no authoritative archive or fresh full-run artifact exists.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER obtains the authoritative Ottawa archive or fresh full-run artifact and records exact SHA-256 provenance.
+PATHFINDER obtains authoritative Ottawa archive or fresh full-run artifact and records exact SHA-256 provenance.

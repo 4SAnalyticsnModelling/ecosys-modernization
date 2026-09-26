@@ -60,8 +60,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "No authoritative Ottawa legacy archive or fresh full-run artifact exists; G0-4 remains blocked, and any rerun would be unsupported by evidence.",
-  "task_id": "T-00136",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "G0-4 remains blocked by missing authoritative Ottawa legacy archive provenance; PATHFINDER must obtain and record it.",
+  "task_id": "T-00137",
+  "worker": "PATHFINDER"
 }
