@@ -508,6 +508,29 @@ class SwarmTests(unittest.TestCase):
         self.herdr.behaviors["pathfinder"] = lambda _t: self.write_result("T-00001")
         self.assertEqual(self.swarm.step()["result_status"], "DONE")
 
+    def test_transient_agent_not_running_on_task_prompt_is_waited_out_never_resent(self):
+        # 2026-09-25 T-00018 route: the prompt landed, Herdr answered agent_not_running and
+        # dropped the name while it re-detected OpenCode after /new.
+        h = self.herdr
+        self.dispatch_pending("T-00001", "PATHFINDER")
+        h.pane_list = [{"pane_id": "w1:p2", "label": "PATHFINDER", "agent": "opencode"}]
+        real_prompt = h.prompt
+
+        def prompt(name, text, wait, timeout_s=None):
+            real_prompt(name, text, wait, timeout_s)
+            if not text.startswith("/"):
+                h.dropped = h.agents.pop(name)
+                raise sw.HerdrError("agent is no longer running in the target pane", "agent_not_running")
+        h.prompt = prompt
+
+        def rename(pane, name):
+            h.agents[name] = {**h.dropped, "pane_id": pane, "name": name}
+        h.rename = rename
+        h.behaviors["pathfinder"] = lambda _t: self.write_result("T-00001")
+        out = self.swarm.step()
+        self.assertEqual((out["status"], out["result_status"]), ("COLLECTED", "DONE"))
+        self.assertEqual(len(h.task_prompts("pathfinder")), 1)
+
     def test_name_dropped_by_herdr_after_clear_is_rebound_to_the_labelled_pane(self):
         # 2026-09-25: a directly launched Claude lost its Herdr name at /clear (new session).
         h = self.herdr

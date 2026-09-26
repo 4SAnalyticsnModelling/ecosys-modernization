@@ -41,6 +41,10 @@ TASK_SECTIONS = ("ROLE", "OBJECTIVE", "INPUTS", "ALLOWED FILES", "RELEVANT SKILL
 RESULT_SECTIONS = ("STATUS", "FINDING", "EVIDENCE", "FILES INSPECTED OR CHANGED", "TESTS",
                    "SCIENTIFIC IMPACT", "UNCERTAINTY", "RECOMMENDED NEXT ACTION")
 SHELLS = ("zsh", "bash", "sh", "pwsh", "powershell", "cmd")
+# Herdr briefly loses an OpenCode process after /new and re-detects it ~1 s later, sometimes
+# dropping its name (2026-09-25, T-00018 route): these codes mean "look again", not "gone".
+TRANSIENT = ("agent_not_found", "agent_not_running", "agent_not_ready")
+ABSENT_GRACE_S = 30
 LIMITATIONS = ("Process management only. Scope checks see Git-visible files (ignored paths such as evidence/ "
                "are not attributed); concurrent human edits during a turn are attributed to the agent.")
 
@@ -83,7 +87,7 @@ class Herdr:
         try:
             return self.call("agent", "get", name)["result"]["agent"]
         except HerdrError as e:
-            if e.code == "agent_not_found":
+            if e.code in TRANSIENT:
                 return None
             raise
 
@@ -357,12 +361,26 @@ class Swarm:
                 return self.herdr.agent(name)
         return None
 
+    def present(self, name: str, absent_since: list) -> dict | None:
+        """live(), tolerating a transient absence up to ABSENT_GRACE_S (absent_since: 1-slot state)."""
+        a = self.live(name)
+        if a is not None:
+            absent_since[0] = None
+            return a
+        if absent_since[0] is None:
+            absent_since[0] = self.clock()
+        if self.clock() - absent_since[0] >= ABSENT_GRACE_S:
+            raise HumanReview(f"agent {name} is not live in Herdr")
+        return None
+
     def wait_settled(self, name: str, timeout_s: float) -> dict:
         end = self.clock() + timeout_s
+        gone = [None]
         while True:
-            a = self.live(name)
+            a = self.present(name, gone)
             if a is None:
-                raise HumanReview(f"agent {name} is not live in Herdr")
+                self.sleep(2)
+                continue
             if a["agent_status"] == "blocked":
                 raise HumanReview(f"agent {name} is at a permission/question dialog; never answered automatically")
             if a["agent_status"] in ("idle", "done"):
@@ -379,7 +397,15 @@ class Swarm:
             raise HumanReview(f"{name} hosts {before.get('agent')}, roster expects {r['kind']}")
         old = session_id(before)
         marker = r.get("reset_marker")
-        self.herdr.prompt(name, r["reset_command"], wait=False)
+        for attempt in range(5):  # a reset command is safe to resend; a task prompt never is
+            try:
+                self.herdr.prompt(name, r["reset_command"], wait=False)
+                break
+            except HerdrError as e:
+                if e.code not in TRANSIENT or attempt == 4:
+                    raise
+                self.sleep(3)
+                self.live(name)
         end = self.clock() + 90
         while self.clock() < end:
             self.sleep(1)
@@ -408,22 +434,31 @@ class Swarm:
         name = r["agent_name"]
         budget = float(r["budget"]["minutes"]) * 60
         deadline = self.clock() + budget
+        need = 2  # consecutive settled observations, 3 s apart
         try:
             self.herdr.prompt(name, text, wait=True, timeout_s=budget)
         except (HerdrError, subprocess.TimeoutExpired) as e:
             if isinstance(e, HerdrError) and e.code == "agent_blocked":
                 raise HumanReview(f"{name} is at a permission/question dialog") from e
-            if isinstance(e, HerdrError) and e.code not in ("timeout", "agent_prompt_stalled"):
+            if isinstance(e, HerdrError) and e.code in TRANSIENT:
+                # The text may or may not have landed (T-00018: it did). Never resend; watch longer
+                # before calling an idle agent finished, since it may not have started yet.
+                need = 10
+            elif isinstance(e, HerdrError) and e.code not in ("timeout", "agent_prompt_stalled"):
                 raise
-        settled = 0
+        settled, gone = 0, [None]
         while self.clock() < deadline:
-            a = self.live(name)
+            a = self.present(name, gone)
             if a is None:
-                raise HumanReview(f"agent {name} is not live in Herdr")
+                settled = 0
+                self.sleep(3)
+                continue
             if a["agent_status"] == "blocked":
                 raise HumanReview(f"{name} is at a permission/question dialog; never answered automatically")
+            if a["agent_status"] == "working":
+                need = 2
             settled = settled + 1 if a["agent_status"] in ("idle", "done") else 0
-            if settled >= 2:
+            if settled >= need:
                 return "settled"
             self.sleep(3)
         try:  # budget exhausted: interrupt generation; never kill the harness
