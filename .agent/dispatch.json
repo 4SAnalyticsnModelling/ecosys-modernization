@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00137", "role": "PATHFINDER", "task_file": ".agent/tasks/T-00137.md", "result_file": ".agent/results/T-00137.md", "skills": ["ecosys-source-navigation"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "G0-4 remains blocked by missing authoritative Ottawa legacy archive provenance; PATHFINDER must obtain and record it.", "state_recent": ["T-00136 PATHFINDER BLOCKED: missing full Ottawa archive; G0-4 remains unresolved.", "T-00135 PATHFINDER BLOCKED: partial legacy evidence is not a trusted baseline.", "T-00134 PATHFINDER BLOCKED: no authoritative archive or fresh full-run artifact exists."], "state_next": "PATHFINDER obtains authoritative Ottawa archive or fresh full-run artifact and records exact SHA-256 provenance."}
+{
+  "full_run_justification": null,
+  "reason": "G0-4 remains blocked by missing authoritative Ottawa legacy archive provenance; PATHFINDER must obtain and record it.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00137.md",
+  "result_status": "BLOCKED",
+  "role": "PATHFINDER",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-source-navigation"
+  ],
+  "state_next": "PATHFINDER obtains authoritative Ottawa archive or fresh full-run artifact and records exact SHA-256 provenance.",
+  "state_recent": [
+    "T-00136 PATHFINDER BLOCKED: missing full Ottawa archive; G0-4 remains unresolved.",
+    "T-00135 PATHFINDER BLOCKED: partial legacy evidence is not a trusted baseline.",
+    "T-00134 PATHFINDER BLOCKED: no authoritative archive or fresh full-run artifact exists."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00137.md",
+  "task_id": "T-00137"
+}
