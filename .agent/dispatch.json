@@ -1,28 +1,17 @@
 {
-  "errors": [
-    "ALLOWED FILES `audit/traceability/` is outside PATHFINDER may_write"
-  ],
-  "rejected": {
-    "full_run_justification": null,
-    "reason": "Need row-by-row stale traceability revalidation before any ledger rewrite; no code or full-run changes.",
-    "requires_sage_review": false,
-    "result_file": ".agent/results/T-00083.md",
-    "role": "PATHFINDER",
-    "schema_version": 1,
-    "skills": [
-      "ecosys-source-navigation"
-    ],
-    "state_next": "PATHFINDER to revalidate stale zig_sha256 rows against cited Zig ranges and report verified versus unresolved entries.",
-    "state_recent": [
-      "T-00082 PATHFINDER DONE: stale traceability rows remain untrusted; no hash refresh.",
-      "T-00080 PATHFINDER DONE: G0-5 is stale evidence, not scientific regression.",
-      "T-00078 SAGE DONE: D6 list signed; G0-5 remains open."
-    ],
-    "status": "PENDING",
-    "t1_argv": null,
-    "task_file": ".agent/tasks/T-00083.md",
-    "task_id": "T-00083"
-  },
+  "decision_kind": "routing-failure",
+  "decision_of": "SENTINEL",
+  "full_run_justification": null,
+  "reason": "SAGE decision (routing-failure) from SENTINEL",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00085.md",
+  "role": "SAGE",
   "schema_version": 1,
-  "status": "REJECTED"
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00085.md",
+  "task_id": "T-00085"
 }

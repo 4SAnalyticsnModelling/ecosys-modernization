@@ -59,10 +59,10 @@
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Unblocked G0-5 evidence task: revalidate stale tracecov rows before any ledger rewrite; no source edits or full run.",
-  "task_id": "T-00082",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE decision (routing-failure) from SENTINEL",
+  "task_id": "T-00085",
+  "worker": "SAGE"
 }
