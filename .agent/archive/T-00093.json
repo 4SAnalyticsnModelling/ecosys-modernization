@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00093.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Fresh evidence shows the 62 CHANGED-RANGE rows remain valid mappings; SAGE must approve the reopened write-once ledger refresh before any application.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00093.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE adjudicates the reopened write-once traceability refresh under the approved protocol and keeps NO-MATCHING-BLOB rows quarantined.",
+    "state_recent": [
+      "T-00092 FORGE DONE: patch refreshes 62 valid CHANGED-RANGE hash rows, leaves quarantines untouched.",
+      "T-00091 PATHFINDER DONE: all 62 rows still map live to the cited Zig implementations.",
+      "T-00090 FORGE DONE: only seven UNCHANGED-RANGE rows are approved for a safe refresh."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00093.md",
+    "task_id": "T-00093"
+  },
+  "ended": 1790454153.1529582,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "41604e9d-d0fa-4c0c-ae08-7f7065c8b49a",
+    "old": "e94fb95a-12a7-43f4-8161-e6c98f4f9f60",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 806522,
+    "cache_write": 56042,
+    "cost": null,
+    "input": 26,
+    "llm_calls": 13,
+    "output": 5194,
+    "tool_calls": 6
+  },
+  "violations": []
+}

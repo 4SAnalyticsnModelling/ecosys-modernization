@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Fresh evidence shows the 62 CHANGED-RANGE rows remain valid mappings; SAGE must approve the reopened write-once ledger refresh before any application.",
   "task_id": "T-00093",
-  "worker": "SAGE"
+  "worker": null
 }
