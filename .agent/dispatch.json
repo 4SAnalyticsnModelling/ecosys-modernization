@@ -5,12 +5,13 @@
   "reason": "SAGE decision (idle-check) from SENTINEL",
   "requires_sage_review": false,
   "result_file": ".agent/results/T-00078.md",
+  "result_status": "DONE",
   "role": "SAGE",
   "schema_version": 1,
   "skills": [
     "ecosys-feature-attribution"
   ],
-  "status": "PENDING",
+  "status": "COMPLETE",
   "t1_argv": null,
   "task_file": ".agent/tasks/T-00078.md",
   "task_id": "T-00078"
