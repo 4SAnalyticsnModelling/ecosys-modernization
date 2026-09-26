@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00106.md",
+    "audit/analysis/T-00106-live-anchors-2026-09-26.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Next batch is live and unresolved; PATHFINDER owns the evidence packet in audit/analysis with no ledger mutation.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00106.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER: bind TRC-313 through TRC-340 to live anchors or quarantine unresolved rows without ledger mutation.",
+    "state_recent": [
+      "T-00105 PATHFINDER DONE: live CHANGED-RANGE batch remains quarantined and ledger-safe.",
+      "T-00103 PATHFINDER DONE: unresolved rows stay live and no ledger mutation is allowed.",
+      "T-00102 PATHFINDER DONE: prior batch preserved only live anchors and left unresolved rows quarantined."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00106.md",
+    "task_id": "T-00106"
+  },
+  "ended": 1790456404.8493402,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f207f461effe2C5VxhF5n8IelM",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 530944,
+    "cache_write": 0,
+    "cost": 0.053727880000000006,
+    "input": 50467,
+    "llm_calls": 14,
+    "output": 27513,
+    "tool_calls": 23
+  },
+  "violations": []
+}
