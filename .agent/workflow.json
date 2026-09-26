@@ -47,8 +47,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Newest evidence pins DEV-004 to a bounded runtime-ceiling effect; FORGE should encode the legacy-equivalent bound with the preserved hour-9 onset.",
   "task_id": "T-00029",
-  "worker": "FORGE"
+  "worker": null
 }

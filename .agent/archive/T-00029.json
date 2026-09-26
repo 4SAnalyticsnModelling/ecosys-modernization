@@ -1,0 +1,51 @@
+{
+  "changed": [
+    ".agent/results/T-00029.md",
+    "audit/runs/T-00029-iteration-control-test/receipt.json",
+    "audit/runs/T-00029-iteration-control-test/stderr.log",
+    "audit/runs/T-00029-iteration-control-test/stdout.log"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Newest evidence pins DEV-004 to a bounded runtime-ceiling effect; FORGE should encode the legacy-equivalent bound with the preserved hour-9 onset.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00029.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "FORGE: encode DEV-004 as a legacy-equivalent runtime ceiling bound using the preserved hour-9 divergence onset.",
+    "state_recent": [
+      "T-00027 PATHFINDER DONE: preserved n100e/n100f evidence fixes DEV-004 to a runtime ceiling bound with a first divergence at hour 9.",
+      "T-00024 SAGE DONE: DEV-005 is legacy parity; DEV-004 remains the material deviation.",
+      "T-00023 FORGE DONE: bounded compare isolated chemistry from the water stall."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00029.md",
+    "task_id": "T-00029"
+  },
+  "ended": 1790391621.9257236,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": "ses_f249d2ed0ffe6ZMNdmpNOOjDNP",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 6853019,
+    "cache_write": 0,
+    "cost": 0.970384425,
+    "input": 572944,
+    "llm_calls": 79,
+    "output": 7120,
+    "tool_calls": 85
+  },
+  "violations": []
+}

@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/shims/zig.exe",
+    "test",
+    "src/module_index.zig",
+    "--test-filter",
+    "legacy option controls become convergence ceilings"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 57.876,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 23760,
+  "pid": 17904,
+  "started_unix": 1790391443.9841838,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/T-00029-iteration-control-test/stderr.log",
+    "sha256": "c802b0c4b7ab76721c1a18e082fb49766b6f9b67d85d03bcba0b9ca2ba7f5aed"
+  },
+  "stdout": {
+    "path": "audit/runs/T-00029-iteration-control-test/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}
