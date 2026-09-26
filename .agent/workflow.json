@@ -46,8 +46,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Need the next unblocked PATHFINDER check: compare cell-0 soil-water state before hour 3,162 with DEV-005 on/off to determine if the matrix residual is the real driver.",
   "task_id": "T-00022",
-  "worker": "PATHFINDER"
+  "worker": null
 }

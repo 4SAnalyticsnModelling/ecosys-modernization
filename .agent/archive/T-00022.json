@@ -1,0 +1,48 @@
+{
+  "changed": [
+    ".agent/results/T-00022.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Need the next unblocked PATHFINDER check: compare cell-0 soil-water state before hour 3,162 with DEV-005 on/off to determine if the matrix residual is the real driver.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00022.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-divergence-diagnosis"
+    ],
+    "state_next": "PATHFINDER: isolate the hour-3,161->3,162 cell-0 soil-water state under the restored deck and compare DEV-005 vs baseline before any fix.",
+    "state_recent": [
+      "T-00021 PATHFINDER DONE: cell-0 failure is matrix water residual, not DEV-005",
+      "T-00020 PATHFINDER DONE: water stagnation is matrix non-improvement",
+      "T-00019 FORGE DONE: cap was not load-bearing"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00022.md",
+    "task_id": "T-00022"
+  },
+  "ended": 1790387037.435983,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": null,
+    "old": "ses_f249ff24fffeaTqHa3S1Uyyzxi",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 101504,
+    "cache_write": 0,
+    "cost": 0.01473008,
+    "input": 34430,
+    "llm_calls": 5,
+    "output": 4845,
+    "tool_calls": 11
+  },
+  "violations": []
+}
