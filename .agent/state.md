@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00075 SAGE STATUS: approval packet for DEV-008 is ready
-- T-00074 FORGE STATUS: final T-00060 revision closes criteria 2/3
-- T-00073 SAGE STATUS: revise patch; criterion 2 remains open
+- T-00078 SAGE DONE: D6 list signed; deck revert and G0-5 remain open.
+- T-00076 SAGE DONE: DEV-008 accepted after confirmation.
+- T-00075 SAGE DONE: DEV-008 approved under legacy-derived bounds.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-idle: wait for new evidence or a new frontier item
+PATHFINDER to audit stale tracecov hashes and write the G0-5 report without refreshing them.

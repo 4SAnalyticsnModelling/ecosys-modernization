@@ -50,19 +50,16 @@
       "time": 1790397956.3815045
     }
   ],
-  "idle_check": true,
+  "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "ALLOWED FILES `ecosys-ng-prod-examples/Cool` is a protected reference path"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "SAGE decision (idle-check) from SENTINEL",
-  "task_id": "T-00078",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Unblocked G0-5 report task: stale tracecov hashes, no protected-path edits, no full run.",
+  "task_id": "T-00080",
+  "worker": "PATHFINDER"
 }
