@@ -1,1 +1,1 @@
-T-00043 PATHFINDER: verify legacy/Zig SOLUTE and STARTE budget semantics under the staged deck cap.
+T-00044 FORGE Confirm exact hard_max_iterations mapping for the hourly SOLUTE and initial STARTE reaction solves under a staged deck mutation.

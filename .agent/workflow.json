@@ -56,8 +56,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "T-00042 closed with a precise legacy/Zig budget gap; PATHFINDER must resolve semantics before any science fix.",
-  "task_id": "T-00043",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Newest evidence says the deck cap is a runtime ceiling, but the exact reaction-path mapping and legacy divisor semantics remain unconfirmed; FORGE can test one bounded mutation next.",
+  "task_id": "T-00044",
+  "worker": "FORGE"
 }

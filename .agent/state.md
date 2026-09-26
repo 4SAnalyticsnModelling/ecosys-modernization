@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00042 SAGE DONE: the characterization test is approved; budget semantics remain unresolved.
-- T-00041 FORGE DONE: deck cap clamps SOLUTE and STARTE budgets under the staged deck.
-- T-00039 PATHFINDER DONE: root cause is the deck-to-source iteration cap path.
+- T-00043 PATHFINDER DONE: ceiling-vs-fixed-count semantics confirmed; divisor still open.
+- T-00042 SAGE DONE: test-only change approved; science remains untouched.
+- T-00041 FORGE DONE: staged deck clamps SOLUTE and STARTE budgets identically.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER verifies the legacy-vs-Zig SOLUTE and STARTE iteration semantics before any science change.
+FORGE will confirm the exact reaction-path mapping and staged-deck mutation semantics before any science change.
