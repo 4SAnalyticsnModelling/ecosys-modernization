@@ -1,0 +1,3 @@
+src\soil\chemistry\snow_initialization.zig:2182:146: error: use of undeclared identifier 'tight_tol'
+    try std.testing.expectApproxEqRel(@as(f64, 1.00000000000000005e-04), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydrogen)], tight_tol);
+                                                                                                                                                 ^~~~~~~~~

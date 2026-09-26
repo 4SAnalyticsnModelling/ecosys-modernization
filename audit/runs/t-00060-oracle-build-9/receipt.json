@@ -1,0 +1,34 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/mingw64/bin/gfortran.exe",
+    "-ffixed-form",
+    "-ffixed-line-length-72",
+    "-fdefault-real-8",
+    "-fdefault-double-8",
+    "-std=legacy",
+    "-fallow-argument-mismatch",
+    "-o",
+    "ecosys-audit/tests/starte_mloop_oracle.exe",
+    "ecosys-audit/tests/starte_mloop_oracle.f"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.164,
+  "exit_code": 1,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 24692,
+  "pid": 34624,
+  "started_unix": 1790440927.4806318,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00060-oracle-build-9/stderr.log",
+    "sha256": "b5468a331dcc962bb5b4fa7c0b4753ad14554bc3da292d7d21be2502e5339ebd"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00060-oracle-build-9/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

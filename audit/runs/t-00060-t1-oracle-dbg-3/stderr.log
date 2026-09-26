@@ -1,0 +1,3 @@
+src\soil\chemistry\snow_initialization.zig:1303:13: error: use of undeclared identifier 'iter'
+        if (iter == 0) {
+            ^~~~

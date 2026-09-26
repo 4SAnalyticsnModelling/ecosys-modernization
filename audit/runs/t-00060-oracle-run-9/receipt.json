@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "D:/ecosys-modernization/ecosys-audit/tests/starte_mloop_oracle.exe"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.772,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 32528,
+  "pid": 26384,
+  "started_unix": 1790441030.9409199,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00060-oracle-run-9/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00060-oracle-run-9/stdout.log",
+    "sha256": "f7ae88875c83be942fde3fd95b1e438f35339b844a7386030f2564f610ec34fa"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

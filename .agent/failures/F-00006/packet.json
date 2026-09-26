@@ -1,0 +1,19 @@
+{
+  "carried_rejections": 0,
+  "commit": "e15ab2a470eeaab5989603ebca6b4e3936734dd9",
+  "fields": {
+    "binding_id": "UNKNOWN",
+    "candidate_fortran": "UNKNOWN",
+    "candidate_zig": "UNKNOWN",
+    "checkpoint": "UNKNOWN",
+    "exact_error": "task STAGNATED: result file missing",
+    "first_divergent_state": "UNKNOWN",
+    "first_failing_timestep": "UNKNOWN",
+    "last_verified_timestep": "UNKNOWN",
+    "relevant_variables": "UNKNOWN",
+    "subsystem": "UNKNOWN"
+  },
+  "packet": "F-00006",
+  "signature": "FORGE:T-00060",
+  "task": "T-00060"
+}

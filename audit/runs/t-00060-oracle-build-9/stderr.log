@@ -1,0 +1,10 @@
+ecosys-audit/tests/starte_mloop_oracle.f:538:72:
+
+  538 |       IF(K.EQ.1.AND.(M.EQ.10.OR.M.EQ.20.OR.M.EQ.30.OR.M.EQ.40.OR.M.EQ.50))THEN
+      |                                                                        1
+Error: Expected a right parenthesis in expression at (1)
+ecosys-audit/tests/starte_mloop_oracle.f:540:9:
+
+  540 |       ENDIF
+      |         1
+Error: Expecting END DO statement at (1)

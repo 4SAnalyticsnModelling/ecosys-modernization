@@ -1,0 +1,15 @@
+ecosys-audit/tests/starte_mloop_oracle.f:218:7:
+
+  218 |       ACO3Q=DPHCO*AHCO31/AHY1
+      |       1~~~~
+Error: Symbol 'aco3q' at (1) has no IMPLICIT type; did you mean 'aco31'?
+ecosys-audit/tests/starte_mloop_oracle.f:223:7:
+
+  223 |       AHCO3Q=DPCO2*ACO21/AHY1
+      |       1~~~~~
+Error: Symbol 'ahco3q' at (1) has no IMPLICIT type; did you mean 'ahco31'?
+ecosys-audit/tests/starte_mloop_oracle.f:213:7:
+
+  213 |       AN3Q=DPN4*AN41/AHY1
+      |       1~~~
+Error: Symbol 'an3q' at (1) has no IMPLICIT type; did you mean 'an31'?

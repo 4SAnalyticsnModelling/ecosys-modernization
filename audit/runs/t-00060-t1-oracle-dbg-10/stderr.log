@@ -1,0 +1,3 @@
+src\soil\chemistry\snow_initialization.zig:2148:9: error: use of undeclared identifier 'k2_actual'
+        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydrogen)],
+        ^~~~~~~~~
