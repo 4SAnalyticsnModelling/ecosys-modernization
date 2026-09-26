@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Next work is the PATHFINDER re-review for the next CHANGED-RANGE traceability batch using verified live anchors before any ledger rewrite.",
-  "task_id": "T-00102",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Next review batch needs live anchors before any ledger rewrite; PATHFINDER is the only unblocked role.",
+  "task_id": "T-00103",
+  "worker": "PATHFINDER"
 }

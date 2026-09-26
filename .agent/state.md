@@ -40,9 +40,8 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00101 PATHFINDER DONE: next batch prepared with verified live anchors
-- T-00100 PATHFINDER DONE: batch re-bound before any ledger rewrite
-- T-00099 PATHFINDER DONE: stale citations are MOVED, not hash-fixable
+- T-00102 PATHFINDER DONE: prior CHANGED-RANGE batch re-bound to live anchors without ledger mutation
+- T-00101 FORGE DONE: verified zig_lines + zig_sha256 remap prepared without premature ledger rewrite
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
