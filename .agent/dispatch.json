@@ -1,1 +1,14 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00089", "role": "SAGE", "task_file": ".agent/tasks/T-00089.md", "result_file": ".agent/results/T-00089.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Newest result recommends SAGE review of the bounded traceability patch; this is the direct next unblocked gate action and SAGE is >25% of recent turns.", "state_recent": ["T-00088 FORGE DONE: refreshes only 62 rows and excludes quarantine entries.", "T-00087 PATHFINDER DONE: stale rows classified into refresh, quarantine, or no-action."], "state_next": "SAGE reviews the T-00088 traceability patch before any ledger application."}
+{
+  "chained_from": "T-00089",
+  "full_run_justification": null,
+  "reason": "chained from T-00089 (SAGE CHAIN block)",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00090.md",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00090.md",
+  "task_id": "T-00090"
+}

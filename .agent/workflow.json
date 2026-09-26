@@ -59,7 +59,7 @@
   "route_failures": 0,
   "schema_version": 1,
   "status": "DISPATCHED",
-  "status_reason": "Newest result recommends SAGE review of the bounded traceability patch; this is the direct next unblocked gate action and SAGE is >25% of recent turns.",
-  "task_id": "T-00089",
-  "worker": "SAGE"
+  "status_reason": "chained from T-00089 (SAGE CHAIN block)",
+  "task_id": "T-00090",
+  "worker": "FORGE"
 }
