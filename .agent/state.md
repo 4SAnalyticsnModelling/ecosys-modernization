@@ -38,12 +38,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00019 FORGE DONE: diagnostic replay disproved the 100-deck cap as load-bearing.
-- T-00018 PATHFINDER DONE: exact hard_max_iterations soil-water consumer confirmed.
-- T-00017 PATHFINDER DONE: load-bearing cap path rooted to the soil-water solver rejection.
+- T-00020 PATHFINDER DONE: cell-0 matrix stagnation isolated at hour 3,162
+- T-00019 FORGE DONE: 100-cap is not load-bearing; stagnation happens before exhaustion
 
 ## Open blockers (user decisions, plan section 8)
 1. P0.2: the user signs the D6 list (after the SAGE verdict exists).
 
 ## Next expected operation
-PATHFINDER: diagnose the cell-0 soil-water stagnation at hour 3,162 under the restored deck and DEV-005 effects.
+PATHFINDER: inspect the hour-3,161->3,162 soil-water state at cell 0 under the restored deck and compare DEV-005 vs baseline before any fix.

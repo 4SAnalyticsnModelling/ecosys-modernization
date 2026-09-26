@@ -1,1 +1,1 @@
-T-00020 PATHFINDER: determine why the restored-100 soil-water solver stagnates at hour 3,162 on cell 0 and whether the DEV-005 multiplier changes the matrix potential/conductivity path.
+T-00021 PATHFINDER: isolate the restored-deck cell-0 soil-water stagnation at hour 3,162 and determine whether the DEV-005 multiplier is causal.
