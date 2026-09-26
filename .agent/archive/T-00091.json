@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00091.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Route to PATHFINDER: re-review 62 CHANGED-RANGE traceability rows before ledger refresh; newest result requires this evidence gate.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00091.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER re-reviews 62 CHANGED-RANGE traceability rows in <=15-row batches before any refresh.",
+    "state_recent": [
+      "T-00090 PATHFINDER DONE: 7 safe rows refreshed; 62 changed rows excluded.",
+      "T-00089 SAGE DONE: reject 62-row refresh and order re-review.",
+      "T-00088 FORGE DONE: 62-row patch produced but excluded from ledger."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00091.md",
+    "task_id": "T-00091"
+  },
+  "ended": 1790453317.5427835,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20c031f9ffepJspOUsGyaXUwZ",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 158080,
+    "cache_write": 0,
+    "cost": 0.023814000000000002,
+    "input": 51218,
+    "llm_calls": 6,
+    "output": 8674,
+    "tool_calls": 10
+  },
+  "violations": []
+}
