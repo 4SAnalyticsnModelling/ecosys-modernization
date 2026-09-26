@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00120.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Newest result rejects the signed matrix; remaining unresolved TRC rows need exact legacy ZEROS/ZEROS2 evidence before a ledger rewrite.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00120.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER finds exact legacy ZEROS or ZEROS2 anchors for TRC-331..335, 337, 338.",
+    "state_recent": [
+      "T-00119 SAGE DONE: final TRC matrix rejected; four rows may proceed.",
+      "T-00118 PATHFINDER DONE: signed matrix complete for all unresolved rows.",
+      "T-00117 PATHFINDER DONE: unresolved TRC cluster split by evidence class."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00120.md",
+    "task_id": "T-00120"
+  },
+  "ended": 1790458602.4928842,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f205ee5ccffe8o583bR3Dilo6d",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 248960,
+    "cache_write": 0,
+    "cost": 0.024814999999999997,
+    "input": 45911,
+    "llm_calls": 9,
+    "output": 8878,
+    "tool_calls": 13
+  },
+  "violations": []
+}
