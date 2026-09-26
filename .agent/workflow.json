@@ -56,8 +56,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "SAGE review of the bounded trace is the next unblocked gate: confirm closure or specify missing evidence, with recent SAGE load already high.",
   "task_id": "T-00049",
-  "worker": "SAGE"
+  "worker": null
 }

@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00049.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "SAGE review of the bounded trace is the next unblocked gate: confirm closure or specify missing evidence, with recent SAGE load already high.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00049.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE reviews the T-00048 bounded trace against the T-00046/T-00047 approvals to decide whether more evidence is required before closing the issue.",
+    "state_recent": [
+      "T-00048 PATHFINDER DONE: bounded trace shows SoluteReactionSolverDidNotConverge is rethrown unchanged and rolled back.",
+      "T-00047 SAGE DONE: approved the ceiling-decoupling fix after the confirming review.",
+      "T-00046 FORGE DONE: removed the hard_max_iterations clamp and added invariant tests."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00049.md",
+    "task_id": "T-00049"
+  },
+  "ended": 1790402210.561074,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "ad109166-fd46-42ae-adc6-ef16ac83aa37",
+    "old": "e9553ed5-76fd-4468-850c-1ab56e2f3107",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 794989,
+    "cache_write": 47406,
+    "cost": null,
+    "input": 30,
+    "llm_calls": 15,
+    "output": 7047,
+    "tool_calls": 5
+  },
+  "violations": []
+}
