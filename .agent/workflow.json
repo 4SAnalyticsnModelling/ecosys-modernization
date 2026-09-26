@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Newest evidence rejects hash-only refresh; the next task is a bounded PATHFINDER row-by-row source audit before any ledger write.",
   "task_id": "T-00097",
-  "worker": "PATHFINDER"
+  "worker": null
 }
