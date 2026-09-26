@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00094.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "T-00093 rejected the refresh; PATHFINDER must re-review 62 CHANGED-RANGE rows and record live Zig mappings before any ledger rewrite.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00094.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER re-reviews the 62 CHANGED-RANGE rows in batches and records each current zig_lines mapping status.",
+    "state_recent": [
+      "T-00093 SAGE DONE: patch rejected; new evidence packet required",
+      "T-00092 FORGE DONE: 62-row patch prepared and quarantined rows stayed excluded",
+      "T-00091 PATHFINDER DONE: CHANGED-RANGE rows still map live to Zig implementations"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00094.md",
+    "task_id": "T-00094"
+  },
+  "ended": 1790454337.991204,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20ab590dffeWEu57Pc5MWKtmi",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 526976,
+    "cache_write": 0,
+    "cost": 0.042892320000000005,
+    "input": 79678,
+    "llm_calls": 10,
+    "output": 13681,
+    "tool_calls": 14
+  },
+  "violations": []
+}
