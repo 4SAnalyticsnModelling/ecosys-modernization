@@ -5,10 +5,10 @@
 # ///
 """Generate and verify a bounded patch for audit/traceability/traceability.csv.
 
-Refreshes ONLY rows classified as REFRESH-LEDGER in the stale-row revalidation
-(audit/analysis/tracecov-stale-row-disposition-2026-09-26.md).
-Explicitly excludes all QUARANTINE rows (64 entries, 44 unique unit_ids) and
-all NO-ACTION rows (7 entries).
+Refreshes ONLY rows classified as UNCHANGED-RANGE in the stale-row revalidation
+(audit/analysis/tracecov-stale-row-disposition-2026-09-26.md), per SAGE T-00089 ruling.
+Explicitly excludes all CHANGED-RANGE rows (62 entries) and all NO-MATCHING-BLOB /
+QUARANTINE rows (64 entries, 44 unique unit_ids).
 Leaves the canonical ledger untouched while producing auditable patch artifacts
 for SAGE review.
 """
@@ -27,16 +27,21 @@ import sys
 def parse_disposition_table(disposition_path: Path) -> dict[str, list[dict]]:
     """Parse the authoritative disposition markdown table.
 
-    Returns dict mapping disposition name ('REFRESH-LEDGER', 'NO-ACTION', 'QUARANTINE')
-    to list of row dictionaries.
+    Returns dict mapping revalidation class names:
+    - 'UNCHANGED-RANGE': 7 rows
+    - 'CHANGED-RANGE': 62 rows
+    - 'NO-MATCHING-BLOB': 64 rows
+    And backward-compatible/semantic aliases:
+    - 'REFRESH-LEDGER': mapped to UNCHANGED-RANGE entries (per SAGE T-00089)
+    - 'QUARANTINE': mapped to NO-MATCHING-BLOB entries
     """
     if not disposition_path.is_file():
         raise FileNotFoundError(f"Disposition file not found: {disposition_path}")
 
     groups: dict[str, list[dict]] = {
-        "REFRESH-LEDGER": [],
-        "NO-ACTION": [],
-        "QUARANTINE": [],
+        "UNCHANGED-RANGE": [],
+        "CHANGED-RANGE": [],
+        "NO-MATCHING-BLOB": [],
     }
 
     with disposition_path.open("r", encoding="utf-8") as f:
@@ -56,10 +61,14 @@ def parse_disposition_table(disposition_path: Path) -> dict[str, list[dict]]:
                 "disposition": disposition,
                 "reason": reason,
             }
-            if disposition in groups:
-                groups[disposition].append(entry)
+            if reval_class in groups:
+                groups[reval_class].append(entry)
             else:
-                raise ValueError(f"Unknown disposition in {disposition_path}: {disposition}")
+                raise ValueError(f"Unknown revalidation_class in {disposition_path}: {reval_class}")
+
+    # Aliases
+    groups["REFRESH-LEDGER"] = groups["UNCHANGED-RANGE"]
+    groups["QUARANTINE"] = groups["NO-MATCHING-BLOB"]
 
     return groups
 
@@ -78,6 +87,9 @@ def generate_traceability_patch(
 ) -> dict:
     """Build the bounded ledger patch and audit evidence without modifying the input CSV.
 
+    Refreshes ONLY the 7 UNCHANGED-RANGE rows per SAGE T-00089 ruling.
+    Excludes all 62 CHANGED-RANGE and all 64 NO-MATCHING-BLOB rows.
+
     Returns a dictionary containing:
     - original_content: str
     - patched_content: str
@@ -86,32 +98,39 @@ def generate_traceability_patch(
     """
     groups = parse_disposition_table(disposition_path)
 
-    refresh_entries = groups["REFRESH-LEDGER"]
-    no_action_entries = groups["NO-ACTION"]
-    quarantine_entries = groups["QUARANTINE"]
+    refresh_entries = groups["UNCHANGED-RANGE"]
+    changed_range_entries = groups["CHANGED-RANGE"]
+    quarantine_entries = groups["NO-MATCHING-BLOB"]
 
-    # Enforce expected counts from T-00086 / T-00087 revalidation
-    if len(refresh_entries) != 62:
-        raise ValueError(f"Expected 62 REFRESH-LEDGER rows, found {len(refresh_entries)}")
-    if len(no_action_entries) != 7:
-        raise ValueError(f"Expected 7 NO-ACTION rows, found {len(no_action_entries)}")
+    # Enforce expected counts per SAGE T-00089 ruling
+    if len(refresh_entries) != 7:
+        raise ValueError(f"Expected 7 UNCHANGED-RANGE rows, found {len(refresh_entries)}")
+    if len(changed_range_entries) != 62:
+        raise ValueError(f"Expected 62 CHANGED-RANGE rows, found {len(changed_range_entries)}")
     if len(quarantine_entries) != 64:
-        raise ValueError(f"Expected 64 QUARANTINE rows, found {len(quarantine_entries)}")
+        raise ValueError(f"Expected 64 NO-MATCHING-BLOB rows, found {len(quarantine_entries)}")
+
+    EXPECTED_REFRESH_UIDS = {
+        "TRC-028", "TRC-029", "TRC-055", "TRC-056", "TRC-075", "TRC-109", "TRC-189"
+    }
+    actual_refresh_uids = set(e["unit_id"] for e in refresh_entries)
+    if actual_refresh_uids != EXPECTED_REFRESH_UIDS:
+        raise ValueError(f"Unexpected UNCHANGED-RANGE unit IDs: {actual_refresh_uids} vs {EXPECTED_REFRESH_UIDS}")
 
     refresh_map: dict[str, dict] = {e["unit_id"]: e for e in refresh_entries}
+    changed_range_uids = sorted(set(e["unit_id"] for e in changed_range_entries))
     quarantine_uids = sorted(set(e["unit_id"] for e in quarantine_entries))
-    no_action_uids = sorted(set(e["unit_id"] for e in no_action_entries))
 
     # Strict disjointness assertions
+    overlap_rc = set(refresh_map.keys()) & set(changed_range_uids)
+    if overlap_rc:
+        raise ValueError(f"Fatal overlap between UNCHANGED-RANGE and CHANGED-RANGE: {overlap_rc}")
     overlap_rq = set(refresh_map.keys()) & set(quarantine_uids)
     if overlap_rq:
-        raise ValueError(f"Fatal overlap between REFRESH-LEDGER and QUARANTINE: {overlap_rq}")
-    overlap_rn = set(refresh_map.keys()) & set(no_action_uids)
-    if overlap_rn:
-        raise ValueError(f"Fatal overlap between REFRESH-LEDGER and NO-ACTION: {overlap_rn}")
-    overlap_qn = set(quarantine_uids) & set(no_action_uids)
-    if overlap_qn:
-        raise ValueError(f"Fatal overlap between QUARANTINE and NO-ACTION: {overlap_qn}")
+        raise ValueError(f"Fatal overlap between UNCHANGED-RANGE and NO-MATCHING-BLOB: {overlap_rq}")
+    overlap_cq = set(changed_range_uids) & set(quarantine_uids)
+    if overlap_cq:
+        raise ValueError(f"Fatal overlap between CHANGED-RANGE and NO-MATCHING-BLOB: {overlap_cq}")
 
     with csv_path.open("r", encoding="utf-8", newline="") as f:
         original_lines = f.readlines()
@@ -129,11 +148,11 @@ def generate_traceability_patch(
 
         unit_id = parsed_row[0].strip()
 
-        # Guard: Quarantine and No-Action rows MUST NOT be altered
+        # Guard: Quarantine and Changed-Range rows MUST NOT be altered
         if unit_id in quarantine_uids:
             patched_lines.append(line)
             continue
-        if unit_id in no_action_uids:
+        if unit_id in changed_range_uids:
             patched_lines.append(line)
             continue
 
@@ -183,8 +202,8 @@ def generate_traceability_patch(
         else:
             patched_lines.append(line)
 
-    if len(modified_indices) != 62:
-        raise ValueError(f"Expected exactly 62 modified lines, got {len(modified_indices)}")
+    if len(modified_indices) != 7:
+        raise ValueError(f"Expected exactly 7 modified lines, got {len(modified_indices)}")
 
     original_text = "".join(original_lines)
     patched_text = "".join(patched_lines)
@@ -218,11 +237,12 @@ def generate_traceability_patch(
         "input_disposition": {
             "path": str(disposition_path.as_posix()),
             "sha256": disp_sha,
-            "total_stale_rows": len(refresh_entries) + len(no_action_entries) + len(quarantine_entries),
+            "total_stale_rows": len(refresh_entries) + len(changed_range_entries) + len(quarantine_entries),
         },
         "summary": {
             "refresh_ledger_count": len(refresh_entries),
-            "no_action_count": len(no_action_entries),
+            "unchanged_range_count": len(refresh_entries),
+            "changed_range_count": len(changed_range_entries),
             "quarantine_count": len(quarantine_entries),
             "patched_rows_count": len(refreshed_details),
             "unmodified_rows_count": len(original_lines) - 1 - len(refreshed_details),
@@ -232,8 +252,8 @@ def generate_traceability_patch(
         "exclusions": {
             "quarantine_rows_excluded": len(quarantine_entries),
             "quarantine_unique_unit_ids": quarantine_uids,
-            "no_action_rows_excluded": len(no_action_entries),
-            "no_action_unique_unit_ids": no_action_uids,
+            "changed_range_rows_excluded": len(changed_range_entries),
+            "changed_range_unique_unit_ids": changed_range_uids,
         },
         "patched_traceability_csv": {
             "sha256": patched_sha,
@@ -283,9 +303,9 @@ def main() -> int:
     summary = result["audit_report"]["summary"]
     print("Traceability patch generated and verified successfully:")
     print(f"  Total stale rows classified: {result['audit_report']['input_disposition']['total_stale_rows']}")
-    print(f"  Rows refreshed (REFRESH-LEDGER): {summary['refresh_ledger_count']}")
-    print(f"  Rows excluded (NO-ACTION): {summary['no_action_count']}")
-    print(f"  Rows excluded (QUARANTINE): {summary['quarantine_count']}")
+    print(f"  Rows refreshed (UNCHANGED-RANGE): {summary['unchanged_range_count']}")
+    print(f"  Rows excluded (CHANGED-RANGE): {summary['changed_range_count']}")
+    print(f"  Rows excluded (QUARANTINE / NO-MATCHING-BLOB): {summary['quarantine_count']}")
     print(f"  Diff lines: -{summary['diff_removals']} / +{summary['diff_additions']}")
     print(f"  Patched CSV SHA-256: {result['audit_report']['patched_traceability_csv']['sha256']}")
 
