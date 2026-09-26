@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00036", "role": "SAGE", "task_file": ".agent/tasks/T-00036.md", "result_file": ".agent/results/T-00036.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Latest accepted result directs SAGE to confirm the D6 DEV-004 rejection before FORGE reverts the cap.", "state_recent": ["T-00035 SAGE STATUS: DEV-004 rejected; D6 must revert the ceiling and root-cause the cap.", "T-00034 PATHFINDER STATUS: first preserved divergence occurs at hour 9 in f25wh1.txt.", "T-00031 FORGE STATUS: DEV-004 row updated after SAGE review."], "state_next": "Confirm T-00035 and finalize the D6 packet for DEV-004 rejection and revert path."}
+{
+  "full_run_justification": null,
+  "reason": "Latest accepted result directs SAGE to confirm the D6 DEV-004 rejection before FORGE reverts the cap.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00036.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "Confirm T-00035 and finalize the D6 packet for DEV-004 rejection and revert path.",
+  "state_recent": [
+    "T-00035 SAGE STATUS: DEV-004 rejected; D6 must revert the ceiling and root-cause the cap.",
+    "T-00034 PATHFINDER STATUS: first preserved divergence occurs at hour 9 in f25wh1.txt.",
+    "T-00031 FORGE STATUS: DEV-004 row updated after SAGE review."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00036.md",
+  "task_id": "T-00036"
+}

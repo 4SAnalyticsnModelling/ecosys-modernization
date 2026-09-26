@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00036.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Latest accepted result directs SAGE to confirm the D6 DEV-004 rejection before FORGE reverts the cap.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00036.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "Confirm T-00035 and finalize the D6 packet for DEV-004 rejection and revert path.",
+    "state_recent": [
+      "T-00035 SAGE STATUS: DEV-004 rejected; D6 must revert the ceiling and root-cause the cap.",
+      "T-00034 PATHFINDER STATUS: first preserved divergence occurs at hour 9 in f25wh1.txt.",
+      "T-00031 FORGE STATUS: DEV-004 row updated after SAGE review."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00036.md",
+    "task_id": "T-00036"
+  },
+  "ended": 1790398744.809745,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "0af16297-3e30-456d-8861-1fce114ab9e5",
+    "old": "9429901f-2c86-416d-95cf-a4740065091a",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 291314,
+    "cache_write": 31739,
+    "cost": null,
+    "input": 14,
+    "llm_calls": 7,
+    "output": 4144,
+    "tool_calls": 2
+  },
+  "violations": []
+}
