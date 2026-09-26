@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00016", "role": "SAGE", "task_file": ".agent/tasks/T-00016.md", "result_file": ".agent/results/T-00016.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "The D6 evidence packet is ready for SAGE adjudication; only the user signature is blocked, and science approval must precede it.", "state_recent": ["T-00014 PATHFINDER DONE: D6 packet ties the three edits to their effects.", "T-00012 PATHFINDER DONE: legacy archive is partial; full baseline remains unverified.", "T-00011 PATHFINDER DONE: no durable full 30-year legacy baseline exists in repo."], "state_next": "SAGE adjudicates DEV-004..006 against the D6 packet before user signature."}
+{
+  "full_run_justification": null,
+  "reason": "The D6 evidence packet is ready for SAGE adjudication; only the user signature is blocked, and science approval must precede it.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00016.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE adjudicates DEV-004..006 against the D6 packet before user signature.",
+  "state_recent": [
+    "T-00014 PATHFINDER DONE: D6 packet ties the three edits to their effects.",
+    "T-00012 PATHFINDER DONE: legacy archive is partial; full baseline remains unverified.",
+    "T-00011 PATHFINDER DONE: no durable full 30-year legacy baseline exists in repo."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00016.md",
+  "task_id": "T-00016"
+}

@@ -1,0 +1,48 @@
+{
+  "changed": [
+    ".agent/results/T-00016.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "The D6 evidence packet is ready for SAGE adjudication; only the user signature is blocked, and science approval must precede it.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00016.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE adjudicates DEV-004..006 against the D6 packet before user signature.",
+    "state_recent": [
+      "T-00014 PATHFINDER DONE: D6 packet ties the three edits to their effects.",
+      "T-00012 PATHFINDER DONE: legacy archive is partial; full baseline remains unverified.",
+      "T-00011 PATHFINDER DONE: no durable full 30-year legacy baseline exists in repo."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00016.md",
+    "task_id": "T-00016"
+  },
+  "ended": 1790385311.113682,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": "f86c1009-6948-4520-a98e-49f08698de45",
+    "old": "ab2147e1-0d26-492f-b1c6-fc149b78ef50",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 503647,
+    "cache_write": 55495,
+    "cost": null,
+    "input": 20,
+    "llm_calls": 10,
+    "output": 9948,
+    "tool_calls": 2
+  },
+  "violations": []
+}
