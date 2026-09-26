@@ -31,6 +31,12 @@
       "note": "Halt was a controller defect: a rejected SENTINEL dispatch (two SAGE skills) was left PENDING and then delivered. Fixed: rejected dispatches become REJECTED and their errors reach the next brief. Also repaired state.md, which SENTINEL had filled with its brief; SENTINEL no longer edits it.",
       "reason": "invalid pending dispatch T-00015: SAGE tasks name exactly one of its skills_one_of",
       "time": 1790379098.5215757
+    },
+    {
+      "cleared_by": "claude-operator-session (user goal: 5-cycle run)",
+      "note": "Controller defect, not an agent fault: sage lost its Herdr name at its session reset after a direct launch. Fixed in 984912d (name re-bind; inflight written after reset). The T-00016 prompt was never delivered (SAGE screen showed only the reset command), so its inflight record was removed and the dispatch stays PENDING.",
+      "reason": "sage did not acknowledge /clear with a new session",
+      "time": 1790385163.5920098
     }
   ],
   "last_advance_unix": null,
@@ -41,7 +47,7 @@
   "route_failures": 0,
   "schema_version": 1,
   "status": "DISPATCHED",
-  "status_reason": "The D6 evidence packet is ready for SAGE adjudication; only the user signature is blocked, and science approval must precede it.",
+  "status_reason": "review cleared by claude-operator-session (user goal: 5-cycle run): Controller defect, not an agent fault: sage lost its Herdr name at its session reset after a direct launch. Fixed in 984912d (name re-bind; inflight written aft",
   "task_id": "T-00016",
   "worker": "SAGE"
 }
