@@ -1,1 +1,1 @@
-T-00149 FORGE: collect and verify the controller-managed legacy Ottawa full-run evidence after the authorized out-of-band launch.
+T-00152 SAGE objective: confirm no unblocked worker task; controller launch is the next operation and L5 collection waits for the receipt.

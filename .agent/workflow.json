@@ -62,19 +62,16 @@
       "time": 1790397956.3815045
     }
   ],
-  "idle_check": false,
+  "idle_check": true,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "result_file must be .agent/results/<task_id>.md"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "chained from T-00150 (SAGE CHAIN block)",
-  "task_id": "T-00151",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE decision (idle-check) from SENTINEL",
+  "task_id": "T-00153",
+  "worker": "SAGE"
 }

@@ -48,4 +48,4 @@ none active.
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE decides whether to authorize the full legacy rerun under a controller-managed execution budget.
+controller launches the detached legacy campaign and L5 collection is routed only after the run receipt is present
