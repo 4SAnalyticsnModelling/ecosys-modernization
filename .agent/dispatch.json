@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00127", "role": "FORGE", "task_file": ".agent/tasks/T-00127.md", "result_file": ".agent/results/T-00127.md", "skills": ["ecosys-source-navigation"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Newest result directs a bounded ledger-text rewrite: fix the three residual anchor defects before final inclusion and keep the ZEROS binding unchanged.", "state_recent": ["T-00126 SAGE DONE: revise anchor defects before final ledger inclusion", "T-00125 FORGE DONE: approved ZEROS row text", "T-00123 PATHFINDER DONE: exact ZEROS guard evidence"], "state_next": "FORGE fixes the three TRC anchor defects and prepares the corrected seven-row ledger packet for SAGE review."}
+{
+  "full_run_justification": null,
+  "reason": "Newest result directs a bounded ledger-text rewrite: fix the three residual anchor defects before final inclusion and keep the ZEROS binding unchanged.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00127.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-source-navigation"
+  ],
+  "state_next": "FORGE fixes the three TRC anchor defects and prepares the corrected seven-row ledger packet for SAGE review.",
+  "state_recent": [
+    "T-00126 SAGE DONE: revise anchor defects before final ledger inclusion",
+    "T-00125 FORGE DONE: approved ZEROS row text",
+    "T-00123 PATHFINDER DONE: exact ZEROS guard evidence"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00127.md",
+  "task_id": "T-00127"
+}
