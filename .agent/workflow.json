@@ -59,8 +59,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "PATHFINDER evidence mapping for the unresolved TRC cluster is the verified next bounded task; no ledger or code changes before the signed matrix.",
   "task_id": "T-00118",
-  "worker": "PATHFINDER"
+  "worker": null
 }

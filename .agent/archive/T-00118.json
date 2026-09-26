@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00118.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "PATHFINDER evidence mapping for the unresolved TRC cluster is the verified next bounded task; no ledger or code changes before the signed matrix.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00118.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER to map each unresolved TRC gate to exact legacy file:line evidence and produce the signed matrix.",
+    "state_recent": [
+      "T-00117 PATHFINDER DONE: exact TRC-313/331..340 legacy mapping leaves no unresolved row unbound.",
+      "T-00116 PATHFINDER DONE: approved TRC refresh packet and unresolved dispositions are locked without ledger mutation.",
+      "T-00115 PATHFINDER FAIL: evidence packet for approved TRC refreshes was not completed as a valid bounded packet."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00118.md",
+    "task_id": "T-00118"
+  },
+  "ended": 1790458327.6411626,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20607908ffeI25XzptI40ej7e",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 110720,
+    "cache_write": 0,
+    "cost": 0.0163156,
+    "input": 18552,
+    "llm_calls": 6,
+    "output": 8659,
+    "tool_calls": 10
+  },
+  "violations": []
+}
