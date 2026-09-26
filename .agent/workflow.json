@@ -59,8 +59,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Latest evidence pins the unresolved rows to the ZEROS guard in hour1.f; PATHFINDER must record exact anchors before any ledger rewrite.",
   "task_id": "T-00123",
-  "worker": "PATHFINDER"
+  "worker": null
 }

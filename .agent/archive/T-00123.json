@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00123.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Latest evidence pins the unresolved rows to the ZEROS guard in hour1.f; PATHFINDER must record exact anchors before any ledger rewrite.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00123.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER records the exact ZEROS legacy anchors for TRC-331..335, 337, and 338 in audit/analysis/.",
+    "state_recent": [
+      "T-00122 PATHFINDER DONE: exact ZEROS anchors for TRC-331..335, 337, 338.",
+      "T-00121 PATHFINDER DONE: row-by-row hour1.f ZEROS binding classified.",
+      "T-00120 PATHFINDER DONE: legacy ZEROS vs ZEROS2 gate semantics narrowed."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00123.md",
+    "task_id": "T-00123"
+  },
+  "ended": 1790458935.3972905,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f2057bd94ffe2v6FJGt6gwJ7j6",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 328192,
+    "cache_write": 0,
+    "cost": 0.03104724,
+    "input": 41369,
+    "llm_calls": 12,
+    "output": 13508,
+    "tool_calls": 15
+  },
+  "violations": []
+}
