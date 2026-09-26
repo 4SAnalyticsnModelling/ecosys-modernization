@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00064", "role": "SAGE", "task_file": ".agent/tasks/T-00064.md", "result_file": ".agent/results/T-00064.md", "skills": ["ecosys-process-science-parity"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "SAGE must adjudicate the quarantined T-00060 diff and settle R1-R4 before any new implementation overwrites the working tree.", "state_recent": ["T-00063 SAGE STATUS: review T-00060 diff; do not re-implement", "T-00059 SAGE STATUS: REVISE T-00058; R1-R4 remain open", "T-00058 FORGE STATUS: fixed-pH STARTE speciation implemented; SAGE review pending"], "state_next": "SAGE reviews T-00060 against T-00059 R1-R4 and outputs VERDICT: APPROVE|REVISE|REJECT."}
+{
+  "full_run_justification": null,
+  "reason": "SAGE must adjudicate the quarantined T-00060 diff and settle R1-R4 before any new implementation overwrites the working tree.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00064.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "state_next": "SAGE reviews T-00060 against T-00059 R1-R4 and outputs VERDICT: APPROVE|REVISE|REJECT.",
+  "state_recent": [
+    "T-00063 SAGE STATUS: review T-00060 diff; do not re-implement",
+    "T-00059 SAGE STATUS: REVISE T-00058; R1-R4 remain open",
+    "T-00058 FORGE STATUS: fixed-pH STARTE speciation implemented; SAGE review pending"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00064.md",
+  "task_id": "T-00064"
+}
