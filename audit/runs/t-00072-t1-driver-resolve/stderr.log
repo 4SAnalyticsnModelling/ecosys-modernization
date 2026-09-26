@@ -1,0 +1,5 @@
+1/4 ecosys_ng.test_0...OK
+2/4 stages.hourly_process_pipeline.test_0...OK
+3/4 stages.hourly_process_driver.test.resolveDynamicInputSoilHydrogen exercises production error paths and bypasses live hydrogen when event state is present...OK
+4/4 stages.hourly_vegetation.test_0...OK
+All 4 tests passed.

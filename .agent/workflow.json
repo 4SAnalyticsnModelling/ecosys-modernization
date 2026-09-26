@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "SAGE rejected the latest T-00070 patch; the controller requires a bounded FORGE revision on T-00060 with a new diff hash and re-review.",
   "task_id": "T-00072",
-  "worker": "FORGE"
+  "worker": null
 }

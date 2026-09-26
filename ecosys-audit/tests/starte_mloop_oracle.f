@@ -576,6 +576,21 @@ C      408-483, 838-858, 860-1182, 1234-1284, 1291-1341
       WRITE(*,'(A,I1)') 'END_BOUNDED_20_K=', K
       ENDIF
 
+      IF(IPERT.EQ.0.AND.M.GE.20)THEN
+      WRITE(*,'(A,I1,A,I4,47(A,ES25.17))') 'GF_CYCLE,', K, ',', M,
+     1 ',', CHY1, ',', COH1, ',', CAL1, ',', CFE1, ',', CCA1,
+     2 ',', CMG1, ',', CNA1, ',', CKA1, ',', CSO41, ',', CCL1,
+     3 ',', CCO31, ',', CHCO31, ',', CALO1, ',', CALO2, ',', CALO3,
+     4 ',', CALO4, ',', CALS1, ',', CFEO1, ',', CFEO2, ',', CFEO3,
+     5 ',', CFEO4, ',', CFES1, ',', CCAO1, ',', CCAC1, ',', CCAH1,
+     6 ',', CCAS1, ',', CMGO1, ',', CMGC1, ',', CMGH1, ',', CMGS1,
+     7 ',', CNAC1, ',', CNAS1, ',', CKAS1, ',', CH0P1, ',', CH3P1,
+     8 ',', CF1P1, ',', CF2P1, ',', CC0P1, ',', CC1P1, ',', CC2P1,
+     9 ',', CM1P1, ',', CN41*14.0D0, ',', CN31*14.0D0, ',',
+     1 CNO1*14.0D0, ',', CH1P1*31.0D0, ',', CH2P1*31.0D0, ',',
+     2 CCO21*12.0D0
+      ENDIF
+
       IF(M.GE.980.AND.M.LE.1000)THEN
       WRITE(*,'(A,I1,A,I1,A,I4,A,ES24.16,A,ES24.16,A,ES24.16,
      2A,ES24.16,A,ES24.16,A,ES24.16)')

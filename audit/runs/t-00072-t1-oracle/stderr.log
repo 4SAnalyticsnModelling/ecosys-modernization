@@ -1,0 +1,7 @@
+C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\Io\Writer.zig:622:9: error: 32 arguments max are supported per format call
+        @compileError("32 arguments max are supported per format call");
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    print__anon_69113: C:\Users\symon.mezbahuddin\scoop\apps\zig\0.16.0\lib\std\debug.zig:311:39
+    printZigCycle: src\soil\chemistry\snow_initialization.zig:2338:20
+    5 reference(s) hidden; use '-freference-trace=7' to see all references
