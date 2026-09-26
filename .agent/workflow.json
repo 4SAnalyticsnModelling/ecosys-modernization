@@ -52,17 +52,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "ALLOWED FILES `audit/traceability/` is outside PATHFINDER may_write"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "chained from T-00085 (SAGE CHAIN block)",
-  "task_id": "T-00086",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Next unblocked work is PATHFINDER evidence triage: classify stale zig_sha256 rows and recommend refresh versus quarantine before any ledger rewrite.",
+  "task_id": "T-00087",
+  "worker": "PATHFINDER"
 }

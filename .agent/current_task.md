@@ -1,1 +1,1 @@
-T-00084 PATHFINDER: Revalidate stale traceability zig_sha256 rows against cited Zig ranges without refreshing hashes.
+T-00087 PATHFINDER: classify stale zig_sha256 rows into refresh or quarantine dispositions and record the decision table under audit/analysis/.

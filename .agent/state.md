@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00080 PATHFINDER DONE: stale ledger is evidence-only; report no hash refresh.
-- T-00078 SAGE DONE: D6 list signed; G0-2a/3/4/5 remain open.
-- T-00076 SAGE DONE: DEV-008 accepted; no further SAGE work.
+- T-00086 PATHFINDER DONE: stale zig_sha256 rows were revalidated and classified; 133 stale rows remain open.
+- T-00085 SAGE DONE: routed the stale-hash report to PATHFINDER; audit/traceability stays read-only until re-review.
+- T-00082 PATHFINDER DONE: 117 stale rows remain untrusted; no ledger rewrite allowed.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER to revalidate stale tracecov zig_sha256 rows against cited Zig ranges without modifying evidence.
+PATHFINDER to classify each stale zig_sha256 row into refresh, quarantine, or no-action disposition before any ledger rewrite.
