@@ -1,1 +1,1 @@
-T-00115 PATHFINDER: prepare the verified TRC ledger evidence packet without mutating the ledger.
+T-00116 PATHFINDER: prepare the verified TRC evidence packet and approved refresh set for SAGE ledger review without mutating the ledger.

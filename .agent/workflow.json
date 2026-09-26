@@ -59,8 +59,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Next unblocked PATHFINDER evidence task follows SAGE's final ledger disposition and keeps the write set bounded to verified rows.",
-  "task_id": "T-00115",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "New T-00113 direction calls for a PATHFINDER evidence packet to verify the approved traceability refresh set before SAGE ledger review.",
+  "task_id": "T-00116",
+  "worker": "PATHFINDER"
 }
