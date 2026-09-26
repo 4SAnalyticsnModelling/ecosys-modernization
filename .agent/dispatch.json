@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00076", "role": "SAGE", "task_file": ".agent/tasks/T-00076.md", "result_file": ".agent/results/T-00076.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "SAGE confirms final DEV-008 acceptance following the T-00075 approval packet; no new work remains unreviewed.", "state_recent": ["T-00075 SAGE STATUS: approval packet for DEV-008 is ready", "T-00074 FORGE STATUS: final T-00060 revision closes criteria 2/3", "T-00073 SAGE STATUS: revise patch; criterion 2 remains open"], "state_next": "SAGE confirms T-00075 and signs DEV-008 as accepted."}
+{
+  "full_run_justification": null,
+  "reason": "SAGE confirms final DEV-008 acceptance following the T-00075 approval packet; no new work remains unreviewed.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00076.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE confirms T-00075 and signs DEV-008 as accepted.",
+  "state_recent": [
+    "T-00075 SAGE STATUS: approval packet for DEV-008 is ready",
+    "T-00074 FORGE STATUS: final T-00060 revision closes criteria 2/3",
+    "T-00073 SAGE STATUS: revise patch; criterion 2 remains open"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00076.md",
+  "task_id": "T-00076"
+}

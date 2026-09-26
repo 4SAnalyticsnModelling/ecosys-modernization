@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "SAGE confirms final DEV-008 acceptance following the T-00075 approval packet; no new work remains unreviewed.",
   "task_id": "T-00076",
-  "worker": "SAGE"
+  "worker": null
 }
