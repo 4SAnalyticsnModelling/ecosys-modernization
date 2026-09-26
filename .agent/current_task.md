@@ -1,1 +1,1 @@
-T-00103 PATHFINDER: review the next CHANGED-RANGE traceability batch and quarantine unresolved rows without ledger mutation.
+T-00104 FORGE: produce the next CHANGED-RANGE batch packet with exact live zig_lines + sha256 anchors and quarantine unresolved rows.
