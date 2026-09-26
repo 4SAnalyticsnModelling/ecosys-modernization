@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00092 FORGE DONE: patch refreshes 62 valid CHANGED-RANGE hash rows, leaves quarantines untouched.
-- T-00091 PATHFINDER DONE: all 62 rows still map live to the cited Zig implementations.
-- T-00090 FORGE DONE: only seven UNCHANGED-RANGE rows are approved for a safe refresh.
+- T-00093 SAGE DONE: patch rejected; new evidence packet required
+- T-00092 FORGE DONE: 62-row patch prepared and quarantined rows stayed excluded
+- T-00091 PATHFINDER DONE: CHANGED-RANGE rows still map live to Zig implementations
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE adjudicates the reopened write-once traceability refresh under the approved protocol and keeps NO-MATCHING-BLOB rows quarantined.
+PATHFINDER re-reviews the 62 CHANGED-RANGE rows in batches and records each current zig_lines mapping status.
