@@ -59,8 +59,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "New T-00113 direction calls for a PATHFINDER evidence packet to verify the approved traceability refresh set before SAGE ledger review.",
   "task_id": "T-00116",
-  "worker": "PATHFINDER"
+  "worker": null
 }
