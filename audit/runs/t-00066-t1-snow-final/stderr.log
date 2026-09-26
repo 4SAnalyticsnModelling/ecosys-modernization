@@ -1,0 +1,119 @@
+1/114 module_index.test_0...OK
+2/114 index.atmosphere_test_index.test_0...OK
+3/114 index.canopy_test_index.test_0...OK
+4/114 index.chemistry_test_index.test_0...OK
+5/114 index.core_test_index.test_0...OK
+6/114 index.driver_test_index.test_0...OK
+7/114 index.erosion_test_index.test_0...OK
+8/114 index.grid_cell_test_index.test_0...OK
+9/114 index.io_test_index.test_0...OK
+10/114 index.management_test_index.test_0...OK
+11/114 index.plant_test_index.test_0...OK
+12/114 index.redistribution_test_index.test_0...OK
+13/114 index.soil_test_index.test_0...OK
+14/114 index.state_test_index.test_0...OK
+15/114 index.surface_test_index.test_0...OK
+16/114 index.transport_test_index.test_0...OK
+17/114 index.validation_test_index.test_0...OK
+18/114 validation.landscape_boundary_balance.test_0...OK
+19/114 validation.landscape_mass_inventory.test_0...OK
+20/114 validation.mass_balance_audit.test_0...OK
+21/114 validation.soil_water_retention_validation.test_0...OK
+22/114 validation.landscape_boundary_balance_test.test.precipitation heat counts raw liquid and snow once across runtime cells...OK
+23/114 validation.landscape_boundary_balance_test.test.invalid precipitation heat transaction cannot advance ledger...OK
+24/114 validation.landscape_boundary_balance_test.test.non-default precipitation thermodynamics are used without fallback constants...OK
+25/114 surface.litter_chemistry.test_0...OK
+26/114 surface.microbial_oxygen_driver.test.surface oxygen driver consumes accepted precipitation inventory without a second input...OK
+27/114 surface.precipitation.test.surface precipitation state releases every mixed-slice allocation prefix...OK
+28/114 surface.precipitation.test.the runtime snow cover carrier uses the WATSUB square-root relation...OK
+29/114 surface.precipitation.test.precipitation exceeding pore air is redirected to litter with heat...OK
+30/114 surface.precipitation.test.runtime surface ingress retains separate rain snow litter and pore carriers...OK
+31/114 surface.precipitation.test.top-soil ingress state_update validates every runtime cell before mutation...OK
+32/114 surface.precipitation.test.direct litter precipitation heat closes before separately heated snow at every substep...OK
+33/114 surface.precipitation.test.direct litter precipitation heat starts dry carriers and preserves zero-input mirrors...OK
+34/114 surface.precipitation.test.direct litter precipitation heat rejects invalid final lanes without partial publication...OK
+35/114 surface.precipitation.test.direct precipitation heat pairs with current soil ingress carrier at every substep...OK
+36/114 surface.precipitation.test.direct precipitation heat rejects invalid final cells before any source publication...OK
+37/114 surface.precipitation.test.direct precipitation heat excludes the separately heated snow ingress...OK
+38/114 surface.precipitation.test.atmospheric rain snow litter and pore partition conserves liquid water and heat...OK
+39/114 surface.precipitation.test.precipitation heat uses explicit non-default thermodynamic coefficients...OK
+40/114 surface.precipitation.test.nonlinear iteration ceilings cannot affect precipitation partition physics...OK
+41/114 surface.precipitation.test.partition fraction sums use scaled roundoff validation and normalized closure...OK
+42/114 surface.precipitation.test.solute precipitation routing follows snow presence and dry-surface branches...OK
+43/114 surface.precipitation.test.canopy drainage carries no new atmospheric chemistry and cannot make FLQG negative...OK
+44/114 surface.precipitation.test.rainfall impact attenuates conductivity and accumulates after recovery...OK
+45/114 surface.precipitation.test.WATSUB rainfall impact recovery advances on dry hours and rejects overshoot...OK
+46/114 surface.precipitation.test.litter gas exchange response is bounded on dry branch...OK
+47/114 surface.precipitation.test.whole-step gas exchange integrates legacy substep kinetics exponentially...OK
+48/114 surface.precipitation.test.litter-soil flux uses litter donor temperature when flow is into soil...OK
+49/114 surface.precipitation.test.litter-soil flux uses soil donor temperature when flow is upward...OK
+50/114 state.grid_environment.test_0...OK
+51/114 state.plant_assignment.test_0...OK
+52/114 state.topography.test_0...OK
+53/114 soil.water.solver.test_0...OK
+54/114 soil.solute.cation_exchange.test_0...OK
+55/114 soil.gas.coupled_gas_solver.test_0...OK
+56/114 soil.chemistry.snow_initialization.test.acidic phosphate-bearing precipitation reaches carrier-free equilibrium...OK
+57/114 soil.chemistry.snow_initialization.test.equilibrated precipitation maps all 41 snow salt species without dropping phosphate pairs...OK
+58/114 soil.chemistry.snow_initialization.test.carrier-free precipitation equilibrium cost...PRECIP_EQUILIBRIUM_COST label=deck_ph7 ph=7 repetitions=20 total_ms=8 per_call_ms=0
+PRECIP_EQUILIBRIUM_COST label=deck_ph7_perturbed ph=7 repetitions=20 total_ms=11 per_call_ms=0
+PRECIP_EQUILIBRIUM_COST label=acidic_ph4 ph=4 repetitions=20 total_ms=7 per_call_ms=0
+PRECIP_EQUILIBRIUM_COST total_calls=60 checksum=1.3987563606136801e1
+OK
+59/114 soil.organic.combustion.test_0...OK
+60/114 soil.nutrients.fertilizer_dissolution.test_0...OK
+61/114 soil.heat.solver.test_0...OK
+62/114 soil.profile.relayering.test_0...OK
+63/114 soil.solute.carboxyl_exchange.test_0...OK
+64/114 soil.solute.mineral_precipitation.test.zero partner activity produces finite inventory-bounded dissolution...OK
+65/114 soil.solute.mineral_precipitation.test.gibbsite precipitation consumes three hydroxides per aluminum...OK
+66/114 soil.solute.mineral_precipitation.test.calcite hydroxide inhibition reduces its dissolution ceiling...OK
+67/114 soil.solute.phosphate_precipitation.test.hydroxyapatite precipitation is stoichiometrically bounded and conservative...OK
+68/114 soil.solute.phosphate_precipitation.test.phosphate mineral dissolution cannot exceed precipitate inventory...OK
+69/114 soil.solute.phosphate_precipitation.test.zero dissolved metal yields the dissolution-side equilibrium limit...OK
+70/114 soil.solute.phosphate_precipitation.test.fixed-pH precipitation limiter follows phosphate without metal cap...OK
+71/114 soil.solute.reaction_solver.test_0...OK
+72/114 soil.solute.water_equilibrium.test_0...OK
+73/114 soil.water.input_climate_forcing.test.precipitation and irrigation use distinct exact WTHR multipliers...OK
+74/114 soil.water.input_climate_forcing.test.zero precipitation multiplier does not suppress irrigation...OK
+75/114 soil.solute.reaction_solver_tests.test_0...OK
+76/114 chemistry.precipitation_nutrient_speciation.test.STARTE precipitation initialization conserves ammoniacal N and phosphate P...OK
+77/114 soil.gas.coupled_gas_solver_tests.test_0...OK
+78/114 plant.root.plant_root_disturbance.test_0...OK
+79/114 plant.root.plant_root_metabolism.test_0...OK
+80/114 plant.root.plant_root_nutrient_uptake.test_0...OK
+81/114 plant.root.plant_root_system.test_0...OK
+82/114 plant.growth.storage_remobilization.test_0...OK
+83/114 plant.growth.shoot_growth_runtime.test_0...OK
+84/114 management.land_management.test_0...OK
+85/114 management.plant_harvest_runtime.test_0...OK
+86/114 validation.plant_harvest_runtime_test.test_0...OK
+87/114 validation.plant_root_metabolism_test.test_0...OK
+88/114 io.input.climate_change.test.precipitation chemistry multipliers follow active season and reject invalid mode...OK
+89/114 io.input.daily_weather_disaggregation.test.daily precipitation is assigned to reference hours and conserved when rain...OK
+90/114 io.input.cell_grid_file.test_0...OK
+91/114 io.input.hourly_weather_stream.test.READS three-hour infill interpolates state and conserves precipitation...OK
+92/114 io.input.weather.test.weather scanner requires every precipitation chemistry value...OK
+93/114 driver.runscript.test_0...OK
+94/114 chemistry.precipitation_irrigation_dissolved_gases.test.precipitation and irrigation retain identical legacy initialization...OK
+95/114 chemistry.precipitation_irrigation_dissolved_gases.test.absolute-zero canopy temperature is rejected...OK
+96/114 canopy.photosynthesis.photosynthesis.test_0...OK
+97/114 canopy.energy.precipitation_retention.test.canopy precipitation retention releases every partial allocation prefix...OK
+98/114 canopy.energy.precipitation_retention.test.shared radiation interception fraction: two species sharing a cell never claim more than the cell's shared fraction, unlike each dividing by its own total...OK
+99/114 canopy.energy.precipitation_retention.test.shared radiation interception fraction: low-sun branch splits by area share of the shared total, sum never exceeds the shared fraction...OK
+100/114 canopy.energy.precipitation_retention.test.shared radiation interception fraction: single species sharing its own cell alone is unaffected (regression guard)...OK
+101/114 canopy.energy.precipitation_retention.test.runtime canopy retention fills storage and publishes throughfall...OK
+102/114 canopy.energy.precipitation_retention.test.runtime canopy retention state supports arbitrary species count...OK
+103/114 canopy.energy.precipitation_retention.test.retention state_update rejects a late invalid value atomically...OK
+104/114 canopy.energy.precipitation_retention.test.retention state_update rejects sub-legacy-tolerance water loss without clipping...OK
+105/114 canopy.energy.precipitation_retention.test.surface-water state_update rejects non-finite late input atomically...OK
+106/114 canopy.energy.precipitation_retention.test.production retention flux matches HOUR1 source-order kernel...OK
+107/114 canopy.energy.precipitation_retention_source_order.test.canopy retention fills capacity and releases overflow in source order...OK
+108/114 canopy.energy.precipitation_retention_source_order.test.vegetation type bounds fail before output mutation...OK
+109/114 canopy.energy.precipitation_retention_source_order.test.overflow fails before output mutation...OK
+110/114 canopy.energy.substep_initialization.test.UPTAKE substep initializes combustion precipitation and retained heat...OK
+111/114 validation.canopy_photosynthesis_test.test_0...OK
+112/114 atmosphere.local_conservation_sidecar.test.precipitation routes external liquid and canopy drainage to disjoint exact owners...OK
+113/114 atmosphere.local_conservation_sidecar.test.solid precipitation and snow exchange book canonical frozen heat exactly once...OK
+114/114 atmosphere.atmospheric_chemistry_forcing.test.multiplication overflow cannot silently enter precipitation chemistry...OK
+All 114 tests passed.

@@ -1,1 +1,17 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00066", "role": "FORGE", "task_file": ".agent/tasks/T-00066.md", "result_file": ".agent/results/T-00066.md", "skills": ["ecosys-process-science-parity"], "t1_argv": null, "requires_sage_review": true, "full_run_justification": null, "reason": "Latest SAGE verdict is REVISE; the next bounded step is a FORGE revision of T-00060 to close R1/R3 before any Ottawa evidence counts.", "state_recent": ["T-00065 SAGE STATUS: REVISE T-00060; R1 and R3 remain open", "T-00064 SAGE STATUS: REVISE T-00060; R3 and 1000-cycle discrepancy remain open", "T-00063 SAGE STATUS: no reimplementation; review the quarantined diff directly"], "state_next": "FORGE revises T-00060 in place to resolve R1/R3 before any new Ottawa evidence."}
+{
+  "diff_sha256": "ab2af383ace21af45ae9d2bb17be137855fed797b86e1958cf436d1cc57678ba",
+  "full_run_justification": null,
+  "reason": "automatic review of production-source change",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00067.md",
+  "review_of": "T-00066",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00067.md",
+  "task_id": "T-00067"
+}

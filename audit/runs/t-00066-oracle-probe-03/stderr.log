@@ -1,0 +1,3 @@
+src\soil\chemistry\snow_initialization.zig:2111:11: error: unused local constant
+    const attractor_tol = 1.0e-11;
+          ^~~~~~~~~~~~~

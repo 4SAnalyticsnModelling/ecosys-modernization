@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/apps/zig/current/zig.exe",
+    "test",
+    "src/module_index.zig",
+    "--test-filter",
+    "precipitation"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 7.852,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 39592,
+  "pid": 21120,
+  "started_unix": 1790446174.1038208,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00066-t1-snow-final/stderr.log",
+    "sha256": "c7dbd472a1dcd01fb2582afd22bf7d35d50ae1d5e1bd030a966fa928f3999a58"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00066-t1-snow-final/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

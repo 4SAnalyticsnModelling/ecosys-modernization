@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/scoop/apps/zig/current/zig.exe",
+    "fmt",
+    "--check",
+    "src/ecosys_ng.zig",
+    "src/stages/hourly_process_driver.zig",
+    "src/soil/chemistry/snow_initialization.zig"
+  ],
+  "cwd": "D:\\ecosys-modernization\\ecosys-ng",
+  "elapsed_seconds": 0.594,
+  "exit_code": 1,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 11444,
+  "pid": 16704,
+  "started_unix": 1790446043.9469867,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00066-fmt-probe/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00066-fmt-probe/stdout.log",
+    "sha256": "4d118d6104abc8778d2e2c9f12dccd360069c6f53455cc2ff730285b3cc6e83e"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}
