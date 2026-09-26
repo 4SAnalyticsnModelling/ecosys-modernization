@@ -1,1 +1,1 @@
-T-00101 FORGE: remap the next CHANGED-RANGE traceability batch to live anchors and update paired zig_lines + zig_sha256 values.
+T-00102 PATHFINDER: review the next CHANGED-RANGE traceability file group with verified live-source anchors and quarantine unresolved rows.
