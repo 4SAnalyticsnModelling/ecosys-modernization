@@ -16,6 +16,9 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   (`solute.f:112-118,368-402`) vs Zig single closure with relaxation caps unbounded (`reaction_solve.zig:73-129`), and
   hourly rain/irrigation input equilibration using the STARTE ceiling (`hourly_process_driver.zig:634,670`) needs its
   legacy counterpart identified. Unlisted; not a D6 approval | `.agent/results/T-00044.md`, `.agent/results/T-00045.md`
+- G0-2c | SAGE review | DEV-008 fixed-pH STARTE dynamic-input revision (T-00060) exists as uncommitted working-tree
+  diff (diff-hash 53175e5b...2618) but its FORGE result was lost; T-00063 decided: no re-implementation (T-00061/62
+  superseded), SAGE reviews the diff directly with the quarantined claims copy | `.agent/results/T-00063.md`
 - G0-3 | PARTIAL | P0.3 partial legacy set (hours 1-6,875) preserved in `evidence/legacy/` with manifest
   (T-00007/8); the full 30-yr outputs do not exist and come from the P0.4 rerun
 - G0-4 | PATHFINDER | P0.4 full legacy rerun + -O2 timing x3 from the run-002 recipe (after G0-2 is signed) | plan P0.4

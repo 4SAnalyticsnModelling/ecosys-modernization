@@ -61,8 +61,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "SAGE decision (routing-failure) from SENTINEL",
   "task_id": "T-00063",
-  "worker": "SAGE"
+  "worker": null
 }
