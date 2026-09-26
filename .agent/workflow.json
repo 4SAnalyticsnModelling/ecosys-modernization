@@ -46,8 +46,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "PATHFINDER follows the unblocked root-cause trace from T-00017: the restored 100-deck failure is pinned to the soil-water hard_max_iterations path.",
-  "task_id": "T-00018",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "T-00018 confirms the restored 100-deck failure is a load-bearing soil-water iteration cap, so FORGE should do one bounded diagnostic replay.",
+  "task_id": "T-00019",
+  "worker": "FORGE"
 }
