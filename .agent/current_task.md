@@ -1,1 +1,1 @@
-T-00128 SAGE: approve corrected seven-row ZEROS ledger packet and finalize traceability ledger inclusion.
+T-00129 SAGE: review the corrected TRC legacy ZEROS packet and decide final ledger disposition.

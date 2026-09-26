@@ -54,17 +54,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "ALLOWED FILES `audit/traceability/traceability.csv` is outside SAGE may_write"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Newest result directs a bounded ledger-text rewrite: fix the three residual anchor defects before final inclusion and keep the ZEROS binding unchanged.",
-  "task_id": "T-00127",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Newest result requires SAGE adjudication of the corrected seven-row ZEROS ledger packet before acceptance; no unblocked work remains for PATHFINDER or FORGE.",
+  "task_id": "T-00129",
+  "worker": "SAGE"
 }
