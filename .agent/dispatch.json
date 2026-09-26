@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00142", "role": "SAGE", "task_file": ".agent/tasks/T-00142.md", "result_file": ".agent/results/T-00142.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "T-00141 requires a SAGE provenance review before the fresh legacy full-run baseline; this is the only unblocked path to reopen G0-4.", "state_recent": ["T-00141 FORGE DONE: warmup manifest drafted; G0-4 may reopen only after SAGE approval.", "T-00140 SAGE DONE: fresh legacy P0.4 is the only valid route to reopen G0-4.", "T-00139 PATHFINDER BLOCKED: no authoritative archive exists; only a fresh legacy run can satisfy G0-4."], "state_next": "SAGE approves or revises the P0.4 provenance manifest before authorizing the legacy full-run baseline."}
+{
+  "full_run_justification": null,
+  "reason": "T-00141 requires a SAGE provenance review before the fresh legacy full-run baseline; this is the only unblocked path to reopen G0-4.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00142.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE approves or revises the P0.4 provenance manifest before authorizing the legacy full-run baseline.",
+  "state_recent": [
+    "T-00141 FORGE DONE: warmup manifest drafted; G0-4 may reopen only after SAGE approval.",
+    "T-00140 SAGE DONE: fresh legacy P0.4 is the only valid route to reopen G0-4.",
+    "T-00139 PATHFINDER BLOCKED: no authoritative archive exists; only a fresh legacy run can satisfy G0-4."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00142.md",
+  "task_id": "T-00142"
+}
