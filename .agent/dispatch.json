@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00088", "role": "FORGE", "task_file": ".agent/tasks/T-00088.md", "result_file": ".agent/results/T-00088.md", "skills": ["ecosys-zig-safety-design"], "t1_argv": null, "requires_sage_review": true, "full_run_justification": null, "reason": "T-00087 resolved the stale rows; only a bounded ledger refresh patch remains, and FORGE is the correct implementation lane.", "state_recent": ["T-00087 PATHFINDER DONE: revalidated stale zig_sha256 rows into REFRESH-LEDGER vs QUARANTINE dispositions without touching the ledger.", "T-00086 PATHFINDER DONE: report and revalidation table were written to audit/analysis/ for 133 stale rows.", "T-00085 SAGE DONE: re-routed stale-hash work to PATHFINDER and kept audit/traceability read-only."], "state_next": "FORGE to draft a constrained ledger-update patch that refreshes only REFRESH-LEDGER rows and excludes QUARANTINE entries from the write set."}
+{
+  "full_run_justification": null,
+  "reason": "T-00087 resolved the stale rows; only a bounded ledger refresh patch remains, and FORGE is the correct implementation lane.",
+  "requires_sage_review": true,
+  "result_file": ".agent/results/T-00088.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-zig-safety-design"
+  ],
+  "state_next": "FORGE to draft a constrained ledger-update patch that refreshes only REFRESH-LEDGER rows and excludes QUARANTINE entries from the write set.",
+  "state_recent": [
+    "T-00087 PATHFINDER DONE: revalidated stale zig_sha256 rows into REFRESH-LEDGER vs QUARANTINE dispositions without touching the ledger.",
+    "T-00086 PATHFINDER DONE: report and revalidation table were written to audit/analysis/ for 133 stale rows.",
+    "T-00085 SAGE DONE: re-routed stale-hash work to PATHFINDER and kept audit/traceability read-only."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00088.md",
+  "task_id": "T-00088"
+}

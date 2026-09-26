@@ -1,0 +1,61 @@
+{
+  "changed": [
+    ".agent/results/T-00088.md",
+    ".agent/tasks/T-00088.hypothesis.md",
+    "audit/runs/T-00088-patch/patch_report.json",
+    "audit/runs/T-00088-patch/receipt.json",
+    "audit/runs/T-00088-patch/stderr.log",
+    "audit/runs/T-00088-patch/stdout.log",
+    "audit/runs/T-00088-patch/traceability_refresh.patch",
+    "audit/runs/T-00088-patch/traceability_staged.csv",
+    "audit/runs/T-00088-tests/receipt.json",
+    "audit/runs/T-00088-tests/stderr.log",
+    "audit/runs/T-00088-tests/stdout.log",
+    "ecosys-audit/scripts/traceability_patch.py",
+    "ecosys-audit/tests/test_traceability_patch.py"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "T-00087 resolved the stale rows; only a bounded ledger refresh patch remains, and FORGE is the correct implementation lane.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00088.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-zig-safety-design"
+    ],
+    "state_next": "FORGE to draft a constrained ledger-update patch that refreshes only REFRESH-LEDGER rows and excludes QUARANTINE entries from the write set.",
+    "state_recent": [
+      "T-00087 PATHFINDER DONE: revalidated stale zig_sha256 rows into REFRESH-LEDGER vs QUARANTINE dispositions without touching the ledger.",
+      "T-00086 PATHFINDER DONE: report and revalidation table were written to audit/analysis/ for 133 stale rows.",
+      "T-00085 SAGE DONE: re-routed stale-hash work to PATHFINDER and kept audit/traceability read-only."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00088.md",
+    "task_id": "T-00088"
+  },
+  "ended": 1790452631.4447494,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20e80033ffeRcrx3S8hdIkf4l",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 7769822,
+    "cache_write": 0,
+    "cost": 1.0800939000000003,
+    "input": 570243,
+    "llm_calls": 78,
+    "output": 18580,
+    "tool_calls": 84
+  },
+  "violations": []
+}

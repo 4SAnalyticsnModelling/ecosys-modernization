@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "T-00087 resolved the stale rows; only a bounded ledger refresh patch remains, and FORGE is the correct implementation lane.",
   "task_id": "T-00088",
-  "worker": "FORGE"
+  "worker": null
 }
