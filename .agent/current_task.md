@@ -1,1 +1,1 @@
-T-00119 SAGE: adjudicate final TRC legacy evidence matrix before ledger rewrite.
+T-00120 PATHFINDER: locate exact legacy ZEROS/ZEROS2 line anchors for unresolved TRC rows.

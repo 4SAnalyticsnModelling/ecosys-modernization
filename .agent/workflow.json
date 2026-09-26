@@ -59,8 +59,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Newest result says the TRC evidence matrix is complete; the next move is SAGE adjudication before any ledger rewrite or rebind decision.",
-  "task_id": "T-00119",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Newest result rejects the signed matrix; remaining unresolved TRC rows need exact legacy ZEROS/ZEROS2 evidence before a ledger rewrite.",
+  "task_id": "T-00120",
+  "worker": "PATHFINDER"
 }

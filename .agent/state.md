@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00118 PATHFINDER DONE: signed TRC matrix binds every unresolved row to legacy evidence.
-- T-00117 PATHFINDER DONE: exact TRC-313/331..340 legacy file:line mapping complete.
-- T-00116 PATHFINDER DONE: approved refresh packet and unresolved dispositions captured.
+- T-00119 SAGE DONE: final TRC matrix rejected; four rows may proceed.
+- T-00118 PATHFINDER DONE: signed matrix complete for all unresolved rows.
+- T-00117 PATHFINDER DONE: unresolved TRC cluster split by evidence class.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE accepts or rejects the final legacy binding for unresolved TRC rows before any ledger rewrite.
+PATHFINDER finds exact legacy ZEROS or ZEROS2 anchors for TRC-331..335, 337, 338.
