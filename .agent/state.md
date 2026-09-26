@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00090 PATHFINDER DONE: 7 safe rows refreshed; 62 changed rows excluded.
-- T-00089 SAGE DONE: reject 62-row refresh and order re-review.
-- T-00088 FORGE DONE: 62-row patch produced but excluded from ledger.
+- T-00091 PATHFINDER DONE: 62 CHANGED-RANGE rows still map to live Zig ranges; no range moves.
+- T-00090 FORGE DONE: only seven UNCHANGED-RANGE rows are safe for mechanical refresh.
+- T-00089 SAGE DONE: reject 62-row refresh before re-review; quarantine NO-MATCHING-BLOB rows.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER re-reviews 62 CHANGED-RANGE traceability rows in <=15-row batches before any refresh.
+FORGE prepares the approved write-once refresh for the 62 CHANGED-RANGE rows and leaves quarantined rows untouched.

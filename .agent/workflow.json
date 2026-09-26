@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Route to PATHFINDER: re-review 62 CHANGED-RANGE traceability rows before ledger refresh; newest result requires this evidence gate.",
-  "task_id": "T-00091",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "T-00091 revalidated the 62 CHANGED-RANGE rows; all still map live to Zig, so the next bounded step is the approved FORGE refresh batch after reopen.",
+  "task_id": "T-00092",
+  "worker": "FORGE"
 }
