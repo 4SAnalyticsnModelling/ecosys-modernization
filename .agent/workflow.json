@@ -58,8 +58,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Newest result recommends SAGE review of the next live-anchor batch; this is the next unblocked evidence check and keeps the ledger unchanged.",
-  "task_id": "T-00108",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Follow the newest live-anchor evidence: classify TRC-313..340 refreshable rows from unresolved cases without ledger mutation.",
+  "task_id": "T-00109",
+  "worker": "PATHFINDER"
 }

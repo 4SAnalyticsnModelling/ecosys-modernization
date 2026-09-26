@@ -1,1 +1,1 @@
-T-00108 SAGE: verify the next stale CHANGED-RANGE batch against live Zig anchors before any ledger action.
+T-00109 PATHFINDER: re-review TRC-313..340 live Zig anchors and classify refreshable versus unresolved traceability rows without ledger mutation.
