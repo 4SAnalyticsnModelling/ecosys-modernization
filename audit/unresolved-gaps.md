@@ -48,6 +48,13 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   comments claim it is. CCO2S/CNO2S legacy uses ZEROS (`hour1.f:3777`). TRC-339's `nitro.f:2955` is not a guarded
   division. TRC-336 -> `retired-with-explicit-scope-approval`: its subject was removed (ISSUE-103), and the
   caller-less helper `soil_chemistry_convergence.zig:102-134` should be deleted or re-homed | `.agent/results/T-00111.md`
+- G0-5c | DECIDED 2026-09-26 T-00119 (SAGE): T-00118 matrix REJECTED as the final legacy binding. It binds
+  TRC-337 (CCO2S) to `solute.f:610` ZEROS2, which contradicts G0-5b and `hour1.f:3777-3778` (ZEROS). It cites
+  `nitro.f:2948-2958` for TRC-338 as a water-volume guard, but that range has no VOLW guard (`RN2BY>ZEROS`, `VMXC4S`).
+  TRC-331..335 and 338 carry mineral N/P/NO2 carrier analogs that legacy computes under ZEROS
+  (`hour1.f:3804-3836`; L=0: `hour1.f:4605`). `solute.f:610` is the ZEROS2 gate on the solute-equilibrium
+  sub-cycle, not a concentration carrier. The ledger may be rewritten now only for TRC-313, 336, 339 and 340.
+  TRC-331..335/337/338 need a row-by-row ZEROS-vs-ZEROS2 re-derivation first | `.agent/results/T-00119.md`
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)

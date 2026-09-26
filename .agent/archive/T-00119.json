@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00119.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Newest result says the TRC evidence matrix is complete; the next move is SAGE adjudication before any ledger rewrite or rebind decision.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00119.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-process-science-parity"
+    ],
+    "state_next": "SAGE accepts or rejects the final legacy binding for unresolved TRC rows before any ledger rewrite.",
+    "state_recent": [
+      "T-00118 PATHFINDER DONE: signed TRC matrix binds every unresolved row to legacy evidence.",
+      "T-00117 PATHFINDER DONE: exact TRC-313/331..340 legacy file:line mapping complete.",
+      "T-00116 PATHFINDER DONE: approved refresh packet and unresolved dispositions captured."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00119.md",
+    "task_id": "T-00119"
+  },
+  "ended": 1790458480.9543452,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "c68fec3e-d15b-47bd-af73-1e6930ee073f",
+    "old": "5f3970aa-25b9-4054-9004-61992aad7bdf",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 656661,
+    "cache_write": 50435,
+    "cost": null,
+    "input": 24,
+    "llm_calls": 12,
+    "output": 8062,
+    "tool_calls": 6
+  },
+  "violations": []
+}
