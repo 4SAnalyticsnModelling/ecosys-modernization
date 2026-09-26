@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00034.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Latest accepted result directs a read-only PATHFINDER trace to find the Ottawa deck's NPH/NPG and the first preserved n100e/n100f divergence hour across all files.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00034.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER to determine Ottawa deck NPH/NPG and the first preserved n100e/n100f divergence hour.",
+    "state_recent": [
+      "T-00031 FORGE DONE: DEV-004 row updated after SAGE adjudication.",
+      "T-00030 SAGE DONE: rejected DEV-004 as not legacy-equivalent.",
+      "T-00029 FORGE DONE: hour-9 divergence onset is verified in f25wh1."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00034.md",
+    "task_id": "T-00034"
+  },
+  "ended": 1790398522.8111908,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f23f3fe29ffevydsKNjQb1vQi9",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 1815552,
+    "cache_write": 0,
+    "cost": 0.08194104000000002,
+    "input": 90894,
+    "llm_calls": 26,
+    "output": 22876,
+    "tool_calls": 34
+  },
+  "violations": []
+}
