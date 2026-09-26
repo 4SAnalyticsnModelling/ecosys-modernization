@@ -1,1 +1,1 @@
-T-00139 PATHFINDER obtain authoritative full Ottawa legacy archive or fresh full-run artifact and append SHA-256 provenance for G0-4.
+T-00140 SAGE: decide evidence-acquisition path for authoritative Ottawa archive or verified full-run artifact before G0-4 reopen.
