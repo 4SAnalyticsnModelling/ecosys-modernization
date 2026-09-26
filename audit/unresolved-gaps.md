@@ -39,6 +39,15 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   fixed", so a hash refresh would re-certify false text. TRC-336's subject `updateFertilizerBandGeometry` was
   removed (ISSUE-103; anchor is a caller-less helper): re-scope or retire. TRC-313 disposition to be cross-checked
   against DEV-004/007. TRC-315/318/321/326: hash+lines refresh only | `.agent/results/T-00108.md`
+- G0-5b | DECIDED 2026-09-26 T-00111 (SIGNED-SAGE), ledger write pending | Final dispositions for the TRC-313/331..340 cluster.
+  TRC-313 -> `unresolved`: the `legacy-defect-corrected` claim is retracted. MRXN=60 is a fixed sub-cycle count, and
+  that is not a defect. The Zig 100 is a fail-loud ceiling (DEV-007/T-00045). The semantic gap is G0-2b (P3).
+  TRC-331..335/337..340 -> stay `unresolved` with corrected text. The live floors exist, but production binds
+  them to `physical_tolerance.water_volume_m3` (default 1e-14 m3, `config.zig:17`; `biogeochemistry_batches.zig`
+  :24,26,138,157,177,195,374,617,779). That is not ZEROS2 (1e-6*area m3, `starts.f:94,270`), even though the code
+  comments claim it is. CCO2S/CNO2S legacy uses ZEROS (`hour1.f:3777`). TRC-339's `nitro.f:2955` is not a guarded
+  division. TRC-336 -> `retired-with-explicit-scope-approval`: its subject was removed (ISSUE-103), and the
+  caller-less helper `soil_chemistry_convergence.zig:102-134` should be deleted or re-homed | `.agent/results/T-00111.md`
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)

@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00111.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Review and decide the unresolved TRC-313/TRC-331..340 ledger disposition against live Zig evidence and D6 rules.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00111.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE adjudicates the final ledger disposition for unresolved TRC rows and records the decision.",
+    "state_recent": [
+      "T-00109 PATHFINDER DONE: live-source review leaves TRC-313 and TRC-331..340 unresolved for SAGE.",
+      "T-00108 SAGE DONE: hash-only refresh rejected; stale ledger text remains false."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00111.md",
+    "task_id": "T-00111"
+  },
+  "ended": 1790457072.5749197,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "5f3970aa-25b9-4054-9004-61992aad7bdf",
+    "old": "a24f092b-334b-4801-9f7f-5f6c45f1c9ca",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 1602835,
+    "cache_write": 69988,
+    "cost": null,
+    "input": 48,
+    "llm_calls": 24,
+    "output": 13710,
+    "tool_calls": 7
+  },
+  "violations": []
+}
