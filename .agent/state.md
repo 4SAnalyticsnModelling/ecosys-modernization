@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00125 FORGE DONE: corrected ZEROS binding for TRC-331..335,337,338.
-- T-00123 PATHFINDER DONE: exact ZEROS guard evidence for TRC-331..338.
-- T-00122 PATHFINDER DONE: row-by-row ZEROS binding classified.
+- T-00126 SAGE DONE: revise anchor defects before final ledger inclusion
+- T-00125 FORGE DONE: approved ZEROS row text
+- T-00123 PATHFINDER DONE: exact ZEROS guard evidence
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE adjudicates the corrected ZEROS binding and approves final ledger inclusion.
+FORGE fixes the three TRC anchor defects and prepares the corrected seven-row ledger packet for SAGE review.
