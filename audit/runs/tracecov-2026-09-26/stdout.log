@@ -1,0 +1,50 @@
+=== traceability coverage (in-build legacy scope) ===
+  executable statements : 46739
+  covered by a row      : 32079
+  uncovered             : 14660
+  coverage              : 68.63%
+  traceability rows     : 373
+=== dispositions ===
+  legacy-defect-corrected            60
+  preserved                          195
+  replaced-by-approved-feature       38
+  unresolved                         80   <-- blocks its gate
+=== problems (165) ===
+  missing-zig-path                   8
+  stale-zig-sha256                   133
+  unknown-fortran-path               3
+  unusable-zig-path                  1
+  zig-path-hash-count-mismatch       20
+    TRC-007: stale-zig-sha256: ecosys-ng/src/soil/solute/reaction_solve.zig: row cites 623ae7178cbc..., file is f3b3c0bf621c...
+    TRC-008: stale-zig-sha256: ecosys-ng/src/stages/hourly_heat_water_solute.zig: row cites fce767ad491f..., file is bc30f807a250...
+    TRC-009: stale-zig-sha256: ecosys-ng/src/plant/root/water_balance.zig: row cites d324ae80966b..., file is 10e55a5d6ba6...
+    TRC-011: stale-zig-sha256: ecosys-ng/src/soil/microbial/nitrification.zig: row cites 7ee3ea8dde00..., file is acba97948738...
+    TRC-013: stale-zig-sha256: ecosys-ng/src/soil/microbial/nitrogen_exchange_step.zig: row cites cb2ef6ade635..., file is f11ff5cd871d...
+    TRC-027: stale-zig-sha256: ecosys-ng/src/stages/hourly_heat_water_solute.zig: row cites fce767ad491f..., file is bc30f807a250...
+    TRC-028: stale-zig-sha256: ecosys-ng/src/soil/profile/geometry_disturbance_transaction.zig: row cites e99fa3e8300b..., file is 2a2b1e11df26...
+    TRC-038: stale-zig-sha256: ecosys-ng/src/erosion/eroded_constituents.zig: row cites 7fc00da0105d..., file is 4357d5573089...
+    TRC-039: unusable-zig-path: ecosys-ng-prod-examples/.../parameters/soil_chemistry_reaction_parameters.txt (geochemistry_kinetics field 3/4)
+    TRC-039: zig-path-hash-count-mismatch: 0 paths vs 2 hashes; cannot attribute hashes to files
+    ... 155 more (see --out JSON)
+=== largest uncovered blocks ===
+     175 statements  f77src/trnsfrs.f:4280-4454
+     173 statements  f77src/trnsfrs.f:4668-4840
+     141 statements  f77src/routp.f:334-474
+     125 statements  f77src/trnsfr.f:5641-5765
+     116 statements  f77src/uptake.f:3688-3803
+      90 statements  f77src/startq.f:754-843
+      84 statements  f77src/trnsfrs.f:4531-4614
+      76 statements  f77src/hour1.f:3077-3152
+      64 statements  f77src/readi.f:487-550
+      61 statements  f77src/grosub.f:9198-9258
+      60 statements  f77src/readi.f:554-613
+      59 statements  f77src/erosion.f:341-399
+      59 statements  f77src/extract.f:458-516
+      59 statements  f77src/fouts.f:566-624
+      59 statements  f77src/starts.f:414-472
+      58 statements  f77src/fouts.f:385-442
+      58 statements  f77src/fouts.f:446-503
+      58 statements  f77src/hour1.f:848-905
+      58 statements  f77src/outsh.f:49-106
+      58 statements  f77src/redist.f:626-683
+evidence written to audit/analysis/tracecov-2026-09-26.json

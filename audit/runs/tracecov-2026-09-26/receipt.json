@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "ecosys-audit/scripts/tracecov.py",
+    "--root",
+    ".",
+    "--out",
+    "audit/analysis/tracecov-2026-09-26.json"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 14.23,
+  "exit_code": 1,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 28304,
+  "pid": 36628,
+  "started_unix": 1790451439.2508795,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/tracecov-2026-09-26/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/tracecov-2026-09-26/stdout.log",
+    "sha256": "d4a3d8fcb705f95e3348972da0153c259836d0aae92b50472bf894bda61e7014"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 300.0
+}

@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00086.md",
+    "audit/analysis/tracecov-2026-09-26.json",
+    "audit/analysis/tracecov-stale-revalidation-2026-09-26.md",
+    "audit/runs/tracecov-2026-09-26/receipt.json",
+    "audit/runs/tracecov-2026-09-26/stderr.log",
+    "audit/runs/tracecov-2026-09-26/stdout.log"
+  ],
+  "dispatch": {
+    "chained_from": "T-00085",
+    "full_run_justification": null,
+    "reason": "chained from T-00085 (SAGE CHAIN block)",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00086.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00086.md",
+    "task_id": "T-00086"
+  },
+  "ended": 1790451839.510901,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20cca809ffePMkakvcqkCSyJ0",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 517760,
+    "cache_write": 0,
+    "cost": 0.050066400000000004,
+    "input": 40798,
+    "llm_calls": 20,
+    "output": 26293,
+    "tool_calls": 24
+  },
+  "violations": []
+}

@@ -61,8 +61,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "chained from T-00085 (SAGE CHAIN block)",
   "task_id": "T-00086",
-  "worker": "PATHFINDER"
+  "worker": null
 }
