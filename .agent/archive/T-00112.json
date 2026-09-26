@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00112.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Map the legacy ZEROS/ZEROS2 semantics for unresolved TRC rows to exact file:lines before any FORGE fix.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00112.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "Map the legacy ZEROS/ZEROS2 gate for TRC-313 and TRC-331..340 to exact legacy files and lines.",
+    "state_recent": [
+      "T-00111 SAGE DONE: final TRC dispositions set, no hash refresh.",
+      "T-00109 PATHFINDER DONE: only four rows remain refreshable.",
+      "T-00108 SAGE DONE: hash-only refresh rejected."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00112.md",
+    "task_id": "T-00112"
+  },
+  "ended": 1790457241.0783982,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f207627b2ffeEhf8a5VvGNPLBz",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 475776,
+    "cache_write": 0,
+    "cost": 0.04229832,
+    "input": 64194,
+    "llm_calls": 14,
+    "output": 16620,
+    "tool_calls": 23
+  },
+  "violations": []
+}
