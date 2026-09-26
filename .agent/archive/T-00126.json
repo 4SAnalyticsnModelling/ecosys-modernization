@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00126.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Newest result directs SAGE to review the corrected ZEROS binding and finalize ledger inclusion; no user decision is pending.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00126.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-process-science-parity"
+    ],
+    "state_next": "SAGE adjudicates the corrected ZEROS binding and approves final ledger inclusion.",
+    "state_recent": [
+      "T-00125 FORGE DONE: corrected ZEROS binding for TRC-331..335,337,338.",
+      "T-00123 PATHFINDER DONE: exact ZEROS guard evidence for TRC-331..338.",
+      "T-00122 PATHFINDER DONE: row-by-row ZEROS binding classified."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00126.md",
+    "task_id": "T-00126"
+  },
+  "ended": 1790459745.3300571,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "0a963e22-d1c7-41d6-b22f-ce7812f873bc",
+    "old": "c68fec3e-d15b-47bd-af73-1e6930ee073f",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 658384,
+    "cache_write": 52044,
+    "cost": null,
+    "input": 24,
+    "llm_calls": 12,
+    "output": 8068,
+    "tool_calls": 4
+  },
+  "violations": []
+}

@@ -60,8 +60,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Newest result directs SAGE to review the corrected ZEROS binding and finalize ledger inclusion; no user decision is pending.",
   "task_id": "T-00126",
-  "worker": "SAGE"
+  "worker": null
 }
