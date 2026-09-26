@@ -1,0 +1,37 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "ecosys-audit/scripts/run_legacy_p04_warmup.py",
+    "--staged-deck",
+    "D:/ecosys-evidence/legacy/staged_deck",
+    "--exe",
+    "D:/ecosys-evidence/legacy/ecosys_oracle.exe",
+    "--run-dir",
+    "audit/runs/p0-4-warmup-deck",
+    "--timeout",
+    "120",
+    "--out",
+    "audit/runs/legacy_p04_warmup_receipt.json"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 14.429,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 27664,
+  "pid": 33472,
+  "started_unix": 1790463493.0763626,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/legacy-p04-warmup/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/legacy-p04-warmup/stdout.log",
+    "sha256": "9d412d596411d22add1ec8b2ff8d3dab16c8ef24bcc2e20096e2cc7e98d76c7e"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 180.0
+}

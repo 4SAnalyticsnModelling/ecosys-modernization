@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/mingw64/bin/gcc.exe",
+    "-O2",
+    "-c",
+    "splitp.c",
+    "-o",
+    "splitp_c.o"
+  ],
+  "cwd": "C:\\Users\\symon.mezbahuddin\\scoop\\apps\\msys2\\2025-02-21\\tmp\\opencode\\p04_legacy_build",
+  "elapsed_seconds": 0.276,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 25156,
+  "pid": 32588,
+  "started_unix": 1790462786.551686,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/legacy-oracle-build-splitp-c/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/legacy-oracle-build-splitp-c/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

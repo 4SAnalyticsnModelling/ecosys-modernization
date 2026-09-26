@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/mingw64/bin/gfortran.exe",
+    "--version"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.042,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 33396,
+  "pid": 34832,
+  "started_unix": 1790462435.9218216,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/gfortran-version-check/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/gfortran-version-check/stdout.log",
+    "sha256": "f2b50cc9b9832c2edde9fcebcf407805b9283da5ee8887de5b3e032924554be3"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

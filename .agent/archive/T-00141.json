@@ -1,0 +1,74 @@
+{
+  "changed": [
+    ".agent/results/T-00141.md",
+    "audit/runs/gcc-version-check/receipt.json",
+    "audit/runs/gcc-version-check/stderr.log",
+    "audit/runs/gcc-version-check/stdout.log",
+    "audit/runs/gfortran-version-check/receipt.json",
+    "audit/runs/gfortran-version-check/stderr.log",
+    "audit/runs/gfortran-version-check/stdout.log",
+    "audit/runs/legacy-oracle-build-link/receipt.json",
+    "audit/runs/legacy-oracle-build-link/stderr.log",
+    "audit/runs/legacy-oracle-build-link/stdout.log",
+    "audit/runs/legacy-oracle-build-splitp-c/receipt.json",
+    "audit/runs/legacy-oracle-build-splitp-c/stderr.log",
+    "audit/runs/legacy-oracle-build-splitp-c/stdout.log",
+    "audit/runs/legacy-oracle-build-splits-c/receipt.json",
+    "audit/runs/legacy-oracle-build-splits-c/stderr.log",
+    "audit/runs/legacy-oracle-build-splits-c/stdout.log",
+    "audit/runs/legacy-p04-warmup/receipt.json",
+    "audit/runs/legacy-p04-warmup/stderr.log",
+    "audit/runs/legacy-p04-warmup/stdout.log",
+    "audit/runs/legacy_p04_warmup_receipt.json",
+    "audit/runs/p04_provenance_manifest.json",
+    "audit/runs/staged_deck_manifest.json",
+    "ecosys-audit/scripts/prepare_legacy_build.py",
+    "ecosys-audit/scripts/run_legacy_p04_warmup.py",
+    "ecosys-audit/scripts/stage_legacy_deck.py"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "T-00140 already decided the only valid route: a fresh legacy gfortran P0.4 warmup with provenance, and FORGE owns the bounded build/manifests.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00141.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-repository-baseline",
+      "ecosys-build-reproducibility"
+    ],
+    "state_next": "FORGE builds the legacy gfortran oracle and records the P0.4 provenance manifest.",
+    "state_recent": [
+      "T-00140 SAGE DONE: archive search stops; only fresh legacy P0.4 run can reopen G0-4.",
+      "T-00139 PATHFINDER BLOCKED: no authoritative archive or fresh artifact exists in repo evidence.",
+      "T-00137 PATHFINDER BLOCKED: G0-4 cannot reopen without a verified full-run artifact."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00141.md",
+    "task_id": "T-00141"
+  },
+  "ended": 1790463604.2762957,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f203b5bfaffevYEyitByQUCnGk",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 9560555,
+    "cache_write": 0,
+    "cost": 2.1712721250000007,
+    "input": 1845884,
+    "llm_calls": 109,
+    "output": 18618,
+    "tool_calls": 115
+  },
+  "violations": []
+}

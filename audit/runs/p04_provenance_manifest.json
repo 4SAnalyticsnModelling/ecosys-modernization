@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "authorization": "SAGE T-00140 / execution plan \u00a75 P0.4 (legacy gfortran only; no Zig)",
+  "purpose": "Draft provenance manifest for reopening G0-4 baseline",
+  "source": {
+    "git_commit": "5eaa1e958fc76def65d7dd1d4f088055663bcbe3",
+    "f77src_directory": "f77src",
+    "compilation_units_count": 40,
+    "c_helpers_count": 2,
+    "headers_count": 54,
+    "soil_f_patch": "EXTERNAL SPLIT inserted at line 17 before SAVE NF,NX,NTZ,NTZX",
+    "soil_f_staged_sha256": "5CD0DB6342443E464E2E7011C42E84A826F9CDB95A0F2F02F9F42C66F38B287F"
+  },
+  "toolchain": {
+    "compiler": "GNU Fortran (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 16.1.0",
+    "c_compiler": "gcc.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 16.1.0",
+    "flags": [
+      "-O2",
+      "-std=legacy",
+      "-cpp",
+      "-ffixed-form",
+      "-ffixed-line-length-72",
+      "-fdefault-real-8",
+      "-fdefault-double-8",
+      "-falign-commons",
+      "-fautomatic",
+      "-fmax-stack-var-size=0",
+      "-fprotect-parens",
+      "-fno-associative-math",
+      "-fno-reciprocal-math",
+      "-ffp-contract=off",
+      "-fno-frontend-optimize",
+      "-fallow-argument-mismatch"
+    ]
+  },
+  "executable": {
+    "path": "D:/ecosys-evidence/legacy/ecosys_oracle.exe",
+    "size_bytes": 38967626,
+    "sha256": "273630BEAD10306D7E55B8EC87BF8B58C8E4BB4422ADD5CD5B94BA3FD742F319",
+    "historical_sha256": "C17182F95CFD442AEF5FB4F3A5F48B0F3D6CAB1AF577ECD2D577E0ECE534EB90",
+    "build_receipt": "audit/runs/legacy-oracle-build-link/receipt.json"
+  },
+  "staged_deck": {
+    "canonical_path": "D:/ecosys-evidence/legacy/staged_deck",
+    "source_path": "f77example/Cool Temperate Maize-Soybean ON",
+    "total_files": 66,
+    "documented_removals": [
+      "f25sol98 line 4: van_genuchten_inflection_pressure_head_m... removed",
+      "f25y98..f25y03 line 12: weather_phase... removed"
+    ],
+    "f25sol98_sha256": "99DF888A11AA5EDD444C6729634B7C9F2F9F1CCFB8F740D5B325584578DD94A4",
+    "year_files_sha256": {
+      "f25y98": "956D74F70D134DE71B56262920F6A25A7D0E826EF180020F1FCECD82C9CB3976",
+      "f25y99": "EA1FBB7EE4826CC7F1A8F67FCDD56802723FFE5D3CA693DC256B49A9B6C338BA",
+      "f25y00": "2FA498F11CAC89FC360E0E1B7D6D5072E14FCC36203F6E17A52E3D8C3D1E34D9",
+      "f25y01": "51DE6B9C240F41D8F60BAE525BFAF8F796CD3B9DC42EF35AC29235B6F50AB8DD",
+      "f25y02": "BB8C385FF8586845060D5D533A1495C5D70212E78F35FCBFADED1DE407CBAD7E",
+      "f25y03": "1A907193B17B0244B503565C018B8956278A31605493809C869C3B0EE6C5FE0A"
+    },
+    "manifest_file": "audit/runs/staged_deck_manifest.json"
+  },
+  "warmup_run": {
+    "status": "WARMUP_COMPLETED",
+    "bounded_scope": "1 simulated day (Day 1 of Year 1998, 24 hourly records)",
+    "elapsed_seconds": 12.319,
+    "simulated_days": 1,
+    "simulated_hours": 24,
+    "output_files_generated": 29,
+    "run_logged_receipt": "audit/runs/legacy-p04-warmup/receipt.json",
+    "warmup_receipt": "audit/runs/legacy_p04_warmup_receipt.json"
+  }
+}

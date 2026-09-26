@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "C:/Users/symon.mezbahuddin/mingw64/bin/gcc.exe",
+    "--version"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 0.06,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 28336,
+  "pid": 37816,
+  "started_unix": 1790462442.2468293,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/gcc-version-check/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/gcc-version-check/stdout.log",
+    "sha256": "908fcaacac3511fb83a28c5d99453b682da5f803c6a4009f9ce73f9fdd45d66a"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

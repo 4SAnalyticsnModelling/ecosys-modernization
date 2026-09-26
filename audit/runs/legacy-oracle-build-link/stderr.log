@@ -1,0 +1,10 @@
+watsub.f:5774:19:
+
+ 5774 |      2,XN*0.0098*-ABS(SLOPE(N,N2,N1))*CND1
+      |                   1
+Warning: Extension: Unary operator following arithmetic operator (use parentheses) at (1)
+watsub.f:5780:19:
+
+ 5780 |      2,XN*0.0098*-ABS(SLOPE(N,N2,N1))*CNDH1(N,N2,N1)
+      |                   1
+Warning: Extension: Unary operator following arithmetic operator (use parentheses) at (1)

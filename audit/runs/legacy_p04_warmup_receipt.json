@@ -1,0 +1,173 @@
+{
+  "status": "WARMUP_COMPLETED",
+  "protocol": "plan \u00a75 P0.4 / SAGE T-00140 / T-00141",
+  "bounded_scope": "1 simulated day (Day 1 of Year 1998, 24 hourly records)",
+  "started_unix": 1790463493.9107833,
+  "elapsed_seconds": 12.319,
+  "executable": {
+    "source_path": "D:\\ecosys-evidence\\legacy\\ecosys_oracle.exe",
+    "sha256": "273630BEAD10306D7E55B8EC87BF8B58C8E4BB4422ADD5CD5B94BA3FD742F319",
+    "note_vs_historical": "Matches historical build options and sources exactly; sha256 differs from C17182F95CFD442AEF5FB4F3A5F48B0F3D6CAB1AF577ECD2D577E0ECE534EB90 due to PE timestamp / compiler build metadata"
+  },
+  "deck": {
+    "source_path": "D:\\ecosys-evidence\\legacy\\staged_deck",
+    "staged_input_file_count": 67,
+    "f25sol98_sha256": "99DF888A11AA5EDD444C6729634B7C9F2F9F1CCFB8F740D5B325584578DD94A4",
+    "f25y98_sha256": "956D74F70D134DE71B56262920F6A25A7D0E826EF180020F1FCECD82C9CB3976"
+  },
+  "warmup_execution": {
+    "run_dir": "D:\\ecosys-modernization\\audit\\runs\\p0-4-warmup-deck",
+    "log_file": "log98f25",
+    "termination_marker": "NOW EXECUTING DAY     2   OF YEAR  1998",
+    "simulated_days_completed": 1,
+    "simulated_hours_completed": 24,
+    "output_file_count": 29,
+    "outputs": {
+      "01998f25cd1": {
+        "size_bytes": 16560,
+        "lines": 32,
+        "sha256": "D5D670B88AF24B09761B9C4F7626EDA9ECE026DD4C08D4F1ACC0D8DBFD6892C6"
+      },
+      "01998f25ch1": {
+        "size_bytes": 251820,
+        "lines": 754,
+        "sha256": "ECB3371E7FCD561E94EA6020C839DC3ABBEE25D38BAA2E53F687ED4BCB5E8B68"
+      },
+      "01998f25ed1": {
+        "size_bytes": 25124,
+        "lines": 30,
+        "sha256": "C38DD20E3BC838EC053E09D3BD6A42ED74F4DA3B7D692BA574B9471EECC86095"
+      },
+      "01998f25eh1": {
+        "size_bytes": 345098,
+        "lines": 747,
+        "sha256": "5F96E6636AE7CC0D3AACCBB03C935A62E291E159F8F2D3FBE83CE9D389B7E1BC"
+      },
+      "01998f25nd1": {
+        "size_bytes": 18520,
+        "lines": 28,
+        "sha256": "4FDD26D74897424F1E2654CB36E36D66E6116C4D61565F98C4F25EC1C0F2C170"
+      },
+      "01998f25nh1": {
+        "size_bytes": 189976,
+        "lines": 748,
+        "sha256": "335BBE11983056567C96B42AC22936B204CFE1C6915EE8F17E9E983203DF6416"
+      },
+      "01998f25pd1": {
+        "size_bytes": 12674,
+        "lines": 27,
+        "sha256": "25D259D8A74EA42C37D7A277043AE46F0D18F905918C87256B7E690DCF034D6E"
+      },
+      "01998f25wd1": {
+        "size_bytes": 25124,
+        "lines": 30,
+        "sha256": "114A8BBFC3F3AE411470527E39264220A43891F30EC6CE4F1C5C38071D39A422"
+      },
+      "01998f25wh1": {
+        "size_bytes": 598484,
+        "lines": 750,
+        "sha256": "FC78ADD87BE72332B3A6DC69B7FC09C0AD6B5F78895E7BAEAC872473861FEF39"
+      },
+      "11998f25cd1": {
+        "size_bytes": 16728,
+        "lines": 28,
+        "sha256": "7F2BF4304803B2871AC43A02935F8D5E9BC9C6C43C781CAAA8BAB36D1343782D"
+      },
+      "11998f25ch1": {
+        "size_bytes": 107052,
+        "lines": 754,
+        "sha256": "A876C55E59B14230B32A65688E6E396DC9EE1872A5F01D9657729ABF2FEB3023"
+      },
+      "11998f25ed1": {
+        "size_bytes": 0,
+        "lines": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "11998f25eh1": {
+        "size_bytes": 107052,
+        "lines": 754,
+        "sha256": "9A5185A1EC0B2DDC8B736301D527999EFB22BCC0449675F2E2CD612AC8A88103"
+      },
+      "11998f25nd1": {
+        "size_bytes": 8212,
+        "lines": 22,
+        "sha256": "6881A153A846BA3674A94F48CFDE7C52278CB4C4D4B04ECF91DA65A8149B8353"
+      },
+      "11998f25nh1": {
+        "size_bytes": 33104,
+        "lines": 720,
+        "sha256": "9743DEEBC353362BBCBD0D6DB3E78F832CEAE322C4D7D3EDFE238FD0E272331A"
+      },
+      "11998f25pd1": {
+        "size_bytes": 8460,
+        "lines": 26,
+        "sha256": "83BD4E7CCE4590851C5006EDDB6831EA3A182495E55C92C45CCC59A2F04BA6FE"
+      },
+      "11998f25wd1": {
+        "size_bytes": 0,
+        "lines": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "11998f25wh1": {
+        "size_bytes": 91460,
+        "lines": 726,
+        "sha256": "7E66A9AEB7F41B14C1D45FA88AFFE3CC9A750976DA300C0801D7DB939B60411E"
+      },
+      "Cf21998": {
+        "size_bytes": 0,
+        "lines": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "log98f25": {
+        "size_bytes": 198233,
+        "lines": 919,
+        "sha256": "C926E1AFA5CCFFA8074E6FF8E909F57F7F9172BA3B149E4760687FD95074B5D7"
+      },
+      "logfile1": {
+        "size_bytes": 4107,
+        "lines": 40,
+        "sha256": "2AB637DA65EE13CDF2FD1BF90F0C0898E39AE2DF7F0958E205A6DA8AB5D8F603"
+      },
+      "logfile2": {
+        "size_bytes": 0,
+        "lines": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "logfile3": {
+        "size_bytes": 0,
+        "lines": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "Mf21998": {
+        "size_bytes": 0,
+        "lines": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "Nf21998": {
+        "size_bytes": 893796,
+        "lines": 4213,
+        "sha256": "E2B85533F12B43E02C2351E586E5C7FE17FACB13C666F9829123E22EC235CCB9"
+      },
+      "Pf21998": {
+        "size_bytes": 0,
+        "lines": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "Qf21998": {
+        "size_bytes": 0,
+        "lines": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "Rf21998": {
+        "size_bytes": 0,
+        "lines": 0,
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "Wf21998": {
+        "size_bytes": 173282,
+        "lines": 877,
+        "sha256": "D90B249ECF9C0066DBF96B6350E55DE014CD27F1C8AA7C3C43831969D9E41E05"
+      }
+    }
+  }
+}

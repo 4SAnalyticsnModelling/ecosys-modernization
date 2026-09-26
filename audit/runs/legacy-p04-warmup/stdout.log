@@ -1,0 +1,11 @@
+Acquiring machine lock: D:\ecosys-modernization\.agent\locks\machine.lock
+Launching legacy oracle: D:\ecosys-modernization\audit\runs\p0-4-warmup-deck\ecosys_oracle.exe runscript .
+Warmup receipt written to D:\ecosys-modernization\audit\runs\legacy_p04_warmup_receipt.json
+{
+  "status": "WARMUP_COMPLETED",
+  "elapsed_seconds": 12.319,
+  "simulated_days": 1,
+  "simulated_hours": 24,
+  "output_files_generated": 29,
+  "sample_output_file": "01998f25cd1"
+}
