@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00099.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "The newest batch review says CHANGED-RANGE rows moved; PATHFINDER must re-map them with anchors before any ledger rewrite.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00099.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER to revise the next CHANGED-RANGE row batches with anchor-based live-source mappings.",
+    "state_recent": [
+      "T-00098 SAGE DONE: CHANGED-RANGE rows require joint lines+sha256 refresh after mapping proof.",
+      "T-00097 PATHFINDER DONE: first batch confirms moved ranges and invalid hash-only refresh.",
+      "T-00096 SAGE DONE: hash-only refresh rejected; per-row line mapping required."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00099.md",
+    "task_id": "T-00099"
+  },
+  "ended": 1790455262.438144,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f20920a43ffeZieM7tl9e3mP6v",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 76160,
+    "cache_write": 0,
+    "cost": 0.0078362,
+    "input": 5621,
+    "llm_calls": 6,
+    "output": 4324,
+    "tool_calls": 8
+  },
+  "violations": []
+}
