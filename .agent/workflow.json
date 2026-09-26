@@ -10,7 +10,8 @@
     "PATHFINDER:T-00007": 1,
     "PATHFINDER:T-00026": 1,
     "PATHFINDER:T-00032": 1,
-    "PATHFINDER:T-00033": 1
+    "PATHFINDER:T-00033": 1,
+    "PATHFINDER:T-00115": 1
   },
   "full_run_justifications": [],
   "full_runs": {
@@ -58,8 +59,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Next unblocked PATHFINDER evidence task follows SAGE's final ledger disposition and keeps the write set bounded to verified rows.",
   "task_id": "T-00115",
-  "worker": "PATHFINDER"
+  "worker": null
 }

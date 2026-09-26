@@ -1,0 +1,49 @@
+{
+  "changed": [],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Next unblocked PATHFINDER evidence task follows SAGE's final ledger disposition and keeps the write set bounded to verified rows.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00115.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER: prepare the verified TRC ledger evidence packet without mutating the ledger.",
+    "state_recent": [
+      "T-00113 FORGE DONE: final ledger rewrite for unresolved rows.",
+      "T-00112 PATHFINDER DONE: shared legacy ZEROS/ZEROS2 guard evidence mapped.",
+      "T-00111 SAGE DONE: unresolved rows preserve status; no hash refresh."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00115.md",
+    "task_id": "T-00115"
+  },
+  "ended": 1790458000.9982378,
+  "failure_packet": ".agent/failures/F-00007",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f207079fdffeDFn41U6wuhUoM2",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [
+    "result file missing"
+  ],
+  "result_status": "FAIL",
+  "review": null,
+  "usage": {
+    "cache_read": 35072,
+    "cache_write": 0,
+    "cost": 0.05472484,
+    "input": 70863,
+    "llm_calls": 3,
+    "output": 33209,
+    "tool_calls": 7
+  },
+  "violations": []
+}
