@@ -1,1 +1,1 @@
-T-00130 SAGE: approve the corrected seven-row legacy ZEROS ledger packet and close TRC-331..335, 337, 338.
+T-00131 FORGE: apply the approved seven-row legacy ZEROS packet to the traceability ledger.

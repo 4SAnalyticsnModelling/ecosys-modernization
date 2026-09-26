@@ -40,11 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00129 SAGE DONE: final packet approval for corrected seven-row legacy ZEROS rows
-- T-00127 FORGE DONE: fixed the residual TRC anchor defects in the packet
+- T-00130 SAGE DONE: final packet approval closes legacy ZEROS provenance review.
+- T-00129 SAGE DONE: corrected seven-row packet approved with reviewer update.
+- T-00127 FORGE DONE: residual anchor defects fixed in the seven-row packet.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE approves the final seven-row ZEROS packet and closes TRC-331..335, 337, and 338.
+FORGE applies the approved seven-row legacy ZEROS packet to the traceability ledger and records the provenance update.
