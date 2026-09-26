@@ -60,8 +60,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Newest result directs a FORGE ledger-only packet write; no science change and no full run required.",
   "task_id": "T-00131",
-  "worker": "FORGE"
+  "worker": null
 }

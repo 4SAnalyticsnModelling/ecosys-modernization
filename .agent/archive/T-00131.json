@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00131.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Newest result directs a FORGE ledger-only packet write; no science change and no full run required.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00131.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "FORGE applies the approved seven-row legacy ZEROS packet to the traceability ledger and records the provenance update.",
+    "state_recent": [
+      "T-00130 SAGE DONE: final packet approval closes legacy ZEROS provenance review.",
+      "T-00129 SAGE DONE: corrected seven-row packet approved with reviewer update.",
+      "T-00127 FORGE DONE: residual anchor defects fixed in the seven-row packet."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00131.md",
+    "task_id": "T-00131"
+  },
+  "ended": 1790461223.596604,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f2047a730ffe2Kg4RGGItHoFvn",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 5598900,
+    "cache_write": 0,
+    "cost": 0.88532475,
+    "input": 500068,
+    "llm_calls": 68,
+    "output": 24095,
+    "tool_calls": 77
+  },
+  "violations": []
+}
