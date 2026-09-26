@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00130 SAGE DONE: final packet approval closes legacy ZEROS provenance review.
-- T-00129 SAGE DONE: corrected seven-row packet approved with reviewer update.
-- T-00127 FORGE DONE: residual anchor defects fixed in the seven-row packet.
+- T-00131 FORGE DONE: seven-row packet finalized and verified.
+- T-00130 SAGE DONE: final reviewer update approved; no science change.
+- T-00129 SAGE DONE: residual anchor defects fixed; packet approved.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE applies the approved seven-row legacy ZEROS packet to the traceability ledger and records the provenance update.
+PATHFINDER prepares the G0-4 legacy rerun evidence packet and run-002 recipe check.
