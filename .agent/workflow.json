@@ -56,8 +56,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "New frontier evidence shows hard_max_iterations is a ceiling, not MRXN. Forge should remove the clamp and add invariant tests before SAGE's confirming review.",
-  "task_id": "T-00047",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Trace the exact error propagation path for SOLUTE convergence failures to confirm rollback semantics without a full Ottawa run.",
+  "task_id": "T-00048",
+  "worker": "PATHFINDER"
 }
