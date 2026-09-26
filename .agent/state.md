@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
+- T-00050 PATHFINDER DONE: hourly SOLUTE failure isolated to dynamic input equilibration
 - T-00049 SAGE DONE: solver-budget closure confirmed; no more evidence needed
-- T-00048 PATHFINDER DONE: bounded trace proves no silent state commit
-- T-00047 SAGE DONE: approved DEV-007 removal and solver ceiling change
+- T-00048 PATHFINDER DONE: no silent state commit in STARTE or wet-hour callers
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-T-00050 PATHFINDER: trace the hour-2,589 SOLUTE exhaustion path and bound the legacy-equivalent closure.
+PATHFINDER: add the missing legacy hourly input-equilibration trace for G0-2b.

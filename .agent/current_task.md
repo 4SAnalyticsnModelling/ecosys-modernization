@@ -1,1 +1,1 @@
-T-00050 PATHFINDER: Trace the Ottawa hour-2,589 SOLUTE exhaustion path to bound the legacy-equivalent closure.
+T-00051 PATHFINDER: trace the missing legacy hourly input-equilibration semantics for the Ottawa hour-2,589 SOLUTE failure.
