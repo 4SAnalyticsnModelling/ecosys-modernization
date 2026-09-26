@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
+- T-00073 SAGE STATUS: REVISE T-00060; criterion 2 remains open
+- T-00072 FORGE STATUS: revised T-00060; SAGE re-review pending
 - T-00071 SAGE STATUS: REVISE T-00060; R1 remains open
-- T-00070 FORGE STATUS: revised T-00060; SAGE re-review pending
-- T-00068 SAGE STATUS: REVISE T-00060; R1 and R3 remain open
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE revises T-00060 in place, emits a new diff hash, and prepares the packet for SAGE re-review.
+FORGE revises T-00060 in place on a new diff hash and prepares SAGE re-review.
