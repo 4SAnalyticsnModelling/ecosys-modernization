@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00101", "role": "FORGE", "task_file": ".agent/tasks/T-00101.md", "result_file": ".agent/results/T-00101.md", "skills": ["ecosys-source-navigation"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Next unblocked work is the FORGE remap of the next CHANGED-RANGE batch using verified anchors; the newest result explicitly directs this task.", "state_recent": ["T-00100 PATHFINDER DONE: next batch re-bound to live anchors before ledger rewrite", "T-00099 PATHFINDER DONE: stale citations are MOVED, not hash-fixable", "T-00098 SAGE DONE: hash-only refresh rejected; need zig_lines + zig_sha256"], "state_next": "FORGE remaps the next CHANGED-RANGE batch to verified live anchors and pairs each zig_lines update with a matching zig_sha256 refresh."}
+{
+  "full_run_justification": null,
+  "reason": "Next unblocked work is the FORGE remap of the next CHANGED-RANGE batch using verified anchors; the newest result explicitly directs this task.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00101.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-source-navigation"
+  ],
+  "state_next": "FORGE remaps the next CHANGED-RANGE batch to verified live anchors and pairs each zig_lines update with a matching zig_sha256 refresh.",
+  "state_recent": [
+    "T-00100 PATHFINDER DONE: next batch re-bound to live anchors before ledger rewrite",
+    "T-00099 PATHFINDER DONE: stale citations are MOVED, not hash-fixable",
+    "T-00098 SAGE DONE: hash-only refresh rejected; need zig_lines + zig_sha256"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00101.md",
+  "task_id": "T-00101"
+}
