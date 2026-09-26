@@ -1,0 +1,48 @@
+{
+  "changed": [
+    ".agent/results/T-00024.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Latest evidence narrows DEV-005 to an indirect trajectory modifier; the next unlocked action is SAGE review of the D6 attribution packet before user approval.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00024.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE adjudicates D6 DEV-005 attribution evidence and advises whether the user may sign.",
+    "state_recent": [
+      "T-00023 FORGE DONE: DEV-005 compare isolates matrix-water stall from chemistry drift.",
+      "T-00022 PATHFINDER DONE: matrix-water non-improvement, not DEV-005, drives the stall.",
+      "T-00021 PATHFINDER DONE: matrix residual, not ammonium multiplier, causes the failure."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00024.md",
+    "task_id": "T-00024"
+  },
+  "ended": 1790390577.931877,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "reset": {
+    "new": "f335171d-5acf-4aa9-be65-df403f4337c9",
+    "old": "f86c1009-6948-4520-a98e-49f08698de45",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 677673,
+    "cache_write": 45354,
+    "cost": null,
+    "input": 26,
+    "llm_calls": 13,
+    "output": 6620,
+    "tool_calls": 4
+  },
+  "violations": []
+}

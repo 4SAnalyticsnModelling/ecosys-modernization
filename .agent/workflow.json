@@ -46,8 +46,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Latest evidence narrows DEV-005 to an indirect trajectory modifier; the next unlocked action is SAGE review of the D6 attribution packet before user approval.",
   "task_id": "T-00024",
-  "worker": "SAGE"
+  "worker": null
 }
