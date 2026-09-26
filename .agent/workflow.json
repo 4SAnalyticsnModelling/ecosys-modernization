@@ -56,8 +56,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "FORGE should produce the bounded matched-state replay packet for the legacy reads.f → starte.f hourly precipitation/irrigation equilibration branch, resolving whether the mismatch is state initialization or reaction residual logic.",
-  "task_id": "T-00054",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Revise the T-00053 bounded chemistry test to isolate fixed-pH legacy semantics and re-submit for SAGE review.",
+  "task_id": "T-00055",
+  "worker": "FORGE"
 }

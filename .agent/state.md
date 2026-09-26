@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00051 PATHFINDER DONE: legacy hourly equilibration uses fixed-point loop; no hidden cap
-- T-00050 PATHFINDER DONE: dynamic-input path isolated to hourly equilibration path
-- T-00049 SAGE DONE: solver-budget closure confirmed; no more evidence required
+- T-00054 SAGE DONE: T-00053 test needs revision to isolate fixed-pH semantics
+- T-00053 FORGE DONE: matched-state replay isolates residual update mismatch
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE: build the bounded matched-state replay for the hourly input-equilibration chemistry branch and compare it to the Zig hourly update sequence.
+FORGE: revise the bounded T-00053 chemistry test and prepare the SAGE review packet.

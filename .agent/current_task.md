@@ -1,1 +1,1 @@
-T-00053 FORGE: build the bounded matched-state replay for the legacy hourly input-equilibration chemistry branch and compare it to the Zig hourly update sequence.
+T-00055 FORGE: revise the bounded T-00053 chemistry test to isolate fixed-pH hourly input-equilibration semantics and prepare SAGE review.

@@ -1,18 +1,1 @@
-{
-  "diff_sha256": "3f4945851248e3b58484c104b0d85e53bedcbc7a815b6efa49c0ce6979823340",
-  "full_run_justification": null,
-  "reason": "automatic review of production-source change",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00054.md",
-  "result_status": "DONE",
-  "review_of": "T-00053",
-  "role": "SAGE",
-  "schema_version": 1,
-  "skills": [
-    "ecosys-process-science-parity"
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00054.md",
-  "task_id": "T-00054"
-}
+{"schema_version": 1, "status": "PENDING", "task_id": "T-00055", "role": "FORGE", "task_file": ".agent/tasks/T-00055.md", "result_file": ".agent/results/T-00055.md", "skills": ["ecosys-validation-tests"], "t1_argv": null, "requires_sage_review": true, "full_run_justification": null, "reason": "Revise the T-00053 bounded chemistry test to isolate fixed-pH legacy semantics and re-submit for SAGE review.", "state_recent": ["T-00054 SAGE DONE: T-00053 test needs revision to isolate fixed-pH semantics", "T-00053 FORGE DONE: matched-state replay isolates residual update mismatch"], "state_next": "FORGE: revise the bounded T-00053 chemistry test and prepare the SAGE review packet."}
