@@ -1,0 +1,51 @@
+{
+  "changed": [
+    ".agent/results/T-00181.md",
+    "audit/runs/controller-restart/receipt.json",
+    "audit/runs/test-campaign-exempt-t181/receipt.json",
+    "audit/runs/test-campaign-exempt-t181/stderr.log",
+    "audit/runs/test-campaign-exempt-t181/stdout.log"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Controller is stale; the fix loads only after restart, and the next valid work is the FORGE relaunch of the detached legacy P0.4 campaign.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00181.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-multi-agent-coordination"
+    ],
+    "state_next": "FORGE restarts the stale controller and relaunches the detached legacy P0.4 Ottawa campaign after code reload.",
+    "state_recent": [
+      "T-00179 SAGE DONE: stale controller blocks all routing until restart.",
+      "T-00176 FORGE DONE: detached legacy campaign relaunch verified and heartbeating.",
+      "T-00175 FORGE DONE: lock attribution fix resolves deadlock loop."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00181.md",
+    "task_id": "T-00181"
+  },
+  "ended": 1790472693.8622842,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "recovered",
+  "quarantine": null,
+  "reset": {
+    "reset": "recovered"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 7038656,
+    "cache_write": 0,
+    "cost": 1.4171471999999996,
+    "input": 1139769,
+    "llm_calls": 108,
+    "output": 9179,
+    "tool_calls": 120
+  },
+  "violations": []
+}

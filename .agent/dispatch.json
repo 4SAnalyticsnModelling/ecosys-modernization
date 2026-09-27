@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00181", "role": "FORGE", "task_file": ".agent/tasks/T-00181.md", "result_file": ".agent/results/T-00181.md", "skills": ["ecosys-multi-agent-coordination"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Controller is stale; the fix loads only after restart, and the next valid work is the FORGE relaunch of the detached legacy P0.4 campaign.", "state_recent": ["T-00179 SAGE DONE: stale controller blocks all routing until restart.", "T-00176 FORGE DONE: detached legacy campaign relaunch verified and heartbeating.", "T-00175 FORGE DONE: lock attribution fix resolves deadlock loop."], "state_next": "FORGE restarts the stale controller and relaunches the detached legacy P0.4 Ottawa campaign after code reload."}
+{
+  "full_run_justification": null,
+  "reason": "Controller is stale; the fix loads only after restart, and the next valid work is the FORGE relaunch of the detached legacy P0.4 campaign.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00181.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-multi-agent-coordination"
+  ],
+  "state_next": "FORGE restarts the stale controller and relaunches the detached legacy P0.4 Ottawa campaign after code reload.",
+  "state_recent": [
+    "T-00179 SAGE DONE: stale controller blocks all routing until restart.",
+    "T-00176 FORGE DONE: detached legacy campaign relaunch verified and heartbeating.",
+    "T-00175 FORGE DONE: lock attribution fix resolves deadlock loop."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00181.md",
+  "task_id": "T-00181"
+}
