@@ -85,16 +85,17 @@
   "idle_check": true,
   "last_advance_unix": null,
   "last_route_errors": [
+    "task file missing sections ['RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']",
     "ALLOWED FILES `audit/traceability/traceability.csv` is outside FORGE may_write"
   ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "SAGE decision (idle-check) from SENTINEL",
-  "task_id": "T-00230",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE decision (routing-failure) from SENTINEL",
+  "task_id": "T-00233",
+  "worker": "SAGE"
 }

@@ -1,25 +1,17 @@
 {
-  "errors": [
-    "ALLOWED FILES `audit/traceability/traceability.csv` is outside FORGE may_write"
-  ],
-  "rejected": {
-    "full_run_justification": null,
-    "reason": "Fresh result T-00230 requires the approved seven-row ledger fix; no full run or science review is needed.",
-    "requires_sage_review": false,
-    "result_file": ".agent/results/T-00231.md",
-    "role": "FORGE",
-    "schema_version": 1,
-    "skills": [],
-    "state_next": "FORGE applies the approved seven-row traceability ledger packet and validates the CSV diff matches T-00130.",
-    "state_recent": [
-      "T-00230 SAGE DONE: G0-4 stays closed; the approved ledger write was never applied.",
-      "T-00228 SAGE DONE: Hold G0-4 closed until the live legacy Ottawa run exits or its heartbeat goes stale."
-    ],
-    "status": "PENDING",
-    "t1_argv": null,
-    "task_file": ".agent/tasks/T-00231.md",
-    "task_id": "T-00231"
-  },
+  "decision_kind": "routing-failure",
+  "decision_of": "SENTINEL",
+  "full_run_justification": null,
+  "reason": "SAGE decision (routing-failure) from SENTINEL",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00233.md",
+  "role": "SAGE",
   "schema_version": 1,
-  "status": "REJECTED"
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00233.md",
+  "task_id": "T-00233"
 }
