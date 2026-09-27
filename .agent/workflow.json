@@ -43,6 +43,10 @@
     {
       "task_id": "T-00209",
       "text": "P0.4 requires a fresh full legacy rerun because the full 30-year Ottawa outputs are not present in-repo and bounded evidence cannot establish the authoritative baseline."
+    },
+    {
+      "task_id": "T-00247",
+      "text": "The P0.4 legacy Ottawa rerun is required to produce the fresh 3-run evidence baseline; a bounded replay cannot establish the approved terminal receipt or restart validity under the detached-driver fix."
     }
   ],
   "full_runs": {
@@ -84,17 +88,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "task file missing sections ['INPUTS', 'RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "dead detached legacy Ottawa campaign has no terminal receipt; SAGE must decide diagnosis or relaunch strategy before gate reopening.",
-  "task_id": "T-00245",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Fresh detached legacy Ottawa relaunch follows the newest T-00245 decision; the dead driver fix is a bounded FORGE task.",
+  "task_id": "T-00247",
+  "worker": "FORGE"
 }

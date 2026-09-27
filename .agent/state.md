@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00241 SAGE DONE: idle confirmed; live detached legacy Ottawa campaign remains healthy.
-- T-00239 SAGE DONE: G0-4 stays closed; no unblocked worker task while heartbeat is fresh.
-- T-00238 SAGE DONE: no unblocked work; T-00228 hold remains active.
+- T-00245 SAGE DONE: dead detached legacy run ended without terminal receipt; relaunch under hidden-console and new pinned hash is required.
+- T-00241 SAGE DONE: G0-4 remains closed until fresh P0.4 evidence or stale heartbeat triggers.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE decides whether the dead legacy Ottawa campaign requires diagnosis/relaunch before G0-4 can reopen.
+FORGE commits the detached-driver fix, relaunches the legacy Ottawa P0.4 campaign under the new pinned driver hash, and quarantines the dead runs.
