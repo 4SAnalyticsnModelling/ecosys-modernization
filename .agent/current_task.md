@@ -1,1 +1,1 @@
-T-00206 PATHFINDER: identify kill cause and hardened relaunch recipe for the dead detached legacy P0.4 driver.
+T-00207 FORGE: implement hardened detached P0.4 relaunch harness and lock/log quarantine checks.

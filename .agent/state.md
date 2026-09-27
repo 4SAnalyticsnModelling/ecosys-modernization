@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00204 SAGE DONE: stale RUN_FAILED receipt invalid; dead driver needs diagnosis.
-- T-00197 SAGE BLOCKED: P0.4 hold until exit or stale heartbeat.
-- T-00195 SAGE BLOCKED: stale receipt invalid; PID 41688 still alive.
+- T-00206 PATHFINDER DONE: external kill; hardened relaunch recipe is next.
+- T-00204 SAGE DONE: stale RUN_FAILED invalid; do not retry in place.
+- T-00197 SAGE BLOCKED: hold P0.4 until driver exits or heartbeat is stale.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-Investigate the dead detached legacy P0.4 driver and document a hardened relaunch recipe.
+FORGE will harden the detached P0.4 relaunch path by enforcing campaign logs, run_1 quarantine, and fresh valid exit-receipt gating before any rerun.
