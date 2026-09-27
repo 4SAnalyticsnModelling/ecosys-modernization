@@ -22,6 +22,7 @@
     "PATHFINDER:T-00211": 1,
     "PATHFINDER:T-00212": 1,
     "PATHFINDER:T-00226": 1,
+    "PATHFINDER:T-00227": 1,
     "SAGE:T-00158": 1,
     "SAGE:T-00161": 1,
     "SAGE:T-00164": 1,
@@ -89,8 +90,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Open G0 gate is the detached legacy Ottawa P0.4 receipt; PATHFINDER must validate evidence without disturbing the live lock.",
   "task_id": "T-00227",
-  "worker": "PATHFINDER"
+  "worker": null
 }

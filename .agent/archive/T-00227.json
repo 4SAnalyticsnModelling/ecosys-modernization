@@ -1,0 +1,48 @@
+{
+  "changed": [
+    ".agent/results/T-00227.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Open G0 gate is the detached legacy Ottawa P0.4 receipt; PATHFINDER must validate evidence without disturbing the live lock.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00227.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER validates the live detached legacy Ottawa P0.4 receipt and decides whether G0-4 can reopen without disturbing the active machine lock.",
+    "state_recent": [
+      "T-00226 PATHFINDER STAGNATED: live legacy Ottawa P0.4 receipt remains active; no terminal evidence yet.",
+      "T-00225 SAGE DONE: G0-2c closed; G0-4 is the next open gate."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00227.md",
+    "task_id": "T-00227"
+  },
+  "ended": 1790543534.978184,
+  "failure_packet": ".agent/failures/F-00025",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1b4db8c1ffepjrR759RGe0Ksg",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "STAGNATED",
+  "review": null,
+  "usage": {
+    "cache_read": 171776,
+    "cache_write": 0,
+    "cost": 0.01884032,
+    "input": 12590,
+    "llm_calls": 10,
+    "output": 10739,
+    "tool_calls": 15
+  },
+  "violations": []
+}
