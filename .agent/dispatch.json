@@ -1,18 +1,26 @@
 {
-  "decision_kind": "routing-failure",
-  "decision_of": "SENTINEL",
-  "full_run_justification": null,
-  "reason": "SAGE decision (routing-failure) from SENTINEL",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00167.md",
-  "result_status": "FAIL",
-  "role": "SAGE",
-  "schema_version": 1,
-  "skills": [
-    "ecosys-process-science-parity"
+  "errors": [
+    "you wrote outside your lane (undone, copy in .agent/failures/route-1790468906/): audit/runs/p04-full-campaign/heartbeat.json: outside SENTINEL may_write"
   ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00167.md",
-  "task_id": "T-00167"
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "The latest evidence shows the detached P0.4 heartbeat is misattributed to SENTINEL, so the next bounded controller fix belongs to FORGE to restore routing without touching science.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00168.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [],
+    "state_next": "FORGE fixes the controller heartbeat/lock attribution bug so detached legacy campaign writes stop blocking valid P0 work.",
+    "state_recent": [
+      "T-00167 SAGE DONE: heartbeat loop continues; fix must land in FORGE.",
+      "T-00164 SAGE DONE: detached run rewrote liveness; routing fix is unchanged.",
+      "T-00161 SAGE DONE: same false attribution loop; FORGE fix is the correct next turn."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00168.md",
+    "task_id": "T-00168"
+  },
+  "schema_version": 1,
+  "status": "REJECTED"
 }
