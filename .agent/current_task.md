@@ -1,1 +1,1 @@
-T-00210 PATHFINDER: monitor the live detached legacy Ottawa P0.4 full-run campaign and verify the fresh terminal receipt.
+T-00211 PATHFINDER: Monitor the live detached legacy Ottawa P0.4 campaign until exit and verify a fresh terminal receipt without disturbing the active lock or heartbeat.
