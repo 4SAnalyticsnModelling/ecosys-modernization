@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00191.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Stale RUN_FAILED predates the live heartbeat; no fresh exit receipt exists, so SAGE must decide evidence validity before any retry.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00191.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE adjudicates the stale-vs-live detached legacy Ottawa P0.4 receipt mismatch and decides whether to invalidate RUN_FAILED or audit the exit path before any retry.",
+    "state_recent": [
+      "T-00190 PATHFINDER BLOCKED: stale RUN_FAILED predates live heartbeat.",
+      "T-00189 PATHFINDER STAGNATED: no fresh exit receipt after termination.",
+      "T-00188 PATHFINDER STAGNATED: live campaign remains active; stale receipt persists."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00191.md",
+    "task_id": "T-00191"
+  },
+  "ended": 1790473931.0729606,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "fff5a8de-7853-42fb-a08d-34cd54277dcc",
+    "old": "d9a4c322-4d85-4feb-b35c-af9214acff81",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 616740,
+    "cache_write": 39250,
+    "cost": null,
+    "input": 26,
+    "llm_calls": 13,
+    "output": 8745,
+    "tool_calls": 4
+  },
+  "violations": []
+}

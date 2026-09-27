@@ -80,8 +80,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Stale RUN_FAILED predates the live heartbeat; no fresh exit receipt exists, so SAGE must decide evidence validity before any retry.",
   "task_id": "T-00191",
-  "worker": "SAGE"
+  "worker": null
 }

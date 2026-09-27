@@ -102,6 +102,15 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   DECISION: continue the campaign and do not restart or supersede it. Only the receipt that driver 41688 writes counts.
   Still open: the cause of the early exit-2 run_1 failure (about 17:52 local) was never found. If the live run exits
   non-zero, PATHFINDER reads `run_1` logs before any relaunch.
+  T-00191 (SAGE, 2026-09-27T01:50Z, re-asked via T-00188..T-00190): T-00184 REAFFIRMED, not re-decided. The receipt
+  d9ed4644... is INVALID as the status of the live attempt. Driver 41688 (argv has the same `--out`) and oracle child
+  41592 (started 01:28:20Z) were alive at 01:50:23Z. The heartbeat read `RUN_1` at 1321 s, and run_1 outputs were written
+  at 01:49:32Z. The premise of T-00189, "after the process termination", is false. DECISION: no exit-path audit before
+  the live run ends, and no kill, retry or relaunch. The only next evidence is the terminal receipt that 41688 writes
+  over the same path. SENTINEL routes no further P0.4 receipt tasks while 41688 holds the lock. Correction to T-00184:
+  run_1 was restaged at 01:28:17Z, so the logs of the exit-2 attempt are gone. Its only remaining evidence is receipt
+  d9ed4644... and the first-attempt text in driver.log. The exit-2 cause stays open. It blocks P0.4 acceptance only if
+  the live receipt is non-zero or its exe/deck hashes differ.
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)

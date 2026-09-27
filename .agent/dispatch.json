@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00191", "role": "SAGE", "task_file": ".agent/tasks/T-00191.md", "result_file": ".agent/results/T-00191.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Stale RUN_FAILED predates the live heartbeat; no fresh exit receipt exists, so SAGE must decide evidence validity before any retry.", "state_recent": ["T-00190 PATHFINDER BLOCKED: stale RUN_FAILED predates live heartbeat.", "T-00189 PATHFINDER STAGNATED: no fresh exit receipt after termination.", "T-00188 PATHFINDER STAGNATED: live campaign remains active; stale receipt persists."], "state_next": "SAGE adjudicates the stale-vs-live detached legacy Ottawa P0.4 receipt mismatch and decides whether to invalidate RUN_FAILED or audit the exit path before any retry."}
+{
+  "full_run_justification": null,
+  "reason": "Stale RUN_FAILED predates the live heartbeat; no fresh exit receipt exists, so SAGE must decide evidence validity before any retry.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00191.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE adjudicates the stale-vs-live detached legacy Ottawa P0.4 receipt mismatch and decides whether to invalidate RUN_FAILED or audit the exit path before any retry.",
+  "state_recent": [
+    "T-00190 PATHFINDER BLOCKED: stale RUN_FAILED predates live heartbeat.",
+    "T-00189 PATHFINDER STAGNATED: no fresh exit receipt after termination.",
+    "T-00188 PATHFINDER STAGNATED: live campaign remains active; stale receipt persists."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00191.md",
+  "task_id": "T-00191"
+}
