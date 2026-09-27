@@ -1,1 +1,1 @@
-T-00196 SAGE: IDLE — wait for PID 41688 to exit before validating the fresh P0.4 receipt.
+T-00198 SAGE: no unblocked work; hold P0.4 until PID 41688 exits or the heartbeat goes stale, then judge the fresh receipt.

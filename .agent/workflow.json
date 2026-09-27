@@ -81,8 +81,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "SAGE decision (idle-check) from SENTINEL",
+  "status": "IDLE",
+  "status_reason": "no unblocked work: PID 41688 still alive; stale RUN_FAILED receipt remains invalid; SAGE waits for exit or 30m stale heartbeat before judging the fresh P0.4 receipt.",
   "task_id": "T-00197",
   "worker": null
 }
