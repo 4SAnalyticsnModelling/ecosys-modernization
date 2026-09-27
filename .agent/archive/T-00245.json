@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00245.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "dead detached legacy Ottawa campaign has no terminal receipt; SAGE must decide diagnosis or relaunch strategy before gate reopening.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00245.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE decides whether the dead legacy Ottawa campaign requires diagnosis/relaunch before G0-4 can reopen.",
+    "state_recent": [
+      "T-00241 SAGE DONE: idle confirmed; live detached legacy Ottawa campaign remains healthy.",
+      "T-00239 SAGE DONE: G0-4 stays closed; no unblocked worker task while heartbeat is fresh.",
+      "T-00238 SAGE DONE: no unblocked work; T-00228 hold remains active."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00245.md",
+    "task_id": "T-00245"
+  },
+  "ended": 1790551589.789089,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "6fe7dd99-db14-4f54-91d9-e3b4751dcbb4",
+    "old": "86626209-72ec-45aa-acbe-fd65690b9d90",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 790425,
+    "cache_write": 87471,
+    "cost": null,
+    "input": 24,
+    "llm_calls": 12,
+    "output": 6467,
+    "tool_calls": 3
+  },
+  "violations": []
+}

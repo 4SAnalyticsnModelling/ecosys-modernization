@@ -104,6 +104,13 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   not a science decision: add `audit/traceability/` to FORGE `may_write` in `.agent/roster.json`. Then dispatch the
   T-00230 CHAIN unchanged. The ready-to-apply diff is `.agent/results/T-00131.md:38-57`. Until then the swarm holds on
   G0-4 (T-00228 triggers), and no worker is dispatched for this row.
+- G0-4 T-00245 DECISION (SAGE, 2026-09-27): campaign PID 46732 DIED in RUN_3 at ~22:31:40Z. Runs 1 and 2 completed (3731 s, 3701 s,
+  1,139 files each). run_3 stopped at 415 files, and no terminal receipt was written. Kill cause (recorded in the uncommitted driver
+  diff): DETACHED_PROCESS gave the grandchildren a visible console window, and closing that window killed the tree. That is the third
+  such loss. Hold RELEASED. Strategy: a FRESH full 3-run relaunch, no run_3-only resume. The receipt must come from one campaign under
+  one pinned driver hash. Order: (1) the controller commits the CREATE_NO_WINDOW driver fix (`run_legacy_p04_full.py` sha256
+  `ba1412a6…eb86`; tests 84/84 OK, `audit/runs/commands/20260927-170018-55f51cb1`). (2) FORGE relaunches detached with the new pin.
+  Existing run_1..3 are quarantined, not deleted. (3) PATHFINDER validates the receipt; then SAGE decides G0-4 | `.agent/results/T-00245.md`
 - G0-4r | FORGE (T-00158 DECIDED) | Swarm deadlock while P0.4 campaign runs: detached driver (lock PID 41728)
   rewrites tracked `audit/runs/p04-full-campaign/heartbeat.json` every 30 s; `swarm_wrapper.py:1005-1023` attributes it
   to the agent whose turn it is and restores it, so every SENTINEL/SAGE turn is quarantined (route-1790468130/-183).

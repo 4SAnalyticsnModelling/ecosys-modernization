@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00245", "role": "SAGE", "task_file": ".agent/tasks/T-00245.md", "result_file": ".agent/results/T-00245.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "dead detached legacy Ottawa campaign has no terminal receipt; SAGE must decide diagnosis or relaunch strategy before gate reopening.", "state_recent": ["T-00241 SAGE DONE: idle confirmed; live detached legacy Ottawa campaign remains healthy.", "T-00239 SAGE DONE: G0-4 stays closed; no unblocked worker task while heartbeat is fresh.", "T-00238 SAGE DONE: no unblocked work; T-00228 hold remains active."], "state_next": "SAGE decides whether the dead legacy Ottawa campaign requires diagnosis/relaunch before G0-4 can reopen."}
+{
+  "full_run_justification": null,
+  "reason": "dead detached legacy Ottawa campaign has no terminal receipt; SAGE must decide diagnosis or relaunch strategy before gate reopening.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00245.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE decides whether the dead legacy Ottawa campaign requires diagnosis/relaunch before G0-4 can reopen.",
+  "state_recent": [
+    "T-00241 SAGE DONE: idle confirmed; live detached legacy Ottawa campaign remains healthy.",
+    "T-00239 SAGE DONE: G0-4 stays closed; no unblocked worker task while heartbeat is fresh.",
+    "T-00238 SAGE DONE: no unblocked work; T-00228 hold remains active."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00245.md",
+  "task_id": "T-00245"
+}
