@@ -90,8 +90,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "No worker task is unblocked; G0-4 remains held while the detached legacy Ottawa campaign stays live.",
   "task_id": "T-00239",
-  "worker": "SAGE"
+  "worker": null
 }

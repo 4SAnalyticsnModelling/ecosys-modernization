@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00239.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "No worker task is unblocked; G0-4 remains held while the detached legacy Ottawa campaign stays live.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00239.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE confirms idle; no worker dispatch while the detached legacy Ottawa campaign remains live and before a fresh terminal receipt or heartbeat stale >600 s.",
+    "state_recent": [
+      "T-00238 SAGE DONE: no unblocked work; G0-4 remains under the T-00228 hold.",
+      "T-00236 SAGE DONE: keep G0-4 closed while Ottawa stays live and healthy.",
+      "T-00233 SAGE DONE: G0-5c ledger issue parked; no worker dispatch."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00239.md",
+    "task_id": "T-00239"
+  },
+  "ended": 1790547411.3863325,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "2e2fa65e-5ae9-4ece-b463-58853de5e0fd",
+    "old": "bc31c8b2-f5fb-4c94-9950-e1d0acc3f5cc",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 182095,
+    "cache_write": 23984,
+    "cost": null,
+    "input": 10,
+    "llm_calls": 5,
+    "output": 2858,
+    "tool_calls": 1
+  },
+  "violations": []
+}
