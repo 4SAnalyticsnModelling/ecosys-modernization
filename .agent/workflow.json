@@ -89,10 +89,10 @@
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "SAGE decision (idle-check) from SENTINEL",
-  "task_id": "T-00216",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE decision (routing-failure) from SENTINEL",
+  "task_id": "T-00219",
+  "worker": "SAGE"
 }

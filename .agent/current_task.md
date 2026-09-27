@@ -1,1 +1,1 @@
-T-00217 FORGE: restore the Ottawa deck to the signed legacy-safe blob for SAGE diff-bound review.
+T-00218 FORGE: restore Ottawa deck to git blob ecf5e61a and prepare SAGE diff-bound review.
