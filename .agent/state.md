@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
+- T-00181 FORGE DONE: controller restarted and legacy campaign relaunched cleanly.
 - T-00179 SAGE DONE: stale controller blocks all routing until restart.
 - T-00176 FORGE DONE: detached legacy campaign relaunch verified and heartbeating.
-- T-00175 FORGE DONE: lock attribution fix resolves deadlock loop.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE restarts the stale controller and relaunches the detached legacy P0.4 Ottawa campaign after code reload.
+Monitor the active detached P0.4 legacy campaign and collect the completion or failure receipt without colliding with the driver or heartbeat.

@@ -1,1 +1,1 @@
-T-00182 PATHFINDER Monitor the detached legacy Ottawa P0.4 full-run campaign and collect completion or failure evidence without colliding with the live driver or heartbeat.
+T-00183 PATHFINDER: monitor the detached legacy P0.4 Ottawa campaign and collect completion/failure receipt without colliding with the active driver or heartbeat.
