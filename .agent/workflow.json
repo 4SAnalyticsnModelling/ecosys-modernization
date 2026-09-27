@@ -20,6 +20,7 @@
     "PATHFINDER:T-00192": 1,
     "PATHFINDER:T-00210": 1,
     "PATHFINDER:T-00211": 1,
+    "PATHFINDER:T-00212": 1,
     "SAGE:T-00158": 1,
     "SAGE:T-00161": 1,
     "SAGE:T-00164": 1,
@@ -87,8 +88,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Monitor the live detached legacy Ottawa P0.4 campaign until exit and a fresh receipt appears without touching the lock or heartbeat.",
   "task_id": "T-00212",
-  "worker": "PATHFINDER"
+  "worker": null
 }
