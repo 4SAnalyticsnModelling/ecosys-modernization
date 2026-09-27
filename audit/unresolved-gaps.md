@@ -14,6 +14,10 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   `ecf5e61a…` with SAGE diff-bound review. Earlier: T-00035 D6 decision on DEV-004: REJECTED-REVERT (revert deck f6 200->100 and
   `iteration_control.zig:150` 200->100 of `9253d3b`; hour-2,589 SOLUTE exhaustion becomes a defect to root-cause).
   The STARTE clamp is now listed as DEV-007 and decided in T-00045: decouple SOLUTE/STARTE ceilings from f6 (FORGE) | `.agent/results/T-00035.md`, `.agent/results/T-00045.md`
+  T-00216 DECISION (SAGE, 2026-09-27T20:17Z, idle-check): STILL OPEN, and it is the next lock-free G0 item. The live deck blob
+  is `9ec1bf4e…` and differs from `ecf5e61a…` (tree `9253d3b^`) in exactly one line: deck line 6 `runtime` f6 is 200 where it
+  should be 100. FORGE restores `ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa` to blob `ecf5e61a…`: one file,
+  no build, no run, no `machine.lock`. It stays uncommitted until a SAGE review bound to the diff hash is done | `.agent/results/T-00216.md`
 - G0-2b | PATHFINDER->SAGE | Legacy MRXN semantics not reproduced by any Zig ceiling: per-sub-cycle kinetic rates /MRXN
   (`solute.f:112-118,368-402`) vs Zig single closure with relaxation caps unbounded (`reaction_solve.zig:73-129`), and
   hourly rain/irrigation input equilibration using the STARTE ceiling (`hourly_process_driver.zig:634,670`) needs its

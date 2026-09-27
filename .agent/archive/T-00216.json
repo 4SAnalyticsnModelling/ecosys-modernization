@@ -1,0 +1,46 @@
+{
+  "changed": [
+    ".agent/results/T-00216.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "decision_kind": "idle-check",
+    "decision_of": "SENTINEL",
+    "full_run_justification": null,
+    "reason": "SAGE decision (idle-check) from SENTINEL",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00216.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00216.md",
+    "task_id": "T-00216"
+  },
+  "ended": 1790540273.1874523,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "d159cbb1-773a-4b9c-ac30-0507dafd1050",
+    "old": "cb42ecbd-2160-4e12-89bc-9d618a3b66c1",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 754305,
+    "cache_write": 49501,
+    "cost": null,
+    "input": 28,
+    "llm_calls": 14,
+    "output": 6893,
+    "tool_calls": 6
+  },
+  "violations": []
+}
