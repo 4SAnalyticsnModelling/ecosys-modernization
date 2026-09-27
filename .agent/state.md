@@ -40,11 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00226 PATHFINDER STAGNATED: live legacy Ottawa P0.4 receipt remains active; no terminal evidence yet.
+- T-00227 PATHFINDER STAGNATED: detached Ottawa P0.4 run remains live; G0-4 stays closed.
+- T-00226 PATHFINDER STAGNATED: no fresh receipt; preserve active lock and heartbeat.
 - T-00225 SAGE DONE: G0-2c closed; G0-4 is the next open gate.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER validates the live detached legacy Ottawa P0.4 receipt and decides whether G0-4 can reopen without disturbing the active machine lock.
+SAGE adjudicates the detached legacy Ottawa P0.4 terminal receipt once the run exits or the lock/heartbeat becomes stale beyond policy.
