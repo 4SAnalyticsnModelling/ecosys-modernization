@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00176.md",
+    "audit/runs/p04-full-campaign/heartbeat.json"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Fresh controller fix restored routing; next task relaunches the detached legacy P0.4 campaign with pinned hashes so evidence can advance.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00176.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-build-reproducibility"
+    ],
+    "state_next": "FORGE relaunches the detached P0.4 legacy campaign after controller restart using pinned hashes.",
+    "state_recent": [
+      "T-00175 FORGE DONE: controller lock attribution fix restores valid routing.",
+      "T-00173 SAGE DONE: deadlock loop was identified and stopped.",
+      "T-00170 SAGE DONE: detached driver rewrote heartbeat and blocked CHAIN turns."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00176.md",
+    "task_id": "T-00176"
+  },
+  "ended": 1790471464.833154,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1fb3848dffeJt75jn2rhGB31K",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 3610719,
+    "cache_write": 0,
+    "cost": 0.774584925,
+    "input": 645198,
+    "llm_calls": 73,
+    "output": 5302,
+    "tool_calls": 78
+  },
+  "violations": []
+}

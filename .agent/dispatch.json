@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00176", "role": "FORGE", "task_file": ".agent/tasks/T-00176.md", "result_file": ".agent/results/T-00176.md", "skills": ["ecosys-build-reproducibility"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Fresh controller fix restored routing; next task relaunches the detached legacy P0.4 campaign with pinned hashes so evidence can advance.", "state_recent": ["T-00175 FORGE DONE: controller lock attribution fix restores valid routing.", "T-00173 SAGE DONE: deadlock loop was identified and stopped.", "T-00170 SAGE DONE: detached driver rewrote heartbeat and blocked CHAIN turns."], "state_next": "FORGE relaunches the detached P0.4 legacy campaign after controller restart using pinned hashes."}
+{
+  "full_run_justification": null,
+  "reason": "Fresh controller fix restored routing; next task relaunches the detached legacy P0.4 campaign with pinned hashes so evidence can advance.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00176.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-build-reproducibility"
+  ],
+  "state_next": "FORGE relaunches the detached P0.4 legacy campaign after controller restart using pinned hashes.",
+  "state_recent": [
+    "T-00175 FORGE DONE: controller lock attribution fix restores valid routing.",
+    "T-00173 SAGE DONE: deadlock loop was identified and stopped.",
+    "T-00170 SAGE DONE: detached driver rewrote heartbeat and blocked CHAIN turns."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00176.md",
+  "task_id": "T-00176"
+}

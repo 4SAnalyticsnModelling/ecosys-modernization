@@ -76,8 +76,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Fresh controller fix restored routing; next task relaunches the detached legacy P0.4 campaign with pinned hashes so evidence can advance.",
   "task_id": "T-00176",
-  "worker": "FORGE"
+  "worker": null
 }
