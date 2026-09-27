@@ -1,0 +1,51 @@
+{
+  "changed": [
+    ".agent/results/T-00213.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "The latest results all show a live campaign with no fresh receipt, which requires SAGE disposition under the no-new-evidence rule and the metrics threshold.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00213.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE adjudicates the live detached legacy Ottawa P0.4 no-new-evidence condition and decides whether to close the monitoring window or continue the hold.",
+    "state_recent": [
+      "T-00212 PATHFINDER STAGNATED: live detached legacy Ottawa P0.4 campaign remains under active lock and heartbeat; no fresh terminal receipt and stale RUN_FAILED remains invalid.",
+      "T-00211 PATHFINDER STAGNATED: active PID 46732 is still healthy and the task success condition is unmet.",
+      "T-00210 PATHFINDER STAGNATED: no fresh terminal receipt supersedes the stale RUN_FAILED artifact; only a relaunch receipt exists."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00213.md",
+    "task_id": "T-00213"
+  },
+  "ended": 1790539986.0344694,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "6abdf991-a3f2-4d3e-9a27-58a614142e26",
+    "old": "80b7493a-8959-46e3-9ae6-62971e78433b",
+    "reset": "verified"
+  },
+  "result_errors": [
+    "missing section EVIDENCE"
+  ],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 273060,
+    "cache_write": 26860,
+    "cost": null,
+    "input": 14,
+    "llm_calls": 7,
+    "output": 4797,
+    "tool_calls": 1
+  },
+  "violations": []
+}

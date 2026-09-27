@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00213", "role": "SAGE", "task_file": ".agent/tasks/T-00213.md", "result_file": ".agent/results/T-00213.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "The latest results all show a live campaign with no fresh receipt, which requires SAGE disposition under the no-new-evidence rule and the metrics threshold.", "state_recent": ["T-00212 PATHFINDER STAGNATED: live detached legacy Ottawa P0.4 campaign remains under active lock and heartbeat; no fresh terminal receipt and stale RUN_FAILED remains invalid.", "T-00211 PATHFINDER STAGNATED: active PID 46732 is still healthy and the task success condition is unmet.", "T-00210 PATHFINDER STAGNATED: no fresh terminal receipt supersedes the stale RUN_FAILED artifact; only a relaunch receipt exists."], "state_next": "SAGE adjudicates the live detached legacy Ottawa P0.4 no-new-evidence condition and decides whether to close the monitoring window or continue the hold."}
+{
+  "full_run_justification": null,
+  "reason": "The latest results all show a live campaign with no fresh receipt, which requires SAGE disposition under the no-new-evidence rule and the metrics threshold.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00213.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE adjudicates the live detached legacy Ottawa P0.4 no-new-evidence condition and decides whether to close the monitoring window or continue the hold.",
+  "state_recent": [
+    "T-00212 PATHFINDER STAGNATED: live detached legacy Ottawa P0.4 campaign remains under active lock and heartbeat; no fresh terminal receipt and stale RUN_FAILED remains invalid.",
+    "T-00211 PATHFINDER STAGNATED: active PID 46732 is still healthy and the task success condition is unmet.",
+    "T-00210 PATHFINDER STAGNATED: no fresh terminal receipt supersedes the stale RUN_FAILED artifact; only a relaunch receipt exists."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00213.md",
+  "task_id": "T-00213"
+}
