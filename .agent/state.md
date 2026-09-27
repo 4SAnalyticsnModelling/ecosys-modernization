@@ -47,4 +47,4 @@ none active.
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-hold P0.4 until PID 41688 exits or its heartbeat is >30 minutes stale; then SAGE reviews the fresh receipt under T-00191
+hold P0.4 until PID 41688 exits or the heartbeat exceeds 30 minutes; then SAGE judges the fresh legacy receipt.
