@@ -69,6 +69,7 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   rewrites tracked `audit/runs/p04-full-campaign/heartbeat.json` every 30 s; `swarm_wrapper.py:1005-1023` attributes it
   to the agent whose turn it is and restores it, so every SENTINEL/SAGE turn is quarantined (route-1790468130/-183).
   Fix in `swarm_wrapper.py` only: exclude the live machine-lock holder's heartbeat/driver.log from scope attribution.
+  T-00164 (SAGE, 3rd recurrence, route-1790468601): unchanged decision; dispatch `.agent/tasks/T-00163.md` to FORGE as written.
   Do NOT touch the pinned driver or the running campaign | `.agent/results/T-00158.md`
   T-00161 (2026-09-26): still open. T-00158 was FAIL-collected on the same defect, so its CHAIN was dropped.
   Route-1790468357/-415 were also quarantined, only for the heartbeat. Re-chained to FORGE with the same scope

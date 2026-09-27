@@ -1,0 +1,13 @@
+{
+  "not_restored": [],
+  "note": "Agent's version of each file is under files/; the working tree was restored.",
+  "problems": [
+    "audit/runs/p04-full-campaign/heartbeat.json: outside SAGE may_write"
+  ],
+  "restored": [
+    "audit/runs/p04-full-campaign/heartbeat.json"
+  ],
+  "role": "SAGE",
+  "tag": "T-00164",
+  "time": 1790468715.4011803
+}
