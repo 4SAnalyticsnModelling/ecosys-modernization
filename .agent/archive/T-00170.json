@@ -1,0 +1,62 @@
+{
+  "changed": [
+    ".agent/failures/Q-T-00170/files/audit/runs/p04-full-campaign/heartbeat.json",
+    ".agent/failures/Q-T-00170/quarantine.json",
+    ".agent/results/T-00170.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "decision_kind": "routing-failure",
+    "decision_of": "SENTINEL",
+    "full_run_justification": null,
+    "reason": "SAGE decision (routing-failure) from SENTINEL",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00170.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-process-science-parity"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00170.md",
+    "task_id": "T-00170"
+  },
+  "ended": 1790469084.9039223,
+  "failure_packet": ".agent/failures/F-00014",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": {
+    "not_restored": [],
+    "note": "Agent's version of each file is under files/; the working tree was restored.",
+    "problems": [
+      "audit/runs/p04-full-campaign/heartbeat.json: outside SAGE may_write"
+    ],
+    "restored": [
+      "audit/runs/p04-full-campaign/heartbeat.json"
+    ],
+    "role": "SAGE",
+    "tag": "T-00170",
+    "time": 1790469084.3688016
+  },
+  "reset": {
+    "new": "b01bbcfe-f14f-4b1f-ab7d-bf94f95921d9",
+    "old": "a6daa738-ac5b-4cc9-9d86-7b2742f417cc",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "FAIL",
+  "review": null,
+  "usage": {
+    "cache_read": 346430,
+    "cache_write": 33491,
+    "cost": null,
+    "input": 16,
+    "llm_calls": 8,
+    "output": 4080,
+    "tool_calls": 4
+  },
+  "violations": [
+    "audit/runs/p04-full-campaign/heartbeat.json: outside SAGE may_write"
+  ]
+}

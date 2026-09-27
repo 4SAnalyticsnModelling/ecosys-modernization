@@ -78,6 +78,8 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   (at the latest after the lock is released) dispatches T-00163, and no detached campaign is relaunched before it lands.
   Route-1790468357/-415 were also quarantined, only for the heartbeat. Re-chained to FORGE with the same scope
   (T-00160 text). FORGE's lane includes `audit/runs/`, so a FORGE turn is not quarantined | `.agent/results/T-00161.md`
+  T-00170 (SAGE, 5th recurrence, route-1790468953; T-00167 FAIL-collected as F-00013): duplicate of T-00167, not re-decided.
+  FORGE runs `.agent/tasks/T-00163.md`. The controller must dispatch a SAGE CHAIN whose only scope problem is this heartbeat.
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)

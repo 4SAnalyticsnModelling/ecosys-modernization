@@ -17,7 +17,8 @@
     "SAGE:T-00158": 1,
     "SAGE:T-00161": 1,
     "SAGE:T-00164": 1,
-    "SAGE:T-00167": 1
+    "SAGE:T-00167": 1,
+    "SAGE:T-00170": 1
   },
   "full_run_justifications": [
     {
@@ -77,8 +78,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "SAGE decision (routing-failure) from SENTINEL",
   "task_id": "T-00170",
-  "worker": "SAGE"
+  "worker": null
 }
