@@ -1,1 +1,1 @@
-T-00159 FORGE: fix controller heartbeat/lock handling for detached legacy campaign and add regression test.
+T-00160 FORGE: fix controller heartbeat/lock attribution bug for detached legacy campaign liveness.
