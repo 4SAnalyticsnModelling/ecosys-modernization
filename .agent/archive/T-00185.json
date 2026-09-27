@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00185.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Active legacy run holds the lock; stale receipt predates it. PATHFINDER should read live run_1 evidence before any restart.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00185.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER reads the live P0.4 run_1 logs and receipt before any restart or relaunch.",
+    "state_recent": [
+      "T-00184 PATHFINDER DONE: stale receipt predates the active run and lock.",
+      "T-00183 PATHFINDER DONE: detached legacy P0.4 failed before completion.",
+      "T-00181 FORGE DONE: controller relaunched the legacy campaign under the live lock."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00185.md",
+    "task_id": "T-00185"
+  },
+  "ended": 1790473121.6188707,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1f813c0cffev8qQpvQBL9Gg0R",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 165760,
+    "cache_write": 0,
+    "cost": 0.0157686,
+    "input": 10997,
+    "llm_calls": 10,
+    "output": 8545,
+    "tool_calls": 15
+  },
+  "violations": []
+}
