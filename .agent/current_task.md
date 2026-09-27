@@ -1,1 +1,1 @@
-T-00172 FORGE: fix the detached legacy heartbeat/lock attribution bug so P0.4 routing can continue.
+T-00174 FORGE: execute the existing T-00163 heartbeat/lock fix to unblock detached P0.4 routing.
