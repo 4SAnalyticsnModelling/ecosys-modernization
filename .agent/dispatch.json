@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00228", "role": "SAGE", "task_file": ".agent/tasks/T-00228.md", "result_file": ".agent/results/T-00228.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "G0-4 remains blocked by an active detached legacy Ottawa campaign; SAGE must adjudicate the valid terminal receipt path without disturbing the live lock.", "state_recent": ["T-00227 PATHFINDER STAGNATED: detached Ottawa P0.4 run remains live; G0-4 stays closed.", "T-00226 PATHFINDER STAGNATED: no fresh receipt; preserve active lock and heartbeat.", "T-00225 SAGE DONE: G0-2c closed; G0-4 is the next open gate."], "state_next": "SAGE adjudicates the detached legacy Ottawa P0.4 terminal receipt once the run exits or the lock/heartbeat becomes stale beyond policy."}
+{
+  "full_run_justification": null,
+  "reason": "G0-4 remains blocked by an active detached legacy Ottawa campaign; SAGE must adjudicate the valid terminal receipt path without disturbing the live lock.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00228.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE adjudicates the detached legacy Ottawa P0.4 terminal receipt once the run exits or the lock/heartbeat becomes stale beyond policy.",
+  "state_recent": [
+    "T-00227 PATHFINDER STAGNATED: detached Ottawa P0.4 run remains live; G0-4 stays closed.",
+    "T-00226 PATHFINDER STAGNATED: no fresh receipt; preserve active lock and heartbeat.",
+    "T-00225 SAGE DONE: G0-2c closed; G0-4 is the next open gate."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00228.md",
+  "task_id": "T-00228"
+}

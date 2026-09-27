@@ -90,8 +90,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "G0-4 remains blocked by an active detached legacy Ottawa campaign; SAGE must adjudicate the valid terminal receipt path without disturbing the live lock.",
   "task_id": "T-00228",
-  "worker": "SAGE"
+  "worker": null
 }
