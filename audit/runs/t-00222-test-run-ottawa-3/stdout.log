@@ -1,0 +1,12 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\symon.mezbahuddin\AppData\Local\uv\cache\environments-v2\test-run-ottawa-2681c8cfe1c8a14b\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\ecosys-modernization
+collecting ... collected 4 items
+
+ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_stages_approved_deck_and_records_receipt PASSED [ 25%]
+ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_refuses_nonempty_staged_deck PASSED [ 50%]
+ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_records_hash_on_simulation_failure PASSED [ 75%]
+ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_custom_staged_deck_and_out_options PASSED [100%]
+
+============================= 4 passed in 14.23s ==============================

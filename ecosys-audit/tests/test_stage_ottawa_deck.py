@@ -170,5 +170,21 @@ def test_stage_ottawa_deck_requires_out_arg():
     assert res.returncode != 0
 
 
+def test_stage_ottawa_deck_hash_comparison_branch_fails(tmp_path: Path, monkeypatch):
+    """Assert RuntimeError from hash-comparison branch when actual hash != blob_hash (SAGE T-00221)."""
+    staged_dir = tmp_path / "corrupted_deck"
+    real_run = subprocess.run
+
+    def mock_run(args, **kwargs):
+        if len(args) >= 2 and args[1] == "hash-object":
+            # Simulate a mismatched hash returned by git hash-object
+            return subprocess.CompletedProcess(args, 0, stdout="bad_hash_000000000000000000000000000000\n", stderr="")
+        return real_run(args, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", mock_run)
+    with pytest.raises(RuntimeError, match="git hash-object verification failed"):
+        stage_ottawa_deck(out_dir=staged_dir, repo_root=REPO_ROOT)
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))

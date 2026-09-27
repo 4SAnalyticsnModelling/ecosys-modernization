@@ -1,0 +1,59 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\symon.mezbahuddin\AppData\Local\uv\cache\environments-v2\test-run-ottawa-2681c8cfe1c8a14b\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\ecosys-modernization
+collecting ... collected 4 items
+
+ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_stages_approved_deck_and_records_receipt PASSED [ 25%]
+ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_refuses_nonempty_staged_deck PASSED [ 50%]
+ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_records_hash_on_simulation_failure PASSED [ 75%]
+ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_custom_staged_deck_and_out_options FAILED [100%]
+
+================================== FAILURES ===================================
+_____________ test_run_ottawa_custom_staged_deck_and_out_options ______________
+
+dummy_success_exe = WindowsPath('C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/tmp/pytest-of-symon.mezbahuddin/pytest-5/zig_success0/ecosys_ng_dummy.exe')
+tmp_path = WindowsPath('C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/tmp/pytest-of-symon.mezbahuddin/pytest-5/test_run_ottawa_custom_staged_0')
+
+    def test_run_ottawa_custom_staged_deck_and_out_options(dummy_success_exe: Path, tmp_path: Path):
+        """Assert runner stages into custom --staged-deck and writes to custom --out."""
+        custom_deck = tmp_path / "custom_staged"
+        custom_logs_rel = f"audit/runs/ottawa/custom-{uuid.uuid4().hex[:6]}"
+        custom_logs_abs = REPO_ROOT / custom_logs_rel
+        script = SCRIPTS_DIR / "run_ottawa.py"
+        test_lock = tmp_path / "test.lock"
+    
+        res = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--exe",
+                str(dummy_success_exe),
+                "--mode",
+                "strict",
+                "--build-mode",
+                "Debug",
+                "--timeout",
+                "30",
+                "--staged-deck",
+                str(custom_deck),
+                "--out",
+                custom_logs_rel,
+                "--lock-file",
+                str(test_lock),
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        try:
+>           assert res.returncode == 0, f"run_ottawa failed: {res.stderr}"
+E           AssertionError: run_ottawa failed: {"status": "BLOCKED", "error": "'C:\\\\Users\\\\symon.mezbahuddin\\\\scoop\\\\apps\\\\msys2\\\\2025-02-21\\\\tmp\\\\pytest-of-symon.mezbahuddin\\\\pytest-5\\\\test_run_ottawa_custom_staged_0\\\\custom_staged' is not in the subpath of 'D:\\\\ecosys-modernization'"}
+E             
+E           assert 2 == 0
+E            +  where 2 = CompletedProcess(args=['C:\\Users\\symon.mezbahuddin\\AppData\\Local\\uv\\cache\\environments-v2\\test-run-ottawa-2681c8cfe1c8a14b\\Scripts\\python.exe', 'D:\\ecosys-modernization\\ecosys-audit\\scripts\\run_ottawa.py', '--exe', 'C:\\Users\\symon.mezbahuddin\\scoop\\apps\\msys2\\2025-02-21\\tmp\\pytest-of-symon.mezbahuddin\\pytest-5\\zig_success0\\ecosys_ng_dummy.exe', '--mode', 'strict', '--build-mode', 'Debug', '--timeout', '30', '--staged-deck', 'C:\\Users\\symon.mezbahuddin\\scoop\\apps\\msys2\\2025-02-21\\tmp\\pytest-of-symon.mezbahuddin\\pytest-5\\test_run_ottawa_custom_staged_0\\custom_staged', '--out', 'audit/runs/ottawa/custom-223fe4', '--lock-file', 'C:\\Users\\symon.mezbahuddin\\scoop\\apps\\msys2\\2025-02-21\\tmp\\pytest-of-symon.mezbahuddin\\pytest-5\\test_run_ottawa_custom_staged_0\\test.lock'], returncode=2, stdout='', stderr='{"status": "BLOCKED", "error": "\'C:\\\\\\\\Users\\\\\\\\symon.mezbahuddin\\\\\\\\scoop\\\\\\\\apps\\\\\\\\msys2\\\\\\\\2025-02-21\\\\\\\\tmp\\\\\\\\pytest-of-symon.mezbahuddin\\\\\\\\pytest-5\\\\\\\\test_run_ottawa_custom_staged_0\\\\\\\\custom_staged\' is not in the subpath of \'D:\\\\\\\\ecosys-modernization\'"}\n').returncode
+
+ecosys-audit\tests\test_run_ottawa.py:281: AssertionError
+=========================== short test summary info ===========================
+FAILED ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_custom_staged_deck_and_out_options
+======================== 1 failed, 3 passed in 12.04s =========================

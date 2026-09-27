@@ -1,0 +1,73 @@
+{
+  "changed": [
+    ".agent/results/T-00222.md",
+    "audit/runs/t-00222-probe/receipt.json",
+    "audit/runs/t-00222-probe/stderr.log",
+    "audit/runs/t-00222-probe/stdout.log",
+    "audit/runs/t-00222-test-run-ottawa-2/receipt.json",
+    "audit/runs/t-00222-test-run-ottawa-2/stderr.log",
+    "audit/runs/t-00222-test-run-ottawa-2/stdout.log",
+    "audit/runs/t-00222-test-run-ottawa-3/receipt.json",
+    "audit/runs/t-00222-test-run-ottawa-3/stderr.log",
+    "audit/runs/t-00222-test-run-ottawa-3/stdout.log",
+    "audit/runs/t-00222-test-run-ottawa-pytest/receipt.json",
+    "audit/runs/t-00222-test-run-ottawa-pytest/stderr.log",
+    "audit/runs/t-00222-test-run-ottawa-pytest/stdout.log",
+    "audit/runs/t-00222-test-run-ottawa/receipt.json",
+    "audit/runs/t-00222-test-run-ottawa/stderr.log",
+    "audit/runs/t-00222-test-run-ottawa/stdout.log",
+    "audit/runs/t-00222-test-stage-ottawa-final/receipt.json",
+    "audit/runs/t-00222-test-stage-ottawa-final/stderr.log",
+    "audit/runs/t-00222-test-stage-ottawa-final/stdout.log",
+    "audit/runs/t-00222-test-stage-ottawa/receipt.json",
+    "audit/runs/t-00222-test-stage-ottawa/stderr.log",
+    "audit/runs/t-00222-test-stage-ottawa/stdout.log",
+    "ecosys-audit/scripts/run_ottawa.py",
+    "ecosys-audit/tests/test_run_ottawa.py",
+    "ecosys-audit/tests/test_stage_ottawa_deck.py"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Next unblocked work is a bounded FORGE runner change: stage the Ottawa deck before qualification runs and record the hash in the receipt.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00222.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-build-reproducibility"
+    ],
+    "state_next": "FORGE wires the Ottawa runner to stage the deck and record runottawa_hash in the receipt",
+    "state_recent": [
+      "T-00221 ROLE SAGE DONE: staged deck accepted; G0-2a closes without protected deck edits",
+      "T-00220 ROLE FORGE DONE: Ottawa staged-deck script and tests passed",
+      "T-00219 ROLE SAGE DONE: direct protected-deck route withdrawn; staged deck required"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00222.md",
+    "task_id": "T-00222"
+  },
+  "ended": 1790542186.5882509,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1b780f97ffe6jwWlQ33uGIRUv",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 6950816,
+    "cache_write": 0,
+    "cost": 1.5490819499999995,
+    "input": 1282661,
+    "llm_calls": 84,
+    "output": 17540,
+    "tool_calls": 86
+  },
+  "violations": []
+}

@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00222", "role": "FORGE", "task_file": ".agent/tasks/T-00222.md", "result_file": ".agent/results/T-00222.md", "skills": ["ecosys-build-reproducibility"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Next unblocked work is a bounded FORGE runner change: stage the Ottawa deck before qualification runs and record the hash in the receipt.", "state_recent": ["T-00221 ROLE SAGE DONE: staged deck accepted; G0-2a closes without protected deck edits", "T-00220 ROLE FORGE DONE: Ottawa staged-deck script and tests passed", "T-00219 ROLE SAGE DONE: direct protected-deck route withdrawn; staged deck required"], "state_next": "FORGE wires the Ottawa runner to stage the deck and record runottawa_hash in the receipt"}
+{
+  "full_run_justification": null,
+  "reason": "Next unblocked work is a bounded FORGE runner change: stage the Ottawa deck before qualification runs and record the hash in the receipt.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00222.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-build-reproducibility"
+  ],
+  "state_next": "FORGE wires the Ottawa runner to stage the deck and record runottawa_hash in the receipt",
+  "state_recent": [
+    "T-00221 ROLE SAGE DONE: staged deck accepted; G0-2a closes without protected deck edits",
+    "T-00220 ROLE FORGE DONE: Ottawa staged-deck script and tests passed",
+    "T-00219 ROLE SAGE DONE: direct protected-deck route withdrawn; staged deck required"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00222.md",
+  "task_id": "T-00222"
+}

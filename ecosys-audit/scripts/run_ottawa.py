@@ -29,6 +29,12 @@ import uuid
 from workflow import ROOT, ProtocolError, atomic, encoded, file_digest, inside, load, lock, relative
 from evidence_binding import compute as compute_binding
 
+try:
+    from stage_ottawa_deck import TARGET_BLOB, stage_ottawa_deck
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from stage_ottawa_deck import TARGET_BLOB, stage_ottawa_deck
+
 DECK = "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON"
 CHECKPOINT = re.compile(r"^(\d+)\.grid_and_plants\.bin$")
 LONG_RUN_SECONDS = 3 * 3600
@@ -78,6 +84,9 @@ def main():
     ap.add_argument("--build-option", action="append", default=[])
     ap.add_argument("--deck", default=DECK)
     ap.add_argument("--run-id", default=None)
+    ap.add_argument("--staged-deck", type=Path, default=None, help="Directory for staged deck (default: evidence/runs/<run-id>/deck)")
+    ap.add_argument("--out", type=str, default=None, help="Directory for run logs and receipt under audit/runs (default: audit/runs/ottawa/<run-id>)")
+    ap.add_argument("--lock-file", type=Path, default=None, help="Machine lock path (default: .agent/locks/machine.lock)")
     ap.add_argument("--restart-from", help="<prior-run-id>:<hour> checkpoint set to replay from")
     ap.add_argument("--threads", type=int)
     ap.add_argument("--timeout", type=float, required=True, help="seconds")
@@ -93,18 +102,25 @@ def main():
             raise ProtocolError("a run longer than 3 h is a full run: pass --full-run-justification (plan section 5)")
         run_id = a.run_id or f"{time.strftime('%Y%m%d-%H%M%S')}-{a.mode}-{uuid.uuid4().hex[:6]}"
         stage = inside(root, f"evidence/runs/{run_id}")
-        logs = f"audit/runs/ottawa/{run_id}"
+        logs = a.out or f"audit/runs/ottawa/{run_id}"
         deck_src = inside(root, a.deck)
         exe = a.exe.resolve(strict=True)
         free_gb = shutil.disk_usage(root).free / 1e9
         if free_gb < a.min_free_gb:
             raise ProtocolError(f"only {free_gb:.1f} GB free (< {a.min_free_gb}); refusing to start")
         probe = io_probe(next(p for p in deck_src.rglob("*") if p.is_file()), a.io_probe_limit)
-        with lock(root / ".agent/locks/machine.lock"):
+        lock_path = a.lock_file.resolve() if a.lock_file else (root / ".agent/locks/machine.lock")
+        with lock(lock_path):
             binding = compute_binding(root, a.deck, a.build_mode, a.build_option)
-            deck = stage / "deck"
-            # Prior outputs (and their checkpoint siblings) are never staged; the binary writes a fresh tree.
-            shutil.copytree(deck_src, deck, ignore=shutil.ignore_patterns("runottawa_output_files", "*.grid_and_plants.bin"))
+            deck = a.staged_deck.resolve() if a.staged_deck else stage / "deck"
+            if deck.exists() and any(deck.iterdir()):
+                raise ProtocolError(f"staged deck destination {deck} already exists and is not empty; qualification runs require a fresh directory")
+            # Prior outputs (and their checkpoint siblings) are never staged; stage the approved deck
+            # with verified blob overwrite (G0-2a, T-00220/T-00221, blob ecf5e61ab453288b1763f81f841729bee34e8426).
+            stage_report = stage_ottawa_deck(out_dir=deck, src_dir=deck_src, repo_root=root)
+            runottawa_hash = stage_report["runottawa_hash"]
+            if runottawa_hash != TARGET_BLOB:
+                raise ProtocolError(f"staged runottawa hash mismatch: expected {TARGET_BLOB}, got {runottawa_hash}")
             (deck / "runottawa_output_files").mkdir(exist_ok=True)
             pre = checkpoints(deck)
             start_hour = 0
@@ -130,9 +146,14 @@ def main():
             started = time.time()
             p = subprocess.run([sys.executable, str(Path(__file__).resolve().parent / "run_logged.py"), "--root", str(root),
                                 "--cwd", str(deck), "--out", logs, "--timeout", str(a.timeout), "--", *argv],
-                               cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace",
-                               timeout=a.timeout + 300)
-            receipt = load(root / logs / "receipt.json")
+                                cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                                timeout=a.timeout + 300)
+            staged_deck_rel = relative(root, deck) if deck.resolve().is_relative_to(root.resolve()) else str(deck.resolve())
+            receipt_path = root / logs / "receipt.json"
+            receipt = load(receipt_path) if receipt_path.exists() else {}
+            receipt["runottawa_hash"] = runottawa_hash
+            receipt["staged_deck"] = staged_deck_rel
+            atomic(receipt_path, encoded(receipt))
             cps = checkpoints(deck)
             outcome = parse_outcome(root / logs / "stdout.log", root / logs / "stderr.log")
             code = receipt.get("exit_code")
@@ -149,7 +170,8 @@ def main():
                 "conservation_breaches": None, "solver_fallbacks_unexplained": None,
                 "binding": binding, "exe_sha256": file_digest(exe), "io_probe_seconds": round(probe, 4),
                 "wall_seconds": round(time.time() - started, 1), "full_run_justification": a.full_run_justification,
-                "full_log": f"{logs}/stdout.log", "receipt": f"{logs}/receipt.json", "staged_deck": relative(root, deck),
+                "full_log": f"{logs}/stdout.log", "receipt": f"{logs}/receipt.json", "staged_deck": staged_deck_rel,
+                "runottawa_hash": runottawa_hash,
                 "limitations": ("failure_hour/error are heuristic parses; conservation_breaches and "
                                 "solver_fallbacks_unexplained stay null until a validator fills them, so this summary alone "
                                 "can never promote the frontier."),
@@ -164,9 +186,9 @@ def main():
                 atomic(wf_path, encoded(wf))
         print(json.dumps({k: summary[k] for k in ("run_id", "status", "mode", "failure_hour", "error",
                                                   "last_checkpoint_key", "wall_seconds")} |
-                         {"summary": f"{logs}/summary.json"}, indent=2))
+                         {"summary": f"{logs}/summary.json", "runottawa_hash": runottawa_hash}, indent=2))
         return 0 if status == "COMPLETE" else 1
-    except (OSError, ValueError, KeyError, StopIteration, ProtocolError, subprocess.SubprocessError) as e:
+    except (OSError, ValueError, KeyError, StopIteration, ProtocolError, RuntimeError, subprocess.SubprocessError) as e:
         print(json.dumps({"status": "BLOCKED", "error": str(e)}), file=sys.stderr)
         return 2
 

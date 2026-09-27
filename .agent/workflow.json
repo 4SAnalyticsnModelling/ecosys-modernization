@@ -88,8 +88,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Next unblocked work is a bounded FORGE runner change: stage the Ottawa deck before qualification runs and record the hash in the receipt.",
   "task_id": "T-00222",
-  "worker": "FORGE"
+  "worker": null
 }

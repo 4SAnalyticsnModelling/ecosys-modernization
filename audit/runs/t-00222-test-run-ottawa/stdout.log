@@ -1,0 +1,177 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\symon.mezbahuddin\AppData\Local\uv\cache\environments-v2\test-run-ottawa-2681c8cfe1c8a14b\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\ecosys-modernization
+collecting ... collected 4 items
+
+ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_stages_approved_deck_and_records_receipt FAILED [ 25%]
+ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_refuses_nonempty_staged_deck FAILED [ 50%]
+ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_records_hash_on_simulation_failure FAILED [ 75%]
+ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_custom_staged_deck_and_out_options FAILED [100%]
+
+================================== FAILURES ===================================
+__________ test_run_ottawa_stages_approved_deck_and_records_receipt ___________
+
+dummy_success_exe = WindowsPath('C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/tmp/pytest-of-symon.mezbahuddin/pytest-4/zig_success0/ecosys_ng_dummy.exe')
+
+    def test_run_ottawa_stages_approved_deck_and_records_receipt(dummy_success_exe: Path):
+        """Smoke run: assert approved deck is staged and receipt.json + summary.json record runottawa_hash."""
+        run_id = f"test-smoke-{uuid.uuid4().hex[:8]}"
+        script = SCRIPTS_DIR / "run_ottawa.py"
+    
+        # Pre-condition: check protected deck
+        assert PROTECTED_RUNOTTAWA.is_file()
+        p_hash = subprocess.check_output(["git", "hash-object", str(PROTECTED_RUNOTTAWA)], text=True).strip()
+        assert p_hash == PROTECTED_EXPECTED_HASH
+    
+        # Invoke run_ottawa with stand-in exe
+        res = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--exe",
+                str(dummy_success_exe),
+                "--mode",
+                "strict",
+                "--build-mode",
+                "Debug",
+                "--timeout",
+                "30",
+                "--run-id",
+                run_id,
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        try:
+>           assert res.returncode == 0, f"run_ottawa failed (stderr: {res.stderr}, stdout: {res.stdout})"
+E           AssertionError: run_ottawa failed (stderr: {"status": "BLOCKED", "error": "Another workflow process owns this lane"}
+E             , stdout: )
+E           assert 2 == 0
+E            +  where 2 = CompletedProcess(args=['C:\\Users\\symon.mezbahuddin\\AppData\\Local\\uv\\cache\\environments-v2\\test-run-ottawa-2681c8cfe1c8a14b\\Scripts\\python.exe', 'D:\\ecosys-modernization\\ecosys-audit\\scripts\\run_ottawa.py', '--exe', 'C:\\Users\\symon.mezbahuddin\\scoop\\apps\\msys2\\2025-02-21\\tmp\\pytest-of-symon.mezbahuddin\\pytest-4\\zig_success0\\ecosys_ng_dummy.exe', '--mode', 'strict', '--build-mode', 'Debug', '--timeout', '30', '--run-id', 'test-smoke-dc6c6a71'], returncode=2, stdout='', stderr='{"status": "BLOCKED", "error": "Another workflow process owns this lane"}\n').returncode
+
+ecosys-audit\tests\test_run_ottawa.py:103: AssertionError
+________________ test_run_ottawa_refuses_nonempty_staged_deck _________________
+
+dummy_success_exe = WindowsPath('C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/tmp/pytest-of-symon.mezbahuddin/pytest-4/zig_success0/ecosys_ng_dummy.exe')
+tmp_path = WindowsPath('C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/tmp/pytest-of-symon.mezbahuddin/pytest-4/test_run_ottawa_refuses_nonemp0')
+
+    def test_run_ottawa_refuses_nonempty_staged_deck(dummy_success_exe: Path, tmp_path: Path):
+        """Assert runner refuses to start when destination staged deck already contains files."""
+        run_id = f"test-nonempty-{uuid.uuid4().hex[:8]}"
+        script = SCRIPTS_DIR / "run_ottawa.py"
+    
+        dirty_deck = tmp_path / "dirty_deck"
+        dirty_deck.mkdir(parents=True, exist_ok=True)
+        (dirty_deck / "stale_file.txt").write_text("stale", encoding="utf-8")
+    
+        res = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--exe",
+                str(dummy_success_exe),
+                "--mode",
+                "strict",
+                "--build-mode",
+                "Debug",
+                "--timeout",
+                "30",
+                "--staged-deck",
+                str(dirty_deck),
+                "--run-id",
+                run_id,
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        assert res.returncode == 2, f"Expected exit 2 for non-empty deck, got {res.returncode}"
+>       assert "already exists and is not empty" in res.stderr
+E       assert 'already exists and is not empty' in '{"status": "BLOCKED", "error": "Another workflow process owns this lane"}\n'
+E        +  where '{"status": "BLOCKED", "error": "Another workflow process owns this lane"}\n' = CompletedProcess(args=['C:\\Users\\symon.mezbahuddin\\AppData\\Local\\uv\\cache\\environments-v2\\test-run-ottawa-2681c8cfe1c8a14b\\Scripts\\python.exe', 'D:\\ecosys-modernization\\ecosys-audit\\scripts\\run_ottawa.py', '--exe', 'C:\\Users\\symon.mezbahuddin\\scoop\\apps\\msys2\\2025-02-21\\tmp\\pytest-of-symon.mezbahuddin\\pytest-4\\zig_success0\\ecosys_ng_dummy.exe', '--mode', 'strict', '--build-mode', 'Debug', '--timeout', '30', '--staged-deck', 'C:\\Users\\symon.mezbahuddin\\scoop\\apps\\msys2\\2025-02-21\\tmp\\pytest-of-symon.mezbahuddin\\pytest-4\\test_run_ottawa_refuses_nonemp0\\dirty_deck', '--run-id', 'test-nonempty-971caf88'], returncode=2, stdout='', stderr='{"status": "BLOCKED", "error": "Another workflow process owns this lane"}\n').stderr
+
+ecosys-audit\tests\test_run_ottawa.py:189: AssertionError
+_____________ test_run_ottawa_records_hash_on_simulation_failure ______________
+
+dummy_fail_exe = WindowsPath('C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/tmp/pytest-of-symon.mezbahuddin/pytest-4/zig_fail0/ecosys_ng_failing.exe')
+
+    def test_run_ottawa_records_hash_on_simulation_failure(dummy_fail_exe: Path):
+        """Assert receipt and summary record runottawa_hash even when simulation binary exits nonzero."""
+        run_id = f"test-fail-{uuid.uuid4().hex[:8]}"
+        script = SCRIPTS_DIR / "run_ottawa.py"
+    
+        res = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--exe",
+                str(dummy_fail_exe),
+                "--mode",
+                "strict",
+                "--build-mode",
+                "Debug",
+                "--timeout",
+                "30",
+                "--run-id",
+                run_id,
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        try:
+>           assert res.returncode == 1, f"Expected exit 1 for failing simulation, got {res.returncode}"
+E           AssertionError: Expected exit 1 for failing simulation, got 2
+E           assert 2 == 1
+E            +  where 2 = CompletedProcess(args=['C:\\Users\\symon.mezbahuddin\\AppData\\Local\\uv\\cache\\environments-v2\\test-run-ottawa-2681c8cfe1c8a14b\\Scripts\\python.exe', 'D:\\ecosys-modernization\\ecosys-audit\\scripts\\run_ottawa.py', '--exe', 'C:\\Users\\symon.mezbahuddin\\scoop\\apps\\msys2\\2025-02-21\\tmp\\pytest-of-symon.mezbahuddin\\pytest-4\\zig_fail0\\ecosys_ng_failing.exe', '--mode', 'strict', '--build-mode', 'Debug', '--timeout', '30', '--run-id', 'test-fail-976d0d05'], returncode=2, stdout='', stderr='{"status": "BLOCKED", "error": "Another workflow process owns this lane"}\n').returncode
+
+ecosys-audit\tests\test_run_ottawa.py:217: AssertionError
+_____________ test_run_ottawa_custom_staged_deck_and_out_options ______________
+
+dummy_success_exe = WindowsPath('C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/tmp/pytest-of-symon.mezbahuddin/pytest-4/zig_success0/ecosys_ng_dummy.exe')
+tmp_path = WindowsPath('C:/Users/symon.mezbahuddin/scoop/apps/msys2/2025-02-21/tmp/pytest-of-symon.mezbahuddin/pytest-4/test_run_ottawa_custom_staged_0')
+
+    def test_run_ottawa_custom_staged_deck_and_out_options(dummy_success_exe: Path, tmp_path: Path):
+        """Assert runner stages into custom --staged-deck and writes to custom --out."""
+        custom_deck = tmp_path / "custom_staged"
+        custom_logs_rel = f"audit/runs/ottawa/custom-{uuid.uuid4().hex[:6]}"
+        custom_logs_abs = REPO_ROOT / custom_logs_rel
+        script = SCRIPTS_DIR / "run_ottawa.py"
+    
+        res = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--exe",
+                str(dummy_success_exe),
+                "--mode",
+                "strict",
+                "--build-mode",
+                "Debug",
+                "--timeout",
+                "30",
+                "--staged-deck",
+                str(custom_deck),
+                "--out",
+                custom_logs_rel,
+            ],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        try:
+>           assert res.returncode == 0, f"run_ottawa failed: {res.stderr}"
+E           AssertionError: run_ottawa failed: {"status": "BLOCKED", "error": "Another workflow process owns this lane"}
+E             
+E           assert 2 == 0
+E            +  where 2 = CompletedProcess(args=['C:\\Users\\symon.mezbahuddin\\AppData\\Local\\uv\\cache\\environments-v2\\test-run-ottawa-2681c8cfe1c8a14b\\Scripts\\python.exe', 'D:\\ecosys-modernization\\ecosys-audit\\scripts\\run_ottawa.py', '--exe', 'C:\\Users\\symon.mezbahuddin\\scoop\\apps\\msys2\\2025-02-21\\tmp\\pytest-of-symon.mezbahuddin\\pytest-4\\zig_success0\\ecosys_ng_dummy.exe', '--mode', 'strict', '--build-mode', 'Debug', '--timeout', '30', '--staged-deck', 'C:\\Users\\symon.mezbahuddin\\scoop\\apps\\msys2\\2025-02-21\\tmp\\pytest-of-symon.mezbahuddin\\pytest-4\\test_run_ottawa_custom_staged_0\\custom_staged', '--out', 'audit/runs/ottawa/custom-b4e89b'], returncode=2, stdout='', stderr='{"status": "BLOCKED", "error": "Another workflow process owns this lane"}\n').returncode
+
+ecosys-audit\tests\test_run_ottawa.py:269: AssertionError
+=========================== short test summary info ===========================
+FAILED ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_stages_approved_deck_and_records_receipt
+FAILED ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_refuses_nonempty_staged_deck
+FAILED ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_records_hash_on_simulation_failure
+FAILED ecosys-audit/tests/test_run_ottawa.py::test_run_ottawa_custom_staged_deck_and_out_options
+============================== 4 failed in 8.73s ==============================
