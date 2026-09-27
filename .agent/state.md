@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00233 SAGE DONE: no worker dispatch for G0-5c; G0-4 still held.
-- T-00230 SAGE DONE: keep G0-4 closed while run remains live.
-- T-00228 SAGE DONE: hold G0-4 until fresh receipt or stale heartbeat >600s.
+- T-00238 SAGE DONE: no unblocked work; G0-4 remains under the T-00228 hold.
+- T-00236 SAGE DONE: keep G0-4 closed while Ottawa stays live and healthy.
+- T-00233 SAGE DONE: G0-5c ledger issue parked; no worker dispatch.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE confirms idle while the legacy Ottawa run stays live and G0-4 remains closed until a fresh receipt or stale heartbeat >600 s.
+SAGE confirms idle; no worker dispatch while the detached legacy Ottawa campaign remains live and before a fresh terminal receipt or heartbeat stale >600 s.

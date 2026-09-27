@@ -1,1 +1,1 @@
-T-00237 SAGE: confirm idle; no worker work remains and G0-4 stays closed until a fresh receipt or stale heartbeat >600s.
+T-00239 SAGE Confirm idle: no unblocked work remains and G0-4 stays closed until a fresh legacy receipt or a stale heartbeat >600 s.

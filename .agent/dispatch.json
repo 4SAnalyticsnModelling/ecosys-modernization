@@ -1,18 +1,1 @@
-{
-  "decision_kind": "idle-check",
-  "decision_of": "SENTINEL",
-  "full_run_justification": null,
-  "reason": "SAGE decision (idle-check) from SENTINEL",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00238.md",
-  "result_status": "DONE",
-  "role": "SAGE",
-  "schema_version": 1,
-  "skills": [
-    "ecosys-feature-attribution"
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00238.md",
-  "task_id": "T-00238"
-}
+{"schema_version": 1, "status": "PENDING", "task_id": "T-00239", "role": "SAGE", "task_file": ".agent/tasks/T-00239.md", "result_file": ".agent/results/T-00239.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "No worker task is unblocked; G0-4 remains held while the detached legacy Ottawa campaign stays live.", "state_recent": ["T-00238 SAGE DONE: no unblocked work; G0-4 remains under the T-00228 hold.", "T-00236 SAGE DONE: keep G0-4 closed while Ottawa stays live and healthy.", "T-00233 SAGE DONE: G0-5c ledger issue parked; no worker dispatch."], "state_next": "SAGE confirms idle; no worker dispatch while the detached legacy Ottawa campaign remains live and before a fresh terminal receipt or heartbeat stale >600 s."}
