@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00223.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Latest Ottawa runner result requests SAGE review before the next qualification milestone; no unblocked PATHFINDER/FORGE work remains, and SAGE must decide acceptance.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00223.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "Review T-00222 Ottawa runner staged-deck acceptance before next qualification milestone.",
+    "state_recent": [
+      "T-00222 FORGE DONE: runner stages deck, records hash, tests passed",
+      "T-00221 SAGE DONE: staged deck accepted; G0-2a closed",
+      "T-00220 FORGE DONE: stager script and tests passed"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00223.md",
+    "task_id": "T-00223"
+  },
+  "ended": 1790542376.1270907,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "f459e555-76f5-4681-ba9f-c2c1eb7455d5",
+    "old": "12a57e32-10e4-40ec-afc7-f6c774e84323",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 632278,
+    "cache_write": 46397,
+    "cost": null,
+    "input": 24,
+    "llm_calls": 12,
+    "output": 7374,
+    "tool_calls": 4
+  },
+  "violations": []
+}

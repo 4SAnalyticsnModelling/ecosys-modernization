@@ -30,6 +30,11 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   commit `821d520`) meets the T-00219 CHAIN. `git diff --stat 9253d3b^ HEAD` over the deck dir shows only `runottawa` changed
   (a one-line f6 change), so staged deck = deck tree at `9253d3b^` (5add7de NH4 fix kept). Carried acceptance criteria, owned by the P3/P4 runner: use a
   fresh `--out` dir, keep the default `--blob`, and record `runottawa_hash == ecf5e61a…` in the run receipt | `.agent/results/T-00221.md`
+  T-00223 DECISION (SAGE, 2026-09-27): runner wiring ACCEPTED. `run_ottawa.py` (sha256 `39b38dac…`, commit `9ead49d`) meets all three
+  carried criteria (`:116-123`, `:154`, `:174`). P3/P4 Ottawa runs may proceed. Open item G0-2c, which blocks PROMOTION but not running:
+  `summary.binding.deck` hashes the raw protected deck (`run_ottawa.py:114`, `evidence_binding.py:78`), and `update_frontier.py promote`
+  (`:50-72`) never checks `runottawa_hash`. So the criterion is recorded but not enforced. Before any Ottawa promote, FORGE makes promote refuse
+  unless `summary.runottawa_hash == ecf5e61a…` | `.agent/results/T-00223.md`
 - G0-2b | PATHFINDER->SAGE | Legacy MRXN semantics not reproduced by any Zig ceiling: per-sub-cycle kinetic rates /MRXN
   (`solute.f:112-118,368-402`) vs Zig single closure with relaxation caps unbounded (`reaction_solve.zig:73-129`), and
   hourly rain/irrigation input equilibration using the STARTE ceiling (`hourly_process_driver.zig:634,670`) needs its

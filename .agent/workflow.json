@@ -89,7 +89,7 @@
   "route_failures": 0,
   "schema_version": 1,
   "status": "ROUTING",
-  "status_reason": "Next unblocked work is a bounded FORGE runner change: stage the Ottawa deck before qualification runs and record the hash in the receipt.",
-  "task_id": "T-00222",
+  "status_reason": "Latest Ottawa runner result requests SAGE review before the next qualification milestone; no unblocked PATHFINDER/FORGE work remains, and SAGE must decide acceptance.",
+  "task_id": "T-00223",
   "worker": null
 }
