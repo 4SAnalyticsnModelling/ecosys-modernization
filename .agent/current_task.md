@@ -1,1 +1,1 @@
-T-00192 PATHFINDER: verify the active detached legacy Ottawa P0.4 receipt and hash state before any retry.
+T-00193 PATHFINDER: confirm the live detached legacy Ottawa P0.4 receipt and exit-code-2 failure packet before any retry.

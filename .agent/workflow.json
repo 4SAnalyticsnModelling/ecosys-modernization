@@ -81,8 +81,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "No new evidence for retry; next is PATHFINDER receipt validation once the live legacy Ottawa campaign's lock releases.",
-  "task_id": "T-00192",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "PATHFINDER is the unblocked role for the live detached P0.4 receipt failure packet; T-00192 requires reading the active logs before any retry.",
+  "task_id": "T-00193",
+  "worker": "PATHFINDER"
 }
