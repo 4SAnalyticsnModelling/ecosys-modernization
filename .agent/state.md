@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00206 PATHFINDER DONE: external kill; hardened relaunch recipe is next.
-- T-00204 SAGE DONE: stale RUN_FAILED invalid; do not retry in place.
-- T-00197 SAGE BLOCKED: hold P0.4 until driver exits or heartbeat is stale.
+- T-00207 SAGE DONE: hardened relaunch harness verified; launch is the next gate.
+- T-00206 PATHFINDER DONE: dead driver likely external kill; stale receipt invalid.
+- T-00204 SAGE DONE: stale RUN_FAILED receipt invalid; do not retry in place.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE will harden the detached P0.4 relaunch path by enforcing campaign logs, run_1 quarantine, and fresh valid exit-receipt gating before any rerun.
+SAGE will validate the fresh detached P0.4 terminal receipt before authorizing the next campaign step.
