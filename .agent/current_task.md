@@ -1,1 +1,1 @@
-T-00223 SAGE: review T-00222 Ottawa runner staged-deck/hash acceptance before next qualification milestone.
+T-00224 FORGE: enforce the Ottawa promotion gate and add the refusal test.

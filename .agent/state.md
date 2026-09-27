@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00222 FORGE DONE: runner stages deck, records hash, tests passed
-- T-00221 SAGE DONE: staged deck accepted; G0-2a closed
-- T-00220 FORGE DONE: stager script and tests passed
+- T-00223 SAGE DONE: Ottawa runner accepted; promotion gate fix is next.
+- T-00222 FORGE DONE: staged deck and runottawa_hash were recorded and tests passed.
+- T-00221 SAGE DONE: staged deck accepted and G0-2a closed.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-Review T-00222 Ottawa runner staged-deck acceptance before next qualification milestone.
+FORGE enforces the Ottawa promotion gate and adds the refusal test before any promote.
