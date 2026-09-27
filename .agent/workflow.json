@@ -82,7 +82,7 @@
   "route_failures": 0,
   "schema_version": 1,
   "status": "IDLE",
-  "status_reason": "no unblocked work: PID 41688 is still alive and the heartbeat is fresh, so no valid P0.4 receipt exists for SAGE to judge.",
+  "status_reason": "no unblocked work: PID 41688 is still alive and the heartbeat is fresh, so no valid post-exit P0.4 receipt exists for SAGE to judge.",
   "task_id": "T-00197",
   "worker": null
 }
