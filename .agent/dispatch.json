@@ -1,22 +1,28 @@
 {
-  "full_run_justification": null,
-  "reason": "dead detached legacy Ottawa campaign has no terminal receipt; SAGE must decide diagnosis or relaunch strategy before gate reopening.",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00245.md",
-  "result_status": "DONE",
-  "role": "SAGE",
+  "errors": [
+    "task file missing sections ['INPUTS', 'RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
+  ],
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "Fresh driver fix plus a new Ottawa relaunch is the only unblocked next action; idle checks are resolved and no human decision remains.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00246.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-build-reproducibility"
+    ],
+    "state_next": "FORGE relaunches the detached legacy Ottawa campaign with the committed hidden-console driver fix and fresh run receipt.",
+    "state_recent": [
+      "T-00245 FORGE STATUS: driver fix and relaunch required after stale exit",
+      "T-00241 SAGE STATUS: idle confirmed; G0-4 stays closed",
+      "T-00239 SAGE STATUS: no unblocked work while heartbeat is fresh"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00246.md",
+    "task_id": "T-00246"
+  },
   "schema_version": 1,
-  "skills": [
-    "ecosys-feature-attribution"
-  ],
-  "state_next": "SAGE decides whether the dead legacy Ottawa campaign requires diagnosis/relaunch before G0-4 can reopen.",
-  "state_recent": [
-    "T-00241 SAGE DONE: idle confirmed; live detached legacy Ottawa campaign remains healthy.",
-    "T-00239 SAGE DONE: G0-4 stays closed; no unblocked worker task while heartbeat is fresh.",
-    "T-00238 SAGE DONE: no unblocked work; T-00228 hold remains active."
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00245.md",
-  "task_id": "T-00245"
+  "status": "REJECTED"
 }
