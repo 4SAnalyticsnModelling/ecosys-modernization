@@ -72,6 +72,10 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   T-00164 (SAGE, 3rd recurrence, route-1790468601): unchanged decision; dispatch `.agent/tasks/T-00163.md` to FORGE as written.
   Do NOT touch the pinned driver or the running campaign | `.agent/results/T-00158.md`
   T-00161 (2026-09-26): still open. T-00158 was FAIL-collected on the same defect, so its CHAIN was dropped.
+  T-00167 (SAGE, 4th recurrence, route-1790468772; T-00164 FAIL-collected as F-00012): the loop is structural
+  (`swarm_wrapper.py:1018-1027` fails every non-FORGE turn while the driver writes). Decision unchanged: FORGE runs
+  `.agent/tasks/T-00163.md`. If this CHAIN is dropped too, the campaign keeps running; the first turn that passes
+  (at the latest after the lock is released) dispatches T-00163, and no detached campaign is relaunched before it lands.
   Route-1790468357/-415 were also quarantined, only for the heartbeat. Re-chained to FORGE with the same scope
   (T-00160 text). FORGE's lane includes `audit/runs/`, so a FORGE turn is not quarantined | `.agent/results/T-00161.md`
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
