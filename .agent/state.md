@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00225 SAGE DONE: G0-2c is closed; next open G0 item is the P0.4 legacy rerun.
-- T-00224 FORGE DONE: Ottawa promote gate enforced and requires a valid runottawa_hash.
-- T-00223 SAGE DONE: staged deck and runottawa_hash runner wiring accepted.
+- T-00226 PATHFINDER STAGNATED: live legacy Ottawa P0.4 receipt remains active; no terminal evidence yet.
+- T-00225 SAGE DONE: G0-2c closed; G0-4 is the next open gate.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER validates the live detached legacy Ottawa P0.4 receipt and clarifies whether G0-4 can reopen without changing the protected deck.
+PATHFINDER validates the live detached legacy Ottawa P0.4 receipt and decides whether G0-4 can reopen without disturbing the active machine lock.

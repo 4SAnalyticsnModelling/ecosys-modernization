@@ -89,8 +89,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Next unblocked G0 item is the legacy Ottawa P0.4 rerun evidence check; PATHFINDER validates receipts without source edits or deck changes.",
-  "task_id": "T-00226",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Open G0 gate is the detached legacy Ottawa P0.4 receipt; PATHFINDER must validate evidence without disturbing the live lock.",
+  "task_id": "T-00227",
+  "worker": "PATHFINDER"
 }
