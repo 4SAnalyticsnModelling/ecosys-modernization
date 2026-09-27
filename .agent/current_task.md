@@ -1,1 +1,1 @@
-T-00184 SAGE: decide whether the detached legacy Ottawa P0.4 campaign should restart or be superseded under the active machine lock.
+T-00185 PATHFINDER: confirm the live legacy P0.4 run_1 receipt and logs before any restart or relaunch.

@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00183 PATHFINDER DONE: detached legacy P0.4 failed with RUN_FAILED exit 2; no collision.
-- T-00181 FORGE DONE: controller restarted and the campaign relaunched under the active lock.
-- T-00179 SAGE DONE: stale controller failures were fixed before relaunch.
+- T-00184 PATHFINDER DONE: stale receipt predates the active run and lock.
+- T-00183 PATHFINDER DONE: detached legacy P0.4 failed before completion.
+- T-00181 FORGE DONE: controller relaunched the legacy campaign under the live lock.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE decides whether to restart or supersede the detached legacy P0.4 campaign under the active machine lock.
+PATHFINDER reads the live P0.4 run_1 logs and receipt before any restart or relaunch.
