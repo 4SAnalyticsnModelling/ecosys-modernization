@@ -1,1 +1,1 @@
-T-00225 SAGE: review T-00224 Ottawa promotion gate enforcement and decide whether G0-2c can close.
+T-00226 PATHFINDER: validate the live detached legacy Ottawa P0.4 rerun receipt and determine whether G0-4 can reopen.
