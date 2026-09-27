@@ -91,7 +91,7 @@
   "route_failures": 0,
   "schema_version": 1,
   "status": "IDLE",
-  "status_reason": "no unblocked work: detached legacy Ottawa P0.4 remains live and healthy under T-00228; the G0-5c ledger item is a controller-config issue, not a worker task.",
+  "status_reason": "no unblocked work: detached legacy Ottawa P0.4 remains live and healthy; G0-4 stays closed under T-00228 until a fresh receipt or stale heartbeat >600 s.",
   "task_id": "T-00233",
   "worker": null
 }
