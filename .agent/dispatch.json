@@ -1,21 +1,17 @@
 {
-  "full_run_justification": "The P0.4 legacy Ottawa rerun is required to produce the fresh 3-run evidence baseline; a bounded replay cannot establish the approved terminal receipt or restart validity under the detached-driver fix.",
-  "reason": "Fresh detached legacy Ottawa relaunch follows the newest T-00245 decision; the dead driver fix is a bounded FORGE task.",
+  "decision_kind": "idle-check",
+  "decision_of": "SENTINEL",
+  "full_run_justification": null,
+  "reason": "SAGE decision (idle-check) from SENTINEL",
   "requires_sage_review": false,
-  "result_file": ".agent/results/T-00247.md",
-  "result_status": "DONE",
-  "role": "FORGE",
+  "result_file": ".agent/results/T-00249.md",
+  "role": "SAGE",
   "schema_version": 1,
   "skills": [
-    "ecosys-build-reproducibility"
+    "ecosys-feature-attribution"
   ],
-  "state_next": "FORGE commits the detached-driver fix, relaunches the legacy Ottawa P0.4 campaign under the new pinned driver hash, and quarantines the dead runs.",
-  "state_recent": [
-    "T-00245 SAGE DONE: dead detached legacy run ended without terminal receipt; relaunch under hidden-console and new pinned hash is required.",
-    "T-00241 SAGE DONE: G0-4 remains closed until fresh P0.4 evidence or stale heartbeat triggers."
-  ],
-  "status": "COMPLETE",
+  "status": "PENDING",
   "t1_argv": null,
-  "task_file": ".agent/tasks/T-00247.md",
-  "task_id": "T-00247"
+  "task_file": ".agent/tasks/T-00249.md",
+  "task_id": "T-00249"
 }

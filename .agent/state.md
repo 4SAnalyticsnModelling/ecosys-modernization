@@ -47,4 +47,4 @@ none active.
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE commits the detached-driver fix, relaunches the legacy Ottawa P0.4 campaign under the new pinned driver hash, and quarantines the dead runs.
+Wait for the fresh terminal receipt or stale-heartbeat trigger, then route PATHFINDER to validate audit/runs/p04_full_run_receipt.json.
