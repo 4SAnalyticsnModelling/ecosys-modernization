@@ -1,1 +1,1 @@
-T-00250 SAGE Confirm the swarm remains idle with G0-4 held until a fresh legacy P0.4 receipt or stale heartbeat trigger.
+T-00251 SENTINEL: keep the swarm idle until the detached legacy Ottawa P0.4 campaign writes a fresh terminal receipt or its heartbeat exceeds 600s; then route PATHFINDER validation.

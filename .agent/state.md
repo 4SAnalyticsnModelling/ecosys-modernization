@@ -47,4 +47,4 @@ none active.
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-Wait for the fresh terminal receipt or stale-heartbeat trigger, then route PATHFINDER to validate audit/runs/p04_full_run_receipt.json.
+Hold the swarm idle until PID 29444 exits with a fresh receipt or its heartbeat ages beyond 600s; then validate audit/runs/p04_full_run_receipt.json.

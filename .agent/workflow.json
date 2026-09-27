@@ -88,17 +88,14 @@
   ],
   "idle_check": true,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "ALLOWED FILES `.agent/state.md` is outside SAGE may_write"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "SAGE decision (idle-check) from SENTINEL",
+  "status": "IDLE",
+  "status_reason": "no unblocked work: detached legacy Ottawa P0.4 remains live and healthy; wait for the fresh terminal receipt or stale-heartbeat wake trigger before routing PATHFINDER to validate audit/runs/p04_full_run_receipt.json.",
   "task_id": "T-00249",
   "worker": null
 }
