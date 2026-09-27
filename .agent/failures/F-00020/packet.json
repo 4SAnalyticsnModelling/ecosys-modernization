@@ -1,0 +1,19 @@
+{
+  "carried_rejections": 0,
+  "commit": "f72c9404c72044241cbbb3aaf899e422450153aa",
+  "fields": {
+    "binding_id": "UNKNOWN",
+    "candidate_fortran": "UNKNOWN",
+    "candidate_zig": "UNKNOWN",
+    "checkpoint": "UNKNOWN",
+    "exact_error": "task FAIL: settled",
+    "first_divergent_state": "UNKNOWN",
+    "first_failing_timestep": "UNKNOWN",
+    "last_verified_timestep": "UNKNOWN",
+    "relevant_variables": "UNKNOWN",
+    "subsystem": "UNKNOWN"
+  },
+  "packet": "F-00020",
+  "signature": "PATHFINDER:T-00192",
+  "task": "T-00192"
+}

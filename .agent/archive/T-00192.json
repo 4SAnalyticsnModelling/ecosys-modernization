@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00192.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "No new evidence for retry; next is PATHFINDER receipt validation once the live legacy Ottawa campaign's lock releases.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00192.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER: read the live Ottawa receipt when the lock releases and confirm exit and hash status.",
+    "state_recent": [
+      "T-00191 SAGE DONE: stale RUN_FAILED invalid; live PID 41688 still writes outputs",
+      "T-00190 PATHFINDER BLOCKED: stale-vs-live receipt mismatch remains unresolved",
+      "T-00189 PATHFINDER STAGNATED: no fresh exit receipt after prior termination"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00192.md",
+    "task_id": "T-00192"
+  },
+  "ended": 1790474063.8542233,
+  "failure_packet": ".agent/failures/F-00020",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1f739342ffemEi5zTamRsVS78",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "FAIL",
+  "review": null,
+  "usage": {
+    "cache_read": 340096,
+    "cache_write": 0,
+    "cost": 0.025921720000000006,
+    "input": 47977,
+    "llm_calls": 10,
+    "output": 7937,
+    "tool_calls": 17
+  },
+  "violations": []
+}
