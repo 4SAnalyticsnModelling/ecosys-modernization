@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00194", "role": "SAGE", "task_file": ".agent/tasks/T-00194.md", "result_file": ".agent/results/T-00194.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "SAGE is the only role that can adjudicate the live detached run's final receipt and authorize any retry after the lock is released.", "state_recent": ["T-00193 PATHFINDER DONE: valid terminal receipt is still missing; stale failure packet remains invalid.", "T-00192 PATHFINDER FAIL: exit-code-2 packet is not a valid completion proof.", "T-00191 SAGE DONE: stale RUN_FAILED receipt is invalid while PID 41688 remains alive."], "state_next": "SAGE will wait for the live detached legacy Ottawa P0.4 driver to exit, inspect the new terminal receipt, and decide whether a retry is valid."}
+{
+  "full_run_justification": null,
+  "reason": "SAGE is the only role that can adjudicate the live detached run's final receipt and authorize any retry after the lock is released.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00194.md",
+  "result_status": "BLOCKED",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE will wait for the live detached legacy Ottawa P0.4 driver to exit, inspect the new terminal receipt, and decide whether a retry is valid.",
+  "state_recent": [
+    "T-00193 PATHFINDER DONE: valid terminal receipt is still missing; stale failure packet remains invalid.",
+    "T-00192 PATHFINDER FAIL: exit-code-2 packet is not a valid completion proof.",
+    "T-00191 SAGE DONE: stale RUN_FAILED receipt is invalid while PID 41688 remains alive."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00194.md",
+  "task_id": "T-00194"
+}

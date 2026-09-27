@@ -111,6 +111,12 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   run_1 was restaged at 01:28:17Z, so the logs of the exit-2 attempt are gone. Its only remaining evidence is receipt
   d9ed4644... and the first-attempt text in driver.log. The exit-2 cause stays open. It blocks P0.4 acceptance only if
   the live receipt is non-zero or its exe/deck hashes differ.
+  T-00194 (SAGE, 2026-09-27T01:58Z): the post-exit receipt does not exist yet, so nothing was re-decided. Driver 41688 and oracle
+  41592 were alive (oracle CPU 1433 s). The heartbeat read `RUN_1` of 3 at 1771.63 s. run_1 is in simulated 2011: the 2010 annual
+  files were written at 01:56Z and the 2011 hourly files at 01:58Z. The run_1 exe sha256 is 63DD7D5F..., the pinned value.
+  Receipt d9ed4644... is unchanged and still stale. DECISION: no retry and no relaunch. SENTINEL creates a P0.4 receipt task only
+  when PID 41688 is gone AND the receipt mtime is later than 2026-09-27T01:28:02Z. With 3 runs and a 21600 s timeout per run,
+  that can take several hours.
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)

@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00194.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "SAGE is the only role that can adjudicate the live detached run's final receipt and authorize any retry after the lock is released.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00194.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE will wait for the live detached legacy Ottawa P0.4 driver to exit, inspect the new terminal receipt, and decide whether a retry is valid.",
+    "state_recent": [
+      "T-00193 PATHFINDER DONE: valid terminal receipt is still missing; stale failure packet remains invalid.",
+      "T-00192 PATHFINDER FAIL: exit-code-2 packet is not a valid completion proof.",
+      "T-00191 SAGE DONE: stale RUN_FAILED receipt is invalid while PID 41688 remains alive."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00194.md",
+    "task_id": "T-00194"
+  },
+  "ended": 1790474333.6912549,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "5c5e5951-5c2d-4036-93b7-0046b34d5a05",
+    "old": "fff5a8de-7853-42fb-a08d-34cd54277dcc",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "BLOCKED",
+  "review": null,
+  "usage": {
+    "cache_read": 512778,
+    "cache_write": 31703,
+    "cost": null,
+    "input": 24,
+    "llm_calls": 12,
+    "output": 5426,
+    "tool_calls": 5
+  },
+  "violations": []
+}

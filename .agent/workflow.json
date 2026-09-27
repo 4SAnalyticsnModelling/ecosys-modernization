@@ -81,8 +81,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "SAGE is the only role that can adjudicate the live detached run's final receipt and authorize any retry after the lock is released.",
   "task_id": "T-00194",
-  "worker": "SAGE"
+  "worker": null
 }
