@@ -1,0 +1,62 @@
+
+[Execution Failure] Run run_1 failed: exit_code=2, timed_out=False, elapsed=97.776s
+Failure receipt successfully written to D:\ecosys-modernization\audit\runs\p04_full_run_receipt.json
+=== ECOSYS P0.4 LEGACY GFORTRAN FULL-RUN DRIVER ===
+  Deck source: D:\ecosys-evidence\legacy\staged_deck
+  Executable: D:\ecosys-evidence\legacy\ecosys_oracle.exe
+  Output directory base: D:\ecosys-evidence\legacy\p04-full-campaign
+  Core affinity mask: 0x1
+  Runs requested: 3
+  Timeout per run: 21600.0s
+  Dry-run: False
+  Machine lock path: D:\ecosys-modernization\.agent\locks\machine.lock
+  Heartbeat path: D:\ecosys-modernization\audit\runs\p04-full-campaign\heartbeat.json
+Acquiring exclusive machine lock: D:\ecosys-modernization\.agent\locks\machine.lock
+Heartbeat path: D:\ecosys-modernization\audit\runs\p04-full-campaign\heartbeat.json
+[Lock] Reclaiming stale lock: reason=UNOWNED_LOCK, stale_pid=None
+
+--- [Iteration 1/3] Starting Warmup ---
+  [Warmup] Staging warmup directory: D:\ecosys-evidence\legacy\p04-full-campaign\warmup_1
+  [Warmup] Completed in 11.847s; discarded warmup directory.
+--- [Iteration 1/3] Starting Timed Run ---
+  [Timed Run run_1] Staging run directory: D:\ecosys-evidence\legacy\p04-full-campaign\run_1
+Traceback (most recent call last):
+  File "D:\ecosys-modernization\ecosys-audit\scripts\run_legacy_p04_full.py", line 1243, in <module>
+    main()
+  File "D:\ecosys-modernization\ecosys-audit\scripts\run_legacy_p04_full.py", line 1125, in main
+    run_res = execute_single_full_run(
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ecosys-modernization\ecosys-audit\scripts\run_legacy_p04_full.py", line 791, in execute_single_full_run
+    raise RuntimeError(
+RuntimeError: Run run_1 failed: exit_code=2, timed_out=False, elapsed=97.776s
+
+[Execution Failure] Run run_1 failed: exit_code=4294967295, timed_out=False, elapsed=1430.271s
+Failure receipt successfully written to D:\ecosys-modernization\audit\runs\p04_full_run_receipt.json
+=== ECOSYS P0.4 LEGACY GFORTRAN FULL-RUN DRIVER ===
+  Deck source: D:\ecosys-evidence\legacy\staged_deck
+  Executable: D:\ecosys-evidence\legacy\ecosys_oracle.exe
+  Output directory base: D:\ecosys-evidence\legacy\p04-full-campaign
+  Core affinity mask: 0x1
+  Runs requested: 3
+  Timeout per run: 21600.0s
+  Dry-run: False
+  Machine lock path: D:\ecosys-modernization\.agent\locks\machine.lock
+  Heartbeat path: D:\ecosys-modernization\audit\runs\p04-full-campaign\heartbeat.json
+Acquiring exclusive machine lock: D:\ecosys-modernization\.agent\locks\machine.lock
+Heartbeat path: D:\ecosys-modernization\audit\runs\p04-full-campaign\heartbeat.json
+[Lock] Reclaiming stale lock: reason=UNOWNED_LOCK, stale_pid=None
+
+--- [Iteration 1/3] Starting Warmup ---
+  [Warmup] Staging warmup directory: D:\ecosys-evidence\legacy\p04-full-campaign\warmup_1
+  [Warmup] Completed in 11.617s; discarded warmup directory.
+--- [Iteration 1/3] Starting Timed Run ---
+  [Timed Run run_1] Staging run directory: D:\ecosys-evidence\legacy\p04-full-campaign\run_1
+Traceback (most recent call last):
+  File "D:\ecosys-modernization\ecosys-audit\scripts\run_legacy_p04_full.py", line 1243, in <module>
+    main()
+  File "D:\ecosys-modernization\ecosys-audit\scripts\run_legacy_p04_full.py", line 1125, in main
+    run_res = execute_single_full_run(
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ecosys-modernization\ecosys-audit\scripts\run_legacy_p04_full.py", line 791, in execute_single_full_run
+    raise RuntimeError(
+RuntimeError: Run run_1 failed: exit_code=4294967295, timed_out=False, elapsed=1430.271s

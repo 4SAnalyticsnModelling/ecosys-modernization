@@ -80,6 +80,12 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   (T-00160 text). FORGE's lane includes `audit/runs/`, so a FORGE turn is not quarantined | `.agent/results/T-00161.md`
   T-00170 (SAGE, 5th recurrence, route-1790468953; T-00167 FAIL-collected as F-00013): duplicate of T-00167, not re-decided.
   FORGE runs `.agent/tasks/T-00163.md`. The controller must dispatch a SAGE CHAIN whose only scope problem is this heartbeat.
+  T-00173 (SAGE, 6th recurrence, route-1790469137; STRATEGY CHANGED after stagnation): `swarm_wrapper.py:1143,1189`
+  dispatches a CHAIN only from a DONE SAGE result, and a scope hit forces FAIL, so no SAGE/SENTINEL turn could pass
+  while the driver lived (deadlock, not a delay). SAGE stopped the campaign at 2026-09-27T00:35Z (oracle PID 24744
+  killed; driver 41728/launcher 41452 exited; heartbeat `FAILED`, elapsed 1446 s, run_1 of 3). That run_1 "failure"
+  (exit 4294967295) is the deliberate kill, not model science. Next: SENTINEL dispatches T-00163 to FORGE. After it
+  lands, FORGE relaunches P0.4 from scratch with the same pinned driver (E3F55330...) and exe (63DD7D5F...).
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)
