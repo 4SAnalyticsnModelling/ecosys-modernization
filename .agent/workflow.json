@@ -88,8 +88,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "No unblocked work remains; the live detached legacy P0.4 campaign is held under the no-new-evidence rule until fresh evidence or the expiry threshold.",
   "task_id": "T-00214",
-  "worker": "SAGE"
+  "worker": null
 }
