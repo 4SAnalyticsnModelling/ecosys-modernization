@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00226.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Next unblocked G0 item is the legacy Ottawa P0.4 rerun evidence check; PATHFINDER validates receipts without source edits or deck changes.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00226.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER validates the live detached legacy Ottawa P0.4 receipt and clarifies whether G0-4 can reopen without changing the protected deck.",
+    "state_recent": [
+      "T-00225 SAGE DONE: G0-2c is closed; next open G0 item is the P0.4 legacy rerun.",
+      "T-00224 FORGE DONE: Ottawa promote gate enforced and requires a valid runottawa_hash.",
+      "T-00223 SAGE DONE: staged deck and runottawa_hash runner wiring accepted."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00226.md",
+    "task_id": "T-00226"
+  },
+  "ended": 1790543356.0664506,
+  "failure_packet": ".agent/failures/F-00024",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1b83aaabffeAd6YC4w88YAkRa",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "STAGNATED",
+  "review": null,
+  "usage": {
+    "cache_read": 208768,
+    "cache_write": 0,
+    "cost": 0.018881359999999996,
+    "input": 33186,
+    "llm_calls": 9,
+    "output": 6724,
+    "tool_calls": 16
+  },
+  "violations": []
+}
