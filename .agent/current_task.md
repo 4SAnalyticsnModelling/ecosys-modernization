@@ -1,1 +1,1 @@
-T-00183 PATHFINDER: monitor the detached legacy P0.4 Ottawa campaign and collect completion/failure receipt without colliding with the active driver or heartbeat.
+T-00184 SAGE: decide whether the detached legacy Ottawa P0.4 campaign should restart or be superseded under the active machine lock.
