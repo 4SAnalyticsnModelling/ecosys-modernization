@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00154 FORGE DONE: legacy campaign failed at DOY 286 on issue-023.
-- T-00153 SAGE DONE: detached launch was authorized and relaunch awaits fix.
-- T-00151 FORGE DONE: detached driver and lock harness passed tests.
+- T-00173 SAGE DONE: deadlock found; controller misattributes heartbeat writes and blocks routing.
+- T-00170 SAGE DONE: loop repeated; only FORGE can fix the heartbeat/lock attribution bug.
+- T-00167 SAGE DONE: dispatch T-00163 to FORGE; do not relaunch the loop.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE will rebuild the scratch legacy oracle, smoke-test through DOY 287, and relaunch the detached P0.4 campaign.
+FORGE fixes the heartbeat/lock attribution bug so detached legacy campaign writes no longer block valid P0 routing.
