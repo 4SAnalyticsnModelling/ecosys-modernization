@@ -88,8 +88,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Close G0-2c by reviewing the Ottawa runottawa_hash gate enforcement in T-00224 and confirming acceptance.",
   "task_id": "T-00225",
-  "worker": "SAGE"
+  "worker": null
 }

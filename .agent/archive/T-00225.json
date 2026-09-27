@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00225.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Close G0-2c by reviewing the Ottawa runottawa_hash gate enforcement in T-00224 and confirming acceptance.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00225.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE review of T-00224 gate enforcement to confirm G0-2c closure or rejection with explicit reason.",
+    "state_recent": [
+      "T-00224 FORGE DONE: Ottawa promotion gate enforced with runottawa_hash refusal and mandatory hash validation.",
+      "T-00223 SAGE DONE: runner wiring accepted and G0-2c remained open only at the promotion gate enforcement step."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00225.md",
+    "task_id": "T-00225"
+  },
+  "ended": 1790543223.2088332,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "621046f5-f338-4b4b-a4c1-003b7e8695c7",
+    "old": "f459e555-76f5-4681-ba9f-c2c1eb7455d5",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 414925,
+    "cache_write": 38339,
+    "cost": null,
+    "input": 18,
+    "llm_calls": 9,
+    "output": 5390,
+    "tool_calls": 2
+  },
+  "violations": []
+}

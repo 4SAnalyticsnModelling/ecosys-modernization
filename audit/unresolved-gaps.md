@@ -35,6 +35,12 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   `summary.binding.deck` hashes the raw protected deck (`run_ottawa.py:114`, `evidence_binding.py:78`), and `update_frontier.py promote`
   (`:50-72`) never checks `runottawa_hash`. So the criterion is recorded but not enforced. Before any Ottawa promote, FORGE makes promote refuse
   unless `summary.runottawa_hash == ecf5e61a…` | `.agent/results/T-00223.md`
+  T-00225 DECISION (SAGE, 2026-09-27): the promotion-gate open item from T-00223 is CLOSED. (It shares the label "G0-2c" with the
+  DEV-008 row below, which is a different item and was already DONE.) `update_frontier.py` (sha256 `aa99211a…`, commit `de9cd41`)
+  refuses promote with exit 1 unless `summary.runottawa_hash == TARGET_BLOB` (`:114-121,166`). `.agent/frontier.json:3` has case
+  `Ottawa`, so every promote is gated. The summary key matches the runner's (`run_ottawa.py:174`), whose value comes from `git hash-object`
+  on the staged file (`stage_ottawa_deck.py:112-137`). Tests: 8/8 pass. Known limit: the hash is not part of `binding_id`, so promote trusts
+  the runner-written summary, whose sha256 is recorded in history. That is enough for bookkeeping, which is all this tool claims to do | `.agent/results/T-00225.md`
 - G0-2b | PATHFINDER->SAGE | Legacy MRXN semantics not reproduced by any Zig ceiling: per-sub-cycle kinetic rates /MRXN
   (`solute.f:112-118,368-402`) vs Zig single closure with relaxation caps unbounded (`reaction_solve.zig:73-129`), and
   hourly rain/irrigation input equilibration using the STARTE ceiling (`hourly_process_driver.zig:634,670`) needs its

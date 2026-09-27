@@ -1,1 +1,21 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00225", "role": "SAGE", "task_file": ".agent/tasks/T-00225.md", "result_file": ".agent/results/T-00225.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Close G0-2c by reviewing the Ottawa runottawa_hash gate enforcement in T-00224 and confirming acceptance.", "state_recent": ["T-00224 FORGE DONE: Ottawa promotion gate enforced with runottawa_hash refusal and mandatory hash validation.", "T-00223 SAGE DONE: runner wiring accepted and G0-2c remained open only at the promotion gate enforcement step."], "state_next": "SAGE review of T-00224 gate enforcement to confirm G0-2c closure or rejection with explicit reason."}
+{
+  "full_run_justification": null,
+  "reason": "Close G0-2c by reviewing the Ottawa runottawa_hash gate enforcement in T-00224 and confirming acceptance.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00225.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE review of T-00224 gate enforcement to confirm G0-2c closure or rejection with explicit reason.",
+  "state_recent": [
+    "T-00224 FORGE DONE: Ottawa promotion gate enforced with runottawa_hash refusal and mandatory hash validation.",
+    "T-00223 SAGE DONE: runner wiring accepted and G0-2c remained open only at the promotion gate enforcement step."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00225.md",
+  "task_id": "T-00225"
+}
