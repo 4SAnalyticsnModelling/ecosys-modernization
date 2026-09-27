@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00208 SAGE DONE: stale P0.4 receipt rejected, campaign remains held
-- T-00207 SAGE DONE: hardened relaunch harness validated
-- T-00206 PATHFINDER DONE: dead driver likely external kill
+- T-00209 FORGE DONE: live detached relaunch is active and healthy.
+- T-00208 SAGE DONE: stale RUN_FAILED receipt is rejected and campaign stays held.
+- T-00207 FORGE DONE: relaunch harness hardened for lock and receipt quarantine.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-Run the hardened P0.4 relaunch dry run, then launch the detached legacy campaign and capture the fresh terminal receipt.
+Monitor the live detached legacy Ottawa P0.4 campaign until it exits and verify the fresh terminal receipt without disturbing the lock or heartbeat.

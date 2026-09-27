@@ -1,1 +1,1 @@
-T-00209 FORGE: run the hardened detached legacy P0.4 relaunch dry run and live launch to produce a fresh terminal receipt.
+T-00210 PATHFINDER: monitor the live detached legacy Ottawa P0.4 full-run campaign and verify the fresh terminal receipt.
