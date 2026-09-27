@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00227 PATHFINDER STAGNATED: detached Ottawa P0.4 run remains live; G0-4 stays closed.
-- T-00226 PATHFINDER STAGNATED: no fresh receipt; preserve active lock and heartbeat.
-- T-00225 SAGE DONE: G0-2c closed; G0-4 is the next open gate.
+- T-00233 SAGE DONE: no worker dispatch for G0-5c; G0-4 still held.
+- T-00230 SAGE DONE: keep G0-4 closed while run remains live.
+- T-00228 SAGE DONE: hold G0-4 until fresh receipt or stale heartbeat >600s.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-Hold G0-4 closed; no worker dispatch until a fresh terminal receipt or heartbeat exceeds 600 s.
+SAGE decides no unblocked work remains; G0-4 remains closed until a fresh receipt or stale heartbeat >600 s.
