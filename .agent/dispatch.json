@@ -1,22 +1,28 @@
 {
-  "full_run_justification": null,
-  "reason": "Controller is stale; the fix loads only after restart, and the next valid work is the FORGE relaunch of the detached legacy P0.4 campaign.",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00181.md",
-  "result_status": "DONE",
-  "role": "FORGE",
+  "errors": [
+    "task file missing sections ['ROLE', 'OBJECTIVE', 'INPUTS', 'ALLOWED FILES', 'RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
+  ],
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "Monitor the detached legacy Ottawa P0.4 campaign to capture the live completion or failure receipt without colliding with the active driver or heartbeat.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00182.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "Monitor detached legacy P0.4 progression and collect completion or failure evidence without colliding with the live driver.",
+    "state_recent": [
+      "T-00181 FORGE DONE: detached legacy campaign relaunched cleanly under lock ownership.",
+      "T-00179 SAGE DONE: stale controller restart required before routing resumed.",
+      "T-00176 FORGE DONE: P0.4 relaunch verified and heartbeating."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00182.md",
+    "task_id": "T-00182"
+  },
   "schema_version": 1,
-  "skills": [
-    "ecosys-multi-agent-coordination"
-  ],
-  "state_next": "FORGE restarts the stale controller and relaunches the detached legacy P0.4 Ottawa campaign after code reload.",
-  "state_recent": [
-    "T-00179 SAGE DONE: stale controller blocks all routing until restart.",
-    "T-00176 FORGE DONE: detached legacy campaign relaunch verified and heartbeating.",
-    "T-00175 FORGE DONE: lock attribution fix resolves deadlock loop."
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00181.md",
-  "task_id": "T-00181"
+  "status": "REJECTED"
 }

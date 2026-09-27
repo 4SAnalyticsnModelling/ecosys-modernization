@@ -1,1 +1,1 @@
-T-00181 FORGE: restart stale controller and relaunch detached legacy P0.4 Ottawa campaign after the fix is loaded.
+T-00182 PATHFINDER Monitor the detached legacy Ottawa P0.4 full-run campaign and collect completion or failure evidence without colliding with the live driver or heartbeat.
