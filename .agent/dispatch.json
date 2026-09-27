@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00186", "role": "SAGE", "task_file": ".agent/tasks/T-00186.md", "result_file": ".agent/results/T-00186.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Latest evidence shows a stale receipt, but the live detached legacy run holds the lock and heartbeat; SAGE must decide whether to continue or halt it before any restart.", "state_recent": ["T-00185 PATHFINDER DONE: live detached legacy run remains active; avoid restart.", "T-00184 PATHFINDER DONE: stale RUN_FAILED receipt predates the live lock and heartbeat.", "T-00183 PATHFINDER DONE: failed detached run was distinct from the active campaign."], "state_next": "SAGE verifies the live detached legacy Ottawa P0.4 lock and heartbeat before deciding whether to continue or safely stop the active run."}
+{
+  "full_run_justification": null,
+  "reason": "Latest evidence shows a stale receipt, but the live detached legacy run holds the lock and heartbeat; SAGE must decide whether to continue or halt it before any restart.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00186.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE verifies the live detached legacy Ottawa P0.4 lock and heartbeat before deciding whether to continue or safely stop the active run.",
+  "state_recent": [
+    "T-00185 PATHFINDER DONE: live detached legacy run remains active; avoid restart.",
+    "T-00184 PATHFINDER DONE: stale RUN_FAILED receipt predates the live lock and heartbeat.",
+    "T-00183 PATHFINDER DONE: failed detached run was distinct from the active campaign."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00186.md",
+  "task_id": "T-00186"
+}

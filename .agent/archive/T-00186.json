@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00186.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Latest evidence shows a stale receipt, but the live detached legacy run holds the lock and heartbeat; SAGE must decide whether to continue or halt it before any restart.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00186.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE verifies the live detached legacy Ottawa P0.4 lock and heartbeat before deciding whether to continue or safely stop the active run.",
+    "state_recent": [
+      "T-00185 PATHFINDER DONE: live detached legacy run remains active; avoid restart.",
+      "T-00184 PATHFINDER DONE: stale RUN_FAILED receipt predates the live lock and heartbeat.",
+      "T-00183 PATHFINDER DONE: failed detached run was distinct from the active campaign."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00186.md",
+    "task_id": "T-00186"
+  },
+  "ended": 1790473246.8958757,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "d9a4c322-4d85-4feb-b35c-af9214acff81",
+    "old": "782ed603-4979-415f-b68a-160edcd24e16",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 231237,
+    "cache_write": 25825,
+    "cost": null,
+    "input": 12,
+    "llm_calls": 6,
+    "output": 2973,
+    "tool_calls": 1
+  },
+  "violations": []
+}
