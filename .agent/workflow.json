@@ -85,8 +85,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Latest result rejects stale receipt; next unblocked operation is the hardened P0.4 relaunch dry run and detached launch under the T-00191 gate.",
   "task_id": "T-00209",
-  "worker": "FORGE"
+  "worker": null
 }

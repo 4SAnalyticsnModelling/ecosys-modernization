@@ -1,0 +1,25 @@
+{
+  "status": "RELAUNCH_DRY_RUN_PASSED",
+  "campaign_id": "p04-full-campaign",
+  "campaign_directory": "D:\\ecosys-evidence\\legacy\\p04-full-campaign",
+  "machine_lock_path": "D:\\ecosys-modernization\\.agent\\locks\\machine.lock",
+  "lock_precheck": {
+    "locked": true,
+    "reclaimable": true,
+    "reason": "DEAD_PID",
+    "pid": 41688,
+    "heartbeat_age": null,
+    "heartbeat_path": "D:\\ecosys-modernization\\audit\\runs\\p04-full-campaign\\heartbeat.json"
+  },
+  "quarantined_artifacts": {
+    "D:\\ecosys-evidence\\legacy\\p04-full-campaign\\run_1": "D:\\ecosys-evidence\\legacy\\p04-full-campaign\\run_1_quarantine_20260927T195858Z",
+    "D:\\ecosys-modernization\\audit\\runs\\p04-full-campaign\\driver.log": "D:\\ecosys-modernization\\audit\\runs\\p04-full-campaign\\driver_quarantine_20260927T195858Z.log",
+    "D:\\ecosys-modernization\\audit\\runs\\p04_full_run_receipt.json": "D:\\ecosys-modernization\\audit\\runs\\p04_full_run_receipt_quarantine_20260927T195858Z.json",
+    "D:\\ecosys-modernization\\.agent\\locks\\machine.lock": "D:\\ecosys-modernization\\.agent\\locks\\machine_quarantine_20260927T195858Z.lock"
+  },
+  "child_log": "D:\\ecosys-modernization\\audit\\runs\\p04-full-campaign\\driver.log",
+  "deck_source": "D:\\ecosys-evidence\\legacy\\staged_deck",
+  "exe_path": "D:\\ecosys-evidence\\legacy\\ecosys_oracle.exe",
+  "runs_planned": 3,
+  "timeout_per_run_s": 21600.0
+}

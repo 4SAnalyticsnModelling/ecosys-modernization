@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00209", "role": "FORGE", "task_file": ".agent/tasks/T-00209.md", "result_file": ".agent/results/T-00209.md", "skills": ["ecosys-build-reproducibility"], "t1_argv": null, "requires_sage_review": true, "full_run_justification": "P0.4 requires a fresh full legacy rerun because the full 30-year Ottawa outputs are not present in-repo and bounded evidence cannot establish the authoritative baseline.", "reason": "Latest result rejects stale receipt; next unblocked operation is the hardened P0.4 relaunch dry run and detached launch under the T-00191 gate.", "state_recent": ["T-00208 SAGE DONE: stale P0.4 receipt rejected, campaign remains held", "T-00207 SAGE DONE: hardened relaunch harness validated", "T-00206 PATHFINDER DONE: dead driver likely external kill"], "state_next": "Run the hardened P0.4 relaunch dry run, then launch the detached legacy campaign and capture the fresh terminal receipt."}
+{
+  "full_run_justification": "P0.4 requires a fresh full legacy rerun because the full 30-year Ottawa outputs are not present in-repo and bounded evidence cannot establish the authoritative baseline.",
+  "reason": "Latest result rejects stale receipt; next unblocked operation is the hardened P0.4 relaunch dry run and detached launch under the T-00191 gate.",
+  "requires_sage_review": true,
+  "result_file": ".agent/results/T-00209.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-build-reproducibility"
+  ],
+  "state_next": "Run the hardened P0.4 relaunch dry run, then launch the detached legacy campaign and capture the fresh terminal receipt.",
+  "state_recent": [
+    "T-00208 SAGE DONE: stale P0.4 receipt rejected, campaign remains held",
+    "T-00207 SAGE DONE: hardened relaunch harness validated",
+    "T-00206 PATHFINDER DONE: dead driver likely external kill"
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00209.md",
+  "task_id": "T-00209"
+}

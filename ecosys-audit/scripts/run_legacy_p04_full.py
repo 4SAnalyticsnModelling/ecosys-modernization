@@ -673,8 +673,9 @@ def quarantine_campaign_artifacts(
     receipt_path: Path | None = None,
     driver_log: Path | None = None,
     target_runs: list[str] | None = None,
+    lock_path: Path | None = None,
 ) -> dict[str, str]:
-    """Quarantine prior run outputs, driver log, and stale receipts before relaunch.
+    """Quarantine prior run outputs, driver log, stale receipts, and stale lock before relaunch.
 
     Returns a dictionary mapping original path string to quarantined destination path string.
     """
@@ -699,6 +700,11 @@ def quarantine_campaign_artifacts(
         q_dest = quarantine_path(receipt_path)
         if q_dest:
             quarantined[str(receipt_path)] = str(q_dest)
+
+    if lock_path and lock_path.exists():
+        q_dest = quarantine_path(lock_path)
+        if q_dest:
+            quarantined[str(lock_path)] = str(q_dest)
 
     return quarantined
 
@@ -1191,12 +1197,22 @@ def relaunch_campaign(
             f"(heartbeat age: {status['heartbeat_age']:.1f}s); live lock cannot be stolen"
         )
 
+    if status["locked"] and status["reclaimable"]:
+        if (
+            status["reason"] == "STALE_HEARTBEAT"
+            and status.get("pid")
+            and status["pid"] != os.getpid()
+            and is_pid_alive(status["pid"])
+        ):
+            stop_process_by_pid(status["pid"])
+
     # 2. Quarantine prior artifacts
     child_log = (campaign_log or (heartbeat_path.parent / "driver.log")).resolve()
     quarantined = quarantine_campaign_artifacts(
         campaign_dir=campaign_dir,
         receipt_path=out_receipt,
         driver_log=child_log,
+        lock_path=lock_path if (status["locked"] and status["reclaimable"]) else None,
     )
 
     # 3. Dry-run handling
@@ -1349,10 +1365,12 @@ def main():
         child_log = (a.campaign_log or (heartbeat_path.parent / "driver.log")).resolve()
         quarantined = {}
         if a.quarantine_prior:
+            status = inspect_lock_status(lock_path, heartbeat_path)
             quarantined = quarantine_campaign_artifacts(
                 campaign_dir=campaign_dir,
                 receipt_path=out_receipt,
                 driver_log=child_log,
+                lock_path=lock_path if (status["locked"] and status["reclaimable"]) else None,
             )
             if quarantined:
                 print(f"[Quarantine] Quarantined prior artifacts: {json.dumps(quarantined)}")

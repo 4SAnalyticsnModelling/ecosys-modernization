@@ -1,0 +1,80 @@
+{
+  "status": "RUN_FAILED",
+  "protocol": "plan \u00a75 P0.4 / SAGE T-00140 / SAGE T-00142 R5",
+  "campaign_id": "p04-full-campaign",
+  "campaign_directory": "D:\\ecosys-evidence\\legacy\\p04-full-campaign",
+  "error": "Run run_1 failed: exit_code=2, timed_out=False, elapsed=97.776s",
+  "runs_completed": 0,
+  "machine_and_environment": {
+    "machine_lock": "D:\\ecosys-modernization\\.agent\\locks\\machine.lock",
+    "heartbeat_path": "D:\\ecosys-modernization\\audit\\runs\\p04-full-campaign\\heartbeat.json",
+    "core_affinity_mask": "0x1",
+    "checkpoints_policy": "No *.bin checkpoints; legacy Fortran 77 does not implement Zig checkpointing",
+    "system_load_summary": {
+      "warmups": [
+        {
+          "start": {
+            "timestamp": 1790466763.6425018,
+            "timestamp_utc": "2026-09-26T23:52:43Z",
+            "memory_load_percent": 42,
+            "total_phys_mb": 65192.1,
+            "avail_phys_mb": 37354.8,
+            "cpu_times_raw": {
+              "idle": 61774898125000,
+              "kernel": 65795917187500,
+              "user": 4704405156250
+            }
+          },
+          "end": {
+            "timestamp": 1790466777.8927145,
+            "timestamp_utc": "2026-09-26T23:52:57Z",
+            "memory_load_percent": 42,
+            "total_phys_mb": 65192.1,
+            "avail_phys_mb": 37323.4,
+            "cpu_times_raw": {
+              "idle": 61778764218750,
+              "kernel": 65800072656250,
+              "user": 4704802187500
+            }
+          }
+        }
+      ],
+      "runs": []
+    }
+  },
+  "warmups": [
+    {
+      "status": "WARMUP_DISCARDED",
+      "elapsed_seconds": 11.847,
+      "termination_marker": "NOW EXECUTING DAY     2",
+      "affinity_mask": "0x1",
+      "system_load": {
+        "start": {
+          "timestamp": 1790466763.6425018,
+          "timestamp_utc": "2026-09-26T23:52:43Z",
+          "memory_load_percent": 42,
+          "total_phys_mb": 65192.1,
+          "avail_phys_mb": 37354.8,
+          "cpu_times_raw": {
+            "idle": 61774898125000,
+            "kernel": 65795917187500,
+            "user": 4704405156250
+          }
+        },
+        "end": {
+          "timestamp": 1790466777.8927145,
+          "timestamp_utc": "2026-09-26T23:52:57Z",
+          "memory_load_percent": 42,
+          "total_phys_mb": 65192.1,
+          "avail_phys_mb": 37323.4,
+          "cpu_times_raw": {
+            "idle": 61778764218750,
+            "kernel": 65800072656250,
+            "user": 4704802187500
+          }
+        }
+      }
+    }
+  ],
+  "runs": []
+}

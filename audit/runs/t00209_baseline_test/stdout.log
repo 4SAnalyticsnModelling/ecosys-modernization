@@ -1,0 +1,3 @@
+  [Quarantine] Preserved existing directory C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\tmp\tmptd7cy8e5\run_1 -> C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\tmp\tmptd7cy8e5\run_1_quarantine_20260927T195552Z
+[Lock] Reclaiming stale lock: reason=DEAD_PID, stale_pid=99999999
+[Lock] Reclaiming stale lock: reason=STALE_HEARTBEAT, stale_pid=28500

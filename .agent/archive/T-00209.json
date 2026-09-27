@@ -1,0 +1,72 @@
+{
+  "changed": [
+    ".agent/results/T-00209.md",
+    ".agent/tasks/T-00209.hypothesis.md",
+    "audit/runs/p04-full-campaign/driver_quarantine_20260927T195858Z.log",
+    "audit/runs/p04_full_run_receipt_quarantine_20260927T195858Z.json",
+    "audit/runs/p04_full_run_receipt_quarantine_20260927T195923Z.json",
+    "audit/runs/t00209_baseline_test/receipt.json",
+    "audit/runs/t00209_baseline_test/stderr.log",
+    "audit/runs/t00209_baseline_test/stdout.log",
+    "audit/runs/t00209_live_relaunch/receipt.json",
+    "audit/runs/t00209_live_relaunch/stderr.log",
+    "audit/runs/t00209_live_relaunch/stdout.log",
+    "audit/runs/t00209_relaunch_dry_run/receipt.json",
+    "audit/runs/t00209_relaunch_dry_run/stderr.log",
+    "audit/runs/t00209_relaunch_dry_run/stdout.log",
+    "audit/runs/t00209_test_after_fix/receipt.json",
+    "audit/runs/t00209_test_after_fix/stderr.log",
+    "audit/runs/t00209_test_after_fix/stdout.log",
+    "audit/runs/t00209_test_workflow/receipt.json",
+    "audit/runs/t00209_test_workflow/stderr.log",
+    "audit/runs/t00209_test_workflow/stdout.log",
+    "audit/runs/t00209_test_wrapper_exempt/receipt.json",
+    "audit/runs/t00209_test_wrapper_exempt/stderr.log",
+    "audit/runs/t00209_test_wrapper_exempt/stdout.log",
+    "ecosys-audit/scripts/run_legacy_p04_full.py"
+  ],
+  "dispatch": {
+    "full_run_justification": "P0.4 requires a fresh full legacy rerun because the full 30-year Ottawa outputs are not present in-repo and bounded evidence cannot establish the authoritative baseline.",
+    "reason": "Latest result rejects stale receipt; next unblocked operation is the hardened P0.4 relaunch dry run and detached launch under the T-00191 gate.",
+    "requires_sage_review": true,
+    "result_file": ".agent/results/T-00209.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-build-reproducibility"
+    ],
+    "state_next": "Run the hardened P0.4 relaunch dry run, then launch the detached legacy campaign and capture the fresh terminal receipt.",
+    "state_recent": [
+      "T-00208 SAGE DONE: stale P0.4 receipt rejected, campaign remains held",
+      "T-00207 SAGE DONE: hardened relaunch harness validated",
+      "T-00206 PATHFINDER DONE: dead driver likely external kill"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00209.md",
+    "task_id": "T-00209"
+  },
+  "ended": 1790539404.205817,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1ba46413ffe9yEas0Ktkq1F84",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 5294704,
+    "cache_write": 0,
+    "cost": 0.6938628,
+    "input": 353940,
+    "llm_calls": 70,
+    "output": 8348,
+    "tool_calls": 72
+  },
+  "violations": []
+}
