@@ -1,1 +1,1 @@
-T-00218 FORGE: restore Ottawa deck to git blob ecf5e61a and prepare SAGE diff-bound review.
+T-00221 SAGE: review staged Ottawa deck hash-bound proof and close G0-2a.

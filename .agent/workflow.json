@@ -82,17 +82,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "ALLOWED FILES `ecosys-ng-prod-examples/Cool` is a protected reference path"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "chained from T-00219 (SAGE CHAIN block)",
-  "task_id": "T-00220",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE must review the staged Ottawa deck proof and close G0-2a without touching the protected deck.",
+  "task_id": "T-00221",
+  "worker": "SAGE"
 }

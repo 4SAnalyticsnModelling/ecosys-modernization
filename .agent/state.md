@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00213 SAGE DONE: The detached legacy Ottawa P0.4 campaign is live and making real progress, so repeated polling is invalid under the no-new-evidence rule.
-- T-00212 PATHFINDER STAGNATED: the live campaign remains under active lock and heartbeat with no fresh terminal receipt.
-- T-00211 PATHFINDER STAGNATED: active PID 46732 is healthy and no new evidence supersedes the stale RUN_FAILED record.
+- T-00220 FORGE DONE: staged Ottawa deck and test pass.
+- T-00219 SAGE DONE: direct deck edit withdrawn; staged-copy rule applies.
+- T-00216 SAGE DONE: G0-2a remains open and D6 deck half is still pending.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-hold P0.4 and dispatch no more polling until a fresh receipt or expiry triggers review.
+SAGE reviews staged Ottawa deck hash-bound evidence to close G0-2a without editing the protected deck.
