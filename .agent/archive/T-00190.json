@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00190.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "PATHFINDER to reconcile the detached legacy Ottawa P0.4 evidence gap: stale RUN_FAILED and live heartbeat with no terminal receipt; no retry before fresh evidence.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00190.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER performs one bounded audit of the detached legacy Ottawa P0.4 receipt paths and timestamps before any retry.",
+    "state_recent": [
+      "T-00189 PATHFINDER STAGNATED: no fresh Ottawa P0.4 receipt; stale RUN_FAILED remains only record.",
+      "T-00188 PATHFINDER STAGNATED: campaign still live; no post-exit receipt exists.",
+      "T-00187 PATHFINDER STAGNATED: live heartbeat newer than stale receipt; must await the exit."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00190.md",
+    "task_id": "T-00190"
+  },
+  "ended": 1790473753.8664222,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1f75c767ffekFKDH6zNnaVCab",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "BLOCKED",
+  "review": null,
+  "usage": {
+    "cache_read": 170112,
+    "cache_write": 0,
+    "cost": 0.017657439999999996,
+    "input": 36080,
+    "llm_calls": 7,
+    "output": 5866,
+    "tool_calls": 13
+  },
+  "violations": []
+}

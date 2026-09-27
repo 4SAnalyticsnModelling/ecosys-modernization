@@ -80,8 +80,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "PATHFINDER to reconcile the detached legacy Ottawa P0.4 evidence gap: stale RUN_FAILED and live heartbeat with no terminal receipt; no retry before fresh evidence.",
   "task_id": "T-00190",
-  "worker": "PATHFINDER"
+  "worker": null
 }
