@@ -1,1 +1,1 @@
-T-00221 SAGE: review staged Ottawa deck hash-bound proof and close G0-2a.
+T-00222 FORGE: wire the Ottawa qualification runner to stage the approved deck and record runottawa_hash in the receipt.

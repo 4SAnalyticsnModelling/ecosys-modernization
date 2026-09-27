@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00220 FORGE DONE: staged Ottawa deck and test pass.
-- T-00219 SAGE DONE: direct deck edit withdrawn; staged-copy rule applies.
-- T-00216 SAGE DONE: G0-2a remains open and D6 deck half is still pending.
+- T-00221 ROLE SAGE DONE: staged deck accepted; G0-2a closes without protected deck edits
+- T-00220 ROLE FORGE DONE: Ottawa staged-deck script and tests passed
+- T-00219 ROLE SAGE DONE: direct protected-deck route withdrawn; staged deck required
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE reviews staged Ottawa deck hash-bound evidence to close G0-2a without editing the protected deck.
+FORGE wires the Ottawa runner to stage the deck and record runottawa_hash in the receipt
