@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00186 SAGE DONE: active Ottawa P0.4 run remains healthy and advancing.
-- T-00185 PATHFINDER DONE: stale RUN_FAILED receipt predates the live campaign.
-- T-00184 PATHFINDER DONE: live driver holds lock; no new receipt has been written.
+- T-00187 PATHFINDER STAGNATED: active campaign still has no exit receipt.
+- T-00186 SAGE DONE: active Ottawa P0.4 remains healthy and advancing.
+- T-00185 PATHFINDER DONE: stale RUN_FAILED predates the live campaign.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER waits for the detached legacy Ottawa P0.4 driver to exit, then records the new receipt without disturbing its live lock.
+PATHFINDER waits for the active detached legacy Ottawa P0.4 run to exit, then records the new receipt without disturbing the live lock.

@@ -78,8 +78,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Active legacy Ottawa P0.4 is still healthy; the next needed action is PATHFINDER collection of the new exit receipt, not another SAGE decision.",
-  "task_id": "T-00187",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "PATHFINDER: collect the exit receipt from the live detached Ottawa P0.4 campaign without disturbing its lock or heartbeat.",
+  "task_id": "T-00188",
+  "worker": "PATHFINDER"
 }

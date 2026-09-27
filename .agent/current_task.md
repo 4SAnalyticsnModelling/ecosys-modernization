@@ -1,1 +1,1 @@
-T-00187 PATHFINDER: Collect the detached legacy Ottawa P0.4 completion/failure receipt when the active run exits.
+T-00188 PATHFINDER: collect the detached legacy Ottawa P0.4 exit receipt once the driver exits without disturbing the live lock or heartbeat.
