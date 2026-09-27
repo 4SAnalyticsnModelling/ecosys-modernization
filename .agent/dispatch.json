@@ -1,22 +1,28 @@
 {
-  "full_run_justification": null,
-  "reason": "No valid P0.4 receipt exists: PID 41688 is dead and stale run_failed is invalid; SAGE must judge the hang/receipt path now.",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00204.md",
-  "result_status": "DONE",
-  "role": "SAGE",
+  "errors": [
+    "ALLOWED FILES `No` is outside PATHFINDER may_write"
+  ],
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "PATHFINDER follows T-00204: dead legacy P0.4 driver needs evidence on kill cause and hardened launch recipe; no science decision.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00205.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER to trace the dead P0.4 driver and confirm a hardened relaunch recipe.",
+    "state_recent": [
+      "T-00204 SAGE DONE: stale RUN_FAILED invalid; dead legacy P0.4 driver needs diagnosis or relaunch.",
+      "T-00197 SAGE BLOCKED: PID 41688 still alive; no valid P0.4 receipt exists.",
+      "T-00195 SAGE BLOCKED: stale receipt predates active campaign and remains invalid."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00205.md",
+    "task_id": "T-00205"
+  },
   "schema_version": 1,
-  "skills": [
-    "ecosys-feature-attribution"
-  ],
-  "state_next": "Hold legacy Ottawa P0.4 gate until the dead driver is adjudicated; decide whether the run needs diagnosis or relaunch.",
-  "state_recent": [
-    "T-00197 SAGE BLOCKED: live run still active; no valid receipt",
-    "T-00196 SAGE PENDING: hold until exit or stale heartbeat",
-    "T-00195 SAGE BLOCKED: stale RUN_FAILED invalid until exit receipt"
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00204.md",
-  "task_id": "T-00204"
+  "status": "REJECTED"
 }

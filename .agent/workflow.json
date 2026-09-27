@@ -75,11 +75,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
+  "last_route_errors": [
+    "ALLOWED FILES `No` is outside PATHFINDER may_write"
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "No valid P0.4 receipt exists: PID 41688 is dead and stale run_failed is invalid; SAGE must judge the hang/receipt path now.",

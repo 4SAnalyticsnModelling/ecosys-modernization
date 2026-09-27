@@ -1,1 +1,1 @@
-T-00204 SAGE: decide whether the dead detached legacy Ottawa P0.4 run has a valid terminal receipt or requires diagnosis/relaunch.
+T-00205 PATHFINDER: identify the dead legacy P0.4 driver’s kill cause and confirm the hardened relaunch recipe.
