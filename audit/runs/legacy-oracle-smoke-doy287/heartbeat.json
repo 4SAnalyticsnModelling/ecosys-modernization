@@ -1,0 +1,22 @@
+{
+  "pid": 40940,
+  "campaign_id": "p04-smoke-doy287",
+  "status": "COMPLETED",
+  "heartbeat_unix": 1790467812.433209,
+  "heartbeat_utc": "2026-09-27T00:10:12Z",
+  "elapsed_seconds": 121.92,
+  "current_run": 1,
+  "total_runs": 1,
+  "system_load": {
+    "timestamp": 1790467812.433209,
+    "timestamp_utc": "2026-09-27T00:10:12Z",
+    "memory_load_percent": 42,
+    "total_phys_mb": 65192.1,
+    "avail_phys_mb": 37468.7,
+    "cpu_times_raw": {
+      "idle": 62070830156250,
+      "kernel": 66110512968750,
+      "user": 4725416875000
+    }
+  }
+}

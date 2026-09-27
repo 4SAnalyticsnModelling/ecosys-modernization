@@ -70,8 +70,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "The detached legacy P0.4 campaign failed at DOY 286 on documented issue-023/issue-084; the next bounded action is a scratch-only rebuild and smoke test.",
   "task_id": "T-00155",
-  "worker": "FORGE"
+  "worker": null
 }

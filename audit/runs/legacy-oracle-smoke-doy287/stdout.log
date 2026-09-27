@@ -1,0 +1,30 @@
+=== ECOSYS P0.4 LEGACY GFORTRAN FULL-RUN DRIVER ===
+  Deck source: D:\ecosys-evidence\legacy\staged_deck
+  Executable: D:\ecosys-evidence\legacy\ecosys_oracle.exe
+  Output directory base: D:\ecosys-evidence\legacy\p04-smoke-doy287
+  Core affinity mask: 0x1
+  Runs requested: 1
+  Timeout per run: 600.0s
+  Dry-run: False
+  Machine lock path: D:\ecosys-modernization\.agent\locks\machine.lock
+  Heartbeat path: D:\ecosys-modernization\audit\runs\legacy-oracle-smoke-doy287\heartbeat.json
+Acquiring exclusive machine lock: D:\ecosys-modernization\.agent\locks\machine.lock
+Heartbeat path: D:\ecosys-modernization\audit\runs\legacy-oracle-smoke-doy287\heartbeat.json
+[Lock] Reclaiming stale lock: reason=UNOWNED_LOCK, stale_pid=None
+
+--- [Iteration 1/1] Starting Warmup ---
+  [Warmup] Staging warmup directory: D:\ecosys-evidence\legacy\p04-smoke-doy287\warmup_1
+  [Warmup] Completed in 15.988s; discarded warmup directory.
+--- [Iteration 1/1] Starting Timed Run ---
+  [Timed Run run_1] Staging run directory: D:\ecosys-evidence\legacy\p04-smoke-doy287\run_1
+  Run 1 completed in 99.966s
+
+Full execution receipt written to D:\ecosys-modernization\audit\runs\legacy_p04_smoke_doy287_receipt.json
+{
+  "status": "ALL_RUNS_COMPLETED",
+  "runs_completed": 1,
+  "median_seconds": 99.966,
+  "spread_seconds": 0.0,
+  "deterministic": true,
+  "output_files_per_run": 29
+}

@@ -1,0 +1,65 @@
+{
+  "changed": [
+    ".agent/results/T-00155.md",
+    "audit/runs/legacy-oracle-build-link-r023/receipt.json",
+    "audit/runs/legacy-oracle-build-link-r023/stderr.log",
+    "audit/runs/legacy-oracle-build-link-r023/stdout.log",
+    "audit/runs/legacy-oracle-build-splitp-c-r023/receipt.json",
+    "audit/runs/legacy-oracle-build-splitp-c-r023/stderr.log",
+    "audit/runs/legacy-oracle-build-splitp-c-r023/stdout.log",
+    "audit/runs/legacy-oracle-build-splits-c-r023/receipt.json",
+    "audit/runs/legacy-oracle-build-splits-c-r023/stderr.log",
+    "audit/runs/legacy-oracle-build-splits-c-r023/stdout.log",
+    "audit/runs/legacy-oracle-smoke-doy287/heartbeat.json",
+    "audit/runs/legacy-oracle-smoke-doy287/receipt.json",
+    "audit/runs/legacy-oracle-smoke-doy287/stderr.log",
+    "audit/runs/legacy-oracle-smoke-doy287/stdout.log",
+    "audit/runs/legacy_p04_smoke_doy287_receipt.json",
+    "audit/runs/p04-full-campaign/heartbeat.json",
+    "ecosys-audit/scripts/prepare_legacy_build.py"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "The detached legacy P0.4 campaign failed at DOY 286 on documented issue-023/issue-084; the next bounded action is a scratch-only rebuild and smoke test.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00155.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "FORGE will rebuild the scratch legacy oracle, smoke-test through DOY 287, and relaunch the detached P0.4 campaign.",
+    "state_recent": [
+      "T-00154 FORGE DONE: legacy campaign failed at DOY 286 on issue-023.",
+      "T-00153 SAGE DONE: detached launch was authorized and relaunch awaits fix.",
+      "T-00151 FORGE DONE: detached driver and lock harness passed tests."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00155.md",
+    "task_id": "T-00155"
+  },
+  "ended": 1790468125.8539293,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1fdf727effeJjNj9A522bQfOZ",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 6776526,
+    "cache_write": 0,
+    "cost": 1.4159397000000005,
+    "input": 1143372,
+    "llm_calls": 79,
+    "output": 13379,
+    "tool_calls": 88
+  },
+  "violations": []
+}

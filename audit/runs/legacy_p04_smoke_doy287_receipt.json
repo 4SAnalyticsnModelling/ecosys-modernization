@@ -1,0 +1,325 @@
+{
+  "status": "ALL_RUNS_COMPLETED",
+  "protocol": "plan \u00a75 P0.4 / SAGE T-00140 / SAGE T-00142 R5",
+  "campaign_id": "p04-smoke-doy287",
+  "campaign_directory": "D:\\ecosys-evidence\\legacy\\p04-smoke-doy287",
+  "runs_count": 1,
+  "timing_statistics": {
+    "elapsed_seconds_all_runs": [
+      99.966
+    ],
+    "sorted_elapsed_seconds": [
+      99.966
+    ],
+    "median_seconds": 99.966,
+    "spread_seconds": 0.0,
+    "relative_spread_percent": 0.0
+  },
+  "determinism_audit": {
+    "byte_for_byte_identical": true,
+    "deterministic": true,
+    "total_files_compared": 29,
+    "discrepancies_count": 0,
+    "discrepancies": [],
+    "note": "Single run evaluated; cross-run comparison requires >=2 runs."
+  },
+  "inventory_audit": {
+    "run_002_baseline_files": 1138,
+    "actual_output_files": 29,
+    "file_count_difference": -1109,
+    "run_002_baseline_approx_bytes": 1428000000,
+    "actual_total_bytes": 33787307,
+    "size_difference_bytes": -1394212693,
+    "explanation": "File count difference of -1109 files relative to run-002 inventory."
+  },
+  "machine_and_environment": {
+    "machine_lock": "D:\\ecosys-modernization\\.agent\\locks\\machine.lock",
+    "heartbeat_path": "D:\\ecosys-modernization\\audit\\runs\\legacy-oracle-smoke-doy287\\heartbeat.json",
+    "core_affinity_mask": "0x1",
+    "checkpoints_policy": "No *.bin checkpoints; legacy Fortran 77 does not implement Zig checkpointing",
+    "system_load_summary": {
+      "warmups": [
+        {
+          "start": {
+            "timestamp": 1790467690.5236964,
+            "timestamp_utc": "2026-09-27T00:08:10Z",
+            "memory_load_percent": 42,
+            "total_phys_mb": 65192.1,
+            "avail_phys_mb": 37376.2,
+            "cpu_times_raw": {
+              "idle": 62035361250000,
+              "kernel": 66073558750000,
+              "user": 4723358906250
+            }
+          },
+          "end": {
+            "timestamp": 1790467710.3886194,
+            "timestamp_utc": "2026-09-27T00:08:30Z",
+            "memory_load_percent": 42,
+            "total_phys_mb": 65192.1,
+            "avail_phys_mb": 37385.8,
+            "cpu_times_raw": {
+              "idle": 62041045625000,
+              "kernel": 66079540000000,
+              "user": 4723732343750
+            }
+          }
+        }
+      ],
+      "runs": [
+        {
+          "start": {
+            "timestamp": 1790467711.5855403,
+            "timestamp_utc": "2026-09-27T00:08:31Z",
+            "memory_load_percent": 42,
+            "total_phys_mb": 65192.1,
+            "avail_phys_mb": 37392.8,
+            "cpu_times_raw": {
+              "idle": 62041360312500,
+              "kernel": 66079892343750,
+              "user": 4723760781250
+            }
+          },
+          "end": {
+            "timestamp": 1790467812.101911,
+            "timestamp_utc": "2026-09-27T00:10:12Z",
+            "memory_load_percent": 42,
+            "total_phys_mb": 65192.1,
+            "avail_phys_mb": 37472.4,
+            "cpu_times_raw": {
+              "idle": 62070740781250,
+              "kernel": 66110413281250,
+              "user": 4725411562500
+            }
+          }
+        }
+      ]
+    }
+  },
+  "warmups": [
+    {
+      "status": "WARMUP_DISCARDED",
+      "elapsed_seconds": 15.988,
+      "termination_marker": "NOW EXECUTING DAY     2",
+      "affinity_mask": "0x1",
+      "system_load": {
+        "start": {
+          "timestamp": 1790467690.5236964,
+          "timestamp_utc": "2026-09-27T00:08:10Z",
+          "memory_load_percent": 42,
+          "total_phys_mb": 65192.1,
+          "avail_phys_mb": 37376.2,
+          "cpu_times_raw": {
+            "idle": 62035361250000,
+            "kernel": 66073558750000,
+            "user": 4723358906250
+          }
+        },
+        "end": {
+          "timestamp": 1790467710.3886194,
+          "timestamp_utc": "2026-09-27T00:08:30Z",
+          "memory_load_percent": 42,
+          "total_phys_mb": 65192.1,
+          "avail_phys_mb": 37385.8,
+          "cpu_times_raw": {
+            "idle": 62041045625000,
+            "kernel": 66079540000000,
+            "user": 4723732343750
+          }
+        }
+      }
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "run_1",
+      "status": "RUN_COMPLETED_SUCCESS",
+      "exit_code": 0,
+      "elapsed_seconds": 99.966,
+      "core_affinity_mask_applied": "0x1",
+      "core_affinity_mask_verified": "0x1",
+      "run_directory": "D:\\ecosys-evidence\\legacy\\p04-smoke-doy287\\run_1",
+      "total_output_files": 29,
+      "total_output_bytes": 33787307,
+      "horizon_check": {
+        "verified": true,
+        "horizon_type": "BOUNDED_TEST",
+        "simulated_days_target": 287,
+        "note": "Bounded test mode verified reaching day 287"
+      },
+      "system_load": {
+        "start": {
+          "timestamp": 1790467711.5855403,
+          "timestamp_utc": "2026-09-27T00:08:31Z",
+          "memory_load_percent": 42,
+          "total_phys_mb": 65192.1,
+          "avail_phys_mb": 37392.8,
+          "cpu_times_raw": {
+            "idle": 62041360312500,
+            "kernel": 66079892343750,
+            "user": 4723760781250
+          }
+        },
+        "end": {
+          "timestamp": 1790467812.101911,
+          "timestamp_utc": "2026-09-27T00:10:12Z",
+          "memory_load_percent": 42,
+          "total_phys_mb": 65192.1,
+          "avail_phys_mb": 37472.4,
+          "cpu_times_raw": {
+            "idle": 62070740781250,
+            "kernel": 66110413281250,
+            "user": 4725411562500
+          }
+        }
+      },
+      "outputs": {
+        "01998f25cd1": {
+          "size_bytes": 153312,
+          "sha256": "3A85B06C036CE7C9F53D9122CC369B8FC68E3634316A1FF963B519180DB9CA99",
+          "lines": 296
+        },
+        "01998f25ch1": {
+          "size_bytes": 2418478,
+          "sha256": "7436B3D221CBC1D486E9F92D6E734FC7F04002F054C99C4550D1DCCA7429F2ED",
+          "lines": 7241
+        },
+        "01998f25ed1": {
+          "size_bytes": 251384,
+          "sha256": "3A857AB8A09B0E521BC8FBE75D7DF07E59FC9064FDFEED83FA0CD6A73D465D15",
+          "lines": 300
+        },
+        "01998f25eh1": {
+          "size_bytes": 3343016,
+          "sha256": "9053CE5F9E8AD34D4F29B08AC6C31A3BA8536FAB93BC239CE366DF83942538C3",
+          "lines": 7236
+        },
+        "01998f25nd1": {
+          "size_bytes": 199246,
+          "sha256": "0CBABF03C527E851C37C68ED8D31EC542E5BCB2BFB7E16E74917A4AC563E73CF",
+          "lines": 301
+        },
+        "01998f25nh1": {
+          "size_bytes": 1839452,
+          "sha256": "F7CC3364D9704610B36CDA3B1F66BA9332B80E9CE503D1E27F88229D44ADC6D2",
+          "lines": 7242
+        },
+        "01998f25pd1": {
+          "size_bytes": 139574,
+          "sha256": "30D06AF75D9F575AB8268D459906B013E48828C2E89EF6A60E3DBBFA48119C87",
+          "lines": 297
+        },
+        "01998f25wd1": {
+          "size_bytes": 251384,
+          "sha256": "B9AB06FE39137C3DA44A4192C0C96724CFE922381F58AEF2DEDE917B65088FF7",
+          "lines": 300
+        },
+        "01998f25wh1": {
+          "size_bytes": 5779100,
+          "sha256": "A2CD514756D2DDE746D0AD48338AA9F98133F7F512E59EE6EAE1EA63FC5CF64E",
+          "lines": 7242
+        },
+        "11998f25cd1": {
+          "size_bytes": 179982,
+          "sha256": "A3DC1B7C016C8102E9A3B99832CC2D92261BE4F95352BB52AE36914D4253133C",
+          "lines": 301
+        },
+        "11998f25ch1": {
+          "size_bytes": 1025366,
+          "sha256": "F1F1F078C274C8BDA11F689813BD859D9E620F20982BA0D4F0AC7C8E1E0A141D",
+          "lines": 7221
+        },
+        "11998f25ed1": {
+          "size_bytes": 37574,
+          "sha256": "6F80B44E04A51B3845BCEA9B5B5905F680A505D0DBC5C88DC01AFF8DFB952D43",
+          "lines": 297
+        },
+        "11998f25eh1": {
+          "size_bytes": 1025366,
+          "sha256": "F64FB4FB611BBBA664D949B172368D4FFD8179D42D338E2BFC6E1426B2C2FE86",
+          "lines": 7221
+        },
+        "11998f25nd1": {
+          "size_bytes": 111062,
+          "sha256": "78605277C141C5F20EBD8BA060FC9C3D0172C8A451FD75992F37825109A73D9D",
+          "lines": 297
+        },
+        "11998f25nh1": {
+          "size_bytes": 331184,
+          "sha256": "B6221590CFAD3CC9B7AE37FA8C6FEEA6A86E7405CED0B8035F570833D5510411",
+          "lines": 7200
+        },
+        "11998f25pd1": {
+          "size_bytes": 97458,
+          "sha256": "D6442B4C31E20F000FAA61997ED63A88BF5E8982F5308148C919AC93C52FFFAA",
+          "lines": 299
+        },
+        "11998f25wd1": {
+          "size_bytes": 24752,
+          "sha256": "B957A987DEF1AA13B0226076BE4B8A9670613A0F8042962407BB4E547F61FEF1",
+          "lines": 288
+        },
+        "11998f25wh1": {
+          "size_bytes": 910586,
+          "sha256": "E9409CE1049C7458B929252196DE5F6C3808B8F39AC1FAC04736BE57EAB3F5DA",
+          "lines": 7227
+        },
+        "Cf21998": {
+          "size_bytes": 95392,
+          "sha256": "FA24978C2741A35889FD338E45CA9D3B6FA8890373199E6547EE1BFDECBF0195",
+          "lines": 998
+        },
+        "log98f25": {
+          "size_bytes": 939011,
+          "sha256": "BC620726006F91A6C5C0BB8E7C0BE4E575831DE615C3607D9CC203B849AEB631",
+          "lines": 4465
+        },
+        "logfile1": {
+          "size_bytes": 41478,
+          "sha256": "78EDAA23B0B3797241F1F50D3DE9CAAE8D8C4A4E1369AFA2162993A47E5D0A53",
+          "lines": 389
+        },
+        "logfile2": {
+          "size_bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "lines": 0
+        },
+        "logfile3": {
+          "size_bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "lines": 0
+        },
+        "Mf21998": {
+          "size_bytes": 3062546,
+          "sha256": "0C12E94F088B0D031FA358C2F9EBE2BA2541315CEAB31F0253456F2DE89DA81B",
+          "lines": 16419
+        },
+        "Nf21998": {
+          "size_bytes": 8953277,
+          "sha256": "9B498BEF4077542FDAE07DF025DB6B85F3155903753A2FFB1E093E4E6D53141C",
+          "lines": 42198
+        },
+        "Pf21998": {
+          "size_bytes": 61583,
+          "sha256": "F764CC3EB3CD6E34DA829A34F9F8C9C0E39AD096A5200D80EEEF31287067E8CD",
+          "lines": 730
+        },
+        "Qf21998": {
+          "size_bytes": 0,
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "lines": 0
+        },
+        "Rf21998": {
+          "size_bytes": 749570,
+          "sha256": "AE5020005E9582C680F69DC550AA1E2EA2A960864D4045832C0EA125301C7295",
+          "lines": 4112
+        },
+        "Wf21998": {
+          "size_bytes": 1766174,
+          "sha256": "9E30178E5F2508390B002DA83666EA656313951471A3F2DEAFBBADAD23FE7CA1",
+          "lines": 8923
+        }
+      }
+    }
+  ]
+}
