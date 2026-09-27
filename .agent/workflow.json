@@ -15,6 +15,7 @@
     "PATHFINDER:T-00033": 1,
     "PATHFINDER:T-00115": 1,
     "PATHFINDER:T-00187": 1,
+    "PATHFINDER:T-00188": 1,
     "SAGE:T-00158": 1,
     "SAGE:T-00161": 1,
     "SAGE:T-00164": 1,
@@ -78,8 +79,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "PATHFINDER: collect the exit receipt from the live detached Ottawa P0.4 campaign without disturbing its lock or heartbeat.",
   "task_id": "T-00188",
-  "worker": "PATHFINDER"
+  "worker": null
 }
