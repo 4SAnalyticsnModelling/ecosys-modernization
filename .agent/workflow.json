@@ -81,8 +81,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "PATHFINDER is the unblocked role for the live detached P0.4 receipt failure packet; T-00192 requires reading the active logs before any retry.",
-  "task_id": "T-00193",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE is the only role that can adjudicate the live detached run's final receipt and authorize any retry after the lock is released.",
+  "task_id": "T-00194",
+  "worker": "SAGE"
 }
