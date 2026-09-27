@@ -1,26 +1,17 @@
 {
-  "errors": [
-    "you wrote outside your lane (undone, copy in .agent/failures/route-1790471467/): audit/runs/p04-full-campaign/heartbeat.json: outside SENTINEL may_write"
-  ],
-  "rejected": {
-    "full_run_justification": null,
-    "reason": "Route to PATHFINDER to monitor detached legacy P0.4 progress and capture completion evidence without colliding.",
-    "requires_sage_review": false,
-    "result_file": ".agent/results/T-00177.md",
-    "role": "PATHFINDER",
-    "schema_version": 1,
-    "skills": [],
-    "state_next": "PATHFINDER monitors the detached legacy P0.4 campaign receipt and heartbeat until completion enables L5 collection.",
-    "state_recent": [
-      "T-00176 FORGE DONE: detached legacy campaign advanced past DOY 286, no scope issues.",
-      "T-00175 FORGE DONE: live heartbeat exemption fix restored routing; restart required.",
-      "T-00173 SAGE DONE: deadlock loop was stopped and relaunch path chosen with pinned hashes."
-    ],
-    "status": "PENDING",
-    "t1_argv": null,
-    "task_file": ".agent/tasks/T-00177.md",
-    "task_id": "T-00177"
-  },
+  "decision_kind": "routing-failure",
+  "decision_of": "SENTINEL",
+  "full_run_justification": null,
+  "reason": "SAGE decision (routing-failure) from SENTINEL",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00179.md",
+  "role": "SAGE",
   "schema_version": 1,
-  "status": "REJECTED"
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00179.md",
+  "task_id": "T-00179"
 }

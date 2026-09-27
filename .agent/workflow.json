@@ -71,16 +71,16 @@
   "idle_check": false,
   "last_advance_unix": null,
   "last_route_errors": [
-    "you wrote outside your lane (undone, copy in .agent/failures/route-1790471467/): audit/runs/p04-full-campaign/heartbeat.json: outside SENTINEL may_write"
+    "you wrote outside your lane (undone, copy in .agent/failures/route-1790471518/): audit/runs/p04-full-campaign/heartbeat.json: outside SENTINEL may_write"
   ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Fresh controller fix restored routing; next task relaunches the detached legacy P0.4 campaign with pinned hashes so evidence can advance.",
-  "task_id": "T-00176",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE decision (routing-failure) from SENTINEL",
+  "task_id": "T-00179",
+  "worker": "SAGE"
 }
