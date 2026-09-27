@@ -87,8 +87,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Newest result T-00210 is a PATHFINDER stagnation: the live detached campaign has no fresh terminal receipt, so a bounded monitor-and-verify task is the correct next step.",
-  "task_id": "T-00211",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Monitor the live detached legacy Ottawa P0.4 campaign until exit and a fresh receipt appears without touching the lock or heartbeat.",
+  "task_id": "T-00212",
+  "worker": "PATHFINDER"
 }

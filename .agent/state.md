@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00210 PATHFINDER STAGNATED: live detached legacy campaign still active without fresh terminal receipt.
-- T-00209 FORGE DONE: hardened relaunch succeeded and live campaign holds PID 46732 with fresh heartbeat.
-- T-00208 SAGE DONE: stale RUN_FAILED receipt rejected; campaign stays held until new receipt exists.
+- T-00211 PATHFINDER STAGNATED: active legacy campaign still no fresh terminal receipt.
+- T-00210 PATHFINDER STAGNATED: campaign remains live and healthy but receipt is still missing.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-Monitor the live detached legacy P0.4 campaign until exit and verify a fresh terminal receipt without disturbing the lock or heartbeat.
+PATHFINDER monitors the detached legacy P0.4 campaign until exit and confirms a fresh receipt newer than the stale RUN_FAILED artifact.
