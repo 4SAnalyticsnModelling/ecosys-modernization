@@ -70,6 +70,9 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   to the agent whose turn it is and restores it, so every SENTINEL/SAGE turn is quarantined (route-1790468130/-183).
   Fix in `swarm_wrapper.py` only: exclude the live machine-lock holder's heartbeat/driver.log from scope attribution.
   Do NOT touch the pinned driver or the running campaign | `.agent/results/T-00158.md`
+  T-00161 (2026-09-26): still open. T-00158 was FAIL-collected on the same defect, so its CHAIN was dropped.
+  Route-1790468357/-415 were also quarantined, only for the heartbeat. Re-chained to FORGE with the same scope
+  (T-00160 text). FORGE's lane includes `audit/runs/`, so a FORGE turn is not quarantined | `.agent/results/T-00161.md`
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)

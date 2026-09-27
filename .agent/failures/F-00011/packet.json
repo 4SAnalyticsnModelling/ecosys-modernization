@@ -1,0 +1,19 @@
+{
+  "carried_rejections": 0,
+  "commit": "353245dbb7e67e3b9192ef4d31c3cafbf425be3c",
+  "fields": {
+    "binding_id": "UNKNOWN",
+    "candidate_fortran": "UNKNOWN",
+    "candidate_zig": "UNKNOWN",
+    "checkpoint": "UNKNOWN",
+    "exact_error": "task FAIL: scope violation, undone (copy in .agent/failures/Q-T-00161/): audit/runs/p04-full-campaign/heartbeat.json: outside SAGE may_write",
+    "first_divergent_state": "UNKNOWN",
+    "first_failing_timestep": "UNKNOWN",
+    "last_verified_timestep": "UNKNOWN",
+    "relevant_variables": "UNKNOWN",
+    "subsystem": "UNKNOWN"
+  },
+  "packet": "F-00011",
+  "signature": "SAGE:T-00161",
+  "task": "T-00161"
+}
