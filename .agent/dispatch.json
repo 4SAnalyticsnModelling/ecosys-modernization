@@ -4,12 +4,13 @@
   "reason": "chained from T-00219 (SAGE CHAIN block)",
   "requires_sage_review": false,
   "result_file": ".agent/results/T-00220.md",
+  "result_status": "DONE",
   "role": "FORGE",
   "schema_version": 1,
   "skills": [
     "ecosys-validation-tests"
   ],
-  "status": "PENDING",
+  "status": "COMPLETE",
   "t1_argv": null,
   "task_file": ".agent/tasks/T-00220.md",
   "task_id": "T-00220"

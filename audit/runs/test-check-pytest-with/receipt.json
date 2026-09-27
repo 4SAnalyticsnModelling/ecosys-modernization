@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "--with",
+    "pytest",
+    "pytest",
+    "--version"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 3.626,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 46296,
+  "pid": 46896,
+  "started_unix": 1790540755.8571563,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/test-check-pytest-with/stderr.log",
+    "sha256": "2c3cb2684ca2e01e3487210da5abc80f540c82052a8641179585d4daff66bc8a"
+  },
+  "stdout": {
+    "path": "audit/runs/test-check-pytest-with/stdout.log",
+    "sha256": "e736fb72d5c1af14c1550d6863d1e7ddae5491537766a381a3258c10cc5db9d5"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 60.0
+}

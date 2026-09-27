@@ -1,0 +1,2 @@
+error: Failed to spawn: `pytest`
+  Caused by: program not found

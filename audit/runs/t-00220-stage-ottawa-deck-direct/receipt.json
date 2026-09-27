@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "ecosys-audit/tests/test_stage_ottawa_deck.py"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 2.183,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 45528,
+  "pid": 23752,
+  "started_unix": 1790540899.3646667,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00220-stage-ottawa-deck-direct/stderr.log",
+    "sha256": "8099eb0c8ab2685632fe25a9204462aa021157073e6267ff6ed0c7b3f44c5bec"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00220-stage-ottawa-deck-direct/stdout.log",
+    "sha256": "c73d217904d43c6ae6ee5e5989722bc84df5ff72cb3e768241f118dce256dbea"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

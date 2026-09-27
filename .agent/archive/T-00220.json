@@ -1,0 +1,58 @@
+{
+  "changed": [
+    ".agent/results/T-00220.md",
+    "audit/runs/t-00220-stage-ottawa-deck-direct/receipt.json",
+    "audit/runs/t-00220-stage-ottawa-deck-direct/stderr.log",
+    "audit/runs/t-00220-stage-ottawa-deck-direct/stdout.log",
+    "audit/runs/t-00220-stage-ottawa-deck-pytest/receipt.json",
+    "audit/runs/t-00220-stage-ottawa-deck-pytest/stderr.log",
+    "audit/runs/t-00220-stage-ottawa-deck-pytest/stdout.log",
+    "audit/runs/test-check-pytest-with/receipt.json",
+    "audit/runs/test-check-pytest-with/stderr.log",
+    "audit/runs/test-check-pytest-with/stdout.log",
+    "audit/runs/test-check-pytest/receipt.json",
+    "audit/runs/test-check-pytest/stderr.log",
+    "audit/runs/test-check-pytest/stdout.log",
+    "ecosys-audit/scripts/stage_ottawa_deck.py",
+    "ecosys-audit/tests/test_stage_ottawa_deck.py"
+  ],
+  "dispatch": {
+    "chained_from": "T-00219",
+    "full_run_justification": null,
+    "reason": "chained from T-00219 (SAGE CHAIN block)",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00220.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-validation-tests"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00220.md",
+    "task_id": "T-00220"
+  },
+  "ended": 1790540983.455025,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1b93f695ffeCKBlJVE2AGD7KA",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 2169358,
+    "cache_write": 0,
+    "cost": 0.5290903499999999,
+    "input": 449153,
+    "llm_calls": 48,
+    "output": 7873,
+    "tool_calls": 50
+  },
+  "violations": []
+}
