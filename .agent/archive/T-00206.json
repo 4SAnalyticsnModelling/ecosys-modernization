@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00206.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "The detached legacy P0.4 driver died without a valid receipt; PATHFINDER must confirm the kill cause and a hardened launch recipe before any fresh run.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00206.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "Investigate the dead detached legacy P0.4 driver and document a hardened relaunch recipe.",
+    "state_recent": [
+      "T-00204 SAGE DONE: stale RUN_FAILED receipt invalid; dead driver needs diagnosis.",
+      "T-00197 SAGE BLOCKED: P0.4 hold until exit or stale heartbeat.",
+      "T-00195 SAGE BLOCKED: stale receipt invalid; PID 41688 still alive."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00206.md",
+    "task_id": "T-00206"
+  },
+  "ended": 1790537545.478504,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1f6d405dffeTCjJm3vbUwB05r",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 471680,
+    "cache_write": 0,
+    "cost": 0.0354186,
+    "input": 57799,
+    "llm_calls": 14,
+    "output": 12021,
+    "tool_calls": 25
+  },
+  "violations": []
+}

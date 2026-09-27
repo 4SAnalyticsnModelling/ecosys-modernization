@@ -81,8 +81,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "The detached legacy P0.4 driver died without a valid receipt; PATHFINDER must confirm the kill cause and a hardened launch recipe before any fresh run.",
   "task_id": "T-00206",
-  "worker": "PATHFINDER"
+  "worker": null
 }
