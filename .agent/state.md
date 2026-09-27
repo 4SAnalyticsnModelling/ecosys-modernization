@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00173 SAGE DONE: deadlock found; controller misattributes heartbeat writes and blocks routing.
-- T-00170 SAGE DONE: loop repeated; only FORGE can fix the heartbeat/lock attribution bug.
-- T-00167 SAGE DONE: dispatch T-00163 to FORGE; do not relaunch the loop.
+- T-00175 FORGE DONE: controller lock attribution fix restores valid routing.
+- T-00173 SAGE DONE: deadlock loop was identified and stopped.
+- T-00170 SAGE DONE: detached driver rewrote heartbeat and blocked CHAIN turns.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE fixes the heartbeat/lock attribution bug so detached legacy campaign writes no longer block valid P0 routing.
+FORGE relaunches the detached P0.4 legacy campaign after controller restart using pinned hashes.

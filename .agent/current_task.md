@@ -1,1 +1,1 @@
-T-00175 FORGE: fix the controller heartbeat/lock attribution bug so detached legacy campaign writes do not block valid P0 routing.
+T-00176 FORGE: relaunch detached legacy P0.4 campaign with pinned driver/exe after controller restart.
