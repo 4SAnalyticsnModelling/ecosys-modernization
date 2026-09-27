@@ -92,6 +92,11 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   (`hour1.f:3777-3791`/`3804-3836`, `starts.f:93,269`), and the T-00127 packet is final with reviewer `SAGE T-00129`.
   The disposition stays `unresolved`: production uses 1e-14 m3 where legacy uses 1e-15*DH*DV (G0-5b). The only remaining step is
   the FORGE write to traceability.csv, which is still pending: the T-00129 chain was not applied.
+  T-00230 DECISION (SAGE, 2026-09-27): T-00131's DONE claim is FALSE. traceability.csv sha256 is still `9dee3fbb…bd024a`
+  (the T-00085-era value), no commit touches it since f474ed9, and rows 332-339 still cite `solute.f` ZEROS2 with reviewer
+  `claude-sonnet-issue07{3,2b}-sweep`. The ledger write is lock-safe (text only, no build or run), so it is the next task while
+  P0.4 runs: FORGE applies the T-00127 packet (sha256 `0bb956a4…19703c`) per the T-00130 CHAIN. Then a fresh PATHFINDER
+  review checks the new file hash and diff.
 - G0-4r | FORGE (T-00158 DECIDED) | Swarm deadlock while P0.4 campaign runs: detached driver (lock PID 41728)
   rewrites tracked `audit/runs/p04-full-campaign/heartbeat.json` every 30 s; `swarm_wrapper.py:1005-1023` attributes it
   to the agent whose turn it is and restores it, so every SENTINEL/SAGE turn is quarantined (route-1790468130/-183).
