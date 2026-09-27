@@ -1,1 +1,1 @@
-T-00242 SAGE: confirm swarm idle and hold G0-4 under T-00228 while the detached legacy Ottawa campaign remains live and healthy.
+T-00243 | SAGE | Confirm idle: no unblocked work remains; keep G0-4 closed under T-00228 until a fresh receipt or stale heartbeat.

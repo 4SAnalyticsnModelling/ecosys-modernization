@@ -91,7 +91,7 @@
   "route_failures": 0,
   "schema_version": 1,
   "status": "IDLE",
-  "status_reason": "no unblocked work: detached legacy Ottawa remains live and healthy, G0-4 is held under T-00228, and no worker task or user decision is unblocked",
+  "status_reason": "no unblocked work: G0-4 stays under T-00228, the detached legacy Ottawa campaign is live and healthy, and no fresh receipt or stale heartbeat has triggered reopening",
   "task_id": "T-00241",
   "worker": null
 }
