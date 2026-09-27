@@ -77,8 +77,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Active legacy run holds the lock; stale receipt predates it. PATHFINDER should read live run_1 evidence before any restart.",
-  "task_id": "T-00185",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Latest evidence shows a stale receipt, but the live detached legacy run holds the lock and heartbeat; SAGE must decide whether to continue or halt it before any restart.",
+  "task_id": "T-00186",
+  "worker": "SAGE"
 }

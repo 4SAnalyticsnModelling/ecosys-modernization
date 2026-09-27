@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00184 PATHFINDER DONE: stale receipt predates the active run and lock.
-- T-00183 PATHFINDER DONE: detached legacy P0.4 failed before completion.
-- T-00181 FORGE DONE: controller relaunched the legacy campaign under the live lock.
+- T-00185 PATHFINDER DONE: live detached legacy run remains active; avoid restart.
+- T-00184 PATHFINDER DONE: stale RUN_FAILED receipt predates the live lock and heartbeat.
+- T-00183 PATHFINDER DONE: failed detached run was distinct from the active campaign.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER reads the live P0.4 run_1 logs and receipt before any restart or relaunch.
+SAGE verifies the live detached legacy Ottawa P0.4 lock and heartbeat before deciding whether to continue or safely stop the active run.
