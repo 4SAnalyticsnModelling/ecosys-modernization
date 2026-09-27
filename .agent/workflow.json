@@ -88,8 +88,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "The latest results all show a live campaign with no fresh receipt, which requires SAGE disposition under the no-new-evidence rule and the metrics threshold.",
-  "task_id": "T-00213",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "No unblocked work remains; the live detached legacy P0.4 campaign is held under the no-new-evidence rule until fresh evidence or the expiry threshold.",
+  "task_id": "T-00214",
+  "worker": "SAGE"
 }

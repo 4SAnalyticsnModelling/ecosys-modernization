@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00212 PATHFINDER STAGNATED: live detached legacy Ottawa P0.4 campaign remains under active lock and heartbeat; no fresh terminal receipt and stale RUN_FAILED remains invalid.
-- T-00211 PATHFINDER STAGNATED: active PID 46732 is still healthy and the task success condition is unmet.
-- T-00210 PATHFINDER STAGNATED: no fresh terminal receipt supersedes the stale RUN_FAILED artifact; only a relaunch receipt exists.
+- T-00213 SAGE DONE: The detached legacy Ottawa P0.4 campaign is live and making real progress, so repeated polling is invalid under the no-new-evidence rule.
+- T-00212 PATHFINDER STAGNATED: the live campaign remains under active lock and heartbeat with no fresh terminal receipt.
+- T-00211 PATHFINDER STAGNATED: active PID 46732 is healthy and no new evidence supersedes the stale RUN_FAILED record.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE adjudicates the live detached legacy Ottawa P0.4 no-new-evidence condition and decides whether to close the monitoring window or continue the hold.
+SAGE confirms idle and keeps the P0.4 hold parked until fresh evidence or the expiry threshold.
