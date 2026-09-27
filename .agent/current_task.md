@@ -1,1 +1,1 @@
-T-00169 FORGE: fix controller heartbeat/lock attribution so detached legacy campaign writes are not mistaken for SENTINEL work.
+T-00171 FORGE: fix detached legacy heartbeat attribution so the live P0.4 run no longer blocks valid routing.
