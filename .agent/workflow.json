@@ -77,8 +77,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Legacy P0.4 campaign is live; PATHFINDER should monitor heartbeat and receipt without collisions while SAGE burden is already over 25%.",
   "task_id": "T-00183",
-  "worker": "PATHFINDER"
+  "worker": null
 }

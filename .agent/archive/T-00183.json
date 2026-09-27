@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00183.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Legacy P0.4 campaign is live; PATHFINDER should monitor heartbeat and receipt without collisions while SAGE burden is already over 25%.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00183.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "Monitor the active detached P0.4 legacy campaign and collect the completion or failure receipt without colliding with the driver or heartbeat.",
+    "state_recent": [
+      "T-00181 FORGE DONE: controller restarted and legacy campaign relaunched cleanly.",
+      "T-00179 SAGE DONE: stale controller blocks all routing until restart.",
+      "T-00176 FORGE DONE: detached legacy campaign relaunch verified and heartbeating."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00183.md",
+    "task_id": "T-00183"
+  },
+  "ended": 1790472845.6587265,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f2025e51fffem5TtXORkt1zp7R",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 82688,
+    "cache_write": 0,
+    "cost": 0.010478959999999999,
+    "input": 15404,
+    "llm_calls": 6,
+    "output": 4787,
+    "tool_calls": 10
+  },
+  "violations": []
+}
