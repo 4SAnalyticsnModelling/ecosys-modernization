@@ -1,1 +1,1 @@
-T-00165 FORGE: fix swarm_wrapper heartbeat attribution bug and add a regression test.
+T-00166 FORGE Fix controller heartbeat/lock attribution for detached legacy P0.4 campaign writes.

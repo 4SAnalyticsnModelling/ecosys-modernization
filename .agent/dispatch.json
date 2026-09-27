@@ -1,26 +1,17 @@
 {
-  "errors": [
-    "you wrote outside your lane (undone, copy in .agent/failures/route-1790468719/): audit/runs/p04-full-campaign/heartbeat.json: outside SENTINEL may_write"
-  ],
-  "rejected": {
-    "full_run_justification": null,
-    "reason": "Newest result requires a FORGE controller fix: detached legacy heartbeat writes were misattributed to SENTINEL, blocking unrelated P0 work.",
-    "requires_sage_review": false,
-    "result_file": ".agent/results/T-00165.md",
-    "role": "FORGE",
-    "schema_version": 1,
-    "skills": [],
-    "state_next": "FORGE fixes swarm_wrapper heartbeat attribution and adds the regression test.",
-    "state_recent": [
-      "T-00164 SAGE DONE: live P0.4 heartbeat was not SENTINEL-owned.",
-      "T-00161 SAGE DONE: same root cause as T-00158, controller bug blocks work.",
-      "T-00158 SAGE DONE: detached campaign rewrote heartbeat during SENTINEL turn."
-    ],
-    "status": "PENDING",
-    "t1_argv": null,
-    "task_file": ".agent/tasks/T-00165.md",
-    "task_id": "T-00165"
-  },
+  "decision_kind": "routing-failure",
+  "decision_of": "SENTINEL",
+  "full_run_justification": null,
+  "reason": "SAGE decision (routing-failure) from SENTINEL",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00167.md",
+  "role": "SAGE",
   "schema_version": 1,
-  "status": "REJECTED"
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00167.md",
+  "task_id": "T-00167"
 }
