@@ -1,0 +1,45 @@
+{
+  "changed": [
+    ".agent/results/T-00241.md"
+  ],
+  "dispatch": {
+    "decision_kind": "idle-check",
+    "decision_of": "SENTINEL",
+    "full_run_justification": null,
+    "reason": "SAGE decision (idle-check) from SENTINEL",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00241.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00241.md",
+    "task_id": "T-00241"
+  },
+  "ended": 1790547511.887709,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "86626209-72ec-45aa-acbe-fd65690b9d90",
+    "old": "2e2fa65e-5ae9-4ece-b463-58853de5e0fd",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 227335,
+    "cache_write": 25101,
+    "cost": null,
+    "input": 12,
+    "llm_calls": 6,
+    "output": 2753,
+    "tool_calls": 2
+  },
+  "violations": []
+}
