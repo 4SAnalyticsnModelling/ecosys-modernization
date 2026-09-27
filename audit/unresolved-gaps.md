@@ -95,6 +95,13 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   (oracle 44400 killed, driver 43324 exited, heartbeat `FAILED`, elapsed 425.91 s, run_1 of 3; deliberate kill, not science).
   Next: FORGE restarts the controller. P0.4 is relaunched only after the controller's process CreationDate is later
   than the mtime of `swarm_wrapper.py`.
+  T-00184 (SAGE, 2026-09-26): the `RUN_FAILED` receipt T-00183 read (`p04_full_run_receipt.json` sha256 d9ed4644...,
+  exit 2, 97.776 s, warmup 2026-09-26T23:52:43Z) is STALE. It matches HEAD (last commit ac6fc51, T-00154) and predates
+  the live driver 41688 (started 2026-09-27T01:28:02Z) by about 1.6 h. The current campaign is alive: it holds the lock
+  (the file cannot be read, EBUSY), the heartbeat reads `RUN_1` at 420 s, and run_1 outputs were written at 01:34:48Z.
+  DECISION: continue the campaign and do not restart or supersede it. Only the receipt that driver 41688 writes counts.
+  Still open: the cause of the early exit-2 run_1 failure (about 17:52 local) was never found. If the live run exits
+  non-zero, PATHFINDER reads `run_1` logs before any relaunch.
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)

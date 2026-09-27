@@ -77,8 +77,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "SAGE must decide whether the failed legacy P0.4 receipt and active lock warrant a restart or supersession.",
   "task_id": "T-00184",
-  "worker": "SAGE"
+  "worker": null
 }

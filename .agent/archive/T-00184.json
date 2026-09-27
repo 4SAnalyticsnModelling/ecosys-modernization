@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00184.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "SAGE must decide whether the failed legacy P0.4 receipt and active lock warrant a restart or supersession.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00184.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE decides whether to restart or supersede the detached legacy P0.4 campaign under the active machine lock.",
+    "state_recent": [
+      "T-00183 PATHFINDER DONE: detached legacy P0.4 failed with RUN_FAILED exit 2; no collision.",
+      "T-00181 FORGE DONE: controller restarted and the campaign relaunched under the active lock.",
+      "T-00179 SAGE DONE: stale controller failures were fixed before relaunch."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00184.md",
+    "task_id": "T-00184"
+  },
+  "ended": 1790473002.9530346,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "782ed603-4979-415f-b68a-160edcd24e16",
+    "old": "0bb5db67-b4d8-4d28-81cd-20bf6bc5592e",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 393217,
+    "cache_write": 34436,
+    "cost": null,
+    "input": 18,
+    "llm_calls": 9,
+    "output": 6114,
+    "tool_calls": 3
+  },
+  "violations": []
+}

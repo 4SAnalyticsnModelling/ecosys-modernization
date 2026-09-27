@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00184", "role": "SAGE", "task_file": ".agent/tasks/T-00184.md", "result_file": ".agent/results/T-00184.md", "skills": ["ecosys-feature-attribution"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "SAGE must decide whether the failed legacy P0.4 receipt and active lock warrant a restart or supersession.", "state_recent": ["T-00183 PATHFINDER DONE: detached legacy P0.4 failed with RUN_FAILED exit 2; no collision.", "T-00181 FORGE DONE: controller restarted and the campaign relaunched under the active lock.", "T-00179 SAGE DONE: stale controller failures were fixed before relaunch."], "state_next": "SAGE decides whether to restart or supersede the detached legacy P0.4 campaign under the active machine lock."}
+{
+  "full_run_justification": null,
+  "reason": "SAGE must decide whether the failed legacy P0.4 receipt and active lock warrant a restart or supersession.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00184.md",
+  "result_status": "DONE",
+  "role": "SAGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-feature-attribution"
+  ],
+  "state_next": "SAGE decides whether to restart or supersede the detached legacy P0.4 campaign under the active machine lock.",
+  "state_recent": [
+    "T-00183 PATHFINDER DONE: detached legacy P0.4 failed with RUN_FAILED exit 2; no collision.",
+    "T-00181 FORGE DONE: controller restarted and the campaign relaunched under the active lock.",
+    "T-00179 SAGE DONE: stale controller failures were fixed before relaunch."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00184.md",
+  "task_id": "T-00184"
+}
