@@ -1,1 +1,1 @@
-T-00215 IDLE: hold the live P0.4 legacy campaign under no-new-evidence and dispatch no further polling until fresh evidence or expiry.
+T-00217 FORGE: restore the Ottawa deck to the signed legacy-safe blob for SAGE diff-bound review.
