@@ -1,0 +1,13 @@
+{
+  "not_restored": [],
+  "note": "Agent's version of each file is under files/; the working tree was restored.",
+  "problems": [
+    "audit/runs/p04-full-campaign/heartbeat.json: outside SENTINEL may_write"
+  ],
+  "restored": [
+    "audit/runs/p04-full-campaign/heartbeat.json"
+  ],
+  "role": "SENTINEL",
+  "tag": "route-1790468130",
+  "time": 1790468179.5765138
+}
