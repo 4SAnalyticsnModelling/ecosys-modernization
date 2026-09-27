@@ -48,4 +48,4 @@ none active.
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE decides no unblocked work remains; G0-4 remains closed until a fresh receipt or stale heartbeat >600 s.
+SAGE confirms idle while the legacy Ottawa run stays live and G0-4 remains closed until a fresh receipt or stale heartbeat >600 s.

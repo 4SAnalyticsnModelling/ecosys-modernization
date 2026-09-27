@@ -1,22 +1,17 @@
 {
+  "decision_kind": "idle-check",
+  "decision_of": "SENTINEL",
   "full_run_justification": null,
-  "reason": "Hold G0-4 closed while Ottawa P0.4 stays live; no worker work is unblocked.",
+  "reason": "SAGE decision (idle-check) from SENTINEL",
   "requires_sage_review": false,
-  "result_file": ".agent/results/T-00236.md",
-  "result_status": "DONE",
+  "result_file": ".agent/results/T-00238.md",
   "role": "SAGE",
   "schema_version": 1,
   "skills": [
     "ecosys-feature-attribution"
   ],
-  "state_next": "SAGE decides no unblocked work remains; G0-4 remains closed until a fresh receipt or stale heartbeat >600 s.",
-  "state_recent": [
-    "T-00233 SAGE DONE: no worker dispatch for G0-5c; G0-4 still held.",
-    "T-00230 SAGE DONE: keep G0-4 closed while run remains live.",
-    "T-00228 SAGE DONE: hold G0-4 until fresh receipt or stale heartbeat >600s."
-  ],
-  "status": "COMPLETE",
+  "status": "PENDING",
   "t1_argv": null,
-  "task_file": ".agent/tasks/T-00236.md",
-  "task_id": "T-00236"
+  "task_file": ".agent/tasks/T-00238.md",
+  "task_id": "T-00238"
 }
