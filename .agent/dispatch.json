@@ -1,22 +1,17 @@
 {
+  "decision_kind": "idle-check",
+  "decision_of": "SENTINEL",
   "full_run_justification": null,
-  "reason": "SAGE is the only role that can validate the post-exit receipt and authorize any retry after PID 41688 exits.",
+  "reason": "SAGE decision (idle-check) from SENTINEL",
   "requires_sage_review": false,
-  "result_file": ".agent/results/T-00195.md",
-  "result_status": "BLOCKED",
+  "result_file": ".agent/results/T-00197.md",
   "role": "SAGE",
   "schema_version": 1,
   "skills": [
     "ecosys-feature-attribution"
   ],
-  "state_next": "SAGE waits for PID 41688 to exit, then validates the new final receipt before any retry.",
-  "state_recent": [
-    "T-00194 SAGE BLOCKED: await driver exit; inspect fresh terminal receipt.",
-    "T-00193 PATHFINDER DONE: stale RUN_FAILED invalid until post-exit proof exists.",
-    "T-00192 PATHFINDER FAIL: exit-code-2 packet is not valid terminal evidence."
-  ],
-  "status": "COMPLETE",
+  "status": "PENDING",
   "t1_argv": null,
-  "task_file": ".agent/tasks/T-00195.md",
-  "task_id": "T-00195"
+  "task_file": ".agent/tasks/T-00197.md",
+  "task_id": "T-00197"
 }

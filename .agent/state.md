@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00194 SAGE BLOCKED: await driver exit; inspect fresh terminal receipt.
-- T-00193 PATHFINDER DONE: stale RUN_FAILED invalid until post-exit proof exists.
-- T-00192 PATHFINDER FAIL: exit-code-2 packet is not valid terminal evidence.
+- T-00195 SAGE BLOCKED: live run still active, no valid receipt
+- T-00194 SAGE BLOCKED: stale RUN_FAILED invalid until exit receipt
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE waits for PID 41688 to exit, then validates the new final receipt before any retry.
+wait for PID 41688 to exit, then route a SAGE task to validate the fresh P0.4 receipt under T-00191 criteria
