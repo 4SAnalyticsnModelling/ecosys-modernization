@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00187.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Active legacy Ottawa P0.4 is still healthy; the next needed action is PATHFINDER collection of the new exit receipt, not another SAGE decision.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00187.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER waits for the detached legacy Ottawa P0.4 driver to exit, then records the new receipt without disturbing its live lock.",
+    "state_recent": [
+      "T-00186 SAGE DONE: active Ottawa P0.4 run remains healthy and advancing.",
+      "T-00185 PATHFINDER DONE: stale RUN_FAILED receipt predates the live campaign.",
+      "T-00184 PATHFINDER DONE: live driver holds lock; no new receipt has been written."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00187.md",
+    "task_id": "T-00187"
+  },
+  "ended": 1790473372.891648,
+  "failure_packet": ".agent/failures/F-00017",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1f7d720dffeKw3Hq6NwbO9R6g",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "STAGNATED",
+  "review": null,
+  "usage": {
+    "cache_read": 216064,
+    "cache_write": 0,
+    "cost": 0.01884608,
+    "input": 15666,
+    "llm_calls": 11,
+    "output": 9493,
+    "tool_calls": 16
+  },
+  "violations": []
+}
