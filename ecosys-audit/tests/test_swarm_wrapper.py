@@ -168,7 +168,7 @@ none
 """
 
 
-class SwarmTests(unittest.TestCase):
+class SwarmBase(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
@@ -250,6 +250,8 @@ class SwarmTests(unittest.TestCase):
     def wf(self):
         return w.load(self.root / ".agent/workflow.json")
 
+
+class SwarmTests(SwarmBase):
     # --- tests
     def test_happy_path_sentinel_pathfinder_forge_sage_sentinel(self):
         self.sentinel_queue([

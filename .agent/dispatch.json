@@ -1,1 +1,20 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00175", "role": "FORGE", "task_file": ".agent/tasks/T-00175.md", "result_file": ".agent/results/T-00175.md", "skills": [], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "A repeated deadlock is caused by the controller misattributing detached campaign heartbeat writes to routing turns; FORGE owns the fix.", "state_recent": ["T-00173 SAGE DONE: deadlock found; controller misattributes heartbeat writes and blocks routing.", "T-00170 SAGE DONE: loop repeated; only FORGE can fix the heartbeat/lock attribution bug.", "T-00167 SAGE DONE: dispatch T-00163 to FORGE; do not relaunch the loop."], "state_next": "FORGE fixes the heartbeat/lock attribution bug so detached legacy campaign writes no longer block valid P0 routing."}
+{
+  "full_run_justification": null,
+  "reason": "A repeated deadlock is caused by the controller misattributing detached campaign heartbeat writes to routing turns; FORGE owns the fix.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00175.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [],
+  "state_next": "FORGE fixes the heartbeat/lock attribution bug so detached legacy campaign writes no longer block valid P0 routing.",
+  "state_recent": [
+    "T-00173 SAGE DONE: deadlock found; controller misattributes heartbeat writes and blocks routing.",
+    "T-00170 SAGE DONE: loop repeated; only FORGE can fix the heartbeat/lock attribution bug.",
+    "T-00167 SAGE DONE: dispatch T-00163 to FORGE; do not relaunch the loop."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00175.md",
+  "task_id": "T-00175"
+}

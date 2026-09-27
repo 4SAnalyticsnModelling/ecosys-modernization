@@ -76,8 +76,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "A repeated deadlock is caused by the controller misattributing detached campaign heartbeat writes to routing turns; FORGE owns the fix.",
   "task_id": "T-00175",
-  "worker": "FORGE"
+  "worker": null
 }

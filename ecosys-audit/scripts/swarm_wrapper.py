@@ -43,6 +43,8 @@ from evidence_binding import dirty_source_digest
 
 AGENT = ".agent"
 SCRIPTS = Path(__file__).resolve().parent
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
 TASK_RE = re.compile(r"^T-\d{5}$")
 WORKER_ROLES = ("PATHFINDER", "FORGE", "SAGE")
 RESULT_STATUSES = ("DONE", "FAIL", "STAGNATED", "BLOCKED")
@@ -365,12 +367,50 @@ class Swarm:
                             + (f" (writable by {', '.join(owners)})" if owners else ""))
         return errs
 
+    def campaign_exempt_paths(self) -> set[str]:
+        """Paths written by a live detached campaign (machine lock holder) that must not be
+        attributed to agent turns or restored. T-00175 / T-00163."""
+        lock_file = self.dir / "locks" / "machine.lock"
+        if not lock_file.exists():
+            return set()
+        try:
+            from run_legacy_p04_full import inspect_lock_status, read_lock_info
+            info = read_lock_info(lock_file)
+            hb_cand = None
+            if info and info.get("heartbeat_path"):
+                p = Path(info["heartbeat_path"])
+                hb_cand = p if p.is_absolute() else (self.root / p).resolve()
+            st = inspect_lock_status(lock_file, heartbeat_path=hb_cand)
+        except Exception:
+            return set()
+        if not (st.get("locked") and not st.get("reclaimable")):
+            return set()
+        hb_str = st.get("heartbeat_path")
+        if not hb_str:
+            return set()
+        p = Path(hb_str)
+        hb_path = p if p.is_absolute() else (self.root / p).resolve()
+        exempt = set()
+        try:
+            exempt.add(hb_path.resolve().relative_to(self.root).as_posix())
+        except ValueError:
+            exempt.add(hb_path.as_posix().replace("\\", "/"))
+        driver_log = hb_path.parent / "driver.log"
+        try:
+            exempt.add(driver_log.resolve().relative_to(self.root).as_posix())
+        except ValueError:
+            exempt.add(driver_log.as_posix().replace("\\", "/"))
+        return exempt
+
     def scope_problems(self, role: str, changed: list[str], task_text: str) -> list[tuple[str, str]]:
         r = self.role(role)
         writable = r["may_write"] + self.roster["always_writable"]
         task_globs = allowed_globs(task_text)
+        exempt = self.campaign_exempt_paths()
         out = []
         for p in changed:
+            if p in exempt:
+                continue
             if any(matches(p, x) for x in self.roster["protected_prefixes"]):
                 out.append((p, f"{p}: protected reference path"))
             elif not any(matches(p, x) for x in writable):
@@ -394,7 +434,10 @@ class Swarm:
         snap = self.rt / "pre"
         if snap.exists():
             shutil.rmtree(snap)
+        exempt = self.campaign_exempt_paths()
         for rel, st in before.items():
+            if rel in exempt:
+                continue
             if st and st[0] <= SNAPSHOT_MAX_BYTES:
                 dst = snap / rel
                 dst.parent.mkdir(parents=True, exist_ok=True)
@@ -416,8 +459,11 @@ class Swarm:
         """Copy each offending file to .agent/failures/Q-<tag>/ and restore its pre-turn content."""
         qdir = self.dir / "failures" / f"Q-{tag}"
         before = load(self.rt / "before.json") if (self.rt / "before.json").exists() else {}
+        exempt = self.campaign_exempt_paths()
         restored, left = [], []
         for rel in dict.fromkeys(p for p, _ in problems):  # once per file, or the copy is overwritten
+            if rel in exempt:
+                continue
             f = self.root / rel
             if f.exists():
                 dst = qdir / "files" / rel
@@ -1002,7 +1048,8 @@ class Swarm:
 
     def finish_route(self, outcome: str, started: float, prev_sha: str) -> dict:
         before = load(self.rt / "before.json")
-        changed = changed_paths(before, git_dirty(self.root))
+        exempt = self.campaign_exempt_paths()
+        changed = [p for p in changed_paths(before, git_dirty(self.root)) if p not in exempt]
         d = self.dispatch()
         if digest(encoded(d)) == prev_sha:
             d = {**d, "status": "COMPLETE"}  # SENTINEL made no decision; treated as an invalid route
@@ -1115,7 +1162,8 @@ class Swarm:
         frozen = self.rt / "task.md"
         task_bytes = frozen.read_bytes() if frozen.exists() else (self.root / d["task_file"]).read_bytes()
         task_text = task_bytes.decode("utf-8", errors="replace")
-        changed = changed_paths(load(self.rt / "before.json"), git_dirty(self.root))
+        exempt = self.campaign_exempt_paths()
+        changed = [p for p in changed_paths(load(self.rt / "before.json"), git_dirty(self.root)) if p not in exempt]
         problems = self.scope_problems(role, changed, task_text)
         task_widened = (self.root / d["task_file"]).read_bytes() != task_bytes
         if task_widened:
@@ -1138,7 +1186,7 @@ class Swarm:
             quarantine = self.quarantine(tid, role, problems)
             status = "FAIL"
             notes.append(f"scope violation, undone (copy in .agent/failures/Q-{tid}/): " + "; ".join(violations))
-            changed = changed_paths(load(self.rt / "before.json"), git_dirty(self.root))
+            changed = [p for p in changed_paths(load(self.rt / "before.json"), git_dirty(self.root)) if p not in exempt]
             prod = [p for p in changed if any(matches(p, x) for x in self.roster["production_source_prefixes"])]
         if role == "SAGE" and d.get("decision_of") and status == "DONE" and (self.root / d["result_file"]).exists() \
                 and "DECISION:" not in (self.root / d["result_file"]).read_text(encoding="utf-8", errors="replace"):
@@ -1211,7 +1259,8 @@ class Swarm:
             return {"commit": "disabled"}
         before = load(self.rt / "before.json") if (self.rt / "before.json").exists() else {}
         now = git_dirty(self.root)
-        paths = changed_paths(before, now)
+        exempt = self.campaign_exempt_paths()
+        paths = [p for p in changed_paths(before, now) if p not in exempt]
         prod_dirty = [p for p in now if any(matches(p, x) for x in self.roster["production_source_prefixes"])]
         approved = bool(prod_dirty) and self.precommit()["status"] == "PASS"
         if approved:

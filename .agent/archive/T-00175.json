@@ -1,0 +1,56 @@
+{
+  "changed": [
+    ".agent/results/T-00175.md",
+    "audit/runs/swarm-wrapper-campaign-exempt-test/receipt.json",
+    "audit/runs/swarm-wrapper-campaign-exempt-test/stderr.log",
+    "audit/runs/swarm-wrapper-campaign-exempt-test/stdout.log",
+    "audit/runs/test-swarm-wrapper-post-fix/receipt.json",
+    "audit/runs/test-swarm-wrapper-post-fix/stderr.log",
+    "audit/runs/test-swarm-wrapper-post-fix/stdout.log",
+    "ecosys-audit/scripts/swarm_wrapper.py",
+    "ecosys-audit/tests/test_swarm_wrapper.py",
+    "ecosys-audit/tests/test_swarm_wrapper_campaign_exempt.py"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "A repeated deadlock is caused by the controller misattributing detached campaign heartbeat writes to routing turns; FORGE owns the fix.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00175.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [],
+    "state_next": "FORGE fixes the heartbeat/lock attribution bug so detached legacy campaign writes no longer block valid P0 routing.",
+    "state_recent": [
+      "T-00173 SAGE DONE: deadlock found; controller misattributes heartbeat writes and blocks routing.",
+      "T-00170 SAGE DONE: loop repeated; only FORGE can fix the heartbeat/lock attribution bug.",
+      "T-00167 SAGE DONE: dispatch T-00163 to FORGE; do not relaunch the loop."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00175.md",
+    "task_id": "T-00175"
+  },
+  "ended": 1790470860.726385,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1fd77f97ffea2MLJ0KNoKYuJ1",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 9201602,
+    "cache_write": 0,
+    "cost": 1.8189721499999998,
+    "input": 1417451,
+    "llm_calls": 102,
+    "output": 17537,
+    "tool_calls": 110
+  },
+  "violations": []
+}
