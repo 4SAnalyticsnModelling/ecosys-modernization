@@ -1,1 +1,1 @@
-T-00248 IDLE: hold the swarm idle while the detached legacy Ottawa campaign waits for its terminal receipt.
+T-00250 SAGE Confirm the swarm remains idle with G0-4 held until a fresh legacy P0.4 receipt or stale heartbeat trigger.

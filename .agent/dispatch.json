@@ -1,18 +1,28 @@
 {
-  "decision_kind": "idle-check",
-  "decision_of": "SENTINEL",
-  "full_run_justification": null,
-  "reason": "SAGE decision (idle-check) from SENTINEL",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00249.md",
-  "result_status": "DONE",
-  "role": "SAGE",
-  "schema_version": 1,
-  "skills": [
-    "ecosys-feature-attribution"
+  "errors": [
+    "ALLOWED FILES `.agent/state.md` is outside SAGE may_write"
   ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00249.md",
-  "task_id": "T-00249"
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "No unblocked work remains; legacy Ottawa P0.4 is live and healthy. SAGE must confirm the idle hold and no worker route is valid.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00250.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE confirms the swarm stays idle until a fresh terminal receipt or stale heartbeat triggers PATHFINDER validation.",
+    "state_recent": [
+      "T-00249 SAGE DONE: no unblocked work while P0.4 remains live without receipt.",
+      "T-00247 FORGE DONE: live detached P0.4 campaign is healthy under machine lock.",
+      "T-00245 SAGE DONE: dead legacy run was relaunched under a fresh driver hash."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00250.md",
+    "task_id": "T-00250"
+  },
+  "schema_version": 1,
+  "status": "REJECTED"
 }
