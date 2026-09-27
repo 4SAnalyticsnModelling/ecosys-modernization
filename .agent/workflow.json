@@ -88,8 +88,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Enforce the Ottawa promotion gate by rejecting missing runottawa_hash before promote and add the refusal test.",
-  "task_id": "T-00224",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Close G0-2c by reviewing the Ottawa runottawa_hash gate enforcement in T-00224 and confirming acceptance.",
+  "task_id": "T-00225",
+  "worker": "SAGE"
 }
