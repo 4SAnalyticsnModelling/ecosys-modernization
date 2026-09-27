@@ -111,6 +111,13 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   one pinned driver hash. Order: (1) the controller commits the CREATE_NO_WINDOW driver fix (`run_legacy_p04_full.py` sha256
   `ba1412a6…eb86`; tests 84/84 OK, `audit/runs/commands/20260927-170018-55f51cb1`). (2) FORGE relaunches detached with the new pin.
   Existing run_1..3 are quarantined, not deleted. (3) PATHFINDER validates the receipt; then SAGE decides G0-4 | `.agent/results/T-00245.md`
+  T-00249 DECISION (SAGE, 2026-09-27T23:50Z, idle-check): P0/G0 is NOT finished. G0-3/G0-4 wait on the relaunched campaign
+  (T-00247; driver python PID 29444 alive, heartbeat `RUN_1` 368.63 s at 23:49:40Z, 26 s old). No terminal receipt yet. The idle hold
+  is CORRECT: the exclusive-machine lock (plan §4) blocks other jobs during D4 timing runs, G0-5's report exists
+  (`audit/analysis/tracecov-2026-09-26.json`), and the G0-5c ledger write stays PARKED (T-00233; roster still lacks
+  `audit/traceability/`). Wake trigger (unchanged from T-00194/T-00245): PID 29444 gone AND receipt mtime > 2026-09-27T23:43:32Z,
+  OR heartbeat older than 600 s. Then route PATHFINDER to validate `audit/runs/p04_full_run_receipt.json` (`validate_terminal_receipt`),
+  then SAGE decides G0-4. Expected end is about 3.2 h after launch (runs ~3,700 s each), i.e. ~02:55Z 2026-09-28 | `.agent/results/T-00249.md`
 - G0-4r | FORGE (T-00158 DECIDED) | Swarm deadlock while P0.4 campaign runs: detached driver (lock PID 41728)
   rewrites tracked `audit/runs/p04-full-campaign/heartbeat.json` every 30 s; `swarm_wrapper.py:1005-1023` attributes it
   to the agent whose turn it is and restores it, so every SENTINEL/SAGE turn is quarantined (route-1790468130/-183).
