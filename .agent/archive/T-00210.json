@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00210.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Live detached legacy campaign is healthy and still running; PATHFINDER must verify the final receipt without disturbing the active lock or heartbeat.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00210.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "Monitor the live detached legacy Ottawa P0.4 campaign until it exits and verify the fresh terminal receipt without disturbing the lock or heartbeat.",
+    "state_recent": [
+      "T-00209 FORGE DONE: live detached relaunch is active and healthy.",
+      "T-00208 SAGE DONE: stale RUN_FAILED receipt is rejected and campaign stays held.",
+      "T-00207 FORGE DONE: relaunch harness hardened for lock and receipt quarantine."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00210.md",
+    "task_id": "T-00210"
+  },
+  "ended": 1790539578.0839598,
+  "failure_packet": ".agent/failures/F-00021",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1ba7a95bffeyCrNbAjcOGicOJ",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "STAGNATED",
+  "review": null,
+  "usage": {
+    "cache_read": 302976,
+    "cache_write": 0,
+    "cost": 0.025444119999999997,
+    "input": 29237,
+    "llm_calls": 13,
+    "output": 11281,
+    "tool_calls": 24
+  },
+  "violations": []
+}
