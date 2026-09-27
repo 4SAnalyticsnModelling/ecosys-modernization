@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00190 PATHFINDER BLOCKED: stale RUN_FAILED predates live heartbeat.
-- T-00189 PATHFINDER STAGNATED: no fresh exit receipt after termination.
-- T-00188 PATHFINDER STAGNATED: live campaign remains active; stale receipt persists.
+- T-00191 SAGE DONE: stale RUN_FAILED invalid; live PID 41688 still writes outputs
+- T-00190 PATHFINDER BLOCKED: stale-vs-live receipt mismatch remains unresolved
+- T-00189 PATHFINDER STAGNATED: no fresh exit receipt after prior termination
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE adjudicates the stale-vs-live detached legacy Ottawa P0.4 receipt mismatch and decides whether to invalidate RUN_FAILED or audit the exit path before any retry.
+PATHFINDER: read the live Ottawa receipt when the lock releases and confirm exit and hash status.
