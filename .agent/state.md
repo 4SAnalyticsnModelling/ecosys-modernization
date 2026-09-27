@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00207 SAGE DONE: hardened relaunch harness verified; launch is the next gate.
-- T-00206 PATHFINDER DONE: dead driver likely external kill; stale receipt invalid.
-- T-00204 SAGE DONE: stale RUN_FAILED receipt invalid; do not retry in place.
+- T-00208 SAGE DONE: stale P0.4 receipt rejected, campaign remains held
+- T-00207 SAGE DONE: hardened relaunch harness validated
+- T-00206 PATHFINDER DONE: dead driver likely external kill
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE will validate the fresh detached P0.4 terminal receipt before authorizing the next campaign step.
+Run the hardened P0.4 relaunch dry run, then launch the detached legacy campaign and capture the fresh terminal receipt.

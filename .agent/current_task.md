@@ -1,1 +1,1 @@
-T-00208 SAGE: validate the fresh detached legacy P0.4 terminal receipt and decide whether to accept, reject, or hold the relaunch.
+T-00209 FORGE: run the hardened detached legacy P0.4 relaunch dry run and live launch to produce a fresh terminal receipt.

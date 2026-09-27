@@ -34,6 +34,10 @@
     {
       "task_id": "T-00146",
       "text": "G0-4 requires the fresh 30-year legacy Ottawa baseline; bounded warmup cannot produce the required evidence, and no archived full output set exists."
+    },
+    {
+      "task_id": "T-00209",
+      "text": "P0.4 requires a fresh full legacy rerun because the full 30-year Ottawa outputs are not present in-repo and bounded evidence cannot establish the authoritative baseline."
     }
   ],
   "full_runs": {
@@ -81,8 +85,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Fresh P0.4 relaunch is the only unblocked action; SAGE must validate the new terminal receipt before the next bounded campaign decision.",
-  "task_id": "T-00208",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Latest result rejects stale receipt; next unblocked operation is the hardened P0.4 relaunch dry run and detached launch under the T-00191 gate.",
+  "task_id": "T-00209",
+  "worker": "FORGE"
 }
