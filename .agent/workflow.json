@@ -81,8 +81,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Fresh P0.4 relaunch is the only unblocked action; SAGE must validate the new terminal receipt before the next bounded campaign decision.",
   "task_id": "T-00208",
-  "worker": "SAGE"
+  "worker": null
 }

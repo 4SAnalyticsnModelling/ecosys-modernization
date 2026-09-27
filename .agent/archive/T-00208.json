@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00208.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Fresh P0.4 relaunch is the only unblocked action; SAGE must validate the new terminal receipt before the next bounded campaign decision.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00208.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE will validate the fresh detached P0.4 terminal receipt before authorizing the next campaign step.",
+    "state_recent": [
+      "T-00207 SAGE DONE: hardened relaunch harness verified; launch is the next gate.",
+      "T-00206 PATHFINDER DONE: dead driver likely external kill; stale receipt invalid.",
+      "T-00204 SAGE DONE: stale RUN_FAILED receipt invalid; do not retry in place."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00208.md",
+    "task_id": "T-00208"
+  },
+  "ended": 1790538617.6335187,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "80b7493a-8959-46e3-9ae6-62971e78433b",
+    "old": "a72021d4-8a29-4092-a848-76ddfed6b5b8",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 278879,
+    "cache_write": 29777,
+    "cost": null,
+    "input": 14,
+    "llm_calls": 7,
+    "output": 4252,
+    "tool_calls": 1
+  },
+  "violations": []
+}
