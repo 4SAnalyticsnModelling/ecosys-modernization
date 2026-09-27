@@ -75,17 +75,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "ALLOWED FILES `No` is outside PATHFINDER may_write"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "No valid P0.4 receipt exists: PID 41688 is dead and stale run_failed is invalid; SAGE must judge the hang/receipt path now.",
-  "task_id": "T-00204",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "The detached legacy P0.4 driver died without a valid receipt; PATHFINDER must confirm the kill cause and a hardened launch recipe before any fresh run.",
+  "task_id": "T-00206",
+  "worker": "PATHFINDER"
 }

@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00197 SAGE BLOCKED: live run still active; no valid receipt
-- T-00196 SAGE PENDING: hold until exit or stale heartbeat
-- T-00195 SAGE BLOCKED: stale RUN_FAILED invalid until exit receipt
+- T-00204 SAGE DONE: stale RUN_FAILED receipt invalid; dead driver needs diagnosis.
+- T-00197 SAGE BLOCKED: P0.4 hold until exit or stale heartbeat.
+- T-00195 SAGE BLOCKED: stale receipt invalid; PID 41688 still alive.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-Hold legacy Ottawa P0.4 gate until the dead driver is adjudicated; decide whether the run needs diagnosis or relaunch.
+Investigate the dead detached legacy P0.4 driver and document a hardened relaunch recipe.
