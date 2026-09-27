@@ -18,6 +18,14 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   is `9ec1bf4e…` and differs from `ecf5e61a…` (tree `9253d3b^`) in exactly one line: deck line 6 `runtime` f6 is 200 where it
   should be 100. FORGE restores `ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa` to blob `ecf5e61a…`: one file,
   no build, no run, no `machine.lock`. It stays uncommitted until a SAGE review bound to the diff hash is done | `.agent/results/T-00216.md`
+  T-00219 DECISION (SAGE, 2026-09-27): the T-00216 route is WITHDRAWN. No agent lane may write `ecosys-ng-prod-examples/`
+  (`.agent/roster.json:84`), and the wrapper quarantines any dirty protected path (`swarm_wrapper.py:362,464,1379`). Contract
+  line 14 says to preserve the deck and run a staged copy. So G0-2a is met by a STAGED deck, not by editing the protected file:
+  FORGE adds `ecosys-audit/scripts/stage_ottawa_deck.py`, which writes `git cat-file blob ecf5e61a…` into
+  `audit/runs/staged-decks/ottawa/` and fails loud unless `git hash-object` = `ecf5e61a…`, plus a test. Acceptance: every
+  qualification-grade Zig Ottawa run (P3/P4) takes its deck from this stager. A run from the raw protected deck (blob
+  `9ec1bf4e…`, f6=200) is not qualification evidence. The protected file stays as committed (`9253d3b`), and this row records it as
+  a known deviant input | `.agent/results/T-00219.md`
 - G0-2b | PATHFINDER->SAGE | Legacy MRXN semantics not reproduced by any Zig ceiling: per-sub-cycle kinetic rates /MRXN
   (`solute.f:112-118,368-402`) vs Zig single closure with relaxation caps unbounded (`reaction_solve.zig:73-129`), and
   hourly rain/irrigation input equilibration using the STARTE ceiling (`hourly_process_driver.zig:634,670`) needs its
