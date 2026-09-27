@@ -13,7 +13,8 @@
     "PATHFINDER:T-00026": 1,
     "PATHFINDER:T-00032": 1,
     "PATHFINDER:T-00033": 1,
-    "PATHFINDER:T-00115": 1
+    "PATHFINDER:T-00115": 1,
+    "SAGE:T-00158": 1
   },
   "full_run_justifications": [
     {
@@ -73,8 +74,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "SAGE decision (routing-failure) from SENTINEL",
   "task_id": "T-00158",
-  "worker": "SAGE"
+  "worker": null
 }

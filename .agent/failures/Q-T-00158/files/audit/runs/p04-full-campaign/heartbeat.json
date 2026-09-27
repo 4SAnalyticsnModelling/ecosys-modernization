@@ -1,0 +1,22 @@
+{
+  "pid": 41728,
+  "campaign_id": "p04-full-campaign",
+  "status": "RUN_1",
+  "heartbeat_unix": 1790468321.2477272,
+  "heartbeat_utc": "2026-09-27T00:18:41Z",
+  "elapsed_seconds": 450.57,
+  "current_run": 1,
+  "total_runs": 3,
+  "system_load": {
+    "timestamp": 1790468321.2477272,
+    "timestamp_utc": "2026-09-27T00:18:41Z",
+    "memory_load_percent": 43,
+    "total_phys_mb": 65192.1,
+    "avail_phys_mb": 36748.0,
+    "cpu_times_raw": {
+      "idle": 62213734218750,
+      "kernel": 66262189531250,
+      "user": 4736557031250
+    }
+  }
+}

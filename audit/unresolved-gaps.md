@@ -65,6 +65,11 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   (`hour1.f:3777-3791`/`3804-3836`, `starts.f:93,269`), and the T-00127 packet is final with reviewer `SAGE T-00129`.
   The disposition stays `unresolved`: production uses 1e-14 m3 where legacy uses 1e-15*DH*DV (G0-5b). The only remaining step is
   the FORGE write to traceability.csv, which is still pending: the T-00129 chain was not applied.
+- G0-4r | FORGE (T-00158 DECIDED) | Swarm deadlock while P0.4 campaign runs: detached driver (lock PID 41728)
+  rewrites tracked `audit/runs/p04-full-campaign/heartbeat.json` every 30 s; `swarm_wrapper.py:1005-1023` attributes it
+  to the agent whose turn it is and restores it, so every SENTINEL/SAGE turn is quarantined (route-1790468130/-183).
+  Fix in `swarm_wrapper.py` only: exclude the live machine-lock holder's heartbeat/driver.log from scope attribution.
+  Do NOT touch the pinned driver or the running campaign | `.agent/results/T-00158.md`
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)

@@ -2,21 +2,21 @@
   "pid": 41728,
   "campaign_id": "p04-full-campaign",
   "status": "RUN_1",
-  "heartbeat_unix": 1790468111.1396916,
-  "heartbeat_utc": "2026-09-27T00:15:11Z",
-  "elapsed_seconds": 240.46,
+  "heartbeat_unix": 1790468351.290027,
+  "heartbeat_utc": "2026-09-27T00:19:11Z",
+  "elapsed_seconds": 480.61,
   "current_run": 1,
   "total_runs": 3,
   "system_load": {
-    "timestamp": 1790468111.1396916,
-    "timestamp_utc": "2026-09-27T00:15:11Z",
+    "timestamp": 1790468351.290027,
+    "timestamp_utc": "2026-09-27T00:19:11Z",
     "memory_load_percent": 43,
     "total_phys_mb": 65192.1,
-    "avail_phys_mb": 36809.9,
+    "avail_phys_mb": 36747.8,
     "cpu_times_raw": {
-      "idle": 62154628437500,
-      "kernel": 66199515468750,
-      "user": 4731995156250
+      "idle": 62222571250000,
+      "kernel": 66271341562500,
+      "user": 4737013906250
     }
   }
 }
