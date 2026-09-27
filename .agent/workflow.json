@@ -84,11 +84,14 @@
   ],
   "idle_check": true,
   "last_advance_unix": null,
+  "last_route_errors": [
+    "IDLE contradicts the measured campaign state (see 'Detached campaign liveness' in the brief): the machine-lock holder is dead or its heartbeat is stale. Route the diagnosis/relaunch decision instead of waiting."
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "IDLE",
   "status_reason": "no unblocked work: G0-4 stays under T-00228, the detached legacy Ottawa campaign is live and healthy, and no fresh receipt or stale heartbeat has triggered reopening",

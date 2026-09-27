@@ -1,1 +1,13 @@
-{"schema_version": 1, "status": "IDLE", "reason": "no unblocked work: G0-4 stays under T-00228, the detached legacy Ottawa campaign is live and healthy, and no fresh receipt or stale heartbeat has triggered reopening", "state_next": "Stay idle; do not dispatch any worker until a fresh terminal receipt or a heartbeat older than 600 s."}
+{
+  "errors": [
+    "IDLE contradicts the measured campaign state (see 'Detached campaign liveness' in the brief): the machine-lock holder is dead or its heartbeat is stale. Route the diagnosis/relaunch decision instead of waiting."
+  ],
+  "rejected": {
+    "reason": "no unblocked work: G0-4 waits on a fresh terminal receipt or stale heartbeat; no user decisions remain.",
+    "schema_version": 1,
+    "state_next": "idle — wait for a fresh p04 receipt or heartbeat age > 600 s before reopening G0-4",
+    "status": "REJECTED"
+  },
+  "schema_version": 1,
+  "status": "REJECTED"
+}
