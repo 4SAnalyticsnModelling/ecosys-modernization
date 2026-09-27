@@ -1,1 +1,1 @@
-T-00239 SAGE Confirm idle: no unblocked work remains and G0-4 stays closed until a fresh legacy receipt or a stale heartbeat >600 s.
+T-00240 SAGE: confirm swarm idle and hold G0-4 closed while the detached legacy Ottawa campaign remains live and healthy.

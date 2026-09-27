@@ -48,4 +48,4 @@ none active.
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE confirms idle; no worker dispatch while the detached legacy Ottawa campaign remains live and before a fresh terminal receipt or heartbeat stale >600 s.
+Wait for a fresh P0.4 receipt or heartbeat >600 s before reopening G0-4; no worker dispatch.
