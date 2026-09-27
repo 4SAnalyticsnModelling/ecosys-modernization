@@ -1,1 +1,1 @@
-T-00178 PATHFINDER: Monitor the detached legacy Ottawa P0.4 full-run campaign and collect completion or failure evidence without colliding with the live driver/heartbeat.
+T-00180 FORGE: restart the stale controller and relaunch the detached legacy P0.4 Ottawa campaign under pinned hashes.

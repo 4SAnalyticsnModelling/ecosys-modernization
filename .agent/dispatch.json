@@ -1,18 +1,28 @@
 {
-  "decision_kind": "routing-failure",
-  "decision_of": "SENTINEL",
-  "full_run_justification": null,
-  "reason": "SAGE decision (routing-failure) from SENTINEL",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00179.md",
-  "result_status": "FAIL",
-  "role": "SAGE",
-  "schema_version": 1,
-  "skills": [
-    "ecosys-process-science-parity"
+  "errors": [
+    "unknown skill n/a"
   ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00179.md",
-  "task_id": "T-00179"
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "FORGE restart is the newest unblocked next step: the stale controller is blocking all routing after T-00175, and the run must relaunch only after a verified restart.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00180.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "n/a"
+    ],
+    "state_next": "FORGE restarts the controller and relaunches the detached legacy P0.4 campaign from pinned hashes.",
+    "state_recent": [
+      "T-00179 SAGE DONE: stale controller caused repeated routing failures; restart required.",
+      "T-00176 FORGE DONE: detached P0.4 campaign relaunched cleanly with pinned hashes.",
+      "T-00175 FORGE DONE: controller fix loads only after restart; live-lock bypass is verified."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00180.md",
+    "task_id": "T-00180"
+  },
+  "schema_version": 1,
+  "status": "REJECTED"
 }
