@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00193 PATHFINDER DONE: valid terminal receipt is still missing; stale failure packet remains invalid.
-- T-00192 PATHFINDER FAIL: exit-code-2 packet is not a valid completion proof.
-- T-00191 SAGE DONE: stale RUN_FAILED receipt is invalid while PID 41688 remains alive.
+- T-00194 SAGE BLOCKED: await driver exit; inspect fresh terminal receipt.
+- T-00193 PATHFINDER DONE: stale RUN_FAILED invalid until post-exit proof exists.
+- T-00192 PATHFINDER FAIL: exit-code-2 packet is not valid terminal evidence.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE will wait for the live detached legacy Ottawa P0.4 driver to exit, inspect the new terminal receipt, and decide whether a retry is valid.
+SAGE waits for PID 41688 to exit, then validates the new final receipt before any retry.

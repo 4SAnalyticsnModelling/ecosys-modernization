@@ -81,8 +81,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "SAGE is the only role that can adjudicate the live detached run's final receipt and authorize any retry after the lock is released.",
-  "task_id": "T-00194",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE is the only role that can validate the post-exit receipt and authorize any retry after PID 41688 exits.",
+  "task_id": "T-00195",
+  "worker": "SAGE"
 }
