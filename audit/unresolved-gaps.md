@@ -10,7 +10,7 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
 - G0-2 | DECIDED 2026-09-26 T-00078 | P0.2 D6 list SIGNED-SAGE (D9): DEV-005 KEEP (legacy parity), DEV-004/006
   REVERT (confirmed T-00036), DEV-007 REVERT-decouple (done T-00046/49), DEV-008 ACCEPTED (T-00076). Only the
   deck-half revert of `9253d3b` (G0-2a) remains to implement | `audit/intentional-deviations.md` DEV-004..008
-- G0-2a | FORGE (deck-half open) | Zig half reverted T-00037/T-00038; deck `runottawa` still f6=200, restore blob
+- G0-2a | DONE 2026-09-27 T-00221 (SIGNED-SAGE 2026-09-27 T-00221; staged-deck stager approved; P3/P4 wiring carried as acceptance) | Zig half reverted T-00037/T-00038; deck `runottawa` still f6=200, restore blob
   `ecf5e61a…` with SAGE diff-bound review. Earlier: T-00035 D6 decision on DEV-004: REJECTED-REVERT (revert deck f6 200->100 and
   `iteration_control.zig:150` 200->100 of `9253d3b`; hour-2,589 SOLUTE exhaustion becomes a defect to root-cause).
   The STARTE clamp is now listed as DEV-007 and decided in T-00045: decouple SOLUTE/STARTE ceilings from f6 (FORGE) | `.agent/results/T-00035.md`, `.agent/results/T-00045.md`
@@ -26,6 +26,10 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   qualification-grade Zig Ottawa run (P3/P4) takes its deck from this stager. A run from the raw protected deck (blob
   `9ec1bf4e…`, f6=200) is not qualification evidence. The protected file stays as committed (`9253d3b`), and this row records it as
   a known deviant input | `.agent/results/T-00219.md`
+  T-00221 DECISION (SAGE, 2026-09-27): CLOSED. The stager `ecosys-audit/scripts/stage_ottawa_deck.py` (sha256 `3dff3b2a…`,
+  commit `821d520`) meets the T-00219 CHAIN. `git diff --stat 9253d3b^ HEAD` over the deck dir shows only `runottawa` changed
+  (a one-line f6 change), so staged deck = deck tree at `9253d3b^` (5add7de NH4 fix kept). Carried acceptance criteria, owned by the P3/P4 runner: use a
+  fresh `--out` dir, keep the default `--blob`, and record `runottawa_hash == ecf5e61a…` in the run receipt | `.agent/results/T-00221.md`
 - G0-2b | PATHFINDER->SAGE | Legacy MRXN semantics not reproduced by any Zig ceiling: per-sub-cycle kinetic rates /MRXN
   (`solute.f:112-118,368-402`) vs Zig single closure with relaxation caps unbounded (`reaction_solve.zig:73-129`), and
   hourly rain/irrigation input equilibration using the STARTE ceiling (`hourly_process_driver.zig:634,670`) needs its

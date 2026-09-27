@@ -88,8 +88,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "SAGE must review the staged Ottawa deck proof and close G0-2a without touching the protected deck.",
   "task_id": "T-00221",
-  "worker": "SAGE"
+  "worker": null
 }

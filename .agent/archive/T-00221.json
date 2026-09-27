@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00221.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "SAGE must review the staged Ottawa deck proof and close G0-2a without touching the protected deck.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00221.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE reviews staged Ottawa deck hash-bound evidence to close G0-2a without editing the protected deck.",
+    "state_recent": [
+      "T-00220 FORGE DONE: staged Ottawa deck and test pass.",
+      "T-00219 SAGE DONE: direct deck edit withdrawn; staged-copy rule applies.",
+      "T-00216 SAGE DONE: G0-2a remains open and D6 deck half is still pending."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00221.md",
+    "task_id": "T-00221"
+  },
+  "ended": 1790541121.1879265,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "12a57e32-10e4-40ec-afc7-f6c774e84323",
+    "old": "dadd2499-14b2-428f-aace-77a1bd549afb",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 309163,
+    "cache_write": 38435,
+    "cost": null,
+    "input": 14,
+    "llm_calls": 7,
+    "output": 5712,
+    "tool_calls": 2
+  },
+  "violations": []
+}
