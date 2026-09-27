@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00207", "role": "FORGE", "task_file": ".agent/tasks/T-00207.md", "result_file": ".agent/results/T-00207.md", "skills": ["ecosys-build-reproducibility"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "T-00206 diagnosed the dead detached driver; the next bounded action is a FORGE harness fix for hardened relaunch, logging, quarantine, and fresh-receipt validation.", "state_recent": ["T-00206 PATHFINDER DONE: external kill; hardened relaunch recipe is next.", "T-00204 SAGE DONE: stale RUN_FAILED invalid; do not retry in place.", "T-00197 SAGE BLOCKED: hold P0.4 until driver exits or heartbeat is stale."], "state_next": "FORGE will harden the detached P0.4 relaunch path by enforcing campaign logs, run_1 quarantine, and fresh valid exit-receipt gating before any rerun."}
+{
+  "full_run_justification": null,
+  "reason": "T-00206 diagnosed the dead detached driver; the next bounded action is a FORGE harness fix for hardened relaunch, logging, quarantine, and fresh-receipt validation.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00207.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-build-reproducibility"
+  ],
+  "state_next": "FORGE will harden the detached P0.4 relaunch path by enforcing campaign logs, run_1 quarantine, and fresh valid exit-receipt gating before any rerun.",
+  "state_recent": [
+    "T-00206 PATHFINDER DONE: external kill; hardened relaunch recipe is next.",
+    "T-00204 SAGE DONE: stale RUN_FAILED invalid; do not retry in place.",
+    "T-00197 SAGE BLOCKED: hold P0.4 until driver exits or heartbeat is stale."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00207.md",
+  "task_id": "T-00207"
+}

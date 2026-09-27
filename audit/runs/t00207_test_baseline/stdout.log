@@ -1,0 +1,2 @@
+[Lock] Reclaiming stale lock: reason=DEAD_PID, stale_pid=99999999
+[Lock] Reclaiming stale lock: reason=STALE_HEARTBEAT, stale_pid=36092

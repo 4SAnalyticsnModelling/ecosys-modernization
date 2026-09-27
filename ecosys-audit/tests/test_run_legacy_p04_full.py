@@ -23,7 +23,12 @@ from run_legacy_p04_full import (
     inspect_lock_status,
     HeartbeatDaemon,
     MachineLock,
-    spawn_detached_child
+    spawn_detached_child,
+    quarantine_path,
+    quarantine_campaign_artifacts,
+    stage_run_directory,
+    validate_terminal_receipt,
+    relaunch_campaign,
 )
 from workflow import ProtocolError
 
@@ -281,6 +286,303 @@ class TestRunLegacyP04Full(unittest.TestCase):
                             pass
                     time.sleep(0.1)
                 self.assertTrue(found, "Mock detached child output not detected in log")
+            finally:
+                if is_pid_alive(p.pid):
+                    from run_legacy_p04_full import stop_process_by_pid
+                    stop_process_by_pid(p.pid)
+                try:
+                    p.wait(timeout=3)
+                except Exception:
+                    pass
+
+    def test_quarantine_path_file(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "driver.log"
+            p.write_text("sample log content", encoding="utf-8")
+            q_dest = quarantine_path(p)
+            self.assertFalse(p.exists())
+            self.assertIsNotNone(q_dest)
+            self.assertTrue(q_dest.exists())
+            self.assertIn("_quarantine_", q_dest.name)
+            self.assertEqual(q_dest.read_text(encoding="utf-8"), "sample log content")
+
+    def test_quarantine_path_directory(self):
+        with tempfile.TemporaryDirectory() as td:
+            d = Path(td) / "run_1"
+            d.mkdir()
+            (d / "output.txt").write_text("data 123", encoding="utf-8")
+            q_dest = quarantine_path(d)
+            self.assertFalse(d.exists())
+            self.assertIsNotNone(q_dest)
+            self.assertTrue(q_dest.is_dir())
+            self.assertIn("run_1_quarantine_", q_dest.name)
+            self.assertEqual((q_dest / "output.txt").read_text(encoding="utf-8"), "data 123")
+
+    def test_quarantine_campaign_artifacts(self):
+        with tempfile.TemporaryDirectory() as td:
+            c_dir = Path(td) / "campaign"
+            c_dir.mkdir()
+            r1 = c_dir / "run_1"
+            r1.mkdir()
+            (r1 / "file1.txt").write_text("r1", encoding="utf-8")
+            r2 = c_dir / "run_2"
+            r2.mkdir()
+            (r2 / "file2.txt").write_text("r2", encoding="utf-8")
+            w1 = c_dir / "warmup_1"
+            w1.mkdir()
+            d_log = c_dir / "driver.log"
+            d_log.write_text("log", encoding="utf-8")
+            rec = Path(td) / "receipt.json"
+            rec.write_text("{}", encoding="utf-8")
+
+            quarantined = quarantine_campaign_artifacts(c_dir, receipt_path=rec, driver_log=d_log)
+            self.assertFalse(r1.exists())
+            self.assertFalse(r2.exists())
+            self.assertFalse(w1.exists())
+            self.assertFalse(d_log.exists())
+            self.assertFalse(rec.exists())
+            self.assertEqual(len(quarantined), 5)
+            for orig, q in quarantined.items():
+                self.assertTrue(Path(q).exists())
+
+    def test_stage_run_directory_quarantine_existing(self):
+        with tempfile.TemporaryDirectory() as td:
+            deck = Path(td) / "staged_deck"
+            deck.mkdir()
+            (deck / "runottawa").write_text("cat << eor\ninput\neor\n", encoding="latin-1")
+            (deck / "f1.dat").write_text("data", encoding="latin-1")
+            exe = Path(td) / "oracle.exe"
+            exe.write_bytes(b"dummy_exe")
+
+            target = Path(td) / "run_1"
+            target.mkdir()
+            (target / "old_prior_run.txt").write_text("prior evidence", encoding="utf-8")
+
+            stage_run_directory(deck, exe, target, quarantine_existing=True)
+            self.assertTrue(target.exists())
+            self.assertFalse((target / "old_prior_run.txt").exists())
+            self.assertTrue((target / "ecosys_oracle.exe").exists())
+            self.assertTrue((target / "runscript").exists())
+
+            # Verify quarantine copy was saved
+            q_dirs = [p for p in Path(td).iterdir() if "run_1_quarantine_" in p.name]
+            self.assertEqual(len(q_dirs), 1)
+            self.assertTrue((q_dirs[0] / "old_prior_run.txt").exists())
+
+    def test_validate_terminal_receipt_missing(self):
+        res = validate_terminal_receipt(Path("nonexistent/receipt.json"))
+        self.assertFalse(res["valid"])
+        self.assertEqual(res["status"], "MISSING")
+        self.assertTrue(any("does not exist" in p for p in res["problems"]))
+
+    def test_validate_terminal_receipt_malformed(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "receipt.json"
+            p.write_text("NOT_JSON", encoding="utf-8")
+            res = validate_terminal_receipt(p)
+            self.assertFalse(res["valid"])
+            self.assertEqual(res["status"], "MALFORMED_JSON")
+
+    def test_validate_terminal_receipt_stale_mtime(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "receipt.json"
+            p.write_text(json.dumps({"status": "ALL_RUNS_COMPLETED", "runs": []}), encoding="utf-8")
+            res = validate_terminal_receipt(p, min_mtime=time.time() + 100.0)
+            self.assertFalse(res["valid"])
+            self.assertTrue(any("predates minimum mtime threshold" in pr for pr in res["problems"]))
+
+    def test_validate_terminal_receipt_stale_lock(self):
+        with tempfile.TemporaryDirectory() as td:
+            lock_p = Path(td) / "machine.lock"
+            lock_record = {"acquired_at": time.time() + 50.0}
+            lock_p.write_bytes(b"0\n" + json.dumps(lock_record).encode("utf-8") + b"\n")
+
+            rec_p = Path(td) / "receipt.json"
+            rec_p.write_text(json.dumps({"status": "ALL_RUNS_COMPLETED", "runs": []}), encoding="utf-8")
+
+            res = validate_terminal_receipt(rec_p, lock_path=lock_p)
+            self.assertFalse(res["valid"])
+            self.assertTrue(any("predates lock acquisition" in pr for pr in res["problems"]))
+
+    def test_validate_terminal_receipt_run_failed(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "receipt.json"
+            p.write_text(json.dumps({
+                "status": "RUN_FAILED",
+                "error": "Run run_1 failed: exit_code=2",
+                "runs": []
+            }), encoding="utf-8")
+            res = validate_terminal_receipt(p)
+            self.assertFalse(res["valid"])
+            self.assertEqual(res["status"], "RUN_FAILED")
+            self.assertTrue(any("RUN_FAILED" in pr for pr in res["problems"]))
+            self.assertTrue(any("exit_code=2" in pr for pr in res["problems"]))
+
+    def test_validate_terminal_receipt_nonzero_exit(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "receipt.json"
+            p.write_text(json.dumps({
+                "status": "ALL_RUNS_COMPLETED",
+                "runs_count": 3,
+                "runs": [
+                    {"run_id": "run_1", "status": "RUN_COMPLETED_SUCCESS", "exit_code": 0, "horizon_check": {"verified": True}},
+                    {"run_id": "run_2", "status": "RUN_FAILED", "exit_code": 2, "horizon_check": {"verified": False}},
+                    {"run_id": "run_3", "status": "RUN_COMPLETED_SUCCESS", "exit_code": 0, "horizon_check": {"verified": True}},
+                ],
+                "determinism_audit": {"byte_for_byte_identical": True},
+                "inventory_audit": {"actual_output_files": 1138}
+            }), encoding="utf-8")
+            res = validate_terminal_receipt(p)
+            self.assertFalse(res["valid"])
+            self.assertTrue(any("Run 2 exit code is 2" in pr for pr in res["problems"]))
+
+    def test_validate_terminal_receipt_unverified_horizon(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "receipt.json"
+            p.write_text(json.dumps({
+                "status": "ALL_RUNS_COMPLETED",
+                "runs_count": 1,
+                "runs": [
+                    {"run_id": "run_1", "status": "RUN_COMPLETED_SUCCESS", "exit_code": 0, "horizon_check": {"verified": False}},
+                ],
+                "determinism_audit": {"byte_for_byte_identical": True},
+                "inventory_audit": {"actual_output_files": 1138}
+            }), encoding="utf-8")
+            res = validate_terminal_receipt(p, expected_runs=1)
+            self.assertFalse(res["valid"])
+            self.assertTrue(any("horizon check not verified" in pr for pr in res["problems"]))
+
+    def test_validate_terminal_receipt_determinism_mismatch(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "receipt.json"
+            p.write_text(json.dumps({
+                "status": "ALL_RUNS_COMPLETED",
+                "runs_count": 2,
+                "runs": [
+                    {"run_id": "run_1", "status": "RUN_COMPLETED_SUCCESS", "exit_code": 0, "horizon_check": {"verified": True}},
+                    {"run_id": "run_2", "status": "RUN_COMPLETED_SUCCESS", "exit_code": 0, "horizon_check": {"verified": True}},
+                ],
+                "determinism_audit": {"byte_for_byte_identical": False, "discrepancies_count": 3},
+                "inventory_audit": {"actual_output_files": 1138}
+            }), encoding="utf-8")
+            res = validate_terminal_receipt(p, expected_runs=2)
+            self.assertFalse(res["valid"])
+            self.assertTrue(any("not byte-for-byte identical" in pr for pr in res["problems"]))
+
+    def test_validate_terminal_receipt_success(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "receipt.json"
+            p.write_text(json.dumps({
+                "status": "ALL_RUNS_COMPLETED",
+                "runs_count": 3,
+                "runs": [
+                    {"run_id": "run_1", "status": "RUN_COMPLETED_SUCCESS", "exit_code": 0, "horizon_check": {"verified": True}},
+                    {"run_id": "run_2", "status": "RUN_COMPLETED_SUCCESS", "exit_code": 0, "horizon_check": {"verified": True}},
+                    {"run_id": "run_3", "status": "RUN_COMPLETED_SUCCESS", "exit_code": 0, "horizon_check": {"verified": True}},
+                ],
+                "determinism_audit": {"byte_for_byte_identical": True, "discrepancies_count": 0},
+                "inventory_audit": {"actual_output_files": 1138}
+            }), encoding="utf-8")
+            res = validate_terminal_receipt(p, expected_runs=3)
+            self.assertTrue(res["valid"])
+            self.assertEqual(len(res["problems"]), 0)
+            self.assertTrue(res["exit_code_zero_all_runs"])
+            self.assertTrue(res["determinism_verified"])
+            self.assertTrue(res["horizon_verified"])
+
+    def test_relaunch_campaign_refuses_live_lock(self):
+        with tempfile.TemporaryDirectory() as td:
+            tdp = Path(td)
+            deck = tdp / "deck"
+            deck.mkdir()
+            (deck / "dummy.txt").write_text("d")
+            exe = tdp / "dummy.exe"
+            exe.write_bytes(b"exe")
+
+            lock_p = tdp / "machine.lock"
+            hb_p = tdp / "heartbeat.json"
+            # Live lock (current PID with fresh heartbeat)
+            hb_p.write_text(json.dumps({"pid": os.getpid(), "heartbeat_unix": time.time()}))
+            lock_p.write_bytes(b"0\n" + json.dumps({"pid": os.getpid(), "heartbeat_path": str(hb_p), "last_heartbeat": time.time()}).encode("utf-8") + b"\n")
+
+            with self.assertRaises(ProtocolError) as ctx:
+                relaunch_campaign(
+                    deck_src=deck,
+                    exe_src=exe,
+                    output_base=tdp / "evidence",
+                    campaign_id="test-relaunch-live",
+                    lock_path=lock_p,
+                    heartbeat_path=hb_p,
+                )
+            self.assertIn("live lock cannot be stolen", str(ctx.exception))
+
+    def test_relaunch_campaign_dry_run_quarantine(self):
+        with tempfile.TemporaryDirectory() as td:
+            tdp = Path(td)
+            deck = tdp / "deck"
+            deck.mkdir()
+            (deck / "f.txt").write_text("deck file")
+            exe = tdp / "dummy.exe"
+            exe.write_bytes(b"exe")
+
+            out_base = tdp / "evidence"
+            camp_dir = out_base / "test-camp"
+            camp_dir.mkdir(parents=True)
+            r1 = camp_dir / "run_1"
+            r1.mkdir()
+            (r1 / "partial_output.txt").write_text("partial")
+
+            lock_p = tdp / "machine.lock"
+            hb_p = tdp / "heartbeat.json"
+            # Dead lock (reclaimable)
+            lock_p.write_bytes(b"0\n" + json.dumps({"pid": 99999999, "heartbeat_path": str(hb_p), "last_heartbeat": 0.0}).encode("utf-8") + b"\n")
+
+            rec_out = tdp / "receipt.json"
+            rec_out.write_text(json.dumps({"status": "STALE"}), encoding="utf-8")
+            log_p = tdp / "driver.log"
+            log_p.write_text("old log", encoding="utf-8")
+
+            res = relaunch_campaign(
+                deck_src=deck,
+                exe_src=exe,
+                output_base=out_base,
+                campaign_id="test-camp",
+                lock_path=lock_p,
+                heartbeat_path=hb_p,
+                out_receipt=rec_out,
+                campaign_log=log_p,
+                dry_run=True,
+            )
+            self.assertEqual(res["status"], "RELAUNCH_DRY_RUN_PASSED")
+            self.assertFalse(r1.exists())
+            self.assertFalse(log_p.exists())
+            self.assertIn(str(r1), res["quarantined_artifacts"])
+            self.assertTrue(rec_out.exists())  # dry run receipt written
+
+    def test_spawn_detached_child_unbuffered_logging(self):
+        with tempfile.TemporaryDirectory() as td:
+            log_p = Path(td) / "unbuf.log"
+            # Child writes without explicit flush and sleeps
+            cmd = [
+                sys.executable,
+                "-c",
+                "import sys, time; sys.stdout.write('UNBUFFERED_TEST_LINE\\n'); time.sleep(2)"
+            ]
+            p = spawn_detached_child(cmd, log_p)
+            try:
+                deadline = time.time() + 5.0
+                found = False
+                while time.time() < deadline:
+                    if log_p.exists():
+                        try:
+                            text = log_p.read_text(encoding="utf-8", errors="replace")
+                            if "UNBUFFERED_TEST_LINE" in text:
+                                found = True
+                                break
+                        except PermissionError:
+                            pass
+                    time.sleep(0.05)
+                self.assertTrue(found, "Unbuffered child output was not flushed to log immediately")
             finally:
                 if is_pid_alive(p.pid):
                     from run_legacy_p04_full import stop_process_by_pid

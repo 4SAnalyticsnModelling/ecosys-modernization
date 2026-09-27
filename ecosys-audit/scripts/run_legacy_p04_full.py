@@ -524,10 +524,15 @@ def spawn_detached_child(child_argv: list[str], log_file: Path) -> subprocess.Po
         CREATE_NEW_PROCESS_GROUP = 0x00000200
         flags = DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
 
+    # Ensure unbuffered execution for Python children so live child logs flush immediately
+    argv = list(child_argv)
+    if argv and argv[0] == sys.executable and "-u" not in argv:
+        argv.insert(1, "-u")
+
     with log_file.open("ab") as log_f:
         if os.name == "nt":
             p = subprocess.Popen(
-                child_argv,
+                argv,
                 stdin=subprocess.DEVNULL,
                 stdout=log_f,
                 stderr=subprocess.STDOUT,
@@ -536,7 +541,7 @@ def spawn_detached_child(child_argv: list[str], log_file: Path) -> subprocess.Po
             )
         else:
             p = subprocess.Popen(
-                child_argv,
+                argv,
                 stdin=subprocess.DEVNULL,
                 stdout=log_f,
                 stderr=subprocess.STDOUT,
@@ -632,10 +637,85 @@ def safe_rmtree(path: Path, max_attempts: int = 10, delay: float = 0.5):
             time.sleep(delay)
 
 
-def stage_run_directory(deck_src: Path, exe_src: Path, target_dir: Path) -> dict[str, str]:
+def quarantine_path(target_path: Path, tag: str = "quarantine", max_attempts: int = 5) -> Path | None:
+    """Quarantine a file or directory by renaming it with a timestamped suffix."""
+    if not target_path.exists():
+        return None
+    now_ts = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    parent = target_path.parent
+    if target_path.is_dir():
+        dest = parent / f"{target_path.name}_{tag}_{now_ts}"
+        if dest.exists():
+            dest = parent / f"{target_path.name}_{tag}_{now_ts}_{int(time.time_ns() % 1_000_000)}"
+    else:
+        dest = parent / f"{target_path.stem}_{tag}_{now_ts}{target_path.suffix}"
+        if dest.exists():
+            dest = parent / f"{target_path.stem}_{tag}_{now_ts}_{int(time.time_ns() % 1_000_000)}{target_path.suffix}"
+
+    parent.mkdir(parents=True, exist_ok=True)
+    for attempt in range(max_attempts):
+        try:
+            os.replace(target_path, dest)
+            return dest
+        except OSError:
+            try:
+                shutil.move(str(target_path), str(dest))
+                return dest
+            except OSError:
+                if attempt == max_attempts - 1:
+                    raise
+                time.sleep(0.1 * (attempt + 1))
+    return None
+
+
+def quarantine_campaign_artifacts(
+    campaign_dir: Path,
+    receipt_path: Path | None = None,
+    driver_log: Path | None = None,
+    target_runs: list[str] | None = None,
+) -> dict[str, str]:
+    """Quarantine prior run outputs, driver log, and stale receipts before relaunch.
+
+    Returns a dictionary mapping original path string to quarantined destination path string.
+    """
+    quarantined = {}
+    if target_runs is None:
+        target_runs = ["run_1", "run_2", "run_3", "warmup_1", "warmup_2", "warmup_3"]
+
+    if campaign_dir.exists():
+        for run_name in target_runs:
+            run_dir = campaign_dir / run_name
+            if run_dir.exists():
+                q_dest = quarantine_path(run_dir)
+                if q_dest:
+                    quarantined[str(run_dir)] = str(q_dest)
+
+    if driver_log and driver_log.exists():
+        q_dest = quarantine_path(driver_log)
+        if q_dest:
+            quarantined[str(driver_log)] = str(q_dest)
+
+    if receipt_path and receipt_path.exists():
+        q_dest = quarantine_path(receipt_path)
+        if q_dest:
+            quarantined[str(receipt_path)] = str(q_dest)
+
+    return quarantined
+
+
+def stage_run_directory(
+    deck_src: Path,
+    exe_src: Path,
+    target_dir: Path,
+    quarantine_existing: bool = True,
+) -> dict[str, str]:
     """Stage a clean run directory from the staged deck and executable."""
     if target_dir.exists():
-        safe_rmtree(target_dir)
+        if quarantine_existing and not target_dir.name.startswith("warmup_"):
+            q_dest = quarantine_path(target_dir)
+            print(f"  [Quarantine] Preserved existing directory {target_dir} -> {q_dest}")
+        else:
+            safe_rmtree(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
 
     input_files = {}
@@ -945,6 +1025,249 @@ def compare_determinism(runs_data: list[dict]) -> dict:
     }
 
 
+def validate_terminal_receipt(
+    receipt_path: Path,
+    min_mtime: float | None = None,
+    min_acquired_at: float | None = None,
+    lock_path: Path | None = None,
+    expected_runs: int = 3,
+    pinned_exe_sha256: str | None = None,
+) -> dict:
+    """Validate a terminal run receipt against T-00191 / T-00207 criteria:
+    - Receipt exists and parses as JSON.
+    - Receipt is fresh (mtime >= min_mtime, mtime >= min_acquired_at / lock.acquired_at).
+    - Status is ALL_RUNS_COMPLETED.
+    - All runs completed with exit code 0 and RUN_COMPLETED_SUCCESS.
+    - Horizon completion check is verified for each run.
+    - Determinism audit passes (byte_for_byte_identical).
+    - Inventory audit has non-zero output files.
+    """
+    receipt_p = Path(receipt_path).resolve()
+    problems = []
+
+    if not receipt_p.exists():
+        return {
+            "valid": False,
+            "receipt_path": str(receipt_p),
+            "status": "MISSING",
+            "problems": [f"Receipt file does not exist: {receipt_p}"]
+        }
+
+    try:
+        receipt_data = json.loads(receipt_p.read_text(encoding="utf-8"))
+    except Exception as e:
+        return {
+            "valid": False,
+            "receipt_path": str(receipt_p),
+            "status": "MALFORMED_JSON",
+            "problems": [f"Failed to parse receipt JSON: {e}"]
+        }
+
+    if not isinstance(receipt_data, dict):
+        return {
+            "valid": False,
+            "receipt_path": str(receipt_p),
+            "status": "INVALID_FORMAT",
+            "problems": ["Receipt root is not a JSON object"]
+        }
+
+    stat = receipt_p.stat()
+    receipt_mtime = stat.st_mtime
+
+    # Lock acquisition time check if lock_path is provided
+    if lock_path:
+        try:
+            lock_p = Path(lock_path).resolve()
+            lock_info = read_lock_info(lock_p)
+            if lock_info and "acquired_at" in lock_info:
+                lock_acq = float(lock_info["acquired_at"])
+                if min_acquired_at is None or lock_acq > min_acquired_at:
+                    min_acquired_at = lock_acq
+        except Exception:
+            pass
+
+    # Freshness verification
+    if min_mtime is not None and receipt_mtime < min_mtime:
+        problems.append(
+            f"Receipt mtime ({receipt_mtime:.3f}) predates minimum mtime threshold ({min_mtime:.3f}); stale receipt"
+        )
+    if min_acquired_at is not None and receipt_mtime < min_acquired_at:
+        problems.append(
+            f"Receipt mtime ({receipt_mtime:.3f}) predates lock acquisition ({min_acquired_at:.3f}); stale receipt"
+        )
+
+    # Status check
+    status = receipt_data.get("status")
+    if status != "ALL_RUNS_COMPLETED":
+        problems.append(f"Receipt status is '{status}', expected 'ALL_RUNS_COMPLETED'")
+        if status == "RUN_FAILED":
+            err_msg = receipt_data.get("error", "unknown error")
+            problems.append(f"Recorded execution error: {err_msg}")
+
+    # Runs check
+    runs = receipt_data.get("runs")
+    if not isinstance(runs, list):
+        problems.append("Receipt has no valid 'runs' list")
+        runs = []
+    elif len(runs) != expected_runs:
+        problems.append(f"Runs completed count ({len(runs)}) does not match expected ({expected_runs})")
+
+    # Per-run verification
+    for idx, r in enumerate(runs, start=1):
+        if not isinstance(r, dict):
+            problems.append(f"Run {idx} record is not a dictionary")
+            continue
+        run_status = r.get("status")
+        if run_status != "RUN_COMPLETED_SUCCESS":
+            problems.append(f"Run {idx} status is '{run_status}', expected 'RUN_COMPLETED_SUCCESS'")
+        exit_code = r.get("exit_code")
+        if exit_code != 0:
+            problems.append(f"Run {idx} exit code is {exit_code}, expected 0")
+        horizon = r.get("horizon_check", {})
+        if not horizon.get("verified"):
+            problems.append(f"Run {idx} horizon check not verified: {horizon}")
+
+    # Determinism check (if >= 2 runs)
+    if len(runs) >= 2:
+        det = receipt_data.get("determinism_audit", {})
+        if not det.get("byte_for_byte_identical"):
+            problems.append(f"Runs are not byte-for-byte identical (discrepancies: {det.get('discrepancies_count', 'unknown')})")
+
+    # Inventory audit
+    inv = receipt_data.get("inventory_audit", {})
+    actual_files = inv.get("actual_output_files", 0)
+    if actual_files <= 0 and len(runs) > 0:
+        problems.append("Inventory audit reports 0 actual output files")
+
+    return {
+        "valid": len(problems) == 0,
+        "receipt_path": str(receipt_p),
+        "status": status,
+        "receipt_mtime": receipt_mtime,
+        "runs_completed": len(runs),
+        "expected_runs": expected_runs,
+        "exit_code_zero_all_runs": (all(r.get("exit_code") == 0 for r in runs) if runs else False),
+        "determinism_verified": (receipt_data.get("determinism_audit", {}).get("byte_for_byte_identical", False) if len(runs) >= 2 else True),
+        "horizon_verified": (all(r.get("horizon_check", {}).get("verified", False) for r in runs) if runs else False),
+        "problems": problems,
+    }
+
+
+def relaunch_campaign(
+    deck_src: Path,
+    exe_src: Path,
+    output_base: Path,
+    campaign_id: str,
+    runs: int = 3,
+    core_affinity: int = 1,
+    timeout_per_run: float = 21600.0,
+    warmup_timeout: float = 180.0,
+    out_receipt: Path = Path("audit/runs/p04_full_run_receipt.json"),
+    lock_path: Path = DEFAULT_LOCK_PATH,
+    heartbeat_path: Path = DEFAULT_HEARTBEAT_PATH,
+    heartbeat_interval: float = DEFAULT_HEARTBEAT_INTERVAL_SECONDS,
+    max_simulated_days: int | None = None,
+    dry_run: bool = False,
+    campaign_log: Path | None = None,
+) -> dict:
+    """Execute hardened detached relaunch with lock/log/run_1 quarantine."""
+    deck_src = deck_src.resolve(strict=True)
+    exe_src = exe_src.resolve(strict=True)
+    output_base = output_base.resolve()
+    out_receipt = out_receipt.resolve()
+    lock_path = lock_path.resolve()
+    heartbeat_path = heartbeat_path.resolve()
+    campaign_dir = output_base / campaign_id
+
+    # R5 check
+    if "audit/runs" in str(output_base).replace("\\", "/"):
+        raise ProtocolError(f"R5 violation: outputs cannot be directed into audit/runs/ ({output_base})")
+
+    # 1. Lock pre-check
+    status = inspect_lock_status(lock_path, heartbeat_path)
+    if status["locked"] and not status["reclaimable"]:
+        raise ProtocolError(
+            f"Cannot relaunch: active machine lock held by PID {status['pid']} "
+            f"(heartbeat age: {status['heartbeat_age']:.1f}s); live lock cannot be stolen"
+        )
+
+    # 2. Quarantine prior artifacts
+    child_log = (campaign_log or (heartbeat_path.parent / "driver.log")).resolve()
+    quarantined = quarantine_campaign_artifacts(
+        campaign_dir=campaign_dir,
+        receipt_path=out_receipt,
+        driver_log=child_log,
+    )
+
+    # 3. Dry-run handling
+    if dry_run:
+        deck_files = list(deck_src.glob("*"))
+        if not deck_files:
+            raise ProtocolError(f"Deck directory {deck_src} is empty")
+        if not exe_src.is_file():
+            raise ProtocolError(f"Executable {exe_src} not found")
+
+        relaunch_dry_receipt = {
+            "status": "RELAUNCH_DRY_RUN_PASSED",
+            "campaign_id": campaign_id,
+            "campaign_directory": str(campaign_dir),
+            "machine_lock_path": str(lock_path),
+            "lock_precheck": status,
+            "quarantined_artifacts": quarantined,
+            "child_log": str(child_log),
+            "deck_source": str(deck_src),
+            "exe_path": str(exe_src),
+            "runs_planned": runs,
+            "timeout_per_run_s": timeout_per_run,
+        }
+        out_receipt.parent.mkdir(parents=True, exist_ok=True)
+        out_receipt.write_text(json.dumps(relaunch_dry_receipt, indent=2), encoding="utf-8")
+        return relaunch_dry_receipt
+
+    # 4. Detached launch
+    child_argv = [
+        sys.executable,
+        "-u",
+        str(Path(__file__).resolve()),
+        "--staged-deck", str(deck_src),
+        "--exe", str(exe_src),
+        "--output-base", str(output_base),
+        "--campaign-id", campaign_id,
+        "--runs", str(runs),
+        "--core-affinity", str(core_affinity),
+        "--timeout-per-run", str(timeout_per_run),
+        "--warmup-timeout", str(warmup_timeout),
+        "--out", str(out_receipt),
+        "--lock-file", str(lock_path),
+        "--heartbeat-file", str(heartbeat_path),
+        "--heartbeat-interval", str(heartbeat_interval),
+        "--campaign-log", str(child_log),
+    ]
+    if max_simulated_days is not None:
+        child_argv.extend(["--max-simulated-days", str(max_simulated_days)])
+
+    child_p = spawn_detached_child(child_argv, child_log)
+    time.sleep(0.3)
+    poll_res = child_p.poll()
+    if poll_res is not None:
+        err_tail = ""
+        if child_log.exists():
+            err_tail = child_log.read_text(encoding="latin-1", errors="replace")[-500:]
+        raise RuntimeError(f"Detached relaunch child failed to launch (exit {poll_res}): {err_tail}")
+
+    result = {
+        "status": "RELAUNCH_SPAWNED_SUCCESS",
+        "launcher_pid": os.getpid(),
+        "child_pid": child_p.pid,
+        "campaign_id": campaign_id,
+        "campaign_directory": str(campaign_dir),
+        "heartbeat_path": str(heartbeat_path),
+        "driver_log": str(child_log),
+        "quarantined_artifacts": quarantined,
+    }
+    return result
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--staged-deck", type=Path, default=Path("D:/ecosys-evidence/legacy/staged_deck"))
@@ -958,11 +1281,30 @@ def main():
     ap.add_argument("--max-simulated-days", type=int, default=None, help="Bounded test simulation days (optional)")
     ap.add_argument("--dry-run", action="store_true", help="Validate configuration and exit without running simulation")
     ap.add_argument("--detach", action="store_true", help="Spawn detached background process and return immediately")
+    ap.add_argument("--relaunch", action="store_true", help="Hardened relaunch: verify lock, quarantine prior run_1 / driver.log / receipt, launch detached child with unbuffered logging")
+    ap.add_argument("--quarantine-prior", action="store_true", help="Quarantine prior run_1, driver.log, and stale receipt before launch")
+    ap.add_argument("--campaign-log", type=Path, default=None, help="Campaign log file for driver stdout/stderr (default: audit/runs/p04-full-campaign/driver.log)")
+    ap.add_argument("--validate-receipt", type=Path, default=None, help="Validate an existing terminal run receipt and exit")
+    ap.add_argument("--min-mtime", type=float, default=None, help="Minimum acceptable receipt mtime timestamp for --validate-receipt")
+    ap.add_argument("--min-acquired-at", type=float, default=None, help="Minimum acceptable lock acquisition timestamp for --validate-receipt")
     ap.add_argument("--lock-file", type=Path, default=None, help="Machine lock path (default: .agent/locks/machine.lock)")
     ap.add_argument("--heartbeat-file", type=Path, default=None, help="Path for child heartbeat file (default: audit/runs/p04-full-campaign/heartbeat.json)")
     ap.add_argument("--heartbeat-interval", type=float, default=DEFAULT_HEARTBEAT_INTERVAL_SECONDS, help="Heartbeat update interval in seconds (default: 30s)")
     ap.add_argument("--out", type=Path, default=Path("audit/runs/p04_full_run_receipt.json"))
     a = ap.parse_args()
+
+    # Early exit for receipt validation
+    if a.validate_receipt:
+        lock_p = (a.lock_file or (ROOT / DEFAULT_LOCK_PATH)).resolve() if (a.lock_file or (ROOT / DEFAULT_LOCK_PATH).exists()) else None
+        res = validate_terminal_receipt(
+            receipt_path=a.validate_receipt,
+            min_mtime=a.min_mtime,
+            min_acquired_at=a.min_acquired_at,
+            lock_path=lock_p,
+            expected_runs=a.runs,
+        )
+        print(json.dumps(res, indent=2))
+        sys.exit(0 if res["valid"] else 1)
 
     deck_src = a.staged_deck.resolve(strict=True)
     exe_src = a.exe.resolve(strict=True)
@@ -978,11 +1320,46 @@ def main():
     lock_path = (a.lock_file or (ROOT / DEFAULT_LOCK_PATH)).resolve()
     heartbeat_path = (a.heartbeat_file or (ROOT / DEFAULT_HEARTBEAT_PATH)).resolve()
 
+    # Hardened Relaunch Mode
+    if a.relaunch:
+        res = relaunch_campaign(
+            deck_src=deck_src,
+            exe_src=exe_src,
+            output_base=output_base,
+            campaign_id=cid,
+            runs=a.runs,
+            core_affinity=a.core_affinity,
+            timeout_per_run=a.timeout_per_run,
+            warmup_timeout=a.warmup_timeout,
+            out_receipt=out_receipt,
+            lock_path=lock_path,
+            heartbeat_path=heartbeat_path,
+            heartbeat_interval=a.heartbeat_interval,
+            max_simulated_days=a.max_simulated_days,
+            dry_run=a.dry_run,
+            campaign_log=a.campaign_log,
+        )
+        print(f"[Relaunch Mode] Hardened detached child spawned successfully.")
+        print(json.dumps(res, indent=2))
+        return
+
     if a.detach:
         # C1: Detached mode spawns a child that outlives the turn and returns within a few seconds.
         # Parent prints PID, heartbeat path, and campaign ID.
+        child_log = (a.campaign_log or (heartbeat_path.parent / "driver.log")).resolve()
+        quarantined = {}
+        if a.quarantine_prior:
+            quarantined = quarantine_campaign_artifacts(
+                campaign_dir=campaign_dir,
+                receipt_path=out_receipt,
+                driver_log=child_log,
+            )
+            if quarantined:
+                print(f"[Quarantine] Quarantined prior artifacts: {json.dumps(quarantined)}")
+
         child_argv = [
             sys.executable,
+            "-u",
             str(Path(__file__).resolve()),
             "--staged-deck", str(deck_src),
             "--exe", str(exe_src),
@@ -996,13 +1373,13 @@ def main():
             "--lock-file", str(lock_path),
             "--heartbeat-file", str(heartbeat_path),
             "--heartbeat-interval", str(a.heartbeat_interval),
+            "--campaign-log", str(child_log),
         ]
         if a.max_simulated_days is not None:
             child_argv.extend(["--max-simulated-days", str(a.max_simulated_days)])
         if a.dry_run:
             child_argv.append("--dry-run")
 
-        child_log = heartbeat_path.parent / "driver.log"
         child_p = spawn_detached_child(child_argv, child_log)
 
         time.sleep(0.3)
@@ -1019,6 +1396,15 @@ def main():
         print(f"  Campaign ID: {cid}")
         print(f"  Driver log: {child_log}")
         return
+
+    # Line-buffered stdout/stderr flushing for live child processes
+    try:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(line_buffering=True, write_through=True)
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(line_buffering=True, write_through=True)
+    except Exception:
+        pass
 
     print(f"=== ECOSYS P0.4 LEGACY GFORTRAN FULL-RUN DRIVER ===")
     print(f"  Deck source: {deck_src}")
