@@ -1,1 +1,1 @@
-T-00189 PATHFINDER: wait for detached legacy Ottawa P0.4 exit, verify the fresh receipt, and avoid any restart or takeover.
+T-00190 PATHFINDER: reconcile the detached legacy Ottawa P0.4 receipt evidence and stale RUN_FAILED mismatch before any retry.

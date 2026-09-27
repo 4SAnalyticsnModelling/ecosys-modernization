@@ -80,8 +80,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "No unblocked work; newest result requires PATHFINDER to wait for the live P0.4 exit and verify the fresh receipt before any retry.",
-  "task_id": "T-00189",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "PATHFINDER to reconcile the detached legacy Ottawa P0.4 evidence gap: stale RUN_FAILED and live heartbeat with no terminal receipt; no retry before fresh evidence.",
+  "task_id": "T-00190",
+  "worker": "PATHFINDER"
 }

@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00188 PATHFINDER STAGNATED: run still live; stale RUN_FAILED remains only receipt
-- T-00187 PATHFINDER STAGNATED: live heartbeat newer than stale run receipt
-- T-00186 SAGE DONE: active Ottawa P0.4 campaign remains healthy and advancing
+- T-00189 PATHFINDER STAGNATED: no fresh Ottawa P0.4 receipt; stale RUN_FAILED remains only record.
+- T-00188 PATHFINDER STAGNATED: campaign still live; no post-exit receipt exists.
+- T-00187 PATHFINDER STAGNATED: live heartbeat newer than stale receipt; must await the exit.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER waits for the detached legacy Ottawa P0.4 exit and records the new receipt.
+PATHFINDER performs one bounded audit of the detached legacy Ottawa P0.4 receipt paths and timestamps before any retry.
