@@ -90,8 +90,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "SAGE decision (idle-check) from SENTINEL",
+  "status": "IDLE",
+  "status_reason": "no unblocked work: detached legacy Ottawa remains live and healthy, G0-4 is held under T-00228, and no worker task or user decision is unblocked",
   "task_id": "T-00241",
   "worker": null
 }
