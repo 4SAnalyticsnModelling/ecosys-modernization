@@ -1,1 +1,1 @@
-T-00190 PATHFINDER: reconcile the detached legacy Ottawa P0.4 receipt evidence and stale RUN_FAILED mismatch before any retry.
+T-00191 SAGE adjudicate stale-vs-live detached legacy Ottawa P0.4 receipt evidence before retry.
