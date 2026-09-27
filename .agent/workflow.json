@@ -82,19 +82,16 @@
       "time": 1790397956.3815045
     }
   ],
-  "idle_check": true,
+  "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "IDLE contradicts the measured campaign state (see 'Detached campaign liveness' in the brief): the machine-lock holder is dead or its heartbeat is stale. Route the diagnosis/relaunch decision instead of waiting."
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "IDLE",
-  "status_reason": "no unblocked work: G0-4 stays under T-00228, the detached legacy Ottawa campaign is live and healthy, and no fresh receipt or stale heartbeat has triggered reopening",
-  "task_id": "T-00241",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "dead detached legacy Ottawa campaign has no terminal receipt; SAGE must decide diagnosis or relaunch strategy before gate reopening.",
+  "task_id": "T-00245",
+  "worker": "SAGE"
 }

@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00238 SAGE DONE: no unblocked work; G0-4 remains under the T-00228 hold.
-- T-00236 SAGE DONE: keep G0-4 closed while Ottawa stays live and healthy.
-- T-00233 SAGE DONE: G0-5c ledger issue parked; no worker dispatch.
+- T-00241 SAGE DONE: idle confirmed; live detached legacy Ottawa campaign remains healthy.
+- T-00239 SAGE DONE: G0-4 stays closed; no unblocked worker task while heartbeat is fresh.
+- T-00238 SAGE DONE: no unblocked work; T-00228 hold remains active.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-idle — wait for a fresh p04 receipt or heartbeat age > 600 s before reopening G0-4
+SAGE decides whether the dead legacy Ottawa campaign requires diagnosis/relaunch before G0-4 can reopen.
