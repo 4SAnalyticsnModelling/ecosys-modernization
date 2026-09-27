@@ -75,11 +75,15 @@
   ],
   "idle_check": true,
   "last_advance_unix": null,
+  "last_route_errors": [
+    "ALLOWED FILES `audit/runs/` is outside SAGE may_write (writable by PATHFINDER, FORGE)",
+    "ALLOWED FILES `evidence/` is outside SAGE may_write (writable by PATHFINDER)"
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "IDLE",
   "status_reason": "no unblocked work: PID 41688 is still alive and the heartbeat is fresh, so no valid post-exit P0.4 receipt exists for SAGE to judge.",
