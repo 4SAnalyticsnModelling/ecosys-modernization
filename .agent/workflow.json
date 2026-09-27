@@ -19,6 +19,7 @@
     "PATHFINDER:T-00189": 1,
     "PATHFINDER:T-00192": 1,
     "PATHFINDER:T-00210": 1,
+    "PATHFINDER:T-00211": 1,
     "SAGE:T-00158": 1,
     "SAGE:T-00161": 1,
     "SAGE:T-00164": 1,
@@ -86,8 +87,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Newest result T-00210 is a PATHFINDER stagnation: the live detached campaign has no fresh terminal receipt, so a bounded monitor-and-verify task is the correct next step.",
   "task_id": "T-00211",
-  "worker": "PATHFINDER"
+  "worker": null
 }

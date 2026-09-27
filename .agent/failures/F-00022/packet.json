@@ -1,0 +1,19 @@
+{
+  "carried_rejections": 0,
+  "commit": "403c0c096fba0385a0eb6118094f19be1494a0bd",
+  "fields": {
+    "binding_id": "UNKNOWN",
+    "candidate_fortran": "UNKNOWN",
+    "candidate_zig": "UNKNOWN",
+    "checkpoint": "UNKNOWN",
+    "exact_error": "task STAGNATED: settled",
+    "first_divergent_state": "UNKNOWN",
+    "first_failing_timestep": "UNKNOWN",
+    "last_verified_timestep": "UNKNOWN",
+    "relevant_variables": "UNKNOWN",
+    "subsystem": "UNKNOWN"
+  },
+  "packet": "F-00022",
+  "signature": "PATHFINDER:T-00211",
+  "task": "T-00211"
+}
