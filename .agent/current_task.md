@@ -1,1 +1,1 @@
-T-00186 SAGE: verify the live detached legacy Ottawa P0.4 run state and decide whether to continue or stop it before any restart.
+T-00187 PATHFINDER: Collect the detached legacy Ottawa P0.4 completion/failure receipt when the active run exits.

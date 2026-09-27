@@ -77,8 +77,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Latest evidence shows a stale receipt, but the live detached legacy run holds the lock and heartbeat; SAGE must decide whether to continue or halt it before any restart.",
-  "task_id": "T-00186",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Active legacy Ottawa P0.4 is still healthy; the next needed action is PATHFINDER collection of the new exit receipt, not another SAGE decision.",
+  "task_id": "T-00187",
+  "worker": "PATHFINDER"
 }
