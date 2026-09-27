@@ -48,4 +48,4 @@ none active.
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE confirms idle and keeps the P0.4 hold parked until fresh evidence or the expiry threshold.
+hold P0.4 and dispatch no more polling until a fresh receipt or expiry triggers review.

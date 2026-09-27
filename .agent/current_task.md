@@ -1,1 +1,1 @@
-T-00214 SAGE: confirm no unblocked work after the live detached legacy Ottawa P0.4 campaign is held under the no-new-evidence rule.
+T-00215 IDLE: hold the live P0.4 legacy campaign under no-new-evidence and dispatch no further polling until fresh evidence or expiry.
