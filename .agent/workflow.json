@@ -16,6 +16,7 @@
     "PATHFINDER:T-00115": 1,
     "PATHFINDER:T-00187": 1,
     "PATHFINDER:T-00188": 1,
+    "PATHFINDER:T-00189": 1,
     "SAGE:T-00158": 1,
     "SAGE:T-00161": 1,
     "SAGE:T-00164": 1,
@@ -79,8 +80,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "No unblocked work; newest result requires PATHFINDER to wait for the live P0.4 exit and verify the fresh receipt before any retry.",
   "task_id": "T-00189",
-  "worker": "PATHFINDER"
+  "worker": null
 }

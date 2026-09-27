@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00189.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "No unblocked work; newest result requires PATHFINDER to wait for the live P0.4 exit and verify the fresh receipt before any retry.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00189.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER waits for the detached legacy Ottawa P0.4 exit and records the new receipt.",
+    "state_recent": [
+      "T-00188 PATHFINDER STAGNATED: run still live; stale RUN_FAILED remains only receipt",
+      "T-00187 PATHFINDER STAGNATED: live heartbeat newer than stale run receipt",
+      "T-00186 SAGE DONE: active Ottawa P0.4 campaign remains healthy and advancing"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00189.md",
+    "task_id": "T-00189"
+  },
+  "ended": 1790473638.9867153,
+  "failure_packet": ".agent/failures/F-00019",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1f77be4bffe8AOy4ju3wZtxt5",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "STAGNATED",
+  "review": null,
+  "usage": {
+    "cache_read": 209664,
+    "cache_write": 0,
+    "cost": 0.017763880000000003,
+    "input": 18269,
+    "llm_calls": 11,
+    "output": 8264,
+    "tool_calls": 17
+  },
+  "violations": []
+}
