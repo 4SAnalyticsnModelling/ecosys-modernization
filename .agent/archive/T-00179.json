@@ -1,0 +1,70 @@
+{
+  "changed": [
+    ".agent/failures/Q-T-00179/files/audit/runs/p04-full-campaign/driver.log",
+    ".agent/failures/Q-T-00179/files/audit/runs/p04-full-campaign/heartbeat.json",
+    ".agent/failures/Q-T-00179/files/audit/runs/p04_full_run_receipt.json",
+    ".agent/failures/Q-T-00179/quarantine.json",
+    ".agent/results/T-00179.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "decision_kind": "routing-failure",
+    "decision_of": "SENTINEL",
+    "full_run_justification": null,
+    "reason": "SAGE decision (routing-failure) from SENTINEL",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00179.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-process-science-parity"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00179.md",
+    "task_id": "T-00179"
+  },
+  "ended": 1790471758.239477,
+  "failure_packet": ".agent/failures/F-00016",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": {
+    "not_restored": [],
+    "note": "Agent's version of each file is under files/; the working tree was restored.",
+    "problems": [
+      "audit/runs/p04-full-campaign/driver.log: outside SAGE may_write",
+      "audit/runs/p04-full-campaign/heartbeat.json: outside SAGE may_write",
+      "audit/runs/p04_full_run_receipt.json: outside SAGE may_write"
+    ],
+    "restored": [
+      "audit/runs/p04-full-campaign/driver.log",
+      "audit/runs/p04-full-campaign/heartbeat.json",
+      "audit/runs/p04_full_run_receipt.json"
+    ],
+    "role": "SAGE",
+    "tag": "T-00179",
+    "time": 1790471757.362395
+  },
+  "reset": {
+    "new": "0bb5db67-b4d8-4d28-81cd-20bf6bc5592e",
+    "old": "af83e19f-ade9-418e-b62a-cfaf98018529",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "FAIL",
+  "review": null,
+  "usage": {
+    "cache_read": 1026063,
+    "cache_write": 44001,
+    "cost": null,
+    "input": 40,
+    "llm_calls": 20,
+    "output": 10649,
+    "tool_calls": 8
+  },
+  "violations": [
+    "audit/runs/p04-full-campaign/driver.log: outside SAGE may_write",
+    "audit/runs/p04-full-campaign/heartbeat.json: outside SAGE may_write",
+    "audit/runs/p04_full_run_receipt.json: outside SAGE may_write"
+  ]
+}

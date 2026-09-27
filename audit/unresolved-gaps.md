@@ -86,6 +86,15 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   killed; driver 41728/launcher 41452 exited; heartbeat `FAILED`, elapsed 1446 s, run_1 of 3). That run_1 "failure"
   (exit 4294967295) is the deliberate kill, not model science. Next: SENTINEL dispatches T-00163 to FORGE. After it
   lands, FORGE relaunches P0.4 from scratch with the same pinned driver (E3F55330...) and exe (63DD7D5F...).
+  T-00179 (SAGE, 7th recurrence, route-1790471467/-518 after the T-00176 relaunch): the T-00175 fix is correct on disk
+  (checked by calling `campaign_exempt_paths()` from a new process: it returns heartbeat.json + driver.log, LIVE_LOCK),
+  but the controller running the swarm (PIDs 36484/8084, `swarm_wrapper.py run --resume --max-steps 500`) was started at
+  2026-09-26 10:05 local. `swarm_wrapper.py` last changed at 18:49 (T-00175), and the controller never reloads it
+  (T-00175 result:29). The precondition "after controller restart" (T-00175:32) was skipped, and T-00176's "permanently
+  resolving" claim tested a new process, not the controller. SAGE stopped the campaign again at 2026-09-27T01:14Z
+  (oracle 44400 killed, driver 43324 exited, heartbeat `FAILED`, elapsed 425.91 s, run_1 of 3; deliberate kill, not science).
+  Next: FORGE restarts the controller. P0.4 is relaunched only after the controller's process CreationDate is later
+  than the mtime of `swarm_wrapper.py`.
 - G0-6 | DONE 2026-09-25 | P0.6 issue Status lines normalized (T-00005; SAGE-approved set T-00003)
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)
