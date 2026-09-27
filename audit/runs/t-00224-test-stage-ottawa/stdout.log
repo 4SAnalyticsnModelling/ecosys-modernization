@@ -1,0 +1,13 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\symon.mezbahuddin\AppData\Local\uv\cache\builds-v0\.tmpSnXsvs\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\ecosys-modernization
+collecting ... collected 5 items
+
+ecosys-audit/tests/test_stage_ottawa_deck.py::test_stage_ottawa_deck_direct PASSED [ 20%]
+ecosys-audit/tests/test_stage_ottawa_deck.py::test_stage_ottawa_deck_cli PASSED [ 40%]
+ecosys-audit/tests/test_stage_ottawa_deck.py::test_stage_ottawa_deck_mismatch_exits_nonzero PASSED [ 60%]
+ecosys-audit/tests/test_stage_ottawa_deck.py::test_stage_ottawa_deck_requires_out_arg PASSED [ 80%]
+ecosys-audit/tests/test_stage_ottawa_deck.py::test_stage_ottawa_deck_hash_comparison_branch_fails PASSED [100%]
+
+============================== 5 passed in 1.58s ==============================

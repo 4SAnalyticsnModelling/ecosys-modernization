@@ -1,0 +1,16 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\symon.mezbahuddin\AppData\Local\uv\cache\builds-v0\.tmpOEsVUJ\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\ecosys-modernization
+collecting ... collected 8 items
+
+ecosys-audit/tests/test_update_frontier.py::test_promote_refuses_when_runottawa_hash_missing_for_ottawa_case PASSED [ 12%]
+ecosys-audit/tests/test_update_frontier.py::test_promote_refuses_when_case_generic_but_deck_is_ottawa PASSED [ 25%]
+ecosys-audit/tests/test_update_frontier.py::test_promote_refuses_when_runottawa_hash_mismatch PASSED [ 37%]
+ecosys-audit/tests/test_update_frontier.py::test_promote_succeeds_when_valid_runottawa_hash PASSED [ 50%]
+ecosys-audit/tests/test_update_frontier.py::test_promote_non_ottawa_deck_without_hash PASSED [ 62%]
+ecosys-audit/tests/test_update_frontier.py::test_cli_promote_refusal_exit_code PASSED [ 75%]
+ecosys-audit/tests/test_update_frontier.py::test_cli_promote_success_exit_code PASSED [ 87%]
+ecosys-audit/tests/test_update_frontier.py::test_record_preserves_runottawa_hash PASSED [100%]
+
+============================== 8 passed in 0.85s ==============================

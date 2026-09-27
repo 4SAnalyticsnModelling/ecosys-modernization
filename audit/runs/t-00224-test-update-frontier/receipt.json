@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "--with",
+    "pytest",
+    "pytest",
+    "-v",
+    "ecosys-audit/tests/test_update_frontier.py"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 4.049,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 41444,
+  "pid": 46584,
+  "started_unix": 1790542909.940832,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00224-test-update-frontier/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00224-test-update-frontier/stdout.log",
+    "sha256": "429fbe79eb743a0d5dbdd3c522ac9d5f56015c4b6d72d68b0e1acfc07eb0b2a0"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

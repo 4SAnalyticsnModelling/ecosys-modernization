@@ -1,1 +1,20 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00224", "role": "FORGE", "task_file": ".agent/tasks/T-00224.md", "result_file": ".agent/results/T-00224.md", "skills": [], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Enforce the Ottawa promotion gate by rejecting missing runottawa_hash before promote and add the refusal test.", "state_recent": ["T-00223 SAGE DONE: Ottawa runner accepted; promotion gate fix is next.", "T-00222 FORGE DONE: staged deck and runottawa_hash were recorded and tests passed.", "T-00221 SAGE DONE: staged deck accepted and G0-2a closed."], "state_next": "FORGE enforces the Ottawa promotion gate and adds the refusal test before any promote."}
+{
+  "full_run_justification": null,
+  "reason": "Enforce the Ottawa promotion gate by rejecting missing runottawa_hash before promote and add the refusal test.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00224.md",
+  "result_status": "DONE",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [],
+  "state_next": "FORGE enforces the Ottawa promotion gate and adds the refusal test before any promote.",
+  "state_recent": [
+    "T-00223 SAGE DONE: Ottawa runner accepted; promotion gate fix is next.",
+    "T-00222 FORGE DONE: staged deck and runottawa_hash were recorded and tests passed.",
+    "T-00221 SAGE DONE: staged deck accepted and G0-2a closed."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00224.md",
+  "task_id": "T-00224"
+}

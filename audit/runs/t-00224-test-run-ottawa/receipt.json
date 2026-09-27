@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "uv",
+    "run",
+    "--with",
+    "pytest",
+    "pytest",
+    "-v",
+    "ecosys-audit/tests/test_run_ottawa.py"
+  ],
+  "cwd": "D:\\ecosys-modernization",
+  "elapsed_seconds": 23.557,
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 47928,
+  "pid": 47328,
+  "started_unix": 1790542920.2873502,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/t-00224-test-run-ottawa/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/t-00224-test-run-ottawa/stdout.log",
+    "sha256": "6534853c4e912d7696ea2c2af20668ad06b7f39f99673d681ccb0dac4241c7a9"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 120.0
+}

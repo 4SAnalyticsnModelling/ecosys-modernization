@@ -7,7 +7,8 @@
 record  : update simulation_frontier / current_failure_hour from a run summary.json (any mode).
 promote : set verified_frontier from a STRICT campaign, only when all hold under ONE binding:
           divcheck within rules (approved rules), no conservation breach, no unexplained solver
-          fallback, restart validation PASS, and the run started from hour 0.
+          fallback, restart validation PASS, the run started from hour 0, and valid runottawa_hash
+          for Ottawa deck campaigns.
 Bookkeeping over recorded artifacts; it does not re-derive them and is not a release gate.
 """
 from __future__ import annotations
@@ -21,6 +22,43 @@ import time
 from workflow import ROOT, ProtocolError, atomic, encoded, file_digest, inside, load, relative
 
 FRONTIER = ".agent/frontier.json"
+
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+try:
+    from stage_ottawa_deck import TARGET_BLOB as OTTAWA_TARGET_BLOB
+except ImportError:
+    OTTAWA_TARGET_BLOB = "ecf5e61ab453288b1763f81f841729bee34e8426"
+
+
+def is_ottawa_campaign(frontier: dict, summary: dict) -> bool:
+    """Return True if frontier case is Ottawa, or summary represents an Ottawa run."""
+    if frontier.get("case") == "Ottawa":
+        return True
+    if "runottawa_hash" in summary:
+        return True
+    b = summary.get("binding") or summary.get("evidence_binding")
+    deck = b.get("deck") if isinstance(b, dict) else None
+    paths = []
+    if isinstance(deck, dict) and deck.get("path"):
+        paths.append(str(deck.get("path")))
+    elif isinstance(deck, str):
+        paths.append(deck)
+    if summary.get("staged_deck"):
+        paths.append(str(summary.get("staged_deck")))
+    for p in paths:
+        norm = Path(p).as_posix().strip("/.")
+        if (
+            norm == "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON"
+            or norm.endswith("Cool Temperate Maize-Soybean ON")
+            or "ottawa" in norm.lower()
+        ):
+            return True
+    run_id = str(summary.get("run_id") or "").lower()
+    if "ottawa" in run_id:
+        return True
+    return False
 
 
 def art(root: Path, value: str) -> tuple[dict, dict]:
@@ -42,7 +80,12 @@ def record(root: Path, summary_path: str) -> dict:
     f.update({"simulation_frontier": last, "current_failure_hour": s.get("failure_hour"),
               "last_checkpoint_key": s.get("last_checkpoint_key"), "evidence_binding": s.get("binding")})
     f["simulation_frontier_note"] = f"From {ref['path']} (mode {s.get('mode')})."
-    f["history"].append({"time": time.time(), "op": "record", "simulation_frontier": last, "summary": ref})
+    history_entry = {"time": time.time(), "op": "record", "simulation_frontier": last, "summary": ref}
+    if s.get("runottawa_hash"):
+        history_entry["runottawa_hash"] = s.get("runottawa_hash")
+    if s.get("staged_deck"):
+        history_entry["staged_deck"] = s.get("staged_deck")
+    f["history"].append(history_entry)
     atomic(root / FRONTIER, encoded(f))
     return {"status": "RECORDED", "simulation_frontier": last, "verified_frontier": f["verified_frontier"]}
 
@@ -68,6 +111,12 @@ def promote(root: Path, summary_path: str, divcheck_path: str, restart_path: str
     ids = {binding_id(s), binding_id(d), binding_id(r)}
     if None in ids or len(ids) != 1:
         problems.append(f"artifacts are not bound to one evidence binding: {sorted(map(str, ids))}")
+    if is_ottawa_campaign(f, s):
+        ohash = s.get("runottawa_hash")
+        if ohash != OTTAWA_TARGET_BLOB:
+            problems.append(
+                f"Ottawa summary requires runottawa_hash == {OTTAWA_TARGET_BLOB} (got {ohash!r})"
+            )
     if problems:
         return {"status": "REFUSED", "problems": problems}
     candidates = [s.get("last_completed_hour")]
@@ -81,8 +130,13 @@ def promote(root: Path, summary_path: str, divcheck_path: str, restart_path: str
     old = f["verified_frontier"]
     f.update({"verified_frontier": verified, "evidence_binding": s.get("binding"),
               "verified_frontier_note": f"Promoted from {sref['path']}."})
-    f["history"].append({"time": time.time(), "op": "promote", "from": old, "to": verified,
-                         "binding_id": binding_id(s), "evidence": [sref, dref, rref]})
+    history_entry = {"time": time.time(), "op": "promote", "from": old, "to": verified,
+                     "binding_id": binding_id(s), "evidence": [sref, dref, rref]}
+    if s.get("runottawa_hash"):
+        history_entry["runottawa_hash"] = s.get("runottawa_hash")
+    if s.get("staged_deck"):
+        history_entry["staged_deck"] = s.get("staged_deck")
+    f["history"].append(history_entry)
     atomic(root / FRONTIER, encoded(f))
     return {"status": "PROMOTED", "from": old, "to": verified, "advanced": verified > old}
 
