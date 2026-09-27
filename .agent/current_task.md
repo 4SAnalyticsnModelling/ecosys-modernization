@@ -1,1 +1,1 @@
-T-00176 FORGE: relaunch detached legacy P0.4 campaign with pinned driver/exe after controller restart.
+T-00177 PATHFINDER: Monitor detached legacy Ottawa P0.4 campaign progression and collect completion evidence without colliding with the live process.
