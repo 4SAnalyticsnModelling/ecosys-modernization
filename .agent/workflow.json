@@ -90,8 +90,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Hold G0-4 closed while Ottawa P0.4 stays live; no worker work is unblocked.",
   "task_id": "T-00236",
-  "worker": "SAGE"
+  "worker": null
 }

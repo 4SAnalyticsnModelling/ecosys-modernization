@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00236.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Hold G0-4 closed while Ottawa P0.4 stays live; no worker work is unblocked.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00236.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "state_next": "SAGE decides no unblocked work remains; G0-4 remains closed until a fresh receipt or stale heartbeat >600 s.",
+    "state_recent": [
+      "T-00233 SAGE DONE: no worker dispatch for G0-5c; G0-4 still held.",
+      "T-00230 SAGE DONE: keep G0-4 closed while run remains live.",
+      "T-00228 SAGE DONE: hold G0-4 until fresh receipt or stale heartbeat >600s."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00236.md",
+    "task_id": "T-00236"
+  },
+  "ended": 1790547212.8669243,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "962ae2c3-af3e-4780-a11f-9308a87d9eb7",
+    "old": "aabccd74-1a58-4ce1-9cd2-958678f62b3b",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 228251,
+    "cache_write": 46748,
+    "cost": null,
+    "input": 10,
+    "llm_calls": 5,
+    "output": 2992,
+    "tool_calls": 1
+  },
+  "violations": []
+}
