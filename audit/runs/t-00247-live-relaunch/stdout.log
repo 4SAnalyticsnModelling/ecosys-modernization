@@ -1,0 +1,17 @@
+[Relaunch Mode] Hardened detached child spawned successfully.
+{
+  "status": "RELAUNCH_SPAWNED_SUCCESS",
+  "launcher_pid": 37704,
+  "child_pid": 24496,
+  "campaign_id": "p04-full-campaign",
+  "campaign_directory": "D:\\ecosys-evidence\\legacy\\p04-full-campaign",
+  "heartbeat_path": "D:\\ecosys-modernization\\audit\\runs\\p04-full-campaign\\heartbeat.json",
+  "driver_log": "D:\\ecosys-modernization\\audit\\runs\\p04-full-campaign\\driver.log",
+  "quarantined_artifacts": {
+    "D:\\ecosys-evidence\\legacy\\p04-full-campaign\\run_1": "D:\\ecosys-evidence\\legacy\\p04-full-campaign\\run_1_quarantine_20260927T234331Z",
+    "D:\\ecosys-evidence\\legacy\\p04-full-campaign\\run_2": "D:\\ecosys-evidence\\legacy\\p04-full-campaign\\run_2_quarantine_20260927T234331Z",
+    "D:\\ecosys-evidence\\legacy\\p04-full-campaign\\run_3": "D:\\ecosys-evidence\\legacy\\p04-full-campaign\\run_3_quarantine_20260927T234331Z",
+    "D:\\ecosys-modernization\\audit\\runs\\p04-full-campaign\\driver.log": "D:\\ecosys-modernization\\audit\\runs\\p04-full-campaign\\driver_quarantine_20260927T234331Z.log",
+    "D:\\ecosys-modernization\\.agent\\locks\\machine.lock": "D:\\ecosys-modernization\\.agent\\locks\\machine_quarantine_20260927T234331Z.lock"
+  }
+}

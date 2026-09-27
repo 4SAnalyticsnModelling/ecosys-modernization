@@ -94,8 +94,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Fresh detached legacy Ottawa relaunch follows the newest T-00245 decision; the dead driver fix is a bounded FORGE task.",
   "task_id": "T-00247",
-  "worker": "FORGE"
+  "worker": null
 }

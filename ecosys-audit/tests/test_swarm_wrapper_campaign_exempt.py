@@ -89,6 +89,35 @@ class SwarmCampaignExemptTests(SwarmBase):
         }
         self.assertEqual(exempt, expected)
 
+    def test_sentinel_brief_reports_measured_campaign_liveness(self):
+        """2026-09-27: SENTINEL idled 17 h on a prose claim that a dead driver was alive."""
+        self._setup_machine_lock(pid=99999999, heartbeat_age_s=5.0)
+        brief = self.swarm.sentinel_brief()
+        self.assertIn("Detached campaign liveness", brief)
+        self.assertIn("reason=DEAD_PID", brief)
+        self.assertIn("driver is DEAD", brief)
+        self._setup_machine_lock(pid=os.getpid(), heartbeat_age_s=5.0)
+        brief = self.swarm.sentinel_brief()
+        self.assertIn("campaign is live and healthy", brief)
+        (self.root / ".agent/locks/machine.lock").unlink()
+        self.assertNotIn("Detached campaign liveness", self.swarm.sentinel_brief())
+
+    def test_sentinel_idle_rejected_while_lock_holder_is_dead(self):
+        """2026-09-27: SENTINEL wrote 'campaign live and healthy' IDLE over a measured DEAD_PID."""
+        self._setup_machine_lock(pid=99999999, heartbeat_age_s=5.0)
+        self.sentinel_queue([{"status": "IDLE", "reason": "no unblocked work: campaign live and healthy"}])
+        out = self.swarm.step()
+        self.assertNotEqual(out.get("status"), "IDLE")
+        self.assertNotEqual(out.get("status"), "ESCALATED")
+        errs = self.swarm.workflow().get("last_route_errors") or []
+        self.assertTrue(any("contradicts the measured campaign state" in e for e in errs), errs)
+
+    def test_sentinel_idle_accepted_while_campaign_live(self):
+        self._setup_machine_lock(pid=os.getpid(), heartbeat_age_s=5.0)
+        self.sentinel_queue([{"status": "IDLE", "reason": "no unblocked work: campaign live"}])
+        out = self.swarm.step()
+        self.assertEqual(out.get("status"), "ESCALATED")  # normal idle-check path to SAGE
+
     def test_sentinel_routing_not_blocked_by_live_campaign_heartbeat(self):
         """Live detached campaign writes must not cause SENTINEL routing turn to fail or quarantine."""
         _, hb_path, log_path = self._setup_machine_lock(pid=os.getpid(), heartbeat_age_s=2.0)

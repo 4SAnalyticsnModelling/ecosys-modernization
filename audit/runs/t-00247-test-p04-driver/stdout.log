@@ -1,0 +1,8 @@
+  [Quarantine] Preserved existing directory C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\tmp\tmp22fsy2ot\run_1 -> C:\Users\symon.mezbahuddin\scoop\apps\msys2\2025-02-21\tmp\tmp22fsy2ot\run_1_quarantine_20260927T233907Z
+[Lock] Reclaiming stale lock: reason=DEAD_PID, stale_pid=99999999
+[Lock] Reclaiming stale lock: reason=STALE_HEARTBEAT, stale_pid=22632
+{"status":"RETRY","error":"herdr call failed"}
+{"status":"WAITING"}
+{"status":"AGENT_RECOVERY"}
+{"status":"COLLECTED"}
+{"status":"IDLE"}

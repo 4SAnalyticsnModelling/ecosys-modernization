@@ -402,6 +402,73 @@ class Swarm:
             exempt.add(driver_log.as_posix().replace("\\", "/"))
         return exempt
 
+    def campaign_needs_action(self) -> bool:
+        """True when machine.lock names a campaign that died or hung without releasing it."""
+        lock_file = self.dir / "locks" / "machine.lock"
+        if not lock_file.exists():
+            return False
+        try:
+            from run_legacy_p04_full import inspect_lock_status, read_lock_info
+            info = read_lock_info(lock_file) or {}
+            hb = None
+            if info.get("heartbeat_path"):
+                p = Path(info["heartbeat_path"])
+                hb = p if p.is_absolute() else (self.root / p).resolve()
+            st = inspect_lock_status(lock_file, heartbeat_path=hb)
+        except Exception:
+            return False
+        return bool(st.get("pid")) and st.get("reason") in ("DEAD_PID", "STALE_HEARTBEAT")
+
+    def campaign_liveness(self) -> str:
+        """Measured machine-lock / heartbeat / receipt facts for SENTINEL (2026-09-27).
+
+        Without this, SENTINEL routed from prose ("PID 41688 is still alive") copied between
+        results and state.md, and idled for 17 h after the driver died without a receipt.
+        """
+        lock_file = self.dir / "locks" / "machine.lock"
+        if not lock_file.exists():
+            return ""
+        try:
+            from run_legacy_p04_full import inspect_lock_status, read_lock_info
+            info = read_lock_info(lock_file) or {}
+            hb = None
+            if info.get("heartbeat_path"):
+                p = Path(info["heartbeat_path"])
+                hb = p if p.is_absolute() else (self.root / p).resolve()
+            st = inspect_lock_status(lock_file, heartbeat_path=hb)
+        except Exception as e:  # never block routing on a diagnostic
+            return f"- lock inspection failed: {e}"
+        now = time.time()
+        lines = [f"- machine.lock: pid={st.get('pid')} reason={st.get('reason')} "
+                 f"reclaimable={st.get('reclaimable')}"]
+        if hb and hb.exists():
+            try:
+                hbd = json.loads(hb.read_text(encoding="utf-8"))
+                age = now - float(hbd.get("heartbeat_unix", hb.stat().st_mtime))
+                lines.append(f"- heartbeat: status={hbd.get('status')} utc={hbd.get('heartbeat_utc')} "
+                             f"age={age / 60:.1f} min")
+            except Exception:
+                pass
+        receipt = self.root / "audit/runs/p04_full_run_receipt.json"
+        if receipt.exists():
+            try:
+                status = load(receipt).get("status")
+            except Exception:
+                status = "?"
+            rec_t = receipt.stat().st_mtime
+            newer = rec_t >= float(info.get("acquired_at", 0) or 0)
+            lines.append(f"- receipt audit/runs/p04_full_run_receipt.json: status={status} "
+                         f"{'written by this lock holder' if newer else 'OLDER than the lock holder (stale)'}")
+        if st.get("reason") == "DEAD_PID":
+            lines.append("- VERDICT: the campaign driver is DEAD. Do not wait for it. If no receipt was written by "
+                         "this lock holder, the run ended abnormally with no terminal receipt: route the "
+                         "diagnosis / relaunch decision now.")
+        elif st.get("reason") == "STALE_HEARTBEAT":
+            lines.append("- VERDICT: heartbeat is stale; treat the campaign as hung and route a decision now.")
+        elif st.get("locked") and not st.get("reclaimable"):
+            lines.append("- VERDICT: campaign is live and healthy; waiting is correct.")
+        return "\n".join(lines)
+
     def scope_problems(self, role: str, changed: list[str], task_text: str) -> list[tuple[str, str]]:
         r = self.role(role)
         writable = r["may_write"] + self.roster["always_writable"]
@@ -715,6 +782,10 @@ class Swarm:
         parts += ["## Write lanes (a task's ALLOWED FILES must lie inside its role's lane, or it is rejected)",
                   "\n".join(f"- {n}: {', '.join(r['may_write'])}" for n, r in self.roster["roles"].items()
                             if n in WORKER_ROLES)]
+        campaign = self.campaign_liveness()
+        if campaign:
+            parts += ["## Detached campaign liveness (MEASURED by the controller now; overrides any PID/heartbeat "
+                      "claim in state.md or results)", campaign]
         if wf.get("last_route_errors"):
             parts += ["## YOUR PREVIOUS ROUTING ATTEMPT WAS REJECTED -- fix exactly this",
                       "\n".join(f"- {e}" for e in wf["last_route_errors"])]
@@ -1079,6 +1150,12 @@ class Swarm:
             self.save_workflow(wf)
             nd = self.queue_decision(d.get("reason") or "SENTINEL requested a decision", "SENTINEL", "sentinel-escalation")
             return {"status": "ESCALATED", "task_id": nd["task_id"], "role": "SAGE"}
+        if d["status"] == "IDLE" and self.campaign_needs_action():
+            # 2026-09-27: SENTINEL declared "campaign live and healthy" over a measured DEAD_PID.
+            return self.route_failed(wf, {**d, "status": "REJECTED"}, [
+                "IDLE contradicts the measured campaign state (see 'Detached campaign liveness' in the brief): "
+                "the machine-lock holder is dead or its heartbeat is stale. Route the diagnosis/relaunch "
+                "decision instead of waiting."])
         if d["status"] == "IDLE":
             if wf.get("idle_check"):  # SAGE has already been asked since the last real work: stop
                 wf.update({"status": "IDLE", "status_reason": d.get("reason")})

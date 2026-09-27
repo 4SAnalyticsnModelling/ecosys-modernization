@@ -520,9 +520,14 @@ def spawn_detached_child(child_argv: list[str], log_file: Path) -> subprocess.Po
     log_file.parent.mkdir(parents=True, exist_ok=True)
     flags = 0
     if os.name == "nt":
-        DETACHED_PROCESS = 0x00000008
+        # NOT DETACHED_PROCESS (2026-09-27): a console-less parent makes every console child
+        # (uv's python trampoline target, ecosys_oracle.exe) allocate a NEW console, which the
+        # default-terminal setting opens as a visible Windows Terminal window. Closing that window
+        # killed the campaign twice (16:31:39 / 20:09:56 WT container destroyed; no receipt).
+        # CREATE_NO_WINDOW gives the tree one hidden console that children inherit.
+        CREATE_NO_WINDOW = 0x08000000
         CREATE_NEW_PROCESS_GROUP = 0x00000200
-        flags = DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
+        flags = CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP
 
     # Ensure unbuffered execution for Python children so live child logs flush immediately
     argv = list(child_argv)

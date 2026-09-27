@@ -559,6 +559,24 @@ class TestRunLegacyP04Full(unittest.TestCase):
             self.assertIn(str(r1), res["quarantined_artifacts"])
             self.assertTrue(rec_out.exists())  # dry run receipt written
 
+    @unittest.skipUnless(os.name == "nt", "Windows console semantics")
+    def test_spawn_detached_child_has_hidden_inherited_console(self):
+        """2026-09-27: DETACHED_PROCESS made grandchildren open a visible terminal window whose
+        closing killed two full campaigns. The child must own a (hidden) console to inherit."""
+        with tempfile.TemporaryDirectory() as td:
+            log_p = Path(td) / "console.log"
+            cmd = [sys.executable, "-c",
+                   "import ctypes; k=ctypes.windll.kernel32; "
+                   # GetConsoleCP() is 0 without a console; a CREATE_NO_WINDOW console has no window.
+                   "print('HAS_CONSOLE', k.GetConsoleCP() != 0, "
+                   "'VISIBLE', bool(k.GetConsoleWindow() and "
+                   "ctypes.windll.user32.IsWindowVisible(k.GetConsoleWindow())))"]
+            p = spawn_detached_child(cmd, log_p)
+            p.wait(timeout=30)
+            text = log_p.read_text(encoding="utf-8", errors="replace")
+            self.assertIn("HAS_CONSOLE True", text)
+            self.assertIn("VISIBLE False", text)
+
     def test_spawn_detached_child_unbuffered_logging(self):
         with tempfile.TemporaryDirectory() as td:
             log_p = Path(td) / "unbuf.log"

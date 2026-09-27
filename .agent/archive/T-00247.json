@@ -1,0 +1,59 @@
+{
+  "changed": [
+    ".agent/results/T-00247.md",
+    "audit/runs/p04-full-campaign/driver_quarantine_20260927T234331Z.log",
+    "audit/runs/t-00247-live-relaunch/receipt.json",
+    "audit/runs/t-00247-live-relaunch/stderr.log",
+    "audit/runs/t-00247-live-relaunch/stdout.log",
+    "audit/runs/t-00247-test-p04-driver/receipt.json",
+    "audit/runs/t-00247-test-p04-driver/stderr.log",
+    "audit/runs/t-00247-test-p04-driver/stdout.log",
+    "ecosys-audit/scripts/run_legacy_p04_full.py",
+    "ecosys-audit/scripts/swarm_wrapper.py",
+    "ecosys-audit/tests/test_run_legacy_p04_full.py",
+    "ecosys-audit/tests/test_swarm_wrapper_campaign_exempt.py"
+  ],
+  "dispatch": {
+    "full_run_justification": "The P0.4 legacy Ottawa rerun is required to produce the fresh 3-run evidence baseline; a bounded replay cannot establish the approved terminal receipt or restart validity under the detached-driver fix.",
+    "reason": "Fresh detached legacy Ottawa relaunch follows the newest T-00245 decision; the dead driver fix is a bounded FORGE task.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00247.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-build-reproducibility"
+    ],
+    "state_next": "FORGE commits the detached-driver fix, relaunches the legacy Ottawa P0.4 campaign under the new pinned driver hash, and quarantines the dead runs.",
+    "state_recent": [
+      "T-00245 SAGE DONE: dead detached legacy run ended without terminal receipt; relaunch under hidden-console and new pinned hash is required.",
+      "T-00241 SAGE DONE: G0-4 remains closed until fresh P0.4 evidence or stale heartbeat triggers."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00247.md",
+    "task_id": "T-00247"
+  },
+  "ended": 1790552907.352296,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1b5a888bffeASR7A1savHnV2k",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 6345086,
+    "cache_write": 0,
+    "cost": 1.3498886999999997,
+    "input": 1128358,
+    "llm_calls": 97,
+    "output": 7397,
+    "tool_calls": 99
+  },
+  "violations": []
+}
