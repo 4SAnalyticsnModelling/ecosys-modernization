@@ -97,6 +97,13 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   `claude-sonnet-issue07{3,2b}-sweep`. The ledger write is lock-safe (text only, no build or run), so it is the next task while
   P0.4 runs: FORGE applies the T-00127 packet (sha256 `0bb956a4…19703c`) per the T-00130 CHAIN. Then a fresh PATHFINDER
   review checks the new file hash and diff.
+  T-00233 DECISION (SAGE, 2026-09-27): the write is UNROUTABLE, so stop dispatching it. No role's `may_write` in
+  `.agent/roster.json` (lines 34, 49, 65, 78) covers `audit/traceability/`, so the wrapper rejects every FORGE task for it
+  (T-00231/T-00232 ROUTE_INVALID). This is also why T-00131 changed only its result file (its "changed" list shows
+  that; its "finalized" wording overstated it). PARKED, not a G0 exit item. The fix is a controller config change,
+  not a science decision: add `audit/traceability/` to FORGE `may_write` in `.agent/roster.json`. Then dispatch the
+  T-00230 CHAIN unchanged. The ready-to-apply diff is `.agent/results/T-00131.md:38-57`. Until then the swarm holds on
+  G0-4 (T-00228 triggers), and no worker is dispatched for this row.
 - G0-4r | FORGE (T-00158 DECIDED) | Swarm deadlock while P0.4 campaign runs: detached driver (lock PID 41728)
   rewrites tracked `audit/runs/p04-full-campaign/heartbeat.json` every 30 s; `swarm_wrapper.py:1005-1023` attributes it
   to the agent whose turn it is and restores it, so every SENTINEL/SAGE turn is quarantined (route-1790468130/-183).
