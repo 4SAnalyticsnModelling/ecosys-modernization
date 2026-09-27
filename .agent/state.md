@@ -40,11 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00211 PATHFINDER STAGNATED: active legacy campaign still no fresh terminal receipt.
-- T-00210 PATHFINDER STAGNATED: campaign remains live and healthy but receipt is still missing.
+- T-00212 PATHFINDER STAGNATED: live detached legacy Ottawa P0.4 campaign remains under active lock and heartbeat; no fresh terminal receipt and stale RUN_FAILED remains invalid.
+- T-00211 PATHFINDER STAGNATED: active PID 46732 is still healthy and the task success condition is unmet.
+- T-00210 PATHFINDER STAGNATED: no fresh terminal receipt supersedes the stale RUN_FAILED artifact; only a relaunch receipt exists.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER monitors the detached legacy P0.4 campaign until exit and confirms a fresh receipt newer than the stale RUN_FAILED artifact.
+SAGE adjudicates the live detached legacy Ottawa P0.4 no-new-evidence condition and decides whether to close the monitoring window or continue the hold.

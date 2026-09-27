@@ -88,8 +88,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Monitor the live detached legacy Ottawa P0.4 campaign until exit and a fresh receipt appears without touching the lock or heartbeat.",
-  "task_id": "T-00212",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "The latest results all show a live campaign with no fresh receipt, which requires SAGE disposition under the no-new-evidence rule and the metrics threshold.",
+  "task_id": "T-00213",
+  "worker": "SAGE"
 }
