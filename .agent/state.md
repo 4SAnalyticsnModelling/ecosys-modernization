@@ -48,4 +48,4 @@ none active.
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-Hold G0-4 closed and wait for a fresh terminal receipt or a stale heartbeat; no worker task is dispatched.
+Hold G0-4 closed; no worker dispatch until a fresh terminal receipt appears or the heartbeat exceeds 600 s.

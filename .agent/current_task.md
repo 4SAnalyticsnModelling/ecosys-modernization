@@ -1,1 +1,1 @@
-T-00232 FORGE: apply the approved seven-row legacy ZEROS ledger packet to audit/traceability/traceability.csv and verify the diff.
+T-00234 IDLE no worker dispatch: hold G0-4 closed under T-00228 triggers until fresh receipt or stale heartbeat >600 s.

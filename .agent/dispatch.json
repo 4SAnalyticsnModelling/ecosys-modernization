@@ -1,18 +1,1 @@
-{
-  "decision_kind": "routing-failure",
-  "decision_of": "SENTINEL",
-  "full_run_justification": null,
-  "reason": "SAGE decision (routing-failure) from SENTINEL",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00233.md",
-  "result_status": "DONE",
-  "role": "SAGE",
-  "schema_version": 1,
-  "skills": [
-    "ecosys-process-science-parity"
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00233.md",
-  "task_id": "T-00233"
-}
+{"schema_version": 1, "status": "IDLE", "reason": "no unblocked work: detached legacy Ottawa P0.4 remains live and healthy under T-00228; the G0-5c ledger item is a controller-config issue, not a worker task.", "state_next": "Hold G0-4 closed; no worker dispatch until a fresh terminal receipt appears or the heartbeat exceeds 600 s."}
