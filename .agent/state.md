@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00175 FORGE DONE: controller lock attribution fix restores valid routing.
-- T-00173 SAGE DONE: deadlock loop was identified and stopped.
-- T-00170 SAGE DONE: detached driver rewrote heartbeat and blocked CHAIN turns.
+- T-00179 SAGE DONE: stale controller blocks all routing until restart.
+- T-00176 FORGE DONE: detached legacy campaign relaunch verified and heartbeating.
+- T-00175 FORGE DONE: lock attribution fix resolves deadlock loop.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-FORGE relaunches the detached P0.4 legacy campaign after controller restart using pinned hashes.
+FORGE restarts the stale controller and relaunches the detached legacy P0.4 Ottawa campaign after code reload.

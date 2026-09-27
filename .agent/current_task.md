@@ -1,1 +1,1 @@
-T-00180 FORGE: restart the stale controller and relaunch the detached legacy P0.4 Ottawa campaign under pinned hashes.
+T-00181 FORGE: restart stale controller and relaunch detached legacy P0.4 Ottawa campaign after the fix is loaded.
