@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00271 ROLE PATHFINDER STATUS: clean-tree G0 pass and post-G0 step next
+- T-00272 ROLE PATHFINDER STATUS: clean-tree G0 pass and post-G0 step next
+- T-00271 ROLE PATHFINDER STATUS: clean-tree G0 pass; next step operational
 - T-00269 ROLE PATHFINDER STATUS: committed-tree G0 gate passes
-- T-00268 ROLE PATHFINDER STATUS: p04 artifact bytes match their record
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-Verify the next post-G0 evidence packet and identify the next unblocked workflow step.
+idle: no unblocked work; await new evidence or a new task trigger
