@@ -24,6 +24,7 @@
     "PATHFINDER:T-00226": 1,
     "PATHFINDER:T-00227": 1,
     "PATHFINDER:T-00256": 1,
+    "PATHFINDER:T-00263": 1,
     "SAGE:T-00158": 1,
     "SAGE:T-00161": 1,
     "SAGE:T-00164": 1,
@@ -98,8 +99,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "chained from T-00262 (SAGE CHAIN block)",
   "task_id": "T-00263",
-  "worker": "PATHFINDER"
+  "worker": null
 }
