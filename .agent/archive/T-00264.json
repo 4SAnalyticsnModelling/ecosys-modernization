@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00264.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "G0 is open; PATHFINDER must rebind stale evidence to committed artifacts and rerun the gate without new science work.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00264.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER rebinds G0 evidence to committed artifacts and reruns check_gate on the clean tree.",
+    "state_recent": [
+      "T-00262 SAGE DONE: G0 remains open; rebind to direct evidence",
+      "T-00259 PATHFINDER DONE: stale hashes remain in the G0 record",
+      "T-00258 SAGE DONE: G0 fails because evidence is not committed"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00264.md",
+    "task_id": "T-00264"
+  },
+  "ended": 1790578099.8081372,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f19404222ffeOHWsdkh0ltrEPj",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "BLOCKED",
+  "review": null,
+  "usage": {
+    "cache_read": 269568,
+    "cache_write": 0,
+    "cost": 0.029395959999999995,
+    "input": 41735,
+    "llm_calls": 10,
+    "output": 13048,
+    "tool_calls": 17
+  },
+  "violations": []
+}

@@ -96,8 +96,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "G0 is open; PATHFINDER must rebind stale evidence to committed artifacts and rerun the gate without new science work.",
   "task_id": "T-00264",
-  "worker": "PATHFINDER"
+  "worker": null
 }
