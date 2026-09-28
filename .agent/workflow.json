@@ -94,8 +94,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Idle hold persists until detached legacy P0.4 exits or heartbeat expires; then PATHFINDER validates the fresh receipt before G0-4 can reopen.",
   "task_id": "T-00252",
-  "worker": "PATHFINDER"
+  "worker": null
 }

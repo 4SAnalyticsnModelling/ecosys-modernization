@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00252.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Idle hold persists until detached legacy P0.4 exits or heartbeat expires; then PATHFINDER validates the fresh receipt before G0-4 can reopen.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00252.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "wait for the detached P0.4 wake trigger, then validate audit/runs/p04_full_run_receipt.json before re-opening G0-4",
+    "state_recent": [
+      "T-00249 SAGE DONE: hold idle until exit or 600s stale heartbeat, then validate receipt.",
+      "T-00247 FORGE DONE: detached legacy P0.4 relaunch is live under hidden-console driver fix.",
+      "T-00245 SAGE DONE: dead run was diagnosed and a fresh driver hash relaunch was required."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00252.md",
+    "task_id": "T-00252"
+  },
+  "ended": 1790575573.8747735,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1b4b4d47ffeHEklhqsJEztzMu",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 570112,
+    "cache_write": 0,
+    "cost": 0.04153504,
+    "input": 44956,
+    "llm_calls": 18,
+    "output": 17618,
+    "tool_calls": 24
+  },
+  "violations": []
+}
