@@ -1,1 +1,22 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00256", "role": "PATHFINDER", "task_file": ".agent/tasks/T-00256.md", "result_file": ".agent/results/T-00256.md", "skills": ["ecosys-source-navigation"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Fresh terminal legacy Ottawa receipt and re-bound provenance are in place; route PATHFINDER to record G0-4 with check_gate.py.", "state_recent": ["T-00254 FORGE DONE: provenance manifest rebound to active legacy oracle.", "T-00253 SAGE DONE: G0-4 hold released after rebind and receipt validation.", "T-00252 PATHFINDER DONE: live detached legacy receipt is valid and terminal."], "state_next": "Run check_gate.py to record G0-4 baseline and confirm the gate state after the legacy provenance rebind."}
+{
+  "full_run_justification": null,
+  "reason": "Fresh terminal legacy Ottawa receipt and re-bound provenance are in place; route PATHFINDER to record G0-4 with check_gate.py.",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00256.md",
+  "result_status": "FAIL",
+  "role": "PATHFINDER",
+  "schema_version": 1,
+  "skills": [
+    "ecosys-source-navigation"
+  ],
+  "state_next": "Run check_gate.py to record G0-4 baseline and confirm the gate state after the legacy provenance rebind.",
+  "state_recent": [
+    "T-00254 FORGE DONE: provenance manifest rebound to active legacy oracle.",
+    "T-00253 SAGE DONE: G0-4 hold released after rebind and receipt validation.",
+    "T-00252 PATHFINDER DONE: live detached legacy receipt is valid and terminal."
+  ],
+  "status": "COMPLETE",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00256.md",
+  "task_id": "T-00256"
+}

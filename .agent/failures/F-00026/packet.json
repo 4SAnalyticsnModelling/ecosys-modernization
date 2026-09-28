@@ -1,0 +1,19 @@
+{
+  "carried_rejections": 0,
+  "commit": "bddd3a2cfe74ff967e011340a9826b01c74ea213",
+  "fields": {
+    "binding_id": "UNKNOWN",
+    "candidate_fortran": "UNKNOWN",
+    "candidate_zig": "UNKNOWN",
+    "checkpoint": "UNKNOWN",
+    "exact_error": "task FAIL: scope violation, undone (copy in .agent/failures/Q-T-00256/): audit/manifest/source-snapshot.json: outside PATHFINDER may_write",
+    "first_divergent_state": "UNKNOWN",
+    "first_failing_timestep": "UNKNOWN",
+    "last_verified_timestep": "UNKNOWN",
+    "relevant_variables": "UNKNOWN",
+    "subsystem": "UNKNOWN"
+  },
+  "packet": "F-00026",
+  "signature": "PATHFINDER:T-00256",
+  "task": "T-00256"
+}

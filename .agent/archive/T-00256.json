@@ -1,0 +1,66 @@
+{
+  "changed": [
+    ".agent/failures/Q-T-00256/files/audit/manifest/source-snapshot.json",
+    ".agent/failures/Q-T-00256/quarantine.json",
+    ".agent/results/T-00256.md",
+    "audit/analysis/g0-4-record.json"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Fresh terminal legacy Ottawa receipt and re-bound provenance are in place; route PATHFINDER to record G0-4 with check_gate.py.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00256.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "Run check_gate.py to record G0-4 baseline and confirm the gate state after the legacy provenance rebind.",
+    "state_recent": [
+      "T-00254 FORGE DONE: provenance manifest rebound to active legacy oracle.",
+      "T-00253 SAGE DONE: G0-4 hold released after rebind and receipt validation.",
+      "T-00252 PATHFINDER DONE: live detached legacy receipt is valid and terminal."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00256.md",
+    "task_id": "T-00256"
+  },
+  "ended": 1790577080.7259555,
+  "failure_packet": ".agent/failures/F-00026",
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": {
+    "not_restored": [],
+    "note": "Agent's version of each file is under files/; the working tree was restored.",
+    "problems": [
+      "audit/manifest/source-snapshot.json: outside PATHFINDER may_write"
+    ],
+    "restored": [
+      "audit/manifest/source-snapshot.json"
+    ],
+    "role": "PATHFINDER",
+    "tag": "T-00256",
+    "time": 1790577072.7680624
+  },
+  "reset": {
+    "new": null,
+    "old": "ses_f1964578bffezldaoa9hHsLZAd",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "FAIL",
+  "review": null,
+  "usage": {
+    "cache_read": 1363712,
+    "cache_write": 0,
+    "cost": 0.07718504,
+    "input": 68762,
+    "llm_calls": 28,
+    "output": 30132,
+    "tool_calls": 38
+  },
+  "violations": [
+    "audit/manifest/source-snapshot.json: outside PATHFINDER may_write"
+  ]
+}

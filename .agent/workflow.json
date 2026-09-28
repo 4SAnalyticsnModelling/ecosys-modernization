@@ -23,6 +23,7 @@
     "PATHFINDER:T-00212": 1,
     "PATHFINDER:T-00226": 1,
     "PATHFINDER:T-00227": 1,
+    "PATHFINDER:T-00256": 1,
     "SAGE:T-00158": 1,
     "SAGE:T-00161": 1,
     "SAGE:T-00164": 1,
@@ -94,8 +95,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Fresh terminal legacy Ottawa receipt and re-bound provenance are in place; route PATHFINDER to record G0-4 with check_gate.py.",
   "task_id": "T-00256",
-  "worker": "PATHFINDER"
+  "worker": null
 }

@@ -1,0 +1,13 @@
+{
+  "not_restored": [],
+  "note": "Agent's version of each file is under files/; the working tree was restored.",
+  "problems": [
+    "audit/manifest/source-snapshot.json: outside PATHFINDER may_write"
+  ],
+  "restored": [
+    "audit/manifest/source-snapshot.json"
+  ],
+  "role": "PATHFINDER",
+  "tag": "T-00256",
+  "time": 1790577072.7680624
+}

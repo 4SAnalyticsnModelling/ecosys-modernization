@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "stage": "ottawa-G0",
+  "snapshot": {
+    "path": "audit/manifest/source-snapshot.json",
+    "sha256": "5819da9eb1bacee87e3ae199875e90e763e0d1bc33f8b2d51b0cbc7791b5322f"
+  },
+  "checks": [
+    {
+      "id": "git-state-discovered-and-dirty-work-parked",
+      "status": "PASS",
+      "author": "PATHFINDER",
+      "reviewer": "SAGE",
+      "evidence": [
+        {
+          "path": "audit/manifest/source-snapshot.json",
+          "sha256": "5819da9eb1bacee87e3ae199875e90e763e0d1bc33f8b2d51b0cbc7791b5322f"
+        },
+        {
+          "path": "audit/runs/p04_provenance_manifest.json",
+          "sha256": "8b46ee663c28488ec136b71b7629998162f632ecd397e9498dbc5c04a1a8f5de"
+        }
+      ]
+    },
+    {
+      "id": "d6-deck-edits-adjudicated-and-signed",
+      "status": "PASS",
+      "author": "PATHFINDER",
+      "reviewer": "SAGE",
+      "evidence": [
+        {
+          "path": "audit/runs/p04_provenance_manifest.json",
+          "sha256": "8b46ee663c28488ec136b71b7629998162f632ecd397e9498dbc5c04a1a8f5de"
+        },
+        {
+          "path": "audit/unresolved-gaps.md",
+          "sha256": "b3f06800cff99a7b7ab588099229a19e487289eceeda7c33b1205af34dd7fc72"
+        }
+      ]
+    },
+    {
+      "id": "legacy-oracle-hashed-in-evidence-store",
+      "status": "PASS",
+      "author": "PATHFINDER",
+      "reviewer": "SAGE",
+      "evidence": [
+        {
+          "path": "audit/runs/p04_provenance_manifest.json",
+          "sha256": "8b46ee663c28488ec136b71b7629998162f632ecd397e9498dbc5c04a1a8f5de"
+        },
+        {
+          "path": "audit/runs/legacy-oracle-build-link-r023/receipt.json",
+          "sha256": "1098a7dbafe912d452ab5793390da3f51a38ebbd670e4eb0fbf20af57e69a039"
+        }
+      ]
+    },
+    {
+      "id": "toolchain-recorded",
+      "status": "PASS",
+      "author": "PATHFINDER",
+      "reviewer": "SAGE",
+      "evidence": [
+        {
+          "path": "audit/runs/p04_provenance_manifest.json",
+          "sha256": "8b46ee663c28488ec136b71b7629998162f632ecd397e9498dbc5c04a1a8f5de"
+        },
+        {
+          "path": "audit/runs/p04_full_run_receipt.json",
+          "sha256": "c988796bd548b11671e523f572493b2034f0931553113bebfd6ea032508eda56"
+        }
+      ]
+    },
+    {
+      "id": "legacy-o2-timing-median-of-3",
+      "status": "PASS",
+      "author": "PATHFINDER",
+      "reviewer": "SAGE",
+      "evidence": [
+        {
+          "path": "audit/runs/p04_full_run_receipt.json",
+          "sha256": "c988796bd548b11671e523f572493b2034f0931553113bebfd6ea032508eda56"
+        }
+      ]
+    },
+    {
+      "id": "legacy-output-horizon-inventory",
+      "status": "PASS",
+      "author": "PATHFINDER",
+      "reviewer": "SAGE",
+      "evidence": [
+        {
+          "path": "audit/runs/p04_full_run_receipt.json",
+          "sha256": "c988796bd548b11671e523f572493b2034f0931553113bebfd6ea032508eda56"
+        },
+        {
+          "path": "audit/runs/legacy-oracle-build-link-r023/receipt.json",
+          "sha256": "1098a7dbafe912d452ab5793390da3f51a38ebbd670e4eb0fbf20af57e69a039"
+        }
+      ]
+    },
+    {
+      "id": "tracecov-stale-hash-report",
+      "status": "PASS",
+      "author": "PATHFINDER",
+      "reviewer": "SAGE",
+      "evidence": [
+        {
+          "path": "audit/analysis/tracecov-2026-09-26.json",
+          "sha256": "92e8b636f662f1fd76fab02501b3b3e9b790f4c399c0b47aef731cd46f70b498"
+        },
+        {
+          "path": "audit/manifest/tracecov-2026-09-21.json",
+          "sha256": "ba287785024be34014f1b9cb26bd78d84977f53f9718e2228e6cbb06d9244af5"
+        }
+      ]
+    },
+    {
+      "id": "issue-status-normalized",
+      "status": "PASS",
+      "author": "PATHFINDER",
+      "reviewer": "SAGE",
+      "evidence": [
+        {
+          "path": "audit/unresolved-gaps.md",
+          "sha256": "b3f06800cff99a7b7ab588099229a19e487289eceeda7c33b1205af34dd7fc72"
+        },
+        {
+          "path": "audit/runs/p04_provenance_manifest.json",
+          "sha256": "8b46ee663c28488ec136b71b7629998162f632ecd397e9498dbc5c04a1a8f5de"
+        }
+      ]
+    },
+    {
+      "id": "evidence-binding-recorded",
+      "status": "PASS",
+      "author": "PATHFINDER",
+      "reviewer": "SAGE",
+      "evidence": [
+        {
+          "path": "audit/runs/p04_provenance_manifest.json",
+          "sha256": "8b46ee663c28488ec136b71b7629998162f632ecd397e9498dbc5c04a1a8f5de"
+        },
+        {
+          "path": "audit/runs/p04_full_run_receipt.json",
+          "sha256": "c988796bd548b11671e523f572493b2034f0931553113bebfd6ea032508eda56"
+        }
+      ]
+    }
+  ]
+}
