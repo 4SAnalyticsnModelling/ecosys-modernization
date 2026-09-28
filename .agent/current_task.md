@@ -1,1 +1,1 @@
-T-00261 SAGE Rehash stale G0 evidence and confirm the gate is coherent before any post-G0 Ottawa work.
+T-00264 PATHFINDER: rebind G0 evidence to committed artifacts and rerun check_gate on the clean tree.

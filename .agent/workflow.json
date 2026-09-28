@@ -90,17 +90,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "task file missing sections ['STOP CONDITIONS', 'OUTPUT FILE']"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "chained from T-00262 (SAGE CHAIN block)",
-  "task_id": "T-00263",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "G0 is open; PATHFINDER must rebind stale evidence to committed artifacts and rerun the gate without new science work.",
+  "task_id": "T-00264",
+  "worker": "PATHFINDER"
 }
