@@ -213,7 +213,7 @@ pub fn triggerDailySpeciation(
             const topsoil_cell = try grid.layerIndex(cell, 0);
             const topsoil_hydrogen = soil_chemistry.aqueous[topsoil_cell].hydrogen;
             if (std.math.isFinite(topsoil_hydrogen) and topsoil_hydrogen > 0) {
-                const fractions = if (fertilizer_band) |fb|
+                const fractions: ecosys.solute_charge_classification.ZoneFractions = if (fertilizer_band) |fb|
                     try fb.scienceZoneFractions(cell, 0)
                 else
                     .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 };
@@ -314,7 +314,10 @@ pub fn executeHourlyScience(
     const current_day: u16 = plant_calendar.day_of_year;
     const is_restart: bool = if (@hasField(@TypeOf(context), "restoring_checkpoint")) context.restoring_checkpoint else false;
     if (speciation_state) |state| {
-        const fert = if (@hasField(@TypeOf(context), "fertilizer_band")) &context.fertilizer_band else null;
+        const fert = if (@hasField(@TypeOf(context), "fertilizer_band"))
+            @as(?@TypeOf(context.fertilizer_band), context.fertilizer_band)
+        else
+            null;
         try triggerDailySpeciation(state, current_day, is_restart, context.grid.cell_count, context.grid, context.soil_chemistry, fert);
     }
 
