@@ -96,8 +96,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Post-G0 clean-tree G0 pass demands a bounded evidence packet check before any new workflow step.",
   "task_id": "T-00272",
-  "worker": "PATHFINDER"
+  "worker": null
 }

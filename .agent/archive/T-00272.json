@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00272.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Post-G0 clean-tree G0 pass demands a bounded evidence packet check before any new workflow step.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00272.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "Verify the next post-G0 evidence packet and identify the next unblocked workflow step.",
+    "state_recent": [
+      "T-00271 ROLE PATHFINDER STATUS: clean-tree G0 pass and post-G0 step next",
+      "T-00269 ROLE PATHFINDER STATUS: committed-tree G0 gate passes",
+      "T-00268 ROLE PATHFINDER STATUS: p04 artifact bytes match their record"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00272.md",
+    "task_id": "T-00272"
+  },
+  "ended": 1790578966.3585327,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f19314f9effeceH22ZDYOiE7wz",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 162560,
+    "cache_write": 0,
+    "cost": 0.0160304,
+    "input": 22556,
+    "llm_calls": 8,
+    "output": 6890,
+    "tool_calls": 14
+  },
+  "violations": []
+}
