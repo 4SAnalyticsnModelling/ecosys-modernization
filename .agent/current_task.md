@@ -1,1 +1,1 @@
-T-00265 PATHFINDER: Coordinate controller commit of the three dirty P04 artifacts and rerun the G0 gate on the committed tree.
+T-00266 PATHFINDER: Rebind G0 evidence to direct committed artifacts and rerun check_gate on the clean committed tree.

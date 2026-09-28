@@ -1,28 +1,17 @@
 {
-  "errors": [
-    "task file missing sections ['RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION']"
-  ],
-  "rejected": {
-    "full_run_justification": null,
-    "reason": "G0 remains blocked only by uncommitted P04 artifacts; PATHFINDER must coordinate the commit and rerun the gate on the clean tree.",
-    "requires_sage_review": false,
-    "result_file": ".agent/results/T-00265.md",
-    "role": "PATHFINDER",
-    "schema_version": 1,
-    "skills": [
-      "ecosys-source-navigation"
-    ],
-    "state_next": "PATHFINDER coordinates controller commit of the three P04 artifacts and reruns the G0 gate on the committed tree.",
-    "state_recent": [
-      "T-00264 PATHFINDER BLOCKED: P04 artifacts remain dirty and G0 cannot pass clean-tree gate.",
-      "T-00262 SAGE DONE: G0 stays open until direct evidence is re-bound and committed.",
-      "T-00259 PATHFINDER DONE: stale G0 hashes were re-bound; commit and recheck remain."
-    ],
-    "status": "PENDING",
-    "t1_argv": null,
-    "task_file": ".agent/tasks/T-00265.md",
-    "task_id": "T-00265"
-  },
+  "decision_kind": "routing-failure",
+  "decision_of": "SENTINEL",
+  "full_run_justification": null,
+  "reason": "SAGE decision (routing-failure) from SENTINEL",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00267.md",
+  "role": "SAGE",
   "schema_version": 1,
-  "status": "REJECTED"
+  "skills": [
+    "ecosys-process-science-parity"
+  ],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00267.md",
+  "task_id": "T-00267"
 }

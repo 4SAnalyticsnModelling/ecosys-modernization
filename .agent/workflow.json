@@ -91,16 +91,16 @@
   "idle_check": false,
   "last_advance_unix": null,
   "last_route_errors": [
-    "task file missing sections ['RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION']"
+    "task file missing sections ['ROLE', 'OBJECTIVE', 'INPUTS', 'ALLOWED FILES', 'RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
   ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "G0 is open; PATHFINDER must rebind stale evidence to committed artifacts and rerun the gate without new science work.",
-  "task_id": "T-00264",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE decision (routing-failure) from SENTINEL",
+  "task_id": "T-00267",
+  "worker": "SAGE"
 }
