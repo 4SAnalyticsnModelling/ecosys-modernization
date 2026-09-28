@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00254 FORGE DONE: provenance manifest rebound to active legacy oracle.
-- T-00253 SAGE DONE: G0-4 hold released after rebind and receipt validation.
-- T-00252 PATHFINDER DONE: live detached legacy receipt is valid and terminal.
+- T-00256 PATHFINDER DONE: G0-4 baseline recorded
+- T-00254 FORGE DONE: provenance manifest rebound to active oracle
+- T-00253 SAGE DONE: G0-4 hold released after receipt validation
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-Run check_gate.py to record G0-4 baseline and confirm the gate state after the legacy provenance rebind.
+Hold swarm idle until a new post-G0 evidence item is approved.
