@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00252 PATHFINDER DONE: validated the fresh detached legacy Ottawa receipt and confirmed the new run is terminal.
-- T-00249 SAGE DONE: keep G0-4 closed until a fresh terminal receipt or stale heartbeat is observed.
-- T-00247 FORGE DONE: the detached legacy relaunch is live under the fixed driver hash.
+- T-00254 FORGE DONE: provenance manifest rebound to active legacy oracle.
+- T-00253 SAGE DONE: G0-4 hold released after rebind and receipt validation.
+- T-00252 PATHFINDER DONE: live detached legacy receipt is valid and terminal.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-SAGE reviews the valid P0.4 receipt and decides whether G0-4 can reopen under the current hold.
+Run check_gate.py to record G0-4 baseline and confirm the gate state after the legacy provenance rebind.

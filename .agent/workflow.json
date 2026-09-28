@@ -88,17 +88,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "ALLOWED FILES `audit/manifest/` is outside PATHFINDER may_write"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "chained from T-00253 (SAGE CHAIN block)",
-  "task_id": "T-00254",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Fresh terminal legacy Ottawa receipt and re-bound provenance are in place; route PATHFINDER to record G0-4 with check_gate.py.",
+  "task_id": "T-00256",
+  "worker": "PATHFINDER"
 }
