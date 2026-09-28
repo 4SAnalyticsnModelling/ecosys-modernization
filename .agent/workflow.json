@@ -90,18 +90,16 @@
   "idle_check": false,
   "last_advance_unix": null,
   "last_route_errors": [
-    "ALLOWED FILES `audit/analysis/g0-4-record.json` is outside SAGE may_write (writable by PATHFINDER)",
-    "ALLOWED FILES `audit/analysis/source-snapshot-g0-2026-09-28.json` is outside SAGE may_write (writable by PATHFINDER)",
-    "ALLOWED FILES `audit/runs/p04_full_run_receipt.json` is outside SAGE may_write (writable by PATHFINDER, FORGE)"
+    "task file missing sections ['STOP CONDITIONS', 'OUTPUT FILE']"
   ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 1,
+  "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "chained from T-00258 (SAGE CHAIN block)",
-  "task_id": "T-00259",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "SAGE decision (routing-failure) from SENTINEL",
+  "task_id": "T-00262",
+  "worker": "SAGE"
 }
