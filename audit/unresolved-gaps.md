@@ -127,6 +127,14 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   state, so it is accepted as a build limitation, and T-00140 cond. 1 is amended. Before `check_gate.py` records G0-4, the
   committed `audit/runs/p04_provenance_manifest.json` must be re-bound: it still pins the older exe `273630BE…F319`. SAGE
   does not declare G0-4 | `.agent/results/T-00253.md`
+  T-00258 DECISION (SAGE, 2026-09-28, idle-check): G0 is NOT finished; the idle premise "G0-4 baseline recorded" is false.
+  Re-run this session: `check_gate.py --gate audit/analysis/g0-4-record.json` -> FAIL ("Snapshot artifact is missing",
+  "git-state-discovered-and-dirty-work-parked: Evidence missing"). Cause: T-00256 wrote `audit/manifest/source-snapshot.json`
+  outside PATHFINDER may_write; the wrapper quarantined and removed it (F-00026, Q-T-00256), but committed the record that
+  binds it. Second defect: the record hashes receipt `c988796b…da56` (COMPLETED), which exists only as an uncommitted
+  working-tree edit; HEAD's `p04_full_run_receipt.json` is the old RUN_FAILED receipt. Next: PATHFINDER writes a fresh
+  snapshot via `snapshot.py --out audit/analysis/<new>.json`, rebinds the record to it, carries the three p04 campaign files
+  into the cycle commit, and re-runs check_gate to PASS | `.agent/results/T-00258.md`
 - G0-4r | FORGE (T-00158 DECIDED) | Swarm deadlock while P0.4 campaign runs: detached driver (lock PID 41728)
   rewrites tracked `audit/runs/p04-full-campaign/heartbeat.json` every 30 s; `swarm_wrapper.py:1005-1023` attributes it
   to the agent whose turn it is and restores it, so every SENTINEL/SAGE turn is quarantined (route-1790468130/-183).

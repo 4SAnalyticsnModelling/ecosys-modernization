@@ -96,7 +96,7 @@
   "route_failures": 0,
   "schema_version": 1,
   "status": "DISPATCHED",
-  "status_reason": "SAGE decision (idle-check) from SENTINEL",
-  "task_id": "T-00258",
-  "worker": "SAGE"
+  "status_reason": "chained from T-00258 (SAGE CHAIN block)",
+  "task_id": "T-00259",
+  "worker": "PATHFINDER"
 }
