@@ -135,6 +135,13 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   working-tree edit; HEAD's `p04_full_run_receipt.json` is the old RUN_FAILED receipt. Next: PATHFINDER writes a fresh
   snapshot via `snapshot.py --out audit/analysis/<new>.json`, rebinds the record to it, carries the three p04 campaign files
   into the cycle commit, and re-runs check_gate to PASS | `.agent/results/T-00258.md`
+  T-00262 DECISION (SAGE, 2026-09-28, routing-failure): G0 is still open, with two defects. (1) The checks
+  `d6-deck-edits-adjudicated-and-signed` and `issue-status-normalized` fail only because they bind this living ledger
+  (sha `b3f068…fc72`). T-00258's own row changed it to `c6cffc…ea77` in `c7a7d2e`; `p04_provenance_manifest.json` still
+  matches (`8b46ee…f5de`). Rebind the D6 check to `audit/intentional-deviations.md` + manifest, and the status check to
+  `.agent/results/T-00005.md` (sha `557fc4…bb5d`). Never bind this file again. (2) The T-00259 cycle commit `58dc183` did
+  NOT carry the three p04 files: they are still `M` in the working tree, although their hashes match the record. The
+  controller must commit them, and G0 only counts as PASS when check_gate PASSes on the committed tree | `.agent/results/T-00262.md`
 - G0-4r | FORGE (T-00158 DECIDED) | Swarm deadlock while P0.4 campaign runs: detached driver (lock PID 41728)
   rewrites tracked `audit/runs/p04-full-campaign/heartbeat.json` every 30 s; `swarm_wrapper.py:1005-1023` attributes it
   to the agent whose turn it is and restores it, so every SENTINEL/SAGE turn is quarantined (route-1790468130/-183).
