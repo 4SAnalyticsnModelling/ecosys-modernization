@@ -1,0 +1,49 @@
+{
+  "changed": [
+    ".agent/results/T-00271.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "G0 passes on the clean tree; the newest result directs the next step to post-G0 evidence verification, which is a bounded PATHFINDER task.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00271.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "Verify the next post-G0 gate evidence packet and name the next unblocked workflow step.",
+    "state_recent": [
+      "T-00269 ROLE PATHFINDER STATUS: clean-tree G0 gate pass",
+      "T-00268 ROLE PATHFINDER STATUS: p04 artifact hashes match the record",
+      "T-00267 ROLE PATHFINDER STATUS: dirty-tree blocker explained and G0 remained open"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00271.md",
+    "task_id": "T-00271"
+  },
+  "ended": 1790578769.7789242,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1934d5f8ffezCXEOFZI0GDcrK",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 93184,
+    "cache_write": 0,
+    "cost": 0.013659479999999998,
+    "input": 23807,
+    "llm_calls": 5,
+    "output": 5862,
+    "tool_calls": 11
+  },
+  "violations": []
+}
