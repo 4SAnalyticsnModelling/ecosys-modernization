@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "authorization": "SAGE T-00140 / SAGE T-00142 / execution plan \u00a75 P0.4 (legacy gfortran only; no Zig)",
-  "purpose": "Revised provenance manifest for reopening G0-4 baseline and authorizing legacy gfortran P0.4 full run",
+  "authorization": "SAGE T-00140 / SAGE T-00142 / SAGE T-00253 / execution plan \u00a75 P0.4 (legacy gfortran only; no Zig)",
+  "purpose": "Revised provenance manifest for reopening G0-4 baseline, binding legacy gfortran P0.4 reference outputs, and recording accepted build limitations",
   "source": {
     "git_commit": "5eaa1e958fc76def65d7dd1d4f088055663bcbe3",
     "f77src_directory": "f77src",
@@ -10,10 +10,29 @@
     "c_helpers_count": 2,
     "headers_count": 54,
     "prepare_legacy_build_script": "ecosys-audit/scripts/prepare_legacy_build.py",
-    "prepare_legacy_build_sha256": "1F0E9CED65A16F81AC57359283FBCC2F6218D8BB5C88F0D4C5360DA446AE5E53",
+    "prepare_legacy_build_sha256": "EB62D2332E72D659246912C2EC2B180C742C5B365B4F4283ADAA4332A25F7755",
+    "prepare_legacy_build_original_sha256": "1F0E9CED65A16F81AC57359283FBCC2F6218D8BB5C88F0D4C5360DA446AE5E53",
     "soil_f_original_sha256": "E2C5A5B3AD972907F31336C066019E87D22B9BCC5B50E117AD62B887861EBA0A",
     "soil_f_patch": "EXTERNAL SPLIT inserted at line 17 before SAVE NF,NX,NTZ,NTZX",
     "soil_f_staged_sha256": "5CD0DB6342443E464E2E7011C42E84A826F9CDB95A0F2F02F9F42C66F38B287F",
+    "grosub_f_original_sha256": "FBE2EE22EAF6E91F8BC8AC0CE01C208F92BBE34662D0D4BEFA20DF886B83F674",
+    "grosub_f_patch": "grosub.f:12766 CASNC0 debug print: missing IYRC argument restored in WRITE(*,8821)'CASNC0',IYRC,I,J,NFZ,NX,NY,NZ,NB to match FORMAT 8821(A8,8I4,30E12.4)",
+    "grosub_f_staged_sha256": "815A0E77F74171D1DA91C142E51B6FBA7404E390EB7593C35B99E6DF7B3C534C",
+    "build_limitations": [
+      {
+        "file": "soil.f",
+        "patch": "EXTERNAL SPLIT",
+        "description": "EXTERNAL SPLIT inserted at line 17 before SAVE NF,NX,NTZ,NTZX to resolve gfortran 16 Fortran 2023 SPLIT intrinsic collision with split.f",
+        "accepted_by": "SAGE T-00140 condition 1 / SAGE T-00142 R1"
+      },
+      {
+        "file": "grosub.f",
+        "line": 12766,
+        "patch": "CASNC0 debug WRITE IYRC restore",
+        "description": "grosub.f:12766 IYRC stdout-WRITE repair restoring missing IYRC argument in CASNC0 debug WRITE to match FORMAT 8821(A8,8I4,30E12.4)",
+        "accepted_by": "SAGE T-00253 decision amending T-00140 condition 1 as build limitation alongside EXTERNAL SPLIT (stdout-only WRITE, changes no model state or physics; resolves issue-023 / issue-084 runtime crash on DOY 286 harvest event)"
+      }
+    ],
     "redist_utf8_f_excluded": true,
     "redist_utf8_f_sha256": "18B1BD015782688998BEEFAE7D734098402AC280C10B47FD4AD8F0F0A3BA0482",
     "redist_utf8_f_note": "f77src/redist_utf8.f is an unreferenced duplicate file; explicitly excluded from the 40 Fortran compilation units per f77src/makefile SRCS",
@@ -141,10 +160,13 @@
   "executable": {
     "path": "D:/ecosys-evidence/legacy/ecosys_oracle.exe",
     "size_bytes": 38967626,
-    "sha256": "273630BEAD10306D7E55B8EC87BF8B58C8E4BB4422ADD5CD5B94BA3FD742F319",
+    "sha256": "63DD7D5F191CA0E1AC8BA57154B00BA92350E664309FB554A667520054682DBB",
+    "build_receipt": "audit/runs/legacy-oracle-build-link-r023/receipt.json",
+    "superseded_sha256": "273630BEAD10306D7E55B8EC87BF8B58C8E4BB4422ADD5CD5B94BA3FD742F319",
+    "superseded_build_receipt": "audit/runs/legacy-oracle-build-link/receipt.json",
+    "superseded_status": "SUPERSEDED: 273630BEAD10306D7E55B8EC87BF8B58C8E4BB4422ADD5CD5B94BA3FD742F319 was the pre-repair T-00141 build that aborted at DOY 286 harvest on grosub.f:12766 FORMAT 8821 argument mismatch; kept as superseded per SAGE T-00253 / T-00254. Current bound oracle executable is 63DD7D5F191CA0E1AC8BA57154B00BA92350E664309FB554A667520054682DBB.",
     "historical_sha256": "C17182F95CFD442AEF5FB4F3A5F48B0F3D6CAB1AF577ECD2D577E0ECE534EB90",
-    "sha256_mismatch_status": "UNVERIFIED_INFERENCE: The explanation that the binary hash difference is caused by PE header timestamps and linker build metadata remains an unverified inference. Both sha256 hashes are preserved without claiming bitwise identity.",
-    "build_receipt": "audit/runs/legacy-oracle-build-link/receipt.json"
+    "sha256_mismatch_status": "UNVERIFIED_INFERENCE: The explanation that the binary hash difference is caused by PE header timestamps and linker build metadata remains an unverified inference. Both sha256 hashes are preserved without claiming bitwise identity."
   },
   "staged_deck": {
     "canonical_path": "D:/ecosys-evidence/legacy/staged_deck",
@@ -516,5 +538,46 @@
     "output_files_generated": 29,
     "run_logged_receipt": "audit/runs/legacy-p04-warmup/receipt.json",
     "warmup_receipt": "audit/runs/legacy_p04_warmup_receipt.json"
+  },
+  "terminal_receipt": {
+    "path": "audit/runs/p04_full_run_receipt.json",
+    "sha256": "C988796BD548B11671E523F572493B2034F0931553113BEBFD6EA032508EDA56",
+    "status": "ALL_RUNS_COMPLETED",
+    "protocol": "plan \u00a75 P0.4 / SAGE T-00140 / SAGE T-00142 R5 / SAGE T-00253",
+    "campaign_id": "p04-full-campaign",
+    "campaign_directory": "D:\\ecosys-evidence\\legacy\\p04-full-campaign",
+    "acceptance_decision": "SAGE T-00253 (2026-09-28): Terminal receipt accepted as P0.4 reference outputs and D4 timing evidence.",
+    "runs_count": 3,
+    "timing_statistics": {
+      "elapsed_seconds_all_runs": [
+        5758.517,
+        5605.57,
+        5577.226
+      ],
+      "median_seconds": 5605.57,
+      "spread_seconds": 181.291,
+      "relative_spread_percent": 3.23
+    },
+    "determinism_audit": {
+      "byte_for_byte_identical": true,
+      "total_files_compared": 1071,
+      "discrepancies_count": 0
+    },
+    "horizon_check": {
+      "verified": true,
+      "horizon_type": "FULL_30_YEAR_OTTAWA",
+      "terminal_date": "31-12-2027",
+      "exit_code_all_runs": 0
+    }
+  },
+  "on_disk_inventory": {
+    "total_files": 1139,
+    "total_bytes": 1396470740,
+    "output_files_count": 1071,
+    "output_files_bytes": 1355968559,
+    "staged_and_exe_files_count": 68,
+    "staged_and_exe_files_bytes": 40502181,
+    "composition": "1,139 files / 1,396,470,740 B; 1,071 outputs + 68 exe/deck",
+    "reconciliation_note": "The inventory difference of -67 files in p04_full_run_receipt.json relative to run-002's provisional 1,138 files is a scoping artifact: the 68 excluded files in each run directory are the executable (ecosys_oracle.exe) plus the staged deck and invocation files, including f77example original-deck files (*_resume_validation, restart.manifest, and runscript). Each run directory holds 1,139 files and 1,396,470,740 B on disk, fully explaining the inventory difference per T-00140 condition 3 and SAGE T-00253."
   }
 }

@@ -1,0 +1,43 @@
+{
+  "changed": [
+    ".agent/results/T-00254.md",
+    "audit/runs/p04_provenance_manifest.json"
+  ],
+  "dispatch": {
+    "chained_from": "T-00253",
+    "full_run_justification": null,
+    "reason": "chained from T-00253 (SAGE CHAIN block)",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00254.md",
+    "role": "FORGE",
+    "schema_version": 1,
+    "skills": [],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00254.md",
+    "task_id": "T-00254"
+  },
+  "ended": 1790576586.0576363,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1acd0964ffeWnLG3hLFoMR3Iv",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 8744727,
+    "cache_write": 0,
+    "cost": 1.0098732750000001,
+    "input": 419920,
+    "llm_calls": 71,
+    "output": 10421,
+    "tool_calls": 73
+  },
+  "violations": []
+}
