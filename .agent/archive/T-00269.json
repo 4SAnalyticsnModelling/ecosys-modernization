@@ -1,0 +1,48 @@
+{
+  "changed": [
+    ".agent/results/T-00269.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Fresh G0 evidence is committed and this is the next verified clean-tree gate check; no user decision or science review is required.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00269.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-repository-baseline"
+    ],
+    "state_next": "PATHFINDER re-runs check_gate on the clean committed tree and reports whether G0 passes.",
+    "state_recent": [
+      "T-00268 DONE: p04 artifact bytes match recorded SHA-256; only clean-tree commit inclusion remains.",
+      "T-00267 DONE: dirty P04 files kept G0 from counting on the committed tree."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00269.md",
+    "task_id": "T-00269"
+  },
+  "ended": 1790578569.9488807,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f1936d877ffexAw69kOQKln6wE",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 173568,
+    "cache_write": 0,
+    "cost": 0.01736236,
+    "input": 26411,
+    "llm_calls": 7,
+    "output": 7174,
+    "tool_calls": 15
+  },
+  "violations": []
+}

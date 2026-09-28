@@ -96,8 +96,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "DISPATCHED",
+  "status": "ROUTING",
   "status_reason": "Fresh G0 evidence is committed and this is the next verified clean-tree gate check; no user decision or science review is required.",
   "task_id": "T-00269",
-  "worker": "PATHFINDER"
+  "worker": null
 }
