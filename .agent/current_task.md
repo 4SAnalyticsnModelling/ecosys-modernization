@@ -1,1 +1,1 @@
-T-00253 SAGE: decide whether the fresh valid legacy Ottawa P0.4 receipt reopens G0-4 under the current hold.
+T-00255 PATHFINDER: run check_gate.py for G0-4 baseline recording after the provenance rebind.

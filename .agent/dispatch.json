@@ -1,15 +1,27 @@
 {
-  "chained_from": "T-00253",
-  "full_run_justification": null,
-  "reason": "chained from T-00253 (SAGE CHAIN block)",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00254.md",
-  "result_status": "DONE",
-  "role": "FORGE",
+  "errors": [
+    "ALLOWED FILES `audit/manifest/` is outside PATHFINDER may_write"
+  ],
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "Latest result requires PATHFINDER to run the G0-4 gate check after the provenance manifest rebinding, matching the newest SAGE instruction and keeping work on the valid baseline.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00255.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER runs check_gate.py to record the G0-4 baseline after the provenance rebind.",
+    "state_recent": [
+      "T-00254 FORGE DONE: manifest rebound to the active legacy Ottawa executable.",
+      "T-00253 SAGE DONE: route PATHFINDER to record G0-4 gate after rebind."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00255.md",
+    "task_id": "T-00255"
+  },
   "schema_version": 1,
-  "skills": [],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00254.md",
-  "task_id": "T-00254"
+  "status": "REJECTED"
 }
