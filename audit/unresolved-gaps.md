@@ -142,6 +142,16 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   `.agent/results/T-00005.md` (sha `557fc4…bb5d`). Never bind this file again. (2) The T-00259 cycle commit `58dc183` did
   NOT carry the three p04 files: they are still `M` in the working tree, although their hashes match the record. The
   controller must commit them, and G0 only counts as PASS when check_gate PASSes on the committed tree | `.agent/results/T-00262.md`
+  T-00267 DECISION (SAGE, 2026-09-28, routing-failure): root cause of the uncommitted p04 files found. The cycle commit adds
+  only `changed_paths(before, now)` (`swarm_wrapper.py:1337-1340`, `:209-210`): a file that is already dirty when a turn
+  starts, and is not modified during the turn, is never committed. The detached driver wrote all three files at
+  2026-09-27 22:29 local, between turns, so no cycle will ever commit them. No campaign exemption applies:
+  `machine.lock` holds `0\n`, and `inspect_lock_status` returns `UNOWNED_LOCK, reclaimable=True`, so
+  `campaign_exempt_paths()` is empty. Working-tree hashes still equal the record (`C988796B…DA56`, `9B7C07C2…2712`,
+  `5C465488…B8D9`). Next, PATHFINDER re-stamps the mtimes of the three files, which changes no bytes, so the cycle commit
+  carries them. Then a separate PATHFINDER turn re-runs check_gate on the clean tree. A durable wrapper fix (commit
+  pre-existing non-production dirt, or clear the stale `machine.lock`) stays a FORGE follow-up and does not block G0.
+  SENTINEL's T-00266 used `ROLE:` lines, not `## ROLE` headings (`swarm_wrapper.py:213-216`) | `.agent/results/T-00267.md`
 - G0-4r | FORGE (T-00158 DECIDED) | Swarm deadlock while P0.4 campaign runs: detached driver (lock PID 41728)
   rewrites tracked `audit/runs/p04-full-campaign/heartbeat.json` every 30 s; `swarm_wrapper.py:1005-1023` attributes it
   to the agent whose turn it is and restores it, so every SENTINEL/SAGE turn is quarantined (route-1790468130/-183).
