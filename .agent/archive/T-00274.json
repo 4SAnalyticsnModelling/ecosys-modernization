@@ -1,0 +1,46 @@
+{
+  "changed": [
+    ".agent/results/T-00274.md",
+    "audit/intentional-deviations.md"
+  ],
+  "dispatch": {
+    "decision_kind": "idle-check",
+    "decision_of": "SENTINEL",
+    "full_run_justification": null,
+    "reason": "SAGE decision (idle-check) from SENTINEL",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00274.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-feature-attribution"
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00274.md",
+    "task_id": "T-00274"
+  },
+  "ended": 1790579159.0478532,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "6616c2bb-bffe-4729-84ef-ba4f0aa7354e",
+    "old": "e20ea3f4-416f-4308-bf11-823865f122f2",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 708267,
+    "cache_write": 44937,
+    "cost": null,
+    "input": 28,
+    "llm_calls": 14,
+    "output": 6650,
+    "tool_calls": 7
+  },
+  "violations": []
+}
