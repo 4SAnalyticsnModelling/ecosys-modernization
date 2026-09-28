@@ -40,11 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00268 DONE: p04 artifact bytes match recorded SHA-256; only clean-tree commit inclusion remains.
-- T-00267 DONE: dirty P04 files kept G0 from counting on the committed tree.
+- T-00269 ROLE PATHFINDER STATUS: clean-tree G0 gate pass
+- T-00268 ROLE PATHFINDER STATUS: p04 artifact hashes match the record
+- T-00267 ROLE PATHFINDER STATUS: dirty-tree blocker explained and G0 remained open
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER re-runs check_gate on the clean committed tree and reports whether G0 passes.
+Verify the next post-G0 gate evidence packet and name the next unblocked workflow step.

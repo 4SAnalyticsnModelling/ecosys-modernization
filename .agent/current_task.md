@@ -1,1 +1,1 @@
-T-00270 PATHFINDER: verify the next post-G0 gate packet and advance workflow without reworking the passed G0 evidence.
+T-00271 PATHFINDER: verify the next post-G0 gate evidence packet and determine the next unblocked workflow step after the clean-tree G0 pass.
