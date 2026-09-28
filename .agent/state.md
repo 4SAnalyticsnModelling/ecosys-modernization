@@ -48,4 +48,4 @@ none active.
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-idle: no unblocked work; await new evidence or a new task trigger
+await new evidence or a new task trigger

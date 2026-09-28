@@ -96,8 +96,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "SAGE decision (idle-check) from SENTINEL",
+  "status": "IDLE",
+  "status_reason": "no unblocked work: clean-tree G0 passes; no user decisions and no approved post-G0 task remains.",
   "task_id": "T-00274",
   "worker": null
 }
