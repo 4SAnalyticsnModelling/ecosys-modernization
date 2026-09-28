@@ -1,0 +1,44 @@
+{
+  "changed": [
+    ".agent/results/T-00259.md",
+    "audit/analysis/g0-4-record.json",
+    "audit/analysis/source-snapshot-g0-2026-09-28.json"
+  ],
+  "dispatch": {
+    "chained_from": "T-00258",
+    "full_run_justification": null,
+    "reason": "chained from T-00258 (SAGE CHAIN block)",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00259.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00259.md",
+    "task_id": "T-00259"
+  },
+  "ended": 1790577476.5246954,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": null,
+    "old": "ses_f194fbb77ffeMW42ztS0VbpumG",
+    "reset": "verified-welcome-screen"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 204544,
+    "cache_write": 0,
+    "cost": 0.02067748,
+    "input": 20473,
+    "llm_calls": 10,
+    "output": 10410,
+    "tool_calls": 18
+  },
+  "violations": []
+}
