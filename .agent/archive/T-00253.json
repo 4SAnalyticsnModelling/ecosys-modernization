@@ -1,0 +1,50 @@
+{
+  "changed": [
+    ".agent/results/T-00253.md",
+    "audit/unresolved-gaps.md"
+  ],
+  "dispatch": {
+    "full_run_justification": null,
+    "reason": "Fresh valid legacy receipt exists; SAGE must decide whether G0-4 reopens under the hold without further PATHFINDER work.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00253.md",
+    "role": "SAGE",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-process-science-parity"
+    ],
+    "state_next": "SAGE reviews the valid P0.4 receipt and decides whether G0-4 can reopen under the current hold.",
+    "state_recent": [
+      "T-00252 PATHFINDER DONE: validated the fresh detached legacy Ottawa receipt and confirmed the new run is terminal.",
+      "T-00249 SAGE DONE: keep G0-4 closed until a fresh terminal receipt or stale heartbeat is observed.",
+      "T-00247 FORGE DONE: the detached legacy relaunch is live under the fixed driver hash."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00253.md",
+    "task_id": "T-00253"
+  },
+  "ended": 1790575928.9552329,
+  "failure_packet": null,
+  "hooks": {},
+  "outcome": "settled",
+  "quarantine": null,
+  "reset": {
+    "new": "4e858b46-1d10-40a1-a999-1aded5f427b4",
+    "old": "a89053cd-5b67-4494-a743-bab2516395e0",
+    "reset": "verified"
+  },
+  "result_errors": [],
+  "result_status": "DONE",
+  "review": null,
+  "usage": {
+    "cache_read": 1569874,
+    "cache_write": 69490,
+    "cost": null,
+    "input": 48,
+    "llm_calls": 24,
+    "output": 13839,
+    "tool_calls": 3
+  },
+  "violations": []
+}

@@ -1,1 +1,14 @@
-{"schema_version": 1, "status": "PENDING", "task_id": "T-00253", "role": "SAGE", "task_file": ".agent/tasks/T-00253.md", "result_file": ".agent/results/T-00253.md", "skills": ["ecosys-process-science-parity"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Fresh valid legacy receipt exists; SAGE must decide whether G0-4 reopens under the hold without further PATHFINDER work.", "state_recent": ["T-00252 PATHFINDER DONE: validated the fresh detached legacy Ottawa receipt and confirmed the new run is terminal.", "T-00249 SAGE DONE: keep G0-4 closed until a fresh terminal receipt or stale heartbeat is observed.", "T-00247 FORGE DONE: the detached legacy relaunch is live under the fixed driver hash."], "state_next": "SAGE reviews the valid P0.4 receipt and decides whether G0-4 can reopen under the current hold."}
+{
+  "chained_from": "T-00253",
+  "full_run_justification": null,
+  "reason": "chained from T-00253 (SAGE CHAIN block)",
+  "requires_sage_review": false,
+  "result_file": ".agent/results/T-00254.md",
+  "role": "FORGE",
+  "schema_version": 1,
+  "skills": [],
+  "status": "PENDING",
+  "t1_argv": null,
+  "task_file": ".agent/tasks/T-00254.md",
+  "task_id": "T-00254"
+}

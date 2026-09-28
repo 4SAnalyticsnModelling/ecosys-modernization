@@ -118,6 +118,15 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
   `audit/traceability/`). Wake trigger (unchanged from T-00194/T-00245): PID 29444 gone AND receipt mtime > 2026-09-27T23:43:32Z,
   OR heartbeat older than 600 s. Then route PATHFINDER to validate `audit/runs/p04_full_run_receipt.json` (`validate_terminal_receipt`),
   then SAGE decides G0-4. Expected end is about 3.2 h after launch (runs ~3,700 s each), i.e. ~02:55Z 2026-09-28 | `.agent/results/T-00249.md`
+  T-00253 DECISION (SAGE, 2026-09-28): the terminal receipt (sha256 `c988796b…da56`, T-00252 valid) is ACCEPTED as the P0.4
+  reference outputs + D4 timing (median 5605.57 s, spread 3.23 %). The T-00249 hold is RELEASED. Verified: all 3 run dirs exe
+  `63DD7D5F…2DBB`; all 1,071 outputs hash-identical to the quarantined prior-campaign run_1. The receipt's inventory "-67"
+  is a scoping artifact: 68 excluded files are the exe + staged deck. On-disk count is 1,139 files / 1,396,470,740 B vs
+  run-002's provisional 1,138 (explained). The build has one repair beyond T-00140 cond. 1: `grosub.f:12766` adds `IYRC` to
+  a stdout WRITE (FORMAT 8821). All 96 staged sources were hash-compared: only grosub.f and soil.f differ. It changes no
+  state, so it is accepted as a build limitation, and T-00140 cond. 1 is amended. Before `check_gate.py` records G0-4, the
+  committed `audit/runs/p04_provenance_manifest.json` must be re-bound: it still pins the older exe `273630BE…F319`. SAGE
+  does not declare G0-4 | `.agent/results/T-00253.md`
 - G0-4r | FORGE (T-00158 DECIDED) | Swarm deadlock while P0.4 campaign runs: detached driver (lock PID 41728)
   rewrites tracked `audit/runs/p04-full-campaign/heartbeat.json` every 30 s; `swarm_wrapper.py:1005-1023` attributes it
   to the agent whose turn it is and restores it, so every SENTINEL/SAGE turn is quarantined (route-1790468130/-183).

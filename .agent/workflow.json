@@ -95,7 +95,7 @@
   "route_failures": 0,
   "schema_version": 1,
   "status": "DISPATCHED",
-  "status_reason": "Fresh valid legacy receipt exists; SAGE must decide whether G0-4 reopens under the hold without further PATHFINDER work.",
-  "task_id": "T-00253",
-  "worker": "SAGE"
+  "status_reason": "chained from T-00253 (SAGE CHAIN block)",
+  "task_id": "T-00254",
+  "worker": "FORGE"
 }
