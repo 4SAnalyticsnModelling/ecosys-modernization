@@ -1,21 +1,27 @@
 {
-  "full_run_justification": null,
-  "reason": "Fresh G0 evidence is committed and this is the next verified clean-tree gate check; no user decision or science review is required.",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00269.md",
-  "result_status": "DONE",
-  "role": "PATHFINDER",
+  "errors": [
+    "task file missing sections ['INPUTS', 'RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
+  ],
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "Clean-tree G0 passed; next evidence is post-G0 routing, not science. PATHFINDER should validate the next gate packet and advance workflow.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00270.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER verifies the next post-G0 gate packet and advances workflow without reworking the passed G0 evidence.",
+    "state_recent": [
+      "T-00269 DONE: clean-tree G0 passes; dirty-tree blocker cleared.",
+      "T-00268 DONE: p04 files match SHA-256 after timestamp-only restamp."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00270.md",
+    "task_id": "T-00270"
+  },
   "schema_version": 1,
-  "skills": [
-    "ecosys-repository-baseline"
-  ],
-  "state_next": "PATHFINDER re-runs check_gate on the clean committed tree and reports whether G0 passes.",
-  "state_recent": [
-    "T-00268 DONE: p04 artifact bytes match recorded SHA-256; only clean-tree commit inclusion remains.",
-    "T-00267 DONE: dirty P04 files kept G0 from counting on the committed tree."
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00269.md",
-  "task_id": "T-00269"
+  "status": "REJECTED"
 }
