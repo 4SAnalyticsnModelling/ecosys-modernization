@@ -40,12 +40,12 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00249 SAGE DONE: hold idle until exit or 600s stale heartbeat, then validate receipt.
-- T-00247 FORGE DONE: detached legacy P0.4 relaunch is live under hidden-console driver fix.
-- T-00245 SAGE DONE: dead run was diagnosed and a fresh driver hash relaunch was required.
+- T-00252 PATHFINDER DONE: validated the fresh detached legacy Ottawa receipt and confirmed the new run is terminal.
+- T-00249 SAGE DONE: keep G0-4 closed until a fresh terminal receipt or stale heartbeat is observed.
+- T-00247 FORGE DONE: the detached legacy relaunch is live under the fixed driver hash.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-wait for the detached P0.4 wake trigger, then validate audit/runs/p04_full_run_receipt.json before re-opening G0-4
+SAGE reviews the valid P0.4 receipt and decides whether G0-4 can reopen under the current hold.

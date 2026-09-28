@@ -1,1 +1,1 @@
-T-00252 PATHFINDER: validate the detached legacy Ottawa P0.4 receipt and decide whether G0-4 can reopen.
+T-00253 SAGE: decide whether the fresh valid legacy Ottawa P0.4 receipt reopens G0-4 under the current hold.

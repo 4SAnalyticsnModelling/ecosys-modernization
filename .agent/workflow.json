@@ -94,8 +94,8 @@
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "Idle hold persists until detached legacy P0.4 exits or heartbeat expires; then PATHFINDER validates the fresh receipt before G0-4 can reopen.",
-  "task_id": "T-00252",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Fresh valid legacy receipt exists; SAGE must decide whether G0-4 reopens under the hold without further PATHFINDER work.",
+  "task_id": "T-00253",
+  "worker": "SAGE"
 }
