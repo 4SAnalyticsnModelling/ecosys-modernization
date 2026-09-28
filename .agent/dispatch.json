@@ -1,22 +1,28 @@
 {
-  "full_run_justification": null,
-  "reason": "G0 is open; PATHFINDER must rebind stale evidence to committed artifacts and rerun the gate without new science work.",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00264.md",
-  "result_status": "BLOCKED",
-  "role": "PATHFINDER",
+  "errors": [
+    "task file missing sections ['RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION']"
+  ],
+  "rejected": {
+    "full_run_justification": null,
+    "reason": "G0 remains blocked only by uncommitted P04 artifacts; PATHFINDER must coordinate the commit and rerun the gate on the clean tree.",
+    "requires_sage_review": false,
+    "result_file": ".agent/results/T-00265.md",
+    "role": "PATHFINDER",
+    "schema_version": 1,
+    "skills": [
+      "ecosys-source-navigation"
+    ],
+    "state_next": "PATHFINDER coordinates controller commit of the three P04 artifacts and reruns the G0 gate on the committed tree.",
+    "state_recent": [
+      "T-00264 PATHFINDER BLOCKED: P04 artifacts remain dirty and G0 cannot pass clean-tree gate.",
+      "T-00262 SAGE DONE: G0 stays open until direct evidence is re-bound and committed.",
+      "T-00259 PATHFINDER DONE: stale G0 hashes were re-bound; commit and recheck remain."
+    ],
+    "status": "PENDING",
+    "t1_argv": null,
+    "task_file": ".agent/tasks/T-00265.md",
+    "task_id": "T-00265"
+  },
   "schema_version": 1,
-  "skills": [
-    "ecosys-source-navigation"
-  ],
-  "state_next": "PATHFINDER rebinds G0 evidence to committed artifacts and reruns check_gate on the clean tree.",
-  "state_recent": [
-    "T-00262 SAGE DONE: G0 remains open; rebind to direct evidence",
-    "T-00259 PATHFINDER DONE: stale hashes remain in the G0 record",
-    "T-00258 SAGE DONE: G0 fails because evidence is not committed"
-  ],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00264.md",
-  "task_id": "T-00264"
+  "status": "REJECTED"
 }

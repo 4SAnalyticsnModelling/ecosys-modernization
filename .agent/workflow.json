@@ -90,11 +90,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
+  "last_route_errors": [
+    "task file missing sections ['RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION']"
+  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
-  "route_failures": 0,
+  "route_failures": 1,
   "schema_version": 1,
   "status": "ROUTING",
   "status_reason": "G0 is open; PATHFINDER must rebind stale evidence to committed artifacts and rerun the gate without new science work.",
