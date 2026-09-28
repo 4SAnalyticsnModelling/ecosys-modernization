@@ -1,1 +1,1 @@
-T-00266 PATHFINDER: Rebind G0 evidence to direct committed artifacts and rerun check_gate on the clean committed tree.
+T-00269 PATHFINDER G0 clean-tree gate recheck on committed evidence

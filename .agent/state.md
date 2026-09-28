@@ -40,12 +40,11 @@ Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residual
 none active.
 
 ## Recent accepted change
-- T-00262 SAGE DONE: G0 remains open; rebind to direct evidence
-- T-00259 PATHFINDER DONE: stale hashes remain in the G0 record
-- T-00258 SAGE DONE: G0 fails because evidence is not committed
+- T-00268 DONE: p04 artifact bytes match recorded SHA-256; only clean-tree commit inclusion remains.
+- T-00267 DONE: dirty P04 files kept G0 from counting on the committed tree.
 
 ## Open blockers
 None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
 
 ## Next expected operation
-PATHFINDER rebinds G0 evidence to committed artifacts and reruns check_gate on the clean tree.
+PATHFINDER re-runs check_gate on the clean committed tree and reports whether G0 passes.

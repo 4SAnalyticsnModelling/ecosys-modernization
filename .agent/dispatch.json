@@ -1,15 +1,1 @@
-{
-  "chained_from": "T-00267",
-  "full_run_justification": null,
-  "reason": "chained from T-00267 (SAGE CHAIN block)",
-  "requires_sage_review": false,
-  "result_file": ".agent/results/T-00268.md",
-  "result_status": "DONE",
-  "role": "PATHFINDER",
-  "schema_version": 1,
-  "skills": [],
-  "status": "COMPLETE",
-  "t1_argv": null,
-  "task_file": ".agent/tasks/T-00268.md",
-  "task_id": "T-00268"
-}
+{"schema_version": 1, "status": "PENDING", "task_id": "T-00269", "role": "PATHFINDER", "task_file": ".agent/tasks/T-00269.md", "result_file": ".agent/results/T-00269.md", "skills": ["ecosys-repository-baseline"], "t1_argv": null, "requires_sage_review": false, "full_run_justification": null, "reason": "Fresh G0 evidence is committed and this is the next verified clean-tree gate check; no user decision or science review is required.", "state_recent": ["T-00268 DONE: p04 artifact bytes match recorded SHA-256; only clean-tree commit inclusion remains.", "T-00267 DONE: dirty P04 files kept G0 from counting on the committed tree."], "state_next": "PATHFINDER re-runs check_gate on the clean committed tree and reports whether G0 passes."}

@@ -90,17 +90,14 @@
   ],
   "idle_check": false,
   "last_advance_unix": null,
-  "last_route_errors": [
-    "task file missing sections ['ROLE', 'OBJECTIVE', 'INPUTS', 'ALLOWED FILES', 'RELEVANT SKILLS', 'KNOWN FACTS', 'SUCCESS CONDITION', 'STOP CONDITIONS', 'OUTPUT FILE']"
-  ],
   "phase": "P0",
   "plan": "ecosys-ng_ottawa_qualification_execution_plan.md",
   "project": "ottawa-qualification",
   "resume_safe": true,
   "route_failures": 0,
   "schema_version": 1,
-  "status": "ROUTING",
-  "status_reason": "chained from T-00267 (SAGE CHAIN block)",
-  "task_id": "T-00268",
-  "worker": null
+  "status": "DISPATCHED",
+  "status_reason": "Fresh G0 evidence is committed and this is the next verified clean-tree gate check; no user decision or science review is required.",
+  "task_id": "T-00269",
+  "worker": "PATHFINDER"
 }
