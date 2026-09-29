@@ -30,10 +30,17 @@ pub const Quality = struct {
     }
 };
 
+const legacy_solute_zeroc_mol_per_m3: f64 = 1.0e-32;
+
 fn relativeChange(change: f64, pool: f64, family: f64, criteria: Criteria) !f64 {
     if (!std.math.isFinite(change) or !std.math.isFinite(pool) or pool < 0 or
         !std.math.isFinite(family) or family < 0) return error.InvalidChemicalQualityState;
-    const limit = criteria.species_pool_fraction * pool + criteria.mobile_family_fraction * family +
+    // SOLUTE.F:131 ZEROC=1.0E-32: legacy floors every working concentration
+    // there (solute.f:378-556 AMAX1(ZEROC,...)), so an existing pool below it
+    // (STARTE ZEROC=1.0E-48 wet-deposition dust, starte.f:100) is resolved on
+    // the legacy floor. True zeros keep the newly-supplied-family rule below.
+    const resolvable_pool = if (pool > 0 or family > 0) @max(pool, legacy_solute_zeroc_mol_per_m3) else pool;
+    const limit = criteria.species_pool_fraction * resolvable_pool + criteria.mobile_family_fraction * family +
         128 * std.math.floatEps(f64) * @max(pool, family);
     // A newly supplied family is wholly out of balance, but its finite
     // source must still be allowed to generate a Newton correction.

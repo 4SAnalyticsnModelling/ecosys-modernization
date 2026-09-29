@@ -393,12 +393,20 @@ fn reconcilePhosphorusInventory(
         transformations,
         density,
     );
+    // Solver transformations are differences of packed owner states, so their
+    // binary64 cancellation scales with the touched owners, not with the
+    // (possibly trace) flux: hour 277 has a 2.1e-13 flux on ~3e-4 mol/m3
+    // owners and a -4.7e-20 (one owner ULP) residual. Floor the envelope at
+    // 16 eps of the P-weighted storage of the owners this transformation
+    // actually touches; untouched background pools never widen it.
     const ideal_envelope = @max(
         128 * std.math.floatEps(f64) * ideal_scale,
+        16 * std.math.floatEps(f64) * touchedPhosphorusStorageScale(before, transformations, density),
         128 * std.math.floatTrueMin(f64),
     );
-    if (@abs(ideal_residual) > ideal_envelope)
+    if (@abs(ideal_residual) > ideal_envelope) {
         return error.NonConservativePhosphateInventoryUpdate;
+    }
     const target = try phosphorusInventory(before, density);
     const proposed = next.*;
     const proposed_inventory = try phosphorusInventory(proposed, density);
@@ -411,8 +419,9 @@ fn reconcilePhosphorusInventory(
         128 * std.math.floatEps(f64) * @max(target, proposed_inventory),
         128 * std.math.floatTrueMin(f64),
     );
-    if (@abs(proposed_inventory - target) > roundoff_envelope)
+    if (@abs(proposed_inventory - target) > roundoff_envelope) {
         return error.NonConservativePhosphateInventoryUpdate;
+    }
     const primary_owner = largestDissolvedPhosphorusOwner(next);
     var roundoff_candidate: ?State = null;
     if (try reconcilePhosphorusOwnerExact(
@@ -497,8 +506,70 @@ fn reconcilePhosphorusInventory(
         proposed,
         density,
     )) return;
+    // A trace-scale transaction (e.g. STARTE wet-deposition P, hour 277) on
+    // storage-scale owners cannot satisfy the process-scale gate above: each
+    // touched owner rounds at its own ULP (~eps * 62 mol/m3), which exceeds
+    // 128 eps of a ~1e-12 process magnitude. Legacy solute.f applies the
+    // fluxes directly with no endpoint repair. Accept the rounded endpoint
+    // only when the requested transformation closed at process scale (checked
+    // above), the whole-inventory drift is inside `roundoff_envelope`
+    // (checked above), and every owner's realized change equals its requested
+    // change to within that owner's own representation rounding, so a missing
+    // or misapplied reaction is still rejected.
+    if (realizedMatchesRequestedPerOwner(before, proposed, transformations)) {
+        next.* = proposed;
+        return;
+    }
     next.* = proposed;
     return error.NonConservativePhosphateInventoryUpdate;
+}
+
+fn touchedPhosphorusStorageScale(
+    before: State,
+    transformations: Transformations,
+    density: f64,
+) f64 {
+    var touched = std.mem.zeroes(State);
+    inline for (@typeInfo(State).@"struct".fields) |field| {
+        if (@field(transformations, field.name) != 0)
+            @field(touched, field.name) = @abs(@field(before, field.name));
+    }
+    return phosphorusStateMagnitude(touched, density);
+}
+
+fn realizedMatchesRequestedPerOwner(
+    before: State,
+    after: State,
+    requested: Transformations,
+) bool {
+    const realized = realizedStateChange(before, after);
+    // Phosphorus-bearing owners only: exchange-site owners carry no P and are
+    // closed by their own exact site-inventory reconciliation, which may move
+    // a site owner by adjacent representations before this gate runs.
+    const phosphorus_owners = .{
+        "dissolved_po4_mol_p_per_m3",             "dissolved_hpo4_mol_p_per_m3",
+        "dissolved_h2po4_mol_p_per_m3",           "dissolved_h3po4_mol_p_per_m3",
+        "adsorbed_hpo4_mol_p_per_megagram",       "adsorbed_h2po4_mol_p_per_megagram",
+        "aluminum_phosphate_solid_mol_per_m3",    "iron_phosphate_solid_mol_per_m3",
+        "dicalcium_phosphate_solid_mol_per_m3",   "hydroxyapatite_solid_mol_per_m3",
+        "monocalcium_phosphate_solid_mol_per_m3", "iron_hpo4_pair_mol_per_m3",
+        "iron_h2po4_pair_mol_per_m3",             "calcium_po4_pair_mol_per_m3",
+        "calcium_hpo4_pair_mol_per_m3",           "calcium_h2po4_pair_mol_per_m3",
+        "magnesium_hpo4_pair_mol_per_m3",
+    };
+    inline for (phosphorus_owners) |name| {
+        const field = .{ .name = name };
+        const b = @field(before, field.name);
+        const a = @field(after, field.name);
+        const bound = @max(
+            4 * std.math.floatEps(f64) * @max(@abs(b), @abs(a)),
+            std.math.floatTrueMin(f64),
+        );
+        if (!(@abs(@field(realized, field.name) - @field(requested, field.name)) <= bound)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 fn preserveProcessClosedUnrepresentableEndpoint(
@@ -940,6 +1011,44 @@ fn filledTransformations(value: f64) Transformations {
     return transformations;
 }
 
+test "ideal closure admits operand-scale cancellation of a difference-derived trace transfer" {
+    const density = 1.0;
+    var before = std.mem.zeroes(State);
+    before.dissolved_h2po4_mol_p_per_m3 = 3.0e-4;
+    before.dissolved_hpo4_mol_p_per_m3 = 5.0e-4;
+    before.adsorbed_hpo4_mol_p_per_megagram = 62.2;
+    // Measured hour-277 shape: a 2.1e-13 transfer whose endpoint-difference
+    // derivation leaves one operand ULP (~5.4e-20 at 3e-4) of cancellation.
+    var transformations = std.mem.zeroes(Transformations);
+    transformations.dissolved_h2po4_mol_p_per_m3 = -2.1e-13;
+    transformations.dissolved_hpo4_mol_p_per_m3 = 2.1e-13 + 5.4e-20;
+    try std.testing.expect(@abs(phosphorusTransformation(transformations, density)) > 128 * std.math.floatEps(f64) * phosphorusTransformationMagnitude(transformations, density));
+    var state = before;
+    _ = try state_updateRealized(&state, transformations, density);
+    // An imbalance far above the touched owners' ULPs is still rejected,
+    // however large the untouched adsorbed background is.
+    var leaking = transformations;
+    leaking.dissolved_hpo4_mol_p_per_m3 += 1.0e-16;
+    state = before;
+    try std.testing.expectError(error.NonConservativePhosphateInventoryUpdate, state_updateRealized(&state, leaking, density));
+}
+
+test "per-owner realized gate admits storage-scale rounding and rejects a misapplied trace transfer" {
+    // hour-277 shape: a ~1e-12 transfer between two ~62 mol/m3 owners.
+    const before = filledState(62.218949569176544);
+    var requested = std.mem.zeroes(Transformations);
+    requested.dissolved_h2po4_mol_p_per_m3 = -1.0e-12;
+    requested.dissolved_hpo4_mol_p_per_m3 = 1.0e-12;
+    var after = before;
+    after.dissolved_h2po4_mol_p_per_m3 += requested.dissolved_h2po4_mol_p_per_m3;
+    after.dissolved_hpo4_mol_p_per_m3 += requested.dissolved_hpo4_mol_p_per_m3;
+    try std.testing.expect(realizedMatchesRequestedPerOwner(before, after, requested));
+    // Recipient never credited: a real misapplication far above one owner ULP.
+    var misapplied = before;
+    misapplied.dissolved_h2po4_mol_p_per_m3 += requested.dissolved_h2po4_mol_p_per_m3;
+    try std.testing.expect(!realizedMatchesRequestedPerOwner(before, misapplied, requested));
+}
+
 test "assembled phosphate network conserves phosphorus and exchange sites" {
     const density = 1.7;
     const result = try assemble(.{
@@ -1242,11 +1351,15 @@ test "phosphorus roundoff repair cannot manufacture a metal reaction" {
         .aqueous = std.mem.zeroes(DissociationAndPairingFluxes),
     });
     var state = before;
-    try std.testing.expectError(
-        error.NonConservativePhosphateInventoryUpdate,
-        state_updateRealized(&state, transformations, density),
-    );
-    try std.testing.expectEqualDeep(before, state);
+    // The 1e-4 credit is below the 2^50 recipient's ULP (0.25), exactly as in
+    // legacy f64 solute.f, which applies it without repair or error. The
+    // endpoint is admitted only through the per-owner rounding gate; no
+    // metal-bearing owner may be used to absorb the residual.
+    _ = try state_updateRealized(&state, transformations, density);
+    inline for (.{ "aluminum_phosphate_solid_mol_per_m3", "iron_phosphate_solid_mol_per_m3", "dicalcium_phosphate_solid_mol_per_m3", "hydroxyapatite_solid_mol_per_m3", "monocalcium_phosphate_solid_mol_per_m3", "iron_hpo4_pair_mol_per_m3", "iron_h2po4_pair_mol_per_m3", "calcium_po4_pair_mol_per_m3", "calcium_hpo4_pair_mol_per_m3", "calcium_h2po4_pair_mol_per_m3", "magnesium_hpo4_pair_mol_per_m3" }) |name|
+        try std.testing.expectEqual(@field(before, name), @field(state, name));
+    const drift = @abs(try phosphorusInventory(state, density) - try phosphorusInventory(before, density));
+    try std.testing.expect(drift <= 4 * std.math.floatEps(f64) * 0x1p50);
 }
 
 test "endpoint phosphate reconciliation preserves all shared mineral coupling" {

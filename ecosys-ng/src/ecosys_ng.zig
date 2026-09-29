@@ -6082,6 +6082,16 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
         layer_absolute_per_area.heat_megajoules_m2,
         3.0e-9,
     );
+    // Legacy SOLUTE resolves no concentration below ZEROC=1.0E-32 mol m-3
+    // (solute.f:131, AMAX1 floors :378-556); STARTE's ZEROC=1.0E-48 wet
+    // deposition dust (starte.f:100) is transported down the profile as
+    // ~1e-71 mol Cl/SO4 whose closure is pure arithmetic (hour 543, layer 10).
+    // Floor the per-layer ion balance at that legacy resolution times one m3
+    // of water per m2 (above any layer's water depth), layer ledger only.
+    layer_absolute_per_area.ions_mol_m2 = @max(
+        layer_absolute_per_area.ions_mol_m2,
+        1.0e-32,
+    );
     var hourly_layer_conservation_report = try ecosys.layer_local_conservation.evaluate(
         driver_context.allocator.*,
         driver_context.hourly_layer_storage_before.*,

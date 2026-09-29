@@ -1045,12 +1045,19 @@ fn elementSearchReference(name: []const u8, inventory: AcceptedStateInventory, f
     return fallback;
 }
 
+const solute_legacy_zeroc_mol_per_m3: f64 = 1.0e-32;
+
 fn initializeSearchReferences(state: *const chemistry.State, cell_index: usize, parameters: chemistry.ReactionParameters, inventory: AcceptedStateInventory, water_ion_reference: f64, output: []f64) !void {
     try state.packCell(cell_index, output);
     var cursor: usize = 0;
     inline for (std.meta.fields(@TypeOf(state.aqueous[cell_index]))) |field| {
         const reference = if (comptime std.mem.eql(u8, field.name, "hydrogen") or std.mem.eql(u8, field.name, "hydroxide")) water_ion_reference else elementSearchReference(field.name, inventory, output[cursor]);
-        output[cursor] = @max(output[cursor], reference);
+        // SOLUTE.F:131 ZEROC=1.0E-32 floors every working concentration
+        // (solute.f:378-556 AMAX1(ZEROC,...)); STARTE's own ZEROC=1.0E-48
+        // (starte.f:100) leaves wet-deposition dust (e.g. SO4/Cl pairs ~1e-48)
+        // that legacy SOLUTE cannot distinguish from zero. Scale progress for
+        // such components on the legacy floor, not on the dust itself.
+        output[cursor] = @max(output[cursor], @max(reference, solute_legacy_zeroc_mol_per_m3));
         cursor += 1;
     }
     for ([_]@TypeOf(state.non_band_phosphate[cell_index]){ state.non_band_phosphate[cell_index], state.band_phosphate[cell_index] }, 0..) |zone, zone_index| {
