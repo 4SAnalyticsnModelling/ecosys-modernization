@@ -530,6 +530,10 @@ fn SoilForcingSubstepHooks(
         condensation_step_m3: []f64,
         litter_change_step_m3: []f64,
         litter_ingress_step_m3: []f64,
+        ingress_overflow_matrix_step_m3: []f64,
+        ingress_overflow_macropore_step_m3: []f64,
+        ingress_overflow_matrix_total_m3: []f64,
+        ingress_overflow_macropore_total_m3: []f64,
         topsoil_change_step_m3: []f64,
         litter_evaporation_step_m3: []f64,
         topsoil_evaporation_step_m3: []f64,
@@ -588,6 +592,14 @@ fn SoilForcingSubstepHooks(
             @memset(litter_condensation_total, 0);
             @memset(topsoil_condensation_total, 0);
             @memset(topsoil_vapor_heat_total, 0);
+            const ingress_overflow_matrix_step = try allocator.alloc(f64, context.grid.cell_count);
+            const ingress_overflow_macropore_step = try allocator.alloc(f64, context.grid.cell_count);
+            const ingress_overflow_matrix_total = try allocator.alloc(f64, context.grid.cell_count);
+            const ingress_overflow_macropore_total = try allocator.alloc(f64, context.grid.cell_count);
+            @memset(ingress_overflow_matrix_step, 0);
+            @memset(ingress_overflow_macropore_step, 0);
+            @memset(ingress_overflow_matrix_total, 0);
+            @memset(ingress_overflow_macropore_total, 0);
             return .{
                 .context = context,
                 .allocator = allocator,
@@ -605,6 +617,10 @@ fn SoilForcingSubstepHooks(
                 .condensation_step_m3 = condensation_step,
                 .litter_change_step_m3 = litter_change_step,
                 .litter_ingress_step_m3 = litter_ingress_step,
+                .ingress_overflow_matrix_step_m3 = ingress_overflow_matrix_step,
+                .ingress_overflow_macropore_step_m3 = ingress_overflow_macropore_step,
+                .ingress_overflow_matrix_total_m3 = ingress_overflow_matrix_total,
+                .ingress_overflow_macropore_total_m3 = ingress_overflow_macropore_total,
                 .topsoil_change_step_m3 = try allocator.alloc(f64, context.grid.cell_count),
                 .litter_evaporation_step_m3 = litter_evaporation_step,
                 .topsoil_evaporation_step_m3 = topsoil_evaporation_step,
@@ -642,6 +658,8 @@ fn SoilForcingSubstepHooks(
             @memset(self.litter_condensation_total_m3, 0);
             @memset(self.topsoil_condensation_total_m3, 0);
             @memset(self.topsoil_vapor_heat_total_megajoules, 0);
+            @memset(self.ingress_overflow_matrix_total_m3, 0);
+            @memset(self.ingress_overflow_macropore_total_m3, 0);
             @memset(self.accepted_litter_vapor_change_m3, 0);
             @memset(self.accepted_topsoil_vapor_change_m3, 0);
             @memset(self.accepted_topsoil_liquid_change_m3, 0);
@@ -700,6 +718,39 @@ fn SoilForcingSubstepHooks(
                     self.topsoil_condensation_step_m3[cell]) / time_step_hours;
                 inline for (.{ self.evaporation_step_m3[cell], self.condensation_step_m3[cell] }) |value|
                     if (!std.math.isFinite(value)) return error.NonFiniteGroundSurfaceVaporDiagnostic;
+            }
+            // WATSUB FLQRS/FLQRH (watsub.f:939-947), every cycle against the
+            // CURRENT topsoil air space (this substep's condensation is already
+            // in the grid water here): rain and snowmelt that the micropores or
+            // macropores cannot hold go to the litter instead, with their heat
+            // (HFLQR1 = 4.19*TKAM*(FLQRS+FLQRH), bound in the coupled
+            // prepareSubstep) and their routing booked in acceptedCellActivity.
+            // Rates are rebuilt from the hour base every substep, so this
+            // adjustment is local to the substep. Solutes stay where HOUR routed
+            // them: FLYM/HWFLYM move water and heat only.
+            {
+                const ice_density = context.runscript.soil_phase_heat_parameters.freeze_thaw.ice_density_megagrams_per_m3;
+                for (0..context.grid.cell_count) |cell| {
+                    const top = try context.grid.layerIndex(cell, 0);
+                    const matrix_air_m3 = @max(0, context.grid.matrix_pore_capacity_m3[top] -
+                        context.grid.matrix_liquid_water_m3[top] -
+                        context.grid.matrix_ice_water_m3[top] / ice_density);
+                    const macropore_air_m3 = @max(0, context.grid.macropore_pore_capacity_m3[top] -
+                        context.grid.macropore_liquid_water_m3[top] -
+                        context.grid.macropore_ice_water_m3[top] / ice_density);
+                    const matrix_overflow_m3 = @max(0, context.surface_precipitation.water_to_matrix_m3_per_h[cell] * time_step_hours - matrix_air_m3);
+                    const macropore_overflow_m3 = @max(0, context.surface_precipitation.water_to_macropore_m3_per_h[cell] * time_step_hours - macropore_air_m3);
+                    if (!std.math.isFinite(matrix_overflow_m3) or !std.math.isFinite(macropore_overflow_m3))
+                        return error.InvalidSurfaceIngressStateUpdate;
+                    self.ingress_overflow_matrix_step_m3[cell] = matrix_overflow_m3;
+                    self.ingress_overflow_macropore_step_m3[cell] = macropore_overflow_m3;
+                    if (matrix_overflow_m3 == 0 and macropore_overflow_m3 == 0) continue;
+                    if (matrix_overflow_m3 > 0)
+                        context.surface_precipitation.water_to_matrix_m3_per_h[cell] = matrix_air_m3 / time_step_hours;
+                    if (macropore_overflow_m3 > 0)
+                        context.surface_precipitation.water_to_macropore_m3_per_h[cell] = macropore_air_m3 / time_step_hours;
+                    context.surface_precipitation.water_to_litter_m3_per_h[cell] += (matrix_overflow_m3 + macropore_overflow_m3) / time_step_hours;
+                }
             }
             for (self.litter_ingress_step_m3, context.surface_precipitation.water_to_litter_m3_per_h) |*increment, rate|
                 increment.* = rate * time_step_hours;
@@ -884,6 +935,8 @@ fn SoilForcingSubstepHooks(
             try addFiniteSlices(self.topsoil_evaporation_total_m3, self.topsoil_evaporation_step_m3);
             try addFiniteSlices(self.litter_condensation_total_m3, self.litter_condensation_step_m3);
             try addFiniteSlices(self.topsoil_condensation_total_m3, self.topsoil_condensation_step_m3);
+            try addFiniteSlices(self.ingress_overflow_matrix_total_m3, self.ingress_overflow_matrix_step_m3);
+            try addFiniteSlices(self.ingress_overflow_macropore_total_m3, self.ingress_overflow_macropore_step_m3);
         }
 
         fn deinit(self: *Self) void {
@@ -901,6 +954,10 @@ fn SoilForcingSubstepHooks(
             self.allocator.free(self.litter_evaporation_step_m3);
             self.allocator.free(self.topsoil_change_step_m3);
             self.allocator.free(self.litter_ingress_step_m3);
+            self.allocator.free(self.ingress_overflow_matrix_step_m3);
+            self.allocator.free(self.ingress_overflow_macropore_step_m3);
+            self.allocator.free(self.ingress_overflow_matrix_total_m3);
+            self.allocator.free(self.ingress_overflow_macropore_total_m3);
             self.allocator.free(self.litter_change_step_m3);
             self.allocator.free(self.condensation_step_m3);
             self.allocator.free(self.evaporation_step_m3);
@@ -4324,6 +4381,51 @@ fn CoupledSubstepTransaction(
             var direct_precipitation = self.context.surface_precipitation.*;
             direct_precipitation.water_to_matrix_m3_per_h = self.base_water_to_matrix_m3_per_h;
             direct_precipitation.water_to_macropore_m3_per_h = self.base_water_to_macropore_m3_per_h;
+            // This substep's FLQRS/FLQRH overflow (Forcing.prepareSubstep) left
+            // the soil for the litter: price it out of the soil and into the
+            // litter at the air temperature, HFLQR1 = 4.19*TKAM*(FLQRS+FLQRH)
+            // (watsub.f:942-947). Copies exist only for overflowing substeps.
+            var litter_heat_view = self.context.surface_precipitation.*;
+            var overflow_present = false;
+            for (self.forcing.ingress_overflow_matrix_step_m3, self.forcing.ingress_overflow_macropore_step_m3) |matrix_overflow, macropore_overflow| {
+                if (matrix_overflow != 0 or macropore_overflow != 0) overflow_present = true;
+            }
+            var overflow_matrix_rates: []f64 = &.{};
+            var overflow_macropore_rates: []f64 = &.{};
+            var overflow_soil_heat: []f64 = &.{};
+            var overflow_litter_rates: []f64 = &.{};
+            var overflow_litter_heat: []f64 = &.{};
+            defer if (overflow_present) {
+                self.allocator.free(overflow_matrix_rates);
+                self.allocator.free(overflow_macropore_rates);
+                self.allocator.free(overflow_soil_heat);
+                self.allocator.free(overflow_litter_rates);
+                self.allocator.free(overflow_litter_heat);
+            };
+            if (overflow_present) {
+                overflow_matrix_rates = try self.allocator.dupe(f64, self.base_water_to_matrix_m3_per_h);
+                overflow_macropore_rates = try self.allocator.dupe(f64, self.base_water_to_macropore_m3_per_h);
+                overflow_soil_heat = try self.allocator.dupe(f64, self.context.surface_precipitation.heat_to_soil_megajoules_per_h);
+                overflow_litter_rates = try self.allocator.dupe(f64, self.base_water_to_litter_m3_per_h);
+                overflow_litter_heat = try self.allocator.dupe(f64, self.context.surface_precipitation.heat_to_litter_megajoules_per_h);
+                const liquid_capacity = self.context.runscript.soil_phase_heat_parameters.liquid_water_heat_capacity_megajoules_per_m3_k;
+                for (0..self.context.grid.cell_count) |cell| {
+                    const matrix_overflow_rate = self.forcing.ingress_overflow_matrix_step_m3[cell] / time_step_hours;
+                    const macropore_overflow_rate = self.forcing.ingress_overflow_macropore_step_m3[cell] / time_step_hours;
+                    const overflow_rate = matrix_overflow_rate + macropore_overflow_rate;
+                    if (overflow_rate == 0) continue;
+                    const overflow_heat_rate = liquid_capacity * self.context.surface_precipitation.atmospheric_temperature_k[cell] * overflow_rate;
+                    overflow_matrix_rates[cell] = @max(0, overflow_matrix_rates[cell] - matrix_overflow_rate);
+                    overflow_macropore_rates[cell] = @max(0, overflow_macropore_rates[cell] - macropore_overflow_rate);
+                    overflow_soil_heat[cell] -= overflow_heat_rate;
+                    overflow_litter_rates[cell] += overflow_rate;
+                    overflow_litter_heat[cell] += overflow_heat_rate;
+                }
+                direct_precipitation.water_to_matrix_m3_per_h = overflow_matrix_rates;
+                direct_precipitation.water_to_macropore_m3_per_h = overflow_macropore_rates;
+                direct_precipitation.heat_to_soil_megajoules_per_h = overflow_soil_heat;
+                litter_heat_view.heat_to_litter_megajoules_per_h = overflow_litter_heat;
+            }
             try ecosys.surface_precipitation.bindSoilHeatIngress(
                 &direct_precipitation,
                 self.context.grid,
@@ -4356,8 +4458,8 @@ fn CoupledSubstepTransaction(
                 }
             }
             try ecosys.surface_precipitation.state_updateLitterHeatIngress(
-                self.context.surface_precipitation,
-                self.base_water_to_litter_m3_per_h,
+                &litter_heat_view,
+                if (overflow_present) overflow_litter_rates else self.base_water_to_litter_m3_per_h,
                 .{
                     .heat_capacity_megajoules_per_k = self.context.surface_heat_capacity_megajoules_per_k,
                     .surface_temperature_k = self.context.grid.surface_temperature_k,
@@ -9192,9 +9294,15 @@ fn CoupledSubstepTransaction(
                         .solid_precipitation_water_equivalent_m3 = self.snow_solid_input_total_m3[cell],
                         .canopy_retention_m3 = context.surface_precipitation.intercepted_rain_m3_per_h[cell],
                         .liquid_to_top_snow_m3 = self.snow_liquid_input_total_m3[cell],
-                        .liquid_to_surface_litter_m3 = self.base_water_to_litter_m3_per_h[cell],
-                        .liquid_to_topsoil_matrix_m3 = self.base_water_to_matrix_m3_per_h[cell],
-                        .liquid_to_topsoil_macropore_m3 = self.base_water_to_macropore_m3_per_h[cell],
+                        // FLQRS/FLQRH overflow moved these amounts from the
+                        // topsoil to the litter during the accepted schedule.
+                        .liquid_to_surface_litter_m3 = self.base_water_to_litter_m3_per_h[cell] +
+                            self.forcing.ingress_overflow_matrix_total_m3[cell] +
+                            self.forcing.ingress_overflow_macropore_total_m3[cell],
+                        .liquid_to_topsoil_matrix_m3 = self.base_water_to_matrix_m3_per_h[cell] -
+                            self.forcing.ingress_overflow_matrix_total_m3[cell],
+                        .liquid_to_topsoil_macropore_m3 = self.base_water_to_macropore_m3_per_h[cell] -
+                            self.forcing.ingress_overflow_macropore_total_m3[cell],
                         .atmospheric_temperature_k = context.surface_precipitation.atmospheric_temperature_k[cell],
                         .liquid_heat_capacity_megajoules_per_m3_k = context.runscript.soil_phase_heat_parameters.liquid_water_heat_capacity_megajoules_per_m3_k,
                         .solid_heat_capacity_megajoules_per_m3_k = context.runscript.snow_solid_heat_capacity_megajoules_per_m3_k,
