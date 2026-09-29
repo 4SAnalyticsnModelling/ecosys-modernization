@@ -552,10 +552,10 @@ pub fn residualAt(grid: *const grid_module.GridState, faces: []const group_types
                     );
                 }
                 // watsub.f 5328-5333 (IFLGUH) / 5395-5400 (IFLGDH): macropore
-                // discharge needs the cycle-start VOLWH1 > ZEROS2, and FLWHX
-                // is bounded by that same start-of-cycle store. Bounding it by
-                // the trial made the discharge equal the trial water, a kinked
-                // fixed point x = b - x (Ottawa hour 3608, every rung at b/2).
+                // discharge is enabled only while the cycle-start VOLWH1 exceeds
+                // ZEROS2. Without the gate a sub-ZEROS2 macropore store keeps a
+                // trial-bounded discharge, the kinked fixed point x = b - x
+                // (Ottawa hour 3608: every rung settled at b/2).
                 const base_macropore_water = base[cells + layer];
                 const macropore_negligible_m3 = if (properties.boundary_face_area_m2.len > layer)
                     1.0e-6 * properties.boundary_face_area_m2[layer]
@@ -568,10 +568,10 @@ pub fn residualAt(grid: *const grid_module.GridState, faces: []const group_types
                     // contains horizontal transfers and earlier boundary-face
                     // withdrawals, which is the conservative generalization
                     // required when the source sub-hour sweep is removed.
-                    const oriented = try water_boundary.macroporeDischarge(.{ .direction_sign = boundary_face.direction_sign, .slope_sine = boundary_face.slope_sine, .directional_layer_width_m = boundary_face.directional_layer_width_m, .water_table_slope = table_slope, .macropore_water_depth_m = macro_water_depth_m, .external_water_table_depth_m = external_depth_m, .internal_water_table_depth_m = topology.internal_water_table_depth_m[boundary_face.cell_index], .hydraulic_conductivity_m2_per_h_megapascal = properties.boundary_macropore_hydraulic_conductivity_m2_per_h_megapascal[layer] * group_hydraulics.macroporeFrozenHydraulicImpedance(properties, grid, layer), .face_area_m2 = face_area_m2, .external_separation_distance_m = distance_m, .fraction_face_below_water_table = fraction_below, .recharge_frequency_divisor = 1, .recharge_time_multiplier = exchange_fraction, .time_fraction = properties.nonlinear_time_fraction, .available_macropore_water_m3 = base_macropore_water, .incoming_vertical_macropore_water_m3 = 0, .outgoing_vertical_macropore_water_m3 = 0, .source_temperature_k = grid.soil_temperature_k[layer] });
+                    const oriented = try water_boundary.macroporeDischarge(.{ .direction_sign = boundary_face.direction_sign, .slope_sine = boundary_face.slope_sine, .directional_layer_width_m = boundary_face.directional_layer_width_m, .water_table_slope = table_slope, .macropore_water_depth_m = macro_water_depth_m, .external_water_table_depth_m = external_depth_m, .internal_water_table_depth_m = topology.internal_water_table_depth_m[boundary_face.cell_index], .hydraulic_conductivity_m2_per_h_megapascal = properties.boundary_macropore_hydraulic_conductivity_m2_per_h_megapascal[layer] * group_hydraulics.macroporeFrozenHydraulicImpedance(properties, grid, layer), .face_area_m2 = face_area_m2, .external_separation_distance_m = distance_m, .fraction_face_below_water_table = fraction_below, .recharge_frequency_divisor = 1, .recharge_time_multiplier = exchange_fraction, .time_fraction = properties.nonlinear_time_fraction, .available_macropore_water_m3 = macropore_water, .incoming_vertical_macropore_water_m3 = 0, .outgoing_vertical_macropore_water_m3 = 0, .source_temperature_k = grid.soil_temperature_k[layer] });
                     const accepted_change = group_flux.limitExternalStorageChange(
                         boundary_face.direction_sign * oriented.macropore_water_m3,
-                        target[cells + layer] + macropore_change,
+                        macropore_water + macropore_change,
                         target[cells + layer] + macropore_change,
                         try group_flux.physicalLiquidCapacityM3(macro_capacity, grid.macropore_ice_water_m3[layer], properties.ice_density_megagrams_per_m3),
                     );
