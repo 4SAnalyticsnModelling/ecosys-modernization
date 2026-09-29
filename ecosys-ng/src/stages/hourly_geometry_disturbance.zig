@@ -289,6 +289,22 @@ pub fn finalize(context: anytype) !void {
         .inputs = diagnostics.landscapeMassBalanceInputs(context),
     };
     science.local_activity = try snapshot.binding(&activity_sidecar, science);
+    // REDIST 7910-7911 restores DLYRI - DLYR in the SOC leg, where DLYR has
+    // already been pinned back to DLYRI by the previous hour's DDLYRY
+    // (8188/8199), so seasonal ice heave never reaches that term. ng keeps the
+    // freeze-thaw displacement in `layer_thickness_m`; restoring against it
+    // would move the heave's worth of soil between layers every SOC hour.
+    // The freeze-free boundary depths are the legacy-equivalent DLYR.
+    const thickness_without_freeze_m = try context.allocator.dupe(f64, geometry.layer_thickness_m);
+    defer context.allocator.free(thickness_without_freeze_m);
+    for (0..cell_count) |cell| {
+        const boundary_base = cell * (cap + 1);
+        const first = geometry.first_active_layer[cell];
+        for (first..first + geometry.active_layer_count[cell]) |layer|
+            thickness_without_freeze_m[cell * cap + layer] =
+                geometry.boundary_depth_without_freeze_m[boundary_base + layer + 1] -
+                geometry.boundary_depth_without_freeze_m[boundary_base + layer];
+    }
     try ecosys.soil_profile_relayering.applyEndOfHourGeometry(science, workspace, .{
         .disturbance_mode_by_cell = workspace.disturbance_mode_by_cell,
         .total_ice_volume_change_m3 = workspace.ice_volume_delta_m3,
@@ -303,7 +319,7 @@ pub fn finalize(context: anytype) !void {
         .macropore_fraction = properties.macropore_fraction,
         .reference_bulk_density_megagrams_per_m3 = properties.reference_bulk_density_megagrams_per_m3,
         .initial_layer_thickness_m = properties.initial_layer_thickness_m,
-        .current_layer_thickness_m = geometry.layer_thickness_m,
+        .current_layer_thickness_m = thickness_without_freeze_m,
         .reset_organic_accumulation_by_layer = workspace.reset_organic_accumulation_by_layer,
         .ice_to_water_specific_volume_difference = context.runscript.soil_geometry_parameters.ice_to_water_specific_volume_difference,
         .organic_carbon_specific_volume_m3_per_g = context.runscript.soil_geometry_parameters.organic_carbon_specific_volume_m3_per_g,

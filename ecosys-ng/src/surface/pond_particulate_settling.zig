@@ -1103,7 +1103,9 @@ test "three cells discriminate retention transition from faithful settling eligi
         .liquid_water_heat_capacity_megajoules_per_m3_k = 4.19,
     };
     try transition.applyTile(&transition_context, .{ .first = 0, .end = cell_count });
-    try std.testing.expectEqualSlices(bool, &.{ false, true, true }, transitions.active);
+    // REDIST NN=3 needs NU > NUI, which the separated soil grid never has, so
+    // exceeding retention selects no transition; settling stays independent.
+    try std.testing.expectEqualSlices(bool, &.{ false, false, false }, transitions.active);
 
     const microbial_stride = organic.microbial_substrate_count *
         organic.microbial_population_count * organic.kinetic_fraction_count;

@@ -101,8 +101,11 @@ test "runtime surface transition selection is cell independent and clears stale 
     };
     try applyTile(&context, .{ .first = 0, .end = 2 });
     try std.testing.expect(!state.active[0]);
-    try std.testing.expect(state.active[1]);
+    // REDIST NN=3 needs NU > NUI; ng never removes a soil surface layer, so
+    // excess ponded water stays on the surface and stale events are cleared.
+    try std.testing.expect(!state.active[1]);
     try std.testing.expect(state.active[2]);
     try applyTile(&context, .{ .first = 2, .end = 3 });
-    try std.testing.expect(state.active[2]);
+    try std.testing.expect(!state.active[2]);
+    try std.testing.expectEqual(@as(f64, 0), state.boundary_change_m[2]);
 }

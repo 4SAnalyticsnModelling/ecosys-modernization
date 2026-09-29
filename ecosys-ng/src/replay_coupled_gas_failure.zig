@@ -125,6 +125,20 @@ pub fn main(init: std.process.Init) !void {
             .{args[1]},
         );
     }
+    // TEMP_DIAGNOSTIC (hour 2169): dump the captured system.
+    {
+        const replay_inputs = ecosys.coupled_gas_failure_reporter.replayInputs(&replay_case);
+        const st = &replay_case.state;
+        for (0..st.cell_count) |cell| {
+            std.log.info("replay cell={d} air_m3={e} temperature_k={e} water_vapor_mol={e} air_capacity_mol={e} water_m3={e} band_water_m3={e} bubbling={}", .{ cell, st.air_volume_m3[cell], st.temperature_k[cell], st.water_vapor_mol[cell], 1.2194e4 * st.air_volume_m3[cell] / st.temperature_k[cell], replay_inputs.water_volume_m3[cell], replay_inputs.band_water_volume_m3[cell], replay_inputs.bubbling_enabled[cell] });
+            for (0..st.gaseous_mass_g.len / st.cell_count) |species| {
+                const c = cell * (st.gaseous_mass_g.len / st.cell_count) + species;
+                std.log.info("  species={d} gaseous_g={e} dissolved_g={e} macro_g={e} band_g={e} solubility={e} exchange_rate={e}", .{ species, st.gaseous_mass_g[c], st.dissolved_mass_g[c], st.macropore_dissolved_mass_g[c], st.band_dissolved_mass_g[c], replay_inputs.mass_solubility_ratio[c], replay_inputs.gas_water_exchange_rate_per_step[c] });
+            }
+        }
+        for (replay_inputs.atmospheric_boundaries) |boundary|
+            std.log.info("boundary cell={d} aerodynamic={e} interior={any} atmosphere={any}", .{ boundary.cell_index, boundary.aerodynamic_conductance_m3_per_step, boundary.interior_conductance_m3_per_step, boundary.atmospheric_concentration_g_per_m3 });
+    }
     const solve_started = std.Io.Clock.now(.boot, init.io);
     const result = ecosys.coupled_gas_solver.solve(
         allocator,

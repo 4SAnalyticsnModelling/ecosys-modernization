@@ -221,8 +221,12 @@ pub fn residualAtCapturing(allocator: std.mem.Allocator, scratch: *gas.State, ba
         }
     }
     var boundary_flux: [gas.species_count]f64 = undefined;
+    // TRNSFR's convective (pressure) boundary displacement, like the face
+    // displacement above, is explicit in the step-start inventory
+    // (trnsfr.f 3311-3330); only the diffusive part is solved implicitly.
+    const pressure_gaseous_g = if (inputs.explicit_boundary_pressure) base[0..n] else scratch.gaseous_mass_g;
     for (inputs.atmospheric_boundaries) |boundary| {
-        try atmosphere.calculateFluxesGFromValidatedInputs(scratch, boundary, transport_iteration_fraction, &boundary_flux);
+        try atmosphere.calculateFluxesGWithPressureMassesFromValidatedInputs(scratch, pressure_gaseous_g[boundary.cell_index * gas.species_count ..][0..gas.species_count], boundary, transport_iteration_fraction, &boundary_flux);
         for (boundary_flux, 0..) |flux, species| {
             const index = boundary.cell_index * gas.species_count + species;
             const accepted = @max(-gas_target[index], flux);
@@ -241,12 +245,12 @@ pub fn residualAtCapturing(allocator: std.mem.Allocator, scratch: *gas.State, ba
             if (std.meta.eql(cached, boundary)) {
                 boundary_flux = cached_subsurface_flux;
             } else {
-                try atmosphere.calculateFluxesGFromValidatedInputs(scratch, boundary, transport_iteration_fraction, &boundary_flux);
+                try atmosphere.calculateFluxesGWithPressureMassesFromValidatedInputs(scratch, pressure_gaseous_g[boundary.cell_index * gas.species_count ..][0..gas.species_count], boundary, transport_iteration_fraction, &boundary_flux);
                 cached_subsurface_boundary = boundary;
                 cached_subsurface_flux = boundary_flux;
             }
         } else {
-            try atmosphere.calculateFluxesGFromValidatedInputs(scratch, boundary, transport_iteration_fraction, &boundary_flux);
+            try atmosphere.calculateFluxesGWithPressureMassesFromValidatedInputs(scratch, pressure_gaseous_g[boundary.cell_index * gas.species_count ..][0..gas.species_count], boundary, transport_iteration_fraction, &boundary_flux);
             cached_subsurface_boundary = boundary;
             cached_subsurface_flux = boundary_flux;
         }

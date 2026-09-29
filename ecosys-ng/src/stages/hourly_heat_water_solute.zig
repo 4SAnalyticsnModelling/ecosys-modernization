@@ -13734,9 +13734,12 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         // construction shrinks (frost heave lifts ALTG). Negate here so
         // the end-of-hour assembler receives the true DVOLI sign
         // instead of its inverse.
+        // DVOLI is VOLI + VOLIH (redist.f 5965-5966): matrix (carrier 7) and
+        // macropore (carrier 8) ice both heave the layer.
         for (0..context.grid.layer_count) |l| {
             ws.ice_volume_delta_m3[l] =
-                -accepted_soil_water_heat.grid_delta_by_layer_carrier[l * carrier_count + 7] /
+                -(accepted_soil_water_heat.grid_delta_by_layer_carrier[l * carrier_count + 7] +
+                    accepted_soil_water_heat.grid_delta_by_layer_carrier[l * carrier_count + 8]) /
                 context.runscript.soil_phase_heat_parameters.freeze_thaw.ice_density_megagrams_per_m3;
         }
     }

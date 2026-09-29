@@ -16,6 +16,12 @@ pub const Inputs = struct {
     face_conductance_m3_per_step: []const f64,
     atmospheric_boundaries: []const atmosphere.Boundary,
     subsurface_boundaries: []const atmosphere.Boundary = &.{},
+    /// TRNSFR prices the boundary convective (pressure) displacement from the
+    /// inventory at the start of each gas subcycle (trnsfr.f 3311-3330), so
+    /// production evaluates it at the step-start base (DEV-012). False keeps
+    /// the implicit candidate-priced map; only solver control-flow fixtures
+    /// that need that nonlinearity set it.
+    explicit_boundary_pressure: bool = true,
     /// Full matrix water volume. NH3 non-band volume is this minus
     /// `band_water_volume_m3`; other gases use the full volume.
     water_volume_m3: []const f64,

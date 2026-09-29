@@ -74,11 +74,24 @@ pub fn calculateFluxesG(state: *const gas.State, boundary: Boundary, iteration_f
 /// and one residual-level validation of the nonlinear candidate inventories.
 pub fn calculateFluxesGFromValidatedInputs(state: *const gas.State, boundary: Boundary, iteration_fraction: f64, output_flux_g: []f64) !void {
     const masses = state.gaseous_mass_g[boundary.cell_index * gas.species_count ..][0..gas.species_count];
+    return calculateFluxesGWithPressureMassesFromValidatedInputs(state, masses, boundary, iteration_fraction, output_flux_g);
+}
+
+/// As `calculateFluxesGFromValidatedInputs`, but the TRNSFR convective
+/// (pressure) displacement is priced from `pressure_masses_g` instead of the
+/// candidate. trnsfr.f 3311-3330 applies RFL*G = VGFLW*V*G2/VTGAS explicitly
+/// from the inventory at the start of each gas subcycle. Evaluated at the
+/// implicit candidate, (C - sum n) * n_i / sum n makes every species'
+/// coefficient vanish once the deficit is comparable to the resident gas
+/// (ponded litter at Ottawa hour 2169: 2% of capacity), so the coupled root
+/// does not exist and Newton stagnates.
+pub fn calculateFluxesGWithPressureMassesFromValidatedInputs(state: *const gas.State, pressure_masses_g: []const f64, boundary: Boundary, iteration_fraction: f64, output_flux_g: []f64) !void {
+    const masses = state.gaseous_mass_g[boundary.cell_index * gas.species_count ..][0..gas.species_count];
     var pressure_flux: [gas.species_count]f64 = undefined;
-    try gas.pressureDrivenFluxesGFromValidatedInputs(state.air_volume_m3[boundary.cell_index], state.temperature_k[boundary.cell_index], state.water_vapor_mol[boundary.cell_index], masses, iteration_fraction, &pressure_flux);
+    try gas.pressureDrivenFluxesGFromValidatedInputs(state.air_volume_m3[boundary.cell_index], state.temperature_k[boundary.cell_index], state.water_vapor_mol[boundary.cell_index], pressure_masses_g, iteration_fraction, &pressure_flux);
     var resident_dry_gas_mol: f64 = 0;
     var atmospheric_dry_gas_mol_per_m3: f64 = 0;
-    for (masses, boundary.atmospheric_concentration_g_per_m3, gas.g_per_mol_tracked) |mass, concentration, molar_mass| {
+    for (pressure_masses_g, boundary.atmospheric_concentration_g_per_m3, gas.g_per_mol_tracked) |mass, concentration, molar_mass| {
         resident_dry_gas_mol += mass / molar_mass;
         atmospheric_dry_gas_mol_per_m3 += concentration / molar_mass;
     }

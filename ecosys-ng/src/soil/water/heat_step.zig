@@ -2689,8 +2689,13 @@ fn temperatureForCellEnthalpy(
     // existing, already-tested fixed-hour substep recovery ladder
     // (`isFixedHourDtRecoveryFailure`) refine `dt` instead of committing this
     // candidate.
-    if (!heat_solver.isPhysicalTemperatureK(temperature_k))
+    if (!heat_solver.isPhysicalTemperatureK(temperature_k)) {
+        if (!@import("builtin").is_test) std.log.err(
+            "TEMP_DIAGNOSTIC renormalized temperature out of domain: layer={d} temperature_k={e} prior_k={e} target_mj={e} fusion_offset_mj={e} coefficient_mj_per_k={e} dry_mj_per_k={e} matrix_liquid_m3={e} macro_liquid_m3={e} vapor_m3={e} ice_m3={e} matrix_pore_m3={e}",
+            .{ layer, temperature_k, grid.soil_temperature_k[layer], target_megajoules, fusion_offset_megajoules, temperature_coefficient, dry_solid_heat_capacity_megajoules_per_k, grid.matrix_liquid_water_m3[layer], grid.macropore_liquid_water_m3[layer], grid.water_vapor_volume_m3[layer], frozen_water_equivalent_m3, grid.matrix_pore_capacity_m3[layer] },
+        );
         return error.SoilHeatRenormalizedTemperatureOutsidePhysicalDomain;
+    }
     return temperature_k;
 }
 

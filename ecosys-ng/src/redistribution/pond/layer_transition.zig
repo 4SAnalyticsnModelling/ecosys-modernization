@@ -100,6 +100,12 @@ pub const SeparatedSurfaceInputs = struct {
     minimum_heat_capacity_megajoules_per_k: f64,
     liquid_water_heat_capacity_megajoules_per_m3_k: f64,
     ice_density_megagrams_per_m3: f64 = ice_units.reference_ice_density_megagrams_per_m3,
+    /// REDIST NN=3 (8308-8318) acts only when `NU > NUI`, i.e. an NN=2 event
+    /// earlier removed a pond (BKDS <= 0) surface layer from the soil
+    /// profile, and the soil surface lies below its initial depth. Without
+    /// that, excess ponded water stays in the surface (layer 0) domain: legacy
+    /// sets DDLYRX(3) = 0 and moves no water, litter, or soil boundary.
+    topsoil_replaced_pond_layer: bool = false,
 };
 
 /// Equivalent selector for ecosys-ng's separated surface representation.
@@ -112,6 +118,7 @@ pub fn selectSeparatedSurfacePondTransfer(inputs: SeparatedSurfaceInputs) !?Tran
     };
     if (inputs.surface_pond_liquid_water_m3 < 0 or inputs.surface_pond_ice_m3 < 0 or inputs.surface_ponding_capacity_m3 < 0 or inputs.surface_litter_volume_m3 < 0 or inputs.surface_litter_water_capacity_m3 < 0 or inputs.horizontal_area_m2 <= 0 or inputs.minimum_heat_capacity_megajoules_per_k < 0 or inputs.liquid_water_heat_capacity_megajoules_per_m3_k <= 0) return error.InvalidPondTransitionInput;
     if (inputs.ice_density_megagrams_per_m3 <= 0 or inputs.ice_density_megagrams_per_m3 > 1) return error.InvalidPondTransitionInput;
+    if (!inputs.topsoil_replaced_pond_layer) return null;
     const physical_ice_m3 = try ice_units.physicalVolumeM3FromWaterEquivalent(inputs.surface_pond_ice_m3, inputs.ice_density_megagrams_per_m3);
     const excess_m3 = @max(0, inputs.surface_pond_liquid_water_m3 + physical_ice_m3 - inputs.surface_ponding_capacity_m3);
     if (excess_m3 <= inputs.minimum_heat_capacity_megajoules_per_k / inputs.liquid_water_heat_capacity_megajoules_per_m3_k) return null;
@@ -295,10 +302,28 @@ test "separated surface pond routes to topsoil without changing soil indexing" {
         .horizontal_area_m2 = 10,
         .minimum_heat_capacity_megajoules_per_k = 0.0419,
         .liquid_water_heat_capacity_megajoules_per_m3_k = 4.19,
+        .topsoil_replaced_pond_layer = true,
     })).?;
     try std.testing.expectEqual(@as(usize, 0), transition.next_first_active_layer);
     const physical_ice_m3 = 0.1 / ice_units.reference_ice_density_megagrams_per_m3;
     const expected_excess_m3 = 0.4 + physical_ice_m3 - 0.2;
     const expected_pond_volume_m3 = 0.4 + physical_ice_m3 - 0.1 + 0.1;
     try std.testing.expectApproxEqAbs(expected_excess_m3 / expected_pond_volume_m3, transition.transfer_fraction, 1e-14);
+}
+
+test "separated surface pond excess stays on the surface while NU equals NUI" {
+    // redist.f 8310/8335: without a removed pond layer DDLYRX(3)=0. Ottawa 1998
+    // snowmelt otherwise raised the soil surface by mm per hour and replaced the
+    // topsoil's solids with litter and water.
+    try std.testing.expectEqual(@as(?Transition, null), try selectSeparatedSurfacePondTransfer(.{
+        .top_soil_layer = 0,
+        .surface_pond_liquid_water_m3 = 0.4,
+        .surface_pond_ice_m3 = 0.1,
+        .surface_ponding_capacity_m3 = 0.2,
+        .surface_litter_volume_m3 = 0.1,
+        .surface_litter_water_capacity_m3 = 0.1,
+        .horizontal_area_m2 = 10,
+        .minimum_heat_capacity_megajoules_per_k = 0.0419,
+        .liquid_water_heat_capacity_megajoules_per_m3_k = 4.19,
+    }));
 }

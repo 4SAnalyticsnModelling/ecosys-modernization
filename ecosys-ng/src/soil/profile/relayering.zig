@@ -269,7 +269,6 @@ pub fn applyLayerRedistribution(ctx: Context, geometry_changes: Geometry.Disturb
             else
                 0;
             const ddlyrx = geometry_changes.pond_m[bnd_idx] + freeze_thaw_transfer_m + geometry_changes.erosion_m[bnd_idx] + geometry_changes.organic_carbon_m[bnd_idx];
-
             // REDIST 8210-8216 refreshes the anchor DLYR at this loop
             // position, but leaves the lower neighbor on its prior live DLYR
             // until that layer becomes the next anchor. Only the last pair

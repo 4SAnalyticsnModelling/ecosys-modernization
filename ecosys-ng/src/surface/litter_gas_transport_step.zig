@@ -8,6 +8,7 @@ const ammonia_bridge = @import("litter_ammonia_phase_bridge.zig");
 const litter_geometry = @import("litter_geometry_step.zig");
 const precipitation = @import("precipitation.zig");
 const ice_units = @import("../core/ice_units.zig");
+const legacy_floor = @import("../core/legacy_water_negligible_floor.zig");
 
 pub const RuntimeParameters = struct {
     reference_temperature_k: f64 = 298.15,
@@ -218,7 +219,15 @@ pub const State = struct {
                 litter_ice_m3[cell],
                 parameters.ice_density_megagrams_per_m3,
             );
-            const exchange = try precipitation.litterGasExchange(geometry.pore_volume_m3[cell], physical_ice_volume_m3, litter_water_m3[cell], air_volume, geometry.water_retention_capacity_m3[cell], whole_step_exchange);
+            // trnsfr.f 3436-3438: litter air-water exchange (R*DFG) runs only
+            // when VOLT(0), VOLPM(0) and VOLWM(0) all exceed ZEROS2. A ponded
+            // litter layer with a sliver of air otherwise asks a ~zero gas
+            // phase to absorb the whole degassing flux and the solve stalls.
+            const negligible_volume_m3 = legacy_floor.legacyNegligibleWaterVolumeM3(area);
+            const exchange_air_m3 = if (volume > negligible_volume_m3 and
+                air_volume > negligible_volume_m3 and
+                litter_water_m3[cell] > negligible_volume_m3) air_volume else 0;
+            const exchange = try precipitation.litterGasExchange(geometry.pore_volume_m3[cell], physical_ice_volume_m3, litter_water_m3[cell], exchange_air_m3, geometry.water_retention_capacity_m3[cell], whole_step_exchange);
             var interior: [gas.species_count]f64 = undefined;
             const air_fraction = if (volume > 0) air_volume / volume else 0;
             const diffusion_geometry_m = if (thickness > 0 and porosity > 0 and air_fraction > parameters.minimum_air_fraction)
@@ -259,6 +268,9 @@ pub const State = struct {
             solve_inputs,
             solve_options,
         ) catch |err| {
+            // TEMP_DIAGNOSTIC (hour 2169): litter pore state at failure.
+            if (!@import("builtin").is_test) for (0..self.cell_count) |cell|
+                std.log.warn("TEMP_DIAGNOSTIC litter gas failure: cell={d} volume_m3={e} pore_m3={e} air_m3={e} water_m3={e} ice_m3={e} retention_m3={e} exchange_rate={e}", .{ cell, geometry.expanded_total_volume_m3[cell], geometry.pore_volume_m3[cell], geometry.air_volume_m3[cell], litter_water_m3[cell], litter_ice_m3[cell], geometry.water_retention_capacity_m3[cell], self.gas_water_exchange_rate_per_step[cell * gas.species_count] });
             if (failure_report) |report|
                 return gas_failure_reporter.reportPreservingSolverError(
                     self.allocator,
@@ -392,7 +404,10 @@ test "litter ammonia phase exchange conserves chemistry plus gaseous owner" {
         1e-11,
     );
     try std.testing.expectApproxEqAbs(aqueous_g_n, gas_state.dissolved_mass_g[ammonia], 1e-12);
-    try std.testing.expect(state.atmospheric_flux_g_per_h[ammonia] > 0);
+    // DEV-012: the pressure displacement is priced from the step-start gas
+    // inventory (TRNSFR subcycle start). This fixture starts with no gas and a
+    // gas-free atmosphere, so no convective inflow is admitted this step.
+    try std.testing.expectEqual(@as(f64, 0), state.atmospheric_flux_g_per_h[ammonia]);
 }
 
 test "surface litter gas transaction rolls back gas chemistry and workspaces on later invalid cell" {

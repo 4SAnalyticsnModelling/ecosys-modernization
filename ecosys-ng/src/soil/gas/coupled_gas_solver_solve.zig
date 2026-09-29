@@ -1375,6 +1375,15 @@ fn solveControlled(
             }
             if (options.emit_failure_diagnostics)
                 std.log.warn("coupled gas solver stagnated: iteration={d} scaled_residual={e} newton_steps={d} anderson_steps={d} unknowns={d}", .{ iteration + 1, norm, newton_steps, anderson_steps, unknown_count });
+            // TEMP_DIAGNOSTIC (hour 2169): limiting coordinates.
+            if (options.emit_failure_diagnostics) {
+                const diag_inventory_count = current.len / 3;
+                for (current, residual, 0..) |value, difference, index| {
+                    const scale = @import("coupled_gas_solver_misc.zig").absoluteToleranceForCoordinate(options, index, diag_inventory_count) + options.relative_tolerance * @abs(value);
+                    if (@abs(difference) / scale > 1e3)
+                        std.log.warn("TEMP_DIAGNOSTIC coupled gas limiting: index={d} phase={d} rest={d} value={e} residual={e} scale={e}", .{ index, index / diag_inventory_count, index % diag_inventory_count, value, difference, scale });
+                }
+            }
             return error.CoupledGasSolverStagnated;
         }
         @memcpy(previous, current);
@@ -1598,6 +1607,8 @@ test "published conservative target independently satisfies nonlinear tolerance"
         .band_gas_water_exchange_rate_per_step = &no_exchange,
         .bubbling_enabled = &no_bubbling,
         .atmospheric_flux_g_by_component = &atmospheric_ledger,
+        // Fixture needs the candidate-priced pressure map's nonlinearity.
+        .explicit_boundary_pressure = false,
     };
     const options: group_misc.Options = .{
         .absolute_tolerance_g_by_species = @splat(1e-12),
@@ -1703,6 +1714,8 @@ test "final counted slot may publish within explicit physical ceiling" {
         .gas_water_exchange_rate_per_step = &no_exchange,
         .band_gas_water_exchange_rate_per_step = &no_exchange,
         .bubbling_enabled = &no_bubbling,
+        // Fixture needs the candidate-priced pressure map's nonlinearity.
+        .explicit_boundary_pressure = false,
     };
     const options: group_misc.Options = .{
         .absolute_tolerance_g_by_species = @splat(1e-12),
