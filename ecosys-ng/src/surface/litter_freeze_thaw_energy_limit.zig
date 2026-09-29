@@ -63,6 +63,13 @@ pub const Inputs = struct {
     /// `ZERO*VOLT(0)`, the negligible-volume threshold below which a phase is
     /// treated as absent.
     negligible_volume_m3: f64,
+    /// Legacy uses one TFREEZ for the freeze/thaw switch and the HFLFRX drive
+    /// (watsub.f 3134-3155). A caller whose phase DIRECTION comes from another
+    /// melting temperature (the surface Dall'Amico equilibrium, DEV-002) passes
+    /// it here, so both sides change sign at the same temperature. Otherwise the
+    /// band between the two points requests freezing but permits only thawing,
+    /// a step in the surface energy residual (Ottawa hour 2786, saturated pond).
+    freezing_point_override_k: ?f64 = null,
 };
 
 pub const Result = struct {
@@ -109,7 +116,7 @@ pub fn apply(inputs: Inputs, parameters: Parameters) !Result {
     const denominator = inputs.water_potential_megapascal - latent;
     if (!std.math.isFinite(denominator) or denominator == 0)
         return error.InvalidSurfaceFreezingPointDepression;
-    const depressed_freezing_point_k =
+    const depressed_freezing_point_k = inputs.freezing_point_override_k orelse
         -parameters.freezing_point_depression_numerator / denominator;
     if (!std.math.isFinite(depressed_freezing_point_k) or depressed_freezing_point_k <= 0)
         return error.InvalidSurfaceFreezingPointDepression;

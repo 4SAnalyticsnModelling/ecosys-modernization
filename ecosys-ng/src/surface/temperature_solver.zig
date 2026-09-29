@@ -1513,6 +1513,8 @@ fn limitPhaseChangeToAvailableEnergy(
         .substep_energy_fraction = 1,
         .substep_mass_fraction = 1,
         .negligible_volume_m3 = 0,
+        // One melting temperature for direction and drive (watsub.f 3134-3155).
+        .freezing_point_override_k = equilibrium.depressed_melting_temperature_k,
     }, .{
         .latent_heat_of_fusion_megajoules_per_m3 = context.latent_heat_of_fusion_megajoules_per_m3,
         .freezing_point_depression_numerator = 9.0959e4,
