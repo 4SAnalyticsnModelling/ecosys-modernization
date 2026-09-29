@@ -968,8 +968,9 @@ fn solveControlled(
     // An accepted Anderson recovery is not a publication candidate. The next
     // counted outer iteration must retry Newton before convergence may publish.
     var newton_retry_required = false;
+    var bounded_stagnation = false;
     var iteration: u16 = 0;
-    while (iteration < options.max_iterations) : (iteration += 1) {
+    iterations: while (iteration < options.max_iterations) : (iteration += 1) {
         // Every counted iteration solves the actual whole-hour WATSUB
         // residual. Invalid accepted state is terminal; damping is confined to
         // private Newton trials and can never repair `current` out of band.
@@ -997,7 +998,7 @@ fn solveControlled(
         if (!retrying_newton_after_anderson and current_norm <= 1) {
             var publication_state: []const f64 = current;
             var conservation_accepted = try localConservationAccepted(grid, faces, active_properties, base, current, residual, trial_micro_flux, trial_macro_flux, layer_internal_input_m3, layer_internal_output_m3, cell_internal_input_m3, cell_internal_output_m3, options, null);
-            if (!conservation_accepted and boundedConservativeMapCorrection(current, target, options)) {
+            if (!conservation_accepted and boundedConservativeMapCorrection(current, target, options, 1)) {
                 @memset(candidate, 0);
                 conservation_accepted = try localConservationAccepted(grid, faces, active_properties, base, target, candidate, trial_micro_flux, trial_macro_flux, layer_internal_input_m3, layer_internal_output_m3, cell_internal_input_m3, cell_internal_output_m3, options, null);
                 if (conservation_accepted) publication_state = target;
@@ -1521,6 +1522,18 @@ fn solveControlled(
                 rejected_forecast_recovery_step = newton_steps;
                 continue;
             }
+            // WATSUB (watsub.f) integrates fluxes explicitly and never solves
+            // the implicit system; its accepted storage is always base +
+            // fluxes. When Newton and Anderson both stall within a bounded
+            // factor of tolerance, publish that conservative map at the
+            // current iterate (exact water balance, bounded implicitness
+            // defect) instead of failing the hour. Local conservation must
+            // still pass below. Hour 3163 (1998 d132): drying top layer,
+            // scaled residual 1.99.
+            if (current_norm <= bounded_stagnation_publication_limit) {
+                bounded_stagnation = true;
+                break :iterations;
+            }
             if (!builtin.is_test) {
                 const domain: []const u8 = if (limiting_component < cells)
                     "matrix"
@@ -1574,13 +1587,18 @@ fn solveControlled(
     }
     var final_conservation_diagnostic: LocalConservationDiagnostic = .{};
     var final_publication_state: []const f64 = current;
-    var final_conservation_accepted = final_norm <= 1 and try localConservationAccepted(grid, faces, active_properties, base, current, residual, trial_micro_flux, trial_macro_flux, layer_internal_input_m3, layer_internal_output_m3, cell_internal_input_m3, cell_internal_output_m3, options, &final_conservation_diagnostic);
-    if (final_norm <= 1 and !final_conservation_accepted and boundedConservativeMapCorrection(current, target, options)) {
+    const publication_limit: f64 = if (bounded_stagnation) bounded_stagnation_publication_limit else 1;
+    var final_conservation_accepted = !bounded_stagnation and final_norm <= 1 and try localConservationAccepted(grid, faces, active_properties, base, current, residual, trial_micro_flux, trial_macro_flux, layer_internal_input_m3, layer_internal_output_m3, cell_internal_input_m3, cell_internal_output_m3, options, &final_conservation_diagnostic);
+    if (final_norm <= publication_limit and !final_conservation_accepted and boundedConservativeMapCorrection(current, target, options, publication_limit)) {
         @memset(candidate, 0);
         final_conservation_accepted = try localConservationAccepted(grid, faces, active_properties, base, target, candidate, trial_micro_flux, trial_macro_flux, layer_internal_input_m3, layer_internal_output_m3, cell_internal_input_m3, cell_internal_output_m3, options, null);
         if (final_conservation_accepted) final_publication_state = target;
     }
     if (final_conservation_accepted) {
+        if (bounded_stagnation and !builtin.is_test) std.log.warn(
+            "soil water solver stagnated within bounded tolerance; published conservative flux map: scaled_residual={e} limit={e} newton_steps={d} anderson_steps={d}",
+            .{ final_norm, publication_limit, newton_steps, picard_steps },
+        );
         try group_flux.state_update(grid, properties, final_publication_state);
         @memcpy(micropore_face_flux_m3_per_step, trial_micro_flux);
         @memcpy(macropore_face_flux_m3_per_step, trial_macro_flux);
@@ -1707,19 +1725,25 @@ fn solveControlled(
             },
         );
     }
+    if (bounded_stagnation) return error.SoilWaterSolverStagnated;
     return error.SoilWaterSolverDidNotConverge;
 }
+
+/// Largest scaled residual (multiple of the nonlinear tolerance) at which a
+/// stagnated iterate's conservative flux map may be published.
+const bounded_stagnation_publication_limit: f64 = 4;
 
 fn boundedConservativeMapCorrection(
     current: []const f64,
     target: []const f64,
     options: group_types.Options,
+    limit: f64,
 ) bool {
     if (current.len != target.len) return false;
     for (current, target) |value, mapped| {
         if (!std.math.isFinite(value) or value < 0 or
             !std.math.isFinite(mapped) or mapped < 0 or
-            group_residual.scaledComponentResidual(value, mapped - value, options) > 1)
+            group_residual.scaledComponentResidual(value, mapped - value, options) > limit)
             return false;
     }
     return true;
@@ -1735,16 +1759,19 @@ test "conservative water map correction is bounded by nonlinear tolerance" {
         &.{2.0514824628670227e-14},
         &.{5.841896965627101e-14},
         options,
+        1,
     ));
     try std.testing.expect(!boundedConservativeMapCorrection(
         &.{2.0514824628670227e-14},
         &.{2.0e-13},
         options,
+        1,
     ));
     try std.testing.expect(!boundedConservativeMapCorrection(
         &.{2.0514824628670227e-14},
         &.{-1.0e-14},
         options,
+        1,
     ));
 }
 

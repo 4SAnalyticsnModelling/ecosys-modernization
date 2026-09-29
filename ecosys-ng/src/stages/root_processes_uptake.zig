@@ -201,6 +201,7 @@ pub fn applyRootNutrientUptake(context: anytype) !void {
                     context.soil_chemistry.aqueous[soil].sulfate * context.grid.matrix_liquid_water_m3[soil],
                     context.soil_chemistry.aqueous[soil].chloride * context.grid.matrix_liquid_water_m3[soil],
                 };
+                const soil_salt_content_before_mol = soil_salt_content_mol;
                 for (0..exudation_competitor_count) |competitor_index| {
                     const competitor = exudation_workspace.competitors[competitor_index];
                     const root = try roots.layerIndex(competitor.plant, competitor.domain, competitor.layer);
@@ -259,6 +260,25 @@ pub fn applyRootNutrientUptake(context: anytype) !void {
                 context.soil_chemistry.aqueous[soil].potassium = soil_salt_content_mol[5] * inverse_water;
                 context.soil_chemistry.aqueous[soil].sulfate = soil_salt_content_mol[6] * inverse_water;
                 context.soil_chemistry.aqueous[soil].chloride = soil_salt_content_mol[7] * inverse_water;
+                // issue-108: the micropore transport state is the authority at
+                // the post-UPTAKE ownership boundary (hourly_vegetation
+                // synchronizeCellAfterCarrierChange rebuilds unchanged species
+                // from it), so the root salt exchange must also be published
+                // there. Publish only the exchange delta (REDIST 6968-6977
+                // ZCA=ZCA-TUPZCA etc.): hours without root salt exchange stay
+                // bit-identical, and the census no longer counts the withdrawn
+                // cations in both the root and the soil (hour 3289 Ca/Na/K).
+                {
+                    const transport_amounts = try context.micropore_solute_state.cellAmounts(soil);
+                    const salt_transport_species = [ecosys.plant_root_salt_exchange.species_count]ecosys.solute_transport_species.AqueousSpecies{ .aluminum, .iron, .calcium, .magnesium, .sodium, .potassium, .sulfate, .chloride };
+                    for (salt_transport_species, soil_salt_content_mol, soil_salt_content_before_mol) |species, after_mol, before_mol| {
+                        const delta_mol = after_mol - before_mol;
+                        if (delta_mol == 0) continue;
+                        const updated_mol = transport_amounts[@intFromEnum(species)] + delta_mol;
+                        if (!std.math.isFinite(updated_mol) or updated_mol < 0) return error.InvalidRootSaltTransportPublication;
+                        transport_amounts[@intFromEnum(species)] = updated_mol;
+                    }
+                }
                 try diagnostics.traceIssue108Cation(context, "after_root_salt_writeback", soil, context.executed_weather_hours.* + 1);
             }
             if (competitor_count > 0) {

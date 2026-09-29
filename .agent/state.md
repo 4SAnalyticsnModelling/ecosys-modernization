@@ -1,51 +1,32 @@
-# Swarm state (keep <=1,500 words; replace, do not append)
+# Adversarial Workflow State
 
-Updated 2026-09-25. Plan: `ecosys-ng_ottawa_qualification_execution_plan.md` (v4, reviewed PASS).
-Spec: `ecosys-ng_ottawa_autonomous_qualification_plan.md`. How the swarm works: `.agent/README.md`.
-The controller writes "Recent accepted change" and "Next expected operation" from SENTINEL's dispatch.
+Updated 2026-09-28 22:40 (local). Plan: Complete 30-Year Ottawa Run with Zero Science Gap.
 
-## Current objective
-Phase P0 (freeze, adjudicate inputs, baseline; exit gate G0).
+## Current Round: 5
+- **Active Proposer**: CLAUDE (solver/ledger gaps on the live frontier)
+- **Active Challenger**: DEEPSEEK (round 5: T-00075 deposition double-injection proof; round 4 ZEROC challenge)
 
-## Current candidate commit
-`main` (clean tree, pushed every cycle). `fe3c489` = pre-plan work parked (P0.1 DONE, user-approved
-2026-09-25; branch `wip/pre-plan-2026-09-25`). The 3 Zig stage edits of the old issue-108 work are in
-`fe3c489`, unreviewed.
+## Frontier (provisional, diagnostic runs on C:\ecosys-build\runs, deck blob ecf5e61a)
+- Strict hour-0 at HEAD 8a4a565 failed hour 277 (T-00075 exposure). Fixed (2edcbf2): phosphate gates,
+  legacy SOLUTE ZEROC=1e-32 floors (Newton refs, acceptance, layer ion ledger).
+- Replay from checkpoint 480 (h0E) reached hour 2540; fails hour 2541 (1998 d106 h21)
+  `SnowVaporInventoryWithoutAirVolume`. Fix in progress: remove fatal pre-check, WATSUB 1431-1435/1499-1517
+  leave vapor in airless layers undiffused (face loop already skips them).
+- Next known blocker: hour 3289 Ca/Na/K layer-2 residual (issue-108; DEEPSEEK cation-sync CONTESTED,
+  needs delta publish; stash "deepseek-cation-sync").
+- verified_frontier = 0 (no strict campaign under a single binding yet).
 
-## Verified frontier
-0 under the plan's evidence binding. Historical simulation frontier: 3,288 accepted hours of 262,920
-(run-038, required deck). Provisional until re-verified.
+## Decisions this session
+- D6 DEV-004 deck-half revert executed (runtime f6 200->100, blob ecf5e61a). f6 shown irrelevant to 277.
+- T-00075 (DEV-008) KEPT: pre-T-00075 behaviour is rejected science; its runtime gaps are being fixed.
+- Push to origin fails 403 (account lacks write permission) — commits are local only.
 
-## Current failure
-Historical: hour 3,289, HourlyCellConservationFailure, Ca/Na/K positive residuals in layer 2
-(issue-108 cation half). Not being chased serially; feeds P3/P4.
+## Latent gaps logged (not Ottawa-visible)
+- DEEPSEEK r4 §2: possible double injection of deposition cations (primary_g[Al..Cl] + salt_mol) —
+  Ottawa rain ions are 0; under proof in round 5.
 
-## Confirmed facts
-- Legacy baseline (P0.3), verified by file count 2026-09-25: `evidence/legacy/` holds the PARTIAL legacy
-  Ottawa output set (hours 1-6,875 / day 286; 199 files, 110 MB; manifest `evidence/legacy/manifest/sha256.txt`)
-  plus the rebuilt source and a copy of the run-002 write-up. The full 30-yr output (run-002: 1,138 files,
-  1.33 GB) is NOT in the repo. The run-002 document describes a past run; it is not the outputs.
-  CORRECTION: the T-00011/T-00012 findings calling this "the authoritative full 30-year baseline" are wrong.
-  P0.4 needs a full legacy rerun from the run-002 recipe, which waits only on D6 (the deck).
-- D6: deck edits `9253d3b` (runtime ceiling 100->200) and `5add7de` (starte.f:189) plus the Zig solute
-  iteration ceiling 60->200 (issue-015). The PATHFINDER packet exists (T-00014). DEV-005 = legacy parity
-  (T-00024). DEV-004+DEV-006 are one deviation (merge decided 2026-09-25) and SAGE rejected it as
-  legacy-equivalent (T-00030). By decision D9, SAGE signs the D6 list; no user signature exists or is needed.
-- D9 (user, 2026-09-25): SAGE makes every decision; the swarm never waits for a human (plan section 8).
-- GitHub push works; the controller commits and pushes every cycle.
-- Second test root: 107/115 OK; test 71 FAIL (issue-106); test 109 hangs (issue-107).
-- Issue Status lines normalized (T-00005): 105 files, 0 need normalization.
-
-## Current diagnosis
-none active.
-
-## Recent accepted change
-- T-00272 ROLE PATHFINDER STATUS: clean-tree G0 pass and post-G0 step next
-- T-00271 ROLE PATHFINDER STATUS: clean-tree G0 pass; next step operational
-- T-00269 ROLE PATHFINDER STATUS: committed-tree G0 gate passes
-
-## Open blockers
-None waiting on a person (D9). P0.2 closes when SAGE signs the D6 list under the D6 rule.
-
-## Next expected operation
-await new evidence or a new task trigger
+## Tooling notes
+- Build: `$env:ZIG_LOCAL_CACHE_DIR=C:\ecosys-build\cache; zig build -Doptimize=ReleaseSafe` in ecosys-ng
+  (~15 min); exe lands in cache `o/<hash>/ecosys_ng.exe` (install step does not copy).
+- Replay: copy deck in place (manifest binds absolute path), set f25y98 line 6 resume=YES; runscript edits
+  break run identity; outputs after the checkpoint must match (replay refuses trajectory changes).

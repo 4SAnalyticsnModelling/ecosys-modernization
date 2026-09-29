@@ -115,8 +115,10 @@ pub fn solve(allocator: std.mem.Allocator, state: *snow.State, parameters: Param
             state.horizontal_area_m2[index] <= 0 or
             temperature[index] <= 0)
             return error.InvalidSnowVaporDiffusionState;
-        if (state.air_filled_volume_m3[index] == 0 and state.vapor_water_equivalent_m3[index] != 0)
-            return error.SnowVaporInventoryWithoutAirVolume;
+        // WATSUB 1431-1435 sets VP1=0 when VOLP02<=ZEROS and 1499-1517 sets
+        // FLVSS=0 when either face has no air: vapor held in a layer whose air
+        // space has closed (spring melt, hour 2541) is simply not diffused.
+        // The face loop below skips such faces; the inventory stays put.
     }
     const accepted_interface_vapor = try allocator.alloc(f64, layer_count);
     defer allocator.free(accepted_interface_vapor);
@@ -339,7 +341,7 @@ test "snow vapor diffusion preserves isothermal state and canonical carrier capa
     try std.testing.expectEqual(@as(f64, 0.999), near_full.snow_fraction);
 }
 
-test "snow vapor diffusion rejects isolated vapor without deleting inventory" {
+test "snow vapor diffusion leaves vapor in an airless layer untouched like WATSUB" {
     var state = try snow.State.init(std.testing.allocator, 1, 1);
     defer state.deinit();
     try state.initializePhysicalState(&.{0.01}, &.{1}, &.{268}, &.{0.01}, 0.1, snow.test_thermodynamics);
@@ -349,21 +351,18 @@ test "snow vapor diffusion rejects isolated vapor without deleting inventory" {
     const vapor_before = state.vapor_water_equivalent_m3[0];
     const capacity_before = state.heat_capacity_megajoules_per_k[0];
     const temperature_before = state.temperature_k[0];
-    try std.testing.expectError(
-        error.SnowVaporInventoryWithoutAirVolume,
-        solve(std.testing.allocator, &state, .{
-            .reference_vapor_diffusivity_m2_per_h = 0.0896,
-            .reference_temperature_k = 298.15,
-            .temperature_exponent = 1.75,
-            .minimum_air_fraction = 0,
-            .vapor_sensible_heat_capacity_megajoules_per_m3_k = 4.19,
-        }, .{
-            .physical_time_step_hours = 1,
-            .donor_availability_fraction = 1,
-            .full_snow_cover_depth_m = 0.07,
-            .thermodynamics = snow.test_thermodynamics,
-        }),
-    );
+    _ = try solve(std.testing.allocator, &state, .{
+        .reference_vapor_diffusivity_m2_per_h = 0.0896,
+        .reference_temperature_k = 298.15,
+        .temperature_exponent = 1.75,
+        .minimum_air_fraction = 0,
+        .vapor_sensible_heat_capacity_megajoules_per_m3_k = 4.19,
+    }, .{
+        .physical_time_step_hours = 1,
+        .donor_availability_fraction = 1,
+        .full_snow_cover_depth_m = 0.07,
+        .thermodynamics = snow.test_thermodynamics,
+    });
     try std.testing.expectEqual(vapor_before, state.vapor_water_equivalent_m3[0]);
     try std.testing.expectEqual(capacity_before, state.heat_capacity_megajoules_per_k[0]);
     try std.testing.expectEqual(temperature_before, state.temperature_k[0]);
