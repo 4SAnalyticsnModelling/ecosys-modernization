@@ -317,6 +317,98 @@ fn stageNamedConcentrationPair(
     @field(next_band.*, name) = next.band;
 }
 
+const ZoneFractions = @import("../soil/solute/charge_classification.zig").ZoneFractions;
+
+/// Zone fractions of every layer, taken before `prepareHour` changes them.
+pub fn snapshotZoneFractions(allocator: std.mem.Allocator, state: *const band_state.State) ![]ZoneFractions {
+    const snapshot = try allocator.alloc(ZoneFractions, try std.math.mul(usize, state.cell_count, state.layer_capacity));
+    errdefer allocator.free(snapshot);
+    for (0..state.cell_count) |cell| for (0..state.layer_capacity) |layer| {
+        snapshot[cell * state.layer_capacity + layer] = try state.zoneFractions(cell, layer);
+    };
+    return snapshot;
+}
+
+/// Legacy stores band and non-band inventories as AMOUNTS (ZNH4B, ZNH4S, XNB,
+/// ZNO3B, H1POB, ...). When HOUR1 shrinks a band (hour1.f:4953-4960) no amount
+/// moves (FVLNH4 = MIN(0,...)), and when the band vanishes the amounts are
+/// amalgamated into non-band (hour1.f:4970-4981). Zig keeps zone
+/// CONCENTRATIONS, so a shrink must rescale them to keep each zone's amount,
+/// and a band reduced to zero volume must be folded into non-band; otherwise
+/// conc x smaller volume silently destroys mass (hour 3562: layer-7 band NH4
+/// 4.58e-7 g, layer-8 band NO3 4.7e-9 g). Growth is left to consumeUndissolved.
+pub fn preserveZoneAmountsAfterPrepare(
+    state: *const band_state.State,
+    previous: []const ZoneFractions,
+    chemistry: *chemistry_module.State,
+    reactive_nitrogen: *reactive_nitrogen_module.State,
+) !void {
+    const layer_count = try std.math.mul(usize, state.cell_count, state.layer_capacity);
+    if (previous.len != layer_count or chemistry.cell_count != layer_count or reactive_nitrogen.layer_count != layer_count)
+        return error.FertilizerBandProductionDimensionMismatch;
+    for (0..state.cell_count) |cell| for (0..state.layer_capacity) |layer| {
+        const index = cell * state.layer_capacity + layer;
+        const old = previous[index];
+        const now = try state.zoneFractions(cell, layer);
+        if (now.ammonium_band < old.ammonium_band) {
+            const exchange = &chemistry.cation_exchange_mol_per_megagram[index];
+            try preserveZonePair(&exchange.ammonium_non_band, &exchange.ammonium_band, old.ammonium_non_band, old.ammonium_band, now.ammonium_non_band, now.ammonium_band);
+            const aqueous = &chemistry.aqueous[index];
+            try preserveZonePair(&aqueous.ammonium_non_band, &aqueous.ammonium_band, old.ammonium_non_band, old.ammonium_band, now.ammonium_non_band, now.ammonium_band);
+            try preserveZonePair(&aqueous.ammonia_non_band, &aqueous.ammonia_band, old.ammonium_non_band, old.ammonium_band, now.ammonium_non_band, now.ammonium_band);
+        }
+        if (now.nitrate_band < old.nitrate_band) {
+            const aqueous = &chemistry.aqueous[index];
+            try preserveZonePair(&aqueous.nitrate_non_band, &aqueous.nitrate_band, old.nitrate_non_band, old.nitrate_band, now.nitrate_non_band, now.nitrate_band);
+            // Nitrite is stored extensively (g N); only a vanished band folds.
+            if (now.nitrate_band == 0) {
+                reactive_nitrogen.non_band_nitrite_g_n[index] += reactive_nitrogen.band_nitrite_g_n[index];
+                reactive_nitrogen.band_nitrite_g_n[index] = 0;
+            }
+        }
+        if (now.phosphate_band < old.phosphate_band) {
+            inline for (@typeInfo(phosphate_network.State).@"struct".fields) |field| {
+                try preserveZonePair(
+                    &@field(chemistry.non_band_phosphate[index], field.name),
+                    &@field(chemistry.band_phosphate[index], field.name),
+                    old.phosphate_non_band,
+                    old.phosphate_band,
+                    now.phosphate_non_band,
+                    now.phosphate_band,
+                );
+            }
+        }
+    };
+}
+
+fn preserveZonePair(non_band: *f64, band: *f64, old_non_band: f64, old_band: f64, new_non_band: f64, new_band: f64) !void {
+    inline for (.{ non_band.*, band.*, old_non_band, old_band, new_non_band, new_band }) |value|
+        if (!std.math.isFinite(value) or value < 0) return error.InvalidBandInventoryState;
+    if (new_non_band <= 0) return error.InvalidBandInventoryState;
+    const non_band_amount = non_band.* * old_non_band;
+    const band_amount = band.* * old_band;
+    if (new_band > 0) {
+        band.* = band_amount / new_band;
+        non_band.* = non_band_amount / new_non_band;
+    } else {
+        non_band.* = (non_band_amount + band_amount) / new_non_band;
+        band.* = 0;
+    }
+    if (!std.math.isFinite(non_band.*) or !std.math.isFinite(band.*)) return error.InvalidBandInventoryState;
+}
+
+test "band shrink preserves zone amounts and a vanished band amalgamates" {
+    var non_band: f64 = 2;
+    var band: f64 = 10;
+    // shrink 0.2 -> 0.1: amounts 1.6 and 2.0 are kept.
+    try preserveZonePair(&non_band, &band, 0.8, 0.2, 0.9, 0.1);
+    try std.testing.expectApproxEqAbs(@as(f64, 1.6), non_band * 0.9, 1e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, 2.0), band * 0.1, 1e-15);
+    // vanish 0.1 -> 0: everything lands in non-band.
+    try preserveZonePair(&non_band, &band, 0.9, 0.1, 1, 0);
+    try std.testing.expectApproxEqAbs(@as(f64, 3.6), non_band, 1e-15);
+    try std.testing.expectEqual(@as(f64, 0), band);
+}
 const ConcentrationPair = struct { non_band: f64, band: f64 };
 const ExtensivePair = struct { non_band: f64, band: f64 };
 

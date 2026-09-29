@@ -808,8 +808,13 @@ fn SoilForcingSubstepHooks(
                         time_step_hours,
                         context.surface_precipitation.water_to_matrix_m3_per_h[cell],
                         context.surface_precipitation.water_to_macropore_m3_per_h[cell],
-                        layer_water[0], layer_water[1], layer_water[2], layer_water[3],
-                        layer_water[4], layer_water[5], layer_water[6],
+                        layer_water[0],
+                        layer_water[1],
+                        layer_water[2],
+                        layer_water[3],
+                        layer_water[4],
+                        layer_water[5],
+                        layer_water[6],
                     },
                 );
             }
@@ -829,8 +834,13 @@ fn SoilForcingSubstepHooks(
                     "ISSUE079_CREEP_TRACE stage=post_ingress hour={d} l0={e} l1={e} l2={e} l3={e} l4={e} l5={e} l6={e}",
                     .{
                         context.executed_weather_hours.* + 1,
-                        layer_water[0], layer_water[1], layer_water[2], layer_water[3],
-                        layer_water[4], layer_water[5], layer_water[6],
+                        layer_water[0],
+                        layer_water[1],
+                        layer_water[2],
+                        layer_water[3],
+                        layer_water[4],
+                        layer_water[5],
+                        layer_water[6],
                     },
                 );
             }
@@ -13283,6 +13293,8 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
     if (diagnostic_first_hour) try diagnostics.logPhosphorusRepresentation(context, "before_fertilizer_band_prepare_hour");
     try diagnostics.traceIssue100LayerAmmonium(context, "before_band_prepare", context.executed_weather_hours.* + 1);
     try diagnostics.traceIssue103LayerNitrate(context, "before_band_prepare", context.executed_weather_hours.* + 1);
+    const band_fractions_before_prepare = try ecosys.fertilizer_band_production.snapshotZoneFractions(context.allocator, context.fertilizer_band);
+    defer context.allocator.free(band_fractions_before_prepare);
     try ecosys.fertilizer_band_production.prepareHour(
         context.fertilizer_band,
         fertilizer_band_hour,
@@ -13294,6 +13306,12 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         context.runscript.soil_geometry_parameters.minimum_layer_thickness_m,
         context.runscript.root_nutrient_parameters,
         &fertilizer_band_workspace,
+    );
+    try ecosys.fertilizer_band_production.preserveZoneAmountsAfterPrepare(
+        context.fertilizer_band,
+        band_fractions_before_prepare,
+        context.soil_chemistry,
+        context.soil_reactive_nitrogen,
     );
     if (diagnostic_first_hour) try diagnostics.logPhosphorusRepresentation(context, "after_fertilizer_band_prepare_hour");
     try diagnostics.traceIssue100LayerAmmonium(context, "after_band_prepare", context.executed_weather_hours.* + 1);
