@@ -680,6 +680,19 @@ pub fn applyValidatedTile(context: *ApplyContext, range: CellRange) !void {
             context.grid.surface_temperature_k[cell],
         ) catch |err| {
             std.log.err("surface temperature solve failed: cell={d} initial_temperature_k={e}", .{ cell, context.grid.surface_temperature_k[cell] });
+            // TEMP_DIAGNOSTIC (hour 2786): residual shape near the melting point.
+            if (!@import("builtin").is_test) {
+                const offsets = [_]f64{ -1e-2, -1e-3, -1e-4, -3e-5, -1e-5, -8e-6, -7e-6, -6e-6, -5e-6, -3e-6, -1e-6, -1e-7, 0, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2 };
+                for (offsets) |offset| {
+                    const probe_k = 273.15 + offset;
+                    const phase_ice: f64 = if (residual_context.phase != null) blk: {
+                        const after = phaseContextAfterInternalVapor(residual_context, probe_k);
+                        const equilibrium = surfacePhaseEquilibrium(after, probe_k) catch break :blk std.math.nan(f64);
+                        break :blk equilibrium.ice_water_equivalent_m3;
+                    } else 0;
+                    std.log.err("TEMP_DIAGNOSTIC surface residual probe: offset_k={e} residual={e} phase_ice_m3={e} phase_heat={e}", .{ offset, residual(residual_context, probe_k), phase_ice, phaseHeatFlux(residual_context, probe_k) });
+                }
+            }
             // REAL-DECK-HOUR-11-FATAL-STAGNATION-001 (2026-09-04): full
             // residual-context dump so a real-deck failure can be replayed
             // as a fast, isolated unit test instead of re-paying the
