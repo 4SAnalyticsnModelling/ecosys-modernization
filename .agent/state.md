@@ -2,14 +2,13 @@
 
 Updated 2026-09-29 09:35 (local). Plan: Complete 30-Year Ottawa Run with Zero Science Gap.
 
-## Current Round: 16
-- Proposer: CLAUDE. Challenger: DEEPSEEK (r14 ACCEPT a83519a + 1b098e1; r15 analysis of hour 4037;
-  r16: review 627634a freeze-thaw relayering fix).
+## Current Round: 20
+- Proposer: CLAUDE. Challenger: DEEPSEEK (r16-r19 ACCEPT; r20 reviewing DEV-012 explicit gas pressure).
 
 ## Frontier (diagnostic runs on C:\ecosys-build\runs, deck blob ecf5e61a, ReleaseSafe)
-- r00005 + checkpoint replays reached hour 4036; hour 4037 failed (top-layer solids drained by freeze-thaw
-  relayering, fixed in 627634a; trajectory changes from first thaw, so fresh strict run r00007 started 09:33
-  with binary 1a860d50 → audit/runs/ottawa/r00007-strict).
+- Top-layer solids drain (root of hour 4037/3918 failures) fixed across 627634a + 470810a; verified dry
+  density stays 1.11 MJ m-3 K-1 through thaw (r00011-diag). Fresh strict run r00012 (commit 470810a,
+  binary 5a600650) started 13:03 → audit/runs/ottawa/r00012-strict.
 - Throughput ~150 ms/h (WATSUB ~41, SOLUTE ~30-40); 30-yr ≈ 11 h at steady state (legacy 51 ms/h; D4 = P6).
 - verified_frontier = 0 (a single-binding strict campaign from hour 0 has not yet run to a stopping point
   with every fix; each fix so far validated by strict hour-0 or checkpoint replay).

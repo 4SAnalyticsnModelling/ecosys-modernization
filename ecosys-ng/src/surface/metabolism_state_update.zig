@@ -11,6 +11,7 @@ const denitrification = @import("denitrification_step.zig");
 const assimilation = @import("microbial_assimilation_step.zig");
 const mineral_exchange = @import("microbial_mineral_exchange_step.zig");
 const topsoil_exchange = @import("topsoil_mineral_exchange_step.zig");
+const zoneConcentrationDecrements = @import("topsoil_zone_draw.zig").zoneConcentrationDecrements;
 const turnover = @import("microbial_turnover_step.zig");
 const priming = @import("organic_priming_step.zig");
 const organic_decomposition = @import("organic_decomposition_step.zig");
@@ -312,22 +313,27 @@ fn state_updateCell(context: *ApplyContext, cell: usize) !void {
     const top_h2po4_available = top_aqueous_carrier_m3 * context.phosphorus_molar_mass_g_per_mol * (context.zone_fractions.phosphate_non_band * top_non_band_phosphate_after.dissolved_h2po4_mol_p_per_m3 + context.zone_fractions.phosphate_band * top_band_phosphate_after.dissolved_h2po4_mol_p_per_m3);
     const top_hpo4_available = top_aqueous_carrier_m3 * context.phosphorus_molar_mass_g_per_mol * (context.zone_fractions.phosphate_non_band * top_non_band_phosphate_after.dissolved_hpo4_mol_p_per_m3 + context.zone_fractions.phosphate_band * top_band_phosphate_after.dissolved_hpo4_mol_p_per_m3);
     if (top_aqueous_carrier_m3 > 0) {
-        const ammonium_delta = top_ammonium_g_n / (top_aqueous_carrier_m3 * context.nitrogen_molar_mass_g_per_mol);
-        const nitrate_delta = top_nitrate_g_n / (top_aqueous_carrier_m3 * context.nitrogen_molar_mass_g_per_mol);
-        const h2po4_delta = top_h2po4_g_p / (top_aqueous_carrier_m3 * context.phosphorus_molar_mass_g_per_mol);
-        const hpo4_delta = top_hpo4_g_p / (top_aqueous_carrier_m3 * context.phosphorus_molar_mass_g_per_mol);
-        if (context.zone_fractions.ammonium_non_band > 0) top_aqueous_after.ammonium_non_band -= ammonium_delta;
-        if (context.zone_fractions.ammonium_band > 0) top_aqueous_after.ammonium_band -= ammonium_delta;
-        if (context.zone_fractions.nitrate_non_band > 0) top_aqueous_after.nitrate_non_band -= nitrate_delta;
-        if (context.zone_fractions.nitrate_band > 0) top_aqueous_after.nitrate_band -= nitrate_delta;
-        if (context.zone_fractions.phosphate_non_band > 0) {
-            top_non_band_phosphate_after.dissolved_h2po4_mol_p_per_m3 -= h2po4_delta;
-            top_non_band_phosphate_after.dissolved_hpo4_mol_p_per_m3 -= hpo4_delta;
-        }
-        if (context.zone_fractions.phosphate_band > 0) {
-            top_band_phosphate_after.dissolved_h2po4_mol_p_per_m3 -= h2po4_delta;
-            top_band_phosphate_after.dissolved_hpo4_mol_p_per_m3 -= hpo4_delta;
-        }
+        const nitrogen_carrier = top_aqueous_carrier_m3 * context.nitrogen_molar_mass_g_per_mol;
+        const phosphorus_carrier = top_aqueous_carrier_m3 * context.phosphorus_molar_mass_g_per_mol;
+        const ammonium_step = zoneConcentrationDecrements(top_ammonium_g_n, nitrogen_carrier, context.zone_fractions.ammonium_non_band, context.zone_fractions.ammonium_band, top_aqueous_after.ammonium_non_band, top_aqueous_after.ammonium_band);
+        const nitrate_step = zoneConcentrationDecrements(top_nitrate_g_n, nitrogen_carrier, context.zone_fractions.nitrate_non_band, context.zone_fractions.nitrate_band, top_aqueous_after.nitrate_non_band, top_aqueous_after.nitrate_band);
+        const h2po4_step = zoneConcentrationDecrements(top_h2po4_g_p, phosphorus_carrier, context.zone_fractions.phosphate_non_band, context.zone_fractions.phosphate_band, top_non_band_phosphate_after.dissolved_h2po4_mol_p_per_m3, top_band_phosphate_after.dissolved_h2po4_mol_p_per_m3);
+        const hpo4_step = zoneConcentrationDecrements(top_hpo4_g_p, phosphorus_carrier, context.zone_fractions.phosphate_non_band, context.zone_fractions.phosphate_band, top_non_band_phosphate_after.dissolved_hpo4_mol_p_per_m3, top_band_phosphate_after.dissolved_hpo4_mol_p_per_m3);
+        const ammonium_delta = @max(@abs(ammonium_step[0]), @abs(ammonium_step[1]));
+        const nitrate_delta = @max(@abs(nitrate_step[0]), @abs(nitrate_step[1]));
+        const h2po4_delta = @max(@abs(h2po4_step[0]), @abs(h2po4_step[1]));
+        const hpo4_delta = @max(@abs(hpo4_step[0]), @abs(hpo4_step[1]));
+        top_aqueous_after.ammonium_non_band -= ammonium_step[0];
+        top_aqueous_after.ammonium_band -= ammonium_step[1];
+        top_aqueous_after.nitrate_non_band -= nitrate_step[0];
+        top_aqueous_after.nitrate_band -= nitrate_step[1];
+        top_non_band_phosphate_after.dissolved_h2po4_mol_p_per_m3 -= h2po4_step[0];
+        top_non_band_phosphate_after.dissolved_hpo4_mol_p_per_m3 -= hpo4_step[0];
+        top_band_phosphate_after.dissolved_h2po4_mol_p_per_m3 -= h2po4_step[1];
+        top_band_phosphate_after.dissolved_hpo4_mol_p_per_m3 -= hpo4_step[1];
+        // TEMP_DIAGNOSTIC (hour 3295): which topsoil nutrient is overdrawn.
+        if (!@import("builtin").is_test and (top_aqueous_after.ammonium_non_band < 0 or top_aqueous_after.ammonium_band < 0 or top_aqueous_after.nitrate_non_band < 0 or top_aqueous_after.nitrate_band < 0 or top_non_band_phosphate_after.dissolved_h2po4_mol_p_per_m3 < 0 or top_non_band_phosphate_after.dissolved_hpo4_mol_p_per_m3 < 0 or top_band_phosphate_after.dissolved_h2po4_mol_p_per_m3 < 0 or top_band_phosphate_after.dissolved_hpo4_mol_p_per_m3 < 0))
+            std.log.err("TEMP_DIAGNOSTIC topsoil nutrient overdraw: carrier_m3={e} zone_nh4_nb={e} zone_nh4_b={e} zone_no3_nb={e} zone_no3_b={e} zone_po4_nb={e} zone_po4_b={e} nh4_after_nb={e} nh4_after_b={e} no3_after_nb={e} no3_after_b={e} h2po4_after_nb={e} hpo4_after_nb={e} h2po4_after_b={e} hpo4_after_b={e} demand_nh4_g={e} demand_no3_g={e} demand_h2po4_g={e} demand_hpo4_g={e} avail_nh4_g={e} avail_no3_g={e} avail_h2po4_g={e} avail_hpo4_g={e}", .{ top_aqueous_carrier_m3, context.zone_fractions.ammonium_non_band, context.zone_fractions.ammonium_band, context.zone_fractions.nitrate_non_band, context.zone_fractions.nitrate_band, context.zone_fractions.phosphate_non_band, context.zone_fractions.phosphate_band, top_aqueous_after.ammonium_non_band, top_aqueous_after.ammonium_band, top_aqueous_after.nitrate_non_band, top_aqueous_after.nitrate_band, top_non_band_phosphate_after.dissolved_h2po4_mol_p_per_m3, top_non_band_phosphate_after.dissolved_hpo4_mol_p_per_m3, top_band_phosphate_after.dissolved_h2po4_mol_p_per_m3, top_band_phosphate_after.dissolved_hpo4_mol_p_per_m3, top_ammonium_g_n, top_nitrate_g_n, top_h2po4_g_p, top_hpo4_g_p, top_ammonium_available, top_nitrate_available, top_h2po4_available, top_hpo4_available });
         top_aqueous_after.ammonium_non_band = try nonnegativeCandidate(top_aqueous_after.ammonium_non_band, @abs(context.topsoil_chemistry.aqueous[top].ammonium_non_band) + @abs(ammonium_delta), error.InsufficientTopsoilMineralNutrient);
         top_aqueous_after.ammonium_band = try nonnegativeCandidate(top_aqueous_after.ammonium_band, @abs(context.topsoil_chemistry.aqueous[top].ammonium_band) + @abs(ammonium_delta), error.InsufficientTopsoilMineralNutrient);
         top_aqueous_after.nitrate_non_band = try nonnegativeCandidate(top_aqueous_after.nitrate_non_band, @abs(context.topsoil_chemistry.aqueous[top].nitrate_non_band) + @abs(nitrate_delta), error.InsufficientTopsoilMineralNutrient);

@@ -1554,6 +1554,12 @@ fn solveControlled(
                         picard_steps,
                     },
                 );
+                // TEMP_DIAGNOSTIC (hour 3608): limiting macropore cell detail.
+                std.log.warn("TEMP_DIAGNOSTIC water stagnation cell: base_matrix={e} current_matrix={e} target_matrix={e} base_macro={e} current_macro={e} target_macro={e} residual_matrix={e} residual_macro={e} macro_capacity={e} macro_ice={e} matrix_capacity={e} matrix_ice={e} norm_trace={any}", .{ base[cell], current[cell], target[cell], base[cells + cell], current[cells + cell], target[cells + cell], residual[cell], residual[cells + cell], grid.macropore_pore_capacity_m3[cell], grid.macropore_ice_water_m3[cell], grid.matrix_pore_capacity_m3[cell], grid.matrix_ice_water_m3[cell], failure_norm_trace[0..failure_norm_trace_len] });
+                for (faces, 0..) |face, face_index| {
+                    if (face.source_cell == cell or face.destination_cell == cell)
+                        std.log.warn("TEMP_DIAGNOSTIC   water face={d} source={d} destination={d} active={} micro_flux={e} macro_flux={e}", .{ face_index, face.source_cell, face.destination_cell, face.active, trial_micro_flux[face_index], trial_macro_flux[face_index] });
+                }
             }
             return error.SoilWaterSolverStagnated;
         }

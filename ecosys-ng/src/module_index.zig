@@ -386,6 +386,7 @@ pub const surface_metabolism_state_update = @import("surface/metabolism_state_up
 pub const surface_microbial_assimilation_step = @import("surface/microbial_assimilation_step.zig");
 pub const surface_microbial_mineral_exchange_step = @import("surface/microbial_mineral_exchange_step.zig");
 pub const surface_topsoil_mineral_exchange_step = @import("surface/topsoil_mineral_exchange_step.zig");
+pub const surface_topsoil_zone_draw = @import("surface/topsoil_zone_draw.zig");
 pub const surface_microbial_turnover_step = @import("surface/microbial_turnover_step.zig");
 pub const organic_priming_exchange = @import("soil/biogeochemistry/organic_priming_exchange.zig");
 pub const surface_organic_priming_step = @import("surface/organic_priming_step.zig");

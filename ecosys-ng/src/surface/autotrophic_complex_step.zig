@@ -2,6 +2,7 @@ const std = @import("std");
 const compute = @import("../core/compute.zig");
 const organic = @import("../soil/organic/initialization.zig");
 const chemistry = @import("litter_chemistry.zig");
+const zone_draw = @import("topsoil_zone_draw.zig");
 const denitrification = @import("denitrification_step.zig");
 const gas = @import("../soil/gas/transport.zig");
 const microbial_environment = @import("microbial_environment_step.zig");
@@ -685,22 +686,21 @@ fn calculateCell(context: ApplyContext, cell: usize) !CellResult {
         const topsoil_hpo4 = topsoil_hpo4_result.exchange;
         result.topsoil_residual_capacity[active] = .{ topsoil_ammonium_result.capacity, topsoil_nitrate_result.capacity, topsoil_h2po4_result.capacity, topsoil_hpo4_result.capacity };
         if (topsoil_water > 0) {
-            const ammonium_delta = topsoil_ammonium / (topsoil_water * context.nitrogen_molar_mass_g_per_mol);
-            const nitrate_delta = topsoil_nitrate / (topsoil_water * context.nitrogen_molar_mass_g_per_mol);
-            const h2po4_delta = topsoil_h2po4 / (topsoil_water * context.phosphorus_molar_mass_g_per_mol);
-            const hpo4_delta = topsoil_hpo4 / (topsoil_water * context.phosphorus_molar_mass_g_per_mol);
-            if (context.zone_fractions.ammonium_non_band > 0) result.topsoil_ammonium_non_band_mol_per_m3 -= ammonium_delta;
-            if (context.zone_fractions.ammonium_band > 0) result.topsoil_ammonium_band_mol_per_m3 -= ammonium_delta;
-            if (context.zone_fractions.nitrate_non_band > 0) result.topsoil_nitrate_non_band_mol_per_m3 -= nitrate_delta;
-            if (context.zone_fractions.nitrate_band > 0) result.topsoil_nitrate_band_mol_per_m3 -= nitrate_delta;
-            if (context.zone_fractions.phosphate_non_band > 0) {
-                result.topsoil_h2po4_non_band_mol_p_per_m3 -= h2po4_delta;
-                result.topsoil_hpo4_non_band_mol_p_per_m3 -= hpo4_delta;
-            }
-            if (context.zone_fractions.phosphate_band > 0) {
-                result.topsoil_h2po4_band_mol_p_per_m3 -= h2po4_delta;
-                result.topsoil_hpo4_band_mol_p_per_m3 -= hpo4_delta;
-            }
+            // nitro.f 3942-3946 zone split, capped per zone (topsoil_zone_draw.zig).
+            const nitrogen_carrier = topsoil_water * context.nitrogen_molar_mass_g_per_mol;
+            const phosphorus_carrier = topsoil_water * context.phosphorus_molar_mass_g_per_mol;
+            const ammonium_step = zone_draw.zoneConcentrationDecrements(topsoil_ammonium, nitrogen_carrier, context.zone_fractions.ammonium_non_band, context.zone_fractions.ammonium_band, result.topsoil_ammonium_non_band_mol_per_m3, result.topsoil_ammonium_band_mol_per_m3);
+            const nitrate_step = zone_draw.zoneConcentrationDecrements(topsoil_nitrate, nitrogen_carrier, context.zone_fractions.nitrate_non_band, context.zone_fractions.nitrate_band, result.topsoil_nitrate_non_band_mol_per_m3, result.topsoil_nitrate_band_mol_per_m3);
+            const h2po4_step = zone_draw.zoneConcentrationDecrements(topsoil_h2po4, phosphorus_carrier, context.zone_fractions.phosphate_non_band, context.zone_fractions.phosphate_band, result.topsoil_h2po4_non_band_mol_p_per_m3, result.topsoil_h2po4_band_mol_p_per_m3);
+            const hpo4_step = zone_draw.zoneConcentrationDecrements(topsoil_hpo4, phosphorus_carrier, context.zone_fractions.phosphate_non_band, context.zone_fractions.phosphate_band, result.topsoil_hpo4_non_band_mol_p_per_m3, result.topsoil_hpo4_band_mol_p_per_m3);
+            result.topsoil_ammonium_non_band_mol_per_m3 -= ammonium_step[0];
+            result.topsoil_ammonium_band_mol_per_m3 -= ammonium_step[1];
+            result.topsoil_nitrate_non_band_mol_per_m3 -= nitrate_step[0];
+            result.topsoil_nitrate_band_mol_per_m3 -= nitrate_step[1];
+            result.topsoil_h2po4_non_band_mol_p_per_m3 -= h2po4_step[0];
+            result.topsoil_hpo4_non_band_mol_p_per_m3 -= hpo4_step[0];
+            result.topsoil_h2po4_band_mol_p_per_m3 -= h2po4_step[1];
+            result.topsoil_hpo4_band_mol_p_per_m3 -= hpo4_step[1];
         }
         result.surface_ammonium_exchange[active] = surface_ammonium;
         result.surface_nitrate_exchange[active] = surface_nitrate;

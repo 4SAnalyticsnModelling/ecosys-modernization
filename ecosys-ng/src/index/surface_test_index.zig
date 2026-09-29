@@ -110,5 +110,6 @@ test {
     _ = ecosys.surface_temperature_solver;
     _ = ecosys.surface_topsoil_microbial_mixing;
     _ = ecosys.surface_topsoil_mineral_exchange_step;
+    _ = ecosys.surface_topsoil_zone_draw;
     _ = ecosys.surface_water_flow;
 }
