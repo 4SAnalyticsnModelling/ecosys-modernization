@@ -100,6 +100,10 @@ pub fn advance(
                         return error.NonFiniteRootRespirationGasSource;
                     roots.aqueous_carbon_dioxide_g_c[root] = next_aqueous_co2_g_c;
                     roots.aqueous_carbon_dioxide_reaction_g_c_per_h[root] = next_reaction_g_c;
+                    // Consumed: this is the prior GROSUB's RCO2A. This hour's
+                    // UPTAKE/GROSUB respiration accumulates afresh and enters
+                    // root CO2 next hour (grosub.f:379 reset point).
+                    roots.actual_respiration_g_c_per_h[root] = 0;
                 }
 
                 // The source permits root internal gas transport only in the
@@ -159,6 +163,17 @@ pub fn advance(
                 }
             }
         }
+    }
+    // uptake.f:2087 applies RCO2PX=-RCO2A*XNPG to root CO2 for every root
+    // layer; its IF/ELSE (:2054-2085) only zeroes conductances for roots
+    // without length/volume. Roots skipped above therefore still receive the
+    // prior GROSUB respiration here, so none survives into a second hour.
+    for (roots.actual_respiration_g_c_per_h, roots.aqueous_carbon_dioxide_g_c, roots.aqueous_carbon_dioxide_reaction_g_c_per_h) |*pending_g_c, *aqueous_g_c, *reaction_g_c| {
+        if (pending_g_c.* == 0) continue;
+        if (!std.math.isFinite(pending_g_c.*) or pending_g_c.* < 0) return error.NonFiniteRootRespirationGasSource;
+        aqueous_g_c.* += pending_g_c.*;
+        reaction_g_c.* += pending_g_c.*;
+        pending_g_c.* = 0;
     }
     try roots.validateFinite();
 }

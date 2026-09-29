@@ -378,11 +378,18 @@ fn aggregateRootGasRange(
                     state.aqueous_hydrogen_g_h[index],
                 }) |value| if (!std.math.isFinite(value) or value < 0)
                     return error.InvalidRootGasInventory;
+                // GROSUB RCO2A awaiting the next UPTAKE (uptake.f:2087) is
+                // root CO2 in transit: already removed from root C pools,
+                // not yet in the aqueous pool.
+                const pending_respiration_g_c = state.actual_respiration_g_c_per_h[index];
+                if (!std.math.isFinite(pending_respiration_g_c) or pending_respiration_g_c < 0)
+                    return error.InvalidRootGasInventory;
                 result.carbon_dioxide_carbon_g +=
                     state.gaseous_carbon_dioxide_g_c[index] +
                     state.aqueous_carbon_dioxide_g_c[index] +
                     state.gaseous_methane_g_c[index] +
-                    state.aqueous_methane_g_c[index];
+                    state.aqueous_methane_g_c[index] +
+                    pending_respiration_g_c;
                 result.oxygen_g += state.gaseous_oxygen_g_o[index] +
                     state.aqueous_oxygen_g_o[index];
                 result.hydrogen_g += state.gaseous_hydrogen_g_h[index] +

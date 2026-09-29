@@ -1431,8 +1431,11 @@ pub fn applyTile(context: *ApplyContext, range: CellRange) !void {
                     .respiration_unlimited_by_oxygen_g_c_per_h = context.roots.respiration_unlimited_by_oxygen_g_c_per_h[planting_root] + paired.total_respiration_oxygen_unlimited_g_c / context.timestep_h,
                     .respiration_unlimited_by_carbon_g_c_per_h = context.roots.respiration_unlimited_by_carbon_g_c_per_h[planting_root] + actual_respiration_g_c_per_h,
                     .actual_respiration_g_c_per_h = context.roots.actual_respiration_g_c_per_h[planting_root] + actual_respiration_g_c_per_h,
-                    .aqueous_carbon_dioxide_g_c = context.roots.aqueous_carbon_dioxide_g_c[planting_root] + paired.total_respiration_actual_g_c,
-                    .aqueous_carbon_dioxide_reaction_g_c_per_h = context.roots.aqueous_carbon_dioxide_reaction_g_c_per_h[planting_root] + actual_respiration_g_c_per_h,
+                    // grosub.f:2053 books pre-emergence respiration only in
+                    // RCO2A; root CO2 receives it in the next UPTAKE
+                    // (uptake.f:2087) like every other root respiration.
+                    .aqueous_carbon_dioxide_g_c = context.roots.aqueous_carbon_dioxide_g_c[planting_root],
+                    .aqueous_carbon_dioxide_reaction_g_c_per_h = context.roots.aqueous_carbon_dioxide_reaction_g_c_per_h[planting_root],
                 };
                 inline for (@typeInfo(PreEmergenceRootStateUpdate).@"struct".fields) |field| {
                     if (!std.math.isFinite(@field(state_update, field.name)) or @field(state_update, field.name) < 0)
@@ -2079,6 +2082,8 @@ test "live C3 branch state_updates mobile pools and organ growth atomically" {
     context.execution_year = 2000;
     emerged[0] = false;
     roots.oxygen_process_constraint_fraction[0] = 0.5;
+    const aqueous_co2_before = roots.aqueous_carbon_dioxide_g_c[0];
+    const aqueous_co2_reaction_before = roots.aqueous_carbon_dioxide_reaction_g_c_per_h[0];
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(roots.respiration_unlimited_by_oxygen_g_c_per_h[0] > 0);
     try std.testing.expect(roots.respiration_unlimited_by_carbon_g_c_per_h[0] > 0);
@@ -2087,8 +2092,9 @@ test "live C3 branch state_updates mobile pools and organ growth atomically" {
         roots.actual_respiration_g_c_per_h[0],
     );
     try std.testing.expect(roots.respiration_unlimited_by_oxygen_g_c_per_h[0] >= roots.actual_respiration_g_c_per_h[0]);
-    try std.testing.expectEqual(roots.actual_respiration_g_c_per_h[0], roots.aqueous_carbon_dioxide_g_c[0]);
-    try std.testing.expectEqual(roots.actual_respiration_g_c_per_h[0], roots.aqueous_carbon_dioxide_reaction_g_c_per_h[0]);
+    // grosub.f:2053: RCO2A only; root CO2 receives it next UPTAKE.
+    try std.testing.expectEqual(aqueous_co2_before, roots.aqueous_carbon_dioxide_g_c[0]);
+    try std.testing.expectEqual(aqueous_co2_reaction_before, roots.aqueous_carbon_dioxide_reaction_g_c_per_h[0]);
     try std.testing.expectEqual(
         roots.actual_respiration_g_c_per_h[0],
         accepted_internal_activity.canopy_to_root[0].carbon_g_c,

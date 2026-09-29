@@ -835,7 +835,11 @@ pub const State = struct {
             self.oxygen_demand_g_o_per_h,
             self.respiration_unlimited_by_oxygen_g_c_per_h,
             self.respiration_unlimited_by_carbon_g_c_per_h,
-            self.actual_respiration_g_c_per_h,
+            // `actual_respiration_g_c_per_h` (GROSUB RCO2A) is NOT cleared
+            // here: legacy clears it at GROSUB entry (grosub.f:379) after
+            // this hour's UPTAKE has moved the prior GROSUB value into root
+            // CO2 (uptake.f:2087). `plant_root_gas_transport.advance`
+            // consumes and clears it; until then it is in-transit root CO2.
             self.symbiotic_respiration_actual_g_c_per_h,
             self.symbiotic_respiration_oxygen_unlimited_g_c_per_h,
             self.ammonium_assimilation_g_n_per_h,

@@ -236,6 +236,7 @@ test "UPTAKE hourly reset preserves prior WSRTL and GROSUB reset clears it witho
     state.symbiont_structural_carbon_g_c[0] = 0.4;
     state.symbiont_mobile_nitrogen_g_n[0] = 0.02;
     state.symbiotic_respiration_actual_g_c_per_h[0] = 0.03;
+    state.actual_respiration_g_c_per_h[0] = 0.06;
     state.symbiotic_respiration_oxygen_unlimited_g_c_per_h[0] = 0.05;
     state.withdrawal_carbon_dioxide_loss_g_c_per_h[0] = -0.2;
     state.withdrawal_carbon_dioxide_loss_g_c_per_h_by_root[0] = -0.2;
@@ -254,6 +255,9 @@ test "UPTAKE hourly reset preserves prior WSRTL and GROSUB reset clears it witho
     try std.testing.expectEqual(@as(f64, 0.4), state.symbiont_structural_carbon_g_c[0]);
     try std.testing.expectEqual(@as(f64, 0.02), state.symbiont_mobile_nitrogen_g_n[0]);
     try std.testing.expectEqual(@as(f64, 0), state.symbiotic_respiration_actual_g_c_per_h[0]);
+    // GROSUB RCO2A survives UPTAKE initialization until the root gas advance
+    // moves it into root CO2 (grosub.f:379, uptake.f:2087).
+    try std.testing.expectEqual(@as(f64, 0.06), state.actual_respiration_g_c_per_h[0]);
     try std.testing.expectEqual(@as(f64, 0), state.symbiotic_respiration_oxygen_unlimited_g_c_per_h[0]);
     try std.testing.expectEqual(@as(f64, 0), state.withdrawal_carbon_dioxide_loss_g_c_per_h[0]);
     try std.testing.expectEqual(@as(f64, 0), state.withdrawal_carbon_dioxide_loss_g_c_per_h_by_root[0]);
