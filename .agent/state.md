@@ -1,32 +1,37 @@
 # Adversarial Workflow State
 
-Updated 2026-09-28 22:40 (local). Plan: Complete 30-Year Ottawa Run with Zero Science Gap.
+Updated 2026-09-29 09:35 (local). Plan: Complete 30-Year Ottawa Run with Zero Science Gap.
 
-## Current Round: 5
-- **Active Proposer**: CLAUDE (solver/ledger gaps on the live frontier)
-- **Active Challenger**: DEEPSEEK (round 5: T-00075 deposition double-injection proof; round 4 ZEROC challenge)
+## Current Round: 16
+- Proposer: CLAUDE. Challenger: DEEPSEEK (r14 ACCEPT a83519a + 1b098e1; r15 analysis of hour 4037;
+  r16: review 627634a freeze-thaw relayering fix).
 
-## Frontier (provisional, diagnostic runs on C:\ecosys-build\runs, deck blob ecf5e61a)
-- Strict hour-0 at HEAD 8a4a565 failed hour 277 (T-00075 exposure). Fixed (2edcbf2): phosphate gates,
-  legacy SOLUTE ZEROC=1e-32 floors (Newton refs, acceptance, layer ion ledger).
-- Replay from checkpoint 480 (h0E) reached hour 2540; fails hour 2541 (1998 d106 h21)
-  `SnowVaporInventoryWithoutAirVolume`. Fix in progress: remove fatal pre-check, WATSUB 1431-1435/1499-1517
-  leave vapor in airless layers undiffused (face loop already skips them).
-- Next known blocker: hour 3289 Ca/Na/K layer-2 residual (issue-108; DEEPSEEK cation-sync CONTESTED,
-  needs delta publish; stash "deepseek-cation-sync").
-- verified_frontier = 0 (no strict campaign under a single binding yet).
+## Frontier (diagnostic runs on C:\ecosys-build\runs, deck blob ecf5e61a, ReleaseSafe)
+- r00005 + checkpoint replays reached hour 4036; hour 4037 failed (top-layer solids drained by freeze-thaw
+  relayering, fixed in 627634a; trajectory changes from first thaw, so fresh strict run r00007 started 09:33
+  with binary 1a860d50 → audit/runs/ottawa/r00007-strict).
+- Throughput ~150 ms/h (WATSUB ~41, SOLUTE ~30-40); 30-yr ≈ 11 h at steady state (legacy 51 ms/h; D4 = P6).
+- verified_frontier = 0 (a single-binding strict campaign from hour 0 has not yet run to a stopping point
+  with every fix; each fix so far validated by strict hour-0 or checkpoint replay).
 
-## Decisions this session
-- D6 DEV-004 deck-half revert executed (runtime f6 200->100, blob ecf5e61a). f6 shown irrelevant to 277.
-- T-00075 (DEV-008) KEPT: pre-T-00075 behaviour is rejected science; its runtime gaps are being fixed.
-- Push to origin fails 403 (account lacks write permission) — commits are local only.
+## Fixed this session (commits, all local; push → 403)
+8a4a565 deck D6 revert + compile fix · 2edcbf2 STARTE ZEROC dust (P gates, SOLUTE floors, layer ions) ·
+f0389ce snow vapor airless layers, bounded water stagnation (DEV-009), root salt delta publish ·
+56dfca4 root respiration RCO2A lag (carbon destroyed hourly) · d38218a root salt legacy explicit fallback,
+zero-volume band dissolution · e2e4679 band shrink/collapse amount preservation · 9416f92 DEV-011 interim
+(never triggered since) · 1b098e1 exact phosphate-site projection (SOLUTE site crawl; registered
+NONCONVERGENCE-001 fixture now converges), cell ion floor · 7e04f9f recoverable ingress overflow ·
+a83519a legacy per-cycle FLQRS rain overflow to litter · 627634a freeze-thaw no longer drives soil relayering
+material transfer (redist.f 8186-8195 CDPTHY excludes NN=2).
 
-## Latent gaps logged (not Ottawa-visible)
-- DEEPSEEK r4 §2: possible double injection of deposition cations (primary_g[Al..Cl] + salt_mol) —
-  Ottawa rain ions are 0; under proof in round 5.
+## Proposed deviations (audit/intentional-deviations.md)
+DEV-009 bounded water stagnation publication; DEV-010 legacy ZEROC floors; DEV-011 terminal SOLUTE best-bounded
+(evidence insufficient; unused since 1b098e1).
 
-## Tooling notes
-- Build: `$env:ZIG_LOCAL_CACHE_DIR=C:\ecosys-build\cache; zig build -Doptimize=ReleaseSafe` in ecosys-ng
-  (~15 min); exe lands in cache `o/<hash>/ecosys_ng.exe` (install step does not copy).
-- Replay: copy deck in place (manifest binds absolute path), set f25y98 line 6 resume=YES; runscript edits
-  break run identity; outputs after the checkpoint must match (replay refuses trajectory changes).
+## Open / known simplifications
+- FLQRS ignores FSNX (partial snow cover). Rain solutes not rerouted with overflow water (legacy-consistent).
+- DEEPSEEK r12: H3PO4 dissociation Jacobian ~1/[H+]^2 at high pH (not currently blocking).
+- Push to origin fails 403 (account lacks write permission).
+- Relayering: legacy DDLYRY thickness restore (DLYR→DLYRI) and IFLGM=0 branch not ported.
+- Richards→enthalpy rebase applies internal inflow heat only in the later spatial solve; intermediate
+  temperature can leave [173,373] K for a genuinely low-capacity layer (not seen once solids preserved).
