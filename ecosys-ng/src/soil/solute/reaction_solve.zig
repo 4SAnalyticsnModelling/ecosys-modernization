@@ -1492,6 +1492,18 @@ test "reaction solver hands post kinetic equilibrium the full ceiling, not a lef
     try std.testing.expectEqual(captured.options.max_iterations, scripted_second_closure_max_iterations.?);
 }
 
+/// Last-resort policy owned by the hourly recovery ladder (set only after every
+/// fixed-hour substep schedule has failed on a SOLUTE terminal error). Legacy
+/// SOLUTE (solute.f) runs a fixed MRXN iteration count and publishes whatever
+/// state it reached, bounded by AMAX1(ZEROC,...) floors, with no convergence
+/// test. The analogous Zig publication is the retained best bounded iterate,
+/// which must still pass the element-inventory and charge conservation gates.
+var terminal_best_bounded_acceptance = std.atomic.Value(bool).init(false);
+
+pub fn setTerminalBestBoundedAcceptance(enabled: bool) void {
+    terminal_best_bounded_acceptance.store(enabled, .release);
+}
+
 pub fn solveEquilibriumWithWorkspace(
     workspace: *Workspace,
     state: *chemistry.State,
@@ -1501,7 +1513,43 @@ pub fn solveEquilibriumWithWorkspace(
     trace: ?*SolverTrace,
     closure_index: u8,
 ) !Result {
-    return solveEquilibriumWithAttempt(solveEquilibriumWithInitialization, workspace, state, cell_index, parameters, input_options, trace, closure_index);
+    return solveEquilibriumWithAttempt(solveEquilibriumWithInitialization, workspace, state, cell_index, parameters, input_options, trace, closure_index) catch |err| switch (err) {
+        error.SoluteReactionSolverStagnated, error.SoluteReactionSolverDidNotConverge => {
+            if (!terminal_best_bounded_acceptance.load(.acquire)) return err;
+            return acceptBestBoundedIterate(workspace, state, cell_index, parameters, err) catch return err;
+        },
+        else => return err,
+    };
+}
+
+fn acceptBestBoundedIterate(
+    workspace: *Workspace,
+    state: *chemistry.State,
+    cell_index: usize,
+    parameters: chemistry.ReactionParameters,
+    solver_error: anyerror,
+) !Result {
+    const iteration = workspace.best_bounded_iteration orelse return error.SoluteReactionMissingBestBoundedIterate;
+    const inventory = try acceptedStateInventory(state, cell_index, parameters);
+    const scratch = &workspace.scratch;
+    @memcpy(workspace.current, workspace.best_bounded_state);
+    try scratch.unpackCell(0, workspace.current);
+    try requireConservedInventories(inventory, try acceptedStateInventory(scratch, 0, parameters));
+    try reaction_charge.requireConservedStates(state, cell_index, scratch, 0, parameters);
+    const water_extent = try commitAcceptedWaterEquilibriumProjection(scratch, state, cell_index, workspace.current, parameters);
+    if (!@import("builtin").is_test) std.log.warn(
+        "SOLUTE terminal {s}: published best bounded iterate (legacy fixed-iteration SOLUTE analogue): cell={d} iteration={d} physical_quality={e}",
+        .{ @errorName(solver_error), cell_index, iteration, workspace.best_bounded_maximum },
+    );
+    return .{
+        .iterations = iteration,
+        .newton_raphson_steps = 0,
+        .picard_steps = 0,
+        .anderson_steps = 0,
+        .maximum_scaled_residual = workspace.best_bounded_maximum,
+        .converged = false,
+        .accepted_water_equilibrium_extent_mol_per_m3 = water_extent,
+    };
 }
 
 fn solveEquilibriumWithAttempt(

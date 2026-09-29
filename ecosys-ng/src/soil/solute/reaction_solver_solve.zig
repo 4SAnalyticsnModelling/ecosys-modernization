@@ -199,4 +199,5 @@ pub const solveCellWithWorkspaceAndTrace = __solve.solveCellWithWorkspaceAndTrac
 pub const requireAcceptedStateConservation = __solve.requireAcceptedStateConservation;
 pub const rebaseEntryCarboxylCapacity = __solve.rebaseEntryCarboxylCapacity;
 pub const solveEquilibriumWithWorkspace = __solve.solveEquilibriumWithWorkspace;
+pub const setTerminalBestBoundedAcceptance = __solve.setTerminalBestBoundedAcceptance;
 pub const solvePivotedHouseholder = __solve.solvePivotedHouseholder;

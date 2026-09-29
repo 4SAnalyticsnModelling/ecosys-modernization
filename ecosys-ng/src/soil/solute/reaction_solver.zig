@@ -155,6 +155,7 @@ pub const solveCellWithTrace = group_solve.solveCellWithTrace;
 pub const solveCellWithWorkspace = group_solve.solveCellWithWorkspace;
 pub const solveCellWithWorkspaceAndTrace = group_solve.solveCellWithWorkspaceAndTrace;
 pub const solveEquilibriumWithWorkspace = group_solve.solveEquilibriumWithWorkspace;
+pub const setTerminalBestBoundedAcceptance = group_solve.setTerminalBestBoundedAcceptance;
 pub const solvePivotedHouseholder = group_solve.solvePivotedHouseholder;
 
 // tests

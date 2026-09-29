@@ -12121,8 +12121,33 @@ fn recoverFixedExternalHourAdaptively(
             return;
         };
         recordFreezeFlowRequirement(freeze_flow_coupling_floor_active, attempt_error);
-        var next_substep_count = boundedRecoveryFallback(substep_count) orelse
-            return attempt_error;
+        var next_substep_count = boundedRecoveryFallback(substep_count) orelse {
+            // Every fixed-hour schedule failed in the SOLUTE equilibrium.
+            // Legacy SOLUTE publishes its state after a fixed MRXN iteration
+            // count without a convergence test; the Zig analogue is one final
+            // attempt that may publish each failing layer's retained best
+            // bounded iterate (conservation- and charge-gated). DEV-011.
+            if (attempt_error != error.SoluteReactionSolverStagnated and
+                attempt_error != error.SoluteReactionSolverDidNotConverge)
+                return attempt_error;
+            if (!builtin.is_test) std.log.warn(
+                "SOLUTE recovery ladder exhausted ({s}); final attempt exact_substep_count={d} with best-bounded-iterate publication",
+                .{ @errorName(attempt_error), substep_count },
+            );
+            ecosys.solute_reaction_solver.setTerminalBestBoundedAcceptance(true);
+            defer ecosys.solute_reaction_solver.setTerminalBestBoundedAcceptance(false);
+            if (try runBoundedRecoveryAttempt(attempt, substep_count)) |final_error| return final_error;
+            freeze_flow_coupling_floor_active.* =
+                acceptedAttemptHadSignificantHeatInducedPhaseChange(attempt);
+            try updateAcceptedRecoveryPreference(
+                preferred_substep_count,
+                coarsening_probe_cooldown,
+                substep_count,
+                attempt_error,
+                freeze_flow_coupling_floor_active.*,
+            );
+            return;
+        };
         if (freeze_flow_coupling_floor_active.*)
             next_substep_count = @max(
                 next_substep_count,
