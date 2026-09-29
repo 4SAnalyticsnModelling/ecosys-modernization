@@ -384,7 +384,15 @@ pub fn state_updateSoilIngress(state: *const RuntimeState, grid: *@import("../st
                         macropore_air_m3,
                     },
                 );
-            return error.InvalidSurfaceIngressStateUpdate;
+            // A finite, nonnegative ingress that merely exceeds the air space
+            // left at this substep is a schedule artefact: WATSUB applies rain
+            // per NPH cycle against the current VOLP1 (watsub.f:939-947), so
+            // the hour is retried at finer substeps (isFixedHourRecoveryFailure).
+            const finite_nonnegative = std.math.isFinite(matrix_input) and std.math.isFinite(macropore_input) and
+                matrix_input >= 0 and macropore_input >= 0 and
+                std.math.isFinite(matrix_air_m3) and std.math.isFinite(macropore_air_m3) and
+                matrix_air_m3 >= -matrix_roundoff_m3 and macropore_air_m3 >= -macropore_roundoff_m3;
+            return if (finite_nonnegative) error.SurfaceIngressExceedsPoreCapacity else error.InvalidSurfaceIngressStateUpdate;
         }
     }
     for (0..state.cell_count) |cell| {
@@ -774,7 +782,8 @@ test "top-soil ingress state_update validates every runtime cell before mutation
     @memset(grid.air_volume_m3, 2);
     state.water_to_matrix_m3_per_h[0] = 0.2;
     state.water_to_matrix_m3_per_h[1] = 2;
-    try std.testing.expectError(error.InvalidSurfaceIngressStateUpdate, state_updateSoilIngress(&state, &grid, &hydrology, 1, 0.917));
+    // Overfilling finite ingress is a recoverable schedule artefact (WATSUB per-cycle rain).
+    try std.testing.expectError(error.SurfaceIngressExceedsPoreCapacity, state_updateSoilIngress(&state, &grid, &hydrology, 1, 0.917));
     try std.testing.expectEqual(@as(f64, 0), grid.matrix_liquid_water_m3[0]);
     state.water_to_matrix_m3_per_h[1] = 0.3;
     state.water_to_macropore_m3_per_h[1] = 0.4;

@@ -11842,6 +11842,7 @@ fn isFixedHourRecoveryFailure(err: anyerror) bool {
         error.RootSaltSolverDiverged,
         error.RootSaltSolverStagnated,
         error.RootSaltSolverDidNotConverge,
+        error.SurfaceIngressExceedsPoreCapacity,
         => true,
         else => false,
     };

@@ -7621,8 +7621,8 @@ noinline fn advanceHour(driver_context: anytype, timeline_state: *TimelineState,
     const weather_hour = advance_context.weather_hour_by_stream.*[0];
     const timestamp = weather_hour.timestamp;
     const temporary_profile_active = !builtin.is_test and
-        driver_context.executed_weather_hours.* >= 3842 and
-        driver_context.executed_weather_hours.* < 3850;
+        driver_context.executed_weather_hours.* >= 48 and
+        driver_context.executed_weather_hours.* < 56;
     const temporary_profile_start = std.Io.Clock.now(.boot, driver_context.init.*.io);
     // The fixed external hour is one atomic scientific/accounting
     // transaction. Clone every reallocating persistent owner in
