@@ -143,6 +143,11 @@ pub const SolverOptions = struct {
     /// `error.RootSaltSolverDidNotConverge`.
     divergence_patience: u16 = 8,
     divergence_growth_factor: f64 = 1.0e3,
+    /// When the implicit solve does not converge or stagnates, integrate the
+    /// legacy explicit UPTAKE scheme instead (uptake.f:2647-2783: NPH
+    /// substeps, fluxes from current concentrations, RDX*XNPHX equalisation
+    /// bound, no convergence test). max_iterations is the NPH substep count.
+    legacy_explicit_fallback: bool = false,
 };
 
 pub const SolverReport = struct {
@@ -153,6 +158,8 @@ pub const SolverReport = struct {
     /// relaxed Picard candidate. Counted inside `picard_steps` as well, so the
     /// existing step accounting is unchanged.
     anderson_steps: usize = 0,
+    /// True when the staged exchange came from the legacy explicit scheme.
+    legacy_explicit_fallback: bool = false,
 };
 
 pub const Workspace = struct {
@@ -288,6 +295,75 @@ pub const GridWorkspace = struct {
 /// This is the allocation-free hourly replacement for traversal-ordered RUPZ*
 /// state_update in UPTAKE.
 pub fn stageCompetingLayer(
+    roots: *const RootState,
+    soil_content_mol: []const f64,
+    soil_water_volume_m3: f64,
+    temperature_k: f64,
+    parameters: Parameters,
+    competitors: []const LayerCompetitor,
+    staged_exchange_mol: []f64,
+    candidate_exchange_mol: []f64,
+    previous_exchange_mol: []f64,
+    previous_defect_mol: []f64,
+    options: SolverOptions,
+) !SolverReport {
+    return stageCompetingLayerImplicit(roots, soil_content_mol, soil_water_volume_m3, temperature_k, parameters, competitors, staged_exchange_mol, candidate_exchange_mol, previous_exchange_mol, previous_defect_mol, options) catch |err| switch (err) {
+        error.RootSaltSolverDidNotConverge, error.RootSaltSolverStagnated => {
+            if (!options.legacy_explicit_fallback) return err;
+            try legacyExplicitExchange(roots, soil_content_mol, soil_water_volume_m3, temperature_k, parameters, competitors, staged_exchange_mol, options.max_iterations);
+            if (!@import("builtin").is_test) std.log.warn("root salt implicit solve failed ({s}); used legacy explicit UPTAKE scheme over {d} substeps", .{ @errorName(err), options.max_iterations });
+            return .{ .iterations = options.max_iterations, .newton_raphson_steps = 0, .picard_steps = 0, .legacy_explicit_fallback = true };
+        },
+        else => return err,
+    };
+}
+
+/// uptake.f:2647-2783 for every competitor: each root takes NPH explicit
+/// substeps against its own soil share, with the same per-competitor kernel
+/// as implicitExchangeProposal evaluated at current (not final) contents and
+/// the RDX equalisation bound scaled by XNPHX=1/NPH; shared-soil limits then
+/// apply exactly as for the implicit result.
+fn legacyExplicitExchange(
+    roots: *const RootState,
+    soil_content_mol: []const f64,
+    soil_water_volume_m3: f64,
+    temperature_k: f64,
+    parameters: Parameters,
+    competitors: []const LayerCompetitor,
+    staged_exchange_mol: []f64,
+    substeps: u16,
+) !void {
+    if (substeps == 0) return error.InvalidRootSaltSolverOptions;
+    const substep_fraction = 1.0 / @as(f64, @floatFromInt(substeps));
+    for (competitors, 0..) |competitor, competitor_index| {
+        const root_layer = try roots.layerIndex(competitor.plant, competitor.domain, competitor.layer);
+        for (0..species_count) |species| {
+            var soil_share = soil_content_mol[species] * competitor.soil_inventory_fraction;
+            var root_content = roots.salt_content_mol[root_layer * species_count + species];
+            const conductance = try parameters.diffusivityM2PerH(species, temperature_k) * competitor.diffusive_geometry_m;
+            var exchange: f64 = 0;
+            for (0..substeps) |_| {
+                const soil_concentration = @max(0, soil_share) / soil_water_volume_m3;
+                const root_concentration = @max(0, root_content) / competitor.root_water_volume_m3;
+                const candidate = (competitor.water_advection_m3_per_step * substep_fraction * soil_concentration +
+                    conductance * substep_fraction * (soil_concentration - root_concentration)) * competitor.plant_population_count;
+                const equilibrium_extent = (competitor.root_water_volume_m3 * @max(0, soil_share) - soil_water_volume_m3 * @max(0, root_content)) /
+                    (competitor.root_water_volume_m3 + soil_water_volume_m3) * substep_fraction;
+                const bounded = if (candidate > 0) @min(@max(0, equilibrium_extent), candidate) else @max(@min(0, equilibrium_extent), candidate);
+                const step = bounded / (1 + root_concentration / parameters.root_concentration_inhibition_mol_per_m3[species]);
+                if (!std.math.isFinite(step)) return error.NonFiniteRootSaltCompetition;
+                soil_share -= step;
+                root_content += step;
+                exchange += step;
+            }
+            staged_exchange_mol[competitor_index * species_count + species] = exchange;
+        }
+    }
+    for (0..species_count) |species|
+        constrainSpeciesExchange(roots, soil_content_mol[species], competitors, species, staged_exchange_mol);
+}
+
+fn stageCompetingLayerImplicit(
     roots: *const RootState,
     soil_content_mol: []const f64,
     soil_water_volume_m3: f64,
@@ -752,6 +828,35 @@ test "dynamic salt competitors share one snapshot beyond legacy plant capacity" 
     try std.testing.expectEqual(root_before_failure, roots.salt_content_mol[0]);
 }
 
+test "root salt legacy explicit fallback conserves and replaces a failed implicit solve" {
+    var roots = try RootState.init(std.testing.allocator, 1, 1, 1);
+    defer roots.deinit();
+    var workspace = try Workspace.init(std.testing.allocator, 1);
+    defer workspace.deinit();
+    const root = try roots.layerIndex(0, 0, 0);
+    roots.aqueous_volume_m3[root] = 0.1;
+    for (0..species_count) |species| roots.salt_content_mol[root * species_count + species] = 0.01;
+    workspace.competitors[0] = .{ .plant = 0, .domain = 0, .layer = 0, .soil_inventory_fraction = 1, .root_water_volume_m3 = 0.1, .water_advection_m3_per_step = 0.01, .diffusive_geometry_m = 10, .plant_population_count = 1 };
+    var soil = [_]f64{0.5} ** species_count;
+    const before = soil;
+    // Impossible tolerance with one allowed update: the implicit solve fails.
+    const options: SolverOptions = .{ .absolute_tolerance_mol = 1.0e-30, .relative_tolerance = 1.0e-30, .picard_relaxation = 0.5, .max_iterations = 1 };
+    try std.testing.expectError(error.RootSaltSolverDidNotConverge, workspace.stage(&roots, &soil, 1, 298.15, compatibilityParameters(), 1, options));
+    var fallback_options = options;
+    fallback_options.legacy_explicit_fallback = true;
+    fallback_options.max_iterations = 20;
+    fallback_options.absolute_tolerance_mol = 1.0e-30;
+    const report = try workspace.stage(&roots, &soil, 1, 298.15, compatibilityParameters(), 1, fallback_options);
+    _ = report;
+    try workspace.state_updateStaged(&roots, &soil, 1);
+    for (0..species_count) |species| {
+        const root_after = roots.salt_content_mol[root * species_count + species];
+        try std.testing.expectApproxEqAbs(before[species] + 0.01, soil[species] + root_after, 1.0e-14);
+        try std.testing.expect(soil[species] >= 0 and root_after >= 0);
+        // Uptake toward equalisation only: never overshoots equal concentrations.
+        try std.testing.expect(root_after / 0.1 <= soil[species] / 1.0 + 1.0e-12);
+    }
+}
 test "root salt max one counts one full-vector Newton update" {
     var roots = try RootState.init(std.testing.allocator, 1, 1, 1);
     defer roots.deinit();

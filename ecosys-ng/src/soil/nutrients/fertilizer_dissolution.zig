@@ -313,64 +313,45 @@ pub fn state_updateToRecipients(
         water_volume_m3 * fractions.nitrate_non_band;
     const nitrate_band_water =
         water_volume_m3 * fractions.nitrate_band;
-    try requireRecipientVolume(
-        flux.broadcast_ammonium_non_band_mol_n,
-        ammonium_non_band_water,
-    );
-    try requireRecipientVolume(
-        flux.broadcast_ammonium_band_mol_n +
-            flux.banded_ammonium_mol_n,
-        ammonium_band_water,
-    );
-    try requireRecipientVolume(
-        flux.broadcast_urea_non_band_mol_n,
-        ammonium_non_band_water,
-    );
-    try requireRecipientVolume(
-        flux.broadcast_urea_band_mol_n +
-            flux.banded_urea_mol_n,
-        ammonium_band_water,
-    );
-    try requireRecipientVolume(
-        flux.broadcast_nitrate_non_band_mol_n,
-        nitrate_non_band_water,
-    );
-    try requireRecipientVolume(
-        flux.broadcast_nitrate_band_mol_n +
-            flux.banded_nitrate_mol_n,
-        nitrate_band_water,
-    );
+    // A band zone without water holds no solvent. Legacy dissolves into the
+    // band AMOUNT pools and HOUR1 then amalgamates a zero-volume band into the
+    // non-band zone (hour1.f:4970-4973; Zig does the same in amount space at
+    // publishMatrix, issue-098). With concentration-state recipients the
+    // equivalent is to deliver band-destined dissolution to non-band directly.
+    const ammonium_band_mol_n = flux.broadcast_ammonium_band_mol_n + flux.banded_ammonium_mol_n;
+    const urea_band_mol_n = flux.broadcast_urea_band_mol_n + flux.banded_urea_mol_n;
+    const nitrate_band_mol_n = flux.broadcast_nitrate_band_mol_n + flux.banded_nitrate_mol_n;
+    const ammonium_band_amalgamated = ammonium_band_water <= 0;
+    const nitrate_band_amalgamated = nitrate_band_water <= 0;
+    const ammonium_to_non_band_mol_n = flux.broadcast_ammonium_non_band_mol_n +
+        if (ammonium_band_amalgamated) ammonium_band_mol_n else 0;
+    const urea_to_non_band_mol_n = flux.broadcast_urea_non_band_mol_n +
+        if (ammonium_band_amalgamated) urea_band_mol_n else 0;
+    const nitrate_to_non_band_mol_n = flux.broadcast_nitrate_non_band_mol_n +
+        if (nitrate_band_amalgamated) nitrate_band_mol_n else 0;
+    const ammonium_to_band_mol_n = if (ammonium_band_amalgamated) 0 else ammonium_band_mol_n;
+    const urea_to_band_mol_n = if (ammonium_band_amalgamated) 0 else urea_band_mol_n;
+    const nitrate_to_band_mol_n = if (nitrate_band_amalgamated) 0 else nitrate_band_mol_n;
+    try requireRecipientVolume(ammonium_to_non_band_mol_n + urea_to_non_band_mol_n, ammonium_non_band_water);
+    try requireRecipientVolume(ammonium_to_band_mol_n + urea_to_band_mol_n, ammonium_band_water);
+    try requireRecipientVolume(nitrate_to_non_band_mol_n, nitrate_non_band_water);
+    try requireRecipientVolume(nitrate_to_band_mol_n, nitrate_band_water);
 
     var next_state = state.*;
     var next_aqueous = aqueous.*;
     var next_gaseous_ammonia_g_n = gaseous_ammonia_g_n.*;
     try state_update(&next_state, flux);
-    next_aqueous.ammonium_non_band +=
-        flux.broadcast_ammonium_non_band_mol_n /
-        nonzeroOrOne(ammonium_non_band_water);
-    next_aqueous.ammonium_band +=
-        (flux.broadcast_ammonium_band_mol_n +
-            flux.banded_ammonium_mol_n) /
-        nonzeroOrOne(ammonium_band_water);
-    next_aqueous.ammonia_non_band +=
-        flux.broadcast_urea_non_band_mol_n /
-        nonzeroOrOne(ammonium_non_band_water);
-    next_aqueous.ammonia_band +=
-        (flux.broadcast_urea_band_mol_n +
-            flux.banded_urea_mol_n) /
-        nonzeroOrOne(ammonium_band_water);
+    next_aqueous.ammonium_non_band += ammonium_to_non_band_mol_n / nonzeroOrOne(ammonium_non_band_water);
+    next_aqueous.ammonium_band += ammonium_to_band_mol_n / nonzeroOrOne(ammonium_band_water);
+    next_aqueous.ammonia_non_band += urea_to_non_band_mol_n / nonzeroOrOne(ammonium_non_band_water);
+    next_aqueous.ammonia_band += urea_to_band_mol_n / nonzeroOrOne(ammonium_band_water);
     next_gaseous_ammonia_g_n +=
         (flux.broadcast_ammonia_non_band_mol_n +
             flux.broadcast_ammonia_band_mol_n +
             flux.banded_ammonia_mol_n) *
         nitrogen_molar_mass_g_per_mol;
-    next_aqueous.nitrate_non_band +=
-        flux.broadcast_nitrate_non_band_mol_n /
-        nonzeroOrOne(nitrate_non_band_water);
-    next_aqueous.nitrate_band +=
-        (flux.broadcast_nitrate_band_mol_n +
-            flux.banded_nitrate_mol_n) /
-        nonzeroOrOne(nitrate_band_water);
+    next_aqueous.nitrate_non_band += nitrate_to_non_band_mol_n / nonzeroOrOne(nitrate_non_band_water);
+    next_aqueous.nitrate_band += nitrate_to_band_mol_n / nonzeroOrOne(nitrate_band_water);
     inline for (@typeInfo(aqueous_network.State).@"struct".fields) |field| {
         const value = @field(next_aqueous, field.name);
         if (!std.math.isFinite(value) or value < 0)
@@ -508,33 +489,37 @@ test "SOLUTE fertilizer state_update conserves nitrogen and is transactional" {
         1e-13,
     );
 
+    // A zero-volume band amalgamates into non-band (hour1.f:4970-4973): the
+    // banded dissolution lands in the non-band pool and nitrogen is conserved.
+    var amalgamating_flux = std.mem.zeroes(DissolutionFlux);
+    amalgamating_flux.banded_ammonium_mol_n = 0.1;
+    const zero_band: ZoneFractions = .{
+        .ammonium_non_band = 1,
+        .ammonium_band = 0,
+        .nitrate_non_band = 1,
+        .nitrate_band = 0,
+    };
+    state.banded_ammonium_mol_n = 0.1;
+    const non_band_before = aqueous.ammonium_non_band;
+    const band_before = aqueous.ammonium_band;
+    try state_updateToRecipients(&state, &aqueous, &gaseous_ammonia_g_n, amalgamating_flux, zero_band, 2, 14);
+    try std.testing.expectApproxEqAbs(non_band_before + 0.1 / 2.0, aqueous.ammonium_non_band, 1e-15);
+    try std.testing.expectEqual(band_before, aqueous.ammonium_band);
+    try std.testing.expectEqual(@as(f64, 0), state.banded_ammonium_mol_n);
+
+    // No water at all is still a missing recipient, and the failure is atomic.
+    state.banded_ammonium_mol_n = 0.1;
     const donor_before_failure = state;
     const aqueous_before_failure = aqueous;
     const gaseous_before_failure = gaseous_ammonia_g_n;
-    var invalid_flux = std.mem.zeroes(DissolutionFlux);
-    invalid_flux.banded_ammonium_mol_n = 0.1;
     try std.testing.expectError(
         error.MissingFertilizerRecipientWaterVolume,
-        state_updateToRecipients(
-            &state,
-            &aqueous,
-            &gaseous_ammonia_g_n,
-            invalid_flux,
-            .{
-                .ammonium_non_band = 1,
-                .ammonium_band = 0,
-                .nitrate_non_band = 1,
-                .nitrate_band = 0,
-            },
-            2,
-            14,
-        ),
+        state_updateToRecipients(&state, &aqueous, &gaseous_ammonia_g_n, amalgamating_flux, zero_band, 0, 14),
     );
     try std.testing.expectEqual(donor_before_failure, state);
     try std.testing.expectEqual(aqueous_before_failure, aqueous);
     try std.testing.expectEqual(gaseous_before_failure, gaseous_ammonia_g_n);
 }
-
 fn sumState(state: FertilizerState) f64 {
     var total: f64 = 0;
     inline for (@typeInfo(FertilizerState).@"struct".fields) |field| total += @field(state, field.name);

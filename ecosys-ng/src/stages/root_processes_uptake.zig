@@ -241,6 +241,7 @@ pub fn applyRootNutrientUptake(context: anytype) !void {
                             .relative_tolerance = context.config.nonlinear_tolerance.relative,
                             .picard_relaxation = context.config.picard_relaxation,
                             .max_iterations = context.iteration_limits.water_heat_solute_max_iterations,
+                            .legacy_explicit_fallback = true,
                         },
                     );
                     for (0..salt_competitor_count) |competitor_index| {
