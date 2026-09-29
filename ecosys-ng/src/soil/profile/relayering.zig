@@ -255,7 +255,20 @@ pub fn applyLayerRedistribution(ctx: Context, geometry_changes: Geometry.Disturb
 
             // DDLYRX: total change at the bottom boundary of layer `layer`.
             const bnd_idx = bnd_base + layer + 1;
-            const ddlyrx = geometry_changes.pond_m[bnd_idx] + geometry_changes.freeze_thaw_m[bnd_idx] + geometry_changes.erosion_m[bnd_idx] + geometry_changes.organic_carbon_m[bnd_idx];
+            // REDIST 8186-8195: for a soil layer (BKDS > 0) the material
+            // driver is DDLYRX = CDPTHY - CDPTHX, and CDPTHY excludes the
+            // freeze-thaw leg (8065/8087 reset it to CDPTHX for NN=2). Freeze-
+            // thaw moves boundaries (CDPTH) but carries no soil material across
+            // them unless IFLGK(L)=1, i.e. a pond layer (BKDS <= 0) lies at or
+            // below L (IFLGJ, 7749-7750/8132), where 8195 uses CDPTH - CDPTHX.
+            // Counting the cumulative column heave/settlement as a transfer
+            // pushed FX = |sum of deeper DVOLI|/DLYR(NU) of the top layer's
+            // solids downward every thaw hour until it held almost none.
+            const freeze_thaw_transfer_m = if (freezeThawDrivesTransfer(ctx, cell, first, active, layer))
+                geometry_changes.freeze_thaw_m[bnd_idx]
+            else
+                0;
+            const ddlyrx = geometry_changes.pond_m[bnd_idx] + freeze_thaw_transfer_m + geometry_changes.erosion_m[bnd_idx] + geometry_changes.organic_carbon_m[bnd_idx];
 
             // REDIST 8210-8216 refreshes the anchor DLYR at this loop
             // position, but leaves the lower neighbor on its prior live DLYR
@@ -1078,6 +1091,17 @@ pub fn applyEndOfHourGeometry(
     try applyStagedGeometryTransaction(ctx, &workspace.disturbance_transaction);
 }
 
+/// REDIST IFLGK(L) for the relayering loop: true when layer `layer` or any
+/// deeper active layer of `cell` is a pond layer (BKDS <= 0). Without soil
+/// properties every layer is treated as soil, so freeze-thaw moves no material.
+fn freezeThawDrivesTransfer(ctx: Context, cell: usize, first: usize, active: usize, layer: usize) bool {
+    const props = ctx.soil_properties orelse return false;
+    const cap = ctx.grid.soil_layer_capacity;
+    for (layer..first + active) |deeper|
+        if (props.bulk_density_megagrams_per_m3[cell * cap + deeper] <= 0) return true;
+    return false;
+}
+
 /// Restates the soil-thermal layer volume onto the state_updateted geometry without
 /// moving energy. The extensive dry and total heat capacities are held fixed, so
 /// the EXEC heat census sees the same energy before and after; only the
@@ -1367,11 +1391,12 @@ test "sub-floor nonzero layer redistribution conserves and moves water" {
     ft_change[1] = 0.001; // nonzero movement below the 0.01 m geometry floor
 
     var zero_change = [_]f64{0} ** 4;
+    // SOC-driven (CDPTHY) movement: freeze-thaw alone moves no soil material.
     const geometry_changes = Geometry.DisturbanceChanges{
         .pond_m = &zero_change,
-        .freeze_thaw_m = &ft_change,
+        .freeze_thaw_m = &zero_change,
         .erosion_m = &zero_change,
-        .organic_carbon_m = &zero_change,
+        .organic_carbon_m = &ft_change,
     };
 
     var gas_state = try gas.State.init(allocator, 3);
@@ -1455,6 +1480,81 @@ test "sub-floor nonzero layer redistribution conserves and moves water" {
             worst_relative_mismatch = @max(worst_relative_mismatch, @abs(thermal_state.layer_volume_m3[layer] - geometry_volume_m3) / scale);
     }
     try std.testing.expect(worst_relative_mismatch > 1e-6);
+}
+
+test "REDIST freeze-thaw moves soil boundaries without transferring soil material" {
+    // redist.f 8186-8187: soil DDLYRX = CDPTHY - CDPTHX excludes freeze-thaw.
+    // Ottawa 1998 thaw moved FX of the 1 cm top layer's solids down every hour.
+    const allocator = std.testing.allocator;
+    var geometry = try Geometry.State.init(allocator, 1, 3);
+    defer geometry.deinit();
+    try Geometry.initializeCell(&geometry, 0, 0, &.{ 0.01, 0.015, 0.3 }, 0, 1e-9);
+    const cfg = try SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 3, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-6, .absolute_tolerance = 1e-6, .max_nonlinear_iterations = 10 });
+    var grid = try GridState.init(allocator, cfg);
+    defer grid.deinit();
+    grid.matrix_liquid_water_m3[0] = 0.003;
+    grid.matrix_liquid_water_m3[1] = 0.005;
+    grid.matrix_liquid_water_m3[2] = 0.1;
+    grid.soil_temperature_k[0] = 280;
+    grid.soil_temperature_k[1] = 278;
+    grid.soil_temperature_k[2] = 275;
+    var thermal_lv = [_]f64{ 0.01, 0.015, 0.3 };
+    var thermal_dry = [_]f64{ 1.1, 1.1, 1.1 };
+    var thermal_total = [_]f64{ 2.4, 2.5, 2.5 };
+    var thermal_porosity = [_]f64{ 0.5, 0.5, 0.5 };
+    var thermal_thickness = [_]f64{ 0.01, 0.015, 0.3 };
+    var thermal_state: thermal_module.State = undefined;
+    thermal_state.layer_volume_m3 = &thermal_lv;
+    thermal_state.layer_thickness_m = &thermal_thickness;
+    thermal_state.dry_solid_heat_capacity_megajoules_per_m3_k = &thermal_dry;
+    thermal_state.total_heat_capacity_megajoules_per_m3_k = &thermal_total;
+    thermal_state.porosity_fraction = &thermal_porosity;
+    var gas_state = try gas.State.init(allocator, 3);
+    defer gas_state.deinit();
+    var organic_state = try organic.State.init(allocator, 3);
+    defer organic_state.deinit();
+    var chem_state = try chemistry_module.State.init(allocator, 3);
+    defer chem_state.deinit();
+    var reactive_state = try reactive.State.init(allocator, 3, 1);
+    defer reactive_state.deinit();
+    var nfert_state = try nitrogen_fertilizer.State.init(allocator, 1, 3);
+    defer nfert_state.deinit();
+    var mfert_state = try mineral_fertilizer.State.init(allocator, 1, 3);
+    defer mfert_state.deinit();
+    // Cumulative (bottom-anchored) freeze-thaw boundary movement.
+    const thaw = [_]f64{ -0.0012, -0.0011, -0.0006, 0 };
+    const zero = [_]f64{0} ** 4;
+    const water_before = [_]f64{ grid.matrix_liquid_water_m3[0], grid.matrix_liquid_water_m3[1], grid.matrix_liquid_water_m3[2] };
+    const dry_before = [_]f64{ thermal_dry[0] * thermal_lv[0], thermal_dry[1] * thermal_lv[1], thermal_dry[2] * thermal_lv[2] };
+    try applyLayerRedistribution(.{
+        .grid = &grid,
+        .soil_thermal = &thermal_state,
+        .gas_transport = &gas_state,
+        .soil_organic = &organic_state,
+        .soil_chemistry = &chem_state,
+        .reactive_nitrogen = &reactive_state,
+        .soil_fertilizer_inventory = &nfert_state,
+        .mineral_fertilizer_inventory = &mfert_state,
+        .soil_properties = null,
+        .plant_roots = null,
+        .soil_geometry = &geometry,
+        .soil_face_geometry = null,
+        .soil_transport_faces = null,
+        .water_heat_parameters = .{ .liquid_water_heat_capacity_megajoules_per_m3_k = 4.19, .ice_heat_capacity_megajoules_per_m3_k = 1.9274, .minimum_heat_capacity_megajoules_per_k = 1e-8 },
+        .salinity_enabled_by_cell = &.{false},
+        .nutrient_zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 },
+        .plant_populations = 0,
+        .minimum_layer_thickness_m = 1e-9,
+        .horizontal_cell_width_m = &.{1},
+        .vertical_cell_width_m = &.{1},
+        .rebase_thermal_volume_to_geometry = true,
+    }, .{ .pond_m = &zero, .freeze_thaw_m = &thaw, .erosion_m = &zero, .organic_carbon_m = &zero });
+    for (0..3) |layer| {
+        try std.testing.expectEqual(water_before[layer], grid.matrix_liquid_water_m3[layer]);
+        try std.testing.expectApproxEqRel(dry_before[layer], thermal_dry[layer] * thermal_lv[layer], 1e-14);
+    }
+    try std.testing.expectApproxEqAbs(@as(f64, 0.0101), geometry.layer_thickness_m[0], 1e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.0155), geometry.layer_thickness_m[1], 1e-15);
 }
 
 test "REDIST fraction saturates at DLYRM while content endpoints remain strict" {
@@ -1697,9 +1797,9 @@ test "DISC-WATSUB-002 relayering refills a recipient emptied earlier in the same
         .vertical_cell_width_m = &.{1},
     }, .{
         .pond_m = &zero_change,
-        .freeze_thaw_m = &ft_change,
+        .freeze_thaw_m = &zero_change,
         .erosion_m = &zero_change,
-        .organic_carbon_m = &zero_change,
+        .organic_carbon_m = &ft_change,
     });
 
     const water_after = grid.matrix_liquid_water_m3[0] + grid.matrix_liquid_water_m3[1] + grid.matrix_liquid_water_m3[2];
@@ -1781,7 +1881,7 @@ test "DISC-WATSUB-002 zero-matrix donor still transfers FHOL macropore owners" {
         .horizontal_cell_width_m = &.{1},
         .vertical_cell_width_m = &.{1},
         .rebase_thermal_volume_to_geometry = true,
-    }, .{ .pond_m = &zero, .freeze_thaw_m = &boundary_change, .erosion_m = &zero, .organic_carbon_m = &zero });
+    }, .{ .pond_m = &zero, .freeze_thaw_m = &zero, .erosion_m = &zero, .organic_carbon_m = &boundary_change });
 
     try std.testing.expect(grid.macropore_liquid_water_m3[1] < 0.12);
     try std.testing.expectApproxEqAbs(macro_water_before, grid.macropore_liquid_water_m3[1] + grid.macropore_liquid_water_m3[2], 1e-14);
