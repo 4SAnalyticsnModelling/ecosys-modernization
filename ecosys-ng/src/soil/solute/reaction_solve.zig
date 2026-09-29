@@ -1256,10 +1256,13 @@ test "SOLUTE-HYDROGEN-ROW-RECURRING-NONCONVERGENCE-001: hour 2561/day108-hour3 p
     var workspace = try Workspace.init(std.testing.allocator);
     defer workspace.deinit();
     const parameters = equilibriumClosureParameters(captured.parameters);
-    try std.testing.expectError(
-        error.SoluteReactionSolverDidNotConverge,
-        solveEquilibriumWithWorkspace(&workspace, &captured.state, 0, parameters, captured.options, null, 0),
-    );
+    // Flipped (adversarial r00012): the crawl was accumulated binary64 drift of
+    // the phosphate exchange-site inventory across interpolated iterates;
+    // restoreInterpolatedPhosphateSites removes it and the parent converges.
+    const before = try acceptedStateInventory(&captured.state, 0, parameters);
+    const result = try solveEquilibriumWithWorkspace(&workspace, &captured.state, 0, parameters, captured.options, null, 0);
+    try std.testing.expect(result.converged);
+    try requireConservedInventories(before, try acceptedStateInventory(&captured.state, 0, parameters));
 }
 
 test "reaction solver entry retry cannot reset an exhausted or one iteration budget" {

@@ -5899,6 +5899,11 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
             },
         );
     }
+    // Same legacy SOLUTE ZEROC=1.0E-32 resolution floor as the layer ledger
+    // below (DEV-010): STARTE dust (~1e-46 mol S at hour 2792) has no physical
+    // meaning; local copy only, shared tolerance struct untouched.
+    var cell_absolute_per_area = driver_context.config.*.mass_balance_absolute_tolerance;
+    cell_absolute_per_area.ions_mol_m2 = @max(cell_absolute_per_area.ions_mol_m2, 1.0e-32);
     var hourly_cell_conservation_report = try ecosys.hourly_cell_conservation.evaluate(
         driver_context.allocator.*,
         driver_context.hourly_cell_storage_before.*,
@@ -5906,7 +5911,7 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
         driver_context.hourly_cell_boundary_ledger.*.cells,
         driver_context.canopy_cell_area_m2.*,
         .{
-            .absolute_per_area = driver_context.config.*.mass_balance_absolute_tolerance,
+            .absolute_per_area = cell_absolute_per_area,
             .relative = driver_context.config.*.mass_balance_relative_tolerance,
         },
     );
@@ -7616,8 +7621,8 @@ noinline fn advanceHour(driver_context: anytype, timeline_state: *TimelineState,
     const weather_hour = advance_context.weather_hour_by_stream.*[0];
     const timestamp = weather_hour.timestamp;
     const temporary_profile_active = !builtin.is_test and
-        driver_context.executed_weather_hours.* >= 48 and
-        driver_context.executed_weather_hours.* < 56;
+        driver_context.executed_weather_hours.* >= 3842 and
+        driver_context.executed_weather_hours.* < 3850;
     const temporary_profile_start = std.Io.Clock.now(.boot, driver_context.init.*.io);
     // The fixed external hour is one atomic scientific/accounting
     // transaction. Clone every reallocating persistent owner in

@@ -326,6 +326,7 @@ pub fn evaluateCandidateResidualAtFraction(
         accepted_state,
         parameters,
     );
+    try restoreInterpolatedPhosphateSites(scratch, current, accepted_state);
     try scratch.unpackCell(0, accepted_state);
     const coefficients =
         try scratch.activityCoefficients(0, parameters.fractions);
@@ -376,6 +377,48 @@ pub fn restoreInterpolatedInorganicCarbon(
         scratch.aqueous[0].carbon_dioxide = corrected;
         correction = conserved -
             group_numerics2.inorganicCarbonMolPerM3(scratch, 0);
+    }
+    try scratch.packCell(0, interpolated);
+}
+
+fn phosphateSiteTotal(zone: anytype) f64 {
+    return zone.deprotonated_site_mol_per_megagram +
+        zone.hydroxyl_site_mol_per_megagram +
+        zone.protonated_site_mol_per_megagram +
+        zone.adsorbed_hpo4_mol_p_per_megagram +
+        zone.adsorbed_h2po4_mol_p_per_megagram;
+}
+
+/// Same roundoff restoration for the phosphate exchange-site inventory of each
+/// zone (sites only change form: free <-> protonated/hydroxyl <-> adsorbed).
+/// Accumulated interpolation drift of ~4000 ulps reached the accepted-state
+/// site gate at hour 3823 (48.73 mol/Mg, residual 3.05e-11). The correction
+/// goes to the largest FREE site owner, so no phosphorus moves; it fails
+/// instead of clipping if that owner would become negative.
+pub fn restoreInterpolatedPhosphateSites(
+    scratch: *chemistry.State,
+    current: []const f64,
+    interpolated: []f64,
+) !void {
+    try scratch.unpackCell(0, current);
+    const conserved = [2]f64{
+        phosphateSiteTotal(scratch.non_band_phosphate[0]),
+        phosphateSiteTotal(scratch.band_phosphate[0]),
+    };
+    try scratch.unpackCell(0, interpolated);
+    inline for (.{ &scratch.non_band_phosphate[0], &scratch.band_phosphate[0] }, 0..) |zone, zone_index| {
+        var owner = &zone.deprotonated_site_mol_per_megagram;
+        if (zone.hydroxyl_site_mol_per_megagram > owner.*) owner = &zone.hydroxyl_site_mol_per_megagram;
+        if (zone.protonated_site_mol_per_megagram > owner.*) owner = &zone.protonated_site_mol_per_megagram;
+        inline for (0..4) |_| {
+            const correction = conserved[zone_index] - phosphateSiteTotal(zone.*);
+            if (correction == 0) break;
+            const corrected = owner.* + correction;
+            if (!std.math.isFinite(corrected)) return error.NonFiniteSoluteReactionState;
+            if (corrected < 0) return error.NegativeSoluteReactionRoundoff;
+            if (corrected == owner.*) break;
+            owner.* = corrected;
+        }
     }
     try scratch.packCell(0, interpolated);
 }
