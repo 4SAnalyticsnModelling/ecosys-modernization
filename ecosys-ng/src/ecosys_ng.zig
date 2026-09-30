@@ -925,15 +925,29 @@ noinline fn writeAcceptedHourlyOutputs(driver_context: anytype, accepted_context
                 const top_layer = try driver_context.state.*.layerIndex(cell, 0);
                 const bulk_density_megagrams_per_m3 = driver_context.soil_solver_property_state.*.bulk_density_megagrams_per_m3[top_layer];
                 if (!std.math.isFinite(bulk_density_megagrams_per_m3) or bulk_density_megagrams_per_m3 <= 0) return error.InvalidOutputSoilBulkDensity;
+                // OUTSH 123-124: SWE = (VOLSS + VOLIS*DENSI + VOLWS)/AREA, the
+                // whole snowpack (snow, ice, liquid) — not litter water/ice.
+                var pack_snow_m3: f64 = 0;
+                var pack_ice_water_equivalent_m3: f64 = 0;
+                var pack_liquid_m3: f64 = 0;
+                {
+                    const snow_base = cell * driver_context.snow_transport_state.*.layer_capacity;
+                    for (0..driver_context.snow_transport_state.*.layer_capacity) |snow_layer| {
+                        const snow = snow_base + snow_layer;
+                        pack_snow_m3 += driver_context.snow_transport_state.*.solid_snow_water_equivalent_m3[snow];
+                        pack_liquid_m3 += driver_context.snow_transport_state.*.liquid_water_volume_m3[snow];
+                        pack_ice_water_equivalent_m3 += driver_context.snow_transport_state.*.ice_volume_m3[snow] * driver_context.runscript.*.snow_ice_density_megagrams_per_m3;
+                    }
+                }
                 try ecosys.soil_water_output.calculateInto(.{
                     .evapotranspiration_m3 = evapotranspiration_m3,
                     .runoff_m3 = -driver_context.surface_runoff_state.*.exported_water_m3[cell],
                     .sediment_discharge_water_m3 = driver_context.surface_erosion_state.*.routing.sediment_export_megagrams[cell] / bulk_density_megagrams_per_m3,
                     .root_water_uptake_m3 = root_water_uptake_m3,
                     .external_water_outflow_m3 = external_water_outflow_m3,
-                    .surface_snow_volume_m3 = driver_context.surface_precipitation_state.*.solid_snow_water_equivalent_m3[cell],
-                    .surface_ice_volume_m3 = driver_context.surface_litter_ice_m3.*[cell],
-                    .surface_liquid_water_m3 = driver_context.surface_precipitation_state.*.litter_water_m3[cell],
+                    .surface_snow_volume_m3 = pack_snow_m3,
+                    .surface_ice_volume_m3 = pack_ice_water_equivalent_m3,
+                    .surface_liquid_water_m3 = pack_liquid_m3,
                     // Dall'Amico soil/surface ice is already
                     // stored as water-equivalent volume.
                     .ice_density_megagrams_per_m3 = 1,
@@ -7251,6 +7265,11 @@ noinline fn advancePlantLifecycleManagement(
                             .relative = driver_context.config.*.mass_balance_relative_tolerance,
                         },
                     );
+                    if (!report.accepted()) {
+                        const b = driver_context.plant_lifecycle_inventory_before.*[plant];
+                        const x = driver_context.plant_lifecycle_external_input.*[plant];
+                        std.log.err("TEMP_DIAGNOSTIC plant lifecycle: plant={d} before_c={e} after_c={e} input_c={e} before_n={e} after_n={e} input_n={e}", .{ plant, b.carbon_g, inventory_after.carbon_g, x.carbon_g, b.nitrogen_g, inventory_after.nitrogen_g, x.nitrogen_g });
+                    }
                     try ecosys.plant_daily_flux_ledger.requireLifecycleAccepted(report, plant);
                     try driver_context.hourly_cell_boundary_ledger.*.accumulate(cell, .{
                         .carbon_input_g = driver_context.plant_lifecycle_external_input.*[plant].carbon_g,

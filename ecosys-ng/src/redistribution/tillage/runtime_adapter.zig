@@ -957,7 +957,9 @@ pub fn apply(context: *Context, cell: usize, tillage_depth_m: f64, mixing_fracti
     const work_soluble = try allocZero(allocator, 40);
     const work_som = try allocZero(allocator, 100);
     const applied_fraction = try mixing_initialization.initializeCell(cell, remaining, .{ .ammonium_band_depth_m = cell_values[0], .ammonium_band_extent_m = cell_values[1], .nitrate_band_depth_m = cell_values[2], .nitrate_band_extent_m = cell_values[3], .phosphate_band_depth_m = cell_values[4], .phosphate_band_extent_m = cell_values[5], .disturbance_flag = disturbance_flags, .soil_energy_megajoules = cell_values[6] }, .{ .scalar_accumulators = scalar_totals, .microbial_carbon_g_c = work_microbe[0], .microbial_nitrogen_g_n = work_microbe[1], .microbial_phosphorus_g_p = work_microbe[2], .residue_carbon_g_c = work_residue[0], .residue_nitrogen_g_n = work_residue[1], .residue_phosphorus_g_p = work_residue[2], .soluble_fraction_totals = work_soluble, .som_fraction_totals = work_som });
-    if (applied_fraction != mixing_fraction) return error.TillageMixingFractionMismatch;
+    // `initializeCell` rebuilds 1-(1-m); that is m only to one ulp (1999 d137).
+    if (@abs(applied_fraction - mixing_fraction) > 4 * std.math.floatEps(f64) * @max(1.0, @abs(mixing_fraction)))
+        return error.TillageMixingFractionMismatch;
 
     const physical_gas = try applyOrderedSequence(allocator, context, cell, layers, global_first, first_soil_layer, last_soil_layer, tillage_depth_m, mixing_fraction, remaining, thickness, bottoms, &soil_organic, &surface_organic, held_organic, work_microbe, work_residue, work_soluble, work_som, chemistry_storage, band_geometry, prepared_transport);
 

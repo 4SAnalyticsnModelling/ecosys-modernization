@@ -1001,6 +1001,11 @@ pub fn applyEventInternal(context: *group_misc.Context, plant: usize, source_eve
         state_update.structure.effective_clumping_factor[plant] = state_update.effective;
     }
     if (event.termination != .retain) {
+        // GROSUB 11443-11557 complete death: a terminated (IDTH=1) PFT that is
+        // not reseeded sends its remaining storage and shoot pools to litter in
+        // this hour, so nothing is silently discarded when STARTQ reinitializes
+        // it at the next planting (Ottawa 1999 d137: 0.264 g C of 1998 seed).
+        if (!reseed and context.root_litter_partition != null) try applyWholePlantMortalityResidue(context, plant);
         if (context.root_state) |roots| {
             if (plant >= roots.roots_dead.len) return error.PlantHarvestIndexOutOfBounds;
             roots.roots_dead[plant] = true;
