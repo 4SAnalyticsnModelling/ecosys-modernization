@@ -477,7 +477,10 @@ pub fn residualAt(grid: *const grid_module.GridState, faces: []const group_types
             const matric_megapascal = try group_hydraulics.matricPotentialMpaAtAssumeValid(properties, layer, matrix_fraction);
             const base_fraction = base[layer] / properties.matrix_bulk_volume_m3[layer];
             const base_matric_megapascal = try group_hydraulics.matricPotentialMpaAtAssumeValid(properties, layer, base_fraction);
-            const current_layer_discharge_candidate = base_matric_megapascal > grid.matric_potential_megapascal[layer];
+            // WATSUB 5286/5360: PSISA1(L) > PSISA(L), the HOUR1 air-entry potential,
+            // not the previous matric state (which made discharge depend on the
+            // layer getting wetter and cut Ottawa tile drainage ~9x).
+            const current_layer_discharge_candidate = base_matric_megapascal > try group_hydraulics.airEntryMatricPotentialMpa(properties, layer);
             const macro_capacity = grid.macropore_pore_capacity_m3[layer];
             const macropore_physical_ice_m3 = grid.macropore_ice_water_m3[layer] / properties.ice_density_megagrams_per_m3;
             const macro_water_depth_m = if (macro_capacity > 0) bottom_m - (macropore_water + macropore_physical_ice_m3) / macro_capacity * thickness_m else bottom_m;
@@ -501,7 +504,7 @@ pub fn residualAt(grid: *const grid_module.GridState, faces: []const group_types
                 if (distance_m <= 0) continue;
                 // WATSUB IFLGU/IFLGD require every deeper layer above the
                 // corresponding external table to remain wetter than its
-                // previous HOUR1 matric state. Freeze this active set from the
+                // HOUR1 air-entry potential PSISA. Freeze this active set from the
                 // hour-start state so the implicit residual remains smooth.
                 if (matrix_discharge_enabled and midpoint_m < external_depth_m) {
                     const local_layer = layer % grid.soil_layer_capacity;
@@ -511,7 +514,7 @@ pub fn residualAt(grid: *const grid_module.GridState, faces: []const group_types
                         if (properties.boundary_layer_midpoint_depth_m[lower] >= external_depth_m) break;
                         const lower_fraction = base[lower] / properties.matrix_bulk_volume_m3[lower];
                         const lower_matric_megapascal = try group_hydraulics.matricPotentialMpaAtAssumeValid(properties, lower, lower_fraction);
-                        if (lower_matric_megapascal <= grid.matric_potential_megapascal[lower] or properties.boundary_layer_midpoint_depth_m[lower] > topology.active_layer_depth_m[boundary_face.cell_index]) {
+                        if (lower_matric_megapascal <= try group_hydraulics.airEntryMatricPotentialMpa(properties, lower) or properties.boundary_layer_midpoint_depth_m[lower] > topology.active_layer_depth_m[boundary_face.cell_index]) {
                             matrix_discharge_enabled = false;
                             break;
                         }

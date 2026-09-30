@@ -756,6 +756,7 @@ fn captureTillagePlantOwners(context: *ApplyContext, cell: usize, rollback: *Eve
     if (harvest.shoot_litter_phosphorus_g_p_by_plant) |values| try rollback.capture(values, plant_first, plant_end);
     if (harvest.root_litter_carbon_g_c_by_plant) |values| try rollback.capture(values, plant_first, plant_end);
     if (harvest.deferred_deactivation_by_plant) |values| try rollback.capture(values, plant_first, plant_end);
+    if (harvest.surface_organic_heat_rebase_megajoules_by_cell) |values| try rollback.capture(values, 0, values.len);
     if (harvest.root_litter_nitrogen_g_n_by_plant) |values| try rollback.capture(values, plant_first, plant_end);
     if (harvest.root_litter_phosphorus_g_p_by_plant) |values| try rollback.capture(values, plant_first, plant_end);
     if (harvest.root_litter_carbon_ledger) |ledger|

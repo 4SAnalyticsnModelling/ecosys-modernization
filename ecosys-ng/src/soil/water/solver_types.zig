@@ -94,6 +94,8 @@ pub const Properties = struct {
     osmotic_potential_multiplier: f64,
     nonlinear_time_fraction: f64 = 1,
     boundary_topology: ?*const boundary_topology.State = null,
+    /// HOUR1 FSCNV (see `solver_hydraulics.airEntryMatricPotentialMpa`).
+    air_entry_conductivity_fraction: f64 = 0.1,
     boundary_face_area_m2: []const f64 = &.{},
     boundary_macropore_hydraulic_conductivity_m2_per_h_megapascal: []const f64 = &.{},
     boundary_layer_volume_m3: []const f64 = &.{},

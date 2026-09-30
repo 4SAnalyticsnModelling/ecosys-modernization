@@ -351,6 +351,27 @@ pub fn macroporeFrozenHydraulicImpedance(
     );
 }
 
+/// HOUR1 1320-1340 PSISA: the matric potential at which the vertical
+/// conductivity table first falls below FSCNV x SCNV. ng's continuous
+/// Mualem-van Genuchten curve gives the same definition as the water content
+/// where K_vertical(theta) = fraction x K_vertical(theta_s) (ice-free: PSISA is
+/// a soil property). WATSUB IFLGU/IFLGD enable water-table discharge only while
+/// the layer is wetter than it.
+pub fn airEntryMatricPotentialMpa(properties: group_types.Properties, cell: usize) !f64 {
+    const parameters = properties.mualem_van_genuchten_parameters[cell];
+    const fraction = properties.air_entry_conductivity_fraction;
+    var dry = parameters.residual_water_content_m3_per_m3;
+    var wet = parameters.saturated_water_content_m3_per_m3;
+    if (!(fraction > 0) or !(wet > dry)) return matricPotentialMpaAtAssumeValid(properties, cell, wet);
+    const target = fraction * try conductivityAt(properties, cell, 2, wet, 0);
+    if (!(target > 0)) return matricPotentialMpaAtAssumeValid(properties, cell, wet);
+    for (0..48) |_| {
+        const middle = 0.5 * (dry + wet);
+        if (try conductivityAt(properties, cell, 2, middle, 0) >= target) wet = middle else dry = middle;
+    }
+    return matricPotentialMpaAtAssumeValid(properties, cell, wet);
+}
+
 pub fn saturationMatricPotentialMpa(properties: group_types.Properties, cell: usize) f64 {
     _ = properties;
     _ = cell;

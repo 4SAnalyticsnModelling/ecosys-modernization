@@ -20,6 +20,7 @@ const soil_organic = @import("../soil/organic/initialization.zig");
 const grid_module = @import("../state/grid.zig");
 const carbon_exchange = @import("../canopy/photosynthesis/carbon_exchange.zig");
 const shoot_litter_bridge = @import("../plant/growth/shoot_litter_bridge.zig");
+const surface_heat_rebase = @import("../surface/litter_organic_heat_rebase.zig");
 const canopy_structure = @import("../canopy/morphology/structure.zig");
 const canopy_layers = @import("../canopy/radiation/layer_distribution.zig");
 const canopy_biochemistry = @import("../canopy/photosynthesis/biochemistry.zig");
@@ -276,6 +277,10 @@ pub fn publishPlantProducts(context: *group_misc.Context, plant: usize) !canopy.
         cell,
         products.standing_dead_charcoal_litter,
     );
+    const surface_carbon_before = if (context.surface_organic_heat_rebase_megajoules_by_cell != null)
+        try surface.totalCarbon_g_c(cell)
+    else
+        0;
     try shoot_litter_bridge.state_updateCell(surface, cell, litter);
     try shoot_litter_bridge.state_updateCharcoalCell(
         surface,
@@ -292,6 +297,15 @@ pub fn publishPlantProducts(context: *group_misc.Context, plant: usize) !canopy.
         context.daily_manure_carbon_input_g_c.?[cell] = daily_manure_next.?.carbon_g;
         context.daily_manure_nitrogen_input_g_n.?[cell] = daily_manure_next.?.nitrogen_g;
         context.daily_manure_phosphorus_input_g_p.?[cell] = daily_manure_next.?.phosphorus_g;
+    }
+    if (context.surface_organic_heat_rebase_megajoules_by_cell) |rebase| {
+        if (cell >= rebase.len or cell >= grid.surface_temperature_k.len) return error.PlantHarvestIndexOutOfBounds;
+        rebase[cell] += try surface_heat_rebase.organicCarbonRebaseHeatMegajoules(
+            surface_carbon_before,
+            try surface.totalCarbon_g_c(cell),
+            grid.surface_temperature_k[cell],
+            context.surface_dry_organic_heat_capacity_megajoules_per_g_c_k,
+        );
     }
     if (next_shoot_litter) |next| {
         context.shoot_litter_carbon_g_c_by_plant.?[plant] = next.carbon_g;

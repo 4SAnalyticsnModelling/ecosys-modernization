@@ -59,6 +59,12 @@ pub const Context = struct {
     /// terminated by harvest stays active for the rest of its harvest hour.
     /// When bound, termination defers `active=false` to the hour closeout.
     deferred_deactivation_by_plant: ?[]bool = null,
+    /// REDIST 4318-4330 HFLXO=dVHCP*T: surface litter published by harvest,
+    /// tillage knock-down, grazing or mortality changes the litter heat
+    /// capacity at a fixed surface temperature. When bound, each publication
+    /// accumulates that signed rebase heat per cell for the hourly ledgers.
+    surface_organic_heat_rebase_megajoules_by_cell: ?[]f64 = null,
+    surface_dry_organic_heat_capacity_megajoules_per_g_c_k: f64 = 0,
     soil_organic_state: ?*soil_organic.State = null,
     surface_organic_state: ?*soil_organic.State = null,
     surface_nutrient_state: ?*surface_nutrients.State = null,

@@ -2876,6 +2876,21 @@ noinline fn postScienceAccounting(driver_context: anytype, advance_context: anyt
     // HFUNC 118-120: a PFT terminated this hour (IDTH=1) keeps IFLGC=1 until
     // the next hour's HFUNC, so every post-science publication above still
     // books its already-computed root/canopy fluxes. Deactivate it now.
+    // REDIST 4318-4330 HFLXO: surface litter published by plant products this
+    // hour (harvest, tillage knock-down, grazing, mortality) books its
+    // capacity-at-fixed-T rebase once in every conservation scope.
+    {
+        const rebase = driver_context.plant_product_surface_heat_rebase_megajoules_by_cell.*;
+        var total: f64 = 0;
+        for (rebase) |heat| total += heat;
+        if (!std.math.isFinite(total)) return error.NonFiniteSurfaceLitterHeatRebase;
+        if (total != 0 or std.mem.indexOfNone(f64, rebase, &.{0}) != null) {
+            try driver_context.hourly_cell_boundary_ledger.*.accumulateSignedInternalHeat(rebase);
+            try ecosys.layer_local_conservation.accumulateSurfaceOrganicHeatRebase(&driver_context.hourly_layer_boundary_ledger.*, rebase);
+            try driver_context.landscape_mass_balance_state.*.boundary_ledger.accumulateAcceptedSignedInternalHeat(total);
+        }
+        @memset(rebase, 0);
+    }
     if (driver_context.plant_phenology_state.*) |*phenology| {
         for (driver_context.deferred_plant_deactivation_by_plant.*, 0..) |*deferred, plant| {
             if (!deferred.*) continue;
@@ -6747,6 +6762,7 @@ noinline fn prepareHourlyScience(driver_context: anytype, timeline_state: *Timel
     @memset(driver_context.shoot_harvest_litter_nitrogen_g_n_by_plant.*, 0);
     @memset(driver_context.shoot_harvest_litter_phosphorus_g_p_by_plant.*, 0);
     @memset(driver_context.root_harvest_litter_carbon_g_c_by_plant.*, 0);
+    @memset(driver_context.plant_product_surface_heat_rebase_megajoules_by_cell.*, 0);
     @memset(driver_context.root_harvest_litter_nitrogen_g_n_by_plant.*, 0);
     @memset(driver_context.root_harvest_litter_phosphorus_g_p_by_plant.*, 0);
     @memset(driver_context.hourly_manure_products_by_plant.*, .{});
@@ -10543,6 +10559,7 @@ const PlantTransferOwners = struct {
     root_harvest_litter_nitrogen_g_n_by_plant: []f64,
     root_harvest_litter_phosphorus_g_p_by_plant: []f64,
     deferred_plant_deactivation_by_plant: []bool,
+    plant_product_surface_heat_rebase_megajoules_by_cell: []f64,
     harvest_carbon_at_hour_start_g_c_by_plant: []f64,
     harvest_salt_at_hour_start_mol_by_plant_species: []f64,
 };
@@ -10645,6 +10662,9 @@ noinline fn initializePlantTransferOwners(
     owners.deferred_plant_deactivation_by_plant = try inputs.allocator.alloc(bool, inputs.output_plant_count);
     resources.ownFree(&owners.deferred_plant_deactivation_by_plant);
     @memset(owners.deferred_plant_deactivation_by_plant, false);
+    owners.plant_product_surface_heat_rebase_megajoules_by_cell = try inputs.allocator.alloc(f64, inputs.cell_count);
+    resources.ownFree(&owners.plant_product_surface_heat_rebase_megajoules_by_cell);
+    @memset(owners.plant_product_surface_heat_rebase_megajoules_by_cell, 0);
     owners.hourly_manure_products_by_plant = try inputs.allocator.alloc(
         ecosys.grazing_manure.Products,
         inputs.output_plant_count,
@@ -12629,6 +12649,7 @@ pub fn main(init: std.process.Init) !void {
     const root_harvest_litter_nitrogen_g_n_by_plant = plant_transfer_owners.root_harvest_litter_nitrogen_g_n_by_plant;
     const root_harvest_litter_phosphorus_g_p_by_plant = plant_transfer_owners.root_harvest_litter_phosphorus_g_p_by_plant;
     const deferred_plant_deactivation_by_plant = plant_transfer_owners.deferred_plant_deactivation_by_plant;
+    const plant_product_surface_heat_rebase_megajoules_by_cell = plant_transfer_owners.plant_product_surface_heat_rebase_megajoules_by_cell;
     const harvest_carbon_at_hour_start_g_c_by_plant = plant_transfer_owners.harvest_carbon_at_hour_start_g_c_by_plant;
     const harvest_salt_at_hour_start_mol_by_plant_species = plant_transfer_owners.harvest_salt_at_hour_start_mol_by_plant_species;
     const eroded_organic_component_count = try ecosys.soil_erosion_organic_bridge.componentCount(soil_organic_state);
@@ -13518,6 +13539,8 @@ pub fn main(init: std.process.Init) !void {
                 .root_litter_nitrogen_g_n_by_plant = root_harvest_litter_nitrogen_g_n_by_plant,
                 .root_litter_phosphorus_g_p_by_plant = root_harvest_litter_phosphorus_g_p_by_plant,
                 .deferred_deactivation_by_plant = deferred_plant_deactivation_by_plant,
+                .surface_organic_heat_rebase_megajoules_by_cell = plant_product_surface_heat_rebase_megajoules_by_cell,
+                .surface_dry_organic_heat_capacity_megajoules_per_g_c_k = runscript.surface_pond_dry_organic_heat_capacity_megajoules_per_g_c_k,
                 .soil_organic_state = soil_organic_state,
                 .surface_organic_state = surface_organic_state,
                 .surface_nutrient_state = surface_fire_exchange_state,
@@ -14435,6 +14458,7 @@ pub fn main(init: std.process.Init) !void {
         .root_harvest_litter_nitrogen_g_n_by_plant = &root_harvest_litter_nitrogen_g_n_by_plant,
         .root_harvest_litter_phosphorus_g_p_by_plant = &root_harvest_litter_phosphorus_g_p_by_plant,
         .deferred_plant_deactivation_by_plant = &deferred_plant_deactivation_by_plant,
+        .plant_product_surface_heat_rebase_megajoules_by_cell = &plant_product_surface_heat_rebase_megajoules_by_cell,
         .shoot_senescence_products_by_plant = &shoot_senescence_products_by_plant,
         .site_by_cell = &site_by_cell,
         .snow_depth_m = &snow_depth_m,
