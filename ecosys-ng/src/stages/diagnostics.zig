@@ -682,7 +682,7 @@ pub fn traceImpliedPhosphateExportLayer0(context: anytype, comptime site: []cons
     const live_water_m3 = context.grid.matrix_liquid_water_m3[0];
     const dry_reference_water_m3 = chemistry_state.dry_reference_water_m3[0];
     const negligible_water_volume_m3 = ecosys.soil_chemistry_water_carrier_rebase.legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[0]);
-    const carrier_m3 = if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+    const carrier_m3 = if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else if (dry_reference_water_m3 > 0) dry_reference_water_m3 else live_water_m3;
     var non_band_conc_sum: f64 = 0;
     var band_conc_sum: f64 = 0;
     inline for (@typeInfo(ecosys.solute_transport_species.AqueousSpecies).@"enum".fields) |field| {

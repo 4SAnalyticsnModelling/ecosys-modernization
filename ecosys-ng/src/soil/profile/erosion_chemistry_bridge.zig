@@ -278,7 +278,7 @@ fn erosionWaterCarrierM3(
         !std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0 or
         !std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
         return error.InvalidChemistryErosionState;
-    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else if (dry_reference_water_m3 > 0) dry_reference_water_m3 else live_water_m3;
 }
 
 fn put(value: f64, output: []f64, cursor: *usize) !void {

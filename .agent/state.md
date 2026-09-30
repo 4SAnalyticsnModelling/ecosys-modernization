@@ -2,7 +2,7 @@
 
 Updated 2026-09-30 03:00 (local). Plan: Complete 30-Year Ottawa Run with Zero Science Gap.
 
-## Current Round: 34
+## Current Round: 42
 - Proposer: CLAUDE. Challenger: DEEPSEEK (r31 dust-gate audit, r32 DEV-014, r33 DEV-015, r34 terminal toggles).
 
 ## Frontier (strict runs on C:\ecosys-build\runs, deck blob ecf5e61a, ReleaseSafe)
@@ -30,6 +30,12 @@ DEV-009 bounded water stagnation publication; DEV-010 legacy ZEROC floors; DEV-0
 (evidence insufficient; fired post-tillage with quality 161 before 84c09d5); DEV-012 explicit boundary gas pressure;
 DEV-013 zone-capped topsoil microbial uptake; DEV-014 bounded phase stagnation/ceiling publication; DEV-015 terminal
 stiff solute image. Terminal ladder attempt enables DEV-011/014-ceiling/015 together.
+
+## Fresh strict run r00018 (from hour 0, all fixes incl. PSISA drainage + FOMA fallbacks)
+- passed 2914 (DEV-019 soil), reaching 3254 (d136 tillage): surface Na/K vanish unbooked (trace in progress).
+- COMPARABILITY (DEEPSEEK r36-r42): drainage 45 vs 384 mm (PSISA gate fixed; effect small so far),
+  April topsoil θ 0.42 vs 0.31, SWE DOY10 89.5 vs 14.9 mm (legacy loses snow in Jan 1-10; r42 open),
+  frozen-topsoil frost-heave runoff absent in ng.
 
 ## Open / known simplifications
 - COMPARABILITY: 1998 d200/d210 noon cell fluxes ng vs legacy: CH4 -1.15 vs -0.21 umol m-2 s-1, O2 exchange 0.12 vs

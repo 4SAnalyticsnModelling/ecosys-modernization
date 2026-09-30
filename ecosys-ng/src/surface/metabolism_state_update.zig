@@ -74,6 +74,50 @@ pub const ApplyContext = struct {
 
 /// Atomic per-cell NITRO redistribution for the translated surface metabolism
 /// block. All source sufficiency and finite-result checks precede mutation.
+/// DEV-019 (surface litter pools): FMN-floored competition shares can let the
+/// litter NH4/NO3/H2PO4/HPO4 consumers exceed the pool. Scale each pool's
+/// positive microbial uptakes (per unit) to what is left after denitrification;
+/// mineralization is untouched and the microbial side reads the same arrays.
+fn capSurfaceMicrobialMineralUptake(context: *ApplyContext, cell: usize) !void {
+    const aqueous_carrier_m3 = effectiveAqueousCarrierM3(
+        context.litter_water_m3[cell],
+        context.litter_chemistry.dry_reference_water_m3[cell],
+        negligibleLitterWaterVolumeM3(context.cell_area_m2[cell]),
+    );
+    const litter_cell = context.litter_chemistry.cells[cell];
+    var nitrate_reduction_g_n: f64 = 0;
+    for (0..respiration.litter_complex_count) |complex|
+        nitrate_reduction_g_n += context.denitrification.nitrate_reduction_g_n[cell * respiration.litter_complex_count + complex];
+    const remainder = [4]f64{
+        litter_cell.ammonium_mol_per_m3 * aqueous_carrier_m3 * context.nitrogen_molar_mass_g_per_mol,
+        litter_cell.nitrate_mol_per_m3 * aqueous_carrier_m3 * context.nitrogen_molar_mass_g_per_mol - nitrate_reduction_g_n,
+        litter_cell.h2po4_mol_p_per_m3 * aqueous_carrier_m3 * context.phosphorus_molar_mass_g_per_mol,
+        litter_cell.hpo4_mol_p_per_m3 * aqueous_carrier_m3 * context.phosphorus_molar_mass_g_per_mol,
+    };
+    const first = cell * respiration.unit_count_per_cell;
+    const end = first + respiration.unit_count_per_cell;
+    const exchanges = [4][]f64{
+        context.mineral_exchange.ammonium_exchange_g_n[first..end],
+        context.mineral_exchange.nitrate_exchange_g_n[first..end],
+        context.mineral_exchange.h2po4_exchange_g_p[first..end],
+        context.mineral_exchange.hpo4_exchange_g_p[first..end],
+    };
+    for (exchanges, remainder) |values, available_raw| {
+        var uptake_sum: f64 = 0;
+        var release: f64 = 0;
+        for (values) |value| {
+            if (!std.math.isFinite(value)) return error.NonFiniteSurfaceMetabolismStateUpdate;
+            if (value > 0) uptake_sum += value else release -= value;
+        }
+        if (!(uptake_sum > 0)) continue;
+        if (uptake_sum - release <= @max(0, available_raw) + 64 * std.math.floatEps(f64) * (uptake_sum + release + @abs(available_raw))) continue;
+        const factor = std.math.clamp((@max(0, available_raw) + release) / uptake_sum, 0, 1);
+        for (values) |*value| if (value.* > 0) {
+            value.* *= factor;
+        };
+    }
+}
+
 pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
     try validate(context.*, range);
     for (range.first..range.end) |cell| {
@@ -87,6 +131,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
 }
 
 fn state_updateCell(context: *ApplyContext, cell: usize) !void {
+    try capSurfaceMicrobialMineralUptake(context, cell);
     const conserved_carbon_before_g_c = try authoritativeCellCarbon_g_c(context.*, cell);
     const conserved_nitrogen_before_g_n = try authoritativeCellNitrogen_g_n(context.*, cell);
     const conserved_phosphorus_before_g_p = try authoritativeCellPhosphorus_g_p(context.*, cell);
@@ -544,6 +589,8 @@ fn state_updateCell(context: *ApplyContext, cell: usize) !void {
     // write. In particular, mineralization in a dry cell with neither live
     // water nor a retained carrier must fail without leaving organic pools
     // partially committed.
+    if (!@import("builtin").is_test and aqueous_carrier_m3 == 0 and (nitrate_after_g_n != 0 or ammonium_after_g_n != 0 or h2po4_after_g_p != 0 or hpo4_after_g_p != 0))
+        std.log.err("TEMP_DIAGNOSTIC surface metabolism no carrier: cell={d} live_water={e} dry_reference={e} negligible={e} no3_before={e} no3_after={e} nh4_before={e} nh4_after={e} h2po4_after={e} hpo4_after={e}", .{ cell, water_m3, context.litter_chemistry.dry_reference_water_m3[cell], negligibleLitterWaterVolumeM3(context.cell_area_m2[cell]), nitrate_before_g_n, nitrate_after_g_n, ammonium_before_g_n, ammonium_after_g_n, h2po4_after_g_p, hpo4_after_g_p });
     const nitrate_after_mol_per_m3 = try concentrationFromExtensiveAmount(nitrate_after_g_n, aqueous_carrier_m3, context.nitrogen_molar_mass_g_per_mol);
     const ammonium_after_mol_per_m3 = try concentrationFromExtensiveAmount(ammonium_after_g_n, aqueous_carrier_m3, context.nitrogen_molar_mass_g_per_mol);
     const h2po4_after_mol_p_per_m3 = try concentrationFromExtensiveAmount(h2po4_after_g_p, aqueous_carrier_m3, context.phosphorus_molar_mass_g_per_mol);
@@ -637,7 +684,7 @@ fn requireSignedStorageTransfer(
 /// remembered `dry_reference_water_m3` once `live_water_m3` falls at or below
 /// the legacy negligible-water floor, not only when it is exactly zero.
 fn effectiveAqueousCarrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_volume_m3: f64) f64 {
-    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else if (dry_reference_water_m3 > 0) dry_reference_water_m3 else live_water_m3;
 }
 
 /// `ZEROS2` scaled to one cell's actual horizontal footprint, for this file's

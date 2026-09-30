@@ -58,7 +58,7 @@ comptime {
 /// issue-060/061/063/064/065/066's other instances. `>`, not `>=`, matches
 /// legacy's own strict comparison (`solute.f:610`).
 fn tillageSurfaceWaterCarrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_volume_m3: f64) f64 {
-    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else if (dry_reference_water_m3 > 0) dry_reference_water_m3 else live_water_m3;
 }
 
 /// Gathers REDIST `TZALGS..TZM1PGS` amounts for one surface cell.  Wet free
@@ -118,10 +118,13 @@ pub fn commitTillageSurfaceAmounts(
     actual_water_m3: f64,
     represented_carrier_m3: f64,
     amounts: TillageSurfaceAmounts,
+    /// ZEROS2-equivalent floor: a live trace at or below it is represented by
+    /// the remembered dry carrier, exactly as every reader substitutes it.
+    negligible_water_volume_m3: f64,
 ) !void {
     try validateTillageOwners(chemistry, extensive, cell, actual_water_m3);
     if (!std.math.isFinite(represented_carrier_m3) or represented_carrier_m3 < 0 or
-        (actual_water_m3 > 0 and represented_carrier_m3 != actual_water_m3))
+        (actual_water_m3 > negligible_water_volume_m3 and represented_carrier_m3 != actual_water_m3))
         return error.InvalidTillageSurfaceAqueousCarrier;
 
     var concentrations: [12]f64 = undefined;
@@ -146,7 +149,7 @@ pub fn commitTillageSurfaceAmounts(
     setRepresentedConcentrations(&chemistry_candidate, concentrations);
     const first = cell * extensive.species_count;
     chemistry.cells[cell] = chemistry_candidate;
-    chemistry.dry_reference_water_m3[cell] = if (actual_water_m3 > 0)
+    chemistry.dry_reference_water_m3[cell] = if (actual_water_m3 > negligible_water_volume_m3)
         0
     else
         represented_carrier_m3;
@@ -935,7 +938,7 @@ test "REDIST tillage surface adapter binds all 42 authoritative coordinates in s
 
     var remaining = gathered;
     for (&remaining) |*amount| amount.* *= 0.5;
-    try commitTillageSurfaceAmounts(&chemistry, &extensive, 0, 0, 1, remaining);
+    try commitTillageSurfaceAmounts(&chemistry, &extensive, 0, 0, 1, remaining, 1.0e-6);
     try std.testing.expectEqual(@as(f64, 1), chemistry.cells[0].aluminum_mol_per_m3);
     try std.testing.expectEqual(@as(f64, 2), chemistry.cells[0].iron_mol_per_m3);
     try std.testing.expectEqual(@as(f64, 3), chemistry.cells[0].hydrogen_mol_per_m3);
@@ -973,7 +976,7 @@ test "REDIST tillage surface owner publish rejects a late invalid coordinate ato
     invalid[surface_species_count - 1] = std.math.nan(f64);
     try std.testing.expectError(
         error.InvalidTillageSurfaceAqueousOwner,
-        commitTillageSurfaceAmounts(&chemistry, &extensive, 0, 0.25, 0.25, invalid),
+        commitTillageSurfaceAmounts(&chemistry, &extensive, 0, 0.25, 0.25, invalid, 1.0e-6),
     );
     try std.testing.expectEqualDeep(chemistry_before, chemistry.cells[0]);
     try std.testing.expectEqual(dry_before, chemistry.dry_reference_water_m3[0]);

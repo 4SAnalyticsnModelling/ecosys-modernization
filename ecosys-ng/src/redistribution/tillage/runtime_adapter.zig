@@ -1097,6 +1097,7 @@ pub fn apply(context: *Context, cell: usize, tillage_depth_m: f64, mixing_fracti
         physical_gas.surface_water_m3,
         tillageWaterCarrierM3(physical_gas.surface_water_m3, physical_gas.surface_dry_reference_water_m3, commit_negligible_water_volume_m3),
         physical_gas.surface_dynamic_amount_mol,
+        commit_negligible_water_volume_m3,
     ) catch unreachable;
     const pending_per_cell = (layers + 1) * PlantLitterSaltIngress.salt_count;
     @memcpy(
@@ -1667,7 +1668,7 @@ noinline fn finishOrderedSequence(
         .surface_dynamic_amount_mol = @splat(0),
         .plant_litter_salt_pending_mol = plant_litter_salt_pending,
         .surface_mineral_reference_water_m3 = context.surface_chemistry.mineral_reference_water_m3[cell],
-        .surface_dry_reference_water_m3 = if (phase[0][cell] > rebuild_negligible_water_volume_m3) 0 else context.surface_chemistry.dry_reference_water_m3[cell] * biomass.surface_remaining_fraction,
+        .surface_dry_reference_water_m3 = if (phase[0][cell] > rebuild_negligible_water_volume_m3) 0 else tillageWaterCarrierM3(context.surface_water_m3[cell], context.surface_chemistry.dry_reference_water_m3[cell], rebuild_negligible_water_volume_m3) * biomass.surface_remaining_fraction,
         .surface_chemistry = surface_owners.chemistry,
         .surface_fertilizer = surface_owners.fertilizer,
         .mineral_soil = mineral_soil,
@@ -2579,7 +2580,7 @@ fn setSurfaceInventory(family: *surface_chemical_transfer.TransferFamily, cell: 
 /// issue-060/061/063/064's other instances. `> `, not `>=`, matches legacy's
 /// own strict comparison (`solute.f:610`).
 fn tillageWaterCarrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_volume_m3: f64) f64 {
-    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else if (dry_reference_water_m3 > 0) dry_reference_water_m3 else live_water_m3;
 }
 
 test "issue-064: tillageWaterCarrierM3 substitutes the dry reference at and below the ZEROS2 floor instead of only at exact zero" {

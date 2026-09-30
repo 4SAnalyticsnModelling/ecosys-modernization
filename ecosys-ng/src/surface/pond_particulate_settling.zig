@@ -310,7 +310,7 @@ fn solidTransferWaterCarrierM3(
         !std.math.isFinite(dry_reference_water_m3) or dry_reference_water_m3 < 0 or
         !std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 < 0)
         return error.InvalidSurfacePondChemistryCarrier;
-    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else if (dry_reference_water_m3 > 0) dry_reference_water_m3 else live_water_m3;
 }
 
 test "issue-064 sibling: pond settling's solidTransferWaterCarrierM3 substitutes the dry reference at and below the ZEROS2 floor" {
@@ -340,7 +340,7 @@ test "issue-064 sibling: pond settling manufactures fake mass with a raw near-ze
 
     const censusCarrier = struct {
         fn call(live_water_m3: f64) f64 {
-            return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+            return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else if (dry_reference_water_m3 > 0) dry_reference_water_m3 else live_water_m3;
         }
     }.call;
 

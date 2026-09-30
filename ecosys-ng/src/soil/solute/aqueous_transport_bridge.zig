@@ -65,7 +65,7 @@ pub fn validateCarrierVolumesScaled(
 /// amount). Both now share this same helper, renamed from `exportCarrierM3`
 /// since it is no longer export-direction-only.
 fn carrierM3(live_water_m3: f64, dry_reference_water_m3: f64, negligible_water_volume_m3: f64) f64 {
-    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+    return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else if (dry_reference_water_m3 > 0) dry_reference_water_m3 else live_water_m3;
 }
 
 /// Copies dissolved chemistry concentrations into the conservative transport

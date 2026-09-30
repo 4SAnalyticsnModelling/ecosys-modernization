@@ -875,7 +875,7 @@ test "issue-063: transferSolidLayerFraction manufactures fake mass with a raw ne
     // `landscape_mass_inventory_phosphorus_ions.zig`'s private `aqueousCarrierM3`.
     const censusCarrier = struct {
         fn call(live_water_m3: f64) f64 {
-            return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+            return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else if (dry_reference_water_m3 > 0) dry_reference_water_m3 else live_water_m3;
         }
     }.call;
 
@@ -971,7 +971,7 @@ test "issue-064: transferAqueousLayerFraction manufactures fake mass with a raw 
 
     const censusCarrier = struct {
         fn call(live_water_m3: f64) f64 {
-            return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else dry_reference_water_m3;
+            return if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else if (dry_reference_water_m3 > 0) dry_reference_water_m3 else live_water_m3;
         }
     }.call;
 
