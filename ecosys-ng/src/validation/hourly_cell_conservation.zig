@@ -845,15 +845,6 @@ pub const BoundaryLedger = struct {
         if (cell_count == 0) return error.ZeroHourlyCellBoundaryExtent;
         const cells = try allocator.alloc(BoundaryActivity, cell_count);
         @memset(cells, .{});
-        // TEMP_DIAGNOSTIC (`issue-100`): a presence marker, so that "the probe
-        // below fired zero times" is distinguishable from "the probe was not
-        // in the binary I ran". Also reports the ledger extent, which decides
-        // whether the failing row's `cell=2` can be an index into this slice
-        // at all.
-        if (!@import("builtin").is_test) std.log.err(
-            "TEMP_DIAGNOSTIC n_ledger[init]: cells.len={d}",
-            .{cell_count},
-        );
         return .{ .allocator = allocator, .cells = cells };
     }
 

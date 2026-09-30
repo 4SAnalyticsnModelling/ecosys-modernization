@@ -129,6 +129,7 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
     );
     var nitrate_non_band = context.chemistry_state.aqueous[layer].nitrate_non_band * effective_water_m3 * zone_fractions.nitrate_non_band * n_mass;
     var nitrate_band = context.chemistry_state.aqueous[layer].nitrate_band * effective_water_m3 * zone_fractions.nitrate_band * n_mass;
+    const nitrate_non_band_entry = nitrate_non_band;
     const p_mass = context.phosphorus_molar_mass_g_per_mol;
     var h2po4 = [2]f64{ context.chemistry_state.non_band_phosphate[layer].dissolved_h2po4_mol_p_per_m3 * effective_water_m3 * zone_fractions.phosphate_non_band * p_mass, context.chemistry_state.band_phosphate[layer].dissolved_h2po4_mol_p_per_m3 * effective_water_m3 * zone_fractions.phosphate_band * p_mass };
     var hpo4 = [2]f64{ context.chemistry_state.non_band_phosphate[layer].dissolved_hpo4_mol_p_per_m3 * effective_water_m3 * zone_fractions.phosphate_non_band * p_mass, context.chemistry_state.band_phosphate[layer].dissolved_hpo4_mol_p_per_m3 * effective_water_m3 * zone_fractions.phosphate_band * p_mass };
@@ -159,7 +160,7 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
     const next_structural = try context.microbial_state.allocator.alloc(microbial.ElementalPool, 2 * (end - first));
     defer context.microbial_state.allocator.free(next_structural);
 
-    const published = try transformation_aggregation.calculateSupplyLimited(.{
+    const supply_inputs: transformation_aggregation.SupplyLimitedInputs = .{
         .complex_count = context.microbial_state.substrate_count,
         .population_count = context.microbial_state.population_count,
         .oxygen_satisfaction_fraction = context.oxygen_satisfaction_fraction[first..end],
@@ -186,7 +187,21 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
         .non_band_hpo4_exchange_g_p = context.flux_workspace.non_band_microbial_hpo4_exchange_g_p[first..end],
         .band_hpo4_exchange_g_p = context.flux_workspace.band_microbial_hpo4_exchange_g_p[first..end],
         .fixed_dinitrogen_g_n = context.flux_workspace.fixed_dinitrogen_g_n[first..end],
-    });
+    };
+    var published = try transformation_aggregation.calculateSupplyLimited(supply_inputs);
+    // DEV-019. NITRO competition shares are each floored at FMN, so the
+    // shares of one pool can sum slightly above one (legacy ZNO3S/ZNH4S then
+    // dip below zero in REDIST). Immobilization is the last consumer of each
+    // mineral pool; cap its positive uptake to the zone remainder after
+    // nitrification/denitrification so the pool stays nonnegative. Microbial
+    // gains read the same per-unit exchanges, so both sides stay consistent.
+    if (try capMicrobialMineralUptake(context, first, end, .{
+        ammonium_non_band - published.ammonia_oxidation_g_n[0] - published.autotrophic_ammonium_oxidation_g_n[0],
+        ammonium_band - published.ammonia_oxidation_g_n[1] - published.autotrophic_ammonium_oxidation_g_n[1],
+        nitrate_non_band + published.nitrite_oxidation_g_n[0] - published.nitrate_reduction_g_n[0],
+        nitrate_band + published.nitrite_oxidation_g_n[1] - published.nitrate_reduction_g_n[1],
+    }))
+        published = try transformation_aggregation.calculateSupplyLimited(supply_inputs);
     const ammonia_oxidation = published.ammonia_oxidation_g_n;
     const nitrite_oxidation = published.nitrite_oxidation_g_n;
     const nitrate_reduction = published.nitrate_reduction_g_n;
@@ -277,7 +292,7 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
         return err;
     };
     applyMicrobialExchange(&nitrate_non_band, microbial_nitrate_exchange[0]) catch |err| {
-        if (!builtin.is_test) std.log.err("soil nitrogen state_update failing site: {s} layer={d}", .{ "microbial_nitrate_non_band", layer });
+        if (!builtin.is_test) std.log.err("soil nitrogen state_update failing site: {s} layer={d} nitrate_entry={e} after_zone={e} nitrite_oxidation={e} nitrate_reduction={e} microbial_exchange={e} water_m3={e} zone_fraction={e}", .{ "microbial_nitrate_non_band", layer, nitrate_non_band_entry, nitrate_non_band, nitrite_oxidation[0], nitrate_reduction[0], microbial_nitrate_exchange[0], effective_water_m3, zone_fractions.nitrate_non_band });
         return err;
     };
     applyMicrobialExchange(&nitrate_band, microbial_nitrate_exchange[1]) catch |err| {
@@ -1474,6 +1489,39 @@ test "census roundoff filter discards representation noise symmetrically" {
     try std.testing.expect(normalizeCensusRoundoff(1e-9, 1) == 1e-9);
     // Non-finite input is passed through so the caller's own guard reports it.
     try std.testing.expect(std.math.isNan(normalizeCensusRoundoff(std.math.nan(f64), census)));
+}
+
+/// DEV-019: scales each zone's positive microbial NH4/NO3 uptakes (per unit)
+/// so the net exchange never exceeds `remainder` (the pool left after the
+/// zone's nitrification/denitrification). Mineralization (negative exchange)
+/// is untouched. Returns true when any exchange was scaled.
+fn capMicrobialMineralUptake(context: anytype, first: usize, end: usize, remainder: [4]f64) !bool {
+    const exchanges = [4][]f64{
+        context.flux_workspace.non_band_microbial_ammonium_exchange_g_n[first..end],
+        context.flux_workspace.band_microbial_ammonium_exchange_g_n[first..end],
+        context.flux_workspace.non_band_microbial_nitrate_exchange_g_n[first..end],
+        context.flux_workspace.band_microbial_nitrate_exchange_g_n[first..end],
+    };
+    var scaled = false;
+    for (exchanges, remainder) |values, available_raw| {
+        var uptake: f64 = 0;
+        var release: f64 = 0;
+        for (values) |value| {
+            if (!std.math.isFinite(value)) return error.InvalidSoilNitrogenFlux;
+            if (value > 0) uptake += value else release -= value;
+        }
+        if (!(uptake > 0)) continue;
+        const available = @max(0, available_raw) + release;
+        // Only a genuine excess is capped; roundoff is left to the
+        // state update's own representation floor.
+        if (uptake - release <= @max(0, available_raw) + 64 * std.math.floatEps(f64) * (uptake + release + @abs(available_raw))) continue;
+        const factor = std.math.clamp(available / uptake, 0, 1);
+        for (values) |*value| if (value.* > 0) {
+            value.* *= factor;
+        };
+        scaled = true;
+    }
+    return scaled;
 }
 
 fn applyMicrobialExchange(pool_g_n: *f64, exchange_g_n: f64) !void {
