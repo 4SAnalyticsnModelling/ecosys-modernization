@@ -299,7 +299,7 @@ fn aggregateSurfaceChemistryRange(
         if (water < 0 or dry_reference_water < 0 or mineral_reference_water < 0 or dry_mass < 0 or nitrite_g_n < 0 or area_m2 < 0)
             return error.NegativeSurfaceChemistryInventory;
         const negligible_water_volume_m3 = negligibleLitterWaterVolumeM3(area_m2);
-        const aqueous_carrier = if (water > negligible_water_volume_m3) water else dry_reference_water;
+        const aqueous_carrier = if (water > negligible_water_volume_m3) water else if (dry_reference_water > 0) dry_reference_water else water;
         const cell = chemistry.cells[cell_index];
         try group_support.validateNumericStruct(cell);
         const solid_fertilizer = fertilizer.cells[cell_index];

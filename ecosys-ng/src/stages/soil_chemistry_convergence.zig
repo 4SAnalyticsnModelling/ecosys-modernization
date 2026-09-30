@@ -112,7 +112,7 @@ fn hourlyChemistrySoilMass(
 /// consistent with what the reaction solver assumed for the same layer this
 /// same hour.
 fn fertilizerBandGeometryCarrierM3(water_volume_m3: f64, floor_m3: f64, dry_reference_water_m3: f64) f64 {
-    return if (water_volume_m3 > floor_m3) water_volume_m3 else dry_reference_water_m3;
+    return if (water_volume_m3 > floor_m3) water_volume_m3 else if (dry_reference_water_m3 > 0) dry_reference_water_m3 else water_volume_m3;
 }
 
 test "issue-073 Finding C: fertilizerBandGeometryCarrierM3 substitutes the dry reference below the floor, passes the live carrier through above it" {

@@ -117,7 +117,7 @@ pub fn solublePhosphorus_g_p(
         !std.math.isFinite(dry_reference_water) or dry_reference_water < 0)
         return error.InvalidPhosphateInventory;
     const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(cell_area_m2);
-    const litter_aqueous_carrier = if (litter_water > negligible_water_volume_m3) litter_water else dry_reference_water;
+    const litter_aqueous_carrier = if (litter_water > negligible_water_volume_m3) litter_water else if (dry_reference_water > 0) dry_reference_water else litter_water;
     const litter = surface.cells[cell];
     var phosphorus_mol = litter_aqueous_carrier * (litter.hpo4_mol_p_per_m3 + litter.h2po4_mol_p_per_m3);
     for (0..grid.active_soil_layer_count[cell]) |local_layer| {
