@@ -1181,6 +1181,16 @@ noinline fn solveControlledImpl(
         rejected_forecast_recovery_step = null;
     }
     try residualAt(grid, properties, base, current, target, residual, scratch, trial_heat, trial_exchange, trial_displacement);
+    if (bounded_phase_stagnation) {
+        // DEV-014: publish WATSUB's explicit endpoint from the stalled iterate.
+        // The water coordinates take the ledger image (entry inventory plus the
+        // vapor, freeze-thaw, displacement and FINH transfers just evaluated,
+        // which are the fluxes published below), so water closes exactly per
+        // domain; the temperature then closes C1*T1 = C0*T0 - displaced + phase
+        // heat on that state. Nothing is re-evaluated after this point.
+        for (0..5 * cells) |index| current[index] = target[index];
+        closeStalledPhaseTemperature(base, current, trial_displacement, properties, cells);
+    }
     const final_norm = try scaledNorm(base, current, residual, options);
     var final_phase_energy_accepted = false;
     if (!newton_retry_required and (final_norm <= 1 or bounded_phase_stagnation) and
@@ -1191,7 +1201,8 @@ noinline fn solveControlledImpl(
         if (check.diagnostic) |diagnostic| last_phase_energy_diagnostic.* = diagnostic;
     }
     if (final_phase_energy_accepted) {
-        try residualAt(grid, properties, base, current, target, residual, scratch, trial_heat, trial_exchange, trial_displacement);
+        if (!bounded_phase_stagnation)
+            try residualAt(grid, properties, base, current, target, residual, scratch, trial_heat, trial_exchange, trial_displacement);
         try acceptedLatentHeat(base, current, properties, trial_heat);
         try requireDisplacementBinding(outputs.displacement, trial_displacement);
         try state_update(grid, current, properties.freeze_thaw.ice_density_megagrams_per_m3);
@@ -1209,26 +1220,57 @@ noinline fn solveControlledImpl(
     return error.SoilPhaseSolverDidNotConverge;
 }
 
-/// DEV-014 layer-scale bound for publishing a stalled phase iterate: every water
-/// coordinate's residual within 1e-8 of its domain's pore capacity (matrix
-/// components against the matrix pore, macropore components against the
-/// macropore pore) and the endpoint temperature within 1e-6 K. The caller
+/// DEV-014 energy closure of a published stalled iterate: each active layer's
+/// endpoint temperature is the one that closes the identity checked by
+/// `evaluatePhaseEnergyConservation` on the stalled water/ice state.
+fn closeStalledPhaseTemperature(base: []const f64, current: []f64, displacement: DisplacementOutputs, properties: Properties, cells: usize) void {
+    const liquid_capacity = properties.liquid_water_heat_capacity_megajoules_per_m3_k;
+    const ice_capacity = properties.ice_heat_capacity_megajoules_per_m3_k;
+    for (0..cells) |cell| {
+        if (properties.active_by_layer.len != 0 and !properties.active_by_layer[cell]) continue;
+        const initial_liquid_m3 = base[cell] + base[cells + cell] + base[3 * cells + cell];
+        const initial_ice_m3 = base[2 * cells + cell] + base[4 * cells + cell];
+        const endpoint_liquid_m3 = current[cell] + current[cells + cell] + current[3 * cells + cell];
+        const endpoint_ice_m3 = current[2 * cells + cell] + current[4 * cells + cell];
+        const solid_capacity = properties.heat_capacity_megajoules_per_k[cell] -
+            liquid_capacity * initial_liquid_m3 - ice_capacity * initial_ice_m3;
+        const endpoint_capacity = solid_capacity +
+            liquid_capacity * endpoint_liquid_m3 + ice_capacity * endpoint_ice_m3;
+        const phase_heat = properties.vapor.latent_heat_of_vaporization_megajoules_per_m3 * (base[cells + cell] - current[cells + cell]) +
+            properties.freeze_thaw.latent_heat_of_fusion_megajoules_per_m3 * (endpoint_ice_m3 - initial_ice_m3);
+        const temperature = (properties.heat_capacity_megajoules_per_k[cell] * base[5 * cells + cell] -
+            displacement.advective_enthalpy_megajoules[cell] + phase_heat) / endpoint_capacity;
+        // Invalid closures are left for the unchanged gates to reject.
+        if (std.math.isFinite(temperature) and temperature > 0 and endpoint_capacity > 0)
+            current[5 * cells + cell] = temperature;
+    }
+}
+
+/// DEV-014 layer-scale bound for publishing a stalled phase iterate: the layer's
+/// summed water residual within 1e-8 of its total pore capacity, each water
+/// coordinate (an offsetting domain split) within 1e-6 of it, and the endpoint
+/// temperature within 1e-6 K. The caller
 /// still requires `committableState` and the phase-energy conservation gate.
 fn boundedPhaseStagnationPublishable(grid: *const grid_module.GridState, current: []const f64, residual: []const f64, cells: usize) bool {
     const relative_capacity_bound: f64 = 1.0e-8;
+    const relative_partition_bound: f64 = 1.0e-6;
     const temperature_bound_k: f64 = 1.0e-6;
     if (current.len != 6 * cells or residual.len != current.len) return false;
     for (0..cells) |cell| {
-        const matrix_scale = relative_capacity_bound * grid.matrix_pore_capacity_m3[cell];
-        const macropore_scale = relative_capacity_bound * grid.macropore_pore_capacity_m3[cell];
-        inline for (.{ 0, 1, 2 }) |component| {
+        // Every water coordinate is liquid-equivalent, so the layer's water
+        // defect is their sum; it gets the tight bound. The individual
+        // coordinates may carry a larger offsetting split between matrix,
+        // macropore and vapor (Ottawa hour 6456: +4.0e-11/-4.6e-11/+6.5e-12 m3
+        // at the saturated FINH air limit), which moves no water across the
+        // layer boundary.
+        const layer_capacity = grid.matrix_pore_capacity_m3[cell] + grid.macropore_pore_capacity_m3[cell];
+        var water_defect: f64 = 0;
+        inline for (.{ 0, 1, 2, 3, 4 }) |component| {
             const value = residual[component * cells + cell];
-            if (!std.math.isFinite(value) or @abs(value) > matrix_scale) return false;
+            if (!std.math.isFinite(value) or @abs(value) > relative_partition_bound * layer_capacity) return false;
+            water_defect += value;
         }
-        inline for (.{ 3, 4 }) |component| {
-            const value = residual[component * cells + cell];
-            if (!std.math.isFinite(value) or @abs(value) > macropore_scale) return false;
-        }
+        if (@abs(water_defect) > relative_capacity_bound * layer_capacity) return false;
         const temperature_residual = residual[5 * cells + cell];
         if (!std.math.isFinite(temperature_residual) or @abs(temperature_residual) > temperature_bound_k) return false;
     }
