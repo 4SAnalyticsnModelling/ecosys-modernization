@@ -1,8 +1,19 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const transport = @import("transport.zig");
 const numerics = @import("../../core/numerics.zig");
 
 const maximum_dense_newton_components: usize = 256;
+
+/// DEV-015 is enabled only for the hour-recovery ladder's terminal attempt
+/// (the finest schedule, after every ordinary schedule failed), mirroring the
+/// DEV-011 SOLUTE toggle, so every hour the ordinary ladder resolves keeps its
+/// finer-substep solution.
+var terminal_stiff_image_acceptance = std.atomic.Value(bool).init(false);
+
+pub fn setTerminalStiffImageAcceptance(enabled: bool) void {
+    terminal_stiff_image_acceptance.store(enabled, .release);
+}
 
 pub const Options = struct {
     absolute_tolerance_mol: f64 = 1e-12,
@@ -146,6 +157,9 @@ pub fn solve(
     var previous_norm = std.math.inf(f64);
     var insufficient_progress_steps: u16 = 0;
     var newton_retry_required = false;
+    // Every in-loop failure falls through to the post-loop publication test,
+    // so a converged iterate is never discarded by the exit it happened to take.
+    var loop_failure: enum { none, stagnated, ceiling } = .none;
     while (iteration < options.max_iterations) : (iteration += 1) {
         const retrying_newton_after_anderson = newton_retry_required;
         newton_retry_required = false;
@@ -306,8 +320,10 @@ pub fn solve(
         }
         if (accepted_newton) continue;
         if (retrying_newton_after_anderson) continue;
-        if (iteration + 1 >= options.max_iterations)
-            return error.SoluteTransportSolverDidNotConverge;
+        if (iteration + 1 >= options.max_iterations) {
+            loop_failure = .ceiling;
+            break;
+        }
 
         // Sole fallback: evaluate the relaxed point as a same-iteration seed,
         // then accept only the depth-one Anderson candidate.
@@ -327,19 +343,28 @@ pub fn solve(
                     residual[stagnation_index],
                 },
             );
-            return error.SoluteTransportSolverStagnated;
+            loop_failure = .stagnated;
+            break;
         }
         for (probe) |*value| {
-            if (!std.math.isFinite(value.*) or value.* < 0) return error.SoluteTransportSolverStagnated;
+            if (!std.math.isFinite(value.*) or value.* < 0) loop_failure = .stagnated;
         }
+        if (loop_failure != .none) break;
         try residualAt(&scratch, base, probe, faces, diffusive_conductance_m3_per_step, mobility_fraction, face_parameters, face_flux, fixed_point, probe_residual);
         const anderson_norm = try scaledNorm(probe, probe_residual, options);
-        if (!numerics.andersonImprovesAcceptedMerit(anderson_norm, current_norm)) return error.SoluteTransportSolverStagnated;
+        if (!numerics.andersonImprovesAcceptedMerit(anderson_norm, current_norm)) {
+            loop_failure = .stagnated;
+            break;
+        }
         @memcpy(current, probe);
         anderson_steps += 1;
         picard_steps += 1;
         newton_retry_required = true;
     }
+    // Outside the terminal attempt an in-loop failure keeps its original
+    // immediate exit (the recovery ladder refines the schedule instead).
+    if (loop_failure != .none and !terminal_stiff_image_acceptance.load(.acquire))
+        return if (loop_failure == .stagnated) error.SoluteTransportSolverStagnated else error.SoluteTransportSolverDidNotConverge;
     try residualAt(
         &scratch,
         base,
@@ -357,7 +382,14 @@ pub fn solve(
         @memcpy(publication_candidate, fixed_point);
         try residualAt(&scratch, base, publication_candidate, faces, diffusive_conductance_m3_per_step, mobility_fraction, face_parameters, face_flux, fixed_point, publication_residual);
         const publication_norm = try scaledNorm(publication_candidate, publication_residual, options);
-        if (publication_norm <= 1) {
+        // DEV-015 is a terminal-attempt, ceiling-only fallback so every hour
+        // that converges on the ordinary path keeps its published state.
+        const stiff_image = publication_norm > 1 and
+            terminal_stiff_image_acceptance.load(.acquire) and
+            stiffImageWithinTolerance(current, residual, publication_candidate, publication_residual, state.species_count, options);
+        if (stiff_image and !builtin.is_test)
+            std.log.warn("solute transport publishes the stiff conservative image of a converged iterate (DEV-015): publication_norm={e} final_norm={e}", .{ publication_norm, final_norm });
+        if (publication_norm <= 1 or stiff_image) {
             if (options.face_flux_mol_by_component) |accepted_flux| {
                 @memcpy(scratch.amount_mol, current);
                 try captureAcceptedFaceFlux(
@@ -381,6 +413,11 @@ pub fn solve(
                 .anderson_steps = anderson_steps,
             };
         }
+        // TEMP_DIAGNOSTIC: converged iterate whose conservative image fails.
+        const publication_index = try worstResidualIndex(publication_candidate, publication_residual, options);
+        std.log.warn("TEMP_DIAGNOSTIC solute publication image rejected: publication_norm={e} cell={d} species={d} current_mol={e} image_mol={e} image_residual_mol={e}", .{ publication_norm, publication_index / state.species_count, publication_index % state.species_count, current[publication_index], publication_candidate[publication_index], publication_residual[publication_index] });
+    } else if (newton_retry_required) {
+        std.log.warn("TEMP_DIAGNOSTIC solute ceiling reached on an Anderson step: final_norm={e}", .{final_norm});
     }
     const limiting_index =
         try worstResidualIndex(current, residual, options);
@@ -397,7 +434,7 @@ pub fn solve(
             picard_steps,
         },
     );
-    return error.SoluteTransportSolverDidNotConverge;
+    return if (loop_failure == .stagnated) error.SoluteTransportSolverStagnated else error.SoluteTransportSolverDidNotConverge;
 }
 
 fn denseSpeciesNewtonDirection(
@@ -662,10 +699,59 @@ fn worstResidualIndex(
     return limiting_index;
 }
 
+/// DEV-015. The conservative image F(x) of a converged iterate x is published
+/// even when F(F(x)) - F(x) exceeds the tolerance on a stiff donor (Ottawa
+/// hour 6457: H2PO4 3.9e-14 mol drained to 0 by a flux ~460x its inventory).
+/// Transport is x = b - A x with I + A a column-diagonally-dominant M-matrix
+/// (outflow leaves the donor, arrives at receivers or the boundary), so with
+/// r0 = F(x) - x the image error is F(x) - x* = (I - (I + A)^-1) r0 and
+/// ||F(x) - x*||_1 <= 2 ||r0||_1 per species, independent of the stiffness
+/// and of face coupling. The image is admitted only when that bound lies
+/// within the species' L1 residual budget (the sum over cells of the
+/// component scales the ordinary convergence test grants) for every species
+/// whose re-check fails.
+fn stiffImageWithinTolerance(current: []const f64, residual: []const f64, image: []const f64, image_residual: []const f64, species_count: usize, options: Options) bool {
+    if (species_count == 0 or current.len % species_count != 0 or current.len != residual.len or
+        image.len != current.len or image_residual.len != current.len) return false;
+    const cell_count = current.len / species_count;
+    for (0..species_count) |species| {
+        var recheck_failed = false;
+        var residual_mass: f64 = 0;
+        var residual_budget: f64 = 0;
+        for (0..cell_count) |cell| {
+            const index = cell * species_count + species;
+            const r1 = image_residual[index];
+            if (!std.math.isFinite(r1) or !std.math.isFinite(image[index]) or image[index] < 0 or
+                !std.math.isFinite(residual[index])) return false;
+            if (@abs(r1) > residualScale(image[index], r1, options)) recheck_failed = true;
+            residual_mass += @abs(residual[index]);
+            residual_budget += residualScale(current[index], residual[index], options);
+        }
+        if (!recheck_failed) continue;
+        if (2 * residual_mass > residual_budget) return false;
+    }
+    return true;
+}
+
 fn residualScale(value: f64, residual: f64, options: Options) f64 {
     const target = value + residual;
     return options.absolute_tolerance_mol +
         options.relative_tolerance * @max(@abs(value), @abs(target));
+}
+
+test "DEV-015 admits the stiff image only within the per-species L1 bound" {
+    const options: Options = .{ .absolute_tolerance_mol = 1e-13, .relative_tolerance = 1e-8, .max_iterations = 4 };
+    // Ottawa hour 6457 shape, two cells: the donor is drained to 0 by F(x) and
+    // its coupled receiver then carries the re-check defect.
+    const current = [_]f64{ 3.9376e-14, 1.0e-9 };
+    const residual = [_]f64{ -3.9376e-14, 0 };
+    const image = [_]f64{ 0, 1.0e-9 };
+    const image_residual = [_]f64{ 1.787e-11, -1.787e-11 };
+    try std.testing.expect(stiffImageWithinTolerance(&current, &residual, &image, &image_residual, 1, options));
+    // A residual mass above half the species' L1 budget is not admitted.
+    try std.testing.expect(!stiffImageWithinTolerance(&current, &[_]f64{ -3.9376e-14, 9.0e-14 }, &image, &image_residual, 1, options));
+    // A negative image is never admitted.
+    try std.testing.expect(!stiffImageWithinTolerance(&current, &residual, &[_]f64{ -1.0e-20, 1.0e-9 }, &image_residual, 1, options));
 }
 
 test "trace transport inventories do not inherit a one-mol relative floor" {

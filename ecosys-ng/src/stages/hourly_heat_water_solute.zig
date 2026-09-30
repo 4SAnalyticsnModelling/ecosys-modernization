@@ -12238,15 +12238,21 @@ fn recoverFixedExternalHourAdaptively(
             // count without a convergence test; the Zig analogue is one final
             // attempt that may publish each failing layer's retained best
             // bounded iterate (conservation- and charge-gated). DEV-011.
-            if (attempt_error != error.SoluteReactionSolverStagnated and
-                attempt_error != error.SoluteReactionSolverDidNotConverge)
-                return attempt_error;
+            // DEV-015 is the transport analogue: the terminal attempt may publish
+            // a converged transport iterate's stiff conservative image.
+            const reaction_failure = attempt_error == error.SoluteReactionSolverStagnated or
+                attempt_error == error.SoluteReactionSolverDidNotConverge;
+            const transport_failure = attempt_error == error.SoluteTransportSolverStagnated or
+                attempt_error == error.SoluteTransportSolverDidNotConverge;
+            if (!reaction_failure and !transport_failure) return attempt_error;
             if (!builtin.is_test) std.log.warn(
-                "SOLUTE recovery ladder exhausted ({s}); final attempt exact_substep_count={d} with best-bounded-iterate publication",
+                "SOLUTE recovery ladder exhausted ({s}); final attempt exact_substep_count={d} with best-bounded-iterate / stiff-image publication",
                 .{ @errorName(attempt_error), substep_count },
             );
-            ecosys.solute_reaction_solver.setTerminalBestBoundedAcceptance(true);
+            ecosys.solute_reaction_solver.setTerminalBestBoundedAcceptance(reaction_failure);
             defer ecosys.solute_reaction_solver.setTerminalBestBoundedAcceptance(false);
+            ecosys.solute_transport_solver.setTerminalStiffImageAcceptance(transport_failure);
+            defer ecosys.solute_transport_solver.setTerminalStiffImageAcceptance(false);
             if (try runBoundedRecoveryAttempt(attempt, substep_count)) |final_error| return final_error;
             freeze_flow_coupling_floor_active.* =
                 acceptedAttemptHadSignificantHeatInducedPhaseChange(attempt);
