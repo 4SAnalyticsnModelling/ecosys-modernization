@@ -1,5 +1,11 @@
 const std = @import("std");
 const builtin = @import("builtin");
+
+/// DEV-010: legacy SOLUTE resolves nothing below ZEROC = 1.0E-32 mol m-3
+/// (solute.f:131). Applied here at the check site (not the constructor)
+/// because checkpoints restore the monitor's stored tolerances; STARTE dust
+/// (~1e-46 mol S, Cl) otherwise fails on pure arithmetic (Ottawa day 173).
+const legacy_zeroc_ion_floor_mol_m2: f64 = 1.0e-32;
 const conservation_tolerance = @import("../core/conservation_tolerance.zig");
 
 pub const scoped = @import("scoped_conservation.zig");
@@ -406,17 +412,17 @@ pub const Monitor = struct {
                 .carbon_g_m2 = acceptanceLimit(self.absolute_tolerance_per_area.carbon_g_m2, self.relative_tolerance, interval.carbon_g, area),
                 .nitrogen_g_m2 = acceptanceLimit(self.absolute_tolerance_per_area.nitrogen_g_m2, self.relative_tolerance, interval.nitrogen_g, area),
                 .phosphorus_g_m2 = acceptanceLimit(self.absolute_tolerance_per_area.phosphorus_g_m2, self.relative_tolerance, interval.phosphorus_g, area),
-                .ions_mol_m2 = acceptanceLimit(self.absolute_tolerance_per_area.ions_mol_m2, self.relative_tolerance, interval.ions_mol, area),
+                .ions_mol_m2 = acceptanceLimit(@max(self.absolute_tolerance_per_area.ions_mol_m2, legacy_zeroc_ion_floor_mol_m2), self.relative_tolerance, interval.ions_mol, area),
                 .hydrogen_g_m2 = acceptanceLimit(self.absolute_tolerance_per_area.hydrogen_g_m2, self.relative_tolerance, interval.hydrogen_g, area),
-                .aluminum_mol_m2 = acceptanceLimit(self.absolute_tolerance_per_area.ions_mol_m2, self.relative_tolerance, interval.aluminum_mol, area),
-                .iron_mol_m2 = acceptanceLimit(self.absolute_tolerance_per_area.ions_mol_m2, self.relative_tolerance, interval.iron_mol, area),
-                .calcium_mol_m2 = acceptanceLimit(self.absolute_tolerance_per_area.ions_mol_m2, self.relative_tolerance, interval.calcium_mol, area),
-                .magnesium_mol_m2 = acceptanceLimit(self.absolute_tolerance_per_area.ions_mol_m2, self.relative_tolerance, interval.magnesium_mol, area),
-                .sodium_mol_m2 = acceptanceLimit(self.absolute_tolerance_per_area.ions_mol_m2, self.relative_tolerance, interval.sodium_mol, area),
-                .potassium_mol_m2 = acceptanceLimit(self.absolute_tolerance_per_area.ions_mol_m2, self.relative_tolerance, interval.potassium_mol, area),
-                .sulfur_mol_m2 = acceptanceLimit(self.absolute_tolerance_per_area.ions_mol_m2, self.relative_tolerance, interval.sulfur_mol, area),
-                .chloride_mol_m2 = acceptanceLimit(self.absolute_tolerance_per_area.ions_mol_m2, self.relative_tolerance, interval.chloride_mol, area),
-                .silicon_mol_m2 = acceptanceLimit(self.absolute_tolerance_per_area.ions_mol_m2, self.relative_tolerance, interval.silicon_mol, area),
+                .aluminum_mol_m2 = acceptanceLimit(@max(self.absolute_tolerance_per_area.ions_mol_m2, legacy_zeroc_ion_floor_mol_m2), self.relative_tolerance, interval.aluminum_mol, area),
+                .iron_mol_m2 = acceptanceLimit(@max(self.absolute_tolerance_per_area.ions_mol_m2, legacy_zeroc_ion_floor_mol_m2), self.relative_tolerance, interval.iron_mol, area),
+                .calcium_mol_m2 = acceptanceLimit(@max(self.absolute_tolerance_per_area.ions_mol_m2, legacy_zeroc_ion_floor_mol_m2), self.relative_tolerance, interval.calcium_mol, area),
+                .magnesium_mol_m2 = acceptanceLimit(@max(self.absolute_tolerance_per_area.ions_mol_m2, legacy_zeroc_ion_floor_mol_m2), self.relative_tolerance, interval.magnesium_mol, area),
+                .sodium_mol_m2 = acceptanceLimit(@max(self.absolute_tolerance_per_area.ions_mol_m2, legacy_zeroc_ion_floor_mol_m2), self.relative_tolerance, interval.sodium_mol, area),
+                .potassium_mol_m2 = acceptanceLimit(@max(self.absolute_tolerance_per_area.ions_mol_m2, legacy_zeroc_ion_floor_mol_m2), self.relative_tolerance, interval.potassium_mol, area),
+                .sulfur_mol_m2 = acceptanceLimit(@max(self.absolute_tolerance_per_area.ions_mol_m2, legacy_zeroc_ion_floor_mol_m2), self.relative_tolerance, interval.sulfur_mol, area),
+                .chloride_mol_m2 = acceptanceLimit(@max(self.absolute_tolerance_per_area.ions_mol_m2, legacy_zeroc_ion_floor_mol_m2), self.relative_tolerance, interval.chloride_mol, area),
+                .silicon_mol_m2 = acceptanceLimit(@max(self.absolute_tolerance_per_area.ions_mol_m2, legacy_zeroc_ion_floor_mol_m2), self.relative_tolerance, interval.silicon_mol, area),
                 .sand_megagrams_m2 = acceptanceLimit(self.absolute_tolerance_per_area.sand_megagrams_m2, self.relative_tolerance, interval.sand_megagrams, area),
                 .silt_megagrams_m2 = acceptanceLimit(self.absolute_tolerance_per_area.silt_megagrams_m2, self.relative_tolerance, interval.silt_megagrams, area),
                 .clay_megagrams_m2 = acceptanceLimit(self.absolute_tolerance_per_area.clay_megagrams_m2, self.relative_tolerance, interval.clay_megagrams, area),
