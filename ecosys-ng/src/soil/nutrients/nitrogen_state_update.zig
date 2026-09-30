@@ -260,12 +260,30 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
     );
     if (!chemo_closure.accepted) return error.SoilNitrogenBalanceFailure;
 
-    try applyZone(&ammonium_non_band, &nitrate_non_band, &nitrite_non_band, ammonia_oxidation[0], nitrite_oxidation[0], nitrate_reduction[0], heterotrophic_nitrite_reduction[0], autotrophic_nitrite_reduction[0], autotrophic_ammonium_oxidation[0], chemo_nitrite[0]);
-    try applyZone(&ammonium_band, &nitrate_band, &nitrite_band, ammonia_oxidation[1], nitrite_oxidation[1], nitrate_reduction[1], heterotrophic_nitrite_reduction[1], autotrophic_nitrite_reduction[1], autotrophic_ammonium_oxidation[1], chemo_nitrite[1]);
-    try applyMicrobialExchange(&ammonium_non_band, microbial_ammonium_exchange[0]);
-    try applyMicrobialExchange(&ammonium_band, microbial_ammonium_exchange[1]);
-    try applyMicrobialExchange(&nitrate_non_band, microbial_nitrate_exchange[0]);
-    try applyMicrobialExchange(&nitrate_band, microbial_nitrate_exchange[1]);
+    applyZone(&ammonium_non_band, &nitrate_non_band, &nitrite_non_band, ammonia_oxidation[0], nitrite_oxidation[0], nitrate_reduction[0], heterotrophic_nitrite_reduction[0], autotrophic_nitrite_reduction[0], autotrophic_ammonium_oxidation[0], chemo_nitrite[0]) catch |err| {
+        if (!builtin.is_test) std.log.err("soil nitrogen state_update failing site: {s} layer={d}", .{ "zone_non_band", layer });
+        return err;
+    };
+    applyZone(&ammonium_band, &nitrate_band, &nitrite_band, ammonia_oxidation[1], nitrite_oxidation[1], nitrate_reduction[1], heterotrophic_nitrite_reduction[1], autotrophic_nitrite_reduction[1], autotrophic_ammonium_oxidation[1], chemo_nitrite[1]) catch |err| {
+        if (!builtin.is_test) std.log.err("soil nitrogen state_update failing site: {s} layer={d}", .{ "zone_band", layer });
+        return err;
+    };
+    applyMicrobialExchange(&ammonium_non_band, microbial_ammonium_exchange[0]) catch |err| {
+        if (!builtin.is_test) std.log.err("soil nitrogen state_update failing site: {s} layer={d}", .{ "microbial_ammonium_non_band", layer });
+        return err;
+    };
+    applyMicrobialExchange(&ammonium_band, microbial_ammonium_exchange[1]) catch |err| {
+        if (!builtin.is_test) std.log.err("soil nitrogen state_update failing site: {s} layer={d}", .{ "microbial_ammonium_band", layer });
+        return err;
+    };
+    applyMicrobialExchange(&nitrate_non_band, microbial_nitrate_exchange[0]) catch |err| {
+        if (!builtin.is_test) std.log.err("soil nitrogen state_update failing site: {s} layer={d}", .{ "microbial_nitrate_non_band", layer });
+        return err;
+    };
+    applyMicrobialExchange(&nitrate_band, microbial_nitrate_exchange[1]) catch |err| {
+        if (!builtin.is_test) std.log.err("soil nitrogen state_update failing site: {s} layer={d}", .{ "microbial_nitrate_band", layer });
+        return err;
+    };
     try applyMicrobialExchange(&h2po4[0], microbial_h2po4_exchange[0]);
     try applyMicrobialExchange(&h2po4[1], microbial_h2po4_exchange[1]);
     try applyMicrobialExchange(&hpo4[0], microbial_hpo4_exchange[0]);

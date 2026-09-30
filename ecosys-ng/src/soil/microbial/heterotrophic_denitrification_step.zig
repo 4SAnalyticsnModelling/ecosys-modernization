@@ -54,7 +54,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
             total_raw_nitrous_oxide_competition += reaction.competitionFraction(
                 context.reactive_nitrogen.previous_total_nitrous_oxide_demand_g_n[layer],
                 context.reactive_nitrogen.previous_nitrous_oxide_reduction_capacity_g_n[unit],
-                context.result.aerobic_fallback_active_fraction[unit],
+                context.result.total_active_fraction[unit],
                 context.negligible_nitrogen_g_n,
                 context.nitrogen_parameters.denitrification.minimum_competition_fraction,
             );
@@ -73,7 +73,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
             const raw_nitrous_oxide_competition = reaction.competitionFraction(
                 context.reactive_nitrogen.previous_total_nitrous_oxide_demand_g_n[layer],
                 context.reactive_nitrogen.previous_nitrous_oxide_reduction_capacity_g_n[unit],
-                context.result.aerobic_fallback_active_fraction[unit],
+                context.result.total_active_fraction[unit],
                 context.negligible_nitrogen_g_n,
                 context.nitrogen_parameters.denitrification.minimum_competition_fraction,
             );
@@ -85,7 +85,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
                 .biologically_active_water_m3 = active_water_m3,
                 .substrate_complex_fraction = context.result.substrate_complex_fraction[unit],
                 .available_doc_g_c = available_doc_g_c,
-                .microbial_active_fraction = context.result.aerobic_fallback_active_fraction[unit],
+                .microbial_active_fraction = context.result.total_active_fraction[unit],
                 .nitrous_oxide_concentration_g_n_per_m3 = if (active_water_m3 > context.negligible_water_volume_m3) n2o_g_n / active_water_m3 else 0,
                 .nitrous_oxide_amount_g_n = n2o_g_n,
                 .previous_total_nitrous_oxide_demand_g_n = context.reactive_nitrogen.previous_total_nitrous_oxide_demand_g_n[layer],
@@ -179,6 +179,7 @@ test "runtime soil denitrifier builds sequential nitrogen reduction potentials" 
     result.doc_competition_fraction[unit] = 1;
     result.substrate_complex_fraction[unit] = 0.5;
     result.aerobic_fallback_active_fraction[unit] = 1;
+    result.total_active_fraction[unit] = 1;
     result.layer_biologically_active_water_m3[0] = 0.2;
     var oxygen_state = try oxygen.State.init(std.testing.allocator, 1, 12, 1);
     defer oxygen_state.deinit();

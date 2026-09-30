@@ -81,7 +81,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
             context.staging.populations[unit] = .{
                 .is_aerobic = active,
                 .previous_oxygen_demand_g_o = if (active) context.reactive.previous_aerobic_oxygen_demand_g_o[unit] else 0,
-                .fallback_active_fraction = if (active) context.flux.aerobic_fallback_active_fraction[unit] else 0,
+                .fallback_active_fraction = if (active) context.flux.total_active_fraction[unit] else 0,
                 .uptake_conductance_m3_per_step = if (active) try oxygen_solver.uptakeConductance_m3_per_step(.{
                     .microbial_radius_m = context.oxygen_parameters.microbial_radius_m,
                     .water_film_thickness_m = water_film_m,
@@ -183,6 +183,7 @@ test "tiled soil oxygen solve conserves oxygen and exits before NPH times NPG" {
     flux.aerobic_oxygen_demand_g_o[0] = 0.1;
     flux.aerobic_active_biomass_g_c[0] = 0.01;
     flux.aerobic_fallback_active_fraction[0] = 1;
+    flux.total_active_fraction[0] = 1;
     var environment = try nitrifier_environment.State.init(std.testing.allocator, 1, 2);
     defer environment.deinit();
     var reactive = try reactive_nitrogen.State.init(std.testing.allocator, 1, 2);

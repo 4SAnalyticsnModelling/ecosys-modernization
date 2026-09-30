@@ -38,6 +38,10 @@ pub const State = struct {
     substrate_limited_respiration_g_c: []f64,
     aerobic_active_biomass_g_c: []f64,
     aerobic_fallback_active_fraction: []f64,
+    /// NITRO.F 418-449, 613-615 FOMA = OMA/TOMA over every active population
+    /// of the layer (all complexes; autotrophs N=1-3,5), 1 when TOMA<=ZEROS.
+    /// The O2/NO3/NO2/N2O competition fallbacks use it; DOC/acetate use FOMK.
+    total_active_fraction: []f64,
     doc_competition_fraction: []f64,
     substrate_complex_fraction: []f64,
     layer_biologically_active_water_m3: []f64,

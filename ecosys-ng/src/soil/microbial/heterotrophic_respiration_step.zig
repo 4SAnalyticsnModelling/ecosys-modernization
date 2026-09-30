@@ -143,6 +143,23 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
         const layer_oxygen_inhibition = try layerFermentationOxygenInhibition(context.*, layer);
         var total_colonized_g_c: f64 = 0;
         for (0..substrate_count) |substrate| total_colonized_g_c += colonizedAndSorbedCarbon(context.organic_state, layer, substrate);
+        // NITRO.F 418-449 TOMA over all complexes (autotrophic K=5: N=1-3,5),
+        // then FOMA=OMA/TOMA (613-615) for every unit of the layer.
+        {
+            const autotrophic = context.parameters.nitrifier_indices.autotrophic_substrate_index;
+            var toma: f64 = 0;
+            for (0..context.microbial_state.substrate_count) |substrate| for (0..population_count) |population| {
+                if (substrate == autotrophic and !(population <= 2 or population == 4)) continue;
+                const runtime_index = try context.microbial_state.populationIndex(layer / context.microbial_state.layer_count, layer % context.microbial_state.layer_count, substrate, population);
+                toma += @max(0, context.microbial_state.structural[runtime_index * 2].carbon_g_c / context.parameters.nitrifier_environment.labile_biomass_fraction);
+            };
+            for (0..context.microbial_state.substrate_count) |substrate| for (0..population_count) |population| {
+                const unit = layer * units_per_layer + substrate * population_count + population;
+                const runtime_index = try context.microbial_state.populationIndex(layer / context.microbial_state.layer_count, layer % context.microbial_state.layer_count, substrate, population);
+                const oma = @max(0, context.microbial_state.structural[runtime_index * 2].carbon_g_c / context.parameters.nitrifier_environment.labile_biomass_fraction);
+                context.result.total_active_fraction[unit] = if (!(oma > 0)) 0 else if (toma > context.negligible_carbon_g_c) oma / toma else 1;
+            };
+        }
         for (0..substrate_count) |substrate| {
             if (substrate == context.parameters.nitrifier_indices.autotrophic_substrate_index) continue;
             var total_active_g_c: f64 = 0;
