@@ -1181,6 +1181,8 @@ noinline fn prepareOrderedSurfacePhase(sequence: *const OrderedSequenceContext) 
         if (!std.math.isFinite(amount) or amount < 0) return error.InvalidPendingPlantLitterSaltInventory;
 
     const surface_organic_before = try organicInventory(surface.*);
+    // TEMP_DIAGNOSTIC: packed vs authoritative surface carbon at tillage start.
+    if (!@import("builtin").is_test) std.log.warn("TEMP_DIAGNOSTIC tillage surface carbon: packed={e} authoritative={e} water={e} T={e}", .{ surface_organic_before.carbon, context.surface_organic.totalCarbon_g_c(cell) catch -1, context.surface_water_m3[cell], context.grid.surface_temperature_k[cell] });
     try addSurfaceOrganicActivity(&surface_mixable_before, surface.*);
     // REDIST 11625--11842 never places surface PALPO/PFEPO/PCAP* or
     // PALOH/PFEOH/PCAC/PCAS in an incorporation temporary. Those solid
@@ -1194,10 +1196,10 @@ noinline fn prepareOrderedSurfacePhase(sequence: *const OrderedSequenceContext) 
         context.surface_water_m3[cell],
         context.surface_ice_m3[cell],
         context.surface_gas.water_vapor_mol[cell] * 18.0e-6,
-        context.surface_gas.temperature_k[cell],
+        context.grid.surface_temperature_k[cell],
     );
     surface_mixable_before.heat_megajoules += context.dry_organic_heat_capacity_megajoules_per_g_c_k *
-        surface_organic_before.carbon * context.surface_gas.temperature_k[cell];
+        surface_organic_before.carbon * context.grid.surface_temperature_k[cell];
     try addMineralFertilizerActivity(&surface_mixable_before, context.mineral_fertilizer.surface[cell], context);
 
     // 4. Surface microbial biomass transfer.
@@ -1306,7 +1308,10 @@ noinline fn prepareOrderedSurfacePhase(sequence: *const OrderedSequenceContext) 
     phase[0][cell] = context.surface_water_m3[cell];
     phase[1][cell] = context.surface_ice_m3[cell];
     phase[2][cell] = context.surface_gas.water_vapor_mol[cell] * 18.0e-6;
-    phase[9][cell] = context.surface_gas.temperature_k[cell];
+    // REDIST HFLXD prices incorporated residue at TKS(0), the grid surface
+    // temperature the landscape inventory also uses; the litter gas state's
+    // temperature copy can lag it (Ottawa hour 7452: 0.043 K, 7.4e-4 MJ).
+    phase[9][cell] = context.grid.surface_temperature_k[cell];
     phase[11][cell] = context.surface_heat_capacity_megajoules_per_k[cell];
     phase[20][cell] = context.surface_fertilizer.cells[cell].initial_urease_inhibition_fraction;
     phase[21][cell] = context.surface_fertilizer.cells[cell].current_urease_inhibition_fraction;
@@ -1366,6 +1371,8 @@ noinline fn prepareOrderedSurfacePhase(sequence: *const OrderedSequenceContext) 
         ice_heat_capacity_per_water_equivalent_m3_k * phase[1][cell];
     phase[12][cell] = -incorporated_surface_dry_heat_capacity * phase[9][cell];
     phase[13][cell] = phase[12][cell];
+    // TEMP_DIAGNOSTIC: tillage surface energy routing.
+    if (!@import("builtin").is_test) std.log.warn("TEMP_DIAGNOSTIC tillage surface energy: cell={d} T={e} grid_T={e} gas_T={e} C_inc={e} ice_inc={e} vapor_inc={e} water_inc={e} energy_to_soil={e} heat_input={e} water_before={e} water_after={e} ice_before={e} ice_after={e} vhcp_after={e}", .{ cell, phase[9][cell], context.grid.surface_temperature_k[cell], context.surface_gas.temperature_k[cell], incorporated_surface_dry_heat_capacity, incorporated_surface_ice, incorporated_surface_vapor, phase[3][cell], phase[4][cell], phase[12][cell], context.surface_water_m3[cell], phase[0][cell], context.surface_ice_m3[cell], phase[1][cell], phase[11][cell] });
 
     return .{
         .dynamic_salts = dynamic_salts,
@@ -1584,6 +1591,8 @@ noinline fn finishOrderedSequence(
     try addSurfaceChemicalActivity(&surface_mixable_after, core, dynamic, cell, false, dynamic_salts, context);
     try addMineralFertilizerActivity(&surface_mixable_after, mineral_surface, context);
     const surface_incorporated_activity = try storageDifference(surface_mixable_before, surface_mixable_after);
+    // TEMP_DIAGNOSTIC: booked surface incorporation vs routed energy.
+    if (!@import("builtin").is_test) std.log.warn("TEMP_DIAGNOSTIC tillage surface booking: heat_before={e} heat_after={e} booked_heat={e} water_before={e} water_after={e} carbon_before={e} carbon_after={e}", .{ surface_mixable_before.heat_megajoules, surface_mixable_after.heat_megajoules, surface_mixable_before.heat_megajoules - surface_mixable_after.heat_megajoules, surface_mixable_before.water_m3, surface_mixable_after.water_m3, surface_mixable_before.organic_carbon_g, surface_mixable_after.organic_carbon_g });
     try context.local_activity.stageCell(
         cell,
         first_soil_layer,
@@ -2440,6 +2449,42 @@ fn inventoryConcentration(inventory: f64, carrier: f64) f64 {
     return if (carrier > 0) inventory / carrier else 0;
 }
 
+/// Non-band partner of a band-zone chemistry coordinate, or null.
+fn nonBandPartner(coordinate: usize) ?usize {
+    if (coordinate == exchange_offset + 1) return exchange_offset;
+    if (coordinate >= phosphate_surface_band_offset and coordinate < geochemistry_offset)
+        return phosphate_surface_nonband_offset + (coordinate - phosphate_surface_band_offset);
+    if (coordinate >= phosphate_solid_band_offset and coordinate < phosphate_solid_band_offset + 5)
+        return phosphate_solid_nonband_offset + (coordinate - phosphate_solid_band_offset);
+    if (coordinate >= mineral_n_offset and coordinate < mineral_n_offset + 6 and (coordinate - mineral_n_offset) % 2 == 1)
+        return coordinate - 1;
+    if (coordinate >= phosphate_aqueous_band_offset and coordinate < phosphate_aqueous_band_offset + 10)
+        return phosphate_aqueous_nonband_offset + (coordinate - phosphate_aqueous_band_offset);
+    return null;
+}
+
+/// DEV-018. Tillage mixes band amounts by layer (legacy REDIST); a mixed layer
+/// whose band volume fraction is zero (hour1.f 4952-4956: VLNHB=0 when
+/// DLYR<=DLYRM, e.g. the 1 cm topsoil) cannot hold a concentration-carried band
+/// amount. Amalgamate it into the non-band partner exactly as hour1.f
+/// 4962-4980 does when a band no longer exists; the amount is conserved.
+fn amalgamateZeroCarrierBands(water: []const f64, volume: []const f64, bulk_density: []const f64, matrix_bulk_volume: []const f64, band_geometry: [3][4][]f64, storage: []f64) !void {
+    const layers = water.len;
+    if (storage.len != chemistry_family_count * layers) return error.TillageChemistryDimensionMismatch;
+    for (0..layers) |layer| {
+        const mass = try chemistryMassCarrier(bulk_density[layer], matrix_bulk_volume[layer]);
+        for (0..chemistry_family_count) |coordinate| {
+            const partner = nonBandPartner(coordinate) orelse continue;
+            const index = coordinate * layers + layer;
+            if (storage[index] == 0) continue;
+            if (chemistryCarrier(coordinate, layer, water[layer], volume[layer], mass, band_geometry) != 0) continue;
+            if (chemistryCarrier(partner, layer, water[layer], volume[layer], mass, band_geometry) <= 0) continue;
+            storage[partner * layers + layer] += storage[index];
+            storage[index] = 0;
+        }
+    }
+}
+
 fn validateChemistryCarriers(water: []const f64, volume: []const f64, bulk_density: []const f64, matrix_bulk_volume: []const f64, band_geometry: [3][4][]f64, storage: []const f64, allow_dry_plant_litter_salts: bool) !void {
     const layers = water.len;
     if (volume.len != layers or bulk_density.len != layers or matrix_bulk_volume.len != layers or storage.len != chemistry_family_count * layers) return error.TillageChemistryDimensionMismatch;
@@ -2449,7 +2494,10 @@ fn validateChemistryCarriers(water: []const f64, volume: []const f64, bulk_densi
             const carrier = chemistryCarrier(coordinate, layer, water[layer], volume[layer], mass, band_geometry);
             const inventory = storage[coordinate * layers + layer];
             const dry_pending_coordinate = allow_dry_plant_litter_salts and carrier == 0 and inventory != 0 and isPlantLitterSaltCoordinate(coordinate);
-            if (!std.math.isFinite(inventory) or inventory < 0 or !std.math.isFinite(carrier) or carrier < 0 or (carrier == 0 and inventory != 0 and !dry_pending_coordinate)) return error.UnboundTillageChemistryInventory;
+            if (!std.math.isFinite(inventory) or inventory < 0 or !std.math.isFinite(carrier) or carrier < 0 or (carrier == 0 and inventory != 0 and !dry_pending_coordinate)) {
+                if (!@import("builtin").is_test) std.log.err("unbound tillage chemistry inventory: coordinate={d} layer={d} inventory={e} carrier={e} water={e} mass={e}", .{ coordinate, layer, inventory, carrier, water[layer], mass });
+                return error.UnboundTillageChemistryInventory;
+            }
             if (dry_pending_coordinate) continue;
             const concentration = inventoryConcentration(inventory, carrier);
             if (!std.math.isFinite(concentration) or concentration < 0) return error.NonFiniteTillageChemistryConcentration;
@@ -2982,6 +3030,7 @@ noinline fn redistributeChemistryPhase(
         layers,
         error.TillageChemistryRedistributionConservationFailure,
     );
+    try amalgamateZeroCarrierBands(matrix_water, context.properties.layer_volume_m3[global_first .. global_first + layers], context.properties.bulk_density_megagrams_per_m3[global_first .. global_first + layers], context.properties.matrix_bulk_volume_m3[global_first .. global_first + layers], band_geometry, chemistry_storage);
     try validateChemistryCarriers(matrix_water, context.properties.layer_volume_m3[global_first .. global_first + layers], context.properties.bulk_density_megagrams_per_m3[global_first .. global_first + layers], context.properties.matrix_bulk_volume_m3[global_first .. global_first + layers], band_geometry, chemistry_storage, true);
     return .{
         .same_scope_gain = chemistry_same_scope_gain,
@@ -3202,6 +3251,7 @@ noinline fn incorporateSurfacePhase(
             chemistry_storage[chemistry_index] = 0;
         }
     }
+    try amalgamateZeroCarrierBands(matrix_water, context.properties.layer_volume_m3[global_first .. global_first + layers], context.properties.bulk_density_megagrams_per_m3[global_first .. global_first + layers], context.properties.matrix_bulk_volume_m3[global_first .. global_first + layers], band_geometry, chemistry_storage);
     try validateChemistryCarriers(matrix_water, context.properties.layer_volume_m3[global_first .. global_first + layers], context.properties.bulk_density_megagrams_per_m3[global_first .. global_first + layers], context.properties.matrix_bulk_volume_m3[global_first .. global_first + layers], band_geometry, chemistry_storage, false);
     syncPreparedTransportFromChemistry(transport_owners, chemistry_storage, layers);
     var mineral_surface_addition_mol: [MineralNitrogenTransport.species_count]f64 = @splat(0);
