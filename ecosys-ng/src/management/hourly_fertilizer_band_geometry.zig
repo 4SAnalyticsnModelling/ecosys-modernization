@@ -243,11 +243,13 @@ pub fn update(
                     workspace.band_depth_m[layer] + growth_m,
                 );
             }
+            // hour1.f 4936-4941 seeds DPNHB(L+1) for L = NL too, i.e. an
+            // array slot below the active profile that no later code reads;
+            // the band simply stops growing into soil at the profile bottom.
             if (lower_edge_m > geometry.lower_depth_m[layer] and
-                upper_edge_m <= geometry.upper_depth_m[layer])
+                upper_edge_m <= geometry.upper_depth_m[layer] and
+                layer < geometry.last_active_layer)
             {
-                if (layer == geometry.last_active_layer)
-                    return error.FertilizerBandGrowthBelowProfile;
                 if (workspace.band_volume_fraction[layer + 1] <
                     geometry.structural_presence_threshold)
                 {
