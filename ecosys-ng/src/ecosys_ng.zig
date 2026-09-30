@@ -2873,6 +2873,16 @@ noinline fn finishAcceptedHourOutputs(
 noinline fn postScienceAccounting(driver_context: anytype, advance_context: anytype, post_context: anytype) !void {
     try postScienceManagementAndGasAccounting(driver_context, advance_context, post_context);
     try postScienceCanopyFireAndCloseout(driver_context, advance_context);
+    // HFUNC 118-120: a PFT terminated this hour (IDTH=1) keeps IFLGC=1 until
+    // the next hour's HFUNC, so every post-science publication above still
+    // books its already-computed root/canopy fluxes. Deactivate it now.
+    if (driver_context.plant_phenology_state.*) |*phenology| {
+        for (driver_context.deferred_plant_deactivation_by_plant.*, 0..) |*deferred, plant| {
+            if (!deferred.*) continue;
+            if (plant < phenology.active.len) phenology.active[plant] = false;
+            deferred.* = false;
+        }
+    }
 }
 
 noinline fn postScienceManagementAndGasAccounting(driver_context: anytype, advance_context: anytype, post_context: anytype) !void {
@@ -4180,14 +4190,17 @@ noinline fn postScienceManureAndPlantExchange(driver_context: anytype, advance_c
                 litterfall.aboveground.nitrogen_g_n;
             driver_context.aboveground_litter_phosphorus_g_p_per_h_by_plant.*[plant] =
                 litterfall.aboveground.phosphorus_g_p;
+            // Harvest/termination root litter (applyRootSymbiontHarvest) is
+            // belowground CSNC/ZSNC/PSNC too; it never enters the natural
+            // root_litter_products owner.
             try driver_context.plant_daily_flux_ledger.*.accumulateLitterStateUpdate(
                 plant,
                 litterfall.aboveground.carbon_g_c,
                 litterfall.aboveground.nitrogen_g_n,
                 litterfall.aboveground.phosphorus_g_p,
-                litterfall.belowground.carbon_g_c,
-                litterfall.belowground.nitrogen_g_n,
-                litterfall.belowground.phosphorus_g_p,
+                litterfall.belowground.carbon_g_c + driver_context.root_harvest_litter_carbon_g_c_by_plant.*[plant],
+                litterfall.belowground.nitrogen_g_n + driver_context.root_harvest_litter_nitrogen_g_n_by_plant.*[plant],
+                litterfall.belowground.phosphorus_g_p + driver_context.root_harvest_litter_phosphorus_g_p_by_plant.*[plant],
             );
         }
         // GROSUB 12636--12653 publishes natural shoot,
@@ -5535,6 +5548,15 @@ noinline fn postScienceFireAndCloseout(driver_context: anytype, advance_context:
     // consumption by their emitting/consuming soil layer. Soil-
     // root and root phase exchange are internal to that exact
     // local scope and therefore do not cross this ledger.
+    // TEMP_DIAGNOSTIC: root gas booking per layer in disturbance hours.
+    {
+        const withdrawal = driver_context.root_gas_withdrawal_state_update_state.*.loss_g_element_per_h_by_gas_and_layer;
+        const atmosphere = driver_context.root_atmosphere_gas_state_update_state.*.exchange_g_per_h_by_gas_and_layer;
+        for (0..withdrawal[0].len) |layer| {
+            if (withdrawal[0][layer] != 0 or withdrawal[2][layer] != 0)
+                std.log.warn("TEMP_DIAGNOSTIC root gas booking: layer={d} withdrawal_co2_c={e} withdrawal_ch4_c={e} withdrawal_n2o_n={e} withdrawal_nh3_n={e} withdrawal_h2={e} atmosphere_co2_c={e} atmosphere_ch4_c={e}", .{ layer, withdrawal[0][layer], withdrawal[2][layer], withdrawal[3][layer], withdrawal[4][layer], withdrawal[5][layer], atmosphere[0][layer], atmosphere[2][layer] });
+        }
+    }
     try ecosys.layer_local_conservation.accumulateRootGasActivity(
         &driver_context.hourly_layer_boundary_ledger.*,
         .{
@@ -5819,6 +5841,18 @@ noinline fn postScienceFireAndCloseout(driver_context: anytype, advance_context:
                         .relative = driver_context.config.*.mass_balance_relative_tolerance,
                     },
                 );
+            // TEMP_DIAGNOSTIC: plant inventory and ledger movement on failure.
+            if (!driver_context.plant_conservation_reports.*[plant].accepted()) {
+                const b = driver_context.plant_conservation_hour_start.*[plant];
+                std.log.err("TEMP_DIAGNOSTIC plant conservation: plant={d} C {e}->{e} N {e}->{e} P {e}->{e} dfix={e} dresp={e} droot_c={e} dlitter_c={e} doxid_c={e} dharv_c={e} droot_n={e} dlitter_n={e} dlitter_p={e} manure_c={e}", .{
+                    plant,                                                                               b.inventory.carbon_g,                                                                    inventory_after.carbon_g,
+                    b.inventory.nitrogen_g,                                                              inventory_after.nitrogen_g,                                                              b.inventory.phosphorus_g,
+                    inventory_after.phosphorus_g,                                                        ledger_after.gross_canopy_fixation_g_c - b.ledger.gross_canopy_fixation_g_c,             ledger_after.signed_total_respiration_g_c - b.ledger.signed_total_respiration_g_c,
+                    ledger_after.root_soil_carbon_exchange_g_c - b.ledger.root_soil_carbon_exchange_g_c, ledger_after.carbon_litter_sink_g_c - b.ledger.carbon_litter_sink_g_c,                   ledger_after.carbon_oxidation_g_c - b.ledger.carbon_oxidation_g_c,
+                    ledger_after.harvested_carbon_g_c - b.ledger.harvested_carbon_g_c,                   ledger_after.root_soil_nitrogen_exchange_g_n - b.ledger.root_soil_nitrogen_exchange_g_n, ledger_after.nitrogen_litter_sink_g_n - b.ledger.nitrogen_litter_sink_g_n,
+                    ledger_after.phosphorus_litter_sink_g_p - b.ledger.phosphorus_litter_sink_g_p,       manure_output.carbon_g,
+                });
+            }
         }
         try ecosys.plant_daily_flux_ledger.requireAccepted(
             driver_context.plant_conservation_reports.*,
@@ -6712,6 +6746,9 @@ noinline fn prepareHourlyScience(driver_context: anytype, timeline_state: *Timel
     @memset(driver_context.shoot_harvest_litter_carbon_g_c_by_plant.*, 0);
     @memset(driver_context.shoot_harvest_litter_nitrogen_g_n_by_plant.*, 0);
     @memset(driver_context.shoot_harvest_litter_phosphorus_g_p_by_plant.*, 0);
+    @memset(driver_context.root_harvest_litter_carbon_g_c_by_plant.*, 0);
+    @memset(driver_context.root_harvest_litter_nitrogen_g_n_by_plant.*, 0);
+    @memset(driver_context.root_harvest_litter_phosphorus_g_p_by_plant.*, 0);
     @memset(driver_context.hourly_manure_products_by_plant.*, .{});
     @memcpy(
         driver_context.harvest_carbon_at_hour_start_g_c_by_plant.*,
@@ -10502,6 +10539,10 @@ const PlantTransferOwners = struct {
     hourly_manure_products_by_plant: []ecosys.grazing_manure.Products,
     shoot_harvest_litter_nitrogen_g_n_by_plant: []f64,
     shoot_harvest_litter_phosphorus_g_p_by_plant: []f64,
+    root_harvest_litter_carbon_g_c_by_plant: []f64,
+    root_harvest_litter_nitrogen_g_n_by_plant: []f64,
+    root_harvest_litter_phosphorus_g_p_by_plant: []f64,
+    deferred_plant_deactivation_by_plant: []bool,
     harvest_carbon_at_hour_start_g_c_by_plant: []f64,
     harvest_salt_at_hour_start_mol_by_plant_species: []f64,
 };
@@ -10596,6 +10637,14 @@ noinline fn initializePlantTransferOwners(
     owners.shoot_harvest_litter_carbon_g_c_by_plant = try inputs.allocator.alloc(f64, inputs.output_plant_count);
     resources.ownFree(&owners.shoot_harvest_litter_carbon_g_c_by_plant);
     @memset(owners.shoot_harvest_litter_carbon_g_c_by_plant, 0);
+    inline for (.{ "root_harvest_litter_carbon_g_c_by_plant", "root_harvest_litter_nitrogen_g_n_by_plant", "root_harvest_litter_phosphorus_g_p_by_plant" }) |name| {
+        @field(owners, name) = try inputs.allocator.alloc(f64, inputs.output_plant_count);
+        resources.ownFree(&@field(owners, name));
+        @memset(@field(owners, name), 0);
+    }
+    owners.deferred_plant_deactivation_by_plant = try inputs.allocator.alloc(bool, inputs.output_plant_count);
+    resources.ownFree(&owners.deferred_plant_deactivation_by_plant);
+    @memset(owners.deferred_plant_deactivation_by_plant, false);
     owners.hourly_manure_products_by_plant = try inputs.allocator.alloc(
         ecosys.grazing_manure.Products,
         inputs.output_plant_count,
@@ -12576,6 +12625,10 @@ pub fn main(init: std.process.Init) !void {
     const hourly_manure_products_by_plant = plant_transfer_owners.hourly_manure_products_by_plant;
     const shoot_harvest_litter_nitrogen_g_n_by_plant = plant_transfer_owners.shoot_harvest_litter_nitrogen_g_n_by_plant;
     const shoot_harvest_litter_phosphorus_g_p_by_plant = plant_transfer_owners.shoot_harvest_litter_phosphorus_g_p_by_plant;
+    const root_harvest_litter_carbon_g_c_by_plant = plant_transfer_owners.root_harvest_litter_carbon_g_c_by_plant;
+    const root_harvest_litter_nitrogen_g_n_by_plant = plant_transfer_owners.root_harvest_litter_nitrogen_g_n_by_plant;
+    const root_harvest_litter_phosphorus_g_p_by_plant = plant_transfer_owners.root_harvest_litter_phosphorus_g_p_by_plant;
+    const deferred_plant_deactivation_by_plant = plant_transfer_owners.deferred_plant_deactivation_by_plant;
     const harvest_carbon_at_hour_start_g_c_by_plant = plant_transfer_owners.harvest_carbon_at_hour_start_g_c_by_plant;
     const harvest_salt_at_hour_start_mol_by_plant_species = plant_transfer_owners.harvest_salt_at_hour_start_mol_by_plant_species;
     const eroded_organic_component_count = try ecosys.soil_erosion_organic_bridge.componentCount(soil_organic_state);
@@ -13461,6 +13514,10 @@ pub fn main(init: std.process.Init) !void {
                 .shoot_litter_carbon_g_c_by_plant = shoot_harvest_litter_carbon_g_c_by_plant,
                 .shoot_litter_nitrogen_g_n_by_plant = shoot_harvest_litter_nitrogen_g_n_by_plant,
                 .shoot_litter_phosphorus_g_p_by_plant = shoot_harvest_litter_phosphorus_g_p_by_plant,
+                .root_litter_carbon_g_c_by_plant = root_harvest_litter_carbon_g_c_by_plant,
+                .root_litter_nitrogen_g_n_by_plant = root_harvest_litter_nitrogen_g_n_by_plant,
+                .root_litter_phosphorus_g_p_by_plant = root_harvest_litter_phosphorus_g_p_by_plant,
+                .deferred_deactivation_by_plant = deferred_plant_deactivation_by_plant,
                 .soil_organic_state = soil_organic_state,
                 .surface_organic_state = surface_organic_state,
                 .surface_nutrient_state = surface_fire_exchange_state,
@@ -14374,6 +14431,10 @@ pub fn main(init: std.process.Init) !void {
         .shoot_harvest_litter_carbon_g_c_by_plant = &shoot_harvest_litter_carbon_g_c_by_plant,
         .shoot_harvest_litter_nitrogen_g_n_by_plant = &shoot_harvest_litter_nitrogen_g_n_by_plant,
         .shoot_harvest_litter_phosphorus_g_p_by_plant = &shoot_harvest_litter_phosphorus_g_p_by_plant,
+        .root_harvest_litter_carbon_g_c_by_plant = &root_harvest_litter_carbon_g_c_by_plant,
+        .root_harvest_litter_nitrogen_g_n_by_plant = &root_harvest_litter_nitrogen_g_n_by_plant,
+        .root_harvest_litter_phosphorus_g_p_by_plant = &root_harvest_litter_phosphorus_g_p_by_plant,
+        .deferred_plant_deactivation_by_plant = &deferred_plant_deactivation_by_plant,
         .shoot_senescence_products_by_plant = &shoot_senescence_products_by_plant,
         .site_by_cell = &site_by_cell,
         .snow_depth_m = &snow_depth_m,

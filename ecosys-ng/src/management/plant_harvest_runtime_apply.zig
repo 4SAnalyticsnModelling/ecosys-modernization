@@ -1008,7 +1008,12 @@ pub fn applyEventInternal(context: *group_misc.Context, plant: usize, source_eve
         try phenology.terminatePlantBranches(context.branch_development, branches.first, branches.end, true);
         if (context.plant_phenology) |plant_state| {
             if (plant >= plant_state.active.len) return error.PlantHarvestIndexOutOfBounds;
-            if (!reseed) plant_state.active[plant] = false;
+            if (!reseed) {
+                if (context.deferred_deactivation_by_plant) |deferred|
+                    deferred[plant] = true
+                else
+                    plant_state.active[plant] = false;
+            }
         }
         if (context.emerged_by_plant) |emerged| {
             if (plant >= emerged.len) return error.PlantHarvestIndexOutOfBounds;
@@ -1638,8 +1643,26 @@ pub fn applyRootSymbiontHarvest(context: *group_misc.Context, plant: usize, rema
         state_update.add(host.litterfall) catch unreachable;
         if (layer == planting_layer) state_update.add(storage_result.litterfall) catch unreachable;
         group_harvest.state_updateHostLayerHarvest(roots, plant, layer, retention);
+        // TEMP_DIAGNOSTIC: harvest root litter and root gas released per layer.
+        if (!@import("builtin").is_test) {
+            var gas_c: f64 = 0;
+            for (0..root_system.biological_domain_count) |domain| {
+                const index = roots.layerIndex(plant, domain, layer) catch unreachable;
+                gas_c += roots.gaseous_carbon_dioxide_g_c[index] + roots.aqueous_carbon_dioxide_g_c[index] +
+                    roots.gaseous_methane_g_c[index] + roots.aqueous_methane_g_c[index];
+            }
+            const litter_c = rootLitterElementTotal(state_update.litter, "carbon_g_c");
+            if (litter_c != 0 or gas_c != 0) std.log.warn("TEMP_DIAGNOSTIC harvest root layer: plant={d} layer={d} litter_c={e} gas_c_released={e} removed_fraction={e} host_removed_c={e}", .{ plant, layer, litter_c, gas_c * (1 - remaining_fraction), 1 - remaining_fraction, host.removed.carbon_g_c });
+        }
         root_disturbance.releaseRootGasFraction(roots, plant, layer, 1 - remaining_fraction) catch unreachable;
         root_litterfall.publishValidated(organic, soil, state_update);
+        // GROSUB CSNC/ZSNC/PSNC: harvest/death root litter leaves the plant
+        // inventory, so the plant ledger's litter sink must carry it too.
+        if (context.root_litter_carbon_g_c_by_plant) |carbon| {
+            carbon[plant] += rootLitterElementTotal(state_update.litter, "carbon_g_c");
+            context.root_litter_nitrogen_g_n_by_plant.?[plant] += rootLitterElementTotal(state_update.litter, "nitrogen_g_n");
+            context.root_litter_phosphorus_g_p_by_plant.?[plant] += rootLitterElementTotal(state_update.litter, "phosphorus_g_p");
+        }
         if (context.root_litter_carbon_ledger) |ledger| {
             for (0..root_system.biological_domain_count) |domain|
                 ledger.addValidated(plant, domain, layer, host_litter_by_domain[domain]);
@@ -1647,8 +1670,15 @@ pub fn applyRootSymbiontHarvest(context: *group_misc.Context, plant: usize, rema
             if (layer == planting_layer) ledger.addValidated(plant, 0, layer, storage_result.litterfall);
         }
     }
-    if (context.carbon_exchange_state) |exchange| {
-        const branches = context.canopy_state.branchRange(plant) catch unreachable;
-        exchange.disturbance_carbon_g_c_per_h[branches.first] += removed_host_carbon_g_c;
-    }
+    // DEV-017: GROSUB 9814-9848 also subtracts the harvested root litter FHVST
+    // from CNET/HCNET, which EXTRACT sums into the XCNET atmosphere exchange,
+    // so the same carbon would be both soil litter (CSNC above) and emitted
+    // CO2. The litter owner alone carries it (Ottawa hour 6852: 4.59e-5 g C).
+}
+
+fn rootLitterElementTotal(litter: anytype, comptime element: []const u8) f64 {
+    var total: f64 = 0;
+    for (@field(litter, "woody_" ++ element)) |value| total += value;
+    for (@field(litter, "nonwoody_" ++ element)) |value| total += value;
+    return total;
 }

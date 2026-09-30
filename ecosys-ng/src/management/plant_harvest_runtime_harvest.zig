@@ -516,7 +516,11 @@ fn scaleHostLayerHarvestState(
             roots.root_surface_area_m2_per_plant[root] = scaled_layer.root_surface_area_m2_per_plant;
             roots.respiration_unlimited_by_oxygen_g_c_per_h[root] = scaled_layer.respiration_unlimited_by_oxygen_g_c_per_h;
             roots.respiration_unlimited_by_carbon_g_c_per_h[root] = scaled_layer.respiration_unlimited_by_carbon_g_c_per_h;
-            roots.actual_respiration_g_c_per_h[root] = scaled_layer.actual_respiration_g_c_per_h;
+            // DEV-016: GROSUB 9932-9934 also scales RCO2A by XHVST, but this
+            // hour's root respiration was already debited from the root pools
+            // and delivered to soil CO2 before post-science harvest; rescaling
+            // the published flux would drop it from the plant TCO2T/BALC ledger
+            // (Ottawa hour 6852: 6.8e-9 g C). The respired amount is kept.
         }
     }
 }

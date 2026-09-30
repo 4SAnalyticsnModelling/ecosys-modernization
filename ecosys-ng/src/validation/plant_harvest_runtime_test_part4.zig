@@ -164,7 +164,8 @@ test "GROSUB belowground harvest scales every root field and conserves element-s
             .{ roots.root_surface_area_m2_per_plant[root], 5.0 },
             .{ roots.respiration_unlimited_by_oxygen_g_c_per_h[root], 6.0 },
             .{ roots.respiration_unlimited_by_carbon_g_c_per_h[root], 7.0 },
-            .{ roots.actual_respiration_g_c_per_h[root], 8.0 },
+            // DEV-016: the hour's published respiration is not rescaled.
+            .{ roots.actual_respiration_g_c_per_h[root], 16.0 },
             .{ roots.secondary_axis_count_total[root], 13.0 },
         }) |pair| try std.testing.expectApproxEqAbs(pair[1], pair[0], 1e-14);
         const axis = try roots.layerAxisIndex(0, domain, 0, 0);

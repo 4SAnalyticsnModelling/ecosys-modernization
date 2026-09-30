@@ -50,6 +50,15 @@ pub const Context = struct {
     shoot_litter_carbon_g_c_by_plant: ?[]f64 = null,
     shoot_litter_nitrogen_g_n_by_plant: ?[]f64 = null,
     shoot_litter_phosphorus_g_p_by_plant: ?[]f64 = null,
+    /// Hourly belowground (root, nodule, storage) harvest/death litterfall
+    /// per plant, booked into the plant ledger's CSNC/ZSNC/PSNC sink.
+    root_litter_carbon_g_c_by_plant: ?[]f64 = null,
+    root_litter_nitrogen_g_n_by_plant: ?[]f64 = null,
+    root_litter_phosphorus_g_p_by_plant: ?[]f64 = null,
+    /// HFUNC 118-120 clears IFLGC at the next hour's start, so a plant
+    /// terminated by harvest stays active for the rest of its harvest hour.
+    /// When bound, termination defers `active=false` to the hour closeout.
+    deferred_deactivation_by_plant: ?[]bool = null,
     soil_organic_state: ?*soil_organic.State = null,
     surface_organic_state: ?*soil_organic.State = null,
     surface_nutrient_state: ?*surface_nutrients.State = null,

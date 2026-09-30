@@ -966,7 +966,8 @@ test "thinning then complete mortality conserves host and nodule roots and publi
     }
     try std.testing.expectApproxEqAbs(14, remaining_carbon_g_c + litter_carbon_g_c, 1e-14);
     try std.testing.expectApproxEqAbs(7, remaining_carbon_g_c, 1e-14);
-    try std.testing.expectApproxEqAbs(4, exchange.disturbance_carbon_g_c_per_h[0], 1e-14);
+    // DEV-017: root litter is not also booked as HCNET disturbance CO2.
+    try std.testing.expectApproxEqAbs(0, exchange.disturbance_carbon_g_c_per_h[0], 1e-14);
     try std.testing.expectApproxEqAbs(-8, roots.withdrawal_carbon_dioxide_loss_g_c_per_h[0], 1e-14);
     var remaining_root_carbon_dioxide_g_c: f64 = 0;
     for (roots.gaseous_carbon_dioxide_g_c, roots.aqueous_carbon_dioxide_g_c) |gaseous, aqueous|
@@ -986,7 +987,7 @@ test "thinning then complete mortality conserves host and nodule roots and publi
     }
     try std.testing.expectApproxEqAbs(0, remaining_carbon_g_c, 1e-14);
     try std.testing.expectApproxEqAbs(14, litter_carbon_g_c, 1e-14);
-    try std.testing.expectApproxEqAbs(8, exchange.disturbance_carbon_g_c_per_h[0], 1e-14);
+    try std.testing.expectApproxEqAbs(0, exchange.disturbance_carbon_g_c_per_h[0], 1e-14);
     try std.testing.expectApproxEqAbs(-16, roots.withdrawal_carbon_dioxide_loss_g_c_per_h[0], 1e-14);
     remaining_root_carbon_dioxide_g_c = 0;
     for (roots.gaseous_carbon_dioxide_g_c, roots.aqueous_carbon_dioxide_g_c) |gaseous, aqueous|
