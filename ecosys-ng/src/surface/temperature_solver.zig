@@ -1500,6 +1500,9 @@ fn limitPhaseChangeToAvailableEnergy(
     if (requested_ice_change_m3 == 0) return equilibrium;
     if (!std.math.isFinite(context.heat_capacity_megajoules_per_k) or
         context.heat_capacity_megajoules_per_k <= 0) return equilibrium;
+    // `TFREEZ = -9.0959E+04/(PSISVR-333.0)`, the limit's own legacy point.
+    const legacy_freezing_point_k = -9.0959e4 /
+        (context.water_potential_megapascal - context.latent_heat_of_fusion_megajoules_per_m3);
 
     const limit = try freeze_thaw_energy_limit.apply(.{
         .temperature_k = temperature_k,
@@ -1513,8 +1516,15 @@ fn limitPhaseChangeToAvailableEnergy(
         .substep_energy_fraction = 1,
         .substep_mass_fraction = 1,
         .negligible_volume_m3 = 0,
-        // One melting temperature for direction and drive (watsub.f 3134-3155).
-        .freezing_point_override_k = equilibrium.depressed_melting_temperature_k,
+        // Legacy TFREEZ drives the rate (watsub.f 3134-3155), but it must not
+        // permit a change the equilibrium does not request: freezing is driven
+        // below min(TFREEZ, T_m) and thawing above max(TFREEZ, T_m). Otherwise
+        // a thaw request just above T_m inherits C*(T_m - TFREEZ) and the
+        // surface energy residual steps at T_m (Ottawa hour 2786, pond).
+        .freezing_point_override_k = if (requested_ice_change_m3 > 0)
+            @min(legacy_freezing_point_k, equilibrium.depressed_melting_temperature_k)
+        else
+            @max(legacy_freezing_point_k, equilibrium.depressed_melting_temperature_k),
     }, .{
         .latent_heat_of_fusion_megajoules_per_m3 = context.latent_heat_of_fusion_megajoules_per_m3,
         .freezing_point_depression_numerator = 9.0959e4,
