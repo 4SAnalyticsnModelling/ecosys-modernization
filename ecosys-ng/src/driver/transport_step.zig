@@ -570,7 +570,8 @@ fn requireLocalSoilSoluteConservation(
             const configured_absolute = if (inputs.horizontal_cell_area_m2.len == 0)
                 0
             else
-                inputs.conservation_absolute_tolerance_mol_per_m2 * inputs.horizontal_cell_area_m2[horizontal_cell];
+                // DEV-010: never below the legacy ZEROC dust resolution.
+                @max(inputs.conservation_absolute_tolerance_mol_per_m2, 1.0e-32) * inputs.horizontal_cell_area_m2[horizontal_cell];
             const closure = try scoped_conservation.evaluate(.{
                 .storage_before = storage_before,
                 .storage_after = storage_after,

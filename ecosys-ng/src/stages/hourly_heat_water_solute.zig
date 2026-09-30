@@ -2428,7 +2428,9 @@ fn snowSurfaceExchangeParameters(context: anytype) ecosys.snow_surface_atmospher
 }
 
 fn snowDisappearanceConservationTolerances(context: anytype) ecosys.snowpack_litter_heat_water_transfer.LiveConservationTolerances {
-    const absolute = context.config.mass_balance_absolute_tolerance;
+    var absolute = context.config.mass_balance_absolute_tolerance;
+    // DEV-010: ion gates never below the legacy ZEROC dust resolution.
+    absolute.ions_mol_m2 = @max(absolute.ions_mol_m2, 1.0e-32);
     const molar_mass = context.runscript.chemistry_primary_initialization.molar_mass_g_per_mol;
     const amount_g_per_m2: [ecosys.snow_solute_transport.species_count]f64 = .{
         absolute.carbon_g_m2,

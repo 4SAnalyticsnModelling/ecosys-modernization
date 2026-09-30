@@ -575,6 +575,7 @@ noinline fn solveControlledImpl(
     var slow_newton_norm_count: u8 = 0;
     var slow_newton_last_recorded_step: u16 = 0;
     var rejected_forecast_recovery_step: ?u16 = null;
+    var bounded_phase_stagnation = false;
     var iteration: u16 = 0;
     while (iteration < options.max_iterations) : (iteration += 1) {
         const retrying_newton_after_anderson = newton_retry_required;
@@ -1157,6 +1158,19 @@ noinline fn solveControlledImpl(
                 const limiting_cell = largest_index % cells;
                 std.log.err("soil phase limiting block: temperature_k={e}->{e} matrix_water={e}->{e} vapor={e}->{e} matrix_ice={e}->{e} macropore_water={e}->{e} macropore_ice={e}->{e}", .{ current[5 * cells + limiting_cell], current[5 * cells + limiting_cell] + residual[5 * cells + limiting_cell], current[limiting_cell], current[limiting_cell] + residual[limiting_cell], current[cells + limiting_cell], current[cells + limiting_cell] + residual[cells + limiting_cell], current[2 * cells + limiting_cell], current[2 * cells + limiting_cell] + residual[2 * cells + limiting_cell], current[3 * cells + limiting_cell], current[3 * cells + limiting_cell] + residual[3 * cells + limiting_cell], current[4 * cells + limiting_cell], current[4 * cells + limiting_cell] + residual[4 * cells + limiting_cell] });
             }
+            // DEV-014: WATSUB integrates the phase endpoint explicitly with no
+            // convergence test. When Newton and Anderson both stall on a defect
+            // that is unresolvable at the layer scale (every water coordinate
+            // within 1e-8 of its domain capacity, temperature within 1e-6 K),
+            // the iterate is still published through the unchanged committable
+            // and phase-energy conservation gates below. Ottawa hour 6456:
+            // saturated topsoil matrix stalled 7.6e-12 m3 below its target.
+            if (boundedPhaseStagnationPublishable(grid, current, residual, cells)) {
+                if (!builtin.is_test) std.log.warn("soil phase solver stagnated within the layer-scale bound; publishing the iterate through the conservation gates: scaled_residual={e}", .{norm});
+                newton_retry_required = false;
+                bounded_phase_stagnation = true;
+                break;
+            }
             return error.SoilPhaseSolverStagnated;
         }
         control.record(.anderson_accept);
@@ -1169,7 +1183,7 @@ noinline fn solveControlledImpl(
     try residualAt(grid, properties, base, current, target, residual, scratch, trial_heat, trial_exchange, trial_displacement);
     const final_norm = try scaledNorm(base, current, residual, options);
     var final_phase_energy_accepted = false;
-    if (!newton_retry_required and final_norm <= 1 and
+    if (!newton_retry_required and (final_norm <= 1 or bounded_phase_stagnation) and
         committableState(grid, current, properties.freeze_thaw.ice_density_megagrams_per_m3))
     {
         const check = try evaluatePhaseEnergyConservation(base, current, trial_displacement, properties, options);
@@ -1193,6 +1207,32 @@ noinline fn solveControlledImpl(
         if (last_reduced_block_probe_error) |err| std.log.err("last reduced phase block probe error: {s}", .{@errorName(err)});
     }
     return error.SoilPhaseSolverDidNotConverge;
+}
+
+/// DEV-014 layer-scale bound for publishing a stalled phase iterate: every water
+/// coordinate's residual within 1e-8 of its domain's pore capacity (matrix
+/// components against the matrix pore, macropore components against the
+/// macropore pore) and the endpoint temperature within 1e-6 K. The caller
+/// still requires `committableState` and the phase-energy conservation gate.
+fn boundedPhaseStagnationPublishable(grid: *const grid_module.GridState, current: []const f64, residual: []const f64, cells: usize) bool {
+    const relative_capacity_bound: f64 = 1.0e-8;
+    const temperature_bound_k: f64 = 1.0e-6;
+    if (current.len != 6 * cells or residual.len != current.len) return false;
+    for (0..cells) |cell| {
+        const matrix_scale = relative_capacity_bound * grid.matrix_pore_capacity_m3[cell];
+        const macropore_scale = relative_capacity_bound * grid.macropore_pore_capacity_m3[cell];
+        inline for (.{ 0, 1, 2 }) |component| {
+            const value = residual[component * cells + cell];
+            if (!std.math.isFinite(value) or @abs(value) > matrix_scale) return false;
+        }
+        inline for (.{ 3, 4 }) |component| {
+            const value = residual[component * cells + cell];
+            if (!std.math.isFinite(value) or @abs(value) > macropore_scale) return false;
+        }
+        const temperature_residual = residual[5 * cells + cell];
+        if (!std.math.isFinite(temperature_residual) or @abs(temperature_residual) > temperature_bound_k) return false;
+    }
+    return true;
 }
 
 /// Independent acceptance gate for the WATSUB phase endpoint. The nonlinear
