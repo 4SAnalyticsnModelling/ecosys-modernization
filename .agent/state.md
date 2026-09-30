@@ -10,8 +10,10 @@ Updated 2026-09-29 16:50 (local). Plan: Complete 30-Year Ottawa Run with Zero Sc
 - r00012 (470810a) + checkpoint replays with later fixes reached hour 3607 (d151).
 - r00014 (6f50e81) fresh hour-0: failed hour 2786 (1998 d117 h02) surface litter/pond temperature solve pinned at
   273.14999 K (ponded water now stays on the surface after the NN=3 gate).
-- r00015 (84c09d5) fresh hour-0 started 16:46 → audit/runs/ottawa/r00015-strict (adds SOLUTE entry RHHX reset and a
-  failure-only surface residual probe).
+- r00015 (84c09d5, SOLUTE entry reset) crawled post-liming; stopped. Entry reset and hydroxyl site owner reverted.
+- r00017 (df86724) fresh hour-0 started 19:02: passed 2786 (freeze clamp), 3295 (DEV-013), 3608 (ZEROS2 gate),
+  3917, 4037; hour 4128 at 19:42 (new record; previous best 4036). One DEV-011 publication at d119 (quality 516).
+- d105 lime (360 g Ca m-2 CaCO3 broadcast) makes layer-0 pH 8-9.8 plausibly (DEEPSEEK r29): SOLUTE stiffness.
 - Throughput ~150 ms/h at steady state; spring thaw/tillage hours slower.
 - verified_frontier = 0 (no single-binding strict campaign has yet run to a stopping point with every fix).
 

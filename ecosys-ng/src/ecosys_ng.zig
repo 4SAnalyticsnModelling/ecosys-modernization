@@ -6463,7 +6463,10 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
                 driver_context.hourly_cell_boundary_ledger.*.cells,
                 driver_context.canopy_cell_area_m2.*,
                 .{
-                    .absolute_per_area = driver_context.config.*.mass_balance_absolute_tolerance,
+                    // Same DEV-010 ZEROC ion floor as the hourly closures: the
+                    // accumulated identity over STARTE dust (~1e-46 mol S, Cl at
+                    // hour 4142) has no physical resolution either.
+                    .absolute_per_area = cell_absolute_per_area,
                     .relative = driver_context.config.*.mass_balance_relative_tolerance,
                 },
                 driver_context.landscape_mass_balance_state.*.hourly_cell_closure.accepted_hour_count,
@@ -6480,7 +6483,7 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
                 driver_context.hourly_layer_boundary_ledger.*.activity,
                 driver_context.layer_scope_area_m2.*,
                 .{
-                    .absolute_per_area = driver_context.config.*.mass_balance_absolute_tolerance,
+                    .absolute_per_area = layer_absolute_per_area,
                     .relative = driver_context.config.*.mass_balance_relative_tolerance,
                 },
                 driver_context.landscape_mass_balance_state.*.hourly_layer_closure.accepted_hour_count,
