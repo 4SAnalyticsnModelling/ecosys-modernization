@@ -1,10 +1,9 @@
 # Adversarial Workflow State
 
-Updated 2026-09-29 16:50 (local). Plan: Complete 30-Year Ottawa Run with Zero Science Gap.
+Updated 2026-09-30 03:00 (local). Plan: Complete 30-Year Ottawa Run with Zero Science Gap.
 
-## Current Round: 26
-- Proposer: CLAUDE. Challenger: DEEPSEEK (r16-r25 reviews ACCEPT or CONTEST-resolved; r26 analysing the
-  hour-2786 ponded-litter freeze discontinuity).
+## Current Round: 34
+- Proposer: CLAUDE. Challenger: DEEPSEEK (r31 dust-gate audit, r32 DEV-014, r33 DEV-015, r34 terminal toggles).
 
 ## Frontier (strict runs on C:\ecosys-build\runs, deck blob ecf5e61a, ReleaseSafe)
 - r00012 (470810a) + checkpoint replays with later fixes reached hour 3607 (d151).
@@ -13,6 +12,9 @@ Updated 2026-09-29 16:50 (local). Plan: Complete 30-Year Ottawa Run with Zero Sc
 - r00015 (84c09d5, SOLUTE entry reset) crawled post-liming; stopped. Entry reset and hydroxyl site owner reverted.
 - r00017 (df86724) fresh hour-0 started 19:02: passed 2786 (freeze clamp), 3295 (DEV-013), 3608 (ZEROS2 gate),
   3917, 4037; hour 4128 at 19:42 (new record; previous best 4036). One DEV-011 publication at d119 (quality 516).
+- r00017 checkpoint replays (3edb1f2..): 4142/5617 fixed; 6456 DEV-014 (explicit WATSUB endpoint for a bounded stalled
+  phase iterate); 6457 DEV-015 (terminal stiff solute image); 6458 DEV-014 at ceiling (terminal) + layer O2
+  storage-update gamma_{4n} provenance (layer 11 O2 residual 1.3e-14 g on 4.02 g).
 - d105 lime (360 g Ca m-2 CaCO3 broadcast) makes layer-0 pH 8-9.8 plausibly (DEEPSEEK r29): SOLUTE stiffness.
 - Throughput ~150 ms/h at steady state; spring thaw/tillage hours slower.
 - verified_frontier = 0 (no single-binding strict campaign has yet run to a stopping point with every fix).
@@ -26,7 +28,8 @@ zone-capped topsoil uptake · 6f50e81 ZEROS2 gate on macropore water-table disch
 ## Proposed deviations (audit/intentional-deviations.md)
 DEV-009 bounded water stagnation publication; DEV-010 legacy ZEROC floors; DEV-011 terminal SOLUTE best-bounded
 (evidence insufficient; fired post-tillage with quality 161 before 84c09d5); DEV-012 explicit boundary gas pressure;
-DEV-013 zone-capped topsoil microbial uptake.
+DEV-013 zone-capped topsoil microbial uptake; DEV-014 bounded phase stagnation/ceiling publication; DEV-015 terminal
+stiff solute image. Terminal ladder attempt enables DEV-011/014-ceiling/015 together.
 
 ## Open / known simplifications
 - Hour 2786 surface pond freeze discontinuity (energy-limit TFREEZ vs Dall'Amico melt point?) — r26.

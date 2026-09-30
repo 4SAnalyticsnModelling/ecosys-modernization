@@ -4351,6 +4351,40 @@ pub fn requireAccepted(report: hourly.Report) !void {
     if (!report.accepted()) return error.HourlyLayerConservationFailure;
 }
 
+/// Oxygen storage-update provenance for the per-layer gate. Each accepted
+/// substep updates a scope's gas+aqueous O2 storage through at most four
+/// sequential owners (gas transport, gas-aqueous exchange, microbial and root
+/// uptake), and no accepted hour runs more than `maximum_substep_count`
+/// substeps, so Higham's gamma_{4n} bounds the carried rounding over the
+/// standing storage plus direction-separated O2 activity (Ottawa hour 6458:
+/// layer 11 residual 1.3e-14 g on 4.02 g after 64 substeps). Arithmetic
+/// provenance only, like the water lane; computed at the gate so the
+/// checkpointed BoundaryActivity layout is unchanged.
+pub fn oxygenStorageUpdateRoundoffAllowance(
+    allocator: std.mem.Allocator,
+    maximum_substep_count: u16,
+    activity_by_scope: []const hourly.BoundaryActivity,
+    storage_before: []const inventory.Storage,
+    storage_after: []const inventory.Storage,
+) ![]f64 {
+    const scope_count = activity_by_scope.len;
+    if (storage_before.len != scope_count or storage_after.len != scope_count)
+        return error.LayerConservationActivityDimensionMismatch;
+    const scaled_epsilon = 4 * @as(f64, @floatFromInt(maximum_substep_count)) * std.math.floatEps(f64);
+    if (!std.math.isFinite(scaled_epsilon) or scaled_epsilon >= 1)
+        return error.InvalidWaterStorageUpdateArithmeticProvenance;
+    const allowance = try allocator.alloc(f64, scope_count);
+    errdefer allocator.free(allowance);
+    for (allowance, activity_by_scope, storage_before, storage_after) |*value, activity, before, after| {
+        const magnitude = @max(@abs(before.oxygen_g), @abs(after.oxygen_g)) +
+            activity.oxygen_input_g + activity.oxygen_output_g +
+            activity.oxygen_internal_production_g + activity.oxygen_internal_consumption_g;
+        value.* = scaled_epsilon / (1 - scaled_epsilon) * magnitude;
+        if (!std.math.isFinite(value.*)) return error.InvalidWaterStorageUpdateArithmeticProvenance;
+    }
+    return allowance;
+}
+
 test "accepted terminal recovery producer commits explain exact deep-layer closure and reject leakage" {
     const layout = try Layout.init(1, 1, 1);
     var layer_ledger = try Ledger.init(std.testing.allocator, layout);

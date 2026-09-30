@@ -6097,6 +6097,14 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
         layer_absolute_per_area.ions_mol_m2,
         1.0e-32,
     );
+    const layer_oxygen_roundoff_g = try ecosys.layer_local_conservation.oxygenStorageUpdateRoundoffAllowance(
+        driver_context.allocator.*,
+        ecosys.soil_water_heat_step.recovery_substep_counts[ecosys.soil_water_heat_step.recovery_substep_counts.len - 1],
+        driver_context.hourly_layer_boundary_ledger.*.activity,
+        driver_context.hourly_layer_storage_before.*,
+        driver_context.hourly_layer_storage_after.*,
+    );
+    defer driver_context.allocator.*.free(layer_oxygen_roundoff_g);
     var hourly_layer_conservation_report = try ecosys.layer_local_conservation.evaluate(
         driver_context.allocator.*,
         driver_context.hourly_layer_storage_before.*,
@@ -6106,6 +6114,7 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
         .{
             .absolute_per_area = layer_absolute_per_area,
             .relative = driver_context.config.*.mass_balance_relative_tolerance,
+            .oxygen_storage_update_roundoff_allowance_g_by_scope = layer_oxygen_roundoff_g,
         },
     );
     defer hourly_layer_conservation_report.deinit(driver_context.allocator.*);

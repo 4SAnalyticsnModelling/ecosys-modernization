@@ -2311,6 +2311,10 @@ fn transferBoundary(transfer: IntercellTransfer, direction: enum { input, output
 pub const Tolerances = struct {
     absolute_per_area: tolerance_config.AbsolutePerArea,
     relative: f64,
+    /// Optional per-scope oxygen storage-update arithmetic provenance
+    /// (`layer_local_conservation.oxygenStorageUpdateRoundoffAllowance`).
+    /// Empty leaves every closure unchanged.
+    oxygen_storage_update_roundoff_allowance_g_by_scope: []const f64 = &.{},
 
     pub fn validate(self: Tolerances) !void {
         try self.absolute_per_area.validate();
@@ -2439,7 +2443,11 @@ pub fn evaluateForScope(
                 .{
                     .absolute = absolutePerArea(quantity, tolerances.absolute_per_area) * area_m2,
                     .relative = tolerances.relative,
-                    .upstream_arithmetic_roundoff_allowance = storageUpdateRoundoffAllowance(quantity, boundary[cell]),
+                    .upstream_arithmetic_roundoff_allowance = storageUpdateRoundoffAllowance(quantity, boundary[cell]) +
+                        if (quantity == .oxygen and tolerances.oxygen_storage_update_roundoff_allowance_g_by_scope.len == cell_count)
+                            tolerances.oxygen_storage_update_roundoff_allowance_g_by_scope[cell]
+                        else
+                            0,
                 },
             );
             result.cells[cell].closure[index] = closure;

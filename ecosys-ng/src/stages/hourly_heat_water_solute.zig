@@ -12244,15 +12244,18 @@ fn recoverFixedExternalHourAdaptively(
                 attempt_error == error.SoluteReactionSolverDidNotConverge;
             const transport_failure = attempt_error == error.SoluteTransportSolverStagnated or
                 attempt_error == error.SoluteTransportSolverDidNotConverge;
-            if (!reaction_failure and !transport_failure) return attempt_error;
+            const phase_failure = attempt_error == error.SoilPhaseSolverDidNotConverge;
+            if (!reaction_failure and !transport_failure and !phase_failure) return attempt_error;
             if (!builtin.is_test) std.log.warn(
                 "SOLUTE recovery ladder exhausted ({s}); final attempt exact_substep_count={d} with best-bounded-iterate / stiff-image publication",
                 .{ @errorName(attempt_error), substep_count },
             );
-            ecosys.solute_reaction_solver.setTerminalBestBoundedAcceptance(reaction_failure);
+            ecosys.solute_reaction_solver.setTerminalBestBoundedAcceptance(true);
             defer ecosys.solute_reaction_solver.setTerminalBestBoundedAcceptance(false);
-            ecosys.solute_transport_solver.setTerminalStiffImageAcceptance(transport_failure);
+            ecosys.solute_transport_solver.setTerminalStiffImageAcceptance(true);
             defer ecosys.solute_transport_solver.setTerminalStiffImageAcceptance(false);
+            ecosys.soil_phase_solver.setTerminalBoundedCeilingAcceptance(true);
+            defer ecosys.soil_phase_solver.setTerminalBoundedCeilingAcceptance(false);
             if (try runBoundedRecoveryAttempt(attempt, substep_count)) |final_error| return final_error;
             freeze_flow_coupling_floor_active.* =
                 acceptedAttemptHadSignificantHeatInducedPhaseChange(attempt);

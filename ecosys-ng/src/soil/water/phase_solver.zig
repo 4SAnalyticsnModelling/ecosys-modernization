@@ -8,6 +8,15 @@ const ice_units = @import("../../core/ice_units.zig");
 const scoped_conservation = @import("../../validation/scoped_conservation.zig");
 const heat_solver = @import("../heat/solver.zig");
 
+/// DEV-014 at the iteration ceiling is enabled only for the hour-recovery
+/// ladder's terminal attempt (mirrors DEV-011/DEV-015), so every hour the
+/// ordinary ladder resolves keeps its finer-substep solution.
+var terminal_bounded_ceiling_acceptance = std.atomic.Value(bool).init(false);
+
+pub fn setTerminalBoundedCeilingAcceptance(enabled: bool) void {
+    terminal_bounded_ceiling_acceptance.store(enabled, .release);
+}
+
 pub const Properties = struct {
     /// Runtime DLYRM mask. Empty preserves standalone all-layer behavior.
     active_by_layer: []const bool = &.{},
@@ -1116,7 +1125,10 @@ noinline fn solveControlledImpl(
             if (accepted_newton) continue;
         }
         if (retrying_newton_after_anderson) continue;
-        if (iteration + 1 >= options.max_iterations) return error.SoilPhaseSolverDidNotConverge;
+        if (iteration + 1 >= options.max_iterations) {
+            if (!terminal_bounded_ceiling_acceptance.load(.acquire)) return error.SoilPhaseSolverDidNotConverge;
+            break;
+        }
         // Sole nonlinear fallback. A relaxed fixed-point point is evaluated as
         // the second Anderson sample but is never committed. This makes the
         // first recovery update genuinely accelerated; the next outer
@@ -1181,6 +1193,15 @@ noinline fn solveControlledImpl(
         rejected_forecast_recovery_step = null;
     }
     try residualAt(grid, properties, base, current, target, residual, scratch, trial_heat, trial_exchange, trial_displacement);
+    if (!bounded_phase_stagnation and terminal_bounded_ceiling_acceptance.load(.acquire) and
+        (try scaledNorm(base, current, residual, options)) > 1 and
+        boundedPhaseStagnationPublishable(grid, current, residual, cells))
+    {
+        // DEV-014 at the iteration ceiling, terminal recovery attempt only.
+        if (!builtin.is_test) std.log.warn("soil phase solver reached its ceiling within the layer-scale bound on the terminal attempt; publishing the explicit endpoint (DEV-014)", .{});
+        newton_retry_required = false;
+        bounded_phase_stagnation = true;
+    }
     if (bounded_phase_stagnation) {
         // DEV-014: publish WATSUB's explicit endpoint from the stalled iterate.
         // The water coordinates take the ledger image (entry inventory plus the
