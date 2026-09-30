@@ -960,13 +960,6 @@ fn solveCellWithWorkspaceAndTraceUsing(
     errdefer state.unpackCell(cell_index, original_state) catch
         @panic("validated SOLUTE rollback state could not be restored");
     try rebaseEntryCarboxylCapacity(state, cell_index, parameters);
-    // solute.f 824-853 "RESET PH AT START OF ITERATION": H+ and OH- are
-    // brought to DPH2O by an equal extent RHHX before any reaction, and
-    // TBH2O books that water. Tillage mixes ZHY and ZOH linearly
-    // (redist.f), so the first post-tillage entry is far off Kw (Ottawa
-    // 1998 d106: H*OH ~70x below Kw) and Newton did not converge from it.
-    // A failed solve rolls back to the unprojected entry above.
-    const entry_water_extent = try applyEntryWaterEquilibriumReset(state, cell_index, parameters);
 
     const equilibrium_parameters = equilibriumClosureParameters(parameters);
     const first = try equilibrium_solve(
@@ -986,9 +979,7 @@ fn solveCellWithWorkspaceAndTraceUsing(
             original_state,
             parameters,
         );
-        var result = first;
-        result.accepted_water_equilibrium_extent_mol_per_m3 += entry_water_extent;
-        return result;
+        return first;
     }
 
     try applyKineticGeochemistryStep(
@@ -1036,25 +1027,7 @@ fn solveCellWithWorkspaceAndTraceUsing(
         original_state,
         parameters,
     );
-    var result = combineResults(first, second);
-    result.accepted_water_equilibrium_extent_mol_per_m3 += entry_water_extent;
-    return result;
-}
-
-/// solute.f 834-853 entry RHHX reset on the live cell; returns the equal
-/// H+/OH- extent (mol m-3) that legacy books into TBH2O.
-fn applyEntryWaterEquilibriumReset(state: *chemistry.State, cell_index: usize, parameters: chemistry.ReactionParameters) !f64 {
-    const coefficients = try state.activityCoefficients(cell_index, parameters.fractions);
-    const water = try water_equilibrium.solve(.{
-        .hydrogen_concentration_mol_per_m3 = state.aqueous[cell_index].hydrogen,
-        .hydroxide_concentration_mol_per_m3 = state.aqueous[cell_index].hydroxide,
-        .monovalent_activity_coefficient = coefficients.monovalent_activity_coefficient,
-        .water_activity_product_mol2_per_m6 = parameters.water_activity_product_mol2_per_m6,
-        .negligible_concentration_mol_per_m3 = parameters.negligible_water_ion_concentration_mol_per_m3,
-    });
-    state.aqueous[cell_index].hydrogen = water.hydrogen_concentration_mol_per_m3;
-    state.aqueous[cell_index].hydroxide = water.hydroxide_concentration_mol_per_m3;
-    return water.equal_reaction_extent_mol_per_m3;
+    return combineResults(first, second);
 }
 
 fn elementSearchReference(name: []const u8, inventory: AcceptedStateInventory, fallback: f64) f64 {

@@ -407,9 +407,15 @@ pub fn restoreInterpolatedPhosphateSites(
     };
     try scratch.unpackCell(0, interpolated);
     inline for (.{ &scratch.non_band_phosphate[0], &scratch.band_phosphate[0] }, 0..) |zone, zone_index| {
-        var owner = &zone.deprotonated_site_mol_per_megagram;
-        if (zone.hydroxyl_site_mol_per_megagram > owner.*) owner = &zone.hydroxyl_site_mol_per_megagram;
-        if (zone.protonated_site_mol_per_megagram > owner.*) owner = &zone.protonated_site_mol_per_megagram;
+        // Prefer the neutral hydroxyl site (SXOH) so the roundoff restoration
+        // cannot move surface charge; fall back to the largest charged site
+        // only when no hydroxyl site remains (DEEPSEEK r00014 charge caveat).
+        var owner = &zone.hydroxyl_site_mol_per_megagram;
+        if (!(owner.* >= 1.0e-6 * conserved[zone_index])) {
+            owner = &zone.deprotonated_site_mol_per_megagram;
+            if (zone.hydroxyl_site_mol_per_megagram > owner.*) owner = &zone.hydroxyl_site_mol_per_megagram;
+            if (zone.protonated_site_mol_per_megagram > owner.*) owner = &zone.protonated_site_mol_per_megagram;
+        }
         inline for (0..4) |_| {
             const correction = conserved[zone_index] - phosphateSiteTotal(zone.*);
             if (correction == 0) break;
