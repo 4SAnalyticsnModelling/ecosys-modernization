@@ -2435,10 +2435,18 @@ pub fn evaluateForScope(
                     .absolute = absolutePerArea(quantity, tolerances.absolute_per_area) * area_m2,
                     .relative = tolerances.relative,
                     .upstream_arithmetic_roundoff_allowance = storageUpdateRoundoffAllowance(quantity, boundary[cell]) +
-                        if (quantity == .oxygen and tolerances.oxygen_storage_update_roundoff_allowance_g_by_scope.len == cell_count)
+                        (if (quantity == .oxygen and tolerances.oxygen_storage_update_roundoff_allowance_g_by_scope.len == cell_count)
                             tolerances.oxygen_storage_update_roundoff_allowance_g_by_scope[cell]
                         else
-                            0,
+                            0) +
+                        // Exchange capacity is a census of per-layer
+                        // capacity x mass products rewritten by every chemistry
+                        // commit; carry a 64-op binary64 floor on the standing
+                        // census (accumulated Ottawa CEC 519.79: 10 ulps).
+                        (if (quantity == .cation_exchange_capacity or quantity == .anion_exchange_capacity)
+                            128 * std.math.floatEps(f64) * @max(@abs(terms.storage_before), @abs(terms.storage_after))
+                        else
+                            0),
                 },
             );
             result.cells[cell].closure[index] = closure;
