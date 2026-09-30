@@ -64,8 +64,11 @@ pub fn calculate(inputs: Inputs, outputs: Outputs) !void {
         const bottom_index = cell * inputs.layer_capacity + bottom;
         const releasable = releasableWater(inputs.liquid_water_volume_m3[bottom_index], inputs.solid_snow_volume_m3[bottom_index], inputs.step_fraction);
         const bare_delivery = releasable * (1 - inputs.litter_cover_fraction[cell]);
-        const micro_capacity = @max(0, inputs.topsoil_micropore_air_capacity_m3[cell] * inputs.step_fraction - inputs.other_micropore_water_input_m3[cell]);
-        const macro_capacity = @max(0, inputs.topsoil_macropore_air_capacity_m3[cell] * inputs.step_fraction - inputs.other_macropore_water_input_m3[cell]);
+        // WATSUB 1627 FLWQGS=min(VOLP1*XNPSX, ...): summed over one call's
+        // NPH*NPS cycles the whole air volume is available per NFZ step.
+        const capacity_fraction = @min(1, legacy_calls_per_hour * inputs.step_fraction);
+        const micro_capacity = @max(0, inputs.topsoil_micropore_air_capacity_m3[cell] * capacity_fraction - inputs.other_micropore_water_input_m3[cell]);
+        const macro_capacity = @max(0, inputs.topsoil_macropore_air_capacity_m3[cell] * capacity_fraction - inputs.other_macropore_water_input_m3[cell]);
         const micro = @min(micro_capacity, bare_delivery * inputs.micropore_fraction[cell]);
         const macro_candidate = @min(macro_capacity, bare_delivery * inputs.macropore_fraction[cell]);
         // Preserve an exact nonnegative remainder despite the final ulp in
@@ -77,8 +80,20 @@ pub fn calculate(inputs: Inputs, outputs: Outputs) !void {
     }
 }
 
+/// Legacy NFH: SOIL.F 145-157 calls WATSUB once per NFZ step (NFH=4 in
+/// non-fire hours, WTHR.F 597), and each call's NPH*NPS snow cycles drain
+/// XNPSX=XNPH/NPS of the excess (WATSUB 1457), i.e. about 1-exp(-1) per NFZ
+/// step (≈98% per hour). The continuous-time equivalent for an ng substep of
+/// `step_fraction` hours is 1-exp(-NFH*step_fraction), independent of the
+/// substep count.
+const legacy_calls_per_hour: f64 = 4;
+
+fn legacyReleaseFraction(step_fraction: f64) f64 {
+    return 1 - @exp(-legacy_calls_per_hour * step_fraction);
+}
+
 fn releasableWater(liquid_m3: f64, solid_snow_m3: f64, step_fraction: f64) f64 {
-    return @max(0, liquid_m3 - 0.05 * solid_snow_m3) * step_fraction;
+    return @max(0, liquid_m3 - 0.05 * solid_snow_m3) * legacyReleaseFraction(step_fraction);
 }
 
 fn validate(inputs: Inputs, outputs: Outputs) !void {
@@ -152,12 +167,14 @@ test "WATSUB snow liquid retention and lowest-layer routing are conservative" {
         .step_fraction = 1,
     }, .{ .downward_water_flux_m3 = &downward, .litter_water_flux_m3 = &litter, .soil_micropore_water_flux_m3 = &micro, .soil_macropore_water_flux_m3 = &macro });
     // Source WATSUB limits by THETP2=VOLP02/VOLS1=0.3, not by the
-    // receiving air volume 0.15 m3. The donor's 0.2 m3 is limiting.
-    try std.testing.expectApproxEqAbs(@as(f64, 0.2), downward[1], 1e-12);
+    // receiving air volume 0.15 m3. The donor's 0.2 m3 excess is limiting,
+    // released at the legacy NFH rate over one hour.
+    const f = legacyReleaseFraction(1);
+    try std.testing.expectApproxEqAbs(0.2 * f, downward[1], 1e-12);
     try std.testing.expectApproxEqAbs(@as(f64, 0.1), micro[0], 1e-12);
-    try std.testing.expectApproxEqAbs(@as(f64, 0.09), macro[0], 1e-12);
-    try std.testing.expectApproxEqAbs(@as(f64, 0.11), litter[0], 1e-12);
-    try std.testing.expectApproxEqAbs(@as(f64, 0.3), micro[0] + macro[0] + litter[0], 1e-12);
+    try std.testing.expectApproxEqAbs(0.3 * f * 0.75 * 0.4, macro[0], 1e-12);
+    try std.testing.expectApproxEqAbs(0.3 * f - 0.1 - 0.3 * f * 0.75 * 0.4, litter[0], 1e-12);
+    try std.testing.expectApproxEqAbs(0.3 * f, micro[0] + macro[0] + litter[0], 1e-12);
 }
 
 test "snow routing rejects non-finite state before publishing outputs" {
