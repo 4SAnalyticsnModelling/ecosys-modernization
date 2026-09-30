@@ -32,6 +32,9 @@ DEV-013 zone-capped topsoil microbial uptake; DEV-014 bounded phase stagnation/c
 stiff solute image. Terminal ladder attempt enables DEV-011/014-ceiling/015 together.
 
 ## Open / known simplifications
+- COMPARABILITY: 1998 d200/d210 noon cell fluxes ng vs legacy: CH4 -1.15 vs -0.21 umol m-2 s-1, O2 exchange 0.12 vs
+  3.23 (NEE -1.30 vs -0.55). Maize sown d138 never emerges in BOTH (legacy pop file zero) - deck-consistent.
+- Hour 6852 (d286 JCUT termination of unemerged maize): ~4.6e-5 g root C leaves the plant without litter booking.
 - Hour 2786 surface pond freeze discontinuity (energy-limit TFREEZ vs Dall'Amico melt point?) — r26.
 - Frost heave dilutes intensive mol/Mg soil carriers (legacy pins DLYR via DDLYRY; ng keeps elastic geometry).
 - FLQRS ignores FSNX (partial snow cover). Rain solutes not rerouted with overflow water (legacy-consistent).

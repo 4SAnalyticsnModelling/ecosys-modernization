@@ -365,19 +365,13 @@ fn checkCoupling(owners: Owners, inputs: Inputs) !void {
         }
     }
 
-    // A cell with no active plant cannot withdraw gas from the atmosphere.
-    for (0..owners.root_gas_withdrawal.cell_count) |cell| {
-        var any_active = false;
-        for (0..owners.root_gas_withdrawal.species_count) |species| {
-            if (inputs.shape.active_by_plant[cell * owners.root_gas_withdrawal.species_count + species]) {
-                any_active = true;
-                break;
-            }
-        }
-        if (any_active) continue;
-        for (owners.root_gas_withdrawal.loss_g_element_per_h_by_gas_and_cell) |values|
-            if (values[cell] != 0) return error.UptakeTransactionWithdrawalWithoutActivePlant;
-    }
+    // No activity guard on root gas withdrawal: grosub.f 11265-11300 releases
+    // the gas contents of dead roots (RCO2Z..RH2GZ -= CO2A+CO2P, ...) in the
+    // IDTHR=1 hour, when the plant is already inactive, and EXTRACT 9985 sums
+    // RCO2Z over every NP0 plant without an IFLGC gate. Ottawa hour 6852:
+    // seedling root death released its gas with no active plant in the cell.
+    // Sign and spatial provenance stay enforced by
+    // `gas_withdrawal_state_update.refresh`.
 }
 
 const TestFixture = struct {
