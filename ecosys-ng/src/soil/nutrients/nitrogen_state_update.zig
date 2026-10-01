@@ -1664,6 +1664,9 @@ fn validatePublishedAmmonium(
         return error.InvalidSoilNitrogenWaterMolarity;
     for (0..2) |zone| {
         if (concentration_mol_per_m3[zone] <= water_mol_per_m3) continue;
+        // DEV-021: a zone below the structural threshold is absent in HOUR1/
+        // SOLUTE (VL*B <= ZERO); its relayering-sliver concentration is not read.
+        if (zone_fraction[zone] < 1.0e-12) continue;
         std.log.warn(
             "soil nitrogen state_update exceeds water molarity: layer={d} zone={s} ammonium_mol_per_m3={e} water_mol_per_m3={e} final_mass_g_n={e} microbial_exchange_g_n={e} oxidation_g_n={e} water_volume_m3={e} zone_fraction={e}",
             .{

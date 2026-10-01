@@ -19,10 +19,35 @@ const group_evaluate = @import("reaction_solver_evaluate.zig");
 const group_numerics2 = @import("reaction_solver_numerics2.zig");
 const group_types = @import("reaction_solver_types.zig");
 const diagnostic_control = @import("reaction_diagnostic_control.zig");
+const charge_classification = @import("charge_classification.zig");
+
+/// Zone fraction below which a band/non-band zone is structurally absent.
+/// HOUR1 3845 and SOLUTE evaluate a zone only while its water volume VL*B
+/// exceeds ZERO; a REDIST relayering sliver below that holds a concentration
+/// legacy never reads, so the molarity bound does not apply to it (DEV-021).
+const structurally_absent_zone_fraction = 1.0e-12;
+
+fn aqueousFieldZoneFraction(
+    comptime name: []const u8,
+    fractions: charge_classification.ZoneFractions,
+) f64 {
+    if (comptime std.mem.eql(u8, name, "ammonium_non_band") or
+        std.mem.eql(u8, name, "ammonia_non_band"))
+        return fractions.ammonium_non_band;
+    if (comptime std.mem.eql(u8, name, "ammonium_band") or
+        std.mem.eql(u8, name, "ammonia_band"))
+        return fractions.ammonium_band;
+    if (comptime std.mem.eql(u8, name, "nitrate_non_band"))
+        return fractions.nitrate_non_band;
+    if (comptime std.mem.eql(u8, name, "nitrate_band"))
+        return fractions.nitrate_band;
+    return 1;
+}
 
 pub fn validateAqueousMolarity(
     state: *const chemistry.State,
     cell_index: usize,
+    fractions: charge_classification.ZoneFractions,
 ) !void {
     const water_mol_per_m3 = state.water_mol_per_m3[cell_index];
     if (!std.math.isFinite(water_mol_per_m3) or water_mol_per_m3 <= 0)
@@ -34,7 +59,10 @@ pub fn validateAqueousMolarity(
         const concentration = @field(state.aqueous[cell_index], field.name);
         if (!std.math.isFinite(concentration) or concentration < 0)
             return error.NonFiniteSoluteReactionState;
-        if (concentration > water_mol_per_m3) {
+        if (concentration > water_mol_per_m3 and
+            aqueousFieldZoneFraction(field.name, fractions) >=
+                structurally_absent_zone_fraction)
+        {
             if (diagnostic_control.isEnabled()) std.log.warn(
                 "SOLUTE aqueous concentration exceeds water molarity: cell={d} packed_component={d} name=aqueous.{s} concentration_mol_per_m3={e} water_mol_per_m3={e}",
                 .{

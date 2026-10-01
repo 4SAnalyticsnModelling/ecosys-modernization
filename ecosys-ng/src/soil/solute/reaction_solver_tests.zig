@@ -4565,10 +4565,10 @@ test "day 12 snapshot rejects ammonium above water molarity" {
     state.aqueous[0].ammonium_non_band = 1353591.0109655228;
     try std.testing.expectError(
         error.SoluteConcentrationExceedsWaterMolarity,
-        group_numerics.validateAqueousMolarity(&state, 0),
+        group_numerics.validateAqueousMolarity(&state, 0, .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }),
     );
     state.aqueous[0].ammonium_non_band = 0.6232257391219167;
-    try group_numerics.validateAqueousMolarity(&state, 0);
+    try group_numerics.validateAqueousMolarity(&state, 0, .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 });
 }
 
 test "diagnostic suppression preserves solver error and rollback bytes" {

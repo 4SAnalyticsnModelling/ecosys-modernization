@@ -698,7 +698,7 @@ pub fn retainBestBoundedIterate(
         workspace.scratch.aqueous[0].hydroxide = projected_hydroxide;
     }
     try workspace.scratch.unpackCell(0, workspace.current);
-    try validateAqueousMolarity(&workspace.scratch, 0);
+    try validateAqueousMolarity(&workspace.scratch, 0, parameters.fractions);
     const before = try acceptedStateInventory(entry, cell_index, parameters);
     const after = try acceptedStateInventory(&workspace.scratch, 0, parameters);
     try requireConservedInventories(before, after);
@@ -899,7 +899,7 @@ pub fn rebaseEntryCarboxylCapacity(
     transformations.cation_exchange_water_ratios =
         parameters.cation_exchange_water_ratios;
     try state.state_updateCell(cell_index, transformations);
-    try validateAqueousMolarity(state, cell_index);
+    try validateAqueousMolarity(state, cell_index, parameters.fractions);
 }
 
 pub fn solveCellWithWorkspaceAndTrace(
@@ -954,7 +954,7 @@ fn solveCellWithWorkspaceAndTraceUsing(
     try validateOptions(options);
     if (cell_index >= state.cell_count)
         return error.ChemistryCellIndexOutOfBounds;
-    try validateAqueousMolarity(state, cell_index);
+    try validateAqueousMolarity(state, cell_index, parameters.fractions);
     try state.packCell(cell_index, workspace.rollback_state);
     const original_state = workspace.rollback_state;
     errdefer state.unpackCell(cell_index, original_state) catch
