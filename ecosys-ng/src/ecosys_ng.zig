@@ -7276,6 +7276,13 @@ noinline fn advancePlantLifecycleManagement(
                         .nitrogen_input_g = driver_context.plant_lifecycle_external_input.*[plant].nitrogen_g,
                         .phosphorus_input_g = driver_context.plant_lifecycle_external_input.*[plant].phosphorus_g,
                     });
+                    try ecosys.layer_local_conservation.accumulateCanopyPlantingInput(
+                        &driver_context.hourly_layer_boundary_ledger.*,
+                        cell,
+                        driver_context.plant_lifecycle_external_input.*[plant].carbon_g,
+                        driver_context.plant_lifecycle_external_input.*[plant].nitrogen_g,
+                        driver_context.plant_lifecycle_external_input.*[plant].phosphorus_g,
+                    );
                 }
                 if (driver_context.harvest_context.* != null) for (0..driver_context.runtime_plant_count.*) |plant| {
                     const exported = try ecosys.plant_harvest_runtime.publishPlantProducts(&driver_context.harvest_context.*.?, plant);

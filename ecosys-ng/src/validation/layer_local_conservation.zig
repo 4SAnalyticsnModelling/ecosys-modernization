@@ -1638,6 +1638,26 @@ pub fn accumulateCanopyHarvest(
     });
 }
 
+/// A replanting's seed storage is an external planting input (the cell ledger
+/// books it in the lifecycle boundary); the census owns it in the canopy scope.
+pub fn accumulateCanopyPlantingInput(
+    ledger: *Ledger,
+    cell: usize,
+    carbon_g_c: f64,
+    nitrogen_g_n: f64,
+    phosphorus_g_p: f64,
+) !void {
+    if (cell >= ledger.layout.cell_count) return error.LayerConservationScopeOutOfBounds;
+    inline for (.{ carbon_g_c, nitrogen_g_n, phosphorus_g_p }) |value|
+        if (!std.math.isFinite(value) or value < 0)
+            return error.InvalidLayerConservationActivity;
+    try ledger.accumulate(.{ .kind = .canopy, .cell = cell }, .{
+        .carbon_input_g = carbon_g_c,
+        .nitrogen_input_g = nitrogen_g_n,
+        .phosphorus_input_g = phosphorus_g_p,
+    });
+}
+
 /// Dynamic plant-salt harvest is likewise shoot-only. Preserve the producer's
 /// Al, Fe, Ca, Mg, Na, K, SO4, Cl order and publish it at the canopy scope.
 pub fn accumulateCanopyHarvestSalt(

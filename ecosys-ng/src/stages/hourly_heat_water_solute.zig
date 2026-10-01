@@ -7887,8 +7887,8 @@ fn CoupledSubstepTransaction(
         noinline fn advanceSoilGasTransport(self: *Self, time_step_hours: f64) !void {
             const context = self.context;
             const temporary_profile_active = !builtin.is_test and
-                context.executed_weather_hours.* >= 48 and
-                context.executed_weather_hours.* < 56;
+                context.executed_weather_hours.* >= 2000 and
+                context.executed_weather_hours.* < 2008;
             const gas_result = try context.soil_gas_transport.advance(.{
                 .grid = context.grid,
                 .hydrology = context.transport_hydrology,
@@ -12972,8 +12972,8 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
             exact_substep_count,
         });
     const temporary_profile_active = !builtin.is_test and
-        context.executed_weather_hours.* >= 48 and
-        context.executed_weather_hours.* < 56;
+        context.executed_weather_hours.* >= 2000 and
+        context.executed_weather_hours.* < 2008;
     const temporary_profile_start = std.Io.Clock.now(.boot, context.io);
     var diagnostic_previous_heat_megajoules = diagnostic_previous_heat_megajoules_ptr.*;
     defer {
