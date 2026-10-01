@@ -75,9 +75,10 @@ pub fn acceptedCellActivity(
     try validatePrecipitation(precipitation);
     inline for (std.meta.fields(SurfaceExchangeInputs)) |field| {
         const value = @field(exchange, field.name);
-        if (!std.math.isFinite(value)) return error.InvalidAtmosphericLocalActivity;
-        if (!std.mem.endsWith(u8, field.name, "heat_megajoules") and value < 0)
+        if (!std.math.isFinite(value) or (!std.mem.endsWith(u8, field.name, "heat_megajoules") and value < 0)) {
+            if (!@import("builtin").is_test) std.log.err("invalid atmospheric local activity: field={s} value={e}", .{ field.name, value });
             return error.InvalidAtmosphericLocalActivity;
+        }
     }
 
     const retained = @max(0, precipitation.canopy_retention_m3);
@@ -187,6 +188,10 @@ pub fn acceptedCellActivity(
 }
 
 fn validatePrecipitation(inputs: PrecipitationInputs) !void {
+    if (!@import("builtin").is_test) inline for (std.meta.fields(PrecipitationInputs)) |field| {
+        const value = @field(inputs, field.name);
+        if (!std.math.isFinite(value) or value < 0) std.log.err("invalid atmospheric precipitation input: field={s} value={e}", .{ field.name, value });
+    };
     inline for (std.meta.fields(PrecipitationInputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name))) return error.InvalidAtmosphericLocalActivity;
     inline for (.{

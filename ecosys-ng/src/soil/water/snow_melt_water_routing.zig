@@ -64,11 +64,11 @@ pub fn calculate(inputs: Inputs, outputs: Outputs) !void {
         const bottom_index = cell * inputs.layer_capacity + bottom;
         const releasable = releasableWater(inputs.liquid_water_volume_m3[bottom_index], inputs.solid_snow_volume_m3[bottom_index], inputs.step_fraction);
         const bare_delivery = releasable * (1 - inputs.litter_cover_fraction[cell]);
-        // WATSUB 1627 FLWQGS=min(VOLP1*XNPSX, ...): summed over one call's
-        // NPH*NPS cycles the whole air volume is available per NFZ step.
-        const capacity_fraction = @min(1, legacy_calls_per_hour * inputs.step_fraction);
-        const micro_capacity = @max(0, inputs.topsoil_micropore_air_capacity_m3[cell] * capacity_fraction - inputs.other_micropore_water_input_m3[cell]);
-        const macro_capacity = @max(0, inputs.topsoil_macropore_air_capacity_m3[cell] * capacity_fraction - inputs.other_macropore_water_input_m3[cell]);
+        // The topsoil air allocation stays per substep: the coupled ingress
+        // overflow (FLQRS) is attributed to precipitation, so snowmelt must not
+        // fill the air volume ahead of it; excess melt routes to the litter.
+        const micro_capacity = @max(0, inputs.topsoil_micropore_air_capacity_m3[cell] * inputs.step_fraction - inputs.other_micropore_water_input_m3[cell]);
+        const macro_capacity = @max(0, inputs.topsoil_macropore_air_capacity_m3[cell] * inputs.step_fraction - inputs.other_macropore_water_input_m3[cell]);
         const micro = @min(micro_capacity, bare_delivery * inputs.micropore_fraction[cell]);
         const macro_candidate = @min(macro_capacity, bare_delivery * inputs.macropore_fraction[cell]);
         // Preserve an exact nonnegative remainder despite the final ulp in
