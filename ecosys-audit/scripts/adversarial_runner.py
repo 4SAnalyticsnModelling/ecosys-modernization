@@ -4,10 +4,11 @@
 # ///
 """Worker/judge adversarial workflow orchestrator for ecosys-modernization.
 
-- DEEPSEEK (local Qwen3.8-35B-A3B-Distill on llama.cpp via the DeepSeek Harness): main worker.
-- CLAUDE (Claude Opus 5.5): reviewer, critic, supervisor, idea generator and judge. Its ruling is final.
+- DEEPSEEK (local Qwen3.8-27B on llama.cpp via the DeepSeek Harness): does all the work.
+- CLAUDE (Claude Opus 5.5): deep scientific diagnosis, cross-language reasoning, architecture decisions,
+  final scientific review and final judgement; guides Qwen when needed. Its ruling is final.
 
-Each round: CLAUDE writes the directive, DEEPSEEK does the work and reports, CLAUDE rules
+Each round: DEEPSEEK plans, works, self-checks and reports (escalating to CLAUDE only when needed), CLAUDE rules
 APPROVED / REVISE / REJECTED in the round file. Only APPROVED rounds are committed and pushed.
 
 Objective: Complete 30-year Ottawa run with zero ecosys-ng science gap against legacy Fortran
@@ -99,7 +100,7 @@ def update_state(round_num: int, worker: str, judge: str, status: str) -> None:
     block = (
         f"{STATE_BEGIN}\n"
         f"## Runner: round {round_num:05d} ({time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime())})\n"
-        f"- Worker: {worker} (local Qwen3.8-35B-A3B-Distill). Judge: {judge} (Claude Opus 5.5, final say).\n"
+        f"- Worker: {worker} (local Qwen3.8-27B). Judge: {judge} (Claude Opus 5.5, final say).\n"
         f"- Round status: {status}\n"
         f"{STATE_END}\n"
     )
@@ -152,10 +153,10 @@ def open_round(round_num: int, worker: str, judge: str) -> Path:
         template.replace("{{ROUND_ID}}", f"{round_num:05d}")
         .replace("{{WORKER}}", worker)
         .replace("{{JUDGE}}", judge)
-        .replace("{{STATUS}}", "DIRECTIVE"),
+        .replace("{{STATUS}}", "PLANNING"),
         encoding="utf-8",
     )
-    print(f"[*] Opened round {round_num:05d}: {judge} writes the directive, {worker} works, {judge} rules.")
+    print(f"[*] Opened round {round_num:05d}: {worker} plans and works, {judge} reviews and rules.")
     return path
 
 
@@ -168,7 +169,7 @@ def step(roster: dict, dry_run: bool) -> bool:
             print("[dry-run] would open round 00001.")
             return False
         open_round(1, worker, judge)
-        update_state(1, worker, judge, "DIRECTIVE")
+        update_state(1, worker, judge, "PLANNING")
         return False
 
     latest = max(files)
@@ -200,7 +201,7 @@ def step(roster: dict, dry_run: bool) -> bool:
         print(f"[dry-run] would open round {nxt:05d}.")
     else:
         open_round(nxt, worker, judge)
-        update_state(nxt, worker, judge, f"DIRECTIVE (previous round {latest:05d}: {ruling or 'processed'})")
+        update_state(nxt, worker, judge, f"PLANNING (previous round {latest:05d}: {ruling or 'processed'})")
     return True
 
 

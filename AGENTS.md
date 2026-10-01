@@ -1,13 +1,20 @@
 ## Workflow: Worker/Judge Adversarial Loop (DEEPSEEK works, CLAUDE judges)
 
 This project operates on an adversarial workflow between two models hosted on the **same Herdr tab in multi-pane** (`ADVERSARIAL` tab: `CLAUDE` on left, `DEEPSEEK` on right):
-1. **DEEPSEEK** (`local/qwen3.8-35b-a3b-distill`, local llama.cpp via the DeepSeek Harness): **main worker** — investigation, implementation, tests and runs.
-2. **CLAUDE** (`claude-opus-5-5`): **reviewer, critic, supervisor, idea generator, and judge**. **CLAUDE's decision is final.**
+1. **DEEPSEEK** (`local/qwen3.8-27b`, local llama.cpp via the DeepSeek Harness): **does all the work**: plans rounds, investigates, implements, builds, tests, runs, self-checks and keeps the ledgers.
+2. **CLAUDE** (`claude-opus-5-5`): handles **only** deep scientific diagnosis, cross-language (Fortran → Zig) reasoning, architecture decisions and the final scientific review. It makes the **final judgement call**, and **directs and guides Qwen when needed**. **CLAUDE's decision is final.**
 
 ### Continuous Worker/Judge Loop
-- Each round: CLAUDE writes the directive → DEEPSEEK does the work and reports evidence → CLAUDE reviews and rules `APPROVED | REVISE | REJECTED` (final; DEEPSEEK may lodge one evidence-backed objection before the ruling, never after).
+- Each round: DEEPSEEK plans → DEEPSEEK works, self-checks and reports evidence → (only if needed) DEEPSEEK escalates a deep-diagnosis, cross-language or architecture question and CLAUDE answers → CLAUDE gives the final scientific review and rules `APPROVED | REVISE | REJECTED` with the next target. The ruling is final; DEEPSEEK may lodge one evidence-backed objection to it.
 - Only APPROVED rounds are committed and pushed. DEEPSEEK reverts REJECTED changes before new work and fixes REVISE points in the next round.
-- DEEPSEEK never rules on its own work and never registers intentional deviations; CLAUDE does.
+- **Convergence & balance failures** (the ReleaseFast run currently stalls on mass/energy balance or Newton/Anderson non-convergence): follow `.agent/playbooks/convergence-and-balance.md`. **CLAUDE leads the strategy** and teaches it to Qwen.
+  - Legacy steps explicitly in fixed sub-cycles and never iterates, so the legacy trajectory is the oracle.
+  - DEEPSEEK first rules out **science, translation, binding and duplication bugs** in the routines that touch the failing hour (PASS/FAIL each, with `file:line`). Any FAIL is fixed before trying numerical strategies.
+  - DEEPSEEK then builds a diagnostic packet, replays the hour in ReleaseSafe/Debug, finite-difference-checks the Jacobian, and classifies the failure.
+  - DEEPSEEK applies the simple rungs (residual-based convergence, conservative form, line search/update caps, Δt cut-and-retry, scaling).
+  - CLAUDE briefs the hard rungs: phase-change splitting, Picard/L-scheme→Newton with safeguarded Anderson, operator splitting, and the legacy explicit sub-cycling fallback.
+  - Never loosen tolerances, clamp after the solve, accept an unclosed ledger, or add new "publish best-bounded" deviations.
+- DEEPSEEK never rules on its own work. CLAUDE alone decides intentional deviations (DEV-NNN), legacy-inconsistency claims and architecture; DEEPSEEK records those decisions.
 - **Loop guard**: Qwen3.8 is small and can get stuck in loops. Signs include:
   - the same command, edit or error 3+ times;
   - re-reading the same files without new findings;

@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "note": "Single source of truth for the worker/judge adversarial workflow. DEEPSEEK (local Qwen3.8-35B-A3B-Distill on llama.cpp through the DeepSeek Harness) is the main worker. CLAUDE (Claude Opus 5.5) is the reviewer, critic, supervisor, idea generator and judge; CLAUDE's ruling is final. The loop runs until the complete Ottawa qualification has zero science gap and output parity against legacy Fortran.",
+  "note": "Single source of truth for the worker/judge workflow. DEEPSEEK (local Qwen3.8-27B on llama.cpp through the DeepSeek Harness) does all the work. CLAUDE (Claude Opus 5.5) handles only deep scientific diagnosis, cross-language reasoning, architecture decisions and the final scientific review. It also makes the final judgement call, and directs and guides Qwen when needed. CLAUDE's ruling is final.",
   "herdr_session": "ecosys-adversarial",
   "layout": {
     "tab_label": "ADVERSARIAL",
@@ -76,38 +76,41 @@
       },
       "may_write": [
         ".agent/adversarial/",
-        ".agent/tasks/",
-        ".agent/state.md",
-        "audit/intentional-deviations.md",
-        "audit/output-provenance.csv",
-        "audit/science-invariants.md",
-        "audit/unresolved-gaps.md",
-        "audit/issues/",
+        ".agent/pokes/",
         "audit/reviews/",
-        ".agent/pokes/"
+        ".agent/playbooks/"
       ],
       "may_edit_production_source": false,
-      "function": "Reviewer, critic, supervisor, idea generator and judge (final say)"
+      "function": "Deep scientific diagnosis, cross-language reasoning, architecture decisions, final scientific review and final judgement; directs and guides Qwen when needed",
+      "scope": [
+        "deep scientific diagnosis",
+        "cross-language reasoning",
+        "architecture decisions",
+        "final scientific review",
+        "final judgement call",
+        "direct and guide Qwen when needed",
+        "lead convergence/balance strategy and teach it to Qwen (Strategy Briefs, playbook Lessons)"
+      ]
     },
     "DEEPSEEK": {
       "agent_name": "deepseek",
       "tab_label": "ADVERSARIAL",
       "pane_label": "DEEPSEEK",
       "kind": "deepseek",
-      "function": "Main worker: investigation, implementation, tests and runs",
-      "model": "local/qwen3.8-35b-a3b-distill",
+      "function": "Does all the work: plans rounds, investigates, implements, builds, tests, runs, self-checks and keeps the ledgers",
+      "model": "local/qwen3.8-27b",
       "provider": {
         "id": "local",
         "displayName": "Local (llama.cpp)",
         "baseURL": "http://127.0.0.1:8090/v1",
         "api": "openai-completions"
       },
-      "variant_note": "Qwen3.8-35B-A3B-Distill served locally by llama.cpp through the DeepSeek Harness 'local' provider. DEEPSEEK is the main worker; its work is final only after CLAUDE approves it.",
+      "variant_note": "Qwen3.8-27B served locally by llama.cpp through the DeepSeek Harness 'local' provider. DEEPSEEK does all the work; its work is final only after CLAUDE approves it.",
       "launch_args": [
         "--agent",
         "deepseek",
         "-m",
-        "local/qwen3.8-35b-a3b-distill"
+        "local/qwen3.8-27b"
       ],
       "reset_command": "/clear",
       "prompt_file": ".agent/roles/deepseek.md",
@@ -128,18 +131,24 @@
         "max_round_prompt_tokens": 6000,
         "max_output_tokens_per_turn": 8192,
         "reset_at_context_percent": 75,
-        "note": "Sized for local Qwen3.8-35B-A3B-Distill (131k context). The ~35k left over covers generation and thinking. At 75% context (~98k), or after a poke-2 escalation, CLAUDE resets DEEPSEEK with /clear and restates the directive."
+        "note": "Sized for local Qwen3.8-27B (131k context). The ~35k left over covers generation and thinking. At 75% context (~98k), or after a poke-2 escalation, CLAUDE resets DEEPSEEK with /clear and restates the directive."
       },
       "may_write": [
         "ecosys-ng/src/",
         "ecosys-ng/build.zig",
-        ".agent/results/",
+        "ecosys-audit/scripts/",
+        "ecosys-audit/tests/",
         ".agent/adversarial/",
+        ".agent/results/",
+        ".agent/tasks/",
+        ".agent/state.md",
         "audit/analysis/",
         "audit/runs/",
         "audit/issues/",
-        "ecosys-audit/scripts/",
-        "ecosys-audit/tests/"
+        "audit/unresolved-gaps.md",
+        "audit/output-provenance.csv",
+        "audit/science-invariants.md",
+        "audit/intentional-deviations.md"
       ],
       "may_edit_production_source": true
     }
@@ -171,11 +180,12 @@
     ],
     "ruling_marker": "**Final Ruling (CLAUDE)**:",
     "rules": [
-      "DEEPSEEK does the investigation, implementation, tests and runs; it never rules on its own work.",
-      "CLAUDE reviews every DEEPSEEK round, issues directives and ideas, and rules APPROVED, REVISE or REJECTED. That ruling is final and is not appealed or re-litigated.",
-      "DEEPSEEK may record one written objection in the round, with evidence. CLAUDE reads it before ruling, but the ruling stands once given.",
+      "DEEPSEEK does all the work: it plans each round, investigates, implements, builds, tests, runs, self-checks and keeps the ledgers. It never rules on its own work.",
+      "CLAUDE is engaged only for deep scientific diagnosis, cross-language (Fortran -> Zig) reasoning, architecture decisions, the final scientific review of each round, and guidance when Qwen is off track or looping.",
+      "CLAUDE ends every round with APPROVED, REVISE or REJECTED. That ruling is final and is not appealed or re-litigated.",
+      "DEEPSEEK may record one written objection to a ruling, with new evidence. CLAUDE reads it, but the ruling stands once given.",
       "Only APPROVED rounds are committed and pushed. After REJECTED, DEEPSEEK reverts the rejected change before doing new work; after REVISE, it addresses every listed point in the next round.",
-      "Intentional deviations (DEV-NNN), declarations that legacy is inconsistent, and science acceptance are decided only by CLAUDE.",
+      "Intentional deviations (DEV-NNN), declarations that legacy is inconsistent, architecture changes and science acceptance are decided only by CLAUDE. DEEPSEEK records the decision.",
       "CLAUDE watches DEEPSEEK for loops and pokes it with new direction (see loop_guard). A poke carries CLAUDE's authority; DEEPSEEK drops its current approach and follows it."
     ]
   },
@@ -204,6 +214,65 @@
       "poke 2 without progress: /clear DEEPSEEK and send a narrowed directive",
       "poke 3: rule REVISE or REJECTED and split the target",
       "context >= 75% of 131k (shown as 'ctx NN%' in the DEEPSEEK pane footer): /clear DEEPSEEK and restate the directive"
+    ]
+  },
+  "escalation": {
+    "from": "DEEPSEEK",
+    "to": "CLAUDE",
+    "channel": "round file section 3, status ESCALATED",
+    "triggers": [
+      "deep scientific diagnosis: a divergence or conservation failure still unexplained after 2 serious hypotheses, or physics that cannot be pinned to legacy lines",
+      "cross-language reasoning: Fortran semantics whose Zig reproduction is uncertain (COMMON/EQUIVALENCE, implicit -r8 -i4 typing, 0-based or column-major indexing, SAVE/DATA, arithmetic IF/GOTO, intrinsic precision)",
+      "architecture decisions: solver design, module boundaries, state ownership, any DEV-NNN or legacy-inconsistency claim",
+      "stuck: the same command, edit or error repeated 3+ times",
+      "solver convergence or balance failure after 2 playbook rungs, or one needing S4/S5/S8/S9/DEV (escalate with the diagnostic packet; CLAUDE answers with a Strategy Brief)"
+    ],
+    "not_escalated": [
+      "builds",
+      "readable test failures",
+      "refactors",
+      "bookkeeping",
+      "tooling"
+    ]
+  },
+  "convergence_playbook": {
+    "path": ".agent/playbooks/convergence-and-balance.md",
+    "owner": "CLAUDE",
+    "applies_to": "mass/energy balance and Newton/Anderson convergence failures in the ReleaseFast Ottawa run",
+    "deepseek_rungs": [
+      "S1 residual-based convergence",
+      "S2 conservative chord-slope/enthalpy storage",
+      "S3 line search + update caps",
+      "S6 step reject/cut/retry",
+      "S7 per-layer scaling"
+    ],
+    "claude_rungs": [
+      "S4 phase-change step splitting / C-max",
+      "S5 Picard/L-scheme->Newton, safeguarded Anderson",
+      "S8 operator splitting in legacy order",
+      "S9 legacy explicit sub-cycling fallback (wthr.f:589-611)",
+      "any DEV"
+    ],
+    "triage": [
+      "rule out science, translation, binding and duplication bugs first (PASS/FAIL each with file:line; fix any FAIL before numerical work)",
+      "diagnostic packet",
+      "ReleaseSafe + Debug replay of the failing hour",
+      "finite-difference Jacobian check",
+      "classify A bug / B threshold / C degenerate-stiff / D oscillation / E balance leak"
+    ],
+    "forbidden": [
+      "loosening tolerances or raising iteration/step ceilings to pass",
+      "post-solve clamps",
+      "accepting an unclosed ledger",
+      "new publish-best-bounded deviations",
+      "silent retries"
+    ],
+    "metrics": [
+      "iterations per hour",
+      "substep cuts per hour",
+      "S9 fallback hours",
+      "max mass/energy balance residual",
+      "ReleaseFast wall time per simulated day"
     ]
   }
 }

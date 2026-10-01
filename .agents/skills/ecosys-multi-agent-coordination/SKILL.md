@@ -1,6 +1,6 @@
 ---
 name: ecosys-multi-agent-coordination
-description: "Coordinate the worker/judge adversarial workflow (DEEPSEEK: local Qwen3.8-35B-A3B-Distill is the main worker; CLAUDE: Claude Opus 5.5 is reviewer, critic, supervisor and judge with the final say) without conflicting edits or duplicate full runs. Use for round directives, reviews, rulings, and cross-harness verification."
+description: "Coordinate the worker/judge adversarial workflow (DEEPSEEK: local Qwen3.8-27B does all the work; CLAUDE: Claude Opus 5.5 handles deep diagnosis, cross-language reasoning, architecture and the final scientific review, with the final say) without conflicting edits or duplicate full runs. Use for round planning, escalations, reviews, rulings, and cross-harness verification."
 ---
 
 
@@ -26,13 +26,14 @@ The coordinator integrates one coherent change set at a time, checks for shared 
 
 ## Communication and resource control
 The installed team is two models on one Herdr tab (`ADVERSARIAL`, `.agent/README.md`): DEEPSEEK
-(local Qwen3.8-35B-A3B-Distill via llama.cpp) is the main worker; CLAUDE (Claude Opus 5.5) is the
-reviewer, critic, supervisor, idea generator and judge, and its ruling is final. Roles, models,
+(local Qwen3.8-27B via llama.cpp) does all the work; CLAUDE (Claude Opus 5.5) handles only deep
+scientific diagnosis, cross-language reasoning, architecture decisions and the final scientific review,
+guides Qwen when needed, and its ruling is final. Roles, models,
 authority rules and write lanes are defined once in `.agent/roster.json`. Each round file
-(`.agent/templates/adversarial-round.md`) carries CLAUDE's directive, DEEPSEEK's work and evidence,
-at most one DEEPSEEK objection, and CLAUDE's `**Final Ruling (CLAUDE)**: APPROVED | REVISE | REJECTED`.
+(`.agent/templates/adversarial-round.md`) carries DEEPSEEK's plan, work, evidence and self-check, any escalation
+with CLAUDE's guidance (or one DEEPSEEK objection), and CLAUDE's `**Final Ruling (CLAUDE)**: APPROVED | REVISE | REJECTED`.
 `adversarial_runner.py` commits and pushes only APPROVED rounds. One bounded question per round;
-further work needs a new falsifiable directive, not a renamed repeat. The worker never approves its
+further work needs a new falsifiable target, not a renamed repeat. The worker never approves its
 own work. Report FAIL/STAGNATED/BLOCKED honestly.
 `.agent/state.md` is the single current-state file; each worker writes only its task's result
 file; task-scoped DONE never approves a release. This project's durable artifact-first protocol

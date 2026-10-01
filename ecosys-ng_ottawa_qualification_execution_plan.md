@@ -21,11 +21,12 @@ marked "spec §N"). Where this plan is silent, the spec governs. Date: 2026-09-2
 > with legacy Fortran outputs. There are no stopping hooks or artificial budget halts: the models
 > continuously hypothesize, implement, challenge, and verify until the milestone is reached.
 >
-> **Addendum 2026-10-01 (Worker/Judge roles):** DEEPSEEK now runs the local model Qwen3.8-35B-A3B-Distill
-> (llama.cpp, `local/qwen3.8-35b-a3b-distill`) and is the **main worker**. CLAUDE (Claude Opus 5.5) is the
-> **reviewer, critic, supervisor, idea generator and judge**; **CLAUDE's decision is final**. Rounds no longer
-> alternate proposer/challenger: CLAUDE directs, DEEPSEEK works, CLAUDE rules APPROVED / REVISE / REJECTED,
-> and only APPROVED rounds are committed and pushed (see §2).
+> **Addendum 2026-10-01 (Worker/Judge roles):** DEEPSEEK now runs the local model Qwen3.8-27B
+> (llama.cpp, `local/qwen3.8-27b`) and **does all the work**. CLAUDE (Claude Opus 5.5) handles only **deep
+> scientific diagnosis, cross-language reasoning, architecture decisions and the final scientific review**, makes
+> the **final judgement call**, and directs and guides Qwen when needed; **CLAUDE's decision is final**. Rounds no
+> longer alternate proposer/challenger: DEEPSEEK plans and works, escalates only when needed, CLAUDE rules
+> APPROVED / REVISE / REJECTED, and only APPROVED rounds are committed and pushed (see §2).
 
 ---
 
@@ -65,7 +66,7 @@ session. The plan changes three things:
 |---|---|
 | D1 | Science bar = **explained comparability**: every Ottawa-used legacy pathway accounted for with semantic evidence; outputs within per-variable rules fixed *before* comparison; every material deviation explained. Not bit-identity. |
 | D2 | Intentional numerics (Newton/Anderson, Dall'Amico freeze-thaw, Mualem–van Genuchten) are **kept and attributed** by A/B runs. |
-| D3 | Execution uses the **continuous worker/judge workflow**: DEEPSEEK (local Qwen3.8-35B-A3B-Distill) works, CLAUDE (Claude Opus 5.5) reviews and rules; CLAUDE's decision is final (2026-10-01). |
+| D3 | Execution uses the **continuous worker/judge workflow**: DEEPSEEK (local Qwen3.8-27B) works, CLAUDE (Claude Opus 5.5) reviews and rules; CLAUDE's decision is final (2026-10-01). |
 | D4 | Performance = **full 30-yr Ottawa wall time**: ecosys-ng ReleaseFast < legacy gfortran `-O2`, same machine, median of 3 each side, outputs still passing parity. |
 | D5 | Scope = **Ottawa milestone first**; remaining v1 gate-matrix items move to P8. |
 | D6 | Deck edits (`9253d3b` runtime ceiling 100→200; `5add7de` starte.f:189) and the Zig solute iteration ceiling 60→200 (issue-015) are **kept only if justified from legacy**; otherwise reverted and root-caused. ~~The user signs the final list.~~ SAGE signs the final list (D9). |
@@ -79,11 +80,25 @@ session. The plan changes three things:
 
 | Role | Harness / model | Function | Scope & Authority |
 |---|---|---|---|
-| CLAUDE | Claude Code, Claude Opus 5.5 | Reviewer, critic, supervisor, idea generator, judge | Writes directives; reviews every DEEPSEEK round; final APPROVED / REVISE / REJECTED ruling; sole authority on DEV-NNN and science acceptance; does not edit production source |
-| DEEPSEEK | DeepSeek Harness, Qwen3.8-35B-A3B-Distill (local llama.cpp) | Main worker: investigation, implementation, tests, runs | Production source, tests and runs; one evidence-backed objection per ruling; never rules on its own work |
+| CLAUDE | Claude Code, Claude Opus 5.5 | Deep scientific diagnosis, cross-language reasoning, architecture decisions, final scientific review, final judgement; guides Qwen when needed | Answers DEEPSEEK escalations; final scientific review and APPROVED / REVISE / REJECTED ruling of every round; sole authority on DEV-NNN, architecture and science acceptance; no routine planning, implementation, testing or bookkeeping; does not edit production source |
+| DEEPSEEK | DeepSeek Harness, Qwen3.8-27B (local llama.cpp) | Does all the work: plans rounds, investigates, implements, builds, tests, runs, self-checks, keeps the ledgers | Production source, tests, runs, `state.md` and `audit/` ledgers (records CLAUDE-decided DEVs); escalates only deep diagnosis, cross-language or architecture questions; one evidence-backed objection per ruling; never rules on its own work |
 
 - **Continuous execution.** There are no artificial stopping hooks, early halts, or human review stops.
-- **Rounds.** CLAUDE directive → DEEPSEEK work and evidence → CLAUDE final ruling, in `.agent/adversarial/` using `.agent/templates/adversarial-round.md`. Only APPROVED rounds are committed and pushed; REJECTED changes are reverted by DEEPSEEK.
+- **Rounds.** DEEPSEEK plan → DEEPSEEK work, evidence and self-check → (if needed) escalation to CLAUDE → CLAUDE final scientific review and ruling, in `.agent/adversarial/` using `.agent/templates/adversarial-round.md`. Only APPROVED rounds are committed and pushed; REJECTED changes are reverted by DEEPSEEK.
+- **Convergence & balance failures (2026-10-01).** The ReleaseFast Ottawa run cannot progress further because of
+  mass/energy balance or Newton/Anderson convergence failures. These are handled by
+  `.agent/playbooks/convergence-and-balance.md`, with **CLAUDE leading the strategy**:
+  - **bugs first** (DEEPSEEK): rule out science, translation, binding and duplication bugs in the routines
+    touching the failing hour, PASS/FAIL with `file:line`; fix any FAIL before numerical work;
+  - **triage** (DEEPSEEK): diagnostic packet, ReleaseSafe/Debug replay, finite-difference Jacobian check, and
+    classification as bug / threshold / degenerate-stiff / oscillation / leak;
+  - **ladder S1–S9**: residual-based convergence; conservative chord-slope/enthalpy form; line search and update
+    caps; phase-change step splitting with C-max; L-scheme/Picard→Newton with safeguarded Anderson; Δt
+    cut-and-retry aligned to forcing events; scaling; operator splitting in legacy order; and a last-rung legacy
+    explicit sub-cycling fallback (`wthr.f:589-611`), whose hours are counted and driven to zero;
+  - **briefs**: CLAUDE writes a Strategy Brief for the hard rungs and keeps a Lessons log;
+  - **forbidden**: loosening tolerances, post-solve clamps, unclosed ledgers, and new "publish best-bounded"
+    deviations (the existing DEV-009/011/014/015 are debt to retire).
 - **Loop guard (2026-10-01).** Qwen3.8 is a small model and can get stuck in loops. While a round is open, CLAUDE checks
   the DEEPSEEK pane about every 10–15 min. Loop signs:
   - the same command, edit or error 3+ times;
@@ -95,7 +110,7 @@ session. The plan changes three things:
 
   On those signs CLAUDE **pokes** DEEPSEEK: guidance in `.agent/pokes/poke_RRRRR_K.md` (loop seen, what to stop, the
   single next step with `file:line`/command, when to hand off), delivered by Esc plus a one-line pointer to the
-  DEEPSEEK pane through Herdr. Escalation: 2nd poke without progress → `/clear` reset and a narrowed directive;
+  DEEPSEEK pane through Herdr. Escalation: 2nd poke without progress → `/clear` reset and a narrowed target;
   3rd → REVISE/REJECTED and the target is split. DEEPSEEK acknowledges each poke in §1; CLAUDE lists the pokes it
   sent in §4. The exact commands are in `CLAUDE.md` (Loop Guard).
 - **Target.** Full 30-year Ottawa run with verified scientific comparability against legacy Fortran.

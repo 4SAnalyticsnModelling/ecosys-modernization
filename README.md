@@ -9,10 +9,10 @@ Complete the 30-year Ottawa simulation run in `ecosys-ng` with **zero science ga
 ## Adversarial Workflow
 Work is executed via a continuous, token-frugal worker/judge workflow between two AI models hosted on the **same Herdr tab in multi-pane**:
 - **Tab**: `ADVERSARIAL`
-- **DEEPSEEK Pane (Right)**: `Qwen3.8-35B-A3B-Distill` (local llama.cpp at `127.0.0.1:8090`, via the DeepSeek Harness) — **main worker**: investigation, implementation, tests and runs.
-- **CLAUDE Pane (Left)**: `Claude Opus 5.5` — **reviewer, critic, supervisor, idea generator, and judge**. CLAUDE's decision is final.
+- **DEEPSEEK Pane (Right)**: `Qwen3.8-27B` (local llama.cpp at `127.0.0.1:8090`, via the DeepSeek Harness) — **does all the work**: plans rounds, investigates, implements, builds, tests, runs, self-checks and keeps the ledgers.
+- **CLAUDE Pane (Left)**: `Claude Opus 5.5` — only **deep scientific diagnosis, cross-language reasoning, architecture decisions and the final scientific review**; makes the **final judgement call** and **directs and guides Qwen when needed**. CLAUDE's decision is final.
 
-Each round, CLAUDE writes a directive, DEEPSEEK does the work and reports evidence, and CLAUDE rules `APPROVED`, `REVISE` or `REJECTED`. The loop continues until the complete Ottawa run is achieved. There are no stopping hooks or artificial early exits.
+Each round, DEEPSEEK plans and does the work, escalating to CLAUDE only for deep diagnosis, cross-language or architecture questions; CLAUDE then gives the final scientific review and rules `APPROVED`, `REVISE` or `REJECTED`. The loop continues until the complete Ottawa run is achieved. There are no stopping hooks or artificial early exits.
 
 ## Autonomous Git & Continuous Delivery
 - The orchestrator **commits and pushes to `main`** only after a round that CLAUDE has APPROVED.
