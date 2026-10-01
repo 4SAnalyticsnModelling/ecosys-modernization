@@ -254,7 +254,7 @@
       "any DEV"
     ],
     "triage": [
-      "rule out science, translation, binding and duplication bugs first (PASS/FAIL each with file:line; fix any FAIL before numerical work)",
+      "rule out science, translation, binding, duplication and floor-bound bugs first (floors: 0.0, ZERO=1e-15, ZERO2=1e-6, area-scaled ZEROS/ZEROS2, daily population-scaled ZEROP/ZEROQ/ZEROP2, routine-local ZEROC 1e-32 SOLUTE vs 1e-48 STARTE; same value, scale, operator, units, placement); PASS/FAIL each with file:line; fix any FAIL before numerical work",
       "diagnostic packet",
       "ReleaseSafe + Debug replay of the failing hour",
       "finite-difference Jacobian check",

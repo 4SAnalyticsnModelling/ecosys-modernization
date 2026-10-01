@@ -82,7 +82,15 @@ The run currently stalls on mass/energy balance or Newton/Anderson non-convergen
    - **duplication**: is a flux, source, sink, transfer or conversion applied twice, or are state copies out
      of sync?
 
-   Fix any FAIL first. Go on to step 1 only when all four pass.
+   - **floor bounds**: does every guard use the same floor as legacy? Check:
+     - which floor: `0.0` / `ZERO` / `ZERO2` / area-scaled `ZEROS*` / population-scaled `ZEROP*`/`ZEROQ`
+       (recomputed daily) / routine-local `ZEROC` (1e-32 SOLUTE, 1e-48 STARTE);
+     - the operator, units and placement.
+
+     List each guard on the failing path as `Zig file:line ↔ legacy file:line ↔ floor ↔ value ↔ scale ↔
+     operator ↔ PASS/FAIL` (playbook §1b).
+
+   Fix any FAIL first. Go on to step 1 only when all five pass.
 1. **Triage before changing code.**
    - Build the diagnostic packet: hour, substep, solver, layers, state and thresholds, residual/increment
      history, NaN, smallest pivot.

@@ -25,6 +25,10 @@ Achieve the complete 30-year Ottawa run for `ecosys-ng` with **zero science gap*
 4. **Final scientific review and judgement** — for each round at `AWAITING_RULING`:
    - Review the science: physics against the cited legacy code, conservation, tolerance softening, ad-hoc
      clamps, fixes that hide a symptom, and Fortran-to-Zig traceability.
+   - Check floor bounds: does each guard use the legacy `0.0` / `ZERO*` floor with the same value, scale
+     (cell area, or daily-recomputed plant population), operator, units and placement? Remember `ZEROC` is
+     1e-32 in SOLUTE but 1e-48 in STARTE. Treat a literal that matches only because the Ottawa cell is 1 m²
+     as unverified (playbook §1b).
    - Spot-check the decisive evidence yourself when it is thin.
    - End with `**Final Ruling (CLAUDE)**: APPROVED | REVISE | REJECTED`, plus reasons and the next target or
      guidance.

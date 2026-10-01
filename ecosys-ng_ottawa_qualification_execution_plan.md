@@ -88,7 +88,9 @@ session. The plan changes three things:
 - **Convergence & balance failures (2026-10-01).** The ReleaseFast Ottawa run cannot progress further because of
   mass/energy balance or Newton/Anderson convergence failures. These are handled by
   `.agent/playbooks/convergence-and-balance.md`, with **CLAUDE leading the strategy**:
-  - **bugs first** (DEEPSEEK): rule out science, translation, binding and duplication bugs in the routines
+  - **bugs first** (DEEPSEEK): rule out science, translation, binding, duplication and **floor-bound** bugs. Floor bounds means each guard matches the legacy `0.0`/`ZERO*` floor in value, scale (cell area or
+    daily-recomputed plant population), operator, units and placement. Note that `ZEROC` is 1e-32 in SOLUTE but
+    1e-48 in STARTE (playbook §1b). These checks cover the routines
     touching the failing hour, PASS/FAIL with `file:line`; fix any FAIL before numerical work;
   - **triage** (DEEPSEEK): diagnostic packet, ReleaseSafe/Debug replay, finite-difference Jacobian check, and
     classification as bug / threshold / degenerate-stiff / oscillation / leak;

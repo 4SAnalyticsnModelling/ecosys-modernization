@@ -37,7 +37,20 @@ The ReleaseFast Ottawa run currently cannot progress further because of converge
   1. **science**: the equation differs from legacy;
   2. **translation**: indexing, loop bounds, implicit typing, GOTO flow, SAVE/DATA, update order;
   3. **binding**: a COMMON variable mapped to stale, uninitialized or zero Zig state, or the solver and the ledger reading different state;
-  4. **duplication**: the same flux, source, sink, transfer or conversion applied twice, or state copies out of sync.
+  4. **duplication**: the same flux, source, sink, transfer or conversion applied twice, or state copies out of sync;
+  5. **floor bounds**: every guard must use the legacy floor. The legacy floors are:
+     - `0.0`;
+     - `ZERO`=1e-15 and `ZERO2`=1e-6;
+     - cell-area-scaled `ZEROS`/`ZEROS2`=`ZERO*DH*DV`/`ZERO2*DH*DV`;
+     - plant-population-scaled `ZEROP`/`ZEROQ`/`ZEROP2`, which are **recomputed daily** from PP;
+     - routine-local `ZEROC`, which is **1e-32 in SOLUTE but 1e-48 in STARTE**.
+
+     For each guard, check:
+     - the comparison operator and compared variable (`AMAX1(ZERO,X)` is not `IF(X.GT.ZERO)`);
+     - the units;
+     - the placement: no floor moved into an implicit residual or Jacobian, and no unbooked clip.
+
+     At Ottawa the cell area is 1 m², so a literal `1e-15` matching `ZEROS` is a coincidence, not parity. The Zig code hard-codes ~1,470 `1e-15` and ~500 `1e-6` literals, so map each guard on the failing path to its legacy line (playbook §1b).
 
   A FAIL is fixed first. Numerical strategies start only after all four pass.
 - **Triage first (DEEPSEEK)**:

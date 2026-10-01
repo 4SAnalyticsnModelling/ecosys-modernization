@@ -40,7 +40,56 @@ variables. Record each check as PASS or FAIL in the round file, with `file:line`
    - Duplicated state copies that drift out of sync.
    - The same conversion applied twice.
 
-Only when all four pass may DEEPSEEK move on to the numerical triage (§1) and the strategy ladder (§2).
+5. **Floor-bound bug**: does a guard use a different floor, scale, comparison or placement than legacy? See §1b.
+
+Only when all five pass may DEEPSEEK move on to the numerical triage (§1) and the strategy ladder (§2).
+
+## 1b. Floor-bound audit (`0.0` and the `ZERO*` family)
+Legacy ecosys guards almost every division, logarithm, flux and transfer with floors. The floors differ in
+value, in scale, and in how often they are recomputed. A Zig guard that uses the "wrong zero" changes a
+branch exactly where the run stalls: thin sliver layers, near-dry or frozen layers, vanishing pools and
+plants.
+
+| Legacy floor | Value / definition | Scale | Notes |
+|---|---|---|---|
+| `0.0` literal | exactly zero | none | `.GT.0.0` is **not** `.GT.ZERO` |
+| `ZERO` | 1.0E-15 (`starts.f:93`) | absolute | 418 legacy uses |
+| `ZERO2` | 1.0E-06 (`starts.f:94`) | absolute | also `DLYRM=ZERO2` |
+| `ZEROS(NY,NX)` | `ZERO*DH*DV` (`starts.f:269`) | grid-cell area | 477 uses |
+| `ZEROS2(NY,NX)` | `ZERO2*DH*DV` (`starts.f:270`) | grid-cell area | 243 uses |
+| `ZEROP(NZ,NY,NX)` | `ZERO*PP` (`startq.f:886`, `grosub.f:10914`) | plant population | **recomputed daily** as PP changes |
+| `ZEROQ(NZ,NY,NX)` | `ZERO*PP/AREA(3,NU)` (`startq.f:887`, `grosub.f:10915`) | population per area | recomputed daily |
+| `ZEROP2(NZ,NY,NX)` | `ZERO2*PP` (`startq.f:888`, `grosub.f:10916`) | plant population | recomputed daily |
+| `ZEROC` | **1.0E-32 in `solute.f:131`; 1.0E-48 in `starte.f:100`** | routine-local PARAMETER | value depends on the routine |
+
+Rules for each guard on the failing path:
+1. **Same floor.** The Zig guard must use the same floor as the legacy line. The usual errors:
+   - `ZERO` vs `ZERO2` vs `ZEROS`/`ZEROS2` vs `ZEROP`/`ZEROQ`/`ZEROP2` vs `ZEROC` vs `0.0`;
+   - for `ZEROC`, using the other routine's value (1e-32 in SOLUTE, 1e-48 in STARTE).
+2. **Same comparison.** Check the operator (`.GT.`/`.GE.`/`.LT.`/`.LE.`), the compared variable, and the sign.
+   - `AMAX1(ZERO,X)` (floor the value) is not `IF(X.GT.ZERO)` (skip the process).
+   - A `.GT.` turned into `>=` flips the branch at exactly the floor.
+3. **Same scale, with no deck coincidence.**
+   - `ZEROS`/`ZEROS2` scale with cell area. At Ottawa `DH*DV = 1 m²`, so a Zig literal `1e-15`/`1e-6`
+     matches here only by coincidence. Derive the floor the legacy way: area-scaled, or from the current
+     plant population.
+   - Plant floors must be recomputed from the **current** population (as `grosub.f:10914-10916` does daily),
+     never cached from startup.
+4. **Same units.** If a Zig module changed units (per cell ↔ per m², g ↔ kg, MJ ↔ J, mol m-3 ↔ mol), the floor
+   must be converted too.
+5. **Same placement.** Legacy applies floors inside explicit cycles. A floor moved into an implicit
+   Newton/Anderson residual or Jacobian (`max(x, floor)`) makes the function non-smooth and can stall Newton.
+   A floor that clips state removes mass or energy, which is a class E leak.
+   - Every clip must either match legacy exactly, or be booked in the ledger.
+6. **Find the literals.** The Zig code hard-codes `1e-15` about 1,470 times and `1e-6` about 500 times, against
+   418 legacy `ZERO` and 39 `ZERO2` uses. So many literals stand in for scaled floors or for other legacy
+   constants.
+   - For the routines on the failing path, list every guard (floor, threshold `IF`, `AMAX1`/`AMIN1`/`MAX`/`MIN`):
+
+     `Zig file:line ↔ legacy file:line ↔ floor name ↔ value ↔ scale ↔ operator ↔ PASS/FAIL`
+
+   - Fix each FAIL by citing the legacy line. Prefer a named Zig constant derived as legacy derives it over
+     a bare literal.
 A FAIL is fixed as a normal round, with legacy evidence, and the failing hour is replayed before going on.
 
 ## 1. Triage: DEEPSEEK, on every failure, before changing code
