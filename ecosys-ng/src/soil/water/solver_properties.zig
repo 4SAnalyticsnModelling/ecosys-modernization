@@ -217,8 +217,18 @@ pub const State = struct {
                 if (entry.profile.vertical_saturated_conductivity_mm_h[layer] >= 0)
                     mualem_van_genuchten.saturated_hydraulic_conductivity_m_per_h =
                         entry.profile.vertical_saturated_conductivity_mm_h[layer] / 1000.0;
-                const inflection_pressure_head_m =
+                // HOUR1 always anchors retention to FC/WP (hour1.f 2052-2115).
+                // A deck inflection of zero requests the Carsel-Parrish texture
+                // inflection as the remaining anchor, not the unanchored texture
+                // curve: on Ottawa layer 1 that curve holds 0.411 m3 m-3 at
+                // -0.01 MPa against the deck FC 0.28, with K 10-20x below
+                // HCND at 0.28-0.45 (the anchored fit is within ~2x).
+                const supplied_inflection_m =
                     entry.profile.van_genuchten_inflection_pressure_head_m[layer];
+                const inflection_pressure_head_m = if (supplied_inflection_m < 0)
+                    supplied_inflection_m
+                else
+                    try mualem_van_genuchten.inflectionPressureHeadM();
                 if (inflection_pressure_head_m < 0) {
                     const fitted = try retention.fitOriginalMualemVanGenuchten(.{
                         .saturated_water_content_m3_per_m3 = curve.porosity_fraction,
@@ -450,7 +460,13 @@ pub fn resolveDynamicLayerWithCharcoalIncrement(
         maximum_iterations,
     );
     if (fit_budget == 0) return error.InvalidDynamicSoilLayerResolution;
-    const inflection = state.van_genuchten_inflection_pressure_head_m[index];
+    // Same FC/WP anchoring as the initial build: zero requests the texture
+    // inflection, never the unanchored texture curve.
+    const supplied_inflection = state.van_genuchten_inflection_pressure_head_m[index];
+    const inflection = if (supplied_inflection < 0)
+        supplied_inflection
+    else
+        try mualem.inflectionPressureHeadM();
     if (inflection < 0) {
         const fitted = try retention.fitOriginalMualemVanGenuchten(.{
             .saturated_water_content_m3_per_m3 = porosity_fraction,

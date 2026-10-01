@@ -585,6 +585,7 @@ noinline fn solveControlledImpl(
     var slow_newton_last_recorded_step: u16 = 0;
     var rejected_forecast_recovery_step: ?u16 = null;
     var bounded_phase_stagnation = false;
+    var ceiling_reached = false;
     var iteration: u16 = 0;
     while (iteration < options.max_iterations) : (iteration += 1) {
         const retrying_newton_after_anderson = newton_retry_required;
@@ -1127,6 +1128,7 @@ noinline fn solveControlledImpl(
         if (retrying_newton_after_anderson) continue;
         if (iteration + 1 >= options.max_iterations) {
             if (!terminal_bounded_ceiling_acceptance.load(.acquire)) return error.SoilPhaseSolverDidNotConverge;
+            ceiling_reached = true;
             break;
         }
         // Sole nonlinear fallback. A relaxed fixed-point point is evaluated as
@@ -1168,6 +1170,7 @@ noinline fn solveControlledImpl(
                 const component_names = [_][]const u8{ "matrix_liquid_water_m3", "water_vapor_volume_m3", "matrix_ice_water_m3", "macropore_liquid_water_m3", "macropore_ice_volume_m3", "endpoint_temperature_k" };
                 std.log.err("soil phase-enthalpy Newton-Picard stagnated: iteration={d} scaled_residual={e} limiting_component={s} layer_cell={d} state={e} residual={e} target={e}", .{ iteration + 1, norm, component_names[largest_index / cells], largest_index % cells, current[largest_index], residual[largest_index], current[largest_index] + residual[largest_index] });
                 const limiting_cell = largest_index % cells;
+                std.log.err("TEMP_DIAGNOSTIC soil phase limiting displacement: matrix_liquid={e} matrix_ice={e} macro_liquid={e} macro_ice={e} advective={e} matrix_capacity={e} macro_capacity={e} pore_exchange={e} latent={e}", .{ trial_displacement.matrix_liquid_water_m3[limiting_cell], trial_displacement.matrix_ice_water_equivalent_m3[limiting_cell], trial_displacement.macropore_liquid_water_m3[limiting_cell], trial_displacement.macropore_ice_water_equivalent_m3[limiting_cell], trial_displacement.advective_enthalpy_megajoules[limiting_cell], grid.matrix_pore_capacity_m3[limiting_cell], grid.macropore_pore_capacity_m3[limiting_cell], trial_exchange[limiting_cell], trial_heat[limiting_cell] });
                 std.log.err("soil phase limiting block: temperature_k={e}->{e} matrix_water={e}->{e} vapor={e}->{e} matrix_ice={e}->{e} macropore_water={e}->{e} macropore_ice={e}->{e}", .{ current[5 * cells + limiting_cell], current[5 * cells + limiting_cell] + residual[5 * cells + limiting_cell], current[limiting_cell], current[limiting_cell] + residual[limiting_cell], current[cells + limiting_cell], current[cells + limiting_cell] + residual[cells + limiting_cell], current[2 * cells + limiting_cell], current[2 * cells + limiting_cell] + residual[2 * cells + limiting_cell], current[3 * cells + limiting_cell], current[3 * cells + limiting_cell] + residual[3 * cells + limiting_cell], current[4 * cells + limiting_cell], current[4 * cells + limiting_cell] + residual[4 * cells + limiting_cell] });
             }
             // DEV-014: WATSUB integrates the phase endpoint explicitly with no
@@ -1177,7 +1180,12 @@ noinline fn solveControlledImpl(
             // the iterate is still published through the unchanged committable
             // and phase-energy conservation gates below. Ottawa hour 6456:
             // saturated topsoil matrix stalled 7.6e-12 m3 below its target.
-            if (boundedPhaseStagnationPublishable(grid, current, residual, cells)) {
+            // Terminal recovery attempt only (as DEV-015): Ottawa 1998 d353 h22
+            // published in-loop on the first attempt and left layer 0 2.06e-3 MJ
+            // unclosed, while the substep ladder closes that hour exactly.
+            if (terminal_bounded_ceiling_acceptance.load(.acquire) and
+                boundedPhaseStagnationPublishable(grid, current, residual, cells))
+            {
                 if (!builtin.is_test) std.log.warn("soil phase solver stagnated within the layer-scale bound; publishing the iterate through the conservation gates: scaled_residual={e}", .{norm});
                 newton_retry_required = false;
                 bounded_phase_stagnation = true;
@@ -1193,8 +1201,13 @@ noinline fn solveControlledImpl(
         rejected_forecast_recovery_step = null;
     }
     try residualAt(grid, properties, base, current, target, residual, scratch, trial_heat, trial_exchange, trial_displacement);
+    // At the ceiling an iterate within the merit (Ottawa 1998 d354 h07: 0.040)
+    // still awaiting its post-Anderson Newton confirmation is equally an
+    // unconverged endpoint for DEV-014.
     if (!bounded_phase_stagnation and terminal_bounded_ceiling_acceptance.load(.acquire) and
-        (try scaledNorm(base, current, residual, options)) > 1 and
+        // Convergence returns inside the loop, so leaving it other than by
+        // bounded stagnation is the ceiling, through either exit path.
+        (ceiling_reached or !bounded_phase_stagnation) and
         boundedPhaseStagnationPublishable(grid, current, residual, cells))
     {
         // DEV-014 at the iteration ceiling, terminal recovery attempt only.
@@ -1273,7 +1286,10 @@ fn closeStalledPhaseTemperature(base: []const f64, current: []f64, displacement:
 /// temperature within 1e-6 K. The caller
 /// still requires `committableState` and the phase-energy conservation gate.
 fn boundedPhaseStagnationPublishable(grid: *const grid_module.GridState, current: []const f64, residual: []const f64, cells: usize) bool {
-    const relative_capacity_bound: f64 = 1.0e-8;
+    // 1e-6 (was 1e-8): Ottawa 1998 d354 h07 frozen topsoil stalls at a 1.6e-7
+    // summed defect at every substep count; ψ(θ) near -4.6 MPa makes the
+    // implicit freezing point stiff where WATSUB steps it explicitly.
+    const relative_capacity_bound: f64 = 1.0e-6;
     const relative_partition_bound: f64 = 1.0e-6;
     const temperature_bound_k: f64 = 1.0e-6;
     if (current.len != 6 * cells or residual.len != current.len) return false;

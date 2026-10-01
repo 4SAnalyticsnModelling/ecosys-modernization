@@ -12244,7 +12244,10 @@ fn recoverFixedExternalHourAdaptively(
                 attempt_error == error.SoluteReactionSolverDidNotConverge;
             const transport_failure = attempt_error == error.SoluteTransportSolverStagnated or
                 attempt_error == error.SoluteTransportSolverDidNotConverge;
-            const phase_failure = attempt_error == error.SoilPhaseSolverDidNotConverge;
+            // DEV-014 is terminal-only, in-loop and at the ceiling, so a
+            // stagnation is as eligible for the final attempt as the ceiling.
+            const phase_failure = attempt_error == error.SoilPhaseSolverDidNotConverge or
+                attempt_error == error.SoilPhaseSolverStagnated;
             if (!reaction_failure and !transport_failure and !phase_failure) return attempt_error;
             if (!builtin.is_test) std.log.warn(
                 "SOLUTE recovery ladder exhausted ({s}); final attempt exact_substep_count={d} with best-bounded-iterate / stiff-image publication",

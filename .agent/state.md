@@ -1,9 +1,27 @@
 # Adversarial Workflow State
 
-Updated 2026-09-30 03:00 (local). Plan: Complete 30-Year Ottawa Run with Zero Science Gap.
+Updated 2026-10-01 00:30 (local). Plan: Complete 30-Year Ottawa Run with Zero Science Gap.
 
-## Current Round: 42
-- Proposer: CLAUDE. Challenger: DEEPSEEK (r31 dust-gate audit, r32 DEV-014, r33 DEV-015, r34 terminal toggles).
+## Current Round: 52
+- Proposer: CLAUDE. Challenger: DEEPSEEK (r49 DEV-020 confirmed, r50 DEV-021 confirmed, r51 band sliver legacy
+  gates, r52 challenge of 7ebb94a).
+
+## LIVE: r00019-strict (fresh hour-0 run, resumed from its 4800 checkpoint with 7ebb94a)
+- Past 1998 d209 h20 (hour 5012) after DEV-021 (9a363ea, molarity guards skip <1e-12 zones) and 7ebb94a (exact
+  pre-HOUR1 band fraction; the FVL reconstruction cancelled for a 1e-14 band sliver, losing 0.5% of its mass).
+- Journals 4801-5011 written by the pre-fix binary were moved to C:\ecosys-build\runs\r00019-journals-4801-5011-
+  prefix-fix (1-ulp output differences made replay fail; resume = crash-before-link continuation).
+- Throughput ~190 h/min; hour 7327 at 00:25.
+- Hour 8470 (1998 d353 h22): in-loop DEV-014 publish with a rigid-pore displacement left layer 0 2.06e-3 MJ
+  unclosed -> DEV-014 made terminal-only (ladder closes 8470). Hour 8479 (d354 h07): frozen topsoil
+  (269.4 K, psi ~ -4.6 MPa) stalls at 1.6e-7 of capacity at every substep count -> bound 1e-8 -> 1e-6, phase
+  stagnation made terminal-eligible, terminal ceiling publishes the explicit endpoint (in test).
+- COMPARABILITY (r53/r54/r55): ng topsoil theta +50%, runoff +57%, N2O 16x, Reco +61% vs legacy. Root cause
+  verified: the deck's zero inflection head selected the unanchored Carsel-Parrish MvG (theta 0.411 at FC
+  vs deck 0.28; K 10-20x below HCND). STAGE A (uncommitted, backup C:\ecosys-build\stageA-fcwp-anchored-
+  mvg.patch): zero inflection -> Carsel inflection as third anchor of the FC/WP fit (theta exact at FC/WP,
+  K within ~2x of HCND 0.28-0.45). Needs a FRESH run: r00020-strict deck prepared (restart NO).
+- Build/deploy: C:\ecosys-build\build_deploy.ps1 -Run <run> -Tag <tag> [-WithoutStageA] [-MoveJournalsFrom N].
 
 ## Frontier (strict runs on C:\ecosys-build\runs, deck blob ecf5e61a, ReleaseSafe)
 - r00012 (470810a) + checkpoint replays with later fixes reached hour 3607 (d151).
