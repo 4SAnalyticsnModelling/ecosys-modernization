@@ -1,119 +1,51 @@
-# .agent — 4-agent swarm control plane
+# .agent — Worker/Judge Adversarial Control Plane
 
-Plan: `ecosys-ng_ottawa_qualification_execution_plan.md` (v4, reviewed). Spec: `ecosys-ng_ottawa_autonomous_qualification_plan.md`.
-Everything the swarm needs lives in this repository: state here, large evidence in `evidence/` (git-ignored,
-manifests committed), tools in `ecosys-audit/scripts/`.
+Continuous, token-frugal workflow between two models:
+1. **DEEPSEEK** (`local/qwen3.8-35b-a3b-distill`, local llama.cpp at `http://127.0.0.1:8090/v1` via the DeepSeek Harness `local` provider): **main worker** — investigation, implementation, tests and runs.
+2. **CLAUDE** (`claude-opus-5-5`): **reviewer, critic, supervisor, idea generator, and judge**. **CLAUDE's decision is final.**
 
-## Herdr session `ecosys-ng` (workspace w1, five tabs, one pane each)
+## Herdr Layout: Single Tab Multi-Pane
+Both agents operate side-by-side in **the same Herdr tab** (`ADVERSARIAL`):
+- **Tab Label**: `ADVERSARIAL`
+- **Left Pane (`CLAUDE`)**: Claude Opus 5.5 — judge
+- **Right Pane (`DEEPSEEK`)**: Qwen3.8-35B-A3B-Distill (local llama.cpp, DeepSeek Harness) — worker
 
-Tabs, in order: CONTROLLER, SAGE, FORGE, SENTINEL, PATHFINDER. (Herdr cannot reorder tabs; a pane
-moved with `pane move --new-tab` is appended last.) Tab label = pane label = role.
-Herdr agent names follow the pane, so moving panes between tabs does not break the wrapper.
+Layout setup script: `scripts/setup-adversarial-layout.ps1` (or `.sh`).
+Runner script: `scripts/start-adversarial.ps1` (or `.sh`). `-Status` shows the latest round, its ruling, and whether the local model is served.
 
-| Pane / tab label | Herdr agent name | Harness / model | Role file |
-|---|---|---|---|
-| SAGE | `sage` | Claude Code, Opus 5.5 (`--dangerously-skip-permissions`) | `roles/sage.md` |
-| FORGE | `forge` | OpenCode `--agent forge`, `github-copilot/gemini-3.8-flash`, `--auto` | `roles/forge.md` |
-| PATHFINDER | `pathfinder` | OpenCode `--agent pathfinder`, `github-copilot/mai-code-1.1-flash`, `--auto` | `roles/pathfinder.md` |
-| SENTINEL | `sentinel` | OpenCode `--agent sentinel`, `github-copilot/mai-code-1.1-flash`, `--auto` | `roles/sentinel.md` |
+## Round Cycle (`templates/adversarial-round.md`)
+1. **§0 Directive — CLAUDE**: one bounded, falsifiable target, ranked hypotheses, legacy ranges, required evidence, done condition.
+2. **§1–§2 Work & Evidence — DEEPSEEK**: implementation, tests, `receipt.json` citations; status `AWAITING_RULING`.
+3. **§3 Objection — DEEPSEEK (optional)**: one evidence-backed objection, before the ruling only.
+4. **§4 Review & Final Ruling — CLAUDE**: `**Final Ruling (CLAUDE)**: APPROVED | REVISE | REJECTED`, reasons, next directive.
 
-The `CONTROLLER` tab runs the deterministic controller (`scripts/start-swarm.sh`); the four agent
-tabs are only driven by it.
+The runner polls the latest round for the ruling. **APPROVED** → commit and push, open the next round.
+**REVISE** → no commit; DEEPSEEK fixes the listed points next round. **REJECTED** → no commit; DEEPSEEK reverts the
+rejected change before new work. Rulings are not appealed; a closed point is reopened only with new evidence.
 
-Each pane's shell exports `ECOSYS_SWARM_ROLE=<role>` before the harness starts. For SAGE, the project
-Claude hook then injects the SAGE role bootstrap. The former Claude-lead / Pi-reviewer workflow is
-retired and archived in `archive/pre-swarm-workflow/`. OpenCode per-role permissions (edit/bash allowlists, no webfetch, no git mutation)
-are in `.opencode/agents/*.md`; MCP is off (`opencode.json`). `roster.json` is the single source of
-truth for names, models, launch args, budgets and write lanes.
+## Authority
+- CLAUDE alone rules on rounds, registers intentional deviations (`audit/intentional-deviations.md`), declares legacy
+  inconsistencies, and accepts science. CLAUDE does not edit production source; it directs DEEPSEEK.
+- DEEPSEEK never rules on, approves, or commits its own work.
+- **Loop guard**: Qwen3.8 can get stuck in loops. CLAUDE watches the DEEPSEEK pane and pokes it with a new direction
+  (`pokes/poke_RRRRR_K.md` + Esc + a one-line pointer via Herdr). Escalation: 2nd poke → `/clear` reset and a
+  narrowed directive; 3rd → REVISE/REJECTED. Rule and commands: `CLAUDE.md` (Loop Guard); settings: `roster.json` `loop_guard`.
+- Write lanes are listed per role in `roster.json`.
 
-## Files
+## Objective
+Achieve the complete 30-year Ottawa run for `ecosys-ng` with **zero science gap** against legacy Fortran (`f77src/`) and **scientifically comparable outputs**.
+The loop continues without stopping hooks until this finish line is reached.
 
-| Path | Writer | Purpose |
-|---|---|---|
-| `state.md` | controller (from SENTINEL's dispatch) and SAGE (<=1,500 words, replace not append) | current objective, blockers, next operation |
-| `frontier.json` | `update_frontier.py` only | simulation vs verified frontier + evidence binding |
-| `workflow.json` | wrapper (user sets approval) | durable process state; `autonomy_approved` gate |
-| `dispatch.json` | SENTINEL (wrapper marks COMPLETE) | the one pending task |
-| `current_task.md` | SENTINEL | one line |
-| `tasks/T-NNNNN.md` | SENTINEL (wrapper for auto SAGE reviews) | task contract (`templates/task.md`) |
-| `tasks/T-NNNNN.hypothesis.md` | FORGE | required before any production-science edit |
-| `results/T-NNNNN.md` | the worker | result contract (`templates/result.md`) |
-| `failures/F-NNNNN/` | `make_failure_packet.py` | spec section 18 packet |
-| `failures/Q-<task>/` | wrapper | quarantined out-of-lane edit: the agent's files + `quarantine.json` |
-| `archive/T-NNNNN.json` | wrapper | dispatch, changed paths, violations, hooks, review binding |
-| `metrics.csv` | wrapper | per-turn wall time vs budget; tokens when the harness reports them |
-| `locks/`, `runtime/` | wrapper (git-ignored) | swarm/machine locks, inflight intent, frozen task copy |
+## Token Frugality Policy (Strict)
+- Never paste raw simulation logs or whole source files into prompts or rounds.
+- Use pointer citations (`file:line` and short sha256).
+- Use `f77query.py` and targeted ripgrep rather than bulk file reading.
+- Limit round reports to <= 500 concise words.
+- All heavy builds/tests write logs to disk via `run_logged.py`, citing only `receipt.json`.
 
-## Operating
-
-All commands are run from the project root, inside a Herdr pane (any session; the wrapper targets `ecosys-ng`).
-
-```
-uv run ecosys-audit/scripts/swarm_wrapper.py status
-uv run ecosys-audit/scripts/swarm_wrapper.py ensure-agents [--start]   # check/rename/start the 4 agents
-uv run ecosys-audit/scripts/swarm_wrapper.py relaunch FORGE            # restart one role with roster args
-uv run ecosys-audit/scripts/swarm_wrapper.py approve --by <user>       # GP1 launch approval (given 2026-09-25)
-uv run ecosys-audit/scripts/swarm_wrapper.py step [--manual]           # one agent turn
-uv run ecosys-audit/scripts/swarm_wrapper.py run [--max-steps N]       # default: until SAGE-confirmed IDLE
-uv run ecosys-audit/scripts/swarm_wrapper.py precommit                 # SAGE APPROVE bound to current diff?
-uv run ecosys-audit/scripts/swarm_wrapper.py cost                      # tokens/cost by role, per frontier advance
-uv run ecosys-audit/scripts/swarm_wrapper.py clear-review --by <name> --note "..."  # optional; run clears halts itself
-```
-
-`scripts/start-swarm.sh` = ensure-agents --start, then run.
-
-One `step` = one fresh-session turn: SENTINEL routes when nothing is pending; otherwise the named role runs
-its task. Then deterministic hooks: scope check, `zig fmt` + T1 (FORGE), failure packet (FAIL/STAGNATED),
-automatic SAGE review of any production-source change, archive and metrics.
-
-## No human in the loop (decision D9, user, 2026-09-25)
-SAGE makes every decision. The controller never stops for a person; each former halt is handled in place:
-
-| Event | Automatic response |
-|---|---|
-| ALLOWED FILES outside the role's lane (or protected) | dispatch refused before delivery; errors go to SENTINEL's next brief |
-| Agent edits outside its lane / protected path / source without hypothesis / widens its task | files copied to `failures/Q-<task>/`, restored to pre-turn content; task FAIL; SENTINEL re-routes |
-| SAGE CHAIN into a file the chained role cannot write | chain ignored; SENTINEL routes (SAGE writes its own ledger files) |
-| Agent at a permission/question dialog | declined with esc (never approved); if it persists, the role is relaunched |
-| Agent missing, wrong kind, or ignores its reset | role relaunched with backoff; a never-sent task stays PENDING |
-| SENTINEL writes HUMAN_REVIEW_REQUIRED, or a result asks for a human | SAGE decision task (`DECISION:` line required) |
-| SENTINEL fails to route twice | SAGE decision task names the next task |
-| SENTINEL reports IDLE | SAGE confirms or names work; only a second IDLE after that ends `run` |
-| git add/commit/push failure | recorded; retried next cycle |
-| Controller error (Herdr, I/O) | `run` retries with backoff (max 15 min) |
-| A halt left by the pre-D9 controller | cleared automatically on the next step, leftovers committed |
-
-`run` exits only on SAGE-confirmed IDLE, missing autonomy approval, or another controller holding the lock.
-A machine outage (e.g. a faulted D: drive) still stops everything; that is not a decision.
-
-## Commit and push (decision D8, user, 2026-09-25)
-After every successfully collected cycle, the controller commits exactly the paths that cycle changed
-(message `swarm: <task> <status>`) and pushes `HEAD:main` to `origin` (settings: `roster.json` `git`).
-- Production source is withheld from commits until a SAGE APPROVE matches the current diff
-  (`precommit` PASS); it is then committed in the SAGE cycle.
-- Quarantined edits are restored before the commit, so an out-of-lane change is never committed
-  (its copy under `failures/Q-<task>/` is).
-- Plain fast-forward push only: never force, pull, rebase or merge. A failed push keeps the commit local
-  and is retried every cycle; it never stops the swarm.
-- Agents themselves still never commit or push.
-
-## Token economy (2026-09-25)
-- SENTINEL reads one controller-built brief (`.agent/runtime/sentinel-brief.md`) instead of ~8 files:
-  3 model calls / 42k tokens per route, measured, versus 7-12 calls / 115-175k before.
-- A SAGE result may carry a `## CHAIN` block with one mechanical follow-up (no production source, no
-  reference data). The controller dispatches it directly, skipping a routing turn. Chains never chain.
-- Every turn's tokens are read from the harness's own records (OpenCode session export; Claude
-  session log) into `metrics.csv` (`input_tokens` = fresh + cache read + cache write).
-  `swarm_wrapper.py cost` reports totals and tokens per verified-frontier advance.
-- SAGE runs with `--strict-mcp-config` (no MCP servers). Do NOT add `--disable-slash-commands`:
-  it breaks `/clear`, the reset between tasks. FORGE uses Gemini 3.8 Flash in the `high` variant
-  (set with OpenCode's `/variants`).
-- Keep interactive supervisor sessions short. Watch with `status` / `cost`, not a long chat.
-
-## What the wrapper never does
-Approve a permission dialog (it only declines); re-prompt a task whose delivery was interrupted; discard an
-agent's edit without keeping a copy; force-push; promote the frontier.
-
-## Resume after a crash
-Run `scripts/start-swarm.sh` again. An inflight task is collected from its result file if one exists, else
-closed STAGNATED with a failure packet. It is never re-sent. While an agent is still `working`, `run` waits.
+## Key Files
+- `roster.json`: Model configuration, authority rules, write lanes, layout and token frugality settings.
+- `state.md`: Current state and milestone tracking (curated by CLAUDE; the runner only rewrites its `runner:begin/end` block).
+- `adversarial/`: Round files (directive, work, evidence, objection, ruling).
+- `roles/claude.md`: Role guidance for CLAUDE (reviewer/judge).
+- `roles/deepseek.md`: Role guidance for DEEPSEEK (main worker).

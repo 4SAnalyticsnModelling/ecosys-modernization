@@ -13,11 +13,19 @@ marked "spec §N"). Where this plan is silent, the spec governs. Date: 2026-09-2
 > `evidence/README.md`. The P1 control plane and the P2 tool scaffolds are installed (`.agent/README.md`);
 > this is preparation, not gate evidence. No phase gate has passed.
 >
-> **Addendum 2026-09-25 (user decision D9: "SAGE will make the decision for everything, no human
-> intervention at all").** Every "user approves / user signs / HUMAN_REVIEW_REQUIRED / user replan" in this
-> plan now reads "SAGE decides". §8 lists the former human review points and who decides each now. The
-> controller never stops for a person (`.agent/README.md`). Qualification is **agent-qualified**, not
-> human-signed; release notes must say so.
+> **Addendum 2026-09-28 (Revision to Two-Model Adversarial Dance):** The previous 4-agent
+> loop (SENTINEL, PATHFINDER, FORGE, SAGE) is replaced by an adversarial dance between
+> **CLAUDE** (Claude Opus 5.5) and **DEEPSEEK** (Gemini 3.8 Flash High through GitHub Copilot).
+> The goal and scientific rigor remain identical: achieve the full 30-year Ottawa simulation
+> in ecosys-ng with zero science gap against legacy Fortran and outputs scientifically comparable
+> with legacy Fortran outputs. There are no stopping hooks or artificial budget halts: the models
+> continuously hypothesize, implement, challenge, and verify until the milestone is reached.
+>
+> **Addendum 2026-10-01 (Worker/Judge roles):** DEEPSEEK now runs the local model Qwen3.8-35B-A3B-Distill
+> (llama.cpp, `local/qwen3.8-35b-a3b-distill`) and is the **main worker**. CLAUDE (Claude Opus 5.5) is the
+> **reviewer, critic, supervisor, idea generator and judge**; **CLAUDE's decision is final**. Rounds no longer
+> alternate proposer/challenger: CLAUDE directs, DEEPSEEK works, CLAUDE rules APPROVED / REVISE / REJECTED,
+> and only APPROVED rounds are committed and pushed (see §2).
 
 ---
 
@@ -57,7 +65,7 @@ session. The plan changes three things:
 |---|---|
 | D1 | Science bar = **explained comparability**: every Ottawa-used legacy pathway accounted for with semantic evidence; outputs within per-variable rules fixed *before* comparison; every material deviation explained. Not bit-identity. |
 | D2 | Intentional numerics (Newton/Anderson, Dall'Amico freeze-thaw, Mualem–van Genuchten) are **kept and attributed** by A/B runs. |
-| D3 | Execution uses the **spec's 4-agent Herdr workflow** (SENTINEL, PATHFINDER, FORGE, SAGE). Claude and GPT only author and review this plan. |
+| D3 | Execution uses the **continuous worker/judge workflow**: DEEPSEEK (local Qwen3.8-35B-A3B-Distill) works, CLAUDE (Claude Opus 5.5) reviews and rules; CLAUDE's decision is final (2026-10-01). |
 | D4 | Performance = **full 30-yr Ottawa wall time**: ecosys-ng ReleaseFast < legacy gfortran `-O2`, same machine, median of 3 each side, outputs still passing parity. |
 | D5 | Scope = **Ottawa milestone first**; remaining v1 gate-matrix items move to P8. |
 | D6 | Deck edits (`9253d3b` runtime ceiling 100→200; `5add7de` starte.f:189) and the Zig solute iteration ceiling 60→200 (issue-015) are **kept only if justified from legacy**; otherwise reverted and root-caused. ~~The user signs the final list.~~ SAGE signs the final list (D9). |
@@ -67,14 +75,30 @@ session. The plan changes three things:
 
 ---
 
-## 2. Agent roster, routing, budgets
+## 2. Model roster, adversarial roles, continuous execution
 
-| Role | Harness / model | Owns | Never | Budget per task |
-|---|---|---|---|---|
-| SENTINEL | OpenCode, MAI-Code Flash | reads `.agent/state.md`, `frontier.json`, the latest result; writes one `dispatch.json` + task; escalation to SAGE (D9) | reads source, edits, runs jobs | ≤8 tool calls, ≤40k input tokens, 5 min |
-| PATHFINDER | OpenCode, MAI-Code Flash | localization, `f77query.py`, divcheck reports, failure packets, trace triage, mechanical-change review | edits production source | ≤20 calls, ≤150k tokens, 30 min |
-| FORGE | OpenCode, Gemini Flash | one bounded Zig change with a recorded hypothesis; T0–T1 | alters science semantics without SAGE; runs full Ottawa | one fix + targeted tests, ≤250k tokens, 60 min |
-| SAGE | Claude Code, Claude Opus | science/numerics adjudication; **review gate for every production-science change before commit**; approves deviations, D6, rule table | broad repo search, builds, raw-log summarizing | one question; packet ≤25k tokens + targeted source/raw-evidence reads (spec §8); ≤200k total |
+| Role | Harness / model | Function | Scope & Authority |
+|---|---|---|---|
+| CLAUDE | Claude Code, Claude Opus 5.5 | Reviewer, critic, supervisor, idea generator, judge | Writes directives; reviews every DEEPSEEK round; final APPROVED / REVISE / REJECTED ruling; sole authority on DEV-NNN and science acceptance; does not edit production source |
+| DEEPSEEK | DeepSeek Harness, Qwen3.8-35B-A3B-Distill (local llama.cpp) | Main worker: investigation, implementation, tests, runs | Production source, tests and runs; one evidence-backed objection per ruling; never rules on its own work |
+
+- **Continuous execution.** There are no artificial stopping hooks, early halts, or human review stops.
+- **Rounds.** CLAUDE directive → DEEPSEEK work and evidence → CLAUDE final ruling, in `.agent/adversarial/` using `.agent/templates/adversarial-round.md`. Only APPROVED rounds are committed and pushed; REJECTED changes are reverted by DEEPSEEK.
+- **Loop guard (2026-10-01).** Qwen3.8 is a small model and can get stuck in loops. While a round is open, CLAUDE checks
+  the DEEPSEEK pane about every 10–15 min. Loop signs:
+  - the same command, edit or error 3+ times;
+  - re-reading the same files without new findings;
+  - oscillating edits;
+  - repeated output;
+  - no new evidence for ~20 min;
+  - idle without `AWAITING_RULING`.
+
+  On those signs CLAUDE **pokes** DEEPSEEK: guidance in `.agent/pokes/poke_RRRRR_K.md` (loop seen, what to stop, the
+  single next step with `file:line`/command, when to hand off), delivered by Esc plus a one-line pointer to the
+  DEEPSEEK pane through Herdr. Escalation: 2nd poke without progress → `/clear` reset and a narrowed directive;
+  3rd → REVISE/REJECTED and the target is split. DEEPSEEK acknowledges each poke in §1; CLAUDE lists the pokes it
+  sent in §4. The exact commands are in `CLAUDE.md` (Loop Guard).
+- **Target.** Full 30-year Ottawa run with verified scientific comparability against legacy Fortran.
 
 - **Budget enforcement.** The wrapper enforces time limits and records tokens when the harness reports
   them (`.agent/metrics.csv`). A task over its budget ends as STAGNATED, and the spec §11/§33 rules

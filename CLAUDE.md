@@ -1,61 +1,47 @@
-## Workflow: 4-agent swarm (since 2026-09-25) -- read first
-Work runs through the swarm: SENTINEL routes, PATHFINDER investigates, FORGE implements,
-SAGE adjudicates science and reviews every production-science change. Current state:
-`.agent/state.md`. Frontier: `.agent/frontier.json` (only `update_frontier.py` writes it).
-How it operates: `.agent/README.md`. Plan: `ecosys-ng_ottawa_qualification_execution_plan.md`.
-If your prompt names a role or `ECOSYS_SWARM_ROLE` is set, follow `.agent/roles/<role>.md`
-and your task file only; do not load skills, memory or files your task does not name.
+## Workflow: Worker/Judge Adversarial Loop (DEEPSEEK works, CLAUDE judges)
 
-The previous Claude-lead / Pi-reviewer workflow (`WORKFLOW.md`, `herdr_cycle.py`,
-`audit/handoff.md` checkpoints, `.pi/`) is retired and archived in
-`archive/pre-swarm-workflow/`. Do not resume from it or act on its "next action".
-Its scientific records (`audit/issues/`, `audit/runs/`, `audit/analysis/`) remain
-evidence to re-verify, not fresh passes.
+This project operates on an adversarial workflow between two models hosted on the **same Herdr tab in multi-pane** (`ADVERSARIAL` tab: `CLAUDE` on left, `DEEPSEEK` on right):
+1. **DEEPSEEK** (`local/qwen3.8-35b-a3b-distill`, local llama.cpp at `127.0.0.1:8090` via the DeepSeek Harness): **main worker** — investigation, Zig implementation, tests and runs.
+2. **CLAUDE** (`claude-opus-5-5`): **reviewer, critic, supervisor, idea generator, and judge**. CLAUDE writes each round's directive, reviews DEEPSEEK's work, and ends the round with `**Final Ruling (CLAUDE)**: APPROVED | REVISE | REJECTED`. **CLAUDE's decision is final.** CLAUDE does not edit production source.
 
-Use `run_logged.py` for builds/tests/verbose commands. Agents never commit or push; the controller commits and pushes after every cycle (decision D8, `.agent/README.md`).
-No gate or frontier claim without `check_gate.py` / `update_frontier.py`. Decision D9
-(user, 2026-09-25): SAGE makes every decision and the swarm never waits for a human; plan
-section 8 lists the former human review points and how SAGE decides each.
+### Autonomous Adversarial Loop
+- Round cycle: CLAUDE directive (§0) → DEEPSEEK work + evidence (§1–§2, optional one-time objection §3) → CLAUDE review & final ruling (§4).
+- Only APPROVED rounds are committed and pushed; REJECTED changes are reverted by DEEPSEEK before new work; REVISE points are fixed in the next round.
+- Intentional deviations (DEV-NNN), "legacy is inconsistent" declarations, and science acceptance are decided by CLAUDE alone.
 
-<!-- ecosys-audit-skill-pack:begin -->
-## ecosys Fortran-to-Zig audit
-For this project, read `ecosys-audit/PROJECT_CONTRACT.md` and
-`ecosys-audit/EVIDENCE_GUIDE.md` before source changes or scientific claims.
-Start or resume from `.agent/README.md` and `.agent/state.md`.
-Canonical portable skills are in `.agents/skills/`; shared resources are in
-`ecosys-audit/`. Preserve the four authoritative directories in the contract.
-Run focused tests during source audit; do not enter repetitive full production
-ReleaseFast runs before the evidence gates pass. Preserve references and user
-changes. Skills are instructions, not proof that this model has been audited.
-<!-- ecosys-audit-skill-pack:end -->
+### Loop Guard: CLAUDE pokes DEEPSEEK when it gets stuck
+Qwen3.8 is a small local model and can get stuck in loops. While a round is in progress, CLAUDE checks the DEEPSEEK pane (about every 10–15 min, and whenever the round stops moving) and **pokes** it with a new direction when it is stuck.
+- **Loop signs**:
+  - the same command, edit or error 3+ times;
+  - re-reading the same files without new findings;
+  - edits that oscillate (applied, reverted, re-applied);
+  - repeated text in the pane or the round file;
+  - no new evidence or file change for ~20 min;
+  - idle without setting `AWAITING_RULING`.
+- **Check**: `herdr --session ecosys-adversarial pane read <DEEPSEEK pane> --source recent --lines 80` (pane id from `herdr --session ecosys-adversarial pane list`, label `DEEPSEEK`).
+- **Poke**: write `.agent/pokes/poke_RRRRR_K.md` (round R, poke K). Keep it short:
+  - what loop was seen;
+  - what to stop doing;
+  - the single next concrete step, with the exact `file:line` or command;
+  - when to hand off.
 
-## Source navigation tooling (added 2026-09-21)
-Do not read `f77src/*.f` directly. Each file is one program unit of up to 13,179 lines
-and the call graph is nearly empty, so paging a routine wastes context and teaches you
-nothing. Use the `ecosys-source-navigation` skill; the tools are in
-`ecosys-audit/scripts/` and verified commands are in
-`audit/manifest/command_registry.json` under `analysis`.
+  Then interrupt and point DEEPSEEK at it:
+  `herdr --session ecosys-adversarial pane send-keys <pane> esc` and
+  `herdr --session ecosys-adversarial pane run <pane> "CLAUDE POKE: stop the current approach. Read .agent/pokes/poke_RRRRR_K.md and follow it."`
+- **Escalation**:
+  - 2nd poke in the same round without progress: reset DEEPSEEK (`/clear`), then send a narrowed directive.
+  - 3rd: rule REVISE or REJECTED and split the target into smaller directives.
+  - Context: Qwen has a 131k window (DEEPSEEK input budget ~96k, directives/pokes ≤ ~6k tokens). When the pane footer shows `ctx` ≥ 75%, reset with `/clear` and restate the directive.
+- **Rules**: DEEPSEEK drops its current approach on a poke, follows the guidance, and notes `Poke K acknowledged` in §1. Pokes are guidance under CLAUDE's authority (final, like rulings). CLAUDE lists the pokes it sent in §4 of the round.
+- Current state: `.agent/state.md`.
+- Roster and roles: `.agent/roster.json`, `.agent/roles/claude.md`, `.agent/roles/deepseek.md`.
+- Execution plan: `ecosys-ng_ottawa_qualification_execution_plan.md`.
+- Adversarial rounds: recorded in `.agent/adversarial/round_NNNNN.md`.
+- Orchestrator: `scripts/start-adversarial.sh` / `ecosys-audit/scripts/adversarial_runner.py`.
 
-- `f77query.py outline <file>` -- loop nest plus prose comments; turns 13,179 lines into ~109.
-- `f77query.py show <file> --loop <label> | --lines N-M`, `common <BLK> --users`,
-  `grep <re>` (reports enclosing unit and innermost loop), `units`, `loops`, `stats`.
-- `tracecov.py` -- computed statement coverage, stale-hash and broken-path problems.
-- `bindcheck.py` -- COMMON state inventory vs the Zig port; a worklist, not coverage.
-- `kernelgen.py <ROUTINE>` -- matched-state gfortran oracle plus a byte-layout manifest.
-
-Run all of them as `uv run ecosys-audit/scripts/<tool>.py` from the project root; PATH
-`python` here is MSYS2 and is not what they are validated against. Rebuild the index with
-`f77index.py` after any `f77src/` change.
-
-Three dialect facts that silently produce wrong science if assumed wrong: the legacy build
-is `ifort -r8 -i4` and **no `IMPLICIT` statement exists anywhere**, so every
-implicitly-typed real is **f64**; array lower bounds are often 0, not 1, and Fortran is
-column-major; `f77src/redist_utf8.f` is an out-of-build duplicate of `redist.f` and is not
-the reference. `ifort` is not installed on this host -- gfortran 16.1 reproduces the
-precision contract only, and its Fortran 2023 `SPLIT` intrinsic shadows this project's
-`split.f`, so `soil.f` needs `EXTERNAL split` or `-std=f95`.
-
-These tools parse text. They do not compile the model, prove equivalence, or decide a
-gate; `check_gate.py` owns gate status and a coverage percentage is not a pass. Quote each
-tool's own `limitations` field alongside any number you report.
-
+### Project Mission & Rules
+- **Goal**: Full 30-year Ottawa run for `ecosys-ng` with zero science gap against legacy Fortran (`f77src/`) and outputs scientifically comparable to legacy Fortran outputs.
+- **Continuous Dance**: No stopping hooks or artificial budget halts; the models iterate and challenge each other continuously until verified completion.
+- **Protected directories**: `f77src/` (read-only reference), `f77example/`, `ecosys-ng-prod-examples/`.
+- **Dialect facts**: Fortran legacy is `-r8 -i4` (all implicit reals are f64); arrays often 0-indexed and column-major.
+- Strict conservation of mass, energy, and biogeochemical pools across all solvers and timesteps.

@@ -1,6 +1,6 @@
 ---
 name: ecosys-multi-agent-coordination
-description: "Coordinate the 4-agent ecosys swarm (SENTINEL, PATHFINDER, FORGE, SAGE) without conflicting edits or duplicate full runs. Use for subsystem ownership, independent verification and cross-harness handoffs."
+description: "Coordinate the worker/judge adversarial workflow (DEEPSEEK: local Qwen3.8-35B-A3B-Distill is the main worker; CLAUDE: Claude Opus 5.5 is reviewer, critic, supervisor and judge with the final say) without conflicting edits or duplicate full runs. Use for round directives, reviews, rulings, and cross-harness verification."
 ---
 
 
@@ -25,13 +25,15 @@ Workers return patch/commit identity, exact source mappings, minimal reproducer,
 The coordinator integrates one coherent change set at a time, checks for shared state/interface conflicts, resolves imports/build definitions, reruns affected tests and updates the candidate manifest. Merge order matters for numerical/state changes; do not reuse branch-level success as final integrated success. The final production, output and performance evidence must concern the same integrated candidate.
 
 ## Communication and resource control
-The installed team is the 4-agent swarm in Herdr session `ecosys-ng` (`.agent/README.md`).
-Roles, models, write lanes and budgets are defined once in `.agent/roster.json`; dispatch is
-model-free through `swarm_wrapper.py` (never hand-typed `herdr agent prompt`, no terminal
-scraping, no answering permission dialogs). One bounded question per task; further work needs
-a new falsifiable question, not a renamed repeat. Finalize FAIL/STAGNATED/BLOCKED honestly.
-The former Claude-lead / Pi-reviewer lane is retired (`archive/pre-swarm-workflow/`).
-
+The installed team is two models on one Herdr tab (`ADVERSARIAL`, `.agent/README.md`): DEEPSEEK
+(local Qwen3.8-35B-A3B-Distill via llama.cpp) is the main worker; CLAUDE (Claude Opus 5.5) is the
+reviewer, critic, supervisor, idea generator and judge, and its ruling is final. Roles, models,
+authority rules and write lanes are defined once in `.agent/roster.json`. Each round file
+(`.agent/templates/adversarial-round.md`) carries CLAUDE's directive, DEEPSEEK's work and evidence,
+at most one DEEPSEEK objection, and CLAUDE's `**Final Ruling (CLAUDE)**: APPROVED | REVISE | REJECTED`.
+`adversarial_runner.py` commits and pushes only APPROVED rounds. One bounded question per round;
+further work needs a new falsifiable directive, not a renamed repeat. The worker never approves its
+own work. Report FAIL/STAGNATED/BLOCKED honestly.
 `.agent/state.md` is the single current-state file; each worker writes only its task's result
 file; task-scoped DONE never approves a release. This project's durable artifact-first protocol
 intentionally overrides the generic Herdr skill's terminal-first response preference. Use

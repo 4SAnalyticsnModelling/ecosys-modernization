@@ -49,12 +49,40 @@
     {
       "task_id": "T-00247",
       "text": "The P0.4 legacy Ottawa rerun is required to produce the fresh 3-run evidence baseline; a bounded replay cannot establish the approved terminal receipt or restart validity under the detached-driver fix."
+    },
+    {
+      "run_id": "r00007-strict",
+      "text": "627634a restores legacy relayering (freeze-thaw moves no soil material); trajectory differs from first thaw so a fresh hour-0 strict run toward the full 30-year goal is required"
+    },
+    {
+      "run_id": "r00012-strict",
+      "text": "r00017-r00020 fixes (relayering drain, pond transfer gate, explicit gas pressure) change the trajectory from the first thaw; fresh hour-0 strict run toward the full 30-year goal"
+    },
+    {
+      "run_id": "r00013-strict",
+      "text": "r00021-r00024 fixes (topsoil zone draw, explicit macropore discharge) change the trajectory; fresh hour-0 strict run toward the full 30-year goal"
+    },
+    {
+      "run_id": "r00014-strict",
+      "text": "r00025 minimal ZEROS2 macropore discharge gate; fresh hour-0 strict run toward the full 30-year goal"
+    },
+    {
+      "run_id": "r00015-strict",
+      "text": "r00026 SOLUTE entry water reset changes post-tillage trajectory; fresh hour-0 strict run toward the full 30-year goal"
+    },
+    {
+      "run_id": "r00016-strict",
+      "text": "r00026b surface freeze single melting temperature and r00028 site restoration; fresh hour-0 strict run toward the full 30-year goal"
+    },
+    {
+      "run_id": "r00017-strict",
+      "text": "r00029 surface freeze-thaw clamp; fresh hour-0 strict run toward the full 30-year goal"
     }
   ],
   "full_runs": {
     "legacy": 0,
     "survey": 0,
-    "zig": 0
+    "zig": 7
   },
   "halts": [
     {

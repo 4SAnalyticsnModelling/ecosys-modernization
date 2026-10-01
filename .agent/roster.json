@@ -1,15 +1,44 @@
 {
-  "schema_version": 1,
-  "note": "Single source of truth for the 4-agent swarm (execution plan section 2). swarm_wrapper.py reads this; edit here, not in code. Budgets: minutes are enforced by the wrapper; tokens are recorded only when the harness reports them.",
-  "herdr_session": "ecosys-ng",
-  "controller": {"tab_label": "CONTROLLER", "pane_label": "CONTROLLER", "command": "scripts/start-swarm.sh [--resume]"},
+  "schema_version": 3,
+  "note": "Single source of truth for the worker/judge adversarial workflow. DEEPSEEK (local Qwen3.8-35B-A3B-Distill on llama.cpp through the DeepSeek Harness) is the main worker. CLAUDE (Claude Opus 5.5) is the reviewer, critic, supervisor, idea generator and judge; CLAUDE's ruling is final. The loop runs until the complete Ottawa qualification has zero science gap and output parity against legacy Fortran.",
+  "herdr_session": "ecosys-adversarial",
+  "layout": {
+    "tab_label": "ADVERSARIAL",
+    "description": "Single Herdr tab with side-by-side panes: CLAUDE (judge) on the left, DEEPSEEK (worker) on the right",
+    "panes": {
+      "CLAUDE": {
+        "pane_label": "CLAUDE",
+        "split_direction": "initial",
+        "role": "CLAUDE"
+      },
+      "DEEPSEEK": {
+        "pane_label": "DEEPSEEK",
+        "split_direction": "right",
+        "role": "DEEPSEEK"
+      }
+    }
+  },
+  "controller": {
+    "tab_label": "ADVERSARIAL",
+    "command": "scripts/start-adversarial.sh"
+  },
   "executables": {
-    "note": "Launched directly with a short `pane run`, then detected and named (2026-09-25). `herdr agent start` types a ~1.5k-char PowerShell shim into the zsh pane at 1-6 chars/s and times out; the npm `opencode` shell shim is not detected by Herdr. Use forward slashes (valid in zsh, bash and pwsh).",
-    "opencode": "C:/Users/symon.mezbahuddin/AppData/Roaming/npm/node_modules/opencode-ai/bin/opencode.exe",
-    "claude": "C:/Users/symon.mezbahuddin/.local/bin/claude.exe"
+    "claude": "C:/Users/symon.mezbahuddin/.local/bin/claude.exe",
+    "deepseek": "C:/Users/symon.mezbahuddin/AppData/Roaming/npm/dsh.cmd",
+    "llama_server": "http://127.0.0.1:8090/v1"
+  },
+  "token_frugality": {
+    "enabled": true,
+    "max_round_prompt_tokens": 12000,
+    "max_round_result_words": 600,
+    "rules": [
+      "Never paste raw logs or dump entire source files into prompts or rounds.",
+      "Always cite exact file:line references and SHA256 hashes.",
+      "Use targeted f77query and ripgrep tools rather than broad repo reads.",
+      "Store bulky test artifacts and logs in audit/runs/ and cite only the receipt path and summary metrics."
+    ]
   },
   "git": {
-    "note": "Decision D8 (user, 2026-09-25): autonomous commit AND push after every cycle. The controller commits only the paths the cycle changed; production source is withheld until a SAGE APPROVE matches the current diff; never force-push, pull, rebase or merge.",
     "commit": true,
     "push": true,
     "remote": "origin",
@@ -19,67 +48,162 @@
     "authorized_on": "2026-09-25"
   },
   "roles": {
-    "SENTINEL": {
-      "agent_name": "sentinel",
-      "pane_label": "SENTINEL",
-      "kind": "opencode",
-      "model": "github-copilot/mai-code-1.1-flash",
-      "variant": "high",
-      "launch_args": ["--agent", "sentinel", "-m", "github-copilot/mai-code-1.1-flash", "--auto"],
-      "reset_command": "/new",
-      "reset_marker": "Ask anything",
-      "prompt_file": ".agent/roles/sentinel.md",
-      "skills": [],
-      "budget": {"minutes": 5, "tool_calls": 5, "input_tokens": 40000},
-      "may_write": [".agent/dispatch.json", ".agent/current_task.md", ".agent/tasks/"],
-      "may_edit_production_source": false
-    },
-    "PATHFINDER": {
-      "agent_name": "pathfinder",
-      "pane_label": "PATHFINDER",
-      "kind": "opencode",
-      "model": "github-copilot/mai-code-1.1-flash",
-      "variant": "high",
-      "launch_args": ["--agent", "pathfinder", "-m", "github-copilot/mai-code-1.1-flash", "--auto"],
-      "reset_command": "/new",
-      "reset_marker": "Ask anything",
-      "prompt_file": ".agent/roles/pathfinder.md",
-      "skills": ["ecosys-source-navigation", "ecosys-divergence-diagnosis", "ecosys-fortran-zig-traceability"],
-      "budget": {"minutes": 30, "tool_calls": 20, "input_tokens": 150000},
-      "may_write": [".agent/results/", ".agent/failures/", "audit/analysis/", "audit/runs/", "evidence/"],
-      "may_edit_production_source": false
-    },
-    "FORGE": {
-      "agent_name": "forge",
-      "pane_label": "FORGE",
-      "kind": "opencode",
-      "model": "github-copilot/gemini-3.8-flash",
-      "variant": "high",
-      "variant_note": "Applied by swarm_wrapper.py at every launch via OpenCode's /variants picker and verified on the status line (the user-wide state file is rewritten by every running instance, so it cannot hold the setting).",
-      "launch_args": ["--agent", "forge", "-m", "github-copilot/gemini-3.8-flash", "--auto"],
-      "reset_command": "/new",
-      "reset_marker": "Ask anything",
-      "prompt_file": ".agent/roles/forge.md",
-      "skills": ["ecosys-zig-safety-design", "ecosys-validation-tests"],
-      "budget": {"minutes": 60, "tool_calls": null, "input_tokens": 250000},
-      "may_write": ["ecosys-ng/src/", "ecosys-ng/build.zig", ".agent/results/", ".agent/tasks/T-*.hypothesis.md", "audit/runs/", "audit/issues/", "ecosys-audit/scripts/", "ecosys-audit/tests/"],
-      "may_edit_production_source": true
-    },
-    "SAGE": {
-      "agent_name": "sage",
-      "pane_label": "SAGE",
+    "CLAUDE": {
+      "agent_name": "claude",
+      "tab_label": "ADVERSARIAL",
+      "pane_label": "CLAUDE",
       "kind": "claude",
       "model": "claude-opus-5-5",
-      "launch_args": ["--dangerously-skip-permissions", "--strict-mcp-config"],
+      "launch_args": [
+        "--dangerously-skip-permissions",
+        "--strict-mcp-config"
+      ],
       "reset_command": "/clear",
-      "prompt_file": ".agent/roles/sage.md",
-      "skills_one_of": ["ecosys-process-science-parity", "ecosys-conservation-audit", "ecosys-nonlinear-solver-audit", "ecosys-feature-attribution"],
-      "budget": {"minutes": 45, "tool_calls": null, "input_tokens": 200000},
-      "may_write": [".agent/results/", "audit/intentional-deviations.md", "audit/output-provenance.csv", "audit/science-invariants.md", "audit/unresolved-gaps.md"],
-      "may_edit_production_source": false
+      "prompt_file": ".agent/roles/claude.md",
+      "skills": [
+        "ecosys-process-science-parity",
+        "ecosys-conservation-audit",
+        "ecosys-nonlinear-solver-audit",
+        "ecosys-feature-attribution",
+        "ecosys-output-comparison",
+        "ecosys-release-verification",
+        "ecosys-zig-safety-design"
+      ],
+      "budget": {
+        "minutes": 45,
+        "tool_calls": null,
+        "input_tokens": 150000
+      },
+      "may_write": [
+        ".agent/adversarial/",
+        ".agent/tasks/",
+        ".agent/state.md",
+        "audit/intentional-deviations.md",
+        "audit/output-provenance.csv",
+        "audit/science-invariants.md",
+        "audit/unresolved-gaps.md",
+        "audit/issues/",
+        "audit/reviews/",
+        ".agent/pokes/"
+      ],
+      "may_edit_production_source": false,
+      "function": "Reviewer, critic, supervisor, idea generator and judge (final say)"
+    },
+    "DEEPSEEK": {
+      "agent_name": "deepseek",
+      "tab_label": "ADVERSARIAL",
+      "pane_label": "DEEPSEEK",
+      "kind": "deepseek",
+      "function": "Main worker: investigation, implementation, tests and runs",
+      "model": "local/qwen3.8-35b-a3b-distill",
+      "provider": {
+        "id": "local",
+        "displayName": "Local (llama.cpp)",
+        "baseURL": "http://127.0.0.1:8090/v1",
+        "api": "openai-completions"
+      },
+      "variant_note": "Qwen3.8-35B-A3B-Distill served locally by llama.cpp through the DeepSeek Harness 'local' provider. DEEPSEEK is the main worker; its work is final only after CLAUDE approves it.",
+      "launch_args": [
+        "--agent",
+        "deepseek",
+        "-m",
+        "local/qwen3.8-35b-a3b-distill"
+      ],
+      "reset_command": "/clear",
+      "prompt_file": ".agent/roles/deepseek.md",
+      "skills": [
+        "ecosys-source-navigation",
+        "ecosys-divergence-diagnosis",
+        "ecosys-fortran-zig-traceability",
+        "ecosys-zig-safety-design",
+        "ecosys-validation-tests",
+        "ecosys-output-comparison",
+        "ecosys-conservation-audit"
+      ],
+      "budget": {
+        "minutes": 45,
+        "tool_calls": null,
+        "context_window_tokens": 131072,
+        "input_tokens": 96000,
+        "max_round_prompt_tokens": 6000,
+        "max_output_tokens_per_turn": 8192,
+        "reset_at_context_percent": 75,
+        "note": "Sized for local Qwen3.8-35B-A3B-Distill (131k context). The ~35k left over covers generation and thinking. At 75% context (~98k), or after a poke-2 escalation, CLAUDE resets DEEPSEEK with /clear and restates the directive."
+      },
+      "may_write": [
+        "ecosys-ng/src/",
+        "ecosys-ng/build.zig",
+        ".agent/results/",
+        ".agent/adversarial/",
+        "audit/analysis/",
+        "audit/runs/",
+        "audit/issues/",
+        "ecosys-audit/scripts/",
+        "ecosys-audit/tests/"
+      ],
+      "may_edit_production_source": true
     }
   },
-  "always_writable": [".agent/archive/", ".agent/metrics.csv", ".agent/runtime/", ".agent/locks/"],
-  "production_source_prefixes": ["ecosys-ng/src/", "ecosys-ng/build.zig"],
-  "protected_prefixes": ["f77src/", "f77example/", "ecosys-ng-prod-examples/", "audit/handoff.md"]
+  "always_writable": [
+    ".agent/archive/",
+    ".agent/metrics.csv",
+    ".agent/runtime/",
+    ".agent/adversarial/",
+    ".agent/locks/"
+  ],
+  "production_source_prefixes": [
+    "ecosys-ng/src/",
+    "ecosys-ng/build.zig"
+  ],
+  "protected_prefixes": [
+    "f77src/",
+    "f77example/",
+    "ecosys-ng-prod-examples/"
+  ],
+  "authority": {
+    "worker": "DEEPSEEK",
+    "judge": "CLAUDE",
+    "final_say": "CLAUDE",
+    "rulings": [
+      "APPROVED",
+      "REVISE",
+      "REJECTED"
+    ],
+    "ruling_marker": "**Final Ruling (CLAUDE)**:",
+    "rules": [
+      "DEEPSEEK does the investigation, implementation, tests and runs; it never rules on its own work.",
+      "CLAUDE reviews every DEEPSEEK round, issues directives and ideas, and rules APPROVED, REVISE or REJECTED. That ruling is final and is not appealed or re-litigated.",
+      "DEEPSEEK may record one written objection in the round, with evidence. CLAUDE reads it before ruling, but the ruling stands once given.",
+      "Only APPROVED rounds are committed and pushed. After REJECTED, DEEPSEEK reverts the rejected change before doing new work; after REVISE, it addresses every listed point in the next round.",
+      "Intentional deviations (DEV-NNN), declarations that legacy is inconsistent, and science acceptance are decided only by CLAUDE.",
+      "CLAUDE watches DEEPSEEK for loops and pokes it with new direction (see loop_guard). A poke carries CLAUDE's authority; DEEPSEEK drops its current approach and follows it."
+    ]
+  },
+  "loop_guard": {
+    "owner": "CLAUDE",
+    "target": "DEEPSEEK",
+    "check_every_minutes": "10-15",
+    "no_progress_minutes": 20,
+    "repeat_threshold": 3,
+    "loop_signs": [
+      "same command, edit or error repeated 3+ times",
+      "re-reading the same files without new findings",
+      "oscillating edits (apply/revert/re-apply)",
+      "repeated text in the pane or round file",
+      "no new evidence or file change for ~20 min",
+      "idle without setting AWAITING_RULING"
+    ],
+    "poke_file": ".agent/pokes/poke_RRRRR_K.md",
+    "read_command": "herdr --session ecosys-adversarial pane read <DEEPSEEK pane> --source recent --lines 80",
+    "deliver_commands": [
+      "herdr --session ecosys-adversarial pane send-keys <DEEPSEEK pane> esc",
+      "herdr --session ecosys-adversarial pane run <DEEPSEEK pane> \"CLAUDE POKE: stop the current approach. Read .agent/pokes/poke_RRRRR_K.md and follow it.\""
+    ],
+    "escalation": [
+      "poke 1: guidance file + interrupt",
+      "poke 2 without progress: /clear DEEPSEEK and send a narrowed directive",
+      "poke 3: rule REVISE or REJECTED and split the target",
+      "context >= 75% of 131k (shown as 'ctx NN%' in the DEEPSEEK pane footer): /clear DEEPSEEK and restate the directive"
+    ]
+  }
 }

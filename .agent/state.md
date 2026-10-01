@@ -1,10 +1,21 @@
 # Adversarial Workflow State
 
+<!-- runner:begin -->
+## Runner: round 00057 (2026-10-01 20:42:30Z)
+- Worker: DEEPSEEK (local Qwen3.8-35B-A3B-Distill). Judge: CLAUDE (Claude Opus 5.5, final say).
+- Round status: AWAITING_RULING (no final CLAUDE ruling yet)
+<!-- runner:end -->
+
 Updated 2026-10-01 00:30 (local). Plan: Complete 30-Year Ottawa Run with Zero Science Gap.
 
-## Current Round: 52
-- Proposer: CLAUDE. Challenger: DEEPSEEK (r49 DEV-020 confirmed, r50 DEV-021 confirmed, r51 band sliver legacy
-  gates, r52 challenge of 7ebb94a).
+## Roles (from 2026-10-01): worker/judge
+- Worker: DEEPSEEK (local Qwen3.8-35B-A3B-Distill, llama.cpp 127.0.0.1:8090). Judge: CLAUDE (Claude Opus 5.5);
+  CLAUDE's ruling is final. Proposer/challenger alternation is retired.
+- Transition: round_00057_deepseek.md (old format, accepted in e801fd8) has no `**Final Ruling (CLAUDE)**:` line, so
+  the runner waits on it. CLAUDE closes it with a ruling, and the runner then opens round 00058 in the new format.
+
+## Last old-format rounds
+- r49 DEV-020 confirmed, r50 DEV-021 confirmed, r51 band sliver legacy gates, r52 challenge of 7ebb94a, r57 DEV-003.
 
 ## LIVE: r00019-strict (fresh hour-0 run, resumed from its 4800 checkpoint with 7ebb94a)
 - Past 1998 d209 h20 (hour 5012) after DEV-021 (9a363ea, molarity guards skip <1e-12 zones) and 7ebb94a (exact
