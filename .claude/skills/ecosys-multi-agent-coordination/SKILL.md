@@ -1,6 +1,6 @@
 ---
 name: ecosys-multi-agent-coordination
-description: "Coordinate the worker/judge adversarial workflow (DEEPSEEK: local Qwen3.8-27B does all the work; CLAUDE: Claude Opus 5.5 handles deep diagnosis, cross-language reasoning, architecture and the final scientific review, with the final say) without conflicting edits or duplicate full runs. Use for round planning, escalations, reviews, rulings, and cross-harness verification."
+description: "Coordinate the worker/judge adversarial workflow (DEEPSEEK: local Qwen3.5-35B-A3B does all the work; CLAUDE: Claude Opus 5.5 handles deep diagnosis, cross-language reasoning, architecture and the final scientific review, with the final say) without conflicting edits or duplicate full runs. Use for round planning, escalations, reviews, rulings, and cross-harness verification."
 ---
 
 
@@ -26,7 +26,7 @@ The coordinator integrates one coherent change set at a time, checks for shared 
 
 ## Communication and resource control
 The installed team is two models on one Herdr tab (`ADVERSARIAL`, `.agent/README.md`): DEEPSEEK
-(local Qwen3.8-27B via llama.cpp) does all the work; CLAUDE (Claude Opus 5.5) handles only deep
+(local Qwen3.5-35B-A3B via llama.cpp) does all the work; CLAUDE (Claude Opus 5.5) handles only deep
 scientific diagnosis, cross-language reasoning, architecture decisions and the final scientific review,
 guides Qwen when needed, and its ruling is final. Roles, models,
 authority rules and write lanes are defined once in `.agent/roster.json`. Each round file

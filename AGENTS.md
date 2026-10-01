@@ -1,7 +1,7 @@
 ## Workflow: Worker/Judge Adversarial Loop (DEEPSEEK works, CLAUDE judges)
 
 This project operates on an adversarial workflow between two models hosted on the **same Herdr tab in multi-pane** (`ADVERSARIAL` tab: `CLAUDE` on left, `DEEPSEEK` on right):
-1. **DEEPSEEK** (`local/qwen3.8-27b`, local llama.cpp via the DeepSeek Harness): **does all the work**: plans rounds, investigates, implements, builds, tests, runs, self-checks and keeps the ledgers.
+1. **DEEPSEEK** (`local/qwen3.5-35b-a3b`, local llama.cpp via the DeepSeek Harness): **does all the work**: plans rounds, investigates, implements, builds, tests, runs, self-checks and keeps the ledgers.
 2. **CLAUDE** (`claude-opus-5-5`): handles **only** deep scientific diagnosis, cross-language (Fortran → Zig) reasoning, architecture decisions and the final scientific review. It makes the **final judgement call**, and **directs and guides Qwen when needed**. **CLAUDE's decision is final.**
 
 ### Continuous Worker/Judge Loop
@@ -15,7 +15,7 @@ This project operates on an adversarial workflow between two models hosted on th
   - CLAUDE briefs the hard rungs: phase-change splitting, Picard/L-scheme→Newton with safeguarded Anderson, operator splitting, and the legacy explicit sub-cycling fallback.
   - Never loosen tolerances, clamp after the solve, accept an unclosed ledger, or add new "publish best-bounded" deviations.
 - DEEPSEEK never rules on its own work. CLAUDE alone decides intentional deviations (DEV-NNN), legacy-inconsistency claims and architecture; DEEPSEEK records those decisions.
-- **Loop guard**: Qwen3.8 is small and can get stuck in loops. Signs include:
+- **Loop guard**: Qwen3.5 is small and can get stuck in loops. Signs include:
   - the same command, edit or error 3+ times;
   - re-reading the same files without new findings;
   - edits that oscillate (applied, reverted, re-applied);

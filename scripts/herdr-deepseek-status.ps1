@@ -33,7 +33,7 @@ while ($true) {
         # seq must strictly increase across restarts: use wall-clock milliseconds.
         $seq = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
         $out = herdr pane report-agent $pane --source $source --agent $agent --state $state `
-            --message "Qwen3.8-27B worker" --seq $seq 2>&1 | Out-String
+            --message "Qwen3.5-35B-A3B worker" --seq $seq 2>&1 | Out-String
         Add-Content $log "$(Get-Date -Format s) report state=$state listed=$([bool]$listed) rc=$LASTEXITCODE $($out.Trim())"
         herdr agent rename $pane $name 2>$null | Out-Null
         $last = $state

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Start DEEPSEEK (DeepSeek Harness, local Qwen3.8-27B) in the DEEPSEEK Herdr pane
+# Start DEEPSEEK (DeepSeek Harness, local Qwen3.5-35B-A3B) in the DEEPSEEK Herdr pane
 # and register it as the Herdr agent "deepseek".
 # Herdr cannot detect dsh itself (no built-in integration; MSYS hides the node child from its
 # foreground check), so a background reporter inside this pane reports idle/working state.

@@ -1,7 +1,7 @@
 ## Workflow: Worker/Judge Adversarial Loop (DEEPSEEK works, CLAUDE judges)
 
 This project operates on an adversarial workflow between two models hosted on the **same Herdr tab in multi-pane** (`ADVERSARIAL` tab: `CLAUDE` on left, `DEEPSEEK` on right):
-1. **DEEPSEEK** (`local/qwen3.8-27b`, local llama.cpp at `127.0.0.1:8090` via the DeepSeek Harness): **does all the work**.
+1. **DEEPSEEK** (`local/qwen3.5-35b-a3b`, local llama.cpp at `127.0.0.1:8090` via the DeepSeek Harness): **does all the work**.
    - Plans each round.
    - Investigates, implements Zig, builds, tests and runs.
    - Self-checks conservation and traceability.
@@ -85,7 +85,7 @@ The ReleaseFast Ottawa run currently cannot progress further because of converge
 - **Metrics in every solver round**: iterations per hour, substep cuts, S9 fallback hours, max balance residual, ReleaseFast wall time per simulated day.
 
 ### Loop Guard: CLAUDE pokes DEEPSEEK when it gets stuck
-Qwen3.8 is a small local model and can get stuck in loops. While a round is in progress, CLAUDE checks the DEEPSEEK pane (about every 10–15 min, and whenever the round stops moving) and **pokes** it with a new direction when it is stuck.
+Qwen3.5 is a small local model and can get stuck in loops. While a round is in progress, CLAUDE checks the DEEPSEEK pane (about every 10–15 min, and whenever the round stops moving) and **pokes** it with a new direction when it is stuck.
 - **Loop signs**:
   - the same command, edit or error 3+ times;
   - re-reading the same files without new findings;

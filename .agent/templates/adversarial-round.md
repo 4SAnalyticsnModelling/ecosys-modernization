@@ -1,6 +1,6 @@
 # Adversarial Round: {{ROUND_ID}}
 
-- **Worker**: {{WORKER}} (DEEPSEEK — local Qwen3.8-27B; does all the work)
+- **Worker**: {{WORKER}} (DEEPSEEK — local Qwen3.5-35B-A3B; does all the work)
 - **Judge**: {{JUDGE}} (CLAUDE — Claude Opus 5.5; escalations, final scientific review, final ruling)
 - **Focus / Milestone**: Ottawa 30-year run milestone (current frontier / target subsystem)
 - **Status**: {{STATUS}} (PLANNING / IN_PROGRESS / ESCALATED / AWAITING_RULING / RULED)

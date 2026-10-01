@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "note": "Single source of truth for the worker/judge workflow. DEEPSEEK (local Qwen3.8-27B on llama.cpp through the DeepSeek Harness) does all the work. CLAUDE (Claude Opus 5.5) handles only deep scientific diagnosis, cross-language reasoning, architecture decisions and the final scientific review. It also makes the final judgement call, and directs and guides Qwen when needed. CLAUDE's ruling is final.",
+  "note": "Single source of truth for the worker/judge workflow. DEEPSEEK (local Qwen3.5-35B-A3B on llama.cpp through the DeepSeek Harness) does all the work. CLAUDE (Claude Opus 5.5) handles only deep scientific diagnosis, cross-language reasoning, architecture decisions and the final scientific review. It also makes the final judgement call, and directs and guides Qwen when needed. CLAUDE's ruling is final.",
   "herdr_session": "ecosys-adversarial",
   "layout": {
     "tab_label": "ADVERSARIAL",
@@ -98,19 +98,19 @@
       "pane_label": "DEEPSEEK",
       "kind": "deepseek",
       "function": "Does all the work: plans rounds, investigates, implements, builds, tests, runs, self-checks and keeps the ledgers",
-      "model": "local/qwen3.8-27b",
+      "model": "local/qwen3.5-35b-a3b",
       "provider": {
         "id": "local",
         "displayName": "Local (llama.cpp)",
         "baseURL": "http://127.0.0.1:8090/v1",
         "api": "openai-completions"
       },
-      "variant_note": "Qwen3.8-27B served locally by llama.cpp through the DeepSeek Harness 'local' provider. DEEPSEEK does all the work; its work is final only after CLAUDE approves it.",
+      "variant_note": "Qwen3.5-35B-A3B served locally by llama.cpp through the DeepSeek Harness 'local' provider. DEEPSEEK does all the work; its work is final only after CLAUDE approves it.",
       "launch_args": [
         "--agent",
         "deepseek",
         "-m",
-        "local/qwen3.8-27b"
+        "local/qwen3.5-35b-a3b"
       ],
       "reset_command": "/clear",
       "prompt_file": ".agent/roles/deepseek.md",
@@ -131,7 +131,7 @@
         "max_round_prompt_tokens": 6000,
         "max_output_tokens_per_turn": 8192,
         "reset_at_context_percent": 75,
-        "note": "Sized for local Qwen3.8-27B (131k context). The ~35k left over covers generation and thinking. At 75% context (~98k), or after a poke-2 escalation, CLAUDE resets DEEPSEEK with /clear and restates the directive."
+        "note": "Sized for local Qwen3.5-35B-A3B (131k context). The ~35k left over covers generation and thinking. At 75% context (~98k), or after a poke-2 escalation, CLAUDE resets DEEPSEEK with /clear and restates the directive."
       },
       "may_write": [
         "ecosys-ng/src/",

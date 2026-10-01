@@ -1,14 +1,14 @@
 # .agent — Worker/Judge Adversarial Control Plane
 
 Continuous, token-frugal workflow between two models:
-1. **DEEPSEEK** (`local/qwen3.8-27b`, local llama.cpp at `http://127.0.0.1:8090/v1` via the DeepSeek Harness `local` provider): **does all the work** — plans rounds, investigates, implements, builds, tests, runs, self-checks and keeps the ledgers.
+1. **DEEPSEEK** (`local/qwen3.5-35b-a3b`, local llama.cpp at `http://127.0.0.1:8090/v1` via the DeepSeek Harness `local` provider): **does all the work** — plans rounds, investigates, implements, builds, tests, runs, self-checks and keeps the ledgers.
 2. **CLAUDE** (`claude-opus-5-5`): only **deep scientific diagnosis, cross-language reasoning, architecture decisions and the final scientific review**; makes the **final judgement call** and **directs and guides Qwen when needed**. **CLAUDE's decision is final.**
 
 ## Herdr Layout: Single Tab Multi-Pane
 Both agents operate side-by-side in **the same Herdr tab** (`ADVERSARIAL`):
 - **Tab Label**: `ADVERSARIAL`
 - **Left Pane (`CLAUDE`)**: Claude Opus 5.5 — specialist, final reviewer and judge
-- **Right Pane (`DEEPSEEK`)**: Qwen3.8-27B (local llama.cpp, DeepSeek Harness) — does all the work
+- **Right Pane (`DEEPSEEK`)**: Qwen3.5-35B-A3B (local llama.cpp, DeepSeek Harness) — does all the work
 
 Layout setup script: `scripts/setup-adversarial-layout.ps1` (or `.sh`).
 Start DEEPSEEK in its pane with `scripts/start-deepseek.sh`. Herdr has no dsh integration, so the launcher also
@@ -32,7 +32,7 @@ rejected change before new work. Rulings are not appealed; a closed point is reo
   acceptance. DEEPSEEK records those decisions (`audit/intentional-deviations.md`). CLAUDE does not write routine plans,
   implement, run routine tests, keep the books or edit production source; it guides DEEPSEEK when needed.
 - DEEPSEEK never rules on, approves, or commits its own work.
-- **Loop guard**: Qwen3.8 can get stuck in loops. CLAUDE watches the DEEPSEEK pane and pokes it with a new direction
+- **Loop guard**: Qwen3.5 can get stuck in loops. CLAUDE watches the DEEPSEEK pane and pokes it with a new direction
   (`pokes/poke_RRRRR_K.md` + Esc + a one-line pointer via Herdr). Escalation: 2nd poke → `/clear` reset and a
   narrowed target; 3rd → REVISE/REJECTED. Rule and commands: `CLAUDE.md` (Loop Guard); settings: `roster.json` `loop_guard`.
 - **Convergence & balance failures** (ReleaseFast run stalls): `playbooks/convergence-and-balance.md`. CLAUDE leads the

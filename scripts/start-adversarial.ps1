@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Start or run the worker/judge adversarial runner in PowerShell.
-    DEEPSEEK (local Qwen3.8-27B, llama.cpp) works; CLAUDE (Claude Opus 5.5) reviews and rules.
+    DEEPSEEK (local Qwen3.5-35B-A3B, llama.cpp) works; CLAUDE (Claude Opus 5.5) reviews and rules.
     CLAUDE's ruling is final; only APPROVED rounds are committed and pushed.
 #>
 param(

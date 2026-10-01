@@ -4,7 +4,7 @@
 # ///
 """Worker/judge adversarial workflow orchestrator for ecosys-modernization.
 
-- DEEPSEEK (local Qwen3.8-27B on llama.cpp via the DeepSeek Harness): does all the work.
+- DEEPSEEK (local Qwen3.5-35B-A3B on llama.cpp via the DeepSeek Harness): does all the work.
 - CLAUDE (Claude Opus 5.5): deep scientific diagnosis, cross-language reasoning, architecture decisions,
   final scientific review and final judgement; guides Qwen when needed. Its ruling is final.
 
@@ -100,7 +100,7 @@ def update_state(round_num: int, worker: str, judge: str, status: str) -> None:
     block = (
         f"{STATE_BEGIN}\n"
         f"## Runner: round {round_num:05d} ({time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime())})\n"
-        f"- Worker: {worker} (local Qwen3.8-27B). Judge: {judge} (Claude Opus 5.5, final say).\n"
+        f"- Worker: {worker} (local Qwen3.5-35B-A3B). Judge: {judge} (Claude Opus 5.5, final say).\n"
         f"- Round status: {status}\n"
         f"{STATE_END}\n"
     )

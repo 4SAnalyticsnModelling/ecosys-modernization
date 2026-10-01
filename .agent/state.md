@@ -2,14 +2,14 @@
 
 <!-- runner:begin -->
 ## Runner: round 00057 (2026-10-01 20:42:30Z)
-- Worker: DEEPSEEK (local Qwen3.8-27B). Judge: CLAUDE (Claude Opus 5.5, final say).
+- Worker: DEEPSEEK (local Qwen3.5-35B-A3B). Judge: CLAUDE (Claude Opus 5.5, final say).
 - Round status: AWAITING_RULING (no final CLAUDE ruling yet)
 <!-- runner:end -->
 
 Updated 2026-10-01 00:30 (local). Plan: Complete 30-Year Ottawa Run with Zero Science Gap.
 
 ## Roles (from 2026-10-01): worker/judge
-- Worker: DEEPSEEK (local Qwen3.8-27B, llama.cpp 127.0.0.1:8090) does all the work, including planning rounds
+- Worker: DEEPSEEK (local Qwen3.5-35B-A3B, llama.cpp 127.0.0.1:8090) does all the work, including planning rounds
   and keeping this file. CLAUDE (Claude Opus 5.5): deep diagnosis, cross-language reasoning, architecture, final
   scientific review and final ruling; guides Qwen when needed. Proposer/challenger alternation is retired.
 - Transition: round_00057_deepseek.md (old format, accepted in e801fd8) has no `**Final Ruling (CLAUDE)**:` line, so

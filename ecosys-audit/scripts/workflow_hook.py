@@ -5,7 +5,7 @@
 """Claude Code command hooks: adversarial workflow bootstrap.
 
 Provides role bootstrap and guidance for the worker/judge adversarial workflow:
-DEEPSEEK (local Qwen3.8-27B via llama.cpp) does all the work; CLAUDE (Claude Opus 5.5) handles
+DEEPSEEK (local Qwen3.5-35B-A3B via llama.cpp) does all the work; CLAUDE (Claude Opus 5.5) handles
 deep diagnosis, cross-language reasoning, architecture, final scientific review and the final ruling.
 Never denies operations or halts progress towards the full Ottawa qualification goal.
 """
@@ -21,7 +21,7 @@ from workflow import ROOT, ProtocolError
 ROLES = ("claude", "deepseek")
 
 PROJECT_BOOTSTRAP = (
-    "This project runs a worker/judge adversarial workflow: DEEPSEEK (local Qwen3.8-27B "
+    "This project runs a worker/judge adversarial workflow: DEEPSEEK (local Qwen3.5-35B-A3B "
     "via llama.cpp) does all the work; CLAUDE (Claude Opus 5.5) handles only deep scientific diagnosis, "
     "cross-language reasoning, architecture decisions and final scientific review, guides Qwen when needed, "
     "and makes the final call. The target is the complete 30-year Ottawa run "
