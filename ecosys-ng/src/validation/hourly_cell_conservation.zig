@@ -832,7 +832,7 @@ pub var diagnostic_nitrogen_trace_hour: usize = 0;
 /// TEMP_DIAGNOSTIC (`issue-100`, re-gated for `issue-103` to the new failing hour 3,277): the failing `acceptHourAndPublish` was
 /// attempted hour 3,276 (`executed_weather_hours + 1`); earlier probes gated on
 /// 3,275 described the last ACCEPTED hour instead.
-pub const diagnostic_nitrogen_trace_target_hour: usize = 3289;
+pub const diagnostic_nitrogen_trace_target_hour: usize = 5012;
 /// TEMP_DIAGNOSTIC (`issue-100`): counts `at_evaluate` invocations in the
 /// target hour, so a retried hour is distinguishable from a single call.
 pub var diagnostic_at_evaluate_invocations: usize = 0;
@@ -2478,6 +2478,15 @@ pub fn evaluateForScope(
                     storage_after[cell].carbon_dioxide_carbon_g - storage_after[cell].diagnostic_soil_gas_carbon_g - storage_after[cell].diagnostic_surface_gas_carbon_g,
                     storage_before[cell].plant_carbon_g,
                     storage_after[cell].plant_carbon_g,
+                },
+            );
+            if (!closure.accepted and !builtin.is_test and quantity == .nitrogen) std.log.err(
+                "{s} {s} nitrogen storage components: {s}={d} residue={e}->{e} organic={e}->{e} dinitrogen={e}->{e} ammonium={e}->{e} nitrate={e}->{e} plant={e}->{e}",
+                .{
+                    @tagName(scope),                         domain_word,                            domain_word,                           cell,
+                    storage_before[cell].residue_nitrogen_g, storage_after[cell].residue_nitrogen_g, storage_before[cell].organic_nitrogen_g, storage_after[cell].organic_nitrogen_g,
+                    storage_before[cell].dinitrogen_nitrogen_g, storage_after[cell].dinitrogen_nitrogen_g, storage_before[cell].ammonium_nitrogen_g, storage_after[cell].ammonium_nitrogen_g,
+                    storage_before[cell].nitrate_nitrogen_g, storage_after[cell].nitrate_nitrogen_g, storage_before[cell].plant_nitrogen_g, storage_after[cell].plant_nitrogen_g,
                 },
             );
             if (!closure.accepted and !builtin.is_test and quantity == .heat) std.log.err(

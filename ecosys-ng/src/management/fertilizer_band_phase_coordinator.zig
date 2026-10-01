@@ -48,6 +48,13 @@ pub const Coordinator = struct {
     active_by_family: [3]bool,
     first_active_layer_by_family: [3]usize,
     last_active_layer_by_family: [3]usize,
+    /// Exact pre-HOUR1 band fractions of the pending hour. Rebuilding them
+    /// from FVL as 1 - VLNH4'/(1+FVL) cancels catastrophically for a sliver
+    /// band (1e-14 carries ~1e-2 relative error), so the concentration owners
+    /// would lose mass. Transient: a checkpoint restored mid-hour falls back
+    /// to the FVL reconstruction.
+    pre_prepare_band_fraction: []f64,
+    pre_prepare_band_fraction_exact: bool = false,
 
     pub fn init(
         allocator: std.mem.Allocator,
@@ -58,8 +65,11 @@ pub const Coordinator = struct {
         const relative = try allocator.alloc(f64, extent);
         errdefer allocator.free(relative);
         const disappeared = try allocator.alloc(bool, extent);
+        errdefer allocator.free(disappeared);
+        const pre_band = try allocator.alloc(f64, extent);
         @memset(relative, 0);
         @memset(disappeared, false);
+        @memset(pre_band, 0);
         return .{
             .allocator = allocator,
             .layer_count = layer_count,
@@ -73,10 +83,12 @@ pub const Coordinator = struct {
             .active_by_family = .{ false, false, false },
             .first_active_layer_by_family = .{ 0, 0, 0 },
             .last_active_layer_by_family = .{ 0, 0, 0 },
+            .pre_prepare_band_fraction = pre_band,
         };
     }
 
     pub fn deinit(self: *Coordinator) void {
+        self.allocator.free(self.pre_prepare_band_fraction);
         self.allocator.free(self.band_disappeared);
         self.allocator.free(self.relative_non_band_change);
         self.* = undefined;
@@ -92,6 +104,8 @@ pub const Coordinator = struct {
         self.next_consume_family = 0;
         @memset(self.relative_non_band_change, 0);
         @memset(self.band_disappeared, false);
+        @memset(self.pre_prepare_band_fraction, 0);
+        self.pre_prepare_band_fraction_exact = true;
     }
 
     /// HOUR1 phase. Calls must retain source family order NH4, NO3, PO4.
@@ -108,8 +122,13 @@ pub const Coordinator = struct {
         const family_index = @intFromEnum(family);
         if (family_index != self.next_prepare_family)
             return error.FertilizerBandPrepareOrderViolation;
-        if (state.band_depth_m.len != self.layer_count)
+        if (state.band_depth_m.len != self.layer_count or
+            state.band_volume_fraction.len != self.layer_count)
             return error.FertilizerBandCoordinatorDimensionMismatch;
+        @memcpy(
+            self.pre_prepare_band_fraction[family_index * self.layer_count ..][0..self.layer_count],
+            state.band_volume_fraction,
+        );
         try geometry_module.update(
             state,
             layer_geometry,
@@ -224,6 +243,20 @@ pub const Coordinator = struct {
             relative_non_band_change,
         );
         @memcpy(self.band_disappeared, band_disappeared);
+        self.pre_prepare_band_fraction_exact = false;
+    }
+
+    /// Exact pre-HOUR1 band fraction while an hour is pending, or null when
+    /// only the FVL reconstruction is available.
+    pub fn prePrepareBandFraction(
+        self: *const Coordinator,
+        family: Family,
+        layer: usize,
+    ) ?f64 {
+        if (!self.pre_prepare_band_fraction_exact or self.phase == .idle or
+            self.phase == .preparing or layer >= self.layer_count)
+            return null;
+        return self.pre_prepare_band_fraction[@as(usize, @intFromEnum(family)) * self.layer_count + layer];
     }
 
     pub fn persistentRelativeChanges(

@@ -919,7 +919,7 @@ pub fn traceIssue100LayerAmmonium(context: anytype, label: []const u8, hour: usi
     if (hour != ecosys.hourly_cell_conservation.diagnostic_nitrogen_trace_target_hour) return;
     const totals = try reconstructLandscapeMassBalance(context);
     const n = context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol;
-    const layer: usize = 2;
+    const layer: usize = 10;
     const matrix = try context.mineral_nitrogen_transport.matrix.cellAmountsConst(layer);
     const macro = try context.mineral_nitrogen_transport.macropore.cellAmountsConst(layer);
     const S = ecosys.mineral_nitrogen_transport.Species;
@@ -974,7 +974,7 @@ pub fn traceIssue103LayerNitrate(context: anytype, label: []const u8, hour: usiz
     const totals = try reconstructLandscapeMassBalance(context);
     const n = context.runscript.fertilizer_nitrogen_molar_mass_g_per_mol;
     const S = ecosys.mineral_nitrogen_transport.Species;
-    inline for (.{ 1, 2 }) |layer| {
+    inline for (.{10}) |layer| {
         const matrix = try context.mineral_nitrogen_transport.matrix.cellAmountsConst(layer);
         const macro = try context.mineral_nitrogen_transport.macropore.cellAmountsConst(layer);
         const fractions = try context.fertilizer_band.scienceZoneFractionsForFlatIndex(layer);

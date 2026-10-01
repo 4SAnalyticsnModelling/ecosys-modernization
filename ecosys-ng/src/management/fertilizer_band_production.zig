@@ -185,17 +185,17 @@ pub fn consumeUndissolved(
         for (0..count) |layer| {
             const fractions = try state.zoneFractions(cell, layer);
             const exchange = chemistry.cation_exchange_mol_per_megagram[base + layer];
-            const next = try repartitionConcentrations(exchange.ammonium_non_band, exchange.ammonium_band, fractions.ammonium_non_band, fractions.ammonium_band, relative_ammonium_change[layer]);
+            const next = try repartitionConcentrations(exchange.ammonium_non_band, exchange.ammonium_band, fractions.ammonium_non_band, fractions.ammonium_band, relative_ammonium_change[layer], coordinator.prePrepareBandFraction(.ammonium, layer));
             next_exchange[base + layer].ammonium_non_band = next.non_band;
             next_exchange[base + layer].ammonium_band = next.band;
             const aqueous = chemistry.aqueous[base + layer];
-            const next_ammonium = try repartitionConcentrations(aqueous.ammonium_non_band, aqueous.ammonium_band, fractions.ammonium_non_band, fractions.ammonium_band, relative_ammonium_change[layer]);
-            const next_ammonia = try repartitionConcentrations(aqueous.ammonia_non_band, aqueous.ammonia_band, fractions.ammonium_non_band, fractions.ammonium_band, relative_ammonium_change[layer]);
+            const next_ammonium = try repartitionConcentrations(aqueous.ammonium_non_band, aqueous.ammonium_band, fractions.ammonium_non_band, fractions.ammonium_band, relative_ammonium_change[layer], coordinator.prePrepareBandFraction(.ammonium, layer));
+            const next_ammonia = try repartitionConcentrations(aqueous.ammonia_non_band, aqueous.ammonia_band, fractions.ammonium_non_band, fractions.ammonium_band, relative_ammonium_change[layer], coordinator.prePrepareBandFraction(.ammonium, layer));
             next_aqueous[base + layer].ammonium_non_band = next_ammonium.non_band;
             next_aqueous[base + layer].ammonium_band = next_ammonium.band;
             next_aqueous[base + layer].ammonia_non_band = next_ammonia.non_band;
             next_aqueous[base + layer].ammonia_band = next_ammonia.band;
-            const next_nitrate = try repartitionConcentrations(aqueous.nitrate_non_band, aqueous.nitrate_band, fractions.nitrate_non_band, fractions.nitrate_band, relative_nitrate_change[layer]);
+            const next_nitrate = try repartitionConcentrations(aqueous.nitrate_non_band, aqueous.nitrate_band, fractions.nitrate_non_band, fractions.nitrate_band, relative_nitrate_change[layer], coordinator.prePrepareBandFraction(.nitrate, layer));
             next_aqueous[base + layer].nitrate_non_band = next_nitrate.non_band;
             next_aqueous[base + layer].nitrate_band = next_nitrate.band;
             const next_nitrite = try repartitionExtensivePair(
@@ -213,6 +213,7 @@ pub fn consumeUndissolved(
                 fractions.phosphate_non_band,
                 fractions.phosphate_band,
                 relative_phosphate_change[layer],
+                coordinator.prePrepareBandFraction(.phosphate, layer),
                 salinity_enabled_by_cell[cell],
             );
         }
@@ -274,6 +275,7 @@ fn stagePhosphatePair(
     new_non_band_fraction: f64,
     new_band_fraction: f64,
     relative_non_band_change: f64,
+    exact_old_band_fraction: ?f64,
     dynamic_salts: bool,
 ) !void {
     inline for (.{
@@ -289,7 +291,7 @@ fn stagePhosphatePair(
         "dicalcium_phosphate_solid_mol_per_m3",
         "hydroxyapatite_solid_mol_per_m3",
         "monocalcium_phosphate_solid_mol_per_m3",
-    }) |name| try stageNamedConcentrationPair(next_non_band, next_band, current_non_band, current_band, name, new_non_band_fraction, new_band_fraction, relative_non_band_change);
+    }) |name| try stageNamedConcentrationPair(next_non_band, next_band, current_non_band, current_band, name, new_non_band_fraction, new_band_fraction, relative_non_band_change, exact_old_band_fraction);
     if (dynamic_salts) inline for (.{
         "dissolved_po4_mol_p_per_m3",
         "dissolved_h3po4_mol_p_per_m3",
@@ -299,7 +301,7 @@ fn stagePhosphatePair(
         "calcium_hpo4_pair_mol_per_m3",
         "calcium_h2po4_pair_mol_per_m3",
         "magnesium_hpo4_pair_mol_per_m3",
-    }) |name| try stageNamedConcentrationPair(next_non_band, next_band, current_non_band, current_band, name, new_non_band_fraction, new_band_fraction, relative_non_band_change);
+    }) |name| try stageNamedConcentrationPair(next_non_band, next_band, current_non_band, current_band, name, new_non_band_fraction, new_band_fraction, relative_non_band_change, exact_old_band_fraction);
 }
 
 fn stageNamedConcentrationPair(
@@ -311,8 +313,9 @@ fn stageNamedConcentrationPair(
     new_non_band_fraction: f64,
     new_band_fraction: f64,
     relative_non_band_change: f64,
+    exact_old_band_fraction: ?f64,
 ) !void {
-    const next = try repartitionConcentrations(@field(current_non_band, name), @field(current_band, name), new_non_band_fraction, new_band_fraction, relative_non_band_change);
+    const next = try repartitionConcentrations(@field(current_non_band, name), @field(current_band, name), new_non_band_fraction, new_band_fraction, relative_non_band_change, exact_old_band_fraction);
     @field(next_non_band.*, name) = next.non_band;
     @field(next_band.*, name) = next.band;
 }
@@ -434,6 +437,7 @@ fn repartitionConcentrations(
     new_non_band_fraction: f64,
     new_band_fraction: f64,
     relative_non_band_change: f64,
+    exact_old_band_fraction: ?f64,
 ) !ConcentrationPair {
     inline for (.{ non_band_concentration, band_concentration, new_non_band_fraction, new_band_fraction, relative_non_band_change }) |value| if (!std.math.isFinite(value)) return error.InvalidBandInventoryState;
     if (non_band_concentration < 0 or band_concentration < 0 or new_non_band_fraction < 0 or new_band_fraction < 0 or @abs(new_non_band_fraction + new_band_fraction - 1) > 1.0e-12 or relative_non_band_change < -1 or relative_non_band_change > 0) return error.InvalidBandInventoryState;
@@ -441,7 +445,10 @@ fn repartitionConcentrations(
     const retained_fraction = 1 + relative_non_band_change;
     if (retained_fraction <= 0 or new_band_fraction <= 0) return error.InvalidBandInventoryState;
     const old_non_band_fraction = new_non_band_fraction / retained_fraction;
-    const old_band_fraction = 1 - old_non_band_fraction;
+    // Same owner as `scienceZoneFractions`: the exact pre-HOUR1 band fraction
+    // when recorded, since 1 - old_non_band cancels for a sliver band.
+    const old_band_fraction = exact_old_band_fraction orelse 1 - old_non_band_fraction;
+    if (!std.math.isFinite(old_band_fraction)) return error.InvalidBandInventoryState;
     if (old_non_band_fraction < 0 or old_non_band_fraction > 1 or old_band_fraction < 0) return error.InvalidBandInventoryState;
     const transferred = -relative_non_band_change * old_non_band_fraction * non_band_concentration;
     const next_band = (old_band_fraction * band_concentration + transferred) / new_band_fraction;
@@ -495,11 +502,25 @@ test "production boundaries reject stale and duplicate hour consumption" {
 }
 
 test "exchangeable ammonium concentration repartition conserves extensive moles" {
-    const result = try repartitionConcentrations(10, 2, 0.7, 0.3, -0.125);
+    const result = try repartitionConcentrations(10, 2, 0.7, 0.3, -0.125, null);
     const before = 0.8 * 10 + 0.2 * 2;
     const after = 0.7 * result.non_band + 0.3 * result.band;
     try std.testing.expectApproxEqAbs(before, after, 1.0e-14);
     try std.testing.expectEqual(@as(f64, 10), result.non_band);
+}
+
+test "sliver band growth conserves band amount with the exact pre-HOUR1 fraction" {
+    // Ottawa 1998 d209 h20 layer 10: band 1.0154e-14 grows to 2.55e-3.
+    const old_band: f64 = 1.0154341449702161e-14;
+    const new_band: f64 = 2.55315547749764e-3;
+    const new_non_band = 1 - new_band;
+    const relative = new_non_band / (1 - old_band) - 1;
+    const non_band_concentration: f64 = 0.27;
+    const band_concentration: f64 = 1.8e5;
+    const next = try repartitionConcentrations(non_band_concentration, band_concentration, new_non_band, new_band, relative, old_band);
+    const before = old_band * band_concentration + (1 - old_band) * non_band_concentration;
+    const after = new_band * next.band + new_non_band * next.non_band;
+    try std.testing.expectApproxEqAbs(before, after, 1.0e-14 * before);
 }
 
 test "band expansion preserves fraction-weighted CEC site capacity" {
@@ -511,6 +532,7 @@ test "band expansion preserves fraction-weighted CEC site capacity" {
         next_non_band_fraction,
         next_band_fraction,
         -0.125,
+        null,
     );
     const shared_cation_charge: f64 = 17;
     const before = 0.8 * 10 + 0.2 * 2 + shared_cation_charge;
@@ -520,8 +542,8 @@ test "band expansion preserves fraction-weighted CEC site capacity" {
 }
 
 test "aqueous ammonium and ammonia use zone water fractions conservatively" {
-    const ammonium = try repartitionConcentrations(8, 1, 0.72, 0.28, -0.1);
-    const ammonia = try repartitionConcentrations(3, 0.5, 0.72, 0.28, -0.1);
+    const ammonium = try repartitionConcentrations(8, 1, 0.72, 0.28, -0.1, null);
+    const ammonia = try repartitionConcentrations(3, 0.5, 0.72, 0.28, -0.1, null);
     const old_non_band_fraction = 0.8;
     const old_band_fraction = 0.2;
     try std.testing.expectApproxEqAbs(
@@ -537,7 +559,7 @@ test "aqueous ammonium and ammonia use zone water fractions conservatively" {
 }
 
 test "nitrate concentration and extensive nitrite repartition conserve nitrogen" {
-    const nitrate = try repartitionConcentrations(6, 2, 0.72, 0.28, -0.1);
+    const nitrate = try repartitionConcentrations(6, 2, 0.72, 0.28, -0.1, null);
     const nitrite = try repartitionExtensivePair(8, 3, -0.1);
     try std.testing.expectApproxEqAbs(
         0.8 * 6 + 0.2 * 2,
@@ -561,7 +583,7 @@ test "complete phosphate family conserves each carrier and honors dynamic salt g
     current_band.iron_hpo4_pair_mol_per_m3 = 1;
     var next_non_band = current_non_band;
     var next_band = current_band;
-    try stagePhosphatePair(&next_non_band, &next_band, current_non_band, current_band, 0.72, 0.28, -0.1, true);
+    try stagePhosphatePair(&next_non_band, &next_band, current_non_band, current_band, 0.72, 0.28, -0.1, null, true);
     inline for (.{
         "dissolved_h2po4_mol_p_per_m3",
         "adsorbed_hpo4_mol_p_per_megagram",
@@ -574,6 +596,6 @@ test "complete phosphate family conserves each carrier and honors dynamic salt g
     );
     next_non_band = current_non_band;
     next_band = current_band;
-    try stagePhosphatePair(&next_non_band, &next_band, current_non_band, current_band, 0.72, 0.28, -0.1, false);
+    try stagePhosphatePair(&next_non_band, &next_band, current_non_band, current_band, 0.72, 0.28, -0.1, null, false);
     try std.testing.expectEqual(current_band.iron_hpo4_pair_mol_per_m3, next_band.iron_hpo4_pair_mol_per_m3);
 }

@@ -485,7 +485,9 @@ pub fn finalizeRedistAndLedgers(
     );
     try diagnostics.traceStageBoundaryLayer0Carbon(context, "before_geometry_disturbance_finalize");
     try diagnostics.traceIssue078SoilPoreOverfill(context, "before_geometry_disturbance_finalize");
+    try diagnostics.traceIssue100LayerAmmonium(context, "before_geometry_disturbance_finalize", context.executed_weather_hours.* + 1);
     try geometry_disturbance.finalize(context);
+    try diagnostics.traceIssue100LayerAmmonium(context, "after_geometry_disturbance_finalize", context.executed_weather_hours.* + 1);
     try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_geometry_disturbance_finalize");
     try diagnostics.traceIssue078SoilPoreOverfill(context, "after_geometry_disturbance_finalize");
     // REDIST HEATIN precipitation term. Publish only after every hourly

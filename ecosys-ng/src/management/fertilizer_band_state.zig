@@ -298,13 +298,17 @@ pub const State = struct {
             current.phosphate_non_band,
             relative[@intFromEnum(Family.phosphate) * self.layer_capacity + layer],
         );
+        // The band side of 1 - VLNH4'/(1+FVL) cancels for a sliver band; use
+        // the exact pre-HOUR1 fraction when the pending hour recorded it.
+        // FVL = 0 (unchanged or shrunk band) keeps the current fraction: a
+        // shrink has already rescaled the concentrations onto it.
         return .{
             .ammonium_non_band = ammonium.non_band,
-            .ammonium_band = ammonium.band,
+            .ammonium_band = exactPreConsumptionBand(hour_coordinator, .ammonium, layer, relative[@intFromEnum(Family.ammonium) * self.layer_capacity + layer], ammonium.band),
             .nitrate_non_band = nitrate.non_band,
-            .nitrate_band = nitrate.band,
+            .nitrate_band = exactPreConsumptionBand(hour_coordinator, .nitrate, layer, relative[@intFromEnum(Family.nitrate) * self.layer_capacity + layer], nitrate.band),
             .phosphate_non_band = phosphate.non_band,
-            .phosphate_band = phosphate.band,
+            .phosphate_band = exactPreConsumptionBand(hour_coordinator, .phosphate, layer, relative[@intFromEnum(Family.phosphate) * self.layer_capacity + layer], phosphate.band),
         };
     }
 
@@ -594,6 +598,17 @@ fn validateRelayerFamilyPair(pair: RelayerFamilyPair) !void {
 }
 
 const ZonePair = struct { non_band: f64, band: f64 };
+
+pub fn exactPreConsumptionBand(
+    hour_coordinator: *const phase_module.Coordinator,
+    family: Family,
+    layer: usize,
+    relative_non_band_change: f64,
+    reconstructed_band: f64,
+) f64 {
+    if (relative_non_band_change == 0) return reconstructed_band;
+    return hour_coordinator.prePrepareBandFraction(family, layer) orelse reconstructed_band;
+}
 
 fn preConsumptionPair(current_non_band: f64, relative_non_band_change: f64) !ZonePair {
     if (!std.math.isFinite(current_non_band) or current_non_band < 0 or current_non_band > 1 or
