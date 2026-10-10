@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "zig",
+    "build",
+    "-Doptimize=Debug"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng",
+  "elapsed_seconds": 54.807,
+  "exit_code": 1,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 69929,
+  "pid": 69930,
+  "started_unix": 1791528126.343152,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/zig017-debug-migration-20261008/stderr.log",
+    "sha256": "c2bf104b1cadb2779ade90b8ef299372c6cd121987bc5052b613b405f58d5b21"
+  },
+  "stdout": {
+    "path": "audit/runs/zig017-debug-migration-20261008/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 5400.0
+}

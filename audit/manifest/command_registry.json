@@ -1,9 +1,12 @@
 {
   "status": "PARTIAL",
-  "note": "Populated 2026-09-21 for the analysis tooling only. Every argv under 'analysis' was executed successfully on this machine on that date; the six model build/run slots remain null because they have NOT been run in this pass and must not be treated as verified. No executable command here is pre-authorized by the contract.",
+  "note": "BANNER 2026-10-09 (mandates, .agent/protocol.md §8 and §8a): the recorded toolchains and argv below are dated evidence from the Windows host (verified 2026-09-21/22) and are kept unchanged — they are not rewritten. Two changes govern everything recorded from now on. (1) G1 toolchain: ecosys-ng is built, tested and measured with Zig 0.17.x only; Zig 0.16 is retired, so any 0.16 build/test receipt here is history and cannot close a current gate — re-record under 0.17.x with `zig version` in the receipt (pin .agent/toolchain.json; work order .agent/migrations/zig-0.17.md). (2) G9 containment: every command must run with caches, temp files, checkpoints, run output and logs inside this repository (TMPDIR=$PWD/.tmp, XDG_CACHE_HOME=$PWD/.cache, UV_CACHE_DIR=$PWD/.uv-cache, ZIG_GLOBAL_CACHE_DIR=$PWD/ecosys-ng/.zig-cache-global, plus zig --cache-dir .zig-cache --global-cache-dir .zig-cache-global) and be logged by ecosys-audit/scripts/run_logged.py into audit/runs/. Recorded .exe paths and C:\\... artifacts belong to the retired host, not to this one. Status stays PARTIAL: no recorded slot is re-verified by this banner, and nothing here authorizes a command — establish each argv against the live build files before using it. Populated 2026-09-21 for the analysis tooling only. Every argv under 'analysis' was executed successfully on this machine on that date; the six model build/run slots remain null because they have NOT been run in this pass and must not be treated as verified. No executable command here is pre-authorized by the contract.",
   "toolchains": {
     "zig": {
-      "version": "0.16.0",
+      "mandated_version": "0.17.x",
+      "mandate": "protocol.md §8 / gate G1, pin .agent/toolchain.json, check `uv run ecosys-audit/scripts/preflight.py`. The migration is not yet executed: ecosys-ng/build.zig.zon still declares minimum_zig_version = \"0.16.0\", so a 0.17.x build of the current tree is expected to fail until .agent/migrations/zig-0.17.md is carried out.",
+      "recorded_version": "0.16.0",
+      "recorded_version_status": "RETIRED — host observation of 2026-09-21, kept as dated evidence",
       "source": "zig version",
       "verified_utc": "2026-09-21"
     },
@@ -445,5 +448,32 @@
       "last_verified_evidence": "2026-09-25: dump mode refused as designed; staging+lock+summary smoke with a stand-in exe (no model run yet).",
       "limitations": "failure_hour/error are heuristic parses; breach/fallback counts stay null until validators exist, so a summary alone cannot promote."
     }
+  },
+  "workspace_containment": {
+    "authority": "protocol.md §8a (gate G9)",
+    "rule": "all inputs and outputs of every command stay inside the repository root: sources, builds, caches, temp files, checkpoints, run output, logs and evidence.",
+    "scratch": ".tmp/",
+    "caches": {
+      "XDG_CACHE_HOME": ".cache/",
+      "UV_CACHE_DIR": ".uv-cache/",
+      "ZIG_GLOBAL_CACHE_DIR": "ecosys-ng/.zig-cache-global/",
+      "zig cache flags": "--zig-cache-directory / --cache-dir .zig-cache --global-cache-dir .zig-cache-global"
+    },
+    "evidence": "audit/runs/ (run_logged.py receipts and logs), audit/issues/, audit/features/",
+    "forbidden": [
+      "/tmp",
+      "$HOME",
+      "sibling checkouts",
+      "external or removable drives",
+      "cloud storage",
+      "paste/upload services",
+      "git worktree outside the repository"
+    ],
+    "allowed_outside_read_only": [
+      "installed toolchain and system libraries",
+      "git fetch/pull/push to origin"
+    ],
+    "vet_command": "uv run ecosys-audit/scripts/preflight.py --command \"<the command>\"",
+    "added_utc": "2026-10-09"
   }
 }

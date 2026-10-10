@@ -1,0 +1,14 @@
+install
++- install ecosys_ng
+   +- compile exe ecosys_ng debug native 1 errors
+src/ecosys_ng.zig:8142:55: error: binary operator '*' has whitespace on one side, but not the other
+                        .primary_g_per_m3 = [_]f64{0} ** ecosys.snow_solute_transport.primary_species_count,
+                                                      ^
+error: 1 compilation errors
+failed command: /opt/homebrew/Cellar/zig/0.17.0/bin/zig build-exe -Odebug --dep ecosys_ng -Mroot=src/ecosys_ng.zig -Odebug -Mecosys_ng=src/module_index.zig --cache-dir .zig-cache --global-cache-dir .zig-cache-global --build-root . --name ecosys_ng --zig-lib-dir /opt/homebrew/Cellar/zig/0.17.0/lib/zig/ --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+install transitive failure
++- install ecosys_ng transitive failure
+   +- compile exe ecosys_ng debug native 1 errors
+

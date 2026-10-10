@@ -14,22 +14,25 @@ Use current source/input hashes in evidence. Never claim a test, review, build o
 
 ## Start or resume
 Read the shared project contract and evidence guide if not already present in this context.
-Autonomous work runs through the 4-agent swarm (SENTINEL, PATHFINDER, FORGE, SAGE): state in
-`.agent/state.md`, operation in `.agent/README.md`, plan in
-`ecosys-ng_ottawa_qualification_execution_plan.md`, controller `swarm_wrapper.py`. In a swarm
-role session, follow `.agent/roles/<role>.md` and the task file instead of this section. The
-former Claude-lead / Pi-reviewer workflow and `audit/handoff.md` are retired
-(`archive/pre-swarm-workflow/`); do not resume from them. Inspect actual Git state and relevant
+Autonomous work runs cycle by cycle under `.agent/protocol.md` (plan -> work -> evidence ->
+independent verification -> decide -> commit & push -> next cycle): state in `.agent/state.md`,
+cycle ledger in `.agent/cycle.json`, mission and gates in `.agent/mission.json`, plan in
+`ecosys-ng_ottawa_qualification_execution_plan.md`. One agent owns the whole loop and is the only
+author of changes; use the `ecosys-autonomous-orchestration` skill for the cycle protocol, the
+G1-G9 evidence gates and fanning out read-only sub-agents. The former two-model review and
+role-swarm workflows are retired history (`archive/pre-solo-workflow/` and the archived round
+records); do not resume from them. Inspect actual Git state (`./sync-main.sh pull`) and relevant
 failing evidence, preserving pre-existing work. Reuse the issue board and command registry
 rather than recreating them. Use `ecosys-repository-baseline` when provenance is missing/stale.
-No autonomy for questions/plan-only requests or outside Herdr.
+Continue autonomously; gates and a fresh-context verifier sub-agent, never a second model or a
+human sign-off, decide whether a change is correct.
 
 Token discipline (every task): read the task + one packet/issue + the `f77query`/`rg` hits you
 need, never whole `.f`/Zig files or logs; `run_logged.py` for any verbose command; one-line
 progress notes; evidence written once and cited by path. Stop and report instead of looping
 when every remaining task is blocked by the same external fault (e.g. D: I/O).
 
-Divide the legacy inventory into auditable process/interface units, not arbitrary equal line counts. Assign each unit a source owner and separate reviewer. Use `ecosys-multi-agent-coordination` when concurrency is available; sequentially perform the same roles otherwise. Limit expensive compiles/runs to one coordinator-owned lane unless independent resources are demonstrated.
+Divide the legacy inventory into auditable process/interface units, not arbitrary equal line counts. Assign each unit a scope and a separate fresh-context verifier for its sign-off evidence. Use the `ecosys-autonomous-orchestration` skill to fan out read-only sub-agents when it helps; run the same checks sequentially otherwise. Limit expensive compiles/runs to one agent-owned, serialized lane unless independent resources are demonstrated.
 
 ## Execute the gates
 - G0: baseline and complete scope. Discover real build/run commands instead of inventing target names or flags.

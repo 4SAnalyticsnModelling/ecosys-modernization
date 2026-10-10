@@ -1,58 +1,75 @@
-# .agent — Worker/Judge Adversarial Control Plane
+# `.agent` — control plane for one autonomous agent
 
-Continuous, token-frugal workflow between two models:
-1. **DEEPSEEK** (`local/qwen3.5-35b-a3b`, local llama.cpp at `http://127.0.0.1:8090/v1` via the DeepSeek Harness `local` provider): **does all the work** — plans rounds, investigates, implements, builds, tests, runs, self-checks and keeps the ledgers.
-2. **CLAUDE** (`claude-opus-5-5`): only **deep scientific diagnosis, cross-language reasoning, architecture decisions and the final scientific review**; makes the **final judgement call** and **directs and guides Qwen when needed**. **CLAUDE's decision is final.**
+**Protocol of record: [`protocol.md`](protocol.md).** This file is the directory guide.
 
-## Herdr Layout: Single Tab Multi-Pane
-Both agents operate side-by-side in **the same Herdr tab** (`ADVERSARIAL`):
-- **Tab Label**: `ADVERSARIAL`
-- **Left Pane (`CLAUDE`)**: Claude Opus 5.5 — specialist, final reviewer and judge
-- **Right Pane (`DEEPSEEK`)**: Qwen3.5-35B-A3B (local llama.cpp, DeepSeek Harness) — does all the work
-
-Layout setup script: `scripts/setup-adversarial-layout.ps1` (or `.sh`).
-Start DEEPSEEK in its pane with `scripts/start-deepseek.sh`. Herdr has no dsh integration, so the launcher also
-runs `scripts/herdr-deepseek-status.ps1` in the pane. It registers the pane as Herdr kind `pi` (dsh is built on Pi;
-Herdr drops custom kinds within ~3 s) under the name `deepseek`, with idle/working state. Starting `dsh` directly
-leaves the pane unrecognized. Herdr cannot see dsh as the foreground process, so `herdr agent prompt deepseek` is
-refused (`agent_not_ready`). Send input with `herdr pane send-keys` / `pane run` on the DEEPSEEK pane instead.
-Runner script: `scripts/start-adversarial.ps1` (or `.sh`). `-Status` shows the latest round, its ruling, and whether the local model is served.
-
-## Round Cycle (`templates/adversarial-round.md`)
-1. **§0 Plan — DEEPSEEK**: picks the target (CLAUDE's last next target, the `state.md` frontier, or the execution plan); one bounded, falsifiable question, hypotheses, legacy ranges, done condition.
-2. **§1–§2 Work, Evidence & Self-Check — DEEPSEEK**: implementation, tests, `receipt.json` citations, self-check (regressions, conservation, no tolerance/clamp change, traceability), ledgers updated; status `AWAITING_RULING`.
-3. **§3 Escalation & Guidance — only when needed**: DEEPSEEK sets `ESCALATED` for deep diagnosis, cross-language semantics, architecture or DEV questions (or lodges one objection to a ruling); CLAUDE answers with guidance.
-4. **§4 Final Scientific Review & Ruling — CLAUDE**: `**Final Ruling (CLAUDE)**: APPROVED | REVISE | REJECTED`, decisions, reasons, next target / guidance.
-The runner polls the latest round for the ruling. **APPROVED** → commit and push, open the next round.
-**REVISE** → no commit; DEEPSEEK fixes the listed points next round. **REJECTED** → no commit; DEEPSEEK reverts the
-rejected change before new work. Rulings are not appealed; a closed point is reopened only with new evidence.
-
-## Authority
-- CLAUDE alone rules on rounds and decides intentional deviations, legacy inconsistencies, architecture and science
-  acceptance. DEEPSEEK records those decisions (`audit/intentional-deviations.md`). CLAUDE does not write routine plans,
-  implement, run routine tests, keep the books or edit production source; it guides DEEPSEEK when needed.
-- DEEPSEEK never rules on, approves, or commits its own work.
-- **Loop guard**: Qwen3.5 can get stuck in loops. CLAUDE watches the DEEPSEEK pane and pokes it with a new direction
-  (`pokes/poke_RRRRR_K.md` + Esc + a one-line pointer via Herdr). Escalation: 2nd poke → `/clear` reset and a
-  narrowed target; 3rd → REVISE/REJECTED. Rule and commands: `CLAUDE.md` (Loop Guard); settings: `roster.json` `loop_guard`.
-- **Convergence & balance failures** (ReleaseFast run stalls): `playbooks/convergence-and-balance.md`. CLAUDE leads the
-  strategy and teaches it to Qwen through Strategy Briefs. DEEPSEEK triages, applies the simple rungs, and escalates.
-- Write lanes are listed per role in `roster.json`.
+One agent (any harness, any model, no required name — optional label `ECOSYS-ONE`) runs the whole project alone:
+plans, implements Zig, builds, tests, runs, diagnoses, decides, keeps the ledgers, and reviews its own work against
+objective gates. The retired two-model worker/judge workflow (worker DEEPSEEK, judge CLAUDE with
+`APPROVED|REVISE|REJECTED` rulings, escalations, pokes, Herdr panes) is history; `.agent/adversarial/` remains as the
+scientific record, with no authority.
 
 ## Objective
-Achieve the complete 30-year Ottawa run for `ecosys-ng` with **zero science gap** against legacy Fortran (`f77src/`) and **scientifically comparable outputs**.
-The loop continues without stopping hooks until this finish line is reached.
+Complete 30-year Ottawa run (262,920 h) of `ecosys-ng` with **zero science gap** against legacy Fortran (`f77src/`)
+and **scientifically comparable outputs**. No stopping hooks, no approval gate, no artificial budget halt: cycles
+continue for months until finish line F1–F7 (`.agent/protocol.md` §1) is met with evidence.
 
-## Token Frugality Policy (Strict)
-- Never paste raw simulation logs or whole source files into prompts or rounds.
-- Use pointer citations (`file:line` and short sha256).
-- Use `f77query.py` and targeted ripgrep rather than bulk file reading.
-- Limit round reports to <= 500 concise words.
-- All heavy builds/tests write logs to disk via `run_logged.py`, citing only `receipt.json`.
+## The cycle
+`open` → plan → work → evidence & self-check → independent verification (G7) → decide & record → **commit & push** →
+`close` → next cycle. Ledger: `cycle.json` (via `uv run ecosys-audit/scripts/cycle_runner.py`), record:
+`cycles/cycle_NNNNN.md` from `templates/cycle.md`.
 
-## Key Files
-- `roster.json`: Model configuration, authority rules, write lanes, layout and token frugality settings.
-- `state.md`: Current state and milestone tracking (curated by CLAUDE; the runner only rewrites its `runner:begin/end` block).
-- `adversarial/`: Round files (plan, work, evidence, escalation/guidance, ruling).
-- `roles/claude.md`: Role guidance for CLAUDE (specialist, final reviewer and judge).
-- `roles/deepseek.md`: Role guidance for DEEPSEEK (does all the work).
+| Gate | Decides |
+| --- | --- |
+| G1 | build clean (Debug + ReleaseSafe; ReleaseFast for production runs) |
+| G2 | regressions pass and the fix has a discriminating test |
+| G3 | water, heat, C, N, P ledgers close at every accepted hour |
+| G4 | every physics change traces to `f77src/...:line`, floors match legacy (value, scale, operator, units, placement) |
+| G5 | affected outputs match the legacy oracle (units, time semantics) |
+| G6 | no forbidden diff: tolerance loosening, post-solve clamp, unregistered DEV, ceiling raise, silent retry |
+| G7 | a fresh-context read-only verifier sub-agent re-derives the decisive gates from diff + legacy + receipts |
+| G8 | pushed: `git rev-parse HEAD origin/main` match |
+
+G7 is mandatory for any change to process equations/parameters, solver formulation, bounds/floors, acceptance or
+rollback logic, restart/output semantics, architecture, any DEV, and before a hard solver rung (S4/S5/S8/S9).
+A reproduced FAIL is fixed or reverted — never argued, never outvoted.
+
+## Files
+| Live | Purpose |
+| --- | --- |
+| `protocol.md` | the whole protocol: cycle, gates, decisions, sync, multi-month continuity, recovery |
+| `mission.json` | mission, gates, sync policy, lanes, prohibitions, budgets, legacy map |
+| `cycle.json` | current cycle ledger (status, gates, target, next target, sync) |
+| `cycles/` | cycle records (one file per cycle) |
+| `state.md` | current state: frontier, live run, open threads, next target |
+| `backlog.md` | ordered open threads and blockers with the condition that clears each |
+| `frontier.json` | authoritative simulation frontier (only `update_frontier.py promote` moves `verified_frontier`) |
+| `briefs/` | read-only sub-agent briefs: `verifier` (G7), `diagnose`, `legacy-oracle`, `parity-sweep` |
+| `roles/agent.md` | role card for whoever is the agent this session |
+| `templates/cycle.md` | cycle record template |
+| `playbooks/convergence-and-balance.md` | the solver/balance ladder (bugs → triage → S1–S9) and the Lessons log |
+| `cycle-metrics.csv` | per-cycle metrics (appended by `cycle_runner.py close`) |
+| `locks/` | run locks — stale ones get removed with a note |
+
+| Legacy (do not update) | Was |
+| --- | --- |
+| `adversarial/` | worker/judge round records r1–r57 — science history only |
+| `roster.json` | two-model roster → superseded by `mission.json` |
+| `workflow.json`, `dispatch.json`, `current_task.md`, `tasks/`, `results/`, `failures/` | retired swarm-controller ledgers |
+| `roles/claude.md`, `roles/deepseek.md`, `roles/forge.md`, `roles/pathfinder.md`, `roles/sage.md`, `roles/sentinel.md` | retired personas (archived) |
+| `archive/` | older task history |
+| `../archive/pre-solo-workflow/` | retired launchers + judge-gated runner + poke tooling |
+
+## Sub-agents (optional swarm)
+Fan out fresh-context **read-only** helpers from `briefs/` when wall-clock time or self-blindness is the limit.
+They never edit, commit, push, or start full runs, and their verdicts are evidence to reproduce, not authority to
+follow. See `briefs/README.md` for how to spawn them in any harness.
+
+## Git: never lose work
+`./sync-main.sh pull` at cycle start; **every completed cycle committed and pushed to `origin/main`**, then verified
+(`git rev-parse HEAD origin/main`). Never force-push, never rewrite pushed history, never commit ignored run
+artifacts, never leave `main` broken — revert a gate-failing diff and record the negative result instead.
+
+## Token frugality
+Never paste logs or whole files into prompts, cycle records or sub-agent briefs; cite `file:line`, short sha and
+`receipt.json` paths; use `f77query.py`/`bindcheck.py` and narrow ripgrep; keep a cycle record ≤ 600 words; route
+heavy commands through `run_logged.py` so output stays on disk.

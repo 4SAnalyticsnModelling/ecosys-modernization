@@ -1,22 +1,39 @@
-# Adversarial Workflow State
+# Mission State — ecosys-ng Ottawa (single autonomous agent)
 
 <!-- runner:begin -->
-## Runner: round 00057 (2026-10-01 20:42:30Z)
-- Worker: DEEPSEEK (local Qwen3.5-35B-A3B). Judge: CLAUDE (Claude Opus 5.5, final say).
-- Round status: AWAITING_RULING (no final CLAUDE ruling yet)
+## Cycle ledger
+- Not open yet under the single-agent protocol. `uv run ecosys-audit/scripts/cycle_runner.py open --target "..."`
+  starts cycle 00001. Previous workflow: adversarial round 00057, closed as `ACCEPTED` in commit e801fd8 (retired).
+- Sync: every completed cycle must be committed and pushed to `origin/main` (protocol §7).
 <!-- runner:end -->
 
-Updated 2026-10-01 00:30 (local). Plan: Complete 30-Year Ottawa Run with Zero Science Gap.
+Updated 2026-10-09 (mandates added); workflow revised to a single agent on 2026-10-08. Plan: Complete
+30-Year Ottawa Run with Zero Science Gap.
 
-## Roles (from 2026-10-01): worker/judge
-- Worker: DEEPSEEK (local Qwen3.5-35B-A3B, llama.cpp 127.0.0.1:8090) does all the work, including planning rounds
-  and keeping this file. CLAUDE (Claude Opus 5.5): deep diagnosis, cross-language reasoning, architecture, final
-  scientific review and final ruling; guides Qwen when needed. Proposer/challenger alternation is retired.
-- Transition: round_00057_deepseek.md (old format, accepted in e801fd8) has no `**Final Ruling (CLAUDE)**:` line, so
-  the runner waits on it. CLAUDE closes it with a ruling, and the runner then opens round 00058 in the new format.
+## Mandates added 2026-10-09 (read before any build)
+- **Zig 0.17.x builds `ecosys-ng`; Zig 0.16 is retired** (protocol §8, gate G1). Machine check
+  `uv run ecosys-audit/scripts/preflight.py` → currently `zig-version PASS (0.17.0 installed)` but
+  `build-zon-pin FAIL`: the tree still declares `minimum_zig_version = "0.16.0"` and **the migration has not been
+  executed**. Work order: `.agent/migrations/zig-0.17.md`; pin: `.agent/toolchain.json`; backlog item 0.
+- **All work stays inside this repository** (protocol §8a, gate G9): caches pinned to `.tmp/`, `.cache/`,
+  `.uv-cache/`, `ecosys-ng/.zig-cache*/`; evidence under `audit/runs/`. Nothing needed by a later cycle may live
+  outside the repo; the recorded `C:\ecosys-build\...` paths below are the retired Windows host, not a target.
+- **Test baseline 2026-10-09**: `uv run python -m pytest ecosys-audit/tests` gives **50 failures on a clean `HEAD`
+  worktree** and **48 after this setup round** (the hook fixes two). The remainder are pre-existing, mostly
+  host/evidence-dependent (Windows paths, absent local artefacts) — not science regressions and not blockers for
+  opening a cycle, but never let the number grow: record the count in every cycle that touches tooling.
 
-## Last old-format rounds
-- r49 DEV-020 confirmed, r50 DEV-021 confirmed, r51 band sliver legacy gates, r52 challenge of 7ebb94a, r57 DEV-003.
+## Actor (from 2026-10-08): one autonomous agent
+- **One agent** owns everything — planning, Zig implementation, builds, tests, runs, diagnosis, decisions, the
+  ledgers (this file included) and the final scientific review of each cycle against gates G1–G9. Any harness or
+  model may pick it up; no agent name is required. Protocol: `.agent/protocol.md`.
+- **Verification is objective, not interpersonal**: gates + a fresh-context read-only verifier sub-agent (G7) for
+  any science / solver / DEV / architecture change (`.agent/briefs/verifier.md`). The retired worker/judge pair
+  (DEEPSEEK worker, CLAUDE judge with final rulings) and the earlier 4-agent swarm are history only.
+- **Every completed cycle is committed and pushed to GitHub `main`** (`./sync-main.sh push`), so no work is lost.
+- Historical record: `.agent/adversarial/round_*.md` (r1–r57) — read it for the science, not for authority.
+  Last rounds: r49 DEV-020 confirmed, r50 DEV-021 confirmed, r51 band sliver legacy gates, r52 challenge of
+  7ebb94a, r57 DEV-003.
 
 ## LIVE: r00019-strict (fresh hour-0 run, resumed from its 4800 checkpoint with 7ebb94a)
 - Past 1998 d209 h20 (hour 5012) after DEV-021 (9a363ea, molarity guards skip <1e-12 zones) and 7ebb94a (exact
@@ -49,7 +66,7 @@ Updated 2026-10-01 00:30 (local). Plan: Complete 30-Year Ottawa Run with Zero Sc
 - Throughput ~150 ms/h at steady state; spring thaw/tillage hours slower.
 - verified_frontier = 0 (no single-binding strict campaign has yet run to a stopping point with every fix).
 
-## Fixed this session (commits, all local; push → 403)
+## Fixed in the pre-solo session (commits; the old box could not push — 403)
 8a4a565 · 2edcbf2 · f0389ce · 56dfca4 · d38218a · e2e4679 · 9416f92 · 1b098e1 · 7e04f9f · a83519a (see git log) ·
 627634a freeze-thaw drives no soil relayering transfer · 470810a SOC restore uses freeze-free DLYR, DVOLI =
 VOLI+VOLIH, NN=3 pond→soil transfer gated by NU>NUI, DEV-012 explicit boundary gas pressure · 215ad41 DEV-013
@@ -75,6 +92,8 @@ stiff solute image. Terminal ladder attempt enables DEV-011/014-ceiling/015 toge
 - Frost heave dilutes intensive mol/Mg soil carriers (legacy pins DLYR via DDLYRY; ng keeps elastic geometry).
 - FLQRS ignores FSNX (partial snow cover). Rain solutes not rerouted with overflow water (legacy-consistent).
 - DEEPSEEK r12: H3PO4 dissociation Jacobian ~1/[H+]^2 at high pH (not currently blocking).
-- Push to origin fails 403 (account lacks write permission).
+- Push: works from this macOS clone (HTTPS + macOS Keychain; see `SYNC-LOCAL.md`). **Push-per-cycle is mandatory**
+  (`.agent/protocol.md` §7), so `origin/main` always carries the latest verified work. The old 403 was the retired
+  Windows account.
 - Richards→enthalpy rebase applies internal inflow heat only in the later spatial solve.
 - Many failure-only TEMP_DIAGNOSTIC logs to strip before release.

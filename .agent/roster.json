@@ -1,6 +1,16 @@
 {
   "schema_version": 3,
-  "note": "Single source of truth for the worker/judge workflow. DEEPSEEK (local Qwen3.5-35B-A3B on llama.cpp through the DeepSeek Harness) does all the work. CLAUDE (Claude Opus 5.5) handles only deep scientific diagnosis, cross-language reasoning, architecture decisions and the final scientific review. It also makes the final judgement call, and directs and guides Qwen when needed. CLAUDE's ruling is final.",
+  "status": "RETIRED",
+  "retired_on": "2026-10-08",
+  "superseded_by": ".agent/protocol.md (single-agent mission) and .agent/roles/agent.md",
+  "note": "Configuration of the retired pane controller (scripts/start-swarm.sh + ecosys-audit/scripts/swarm_wrapper.py). The project now runs as ONE agent in cycles: no worker/judge roles, no pokes, no rulings. This file is kept only so the retired tooling and its tests still parse; it is not an entry point and directs no work. Read-only: do not start panes from it.",
+  "solo_agent": {
+    "authority": ".agent/protocol.md",
+    "role_card": ".agent/roles/agent.md",
+    "briefs": ".agent/briefs/",
+    "toolchain": ".agent/toolchain.json",
+    "containment": "protocol.md section 8a (gate G9)"
+  },
   "herdr_session": "ecosys-adversarial",
   "layout": {
     "tab_label": "ADVERSARIAL",
@@ -45,7 +55,8 @@
     "branch": "main",
     "max_consecutive_push_failures": 3,
     "authorized_by": "symon.mezbahuddin",
-    "authorized_on": "2026-09-25"
+    "authorized_on": "2026-09-25",
+    "note": "commit/push flags of the retired controller; the live rule is unconditional: every completed cycle is committed and pushed to origin/main"
   },
   "roles": {
     "CLAUDE": {
@@ -90,7 +101,8 @@
         "final judgement call",
         "direct and guide Qwen when needed",
         "lead convergence/balance strategy and teach it to Qwen (Strategy Briefs, playbook Lessons)"
-      ]
+      ],
+      "retired": true
     },
     "DEEPSEEK": {
       "agent_name": "deepseek",
@@ -150,7 +162,8 @@
         "audit/science-invariants.md",
         "audit/intentional-deviations.md"
       ],
-      "may_edit_production_source": true
+      "may_edit_production_source": true,
+      "retired": true
     }
   },
   "always_writable": [

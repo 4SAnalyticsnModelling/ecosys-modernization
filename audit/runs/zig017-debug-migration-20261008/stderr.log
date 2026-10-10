@@ -1,0 +1,10 @@
+build.zig:29:11: error: no field named 'args' in struct 'Build'
+    if (b.args) |args| run_cmd.addArgs(args);
+          ^~~~
+/opt/homebrew/Cellar/zig/0.17.0/lib/zig/std/Build.zig:1:1: note: struct declared here
+const Build = @This();
+^~~~~
+referenced by:
+    runPackageScript [inlined]: /opt/homebrew/Cellar/zig/0.17.0/lib/zig/std/Build.zig:2144:50
+    main: /opt/homebrew/Cellar/zig/0.17.0/lib/zig/compiler/configurer.zig:138:29
+    3 reference(s) hidden; use '-freference-trace=5' to see all references

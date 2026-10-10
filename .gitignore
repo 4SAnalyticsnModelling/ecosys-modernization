@@ -42,3 +42,15 @@ evidence/*
 
 # Controller console transcript (tee'd by the operator; not agent output).
 audit/runs/swarm-controller-*.log
+
+# ── Containment (protocol.md §8a, gate G9): all work stays inside this repository ──────────
+# Caches and scratch that builds/tests/runs must be pointed at. They live IN the repo and
+# never enter Git: a cache in $HOME or /tmp is work that a later cycle cannot reproduce.
+.tmp/
+.cache/
+.uv-cache/
+.pytest_cache/
+.tmp-baseline/
+.zig-cache/
+ecosys-ng/.zig-cache-global/
+tools/zig/
