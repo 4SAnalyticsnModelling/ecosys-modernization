@@ -1,0 +1,18 @@
+{
+  "commit": null,
+  "cycle": 1,
+  "decisions": [],
+  "gates": {},
+  "metrics": {},
+  "next_target": "Cycle 1 execution: build.zig b.args line, ** codemod (dry-run first), zig fmt, Debug build receipt",
+  "opened_utc": "2026-10-13T20:58:21Z",
+  "record": ".agent/cycles/cycle_00001.md",
+  "schema_version": 1,
+  "status": "PLANNING",
+  "steps_done": [
+    "0 plan: record opened"
+  ],
+  "sync_status": "in_sync",
+  "target": "Compile ecosys-ng with Zig 0.17.x: delete the b.args passthrough in build.zig, apply the ** -> * repeat codemod (1197 repeats / 188 files), zig fmt, then a clean Debug build logged in audit/runs/. No source behaviour change; parity is not re-derived until the build is green.",
+  "updated_utc": "2026-10-13T20:59:29Z"
+}

@@ -1,10 +1,12 @@
 # Mission State — ecosys-ng Ottawa (single autonomous agent)
 
 <!-- runner:begin -->
-## Cycle ledger
-- Not open yet under the single-agent protocol. `uv run ecosys-audit/scripts/cycle_runner.py open --target "..."`
-  starts cycle 00001. Previous workflow: adversarial round 00057, closed as `ACCEPTED` in commit e801fd8 (retired).
-- Sync: every completed cycle must be committed and pushed to `origin/main` (protocol §7).
+## Cycle 00001 · PLANNING · 2026-10-13T20:59:29Z
+- Actor: single autonomous agent (any harness/model). Verification: gates G1-G9 (Zig 0.17.x build, repo-contained work) + read-only sub-agents.
+- Target: Compile ecosys-ng with Zig 0.17.x: delete the b.args passthrough in build.zig, apply the ** -> * repeat codemod (1197 repeats / 188 files), zig fmt, then a clean Debug build logged in audit/runs/. No source behaviour change; parity is not re-derived until the build is green.
+- Gates: none recorded
+- Sync: in_sync (push every completed cycle to origin/main)
+- Next target: Cycle 1 execution: build.zig b.args line, ** codemod (dry-run first), zig fmt, Debug build receipt
 <!-- runner:end -->
 
 Updated 2026-10-09 (mandates added); workflow revised to a single agent on 2026-10-08. Plan: Complete
