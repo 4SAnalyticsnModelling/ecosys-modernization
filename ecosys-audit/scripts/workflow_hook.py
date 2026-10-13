@@ -35,7 +35,8 @@ PICKUP = (
     "G9 CONTAINMENT: every read, write, build, test, run, cache, checkpoint, download and log stays inside this "
     "repository. Pin per command: TMPDIR=$PWD/.tmp XDG_CACHE_HOME=$PWD/.cache UV_CACHE_DIR=$PWD/.uv-cache "
     "ZIG_GLOBAL_CACHE_DIR=$PWD/ecosys-ng/.zig-cache-global, and pass zig build|test --cache-dir .zig-cache "
-    "--global-cache-dir .zig-cache-global. Nothing outside; evidence lands in audit/runs/ via run_logged.py.\n"
+    "(Zig 0.17 rejects --global-cache-dir on zig build; the env var moves the global cache). Nothing outside; "
+    "evidence lands in audit/runs/ via run_logged.py.\n"
     "Close a cycle: git commit, ./sync-main.sh push, then `git rev-parse HEAD origin/main` must match. "
     "Optional read-only sub-agents come from .agent/briefs/ (verifier = G7, diagnose, legacy-oracle, parity-sweep)."
 )

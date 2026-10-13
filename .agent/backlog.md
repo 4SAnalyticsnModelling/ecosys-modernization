@@ -8,7 +8,9 @@ lives here, not in a conversation. Protocol: `.agent/protocol.md` §9.
 ## Now (unblocked, take in cycle order)
 0. **Migrate `ecosys-ng` to Zig 0.17.x — gate G1 cannot pass until it is done.** Toolchain mandate
    `.agent/protocol.md` §8, pin `.agent/toolchain.json`, machine check `uv run ecosys-audit/scripts/preflight.py`
-   (currently FAILs on `minimum_zig_version = "0.16.0"`). Work order with the proven breakages, the codemod and
+   `preflight.py` passes the version checks: the pin was moved to `"0.17.0"` on 2026-10-12, so what remains is the
+   compile itself — `build.zig:29` (`b.args`) and the codemod (1197 repeats / 188 files, `--dry-run` first).
+   Work order with the proven breakages, the codemod and
    the parity re-derivation steps: `.agent/migrations/zig-0.17.md`. Blocked by nothing — take this first.
 1. **Advance the strict Ottawa run past the current failure hour.** Frozen-topsoil phase stagnation at 1998 d354
    h07 (hour 8479 class): stalls at 1.6e-7 of capacity at every substep count. Playbook ladder, bugs first

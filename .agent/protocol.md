@@ -211,7 +211,9 @@ Nothing a later cycle would need to reproduce, re-check or cite may live outside
   mkdir -p .tmp .cache .uv-cache ecosys-ng/.zig-cache ecosys-ng/.zig-cache-global
   export TMPDIR="$PWD/.tmp" XDG_CACHE_HOME="$PWD/.cache" UV_CACHE_DIR="$PWD/.uv-cache" \
          ZIG_GLOBAL_CACHE_DIR="$PWD/ecosys-ng/.zig-cache-global"
-  # zig build / zig test also take: --cache-dir .zig-cache --global-cache-dir .zig-cache-global
+  # zig build / zig test take: --cache-dir .zig-cache  (Zig 0.17 REJECTS --global-cache-dir on `zig build` —
+  # measured 2026-10-12, audit/runs/zig017-pin017-debug-20261012. The global cache follows ZIG_GLOBAL_CACHE_DIR
+  # above; `zig build` passes --global-cache-dir to the compiler itself. Verified: $HOME/.cache/zig untouched.)
   ```
 
   These directories are gitignored on purpose: they live **in** the repository and never enter Git.

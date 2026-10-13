@@ -457,7 +457,7 @@
       "XDG_CACHE_HOME": ".cache/",
       "UV_CACHE_DIR": ".uv-cache/",
       "ZIG_GLOBAL_CACHE_DIR": "ecosys-ng/.zig-cache-global/",
-      "zig cache flags": "--zig-cache-directory / --cache-dir .zig-cache --global-cache-dir .zig-cache-global"
+      "zig cache flags": "--zig-cache-directory / --cache-dir .zig-cache (Zig 0.17: `zig build` rejects --global-cache-dir; global cache via ZIG_GLOBAL_CACHE_DIR — audit/runs/zig017-pin017-debug-20261012)"
     },
     "evidence": "audit/runs/ (run_logged.py receipts and logs), audit/issues/, audit/features/",
     "forbidden": [

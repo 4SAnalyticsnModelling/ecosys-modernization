@@ -119,7 +119,7 @@ def check_command(command: str, root: Path, cwd: Path) -> list[dict]:
     if offenders:
         return [finding("containment", "FAIL",
                         f"command writes/reads outside the repository: {', '.join(sorted(set(offenders)))}; "
-                        "redirect it into the repo (TMPDIR/UV_CACHE_DIR/--cache-dir/--global-cache-dir) "
+                        "redirect it into the repo (TMPDIR/UV_CACHE_DIR/ZIG_GLOBAL_CACHE_DIR/--cache-dir) "
                         "or record a blocker (protocol.md §8a)")]
     return [finding("containment", "PASS", "no command argument escapes the repository root")]
 

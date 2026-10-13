@@ -26,7 +26,8 @@
     "caches_must_live_in_repo": {
       "build_cache": "ecosys-ng/.zig-cache",
       "global_cache": "ecosys-ng/.zig-cache-global",
-      "flags": ["--cache-dir", "--global-cache-dir"],
+      "flags": ["--cache-dir"],
+      "flags_note": "Zig 0.17: `zig build`/`zig test` accept --cache-dir but REJECT --global-cache-dir (measured 2026-10-12, audit/runs/zig017-pin017-debug-20261012). Set ZIG_GLOBAL_CACHE_DIR instead; the build runner passes --global-cache-dir to the compiler itself.",
       "env": ["ZIG_GLOBAL_CACHE_DIR"]
     }
   },

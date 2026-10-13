@@ -34,8 +34,10 @@ unregistered DEV, ceiling raise, silent retry), **G7** independent re-derivation
 - **All work stays inside this repository** (protocol §8a, gate G9): every read, write, build, test, run, cache,
   checkpoint, download and log. Pin the caches per command (`mkdir -p` first, each shell is fresh):
   `TMPDIR=$PWD/.tmp`, `XDG_CACHE_HOME=$PWD/.cache`, `UV_CACHE_DIR=$PWD/.uv-cache`,
-  `ZIG_GLOBAL_CACHE_DIR=$PWD/ecosys-ng/.zig-cache-global`, plus
-  `zig build|test --cache-dir .zig-cache --global-cache-dir .zig-cache-global`. No `/tmp`, no `$HOME`, no second
+  `ZIG_GLOBAL_CACHE_DIR=$PWD/ecosys-ng/.zig-cache-global`, plus `zig build|test --cache-dir .zig-cache`. **Zig 0.17
+  rejects `--global-cache-dir` on `zig build`** (measured 2026-10-12, `audit/runs/zig017-pin017-debug-20261012`): the
+  global cache moves by the env var only, and the build runner passes `--global-cache-dir` to `zig build-exe` itself.
+  No `/tmp`, no `$HOME`, no second
   checkout, no external or removable drive, no cloud or paste service. Vet an unfamiliar command with
   `preflight.py --command "<cmd>"`. Only the installed toolchain (read-only) and `git push` to `origin` live out.
 

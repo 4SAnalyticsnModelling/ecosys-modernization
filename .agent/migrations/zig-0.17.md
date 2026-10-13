@@ -51,16 +51,18 @@ export TMPDIR="$PWD/.tmp" XDG_CACHE_HOME="$PWD/.cache" UV_CACHE_DIR="$PWD/.uv-ca
 uv run ecosys-audit/scripts/zig017_repeat_migration.py ecosys-ng/src
 cd ecosys-ng && zig fmt src && cd ..
 
-# 4. compile, in the repo, with repo-local caches, logged (§8a)
+# 4. compile, in the repo, with repo-local caches, logged (§8a).
+#    Zig 0.17 note (measured 2026-10-12, audit/runs/zig017-pin017-debug-20261012): `zig build` no longer accepts
+#    --global-cache-dir — the global cache comes from ZIG_GLOBAL_CACHE_DIR in the export above.
 uv run ecosys-audit/scripts/run_logged.py --cwd ecosys-ng --timeout 5400 \
   --out audit/runs/zig017-debug-$(date +%Y%m%d) -- \
-  zig build -Doptimize=Debug --cache-dir .zig-cache --global-cache-dir .zig-cache-global
+  zig build -Doptimize=Debug --cache-dir .zig-cache
 #    … then ReleaseSafe, then ReleaseFast (production mode), same flags, new --out each time
 
 # 5. regressions
 uv run ecosys-audit/scripts/run_logged.py --cwd ecosys-ng --timeout 7200 \
   --out audit/runs/zig017-test-$(date +%Y%m%d) -- \
-  zig build test --cache-dir .zig-cache --global-cache-dir .zig-cache-global
+  zig build test --cache-dir .zig-cache
 TMPDIR="$PWD/.tmp" UV_CACHE_DIR="$PWD/.uv-cache" uv run pytest ecosys-audit/tests -q
 
 # 6. preflight must go green on the pin

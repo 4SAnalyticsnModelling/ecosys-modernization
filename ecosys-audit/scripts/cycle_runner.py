@@ -435,7 +435,7 @@ def cmd_status(args: argparse.Namespace) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0],
                                      formatter_class=argparse.RawDescriptionHelpFormatter,
-                                     epilog=__doc__.splitlines()[2:8])
+                                     epilog="\n".join(__doc__.splitlines()[2:8]))
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("status", help="print mission, cycle, gates, frontier and sync state")

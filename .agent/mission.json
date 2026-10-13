@@ -213,7 +213,8 @@
       "XDG_CACHE_HOME": ".cache/",
       "UV_CACHE_DIR": ".uv-cache/",
       "ZIG_GLOBAL_CACHE_DIR": "ecosys-ng/.zig-cache-global/",
-      "zig_flags": "--cache-dir .zig-cache --global-cache-dir .zig-cache-global"
+      "zig_flags": "--cache-dir .zig-cache",
+      "zig_flags_note": "Zig 0.17: `zig build` rejects --global-cache-dir (measured 2026-10-12, audit/runs/zig017-pin017-debug-20261012); the global cache is set by ZIG_GLOBAL_CACHE_DIR. Direct compiler calls (zig build-exe) still take it."
     },
     "evidence": [
       "audit/runs/ (run_logged.py receipts + logs)",

@@ -1,7 +1,7 @@
 .{
     .name = .ecosys_ng,
     .version = "1.0.0",
-    .minimum_zig_version = "0.16.0",
+    .minimum_zig_version = "0.17.0",
     .fingerprint = 0x9cd162ed3d1228b3,
     // ISSUE-001. Previously listed `tools`, `runtime_parameters`, `README.md`,
     // and `MIGRATION.md`, none of which exist in this tree. Verified before

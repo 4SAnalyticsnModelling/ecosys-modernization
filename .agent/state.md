@@ -13,8 +13,10 @@ Updated 2026-10-09 (mandates added); workflow revised to a single agent on 2026-
 ## Mandates added 2026-10-09 (read before any build)
 - **Zig 0.17.x builds `ecosys-ng`; Zig 0.16 is retired** (protocol §8, gate G1). Machine check
   `uv run ecosys-audit/scripts/preflight.py` → currently `zig-version PASS (0.17.0 installed)` but
-  `build-zon-pin FAIL`: the tree still declares `minimum_zig_version = "0.16.0"` and **the migration has not been
-  executed**. Work order: `.agent/migrations/zig-0.17.md`; pin: `.agent/toolchain.json`; backlog item 0.
+  `build-zon-pin PASS`: `ecosys-ng/build.zig.zon` now declares `minimum_zig_version = "0.17.0"` (2026-10-12), so the
+  tree can no longer be built by a retired 0.16. **The compile migration is still NOT executed** — Debug fails at
+  `build.zig:29` (`std.Build.args` gone) and then at `src/ecosys_ng.zig:8142` (`**` repeat gone; dry-run scope
+  1197 repeats in 188 files), receipts `audit/runs/zig017-debug-migration-20261008{,-attempt2}/`. Work order: `.agent/migrations/zig-0.17.md`; pin: `.agent/toolchain.json`; backlog item 0.
 - **All work stays inside this repository** (protocol §8a, gate G9): caches pinned to `.tmp/`, `.cache/`,
   `.uv-cache/`, `ecosys-ng/.zig-cache*/`; evidence under `audit/runs/`. Nothing needed by a later cycle may live
   outside the repo; the recorded `C:\ecosys-build\...` paths below are the retired Windows host, not a target.
