@@ -28,7 +28,10 @@ It is the first item in `.agent/backlog.md`.
    Codemod + probe evidence: `ecosys-audit/scripts/zig017_repeat_migration.py` (rewrites `**` → ` * `,
    skipping strings/comments; verified that `[_]u8{0} * 3` still repeats the array).
    Run it over `ecosys-ng/src`, then `zig fmt`, and **diff-review every touched line count** — the token is
-   unambiguous, but the size of the change must be recorded.
+   unambiguous, but the size of the change must be recorded. Start with
+   `uv run ecosys-audit/scripts/zig017_repeat_migration.py --dry-run ecosys-ng/src` (writes nothing).
+   Measured 2026-10-12 at this commit: **1197 `**` repeats in 188 files** under `ecosys-ng/src`; re-run the
+   dry-run at the start of the migration cycle and treat a different number as a change in scope.
 3. **Expect more.** Anything the compiler rejects next is part of this same migration: fix it forward, fix it
    in the same cycle, and list each language/API change you hit in the cycle file. Never "fix" it by keeping
    or reinstalling a 0.16 compiler, and never gate a 0.17 result against 0.16 evidence.

@@ -15,8 +15,10 @@ The old `**` token was unambiguously a repeat, so this codemod only has to skip
 string literals and comments; it rewrites every `**` token to ` * ` and leaves
 spacing to `zig fmt`. Pointer types (`*const`, `*[*]u8`) never contain a `**` token.
 
-Usage: uv run ecosys-audit/scripts/zig017_repeat_migration.py <file-or-dir>...
-Writes files in place only when a change was made; prints a per-file token count.
+Usage: uv run ecosys-audit/scripts/zig017_repeat_migration.py [--dry-run] <file-or-dir>...
+With --dry-run nothing is written: it only reports what would change (run it first and
+record the number). Otherwise files are rewritten in place only when a change was made.
+Both forms print a per-file token count.
 """
 from __future__ import annotations
 
@@ -85,21 +87,39 @@ def migrate_text(text: str) -> tuple[str, int]:
 
 
 def main(argv: list[str]) -> int:
-    if not argv:
+    dry_run = False
+    targets: list[str] = []
+    for arg in argv:
+        if arg in ("--dry-run", "-n"):
+            dry_run = True
+        elif arg in ("--help", "-h"):
+            print(__doc__)
+            return 0
+        else:
+            targets.append(arg)
+    if not targets:
         print(__doc__)
         return 2
+    missing = [t for t in targets if not Path(t).exists()]
+    if missing:
+        print(f"not found: {', '.join(missing)}", file=sys.stderr)
+        return 2
     total = 0
-    for arg in argv:
+    touched = 0
+    for arg in targets:
         p = Path(arg)
         files = sorted(p.rglob("*.zig")) if p.is_dir() else [p]
         for f in files:
             text = f.read_text(encoding="utf-8")
             new, count = migrate_text(text)
             if count:
-                f.write_text(new, encoding="utf-8")
-                print(f"{f}: {count} repeats rewritten")
+                if not dry_run:
+                    f.write_text(new, encoding="utf-8")
+                print(f"{f}: {count} repeats {'would be ' if dry_run else ''}rewritten")
                 total += count
-    print(f"total: {total}")
+                touched += 1
+    verb = "would be rewritten" if dry_run else "rewritten"
+    print(f"total: {total} repeats in {touched} files ({verb})")
     return 0
 
 
