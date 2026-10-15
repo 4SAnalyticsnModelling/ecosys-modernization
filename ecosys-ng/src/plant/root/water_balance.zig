@@ -8,6 +8,7 @@ const CanopyState = @import("../../canopy/photosynthesis/photosynthesis.zig").St
 const SoilPropertiesState = @import("../../soil/water/solver_properties.zig").State;
 const soil_water_solver = @import("../../soil/water/solver.zig");
 const biological_domain_count = @import("plant_root_system.zig").biological_domain_count;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -146,7 +147,7 @@ pub const Workspace = struct {
         errdefer allocator.free(result.vascular_growth_habit);
         var allocated: usize = 0;
         errdefer freeWorkspaceFields(&result, allocated);
-        inline for (@typeInfo(Workspace).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(Workspace)) |field| if (field.type == []f64) {
             const count = if (comptime std.mem.eql(u8, field.name, "cell_area_m2")) cell_count else if (comptime std.mem.eql(u8, field.name, "root_conductance_m_per_h_megapascal") or std.mem.eql(u8, field.name, "root_biome_fraction") or std.mem.eql(u8, field.name, "root_resistance_mpa_h_per_m") or std.mem.eql(u8, field.name, "soil_path_length_m") or std.mem.eql(u8, field.name, "root_cylinder_radius_m") or std.mem.eql(u8, field.name, "root_surface_area_per_radius_m") or std.mem.startsWith(u8, field.name, "maximum_") or std.mem.startsWith(u8, field.name, "soil_resistance_")) root_count else plant_count;
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
@@ -156,7 +157,7 @@ pub const Workspace = struct {
     }
 
     pub fn deinit(self: *Workspace) void {
-        inline for (@typeInfo(Workspace).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(Workspace)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.allocator.free(self.vascular_growth_habit);
         self.allocator.free(self.dynamically_woody);
         self.allocator.free(self.active);
@@ -182,7 +183,7 @@ pub const Workspace = struct {
 
 fn freeWorkspaceFields(workspace: *Workspace, allocated_count: usize) void {
     var visited: usize = 0;
-    inline for (@typeInfo(Workspace).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(Workspace)) |field| if (field.type == []f64) {
         if (visited < allocated_count) workspace.allocator.free(@field(workspace, field.name));
         visited += 1;
     };
@@ -539,7 +540,7 @@ pub fn canopyVaporFlux(
 /// UPTAKE RSSX, RSRG, RSR1, RSR2, RSRT and RSRS equations. Counts are
 /// expressed per plant, matching the source's RTN*/PP cancellation.
 pub fn hydraulicResistance(path: HydraulicPath) !HydraulicResistance {
-    inline for (@typeInfo(HydraulicPath).@"struct".fields) |field| if (!std.math.isFinite(@field(path, field.name))) return error.NonFiniteHydraulicPath;
+    inline for (ti_compat.fieldViews(HydraulicPath)) |field| if (!std.math.isFinite(@field(path, field.name))) return error.NonFiniteHydraulicPath;
     if (path.soil_path_length_m < 0 or path.root_cylinder_radius_m <= 0 or path.root_surface_area_per_radius_m <= 0 or path.unsaturated_soil_conductivity_m_per_h_megapascal <= 0 or path.root_radial_resistivity_mpa_h_per_m3 < 0 or path.soil_air_volume_m3 < 0 or path.soil_water_volume_m3 <= 0 or path.secondary_root_radius_m <= 0 or path.root_length_m_per_plant <= 0 or path.root_axial_resistivity_mpa_h_per_m2 < 0 or path.primary_root_depth_m < 0 or path.primary_root_radius_m <= 0 or path.primary_axis_count_per_plant <= 0 or path.canopy_height_m < 0 or path.stalk_conducting_element_factor <= 0 or path.secondary_root_length_m < 0 or path.secondary_axis_count_per_plant <= 0) return error.InvalidHydraulicPath;
     const soil = @log((path.soil_path_length_m + path.root_cylinder_radius_m) / path.root_cylinder_radius_m) / path.root_surface_area_per_radius_m / path.unsaturated_soil_conductivity_m_per_h_megapascal;
     const absorbing_area_m2_per_plant = 6.283 * path.secondary_root_radius_m * path.root_length_m_per_plant;

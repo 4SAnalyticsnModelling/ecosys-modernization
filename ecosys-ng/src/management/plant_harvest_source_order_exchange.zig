@@ -11,6 +11,7 @@ const phenology = @import("../plant/lifecycle/phenology.zig");
 const litter_partition = @import("../plant/partition/litter.zig");
 const grazing_manure = @import("grazing_manure.zig");
 const __parent = @import("plant_harvest_runtime.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const SourceOrderSoilPlantExchangeInput = struct {
     organic_carbon_exchange_g_c_step: f64,
@@ -39,12 +40,12 @@ pub const SourceOrderSoilPlantExchangeResult = struct {
 pub fn sourceOrderAccumulateSoilPlantExchange(
     input: SourceOrderSoilPlantExchangeInput,
 ) !SourceOrderSoilPlantExchangeResult {
-    inline for (@typeInfo(SourceOrderSoilPlantExchangeInput).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderSoilPlantExchangeInput)) |field| {
         const value = @field(input, field.name);
         if (field.type == f64) {
             if (!std.math.isFinite(value))
                 return error.InvalidSoilPlantExchange;
-        } else inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element|
+        } else inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element|
             if (!std.math.isFinite(@field(value, element.name)))
                 return error.InvalidSoilPlantExchange;
     }
@@ -77,12 +78,12 @@ pub fn sourceOrderAccumulateSoilPlantExchange(
         .cumulative_net_primary_productivity_g_c = input.cumulative_plant_carbon_g_c +
             input.cumulative_respired_carbon_g_c,
     };
-    inline for (@typeInfo(SourceOrderSoilPlantExchangeResult).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderSoilPlantExchangeResult)) |field| {
         const value = @field(result, field.name);
         if (field.type == f64) {
             if (!std.math.isFinite(value))
                 return error.NonFiniteSoilPlantExchange;
-        } else inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element|
+        } else inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element|
             if (!std.math.isFinite(@field(value, element.name)))
                 return error.NonFiniteSoilPlantExchange;
     }
@@ -138,7 +139,7 @@ pub fn sourceOrderAccumulateLitterfall(
         input.preceding_cumulative_surface_litter,
         input.preceding_hourly_litter,
         input.preceding_cumulative_litter,
-    }) |ledger| inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+    }) |ledger| inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
         const value = @field(ledger, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidLitterfallAccumulationInput;
@@ -175,7 +176,7 @@ pub fn sourceOrderAccumulateLitterfall(
         }
     }
     inline for (.{ surface, hourly, cumulative }) |ledger|
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
             if (!std.math.isFinite(@field(ledger, field.name)))
                 return error.NonFiniteLitterfallAccumulation;
     for (layer_carbon) |value| if (!std.math.isFinite(value))

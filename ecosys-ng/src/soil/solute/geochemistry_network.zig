@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const MineralExtents = struct {
     gibbsite_precipitation_mol_per_m3: f64,
@@ -79,7 +80,7 @@ pub const SourceIterationStage = enum {
 pub fn state_updateSolids(state: *SolidState, transformations: Transformations) !void {
     try validateSolidState(state.*);
     var next = state.*;
-    inline for (@typeInfo(SolidState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SolidState)) |field| {
         const change = @field(transformations, field.name);
         if (!std.math.isFinite(change)) return error.NonFiniteGeochemistryTransformation;
         @field(next, field.name) += change;
@@ -104,7 +105,7 @@ pub fn transformationsForRealizedSolidUpdate(
     try validateSolidState(after);
 
     var result = std.mem.zeroes(Transformations);
-    inline for (@typeInfo(SolidState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SolidState)) |field| {
         const change = @field(after, field.name) - @field(before, field.name);
         if (!std.math.isFinite(change))
             return error.NonFiniteGeochemistryTransformation;
@@ -160,7 +161,7 @@ pub fn applySourceOrderSilicateUpdate(
     stage: SourceIterationStage,
 ) !SolidState {
     try validateSolidState(current);
-    inline for (@typeInfo(Transformations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Transformations)) |field|
         if (!std.math.isFinite(@field(transformations, field.name)))
             return error.NonFiniteGeochemistryTransformation;
     if (stage == .iteration_ceiling) return current;
@@ -189,7 +190,7 @@ pub fn applySourceOrderSilicateUpdate(
 }
 
 fn validateSolidState(state: SolidState) !void {
-    inline for (@typeInfo(SolidState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SolidState)) |field| {
         const value = @field(state, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteGeochemistrySolidState;
         if (value < 0) return error.NegativeGeochemistrySolidState;
@@ -197,8 +198,8 @@ fn validateSolidState(state: SolidState) !void {
 }
 
 pub fn assemble(minerals: MineralExtents, weathering: WeatheringExtents) !Transformations {
-    inline for (@typeInfo(MineralExtents).@"struct".fields) |field| if (!std.math.isFinite(@field(minerals, field.name))) return error.NonFiniteMineralExtent;
-    inline for (@typeInfo(WeatheringExtents).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(MineralExtents)) |field| if (!std.math.isFinite(@field(minerals, field.name))) return error.NonFiniteMineralExtent;
+    inline for (ti_compat.fieldViews(WeatheringExtents)) |field| {
         const extent = @field(weathering, field.name);
         if (!std.math.isFinite(extent) or extent < 0) return error.InvalidWeatheringExtent;
     }
@@ -251,10 +252,10 @@ test "shared mineral and weathering ledger conserves all metals" {
 
 test "geochemistry solid state_update rolls back on exhausted mineral" {
     var state: SolidState = undefined;
-    inline for (@typeInfo(SolidState).@"struct".fields) |field| @field(state, field.name) = 1;
+    inline for (ti_compat.fieldViews(SolidState)) |field| @field(state, field.name) = 1;
     const before = state;
     var transformations: Transformations = undefined;
-    inline for (@typeInfo(Transformations).@"struct".fields) |field| @field(transformations, field.name) = 0;
+    inline for (ti_compat.fieldViews(Transformations)) |field| @field(transformations, field.name) = 0;
     transformations.calcium_natural_silicate_mol_per_m3 = -2;
     try std.testing.expectError(error.NegativeGeochemistrySolidState, state_updateSolids(&state, transformations));
     try std.testing.expectEqualDeep(before, state);
@@ -262,10 +263,10 @@ test "geochemistry solid state_update rolls back on exhausted mineral" {
 
 test "source silicate update is unfloored and ceiling gated" {
     var current: SolidState = undefined;
-    inline for (@typeInfo(SolidState).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SolidState)) |field|
         @field(current, field.name) = 1;
     var changes: Transformations = undefined;
-    inline for (@typeInfo(Transformations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Transformations)) |field|
         @field(changes, field.name) = 0;
     changes.aluminum_natural_silicate_mol_per_m3 = -1;
     changes.potassium_ground_silicate_mol_per_m3 = 0.25;

@@ -1,5 +1,6 @@
 const std = @import("std");
 const RootState = @import("../../plant/root/plant_root_system.zig").State;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 const magic = "ECOSROOT";
 /// Version 10 adds exact per-root/layer provenance for the six source-signed
 /// GROSUB root-gas withdrawal totals. These hourly sidecars participate in
@@ -32,7 +33,7 @@ const SerializedField = struct {
 };
 const serialized_field_count = count: {
     var result: usize = 0;
-    for (@typeInfo(RootState).@"struct".fields) |field| switch (field.type) {
+    for (ti_compat.fieldViews(RootState)) |field| switch (field.type) {
         []f64, []usize, []bool => result += 1,
         else => {},
     };
@@ -46,7 +47,7 @@ const serialized_field_count = count: {
 const serialized_fields: [serialized_field_count]SerializedField = fields: {
     var result: [serialized_field_count]SerializedField = undefined;
     var index: usize = 0;
-    for (@typeInfo(RootState).@"struct".fields) |field| {
+    for (ti_compat.fieldViews(RootState)) |field| {
         const kind: ?SerializedFieldKind = switch (field.type) {
             []f64 => .float,
             []usize => .unsigned,
@@ -104,7 +105,7 @@ pub fn read(allocator: std.mem.Allocator, reader: *std.Io.Reader, limits: Limits
     if (plants == 0 or layers == 0 or axes == 0) return error.InvalidPlantRootCheckpointDimensions;
     var state = try RootState.init(allocator, plants, layers, axes);
     errdefer state.deinit();
-    inline for (@typeInfo(RootState).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(RootState)) |field| switch (field.type) {
         []f64 => if (comptime isRootGasWithdrawalProvenance(field.name)) {
             if (stored_version >= version)
                 try readF64Slice(reader, @field(state, field.name));

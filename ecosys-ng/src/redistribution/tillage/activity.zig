@@ -1,5 +1,6 @@
 const std = @import("std");
 const inventory = @import("../../validation/landscape_mass_inventory_support.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Tolerance = struct {
     absolute: inventory.Storage = .{},
@@ -8,7 +9,7 @@ pub const Tolerance = struct {
 
     fn validate(self: Tolerance) !void {
         try self.absolute.validate();
-        inline for (std.meta.fields(inventory.Storage)) |field|
+        inline for (ti_compat.fieldViews(inventory.Storage)) |field|
             if (@field(self.absolute, field.name) < 0)
                 return error.InvalidTillageActivityTolerance;
         if (!std.math.isFinite(self.relative) or self.relative < 0 or self.representation_ulps == 0)
@@ -209,7 +210,7 @@ fn scaledRecord(source: inventory.Storage, factor: f64) !Record {
     if (!std.math.isFinite(factor) or factor < 0) return error.InvalidTillageActivityInput;
     var transfer: inventory.Storage = .{};
     var heat_reversed = false;
-    inline for (std.meta.fields(inventory.Storage)) |field| {
+    inline for (ti_compat.fieldViews(inventory.Storage)) |field| {
         const signed = @field(source, field.name) * factor;
         if (!std.math.isFinite(signed)) return error.NonFiniteTillageActivityTransfer;
         if (comptime std.mem.eql(u8, field.name, "heat_megajoules")) {
@@ -226,7 +227,7 @@ fn scaledRecord(source: inventory.Storage, factor: f64) !Record {
 
 fn applyRecord(donor: *inventory.Storage, recipient: *inventory.Storage, record: Record) !void {
     if (!record.active) return;
-    inline for (std.meta.fields(inventory.Storage)) |field| {
+    inline for (ti_compat.fieldViews(inventory.Storage)) |field| {
         const amount = @field(record.transfer, field.name);
         if (comptime std.mem.eql(u8, field.name, "heat_megajoules")) {
             if (record.heat_reversed) {
@@ -247,7 +248,7 @@ fn applyRecord(donor: *inventory.Storage, recipient: *inventory.Storage, record:
 
 fn addRecord(recipient: *inventory.Storage, record: Record) !void {
     if (!record.active) return;
-    inline for (std.meta.fields(inventory.Storage)) |field| {
+    inline for (ti_compat.fieldViews(inventory.Storage)) |field| {
         const amount = @field(record.transfer, field.name);
         if (comptime std.mem.eql(u8, field.name, "heat_megajoules"))
             @field(recipient, field.name) += if (record.heat_reversed) -amount else amount
@@ -258,7 +259,7 @@ fn addRecord(recipient: *inventory.Storage, record: Record) !void {
 }
 
 fn subtractStorage(value: *inventory.Storage, amount: inventory.Storage) !void {
-    inline for (std.meta.fields(inventory.Storage)) |field|
+    inline for (ti_compat.fieldViews(inventory.Storage)) |field|
         @field(value, field.name) -= @field(amount, field.name);
     try value.validate();
 }

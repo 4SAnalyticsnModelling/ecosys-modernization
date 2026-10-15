@@ -2,6 +2,7 @@ const std = @import("std");
 const State = @import("../../canopy/photosynthesis/photosynthesis.zig").State;
 const Retention = @import("../../canopy/energy/precipitation_retention.zig").State;
 const LayerDistribution = @import("../../canopy/radiation/layer_distribution.zig").State;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 const magic = "ECOSCANP";
 // v6 adds the coherent WTLS/WTSTK/WVSTK/ARSTP post-harvest snapshot.
 const version: u32 = 6;
@@ -224,21 +225,34 @@ const FloatField = struct {
     offset: usize,
 };
 
+/// Field data read straight off `@typeInfo` in the 0.17 parallel form
+/// (`field_names` / `field_types`).  These two helpers run at comptime over
+/// canopy state structs of up to 194 fields; materialising the shim's
+/// `[n]FieldView` array adds a second full pass over the fields and trips Zig's
+/// 1000-backwards-branch comptime quota (measured 2026-10-14,
+/// audit/runs/zig017-inline-loop-2).  The native two-tuple `inline for` is one
+/// pass and stays inside the quota.  Same fields, same order, same types —
+/// `ti_compat.fieldViews` is exactly this data, so behaviour is unchanged.
 fn floatFieldCount(comptime T: type) usize {
     var count: usize = 0;
-    for (@typeInfo(T).@"struct".fields) |field| if (field.type == []f64) {
-        count += 1;
-    };
+    const info = @typeInfo(T).@"struct";
+    inline for (info.field_names, info.field_types) |name, field_type| {
+        _ = name;
+        if (field_type == []f64) count += 1;
+    }
     return count;
 }
 
 fn floatFields(comptime T: type) [floatFieldCount(T)]FloatField {
     var result: [floatFieldCount(T)]FloatField = undefined;
     var index: usize = 0;
-    for (@typeInfo(T).@"struct".fields) |field| if (field.type == []f64) {
-        result[index] = .{ .offset = @offsetOf(T, field.name) };
-        index += 1;
-    };
+    const info = @typeInfo(T).@"struct";
+    inline for (info.field_names, info.field_types) |name, field_type| {
+        if (field_type == []f64) {
+            result[index] = .{ .offset = @offsetOf(T, name) };
+            index += 1;
+        }
+    }
     return result;
 }
 

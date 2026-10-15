@@ -225,7 +225,7 @@ pub fn residualAt(grid: *const grid_module.GridState, faces: []const group_types
                     destination_water,
                 )) |cached| break :cached_matrix cached;
             }
-            const direction_index: usize = @intFromEnum(face.axis);
+            const direction_index: usize = @backingInt(face.axis);
             const source_air = try group_flux.derivedPhysicalAirVolumeM3(grid.matrix_pore_capacity_m3[source], source_water, grid.matrix_ice_water_m3[source], properties.ice_density_megagrams_per_m3);
             const destination_air = try group_flux.derivedPhysicalAirVolumeM3(grid.matrix_pore_capacity_m3[destination], destination_water, grid.matrix_ice_water_m3[destination], properties.ice_density_megagrams_per_m3);
             const source_fraction = source_water / properties.matrix_bulk_volume_m3[source];

@@ -2,6 +2,7 @@ const std = @import("std");
 const water_flux = @import("../soil/water/flux.zig");
 const retention = @import("../soil/water/retention.zig");
 const solver = @import("../soil/water/solver.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const LitterSoilInputs = struct {
     litter_water_m3: f64,
@@ -75,7 +76,7 @@ pub fn bareSurfaceSoilFreezingFlux(
 /// NPR is now only the caller's convergence ceiling; this evaluates one
 /// nonlinear litter-soil face for a whole-step Newton/Picard residual.
 pub fn litterSoilFlux(inputs: LitterSoilInputs) !LitterSoilFlux {
-    inline for (@typeInfo(LitterSoilInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(LitterSoilInputs)) |field| {
         if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfaceWaterInput;
     }
     if (inputs.litter_cover_fraction < 0 or inputs.litter_cover_fraction > 1 or inputs.wet_litter_cover_fraction < 0 or inputs.wet_litter_cover_fraction > 1 or inputs.litter_temperature_k <= 0 or inputs.soil_temperature_k <= 0 or inputs.liquid_water_heat_capacity_megajoules_per_m3_k <= 0) return error.InvalidSurfaceWaterInput;
@@ -191,7 +192,7 @@ pub const Runoff = struct { water_m3_per_step: f64, velocity_m_per_s: f64, avail
 /// grid does not change per-area overland flow; on the unit-area legacy decks
 /// this is numerically identical to the original absolute `1.0e-3`.
 pub fn runoff(inputs: RunoffInputs) !Runoff {
-    inline for (@typeInfo(RunoffInputs).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfaceWaterInput;
+    inline for (ti_compat.fieldViews(RunoffInputs)) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfaceWaterInput;
     if (inputs.total_excess_water_and_ice_m3 < 0 or inputs.excess_liquid_water_m3 < 0 or inputs.ground_surface_retention_capacity_m3 < 0 or inputs.surface_area_m2 <= 0 or inputs.surface_slope < 0 or inputs.roughness_height_m <= 0 or inputs.flow_width_m < 0) return error.InvalidSurfaceWaterInput;
     const maximum_hydraulic_volume_m3 = maximum_hydraulic_depth_m * inputs.surface_area_m2;
     const available = if (inputs.soil_surface_present and inputs.total_excess_water_and_ice_m3 > inputs.ground_surface_retention_capacity_m3)

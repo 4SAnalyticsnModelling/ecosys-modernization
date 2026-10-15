@@ -15,6 +15,7 @@ const surface_litter_convergence = @import("surface_litter_convergence.zig");
 const tile_kernels = @import("tile_kernels.zig");
 const group_heat_water_solute = @import("hourly_heat_water_solute.zig");
 const group_phenology_preparation = @import("hourly_phenology_preparation.zig");
+const ti_compat = @import("ecosys_ng").typeinfo_compat;
 
 const LivingCanopyPublication = struct {
     coupled: ?ecosys.canopy_coupled_convergence.OuterCoupledResult = null,
@@ -652,7 +653,7 @@ pub fn advanceLivingCanopyAfterWatsub(context: anytype) !void {
             solveLivingCanopyCells,
         );
         try ecosys.plant_water_balance.state_updateRootHydraulicsWithCanopyPotential(staged_balance, roots, context.grid, context.soil_hourly_workspace.root_referenced_total_water_potential_megapascal, staged_canopy_potential, staged_active, water_workspace.cell_area_m2, water_workspace.soil_resistance_mpa_h_per_m, water_workspace.root_resistance_mpa_h_per_m, water_workspace.leaf_osmotic_potential_at_zero_total_megapascal, context.root_biological_domain_count_by_plant);
-        inline for (@typeInfo(ecosys.plant_water_balance.State).@"struct".fields) |field| if (field.type == []f64 or field.type == []u16) @memcpy(@field(balance, field.name), @field(staged_balance, field.name));
+        inline for (ti_compat.fieldViews(ecosys.plant_water_balance.State)) |field| if (field.type == []f64 or field.type == []u16) @memcpy(@field(balance, field.name), @field(staged_balance, field.name));
         // Publish RSMN only after every plant's source-mandated final pass and
         // the coupled root-hydraulics validation succeeded.
         @memcpy(canopy.plant_minimum_water_vapor_resistance_h_per_m, staged_minimum_stomatal_resistance);
@@ -702,22 +703,22 @@ pub fn advanceLivingCanopyAfterWatsub(context: anytype) !void {
                 canopy.plant_canopy_turgor_potential_megapascal[plant] = inactive.canopy_turgor_water_potential_megapascal;
                 canopy.plant_transpiration_m3_per_h[plant] = 0;
                 surface_workspace.stomatal_resistance_h_per_m[plant] = inactive.stomatal_resistance_h_per_m;
-                inline for (@typeInfo(ecosys.canopy_surface_exchange.State).@"struct".fields) |field| {
+                inline for (ti_compat.fieldViews(ecosys.canopy_surface_exchange.State)) |field| {
                     if (field.type == []f64) @field(exchange, field.name)[plant] = 0;
                 }
                 exchange.boundary_layer_resistance_h_per_m[plant] = inactive.aerodynamic_resistance_h_per_m;
                 exchange.total_aerodynamic_resistance_h_per_m[plant] = inactive.aerodynamic_resistance_h_per_m;
                 exchange.canopy_surface_vapor_fraction[plant] = inactive.canopy_air_vapor_concentration_m3_per_m3;
-                inline for (@typeInfo(ecosys.canopy_energy.State).@"struct".fields) |field| {
+                inline for (ti_compat.fieldViews(ecosys.canopy_energy.State)) |field| {
                     if (field.type == []f64) @field(energy, field.name)[plant] = 0;
                 }
                 energy.emitted_sky_longwave_megajoules_per_m2[plant] = inactive.longwave_emission_megajoules_per_step / context.canopy_cell_area_m2[cell];
             } else {
                 canopy.plant_transpiration_m3_per_h[plant] = 0;
-                inline for (@typeInfo(ecosys.canopy_surface_exchange.State).@"struct".fields) |field| {
+                inline for (ti_compat.fieldViews(ecosys.canopy_surface_exchange.State)) |field| {
                     if (field.type == []f64) @field(exchange, field.name)[plant] = 0;
                 }
-                inline for (@typeInfo(ecosys.canopy_energy.State).@"struct".fields) |field| {
+                inline for (ti_compat.fieldViews(ecosys.canopy_energy.State)) |field| {
                     if (field.type == []f64) @field(energy, field.name)[plant] = 0;
                 }
             }

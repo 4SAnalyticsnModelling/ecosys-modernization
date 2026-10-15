@@ -5,6 +5,7 @@
 // `HTNODX`/`HTNODE` height chaining, and the monthly `DSTK` diagnostic.
 // Group B of docs/traceability/plant_growth_unbound_family_disposition.md
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     internode_carbon_g_c: []f64,
@@ -167,11 +168,11 @@ fn previewNode(
 }
 
 fn validateInputs(inputs: Inputs) !void {
-    inline for (@typeInfo(Growth).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Growth)) |field| {
         const value = @field(inputs.growth, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidStalkNodeGrowth;
     }
-    inline for (@typeInfo(Geometry).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Geometry)) |field| {
         const value = @field(inputs.geometry, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteStalkNodeGrowthInput;
     }

@@ -3,6 +3,7 @@ const grid_module = @import("../../state/grid.zig");
 const hydrology_module = @import("../../transport/hydrology.zig");
 const geometry_module = @import("../water/face_geometry.zig");
 const species_module = @import("transport_species.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 const Species = species_module.AqueousSpecies;
 
@@ -97,8 +98,8 @@ pub const State = struct {
             const water_velocity_m_per_step = @abs(faces.micropore_water_flux_m3_per_step[face_index]) / area_m2;
             const dispersivity_m2_per_step = parameters.dispersivity_coefficient * std.math.pow(f64, mean_distance_m, parameters.dispersivity_distance_exponent) * step_hours * @min(step_hours, water_velocity_m_per_step);
             const temperature_factor = std.math.pow(f64, grid.soil_temperature_k[destination] / parameters.reference_temperature_k, parameters.temperature_exponent);
-            inline for (@typeInfo(Species).@"enum".fields) |field| {
-                const species: Species = @enumFromInt(field.value);
+            inline for (ti_compat.enumFieldViews(Species)) |field| {
+                const species: Species = @fromBackingInt(@intCast(field.value));
                 const component = face_index * Species.count + field.value;
                 const reference_diffusivity = if (species_module.diffusivityClass(species) == .phosphate) parameters.phosphate_diffusivity_m2_per_h else parameters.other_ion_diffusivity_m2_per_h;
                 const diffusivity_m2_per_step = reference_diffusivity * temperature_factor * step_hours;

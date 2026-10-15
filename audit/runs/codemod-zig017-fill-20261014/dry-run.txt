@@ -1,0 +1,16 @@
+files scanned        : 882
+files to change       : 180
+repeat rewrites      : 1080  (typed [_]T{v}: 1043, typed decl: 11, place assign: 26)
+files with MANUAL    : 3
+  /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/ecosys_ng.zig:13181: anonymous repeat .{inactive_nutrient_trait} * 3 (elem type not visible, place=None)
+  /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/plant/growth/shoot_growth_metabolism.zig:748: anonymous repeat .{0.8} * partition_module.organ_count (elem type not visible, place=None)
+  /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/plant/growth/shoot_growth_metabolism.zig:748: anonymous repeat .{0.04} * partition_module.organ_count (elem type not visible, place=None)
+  /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/plant/growth/shoot_growth_metabolism.zig:748: anonymous repeat .{0.004} * partition_module.organ_count (elem type not visible, place=None)
+  /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/plant/growth/shoot_growth_metabolism.zig:759: anonymous repeat .{0.8} * partition_module.organ_count (elem type not visible, place=None)
+  /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/plant/growth/shoot_growth_metabolism.zig:759: anonymous repeat .{0.04} * partition_module.organ_count (elem type not visible, place=None)
+  /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/plant/growth/shoot_growth_metabolism.zig:759: anonymous repeat .{0.004} * partition_module.organ_count (elem type not visible, place=None)
+  /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/plant/growth/shoot_growth_metabolism.zig:772: anonymous repeat .{0.8} * partition_module.organ_count (elem type not visible, place=None)
+  /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/plant/growth/shoot_growth_metabolism.zig:772: anonymous repeat .{0.04} * partition_module.organ_count (elem type not visible, place=None)
+  /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/plant/growth/shoot_growth_metabolism.zig:772: anonymous repeat .{0.004} * partition_module.organ_count (elem type not visible, place=None)
+  /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/surface/autotrophic_complex_step.zig:568: anonymous repeat .{.{0} * competition_history.surface_pool_} * active_population_count (elem type not visible, place='result.surface_mineral_capacity')
+  /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/surface/autotrophic_complex_step.zig:569: anonymous repeat .{.{0} * competition_history.surface_pool_} * active_population_count (elem type not visible, place='result.topsoil_residual_capacity')

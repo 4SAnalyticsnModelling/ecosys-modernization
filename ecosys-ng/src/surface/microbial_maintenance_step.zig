@@ -6,6 +6,7 @@ const metabolism = @import("../soil/microbial/metabolism.zig");
 const respiration = @import("microbial_respiration_step.zig");
 const oxygen = @import("microbial_oxygen_driver.zig");
 const environment = @import("microbial_environment_step.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -24,11 +25,11 @@ pub const State = struct {
         result.allocator = allocator;
         result.cell_count = cell_count;
         var allocated: usize = 0;
-        errdefer inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 and allocated > 0) {
+        errdefer inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 and allocated > 0) {
             allocated -= 1;
             allocator.free(@field(result, field.name));
         };
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -37,7 +38,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };

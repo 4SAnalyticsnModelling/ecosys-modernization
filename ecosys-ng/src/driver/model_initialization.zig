@@ -6,6 +6,7 @@ const SoilCatalogEntry = @import("../soil/profile/catalog.zig").Entry;
 const SoilProfile = @import("../state/soil_profile.zig").SoilProfile;
 const ice_units = @import("../core/ice_units.zig");
 
+
 /// Copies one fully resolved soil profile into one horizontal grid cell. The
 /// caller controls profile sharing and tile scheduling; this kernel has no file
 /// I/O or global state and is directly portable to a future device backend.
@@ -364,7 +365,7 @@ test "initial DTBLZ saturation is per cell exact and sentinel independent" {
         &grid,
         // Unsupplied FC/WP on every layer, so hour1.f:2056 takes the ELSE arm
         // and this test exercises the saturation geometry as before.
-        &[_]bool{false} ** 6,
+        &@as([6]bool, @splat(@as(bool, false))),
         &.{ 0.5, 0.8 },
         &shared_profile_midpoints_m,
     );
@@ -456,7 +457,7 @@ test "a below-table layer with supplied retention endpoints is never saturated" 
 test "the supplied-endpoints predicate follows the readi.f negative sentinel" {
     const source = try @import("../core/test_fixtures.zig").soilProfileSource(
         std.testing.allocator,
-        @typeInfo(@import("../state/soil_profile.zig").LayerProperty).@"enum".fields.len,
+        @typeInfo(@import("../state/soil_profile.zig").LayerProperty).@"enum".field_names.len,
     );
     defer std.testing.allocator.free(source);
     var profile = try @import("../state/soil_profile.zig").parsePhysicalProfile(std.testing.allocator, source);
@@ -650,15 +651,15 @@ test "fully saturated DTBLZ layer is an inactive zero-air gas phase" {
         0,
         gas.starte_activity_coefficient,
     );
-    const oxygen = @intFromEnum(gas.Species.oxygen);
+    const oxygen = @backingInt(gas.Species.oxygen);
     try std.testing.expectEqual(@as(f64, 0), state.dissolved_mass_g[oxygen]);
     try std.testing.expect(raw_depth_control.dissolved_mass_g[oxygen] > 0);
     const gaseous_before = state.gaseous_mass_g[0..gas.species_count].*;
     const dissolved_before = state.dissolved_mass_g[0..gas.species_count].*;
     const band_before = state.band_dissolved_mass_g[0..gas.species_count].*;
-    const solubility = [_]f64{1} ** gas.species_count;
-    const exchange = [_]f64{0.75} ** gas.species_count;
-    const zero_exchange = [_]f64{0} ** gas.species_count;
+    const solubility = @as([gas.species_count]f64, @splat(@as(f64, 1)));
+    const exchange = @as([gas.species_count]f64, @splat(@as(f64, 0.75)));
+    const zero_exchange = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     const result = try coupled.solve(
         std.testing.allocator,
         &state,
@@ -687,7 +688,7 @@ test "fully saturated DTBLZ layer is an inactive zero-air gas phase" {
 
 test "resolved hydrology populates heap-backed grid state" {
     const allocator = std.testing.allocator;
-    const source = try @import("../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../state/soil_profile.zig").LayerProperty).@"enum".fields.len);
+    const source = try @import("../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../state/soil_profile.zig").LayerProperty).@"enum".field_names.len);
     defer allocator.free(source);
     var profile = try @import("../state/soil_profile.zig").parsePhysicalProfile(allocator, source);
     defer profile.deinit();
@@ -741,7 +742,7 @@ test "every Ottawa layer supplies both retention endpoints, so the deck takes th
     const soil_profile = @import("../state/soil_profile.zig");
     const source = try @import("../core/test_fixtures.zig").soilProfileSource(
         std.testing.allocator,
-        @typeInfo(soil_profile.LayerProperty).@"enum".fields.len,
+        @typeInfo(soil_profile.LayerProperty).@"enum".field_names.len,
     );
     defer std.testing.allocator.free(source);
     var profile = try soil_profile.parsePhysicalProfile(std.testing.allocator, source);

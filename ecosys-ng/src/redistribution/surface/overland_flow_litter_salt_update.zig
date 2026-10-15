@@ -1,5 +1,7 @@
 const std = @import("std");
 const transport_species = @import("../../soil/solute/transport_species.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Species = transport_species.AqueousSpecies;
 
@@ -9,19 +11,19 @@ pub const Species = transport_species.AqueousSpecies;
 pub const legacy_surface_species_count: usize = 42;
 
 comptime {
-    if (@intFromEnum(Species.aluminum) != 0 or
-        @intFromEnum(Species.bicarbonate) != 11 or
-        @intFromEnum(Species.aluminum_hydroxide_1) != 12 or
-        @intFromEnum(Species.hydrogen_silicate) != 33 or
-        @intFromEnum(Species.non_band_phosphate) != 34 or
-        @intFromEnum(Species.non_band_magnesium_hpo4) != 41 or
-        @intFromEnum(Species.band_phosphate) < legacy_surface_species_count or
-        @intFromEnum(Species.non_band_hpo4) < legacy_surface_species_count)
+    if (@backingInt(Species.aluminum) != 0 or
+        @backingInt(Species.bicarbonate) != 11 or
+        @backingInt(Species.aluminum_hydroxide_1) != 12 or
+        @backingInt(Species.hydrogen_silicate) != 33 or
+        @backingInt(Species.non_band_phosphate) != 34 or
+        @backingInt(Species.non_band_magnesium_hpo4) != 41 or
+        @backingInt(Species.band_phosphate) < legacy_surface_species_count or
+        @backingInt(Species.non_band_hpo4) < legacy_surface_species_count)
         @compileError("legacy surface litter salt coordinate layout changed");
 }
 
 pub fn routesSpecies(species: Species) bool {
-    return @intFromEnum(species) < legacy_surface_species_count;
+    return @backingInt(species) < legacy_surface_species_count;
 }
 
 /// Applies the signed simultaneous runoff change to the authoritative 0..41
@@ -161,10 +163,10 @@ pub const OverlandIonFluxes = struct {
 ///
 /// Caller must check both `ABS(TQR) > ZEROS` and `ISALTG != 0` before invoking.
 pub fn apply(pools: LitterIonSpecies, fluxes: OverlandIonFluxes) !LitterIonSpecies {
-    inline for (@typeInfo(LitterIonSpecies).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(LitterIonSpecies)) |field|
         if (!std.math.isFinite(@field(pools, field.name)))
             return error.InvalidOverlandLitterIonPool;
-    inline for (@typeInfo(OverlandIonFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(OverlandIonFluxes)) |field|
         if (!std.math.isFinite(@field(fluxes, field.name)))
             return error.InvalidOverlandLitterIonFlux;
 
@@ -213,7 +215,7 @@ pub fn apply(pools: LitterIonSpecies, fluxes: OverlandIonFluxes) !LitterIonSpeci
         .ca2p_mol = pools.ca2p_mol + fluxes.ca2p_mol,
         .mg1p_mol = pools.mg1p_mol + fluxes.mg1p_mol,
     };
-    inline for (@typeInfo(LitterIonSpecies).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(LitterIonSpecies)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteOverlandLitterIonPool;
     return result;
@@ -222,12 +224,12 @@ pub fn apply(pools: LitterIonSpecies, fluxes: OverlandIonFluxes) !LitterIonSpeci
 test "REDIST overland litter salt maps all 42 source species" {
     var fluxes = std.mem.zeroes(OverlandIonFluxes);
     var expected_value: f64 = 1.0;
-    inline for (@typeInfo(OverlandIonFluxes).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(OverlandIonFluxes)) |field| {
         @field(fluxes, field.name) = expected_value;
         expected_value += 1.0;
     }
     const result = try apply(std.mem.zeroes(LitterIonSpecies), fluxes);
-    inline for (@typeInfo(LitterIonSpecies).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(LitterIonSpecies)) |field|
         try std.testing.expectEqual(@field(fluxes, field.name), @field(result, field.name));
 }
 
@@ -278,8 +280,8 @@ test "REDIST overland litter salt rejects arithmetic overflow" {
 }
 
 test "production surface layout preserves exactly the legacy 0 through 41 coordinates" {
-    inline for (@typeInfo(Species).@"enum".fields) |field| {
-        const species: Species = @enumFromInt(field.value);
+    inline for (ti_compat.enumFieldViews(Species)) |field| {
+        const species: Species = @fromBackingInt(@intCast(field.value));
         try std.testing.expectEqual(field.value < legacy_surface_species_count, routesSpecies(species));
     }
     try std.testing.expect(routesSpecies(.non_band_phosphate));
@@ -291,9 +293,9 @@ test "production surface layout preserves exactly the legacy 0 through 41 coordi
 
 test "production extensive state update covers all 42 coordinates and is atomic" {
     const stride = Species.count;
-    var original = [_]f64{0} ** (2 * stride);
-    var change = [_]f64{0} ** (2 * stride);
-    var candidate = [_]f64{7} ** (2 * stride);
+    var original = @as([(2 * stride)]f64, @splat(@as(f64, 0)));
+    var change = @as([(2 * stride)]f64, @splat(@as(f64, 0)));
+    var candidate = @as([(2 * stride)]f64, @splat(@as(f64, 7)));
     for (0..legacy_surface_species_count) |species_index| {
         original[species_index] = @floatFromInt(species_index + 1);
         change[species_index] = 0.5;
@@ -301,7 +303,7 @@ test "production extensive state update covers all 42 coordinates and is atomic"
     try applyExtensiveChanges(&original, &change, &candidate, 2, stride);
     for (0..legacy_surface_species_count) |species_index|
         try std.testing.expectEqual(original[species_index] + 0.5, candidate[species_index]);
-    try std.testing.expectEqual(@as(f64, 7), candidate[@intFromEnum(Species.non_band_hpo4)]);
+    try std.testing.expectEqual(@as(f64, 7), candidate[@backingInt(Species.non_band_hpo4)]);
 
     const before = candidate;
     change[stride + legacy_surface_species_count - 1] = std.math.nan(f64);

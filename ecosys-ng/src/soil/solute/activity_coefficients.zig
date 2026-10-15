@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ChargeClassTotals = struct {
     trivalent_cations_mol: f64,
@@ -23,7 +24,7 @@ pub const Result = struct {
 pub fn calculate(totals: ChargeClassTotals, water_volume_m3: f64) !Result {
     var profile_scope = @import("reaction_diagnostic_control.zig").beginPhase(.activity_coefficients);
     defer profile_scope.end();
-    inline for (@typeInfo(ChargeClassTotals).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ChargeClassTotals)) |field| {
         const value = @field(totals, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidChargeClassTotal;
     }

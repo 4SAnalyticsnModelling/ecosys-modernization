@@ -1,5 +1,6 @@
 const std = @import("std");
 const gas = @import("../gas/transport.zig");
+
 const AqueousState = @import("../solute/aqueous_network.zig").State;
 
 /// Componentwise view of the accepted atmospheric gas boundary for one
@@ -35,7 +36,7 @@ pub fn gasBoundaryExchangeComponentsG(
         litter_cell >= litter_cells)
         return error.GasOutputBoundaryDimensionMismatch;
 
-    const species_index = @intFromEnum(species);
+    const species_index = @backingInt(species);
     const litter_exchange_g =
         litter_flux_g_per_h[litter_cell * gas.species_count + species_index];
     var soil_exchange_g: f64 = 0;
@@ -96,11 +97,11 @@ pub fn writeMineralAmmoniaNitrogenProfile(
 }
 
 test "boundary exchange retains legacy positive-into-ecosystem sign over runtime layers" {
-    var soil = [_]f64{0} ** (4 * gas.species_count);
-    var litter = [_]f64{0} ** (2 * gas.species_count);
-    soil[1 * gas.species_count + @intFromEnum(gas.Species.carbon_dioxide)] = 2;
-    soil[2 * gas.species_count + @intFromEnum(gas.Species.carbon_dioxide)] = -0.5;
-    litter[1 * gas.species_count + @intFromEnum(gas.Species.carbon_dioxide)] = 0.25;
+    var soil = @as([(4 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    var litter = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    soil[1 * gas.species_count + @backingInt(gas.Species.carbon_dioxide)] = 2;
+    soil[2 * gas.species_count + @backingInt(gas.Species.carbon_dioxide)] = -0.5;
+    litter[1 * gas.species_count + @backingInt(gas.Species.carbon_dioxide)] = 0.25;
     const components = try gasBoundaryExchangeComponentsG(
         &soil,
         &litter,
@@ -117,7 +118,7 @@ test "boundary exchange retains legacy positive-into-ecosystem sign over runtime
 }
 
 test "CNH3S projection uses runtime nitrogen molar mass and arbitrary layers" {
-    var aqueous = [_]AqueousState{std.mem.zeroes(AqueousState)} ** 4;
+    var aqueous = @as([4]AqueousState, @splat(@as(AqueousState, std.mem.zeroes(AqueousState))));
     aqueous[1].ammonia_non_band = 0.5;
     aqueous[2].ammonia_non_band = 2;
     var output: [2]f64 = undefined;

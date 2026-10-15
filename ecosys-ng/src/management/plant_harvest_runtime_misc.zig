@@ -29,6 +29,7 @@ const surface_nutrients = @import("../soil/biogeochemistry/organic_matter_fire_e
 const spring_reproductive_litterfall = @import("../plant/growth/spring_reproductive_litterfall.zig");
 const group_types = @import("plant_harvest_runtime_types.zig");
 const group_validation = @import("plant_harvest_runtime_validation.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Context = struct {
     canopy_state: *canopy.State,
@@ -169,7 +170,7 @@ pub fn preflightGrazing(context: *const Context, plant: usize, event: management
     if (!std.math.isFinite(event.cutting_height_m_or_lai_fraction) or event.cutting_height_m_or_lai_fraction < 0 or
         !std.math.isFinite(event.thinning_fraction_or_consumption_rate) or event.thinning_fraction_or_consumption_rate < 0)
         return error.InvalidGrazingEvent;
-    inline for (@typeInfo(management.RemovalFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(management.RemovalFractions)) |field| {
         try group_validation.validateGrazingFraction(@field(event.harvested_fraction, field.name));
         try group_validation.validateGrazingFraction(@field(event.ecosystem_export_fraction, field.name));
     }
@@ -246,12 +247,12 @@ pub fn addProducts(target: *canopy.HarvestProducts, source: canopy.HarvestProduc
 }
 
 pub fn addMass(target: *canopy.ElementalMass, source: canopy.ElementalMass) void {
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| @field(target, field.name) += @field(source, field.name);
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| @field(target, field.name) += @field(source, field.name);
 }
 
 pub fn subtractMass(target: *canopy.ElementalMass, source: canopy.ElementalMass) !void {
     var next = target.*;
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
         const value = @field(target, field.name) - @field(source, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.HarvestProductSubtractionWouldOverdraw;
         @field(next, field.name) = value;
@@ -278,7 +279,7 @@ pub fn addMassToStandingDead(state: *canopy.State, plant: usize, mass: canopy.El
 }
 
 pub fn addScaledMass(target: *canopy.ElementalMass, source: canopy.ElementalMass, fraction: f64) void {
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| @field(target, field.name) += fraction * @field(source, field.name);
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| @field(target, field.name) += fraction * @field(source, field.name);
 }
 
 // Moved to plant_harvest_source_order.zig; re-exported so call sites are unchanged.

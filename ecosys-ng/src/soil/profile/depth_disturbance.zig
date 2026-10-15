@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ErosionInputs = struct {
     net_sediment_megagrams: f64,
@@ -58,7 +59,7 @@ pub fn freezeThawDepthChange_m(inputs: FreezeThawInputs) !f64 {
 }
 
 fn validateFinite(comptime T: type, value: T) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| if (!std.math.isFinite(@field(value, field.name))) return error.NonFiniteSoilDepthInput;
+    inline for (ti_compat.fieldViews(T)) |field| if (!std.math.isFinite(@field(value, field.name))) return error.NonFiniteSoilDepthInput;
 }
 
 test "erosion depth uses current surface bulk density and preserves sign" {

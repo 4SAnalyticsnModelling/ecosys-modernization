@@ -12,7 +12,7 @@ pub const Organ = enum(u8) {
     fine_root,
     coarse_wood,
 
-    pub const count: usize = @typeInfo(Organ).@"enum".fields.len;
+    pub const count: usize = @typeInfo(Organ).@"enum".field_names.len;
 };
 
 pub const ElementFractions = struct {
@@ -65,7 +65,7 @@ pub const State = struct {
 
     pub fn get(self: State, plant: usize, organ: Organ) !ElementFractions {
         if (plant >= self.plant_count) return error.PlantIndexOutOfBounds;
-        const result = self.by_plant_and_organ[plant * Organ.count + @intFromEnum(organ)];
+        const result = self.by_plant_and_organ[plant * Organ.count + @backingInt(organ)];
         try result.validate();
         return result;
     }
@@ -146,15 +146,15 @@ fn traitsFor(root_profile: u8, nitrogen_fixation: u8, turnover: u8) PlantTraits 
 test "STARTQ litter table preserves every source vegetation branch" {
     const parameters = @import("../initialization/seed_and_population.zig").compatibilityStandingDeadPartitionParameters();
     const moss = carbonFractions(traitsFor(0, 0, 0), parameters);
-    try std.testing.expectEqual([4]f64{ 0.07, 0.25, 0.30, 0.38 }, moss[@intFromEnum(Organ.foliar)]);
+    try std.testing.expectEqual([4]f64{ 0.07, 0.25, 0.30, 0.38 }, moss[@backingInt(Organ.foliar)]);
     const legume = carbonFractions(traitsFor(2, 1, 0), parameters);
-    try std.testing.expectEqual([4]f64{ 0.16, 0.38, 0.34, 0.12 }, legume[@intFromEnum(Organ.foliar)]);
+    try std.testing.expectEqual([4]f64{ 0.16, 0.38, 0.34, 0.12 }, legume[@backingInt(Organ.foliar)]);
     const annual = carbonFractions(traitsFor(2, 0, 0), parameters);
-    try std.testing.expectEqual([4]f64{ 0.057, 0.263, 0.542, 0.138 }, annual[@intFromEnum(Organ.fine_root)]);
+    try std.testing.expectEqual([4]f64{ 0.057, 0.263, 0.542, 0.138 }, annual[@backingInt(Organ.fine_root)]);
     const deciduous = carbonFractions(traitsFor(2, 0, 1), parameters);
-    try std.testing.expectEqual([4]f64{ 0.059, 0.308, 0.464, 0.169 }, deciduous[@intFromEnum(Organ.fine_root)]);
+    try std.testing.expectEqual([4]f64{ 0.059, 0.308, 0.464, 0.169 }, deciduous[@backingInt(Organ.fine_root)]);
     const conifer = carbonFractions(traitsFor(2, 0, 2), parameters);
-    try std.testing.expectEqual([4]f64{ 0.07, 0.25, 0.38, 0.30 }, conifer[@intFromEnum(Organ.fine_root)]);
+    try std.testing.expectEqual([4]f64{ 0.07, 0.25, 0.38, 0.30 }, conifer[@backingInt(Organ.fine_root)]);
 }
 
 test "runtime plant litter state normalizes C N P independently beyond five species" {
@@ -162,7 +162,7 @@ test "runtime plant litter state normalizes C N P independently beyond five spec
     defer state.deinit();
     const parameters = @import("../initialization/seed_and_population.zig").compatibilityStandingDeadPartitionParameters();
     for (0..state.plant_count) |plant| try state.initializePlant(plant, traitsFor(2, 0, if (plant % 2 == 0) 1 else 2), parameters);
-    for (0..state.plant_count) |plant| for (0..Organ.count) |organ| try (try state.get(plant, @enumFromInt(organ))).validate();
+    for (0..state.plant_count) |plant| for (0..Organ.count) |organ| try (try state.get(plant, @fromBackingInt(@intCast(organ)))).validate();
 }
 
 test "STARTQ runtime kinetic parameters govern coarse wood and all nutrient partitions" {

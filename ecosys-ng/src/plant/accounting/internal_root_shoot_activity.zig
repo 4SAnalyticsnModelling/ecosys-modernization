@@ -1,6 +1,7 @@
 const std = @import("std");
 const roots = @import("../root/plant_root_system.zig");
 
+
 /// Exact accepted cross-scope plant transfer. Positive values are extensive
 /// amounts, never signed nets. C/N/P are grams of element and the eight
 /// dynamic plant salts retain their native molar units and source order.
@@ -8,7 +9,7 @@ pub const Transfer = struct {
     carbon_g_c: f64 = 0,
     nitrogen_g_n: f64 = 0,
     phosphorus_g_p: f64 = 0,
-    salt_mol: [roots.salt_species_count]f64 = [_]f64{0} ** roots.salt_species_count,
+    salt_mol: [roots.salt_species_count]f64 = @as([roots.salt_species_count]f64, @splat(@as(f64, 0))),
 };
 
 /// Producer-owned, direction-separated sidecar for GROSUB transfers between

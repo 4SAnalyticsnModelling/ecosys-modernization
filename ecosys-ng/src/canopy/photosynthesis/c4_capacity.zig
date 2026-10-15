@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     leaf_carbon_g_c: f64,
@@ -81,7 +82,7 @@ pub fn compute(inputs: Inputs) !Result {
                 inputs.dissolved_co2_umol_per_l +
                 10.5 * inputs.co2_compensation_umol_per_l),
     );
-    inline for (@typeInfo(Result).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Result)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteCanopyC4CapacityResult;
     return result;
@@ -100,7 +101,7 @@ pub fn computeRuntimeNodes(
 }
 
 fn validate(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteCanopyC4CapacityInput;
     if (inputs.leaf_carbon_g_c <= 0 or

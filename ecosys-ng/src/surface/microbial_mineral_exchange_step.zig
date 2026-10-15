@@ -4,6 +4,8 @@ const organic = @import("../soil/organic/initialization.zig");
 const chemistry = @import("litter_chemistry.zig");
 const respiration = @import("microbial_respiration_step.zig");
 const competition_history = @import("../soil/nutrients/competition_history.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const Parameters = struct {
     ammonium_maximum_uptake_g_n_per_m2_h: f64,
@@ -33,11 +35,11 @@ pub const State = struct {
         result.allocator = allocator;
         result.cell_count = cell_count;
         var allocated: usize = 0;
-        errdefer inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 and allocated > 0) {
+        errdefer inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 and allocated > 0) {
             allocated -= 1;
             allocator.free(@field(result, field.name));
         };
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -46,7 +48,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -179,7 +181,7 @@ fn validate(context: ApplyContext, range: compute.CellRange) !void {
     const ratios = organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count;
     if (range.first > range.end or range.end > context.result.cell_count or context.surface_organic.layer_count != context.result.cell_count or context.litter_chemistry.cells.len != context.result.cell_count or context.litter_water_m3.len != context.result.cell_count or context.growth_temperature_response.len != context.result.cell_count or context.matric_plus_osmotic_potential_megapascal.len != context.result.cell_count or context.microbial_nitrogen_to_carbon_g_n_per_g_c.len != ratios or context.microbial_phosphorus_to_carbon_g_p_per_g_c.len != ratios or (context.autotrophic_active_biomass_g_c.len != 0 and context.autotrophic_active_biomass_g_c.len != context.result.cell_count * 4)) return error.SurfaceMineralExchangeDimensionMismatch;
     for (context.autotrophic_active_biomass_g_c) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSurfaceMineralExchangeParameter;
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(context.parameters, field.name)) or @field(context.parameters, field.name) <= 0) return error.InvalidSurfaceMineralExchangeParameter;
+    inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(context.parameters, field.name)) or @field(context.parameters, field.name) <= 0) return error.InvalidSurfaceMineralExchangeParameter;
     inline for (.{ context.labile_biomass_fraction, context.microbial_surface_area_m2_per_g_c, context.nitrogen_molar_mass_g_per_mol, context.timestep_h }) |value| if (!std.math.isFinite(value) or value <= 0) return error.InvalidSurfaceMineralExchangeParameter;
     if (!std.math.isFinite(context.minimum_competition_fraction) or context.minimum_competition_fraction < 0 or !std.math.isFinite(context.negligible_nitrogen_g_n) or context.negligible_nitrogen_g_n < 0 or !std.math.isFinite(context.negligible_phosphorus_g_p) or context.negligible_phosphorus_g_p < 0) return error.InvalidSurfaceMineralExchangeParameter;
     if ((context.nutrient_competition == null) != (context.nutrient_competition_attempt == null)) return error.IncompleteSurfaceNutrientCompetitionBinding;
@@ -198,8 +200,8 @@ test "surface mineral exchange immobilizes deficits and mineralizes surpluses" {
     chemistry_state.cells[0].h2po4_mol_p_per_m3 = 1;
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    const n = [_]f64{0.1} ** (organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
-    const p = [_]f64{0.01} ** (organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
+    const n = @as([(organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.1)));
+    const p = @as([(organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.01)));
     var context: ApplyContext = .{ .result = &state, .surface_organic = &organic_state, .litter_chemistry = &chemistry_state, .litter_water_m3 = &.{1}, .growth_temperature_response = &.{1}, .matric_plus_osmotic_potential_megapascal = &.{0}, .microbial_nitrogen_to_carbon_g_n_per_g_c = &n, .microbial_phosphorus_to_carbon_g_p_per_g_c = &p, .labile_biomass_fraction = 0.55, .microbial_surface_area_m2_per_g_c = 3, .nitrogen_molar_mass_g_per_mol = 14, .parameters = .{ .ammonium_maximum_uptake_g_n_per_m2_h = 0.014, .ammonium_minimum_concentration_g_n_per_m3 = 0.0125, .ammonium_half_saturation_g_n_per_m3 = 0.40, .nitrate_maximum_uptake_g_n_per_m2_h = 0.014, .nitrate_minimum_concentration_g_n_per_m3 = 0.03, .nitrate_half_saturation_g_n_per_m3 = 0.35, .phosphate_maximum_uptake_g_p_per_m2_h = 0.003, .phosphate_minimum_concentration_g_p_per_m3 = 0.009, .phosphate_half_saturation_g_p_per_m3 = 0.18, .phosphorus_molar_mass_g_per_mol = 31 }, .timestep_h = 1 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(state.ammonium_exchange_g_n[0] > 0);

@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -59,7 +60,7 @@ pub fn refresh(state: *State, inputs: Inputs) !void {
     );
     if (inputs.fire_active_by_cell.len != state.cell_count)
         return error.InvalidCanopyFireStateUpdateDimensions;
-    inline for (@typeInfo(Inputs).@"struct".fields[1..]) |field|
+    inline for (ti_compat.fieldViews(Inputs)[1..]) |field|
         if (@field(inputs, field.name).len != plant_count)
             return error.InvalidCanopyFireStateUpdateDimensions;
 
@@ -104,7 +105,7 @@ fn totalsForCell(state: *const State, inputs: Inputs, cell: usize) !Totals {
         totals.oxygen += values[2];
         totals.charcoal += values[3];
         totals.heat += values[4];
-        inline for (@typeInfo(Totals).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(Totals)) |field|
             if (!std.math.isFinite(@field(totals, field.name)))
                 return error.NonFiniteCanopyFireStateUpdate;
     }
@@ -136,7 +137,7 @@ test "canopy fire state_update preserves runtime plant order and units" {
 test "late invalid active fire preserves complete state_update" {
     var state = try State.init(std.testing.allocator, 2, 2);
     defer state.deinit();
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64) @memset(@field(state, field.name), 7);
     try std.testing.expectError(
         error.InvalidCanopyFireStateUpdateInput,
@@ -149,7 +150,7 @@ test "late invalid active fire preserves complete state_update" {
             .heat_release_megajoules_per_h_by_plant = &.{ 1, 2, 3, std.math.nan(f64) },
         }),
     );
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64)
             for (@field(state, field.name)) |value|
                 try std.testing.expectEqual(@as(f64, 7), value);

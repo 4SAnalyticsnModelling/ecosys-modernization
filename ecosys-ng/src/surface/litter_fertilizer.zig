@@ -1,5 +1,6 @@
 const std = @import("std");
 const litter_chemistry = @import("litter_chemistry.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Inventory = struct {
     ammonium_mol_n: f64,
@@ -147,9 +148,9 @@ fn aqueousNitrogen(cell: litter_chemistry.Cell) f64 {
 
 fn validate(inventory: Inventory, environment: Environment, parameters: Parameters) !void {
     try validateInventory(inventory);
-    inline for (@typeInfo(Environment).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Environment)) |field|
         if (!std.math.isFinite(@field(environment, field.name)) or @field(environment, field.name) < 0) return error.InvalidLitterEnvironment;
-    inline for (@typeInfo(Parameters).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Parameters)) |field|
         if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) < 0) return error.InvalidLitterFertilizerParameter;
     // FERTILIZER-TFNQ-FRACTION-DOMAIN-001: `microbial_temperature_factor` is
     // NITRO's TFNQ, i.e. TFNX from `nitro.f:316`, an unbounded Arrhenius ratio
@@ -165,7 +166,7 @@ fn validate(inventory: Inventory, environment: Environment, parameters: Paramete
 }
 
 fn validateInventory(inventory: Inventory) !void {
-    inline for (@typeInfo(Inventory).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inventory)) |field|
         if (!std.math.isFinite(@field(inventory, field.name)) or @field(inventory, field.name) < 0) return error.InvalidLitterFertilizerInventory;
     if (inventory.initial_urease_inhibition_fraction > 1 or inventory.current_urease_inhibition_fraction > 1) return error.InvalidLitterFertilizerInventory;
 }

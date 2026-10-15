@@ -6,6 +6,7 @@ const PackedDate = @import("plant_management.zig").PackedDate;
 const Date = @import("../core/options.zig").Date;
 const execution_calendar_date = @import("../driver/execution_calendar_date.zig");
 
+
 pub const dissolved_species_count = 11;
 
 pub const ScheduleMap = struct {
@@ -344,9 +345,9 @@ test "scheduled irrigation dispatch is runtime sized and date-hour selective" {
     const units = [_]usize{ 0, 0, 0 };
     var map = try ScheduleMap.init(allocator, assignments, &units, catalog);
     defer map.deinit();
-    var depth = [_]f64{0} ** 3;
-    var mass = [_]f64{0} ** (3 * dissolved_species_count);
-    var hydrogen = [_]f64{0} ** 3;
+    var depth = @as([3]f64, @splat(@as(f64, 0)));
+    var mass = @as([(3 * dissolved_species_count)]f64, @splat(@as(f64, 0)));
+    var hydrogen = @as([3]f64, @splat(@as(f64, 0)));
     const count = try accumulateScheduledHour(map, catalog, .{ .day = 1, .month = 6, .year = 2024 }, 7, .{ .water_depth_m = &depth, .dissolved_mass_g_per_m2 = &mass, .hydrogen_mol_per_m2 = &hydrogen });
     try std.testing.expectEqual(@as(usize, 3), count);
     try std.testing.expectApproxEqAbs(@as(f64, 0.004), depth[2], 1.0e-12);
@@ -363,7 +364,7 @@ test "automatic irrigation is planned once across its source-hour window" {
     const units = [_]usize{0};
     var map = try ScheduleMap.init(allocator, assignments, &units, catalog);
     defer map.deinit();
-    var planned = [_]f64{0} ** 24;
+    var planned = @as([24]f64, @splat(@as(f64, 0)));
     const count = try planAutomatedDay(map, catalog, .{
         .date = .{ .day = 15, .month = 6, .year = 2024 },
         .cell_area_m2 = &.{10},
@@ -472,7 +473,7 @@ test "automatic irrigation leap-day windows are skipped in non-leap years" {
     const units = [_]usize{0};
     var map = try ScheduleMap.init(allocator, assignments, &units, catalog);
     defer map.deinit();
-    var planned = [_]f64{0} ** 24;
+    var planned = @as([24]f64, @splat(@as(f64, 0)));
     const count = try planAutomatedDay(map, catalog, .{
         .date = .{ .day = 1, .month = 3, .year = 1901 },
         .cell_area_m2 = &.{10},

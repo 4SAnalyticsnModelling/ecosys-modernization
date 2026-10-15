@@ -20,6 +20,7 @@ const group_support = @import("hourly_process_support.zig");
 const group_sediment = @import("hourly_sediment.zig");
 const group_vegetation = @import("hourly_vegetation.zig");
 const run_support = @import("run_support.zig");
+const ti_compat = @import("ecosys_ng").typeinfo_compat;
 const AdaptiveHourSchedule = ecosys.adaptive_hour_schedule.State;
 
 const conservation_trace_point_count = 7;
@@ -67,8 +68,8 @@ const heat_layer_conservation_tolerance_divisor: f64 = 64;
 
 fn diagnosticSoilGasCarbon(context: anytype) !f64 {
     var total_g_c: f64 = 0;
-    const co2 = @intFromEnum(ecosys.gas_transport.Species.carbon_dioxide);
-    const methane = @intFromEnum(ecosys.gas_transport.Species.methane);
+    const co2 = @backingInt(ecosys.gas_transport.Species.carbon_dioxide);
+    const methane = @backingInt(ecosys.gas_transport.Species.methane);
     for (0..context.grid.cell_count) |cell| {
         const first = cell * context.grid.soil_layer_capacity;
         for (0..context.grid.active_soil_layer_count[cell]) |local_layer| {
@@ -347,12 +348,12 @@ fn SliceStateSnapshot(comptime T: type) type {
             var allocated: usize = 0;
             errdefer {
                 var visited: usize = 0;
-                inline for (@typeInfo(T).@"struct".fields) |field| if (comptime isSlice(field.type)) {
+                inline for (ti_compat.fieldViews(T)) |field| if (comptime isSlice(field.type)) {
                     if (visited < allocated) allocator.free(@field(state, field.name));
                     visited += 1;
                 };
             }
-            inline for (@typeInfo(T).@"struct".fields) |field| if (comptime isSlice(field.type)) {
+            inline for (ti_compat.fieldViews(T)) |field| if (comptime isSlice(field.type)) {
                 const Child = @typeInfo(field.type).pointer.child;
                 @field(state, field.name) = try allocator.dupe(Child, @field(source, field.name));
                 allocated += 1;
@@ -362,7 +363,7 @@ fn SliceStateSnapshot(comptime T: type) type {
 
         fn restore(self: *const Self, destination: *T) void {
             @setEvalBranchQuota(10_000);
-            inline for (@typeInfo(T).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(T)) |field| {
                 if (comptime isSlice(field.type))
                     @memcpy(@field(destination, field.name), @field(self.state, field.name))
                 else
@@ -372,7 +373,7 @@ fn SliceStateSnapshot(comptime T: type) type {
 
         fn deinit(self: *Self) void {
             @setEvalBranchQuota(10_000);
-            inline for (@typeInfo(T).@"struct".fields) |field| if (comptime isSlice(field.type))
+            inline for (ti_compat.fieldViews(T)) |field| if (comptime isSlice(field.type))
                 self.allocator.free(@field(self.state, field.name));
             self.* = undefined;
         }
@@ -1431,7 +1432,7 @@ test "accepted substep water and topsoil atmospheric heat close the first hourly
         ecosys.hourly_cell_conservation.Quantity.water,
         ecosys.hourly_cell_conservation.Quantity.heat,
     }) |quantity| {
-        const closure = report.cells[0].closure[@intFromEnum(quantity)];
+        const closure = report.cells[0].closure[@backingInt(quantity)];
         try std.testing.expect(closure.accepted);
         try std.testing.expectApproxEqAbs(@as(f64, 0), closure.residual, 1e-12);
     }
@@ -2229,7 +2230,7 @@ const StageMemorySnapshot = struct {
         const T = @TypeOf(value);
         switch (@typeInfo(T)) {
             .pointer => |pointer| {
-                if (pointer.is_const) return;
+                if (pointer.attrs.@"const") return;
                 switch (pointer.size) {
                     .slice => try self.captureSlice(T, value),
                     .one => switch (@typeInfo(pointer.child)) {
@@ -2248,7 +2249,7 @@ const StageMemorySnapshot = struct {
 
     fn captureSlice(self: *StageMemorySnapshot, comptime Slice: type, values: Slice) !void {
         const pointer = @typeInfo(Slice).pointer;
-        if (pointer.is_const) return;
+        if (pointer.attrs.@"const") return;
         try self.saveBytes(std.mem.sliceAsBytes(values));
         if (comptime typeMayOwnBuffers(pointer.child))
             for (values) |*value| try self.captureOwnedBuffers(pointer.child, value);
@@ -2259,9 +2260,9 @@ const StageMemorySnapshot = struct {
     /// separately, which avoids cycles and duplicate traversal of allocators.
     fn captureOwnedBuffers(self: *StageMemorySnapshot, comptime T: type, value: *T) !void {
         switch (@typeInfo(T)) {
-            .pointer => |pointer| if (pointer.size == .slice and !pointer.is_const)
+            .pointer => |pointer| if (pointer.size == .slice and !pointer.attrs.@"const")
                 try self.captureSlice(T, value.*),
-            .@"struct" => |structure| inline for (structure.fields) |field|
+            .@"struct" => |structure| inline for (ti_compat.fieldViewsFromInfo(structure)) |field|
                 if (comptime typeMayOwnBuffers(field.type))
                     try self.captureOwnedBuffers(field.type, &@field(value.*, field.name)),
             .optional => |optional| if (value.*) |*payload|
@@ -2371,9 +2372,9 @@ noinline fn captureStageSurfaceBiologyAndInventoryFields(snapshot: *StageMemoryS
 
 fn typeMayOwnBuffers(comptime T: type) bool {
     return switch (@typeInfo(T)) {
-        .pointer => |pointer| pointer.size == .slice and !pointer.is_const,
+        .pointer => |pointer| pointer.size == .slice and !pointer.attrs.@"const",
         .@"struct" => |structure| blk: {
-            inline for (structure.fields) |field|
+            inline for (ti_compat.fieldViewsFromInfo(structure)) |field|
                 if (typeMayOwnBuffers(field.type)) break :blk true;
             break :blk false;
         },
@@ -8163,7 +8164,7 @@ fn CoupledSubstepTransaction(
             if (cell >= self.context.grid.cell_count or
                 !std.math.isFinite(signed_litter_to_topsoil))
                 return error.InvalidLitterSoilLocalActivity;
-            inline for (std.meta.fields(ecosys.hourly_cell_conservation.IntercellTransfer)) |field| {
+            inline for (ti_compat.fieldViews(ecosys.hourly_cell_conservation.IntercellTransfer)) |field| {
                 const value = @field(transfer, field.name);
                 if (!std.math.isFinite(value) or value < 0)
                     return error.InvalidLitterSoilLocalActivity;
@@ -8192,7 +8193,7 @@ fn CoupledSubstepTransaction(
             // Gated to the same three-hour window as `traceSurfaceFrontier`, so
             // it fires only around the failing hour.
             const phosphorus_before_accumulate = target.phosphorus_g;
-            inline for (std.meta.fields(ecosys.hourly_cell_conservation.IntercellTransfer)) |field|
+            inline for (ti_compat.fieldViews(ecosys.hourly_cell_conservation.IntercellTransfer)) |field|
                 @field(target, field.name) = try checkedAddFiniteValue(
                     @field(target, field.name),
                     @field(transfer, field.name),
@@ -8231,7 +8232,7 @@ fn CoupledSubstepTransaction(
 
             for (accepted.signed_solute_transfer_mol, 0..) |signed, species| {
                 if (signed == 0) continue;
-                const formula = ecosys.surface_aqueous_runoff_transport.formula(@enumFromInt(species));
+                const formula = ecosys.surface_aqueous_runoff_transport.formula(@fromBackingInt(@intCast(species)));
                 const amount = @abs(signed);
                 try self.accumulateLitterSoilLocalTransfer(cell, signed, .{
                     .carbon_g = amount * formula.carbon_mol * carbon_g_per_mol,
@@ -8298,7 +8299,7 @@ fn CoupledSubstepTransaction(
                     if (amount == 0) continue;
                     const transfer: ecosys.hourly_cell_conservation.IntercellTransfer = switch (@as(
                         ecosys.gas_transport.Species,
-                        @enumFromInt(species),
+                        @fromBackingInt(@intCast(species)),
                     )) {
                         .carbon_dioxide, .methane => .{ .carbon_g = amount },
                         .oxygen => .{ .oxygen_g = amount },
@@ -8307,7 +8308,7 @@ fn CoupledSubstepTransaction(
                     };
                     var output_next = self.gas_bubble_output_total[source];
                     var input_next = self.gas_bubble_input_total[receiver];
-                    inline for (std.meta.fields(ecosys.hourly_cell_conservation.IntercellTransfer)) |field| {
+                    inline for (ti_compat.fieldViews(ecosys.hourly_cell_conservation.IntercellTransfer)) |field| {
                         @field(output_next, field.name) = try checkedAddFiniteValue(
                             @field(output_next, field.name),
                             @field(transfer, field.name),
@@ -9146,7 +9147,7 @@ fn CoupledSubstepTransaction(
             }) |values| for (values) |value|
                 if (!std.math.isFinite(value)) return error.NonFiniteAcceptedSurfaceTemperatureLedger;
 
-            inline for (@typeInfo(ecosys.surface_temperature_solver.State).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(ecosys.surface_temperature_solver.State)) |field| {
                 if (comptime field.type == []f64 or field.type == []u16)
                     @memcpy(@field(context.surface_temperature, field.name), @field(self.surface_temperature_total, field.name));
             }
@@ -13778,7 +13779,7 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
         const current_p_g = try diagnostics.diagnosticStoredPhosphorus_g(context);
         var boundary_p_g: f64 = 0;
         for (context.soil_solute_boundary_net_flux_mol, 0..) |flux_mol, component| {
-            const species: ecosys.solute_transport_species.AqueousSpecies = @enumFromInt(component % ecosys.solute_transport_species.AqueousSpecies.count);
+            const species: ecosys.solute_transport_species.AqueousSpecies = @fromBackingInt(@intCast(component % ecosys.solute_transport_species.AqueousSpecies.count));
             if (ecosys.solute_transport_species.diffusivityClass(species) == .phosphate)
                 boundary_p_g += flux_mol * context.runscript.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol;
         }

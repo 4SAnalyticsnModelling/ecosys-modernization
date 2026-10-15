@@ -3,6 +3,7 @@ const schedule = @import("fertilizer_schedule.zig");
 const chemistry_module = @import("../soil/solute/chemistry_state.zig");
 const surface_chemistry_module = @import("../surface/litter_chemistry.zig");
 const charge_classification = @import("../soil/solute/charge_classification.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Inventory = struct {
     broadcast_monocalcium_phosphate_mol: f64 = 0,
@@ -309,7 +310,7 @@ fn validFraction(value: f64) bool {
 }
 
 fn validateInventory(inventory: Inventory) !void {
-    inline for (@typeInfo(Inventory).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inventory)) |field| {
         const value = @field(inventory, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.MineralFertilizerApplicationOverflow;
     }

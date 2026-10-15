@@ -1,6 +1,7 @@
 const std = @import("std");
 const chemistry = @import("../solute/chemistry_state.zig");
 const aggregation = @import("../biogeochemistry/transformation_aggregation.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     water_volume_m3: f64,
@@ -68,7 +69,7 @@ pub fn stage(state: *const chemistry.State, layer: usize, inputs: Inputs) !Stage
 
 pub fn state_update(state: *chemistry.State, layer: usize, staged: StagedChange) !void {
     if (layer >= state.cell_count) return error.ChemistryCellIndexOutOfBounds;
-    inline for (std.meta.fields(StagedChange)) |field|
+    inline for (ti_compat.fieldViews(StagedChange)) |field|
         if (!std.math.isFinite(@field(staged, field.name)))
             return error.InvalidBiochemicalHydrogenAmount;
     if (staged.initial_hydrogen_mol < 0 or staged.final_hydrogen_mol < 0 or staged.final_hydrogen_mol_per_m3 < 0)

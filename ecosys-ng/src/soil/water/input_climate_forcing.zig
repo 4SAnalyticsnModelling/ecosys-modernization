@@ -28,6 +28,7 @@
 // Group A of docs/traceability/a1b_bind_safe_batch_dispositions.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const WaterInputs = struct {
     rainfall_m_per_h: f64,
@@ -47,14 +48,14 @@ pub const Multipliers = struct {
 /// The update is transactional: every source, multiplier, and result validates
 /// before any caller-owned carrier is replaced.
 pub fn apply(inputs: *WaterInputs, multipliers: Multipliers) !void {
-    inline for (@typeInfo(WaterInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(WaterInputs)) |field| {
         const value = @field(inputs.*, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteWaterClimateInput;
         if (value < 0)
             return error.InvalidWaterClimateInput;
     }
-    inline for (@typeInfo(Multipliers).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Multipliers)) |field| {
         const value = @field(multipliers, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteWaterClimateMultiplier;
@@ -71,7 +72,7 @@ pub fn apply(inputs: *WaterInputs, multipliers: Multipliers) !void {
         .subsurface_irrigation_m_per_h = inputs.subsurface_irrigation_m_per_h *
             multipliers.irrigation_fraction,
     };
-    inline for (@typeInfo(WaterInputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(WaterInputs)) |field|
         if (!std.math.isFinite(@field(next, field.name)))
             return error.WaterClimateForcingOverflow;
     inputs.* = next;

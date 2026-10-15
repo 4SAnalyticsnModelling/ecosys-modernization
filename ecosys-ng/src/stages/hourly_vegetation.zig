@@ -644,7 +644,7 @@ noinline fn advanceShootGrowthAndCloseout(
             .stomatal_resistance_h_per_m_by_plant = canopy_surface_workspace_for_growth.stomatal_resistance_h_per_m,
             .plant_radiation_fraction = canopy_retention_for_growth.living_radiation_fraction,
             .atmospheric_concentration_g_per_m3 = context.current_atmospheric_gas_concentration_g_per_m3,
-            .ammonia_solubility_at_25_c = surface_gas_for_growth.solubility.reference_water_to_air[@intFromEnum(ecosys.gas_transport.Species.ammonia)],
+            .ammonia_solubility_at_25_c = surface_gas_for_growth.solubility.reference_water_to_air[@backingInt(ecosys.gas_transport.Species.ammonia)],
             .canopy_ammonia_parameters = context.runscript.canopy_ammonia_exchange_parameters,
             .partition_parameters = context.runscript.organ_partition_parameters,
             .metabolism_parameters = context.runscript.shoot_metabolism_parameters,

@@ -4,6 +4,8 @@ const microbial = @import("state.zig");
 const metabolism = @import("metabolism.zig");
 const fluxes = @import("../nutrients/nitrogen_flux_workspace.zig");
 const oxygen = @import("../gas/oxygen_allocation.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 const source_complex_count: usize = 6;
 const source_population_count: usize = 7;
@@ -141,7 +143,7 @@ fn validateCellTotals(state: *const microbial.State, cell: usize, active_layers:
     for (0..active_layers) |layer| for (0..source_complex_count) |substrate| for (0..source_population_count) |population| {
         const index = try state.populationIndex(cell, layer, substrate, population);
         inline for (.{ state.nonstructural[index], state.structural[index * 2], state.structural[index * 2 + 1] }) |pool| {
-            inline for (std.meta.fields(metabolism.ElementalPool)) |field| {
+            inline for (ti_compat.fieldViews(metabolism.ElementalPool)) |field| {
                 const value = @field(pool, field.name);
                 // MICROBIAL-POOL-CARBON-OVERDRAW-HOUR-2678-001. The oracle reads
                 // every microbial carbon pool through `AMAX1(0.0, ...)` --
@@ -176,7 +178,7 @@ fn validatePairPools(
             state.nonstructural[lower],
             state.structural[lower * 2],
             state.structural[lower * 2 + 1],
-        }) |pool| inline for (std.meta.fields(metabolism.ElementalPool)) |field| {
+        }) |pool| inline for (ti_compat.fieldViews(metabolism.ElementalPool)) |field| {
             const value = @field(pool, field.name);
             // Same oracle citation as `validateCellTotals` above.
             if (!std.math.isFinite(value))
@@ -213,7 +215,7 @@ fn mixingFraction(context: ApplyContext, upper: usize, lower: usize) !f64 {
 fn mixPool(upper: *metabolism.ElementalPool, lower: *metabolism.ElementalPool, upper_is_donor: bool, fraction: f64) SignedElementTransfer {
     const donor = if (upper_is_donor) upper.* else lower.*;
     var result: SignedElementTransfer = .{};
-    inline for (@typeInfo(metabolism.ElementalPool).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(metabolism.ElementalPool)) |field| {
         const amount = @max(0, @field(donor, field.name)) * fraction;
         @field(upper, field.name) += if (upper_is_donor) -amount else amount;
         @field(lower, field.name) += if (upper_is_donor) amount else -amount;
@@ -270,7 +272,7 @@ test "activity-gradient mixing conserves all microbial C N P components" {
     const thickness = [_]f64{ 1, 1 };
     const organic_carbon = [_]f64{ 1.0e6, 1.0e6 };
     const activity = [_]f64{ 2, 1 };
-    var accepted = [_]SignedElementTransfer{.{}} ** 2;
+    var accepted = @as([2]SignedElementTransfer, @splat(@as(SignedElementTransfer, .{})));
     var context: ApplyContext = .{
         .microbial_state = &state,
         .active_layer_count = &active,
@@ -305,7 +307,7 @@ test "lower-to-upper activity retains direction and exact donor amounts" {
     const ones = [_]f64{ 1, 1 };
     const organic_carbon = [_]f64{ 1.0e6, 1.0e6 };
     const respiration_activity = [_]f64{ 1, 2 };
-    var accepted = [_]SignedElementTransfer{.{}} ** 2;
+    var accepted = @as([2]SignedElementTransfer, @splat(@as(SignedElementTransfer, .{})));
     var context: ApplyContext = .{
         .microbial_state = &state,
         .active_layer_count = &active,

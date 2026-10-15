@@ -13,6 +13,7 @@ const group_misc = @import("coupled_gas_solver_misc.zig");
 const group_residual = @import("coupled_gas_solver_residual.zig");
 const group_solve = @import("coupled_gas_solver_solve.zig");
 
+
 /// Scale the finite-difference perturbation to the represented species mass,
 /// with its unit-aware nonlinear floor as the zero-inventory reference.
 pub fn gasJacobianProbeG(mass_g: f64, absolute_tolerance_g: f64) f64 {
@@ -751,7 +752,7 @@ fn prepareLocalKrylovPreconditioner(
             inputs.band_air_volume_m3[cell];
         for (0..gas.species_count) |species| {
             const index = start + species;
-            const is_ammonia = species == @intFromEnum(gas.Species.ammonia);
+            const is_ammonia = species == @backingInt(gas.Species.ammonia);
             const primary_air_volume_m3 = if (is_ammonia)
                 nonband_air_volume_m3
             else
@@ -1035,20 +1036,20 @@ fn preconditionerSurvivesSubFloorAirVolume(minimum_carrier_volume_m3: []const f6
     }
 
     const faces = [_]gas.Face{.{ .first_cell = 0, .second_cell = 1 }};
-    const conductance = [_]f64{2.497e-3} ** gas.species_count;
+    const conductance = @as([gas.species_count]f64, @splat(@as(f64, 2.497e-3)));
     const inputs: group_misc.Inputs = .{
         .faces = &faces,
         .face_conductance_m3_per_step = &conductance,
         .atmospheric_boundaries = &.{},
         .water_volume_m3 = &.{ 0.2, 0.2 },
         .band_water_volume_m3 = &.{ 0, 0 },
-        .mass_solubility_ratio = &([_]f64{1} ** (2 * gas.species_count)),
-        .gas_water_exchange_rate_per_step = &([_]f64{0.1} ** (2 * gas.species_count)),
-        .band_gas_water_exchange_rate_per_step = &([_]f64{0} ** (2 * gas.species_count)),
+        .mass_solubility_ratio = &(@as([(2 * gas.species_count)]f64, @splat(@as(f64, 1)))),
+        .gas_water_exchange_rate_per_step = &(@as([(2 * gas.species_count)]f64, @splat(@as(f64, 0.1)))),
+        .band_gas_water_exchange_rate_per_step = &(@as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)))),
         .bubbling_enabled = &.{ false, false },
         .minimum_carrier_volume_m3 = minimum_carrier_volume_m3,
     };
-    var coefficients = [_]f64{0} ** (3 * 2 * gas.species_count);
+    var coefficients = @as([(3 * 2 * gas.species_count)]f64, @splat(@as(f64, 0)));
     const prepared = prepareLocalKrylovPreconditioner(&scratch, inputs, 1, &coefficients);
     if (!prepared) return false;
     for (coefficients[0 .. 2 * gas.species_count]) |diagonal| {

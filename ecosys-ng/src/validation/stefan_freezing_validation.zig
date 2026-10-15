@@ -15,7 +15,7 @@
 //
 // Hazard, already filed as `GATE-FREEZE-SKIP-001`, stated here so no reader
 // mistakes a green gate for executed evidence: that consumer is guarded
-// `if (builtin.mode != .ReleaseFast) return error.SkipZigTest`, and
+// `if (builtin.mode != .fast) return error.SkipZigTest`, and
 // `zig build test` builds Debug, so this oracle SKIPS in every ordinary gate
 // run while the gate still reports PASS. `tools/gate.ps1:123--138` documents
 // this and enforces two weaker things instead: that the step stays registered,
@@ -28,6 +28,7 @@
 const std = @import("std");
 const phase_change = @import("../soil/water/phase_change.zig");
 const retention = @import("../soil/water/retention.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     surface_temperature_c: f64 = -5,
@@ -43,7 +44,7 @@ pub const Parameters = struct {
     latent_heat_of_fusion_j_per_kg: f64 = 333_700,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(Parameters)) |field|
             if (!std.math.isFinite(@field(self, field.name)))
                 return error.NonFiniteStefanParameter;
         if (self.surface_temperature_c >= self.melting_temperature_c or

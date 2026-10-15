@@ -10,6 +10,8 @@ const respiration_activity = @import("../microbial/respiration_activity.zig");
 const organic = @import("../organic/initialization.zig");
 const fluxes = @import("../nutrients/nitrogen_flux_workspace.zig");
 const oxygen_allocation = @import("oxygen_allocation.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Parameters = struct {
     hydrogenotrophic: methanogenesis.HydrogenotrophicParameters,
@@ -65,7 +67,7 @@ pub const State = struct {
     /// each fallible allocation does not receive another unrolled copy.
     noinline fn deinitAllocatedPrefix(self: *State, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -82,7 +84,7 @@ pub const State = struct {
         result.layer_count = layer_count;
         var allocated_f64: usize = 0;
         errdefer result.deinitAllocatedPrefix(allocated_f64);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, layer_count);
             allocated_f64 += 1;
             @memset(@field(result, field.name), 0);
@@ -94,7 +96,7 @@ pub const State = struct {
 
     pub fn deinit(self: *State) void {
         self.allocator.free(self.solver_iterations);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -102,7 +104,7 @@ pub const State = struct {
 test "soil methane state releases every partial allocation prefix" {
     const f64_allocation_count = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(State).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) count += 1;
         }
         break :count count;
@@ -570,7 +572,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
     for (range.first..range.end) |layer| _ = try calculateLayer(context.*, layer);
     for (range.first..range.end) |layer| {
         const value = try calculateLayer(context.*, layer);
-        inline for (@typeInfo(LayerResult).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(LayerResult)) |field|
             @field(context.result, field.name)[layer] = @field(value, field.name);
     }
 }
@@ -606,15 +608,15 @@ test "N=3 K=5 methanotroph publishes demand before shared oxygen and consumes ac
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
     gas_state.air_volume_m3[0] = 1;
-    gas_state.gaseous_mass_g[@intFromEnum(gas.Species.methane)] = 1;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.methane)] = 0.2;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.hydrogen)] = 2;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] = 10;
+    gas_state.gaseous_mass_g[@backingInt(gas.Species.methane)] = 1;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.methane)] = 0.2;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.hydrogen)] = 2;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] = 10;
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
     const ratio_count = substrate_count * population_count * organic.kinetic_fraction_count;
-    const target_n = [_]f64{0.1} ** ratio_count;
-    const target_p = [_]f64{0.01} ** ratio_count;
+    const target_n = @as([ratio_count]f64, @splat(@as(f64, 0.1)));
+    const target_p = @as([ratio_count]f64, @splat(@as(f64, 0.01)));
     const parameters: Parameters = .{
         .hydrogenotrophic = .{ .hydrogen_half_saturation_g_h_per_m3 = 0.01, .specific_co2_reduction_g_c_per_g_c_h = 0.1, .reference_energy_yield_kj_per_g_c = 11, .growth_energy_requirement_kj_per_g_c = 37.5, .minimum_growth_respiration_fraction = 0.4, .hydrogen_supply_conversion_g_c_per_g_h = 1.5, .fermentation_hydrogen_to_pool_fraction = 0.111 },
         .methane_half_saturation_g_c_per_m3 = 0.01,
@@ -656,10 +658,10 @@ test "N=3 K=5 methanotroph publishes demand before shared oxygen and consumes ac
 
     // Source GH2X is negative below H2KI and remains a valid energy feedback;
     // preparation must not classify its sign as a negative mass or rate.
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.hydrogen)] = 1e-6;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.hydrogen)] = 1e-6;
     try prepareTile(&prepare, .{ .first = 0, .end = 1 });
     try std.testing.expect(state.hydrogen_feedback_energy_kj_per_mol[0] < 0);
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.hydrogen)] = 2;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.hydrogen)] = 2;
     try prepareTile(&prepare, .{ .first = 0, .end = 1 });
 
     var oxygen_state = try oxygen_allocation.State.init(std.testing.allocator, 1, 1, process_units);
@@ -796,11 +798,11 @@ test "tiled hydrogenotrophic methanogenesis and implicit methanotrophy conserve 
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
     gas_state.air_volume_m3[0] = 1;
-    gas_state.gaseous_mass_g[@intFromEnum(gas.Species.methane)] = 1;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.methane)] = 0.2;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.hydrogen)] = 0.1;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.oxygen)] = 1;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] = 1;
+    gas_state.gaseous_mass_g[@backingInt(gas.Species.methane)] = 1;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.methane)] = 0.2;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.hydrogen)] = 0.1;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.oxygen)] = 1;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] = 1;
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
     const parameters: Parameters = .{
@@ -931,7 +933,7 @@ test "failed methane tile leaves every published layer unchanged" {
     }
     var state = try State.init(std.testing.allocator, 2);
     defer state.deinit();
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) @memset(@field(state, field.name), 7);
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) @memset(@field(state, field.name), 7);
     @memset(state.solver_iterations, 9);
     var oxygen_state = try oxygen_allocation.State.init(std.testing.allocator, 2, 1, 1);
     defer oxygen_state.deinit();
@@ -968,7 +970,7 @@ test "failed methane tile leaves every published layer unchanged" {
         .timestep_h = 1,
     };
     try std.testing.expectError(error.InvalidHydrogenotrophicMethanogenesis, applyTile(&context, .{ .first = 0, .end = 2 }));
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(state, field.name)) |value| try std.testing.expectEqual(@as(f64, 7), value);
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(state, field.name)) |value| try std.testing.expectEqual(@as(f64, 7), value);
     for (state.solver_iterations) |value| try std.testing.expectEqual(@as(u16, 9), value);
 }
 
@@ -983,13 +985,13 @@ test "SOIL-METHANE-DRY-LAYER-001 nitro.f:1398 skips CH4 oxidation when VOLW is z
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
     gas_state.air_volume_m3[0] = 1;
-    gas_state.gaseous_mass_g[@intFromEnum(gas.Species.methane)] = 1.25;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.methane)] = 0.5;
+    gas_state.gaseous_mass_g[@backingInt(gas.Species.methane)] = 1.25;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.methane)] = 0.5;
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
     const ratio_count = substrate_count * population_count * organic.kinetic_fraction_count;
-    const target_n = [_]f64{0.1} ** ratio_count;
-    const target_p = [_]f64{0.01} ** ratio_count;
+    const target_n = @as([ratio_count]f64, @splat(@as(f64, 0.1)));
+    const target_p = @as([ratio_count]f64, @splat(@as(f64, 0.01)));
     var prepare: PrepareContext = .{
         .result = &state,
         .microbial_state = &microbial_state,

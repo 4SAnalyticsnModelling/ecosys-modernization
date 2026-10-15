@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const source_pool_count: usize = 5;
 
@@ -87,7 +88,7 @@ pub fn calculate(inputs: Inputs, parameters: Parameters) !Result {
         .field_capacity_m3_per_m3 = parameters.field_capacity_fraction_of_porosity * porosity + charcoal_volume_fraction,
         .wilting_point_m3_per_m3 = parameters.wilting_point_fraction_of_porosity * porosity + charcoal_volume_fraction,
     };
-    inline for (@typeInfo(Result).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteSurfaceLitterGeometry;
+    inline for (ti_compat.fieldViews(Result)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteSurfaceLitterGeometry;
     return result;
 }
 

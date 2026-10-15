@@ -3,6 +3,7 @@ const CellRange = @import("../../core/compute.zig").CellRange;
 const PlantState = @import("../../state/grid.zig").PlantState;
 const PlantRootState = @import("../root/plant_root_system.zig").State;
 const execution_calendar_date = @import("../../driver/execution_calendar_date.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     gas_constant_j_per_mol_k: f64,
@@ -23,7 +24,7 @@ pub const Parameters = struct {
     emergence_root_depth_margin_m: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFinitePhenologyParameter;
+        inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFinitePhenologyParameter;
         if (self.gas_constant_j_per_mol_k <= 0 or self.temperature_scale_k <= 0 or self.activation_energy_j_per_mol <= 0 or self.low_temperature_inactivation_j_per_mol <= 0 or self.high_temperature_inactivation_j_per_mol <= 0 or self.oxygen_stress_exponent <= 0 or self.vegetative_stage_duration <= 0 or self.reproductive_stage_duration <= 0 or self.maximum_photoperiod_counter_h <= 0 or self.emergence_area_threshold_m2_per_plant < 0 or self.emergence_root_depth_margin_m < 0) return error.InvalidPhenologyParameter;
     }
 };
@@ -101,7 +102,7 @@ pub const State = struct {
         errdefer allocator.free(result.floral_initiated);
         var allocated: usize = 0;
         errdefer freeF64Allocated(&result, allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -120,7 +121,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.allocator.free(self.floral_initiated);
         self.allocator.free(self.annual_growth_habit);
         self.allocator.free(self.lifecycle_initialized);
@@ -135,7 +136,7 @@ pub const State = struct {
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| if (!std.math.isFinite(value)) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| if (!std.math.isFinite(value)) {
             std.log.err("non-finite plant phenology: field={s} index={d} value={e}", .{ field.name, index, value });
             return error.NonFinitePlantPhenology;
         };
@@ -172,7 +173,7 @@ pub const BranchDevelopmentState = struct {
 
     noinline fn deinitAllocatedF64Prefix(self: *BranchDevelopmentState, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(BranchDevelopmentState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(BranchDevelopmentState)) |field| {
             if (field.type == []f64) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -188,7 +189,7 @@ pub const BranchDevelopmentState = struct {
         result.branch_count = branch_count;
         var allocated_f64: usize = 0;
         errdefer result.deinitAllocatedF64Prefix(allocated_f64);
-        inline for (@typeInfo(BranchDevelopmentState).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(BranchDevelopmentState)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, branch_count);
             @memset(@field(result, field.name), 0);
             allocated_f64 += 1;
@@ -212,12 +213,12 @@ pub const BranchDevelopmentState = struct {
         self.allocator.free(self.leafout_initialization_enabled);
         self.allocator.free(self.maximum_concurrently_growing_nodes);
         self.allocator.free(self.stage_day);
-        inline for (@typeInfo(BranchDevelopmentState).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(BranchDevelopmentState)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
     pub fn validateFinite(self: BranchDevelopmentState) !void {
-        inline for (@typeInfo(BranchDevelopmentState).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| if (!std.math.isFinite(value)) {
+        inline for (ti_compat.fieldViews(BranchDevelopmentState)) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| if (!std.math.isFinite(value)) {
             std.log.err("non-finite branch development state: field={s} branch={d} value={e}", .{ field.name, index, value });
             return error.NonFiniteBranchDevelopmentState;
         };
@@ -225,7 +226,7 @@ pub const BranchDevelopmentState = struct {
 
     pub fn clone(self: BranchDevelopmentState) !BranchDevelopmentState {
         const result = try BranchDevelopmentState.init(self.allocator, self.branch_count);
-        inline for (@typeInfo(BranchDevelopmentState).@"struct".fields) |field| switch (field.type) {
+        inline for (ti_compat.fieldViews(BranchDevelopmentState)) |field| switch (field.type) {
             []f64, []usize, []u32, []bool => @memcpy(@field(result, field.name), @field(self, field.name)),
             else => {},
         };
@@ -236,7 +237,7 @@ pub const BranchDevelopmentState = struct {
         if (index > self.branch_count) return error.BranchDevelopmentIndexOutOfBounds;
         var replacement = try BranchDevelopmentState.init(self.allocator, try std.math.add(usize, self.branch_count, 1));
         errdefer replacement.deinit();
-        inline for (@typeInfo(BranchDevelopmentState).@"struct".fields) |field| switch (field.type) {
+        inline for (ti_compat.fieldViews(BranchDevelopmentState)) |field| switch (field.type) {
             []f64, []usize, []bool => copySliceAroundInsertion(@field(replacement, field.name), @field(self, field.name), index, 1),
             []u32 => copySliceAroundInsertion(@field(replacement, field.name), @field(self, field.name), index * 10, 10),
             else => {},
@@ -261,7 +262,7 @@ pub const BranchDevelopmentState = struct {
 
     pub fn clearRangeForReconstruction(self: *BranchDevelopmentState, first: usize, end: usize) !void {
         if (first > end or end > self.branch_count) return error.InvalidBranchDevelopmentRange;
-        inline for (@typeInfo(BranchDevelopmentState).@"struct".fields) |field| switch (field.type) {
+        inline for (ti_compat.fieldViews(BranchDevelopmentState)) |field| switch (field.type) {
             []f64 => @memset(@field(self, field.name)[first..end], 0),
             []usize => @memset(@field(self, field.name)[first..end], 0),
             []bool => @memset(@field(self, field.name)[first..end], false),
@@ -275,7 +276,7 @@ pub const BranchDevelopmentState = struct {
         if (first == end) return;
         var replacement = try BranchDevelopmentState.init(self.allocator, self.branch_count - (end - first));
         errdefer replacement.deinit();
-        inline for (@typeInfo(BranchDevelopmentState).@"struct".fields) |field| switch (field.type) {
+        inline for (ti_compat.fieldViews(BranchDevelopmentState)) |field| switch (field.type) {
             []f64, []usize, []bool => {
                 @memcpy(@field(replacement, field.name)[0..first], @field(self, field.name)[0..first]);
                 @memcpy(@field(replacement, field.name)[first..], @field(self, field.name)[end..]);
@@ -295,7 +296,7 @@ pub const BranchDevelopmentState = struct {
 test "branch development releases reflected and trailing allocation prefixes" {
     const f64_allocation_count = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(BranchDevelopmentState).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(BranchDevelopmentState)) |field| {
             if (field.type == []f64) count += 1;
         }
         break :count count;
@@ -525,7 +526,7 @@ pub fn activateNextRootAxis(roots: *PlantRootState, plant: usize, root_turgor_po
 
 fn freeF64Allocated(state: *State, count: usize) void {
     var visited: usize = 0;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         if (visited < count) state.allocator.free(@field(state, field.name));
         visited += 1;
     };

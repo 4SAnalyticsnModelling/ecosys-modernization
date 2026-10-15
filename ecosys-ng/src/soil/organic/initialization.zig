@@ -2,6 +2,8 @@ const std = @import("std");
 const GridState = @import("../../state/grid.zig").GridState;
 const SoilCatalogEntry = @import("../profile/catalog.zig").Entry;
 const SoilProperties = @import("../water/solver_properties.zig").State;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const substrate_count: usize = 5;
 pub const kinetic_fraction_count: usize = 3;
@@ -103,7 +105,7 @@ pub fn profileOrganicComplexMasses(total_organic_carbon_kg_per_megagram: f64, pa
         .particulate_phosphorus_g_p = particulate_phosphorus_g_p,
         .humus_phosphorus_g_p = @max(0.0, total_phosphorus_g_p - particulate_phosphorus_g_p),
     };
-    inline for (@typeInfo(ProfileOrganicComplexMasses).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteProfileOrganicMatter;
+    inline for (ti_compat.fieldViews(ProfileOrganicComplexMasses)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteProfileOrganicMatter;
     return result;
 }
 
@@ -539,7 +541,7 @@ pub const State = struct {
                 );
                 const soil_mass_megagrams = carrier.amount;
                 const masses = try profileOrganicComplexMasses(1.0e-3 * material.total_organic_carbon_g_per_megagram[layer], 1.0e-3 * material.particulate_organic_carbon_g_per_megagram[layer], material.organic_nitrogen_g_per_megagram[layer], material.organic_phosphorus_g_per_megagram[layer], soil_mass_megagrams, parameters.microbial_derivation.residue_nitrogen_to_carbon[3], parameters.microbial_derivation.residue_phosphorus_to_carbon[3]);
-                var initial_complex = [_]ElementPool{.{}} ** substrate_count;
+                var initial_complex = @as([substrate_count]ElementPool, @splat(@as(ElementPool, .{})));
                 // `starts.f` lines 776--786/1298: previous coarse woody (K=0), fine
                 // (K=1) litter, and manure (K=2) buried in this mineral layer, parsed
                 // by `soil_profile.zig` but previously never consumed
@@ -571,7 +573,7 @@ pub const State = struct {
                 derivation_parameters.depth_partition_factor = parameters.depth_partition_factor_by_layer[layer_cell];
                 const derived = try deriveMineralAllocations(&initial_complex, soil_mass_megagrams, &nitrogen_to_carbon, &phosphorus_to_carbon, derivation_parameters);
 
-                var structural_fraction = [_]f64{0} ** (substrate_count * structural_fraction_count);
+                var structural_fraction = @as([(substrate_count * structural_fraction_count)]f64, @splat(@as(f64, 0)));
                 @memcpy(structural_fraction[0 .. 3 * structural_fraction_count], parameters.residue_structural_fraction);
                 @memcpy(
                     structural_fraction[2 * structural_fraction_count ..][0..structural_fraction_count],
@@ -631,17 +633,17 @@ pub const State = struct {
             vertical_cell_width_m.len != self.layer_count or
             parameters.default_complex_nitrogen_to_carbon.len != substrate_count or parameters.default_complex_phosphorus_to_carbon.len != substrate_count or parameters.woody_structural_fraction.len != structural_fraction_count or parameters.plant_structural_fraction_by_type.len != 12 * structural_fraction_count or parameters.manure_structural_fraction_by_type.len != 2 * structural_fraction_count or parameters.residue_nitrogen_weight.len != 3 * structural_fraction_count or parameters.residue_phosphorus_weight.len != 3 * structural_fraction_count) return error.OrganicInitializationDimensionMismatch;
         if (!std.math.isFinite(parameters.residue_microbial_fraction) or parameters.residue_microbial_fraction < 0 or parameters.residue_microbial_fraction > 1) return error.InvalidOrganicInitializationParameter;
-        const unit_allocation = [_]f64{1} ** substrate_count;
+        const unit_allocation = @as([substrate_count]f64, @splat(@as(f64, 1)));
         for (catalog_index_by_cell, 0..) |catalog_index, cell| {
             if (catalog_index >= catalog_entries.len) return error.SoilCatalogMapOutOfBounds;
             const area_m2 = horizontal_cell_width_m[cell] * vertical_cell_width_m[cell];
             if (!std.math.isFinite(area_m2) or area_m2 <= 0) return error.InvalidCellGeometry;
             const profile = catalog_entries[catalog_index].profile;
-            var initial = [_]ElementPool{.{}} ** substrate_count;
+            var initial = @as([substrate_count]ElementPool, @splat(@as(ElementPool, .{})));
             initial[0] = .{ .carbon_g_c = profile.surface_woody_litter_carbon_g_c_per_m2 * area_m2, .nitrogen_g_n = profile.surface_woody_litter_nitrogen_g_n_per_m2 * area_m2, .phosphorus_g_p = profile.surface_woody_litter_phosphorus_g_p_per_m2 * area_m2 };
             initial[1] = .{ .carbon_g_c = profile.surface_fine_litter_carbon_g_c_per_m2 * area_m2, .nitrogen_g_n = profile.surface_fine_litter_nitrogen_g_n_per_m2 * area_m2, .phosphorus_g_p = profile.surface_fine_litter_phosphorus_g_p_per_m2 * area_m2 };
             initial[2] = .{ .carbon_g_c = profile.surface_manure_carbon_g_c_per_m2 * area_m2, .nitrogen_g_n = profile.surface_manure_nitrogen_g_n_per_m2 * area_m2, .phosphorus_g_p = profile.surface_manure_phosphorus_g_p_per_m2 * area_m2 };
-            var structural_fraction = [_]f64{0} ** (substrate_count * structural_fraction_count);
+            var structural_fraction = @as([(substrate_count * structural_fraction_count)]f64, @splat(@as(f64, 0)));
             @memcpy(structural_fraction[0..structural_fraction_count], parameters.woody_structural_fraction);
             const plant_type_index: usize = if (profile.surface_plant_litter_type >= 1 and profile.surface_plant_litter_type <= 11) @intCast(profile.surface_plant_litter_type - 1) else 11;
             @memcpy(structural_fraction[structural_fraction_count..][0..structural_fraction_count], parameters.plant_structural_fraction_by_type[plant_type_index * structural_fraction_count ..][0..structural_fraction_count]);
@@ -737,7 +739,7 @@ pub const State = struct {
         @memset(structural, .{});
         @memset(colonized, 0);
 
-        var allocated = [_]ElementPool{.{}} ** substrate_count;
+        var allocated = @as([substrate_count]ElementPool, @splat(@as(ElementPool, .{})));
         for (0..substrate_count) |substrate| {
             // Mineral STARTS sets KK=4; surface STARTS retains KK=K.
             const allocation_target = if (layer_kind == .mineral) substrate_count - 1 else substrate;
@@ -889,30 +891,30 @@ test "mineral STARTS organic transaction initializes all runtime pools atomicall
     const allocator = std.testing.allocator;
     var state = try State.init(allocator, 2);
     defer state.deinit();
-    const initial = [_]ElementPool{.{ .carbon_g_c = 100, .nitrogen_g_n = 10, .phosphorus_g_p = 1 }} ** substrate_count;
-    const fives = [_]f64{1} ** substrate_count;
-    const ratios_n = [_]f64{0.1} ** substrate_count;
-    const ratios_p = [_]f64{0.01} ** substrate_count;
-    const structural_fraction = [_]f64{0.2} ** (substrate_count * structural_fraction_count);
-    const microbial_fraction = [_]f64{0.01} ** (substrate_count * kinetic_fraction_count);
-    const residue_fraction = [_]f64{0.01} ** (substrate_count * residue_fraction_count);
-    const dissolved_fraction = [_]f64{0.005} ** substrate_count;
-    const adsorbed_fraction = [_]f64{0.05} ** substrate_count;
-    const heterotroph_fraction = [_]f64{1.0 / 7.0} ** microbial_population_count;
-    const autotroph_fraction = [_]f64{0} ** microbial_population_count;
-    const microbial_n = [_]f64{0.1} ** (substrate_count * microbial_population_count * kinetic_fraction_count);
-    const microbial_p = [_]f64{0.01} ** (substrate_count * microbial_population_count * kinetic_fraction_count);
+    const initial = @as([substrate_count]ElementPool, @splat(@as(ElementPool, .{ .carbon_g_c = 100, .nitrogen_g_n = 10, .phosphorus_g_p = 1 })));
+    const fives = @as([substrate_count]f64, @splat(@as(f64, 1)));
+    const ratios_n = @as([substrate_count]f64, @splat(@as(f64, 0.1)));
+    const ratios_p = @as([substrate_count]f64, @splat(@as(f64, 0.01)));
+    const structural_fraction = @as([(substrate_count * structural_fraction_count)]f64, @splat(@as(f64, 0.2)));
+    const microbial_fraction = @as([(substrate_count * kinetic_fraction_count)]f64, @splat(@as(f64, 0.01)));
+    const residue_fraction = @as([(substrate_count * residue_fraction_count)]f64, @splat(@as(f64, 0.01)));
+    const dissolved_fraction = @as([substrate_count]f64, @splat(@as(f64, 0.005)));
+    const adsorbed_fraction = @as([substrate_count]f64, @splat(@as(f64, 0.05)));
+    const heterotroph_fraction = @as([microbial_population_count]f64, @splat(@as(f64, 1.0 / 7.0)));
+    const autotroph_fraction = @as([microbial_population_count]f64, @splat(@as(f64, 0)));
+    const microbial_n = @as([(substrate_count * microbial_population_count * kinetic_fraction_count)]f64, @splat(@as(f64, 0.1)));
+    const microbial_p = @as([(substrate_count * microbial_population_count * kinetic_fraction_count)]f64, @splat(@as(f64, 0.01)));
     try state.initializeMineralLayer(1, .{
         .initial_complex = &initial,
-        .microbial_carbon_g_c = &([_]f64{10} ** substrate_count),
+        .microbial_carbon_g_c = &(@as([substrate_count]f64, @splat(@as(f64, 10)))),
         .carbon_allocation_fraction = &fives,
         .nitrogen_allocation_fraction = &fives,
         .phosphorus_allocation_fraction = &fives,
         .complex_nitrogen_to_carbon = &ratios_n,
         .complex_phosphorus_to_carbon = &ratios_p,
         .structural_fraction = &structural_fraction,
-        .structural_nitrogen_to_carbon = &([_]f64{0.1} ** (substrate_count * structural_fraction_count)),
-        .structural_phosphorus_to_carbon = &([_]f64{0.01} ** (substrate_count * structural_fraction_count)),
+        .structural_nitrogen_to_carbon = &(@as([(substrate_count * structural_fraction_count)]f64, @splat(@as(f64, 0.1)))),
+        .structural_phosphorus_to_carbon = &(@as([(substrate_count * structural_fraction_count)]f64, @splat(@as(f64, 0.01)))),
     }, .{
         .microbial_kinetic_fraction = &microbial_fraction,
         .residue_fraction = &residue_fraction,
@@ -931,15 +933,15 @@ test "mineral STARTS organic transaction initializes all runtime pools atomicall
     try std.testing.expectEqual(@as(f64, 0), state.dissolved[4].carbon_g_c);
     try state.initializeSurfaceLayer(0, .{
         .initial_complex = &initial,
-        .microbial_carbon_g_c = &([_]f64{25} ** substrate_count),
+        .microbial_carbon_g_c = &(@as([substrate_count]f64, @splat(@as(f64, 25)))),
         .carbon_allocation_fraction = &fives,
         .nitrogen_allocation_fraction = &fives,
         .phosphorus_allocation_fraction = &fives,
         .complex_nitrogen_to_carbon = &ratios_n,
         .complex_phosphorus_to_carbon = &ratios_p,
         .structural_fraction = &structural_fraction,
-        .structural_nitrogen_to_carbon = &([_]f64{0.1} ** (substrate_count * structural_fraction_count)),
-        .structural_phosphorus_to_carbon = &([_]f64{0.01} ** (substrate_count * structural_fraction_count)),
+        .structural_nitrogen_to_carbon = &(@as([(substrate_count * structural_fraction_count)]f64, @splat(@as(f64, 0.1)))),
+        .structural_phosphorus_to_carbon = &(@as([(substrate_count * structural_fraction_count)]f64, @splat(@as(f64, 0.01)))),
     }, .{
         .microbial_kinetic_fraction = &microbial_fraction,
         .residue_fraction = &residue_fraction,
@@ -994,13 +996,13 @@ test "STARTS mineral microbial carbon and humus allocation limits are derived at
     };
     const ratios_n = [_]f64{ 0, 0, 0, 0.05, 0.1 };
     const ratios_p = [_]f64{ 0, 0, 0, 0.005, 0.01 };
-    const budget = [_]f64{0.01} ** substrate_count;
-    const residue_budget = [_]f64{0.25} ** substrate_count;
-    const dissolved_budget = [_]f64{0.005} ** substrate_count;
-    const adsorbed_budget = [_]f64{0.05} ** substrate_count;
-    const kinetic = [_]f64{0.01} ** (substrate_count * kinetic_fraction_count);
-    const microbial_n = [_]f64{0.1} ** (substrate_count * microbial_population_count * kinetic_fraction_count);
-    const microbial_p = [_]f64{0.01} ** (substrate_count * microbial_population_count * kinetic_fraction_count);
+    const budget = @as([substrate_count]f64, @splat(@as(f64, 0.01)));
+    const residue_budget = @as([substrate_count]f64, @splat(@as(f64, 0.25)));
+    const dissolved_budget = @as([substrate_count]f64, @splat(@as(f64, 0.005)));
+    const adsorbed_budget = @as([substrate_count]f64, @splat(@as(f64, 0.05)));
+    const kinetic = @as([(substrate_count * kinetic_fraction_count)]f64, @splat(@as(f64, 0.01)));
+    const microbial_n = @as([(substrate_count * microbial_population_count * kinetic_fraction_count)]f64, @splat(@as(f64, 0.1)));
+    const microbial_p = @as([(substrate_count * microbial_population_count * kinetic_fraction_count)]f64, @splat(@as(f64, 0.01)));
     const derived = try deriveMineralAllocations(&initial, 2, &ratios_n, &ratios_p, .{
         .residue_microbial_fraction = 0.25,
         .humus_microbial_half_saturation_g_c_per_megagram = 25_000,
@@ -1024,16 +1026,16 @@ test "STARTS mineral microbial carbon and humus allocation limits are derived at
 test "mapped STARTS organic initialization uses runtime profile selection and geometry" {
     const allocator = std.testing.allocator;
     const soil_profile = @import("../../state/soil_profile.zig");
-    const fixture = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(soil_profile.LayerProperty).@"enum".fields.len);
+    const fixture = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(soil_profile.LayerProperty).@"enum".field_names.len);
     defer allocator.free(fixture);
     var catalog = @import("../profile/catalog.zig").Catalog.init(allocator);
     defer catalog.deinit();
     _ = try catalog.appendFromSource("soil", fixture, @import("../water/retention.zig").compatibilityParameters(), @import("../profile/derivation.zig").compatibilityParameters());
     // Exercise the now-live buried-manure path. The stock fixture intentionally
     // leaves these optional STARTS inputs at zero.
-    const manure_carbon_offset = @intFromEnum(soil_profile.LayerProperty.manure_carbon_g_m2) * catalog.entries.items[0].profile.total_layer_count;
-    const manure_nitrogen_offset = @intFromEnum(soil_profile.LayerProperty.manure_nitrogen_g_m2) * catalog.entries.items[0].profile.total_layer_count;
-    const manure_phosphorus_offset = @intFromEnum(soil_profile.LayerProperty.manure_phosphorus_g_m2) * catalog.entries.items[0].profile.total_layer_count;
+    const manure_carbon_offset = @backingInt(soil_profile.LayerProperty.manure_carbon_g_m2) * catalog.entries.items[0].profile.total_layer_count;
+    const manure_nitrogen_offset = @backingInt(soil_profile.LayerProperty.manure_nitrogen_g_m2) * catalog.entries.items[0].profile.total_layer_count;
+    const manure_phosphorus_offset = @backingInt(soil_profile.LayerProperty.manure_phosphorus_g_m2) * catalog.entries.items[0].profile.total_layer_count;
     catalog.entries.items[0].profile.layer_properties[manure_carbon_offset] = 100;
     catalog.entries.items[0].profile.layer_properties[manure_nitrogen_offset] = 10;
     catalog.entries.items[0].profile.layer_properties[manure_phosphorus_offset] = 1;
@@ -1045,19 +1047,19 @@ test "mapped STARTS organic initialization uses runtime profile selection and ge
     defer properties.deinit();
     var state = try State.init(allocator, grid.layer_count);
     defer state.deinit();
-    const budget = [_]f64{0.01} ** substrate_count;
-    const residue_budget = [_]f64{0.25} ** substrate_count;
-    const dissolved_budget = [_]f64{0.005} ** substrate_count;
-    const adsorbed_budget = [_]f64{0.05} ** substrate_count;
-    const microbial_kinetic = [_]f64{0.01} ** (substrate_count * kinetic_fraction_count);
-    const residue_fraction = [_]f64{0.01} ** (substrate_count * residue_fraction_count);
-    const heterotroph = [_]f64{1.0 / 7.0} ** microbial_population_count;
-    const autotroph = [_]f64{0} ** microbial_population_count;
-    const microbial_n = [_]f64{0.1} ** (substrate_count * microbial_population_count * kinetic_fraction_count);
-    const microbial_p = [_]f64{0.01} ** (substrate_count * microbial_population_count * kinetic_fraction_count);
+    const budget = @as([substrate_count]f64, @splat(@as(f64, 0.01)));
+    const residue_budget = @as([substrate_count]f64, @splat(@as(f64, 0.25)));
+    const dissolved_budget = @as([substrate_count]f64, @splat(@as(f64, 0.005)));
+    const adsorbed_budget = @as([substrate_count]f64, @splat(@as(f64, 0.05)));
+    const microbial_kinetic = @as([(substrate_count * kinetic_fraction_count)]f64, @splat(@as(f64, 0.01)));
+    const residue_fraction = @as([(substrate_count * residue_fraction_count)]f64, @splat(@as(f64, 0.01)));
+    const heterotroph = @as([microbial_population_count]f64, @splat(@as(f64, 1.0 / 7.0)));
+    const autotroph = @as([microbial_population_count]f64, @splat(@as(f64, 0)));
+    const microbial_n = @as([(substrate_count * microbial_population_count * kinetic_fraction_count)]f64, @splat(@as(f64, 0.1)));
+    const microbial_p = @as([(substrate_count * microbial_population_count * kinetic_fraction_count)]f64, @splat(@as(f64, 0.01)));
     const default_n = [_]f64{ 0.0333, 0.0333, 0.0333, 0.05, 0.167 };
     const default_p = [_]f64{ 0.00333, 0.00333, 0.00333, 0.005, 0.0167 };
-    const residue_structural = [_]f64{0.2} ** (3 * structural_fraction_count);
+    const residue_structural = @as([(3 * structural_fraction_count)]f64, @splat(@as(f64, 0.2)));
     const manure_structural = [_]f64{ 0.036, 0.044, 0.630, 0.290, 0, 0.138, 0.401, 0.316, 0.145, 0 };
     const particulate_structural = [_]f64{ 1, 0, 0, 0, 0 };
     const depth = [_]f64{1};
@@ -1153,9 +1155,9 @@ test "mapped STARTS organic initialization uses runtime profile selection and ge
     try std.testing.expect(mapped_wetland[0]);
 
     const surface_woody = [_]f64{ 0, 0.045, 0.660, 0.295, 0 };
-    const surface_plants = [_]f64{0.2} ** (12 * structural_fraction_count);
-    const surface_nitrogen_weight = [_]f64{0.02} ** (3 * structural_fraction_count);
-    const surface_phosphorus_weight = [_]f64{0.002} ** (3 * structural_fraction_count);
+    const surface_plants = @as([(12 * structural_fraction_count)]f64, @splat(@as(f64, 0.2)));
+    const surface_nitrogen_weight = @as([(3 * structural_fraction_count)]f64, @splat(@as(f64, 0.02)));
+    const surface_phosphorus_weight = @as([(3 * structural_fraction_count)]f64, @splat(@as(f64, 0.002)));
     try state.initializeMappedSurface(catalog.entries.items, &.{0}, &.{1}, &.{1}, .{
         .pool_allocation = .{
             .microbial_kinetic_fraction = &microbial_kinetic,
@@ -1296,7 +1298,7 @@ test "deriveMineralAllocations accepts a volume-carried ponded layer" {
     // STARTS, a ponded layer reaches it with a positive volume-based carrier and
     // is accepted, producing finite allocations. This assertion is what fails if
     // the guard is restored to rejecting a zero mineral mass.
-    var initial = [_]ElementPool{.{}} ** substrate_count;
+    var initial = @as([substrate_count]ElementPool, @splat(@as(ElementPool, .{})));
     initial[3] = .{ .carbon_g_c = 400, .nitrogen_g_n = 40, .phosphorus_g_p = 4 };
     initial[4] = .{ .carbon_g_c = 1600, .nitrogen_g_n = 160, .phosphorus_g_p = 16 };
     const ratios_n = [_]f64{ 0.1, 0.1, 0.1, 0.1, 0.1 };
@@ -1310,9 +1312,9 @@ test "deriveMineralAllocations accepts a volume-carried ponded layer" {
         .residue_budget_fraction = &.{ 0.1, 0.1, 0.1, 0.1, 0.1 },
         .dissolved_budget_fraction = &.{ 0.1, 0.1, 0.1, 0.1, 0.1 },
         .adsorbed_budget_fraction = &.{ 0.1, 0.1, 0.1, 0.1, 0.1 },
-        .microbial_kinetic_fraction = &(.{0.1} ** (substrate_count * kinetic_fraction_count)),
-        .microbial_nitrogen_to_carbon = &(.{0.1} ** (substrate_count * microbial_population_count * kinetic_fraction_count)),
-        .microbial_phosphorus_to_carbon = &(.{0.01} ** (substrate_count * microbial_population_count * kinetic_fraction_count)),
+        .microbial_kinetic_fraction = &@as([(substrate_count * kinetic_fraction_count)]f64, @splat(0.1)),
+        .microbial_nitrogen_to_carbon = &@as([(substrate_count * microbial_population_count * kinetic_fraction_count)]f64, @splat(0.1)),
+        .microbial_phosphorus_to_carbon = &@as([(substrate_count * microbial_population_count * kinetic_fraction_count)]f64, @splat(0.01)),
         .residue_nitrogen_to_carbon = &ratios_n,
         .residue_phosphorus_to_carbon = &ratios_p,
     });

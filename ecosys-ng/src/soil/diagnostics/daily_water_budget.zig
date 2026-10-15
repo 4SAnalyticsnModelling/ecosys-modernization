@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Heap-owned OUTSD daily water carriers. All fields remain extensive until
 /// output so local AREA and landscape TAREA normalization cannot be confused.
@@ -93,7 +94,7 @@ pub const State = struct {
 
     pub fn accumulateCell(self: *State, cell: usize, inputs: CellHourlyInputs) !void {
         if (cell >= self.cell_count) return error.DailyWaterCellOutOfBounds;
-        inline for (std.meta.fields(CellHourlyInputs)) |field| {
+        inline for (ti_compat.fieldViews(CellHourlyInputs)) |field| {
             const value = @field(inputs, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidHourlyWaterAmount;
         }

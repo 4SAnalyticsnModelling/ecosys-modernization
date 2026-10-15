@@ -1,4 +1,6 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Elements = struct { carbon: f64, nitrogen: f64, phosphorus: f64 };
 pub const Fractions = struct { carbon: []const f64, nitrogen: []const f64, phosphorus: []const f64 };
@@ -112,11 +114,11 @@ fn project(state: State, inputs: Inputs) !Projection {
             .phosphorus = state.reserve_phosphorus_g_p.* + fraction * recyclable.phosphorus * inputs.nonwoody_fraction.phosphorus,
         },
     };
-    inline for (@typeInfo(Projection).@"struct".fields) |field| if (field.type == f64) {
+    inline for (ti_compat.fieldViews(Projection)) |field| if (field.type == f64) {
         const value = @field(p, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidInternodeSenescenceResult;
     };
-    inline for (.{ p.recyclable, p.branch, p.node, p.reserve }) |values| inline for (@typeInfo(Elements).@"struct".fields) |field| {
+    inline for (.{ p.recyclable, p.branch, p.node, p.reserve }) |values| inline for (ti_compat.fieldViews(Elements)) |field| {
         const value = @field(values, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidInternodeSenescenceResult;
     };
@@ -130,15 +132,15 @@ fn validateTopology(state: State, inputs: Inputs) !usize {
     const count = inputs.woody_kinetics.carbon.len;
     if (count == 0) return error.ZeroInternodeSenescenceKineticPools;
     inline for (.{ inputs.woody_kinetics.nitrogen, inputs.woody_kinetics.phosphorus, inputs.stalk_kinetics.carbon, inputs.stalk_kinetics.nitrogen, inputs.stalk_kinetics.phosphorus }) |v| if (v.len != count) return error.InternodeSenescenceKineticDimensionMismatch;
-    inline for (@typeInfo(Litter).@"struct".fields) |field| if (@field(state.litter, field.name).len != count) return error.InternodeSenescenceKineticDimensionMismatch;
+    inline for (ti_compat.fieldViews(Litter)) |field| if (@field(state.litter, field.name).len != count) return error.InternodeSenescenceKineticDimensionMismatch;
     inline for (.{ inputs.respiration_demand_g_c_per_timestep, inputs.presence_threshold_g_c, inputs.phenological_senescence_fraction }) |v| if (!std.math.isFinite(v) or v < 0) return error.InvalidInternodeSenescenceInput;
     if (inputs.phenological_senescence_fraction > 1) return error.InvalidInternodeSenescenceInput;
-    inline for (.{ inputs.sapwood_recycling, inputs.woody_fraction, inputs.nonwoody_fraction }) |values| inline for (@typeInfo(Elements).@"struct".fields) |field| {
+    inline for (.{ inputs.sapwood_recycling, inputs.woody_fraction, inputs.nonwoody_fraction }) |values| inline for (ti_compat.fieldViews(Elements)) |field| {
         const v = @field(values, field.name);
         if (!std.math.isFinite(v) or v < 0 or v > 1) return error.InvalidInternodeSenescenceInput;
     };
-    inline for (@typeInfo(Elements).@"struct".fields) |field| if (@abs(@field(inputs.woody_fraction, field.name) + @field(inputs.nonwoody_fraction, field.name) - 1) > 1e-12) return error.InvalidInternodeSenescenceInput;
-    inline for (.{ inputs.woody_kinetics, inputs.stalk_kinetics }) |kinetics| inline for (@typeInfo(Fractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Elements)) |field| if (@abs(@field(inputs.woody_fraction, field.name) + @field(inputs.nonwoody_fraction, field.name) - 1) > 1e-12) return error.InvalidInternodeSenescenceInput;
+    inline for (.{ inputs.woody_kinetics, inputs.stalk_kinetics }) |kinetics| inline for (ti_compat.fieldViews(Fractions)) |field| {
         var total: f64 = 0;
         for (@field(kinetics, field.name)) |v| {
             if (!std.math.isFinite(v) or v < 0 or v > 1) return error.InvalidInternodeSenescenceKineticFraction;
@@ -159,7 +161,7 @@ fn validateLitterPool(state: State, inputs: Inputs, p: Projection, k: usize) !vo
         inputs.stalk_kinetics.nitrogen[k] * p.fraction * (state.internode_nitrogen_g_n[n] - p.recyclable.nitrogen) * inputs.nonwoody_fraction.nitrogen,
         inputs.stalk_kinetics.phosphorus[k] * p.fraction * (state.internode_phosphorus_g_p[n] - p.recyclable.phosphorus) * inputs.nonwoody_fraction.phosphorus,
     };
-    inline for (@typeInfo(Litter).@"struct".fields, 0..) |field, i| {
+    inline for (ti_compat.fieldViews(Litter), 0..) |field, i| {
         const current = @field(state.litter, field.name)[k];
         if (!std.math.isFinite(current) or current < 0 or !std.math.isFinite(current + additions[i]) or additions[i] < 0) return error.InvalidInternodeSenescenceLitterResult;
     }
@@ -234,7 +236,7 @@ test "runtime logical node and kinetic topology fail explicitly" {
     var p = [_]f64{ 0, 0, 0 };
     var len = [_]f64{ 0, 0, 0 };
     var h = [_]f64{ 0, 0, 0 };
-    var branch = [_]f64{0} ** 6;
+    var branch = @as([6]f64, @splat(@as(f64, 0)));
     var litter: [6][2]f64 = @splat(@splat(0));
     var inputs = testInputs();
     inputs.selected_node = 3;

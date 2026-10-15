@@ -34,6 +34,7 @@ const cation_exchange = @import("../soil/solute/cation_exchange.zig");
 const phosphate_network = @import("../soil/solute/phosphate_network.zig");
 const geochemistry_network = @import("../soil/solute/geochemistry_network.zig");
 const group_support = @import("landscape_mass_inventory_support.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub fn aggregateSoilMineralTexture(grid: *const grid_module.GridState, properties: *const soil_properties.State) !group_support.Storage {
     return aggregateSoilMineralTextureRange(grid, properties, 0, grid.cell_count, null);
@@ -127,7 +128,7 @@ pub fn aggregateSuspendedComponentAmounts(
         !std.math.isFinite(phosphorus_g_per_mol) or phosphorus_g_per_mol <= 0 or
         layout.organic_cnp_count != try erosion_organic_bridge.componentCount(organic_profile) or
         layout.nitrogen_fertilizer_count != erosion_fertilizer_bridge.component_count or
-        layout.dry_mineral_fertilizer_count != @typeInfo(dry_mineral_fertilizer.Inventory).@"struct".fields.len or
+        layout.dry_mineral_fertilizer_count != @typeInfo(dry_mineral_fertilizer.Inventory).@"struct".field_names.len or
         layout.chemistry_live_and_pending_count != erosion_chemistry_bridge.component_count or
         amounts.len != try layout.componentCount())
         return error.SuspendedInventoryDimensionMismatch;
@@ -200,7 +201,7 @@ fn aggregateSuspendedRange(
         !std.math.isFinite(phosphorus_g_per_mol) or phosphorus_g_per_mol <= 0 or
         state.layout.organic_cnp_count != try erosion_organic_bridge.componentCount(organic_profile) or
         state.layout.nitrogen_fertilizer_count != erosion_fertilizer_bridge.component_count or
-        state.layout.dry_mineral_fertilizer_count != @typeInfo(dry_mineral_fertilizer.Inventory).@"struct".fields.len or
+        state.layout.dry_mineral_fertilizer_count != @typeInfo(dry_mineral_fertilizer.Inventory).@"struct".field_names.len or
         state.layout.chemistry_live_and_pending_count != erosion_chemistry_bridge.component_count)
         return error.SuspendedInventoryDimensionMismatch;
     var result: group_support.Storage = .{};
@@ -317,7 +318,7 @@ fn organicCarbon(is_humus: bool) SuspendedComposition {
 }
 
 fn dryComposition(component: usize, carbon_g_per_mol: f64, phosphorus_g_per_mol: f64) SuspendedComposition {
-    inline for (@typeInfo(dry_mineral_fertilizer.Inventory).@"struct".fields, 0..) |field, index| if (component == index) {
+    inline for (ti_compat.fieldViews(dry_mineral_fertilizer.Inventory), 0..) |field, index| if (component == index) {
         if (comptime std.mem.indexOf(u8, field.name, "monocalcium_phosphate") != null) return .{ .phosphate_phosphorus_g = 2 * phosphorus_g_per_mol, .calcium_mol = 1 };
         if (comptime std.mem.eql(u8, field.name, "hydroxyapatite_mol")) return .{ .phosphate_phosphorus_g = 3 * phosphorus_g_per_mol, .calcium_mol = 5 };
         if (comptime std.mem.eql(u8, field.name, "calcite_mol")) return .{ .inorganic_carbon_g = carbon_g_per_mol, .calcium_mol = 1 };
@@ -336,17 +337,17 @@ fn dryComposition(component: usize, carbon_g_per_mol: f64, phosphorus_g_per_mol:
 fn chemistryComposition(component: usize, carbon_g_per_mol: f64, nitrogen_g_per_mol: f64, phosphorus_g_per_mol: f64) !SuspendedComposition {
     @setEvalBranchQuota(10_000);
     var cursor: usize = 0;
-    inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| {
         if (component == cursor) return chemistryCation(field.name, nitrogen_g_per_mol);
         cursor += 1;
     }
     if (component == cursor) return .{};
     cursor += 1;
-    inline for (0..2) |_| inline for (@typeInfo(phosphate_network.State).@"struct".fields) |field| if (comptime isErodiblePhosphateField(field.name)) {
+    inline for (0..2) |_| inline for (ti_compat.fieldViews(phosphate_network.State)) |field| if (comptime isErodiblePhosphateField(field.name)) {
         if (component == cursor) return phosphateComposition(field.name, phosphorus_g_per_mol);
         cursor += 1;
     };
-    inline for (@typeInfo(geochemistry_network.SolidState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(geochemistry_network.SolidState)) |field| {
         if (component == cursor) return geochemistryComposition(field.name, carbon_g_per_mol);
         cursor += 1;
     }
@@ -464,7 +465,7 @@ test "suspended organic census preserves REDIST residue and humus provenance" {
     const layout: suspended.Layout = .{
         .organic_cnp_count = organic_count,
         .nitrogen_fertilizer_count = erosion_fertilizer_bridge.component_count,
-        .dry_mineral_fertilizer_count = @typeInfo(dry_mineral_fertilizer.Inventory).@"struct".fields.len,
+        .dry_mineral_fertilizer_count = @typeInfo(dry_mineral_fertilizer.Inventory).@"struct".field_names.len,
         .chemistry_live_and_pending_count = erosion_chemistry_bridge.component_count,
     };
     var state = try suspended.State.init(std.testing.allocator, 1, layout);
@@ -524,7 +525,7 @@ test "suspended census rejects chemistry layouts that cannot match the bridge" {
     var state = try suspended.State.init(std.testing.allocator, 1, .{
         .organic_cnp_count = try erosion_organic_bridge.componentCount(&organic_profile),
         .nitrogen_fertilizer_count = erosion_fertilizer_bridge.component_count,
-        .dry_mineral_fertilizer_count = @typeInfo(dry_mineral_fertilizer.Inventory).@"struct".fields.len,
+        .dry_mineral_fertilizer_count = @typeInfo(dry_mineral_fertilizer.Inventory).@"struct".field_names.len,
         .chemistry_live_and_pending_count = erosion_chemistry_bridge.component_count + 1,
     });
     defer state.deinit();

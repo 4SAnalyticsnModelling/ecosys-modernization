@@ -21,7 +21,7 @@ pub fn coupledExtentReactionEnabled(
     reaction: group_types.CoupledExtentReaction,
     _: usize,
 ) bool {
-    if (@intFromEnum(reaction) < 16) return true;
+    if (@backingInt(reaction) < 16) return true;
     return switch (reaction) {
         .aqueous_calcium_hydroxide_pairing,
         .aqueous_calcium_carbonate_pairing,

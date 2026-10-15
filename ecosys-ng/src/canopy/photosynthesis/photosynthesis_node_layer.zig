@@ -29,6 +29,8 @@ const group_misc = @import("photosynthesis_misc.zig");
 const group_organ_growth = @import("photosynthesis_organ_growth.zig");
 const group_senescence = @import("photosynthesis_senescence.zig");
 const group_state = @import("photosynthesis_state.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const LayerLeafOutputs = struct {
     area_m2: []f64,
@@ -599,14 +601,14 @@ pub fn harvestLeafLayerSample(state: *group_state.State, branch: usize, node_wit
     if (sample_within_node >= samples.end - samples.first) return error.CanopySampleIndexOutOfBounds;
     const sample = samples.first + sample_within_node;
     const initial_mass: group_state.ElementalMass = .{ .carbon_g = state.sample_leaf_carbon_g[sample], .nitrogen_g = state.sample_leaf_nitrogen_g[sample], .phosphorus_g = state.sample_leaf_phosphorus_g[sample] };
-    inline for (@typeInfo(group_state.ElementalMass).@"struct".fields) |field| if (!std.math.isFinite(@field(initial_mass, field.name)) or @field(initial_mass, field.name) < 0) return error.InvalidHarvestMass;
+    inline for (ti_compat.fieldViews(group_state.ElementalMass)) |field| if (!std.math.isFinite(@field(initial_mass, field.name)) or @field(initial_mass, field.name) < 0) return error.InvalidHarvestMass;
     const initial_area_m2 = state.sample_leaf_area_m2[sample];
     if (!std.math.isFinite(initial_area_m2) or initial_area_m2 < 0) return error.InvalidLeafAreaHarvestGeometry;
     const removed_fraction = 1.0 - retention.remaining_fraction;
     const export_fraction = 1.0 - retention.unexported_fraction;
     const litter_fraction = retention.unexported_fraction - retention.remaining_fraction;
     var result: LayerLeafHarvestProducts = .{ .removed_leaf_area_m2 = removed_fraction * initial_area_m2 };
-    inline for (@typeInfo(group_state.ElementalMass).@"struct".fields, .{ carbon_woody_fraction, nitrogen_woody_fraction, phosphorus_woody_fraction }) |field, fractions| {
+    inline for (ti_compat.fieldViews(group_state.ElementalMass), .{ carbon_woody_fraction, nitrogen_woody_fraction, phosphorus_woody_fraction }) |field, fractions| {
         const initial = @field(initial_mass, field.name);
         @field(result.woody.ecosystem_export, field.name) = export_fraction * initial * fractions[0];
         @field(result.woody.litter, field.name) = litter_fraction * initial * fractions[0];
@@ -659,11 +661,11 @@ pub fn harvestNodeSheath(state: *group_state.State, branch: usize, node_within_b
     if (node_within_branch >= nodes.end - nodes.first) return error.CanopyNodeIndexOutOfBounds;
     const node = nodes.first + node_within_branch;
     const initial_mass: group_state.ElementalMass = .{ .carbon_g = state.node_sheath_carbon_g[node], .nitrogen_g = state.node_sheath_nitrogen_g[node], .phosphorus_g = state.node_sheath_phosphorus_g[node] };
-    inline for (@typeInfo(group_state.ElementalMass).@"struct".fields) |field| if (!std.math.isFinite(@field(initial_mass, field.name)) or @field(initial_mass, field.name) < 0) return error.InvalidHarvestMass;
+    inline for (ti_compat.fieldViews(group_state.ElementalMass)) |field| if (!std.math.isFinite(@field(initial_mass, field.name)) or @field(initial_mass, field.name) < 0) return error.InvalidHarvestMass;
     const export_fraction = 1.0 - unexported_fraction;
     const litter_fraction = unexported_fraction - remaining_fraction;
     var result: NodeOrganHarvestProducts = .{};
-    inline for (@typeInfo(group_state.ElementalMass).@"struct".fields, .{ carbon_woody_fraction, nitrogen_woody_fraction, phosphorus_woody_fraction }) |field, fractions| {
+    inline for (ti_compat.fieldViews(group_state.ElementalMass), .{ carbon_woody_fraction, nitrogen_woody_fraction, phosphorus_woody_fraction }) |field, fractions| {
         const initial = @field(initial_mass, field.name);
         @field(result.woody.ecosystem_export, field.name) = export_fraction * initial * fractions[0];
         @field(result.woody.litter, field.name) = litter_fraction * initial * fractions[0];
@@ -878,7 +880,7 @@ pub fn state_updateSelectedNodeSenescence(
         .recycled_phosphorus_g_p = leaf_recycled_p,
     });
     inline for (.{ leaf_next.branch, leaf_next.node }) |tissue|
-        inline for (@typeInfo(leaf_senescence_state_update.Tissue).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(leaf_senescence_state_update.Tissue)) |field|
             if (@field(tissue, field.name) < 0) return error.NegativeSelectedNodeSenescenceState;
     var projected_mobile_c = leaf_next.branch_mobile_carbon_g_c;
     var projected_mobile_n = leaf_next.branch_mobile_nitrogen_g_n;
@@ -951,7 +953,7 @@ pub fn state_updateSelectedNodeSenescence(
         .sheath = .{ .carbon_g_c = &sheath_products.nonwoody_carbon_g, .nitrogen_g_n = &sheath_products.nonwoody_nitrogen_g, .phosphorus_g_p = &sheath_products.nonwoody_phosphorus_g },
     });
     var next_products = accumulated_products.*;
-    inline for (@typeInfo(group_senescence.SenescenceProducts).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(group_senescence.SenescenceProducts)) |field| {
         if (field.type == f64) {
             const value = @field(next_products, field.name) + @field(addition, field.name) + @field(sheath_products, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.NonFiniteSelectedNodeSenescenceProduct;
@@ -1112,7 +1114,7 @@ fn productElementTotals(products: group_senescence.SenescenceProducts) [3]f64 {
 }
 
 test "GROSUB selected-node leaf sheath transaction persists snapshots and closes C N P" {
-    var state = try group_state.State.init(std.testing.allocator, 1, 1, &.{1}, &.{25}, &([_]usize{0} ** 25));
+    var state = try group_state.State.init(std.testing.allocator, 1, 1, &.{1}, &.{25}, &(@as([25]usize, @splat(@as(usize, 0)))));
     defer state.deinit();
     state.node_leaf_area_m2[0] = 4;
     state.node_leaf_carbon_g[0] = 8;
@@ -1183,7 +1185,7 @@ test "GROSUB selected-node leaf sheath transaction persists snapshots and closes
 }
 
 test "selected-node transaction rolls back before a late product overflow" {
-    var state = try group_state.State.init(std.testing.allocator, 1, 1, &.{1}, &.{25}, &([_]usize{0} ** 25));
+    var state = try group_state.State.init(std.testing.allocator, 1, 1, &.{1}, &.{25}, &(@as([25]usize, @splat(@as(usize, 0)))));
     defer state.deinit();
     state.node_leaf_area_m2[0] = 1;
     state.node_leaf_carbon_g[0] = std.math.floatMax(f64);

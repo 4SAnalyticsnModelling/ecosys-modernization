@@ -8,6 +8,7 @@ const LitterAmmoniaBridge = @import("../../surface/litter_ammonia_phase_bridge.z
 const SnowModule = @import("../../soil/solute/snow_solute_transport.zig");
 const Snow = SnowModule.State;
 const SnowSurfaceExchange = @import("../../soil/water/snow_surface_atmosphere_exchange.zig");
+
 const Surface = @import("../../soil/solute/surface_solute_routing.zig").State;
 const MineralNitrogen = @import("../../soil/biogeochemistry/mineral_nitrogen_transport.zig").State;
 const OrganicTransport = @import("../../soil/organic/transport.zig").State;
@@ -254,9 +255,9 @@ test "transport checkpoint round trips runtime snow and resumes exchange identic
     defer snow.deinit();
     try snow.initializePhysicalState(&.{ 0.08, 0.11 }, &.{ 1, 1.5 }, &.{ 268, 269 }, &.{ 0.02, 0.04, 0.08, 0.16 }, 0.1, .{ .solid_snow_heat_capacity_megajoules_per_m3_k = 2.095, .liquid_water_heat_capacity_megajoules_per_m3_k = 4.19, .ice_heat_capacity_megajoules_per_m3_k = 1.9274, .pure_water_melting_temperature_k = 273.15 });
     const initial_snow_concentrations: SnowModule.InitialChemicalConcentrations = .{
-        .primary_g_per_m3 = [_]f64{0.25} ** SnowModule.primary_species_count,
-        .static_ion_g_per_m3 = [_]f64{0.5} ** SnowModule.static_ion_species_count,
-        .salt_mol_per_m3 = [_]f64{0.01} ** SnowModule.salt_species_count,
+        .primary_g_per_m3 = @as([SnowModule.primary_species_count]f64, @splat(@as(f64, 0.25))),
+        .static_ion_g_per_m3 = @as([SnowModule.static_ion_species_count]f64, @splat(@as(f64, 0.5))),
+        .salt_mol_per_m3 = @as([SnowModule.salt_species_count]f64, @splat(@as(f64, 0.01))),
     };
     try SnowModule.initializeChemicalState(
         &snow,
@@ -267,7 +268,7 @@ test "transport checkpoint round trips runtime snow and resumes exchange identic
     );
     try std.testing.expect(snow.amount_g[0] > 0);
     try std.testing.expect(snow.salt_amount_mol[4 * SnowModule.salt_species_count] > 0);
-    var first_half_outputs = [_][2]f64{.{ 0, 0 }} ** 7;
+    var first_half_outputs = @as([7][2]f64, @splat(@as([2]f64, .{ 0, 0 })));
     try applyTestSnowSurfaceStep(&snow, 0.5, &first_half_outputs);
     try std.testing.expect(first_half_outputs[0][0] > 0);
     try std.testing.expect(first_half_outputs[3][0] < 0);
@@ -281,10 +282,10 @@ test "transport checkpoint round trips runtime snow and resumes exchange identic
         .band_h2po4,
     };
     for (appended_species, 0..) |species, offset| {
-        const index = 5 * AqueousSpecies.count + @intFromEnum(species);
+        const index = 5 * AqueousSpecies.count + @backingInt(species);
         micro.amount_mol[index] = 3 + @as(f64, @floatFromInt(offset));
         macro.amount_mol[index] = 7 + @as(f64, @floatFromInt(offset));
-        surface.amount_mol[AqueousSpecies.count + @intFromEnum(species)] =
+        surface.amount_mol[AqueousSpecies.count + @backingInt(species)] =
             11 + @as(f64, @floatFromInt(offset));
     }
     mineral_nitrogen.matrix.water_volume_m3[5] = 0.25;
@@ -295,7 +296,7 @@ test "transport checkpoint round trips runtime snow and resumes exchange identic
     gas.temperature_k[5] = 280;
     gas.gaseous_mass_g[gas.gaseous_mass_g.len - 1] = 5;
     gas.macropore_dissolved_mass_g[gas.macropore_dissolved_mass_g.len - 1] = 5.25;
-    const transient_ammonia = @intFromEnum(GasModule.Species.ammonia);
+    const transient_ammonia = @backingInt(GasModule.Species.ammonia);
     gas.dissolved_mass_g[transient_ammonia] = 91;
     gas.band_dissolved_mass_g[transient_ammonia] = 92;
     gas.macropore_dissolved_mass_g[transient_ammonia] = 93;
@@ -311,8 +312,8 @@ test "transport checkpoint round trips runtime snow and resumes exchange identic
     snow.amount_g[snow.amount_g.len - 1] = 6;
     snow.dynamic_salts_by_cell[1] = true;
     snow.salt_amount_mol[snow.salt_amount_mol.len - 1] = 6.5;
-    snow.salt_amount_mol[7 * SnowModule.salt_species_count + @intFromEnum(SnowModule.SaltSpecies.phosphate)] = 6.75;
-    snow.salt_amount_mol[7 * SnowModule.salt_species_count + @intFromEnum(SnowModule.SaltSpecies.phosphoric_acid)] = 6.875;
+    snow.salt_amount_mol[7 * SnowModule.salt_species_count + @backingInt(SnowModule.SaltSpecies.phosphate)] = 6.75;
+    snow.salt_amount_mol[7 * SnowModule.salt_species_count + @backingInt(SnowModule.SaltSpecies.phosphoric_acid)] = 6.875;
     var bytes: std.Io.Writer.Allocating = .init(std.testing.allocator);
     defer bytes.deinit();
     surface.amount_mol[34] = 7.25;
@@ -346,20 +347,20 @@ test "transport checkpoint round trips runtime snow and resumes exchange identic
     try std.testing.expectEqualSlices(bool, snow.dynamic_salts_by_cell, restored.snow.dynamic_salts_by_cell);
     try std.testing.expectEqualSlices(f64, snow.salt_amount_mol, restored.snow.salt_amount_mol);
     try std.testing.expectEqualSlices(f64, surface.amount_mol, restored.surface.amount_mol);
-    try std.testing.expectEqual(@as(f64, 6.75), restored.snow.salt_amount_mol[7 * SnowModule.salt_species_count + @intFromEnum(SnowModule.SaltSpecies.phosphate)]);
-    try std.testing.expectEqual(@as(f64, 6.875), restored.snow.salt_amount_mol[7 * SnowModule.salt_species_count + @intFromEnum(SnowModule.SaltSpecies.phosphoric_acid)]);
+    try std.testing.expectEqual(@as(f64, 6.75), restored.snow.salt_amount_mol[7 * SnowModule.salt_species_count + @backingInt(SnowModule.SaltSpecies.phosphate)]);
+    try std.testing.expectEqual(@as(f64, 6.875), restored.snow.salt_amount_mol[7 * SnowModule.salt_species_count + @backingInt(SnowModule.SaltSpecies.phosphoric_acid)]);
     try std.testing.expectEqual(@as(f64, 7.25), restored.surface.amount_mol[34]);
     try std.testing.expectEqual(@as(f64, 7.5), restored.surface.amount_mol[35]);
     for (appended_species, 0..) |species, offset| {
-        const layer_index = 5 * AqueousSpecies.count + @intFromEnum(species);
-        const surface_index = AqueousSpecies.count + @intFromEnum(species);
+        const layer_index = 5 * AqueousSpecies.count + @backingInt(species);
+        const surface_index = AqueousSpecies.count + @backingInt(species);
         try std.testing.expectEqual(3 + @as(f64, @floatFromInt(offset)), restored.micropore.amount_mol[layer_index]);
         try std.testing.expectEqual(7 + @as(f64, @floatFromInt(offset)), restored.macropore.amount_mol[layer_index]);
         try std.testing.expectEqual(11 + @as(f64, @floatFromInt(offset)), restored.surface.amount_mol[surface_index]);
     }
 
-    var uninterrupted_outputs = [_][2]f64{.{ 0, 0 }} ** 7;
-    var restarted_outputs = [_][2]f64{.{ 0, 0 }} ** 7;
+    var uninterrupted_outputs = @as([7][2]f64, @splat(@as([2]f64, .{ 0, 0 })));
+    var restarted_outputs = @as([7][2]f64, @splat(@as([2]f64, .{ 0, 0 })));
     try applyTestSnowSurfaceStep(&snow, 0.5, &uninterrupted_outputs);
     try applyTestSnowSurfaceStep(&restored.snow, 0.5, &restarted_outputs);
     try std.testing.expectEqualSlices(bool, snow.active, restored.snow.active);

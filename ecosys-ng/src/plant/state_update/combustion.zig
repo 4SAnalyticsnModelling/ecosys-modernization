@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -55,7 +56,7 @@ pub fn refresh(state: *State, inputs: Inputs) !void {
     ) catch return error.InvalidPlantCombustionStateUpdateDimensions;
     if (expected_plant_count != state.plant_count)
         return error.InvalidPlantCombustionStateUpdateDimensions;
-    inline for (@typeInfo(Inputs).@"struct".fields[2..]) |field|
+    inline for (ti_compat.fieldViews(Inputs)[2..]) |field|
         if (@field(inputs, field.name).len != state.plant_count)
             return error.InvalidPlantCombustionStateUpdateDimensions;
 
@@ -130,7 +131,7 @@ test "plant combustion state_update preserves runtime plant order and signs" {
 test "late invalid active plant preserves complete state_update" {
     var state = try State.init(std.testing.allocator, 4);
     defer state.deinit();
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64) @memset(@field(state, field.name), 7);
     try std.testing.expectError(
         error.InvalidPlantCombustionStateUpdateInput,
@@ -143,7 +144,7 @@ test "late invalid active plant preserves complete state_update" {
             .signed_phosphorus_loss_g_p_per_h_by_plant = &.{ -1, -2, -3, -4 },
         }),
     );
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64)
             for (@field(state, field.name)) |value|
                 try std.testing.expectEqual(@as(f64, 7), value);

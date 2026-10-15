@@ -48,7 +48,7 @@ pub const State = struct {
                 const layer = try model_grid.layerIndex(cell, local_layer);
                 for (0..organic.substrate_count) |substrate| {
                     const base = layer * organic_transport.component_count + substrate * organic_transport.components_per_substrate;
-                    const flux = transport.boundary_net_flux_g[base + @intFromEnum(organic_transport.Component.dissolved_organic_nitrogen)];
+                    const flux = transport.boundary_net_flux_g[base + @backingInt(organic_transport.Component.dissolved_organic_nitrogen)];
                     inward_g_n += @max(0, flux);
                     outward_g_n += @max(0, -flux);
                 }
@@ -85,7 +85,7 @@ pub const State = struct {
                 const layer = try model_grid.layerIndex(cell, local_layer);
                 const base = layer * gas.species_count;
                 inline for ([_]gas.Species{ .nitrogen, .nitrous_oxide }, 0..) |species, species_index| {
-                    const flux = transport.boundary_net_flux_g[base + @intFromEnum(species)];
+                    const flux = transport.boundary_net_flux_g[base + @backingInt(species)];
                     inward_g_n += @max(0, flux);
                     outward_g_n += @max(0, -flux);
                     outward_by_species[species_index] += @max(0, -flux);
@@ -117,8 +117,8 @@ test "UDOND and UDIND sum only outward nitrogen over runtime layers" {
     defer model_grid.deinit();
     var organic_state = try organic_transport.State.init(std.testing.allocator, model_grid.layer_count);
     defer organic_state.deinit();
-    organic_state.boundary_net_flux_g[@intFromEnum(organic_transport.Component.dissolved_organic_nitrogen)] = -2;
-    organic_state.boundary_net_flux_g[organic_transport.components_per_substrate + @intFromEnum(organic_transport.Component.dissolved_organic_nitrogen)] = 1;
+    organic_state.boundary_net_flux_g[@backingInt(organic_transport.Component.dissolved_organic_nitrogen)] = -2;
+    organic_state.boundary_net_flux_g[organic_transport.components_per_substrate + @backingInt(organic_transport.Component.dissolved_organic_nitrogen)] = 1;
     var mineral = try mineral_transport.State.init(std.testing.allocator, model_grid.layer_count);
     defer mineral.deinit();
     mineral.boundary_export_g_n_per_step[1] = 3;
@@ -131,9 +131,9 @@ test "UDOND and UDIND sum only outward nitrogen over runtime layers" {
         model_grid.layer_count,
     );
     defer dissolved_gas.deinit();
-    dissolved_gas.boundary_net_flux_g[@intFromEnum(gas.Species.nitrogen)] = -4;
-    dissolved_gas.boundary_net_flux_g[@intFromEnum(gas.Species.nitrous_oxide)] = 1;
-    dissolved_gas.boundary_net_flux_g[@intFromEnum(gas.Species.ammonia)] = -2;
+    dissolved_gas.boundary_net_flux_g[@backingInt(gas.Species.nitrogen)] = -4;
+    dissolved_gas.boundary_net_flux_g[@backingInt(gas.Species.nitrous_oxide)] = 1;
+    dissolved_gas.boundary_net_flux_g[@backingInt(gas.Species.ammonia)] = -2;
     try daily.accumulateDissolvedGasDrainageHour(&model_grid, &dissolved_gas);
     try std.testing.expectEqual(@as(f64, 2), daily.dissolved_organic_nitrogen_drainage_g_n[0]);
     // The stale gas NH3 ledger is intentionally ignored; its canonical route

@@ -1,5 +1,6 @@
 const std = @import("std");
 const execution_calendar_date = @import("../driver/execution_calendar_date.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const State = struct {
     previous_daylength_h: f64,
@@ -63,7 +64,7 @@ pub fn update(
         day_of_year,
         execution_year,
     ) catch return error.InvalidDaylengthCalendarDate;
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         const value = @field(state.*, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 24)
             return error.InvalidDaylengthState;
@@ -71,7 +72,7 @@ pub fn update(
     if (!std.math.isFinite(latitude_degrees_north) or
         latitude_degrees_north < -90 or latitude_degrees_north > 90)
         return error.InvalidDaylengthLatitude;
-    inline for (@typeInfo(Parameters).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Parameters)) |field|
         if (!std.math.isFinite(@field(parameters, field.name)))
             return error.NonFiniteDaylengthParameter;
     if (parameters.civil_twilight_sine < 0 or

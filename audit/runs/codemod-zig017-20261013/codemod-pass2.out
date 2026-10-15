@@ -1,0 +1,6 @@
+files scanned: 880
+files modified: 14
+files blocked (manual): 0
+shim call rewrites: 66
+in-place slice rewrites + is_const: 22
+MANUAL items: none

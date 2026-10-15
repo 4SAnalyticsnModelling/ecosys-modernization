@@ -281,9 +281,9 @@ pub fn reactionSpanExtentBounds(
 ) !ReactionSpanExtentBounds {
     if (reaction == reaction_span.carboxyl_reaction_index) {
         const carboxyl_index =
-            @typeInfo(aqueous_network.State).@"struct".fields.len +
-            2 * @typeInfo(phosphate_network.State).@"struct".fields.len +
-            @typeInfo(cation_exchange.Cations).@"struct".fields.len;
+            @typeInfo(aqueous_network.State).@"struct".field_names.len +
+            2 * @typeInfo(phosphate_network.State).@"struct".field_names.len +
+            @typeInfo(cation_exchange.Cations).@"struct".field_names.len;
         return .{
             .negative_native_extent = current[carboxyl_index],
             .positive_native_extent = @max(

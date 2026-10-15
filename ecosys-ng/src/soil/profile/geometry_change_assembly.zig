@@ -2,6 +2,7 @@ const std = @import("std");
 const Geometry = @import("layer_geometry.zig");
 const DepthDisturbance = @import("depth_disturbance.zig");
 
+
 /// Reconstructs the REDIST SOC accumulation reset at the deepest layer and at
 /// an organic-to-mineral horizon crossing. Pond-underlayer resets can be ORed
 /// into the caller-owned result when runtime pond layers are present.
@@ -236,7 +237,7 @@ test "REDIST freeze thaw assembly accumulates DVOLI upward from a fixed bottom" 
     var geometry = try Geometry.State.init(std.testing.allocator, 1, 3);
     defer geometry.deinit();
     try Geometry.initializeCell(&geometry, 0, 0, &.{ 0.1, 0.2, 0.3 }, 0, 1e-9);
-    var boundary_change = [_]f64{0} ** 4;
+    var boundary_change = @as([4]f64, @splat(@as(f64, 0)));
     try assembleFreezeThawBoundaryChangeM(&boundary_change, &geometry, &.{ 1, -0.5, 2 }, &.{ 0.5, 0.5, 1 }, &.{10}, 0.1, 0);
     try std.testing.expectApproxEqAbs(@as(f64, 0.03), boundary_change[0], 1e-14);
     try std.testing.expectApproxEqAbs(@as(f64, 0.01), boundary_change[1], 1e-14);
@@ -256,12 +257,12 @@ test "REDIST erosion assembly shifts the datum without changing thickness" {
     var geometry = try Geometry.State.init(std.testing.allocator, 1, 2);
     defer geometry.deinit();
     try Geometry.initializeCell(&geometry, 0, 0, &.{ 0.2, 0.3 }, 0, 1e-9);
-    var erosion = [_]f64{0} ** 3;
+    var erosion = @as([3]f64, @splat(@as(f64, 0)));
     try assembleErosionBoundaryChangeM(&erosion, &geometry, &.{-2}, &.{0.5}, &.{10}, &.{20}, &.{10}, &.{1}, true, 1e-12);
     // -2 Mg / (10 m2 * 2 Mg m-3) + 0.5 Mg / (10 m2 * 1 Mg m-3)
     try std.testing.expectApproxEqAbs(@as(f64, -0.05), erosion[0], 1e-14);
     try std.testing.expectEqualSlices(f64, &.{ erosion[0], erosion[0], erosion[0] }, &erosion);
-    const zero = [_]f64{0} ** 3;
+    const zero = @as([3]f64, @splat(@as(f64, 0)));
     try Geometry.applyDisturbances(&geometry, .{ .pond_m = &zero, .freeze_thaw_m = &zero, .erosion_m = &erosion, .organic_carbon_m = &zero }, 1e-9);
     try std.testing.expectApproxEqAbs(@as(f64, 0.2), geometry.layer_thickness_m[0], 1e-14);
     try std.testing.expectApproxEqAbs(@as(f64, 0.3), geometry.layer_thickness_m[1], 1e-14);
@@ -271,7 +272,7 @@ test "REDIST SOC assembly retains horizon reset and thickness correction" {
     var geometry = try Geometry.State.init(std.testing.allocator, 1, 3);
     defer geometry.deinit();
     try Geometry.initializeCell(&geometry, 0, 0, &.{ 0.1, 0.2, 0.3 }, 0, 1e-9);
-    var carbon = [_]f64{0} ** 4;
+    var carbon = @as([4]f64, @splat(@as(f64, 0)));
     try assembleOrganicCarbonBoundaryChangeM(
         &carbon,
         &geometry,
@@ -299,7 +300,7 @@ test "REDIST SOC assembly skips unchanged zero-density open-water layer" {
     var geometry = try Geometry.State.init(std.testing.allocator, 1, 2);
     defer geometry.deinit();
     try Geometry.initializeCell(&geometry, 0, 0, &.{ 0.1, 0.2 }, 0, 1e-9);
-    var carbon = [_]f64{0} ** 3;
+    var carbon = @as([3]f64, @splat(@as(f64, 0)));
     try assembleOrganicCarbonBoundaryChangeM(
         &carbon,
         &geometry,
@@ -343,7 +344,7 @@ test "REDIST SOC reset mask uses runtime FORGC and deepest active layers" {
     defer geometry.deinit();
     try Geometry.initializeCell(&geometry, 0, 0, &.{ 0.1, 0.1, 0.1, 0.1 }, 0, 1e-9);
     try Geometry.initializeCell(&geometry, 1, 1, &.{ 0.2, 0.2 }, 0, 1e-9);
-    var reset = [_]bool{false} ** 8;
+    var reset = @as([8]bool, @splat(@as(bool, false)));
     try buildOrganicAccumulationReset(&reset, &geometry, &.{ 150_000, 120_000, 90_000, 80_000, 0, 130_000, 80_000, 0 }, 110_000);
     try std.testing.expectEqualSlices(bool, &.{ false, true, false, true }, reset[0..4]);
     try std.testing.expectEqualSlices(bool, &.{ false, true, true, false }, reset[4..8]);

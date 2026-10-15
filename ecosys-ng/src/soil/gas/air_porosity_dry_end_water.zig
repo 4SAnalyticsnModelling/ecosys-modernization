@@ -28,6 +28,7 @@
 // litter layer and the soil layers beneath it.
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     micropore_capacity_m3: f64,
@@ -109,7 +110,7 @@ pub fn compute(inputs: Inputs) !Result {
 }
 
 fn validate(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteSoilAirPorosityInput;
     inline for (.{

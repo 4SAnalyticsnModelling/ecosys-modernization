@@ -12,6 +12,7 @@ const litter_partition = @import("../plant/partition/litter.zig");
 const grazing_manure = @import("grazing_manure.zig");
 const __parent = @import("plant_harvest_runtime.zig");
 const group_tillage = @import("plant_harvest_source_order_tillage.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const SourceOrderDeadBranchPhenologyState = struct {
     dead: bool,
@@ -69,7 +70,7 @@ pub fn sourceOrderResetDeadBranchPhenology(
         !std.math.isFinite(input.initial_node_count))
         return error.InvalidDeadBranchPhenologyResetInput;
     for (branches) |branch| {
-        inline for (@typeInfo(SourceOrderDeadBranchPhenologyState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SourceOrderDeadBranchPhenologyState)) |field| {
             if (field.type == f64 and !std.math.isFinite(@field(branch, field.name)))
                 return error.InvalidDeadBranchPhenologyResetInput;
         }
@@ -150,16 +151,16 @@ pub const SourceOrderDeadBranchLitterResult = struct {
 pub fn sourceOrderDeadBranchLitterfall(
     input: SourceOrderDeadBranchLitterInput,
 ) !SourceOrderDeadBranchLitterResult {
-    inline for (@typeInfo(SourceOrderDeadBranchLitterPools).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderDeadBranchLitterPools)) |field| {
         const mass = @field(input.pools, field.name);
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element| {
+        inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element| {
             const value = @field(mass, element.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidDeadBranchLitterfallInput;
         }
     }
     inline for (.{ input.leaf_woody_fraction, input.sheath_woody_fraction }) |fractions| {
-        inline for (@typeInfo(group_tillage.TillageElementComposition).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(group_tillage.TillageElementComposition)) |field| {
             for (@field(fractions, field.name)) |value| {
                 if (!std.math.isFinite(value) or value < 0 or value > 1)
                     return error.InvalidDeadBranchLitterfallInput;
@@ -173,7 +174,7 @@ pub fn sourceOrderDeadBranchLitterfall(
         input.stalk_kinetics,
         input.coarse_wood_kinetics,
     }) |kinetics| {
-        inline for (@typeInfo(litter_partition.ElementFractions).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(litter_partition.ElementFractions)) |field| {
             for (@field(kinetics, field.name)) |value| {
                 if (!std.math.isFinite(value) or value < 0 or value > 1)
                     return error.InvalidDeadBranchLitterfallInput;
@@ -189,7 +190,7 @@ pub fn sourceOrderDeadBranchLitterfall(
     };
     const winter_annual = input.annual_growth_habit and input.deciduous_phenology;
     inline for (0..4) |component| {
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields, 0..) |element, element_index| {
+        inline for (ti_compat.fieldViews(canopy.ElementalMass), 0..) |element, element_index| {
             const bacterial_nonstructural = @field(input.pools.bacterial_nonstructural, element.name);
             const bacterial_structural = @field(input.pools.bacterial_structural, element.name);
             const leaf = @field(input.pools.leaf, element.name);
@@ -199,7 +200,7 @@ pub fn sourceOrderDeadBranchLitterfall(
             const grain = @field(input.pools.grain, element.name);
             const stalk = @field(input.pools.stalk, element.name);
             const fraction_field =
-                @typeInfo(litter_partition.ElementFractions).@"struct".fields[element_index].name;
+                @typeInfo(litter_partition.ElementFractions).@"struct".field_names[element_index];
             const nonstructural_fraction = @field(input.nonstructural_kinetics, fraction_field)[component];
             const foliar_fraction = @field(input.foliar_kinetics, fraction_field)[component];
             const nonfoliar_fraction = @field(input.nonfoliar_kinetics, fraction_field)[component];
@@ -227,14 +228,14 @@ pub fn sourceOrderDeadBranchLitterfall(
                 stalk_fraction * stalk;
         }
     }
-    inline for (@typeInfo(SourceOrderDeadBranchLitterResult).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderDeadBranchLitterResult)) |field| {
         const value = @field(result, field.name);
         if (field.type == canopy.ElementalMass) {
-            inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element|
+            inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element|
                 if (!std.math.isFinite(@field(value, element.name)))
                     return error.NonFiniteDeadBranchLitterfall;
         } else for (value) |mass| {
-            inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element|
+            inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element|
                 if (!std.math.isFinite(@field(mass, element.name)))
                     return error.NonFiniteDeadBranchLitterfall;
         }
@@ -259,7 +260,7 @@ pub fn sourceOrderDeadBranchStorageRecovery(
     input: SourceOrderDeadBranchStorageRecoveryInput,
 ) !SourceOrderDeadBranchStorageRecoveryResult {
     inline for (.{ input.current_seasonal_storage, input.branch_mobile, input.stalk_reserve }) |mass| {
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
             const value = @field(mass, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidDeadBranchStorageRecoveryInput;
@@ -287,7 +288,7 @@ pub fn sourceOrderDeadBranchStorageRecovery(
     seasonal_storage.phosphorus_g =
         seasonal_storage.phosphorus_g + input.stalk_reserve.phosphorus_g;
 
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
         if (!std.math.isFinite(@field(seasonal_storage, field.name)))
             return error.NonFiniteDeadBranchStorageRecovery;
     }
@@ -370,23 +371,23 @@ pub fn sourceOrderResetDeadBranchCanopy(state: SourceOrderDeadBranchCanopyReset)
         state.branch_projected_stalk_surface_m2.len != layer_count or
         state.node_layers.len != expected_node_layers)
         return error.InvalidDeadBranchCanopyResetDimensions;
-    inline for (@typeInfo(SourceOrderDeadBranchScalarResetState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderDeadBranchScalarResetState)) |field| {
         const value = @field(state.scalar.*, field.name);
         if (field.type == f64) {
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidDeadBranchCanopyResetInput;
-        } else inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element| {
+        } else inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element| {
             const mass = @field(value, element.name);
             if (!std.math.isFinite(mass) or mass < 0)
                 return error.InvalidDeadBranchCanopyResetInput;
         }
     }
-    for (state.nodes) |node| inline for (@typeInfo(SourceOrderDeadBranchNodeResetState).@"struct".fields) |field| {
+    for (state.nodes) |node| inline for (ti_compat.fieldViews(SourceOrderDeadBranchNodeResetState)) |field| {
         const value = @field(node, field.name);
         if (field.type == f64) {
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidDeadBranchCanopyResetInput;
-        } else inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element| {
+        } else inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element| {
             const mass = @field(value, element.name);
             if (!std.math.isFinite(mass) or mass < 0)
                 return error.InvalidDeadBranchCanopyResetInput;
@@ -399,7 +400,7 @@ pub fn sourceOrderResetDeadBranchCanopy(state: SourceOrderDeadBranchCanopyReset)
             const contribution = state.node_layers[node * layer_count + layer];
             if (!std.math.isFinite(contribution.leaf_area_m2) or contribution.leaf_area_m2 < 0)
                 return error.InvalidDeadBranchCanopyResetInput;
-            inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element| {
+            inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element| {
                 const mass = @field(contribution.leaf, element.name);
                 if (!std.math.isFinite(mass) or mass < 0)
                     return error.InvalidDeadBranchCanopyResetInput;

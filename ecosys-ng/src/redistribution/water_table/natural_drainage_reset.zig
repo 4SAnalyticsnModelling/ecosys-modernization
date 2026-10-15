@@ -70,6 +70,7 @@
 // matches, but "matches on reading" is weaker than "agrees at runtime" and is
 // not upgraded here.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Schedule = struct {
     event_count: usize,
@@ -106,13 +107,13 @@ pub fn applyCell(first_daily_cycle: i32, hour: i32, event: usize, cell: usize, s
         schedule.configured_water_table_depth_m.len != schedule.event_count * schedule.cell_count or
         schedule.solar_noon_h.len != schedule.cell_count)
         return error.NaturalDrainageResetDimensionMismatch;
-    inline for (std.meta.fields(Geometry)) |field|
+    inline for (ti_compat.fieldViews(Geometry)) |field|
         if (@field(geometry, field.name).len != schedule.cell_count) return error.NaturalDrainageResetDimensionMismatch;
-    inline for (std.meta.fields(State)) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (@field(state, field.name).len != schedule.cell_count) return error.NaturalDrainageResetDimensionMismatch;
     if (!finiteSlice(schedule.configured_water_table_depth_m) or !finiteSlice(schedule.solar_noon_h))
         return error.InvalidNaturalDrainageResetInput;
-    inline for (std.meta.fields(Geometry)) |field|
+    inline for (ti_compat.fieldViews(Geometry)) |field|
         if (!finiteSlice(@field(geometry, field.name))) return error.InvalidNaturalDrainageResetInput;
     inline for (.{ state.natural_water_table_input_depth_m, state.natural_water_table_reference_depth_m, state.natural_water_table_current_depth_m }) |values|
         if (!finiteSlice(values)) return error.InvalidNaturalDrainageResetInput;

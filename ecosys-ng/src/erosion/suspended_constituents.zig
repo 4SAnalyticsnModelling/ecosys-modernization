@@ -1,5 +1,6 @@
 const std = @import("std");
 
+
 /// Persistent suspended-particulate ownership.  The fixed leading families
 /// correspond to REDIST's mineral carriers; runtime-sized trailing families
 /// retain every translated organic, fertilizer and solid-chemistry pool.
@@ -638,12 +639,12 @@ test "layout explicitly covers every required suspended owner family" {
 }
 
 test "family adapters preserve cell-major ownership and reject invalid candidates" {
-    var packed_values = [_]f64{0} ** 28;
+    var packed_values = @as([28]f64, @splat(@as(f64, 0)));
     const organic = [_]f64{ 1, 2, 3, 4, 5, 6 };
     try packFamily(test_layout, 2, .organic_cnp, &organic, &packed_values);
     try std.testing.expectEqualSlices(f64, &.{ 1, 2, 3 }, packed_values[5..8]);
     try std.testing.expectEqualSlices(f64, &.{ 4, 5, 6 }, packed_values[19..22]);
-    var restored = [_]f64{0} ** 6;
+    var restored = @as([6]f64, @splat(@as(f64, 0)));
     try unpackFamily(test_layout, 2, .organic_cnp, &packed_values, &restored);
     try std.testing.expectEqualSlices(f64, &organic, &restored);
     var invalid = organic;
@@ -711,7 +712,7 @@ test "two-dimensional routing closes every component against source-indexed expo
     state.sediment_megagrams[1] = 8;
     state.sediment_megagrams[2] = 6;
     state.sediment_megagrams[3] = 4;
-    var initial = [_]f64{0} ** 14;
+    var initial = @as([14]f64, @splat(@as(f64, 0)));
     for (0..4) |cell| for (0..14) |component| {
         const value = @as(f64, @floatFromInt((cell + 1) * (component + 1))) / 7;
         state.pools[cell * 14 + component] = value;
@@ -746,7 +747,7 @@ test "settling moves the suspended composition into topsoil without loss" {
     state.pools[10] = 24;
     state.pools[12] = 28;
     state.pools[13] = 32;
-    var topsoil = [_]f64{0} ** 14;
+    var topsoil = @as([14]f64, @splat(@as(f64, 0)));
     var topsoil_mass = [_]f64{10};
     try settle(&state, &topsoil_mass, &topsoil, &.{1});
     try std.testing.expectEqual(@as(f64, 3), state.sediment_megagrams[0]);
@@ -767,7 +768,7 @@ test "failed exchange route settle and restore leave persistent state unchanged"
     state.local_exchange_soil_layer_by_cell[0] = 6;
     state.local_sediment_to_suspension_megagrams[0] = 0.25;
     state.local_transfer_to_suspension[0] = 0.5;
-    var topsoil = [_]f64{1} ** 14;
+    var topsoil = @as([14]f64, @splat(@as(f64, 1)));
     var topsoil_mass = [_]f64{10};
     try std.testing.expectError(error.LocalDepositionExceedsSuspendedSediment, exchangeLocal(&state, &topsoil_mass, &topsoil, &.{-2}, &.{7}));
     try std.testing.expectEqual(@as(f64, 1), state.sediment_megagrams[0]);
@@ -786,7 +787,7 @@ test "failed exchange route settle and restore leave persistent state unchanged"
     try std.testing.expectEqual(@as(f64, 4), state.flux.east[0]);
     try std.testing.expectError(error.SettlingExceedsSuspendedSediment, settle(&state, &topsoil_mass, &topsoil, &.{2}));
     try std.testing.expectEqual(@as(f64, 2), state.pools[0]);
-    var invalid = [_]f64{0} ** 14;
+    var invalid = @as([14]f64, @splat(@as(f64, 0)));
     invalid[7] = std.math.nan(f64);
     try std.testing.expectError(error.InvalidSuspendedConstituentState, state.restore(&.{0}, &invalid));
     try std.testing.expectEqual(@as(f64, 1), state.sediment_megagrams[0]);
@@ -804,7 +805,7 @@ test "checkpoint restore round-trips persistent scalar and all attached pools" {
     try restored.restore(source.sediment_megagrams, source.pools);
     try std.testing.expectEqualSlices(f64, source.sediment_megagrams, restored.sediment_megagrams);
     try std.testing.expectEqualSlices(f64, source.pools, restored.pools);
-    const zero = [_]f64{0} ** 28;
+    const zero = @as([28]f64, @splat(@as(f64, 0)));
     try std.testing.expectEqualSlices(f64, &zero, restored.exported);
 }
 
@@ -813,7 +814,7 @@ test "borrowed scalar storage remains authoritative and is not freed by state" {
     defer std.testing.allocator.free(scalar);
     scalar[0] = 0;
     var state = try State.initBorrowingSediment(std.testing.allocator, scalar, test_layout);
-    var topsoil = [_]f64{1} ** 14;
+    var topsoil = @as([14]f64, @splat(@as(f64, 1)));
     var topsoil_mass = [_]f64{10};
     try exchangeLocal(&state, &topsoil_mass, &topsoil, &.{1}, &.{0});
     try std.testing.expectEqual(@as(f64, 1), scalar[0]);

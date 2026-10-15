@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     bundle_sheath_nonstructural_carbon_g_c: f64,
@@ -21,7 +22,7 @@ pub const Result = struct {
 /// one runtime node. The apparently cancellable leaf-carbon factors remain in
 /// source order to preserve initial translation rounding and traceability.
 pub fn exchange(inputs: Inputs) !Result {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteCanopyC4ExchangeInput;
     }

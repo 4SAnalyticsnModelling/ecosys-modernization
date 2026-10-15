@@ -1,6 +1,7 @@
 const std = @import("std");
 const gas = @import("transport.zig");
 
+
 pub const Boundary = struct {
     cell_index: usize,
     /// Species-independent aerodynamic boundary conductance (`PARG`).
@@ -151,8 +152,8 @@ test "species multipliers reproduce atmospheric boundary conductances" {
     state.temperature_k[0] = 300;
     // Set the molar inventory to ideal capacity so pressure flow is zero.
     state.gaseous_mass_g[0] = 1.2194e4 / @as(f64, 300) * 12;
-    const interior = [_]f64{0.1} ** gas.species_count;
-    var atmosphere = [_]f64{0} ** gas.species_count;
+    const interior = @as([gas.species_count]f64, @splat(@as(f64, 0.1)));
+    var atmosphere = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     atmosphere[0] = state.gaseous_mass_g[0] + 1;
     var flux: [gas.species_count]f64 = undefined;
     try calculateFluxesG(&state, .{ .cell_index = 0, .aerodynamic_conductance_m3_per_step = 0.1, .interior_conductance_m3_per_step = interior, .atmospheric_concentration_g_per_m3 = atmosphere }, 1, &flux);
@@ -186,8 +187,8 @@ test "boundary state_updates are atomic across runtime cells" {
     var state = try gas.State.init(std.testing.allocator, 2);
     defer state.deinit();
     state.gaseous_mass_g[0] = 2;
-    const boundaries = [_]Boundary{.{ .cell_index = 0, .aerodynamic_conductance_m3_per_step = 1, .interior_conductance_m3_per_step = [_]f64{1} ** gas.species_count, .atmospheric_concentration_g_per_m3 = [_]f64{0} ** gas.species_count }};
-    var flux = [_]f64{0} ** gas.species_count;
+    const boundaries = [_]Boundary{.{ .cell_index = 0, .aerodynamic_conductance_m3_per_step = 1, .interior_conductance_m3_per_step = @as([gas.species_count]f64, @splat(@as(f64, 1))), .atmospheric_concentration_g_per_m3 = @as([gas.species_count]f64, @splat(@as(f64, 0))) }};
+    var flux = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     flux[0] = -1;
     try state_updateFluxesG(std.testing.allocator, &state, &boundaries, &flux);
     try std.testing.expectEqual(@as(f64, 1), state.gaseous_mass_g[0]);
@@ -200,8 +201,8 @@ test "boundary state_update rejects a sub-tolerance overdraw without clipping" {
     var state = try gas.State.init(std.testing.allocator, 1);
     defer state.deinit();
     state.gaseous_mass_g[0] = 1;
-    const boundaries = [_]Boundary{.{ .cell_index = 0, .aerodynamic_conductance_m3_per_step = 1, .interior_conductance_m3_per_step = [_]f64{1} ** gas.species_count, .atmospheric_concentration_g_per_m3 = [_]f64{0} ** gas.species_count }};
-    var flux = [_]f64{0} ** gas.species_count;
+    const boundaries = [_]Boundary{.{ .cell_index = 0, .aerodynamic_conductance_m3_per_step = 1, .interior_conductance_m3_per_step = @as([gas.species_count]f64, @splat(@as(f64, 1))), .atmospheric_concentration_g_per_m3 = @as([gas.species_count]f64, @splat(@as(f64, 0))) }};
+    var flux = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     flux[0] = -(1.0 + 1.0e-15);
     try std.testing.expectError(error.NegativeGasBoundaryCandidate, state_updateFluxesG(std.testing.allocator, &state, &boundaries, &flux));
     try std.testing.expectEqual(@as(f64, 1), state.gaseous_mass_g[0]);

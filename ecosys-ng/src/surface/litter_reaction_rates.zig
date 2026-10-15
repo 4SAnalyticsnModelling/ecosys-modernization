@@ -11,6 +11,7 @@ const phosphate_exchange = @import("../soil/solute/phosphate_exchange.zig");
 const core_numerics = @import("../core/numerics.zig");
 const arith = @import("litter_chemistry_struct_arithmetic.zig");
 const chemistry_numerics = @import("litter_chemistry_numerics.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const DissociationConstants = struct {
     ammonium: f64,
@@ -511,7 +512,7 @@ fn activeExchangeTarget(cell: chemistry.Cell, density: f64, p: Parameters) !ledg
         .sodium_mol_per_megagram = target.sodium,
         .potassium_mol_per_megagram = target.potassium,
     };
-    inline for (@typeInfo(ledger.ExchangeAdsorption).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(ledger.ExchangeAdsorption)) |field|
         if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0)
             return error.InvalidLitterExchangeTarget;
     return result;
@@ -995,9 +996,9 @@ fn finiteIntermediate(value: f64) !f64 {
 fn validate(cell: chemistry.Cell, context: Context) !void {
     _ = cell;
     if (!std.math.isFinite(context.litter_mass_per_water_volume_megagrams_per_m3) or context.litter_mass_per_water_volume_megagrams_per_m3 <= 0) return error.InvalidLitterMassWaterRatio;
-    inline for (@typeInfo(DissociationConstants).@"struct".fields) |field| if (!std.math.isFinite(@field(context.parameters.dissociation, field.name)) or @field(context.parameters.dissociation, field.name) <= 0) return error.InvalidLitterDissociationConstant;
-    inline for (@typeInfo(MineralProducts).@"struct".fields) |field| if (!std.math.isFinite(@field(context.parameters.minerals, field.name)) or @field(context.parameters.minerals, field.name) <= 0) return error.InvalidLitterMineralProduct;
-    inline for (@typeInfo(Kinetics).@"struct".fields) |field| if (!std.math.isFinite(@field(context.parameters.kinetics, field.name)) or @field(context.parameters.kinetics, field.name) < 0) return error.InvalidLitterKinetics;
+    inline for (ti_compat.fieldViews(DissociationConstants)) |field| if (!std.math.isFinite(@field(context.parameters.dissociation, field.name)) or @field(context.parameters.dissociation, field.name) <= 0) return error.InvalidLitterDissociationConstant;
+    inline for (ti_compat.fieldViews(MineralProducts)) |field| if (!std.math.isFinite(@field(context.parameters.minerals, field.name)) or @field(context.parameters.minerals, field.name) <= 0) return error.InvalidLitterMineralProduct;
+    inline for (ti_compat.fieldViews(Kinetics)) |field| if (!std.math.isFinite(@field(context.parameters.kinetics, field.name)) or @field(context.parameters.kinetics, field.name) < 0) return error.InvalidLitterKinetics;
     if (context.parameters.kinetics.ammonium_substrate_limit_fraction > 1 or context.parameters.kinetics.general_substrate_limit_fraction > 1 or context.parameters.kinetics.calcite_hydroxide_inhibition_constant_mol_per_m3 <= 0 or context.parameters.cation_exchange_capacity_mol_charge_per_megagram < 0) return error.InvalidLitterKinetics;
 }
 
@@ -1008,7 +1009,7 @@ fn zeroExtents() ledger.ReactionExtents {
 }
 
 fn zeroStruct(comptime T: type, value: *T) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => @field(value.*, field.name) = 0,
         .@"struct" => zeroStruct(field.type, &@field(value.*, field.name)),
         else => unreachable,

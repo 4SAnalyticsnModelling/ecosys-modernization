@@ -14,6 +14,7 @@ const symbiosis = @import("../canopy/symbiosis/plant_symbiotic_fixation.zig");
 /// boundary credit for snowfall and the census's stored snow enthalpy share
 /// one definition rather than two agreeing expressions.
 const inventory = @import("landscape_mass_inventory.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Direction-separated whole-landscape boundary fluxes for one accepted
 /// model interval. Every value is nonnegative; the EXEC sign convention is
@@ -134,7 +135,7 @@ pub const PrecipitationHeatParameters = struct {
     pure_water_melting_temperature_k: f64,
 
     fn validate(self: PrecipitationHeatParameters) !void {
-        inline for (std.meta.fields(PrecipitationHeatParameters)) |field| {
+        inline for (ti_compat.fieldViews(PrecipitationHeatParameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value <= 0)
                 return error.InvalidPrecipitationHeatParameter;
@@ -158,7 +159,7 @@ pub const State = struct {
     pub fn accumulateAccepted(self: *State, fluxes: Fluxes) !void {
         try validate(fluxes);
         var next = self.cumulative;
-        inline for (std.meta.fields(Fluxes)) |field| {
+        inline for (ti_compat.fieldViews(Fluxes)) |field| {
             const value = @field(next, field.name) + @field(fluxes, field.name);
             if (!std.math.isFinite(value))
                 return error.LandscapeBoundaryLedgerOverflow;
@@ -234,7 +235,7 @@ pub const State = struct {
         var fluxes: Fluxes = .{};
         var capacity_internal: InternalProcesses = .{};
         for (activities) |activity| {
-            inline for (std.meta.fields(inventory.ElementMoles)) |element| {
+            inline for (ti_compat.fieldViews(inventory.ElementMoles)) |element| {
                 inline for (.{ "input", "output" }) |direction| {
                     const field_name = element.name ++ "_" ++ direction ++ "_mol";
                     const amount = @field(activity, field_name);
@@ -523,12 +524,12 @@ pub const State = struct {
             try splitSignedAtmosphereFlux(
                 &oxygen_input_g,
                 &oxygen_output_g,
-                boundary_net_flux_g[first + @intFromEnum(gas.Species.oxygen)],
+                boundary_net_flux_g[first + @backingInt(gas.Species.oxygen)],
             );
             try splitSignedAtmosphereFlux(
                 &hydrogen_input_g,
                 &hydrogen_output_g,
-                boundary_net_flux_g[first + @intFromEnum(gas.Species.hydrogen)],
+                boundary_net_flux_g[first + @backingInt(gas.Species.hydrogen)],
             );
         }
         try self.accumulateAccepted(.{
@@ -1217,7 +1218,7 @@ pub const State = struct {
             inputs.cell_count * snow.species_count or
             inputs.daily_salt_input_mol.len != inputs.cell_count * snow.salt_species_count)
             return error.AtmosphericSoluteInputDimensionMismatch;
-        inline for (std.meta.fields(snow_discharge.IonMolarMassesGPerMol)) |field| {
+        inline for (ti_compat.fieldViews(snow_discharge.IonMolarMassesGPerMol)) |field| {
             const value = @field(ion_molar_mass_g_per_mol, field.name);
             if (!std.math.isFinite(value) or value <= 0)
                 return error.InvalidIonMolarMass;
@@ -1237,33 +1238,33 @@ pub const State = struct {
                     return error.InvalidAtmosphericSoluteInput;
             carbon_input_g_c = try addFinite(
                 carbon_input_g_c,
-                amounts[@intFromEnum(snow.Species.carbon_dioxide_carbon)] +
-                    amounts[@intFromEnum(snow.Species.methane_carbon)],
+                amounts[@backingInt(snow.Species.carbon_dioxide_carbon)] +
+                    amounts[@backingInt(snow.Species.methane_carbon)],
             );
             oxygen_input_g = try addFinite(
                 oxygen_input_g,
-                amounts[@intFromEnum(snow.Species.oxygen)],
+                amounts[@backingInt(snow.Species.oxygen)],
             );
             gaseous_nitrogen_input_g_n = try addFinite(
                 gaseous_nitrogen_input_g_n,
-                amounts[@intFromEnum(snow.Species.dinitrogen_nitrogen)] +
+                amounts[@backingInt(snow.Species.dinitrogen_nitrogen)] +
                     amounts[
-                        @intFromEnum(
+                        @backingInt(
                             snow.Species.nitrous_oxide_nitrogen,
                         )
                     ],
             );
             aqueous_nitrogen_input_g_n = try addFinite(
                 aqueous_nitrogen_input_g_n,
-                amounts[@intFromEnum(snow.Species.ammonium_nitrogen)] +
-                    amounts[@intFromEnum(snow.Species.ammonia_nitrogen)] +
-                    amounts[@intFromEnum(snow.Species.nitrate_nitrogen)],
+                amounts[@backingInt(snow.Species.ammonium_nitrogen)] +
+                    amounts[@backingInt(snow.Species.ammonia_nitrogen)] +
+                    amounts[@backingInt(snow.Species.nitrate_nitrogen)],
             );
             const hpo4_g_p = amounts[
-                @intFromEnum(snow.Species.hydrogen_phosphate_phosphorus)
+                @backingInt(snow.Species.hydrogen_phosphate_phosphorus)
             ];
             const h2po4_g_p = amounts[
-                @intFromEnum(snow.Species.dihydrogen_phosphate_phosphorus)
+                @backingInt(snow.Species.dihydrogen_phosphate_phosphorus)
             ];
             phosphorus_input_g_p = try addFinite(
                 phosphorus_input_g_p,
@@ -1273,28 +1274,28 @@ pub const State = struct {
                 ion_input_mol,
                 2 * hpo4_g_p / snow.phosphorus_g_per_mol +
                     3 * h2po4_g_p / snow.phosphorus_g_per_mol +
-                    amounts[@intFromEnum(snow.Species.aluminum)] /
+                    amounts[@backingInt(snow.Species.aluminum)] /
                         ion_molar_mass_g_per_mol.aluminum +
-                    amounts[@intFromEnum(snow.Species.iron)] /
+                    amounts[@backingInt(snow.Species.iron)] /
                         ion_molar_mass_g_per_mol.iron +
-                    amounts[@intFromEnum(snow.Species.calcium)] /
+                    amounts[@backingInt(snow.Species.calcium)] /
                         ion_molar_mass_g_per_mol.calcium +
-                    amounts[@intFromEnum(snow.Species.magnesium)] /
+                    amounts[@backingInt(snow.Species.magnesium)] /
                         ion_molar_mass_g_per_mol.magnesium +
-                    amounts[@intFromEnum(snow.Species.sodium)] /
+                    amounts[@backingInt(snow.Species.sodium)] /
                         ion_molar_mass_g_per_mol.sodium +
-                    amounts[@intFromEnum(snow.Species.potassium)] /
+                    amounts[@backingInt(snow.Species.potassium)] /
                         ion_molar_mass_g_per_mol.potassium +
-                    amounts[@intFromEnum(snow.Species.sulfate_sulfur)] /
+                    amounts[@backingInt(snow.Species.sulfate_sulfur)] /
                         ion_molar_mass_g_per_mol.sulfur +
-                    amounts[@intFromEnum(snow.Species.chloride)] /
+                    amounts[@backingInt(snow.Species.chloride)] /
                         ion_molar_mass_g_per_mol.chloride,
             );
             const salt_first = cell * snow.salt_species_count;
             for (inputs.daily_salt_input_mol[salt_first .. salt_first + snow.salt_species_count], 0..) |amount_mol, snow_species_index| {
                 if (!std.math.isFinite(amount_mol) or amount_mol < 0)
                     return error.InvalidAtmosphericSoluteInput;
-                const aqueous_species = snow.aqueousSpeciesForSalt(@enumFromInt(snow_species_index));
+                const aqueous_species = snow.aqueousSpeciesForSalt(@fromBackingInt(@intCast(snow_species_index)));
                 const formula = surface_aqueous.formula(aqueous_species);
                 carbon_input_g_c = try addFinite(carbon_input_g_c, amount_mol * formula.carbon_mol * 12);
                 phosphorus_input_g_p = try addFinite(phosphorus_input_g_p, amount_mol * formula.phosphorus_mol * snow.phosphorus_g_per_mol);
@@ -1319,7 +1320,7 @@ pub const State = struct {
         self: *State,
         redist: soil_daily_gas.RedistSurfaceGasIncrements,
     ) !void {
-        inline for (std.meta.fields(soil_daily_gas.RedistSurfaceGasIncrements)) |field| {
+        inline for (ti_compat.fieldViews(soil_daily_gas.RedistSurfaceGasIncrements)) |field| {
             if (!std.math.isFinite(@field(redist, field.name)))
                 return error.NonFiniteLandscapeBoundaryFlux;
         }
@@ -1470,7 +1471,7 @@ pub const State = struct {
         totals.cumulative_phosphorus_sink_g = f.phosphorus_sink_g_p;
         totals.cumulative_ion_input_mol = f.ion_input_mol;
         totals.cumulative_ion_output_mol = f.ion_output_mol;
-        inline for (std.meta.fields(inventory.ElementMoles)) |element| {
+        inline for (ti_compat.fieldViews(inventory.ElementMoles)) |element| {
             inline for (.{ "input", "output" }) |direction| {
                 @field(totals, "cumulative_" ++ element.name ++ "_" ++ direction ++ "_mol") =
                     @field(f, element.name ++ "_" ++ direction ++ "_mol");
@@ -1502,7 +1503,7 @@ pub const State = struct {
 };
 
 fn validateInternal(processes: InternalProcesses) !void {
-    inline for (std.meta.fields(InternalProcesses)) |field| {
+    inline for (ti_compat.fieldViews(InternalProcesses)) |field| {
         const value = @field(processes, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteLandscapeInternalProcess;
         if (value < 0) return error.NegativeLandscapeInternalProcess;
@@ -1510,7 +1511,7 @@ fn validateInternal(processes: InternalProcesses) !void {
 }
 
 fn validate(fluxes: Fluxes) !void {
-    inline for (std.meta.fields(Fluxes)) |field| {
+    inline for (ti_compat.fieldViews(Fluxes)) |field| {
         const value = @field(fluxes, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteLandscapeBoundaryFlux;

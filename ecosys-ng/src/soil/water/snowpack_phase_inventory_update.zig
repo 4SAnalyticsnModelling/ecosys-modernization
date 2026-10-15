@@ -53,6 +53,7 @@
 // snowpack phase inventory group of docs/traceability/a1b_snowpack_minimum_heat_capacity_unbound.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Snow-layer phase storage. Solid and vapor are water-equivalent volumes.
 pub const PhaseStorage = struct {
@@ -169,7 +170,7 @@ fn validateStorageSlice(
     domain: StorageDomain,
 ) !void {
     for (values) |value| {
-        inline for (@typeInfo(PhaseStorage).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(PhaseStorage)) |field| {
             const scalar = @field(value, field.name);
             if (!std.math.isFinite(scalar))
                 return error.NonFiniteSnowpackPhaseState;
@@ -180,7 +181,7 @@ fn validateStorageSlice(
 }
 
 fn validateTotals(totals: ColumnTotals) !void {
-    inline for (@typeInfo(ColumnTotals).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ColumnTotals)) |field| {
         const value = @field(totals, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteSnowpackPhaseState;
@@ -219,7 +220,7 @@ fn applyIncrement(
     transport: PhaseStorage,
     phase: PhaseStorage,
 ) !void {
-    inline for (@typeInfo(PhaseStorage).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(PhaseStorage)) |field| {
         const after_transport = @field(candidate.*, field.name) +
             @field(transport, field.name);
         if (!std.math.isFinite(after_transport))
@@ -245,7 +246,7 @@ fn overlap(left: []const PhaseStorage, right: []const PhaseStorage) bool {
 }
 
 fn expectStorage(actual: PhaseStorage, expected: PhaseStorage) !void {
-    inline for (@typeInfo(PhaseStorage).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(PhaseStorage)) |field|
         try std.testing.expectEqual(
             @field(expected, field.name),
             @field(actual, field.name),
@@ -254,7 +255,7 @@ fn expectStorage(actual: PhaseStorage, expected: PhaseStorage) !void {
 
 fn filledStorage(value: f64) PhaseStorage {
     var result: PhaseStorage = undefined;
-    inline for (@typeInfo(PhaseStorage).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(PhaseStorage)) |field|
         @field(result, field.name) = value;
     return result;
 }
@@ -324,13 +325,13 @@ test "transport and conservative enhanced phase deltas update runtime layers" {
 
 fn filledTotals(value: f64) ColumnTotals {
     var result: ColumnTotals = undefined;
-    inline for (@typeInfo(ColumnTotals).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(ColumnTotals)) |field|
         @field(result, field.name) = value;
     return result;
 }
 
 fn expectTotals(actual: ColumnTotals, expected: f64) !void {
-    inline for (@typeInfo(ColumnTotals).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(ColumnTotals)) |field|
         try std.testing.expectEqual(expected, @field(actual, field.name));
 }
 

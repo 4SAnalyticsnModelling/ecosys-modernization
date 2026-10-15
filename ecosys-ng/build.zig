@@ -26,7 +26,8 @@ pub fn build(b: *std.Build) void {
 
     const run_cmd = b.addRunArtifact(executable);
     run_cmd.step.dependOn(b.getInstallStep());
-    if (b.args) |args| run_cmd.addArgs(args);
+    // Zig 0.17: `--` passthrough args are applied to the Run step by the build
+    // runner itself; `std.Build.args` no longer exists, so no explicit b.args line.
     b.step("run", "Run ecosys-ng").dependOn(&run_cmd.step);
 
     const test_step = b.step("test", "Run unit tests");

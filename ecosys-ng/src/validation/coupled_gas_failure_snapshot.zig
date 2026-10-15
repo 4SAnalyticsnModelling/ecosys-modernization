@@ -1,6 +1,8 @@
 const std = @import("std");
 const atmosphere = @import("../soil/gas/atmosphere_exchange.zig");
 const gas = @import("../soil/gas/transport.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 const magic = "ECOSGAS!";
 /// Version written by `write`. Version 2 adds the REDIST `LL=MIN(L,LG)` bubble
@@ -576,7 +578,7 @@ fn validateView(
         try validateBoundary(boundary, cells);
     for (inputs.subsurface_boundaries) |boundary|
         try validateBoundary(boundary, cells);
-    inline for (std.meta.fields(gas.State)) |field| if (field.type == []f64)
+    inline for (ti_compat.fieldViews(gas.State)) |field| if (field.type == []f64)
         try validateFiniteNonnegative(@field(state, field.name));
     for (state.temperature_k) |temperature_k|
         if (temperature_k <= 0) return error.InvalidCoupledGasSnapshotValue;
@@ -700,8 +702,8 @@ fn makeReplayCase(allocator: std.mem.Allocator) !ReplayCase {
     const boundaries = try allocator.dupe(atmosphere.Boundary, &.{.{
         .cell_index = 0,
         .aerodynamic_conductance_m3_per_step = 0.1,
-        .interior_conductance_m3_per_step = [_]f64{0.2} ** gas.species_count,
-        .atmospheric_concentration_g_per_m3 = [_]f64{0.001} ** gas.species_count,
+        .interior_conductance_m3_per_step = @as([gas.species_count]f64, @splat(@as(f64, 0.2))),
+        .atmospheric_concentration_g_per_m3 = @as([gas.species_count]f64, @splat(@as(f64, 0.001))),
     }});
     errdefer allocator.free(boundaries);
     const subsurface = try allocator.alloc(atmosphere.Boundary, 0);
@@ -1070,7 +1072,7 @@ test "version 1 snapshot decodes but is flagged as missing its bubble receiver m
     );
     try std.testing.expectEqualSlices(
         f64,
-        &([_]f64{1e-12} ** gas.species_count),
+        &(@as([gas.species_count]f64, @splat(@as(f64, 1e-12)))),
         &restored.options.absolute_tolerance_g_by_species,
     );
     try std.testing.expect(!restored.options.accept_physically_conserved_ceiling);

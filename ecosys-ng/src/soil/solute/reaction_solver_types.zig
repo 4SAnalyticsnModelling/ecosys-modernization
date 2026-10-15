@@ -16,6 +16,7 @@ const geochemistry_rates = @import("geochemistry_reaction_rates.zig");
 const water_equilibrium = @import("water_equilibrium.zig");
 const reaction_span = @import("reaction_search_span.zig");
 const group_solve = @import("reaction_solver_solve.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Options = struct {
     // These scales guide the numerical search. Physical endpoint acceptance
@@ -130,7 +131,7 @@ pub const CoupledExtentReaction = enum {
 };
 
 pub const coupled_extent_reaction_count =
-    @typeInfo(CoupledExtentReaction).@"enum".fields.len;
+    @typeInfo(CoupledExtentReaction).@"enum".field_names.len;
 
 pub const Workspace = struct {
     allocator: std.mem.Allocator,
@@ -489,7 +490,7 @@ test "reaction solver workspace preserves every buffer extent and resets counter
     try std.testing.expectEqual(@as(usize, 0), workspace.reaction_span_active_count);
     try std.testing.expectEqual(@as(usize, 0), workspace.reaction_span_last_rank);
     try std.testing.expectEqual(@as(usize, 1), workspace.scratch.cell_count);
-    inline for (@typeInfo(chemistry.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(chemistry.State)) |field| {
         if (@typeInfo(field.type) == .pointer) {
             try std.testing.expectEqual(@as(usize, 1), @field(workspace.scratch, field.name).len);
         }

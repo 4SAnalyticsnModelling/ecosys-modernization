@@ -16,6 +16,7 @@
 // soil osmotic potential group of docs/discrepancy_register.md SOIL-PSISO-001
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     matric_potential_megapascal: f64,
@@ -43,7 +44,7 @@ pub const CalculationError = error{
 /// Translates `hour1.f` lines 4181--4184 while making the elevation reference
 /// explicit. Matric potential is supplied by the Mualem-van Genuchten solver.
 pub fn calculate(inputs: Inputs) CalculationError!Result {
-    inline for (std.meta.fields(Inputs)) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteInput;
     }
     if (inputs.matric_potential_megapascal > 0.0) return error.InvalidMatricPotential;
@@ -67,7 +68,7 @@ pub fn calculate(inputs: Inputs) CalculationError!Result {
         .gravitational_potential_megapascal = gravitational_potential_megapascal,
         .total_potential_megapascal = total_potential_megapascal,
     };
-    inline for (std.meta.fields(Result)) |field| {
+    inline for (ti_compat.fieldViews(Result)) |field| {
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteResult;
     }
     return result;

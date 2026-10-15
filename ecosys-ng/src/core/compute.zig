@@ -1,6 +1,7 @@
 const std = @import("std");
 const builtin = @import("builtin");
 
+
 pub const CellRange = struct {
     first: usize,
     end: usize,
@@ -1123,7 +1124,7 @@ test "executor retains balanced layer participants while one-cell spatial work s
             for (range.first..range.end) |layer| self.worker_by_layer[layer] = worker_index;
         }
     };
-    var worker_by_layer = [_]usize{std.math.maxInt(usize)} ** 10;
+    var worker_by_layer = @as([10]usize, @splat(@as(usize, std.math.maxInt(usize))));
     var layer_context = LayerContext{ .worker_by_layer = &worker_by_layer };
     try executor.runIndependentRangeIndexed(
         .{ .first = 0, .end = worker_by_layer.len },
@@ -1159,7 +1160,7 @@ test "executor retains balanced layer participants while one-cell spatial work s
 test "executor participant ceiling includes hardware concurrency" {
     var identity: u8 = 0;
     const offsets = [_]usize{ 0, 17 };
-    const owned = [_]usize{0} ** 17;
+    const owned = @as([17]usize, @splat(@as(usize, 0)));
     const executor = try CpuExecutor.initWithHardwareThreadCount(
         std.testing.allocator,
         99,
@@ -1223,7 +1224,7 @@ test "owned-cell capability dispatches only its tile and rejects other plans" {
         4,
     );
     defer executor.deinit();
-    var visits = [_]u8{0} ** 6;
+    var visits = @as([6]u8, @splat(@as(u8, 0)));
     var context = Context{ .visits = &visits };
     try executor.runOwnedCells(.{
         .plan_identity = @ptrCast(&identity),
@@ -1296,8 +1297,8 @@ test "owned indexed dispatch gives exact disjoint canonical slices and stable wo
         @as(usize, 4),
         executor.statistics().effective_threads,
     );
-    var visits = [_]u8{0} ** owned.len;
-    var worker_by_position = [_]usize{std.math.maxInt(usize)} ** owned.len;
+    var visits = @as([owned.len]u8, @splat(@as(u8, 0)));
+    var worker_by_position = @as([owned.len]usize, @splat(@as(usize, std.math.maxInt(usize))));
     var context = Context{
         .canonical = &owned,
         .visits = &visits,
@@ -1559,7 +1560,7 @@ fn markCallerPartition(
 }
 
 test "thread limit counts caller and caller owns final partition" {
-    var caller_by_cell = [_]bool{false} ** 8;
+    var caller_by_cell = @as([8]bool, @splat(@as(bool, false)));
     var context = CallerParticipationContext{
         .caller_id = std.Thread.getCurrentId(),
         .caller_by_cell = &caller_by_cell,
@@ -1807,8 +1808,8 @@ test "owned multi-tile layer dispatch keeps tiles serial and columns whole" {
     );
     defer executor.deinit();
 
-    var visits = [_]u8{0} ** (cell_count * layers_per_cell);
-    var visited_cells = [_]u8{0} ** cell_count;
+    var visits = @as([(cell_count * layers_per_cell)]u8, @splat(@as(u8, 0)));
+    var visited_cells = @as([cell_count]u8, @splat(@as(u8, 0)));
     var context = IndexedLayerContext{
         .visits_by_layer = &visits,
         .visited_cells = &visited_cells,

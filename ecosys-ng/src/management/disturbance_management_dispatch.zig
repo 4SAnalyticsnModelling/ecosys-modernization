@@ -23,6 +23,8 @@ const PlantAssignment = @import("../state/plant_assignment.zig");
 const TillageRuntime = @import("../redistribution/tillage/runtime_adapter.zig");
 const SurfaceLitterRemoval = @import("../surface/litter_removal.zig");
 const SurfaceLitterGeometry = @import("../surface/litter_geometry_step.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 /// WTHR 50, 548--561 temperature thresholds for ICHKF. The source uses the
 /// warmer threshold for TKS(0..NU) and TKQ, and the lower threshold for soil
@@ -339,8 +341,8 @@ const ScaledRollbackField = struct {
 
 fn mutableSliceFieldCount(comptime State: type) usize {
     var result: usize = 0;
-    for (@typeInfo(State).@"struct".fields) |field| switch (@typeInfo(field.type)) {
-        .pointer => |pointer| if (pointer.size == .slice and !pointer.is_const) {
+    inline for (ti_compat.fieldViews(State)) |field| switch (@typeInfo(field.type)) {
+        .pointer => |pointer| if (pointer.size == .slice and !pointer.attrs.@"const") {
             result += 1;
         },
         else => {},
@@ -354,8 +356,8 @@ fn mutableSliceFieldCount(comptime State: type) usize {
 noinline fn scaledRollbackFields(state: anytype) [mutableSliceFieldCount(@TypeOf(state.*))]ScaledRollbackField {
     var result: [mutableSliceFieldCount(@TypeOf(state.*))]ScaledRollbackField = undefined;
     comptime var index: usize = 0;
-    inline for (@typeInfo(@TypeOf(state.*)).@"struct".fields) |field| switch (@typeInfo(field.type)) {
-        .pointer => |pointer| if (pointer.size == .slice and !pointer.is_const) {
+    inline for (ti_compat.fieldViews(@TypeOf(state.*))) |field| switch (@typeInfo(field.type)) {
+        .pointer => |pointer| if (pointer.size == .slice and !pointer.attrs.@"const") {
             const values = @field(state.*, field.name);
             result[index] = .{
                 .bytes = std.mem.sliceAsBytes(values),
@@ -396,7 +398,7 @@ const EventRollback = struct {
 
     fn capture(self: *EventRollback, values: anytype, first: usize, end: usize) !void {
         const info = @typeInfo(@TypeOf(values)).pointer;
-        comptime std.debug.assert(info.size == .slice and !info.is_const);
+        comptime std.debug.assert(info.size == .slice and !info.attrs.@"const");
         if (first > end or end > values.len) return error.TillageRollbackRangeOutOfBounds;
         const destination = std.mem.sliceAsBytes(values[first..end]);
         const before = try self.allocator.dupe(u8, destination);
@@ -529,7 +531,7 @@ const CanopyRollbackDomain = enum { plant, branch, node, sample };
 
 const canopy_rollback_float_field_count = count: {
     var result: usize = 0;
-    for (@typeInfo(Canopy.State).@"struct".fields) |field| if (field.type == []f64) {
+    for (ti_compat.fieldViews(Canopy.State)) |field| if (field.type == []f64) {
         result += 1;
     };
     break :count result;
@@ -541,7 +543,7 @@ const canopy_rollback_domains: [canopy_rollback_float_field_count]CanopyRollback
     @setEvalBranchQuota(10_000);
     var result: [canopy_rollback_float_field_count]CanopyRollbackDomain = undefined;
     var index: usize = 0;
-    for (@typeInfo(Canopy.State).@"struct".fields) |field| if (field.type == []f64) {
+    for (ti_compat.fieldViews(Canopy.State)) |field| if (field.type == []f64) {
         result[index] = canopyRollbackDomain(field.name);
         index += 1;
     };
@@ -562,7 +564,7 @@ fn canopyRollbackDomain(comptime field_name: []const u8) CanopyRollbackDomain {
 noinline fn canopyRollbackFloatFieldPointers(state: *Canopy.State) CanopyRollbackFloatFieldPointers {
     var result: CanopyRollbackFloatFieldPointers = undefined;
     comptime var index: usize = 0;
-    inline for (@typeInfo(Canopy.State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(Canopy.State)) |field| if (field.type == []f64) {
         result[index] = &@field(state, field.name);
         index += 1;
     };
@@ -690,8 +692,8 @@ test "canopy rollback captures every field in declaration order and preserves ne
 
 fn captureCanopyLayers(rollback: *EventRollback, state: anytype, cell: DomainRange, plant: DomainRange, branch: DomainRange, node: DomainRange) !void {
     @setEvalBranchQuota(10_000);
-    inline for (@typeInfo(@TypeOf(state.*)).@"struct".fields) |field| switch (@typeInfo(field.type)) {
-        .pointer => |pointer| if (pointer.size == .slice and !pointer.is_const and (pointer.child == f64 or pointer.child == ?usize)) {
+    inline for (ti_compat.fieldViews(@TypeOf(state.*))) |field| switch (@typeInfo(field.type)) {
+        .pointer => |pointer| if (pointer.size == .slice and !pointer.attrs.@"const" and (pointer.child == f64 or pointer.child == ?usize)) {
             const maybe_range: ?DomainRange = if (comptime std.mem.startsWith(u8, field.name, "cell_"))
                 cell
             else if (comptime std.mem.startsWith(u8, field.name, "plant_") or std.mem.endsWith(u8, field.name, "_by_plant"))
@@ -1619,7 +1621,7 @@ test "GROSUB fire combustion conserves runtime species nodule C N P" {
     grid.soil_temperature_k[0] = 500;
     var roots = try RootSystem.State.init(std.testing.allocator, 7, 1, 1);
     defer roots.deinit();
-    var canopy = try Canopy.State.init(std.testing.allocator, 1, 7, &([_]usize{1} ** 7), &([_]usize{1} ** 7), &([_]usize{1} ** 7));
+    var canopy = try Canopy.State.init(std.testing.allocator, 1, 7, &(@as([7]usize, @splat(@as(usize, 1)))), &(@as([7]usize, @splat(@as(usize, 1)))), &(@as([7]usize, @splat(@as(usize, 1)))));
     defer canopy.deinit();
     var initial_c: f64 = 0;
     var initial_n: f64 = 0;
@@ -1671,7 +1673,7 @@ test "GROSUB fire combustion conserves runtime species nodule C N P" {
     }
     var fire_exchange = try OrganicMatterFireExchange.State.init(std.testing.allocator, grid.layer_count, SoilOrganic.microbial_substrate_count);
     defer fire_exchange.deinit();
-    var biological_domain_counts = [_]u8{2} ** 7;
+    var biological_domain_counts = @as([7]u8, @splat(@as(u8, 2)));
     biological_domain_counts[0] = 1;
     try applyRootFireCombustion(&roots, &canopy, &grid, 7, &biological_domain_counts, &.{0.01}, &.{true}, 1, &.{true}, RootDisturbance.sourceCombustionParameters(), &fire_exchange);
     var remaining_c: f64 = 0;

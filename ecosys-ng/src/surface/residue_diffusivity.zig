@@ -43,6 +43,7 @@
 //! split owners would duplicate its gaseous writes.
 
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const ReferenceDiffusivities = struct {
     carbon_dioxide_gas_m2_h: f64,
@@ -89,7 +90,7 @@ pub fn calculate(
 ) CalculationError!Result {
     if (!std.math.isFinite(residue_temperature_k)) return error.NonFiniteInput;
     if (residue_temperature_k <= 0.0) return error.NonPositiveTemperature;
-    inline for (std.meta.fields(ReferenceDiffusivities)) |field| {
+    inline for (ti_compat.fieldViews(ReferenceDiffusivities)) |field| {
         const value = @field(reference, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteInput;
         if (value < 0.0) return error.NegativeReferenceDiffusivity;
@@ -143,7 +144,7 @@ pub fn calculate(
     {
         return error.NonFiniteResult;
     }
-    inline for (std.meta.fields(AdjustedDiffusivities)) |field| {
+    inline for (ti_compat.fieldViews(AdjustedDiffusivities)) |field| {
         if (!std.math.isFinite(@field(diffusivities, field.name))) {
             return error.NonFiniteResult;
         }

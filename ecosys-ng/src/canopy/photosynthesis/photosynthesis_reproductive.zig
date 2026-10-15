@@ -21,6 +21,7 @@ const residual_stalk_senescence_state_update = @import("../../plant/growth/resid
 const group_node_layer = @import("photosynthesis_node_layer.zig");
 const group_organ_growth = @import("photosynthesis_organ_growth.zig");
 const group_state = @import("photosynthesis_state.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const PersistentReseedInventories = struct {
     seed_storage: group_state.ElementalMass,
@@ -61,10 +62,10 @@ pub fn capturePersistentReseedInventories(state: *const group_state.State, plant
     @memcpy(&result.standing_dead_carbon_by_kinetic_g, state.plant_standing_dead_carbon_by_kinetic_g[first..][0..4]);
     @memcpy(&result.standing_dead_nitrogen_by_kinetic_g, state.plant_standing_dead_nitrogen_by_kinetic_g[first..][0..4]);
     @memcpy(&result.standing_dead_phosphorus_by_kinetic_g, state.plant_standing_dead_phosphorus_by_kinetic_g[first..][0..4]);
-    inline for (@typeInfo(PersistentReseedInventories).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(PersistentReseedInventories)) |field| switch (field.type) {
         f64 => if (!std.math.isFinite(@field(result, field.name))) return error.NonFinitePersistentReseedInventory,
         [4]f64 => for (@field(result, field.name)) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidPersistentReseedInventory,
-        group_state.ElementalMass => inline for (@typeInfo(group_state.ElementalMass).@"struct".fields) |mass_field| if (!std.math.isFinite(@field(@field(result, field.name), mass_field.name)) or @field(@field(result, field.name), mass_field.name) < 0) return error.InvalidPersistentReseedInventory,
+        group_state.ElementalMass => inline for (ti_compat.fieldViews(group_state.ElementalMass)) |mass_field| if (!std.math.isFinite(@field(@field(result, field.name), mass_field.name)) or @field(@field(result, field.name), mass_field.name) < 0) return error.InvalidPersistentReseedInventory,
         else => unreachable,
     };
     return result;
@@ -136,7 +137,7 @@ pub const SeedSetParameters = struct {
     phosphorus_half_saturation_g_per_g: f64,
 
     pub fn validate(self: SeedSetParameters) !void {
-        inline for (@typeInfo(SeedSetParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SeedSetParameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value <= 0) return error.InvalidSeedSetParameter;
         }
@@ -156,7 +157,7 @@ pub const SeedSetResult = struct {
 
 /// GROSUB SET/FGRNX/GRNOB/GRWTB update following anthesis.
 pub fn updateSeedNumberAndSize(input: SeedSetInputs) !SeedSetResult {
-    inline for (@typeInfo(SeedSetInputs).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(input, field.name))) return error.NonFiniteSeedSetInput;
+    inline for (ti_compat.fieldViews(SeedSetInputs)) |field| if (field.type == f64 and !std.math.isFinite(@field(input, field.name))) return error.NonFiniteSeedSetInput;
     inline for (.{ input.mobile_carbon_concentration_g_per_g, input.mobile_nitrogen_concentration_g_per_g, input.mobile_phosphorus_concentration_g_per_g, input.carbon_half_saturation_g_per_g, input.nitrogen_half_saturation_g_per_g, input.phosphorus_half_saturation_g_per_g, input.seed_loss_fraction_per_c_h, input.timestep_h, input.water_growth_fraction, input.reproductive_stage_increment, input.maximum_seeds_per_site, input.potential_site_count, input.current_seed_count, input.maximum_individual_seed_carbon_g, input.current_individual_seed_carbon_g }) |value| if (value < 0) return error.InvalidSeedSetInput;
     if (input.timestep_h <= 0 or input.water_growth_fraction > 1) return error.InvalidSeedSetInput;
     if (!input.anthesis_started or input.maximum_seed_size_set) return .{

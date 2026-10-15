@@ -9,6 +9,7 @@ const surface_routing = @import("../solute/surface_solute_routing.zig");
 const transport_species = @import("../solute/transport_species.zig");
 const charge_classification = @import("../solute/charge_classification.zig");
 const fertilizer_band_state = @import("../../management/fertilizer_band_state.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     discharge: []const snow.SurfaceDischarge,
@@ -152,7 +153,7 @@ pub fn state_update(allocator: std.mem.Allocator, inputs: Inputs, litter_gas: *g
             else
                 0;
             const carrier_fractions = speciesCarrierFractions(
-                @enumFromInt(species),
+                @fromBackingInt(@intCast(species)),
                 fractions,
             );
             const non_band_carrier_m3 = soil_water * carrier_fractions.non_band;
@@ -161,14 +162,14 @@ pub fn state_update(allocator: std.mem.Allocator, inputs: Inputs, litter_gas: *g
                 return error.SnowDischargeRequiresWater;
             const non_band_mol_per_m3 = if (non_band_carrier_m3 > 0) non_band_g / molar_mass / non_band_carrier_m3 else 0;
             const band_mol_per_m3 = if (band_carrier_m3 > 0) band_g / molar_mass / band_carrier_m3 else 0;
-            switch (@as(snow.Species, @enumFromInt(species))) {
+            switch (@as(snow.Species, @fromBackingInt(@intCast(species)))) {
                 .ammonium_nitrogen => {
                     staged_litter[cell].ammonium_mol_per_m3 += litter_mol_per_m3;
                     staged_aqueous[topsoil].ammonium_non_band += non_band_mol_per_m3;
                     staged_aqueous[topsoil].ammonium_band += band_mol_per_m3;
                     if (inputs.soil_transport_owners != null) {
-                        staged_soil_mineral_nitrogen[topsoil * mineral_nitrogen.species_count + @intFromEnum(mineral_nitrogen.Species.ammonium_non_band)] += non_band_g / inputs.nitrogen_molar_mass_g_per_mol;
-                        staged_soil_mineral_nitrogen[topsoil * mineral_nitrogen.species_count + @intFromEnum(mineral_nitrogen.Species.ammonium_band)] += band_g / inputs.nitrogen_molar_mass_g_per_mol;
+                        staged_soil_mineral_nitrogen[topsoil * mineral_nitrogen.species_count + @backingInt(mineral_nitrogen.Species.ammonium_non_band)] += non_band_g / inputs.nitrogen_molar_mass_g_per_mol;
+                        staged_soil_mineral_nitrogen[topsoil * mineral_nitrogen.species_count + @backingInt(mineral_nitrogen.Species.ammonium_band)] += band_g / inputs.nitrogen_molar_mass_g_per_mol;
                     }
                 },
                 .ammonia_nitrogen => {
@@ -176,8 +177,8 @@ pub fn state_update(allocator: std.mem.Allocator, inputs: Inputs, litter_gas: *g
                     staged_aqueous[topsoil].ammonia_non_band += non_band_mol_per_m3;
                     staged_aqueous[topsoil].ammonia_band += band_mol_per_m3;
                     if (inputs.soil_transport_owners != null) {
-                        staged_soil_mineral_nitrogen[topsoil * mineral_nitrogen.species_count + @intFromEnum(mineral_nitrogen.Species.ammonia_non_band)] += non_band_g / inputs.nitrogen_molar_mass_g_per_mol;
-                        staged_soil_mineral_nitrogen[topsoil * mineral_nitrogen.species_count + @intFromEnum(mineral_nitrogen.Species.ammonia_band)] += band_g / inputs.nitrogen_molar_mass_g_per_mol;
+                        staged_soil_mineral_nitrogen[topsoil * mineral_nitrogen.species_count + @backingInt(mineral_nitrogen.Species.ammonia_non_band)] += non_band_g / inputs.nitrogen_molar_mass_g_per_mol;
+                        staged_soil_mineral_nitrogen[topsoil * mineral_nitrogen.species_count + @backingInt(mineral_nitrogen.Species.ammonia_band)] += band_g / inputs.nitrogen_molar_mass_g_per_mol;
                     }
                 },
                 .nitrate_nitrogen => {
@@ -185,8 +186,8 @@ pub fn state_update(allocator: std.mem.Allocator, inputs: Inputs, litter_gas: *g
                     staged_aqueous[topsoil].nitrate_non_band += non_band_mol_per_m3;
                     staged_aqueous[topsoil].nitrate_band += band_mol_per_m3;
                     if (inputs.soil_transport_owners != null) {
-                        staged_soil_mineral_nitrogen[topsoil * mineral_nitrogen.species_count + @intFromEnum(mineral_nitrogen.Species.nitrate_non_band)] += non_band_g / inputs.nitrogen_molar_mass_g_per_mol;
-                        staged_soil_mineral_nitrogen[topsoil * mineral_nitrogen.species_count + @intFromEnum(mineral_nitrogen.Species.nitrate_band)] += band_g / inputs.nitrogen_molar_mass_g_per_mol;
+                        staged_soil_mineral_nitrogen[topsoil * mineral_nitrogen.species_count + @backingInt(mineral_nitrogen.Species.nitrate_non_band)] += non_band_g / inputs.nitrogen_molar_mass_g_per_mol;
+                        staged_soil_mineral_nitrogen[topsoil * mineral_nitrogen.species_count + @backingInt(mineral_nitrogen.Species.nitrate_band)] += band_g / inputs.nitrogen_molar_mass_g_per_mol;
                     }
                 },
                 .hydrogen_phosphate_phosphorus => {
@@ -194,8 +195,8 @@ pub fn state_update(allocator: std.mem.Allocator, inputs: Inputs, litter_gas: *g
                     staged_non_band[topsoil].dissolved_hpo4_mol_p_per_m3 += non_band_mol_per_m3;
                     staged_band[topsoil].dissolved_hpo4_mol_p_per_m3 += band_mol_per_m3;
                     if (inputs.soil_transport_owners != null) {
-                        staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(transport_species.AqueousSpecies.non_band_hpo4)] += non_band_g / inputs.phosphorus_molar_mass_g_per_mol;
-                        staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(transport_species.AqueousSpecies.band_hpo4)] += band_g / inputs.phosphorus_molar_mass_g_per_mol;
+                        staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(transport_species.AqueousSpecies.non_band_hpo4)] += non_band_g / inputs.phosphorus_molar_mass_g_per_mol;
+                        staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(transport_species.AqueousSpecies.band_hpo4)] += band_g / inputs.phosphorus_molar_mass_g_per_mol;
                     }
                 },
                 .dihydrogen_phosphate_phosphorus => {
@@ -203,49 +204,49 @@ pub fn state_update(allocator: std.mem.Allocator, inputs: Inputs, litter_gas: *g
                     staged_non_band[topsoil].dissolved_h2po4_mol_p_per_m3 += non_band_mol_per_m3;
                     staged_band[topsoil].dissolved_h2po4_mol_p_per_m3 += band_mol_per_m3;
                     if (inputs.soil_transport_owners != null) {
-                        staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(transport_species.AqueousSpecies.non_band_h2po4)] += non_band_g / inputs.phosphorus_molar_mass_g_per_mol;
-                        staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(transport_species.AqueousSpecies.band_h2po4)] += band_g / inputs.phosphorus_molar_mass_g_per_mol;
+                        staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(transport_species.AqueousSpecies.non_band_h2po4)] += non_band_g / inputs.phosphorus_molar_mass_g_per_mol;
+                        staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(transport_species.AqueousSpecies.band_h2po4)] += band_g / inputs.phosphorus_molar_mass_g_per_mol;
                     }
                 },
                 .aluminum => {
                     staged_litter[cell].aluminum_mol_per_m3 += litter_mol_per_m3;
                     staged_aqueous[topsoil].aluminum += non_band_mol_per_m3 + band_mol_per_m3;
-                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(transport_species.AqueousSpecies.aluminum)] += (non_band_g + band_g) / molar_mass;
+                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(transport_species.AqueousSpecies.aluminum)] += (non_band_g + band_g) / molar_mass;
                 },
                 .iron => {
                     staged_litter[cell].iron_mol_per_m3 += litter_mol_per_m3;
                     staged_aqueous[topsoil].iron += non_band_mol_per_m3 + band_mol_per_m3;
-                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(transport_species.AqueousSpecies.iron)] += (non_band_g + band_g) / molar_mass;
+                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(transport_species.AqueousSpecies.iron)] += (non_band_g + band_g) / molar_mass;
                 },
                 .calcium => {
                     staged_litter[cell].calcium_mol_per_m3 += litter_mol_per_m3;
                     staged_aqueous[topsoil].calcium += non_band_mol_per_m3 + band_mol_per_m3;
-                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(transport_species.AqueousSpecies.calcium)] += (non_band_g + band_g) / molar_mass;
+                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(transport_species.AqueousSpecies.calcium)] += (non_band_g + band_g) / molar_mass;
                 },
                 .magnesium => {
                     staged_litter[cell].magnesium_mol_per_m3 += litter_mol_per_m3;
                     staged_aqueous[topsoil].magnesium += non_band_mol_per_m3 + band_mol_per_m3;
-                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(transport_species.AqueousSpecies.magnesium)] += (non_band_g + band_g) / molar_mass;
+                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(transport_species.AqueousSpecies.magnesium)] += (non_band_g + band_g) / molar_mass;
                 },
                 .sodium => {
                     staged_litter[cell].sodium_mol_per_m3 += litter_mol_per_m3;
                     staged_aqueous[topsoil].sodium += non_band_mol_per_m3 + band_mol_per_m3;
-                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(transport_species.AqueousSpecies.sodium)] += (non_band_g + band_g) / molar_mass;
+                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(transport_species.AqueousSpecies.sodium)] += (non_band_g + band_g) / molar_mass;
                 },
                 .potassium => {
                     staged_litter[cell].potassium_mol_per_m3 += litter_mol_per_m3;
                     staged_aqueous[topsoil].potassium += non_band_mol_per_m3 + band_mol_per_m3;
-                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(transport_species.AqueousSpecies.potassium)] += (non_band_g + band_g) / molar_mass;
+                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(transport_species.AqueousSpecies.potassium)] += (non_band_g + band_g) / molar_mass;
                 },
                 .sulfate_sulfur => {
                     staged_litter[cell].sulfate_mol_per_m3 += litter_mol_per_m3;
                     staged_aqueous[topsoil].sulfate += non_band_mol_per_m3 + band_mol_per_m3;
-                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(transport_species.AqueousSpecies.sulfate)] += (non_band_g + band_g) / molar_mass;
+                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(transport_species.AqueousSpecies.sulfate)] += (non_band_g + band_g) / molar_mass;
                 },
                 .chloride => {
                     staged_litter[cell].chloride_mol_per_m3 += litter_mol_per_m3;
                     staged_aqueous[topsoil].chloride += non_band_mol_per_m3 + band_mol_per_m3;
-                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(transport_species.AqueousSpecies.chloride)] += (non_band_g + band_g) / molar_mass;
+                    if (inputs.soil_transport_owners != null) staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(transport_species.AqueousSpecies.chloride)] += (non_band_g + band_g) / molar_mass;
                 },
                 else => unreachable,
             }
@@ -262,8 +263,8 @@ pub fn state_update(allocator: std.mem.Allocator, inputs: Inputs, litter_gas: *g
                 litter_mol / litter_aqueous_carrier_m3
             else
                 0;
-            const salt_species: snow.SaltSpecies = @enumFromInt(species);
-            const phosphate = species >= @intFromEnum(snow.SaltSpecies.phosphate);
+            const salt_species: snow.SaltSpecies = @fromBackingInt(@intCast(species));
+            const phosphate = species >= @backingInt(snow.SaltSpecies.phosphate);
             const non_band_carrier_m3 = soil_water * (if (phosphate) fractions.phosphate_non_band else 1);
             const band_carrier_m3 = soil_water * (if (phosphate) fractions.phosphate_band else 1);
             if ((non_band_mol > 0 and non_band_carrier_m3 == 0) or (band_mol > 0 and band_carrier_m3 == 0))
@@ -279,12 +280,12 @@ pub fn state_update(allocator: std.mem.Allocator, inputs: Inputs, litter_gas: *g
             addSoilSalt(&staged_aqueous[topsoil], &staged_non_band[topsoil], &staged_band[topsoil], salt_species, non_band_concentration, band_concentration);
             if (inputs.soil_transport_owners != null) {
                 const non_band_species = snow.aqueousSpeciesForSalt(salt_species);
-                staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(non_band_species)] += non_band_mol;
+                staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(non_band_species)] += non_band_mol;
                 if (phosphate) {
-                    const band_species: transport_species.AqueousSpecies = @enumFromInt(@intFromEnum(non_band_species) + 8);
-                    staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(band_species)] += band_mol;
+                    const band_species: transport_species.AqueousSpecies = @fromBackingInt(@intCast(@backingInt(non_band_species) + 8));
+                    staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(band_species)] += band_mol;
                 } else {
-                    staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @intFromEnum(non_band_species)] += band_mol;
+                    staged_soil_aqueous[topsoil * transport_species.AqueousSpecies.count + @backingInt(non_band_species)] += band_mol;
                 }
             }
         }
@@ -343,7 +344,7 @@ fn zoneFractions(inputs: Inputs, cell: usize) !charge_classification.ZoneFractio
             .phosphate_non_band = inputs.phosphate_non_band_fraction,
             .phosphate_band = inputs.phosphate_band_fraction,
         };
-    inline for (@typeInfo(charge_classification.ZoneFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(charge_classification.ZoneFractions)) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.InvalidSnowDischargeZoneFraction;
@@ -358,7 +359,7 @@ fn zoneFractions(inputs: Inputs, cell: usize) !charge_classification.ZoneFractio
 }
 
 fn hasLitterAqueousInventory(cell: litter.Cell) bool {
-    inline for (@typeInfo(litter.Cell).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(litter.Cell)) |field| {
         if (comptime isLitterAqueousField(field.name, field.type))
             if (@field(cell, field.name) != 0) return true;
     }
@@ -368,7 +369,7 @@ fn hasLitterAqueousInventory(cell: litter.Cell) bool {
 fn rescaleLitterAqueous(cell: *litter.Cell, scale: f64) !void {
     if (!std.math.isFinite(scale) or scale < 0)
         return error.InvalidSnowDischargeDryReferenceCarrier;
-    inline for (@typeInfo(litter.Cell).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(litter.Cell)) |field| {
         if (comptime isLitterAqueousField(field.name, field.type)) {
             const value = @field(cell, field.name) * scale;
             if (!std.math.isFinite(value) or value < 0)
@@ -388,7 +389,7 @@ fn validateCandidate(value: anytype) !void {
     switch (@typeInfo(@TypeOf(value))) {
         .float => if (!std.math.isFinite(value) or value < 0) return error.InvalidSnowDischargeCandidate,
         .array => for (value) |item| try validateCandidate(item),
-        .@"struct" => inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field|
+        .@"struct" => inline for (ti_compat.fieldViews(@TypeOf(value))) |field|
             try validateCandidate(@field(value, field.name)),
         else => {},
     }
@@ -484,7 +485,7 @@ fn addSoilSalt(aqueous: anytype, non_band: anytype, band: anytype, species: snow
 }
 
 fn molarMass(nitrogen: f64, phosphorus: f64, ions: IonMolarMassesGPerMol, species: usize) f64 {
-    return switch (@as(snow.Species, @enumFromInt(species))) {
+    return switch (@as(snow.Species, @fromBackingInt(@intCast(species)))) {
         .ammonium_nitrogen, .ammonia_nitrogen, .nitrate_nitrogen => nitrogen,
         .hydrogen_phosphate_phosphorus, .dihydrogen_phosphate_phosphorus => phosphorus,
         .aluminum => ions.aluminum,
@@ -515,28 +516,28 @@ test "snow discharge conserves tracked gas nitrogen and phosphorus into runtime 
     var soil_mineral_nitrogen = try mineral_nitrogen.State.init(std.testing.allocator, 2);
     defer soil_mineral_nitrogen.deinit();
     var discharge = [_]snow.SurfaceDischarge{.{}};
-    discharge[0].litter_g[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = 2;
-    discharge[0].soil_nonband_g[@intFromEnum(snow.Species.ammonium_nitrogen)] = 14;
-    discharge[0].litter_g[@intFromEnum(snow.Species.hydrogen_phosphate_phosphorus)] = 31;
-    discharge[0].soil_band_g[@intFromEnum(snow.Species.hydrogen_phosphate_phosphorus)] = 31;
-    discharge[0].litter_g[@intFromEnum(snow.Species.dihydrogen_phosphate_phosphorus)] = 62;
-    discharge[0].soil_nonband_g[@intFromEnum(snow.Species.dihydrogen_phosphate_phosphorus)] = 93;
-    discharge[0].soil_nonband_g[@intFromEnum(snow.Species.calcium)] = 40;
-    discharge[0].litter_salt_mol[@intFromEnum(snow.SaltSpecies.calcium_carbonate)] = 0.25;
-    discharge[0].soil_nonband_salt_mol[@intFromEnum(snow.SaltSpecies.aluminum_sulfate)] = 0.5;
-    discharge[0].litter_salt_mol[@intFromEnum(snow.SaltSpecies.phosphate)] = 4;
-    discharge[0].soil_nonband_salt_mol[@intFromEnum(snow.SaltSpecies.phosphate)] = 5;
-    discharge[0].soil_band_salt_mol[@intFromEnum(snow.SaltSpecies.phosphate)] = 6;
-    discharge[0].litter_salt_mol[@intFromEnum(snow.SaltSpecies.phosphoric_acid)] = 7;
-    discharge[0].soil_nonband_salt_mol[@intFromEnum(snow.SaltSpecies.phosphoric_acid)] = 8;
-    discharge[0].soil_band_salt_mol[@intFromEnum(snow.SaltSpecies.phosphoric_acid)] = 9;
-    discharge[0].soil_band_salt_mol[@intFromEnum(snow.SaltSpecies.magnesium_hydrogen_phosphate)] = 0.75;
+    discharge[0].litter_g[@backingInt(snow.Species.carbon_dioxide_carbon)] = 2;
+    discharge[0].soil_nonband_g[@backingInt(snow.Species.ammonium_nitrogen)] = 14;
+    discharge[0].litter_g[@backingInt(snow.Species.hydrogen_phosphate_phosphorus)] = 31;
+    discharge[0].soil_band_g[@backingInt(snow.Species.hydrogen_phosphate_phosphorus)] = 31;
+    discharge[0].litter_g[@backingInt(snow.Species.dihydrogen_phosphate_phosphorus)] = 62;
+    discharge[0].soil_nonband_g[@backingInt(snow.Species.dihydrogen_phosphate_phosphorus)] = 93;
+    discharge[0].soil_nonband_g[@backingInt(snow.Species.calcium)] = 40;
+    discharge[0].litter_salt_mol[@backingInt(snow.SaltSpecies.calcium_carbonate)] = 0.25;
+    discharge[0].soil_nonband_salt_mol[@backingInt(snow.SaltSpecies.aluminum_sulfate)] = 0.5;
+    discharge[0].litter_salt_mol[@backingInt(snow.SaltSpecies.phosphate)] = 4;
+    discharge[0].soil_nonband_salt_mol[@backingInt(snow.SaltSpecies.phosphate)] = 5;
+    discharge[0].soil_band_salt_mol[@backingInt(snow.SaltSpecies.phosphate)] = 6;
+    discharge[0].litter_salt_mol[@backingInt(snow.SaltSpecies.phosphoric_acid)] = 7;
+    discharge[0].soil_nonband_salt_mol[@backingInt(snow.SaltSpecies.phosphoric_acid)] = 8;
+    discharge[0].soil_band_salt_mol[@backingInt(snow.SaltSpecies.phosphoric_acid)] = 9;
+    discharge[0].soil_band_salt_mol[@backingInt(snow.SaltSpecies.magnesium_hydrogen_phosphate)] = 0.75;
     try state_update(std.testing.allocator, .{ .discharge = &discharge, .litter_water_volume_m3 = &.{1}, .topsoil_water_volume_m3 = &.{ 2, 0 }, .soil_layer_capacity = 2, .nitrogen_molar_mass_g_per_mol = 14, .phosphorus_molar_mass_g_per_mol = 31, .ion_molar_mass_g_per_mol = .{ .aluminum = 27, .iron = 55.8, .calcium = 40, .magnesium = 24.3, .sodium = 23, .potassium = 39.1, .sulfur = 32, .chloride = 35.5 }, .surface_aqueous = &surface_aqueous, .soil_transport_owners = .{ .aqueous = &soil_aqueous, .mineral_nitrogen = &soil_mineral_nitrogen }, .ammonium_non_band_fraction = 0.25, .ammonium_band_fraction = 0.75, .phosphate_non_band_fraction = 0.25, .phosphate_band_fraction = 0.75 }, &litter_gas, &soil_gas, &litter_chemistry, &soil_chemistry);
     try std.testing.expectEqual(@as(f64, 2), litter_gas.dissolved_mass_g[0]);
     try std.testing.expectEqual(@as(f64, 2), soil_chemistry.aqueous[0].ammonium_non_band);
     try std.testing.expectApproxEqAbs(@as(f64, 2.0 / 3.0), soil_chemistry.band_phosphate[0].dissolved_hpo4_mol_p_per_m3, 1e-15);
     try std.testing.expectEqual(@as(f64, 0.5), soil_chemistry.aqueous[0].calcium);
-    try std.testing.expectEqual(@as(f64, 0.25), surface_aqueous.amount_mol[@intFromEnum(snow.SaltSpecies.calcium_carbonate)]);
+    try std.testing.expectEqual(@as(f64, 0.25), surface_aqueous.amount_mol[@backingInt(snow.SaltSpecies.calcium_carbonate)]);
     try std.testing.expectEqual(@as(f64, 0.25), soil_chemistry.aqueous[0].aluminum_sulfate);
     try std.testing.expectEqual(@as(f64, 0.5), soil_chemistry.band_phosphate[0].magnesium_hpo4_pair_mol_per_m3);
     try std.testing.expectEqual(@as(f64, 1), litter_chemistry.cells[0].hpo4_mol_p_per_m3);
@@ -544,15 +545,15 @@ test "snow discharge conserves tracked gas nitrogen and phosphorus into runtime 
     try std.testing.expectEqual(@as(f64, 4), surface_aqueous.amount_mol[34]);
     try std.testing.expectEqual(@as(f64, 7), surface_aqueous.amount_mol[35]);
     const soil_amounts = try soil_aqueous.cellAmountsConst(0);
-    try std.testing.expectEqual(@as(f64, 1), soil_amounts[@intFromEnum(transport_species.AqueousSpecies.calcium)]);
-    try std.testing.expectEqual(@as(f64, 0.5), soil_amounts[@intFromEnum(transport_species.AqueousSpecies.aluminum_sulfate)]);
-    try std.testing.expectEqual(@as(f64, 3), soil_amounts[@intFromEnum(transport_species.AqueousSpecies.non_band_h2po4)]);
-    try std.testing.expectEqual(@as(f64, 1), soil_amounts[@intFromEnum(transport_species.AqueousSpecies.band_hpo4)]);
-    try std.testing.expectEqual(@as(f64, 5), soil_amounts[@intFromEnum(transport_species.AqueousSpecies.non_band_phosphate)]);
-    try std.testing.expectEqual(@as(f64, 6), soil_amounts[@intFromEnum(transport_species.AqueousSpecies.band_phosphate)]);
-    try std.testing.expectEqual(@as(f64, 0.75), soil_amounts[@intFromEnum(transport_species.AqueousSpecies.band_magnesium_hpo4)]);
+    try std.testing.expectEqual(@as(f64, 1), soil_amounts[@backingInt(transport_species.AqueousSpecies.calcium)]);
+    try std.testing.expectEqual(@as(f64, 0.5), soil_amounts[@backingInt(transport_species.AqueousSpecies.aluminum_sulfate)]);
+    try std.testing.expectEqual(@as(f64, 3), soil_amounts[@backingInt(transport_species.AqueousSpecies.non_band_h2po4)]);
+    try std.testing.expectEqual(@as(f64, 1), soil_amounts[@backingInt(transport_species.AqueousSpecies.band_hpo4)]);
+    try std.testing.expectEqual(@as(f64, 5), soil_amounts[@backingInt(transport_species.AqueousSpecies.non_band_phosphate)]);
+    try std.testing.expectEqual(@as(f64, 6), soil_amounts[@backingInt(transport_species.AqueousSpecies.band_phosphate)]);
+    try std.testing.expectEqual(@as(f64, 0.75), soil_amounts[@backingInt(transport_species.AqueousSpecies.band_magnesium_hpo4)]);
     const soil_nitrogen = try soil_mineral_nitrogen.matrix.cellAmountsConst(0);
-    try std.testing.expectEqual(@as(f64, 1), soil_nitrogen[@intFromEnum(mineral_nitrogen.Species.ammonium_non_band)]);
+    try std.testing.expectEqual(@as(f64, 1), soil_nitrogen[@backingInt(mineral_nitrogen.Species.ammonium_non_band)]);
 
     // Four distinct phosphate states cross snow -> litter/topsoil exactly
     // once: mineral HPO4/H2PO4 remain in explicit chemistry owners while
@@ -607,11 +608,11 @@ test "dry disappearance carrier conserves existing and incoming litter aqueous c
 
     var discharge = [_]snow.SurfaceDischarge{.{}};
     discharge[0].litter_dry_reference_carrier_m3 = 3;
-    discharge[0].litter_g[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = 2;
-    discharge[0].litter_g[@intFromEnum(snow.Species.ammonium_nitrogen)] = 14;
-    discharge[0].litter_g[@intFromEnum(snow.Species.hydrogen_phosphate_phosphorus)] = 31;
-    discharge[0].litter_salt_mol[@intFromEnum(snow.SaltSpecies.calcium)] = 5;
-    discharge[0].litter_salt_mol[@intFromEnum(snow.SaltSpecies.calcium_carbonate)] = 7;
+    discharge[0].litter_g[@backingInt(snow.Species.carbon_dioxide_carbon)] = 2;
+    discharge[0].litter_g[@backingInt(snow.Species.ammonium_nitrogen)] = 14;
+    discharge[0].litter_g[@backingInt(snow.Species.hydrogen_phosphate_phosphorus)] = 31;
+    discharge[0].litter_salt_mol[@backingInt(snow.SaltSpecies.calcium)] = 5;
+    discharge[0].litter_salt_mol[@backingInt(snow.SaltSpecies.calcium_carbonate)] = 7;
     try state_update(std.testing.allocator, .{
         .discharge = &discharge,
         .litter_water_volume_m3 = &.{0},
@@ -628,7 +629,7 @@ test "dry disappearance carrier conserves existing and incoming litter aqueous c
     try std.testing.expectApproxEqAbs(@as(f64, 13.0 / 5.0), litter_chemistry.cells[0].calcium_mol_per_m3, 1e-15);
     try std.testing.expectApproxEqAbs(@as(f64, 1.0 / 5.0), litter_chemistry.cells[0].hpo4_mol_p_per_m3, 1e-15);
     try std.testing.expectEqual(@as(f64, 2), litter_gas.dissolved_mass_g[0]);
-    try std.testing.expectEqual(@as(f64, 7), surface_aqueous.amount_mol[@intFromEnum(transport_species.AqueousSpecies.calcium_carbonate)]);
+    try std.testing.expectEqual(@as(f64, 7), surface_aqueous.amount_mol[@backingInt(transport_species.AqueousSpecies.calcium_carbonate)]);
     // Existing 6 mol N and 8 mol Ca plus exactly 1 and 5 mol respectively.
     try std.testing.expectApproxEqAbs(@as(f64, 7), litter_chemistry.cells[0].ammonium_mol_per_m3 * 5, 1e-14);
     try std.testing.expectApproxEqAbs(@as(f64, 13), litter_chemistry.cells[0].calcium_mol_per_m3 * 5, 1e-14);
@@ -652,8 +653,8 @@ test "missing dry disappearance carrier rolls back every discharge recipient" {
     defer surface_aqueous.deinit();
     litter_gas.dissolved_mass_g[0] = 3;
     var discharge = [_]snow.SurfaceDischarge{.{}};
-    discharge[0].litter_g[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = 2;
-    discharge[0].litter_g[@intFromEnum(snow.Species.ammonium_nitrogen)] = 14;
+    discharge[0].litter_g[@backingInt(snow.Species.carbon_dioxide_carbon)] = 2;
+    discharge[0].litter_g[@backingInt(snow.Species.ammonium_nitrogen)] = 14;
 
     try std.testing.expectError(error.SnowDischargeRequiresWater, state_update(std.testing.allocator, .{
         .discharge = &discharge,
@@ -684,10 +685,10 @@ test "late complex overflow rolls back every snow discharge recipient atomically
     litter_gas.dissolved_mass_g[0] = 3;
     litter_chemistry.cells[0].hpo4_mol_p_per_m3 = 5;
     soil_chemistry.aqueous[0].calcium = 7;
-    const complex = @intFromEnum(snow.SaltSpecies.aluminum_monohydroxide);
+    const complex = @backingInt(snow.SaltSpecies.aluminum_monohydroxide);
     surface_aqueous.amount_mol[transport_species.AqueousSpecies.count + complex] = std.math.floatMax(f64);
     var discharge = [_]snow.SurfaceDischarge{ .{}, .{} };
-    discharge[0].litter_g[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = 1;
+    discharge[0].litter_g[@backingInt(snow.Species.carbon_dioxide_carbon)] = 1;
     discharge[1].litter_salt_mol[complex] = std.math.floatMax(f64);
     const litter_gas_before = try std.testing.allocator.dupe(f64, litter_gas.dissolved_mass_g);
     defer std.testing.allocator.free(litter_gas_before);

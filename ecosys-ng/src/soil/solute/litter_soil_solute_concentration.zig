@@ -17,6 +17,7 @@
 // disturbance fraction.
 const std = @import("std");
 
+
 pub const pre_phosphate_species_count = 34;
 pub const phosphate_species_count = 8;
 pub const litter_species_count = 42;
@@ -120,10 +121,10 @@ fn fixture(litter: []const f64, soil: []const f64) Inputs {
 }
 
 test "TRNSFRS constructs exact litter and partitioned soil concentrations" {
-    const litter = [_]f64{8} ** litter_species_count;
-    const soil = [_]f64{8} ** soil_species_count;
-    var litter_concentration = [_]f64{99} ** litter_species_count;
-    var soil_concentration = [_]f64{99} ** soil_species_count;
+    const litter = @as([litter_species_count]f64, @splat(@as(f64, 8)));
+    const soil = @as([soil_species_count]f64, @splat(@as(f64, 8)));
+    var litter_concentration = @as([litter_species_count]f64, @splat(@as(f64, 99)));
+    var soil_concentration = @as([soil_species_count]f64, @splat(@as(f64, 99)));
     try std.testing.expect(try calculate(fixture(&litter, &soil), &litter_concentration, &soil_concentration));
     try std.testing.expectEqual(@as(f64, 4), litter_concentration[0]);
     try std.testing.expectEqual(@as(f64, 2), soil_concentration[0]);
@@ -132,10 +133,10 @@ test "TRNSFRS constructs exact litter and partitioned soil concentrations" {
 }
 
 test "absent phosphate pore volumes preserve exact zero and fallback behavior" {
-    const litter = [_]f64{8} ** litter_species_count;
-    const soil = [_]f64{8} ** soil_species_count;
-    var litter_concentration = [_]f64{0} ** litter_species_count;
-    var soil_concentration = [_]f64{0} ** soil_species_count;
+    const litter = @as([litter_species_count]f64, @splat(@as(f64, 8)));
+    const soil = @as([soil_species_count]f64, @splat(@as(f64, 8)));
+    var litter_concentration = @as([litter_species_count]f64, @splat(@as(f64, 0)));
+    var soil_concentration = @as([soil_species_count]f64, @splat(@as(f64, 0)));
     var inputs = fixture(&litter, &soil);
     inputs.nonband_phosphate_fraction = 0;
     inputs.band_phosphate_fraction = 0;
@@ -146,10 +147,10 @@ test "absent phosphate pore volumes preserve exact zero and fallback behavior" {
 }
 
 test "closed legacy volume gate leaves outputs unchanged" {
-    const litter = [_]f64{8} ** litter_species_count;
-    const soil = [_]f64{8} ** soil_species_count;
-    var litter_concentration = [_]f64{9} ** litter_species_count;
-    var soil_concentration = [_]f64{7} ** soil_species_count;
+    const litter = @as([litter_species_count]f64, @splat(@as(f64, 8)));
+    const soil = @as([soil_species_count]f64, @splat(@as(f64, 8)));
+    var litter_concentration = @as([litter_species_count]f64, @splat(@as(f64, 9)));
+    var soil_concentration = @as([soil_species_count]f64, @splat(@as(f64, 7)));
     var inputs = fixture(&litter, &soil);
     inputs.litter_water_m3 = 0;
     try std.testing.expect(!try calculate(inputs, &litter_concentration, &soil_concentration));
@@ -158,11 +159,11 @@ test "closed legacy volume gate leaves outputs unchanged" {
 }
 
 test "late invalid inventory leaves both concentration groups atomic" {
-    var litter = [_]f64{8} ** litter_species_count;
+    var litter = @as([litter_species_count]f64, @splat(@as(f64, 8)));
     litter[litter_species_count - 1] = std.math.inf(f64);
-    const soil = [_]f64{8} ** soil_species_count;
-    var litter_concentration = [_]f64{9} ** litter_species_count;
-    var soil_concentration = [_]f64{7} ** soil_species_count;
+    const soil = @as([soil_species_count]f64, @splat(@as(f64, 8)));
+    var litter_concentration = @as([litter_species_count]f64, @splat(@as(f64, 9)));
+    var soil_concentration = @as([soil_species_count]f64, @splat(@as(f64, 7)));
     try std.testing.expectError(error.NonFiniteLitterSoilSoluteConcentrationInput, calculate(fixture(&litter, &soil), &litter_concentration, &soil_concentration));
     try std.testing.expectEqual(@as(f64, 9), litter_concentration[0]);
     try std.testing.expectEqual(@as(f64, 7), soil_concentration[0]);

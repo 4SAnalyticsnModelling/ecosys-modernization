@@ -1,6 +1,7 @@
 const std = @import("std");
 const delimited_input = @import("delimited_input.zig");
 const execution_calendar_date = @import("../../driver/execution_calendar_date.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Header = struct {
     temporal_code: [2]u8,
@@ -54,7 +55,7 @@ pub const Header = struct {
         try uniqueCodes(self.weather_variable_codes, 'X');
         if (!std.math.isFinite(self.aerodynamic_roughness_m) or self.aerodynamic_roughness_m < 0 or !std.math.isFinite(self.solar_noon_hour) or self.solar_noon_hour < 0 or self.solar_noon_hour > 24) return error.InvalidWeatherMetadata;
         if (!std.math.isFinite(self.precipitation_ph) or self.precipitation_ph < 0 or self.precipitation_ph > 14) return error.InvalidPrecipitationChemistry;
-        inline for (@typeInfo(Header).@"struct".fields) |field| if (comptime std.mem.endsWith(u8, field.name, "_g_per_m3")) {
+        inline for (ti_compat.fieldViews(Header)) |field| if (comptime std.mem.endsWith(u8, field.name, "_g_per_m3")) {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidPrecipitationChemistry;
         };
@@ -787,7 +788,7 @@ pub fn normalizeDaily(header: Header, real_values: []const f64, altitude_m: f64)
         .shortwave_radiation_megajoules_per_m2_per_day = try dailyRadiation(real_values[radiation_index], header.weather_unit_codes[radiation_index]),
         .wind_speed_m_per_h = try dailyWind(real_values[wind_index], header.weather_unit_codes[wind_index]),
     };
-    inline for (@typeInfo(DailyForcing).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteNormalizedWeather;
+    inline for (ti_compat.fieldViews(DailyForcing)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteNormalizedWeather;
     return result;
 }
 
@@ -884,7 +885,7 @@ pub fn normalizeHourlyWithPhase(header: Header, real_values: []const f64, altitu
         .wind_speed_m_per_h = @max(3600.0, try windMPerH(real_values[wind_index.?], header.weather_unit_codes[wind_index.?])),
         .longwave_radiation_megajoules_per_m2 = if (longwave_index) |index| try radiationMjPerM2(real_values[index], header.weather_unit_codes[index]) else null,
     };
-    inline for (@typeInfo(HourlyForcing).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(HourlyForcing)) |field| {
         if (field.type == f64 and !std.math.isFinite(@field(result, field.name))) return error.NonFiniteNormalizedWeather;
     }
     return result;

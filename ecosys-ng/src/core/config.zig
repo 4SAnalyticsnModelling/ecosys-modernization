@@ -1,5 +1,6 @@
 const std = @import("std");
 const conservation_tolerance = @import("conservation_tolerance.zig");
+const ti_compat = @import("typeinfo_compat.zig");
 
 /// Default physical conservation criterion: one part per billion of accepted
 /// boundary activity in the audited interval. This is intentionally owned by
@@ -29,7 +30,7 @@ pub const PhysicalTolerance = struct {
     dimensionless: f64 = 1.0e-12,
 
     pub fn validate(self: PhysicalTolerance) !void {
-        inline for (std.meta.fields(PhysicalTolerance)) |field| {
+        inline for (ti_compat.fieldViews(PhysicalTolerance)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value <= 0) return error.InvalidPhysicalTolerance;
         }
@@ -150,7 +151,7 @@ pub const NonlinearTolerance = struct {
     }
 
     pub fn validate(self: NonlinearTolerance) !void {
-        inline for (std.meta.fields(NonlinearTolerance)) |field| {
+        inline for (ti_compat.fieldViews(NonlinearTolerance)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value <= 0) return error.InvalidNonlinearTolerance;
         }

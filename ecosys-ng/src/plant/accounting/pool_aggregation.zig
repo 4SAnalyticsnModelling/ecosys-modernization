@@ -4,6 +4,8 @@ const canopy_module = @import("../../canopy/photosynthesis/photosynthesis.zig");
 const root_module = @import("../root/plant_root_system.zig");
 const stages_module = @import("../lifecycle/growth_stages.zig");
 const concentration = @import("../lifecycle/phenology.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const RuntimeParameters = struct {
     branch_structural_presence_g_per_plant: f64,
@@ -14,7 +16,7 @@ pub const RuntimeParameters = struct {
     phosphorus_inhibition_g_p_per_g_c: f64,
 
     pub fn validate(self: RuntimeParameters) !void {
-        inline for (@typeInfo(RuntimeParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name)) or @field(self, field.name) < 0) return error.InvalidPlantPoolAggregationParameter;
+        inline for (ti_compat.fieldViews(RuntimeParameters)) |field| if (!std.math.isFinite(@field(self, field.name)) or @field(self, field.name) < 0) return error.InvalidPlantPoolAggregationParameter;
         if (self.nitrogen_inhibition_g_n_per_g_c <= 0 or self.phosphorus_inhibition_g_p_per_g_c <= 0) return error.InvalidPlantPoolAggregationParameter;
     }
 };
@@ -88,7 +90,7 @@ pub fn sourceOrderPostHarvestPlantTotals(
             result.stalk_surface_area_m2 += area_m2;
         }
     }
-    inline for (@typeInfo(PostHarvestPlantTotals).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(PostHarvestPlantTotals)) |field|
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFinitePostHarvestPlantTotal;
     return result;
 }
@@ -107,9 +109,9 @@ pub fn sourceOrderBranchTotals(
         bundle_sheath_carbon_dioxide_g_c.len != compartment_count or
         bundle_sheath_bicarbonate_g_c.len != compartment_count)
         return error.BranchTotalDimensionMismatch;
-    inline for (@typeInfo(BranchElementPools).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(BranchElementPools)) |field| {
         const pool = @field(pools, field.name);
-        inline for (@typeInfo(ElementMass).@"struct".fields) |element| {
+        inline for (ti_compat.fieldViews(ElementMass)) |element| {
             const value = @field(pool, element.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidBranchTotalInput;
         }
@@ -130,13 +132,13 @@ pub fn sourceOrderBranchTotals(
         .nitrogen_g_n = 0,
         .phosphorus_g_p = 0,
     };
-    inline for (@typeInfo(BranchElementPools).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(BranchElementPools)) |field| {
         const pool = @field(pools, field.name);
         total.carbon_g_c += pool.carbon_g_c;
         total.nitrogen_g_n += pool.nitrogen_g_n;
         total.phosphorus_g_p += pool.phosphorus_g_p;
     }
-    inline for (@typeInfo(ElementMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(ElementMass)) |field|
         if (!std.math.isFinite(@field(total, field.name))) return error.NonFiniteBranchTotal;
     return .{
         .c4_intermediate_carbon_g_c = c4_carbon_g_c,
@@ -315,7 +317,7 @@ test "HFUNC pool aggregation retains separate denominators and arbitrary species
     const second_mycorrhizal_layer = try roots.layerIndex(1, 1, 0);
     roots.mobile_carbon_g[first_mycorrhizal_layer] = 1;
     roots.mobile_carbon_g[second_mycorrhizal_layer] = 1;
-    var biological_domain_counts = [_]u8{2} ** species_count;
+    var biological_domain_counts = @as([species_count]u8, @splat(@as(u8, 2)));
     biological_domain_counts[0] = 1;
     var context: ApplyContext = .{ .canopy = &canopy, .roots = &roots, .growth_stages = &growth, .active_by_plant = active, .biological_domain_count_by_plant = &biological_domain_counts, .salinity_enabled_by_cell = &.{true}, .parameters = compatibilityParameters() };
     try applyTile(&context, .{ .first = 0, .end = 1 });

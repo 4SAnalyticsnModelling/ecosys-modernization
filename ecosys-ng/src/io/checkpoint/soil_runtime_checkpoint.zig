@@ -5,9 +5,10 @@ const SoilThermal = @import("../../soil/heat/thermal.zig").State;
 const retention = @import("../../soil/water/retention.zig");
 const ReactionParameters = @import("../../soil/solute/chemistry_state.zig").ReactionParameters;
 const ExchangeSelectivity = @import("../../soil/solute/cation_exchange.zig").Selectivity;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
-pub const solver_field_count = @typeInfo(SolverField).@"enum".fields.len;
-pub const thermal_field_count = @typeInfo(ThermalField).@"enum".fields.len;
+pub const solver_field_count = @typeInfo(SolverField).@"enum".field_names.len;
+pub const thermal_field_count = @typeInfo(ThermalField).@"enum".field_names.len;
 
 pub const SolverField = enum {
     lateral_saturated_hydraulic_conductivity_m_per_h,
@@ -105,14 +106,14 @@ pub const Snapshot = struct {
             .soil_chemistry_layer_parameters = soil_chemistry_layer_parameters,
         });
         try self.validate();
-        inline for (@typeInfo(SolverField).@"enum".fields, 0..) |field, index|
+        inline for (ti_compat.enumFieldViews(SolverField), 0..) |field, index|
             @memcpy(
-                mutableSolverValues(soil_properties, @enumFromInt(field.value)),
+                mutableSolverValues(soil_properties, @fromBackingInt(@intCast(field.value))),
                 self.solver_fields[index],
             );
-        inline for (@typeInfo(ThermalField).@"enum".fields, 0..) |field, index|
+        inline for (ti_compat.enumFieldViews(ThermalField), 0..) |field, index|
             @memcpy(
-                mutableThermalValues(soil_thermal, @enumFromInt(field.value)),
+                mutableThermalValues(soil_thermal, @fromBackingInt(@intCast(field.value))),
                 self.thermal_fields[index],
             );
         @memcpy(soil_properties.retention_curve, self.retention_curve);
@@ -157,50 +158,50 @@ pub const Snapshot = struct {
         for (self.retention_curve, self.mualem_van_genuchten_parameters, 0..) |curve, mualem, index| {
             try validateResolvedCurve(curve);
             try mualem.validate();
-            if (curve.porosity_fraction != self.solver_fields[@intFromEnum(SolverField.porosity_fraction)][index] or
-                curve.curve.field_capacity_fraction != self.solver_fields[@intFromEnum(SolverField.field_capacity_fraction)][index] or
-                curve.curve.wilting_point_fraction != self.solver_fields[@intFromEnum(SolverField.wilting_point_fraction)][index] or
-                curve.curve.saturation_water_potential_megapascal != self.solver_fields[@intFromEnum(SolverField.saturation_water_potential_megapascal)][index])
+            if (curve.porosity_fraction != self.solver_fields[@backingInt(SolverField.porosity_fraction)][index] or
+                curve.curve.field_capacity_fraction != self.solver_fields[@backingInt(SolverField.field_capacity_fraction)][index] or
+                curve.curve.wilting_point_fraction != self.solver_fields[@backingInt(SolverField.wilting_point_fraction)][index] or
+                curve.curve.saturation_water_potential_megapascal != self.solver_fields[@backingInt(SolverField.saturation_water_potential_megapascal)][index])
                 return error.InvalidSoilRuntimeCheckpointState;
         }
         const solver_volume = self.solver_fields[
-            @intFromEnum(SolverField.layer_volume_m3)
+            @backingInt(SolverField.layer_volume_m3)
         ];
         const matrix_volume = self.solver_fields[
-            @intFromEnum(SolverField.matrix_bulk_volume_m3)
+            @backingInt(SolverField.matrix_bulk_volume_m3)
         ];
         const density = self.solver_fields[
-            @intFromEnum(SolverField.bulk_density_megagrams_per_m3)
+            @backingInt(SolverField.bulk_density_megagrams_per_m3)
         ];
         const solver_porosity = self.solver_fields[
-            @intFromEnum(SolverField.porosity_fraction)
+            @backingInt(SolverField.porosity_fraction)
         ];
         const solver_thickness = self.solver_fields[
-            @intFromEnum(SolverField.layer_thickness_m)
+            @backingInt(SolverField.layer_thickness_m)
         ];
         const initial_thickness = self.solver_fields[
-            @intFromEnum(SolverField.initial_layer_thickness_m)
+            @backingInt(SolverField.initial_layer_thickness_m)
         ];
         const reference_density = self.solver_fields[
-            @intFromEnum(SolverField.reference_bulk_density_megagrams_per_m3)
+            @backingInt(SolverField.reference_bulk_density_megagrams_per_m3)
         ];
         const thermal_volume = self.thermal_fields[
-            @intFromEnum(ThermalField.layer_volume_m3)
+            @backingInt(ThermalField.layer_volume_m3)
         ];
         const thermal_thickness = self.thermal_fields[
-            @intFromEnum(ThermalField.layer_thickness_m)
+            @backingInt(ThermalField.layer_thickness_m)
         ];
         const thermal_porosity = self.thermal_fields[
-            @intFromEnum(ThermalField.porosity_fraction)
+            @backingInt(ThermalField.porosity_fraction)
         ];
         const dry_heat_capacity = self.thermal_fields[
-            @intFromEnum(ThermalField.dry_solid_heat_capacity_megajoules_per_m3_k)
+            @backingInt(ThermalField.dry_solid_heat_capacity_megajoules_per_m3_k)
         ];
         const total_heat_capacity = self.thermal_fields[
-            @intFromEnum(ThermalField.total_heat_capacity_megajoules_per_m3_k)
+            @backingInt(ThermalField.total_heat_capacity_megajoules_per_m3_k)
         ];
         const conductivity = self.thermal_fields[
-            @intFromEnum(ThermalField.thermal_conductivity_m_megajoules_per_h_k)
+            @backingInt(ThermalField.thermal_conductivity_m_megajoules_per_h_k)
         ];
         for (0..self.layer_count) |index| {
             if (solver_volume[index] <= 0 or matrix_volume[index] < 0 or
@@ -213,15 +214,15 @@ pub const Snapshot = struct {
                 dry_heat_capacity[index] < 0 or total_heat_capacity[index] < 0 or
                 conductivity[index] < 0)
                 return error.InvalidSoilRuntimeCheckpointState;
-            const micropore = self.solver_fields[@intFromEnum(SolverField.micropore_fraction)][index];
-            const macropore = self.solver_fields[@intFromEnum(SolverField.macropore_fraction)][index];
-            const rock = self.solver_fields[@intFromEnum(SolverField.rock_fraction)][index];
-            const supplied_fc = self.solver_fields[@intFromEnum(SolverField.supplied_field_capacity_fraction)][index];
-            const supplied_wp = self.solver_fields[@intFromEnum(SolverField.supplied_wilting_point_fraction)][index];
-            const field_potential = self.solver_fields[@intFromEnum(SolverField.field_capacity_water_potential_megapascal)][index];
-            const wilting_potential = self.solver_fields[@intFromEnum(SolverField.wilting_point_water_potential_megapascal)][index];
-            const previous_charcoal = self.solver_fields[@intFromEnum(SolverField.previous_charcoal_carbon_g_c)][index];
-            const inflection = self.solver_fields[@intFromEnum(SolverField.van_genuchten_inflection_pressure_head_m)][index];
+            const micropore = self.solver_fields[@backingInt(SolverField.micropore_fraction)][index];
+            const macropore = self.solver_fields[@backingInt(SolverField.macropore_fraction)][index];
+            const rock = self.solver_fields[@backingInt(SolverField.rock_fraction)][index];
+            const supplied_fc = self.solver_fields[@backingInt(SolverField.supplied_field_capacity_fraction)][index];
+            const supplied_wp = self.solver_fields[@backingInt(SolverField.supplied_wilting_point_fraction)][index];
+            const field_potential = self.solver_fields[@backingInt(SolverField.field_capacity_water_potential_megapascal)][index];
+            const wilting_potential = self.solver_fields[@backingInt(SolverField.wilting_point_water_potential_megapascal)][index];
+            const previous_charcoal = self.solver_fields[@backingInt(SolverField.previous_charcoal_carbon_g_c)][index];
+            const inflection = self.solver_fields[@backingInt(SolverField.van_genuchten_inflection_pressure_head_m)][index];
             if (micropore < 0 or micropore > 1 or macropore < 0 or macropore >= 1 or
                 !validAdditiveRock(rock) or previous_charcoal < 0 or inflection > 0 or
                 field_potential >= 0 or wilting_potential >= field_potential or
@@ -235,17 +236,17 @@ pub const Snapshot = struct {
 pub fn write(writer: anytype, view: View) !void {
     try validateView(view);
     try writer.writeInt(u64, @intCast(view.soil_properties.layer_count), .little);
-    inline for (@typeInfo(SolverField).@"enum".fields) |field|
+    inline for (ti_compat.enumFieldViews(SolverField)) |field|
         try writeF64Slice(
             writer,
-            solverValues(view.soil_properties, @enumFromInt(field.value)),
+            solverValues(view.soil_properties, @fromBackingInt(@intCast(field.value))),
         );
     try writeResolvedCurveSlice(writer, view.soil_properties.retention_curve);
     try writeMualemSlice(writer, view.soil_properties.mualem_van_genuchten_parameters);
-    inline for (@typeInfo(ThermalField).@"enum".fields) |field|
+    inline for (ti_compat.enumFieldViews(ThermalField)) |field|
         try writeF64Slice(
             writer,
-            thermalValues(view.soil_thermal, @enumFromInt(field.value)),
+            thermalValues(view.soil_thermal, @fromBackingInt(@intCast(field.value))),
         );
     for (view.soil_chemistry_layer_parameters) |parameters| {
         try writeF64(
@@ -317,13 +318,13 @@ pub fn read(
 
 pub fn validateView(view: View) !void {
     try validateTargetLayout(view);
-    inline for (@typeInfo(SolverField).@"enum".fields) |field|
+    inline for (ti_compat.enumFieldViews(SolverField)) |field|
         try validateFinite(
-            solverValues(view.soil_properties, @enumFromInt(field.value)),
+            solverValues(view.soil_properties, @fromBackingInt(@intCast(field.value))),
         );
-    inline for (@typeInfo(ThermalField).@"enum".fields) |field|
+    inline for (ti_compat.enumFieldViews(ThermalField)) |field|
         try validateFinite(
-            thermalValues(view.soil_thermal, @enumFromInt(field.value)),
+            thermalValues(view.soil_thermal, @fromBackingInt(@intCast(field.value))),
         );
     for (view.soil_chemistry_layer_parameters, 0..) |parameters, index|
         if (!std.math.isFinite(parameters.cation_exchange_capacity_mol_charge_per_megagram) or
@@ -436,12 +437,12 @@ fn validateDimensions(view: View, layer_count: usize) !void {
         view.soil_thermal.cell_count * view.soil_thermal.soil_layer_capacity !=
             layer_count)
         return error.SoilRuntimeCheckpointDimensionMismatch;
-    inline for (@typeInfo(SolverField).@"enum".fields) |field|
-        if (solverValues(view.soil_properties, @enumFromInt(field.value)).len !=
+    inline for (ti_compat.enumFieldViews(SolverField)) |field|
+        if (solverValues(view.soil_properties, @fromBackingInt(@intCast(field.value))).len !=
             layer_count)
             return error.SoilRuntimeCheckpointDimensionMismatch;
-    inline for (@typeInfo(ThermalField).@"enum".fields) |field|
-        if (thermalValues(view.soil_thermal, @enumFromInt(field.value)).len !=
+    inline for (ti_compat.enumFieldViews(ThermalField)) |field|
+        if (thermalValues(view.soil_thermal, @fromBackingInt(@intCast(field.value))).len !=
             layer_count)
             return error.SoilRuntimeCheckpointDimensionMismatch;
 }
@@ -489,7 +490,7 @@ fn readF64Slice(reader: *std.Io.Reader, values: []f64) !void {
 fn writeResolvedCurveSlice(writer: anytype, values: []const retention.ResolvedCurve) !void {
     for (values) |value| {
         try writeF64(writer, value.porosity_fraction);
-        inline for (@typeInfo(retention.Curve).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(retention.Curve)) |field|
             try writeF64(writer, @field(value.curve, field.name));
     }
 }
@@ -497,21 +498,21 @@ fn writeResolvedCurveSlice(writer: anytype, values: []const retention.ResolvedCu
 fn readResolvedCurveSlice(reader: *std.Io.Reader, values: []retention.ResolvedCurve) !void {
     for (values) |*value| {
         value.porosity_fraction = try readF64(reader);
-        inline for (@typeInfo(retention.Curve).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(retention.Curve)) |field|
             @field(value.curve, field.name) = try readF64(reader);
     }
 }
 
 fn writeMualemSlice(writer: anytype, values: []const retention.MualemVanGenuchtenParameters) !void {
     for (values) |value| {
-        inline for (@typeInfo(retention.MualemVanGenuchtenParameters).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(retention.MualemVanGenuchtenParameters)) |field|
             try writeF64(writer, @field(value, field.name));
     }
 }
 
 fn readMualemSlice(reader: *std.Io.Reader, values: []retention.MualemVanGenuchtenParameters) !void {
     for (values) |*value| {
-        inline for (@typeInfo(retention.MualemVanGenuchtenParameters).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(retention.MualemVanGenuchtenParameters)) |field|
             @field(value, field.name) = try readF64(reader);
     }
 }
@@ -528,13 +529,13 @@ fn readF64(reader: *std.Io.Reader) !f64 {
 }
 
 fn writeExchangeSelectivity(writer: anytype, value: ExchangeSelectivity) !void {
-    inline for (@typeInfo(ExchangeSelectivity).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(ExchangeSelectivity)) |field|
         try writeF64(writer, @field(value, field.name));
 }
 
 fn readExchangeSelectivity(reader: *std.Io.Reader) !ExchangeSelectivity {
     var value: ExchangeSelectivity = undefined;
-    inline for (@typeInfo(ExchangeSelectivity).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(ExchangeSelectivity)) |field|
         @field(value, field.name) = try readF64(reader);
     return value;
 }
@@ -544,14 +545,14 @@ fn validateExchangeSelectivity(values: []const ExchangeSelectivity) !void {
 }
 
 fn validateExchangeSelectivityValue(value: ExchangeSelectivity) !void {
-    inline for (@typeInfo(ExchangeSelectivity).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(ExchangeSelectivity)) |field|
         if (!std.math.isFinite(@field(value, field.name)) or
             @field(value, field.name) < 0)
             return error.InvalidSoilRuntimeCheckpointState;
 }
 
 fn validateResolvedCurve(curve: retention.ResolvedCurve) !void {
-    inline for (@typeInfo(retention.Curve).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(retention.Curve)) |field|
         if (!std.math.isFinite(@field(curve.curve, field.name)))
             return error.NonFiniteSoilRuntimeCheckpoint;
     if (!std.math.isFinite(curve.porosity_fraction) or

@@ -7,6 +7,7 @@ const LayerState = @import("../radiation/layer_distribution.zig").State;
 const RadiationState = @import("../radiation/radiation.zig").State;
 const WoodyOpticsParameters = @import("../radiation/optics.zig").WoodyOpticsParameters;
 const ScatteringDirection = @import("../morphology/geometry.zig").ScatteringDirection;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Leaf-only interception for the current combined canopy layer. Stalk,
 /// standing-dead, vertical-layer scattering and ground reflection are added by
@@ -99,7 +100,7 @@ pub const State = struct {
         result.upward_escape_shortwave_megajoules_per_m2 = try allocator.alloc(f64, cell_count);
         errdefer allocator.free(result.upward_escape_shortwave_megajoules_per_m2);
         result.upward_escape_par_micromol_per_m2_per_s = try allocator.alloc(f64, cell_count);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) @memset(@field(result, field.name), if (comptime std.mem.indexOf(u8, field.name, "transmission") != null) 1 else 0);
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) @memset(@field(result, field.name), if (comptime std.mem.indexOf(u8, field.name, "transmission") != null) 1 else 0);
         return result;
     }
 
@@ -126,7 +127,7 @@ pub const State = struct {
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
             if (!std.math.isFinite(value)) {
                 std.log.err("non-finite canopy interception: field={s} index={d} value={e}", .{ field.name, index, value });
                 return error.NonFiniteCanopyInterception;

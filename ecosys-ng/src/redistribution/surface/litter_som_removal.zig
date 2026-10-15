@@ -20,6 +20,7 @@
 // redistribution_surface_litter_removal_group_is_a_second_translation_of_a_gap.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Totals = struct {
     remaining_carbon_g_c: f64,
@@ -62,7 +63,7 @@ pub fn remove(removal_fraction: f64, pools: Pools, initial: Totals) !Totals {
         !finiteNonnegative(pools.soil_organic_nitrogen_g_n) or
         !finiteNonnegative(pools.soil_organic_phosphorus_g_p))
         return error.InvalidSurfaceLitterSomInput;
-    inline for (std.meta.fields(Totals)) |field|
+    inline for (ti_compat.fieldViews(Totals)) |field|
         if (!std.math.isFinite(@field(initial, field.name)) or @field(initial, field.name) < 0) return error.InvalidSurfaceLitterSomInput;
 
     var carbon: [15]f64 = undefined;
@@ -93,7 +94,7 @@ pub fn remove(removal_fraction: f64, pools: Pools, initial: Totals) !Totals {
         next.removed_carbon_g_c += removed_c;
         next.removed_nitrogen_g_n += removed_n;
         next.removed_phosphorus_g_p += removed_p;
-        inline for (std.meta.fields(Totals)) |field|
+        inline for (ti_compat.fieldViews(Totals)) |field|
             if (!std.math.isFinite(@field(next, field.name))) return error.NonFiniteSurfaceLitterSomResult;
         sequential += 1;
     };

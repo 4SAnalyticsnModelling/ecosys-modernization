@@ -1,0 +1,22 @@
+install
++- install ecosys_ng
+   +- compile exe ecosys_ng debug native 1 errors
+src/core/array_compat.zig:36:5: error: evaluation exceeded 1000 backwards branches
+    for (&out) |*slot| slot.* = value;
+    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/core/array_compat.zig:36:5: note: use @setEvalBranchQuota() to raise the branch limit from 1000
+src/soil/water/kirchhoff.zig:124:50: note: called at comptime here
+    entries: [capacity]?Entry = arr_compat.filled(capacity, ?Entry, @as(?Entry, null)),
+                                ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    solveControlled: src/soil/water/solver_solve.zig:829:45
+    solve: src/soil/water/solver_solve.zig:41:27
+    18 reference(s) hidden; use '-freference-trace=20' to see all references
+error: 1 compilation errors
+failed command: /opt/homebrew/Cellar/zig/0.17.0/bin/zig build-exe -Odebug --dep ecosys_ng -Mroot=src/ecosys_ng.zig -Odebug -Mecosys_ng=src/module_index.zig --cache-dir .zig-cache --global-cache-dir .zig-cache-global --build-root . --name ecosys_ng --zig-lib-dir /opt/homebrew/Cellar/zig/0.17.0/lib/zig/ --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+install transitive failure
++- install ecosys_ng transitive failure
+   +- compile exe ecosys_ng debug native 1 errors
+

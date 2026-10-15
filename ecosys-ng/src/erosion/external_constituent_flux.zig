@@ -17,6 +17,7 @@ const mineral = @import("mineral_fertilizer_flux.zig");
 const exchange = @import("exchange_surface_flux.zig");
 const precipitate = @import("precipitate_silicate_flux.zig");
 const organic = @import("organic_matter_flux.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     cumulative_sediment_megagrams: f64, // XSEDER(N,NN,N5,N4)
@@ -53,7 +54,7 @@ pub fn calculate(allocator: std.mem.Allocator, inputs: Inputs, organic_outputs: 
 
 fn filled(comptime T: type, value: f64) T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| @field(result, field.name) = value;
+    inline for (ti_compat.fieldViews(T)) |field| @field(result, field.name) = value;
     return result;
 }
 

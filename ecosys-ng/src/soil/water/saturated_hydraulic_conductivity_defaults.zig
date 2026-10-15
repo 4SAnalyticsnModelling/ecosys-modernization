@@ -65,6 +65,7 @@
 // docs/traceability/hour1_saturated_conductivity_defaults_are_owned_by_solver_properties.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     vertical_was_missing: bool,
@@ -129,7 +130,7 @@ fn defaultConductivity(inputs: Inputs) !f64 {
 }
 
 fn validate(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteDefaultHydraulicConductivityInput;
     inline for (.{

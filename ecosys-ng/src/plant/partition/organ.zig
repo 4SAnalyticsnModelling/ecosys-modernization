@@ -1,4 +1,6 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const organ_count: usize = 7;
 
@@ -13,7 +15,7 @@ pub const Parameters = struct {
     low_reserve_redirect_fraction: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Parameters)) |field| {
             if (field.type == f64) {
                 const value = @field(self, field.name);
                 if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidOrganPartitionParameter;
@@ -72,7 +74,7 @@ pub fn calculate(parameters: Parameters, inputs: Inputs) !Result {
     if (inputs.turnover_type >= 6) return error.InvalidOrganPartitionCode;
     inline for (.{ inputs.normalized_vegetative_stage, inputs.normalized_reproductive_stage, inputs.reserve_carbon_g_c, inputs.sapwood_carbon_g_c }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidOrganPartitionInput;
     const determinacy: usize = @intFromBool(!inputs.determinate);
-    var part = [_]f64{0} ** organ_count;
+    var part = @as([organ_count]f64, @splat(@as(f64, 0)));
     if (!inputs.floral_initiation_started) {
         part[0] = parameters.initial_leaf_fraction;
         part[1] = parameters.initial_sheath_fraction;

@@ -22,6 +22,7 @@
 //! comparison oracle for the range above. Full argument and the census behind
 //! it: `docs/traceability/hour1_2039_5200_binding_survey.md`.
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const WaterAndHeat = struct {
     runoff_water_m3_timestep: f64, // FLWR
@@ -94,32 +95,32 @@ pub const GridCellDiagnostics = struct {
 
 /// Translates `hour1.f` lines 3015--3064 in source assignment order.
 pub fn reset(diagnostics: *GridCellDiagnostics) void {
-    inline for (std.meta.fields(WaterAndHeat)) |field| {
+    inline for (ti_compat.fieldViews(WaterAndHeat)) |field| {
         @field(diagnostics.water_and_heat, field.name) = 0.0;
     }
-    inline for (std.meta.fields(GasDiffusion)) |field| {
+    inline for (ti_compat.fieldViews(GasDiffusion)) |field| {
         @field(diagnostics.gas_diffusion, field.name) = 0.0;
     }
-    inline for (std.meta.fields(EcosystemTotals)) |field| {
+    inline for (ti_compat.fieldViews(EcosystemTotals)) |field| {
         @field(diagnostics.ecosystem_totals, field.name) = 0.0;
     }
-    inline for (std.meta.fields(LateralTotals)) |field| {
+    inline for (ti_compat.fieldViews(LateralTotals)) |field| {
         @field(diagnostics.lateral_totals, field.name) = 0.0;
     }
 }
 
 test "grid-cell hourly reset clears every diagnostic field" {
     var diagnostics: GridCellDiagnostics = undefined;
-    inline for (std.meta.fields(GridCellDiagnostics)) |group_field| {
-        inline for (std.meta.fields(group_field.type)) |field| {
+    inline for (ti_compat.fieldViews(GridCellDiagnostics)) |group_field| {
+        inline for (ti_compat.fieldViews(group_field.type)) |field| {
             @field(@field(diagnostics, group_field.name), field.name) = 11.0;
         }
     }
 
     reset(&diagnostics);
 
-    inline for (std.meta.fields(GridCellDiagnostics)) |group_field| {
-        inline for (std.meta.fields(group_field.type)) |field| {
+    inline for (ti_compat.fieldViews(GridCellDiagnostics)) |group_field| {
+        inline for (ti_compat.fieldViews(group_field.type)) |field| {
             try std.testing.expectEqual(
                 @as(f64, 0.0),
                 @field(@field(diagnostics, group_field.name), field.name),

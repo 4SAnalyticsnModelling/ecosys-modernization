@@ -11,6 +11,7 @@ const phosphate_exchange = @import("phosphate_exchange.zig");
 const geochemistry_reaction_rates = @import("geochemistry_reaction_rates.zig");
 const carboxyl_exchange = @import("carboxyl_exchange.zig");
 const water_equilibrium = @import("water_equilibrium.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const PhosphateTransformations = struct {
     non_band: phosphate_network.Transformations,
@@ -203,7 +204,7 @@ pub const State = struct {
         if (!std.math.isFinite(soil_mass_megagrams) or soil_mass_megagrams < 0 or
             !std.math.isFinite(water_m3) or water_m3 < 0)
             return error.InvalidPendingChemistryCarrier;
-        inline for (@typeInfo(charge_classification.ZoneFractions).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(charge_classification.ZoneFractions)) |field| {
             const value = @field(fractions, field.name);
             if (!std.math.isFinite(value) or value < 0 or value > 1)
                 return error.InvalidPendingChemistryCarrier;
@@ -217,7 +218,7 @@ pub const State = struct {
 
         var exchange = self.cation_exchange_mol_per_megagram[cell_index];
         var pending_exchange = self.pending_cation_exchange_mol[cell_index];
-        inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| {
             const carrier = if (comptime std.mem.eql(u8, field.name, "ammonium_non_band"))
                 soil_mass_megagrams * fractions.ammonium_non_band
             else if (comptime std.mem.eql(u8, field.name, "ammonium_band"))
@@ -235,7 +236,7 @@ pub const State = struct {
         var band = self.band_phosphate[cell_index];
         var pending_band = self.pending_band_phosphate_mol[cell_index];
         inline for (.{ .{ &non_band, &pending_non_band, fractions.phosphate_non_band }, .{ &band, &pending_band, fractions.phosphate_band } }) |zone| {
-            inline for (@typeInfo(phosphate_network.State).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(phosphate_network.State)) |field| {
                 if (comptime isImmobilePhosphateField(field.name)) {
                     const carrier = (if (comptime std.mem.endsWith(u8, field.name, "_per_megagram")) soil_mass_megagrams else water_m3) * zone[2];
                     try materializeOne(&@field(zone[0].*, field.name), &@field(zone[1].*, field.name), carrier);
@@ -247,7 +248,7 @@ pub const State = struct {
 
         var solids = self.geochemistry_solids[cell_index];
         var pending_solids = self.pending_geochemistry_solids_mol[cell_index];
-        inline for (@typeInfo(geochemistry.SolidState).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(geochemistry.SolidState)) |field|
             try materializeOne(&@field(solids, field.name), &@field(pending_solids, field.name), water_m3);
 
         self.cation_exchange_mol_per_megagram[cell_index] = exchange;
@@ -442,7 +443,7 @@ pub const State = struct {
         var cursor: usize = 0;
         packStruct(aqueous_network.Transformations, aqueous, output, &cursor);
         inline for (.{ transformations.non_band_phosphate, transformations.band_phosphate }) |phosphate| {
-            inline for (std.meta.fields(phosphate_network.State)) |field| {
+            inline for (ti_compat.fieldViews(phosphate_network.State)) |field| {
                 output[cursor] = @field(phosphate, field.name);
                 cursor += 1;
             }
@@ -450,7 +451,7 @@ pub const State = struct {
         packStruct(cation_exchange.Cations, transformations.cation_adsorption_mol_per_megagram, output, &cursor);
         output[cursor] = transformations.carboxyl_hydrogen_change_mol_per_megagram;
         cursor += 1;
-        inline for (std.meta.fields(geochemistry.SolidState)) |field| {
+        inline for (ti_compat.fieldViews(geochemistry.SolidState)) |field| {
             output[cursor] = @field(transformations.geochemistry, field.name);
             cursor += 1;
         }
@@ -508,7 +509,7 @@ pub const State = struct {
         staged.aqueous_changes.hydrogen = 0;
         staged.aqueous_changes.hydroxide = 0;
         inline for (
-            @typeInfo(aqueous_network.State).@"struct".fields,
+            ti_compat.fieldViews(aqueous_network.State),
             0..,
         ) |field, index| {
             const current_value = @field(staged.aqueous, field.name);
@@ -592,33 +593,33 @@ pub const State = struct {
     }
 
     pub fn packedComponentCount() usize {
-        return @typeInfo(aqueous_network.State).@"struct".fields.len +
-            2 * @typeInfo(phosphate_network.State).@"struct".fields.len +
-            @typeInfo(cation_exchange.Cations).@"struct".fields.len +
-            @typeInfo(geochemistry.SolidState).@"struct".fields.len + 2;
+        return @typeInfo(aqueous_network.State).@"struct".field_names.len +
+            2 * @typeInfo(phosphate_network.State).@"struct".field_names.len +
+            @typeInfo(cation_exchange.Cations).@"struct".field_names.len +
+            @typeInfo(geochemistry.SolidState).@"struct".field_names.len + 2;
     }
 
     pub fn packedComponentName(index: usize) ?[]const u8 {
         var cursor: usize = 0;
-        inline for (@typeInfo(aqueous_network.State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(aqueous_network.State)) |field| {
             if (index == cursor) return "aqueous." ++ field.name;
             cursor += 1;
         }
-        inline for (@typeInfo(phosphate_network.State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(phosphate_network.State)) |field| {
             if (index == cursor) return "phosphate_non_band." ++ field.name;
             cursor += 1;
         }
-        inline for (@typeInfo(phosphate_network.State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(phosphate_network.State)) |field| {
             if (index == cursor) return "phosphate_band." ++ field.name;
             cursor += 1;
         }
-        inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| {
             if (index == cursor) return "cation_exchange." ++ field.name;
             cursor += 1;
         }
         if (index == cursor) return "carboxyl_bound_hydrogen_mol_per_megagram";
         cursor += 1;
-        inline for (@typeInfo(geochemistry.SolidState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(geochemistry.SolidState)) |field| {
             if (index == cursor) return "geochemistry_solids." ++ field.name;
             cursor += 1;
         }
@@ -631,25 +632,25 @@ pub const State = struct {
     /// explicit anywhere a numerical absolute tolerance is selected.
     pub fn packedComponentIsMolPerMegagram(index: usize) bool {
         var cursor: usize = 0;
-        inline for (@typeInfo(aqueous_network.State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(aqueous_network.State)) |field| {
             if (index == cursor)
                 return comptime std.mem.endsWith(u8, field.name, "_per_megagram");
             cursor += 1;
         }
         inline for (0..2) |_| {
-            inline for (@typeInfo(phosphate_network.State).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(phosphate_network.State)) |field| {
                 if (index == cursor)
                     return comptime std.mem.endsWith(u8, field.name, "_per_megagram");
                 cursor += 1;
             }
         }
-        inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |_| {
+        inline for (ti_compat.fieldViews(cation_exchange.Cations)) |_| {
             if (index == cursor) return true;
             cursor += 1;
         }
         if (index == cursor) return true; // carboxyl-bound H is mol/Mg.
         cursor += 1;
-        inline for (@typeInfo(geochemistry.SolidState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(geochemistry.SolidState)) |field| {
             if (index == cursor)
                 return comptime std.mem.endsWith(u8, field.name, "_per_megagram");
             cursor += 1;
@@ -819,10 +820,10 @@ pub const State = struct {
 };
 
 test "packed chemistry tolerance units classify both phosphate zones exactly" {
-    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".fields.len;
-    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".fields.len;
-    const exchange_count = @typeInfo(cation_exchange.Cations).@"struct".fields.len;
-    const geochemistry_count = @typeInfo(geochemistry.SolidState).@"struct".fields.len;
+    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".field_names.len;
+    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".field_names.len;
+    const exchange_count = @typeInfo(cation_exchange.Cations).@"struct".field_names.len;
+    const geochemistry_count = @typeInfo(geochemistry.SolidState).@"struct".field_names.len;
     const dissolved_offset = std.meta.fieldIndex(
         phosphate_network.State,
         "dissolved_hpo4_mol_p_per_m3",
@@ -854,12 +855,12 @@ test "packed chemistry tolerance units classify both phosphate zones exactly" {
 }
 
 fn zeroStruct(comptime T: type, value: *T) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| @field(value.*, field.name) = 0;
+    inline for (ti_compat.fieldViews(T)) |field| @field(value.*, field.name) = 0;
 }
 
 fn filledStruct(comptime T: type, amount: f64) T {
     var value: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| @field(value, field.name) = amount;
+    inline for (ti_compat.fieldViews(T)) |field| @field(value, field.name) = amount;
     return value;
 }
 
@@ -912,7 +913,7 @@ test "addCationExchange is a true zero-in-zero-out identity" {
 }
 
 fn packStruct(comptime T: type, value: T, output: []f64, cursor: *usize) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(T)) |field| {
         output[cursor.*] = @field(value, field.name);
         cursor.* += 1;
     }
@@ -920,7 +921,7 @@ fn packStruct(comptime T: type, value: T, output: []f64, cursor: *usize) void {
 
 fn unpackStruct(comptime T: type, input: []const f64, cursor: *usize) !T {
     var value: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(T)) |field| {
         const component = input[cursor.*];
         if (!std.math.isFinite(component)) return error.NonFiniteChemistryVector;
         if (component < 0) return error.NegativeChemistryVector;
@@ -945,7 +946,7 @@ fn addSharedPhosphate(aqueous: *aqueous_network.Transformations, phosphate: phos
 
 fn addCationExchange(exchange_state: *cation_exchange.Cations, aqueous: *aqueous_network.Transformations, adsorption: cation_exchange.Cations, ratios: CationExchangeWaterRatios) !void {
     try validateCationExchangeWaterRatios(adsorption, ratios);
-    inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| {
         const flux = @field(adsorption, field.name);
         if (!std.math.isFinite(flux)) return error.NonFiniteCationExchangeTransformation;
         @field(exchange_state.*, field.name) += flux;
@@ -1430,7 +1431,7 @@ test "runtime state evaluates both phosphate zones with shared activities" {
     const coefficients = try state.activityCoefficients(0, fractions);
     const injected = try state.evaluatePhosphateTransformationsWithCoefficients(0, fractions, coefficients, 1.2, 1.5, constants, surface, null, kinetics);
     try std.testing.expectEqualDeep(changes, injected);
-    inline for (@typeInfo(phosphate_network.Transformations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(phosphate_network.Transformations)) |field| {
         try std.testing.expect(std.math.isFinite(@field(changes.non_band, field.name)));
         try std.testing.expect(std.math.isFinite(@field(changes.band, field.name)));
     }
@@ -1479,8 +1480,8 @@ test "single cell evaluation assembles every active SOLUTE reaction family" {
         .water_activity_product_mol2_per_m6 = 1,
         .negligible_water_ion_concentration_mol_per_m3 = 1e-32,
     });
-    inline for (@typeInfo(aqueous_network.Transformations).@"struct".fields) |field| try std.testing.expect(std.math.isFinite(@field(transformations.aqueous, field.name)));
-    inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field| try std.testing.expect(std.math.isFinite(@field(transformations.cation_adsorption_mol_per_megagram, field.name)));
+    inline for (ti_compat.fieldViews(aqueous_network.Transformations)) |field| try std.testing.expect(std.math.isFinite(@field(transformations.aqueous, field.name)));
+    inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| try std.testing.expect(std.math.isFinite(@field(transformations.cation_adsorption_mol_per_megagram, field.name)));
 }
 
 test "source-order water change includes carbon dioxide hydration" {

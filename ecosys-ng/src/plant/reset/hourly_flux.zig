@@ -12,6 +12,7 @@
 // src/ecosys_ng.zig:3620. Do not bind this module.
 // hourly flux reset group of docs/traceability/plant_reset_unbound_family_disposition.md
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     net_radiation_megajoules_by_species: []f64,
@@ -25,7 +26,7 @@ pub const State = struct {
 /// Exact runtime-species HOUR1 reset from hour1.f:223-230.
 pub fn apply(state: *State, first_subhourly_iteration: bool) !bool {
     const count = state.net_radiation_megajoules_by_species.len;
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         const values = @field(state.*, field.name);
         if (values.len != count)
             return error.HourlyPlantFluxResetDimensionMismatch;
@@ -34,7 +35,7 @@ pub fn apply(state: *State, first_subhourly_iteration: bool) !bool {
                 return error.NonFiniteHourlyPlantFluxState;
     }
     if (!first_subhourly_iteration) return false;
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         @memset(@field(state.*, field.name), 0);
     return true;
 }
@@ -73,7 +74,7 @@ test "first subhour resets all fluxes for arbitrary runtime species" {
         &carbon,
     );
     try std.testing.expect(try apply(&state, true));
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         for (@field(state, field.name)) |value|
             try std.testing.expectEqual(@as(f64, 0), value);
 }

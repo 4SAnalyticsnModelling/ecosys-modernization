@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const EnergyFluxDiagnostics = struct {
     net_radiation_megajoules_per_step: f64,
@@ -77,7 +78,7 @@ pub fn computeRuntimeSpecies(
 }
 
 fn validate(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteAbsentSpeciesCanopyInput;
     if (inputs.intercepted_water_m3 < 0 or

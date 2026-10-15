@@ -21,6 +21,8 @@
 //! comparison oracle for the range above. Full argument and the census behind
 //! it: `docs/traceability/hour1_2039_5200_binding_survey.md`.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 /// Each slice is ordered exactly as the corresponding HOUR1 expression in
 /// lines 4014-4031. Amounts are mol except the explicitly named g N/P slices.
@@ -76,7 +78,7 @@ pub fn calculate(
         return error.InvalidWaterVolume;
     }
     try validateDimensions(inputs);
-    inline for (std.meta.fields(ChargeInputs)) |field| {
+    inline for (ti_compat.fieldViews(ChargeInputs)) |field| {
         for (@field(inputs, field.name)) |amount| {
             if (!std.math.isFinite(amount)) return error.NonFiniteInput;
             if (amount < 0.0) return error.NegativeInput;
@@ -203,10 +205,10 @@ fn orderedSum(values: []const f64) f64 {
 
 test "monovalent ions determine strength activity and conductivity" {
     const zeros2 = [_]f64{ 0.0, 0.0 };
-    const zeros6 = [_]f64{0.0} ** 6;
-    const zeros8 = [_]f64{0.0} ** 8;
-    const zeros12 = [_]f64{0.0} ** 12;
-    var cations15 = [_]f64{0.0} ** 15;
+    const zeros6 = @as([6]f64, @splat(@as(f64, 0.0)));
+    const zeros8 = @as([8]f64, @splat(@as(f64, 0.0)));
+    const zeros12 = @as([12]f64, @splat(@as(f64, 0.0)));
+    var cations15 = @as([15]f64, @splat(@as(f64, 0.0)));
     cations15[0] = 1.0;
     var anions8 = zeros8;
     anions8[0] = 1.0;
@@ -230,10 +232,10 @@ test "monovalent ions determine strength activity and conductivity" {
 
 test "dry layer uses unit activity coefficients" {
     const zeros2 = [_]f64{ 0.0, 0.0 };
-    const zeros6 = [_]f64{0.0} ** 6;
-    const zeros8 = [_]f64{0.0} ** 8;
-    const zeros12 = [_]f64{0.0} ** 12;
-    const zeros15 = [_]f64{0.0} ** 15;
+    const zeros6 = @as([6]f64, @splat(@as(f64, 0.0)));
+    const zeros8 = @as([8]f64, @splat(@as(f64, 0.0)));
+    const zeros12 = @as([12]f64, @splat(@as(f64, 0.0)));
+    const zeros15 = @as([15]f64, @splat(@as(f64, 0.0)));
     const result = try calculate(0.0, 0.0, .{
         .trivalent_cations_mol = &zeros2,
         .trivalent_anions_mol = &zeros2,

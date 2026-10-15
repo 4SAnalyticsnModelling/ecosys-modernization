@@ -32,6 +32,7 @@ const root_metabolism = @import("../plant/root/plant_root_metabolism.zig");
 const group_misc = @import("plant_harvest_runtime_misc.zig");
 const group_source_order_exports = @import("plant_harvest_runtime_source_order_exports.zig");
 const group_types = @import("plant_harvest_runtime_types.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const harvest_product_component_count: usize = 5;
 
@@ -432,7 +433,7 @@ fn hostLayerHarvestRange(
             coarse,
         );
         try litter.add(mobile_result.litterfall);
-        inline for (@typeInfo(symbiotic_fixation.Pool).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(symbiotic_fixation.Pool)) |field|
             @field(removed, field.name) += @field(mobile_result.removed, field.name);
         for (0..roots.active_root_axis_count[plant]) |axis| {
             const axis_layer = try roots.layerAxisIndex(plant, domain, layer, axis);
@@ -451,7 +452,7 @@ fn hostLayerHarvestRange(
                 coarse,
             );
             try litter.add(structural_result.litterfall);
-            inline for (@typeInfo(symbiotic_fixation.Pool).@"struct".fields) |field|
+            inline for (ti_compat.fieldViews(symbiotic_fixation.Pool)) |field|
                 @field(removed, field.name) += @field(structural_result.removed, field.name);
         }
     }
@@ -603,11 +604,11 @@ pub fn harvestVegetativeBranch(context: *group_misc.Context, plant: usize, branc
                 state.plant_population_count[plant],
         );
         retention.unexported_fraction = group_misc.unexportedFraction(retention.remaining_fraction, event.ecosystem_export_fraction.nonfoliar);
-        const sheath_products = try canopy.harvestNodeSheath(state, branch, node_within_branch, retention.remaining_fraction, retention.unexported_fraction, science.carbon_woody_fraction, science.sheath_nitrogen_woody_fraction, science.sheath_phosphorus_woody_fraction, @intFromEnum(event.kind) <= @intFromEnum(management.HarvestKind.above_ground), event.cutting_height_m_or_lai_fraction);
+        const sheath_products = try canopy.harvestNodeSheath(state, branch, node_within_branch, retention.remaining_fraction, retention.unexported_fraction, science.carbon_woody_fraction, science.sheath_nitrogen_woody_fraction, science.sheath_phosphorus_woody_fraction, @backingInt(event.kind) <= @backingInt(management.HarvestKind.above_ground), event.cutting_height_m_or_lai_fraction);
         group_misc.addProducts(&context.products_by_plant[plant].nonfoliar, sheath_products.nonwoody);
         group_misc.addProducts(&context.products_by_plant[plant].woody, sheath_products.woody);
         const internode_remaining = try canopy.internodeHarvestRetention(state.node_height_m[node], state.node_internode_length_m[node], event.cutting_height_m_or_lai_fraction, pruning, event.thinning_fraction_or_consumption_rate, event.harvested_fraction.woody, false, 0, state.branch_stalk_carbon_g[branch]);
-        try canopy.state_updateInternodeHarvest(state, branch, node_within_branch, internode_remaining, @intFromEnum(event.kind) <= @intFromEnum(management.HarvestKind.above_ground) and event.thinning_fraction_or_consumption_rate == 0, event.cutting_height_m_or_lai_fraction);
+        try canopy.state_updateInternodeHarvest(state, branch, node_within_branch, internode_remaining, @backingInt(event.kind) <= @backingInt(management.HarvestKind.above_ground) and event.thinning_fraction_or_consumption_rate == 0, event.cutting_height_m_or_lai_fraction);
     }
     var stalk_retention = try canopy.sourceOrderBranchStalkRetention(
         false,

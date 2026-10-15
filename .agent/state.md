@@ -1,12 +1,12 @@
 # Mission State — ecosys-ng Ottawa (single autonomous agent)
 
 <!-- runner:begin -->
-## Cycle 00001 · PLANNING · 2026-10-13T20:59:29Z
+## Cycle 00001 · VERIFYING · 2026-10-15T10:09:16Z
 - Actor: single autonomous agent (any harness/model). Verification: gates G1-G9 (Zig 0.17.x build, repo-contained work) + read-only sub-agents.
-- Target: Compile ecosys-ng with Zig 0.17.x: delete the b.args passthrough in build.zig, apply the ** -> * repeat codemod (1197 repeats / 188 files), zig fmt, then a clean Debug build logged in audit/runs/. No source behaviour change; parity is not re-derived until the build is green.
-- Gates: none recorded
+- Target: Does ecosys-ng compile (Debug/ReleaseSafe/ReleaseFast) and pass its whole test suite on Zig 0.17.0 with every src change provably mechanical (no production number, tolerance, floor or clamp moved)?
+- Gates: G1=PASS, G2=PASS, G3=NA, G4=NA, G5=NA, G6=PASS, G7=PASS, G9=PASS
 - Sync: in_sync (push every completed cycle to origin/main)
-- Next target: Cycle 1 execution: build.zig b.args line, ** codemod (dry-run first), zig fmt, Debug build receipt
+- Next target: Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded oracle for those hours (cycle_00001.md section 6).
 <!-- runner:end -->
 
 Updated 2026-10-09 (mandates added); workflow revised to a single agent on 2026-10-08. Plan: Complete
@@ -16,9 +16,16 @@ Updated 2026-10-09 (mandates added); workflow revised to a single agent on 2026-
 - **Zig 0.17.x builds `ecosys-ng`; Zig 0.16 is retired** (protocol §8, gate G1). Machine check
   `uv run ecosys-audit/scripts/preflight.py` → currently `zig-version PASS (0.17.0 installed)` but
   `build-zon-pin PASS`: `ecosys-ng/build.zig.zon` now declares `minimum_zig_version = "0.17.0"` (2026-10-12), so the
-  tree can no longer be built by a retired 0.16. **The compile migration is still NOT executed** — Debug fails at
-  `build.zig:29` (`std.Build.args` gone) and then at `src/ecosys_ng.zig:8142` (`**` repeat gone; dry-run scope
-  1197 repeats in 188 files), receipts `audit/runs/zig017-debug-migration-20261008{,-attempt2}/`. Work order: `.agent/migrations/zig-0.17.md`; pin: `.agent/toolchain.json`; backlog item 0.
+  tree can no longer be built by a retired 0.16. **The compile migration IS executed and green (cycle 00001,
+  2026-10-15)**: `build.zig` lost the `std.Build.args` passthrough, the `**` repeat codemod (1197 repeats / 188 files)
+  plus `std.meta.fields` → `ti_compat.fieldViews` and `zig fmt`'s own `@intFromEnum` → `@backingInt` (1563) /
+  `@enumFromInt` → `@fromBackingInt` (165) rewrites landed. Debug 28.1 s / ReleaseSafe 163.6 s / ReleaseFast 168.4 s,
+  all exit 0, `audit/runs/zig017-{debug,releasesafe,releasefast}-20261015-1`; `zig build test` = **4518/4520 passed,
+  1 env-gated skip, 1 crash (tracked issue-106)** and **zero assertion failures**,
+  `audit/runs/zig017-test-20261014-4`. What is still NOT done is the numeric side: **no bounded run has re-derived
+  parity on 0.17 yet** (G3/G4/G5 = NA), and 168 files still carry 0.16 `zig fmt` formatting. Old 0.16 receipts
+  (`audit/runs/zig017-debug-migration-20261008*`) stay as dated history. Work order: `.agent/migrations/zig-0.17.md`;
+  pin: `.agent/toolchain.json`; cycle record: `.agent/cycles/cycle_00001.md`.
 - **All work stays inside this repository** (protocol §8a, gate G9): caches pinned to `.tmp/`, `.cache/`,
   `.uv-cache/`, `ecosys-ng/.zig-cache*/`; evidence under `audit/runs/`. Nothing needed by a later cycle may live
   outside the repo; the recorded `C:\ecosys-build\...` paths below are the retired Windows host, not a target.

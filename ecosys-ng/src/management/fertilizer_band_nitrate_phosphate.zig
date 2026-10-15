@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const BandApplication = enum { unbanded, banded };
 pub const SalinityChemistry = enum { disabled, enabled };
@@ -285,7 +286,7 @@ fn validate(
         return error.LayerIndexOutOfBounds;
     }
     inline for (.{ nitrate_geometry, phosphate_geometry }) |geometry| {
-        inline for (std.meta.fields(BandGeometry)) |field| {
+        inline for (ti_compat.fieldViews(BandGeometry)) |field| {
             if (field.type == f64) {
                 if (!std.math.isFinite(@field(geometry, field.name))) return error.NonFiniteInput;
             } else if (@field(geometry, field.name).len != count) {
@@ -296,7 +297,7 @@ fn validate(
         }
     }
     inline for (.{ nitrate_pools, phosphate_pools }) |pools| {
-        inline for (std.meta.fields(@TypeOf(pools))) |field| {
+        inline for (ti_compat.fieldViews(@TypeOf(pools))) |field| {
             if (@field(pools, field.name).len != count) return error.LayerCountMismatch;
             for (@field(pools, field.name)) |value| {
                 if (!std.math.isFinite(value)) return error.NonFiniteInput;
@@ -323,7 +324,7 @@ fn validate(
         return error.InvalidFraction;
     }
     for (inputs.layers) |layer| {
-        inline for (std.meta.fields(LayerProperties)) |field| {
+        inline for (ti_compat.fieldViews(LayerProperties)) |field| {
             if (!std.math.isFinite(@field(layer, field.name))) return error.NonFiniteInput;
         }
         if (layer.top_depth_m < 0.0 or layer.bottom_depth_m < layer.top_depth_m or
@@ -411,7 +412,7 @@ fn nitratePoolsFrom(storage: anytype) NitratePools {
 
 fn phosphatePoolsFrom(storage: anytype) PhosphatePools {
     var result: PhosphatePools = undefined;
-    inline for (std.meta.fields(PhosphatePools), 0..) |field, index| {
+    inline for (ti_compat.fieldViews(PhosphatePools), 0..) |field, index| {
         @field(result, field.name) = &storage[index];
     }
     return result;

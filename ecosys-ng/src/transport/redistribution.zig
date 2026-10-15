@@ -3,6 +3,7 @@ const solute = @import("../soil/solute/transport.zig");
 const gas = @import("../soil/gas/transport.zig");
 const snow = @import("../soil/solute/snow_solute_transport.zig");
 const surface = @import("../soil/solute/surface_solute_routing.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Runtime extensive-flux ledger replacing the distributed `X*`/`T*` COMMON
 /// accumulators consumed by REDIST. Values are added only after a nonlinear
@@ -64,7 +65,7 @@ pub const Ledger = struct {
     }
 
     pub fn reset(self: *Ledger) void {
-        inline for (@typeInfo(Ledger).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Ledger)) |field| {
             if (field.type == []f64) @memset(@field(self, field.name), 0);
         }
     }

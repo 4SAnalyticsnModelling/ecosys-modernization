@@ -21,6 +21,7 @@
 // redistribution_surface_litter_removal_group_is_a_second_translation_of_a_gap.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ElementTotals = struct {
     remaining_carbon_g_c: f64,
@@ -67,13 +68,13 @@ fn fractionIndex(layer_count: usize, k: usize, layer: usize) usize {
 pub fn remove(layer_count: usize, removal_fraction: f64, pools: Pools, initial: ElementTotals) !ElementTotals {
     if (layer_count == 0 or !std.math.isFinite(removal_fraction) or removal_fraction < 0 or removal_fraction > 0.999)
         return error.InvalidSurfaceLitterSolubleRemovalInput;
-    inline for (std.meta.fields(Pools)) |field| {
+    inline for (ti_compat.fieldViews(Pools)) |field| {
         const values = @field(pools, field.name);
         const expected = if (std.mem.startsWith(u8, field.name, "residue_")) 6 * layer_count else 3 * layer_count;
         if (values.len != expected) return error.SurfaceLitterSolubleRemovalDimensionMismatch;
         if (!finiteSlice(values)) return error.InvalidSurfaceLitterSolubleRemovalInput;
     }
-    inline for (std.meta.fields(ElementTotals)) |field|
+    inline for (ti_compat.fieldViews(ElementTotals)) |field|
         if (!std.math.isFinite(@field(initial, field.name)) or @field(initial, field.name) < 0) return error.InvalidSurfaceLitterSolubleRemovalInput;
 
     var next = initial;
@@ -116,7 +117,7 @@ pub fn remove(layer_count: usize, removal_fraction: f64, pools: Pools, initial: 
         next.removed_carbon_g_c += removal_fraction * pools.adsorbed_carbon_g_c[fractionIndex(layer_count, k, 0)];
         next.removed_nitrogen_g_n += removal_fraction * pools.adsorbed_nitrogen_g_n[fractionIndex(layer_count, k, 0)];
         next.removed_phosphorus_g_p += removal_fraction * pools.adsorbed_phosphorus_g_p[fractionIndex(layer_count, k, 0)];
-        inline for (std.meta.fields(ElementTotals)) |field|
+        inline for (ti_compat.fieldViews(ElementTotals)) |field|
             if (!std.math.isFinite(@field(next, field.name))) return error.NonFiniteSurfaceLitterSolubleRemovalResult;
     }
     r = 0;
@@ -150,13 +151,13 @@ pub fn remove(layer_count: usize, removal_fraction: f64, pools: Pools, initial: 
 pub fn removeCorrected(layer_count: usize, removal_fraction: f64, pools: Pools, initial: ElementTotals) !ElementTotals {
     if (layer_count == 0 or !std.math.isFinite(removal_fraction) or removal_fraction < 0 or removal_fraction > 0.999)
         return error.InvalidSurfaceLitterSolubleRemovalInput;
-    inline for (std.meta.fields(Pools)) |field| {
+    inline for (ti_compat.fieldViews(Pools)) |field| {
         const values = @field(pools, field.name);
         const expected = if (std.mem.startsWith(u8, field.name, "residue_")) 6 * layer_count else 3 * layer_count;
         if (values.len != expected) return error.SurfaceLitterSolubleRemovalDimensionMismatch;
         if (!finiteSlice(values)) return error.InvalidSurfaceLitterSolubleRemovalInput;
     }
-    inline for (std.meta.fields(ElementTotals)) |field|
+    inline for (ti_compat.fieldViews(ElementTotals)) |field|
         if (!std.math.isFinite(@field(initial, field.name)) or @field(initial, field.name) < 0) return error.InvalidSurfaceLitterSolubleRemovalInput;
 
     var next = initial;
@@ -201,7 +202,7 @@ pub fn removeCorrected(layer_count: usize, removal_fraction: f64, pools: Pools, 
         next.removed_carbon_g_c += removal_fraction * pools.adsorbed_carbon_g_c[fractionIndex(layer_count, k, 0)] + removal_fraction * pools.adsorbed_acetate_g_c[fractionIndex(layer_count, k, 0)];
         next.removed_nitrogen_g_n += removal_fraction * pools.adsorbed_nitrogen_g_n[fractionIndex(layer_count, k, 0)];
         next.removed_phosphorus_g_p += removal_fraction * pools.adsorbed_phosphorus_g_p[fractionIndex(layer_count, k, 0)];
-        inline for (std.meta.fields(ElementTotals)) |field|
+        inline for (ti_compat.fieldViews(ElementTotals)) |field|
             if (!std.math.isFinite(@field(next, field.name))) return error.NonFiniteSurfaceLitterSolubleRemovalResult;
     }
     r = 0;

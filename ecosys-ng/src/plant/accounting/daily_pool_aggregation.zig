@@ -1,4 +1,6 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const CarbonInputs = struct {
     branch_leaf_carbon_g: []const f64,
@@ -121,7 +123,7 @@ pub fn calculateElement(inputs: ElementInputs) !ElementPools {
         if (!std.math.isFinite(value) or value < 0) return error.InvalidPlantDailyPool;
         result.root_g += value;
     }
-    inline for (std.meta.fields(ElementPools)) |field|
+    inline for (ti_compat.fieldViews(ElementPools)) |field|
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFinitePlantDailyPool;
     return result;
 }
@@ -208,7 +210,7 @@ pub fn calculateCarbonInto(inputs: CarbonInputs, root_length_density_m_per_m3_by
         result.root_carbon_g += root_carbon_g;
         result_density.* = density;
     }
-    inline for (std.meta.fields(CarbonPools)) |field|
+    inline for (ti_compat.fieldViews(CarbonPools)) |field|
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFinitePlantDailyPool;
     return result;
 }
@@ -216,8 +218,8 @@ pub fn calculateCarbonInto(inputs: CarbonInputs, root_length_density_m_per_m3_by
 test "OUTPD carbon pools use arbitrary branches layers and per-plant RTDNP units" {
     const branches = 7;
     const layers = 19;
-    const ones = [_]f64{1} ** branches;
-    const twos = [_]f64{2} ** layers;
+    const ones = @as([branches]f64, @splat(@as(f64, 1)));
+    const twos = @as([layers]f64, @splat(@as(f64, 2)));
     var root_profile: [layers]f64 = undefined;
     const pools = try calculateCarbonInto(.{
         .branch_leaf_carbon_g = &ones,

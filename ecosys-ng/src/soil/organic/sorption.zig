@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const OrganicMatter = struct { doc_g_c: f64, acetate_g_c: f64, don_g_n: f64, dop_g_p: f64 };
 
@@ -43,9 +44,9 @@ pub fn calculate(state: State, inputs: Inputs) !Flux {
 
 pub fn state_update(state: *State, flux: Flux) !void {
     try validateState(state.*);
-    inline for (@typeInfo(Flux).@"struct".fields) |field| if (!std.math.isFinite(@field(flux, field.name))) return error.NonFiniteOrganicSorptionFlux;
+    inline for (ti_compat.fieldViews(Flux)) |field| if (!std.math.isFinite(@field(flux, field.name))) return error.NonFiniteOrganicSorptionFlux;
     var next = state.*;
-    inline for (@typeInfo(Flux).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Flux)) |field| {
         const amount = @field(flux, field.name);
         @field(next.dissolved, field.name) -= amount;
         @field(next.adsorbed, field.name) += amount;
@@ -74,11 +75,11 @@ fn floorMatter(value: OrganicMatter, inputs: Inputs) OrganicMatter {
 }
 
 fn validateState(state: State) !void {
-    inline for (.{ state.dissolved, state.adsorbed }) |matter| inline for (@typeInfo(OrganicMatter).@"struct".fields) |field| if (!std.math.isFinite(@field(matter, field.name)) or @field(matter, field.name) < -1e-14) return error.InvalidOrganicSorptionState;
+    inline for (.{ state.dissolved, state.adsorbed }) |matter| inline for (ti_compat.fieldViews(OrganicMatter)) |field| if (!std.math.isFinite(@field(matter, field.name)) or @field(matter, field.name) < -1e-14) return error.InvalidOrganicSorptionState;
 }
 
 fn validateInputs(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0) return error.InvalidOrganicSorptionInput;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0) return error.InvalidOrganicSorptionInput;
     if (inputs.doc_fraction_of_dissolved_carbon > 1 or inputs.acetate_fraction_of_dissolved_carbon > 1 or inputs.timestep_h <= 0) return error.InvalidOrganicSorptionInput;
 }
 
@@ -91,7 +92,7 @@ test "organic sorption transaction conserves every dissolved and adsorbed pool" 
     const before = state;
     const flux = try calculate(state, testInputs());
     try state_update(&state, flux);
-    inline for (@typeInfo(OrganicMatter).@"struct".fields) |field| try std.testing.expectApproxEqAbs(@field(before.dissolved, field.name) + @field(before.adsorbed, field.name), @field(state.dissolved, field.name) + @field(state.adsorbed, field.name), 1e-14);
+    inline for (ti_compat.fieldViews(OrganicMatter)) |field| try std.testing.expectApproxEqAbs(@field(before.dissolved, field.name) + @field(before.adsorbed, field.name), @field(state.dissolved, field.name) + @field(state.adsorbed, field.name), 1e-14);
     try std.testing.expect(flux.doc_g_c > 0);
 }
 

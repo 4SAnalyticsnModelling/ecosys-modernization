@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     hydrogen_concentration_mol_per_m3: f64,
@@ -64,7 +65,7 @@ pub fn calculateRestrictedSourceOrder(
     admission: RestrictedAdmission,
 ) !RestrictedFlux {
     try validate(inputs, parameters);
-    inline for (@typeInfo(RestrictedAdmission).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RestrictedAdmission)) |field| {
         const value = @field(admission, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidPhosphateExchangeAdmission;
@@ -143,7 +144,7 @@ pub fn calculateRestrictedBandSourceOrder(
     hydroxyl_h2po4_substrate_limit_fraction: f64,
 ) !RestrictedFlux {
     try validate(inputs, parameters);
-    inline for (@typeInfo(RestrictedAdmission).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RestrictedAdmission)) |field| {
         const value = @field(admission, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidPhosphateExchangeAdmission;
@@ -223,7 +224,7 @@ pub fn calculateAdmitted(
     parameters: Parameters,
     admission: ZoneAdmission,
 ) !Flux {
-    inline for (@typeInfo(ZoneAdmission).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ZoneAdmission)) |field| {
         const value = @field(admission, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidPhosphateExchangeAdmission;
@@ -243,7 +244,7 @@ pub fn calculateBandAdmitted(
     parameters: Parameters,
     admission: ZoneAdmission,
 ) !Flux {
-    inline for (@typeInfo(ZoneAdmission).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ZoneAdmission)) |field| {
         const value = @field(admission, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidPhosphateExchangeAdmission;
@@ -365,14 +366,14 @@ fn bounded(driving_force: f64, maximum_rate: f64, precipitation_limit: f64, diss
 }
 
 fn validate(inputs: Inputs, parameters: Parameters) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0) return error.InvalidPhosphateExchangeInput;
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) < 0) return error.InvalidPhosphateExchangeParameter;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0) return error.InvalidPhosphateExchangeInput;
+    inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) < 0) return error.InvalidPhosphateExchangeParameter;
     if (inputs.monovalent_activity_coefficient <= 0 or inputs.divalent_activity_coefficient <= 0 or parameters.water_activity_product_mol2_per_m6 <= 0 or parameters.h2po4_dissociation_constant <= 0 or parameters.substrate_limit_fraction > 1) return error.InvalidPhosphateExchangeParameter;
 }
 
 test "phosphate exchange rates obey kinetic and substrate bounds" {
     const flux = try calculate(.{ .hydrogen_concentration_mol_per_m3 = 0.1, .hydrogen_activity_mol_per_m3 = 0.08, .hydroxide_activity_mol_per_m3 = 1e-6, .h2po4_concentration_mol_p_per_m3 = 0.2, .h2po4_activity_mol_p_per_m3 = 0.16, .hpo4_concentration_mol_p_per_m3 = 0.1, .hpo4_activity_mol_p_per_m3 = 0.06, .deprotonated_site_mol_per_megagram = 0.2, .hydroxyl_site_mol_per_megagram = 0.4, .protonated_site_mol_per_megagram = 0.3, .adsorbed_h2po4_mol_p_per_megagram = 0.05, .adsorbed_hpo4_mol_p_per_megagram = 0.05, .monovalent_activity_coefficient = 0.8, .divalent_activity_coefficient = 0.6 }, .{ .protonated_site_equilibrium_constant = 0.1, .hydroxyl_site_equilibrium_constant = 0.1, .h2po4_exchange_equilibrium_constant = 0.2, .hpo4_exchange_equilibrium_constant = 0.2, .water_activity_product_mol2_per_m6 = 1e-8, .h2po4_dissociation_constant = 1e-3, .maximum_exchange_mol_per_megagram_step = 0.01, .substrate_limit_fraction = 0.2 });
-    inline for (@typeInfo(Flux).@"struct".fields) |field| try std.testing.expect(@abs(@field(flux, field.name)) <= 0.01);
+    inline for (ti_compat.fieldViews(Flux)) |field| try std.testing.expect(@abs(@field(flux, field.name)) <= 0.01);
 }
 
 test "empty phosphate exchange sites produce finite zero branches" {

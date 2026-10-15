@@ -5,6 +5,7 @@
 
 const std = @import("std");
 const ecosys = @import("ecosys_ng");
+const ti_compat = @import("ecosys_ng").typeinfo_compat;
 /// Resolves the species input file name used to label a plant output file, so
 /// output names carry a readable species instead of the source model's positional
 /// digit.
@@ -1357,8 +1358,8 @@ test "versioned output root checkpoint resume is byte identical to uninterrupted
     try accepted_coordinator.checkpointWillPublish();
 
     var sources: [ecosys.checkpoint_manifest.section_count]ecosys.checkpoint_manifest.EntrySource = undefined;
-    inline for (@typeInfo(ecosys.checkpoint_manifest.Section).@"enum".fields, 0..) |field, index|
-        sources[index] = .{ .section = @enumFromInt(field.value), .file_name = field.name ++ ".bin", .bytes = field.name };
+    inline for (ti_compat.enumFieldViews(ecosys.checkpoint_manifest.Section), 0..) |field, index|
+        sources[index] = .{ .section = @fromBackingInt(@intCast(field.value)), .file_name = field.name ++ ".bin", .bytes = field.name };
     const checkpoint_instant: ecosys.checkpoint_manifest.SimulationInstant = .{
         .year = 2001,
         .day_of_year = 1,

@@ -9,6 +9,7 @@ const surface_autotrophic = @import("../../surface/autotrophic_complex_step.zig"
 const surface_denitrification = @import("../../surface/denitrification_step.zig");
 const fire_exchange = @import("../../soil/biogeochemistry/organic_matter_fire_exchange.zig");
 const litter_salt_ingress = @import("../../plant/salt/litter_ingress.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 const magic = "ECOSORGN";
 // Version 16 persists the dry litter chemistry reference-water carrier.
 // Version 17 adds the signed hourly litter TBH2O balance owner.
@@ -64,8 +65,8 @@ pub fn write(writer: anytype, view: View) !void {
     for (view.litter_fertilizer.cells) |cell| try writeNumericStruct(litter_fertilizer.Inventory, writer, cell);
     try writer.writeAll(view.litter_fertilizer.formulation);
     inline for (.{ view.surface_respiration.unlimited_respiration_g_c, view.surface_respiration.substrate_limited_respiration_g_c, view.surface_respiration.potential_oxygen_demand_g_o, view.surface_respiration.previous_oxygen_demand_g_o, view.surface_respiration.previous_doc_respiration_g_c, view.surface_respiration.previous_acetate_respiration_g_c }) |values| try writeF64Slice(writer, values);
-    inline for (@typeInfo(surface_autotrophic.State).@"struct".fields) |field| if (field.type == []f64) try writeF64Slice(writer, @field(view.surface_autotrophic, field.name));
-    inline for (@typeInfo(surface_denitrification.State).@"struct".fields) |field| if (field.type == []f64) try writeF64Slice(writer, @field(view.surface_denitrification, field.name));
+    inline for (ti_compat.fieldViews(surface_autotrophic.State)) |field| if (field.type == []f64) try writeF64Slice(writer, @field(view.surface_autotrophic, field.name));
+    inline for (ti_compat.fieldViews(surface_denitrification.State)) |field| if (field.type == []f64) try writeF64Slice(writer, @field(view.surface_denitrification, field.name));
     try writeF64Slice(writer, view.surface_fire_exchange.pending_surface_ammonium_mol_n);
     try writeF64Slice(writer, view.surface_fire_exchange.pending_surface_phosphate_mol_p);
     try writeF64Slice(writer, view.surface_fire_exchange.pending_surface_salt_mol);
@@ -121,8 +122,8 @@ pub fn read(allocator: std.mem.Allocator, reader: *std.Io.Reader, limits: Limits
     for (surface_fertilizer.cells) |*cell| cell.* = try readNumericStruct(litter_fertilizer.Inventory, reader);
     @memcpy(surface_fertilizer.formulation, try reader.take(surface_count));
     inline for (.{ respiration_state.unlimited_respiration_g_c, respiration_state.substrate_limited_respiration_g_c, respiration_state.potential_oxygen_demand_g_o, respiration_state.previous_oxygen_demand_g_o, respiration_state.previous_doc_respiration_g_c, respiration_state.previous_acetate_respiration_g_c }) |values| try readF64Slice(reader, values);
-    inline for (@typeInfo(surface_autotrophic.State).@"struct".fields) |field| if (field.type == []f64) try readF64Slice(reader, @field(autotrophic_state, field.name));
-    inline for (@typeInfo(surface_denitrification.State).@"struct".fields) |field| if (field.type == []f64) try readF64Slice(reader, @field(denitrification_state, field.name));
+    inline for (ti_compat.fieldViews(surface_autotrophic.State)) |field| if (field.type == []f64) try readF64Slice(reader, @field(autotrophic_state, field.name));
+    inline for (ti_compat.fieldViews(surface_denitrification.State)) |field| if (field.type == []f64) try readF64Slice(reader, @field(denitrification_state, field.name));
     try readF64Slice(reader, surface_fire_state.pending_surface_ammonium_mol_n);
     try readF64Slice(reader, surface_fire_state.pending_surface_phosphate_mol_p);
     try readF64Slice(reader, surface_fire_state.pending_surface_salt_mol);
@@ -155,17 +156,17 @@ fn validate(view: View) !void {
     for (view.litter_fertilizer.cells) |cell| try validateNumericStruct(litter_fertilizer.Inventory, cell);
     for (view.litter_fertilizer.formulation) |formulation| if (formulation > 4) return error.InvalidSoilOrganicCheckpointPool;
     inline for (.{ view.surface_respiration.unlimited_respiration_g_c, view.surface_respiration.substrate_limited_respiration_g_c, view.surface_respiration.potential_oxygen_demand_g_o, view.surface_respiration.previous_oxygen_demand_g_o, view.surface_respiration.previous_doc_respiration_g_c, view.surface_respiration.previous_acetate_respiration_g_c }) |values| for (values) |value| if (!std.math.isFinite(value) or value < -1e-14) return error.InvalidSoilOrganicCheckpointPool;
-    inline for (@typeInfo(surface_autotrophic.State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(surface_autotrophic.State)) |field| if (field.type == []f64) {
         const signed_exchange = std.mem.indexOf(u8, field.name, "_exchange_g_") != null;
         for (@field(view.surface_autotrophic, field.name)) |value| if (!std.math.isFinite(value) or (!signed_exchange and value < -1e-14)) return error.InvalidSoilOrganicCheckpointPool;
     };
-    inline for (@typeInfo(surface_denitrification.State).@"struct".fields) |field| if (field.type == []f64) for (@field(view.surface_denitrification, field.name)) |value| if (!std.math.isFinite(value) or value < -1e-14) return error.InvalidSoilOrganicCheckpointPool;
+    inline for (ti_compat.fieldViews(surface_denitrification.State)) |field| if (field.type == []f64) for (@field(view.surface_denitrification, field.name)) |value| if (!std.math.isFinite(value) or value < -1e-14) return error.InvalidSoilOrganicCheckpointPool;
     inline for (.{ view.surface_fire_exchange.pending_surface_ammonium_mol_n, view.surface_fire_exchange.pending_surface_phosphate_mol_p, view.surface_fire_exchange.pending_surface_salt_mol }) |values| for (values) |value| if (!std.math.isFinite(value) or value < -1e-14) return error.InvalidSoilOrganicCheckpointPool;
     for (view.litter_salt_ingress.pending_mol) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidPlantLitterSaltCheckpointInventory;
 }
 
 fn writeNumericStruct(comptime T: type, writer: anytype, value: T) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const number = @field(value, field.name);
             if (!std.math.isFinite(number) or number < -1e-14) return error.InvalidSoilOrganicCheckpointPool;
@@ -178,7 +179,7 @@ fn writeNumericStruct(comptime T: type, writer: anytype, value: T) !void {
 
 fn readNumericStruct(comptime T: type, reader: *std.Io.Reader) !T {
     var value: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => @field(value, field.name) = @bitCast(try reader.takeInt(u64, .little)),
         .@"struct" => @field(value, field.name) = try readNumericStruct(field.type, reader),
         else => @compileError("unsupported litter chemistry checkpoint field"),
@@ -188,7 +189,7 @@ fn readNumericStruct(comptime T: type, reader: *std.Io.Reader) !T {
 }
 
 fn validateNumericStruct(comptime T: type, value: T) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => if (!std.math.isFinite(@field(value, field.name)) or @field(value, field.name) < -1e-14) return error.InvalidSoilOrganicCheckpointPool,
         .@"struct" => try validateNumericStruct(field.type, @field(value, field.name)),
         else => unreachable,
@@ -200,18 +201,18 @@ fn bounded(reader: *std.Io.Reader, limit: usize, comptime too_large: anyerror) !
     return @intCast(value);
 }
 fn validatePool(pool: Pool) !void {
-    inline for (@typeInfo(Pool).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Pool)) |field| {
         const value = @field(pool, field.name);
         if (!std.math.isFinite(value) or value < -1e-14) return error.InvalidSoilOrganicCheckpointPool;
     }
 }
 fn writePool(writer: anytype, pool: Pool) !void {
     try validatePool(pool);
-    inline for (@typeInfo(Pool).@"struct".fields) |field| try writer.writeInt(u64, @bitCast(@field(pool, field.name)), .little);
+    inline for (ti_compat.fieldViews(Pool)) |field| try writer.writeInt(u64, @bitCast(@field(pool, field.name)), .little);
 }
 fn readPool(reader: *std.Io.Reader) !Pool {
     var pool: Pool = undefined;
-    inline for (@typeInfo(Pool).@"struct".fields) |field| @field(pool, field.name) = @bitCast(try reader.takeInt(u64, .little));
+    inline for (ti_compat.fieldViews(Pool)) |field| @field(pool, field.name) = @bitCast(try reader.takeInt(u64, .little));
     try validatePool(pool);
     return pool;
 }

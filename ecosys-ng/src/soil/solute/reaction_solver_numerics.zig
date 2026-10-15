@@ -20,6 +20,8 @@ const group_numerics2 = @import("reaction_solver_numerics2.zig");
 const group_types = @import("reaction_solver_types.zig");
 const diagnostic_control = @import("reaction_diagnostic_control.zig");
 const charge_classification = @import("charge_classification.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 /// Zone fraction below which a band/non-band zone is structurally absent.
 /// HOUR1 3845 and SOLUTE evaluate a zone only while its water volume VL*B
@@ -53,7 +55,7 @@ pub fn validateAqueousMolarity(
     if (!std.math.isFinite(water_mol_per_m3) or water_mol_per_m3 <= 0)
         return error.InvalidChemistryWaterState;
     inline for (
-        @typeInfo(aqueous_network.State).@"struct".fields,
+        ti_compat.fieldViews(aqueous_network.State),
         0..,
     ) |field, component_index| {
         const concentration = @field(state.aqueous[cell_index], field.name);
@@ -421,7 +423,7 @@ fn rawNegativeStructOwner(
     raw_transformations: anytype,
     fraction: f64,
 ) ?RawNegativeOwner {
-    inline for (@typeInfo(StateType).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(StateType)) |field| {
         const current_value = @field(current_state, field.name);
         const raw_change = @field(raw_transformations, field.name);
         const scaled_change = raw_change * fraction;
@@ -494,7 +496,7 @@ fn logNoAdmissibleAqueousFraction(
     );
     const aqueous = scratch.aqueous[0];
     inline for (
-        @typeInfo(aqueous_network.State).@"struct".fields,
+        ti_compat.fieldViews(aqueous_network.State),
         0..,
     ) |field, index| {
         const value = @field(aqueous, field.name);
@@ -647,11 +649,11 @@ test "reaction Anderson mixing is invariant to packed component units" {
     const mol_per_m3_index: usize = 0;
     try std.testing.expect(!chemistry.State.packedComponentIsMolPerMegagram(mol_per_m3_index));
 
-    var anchor_state = [_]f64{0} ** component_count;
-    var anchor_defect = [_]f64{0} ** component_count;
-    var seed_state = [_]f64{0} ** component_count;
-    var seed_defect = [_]f64{0} ** component_count;
-    var candidate = [_]f64{0} ** component_count;
+    var anchor_state = @as([component_count]f64, @splat(@as(f64, 0)));
+    var anchor_defect = @as([component_count]f64, @splat(@as(f64, 0)));
+    var seed_state = @as([component_count]f64, @splat(@as(f64, 0)));
+    var seed_defect = @as([component_count]f64, @splat(@as(f64, 0)));
+    var candidate = @as([component_count]f64, @splat(@as(f64, 0)));
     anchor_defect[mol_per_m3_index] = 2;
     seed_defect[mol_per_m3_index] = 1;
     seed_state[mol_per_m3_index] = 1;

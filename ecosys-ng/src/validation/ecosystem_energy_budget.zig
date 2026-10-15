@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Hourly extensive energy ledgers corresponding to OUTSH TRNS/TLES/TSHS/TGHS
 /// (ground surface) and TRN/TLE/TSH/TGH (whole ecosystem). All storage is
@@ -19,7 +20,7 @@ pub const State = struct {
 
     noinline fn deinitAllocatedPrefix(self: *State, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -35,7 +36,7 @@ pub const State = struct {
         result.cell_count = cell_count;
         var allocated: usize = 0;
         errdefer result.deinitAllocatedPrefix(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, cell_count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -44,12 +45,12 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
             if (!std.math.isFinite(value)) {
                 std.log.err("non-finite ecosystem energy ledger: field={s} cell={d} value={e}", .{ field.name, index, value });
                 return error.NonFiniteEcosystemEnergyLedger;
@@ -61,7 +62,7 @@ pub const State = struct {
 test "ecosystem energy ledger releases every partial allocation prefix" {
     const allocation_count = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(State).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) count += 1;
         }
         break :count count;

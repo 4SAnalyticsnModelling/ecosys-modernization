@@ -1,5 +1,6 @@
 const std = @import("std");
 const PlantDailyOutput = @import("../../io/output/plant_daily_output.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -88,7 +89,7 @@ pub fn refresh(state: *State, inputs: Inputs) !void {
         state.cell_count,
         state.plant_species_per_cell,
     );
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (@field(inputs, field.name).len != plant_count)
             return error.InvalidPlantBalanceStateUpdateDimensions;
     }
@@ -131,7 +132,7 @@ fn balanceForCell(
         total.carbon_g_c += balance.carbon_g_c;
         total.nitrogen_g_n += balance.nitrogen_g_n;
         total.phosphorus_g_p += balance.phosphorus_g_p;
-        inline for (std.meta.fields(Balance)) |field|
+        inline for (ti_compat.fieldViews(Balance)) |field|
             if (!std.math.isFinite(@field(total, field.name)))
                 return error.NonFinitePlantBalanceStateUpdate;
     }
@@ -224,7 +225,7 @@ fn phosphorusInputs(value: f64) PlantDailyOutput.NutrientBalanceInputs {
 test "late invalid active balance preserves every published owner" {
     var state = try State.init(std.testing.allocator, 1, 2);
     defer state.deinit();
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64) @memset(@field(state, field.name), 7);
     try std.testing.expectError(
         error.NonFinitePlantOutput,
@@ -235,7 +236,7 @@ test "late invalid active balance preserves every published owner" {
             .phosphorus_by_plant = &.{ phosphorusInputs(1), phosphorusInputs(2) },
         }),
     );
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64)
             for (@field(state, field.name)) |value|
                 try std.testing.expectEqual(@as(f64, 7), value);

@@ -36,6 +36,7 @@
 // `soil/profile/boundary_topology.zig:197`.
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const RetentionMode = enum {
     supplied,
@@ -123,10 +124,10 @@ pub fn apply(inputs: Inputs, state: *State) !void {
 }
 
 fn validate(inputs: Inputs, state: State) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteSoilInitializationInput;
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (!std.math.isFinite(@field(state, field.name)))
             return error.NonFiniteSoilInitializationState;
     if (inputs.porosity_m3_m3 < 0 or inputs.field_capacity_m3_m3 < 0 or

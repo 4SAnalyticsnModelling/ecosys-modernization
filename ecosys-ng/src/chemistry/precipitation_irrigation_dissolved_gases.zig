@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const AtmosphericMassConcentrations = struct {
     carbon_dioxide_g_m3: f64,
@@ -53,17 +54,17 @@ pub fn calculate(
     activity: Activities,
     canopy_air_temperature_c: f64,
 ) DissolutionError!Result {
-    inline for (std.meta.fields(AtmosphericMassConcentrations)) |field| {
+    inline for (ti_compat.fieldViews(AtmosphericMassConcentrations)) |field| {
         const value = @field(atmospheric, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteInput;
         if (value < 0.0) return error.InvalidAtmosphericConcentration;
     }
-    inline for (std.meta.fields(SolubilitiesAt25C)) |field| {
+    inline for (ti_compat.fieldViews(SolubilitiesAt25C)) |field| {
         const value = @field(solubility, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteInput;
         if (value < 0.0) return error.InvalidSolubility;
     }
-    inline for (std.meta.fields(Activities)) |field| {
+    inline for (ti_compat.fieldViews(Activities)) |field| {
         if (!std.math.isFinite(@field(activity, field.name))) return error.NonFiniteInput;
     }
     if (!std.math.isFinite(canopy_air_temperature_c)) return error.NonFiniteInput;
@@ -104,7 +105,7 @@ pub fn calculate(
             @exp(0.897 - 0.0299 * canopy_air_temperature_c),
     };
 
-    inline for (std.meta.fields(DissolvedGasConcentrations)) |field| {
+    inline for (ti_compat.fieldViews(DissolvedGasConcentrations)) |field| {
         if (!std.math.isFinite(@field(precipitation, field.name)) or
             !std.math.isFinite(@field(irrigation, field.name)))
         {
@@ -140,7 +141,7 @@ test "precipitation and irrigation retain identical legacy initialization" {
         20.0,
     );
 
-    inline for (std.meta.fields(DissolvedGasConcentrations)) |field| {
+    inline for (ti_compat.fieldViews(DissolvedGasConcentrations)) |field| {
         try std.testing.expectEqual(
             @field(result.precipitation, field.name),
             @field(result.irrigation, field.name),

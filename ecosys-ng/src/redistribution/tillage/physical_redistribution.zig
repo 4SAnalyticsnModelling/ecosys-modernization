@@ -24,6 +24,7 @@
 //
 const std = @import("std");
 const ice_units = @import("../../core/ice_units.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const intensive_family_count = 10;
 pub const inventory_family_count = 5;
@@ -73,7 +74,7 @@ fn finite(v: []const f64) bool {
 pub noinline fn redistribute(allocator: std.mem.Allocator, inputs: Inputs, state: State) !void {
     const layers = inputs.cumulative_layer_bottom_m.len;
     if (layers == 0 or inputs.first_soil_layer > inputs.last_mixed_layer or inputs.last_mixed_layer >= layers or inputs.layer_thickness_m.len != layers or inputs.intensive_families.len != intensive_family_count or inputs.inventory_families.len != inventory_family_count) return error.TillagePhysicalRedistributionDimensionMismatch;
-    inline for (std.meta.fields(State)) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         if (@field(state, field.name).len != layers) return error.TillagePhysicalRedistributionDimensionMismatch;
         if (!finite(@field(state, field.name))) return error.InvalidTillagePhysicalRedistributionInput;
     }

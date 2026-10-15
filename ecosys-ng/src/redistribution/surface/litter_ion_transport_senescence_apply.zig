@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Litter-layer ion speciation pool at layer 0 (mol). 42 species.
 pub const LitterIonPools = struct {
@@ -136,16 +137,16 @@ pub fn apply(
     tf: TransformationFluxes,
     carbon_g_mol: f64,
 ) !Result {
-    inline for (@typeInfo(LitterIonPools).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(LitterIonPools)) |field|
         if (!std.math.isFinite(@field(pools, field.name)))
             return error.InvalidLitterIonPool;
-    inline for (@typeInfo(TransportFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(TransportFluxes)) |field|
         if (!std.math.isFinite(@field(tr, field.name)))
             return error.InvalidTransportFlux;
-    inline for (@typeInfo(SenescenceFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SenescenceFluxes)) |field|
         if (!std.math.isFinite(@field(sn, field.name)))
             return error.InvalidSenescenceFlux;
-    inline for (@typeInfo(TransformationFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(TransformationFluxes)) |field|
         if (!std.math.isFinite(@field(tf, field.name)))
             return error.InvalidTransformationFlux;
     if (!std.math.isFinite(carbon_g_mol) or carbon_g_mol <= 0.0)
@@ -196,7 +197,7 @@ pub fn apply(
         .mg1p_mol = pools.mg1p_mol + tr.mg1p_mol,
     };
 
-    inline for (@typeInfo(LitterIonPools).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(LitterIonPools)) |field|
         if (!std.math.isFinite(@field(new_pools, field.name)))
             return error.NonFiniteLitterIonPool;
 
@@ -268,12 +269,12 @@ test "REDIST litter ion rejects non-finite transport flux" {
 test "REDIST litter ion transport maps all 42 species" {
     var fluxes = std.mem.zeroes(TransportFluxes);
     var value: f64 = 1.0;
-    inline for (@typeInfo(TransportFluxes).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(TransportFluxes)) |field| {
         @field(fluxes, field.name) = value;
         value += 1.0;
     }
     const result = try apply(std.mem.zeroes(LitterIonPools), fluxes, std.mem.zeroes(SenescenceFluxes), std.mem.zeroes(TransformationFluxes), 12.0);
-    inline for (@typeInfo(LitterIonPools).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(LitterIonPools)) |field|
         try std.testing.expectEqual(@field(fluxes, field.name), @field(result.pools, field.name));
 }
 

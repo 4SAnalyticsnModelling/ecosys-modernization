@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("typeinfo_compat.zig");
 
 /// Optional user-specified physical closure floors, each in its own native
 /// unit per square metre. Zeros request no user floor; the audit still applies
@@ -25,7 +26,7 @@ pub const AbsolutePerArea = struct {
     exchange_capacity_mol_m2: f64 = 0,
 
     pub fn validate(self: AbsolutePerArea) !void {
-        inline for (std.meta.fields(AbsolutePerArea)) |field| {
+        inline for (ti_compat.fieldViews(AbsolutePerArea)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidMassBalanceAbsoluteTolerance;

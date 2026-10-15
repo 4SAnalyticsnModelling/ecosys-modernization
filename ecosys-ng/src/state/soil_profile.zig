@@ -1,5 +1,6 @@
 const std = @import("std");
 const delimited_input = @import("../io/input/delimited_input.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 const RecordIterator = @TypeOf(std.mem.splitScalar(u8, "", '\n'));
 const RecordTokens = @TypeOf(delimited_input.recordTokens(""));
@@ -88,14 +89,14 @@ pub const SoilProfile = struct {
     layer_properties: []f64,
 
     pub fn deinit(self: *SoilProfile) void {
-        inline for (@typeInfo(SoilProfile).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SoilProfile)) |field| {
             if (field.type == []f64) self.allocator.free(@field(self, field.name));
         }
         self.* = undefined;
     }
 
     pub fn property(self: SoilProfile, layer_property: LayerProperty) []const f64 {
-        const property_index: usize = @intFromEnum(layer_property);
+        const property_index: usize = @backingInt(layer_property);
         const start = property_index * self.total_layer_count;
         return self.layer_properties[start .. start + self.total_layer_count];
     }
@@ -201,10 +202,10 @@ noinline fn parseLayerProperties(
     records: *RecordIterator,
     result: *SoilProfile,
 ) !void {
-    const property_count = @typeInfo(LayerProperty).@"enum".fields.len;
+    const property_count = @typeInfo(LayerProperty).@"enum".field_names.len;
     result.layer_properties = try allocator.alloc(f64, try std.math.mul(usize, property_count, result.total_layer_count));
     errdefer allocator.free(result.layer_properties);
-    inline for (@typeInfo(LayerProperty).@"enum".fields, 0..) |property_field, property_index| {
+    inline for (ti_compat.enumFieldViews(LayerProperty), 0..) |property_field, property_index| {
         const start = property_index * result.total_layer_count;
         const values = result.layer_properties[start .. start + result.total_layer_count];
         var fields = delimited_input.recordTokens(try nextRecord(records));
@@ -218,7 +219,7 @@ noinline fn parseLayerProperties(
         try requireEnd(&fields);
         var layer = result.described_layer_count;
         while (layer < result.total_layer_count) : (layer += 1) {
-            const property: LayerProperty = @enumFromInt(property_index);
+            const property: LayerProperty = @fromBackingInt(@intCast(property_index));
             values[layer] = switch (property) {
                 .total_organic_carbon_kg_per_megagram,
                 .particulate_organic_carbon_kg_per_megagram,
@@ -387,7 +388,7 @@ fn number(comptime T: type, tokens: anytype) !T {
 test "parse physical properties from self-contained soil profile" {
     const source = try testSoilProfileSource(
         std.testing.allocator,
-        @typeInfo(LayerProperty).@"enum".fields.len,
+        @typeInfo(LayerProperty).@"enum".field_names.len,
     );
     defer std.testing.allocator.free(source);
     var profile = try parsePhysicalProfile(std.testing.allocator, source);
@@ -403,14 +404,14 @@ test "parse physical properties from self-contained soil profile" {
     try std.testing.expectEqual(@as(i32, 8), profile.surface_plant_litter_type);
     try std.testing.expectEqual(@as(i32, 2), profile.surface_manure_type);
     try std.testing.expectApproxEqAbs(@as(f64, 1.0), profile.property(.initial_liquid_water)[0], 1.0e-12);
-    try std.testing.expectEqual(@typeInfo(LayerProperty).@"enum".fields.len, profile.layer_properties.len);
+    try std.testing.expectEqual(@typeInfo(LayerProperty).@"enum".field_names.len, profile.layer_properties.len);
     try std.testing.expectEqual(@as(f64, 0.0), profile.property(.fine_litter_carbon_g_m2)[0]);
 }
 
 test "required van Genuchten inflection record is case insensitive and pipe delimited" {
     const source = try testSoilProfileSource(
         std.testing.allocator,
-        @typeInfo(LayerProperty).@"enum".fields.len,
+        @typeInfo(LayerProperty).@"enum".field_names.len,
     );
     defer std.testing.allocator.free(source);
     var insertion_index: usize = 0;

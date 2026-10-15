@@ -14,6 +14,7 @@ const group_phosphate_minerals = @import("litter_chemistry_phosphate_minerals.zi
 const group_struct_arithmetic = @import("litter_chemistry_struct_arithmetic.zig");
 const group_types = @import("litter_chemistry_types.zig");
 
+
 /// Semismooth Newton step for the fixed-pH active set exposed by dry,
 /// high-density litter: phosphate association, simultaneous AlPO4
 /// dissolution/FePO4 precipitation, and competitive cation exchange. The
@@ -750,7 +751,7 @@ fn frozenExchangeCoordinates(
     changes: group_types.Cell,
     options: group_types.Options,
 ) [group_types.phosphate_coordinate_count]bool {
-    var result = [_]bool{false} ** group_types.phosphate_coordinate_count;
+    var result = @as([group_types.phosphate_coordinate_count]bool, @splat(@as(bool, false)));
     for (10..17) |index| {
         const scale = phosphateCoordinateScale(
             options,

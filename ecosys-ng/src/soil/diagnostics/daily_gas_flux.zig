@@ -3,6 +3,8 @@ const gas = @import("../gas/transport.zig");
 const RootSystem = @import("../../plant/root/plant_root_system.zig").State;
 const root_disturbance = @import("../../plant/root/plant_root_disturbance.zig");
 const output_binding = @import("hourly_output_binding.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 /// Heap-owned DAY accumulators for accepted soil/litter atmospheric exchange
 /// plus source-signed root withdrawal. Values retain tracked-element units.
@@ -26,7 +28,7 @@ pub const HourlyElementActivity = struct {
 
     pub fn add(self: HourlyElementActivity, other: HourlyElementActivity) !HourlyElementActivity {
         var result: HourlyElementActivity = .{};
-        inline for (std.meta.fields(HourlyElementActivity)) |field|
+        inline for (ti_compat.fieldViews(HourlyElementActivity)) |field|
             @field(result, field.name) = try addFinite(@field(self, field.name), @field(other, field.name));
         return result;
     }
@@ -204,7 +206,7 @@ pub const State = struct {
             else
                 root_disturbance.CellRootGasWithdrawal{};
             for (0..gas.species_count) |species_index| {
-                const species: gas.Species = @enumFromInt(species_index);
+                const species: gas.Species = @fromBackingInt(@intCast(species_index));
                 const root_atmosphere_exchange = if (roots) |root_state| try rootAtmosphereExchangeGPerH(root_state, cell, plant_species_count, species) else 0;
                 const boundary_increment = try boundaryHourIncrement(cell, soil_layer_count, species, soil_atmospheric_flux_g_per_h, litter_atmospheric_flux_g_per_h);
                 const increment = try combinedHourIncrement(species, withdrawal, root_atmosphere_exchange, boundary_increment);
@@ -220,7 +222,7 @@ pub const State = struct {
             else
                 root_disturbance.CellRootGasWithdrawal{};
             for (0..gas.species_count) |species_index| {
-                const species: gas.Species = @enumFromInt(species_index);
+                const species: gas.Species = @fromBackingInt(@intCast(species_index));
                 const root_atmosphere_exchange = if (roots) |root_state| rootAtmosphereExchangeGPerH(root_state, cell, plant_species_count, species) catch unreachable else 0;
                 const boundary_increment = boundaryHourIncrement(cell, soil_layer_count, species, soil_atmospheric_flux_g_per_h, litter_atmospheric_flux_g_per_h) catch unreachable;
                 const increment = combinedHourIncrement(species, withdrawal, root_atmosphere_exchange, boundary_increment) catch unreachable;
@@ -252,7 +254,7 @@ pub const State = struct {
             root_disturbance.CellRootGasWithdrawal{};
         var result: HourlyElementActivity = .{};
         for (0..gas.species_count) |species_index| {
-            const species: gas.Species = @enumFromInt(species_index);
+            const species: gas.Species = @fromBackingInt(@intCast(species_index));
             const root_atmosphere_exchange = if (roots) |root_state|
                 try rootAtmosphereExchangeGPerH(root_state, cell, plant_species_count, species)
             else
@@ -429,7 +431,7 @@ pub const State = struct {
                     subsurface_flux_g_per_h,
                     species_value,
                 );
-                const index = cell * gas.species_count + @intFromEnum(species_value);
+                const index = cell * gas.species_count + @backingInt(species_value);
                 _ = try addFinite(self.soil_litter_boundary_mass_g_by_cell_and_species[index], increment_g);
                 _ = try addFinite(self.tracked_element_mass_g_by_cell_and_species[index], increment_g);
             };
@@ -443,7 +445,7 @@ pub const State = struct {
                     subsurface_flux_g_per_h,
                     species_value,
                 ) catch unreachable;
-                const index = cell * gas.species_count + @intFromEnum(species_value);
+                const index = cell * gas.species_count + @backingInt(species_value);
                 self.soil_litter_boundary_mass_g_by_cell_and_species[index] = addFinite(
                     self.soil_litter_boundary_mass_g_by_cell_and_species[index],
                     increment_g,
@@ -457,7 +459,7 @@ pub const State = struct {
 
     pub fn get(self: *const State, cell: usize, species: gas.Species) !f64 {
         if (cell >= self.cell_count) return error.DailyGasFluxCellOutOfBounds;
-        return self.tracked_element_mass_g_by_cell_and_species[cell * gas.species_count + @intFromEnum(species)];
+        return self.tracked_element_mass_g_by_cell_and_species[cell * gas.species_count + @backingInt(species)];
     }
 
     /// Exact DAY `UCO2G`, `UCH4G`, `UOXYG`, `UH2GG`, ... owner: cumulative
@@ -466,16 +468,16 @@ pub const State = struct {
     /// ecosystem exchange.
     pub fn getSoilLitterBoundary(self: *const State, cell: usize, species: gas.Species) !f64 {
         if (cell >= self.cell_count) return error.DailyGasFluxCellOutOfBounds;
-        return self.soil_litter_boundary_mass_g_by_cell_and_species[cell * gas.species_count + @intFromEnum(species)];
+        return self.soil_litter_boundary_mass_g_by_cell_and_species[cell * gas.species_count + @backingInt(species)];
     }
 };
 
 test "external subsurface nitrogen excludes inactive capacity layers" {
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    var flux = [_]f64{0} ** (2 * gas.species_count);
-    flux[@intFromEnum(gas.Species.nitrogen)] = 3;
-    flux[gas.species_count + @intFromEnum(gas.Species.nitrogen)] = -1;
+    var flux = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    flux[@backingInt(gas.Species.nitrogen)] = 3;
+    flux[gas.species_count + @backingInt(gas.Species.nitrogen)] = -1;
     try state.accumulateSubsurfaceNitrogenBoundaryHour(2, &.{1}, &flux);
     try std.testing.expectEqual(@as(f64, 3), try state.getSoilLitterBoundary(0, .nitrogen));
     try std.testing.expectEqual(@as(f64, 3), try state.get(0, .nitrogen));
@@ -484,9 +486,9 @@ test "external subsurface nitrogen excludes inactive capacity layers" {
 test "accepted external subsurface oxygen and hydrogen exclude inactive capacity slots" {
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    var flux = [_]f64{0} ** (2 * gas.species_count);
-    const oxygen = @intFromEnum(gas.Species.oxygen);
-    const hydrogen = @intFromEnum(gas.Species.hydrogen);
+    var flux = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    const oxygen = @backingInt(gas.Species.oxygen);
+    const hydrogen = @backingInt(gas.Species.hydrogen);
     flux[oxygen] = 6.25;
     flux[hydrogen] = -0.125;
     flux[gas.species_count + oxygen] = -91.0;
@@ -503,9 +505,9 @@ test "accepted external subsurface oxygen and hydrogen exclude inactive capacity
 test "accepted external subsurface oxygen retains signed algebraic hourly sum" {
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    var input_flux = [_]f64{0} ** gas.species_count;
-    var output_flux = [_]f64{0} ** gas.species_count;
-    const oxygen = @intFromEnum(gas.Species.oxygen);
+    var input_flux = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    var output_flux = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    const oxygen = @backingInt(gas.Species.oxygen);
     input_flux[oxygen] = 9.5;
     output_flux[oxygen] = -4.0;
 
@@ -521,13 +523,13 @@ test "accepted external subsurface oxygen retains signed algebraic hourly sum" {
 test "accepted external subsurface physical state_update is atomic on late overflow" {
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    const nitrogen = @intFromEnum(gas.Species.nitrogen);
-    const oxygen = @intFromEnum(gas.Species.oxygen);
+    const nitrogen = @backingInt(gas.Species.nitrogen);
+    const oxygen = @backingInt(gas.Species.oxygen);
     state.soil_litter_boundary_mass_g_by_cell_and_species[oxygen] = std.math.floatMax(f64);
     state.tracked_element_mass_g_by_cell_and_species[oxygen] = std.math.floatMax(f64);
     const boundary_before = state.soil_litter_boundary_mass_g_by_cell_and_species[oxygen];
     const tracked_before = state.tracked_element_mass_g_by_cell_and_species[oxygen];
-    var flux = [_]f64{0} ** gas.species_count;
+    var flux = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     flux[nitrogen] = 7;
     flux[oxygen] = std.math.floatMax(f64);
 
@@ -556,7 +558,7 @@ fn subsurfaceBoundaryIncrement(
     species_value: gas.Species,
 ) !f64 {
     const first_layer = cell * soil_layer_capacity;
-    const species = @intFromEnum(species_value);
+    const species = @backingInt(species_value);
     var increment_g: f64 = 0;
     for (first_layer..first_layer + active_soil_layer_count) |layer|
         increment_g = try addFinite(
@@ -672,11 +674,11 @@ test "DAY gas accumulator combines boundaries and runtime root species" {
     const hydrogen_root = try roots.layerIndex(0, 0, 0);
     roots.atmosphere_to_root_gas_exchange_g_per_h[carbon_root * 6] = 0.75;
     roots.atmosphere_to_root_gas_exchange_g_per_h[hydrogen_root * 6 + 4] = 0.25;
-    var soil = [_]f64{0} ** (2 * gas.species_count);
-    var litter = [_]f64{0} ** gas.species_count;
-    soil[@intFromEnum(gas.Species.carbon_dioxide)] = 3;
-    litter[@intFromEnum(gas.Species.carbon_dioxide)] = 1;
-    litter[@intFromEnum(gas.Species.hydrogen)] = 1.5;
+    var soil = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    var litter = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    soil[@backingInt(gas.Species.carbon_dioxide)] = 3;
+    litter[@backingInt(gas.Species.carbon_dioxide)] = 1;
+    litter[@backingInt(gas.Species.hydrogen)] = 1.5;
     try state.accumulateHour(&roots, 7, 2, &soil, &litter);
     try state.accumulateHour(&roots, 7, 2, &soil, &litter);
     try std.testing.expectEqual(@as(f64, 8), try state.getSoilLitterBoundary(0, .carbon_dioxide));
@@ -701,11 +703,11 @@ test "current-hour gas activity is cell local and matches producer sign algebra"
     const hydrogen_root = try roots.layerIndex(0, 0, 0);
     roots.atmosphere_to_root_gas_exchange_g_per_h[carbon_root * 6] = 0.75;
     roots.atmosphere_to_root_gas_exchange_g_per_h[hydrogen_root * 6 + 4] = 0.25;
-    var soil = [_]f64{0} ** (2 * gas.species_count);
-    var litter = [_]f64{0} ** gas.species_count;
-    soil[@intFromEnum(gas.Species.carbon_dioxide)] = 3;
-    litter[@intFromEnum(gas.Species.carbon_dioxide)] = 1;
-    litter[@intFromEnum(gas.Species.hydrogen)] = 1.5;
+    var soil = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    var litter = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    soil[@backingInt(gas.Species.carbon_dioxide)] = 3;
+    litter[@backingInt(gas.Species.carbon_dioxide)] = 1;
+    litter[@backingInt(gas.Species.hydrogen)] = 1.5;
 
     const activity = try state.currentHourElementActivityForCell(
         &roots,
@@ -741,10 +743,10 @@ test "componentwise hourly ammonia accounting closes locally and matches nitroge
         cell_one_root * @import("../../plant/root/plant_root_system.zig").transported_root_gas_count + 3
     ] = 25;
 
-    var soil = [_]f64{0} ** (4 * gas.species_count);
-    var litter = [_]f64{0} ** (2 * gas.species_count);
-    const ammonia = @intFromEnum(gas.Species.ammonia);
-    const nitrogen = @intFromEnum(gas.Species.nitrogen);
+    var soil = @as([(4 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    var litter = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    const ammonia = @backingInt(gas.Species.ammonia);
+    const nitrogen = @backingInt(gas.Species.nitrogen);
     soil[ammonia] = 1.5;
     soil[gas.species_count + ammonia] = -0.25;
     litter[ammonia] = 0.5;
@@ -799,18 +801,18 @@ test "componentwise hourly ammonia accounting closes locally and matches nitroge
 test "current-hour subsurface gas activity excludes inactive capacity slots" {
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    var flux = [_]f64{0} ** (2 * gas.species_count);
-    flux[@intFromEnum(gas.Species.oxygen)] = 4;
-    flux[@intFromEnum(gas.Species.carbon_dioxide)] = -2;
-    flux[@intFromEnum(gas.Species.methane)] = 0.75;
-    flux[@intFromEnum(gas.Species.nitrogen)] = -1;
-    flux[@intFromEnum(gas.Species.nitrous_oxide)] = 2.5;
-    flux[@intFromEnum(gas.Species.hydrogen)] = -3.25;
-    flux[gas.species_count + @intFromEnum(gas.Species.oxygen)] = 99;
-    flux[gas.species_count + @intFromEnum(gas.Species.carbon_dioxide)] = 88;
-    flux[gas.species_count + @intFromEnum(gas.Species.methane)] = -66;
-    flux[gas.species_count + @intFromEnum(gas.Species.ammonia)] = 77;
-    flux[gas.species_count + @intFromEnum(gas.Species.hydrogen)] = 55;
+    var flux = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    flux[@backingInt(gas.Species.oxygen)] = 4;
+    flux[@backingInt(gas.Species.carbon_dioxide)] = -2;
+    flux[@backingInt(gas.Species.methane)] = 0.75;
+    flux[@backingInt(gas.Species.nitrogen)] = -1;
+    flux[@backingInt(gas.Species.nitrous_oxide)] = 2.5;
+    flux[@backingInt(gas.Species.hydrogen)] = -3.25;
+    flux[gas.species_count + @backingInt(gas.Species.oxygen)] = 99;
+    flux[gas.species_count + @backingInt(gas.Species.carbon_dioxide)] = 88;
+    flux[gas.species_count + @backingInt(gas.Species.methane)] = -66;
+    flux[gas.species_count + @backingInt(gas.Species.ammonia)] = 77;
+    flux[gas.species_count + @backingInt(gas.Species.hydrogen)] = 55;
 
     const activity = try state.currentHourSubsurfacePhysicalActivityForCell(
         2,
@@ -828,8 +830,8 @@ test "failed DAY gas accumulation leaves every cell unchanged" {
     var state = try State.init(std.testing.allocator, 2);
     defer state.deinit();
     state.tracked_element_mass_g_by_cell_and_species[0] = 4;
-    var soil = [_]f64{0} ** (2 * gas.species_count);
-    var litter = [_]f64{0} ** (2 * gas.species_count);
+    var soil = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    var litter = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
     litter[gas.species_count] = std.math.nan(f64);
     try std.testing.expectError(error.NonFiniteGasOutputBoundaryExchange, state.accumulateHour(null, 1, 1, &soil, &litter));
     try std.testing.expectEqual(@as(f64, 4), state.tracked_element_mass_g_by_cell_and_species[0]);

@@ -59,6 +59,7 @@ const soc_lability = @import("soc_lability.zig");
 const fixation_normalization = @import("fixation_normalization.zig");
 const soluble_removal = @import("../surface/litter_soluble_removal.zig");
 const som_removal = @import("../surface/litter_som_removal.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 // REDIST 12487--12554 scales exactly these six macropore aqueous-gas
 // coordinates after the 62 mineral-N/P/salt coordinates. Aqueous NH3 is
@@ -86,18 +87,18 @@ fn bindSourceMacroporeScaling(
     const band_mineral = [_]usize{ 1, 3, 5, 7 };
     for (nonband_mineral, 0..) |species, family|
         families[family] = transport_owners.mineral_macropore_mol[species * layers ..][0..layers];
-    families[4] = transport_owners.macropore_mol[@intFromEnum(SoluteSpecies.AqueousSpecies.non_band_hpo4) * layers ..][0..layers];
-    families[5] = transport_owners.macropore_mol[@intFromEnum(SoluteSpecies.AqueousSpecies.non_band_h2po4) * layers ..][0..layers];
+    families[4] = transport_owners.macropore_mol[@backingInt(SoluteSpecies.AqueousSpecies.non_band_hpo4) * layers ..][0..layers];
+    families[5] = transport_owners.macropore_mol[@backingInt(SoluteSpecies.AqueousSpecies.non_band_h2po4) * layers ..][0..layers];
     for (band_mineral, 0..) |species, family|
         families[6 + family] = transport_owners.mineral_macropore_mol[species * layers ..][0..layers];
-    families[10] = transport_owners.macropore_mol[@intFromEnum(SoluteSpecies.AqueousSpecies.band_hpo4) * layers ..][0..layers];
-    families[11] = transport_owners.macropore_mol[@intFromEnum(SoluteSpecies.AqueousSpecies.band_h2po4) * layers ..][0..layers];
+    families[10] = transport_owners.macropore_mol[@backingInt(SoluteSpecies.AqueousSpecies.band_hpo4) * layers ..][0..layers];
+    families[11] = transport_owners.macropore_mol[@backingInt(SoluteSpecies.AqueousSpecies.band_h2po4) * layers ..][0..layers];
     for (source_scaling_salt_species, 0..) |species, family|
-        families[12 + family] = transport_owners.macropore_mol[@intFromEnum(species) * layers ..][0..layers];
+        families[12 + family] = transport_owners.macropore_mol[@backingInt(species) * layers ..][0..layers];
     for (source_scaling_nonband_phosphate_species, 0..) |species, family|
-        families[45 + family] = transport_owners.macropore_mol[@intFromEnum(species) * layers ..][0..layers];
+        families[45 + family] = transport_owners.macropore_mol[@backingInt(species) * layers ..][0..layers];
     for (source_scaling_band_phosphate_species, 0..) |species, family|
-        families[53 + family] = transport_owners.macropore_mol[@intFromEnum(species) * layers ..][0..layers];
+        families[53 + family] = transport_owners.macropore_mol[@backingInt(species) * layers ..][0..layers];
     for (source_aqueous_gas_species, 0..) |species, family|
         families[macropore_gas_scaling_offset + family] =
             macropore_species_major[species * layers ..][0..layers];
@@ -553,7 +554,7 @@ fn addGasActivity(
         return error.TillageActivityDimensionMismatch;
     const amount = struct {
         fn get(g: []const f64, d: []const f64, species: Gas.Species, local: usize, count: usize) f64 {
-            const index = @intFromEnum(species) * count + local;
+            const index = @backingInt(species) * count + local;
             return g[index] + if (species == .ammonia) 0 else d[index];
         }
     }.get;
@@ -561,7 +562,7 @@ fn addGasActivity(
     try addStorageField(result, "oxygen_g", amount(gaseous_species_major, dissolved_species_major, .oxygen, layer, layers));
     try addStorageField(result, "hydrogen_g", amount(gaseous_species_major, dissolved_species_major, .hydrogen, layer, layers));
     try addStorageField(result, "dinitrogen_nitrogen_g", amount(gaseous_species_major, dissolved_species_major, .nitrogen, layer, layers) + amount(gaseous_species_major, dissolved_species_major, .nitrous_oxide, layer, layers));
-    try addStorageField(result, "ammonium_nitrogen_g", gaseous_species_major[@intFromEnum(Gas.Species.ammonia) * layers + layer]);
+    try addStorageField(result, "ammonium_nitrogen_g", gaseous_species_major[@backingInt(Gas.Species.ammonia) * layers + layer]);
 }
 
 fn addAqueousActivity(result: *InventorySupport.Storage, species: SoluteSpecies.AqueousSpecies, amount_mol: f64, context: *const Context) !void {
@@ -573,7 +574,7 @@ fn addAqueousActivity(result: *InventorySupport.Storage, species: SoluteSpecies.
 }
 
 fn addMineralFertilizerActivity(result: *InventorySupport.Storage, value: MineralFertilizer.Inventory, context: *const Context) !void {
-    inline for (std.meta.fields(MineralFertilizer.Inventory)) |field|
+    inline for (ti_compat.fieldViews(MineralFertilizer.Inventory)) |field|
         if (!std.math.isFinite(@field(value, field.name)) or @field(value, field.name) < 0)
             return error.InvalidTillageActivityInventory;
     const monocalcium = value.broadcast_monocalcium_phosphate_mol + value.banded_monocalcium_phosphate_mol;
@@ -593,7 +594,7 @@ fn addMineralFertilizerActivity(result: *InventorySupport.Storage, value: Minera
 
 fn mineralFertilizerDifference(after: MineralFertilizer.Inventory, before: MineralFertilizer.Inventory) !MineralFertilizer.Inventory {
     var result: MineralFertilizer.Inventory = .{};
-    inline for (std.meta.fields(MineralFertilizer.Inventory)) |field| {
+    inline for (ti_compat.fieldViews(MineralFertilizer.Inventory)) |field| {
         @field(result, field.name) = @field(after, field.name) - @field(before, field.name);
         if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0)
             return error.InvalidTillageActivityInventory;
@@ -671,7 +672,7 @@ fn addSurfaceChemicalActivity(
     }.get;
     for (source_aqueous_gas_species, 0..) |species_index, family| {
         const amount = value(core[family], cell, incorporated);
-        switch (@as(Gas.Species, @enumFromInt(species_index))) {
+        switch (@as(Gas.Species, @fromBackingInt(@intCast(species_index)))) {
             .carbon_dioxide, .methane => try addStorageField(result, "carbon_dioxide_carbon_g", amount),
             .oxygen => try addStorageField(result, "oxygen_g", amount),
             .nitrogen, .nitrous_oxide => try addStorageField(result, "dinitrogen_nitrogen_g", amount),
@@ -696,7 +697,7 @@ fn addSurfaceChemicalActivity(
 
 fn storageDifference(before: InventorySupport.Storage, after: InventorySupport.Storage) !InventorySupport.Storage {
     var result: InventorySupport.Storage = .{};
-    inline for (std.meta.fields(InventorySupport.Storage)) |field| {
+    inline for (ti_compat.fieldViews(InventorySupport.Storage)) |field| {
         @field(result, field.name) = @field(before, field.name) - @field(after, field.name);
     }
     try result.validate();
@@ -2116,7 +2117,7 @@ const fertilizer_fields = .{ "broadcast_ammonium_mol_n", "broadcast_ammonia_mol_
 
 fn fieldIndex(comptime T: type, comptime name: []const u8) usize {
     return comptime blk: {
-        for (@typeInfo(T).@"struct".fields, 0..) |field, index| {
+        for (ti_compat.fieldViews(T), 0..) |field, index| {
             if (std.mem.eql(u8, field.name, name)) break :blk index;
         }
         @compileError("missing tillage chemistry field " ++ name);
@@ -2249,8 +2250,8 @@ fn collapseResetMacroporeBands(
     if (resets.phosphate) {
         for (nonband_phosphate_transport_species, band_phosphate_transport_species) |nonband_species, band_species| {
             try collapsePairForReset(
-                transport.macropore_mol[@intFromEnum(nonband_species) * layers ..][0..layers],
-                transport.macropore_mol[@intFromEnum(band_species) * layers ..][0..layers],
+                transport.macropore_mol[@backingInt(nonband_species) * layers ..][0..layers],
+                transport.macropore_mol[@backingInt(band_species) * layers ..][0..layers],
                 first,
                 tillage_depth_m,
                 bottoms,
@@ -2303,8 +2304,8 @@ fn gatherChemistry(context: *const Context, cell: usize, global_first: usize, la
         };
         const fertilizer = context.fertilizer_nitrogen.soil[cell * layers + layer];
         inline for (fertilizer_fields, 0..) |name, coordinate| try storeInventory(storage, fertilizer_offset + coordinate, layers, layer, @field(fertilizer, name), 1);
-        storage[hydrogen_silicate_coordinate * layers + layer] = transport_owners.micropore_mol[@intFromEnum(SoluteSpecies.AqueousSpecies.hydrogen_silicate) * layers + layer];
-        inline for (@typeInfo(CationExchange.Cations).@"struct".fields, 0..) |field, coordinate| {
+        storage[hydrogen_silicate_coordinate * layers + layer] = transport_owners.micropore_mol[@backingInt(SoluteSpecies.AqueousSpecies.hydrogen_silicate) * layers + layer];
+        inline for (ti_compat.fieldViews(CationExchange.Cations), 0..) |field, coordinate| {
             const carrier = if (coordinate == 0)
                 mass * fractions.ammonium_non_band
             else if (coordinate == 1)
@@ -2318,7 +2319,7 @@ fn gatherChemistry(context: *const Context, cell: usize, global_first: usize, la
             try storeInventory(storage, phosphate_surface_nonband_offset + coordinate, layers, layer, @field(context.soil_chemistry.non_band_phosphate[global], name), mass * fractions.phosphate_non_band);
             try storeInventory(storage, phosphate_surface_band_offset + coordinate, layers, layer, @field(context.soil_chemistry.band_phosphate[global], name), mass * fractions.phosphate_band);
         }
-        inline for (@typeInfo(Geochemistry.SolidState).@"struct".fields, 0..) |field, coordinate|
+        inline for (ti_compat.fieldViews(Geochemistry.SolidState), 0..) |field, coordinate|
             try storeInventory(storage, geochemistry_offset + coordinate, layers, layer, @field(context.soil_chemistry.geochemistry_solids[global], field.name), water);
         inline for (phosphate_solid_fields, 0..) |name, coordinate| {
             try storeInventory(storage, phosphate_solid_nonband_offset + coordinate, layers, layer, @field(context.soil_chemistry.non_band_phosphate[global], name), water * fractions.phosphate_non_band);
@@ -2330,11 +2331,11 @@ fn gatherChemistry(context: *const Context, cell: usize, global_first: usize, la
                 if (coordinate < 6) amount_mol else 14 * amount_mol;
         }
         for (salt_transport_species, 0..) |species, coordinate|
-            storage[(salt_offset + coordinate) * layers + layer] = transport_owners.micropore_mol[@intFromEnum(species) * layers + layer];
+            storage[(salt_offset + coordinate) * layers + layer] = transport_owners.micropore_mol[@backingInt(species) * layers + layer];
         for (nonband_phosphate_transport_species, 0..) |species, coordinate|
-            storage[(phosphate_aqueous_nonband_offset + coordinate) * layers + layer] = transport_owners.micropore_mol[@intFromEnum(species) * layers + layer];
+            storage[(phosphate_aqueous_nonband_offset + coordinate) * layers + layer] = transport_owners.micropore_mol[@backingInt(species) * layers + layer];
         for (band_phosphate_transport_species, 0..) |species, coordinate|
-            storage[(phosphate_aqueous_band_offset + coordinate) * layers + layer] = transport_owners.micropore_mol[@intFromEnum(species) * layers + layer];
+            storage[(phosphate_aqueous_band_offset + coordinate) * layers + layer] = transport_owners.micropore_mol[@backingInt(species) * layers + layer];
     }
 }
 
@@ -2349,16 +2350,16 @@ fn syncPreparedTransportFromChemistry(
             transport_owners.mineral_matrix_mol[species * layers + layer] =
                 if (species < 6) value else value / 14;
         }
-        transport_owners.micropore_mol[@intFromEnum(SoluteSpecies.AqueousSpecies.hydrogen_silicate) * layers + layer] =
+        transport_owners.micropore_mol[@backingInt(SoluteSpecies.AqueousSpecies.hydrogen_silicate) * layers + layer] =
             chemistry_storage[hydrogen_silicate_coordinate * layers + layer];
         for (salt_transport_species, 0..) |species, coordinate|
-            transport_owners.micropore_mol[@intFromEnum(species) * layers + layer] =
+            transport_owners.micropore_mol[@backingInt(species) * layers + layer] =
                 chemistry_storage[(salt_offset + coordinate) * layers + layer];
         for (nonband_phosphate_transport_species, 0..) |species, coordinate|
-            transport_owners.micropore_mol[@intFromEnum(species) * layers + layer] =
+            transport_owners.micropore_mol[@backingInt(species) * layers + layer] =
                 chemistry_storage[(phosphate_aqueous_nonband_offset + coordinate) * layers + layer];
         for (band_phosphate_transport_species, 0..) |species, coordinate|
-            transport_owners.micropore_mol[@intFromEnum(species) * layers + layer] =
+            transport_owners.micropore_mol[@backingInt(species) * layers + layer] =
                 chemistry_storage[(phosphate_aqueous_band_offset + coordinate) * layers + layer];
     }
 }
@@ -2381,9 +2382,9 @@ fn validateTransportOwnerClosure(
     for (0..SoluteSpecies.AqueousSpecies.count) |species| {
         var is_phosphate_zone_coordinate = false;
         for (nonband_phosphate_transport_species) |phosphate_species|
-            is_phosphate_zone_coordinate = is_phosphate_zone_coordinate or species == @intFromEnum(phosphate_species);
+            is_phosphate_zone_coordinate = is_phosphate_zone_coordinate or species == @backingInt(phosphate_species);
         for (band_phosphate_transport_species) |phosphate_species|
-            is_phosphate_zone_coordinate = is_phosphate_zone_coordinate or species == @intFromEnum(phosphate_species);
+            is_phosphate_zone_coordinate = is_phosphate_zone_coordinate or species == @backingInt(phosphate_species);
         // Nitrogen/phosphate band reset is an internal transfer between the
         // two authoritative zone coordinates.  Test those pairs below so a
         // legitimate band -> non-band move is not mistaken for production.
@@ -2396,7 +2397,7 @@ fn validateTransportOwnerClosure(
         }
         if (!closeEnough(before, result)) {
             std.log.err("tillage aqueous closure species={s} before={e} after={e} residual={e}", .{
-                @tagName(@as(SoluteSpecies.AqueousSpecies, @enumFromInt(species))),
+                @tagName(@as(SoluteSpecies.AqueousSpecies, @fromBackingInt(@intCast(species)))),
                 before,
                 result,
                 result - before,
@@ -2405,8 +2406,8 @@ fn validateTransportOwnerClosure(
         }
     }
     for (0..nonband_phosphate_transport_species.len) |coordinate| {
-        const nonband = @intFromEnum(nonband_phosphate_transport_species[coordinate]);
-        const band = @intFromEnum(band_phosphate_transport_species[coordinate]);
+        const nonband = @backingInt(nonband_phosphate_transport_species[coordinate]);
+        const band = @backingInt(band_phosphate_transport_species[coordinate]);
         var before = aqueous_surface_addition[nonband] + aqueous_surface_addition[band];
         var result: f64 = 0;
         for (0..layers) |layer| {
@@ -2543,13 +2544,13 @@ fn scatterChemistryAssumeValid(context: *Context, cell: usize, global_first: usi
         const fertilizer = &context.fertilizer_nitrogen.soil[cell * layers + layer];
         inline for (fertilizer_fields, 0..) |name, coordinate| @field(fertilizer.*, name) = storage[(fertilizer_offset + coordinate) * layers + layer];
         state.aqueous[global].hydrogen_silicate = inventoryConcentration(storage[hydrogen_silicate_coordinate * layers + layer], water[layer]);
-        inline for (@typeInfo(CationExchange.Cations).@"struct".fields, 0..) |field, coordinate| @field(state.cation_exchange_mol_per_megagram[global], field.name) = inventoryConcentration(storage[(exchange_offset + coordinate) * layers + layer], chemistryCarrier(exchange_offset + coordinate, layer, water[layer], volume[layer], mass, band_geometry));
+        inline for (ti_compat.fieldViews(CationExchange.Cations), 0..) |field, coordinate| @field(state.cation_exchange_mol_per_megagram[global], field.name) = inventoryConcentration(storage[(exchange_offset + coordinate) * layers + layer], chemistryCarrier(exchange_offset + coordinate, layer, water[layer], volume[layer], mass, band_geometry));
         state.carboxyl_bound_hydrogen_mol_per_megagram[global] = inventoryConcentration(storage[(exchange_offset + 9) * layers + layer], mass);
         inline for (phosphate_surface_fields, 0..) |name, coordinate| {
             @field(state.non_band_phosphate[global], name) = inventoryConcentration(storage[(phosphate_surface_nonband_offset + coordinate) * layers + layer], chemistryCarrier(phosphate_surface_nonband_offset + coordinate, layer, water[layer], volume[layer], mass, band_geometry));
             @field(state.band_phosphate[global], name) = inventoryConcentration(storage[(phosphate_surface_band_offset + coordinate) * layers + layer], chemistryCarrier(phosphate_surface_band_offset + coordinate, layer, water[layer], volume[layer], mass, band_geometry));
         }
-        inline for (@typeInfo(Geochemistry.SolidState).@"struct".fields, 0..) |field, coordinate| @field(state.geochemistry_solids[global], field.name) = inventoryConcentration(storage[(geochemistry_offset + coordinate) * layers + layer], water[layer]);
+        inline for (ti_compat.fieldViews(Geochemistry.SolidState), 0..) |field, coordinate| @field(state.geochemistry_solids[global], field.name) = inventoryConcentration(storage[(geochemistry_offset + coordinate) * layers + layer], water[layer]);
         inline for (phosphate_solid_fields, 0..) |name, coordinate| {
             @field(state.non_band_phosphate[global], name) = inventoryConcentration(storage[(phosphate_solid_nonband_offset + coordinate) * layers + layer], chemistryCarrier(phosphate_solid_nonband_offset + coordinate, layer, water[layer], volume[layer], mass, band_geometry));
             @field(state.band_phosphate[global], name) = inventoryConcentration(storage[(phosphate_solid_band_offset + coordinate) * layers + layer], chemistryCarrier(phosphate_solid_band_offset + coordinate, layer, water[layer], volume[layer], mass, band_geometry));
@@ -2642,9 +2643,9 @@ fn gatherSurfaceTransfers(context: *const Context, cell: usize, dynamic_salts: b
     core[9].surface_amount[cell] = nitrite;
     try setSurfaceInventory(&core[10], cell, state.hpo4_mol_p_per_m3, water);
     try setSurfaceInventory(&core[11], cell, state.h2po4_mol_p_per_m3, water);
-    inline for (@typeInfo(@TypeOf(state.exchange)).@"struct".fields, 0..) |field, index| try setSurfaceInventory(&core[12 + index], cell, @field(state.exchange, field.name), mass);
+    inline for (ti_compat.fieldViews(@TypeOf(state.exchange)), 0..) |field, index| try setSurfaceInventory(&core[12 + index], cell, @field(state.exchange, field.name), mass);
     try setSurfaceInventory(&core[20], cell, state.carboxyl_hydrogen_mol_per_megagram, mass);
-    inline for (@typeInfo(@TypeOf(state.phosphate_surface)).@"struct".fields, 0..) |field, index| try setSurfaceInventory(&core[21 + index], cell, @field(state.phosphate_surface, field.name), mass);
+    inline for (ti_compat.fieldViews(@TypeOf(state.phosphate_surface)), 0..) |field, index| try setSurfaceInventory(&core[21 + index], cell, @field(state.phosphate_surface, field.name), mass);
     const fertilizer = context.surface_fertilizer.cells[cell];
     inline for (.{ fertilizer.ammonium_mol_n, fertilizer.ammonia_mol_n, fertilizer.urea_mol_n, fertilizer.nitrate_mol_n }, 0..) |value, index| try setSurfaceInventory(&core[26 + index], cell, value, 1);
     core[30].surface_amount[cell] = 0; // surface nitrification-inhibitor owner is scientifically absent
@@ -2702,9 +2703,9 @@ fn surfaceOwnersAfter(context: *const Context, cell: usize, dynamic_salts: bool,
     result.chemistry.nitrate_mol_per_m3 = try concentration(core[8].surface_amount[cell], water);
     result.chemistry.hpo4_mol_p_per_m3 = try concentration(core[10].surface_amount[cell], water);
     result.chemistry.h2po4_mol_p_per_m3 = try concentration(core[11].surface_amount[cell], water);
-    inline for (@typeInfo(@TypeOf(result.chemistry.exchange)).@"struct".fields, 0..) |field, index| @field(result.chemistry.exchange, field.name) = try concentration(core[12 + index].surface_amount[cell], mass);
+    inline for (ti_compat.fieldViews(@TypeOf(result.chemistry.exchange)), 0..) |field, index| @field(result.chemistry.exchange, field.name) = try concentration(core[12 + index].surface_amount[cell], mass);
     result.chemistry.carboxyl_hydrogen_mol_per_megagram = try concentration(core[20].surface_amount[cell], mass);
-    inline for (@typeInfo(@TypeOf(result.chemistry.phosphate_surface)).@"struct".fields, 0..) |field, index| @field(result.chemistry.phosphate_surface, field.name) = try concentration(core[21 + index].surface_amount[cell], mass);
+    inline for (ti_compat.fieldViews(@TypeOf(result.chemistry.phosphate_surface)), 0..) |field, index| @field(result.chemistry.phosphate_surface, field.name) = try concentration(core[21 + index].surface_amount[cell], mass);
     _ = dynamic_salts;
     _ = dynamic;
     result.fertilizer.ammonium_mol_n = core[26].surface_amount[cell];
@@ -2739,7 +2740,7 @@ fn validateMappedSurfaceIncorporation(before: []const f64, after: []const f64, l
 
 fn redistributeMineralFertilizer(soil: []MineralFertilizer.Inventory, surface: *MineralFertilizer.Inventory, first: usize, last: usize, mixing_depth: f64, thickness: []const f64, bottoms: []const f64, remaining: f64) !void {
     if (soil.len != thickness.len or bottoms.len != soil.len or !std.math.isFinite(remaining) or remaining < 0 or remaining > 1) return error.TillageMineralFertilizerDimensionMismatch;
-    inline for (@typeInfo(MineralFertilizer.Inventory).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(MineralFertilizer.Inventory)) |field| {
         const original_surface = @field(surface.*, field.name);
         if (!std.math.isFinite(original_surface) or original_surface < 0) return error.InvalidTillageMineralFertilizerOwner;
         var before = original_surface;
@@ -2921,12 +2922,12 @@ test "REDIST tillage binds exact source-ordered chemical and gas macropore famil
     }, &macropore, 1);
     try std.testing.expect(families[0].ptr == mineral_macropore[0..].ptr);
     try std.testing.expect(families[1].ptr == mineral_macropore[2..].ptr);
-    try std.testing.expect(families[4].ptr == macropore_solute[@intFromEnum(SoluteSpecies.AqueousSpecies.non_band_hpo4)..].ptr);
+    try std.testing.expect(families[4].ptr == macropore_solute[@backingInt(SoluteSpecies.AqueousSpecies.non_band_hpo4)..].ptr);
     try std.testing.expect(families[10].ptr == families[54].ptr);
-    try std.testing.expect(families[12].ptr == macropore_solute[@intFromEnum(SoluteSpecies.AqueousSpecies.aluminum)..].ptr);
-    try std.testing.expect(families[44].ptr == macropore_solute[@intFromEnum(SoluteSpecies.AqueousSpecies.potassium_sulfate)..].ptr);
-    try std.testing.expect(families[45].ptr == macropore_solute[@intFromEnum(SoluteSpecies.AqueousSpecies.non_band_phosphate)..].ptr);
-    try std.testing.expect(families[61].ptr == macropore_solute[@intFromEnum(SoluteSpecies.AqueousSpecies.band_magnesium_hpo4)..].ptr);
+    try std.testing.expect(families[12].ptr == macropore_solute[@backingInt(SoluteSpecies.AqueousSpecies.aluminum)..].ptr);
+    try std.testing.expect(families[44].ptr == macropore_solute[@backingInt(SoluteSpecies.AqueousSpecies.potassium_sulfate)..].ptr);
+    try std.testing.expect(families[45].ptr == macropore_solute[@backingInt(SoluteSpecies.AqueousSpecies.non_band_phosphate)..].ptr);
+    try std.testing.expect(families[61].ptr == macropore_solute[@backingInt(SoluteSpecies.AqueousSpecies.band_magnesium_hpo4)..].ptr);
     try std.testing.expect(families[62].ptr == macropore[0..].ptr);
     try std.testing.expect(families[67].ptr == macropore[6..].ptr);
     try macropore_scaling.scale(std.testing.allocator, .{
@@ -2945,9 +2946,9 @@ test "REDIST tillage binds exact source-ordered chemical and gas macropore famil
     );
     try std.testing.expectEqual(@as(f64, 50), mineral_macropore[0]);
     try std.testing.expectEqual(@as(f64, 51.75), mineral_macropore[7]);
-    try std.testing.expectEqual(@as(f64, 25), macropore_solute[@intFromEnum(SoluteSpecies.AqueousSpecies.aluminum)]);
-    try std.testing.expectEqual(@as(f64, 37.25), macropore_solute[@intFromEnum(SoluteSpecies.AqueousSpecies.band_magnesium_hpo4)]);
-    try std.testing.expectEqual(@as(f64, 133), macropore_solute[@intFromEnum(SoluteSpecies.AqueousSpecies.hydrogen_silicate)]);
+    try std.testing.expectEqual(@as(f64, 25), macropore_solute[@backingInt(SoluteSpecies.AqueousSpecies.aluminum)]);
+    try std.testing.expectEqual(@as(f64, 37.25), macropore_solute[@backingInt(SoluteSpecies.AqueousSpecies.band_magnesium_hpo4)]);
+    try std.testing.expectEqual(@as(f64, 133), macropore_solute[@backingInt(SoluteSpecies.AqueousSpecies.hydrogen_silicate)]);
 }
 
 noinline fn redistributeChemistryPhase(
@@ -3014,11 +3015,11 @@ noinline fn redistributeChemistryPhase(
         else if (index < 8)
             mineral_nitrite_macropore_g[(index - 6) * layers ..][0..layers]
         else if (index < 8 + salt_transport_species.len)
-            transport_owners.macropore_mol[@intFromEnum(salt_transport_species[index - 8]) * layers ..][0..layers]
+            transport_owners.macropore_mol[@backingInt(salt_transport_species[index - 8]) * layers ..][0..layers]
         else if (index < 8 + salt_transport_species.len + nonband_phosphate_transport_species.len)
-            transport_owners.macropore_mol[@intFromEnum(nonband_phosphate_transport_species[index - 8 - salt_transport_species.len]) * layers ..][0..layers]
+            transport_owners.macropore_mol[@backingInt(nonband_phosphate_transport_species[index - 8 - salt_transport_species.len]) * layers ..][0..layers]
         else
-            transport_owners.macropore_mol[@intFromEnum(band_phosphate_transport_species[index - 8 - salt_transport_species.len - nonband_phosphate_transport_species.len]) * layers ..][0..layers];
+            transport_owners.macropore_mol[@backingInt(band_phosphate_transport_species[index - 8 - salt_transport_species.len - nonband_phosphate_transport_species.len]) * layers ..][0..layers];
         family.* = .{ .layer_amount = values, .mixed_total = mixedExtensive(values, thickness, bottoms, first_soil_layer, last_mixed, mixing_depth), .held_amount = held_amount };
     }
     const chemistry_same_scope_gain = try allocZero(allocator, chemistry_family_count * layers);
@@ -3263,8 +3264,8 @@ noinline fn incorporateSurfacePhase(
     mineral_surface_addition_mol[4] = mineral_totals[8];
     mineral_surface_addition_mol[6] = mineral_totals[9] / 14;
     var aqueous_surface_addition_mol: [SoluteSpecies.AqueousSpecies.count]f64 = @splat(0);
-    aqueous_surface_addition_mol[@intFromEnum(SoluteSpecies.AqueousSpecies.non_band_hpo4)] = mineral_totals[10];
-    aqueous_surface_addition_mol[@intFromEnum(SoluteSpecies.AqueousSpecies.non_band_h2po4)] = mineral_totals[11];
+    aqueous_surface_addition_mol[@backingInt(SoluteSpecies.AqueousSpecies.non_band_hpo4)] = mineral_totals[10];
+    aqueous_surface_addition_mol[@backingInt(SoluteSpecies.AqueousSpecies.non_band_h2po4)] = mineral_totals[11];
     for (salt_totals, 0..) |amount, family|
         aqueous_surface_addition_mol[family] += amount;
     var aqueous_pending_before_mol: [SoluteSpecies.AqueousSpecies.count]f64 = @splat(0);
@@ -3272,7 +3273,7 @@ noinline fn incorporateSurfacePhase(
     for (0..layers) |layer| {
         for (plant_litter_salt_transport_species, 0..) |species, salt| {
             const pending_index = (layer + 1) * PlantLitterSaltIngress.salt_count + salt;
-            const species_index = @intFromEnum(species);
+            const species_index = @backingInt(species);
             aqueous_pending_before_mol[species_index] += plant_litter_salt_pending_before[pending_index];
             aqueous_pending_after_mol[species_index] += plant_litter_salt_pending[pending_index];
         }

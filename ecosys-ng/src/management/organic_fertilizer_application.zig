@@ -3,6 +3,7 @@ const organic = @import("../soil/organic/initialization.zig");
 const parameters_module = @import("../soil/organic/parameters.zig");
 const material_fractions = @import("organic_fertilizer_material_fractions.zig");
 
+
 pub const Kind = enum { plant_residue, manure };
 
 /// HOUR1 OFC/OFN/OFP application. The event is first partitioned into local
@@ -31,7 +32,7 @@ pub fn apply(
         return;
     }
 
-    var microbial_delta = [_]organic.ElementPool{.{}} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
+    var microbial_delta = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]organic.ElementPool, @splat(@as(organic.ElementPool, .{})));
     var allocated: organic.ElementPool = .{};
     for (0..organic.microbial_population_count) |population| for (0..organic.kinetic_fraction_count) |fraction| {
         const parameter_index = (target_substrate * organic.microbial_population_count + population) * organic.kinetic_fraction_count + fraction;
@@ -72,7 +73,7 @@ pub fn apply(
     // wrong litter chemistry. Read the HOUR1 codebook from its own translated
     // owner instead. Manure agrees between the two, so it still uses the runtime
     // array.
-    var fraction_storage = [_]f64{0} ** organic.structural_fraction_count;
+    var fraction_storage = @as([organic.structural_fraction_count]f64, @splat(@as(f64, 0)));
     const fractions: []const f64 = switch (kind) {
         .plant_residue => blk: {
             const row = try material_fractions.plant(material_type, material_fractions.sourceParameters());
@@ -103,7 +104,7 @@ pub fn apply(
     };
     inline for (.{ remaining.carbon_g_c, remaining.nitrogen_g_n, remaining.phosphorus_g_p }) |value|
         if (!std.math.isFinite(value) or value < 0) return error.OrganicFertilizerAllocationWouldOverdraw;
-    var structural_delta = [_]organic.ElementPool{.{}} ** organic.structural_fraction_count;
+    var structural_delta = @as([organic.structural_fraction_count]organic.ElementPool, @splat(@as(organic.ElementPool, .{})));
     for (0..organic.structural_fraction_count) |fraction| structural_delta[fraction] = .{
         .carbon_g_c = fractions[fraction] * remaining.carbon_g_c,
         .nitrogen_g_n = if (weighted_nitrogen > 0) fractions[fraction] * nitrogen_weights[fraction] / weighted_nitrogen * remaining.nitrogen_g_n else 0,
@@ -193,7 +194,7 @@ test "HOUR1 plant residue codes four five eight nine use the HOUR1 codebook not 
         const expected = try material_fractions.plant(material_type, material_fractions.sourceParameters());
         try apply(&state, 0, .plant_residue, material_type, .{ .carbon_g_c = 1 }, &parameters);
 
-        var applied = [_]f64{0} ** 4;
+        var applied = @as([4]f64, @splat(@as(f64, 0)));
         var total: f64 = 0;
         for (0..4) |fraction| {
             const index = 1 * organic.structural_fraction_count + fraction; // layer 0, plant-residue substrate

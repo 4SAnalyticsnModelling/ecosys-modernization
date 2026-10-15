@@ -6,12 +6,14 @@ lives here, not in a conversation. Protocol: `.agent/protocol.md` §9.
 **Reading order for a new session**: `state.md` → `cycle.json` → `frontier.json` → this file → `audit/unresolved-gaps.md`.
 
 ## Now (unblocked, take in cycle order)
-0. **Migrate `ecosys-ng` to Zig 0.17.x — gate G1 cannot pass until it is done.** Toolchain mandate
-   `.agent/protocol.md` §8, pin `.agent/toolchain.json`, machine check `uv run ecosys-audit/scripts/preflight.py`
-   `preflight.py` passes the version checks: the pin was moved to `"0.17.0"` on 2026-10-12, so what remains is the
-   compile itself — `build.zig:29` (`b.args`) and the codemod (1197 repeats / 188 files, `--dry-run` first).
-   Work order with the proven breakages, the codemod and
-   the parity re-derivation steps: `.agent/migrations/zig-0.17.md`. Blocked by nothing — take this first.
+0. **Zig 0.17.x — compile half DONE (cycle 00001, 2026-10-15); the parity half is the open work.** G1/G2 are green on
+   0.17.0 (Debug/ReleaseSafe/ReleaseFast exit 0; 4518/4520 tests, 0 assertion failures, 1 known issue-106 crash) —
+   receipts in `.agent/cycles/cycle_00001.md` §2. What is NOT done is the second half of
+   `.agent/migrations/zig-0.17.md`: **prove 0.17 did not move a production number** — one bounded strict ReleaseFast
+   run on the Ottawa deck, compared row-by-row with the recorded legacy oracle for those hours (gates G3/G4/G5, all
+   recorded NA in cycle 00001). Blocked by nothing — take this first.
+   Toolchain mandate `.agent/protocol.md` §8, pin `.agent/toolchain.json`, check
+   `uv run ecosys-audit/scripts/preflight.py`.
 1. **Advance the strict Ottawa run past the current failure hour.** Frozen-topsoil phase stagnation at 1998 d354
    h07 (hour 8479 class): stalls at 1.6e-7 of capacity at every substep count. Playbook ladder, bugs first
    (science / translation / binding / duplication / floor bounds with `file:line`), then triage, then S1→S9.
@@ -37,6 +39,17 @@ lives here, not in a conversation. Protocol: `.agent/protocol.md` §9.
   their manifest (`evidence/manifest/`). Check: manifest exists, hashes verify, hourly outputs cover 262,920 h.
 
 ## Housekeeping / release-time (do not interrupt science work for these)
+- **`audit/manifest/f77index.json` is gitignored and vanishes from a fresh tree** (found missing 2026-10-15, which
+  silently disabled `f77query.py` and cost a G4 sub-agent a fallback path). Rebuild after any clone/reset with
+  `uv run ecosys-audit/scripts/f77index.py --root . --out audit/manifest/f77index.json`; the good totals are recorded
+  in `command_registry.json → analysis.f77_index_build` (95 files / 95 units / 53 COMMON / 1520 loops / 0 unclosed /
+  53803 executable statements) — a mismatch means `f77src/` moved, which is itself a finding.
+- 168 `.zig` files are still formatted by 0.16's `zig fmt` (`zig fmt --check src` on 0.17 lists them). One dedicated
+  formatting-only commit, after the parity run lands, so it cannot contaminate a numerics diff.
+- `src/canopy/gas/aqueous_environment.zig:20` doc comment cites `STOMATE.F 69--73`; the file is `f77src/stomate.f`
+  and the two solubility `EXP` lines are `:69-70`. Comment-only fix, bundle with the formatting commit.
+- `selectionBaseName` (`src/io/output/record.zig:247`) has no explicit mixed-separator (`a/b\c`) test case — G7
+  §3 caveat (ii). Add one assertion to the existing test at `record.zig:540-575`.
 - Strip the failure-only `TEMP_DIAGNOSTIC` logging before release.
 - Richards→enthalpy rebase applies internal inflow heat only in the later spatial solve — confirm whether that is a
   real gap or legacy-consistent.

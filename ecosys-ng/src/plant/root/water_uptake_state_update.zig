@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 const water_heat_capacity_megajoules_per_m3_k = 4.19;
 
@@ -168,7 +169,7 @@ fn totalsFor(
                 water * water_heat_capacity_megajoules_per_m3_k * temperature;
         }
     }
-    inline for (@typeInfo(Totals).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Totals)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteRootWaterStateUpdate;
     return result;

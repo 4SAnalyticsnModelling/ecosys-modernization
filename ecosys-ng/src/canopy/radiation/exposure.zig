@@ -3,6 +3,7 @@ const CellRange = @import("../../core/compute.zig").CellRange;
 const StructureState = @import("../morphology/structure.zig").State;
 const InterceptionState = @import("../energy/interception.zig").State;
 const GroundRadiationState = @import("../../surface/ground_radiation.zig").State;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -47,7 +48,7 @@ pub const State = struct {
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
             if (!std.math.isFinite(value) or value < 0 or value > 1 + 1.0e-12) {
                 std.log.err("invalid canopy exposure: field={s} index={d} value={e}", .{ field.name, index, value });
                 return error.InvalidCanopyExposure;

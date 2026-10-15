@@ -26,6 +26,7 @@ const plant_roots = @import("../plant/root/plant_root_system.zig");
 const group_snow = @import("landscape_mass_inventory_snow.zig");
 const group_organic = @import("landscape_mass_inventory_organic.zig");
 const group_support = @import("landscape_mass_inventory_support.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 test "surface organic all-storage census includes every persistent C N P owner" {
     var state = try organic.State.init(std.testing.allocator, 2);
@@ -92,23 +93,23 @@ test "REDIST snow inventory sums every runtime cell and layer" {
                 (state.liquid_water_volume_m3[layer] + state.vapor_water_equivalent_m3[layer]) +
             physical_ice_capacity * state.ice_volume_m3[layer];
         const values = try state.amounts(layer / 3, layer % 3);
-        values[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = 1;
-        values[@intFromEnum(snow.Species.methane_carbon)] = 2;
-        values[@intFromEnum(snow.Species.oxygen)] = 3;
-        values[@intFromEnum(snow.Species.dinitrogen_nitrogen)] = 4;
-        values[@intFromEnum(snow.Species.nitrous_oxide_nitrogen)] = 5;
-        values[@intFromEnum(snow.Species.ammonium_nitrogen)] = 6;
-        values[@intFromEnum(snow.Species.ammonia_nitrogen)] = 7;
-        values[@intFromEnum(snow.Species.nitrate_nitrogen)] = 8;
-        values[@intFromEnum(snow.Species.hydrogen_phosphate_phosphorus)] = 9;
-        values[@intFromEnum(snow.Species.dihydrogen_phosphate_phosphorus)] = 10;
-        values[@intFromEnum(snow.Species.calcium)] = group_snow.test_molar_mass_g_per_mol.ions.calcium;
+        values[@backingInt(snow.Species.carbon_dioxide_carbon)] = 1;
+        values[@backingInt(snow.Species.methane_carbon)] = 2;
+        values[@backingInt(snow.Species.oxygen)] = 3;
+        values[@backingInt(snow.Species.dinitrogen_nitrogen)] = 4;
+        values[@backingInt(snow.Species.nitrous_oxide_nitrogen)] = 5;
+        values[@backingInt(snow.Species.ammonium_nitrogen)] = 6;
+        values[@backingInt(snow.Species.ammonia_nitrogen)] = 7;
+        values[@backingInt(snow.Species.nitrate_nitrogen)] = 8;
+        values[@backingInt(snow.Species.hydrogen_phosphate_phosphorus)] = 9;
+        values[@backingInt(snow.Species.dihydrogen_phosphate_phosphorus)] = 10;
+        values[@backingInt(snow.Species.calcium)] = group_snow.test_molar_mass_g_per_mol.ions.calcium;
     }
     const inventory = try group_snow.aggregateSnow(&state, ice_density, group_support.default_latent_heat_of_fusion_megajoules_per_m3, solid_capacity, liquid_capacity, physical_ice_capacity, group_support.default_pure_water_melting_temperature_k, group_snow.test_molar_mass_g_per_mol);
     var partition: group_support.Storage = .{};
     try partition.add(try group_snow.aggregateSnowEnthalpyCell(&state, ice_density, group_support.default_latent_heat_of_fusion_megajoules_per_m3, solid_capacity, liquid_capacity, physical_ice_capacity, group_support.default_pure_water_melting_temperature_k, group_snow.test_molar_mass_g_per_mol, 0));
     try partition.add(try group_snow.aggregateSnowEnthalpyCell(&state, ice_density, group_support.default_latent_heat_of_fusion_megajoules_per_m3, solid_capacity, liquid_capacity, physical_ice_capacity, group_support.default_pure_water_melting_temperature_k, group_snow.test_molar_mass_g_per_mol, 1));
-    inline for (std.meta.fields(group_support.Storage)) |field| {
+    inline for (ti_compat.fieldViews(group_support.Storage)) |field| {
         const expected = @field(inventory, field.name);
         try std.testing.expectApproxEqAbs(expected, @field(partition, field.name), 1e-10 * @max(1, @abs(expected)));
     }

@@ -1,6 +1,7 @@
 const std = @import("std");
 const hourly = @import("hourly_cell_conservation.zig");
 const inventory = @import("landscape_mass_inventory.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Persisted, independently reconstructible conservation identity for every
 /// horizontal cell. Baseline/latest storage and every direction-separated
@@ -56,7 +57,7 @@ pub const State = struct {
         for (self.baseline_storage, self.latest_storage, self.cumulative_activity) |baseline, latest, activity| {
             try baseline.validate();
             try latest.validate();
-            inline for (std.meta.fields(hourly.BoundaryActivity)) |field| {
+            inline for (ti_compat.fieldViews(hourly.BoundaryActivity)) |field| {
                 const value = @field(activity, field.name);
                 if (!std.math.isFinite(value) or value < 0)
                     return error.InvalidAccumulatedCellConservationState;

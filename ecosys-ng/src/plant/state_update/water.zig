@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Runtime-sized EXTRACT `TTRAN/CTRAN`, `TVOLWP/TVOLWC`, and
 /// `TEVAPP/TEVAPC` state_update. Plant arrays are cell-major then species-major.
@@ -147,7 +148,7 @@ pub fn refresh(state: *State, inputs: Inputs) !void {
     );
     if (inputs.cell_area_m2.len != state.cell_count)
         return error.InvalidPlantWaterStateUpdateDimensions;
-    inline for (@typeInfo(Inputs).@"struct".fields[1..]) |field|
+    inline for (ti_compat.fieldViews(Inputs)[1..]) |field|
         if (@field(inputs, field.name).len != plant_count)
             return error.InvalidPlantWaterStateUpdateDimensions;
 
@@ -175,7 +176,7 @@ pub fn refresh(state: *State, inputs: Inputs) !void {
 fn candidate(state: *const State, inputs: Inputs, plant: usize) !Candidate {
     const cell = plant / state.species_count;
     const area = inputs.cell_area_m2[cell];
-    inline for (@typeInfo(Inputs).@"struct".fields[1..]) |field| {
+    inline for (ti_compat.fieldViews(Inputs)[1..]) |field| {
         const value = @field(inputs, field.name)[plant];
         if (!std.math.isFinite(value))
             return error.NonFinitePlantWaterStateUpdateInput;
@@ -202,7 +203,7 @@ fn candidate(state: *const State, inputs: Inputs, plant: usize) !Candidate {
             inputs.standing_dead_surface_water_m3_by_plant[plant],
         .evaporation_m3_per_h = evaporation,
     };
-    inline for (@typeInfo(Candidate).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Candidate)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFinitePlantWaterStateUpdate;
     return result;

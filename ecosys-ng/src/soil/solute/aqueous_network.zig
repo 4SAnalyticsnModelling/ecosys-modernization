@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Fluxes = struct {
     ammonium_non_band_association: f64,
@@ -87,7 +88,7 @@ pub const SourceIterationStage = enum {
 pub fn state_update(state: *State, transformations: Transformations) !void {
     try validateState(state.*);
     var next = state.*;
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         const change = @field(transformations, field.name);
         if (!std.math.isFinite(change)) return error.NonFiniteAqueousTransformation;
         @field(next, field.name) += change;
@@ -109,7 +110,7 @@ pub fn applySourceOrderPrimaryUpdate(
     if (!std.math.isFinite(minimum_concentration_mol_per_m3) or
         minimum_concentration_mol_per_m3 <= 0)
         return error.InvalidAqueousConcentrationFloor;
-    inline for (@typeInfo(Transformations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Transformations)) |field|
         if (!std.math.isFinite(@field(transformations, field.name)))
             return error.NonFiniteAqueousTransformation;
 
@@ -162,7 +163,7 @@ pub fn applySourceOrderComplexUpdate(
     if (!std.math.isFinite(minimum_concentration_mol_per_m3) or
         minimum_concentration_mol_per_m3 <= 0)
         return error.InvalidAqueousConcentrationFloor;
-    inline for (@typeInfo(Transformations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Transformations)) |field|
         if (!std.math.isFinite(@field(transformations, field.name)))
             return error.NonFiniteAqueousTransformation;
     if (stage == .iteration_ceiling) return current;
@@ -201,8 +202,8 @@ pub fn applySourceOrderComplexUpdate(
 
 /// Exact non-phosphate ion-pairing portion of SOLUTE.F's transformation block.
 pub fn assemble(f: Fluxes, ammonium_water_fractions: AmmoniumWaterFractions) !Transformations {
-    inline for (@typeInfo(Fluxes).@"struct".fields) |field| if (!std.math.isFinite(@field(f, field.name))) return error.NonFiniteAqueousReactionFlux;
-    inline for (@typeInfo(AmmoniumWaterFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Fluxes)) |field| if (!std.math.isFinite(@field(f, field.name))) return error.NonFiniteAqueousReactionFlux;
+    inline for (ti_compat.fieldViews(AmmoniumWaterFractions)) |field| {
         const fraction = @field(ammonium_water_fractions, field.name);
         if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1) return error.InvalidAmmoniumWaterFraction;
     }
@@ -254,7 +255,7 @@ pub fn assemble(f: Fluxes, ammonium_water_fractions: AmmoniumWaterFractions) !Tr
 fn sampleFluxes() Fluxes {
     var result: Fluxes = undefined;
     var value: f64 = -0.012;
-    inline for (@typeInfo(Fluxes).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Fluxes)) |field| {
         @field(result, field.name) = value;
         value += 0.001;
     }
@@ -262,7 +263,7 @@ fn sampleFluxes() Fluxes {
 }
 
 fn validateState(state: State) !void {
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         const value = @field(state, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteAqueousState;
         if (value < 0) return error.NegativeAqueousState;
@@ -271,7 +272,7 @@ fn validateState(state: State) !void {
 
 fn filledState(value: f64) State {
     var result: State = undefined;
-    inline for (@typeInfo(State).@"struct".fields) |field| @field(result, field.name) = value;
+    inline for (ti_compat.fieldViews(State)) |field| @field(result, field.name) = value;
     return result;
 }
 
@@ -293,7 +294,7 @@ test "aqueous reaction ledger conserves every paired element" {
 
 test "shared hydrogen uses runtime ammonium-zone water fractions" {
     var fluxes = sampleFluxes();
-    inline for (@typeInfo(Fluxes).@"struct".fields) |field| @field(fluxes, field.name) = 0;
+    inline for (ti_compat.fieldViews(Fluxes)) |field| @field(fluxes, field.name) = 0;
     fluxes.ammonium_non_band_association = 0.2;
     fluxes.ammonium_band_association = 0.4;
     const transformations = try assemble(fluxes, .{ .non_band = 0.75, .band = 0.25 });

@@ -69,13 +69,15 @@
 // snowpack initialization group of docs/binding_requests/A4_solute_backlog_batch2.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const SaltEquilibriumMode = enum {
     static,
     dynamic,
 };
 
-pub const ion_species_count = @typeInfo(IonSpecies).@"enum".fields.len;
+pub const ion_species_count = @typeInfo(IonSpecies).@"enum".field_names.len;
 
 pub const IonSpecies = enum(u8) {
     aluminum,
@@ -168,7 +170,7 @@ pub const LayerState = struct {
 };
 
 fn validatePrecipitation(concentrations: PrecipitationConcentrations) !void {
-    inline for (std.meta.fields(PrecipitationConcentrations)) |field| {
+    inline for (ti_compat.fieldViews(PrecipitationConcentrations)) |field| {
         if (comptime std.mem.eql(u8, field.name, "ions_mol_per_m3")) continue;
         const value = @field(concentrations, field.name);
         if (!std.math.isFinite(value) or value < 0)
@@ -211,7 +213,7 @@ pub fn initialize(
     try validatePrecipitation(concentrations);
 
     for (physical_layers) |physical| {
-        inline for (std.meta.fields(LayerPhysicalState)) |field| {
+        inline for (ti_compat.fieldViews(LayerPhysicalState)) |field| {
             const value = @field(physical, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidSnowpackPhysicalState;
@@ -257,7 +259,7 @@ pub fn initialize(
             physical.active_heat_capacity_threshold_megajoules_per_k;
         if (!active) {
             layer.primary = std.mem.zeroes(PrimaryInventories);
-            if (mode == .dynamic) layer.ions_mol = [_]f64{0} ** ion_species_count;
+            if (mode == .dynamic) layer.ions_mol = @as([ion_species_count]f64, @splat(@as(f64, 0)));
             continue;
         }
         const volume_m3 = equivalentWaterVolume(
@@ -302,7 +304,7 @@ fn testConcentrations() PrecipitationConcentrations {
         .nitrate_mol_n_per_m3 = 8,
         .hydrogen_phosphate_mol_p_per_m3 = 9,
         .organic_phosphorus_mol_p_per_m3 = 10,
-        .ions_mol_per_m3 = [_]f64{2} ** ion_species_count,
+        .ions_mol_per_m3 = @as([ion_species_count]f64, @splat(@as(f64, 2))),
     };
 }
 
@@ -325,7 +327,7 @@ test "STARTE active snow layer uses total water-equivalent volume" {
     try std.testing.expectEqual(volume_m3, layers[0].primary.carbon_dioxide_mol);
     try std.testing.expectEqual(volume_m3 * 6 * 14, layers[0].primary.ammonium_g_n);
     try std.testing.expectEqual(volume_m3 * 9 * 31, layers[0].primary.hydrogen_phosphate_g_p);
-    try std.testing.expectEqual(volume_m3 * 2, layers[0].ions_mol[@intFromEnum(IonSpecies.potassium_sulfate)]);
+    try std.testing.expectEqual(volume_m3 * 2, layers[0].ions_mol[@backingInt(IonSpecies.potassium_sulfate)]);
 }
 
 test "STARTE inactive layer zeros tracked chemistry in dynamic mode" {
@@ -344,7 +346,7 @@ test "STARTE inactive layer zeros tracked chemistry in dynamic mode" {
 test "STARTE static salt mode retains caller ion inventories" {
     var layers = [_]LayerState{.{
         .primary = undefined,
-        .ions_mol = [_]f64{7} ** ion_species_count,
+        .ions_mol = @as([ion_species_count]f64, @splat(@as(f64, 7))),
     }};
     try initialize(&layers, &.{.{
         .heat_capacity_megajoules_per_k = 0,

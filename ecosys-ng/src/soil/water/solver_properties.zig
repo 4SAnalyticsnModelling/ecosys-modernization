@@ -3,6 +3,7 @@ const grid_module = @import("../../state/grid.zig");
 const catalog_module = @import("../profile/catalog.zig");
 const retention = @import("retention.zig");
 const profile_derivation = @import("../profile/derivation.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const RuntimeParameters = struct {
     retention: retention.Parameters,
@@ -131,7 +132,7 @@ pub const State = struct {
         result.layer_count = grid.layer_count;
         var allocated: usize = 0;
         errdefer result.freeAllocated(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 @field(result, field.name) = try allocator.alloc(f64, grid.layer_count);
                 @memset(@field(result, field.name), 0);
@@ -335,7 +336,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 or field.type == []retention.ResolvedCurve or field.type == []retention.MualemVanGenuchtenParameters) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 or field.type == []retention.ResolvedCurve or field.type == []retention.MualemVanGenuchtenParameters) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
@@ -345,12 +346,12 @@ pub const State = struct {
         }
         for (self.mualem_van_genuchten_parameters) |parameters|
             try parameters.validate();
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name)) |value| if (!std.math.isFinite(value)) return error.NonFiniteSoilSolverProperty;
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name)) |value| if (!std.math.isFinite(value)) return error.NonFiniteSoilSolverProperty;
     }
 
     fn freeAllocated(self: *State, count: usize) void {
         var visited: usize = 0;
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 or field.type == []retention.ResolvedCurve or field.type == []retention.MualemVanGenuchtenParameters) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 or field.type == []retention.ResolvedCurve or field.type == []retention.MualemVanGenuchtenParameters) {
             if (visited < count) self.allocator.free(@field(self, field.name));
             visited += 1;
         };
@@ -544,7 +545,7 @@ pub fn mpaToPressureHeadM(water_potential_megapascal: f64) !f64 {
 
 test "mapped solver properties use runtime dimensions classes and profile science" {
     const allocator = std.testing.allocator;
-    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".fields.len);
+    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".field_names.len);
     defer allocator.free(source);
     var catalog = catalog_module.Catalog.init(allocator);
     defer catalog.deinit();
@@ -586,7 +587,7 @@ test "SOIL-HCOND-AXIS-ISOTROPY-001: lateral Mualem saturated conductivity is ind
     // (`ISOIL(3|4,...)`) to the same estimate formula only when its own value
     // is unknown, not the other axis's.
     const allocator = std.testing.allocator;
-    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".fields.len);
+    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".field_names.len);
     defer allocator.free(source);
     var catalog = catalog_module.Catalog.init(allocator);
     defer catalog.deinit();

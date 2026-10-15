@@ -1,6 +1,7 @@
 const std = @import("std");
 const root_metabolism = @import("plant_root_metabolism.zig");
 
+
 /// Authoritative hourly GROSUB CSNCL root-carbon source, retained at
 /// plant × biological-domain × soil-layer resolution.
 pub const State = struct {
@@ -161,7 +162,7 @@ test "layer-resolved root litter preserves plant domain layer order and conserva
     try state.add(1, 0, 2, litter);
     try state.add(1, 1, 2, litter);
 
-    var by_layer = [_]f64{0} ** 3;
+    var by_layer = @as([3]f64, @splat(@as(f64, 0)));
     try state.carbonByPlantLayer(1, 2, &by_layer);
     try std.testing.expectEqual(@as(f64, 0), by_layer[0]);
     try std.testing.expectEqual(@as(f64, 0), by_layer[1]);

@@ -3,6 +3,7 @@
 //! imposing detailed balance on the inconsistent legacy reaction cycle.
 const std = @import("std");
 const exchange = @import("phosphate_exchange.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Result = struct {
     /// Deprotonated, hydroxyl, protonated, adsorbed HPO4, adsorbed H2PO4.
@@ -121,7 +122,7 @@ test "algebraic surface circulation satisfies the original bounded source" {
                         const deprotonation_rounding = @max(rounding, 128 * std.math.floatEps(f64) * result.sites[0]);
                         try std.testing.expectApproxEqAbs(@as(f64, 0), rates.hydroxyl_to_deprotonated_site_mol_per_megagram, deprotonation_rounding);
                         try std.testing.expectApproxEqAbs(@as(f64, 0), rates.hpo4_with_hydroxyl_site_mol_p_per_megagram, rounding);
-                        inline for (@typeInfo(exchange.Flux).@"struct".fields) |field| {
+                        inline for (ti_compat.fieldViews(exchange.Flux)) |field| {
                             try std.testing.expectApproxEqAbs(@field(rates, field.name), @field(band_rates, field.name), rounding);
                         }
                     }

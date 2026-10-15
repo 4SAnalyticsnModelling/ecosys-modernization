@@ -9,6 +9,7 @@ const RootState = @import("plant_root_system.zig").State;
 const NutrientResult = @import("plant_root_nutrient_uptake.zig").Result;
 const root_domain_count = @import("plant_root_system.zig").biological_domain_count;
 const group_growth = @import("plant_root_metabolism_growth.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Respiration = struct {
     actual_g_c: f64,
@@ -122,7 +123,7 @@ pub fn rootEnvironmentResponses(
         .extension_water = extension_water,
         .scaled_penetration_resistance_megapascal = scaled_resistance,
     };
-    inline for (@typeInfo(RootEnvironmentResponses).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteRootEnvironmentResponse;
+    inline for (ti_compat.fieldViews(RootEnvironmentResponses)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteRootEnvironmentResponse;
     return result;
 }
 
@@ -182,7 +183,7 @@ pub fn nutrientUptakeRespiration(results: []const NutrientResult, respiration_g_
     var oxygen_unlimited: f64 = 0;
     var carbon_unlimited: f64 = 0;
     for (results) |result| {
-        inline for (@typeInfo(NutrientResult).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.InvalidRootNutrientRespirationInput;
+        inline for (ti_compat.fieldViews(NutrientResult)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.InvalidRootNutrientRespirationInput;
         actual += result.uptake_g_element;
         oxygen_unlimited += result.oxygen_unlimited_uptake_g_element;
         carbon_unlimited += result.carbon_unlimited_uptake_g_element;

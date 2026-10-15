@@ -84,6 +84,7 @@ const canopy_surface_exchange = @import("../canopy/energy/surface_exchange.zig")
 const plant_soil_exchange = @import("../plant/exchange/soil.zig");
 
 const spatial_grid = @import("../state/spatial_grid.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Domain = struct {
     west_column: usize,
@@ -438,7 +439,7 @@ pub noinline fn parse(allocator: std.mem.Allocator, source: []const u8) !RunScri
     };
     try requireRunscriptRecordEnd(&tokens, "chemistry_units");
     const parameters = chemistry_primary_initialization;
-    inline for (@typeInfo(soil_chemistry_initialization.ElementMolarMassesGPerMol).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters.molar_mass_g_per_mol, field.name)) or @field(parameters.molar_mass_g_per_mol, field.name) <= 0) return error.InvalidChemistryInitializationParameters;
+    inline for (ti_compat.fieldViews(soil_chemistry_initialization.ElementMolarMassesGPerMol)) |field| if (!std.math.isFinite(@field(parameters.molar_mass_g_per_mol, field.name)) or @field(parameters.molar_mass_g_per_mol, field.name) <= 0) return error.InvalidChemistryInitializationParameters;
     inline for (.{ parameters.minimum_ammonium_g_n_per_megagram, parameters.minimum_calcium_g_per_megagram, parameters.soil_ammonium_extract_multiplier, parameters.extract_mol_per_megagram_to_mol_per_m3 }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidChemistryInitializationParameters;
     if (parameters.soil_ammonium_extract_multiplier > 1 or parameters.extract_mol_per_megagram_to_mol_per_m3 <= 0) return error.InvalidChemistryInitializationParameters;
 
@@ -789,7 +790,7 @@ noinline fn parseSoilSurfaceRecords(
         .minimum_layer_thickness_m = try nextRecordFloat(&soil_geometry_tokens),
     };
     try requireRunscriptRecordEnd(&soil_geometry_tokens, "soil_geometry");
-    inline for (@typeInfo(SoilGeometryParameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SoilGeometryParameters)) |field| {
         const value = @field(soil_geometry_parameters, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidSoilGeometryParameters;
     }
@@ -1599,7 +1600,7 @@ noinline fn parseRootProcessRecords(records: *RunscriptRecordCursor) !RootProces
         parameters.soil_water_film_scale_m = try nextFloat(&tokens, "soil water film scale in m");
         parameters.soil_water_film_log_intercept = try nextFloat(&tokens, "soil water film log intercept");
         parameters.soil_water_film_potential_exponent = try nextFloat(&tokens, "soil water film potential exponent");
-        const oxygen = @intFromEnum(plant_root_gas_exchange.TransportedGas.oxygen);
+        const oxygen = @backingInt(plant_root_gas_exchange.TransportedGas.oxygen);
         parameters.aqueous_diffusivity_m2_per_h_at_reference[oxygen] = parameters.oxygen_aqueous_diffusivity_m2_per_h_at_reference;
         parameters.water_to_air_mass_solubility_at_25c[oxygen] = parameters.oxygen_solubility_at_25c;
         parameters.solubility_activity_coefficient[oxygen] = parameters.oxygen_solubility_activity_coefficient;
@@ -1617,7 +1618,7 @@ noinline fn parseRootProcessRecords(records: *RunscriptRecordCursor) !RootProces
     for (&root_gas_parameters.solubility_activity_coefficient) |*value| value.* = try nextFloat(&tokens, "root gas solubility activity coefficient");
     for (&root_gas_parameters.solubility_temperature_intercept) |*value| value.* = try nextFloat(&tokens, "root gas solubility temperature intercept");
     for (&root_gas_parameters.solubility_temperature_coefficient_per_c) |*value| value.* = try nextFloat(&tokens, "root gas solubility temperature coefficient per C");
-    const oxygen = @intFromEnum(plant_root_gas_exchange.TransportedGas.oxygen);
+    const oxygen = @backingInt(plant_root_gas_exchange.TransportedGas.oxygen);
     root_gas_parameters.oxygen_aqueous_diffusivity_m2_per_h_at_reference = root_gas_parameters.aqueous_diffusivity_m2_per_h_at_reference[oxygen];
     root_gas_parameters.oxygen_solubility_at_25c = root_gas_parameters.water_to_air_mass_solubility_at_25c[oxygen];
     root_gas_parameters.oxygen_solubility_activity_coefficient = root_gas_parameters.solubility_activity_coefficient[oxygen];

@@ -17,6 +17,7 @@
 // following accepted hour, and checkpoints preserve the complete carrier.
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     cell_area_m2: []const f64, // AREA(3,NU)
@@ -56,13 +57,13 @@ fn finiteSlice(values: []const f64) bool {
 pub fn closeCell(cell: usize, inputs: Inputs, state: State) !Diagnostics {
     const cell_count = inputs.cell_area_m2.len;
     if (cell_count == 0 or cell >= cell_count) return error.CanopyGasCloseoutDimensionMismatch;
-    inline for (std.meta.fields(Inputs)) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (@field(inputs, field.name).len != cell_count) return error.CanopyGasCloseoutDimensionMismatch;
-    inline for (std.meta.fields(State)) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (@field(state, field.name).len != cell_count) return error.CanopyGasCloseoutDimensionMismatch;
-    inline for (std.meta.fields(Inputs)) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!finiteSlice(@field(inputs, field.name))) return error.InvalidCanopyGasCloseoutInput;
-    inline for (std.meta.fields(State)) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (!finiteSlice(@field(state, field.name))) return error.InvalidCanopyGasCloseoutInput;
     if (inputs.cell_area_m2[cell] <= 0 or inputs.canopy_air_temperature_k[cell] <= 0 or
         inputs.timestep_h[cell] <= 0 or inputs.aerodynamic_resistance_h_m[cell] < 0 or

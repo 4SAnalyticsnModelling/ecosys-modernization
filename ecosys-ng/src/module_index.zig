@@ -7,6 +7,12 @@
 //!
 
 pub const config = @import("core/config.zig");
+pub const typeinfo_compat = @import("core/typeinfo_compat.zig");
+/// Array-repeat replacement helper (`array_compat.filled`).  Exported here
+/// because Zig 0.17 requires every file to belong to exactly one module: the
+/// root module (`src/ecosys_ng.zig`, `src/stages/*`) reaches the helper only
+/// through this library export, never by a second `@import` of the file.
+pub const array_compat = @import("core/array_compat.zig");
 pub const heat_failure_snapshot = @import("soil/heat/failure_snapshot.zig");
 pub const grid = @import("state/grid.zig");
 pub const numerics = @import("core/numerics.zig");

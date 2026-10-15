@@ -16,6 +16,7 @@ const band_geometry = @import("hourly_fertilizer_band_geometry.zig");
 const cation_exchange = @import("../soil/solute/cation_exchange.zig");
 const aqueous_network = @import("../soil/solute/aqueous_network.zig");
 const execution_calendar_date = @import("../driver/execution_calendar_date.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Dense runtime lookup built once when a scene is activated. `null` denotes
 /// an explicit case-insensitive NO schedule, never a missing file lookup.
@@ -62,13 +63,13 @@ pub const FertilizerActivity = struct {
     silicon_mol: f64 = 0,
 
     pub fn hasMaterialInput(self: FertilizerActivity) bool {
-        inline for (std.meta.fields(FertilizerActivity)) |field|
+        inline for (ti_compat.fieldViews(FertilizerActivity)) |field|
             if (@field(self, field.name) > 0) return true;
         return false;
     }
 
     fn add(self: *FertilizerActivity, addition: FertilizerActivity) !void {
-        inline for (std.meta.fields(FertilizerActivity)) |field| {
+        inline for (ti_compat.fieldViews(FertilizerActivity)) |field| {
             const next = @field(self, field.name) + @field(addition, field.name);
             if (!std.math.isFinite(next) or next < 0) return error.FertilizerActivityOverflow;
             @field(self, field.name) = next;
@@ -297,7 +298,7 @@ pub fn eventRoutedActivity(
         destination.nitrogen_g_n += input.nitrogen * area_m2;
         destination.phosphorus_g_p += input.phosphorus * area_m2;
     }
-    inline for (std.meta.fields(FertilizerActivity)) |field| {
+    inline for (ti_compat.fieldViews(FertilizerActivity)) |field| {
         const surface_value = @field(result.surface, field.name);
         const soil_value = @field(result.soil, field.name);
         if (!std.math.isFinite(surface_value) or surface_value < 0 or
@@ -349,7 +350,7 @@ fn eventActivity(
 ) !FertilizerActivity {
     var result: FertilizerActivity = .{};
     const n = event.nitrogen_g_per_m2;
-    inline for (@typeInfo(fertilizer_schedule.Nitrogen_g_per_m2).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(fertilizer_schedule.Nitrogen_g_per_m2)) |field| {
         const value = @field(n, field.name) * area_m2;
         if (!std.math.isFinite(value) or value < 0) return error.InvalidFertilizerApplication;
         result.nitrogen_g_n += value;
@@ -386,7 +387,7 @@ fn eventActivity(
         result.nitrogen_g_n += organic_input.nitrogen * area_m2;
         result.phosphorus_g_p += organic_input.phosphorus * area_m2;
     }
-    inline for (std.meta.fields(FertilizerActivity)) |field|
+    inline for (ti_compat.fieldViews(FertilizerActivity)) |field|
         if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0)
             return error.InvalidFertilizerApplication;
     return result;
@@ -1098,14 +1099,14 @@ const TestSoilProperties = struct {
         var allocated: usize = 0;
         errdefer {
             var visited: usize = 0;
-            inline for (@typeInfo(soil_solver_properties.State).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(soil_solver_properties.State)) |field| {
                 if (field.type == []f64 or field.type == []retention.ResolvedCurve or field.type == []retention.MualemVanGenuchtenParameters) {
                     if (visited < allocated) allocator.free(@field(state, field.name));
                     visited += 1;
                 }
             }
         }
-        inline for (@typeInfo(soil_solver_properties.State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(soil_solver_properties.State)) |field| {
             if (field.type == []f64) {
                 @field(state, field.name) = try allocator.alloc(f64, layer_count);
                 @memset(@field(state, field.name), 0);
@@ -1403,7 +1404,7 @@ test "fertilizer local activity mirrors independent litter and soil owner routin
     try std.testing.expectEqual(@as(f64, 26), routed.surface.carbon_g_c);
     try std.testing.expectEqual(@as(f64, 0), routed.soil.carbon_g_c);
     const total = try eventActivity(event, 2, 12);
-    inline for (std.meta.fields(FertilizerActivity)) |field| {
+    inline for (ti_compat.fieldViews(FertilizerActivity)) |field| {
         try std.testing.expectApproxEqAbs(
             @field(total, field.name),
             @field(routed.surface, field.name) + @field(routed.soil, field.name),

@@ -94,6 +94,7 @@
 
 const std = @import("std");
 const snow_heat_conduction = @import("snow_heat_conduction.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Interface = struct {
     /// WATSUB `ATCNDS`/`ATCNDR` after the area and cover scaling
@@ -212,7 +213,7 @@ pub fn litterConductivityMMegajoulesPerHK(
 /// `HFLWX` joint-equilibrium bound so a single number can be debited from the
 /// snowpack and credited to the recipient.
 pub fn acceptedInterfaceHeat(inputs: Inputs) !Interface {
-    inline for (std.meta.fields(Inputs)) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value)) {
             std.log.err(

@@ -48,6 +48,7 @@
 // A4e HOLD1 group of docs/traceability/a4e_trnsfrs_unbound_dispositions.md
 const std = @import("std");
 
+
 pub const micropore_species_count = 42;
 pub const macropore_species_count = 41;
 pub const band_phosphorus_species_count = 8;
@@ -120,10 +121,10 @@ fn totalsFor(micropore: []f64, micro_band: []f64, macropore: []f64, macro_band: 
 }
 
 test "TRNSFRS thin current layer resets every exact pore family" {
-    var micropore = [_]f64{1} ** micropore_species_count;
-    var micro_band = [_]f64{2} ** band_phosphorus_species_count;
-    var macropore = [_]f64{3} ** macropore_species_count;
-    var macro_band = [_]f64{4} ** band_phosphorus_species_count;
+    var micropore = @as([micropore_species_count]f64, @splat(@as(f64, 1)));
+    var micro_band = @as([band_phosphorus_species_count]f64, @splat(@as(f64, 2)));
+    var macropore = @as([macropore_species_count]f64, @splat(@as(f64, 3)));
+    var macro_band = @as([band_phosphorus_species_count]f64, @splat(@as(f64, 4)));
     try std.testing.expect(try reset(.{
         .applicability = .apply,
         .current_layer_thickness_m = 0.1,
@@ -137,10 +138,10 @@ test "TRNSFRS thin current layer resets every exact pore family" {
 }
 
 test "thin neighbor alone triggers reset" {
-    var micropore = [_]f64{1} ** micropore_species_count;
-    var micro_band = [_]f64{2} ** band_phosphorus_species_count;
-    var macropore = [_]f64{3} ** macropore_species_count;
-    var macro_band = [_]f64{4} ** band_phosphorus_species_count;
+    var micropore = @as([micropore_species_count]f64, @splat(@as(f64, 1)));
+    var micro_band = @as([band_phosphorus_species_count]f64, @splat(@as(f64, 2)));
+    var macropore = @as([macropore_species_count]f64, @splat(@as(f64, 3)));
+    var macro_band = @as([band_phosphorus_species_count]f64, @splat(@as(f64, 4)));
     _ = try reset(.{
         .applicability = .apply,
         .current_layer_thickness_m = 0.2,
@@ -151,10 +152,10 @@ test "thin neighbor alone triggers reset" {
 }
 
 test "two thick layers and skipped outer block do not reset" {
-    var micropore = [_]f64{1} ** micropore_species_count;
-    var micro_band = [_]f64{2} ** band_phosphorus_species_count;
-    var macropore = [_]f64{3} ** macropore_species_count;
-    var macro_band = [_]f64{4} ** band_phosphorus_species_count;
+    var micropore = @as([micropore_species_count]f64, @splat(@as(f64, 1)));
+    var micro_band = @as([band_phosphorus_species_count]f64, @splat(@as(f64, 2)));
+    var macropore = @as([macropore_species_count]f64, @splat(@as(f64, 3)));
+    var macro_band = @as([band_phosphorus_species_count]f64, @splat(@as(f64, 4)));
     const totals = totalsFor(&micropore, &micro_band, &macropore, &macro_band);
     try std.testing.expect(!try reset(.{ .applicability = .apply, .current_layer_thickness_m = 0.2, .neighbor_layer_thickness_m = 0.3, .minimum_layer_thickness_m = 0.1 }, totals));
     const empty = [_]f64{};
@@ -163,19 +164,19 @@ test "two thick layers and skipped outer block do not reset" {
 }
 
 test "runtime reset topology mismatch fails atomically" {
-    var short_micropore = [_]f64{1} ** (micropore_species_count - 1);
-    var micro_band = [_]f64{2} ** band_phosphorus_species_count;
-    var macropore = [_]f64{3} ** macropore_species_count;
-    var macro_band = [_]f64{4} ** band_phosphorus_species_count;
+    var short_micropore = @as([(micropore_species_count - 1)]f64, @splat(@as(f64, 1)));
+    var micro_band = @as([band_phosphorus_species_count]f64, @splat(@as(f64, 2)));
+    var macropore = @as([macropore_species_count]f64, @splat(@as(f64, 3)));
+    var macro_band = @as([band_phosphorus_species_count]f64, @splat(@as(f64, 4)));
     try std.testing.expectError(error.ThinLayerPoreSoluteDimensionMismatch, reset(.{ .applicability = .apply, .current_layer_thickness_m = 0.01, .neighbor_layer_thickness_m = 0.2, .minimum_layer_thickness_m = 0.1 }, totalsFor(&short_micropore, &micro_band, &macropore, &macro_band)));
     try std.testing.expectEqual(@as(f64, 3), macropore[0]);
 }
 
 test "nonfinite late family fails before reset" {
-    var micropore = [_]f64{1} ** micropore_species_count;
-    var micro_band = [_]f64{2} ** band_phosphorus_species_count;
-    var macropore = [_]f64{3} ** macropore_species_count;
-    var macro_band = [_]f64{4} ** band_phosphorus_species_count;
+    var micropore = @as([micropore_species_count]f64, @splat(@as(f64, 1)));
+    var micro_band = @as([band_phosphorus_species_count]f64, @splat(@as(f64, 2)));
+    var macropore = @as([macropore_species_count]f64, @splat(@as(f64, 3)));
+    var macro_band = @as([band_phosphorus_species_count]f64, @splat(@as(f64, 4)));
     macro_band[7] = std.math.nan(f64);
     try std.testing.expectError(error.NonFiniteThinLayerPoreSoluteInput, reset(.{ .applicability = .apply, .current_layer_thickness_m = 0.01, .neighbor_layer_thickness_m = 0.2, .minimum_layer_thickness_m = 0.1 }, totalsFor(&micropore, &micro_band, &macropore, &macro_band)));
     try std.testing.expectEqual(@as(f64, 1), micropore[0]);

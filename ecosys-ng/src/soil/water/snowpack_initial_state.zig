@@ -57,6 +57,7 @@
 // snowpack initialization group of docs/traceability/a1b_snowpack_minimum_heat_capacity_unbound.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     snow_depth_m: []const f64,
@@ -110,7 +111,7 @@ pub const State = struct {
 };
 
 fn validateSlices(value: anytype, expected: usize) bool {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field| {
         if (@field(value, field.name).len != expected) return false;
     }
     return true;
@@ -139,7 +140,7 @@ pub fn initialize(
     ) catch return error.DimensionOverflow;
     if (!validateSlices(state.layers, layer_cell_count))
         return error.SnowpackInitialDimensionMismatch;
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         const value = @field(parameters, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteSnowpackInitialParameter;
@@ -300,7 +301,7 @@ pub fn initialize(
 
 fn allocSlices(comptime T: type, allocator: std.mem.Allocator, count: usize) !T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(T)) |field| {
         @field(result, field.name) = try allocator.alloc(f64, count);
         @memset(@field(result, field.name), 7);
     }
@@ -308,7 +309,7 @@ fn allocSlices(comptime T: type, allocator: std.mem.Allocator, count: usize) !T 
 }
 
 fn freeSlices(value: anytype, allocator: std.mem.Allocator) void {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field|
         allocator.free(@field(value, field.name));
 }
 

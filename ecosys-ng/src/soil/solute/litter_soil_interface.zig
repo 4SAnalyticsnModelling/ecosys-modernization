@@ -8,6 +8,7 @@ const accumulation_kernel = @import("litter_soil_solute_flux_accumulation.zig");
 const litter_organic_update = @import("../../redistribution/surface/litter_dissolved_organic_update.zig");
 const transport_species = @import("transport_species.zig");
 const litter_chemistry = @import("../../surface/litter_chemistry.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const litter_species_count = concentration_kernel.litter_species_count;
 pub const soil_species_count = concentration_kernel.soil_species_count;
@@ -64,10 +65,10 @@ pub fn aqueousCarrierTransition(
 
 comptime {
     if (canonical_species_count != soil_species_count + 4 or
-        @intFromEnum(transport_species.AqueousSpecies.non_band_hpo4) != soil_species_count or
-        @intFromEnum(transport_species.AqueousSpecies.non_band_h2po4) != soil_species_count + 1 or
-        @intFromEnum(transport_species.AqueousSpecies.band_hpo4) != soil_species_count + 2 or
-        @intFromEnum(transport_species.AqueousSpecies.band_h2po4) != soil_species_count + 3)
+        @backingInt(transport_species.AqueousSpecies.non_band_hpo4) != soil_species_count or
+        @backingInt(transport_species.AqueousSpecies.non_band_h2po4) != soil_species_count + 1 or
+        @backingInt(transport_species.AqueousSpecies.band_hpo4) != soil_species_count + 2 or
+        @backingInt(transport_species.AqueousSpecies.band_h2po4) != soil_species_count + 3)
         @compileError("litter/topsoil canonical phosphate adapter mapping changed");
 }
 
@@ -116,10 +117,10 @@ pub fn publishCanonicalSolutes(
 
     @memcpy(canonical_litter_mol[0..litter_species_count], litter_compatibility_mol);
     @memcpy(canonical_soil_mol[0..soil_species_count], soil_compatibility_mol);
-    canonical_soil_mol[@intFromEnum(transport_species.AqueousSpecies.non_band_hpo4)] = soil_mineral_mol[8];
-    canonical_soil_mol[@intFromEnum(transport_species.AqueousSpecies.non_band_h2po4)] = soil_mineral_mol[10];
-    canonical_soil_mol[@intFromEnum(transport_species.AqueousSpecies.band_hpo4)] = soil_mineral_mol[9];
-    canonical_soil_mol[@intFromEnum(transport_species.AqueousSpecies.band_h2po4)] = soil_mineral_mol[11];
+    canonical_soil_mol[@backingInt(transport_species.AqueousSpecies.non_band_hpo4)] = soil_mineral_mol[8];
+    canonical_soil_mol[@backingInt(transport_species.AqueousSpecies.non_band_h2po4)] = soil_mineral_mol[10];
+    canonical_soil_mol[@backingInt(transport_species.AqueousSpecies.band_hpo4)] = soil_mineral_mol[9];
+    canonical_soil_mol[@backingInt(transport_species.AqueousSpecies.band_h2po4)] = soil_mineral_mol[11];
 }
 
 pub const Parameters = struct {
@@ -497,7 +498,7 @@ pub fn advance(inputs: Inputs, parameters: Parameters) !Result {
             .dop_g = soil_before.dop_g + transfer[2],
             .acetate_g = soil_before.acetate_g + transfer[3],
         };
-        const fields = @typeInfo(litter_organic_update.OrganicPool).@"struct".fields;
+        const fields = ti_compat.fieldViews(litter_organic_update.OrganicPool);
         inline for (fields, 0..) |field, component| {
             const before = @field(litter_organic_candidate[fraction], field.name) + @field(soil_before, field.name);
             const after = @field(litter_organic_candidate[fraction], field.name) - transfer[component] + @field(soil_organic_candidate[fraction], field.name);
@@ -506,7 +507,7 @@ pub fn advance(inputs: Inputs, parameters: Parameters) !Result {
         }
     }
     litter_organic_candidate = try litter_organic_update.update(litter_fluxes, litter_organic_candidate);
-    for (litter_organic_candidate) |pool| inline for (@typeInfo(litter_organic_update.OrganicPool).@"struct".fields, 0..) |field, component|
+    for (litter_organic_candidate) |pool| inline for (ti_compat.fieldViews(litter_organic_update.OrganicPool), 0..) |field, component|
         try requireAdmissible(@field(pool, field.name), @abs(@field(pool, field.name)), parameters.organic_admissibility_absolute_tolerance_g[component], parameters.admissibility_relative_tolerance);
 
     var litter_mineral_candidate = inputs.litter_mineral_mol.*;
@@ -742,7 +743,7 @@ fn scale3(a: f64, b: f64, c: f64) f64 {
 }
 
 fn validate(inputs: Inputs, parameters: Parameters) !void {
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(Parameters)) |field| switch (@typeInfo(field.type)) {
         .float => if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteLitterSoilInterfaceParameter,
         .array => for (@field(parameters, field.name)) |value| if (!std.math.isFinite(value)) return error.NonFiniteLitterSoilInterfaceParameter,
         else => {},
@@ -774,7 +775,7 @@ fn validate(inputs: Inputs, parameters: Parameters) !void {
         if (value < 0) return error.InvalidLitterSoilInterfaceParameter;
     inline for (.{ inputs.litter_solute_mol, inputs.soil_solute_mol, inputs.litter_mineral_mol, inputs.soil_mineral_mol }) |values|
         for (values) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidLitterSoilInterfaceInventory;
-    for (inputs.litter_organic, inputs.soil_organic) |litter, soil| inline for (@typeInfo(litter_organic_update.OrganicPool).@"struct".fields) |field| {
+    for (inputs.litter_organic, inputs.soil_organic) |litter, soil| inline for (ti_compat.fieldViews(litter_organic_update.OrganicPool)) |field| {
         if (!std.math.isFinite(@field(litter, field.name)) or @field(litter, field.name) < 0 or
             !std.math.isFinite(@field(soil, field.name)) or @field(soil, field.name) < 0)
             return error.InvalidLitterSoilInterfaceInventory;
@@ -976,7 +977,7 @@ test "litter soil interface conserves every salt organic and mineral field" {
             2e-13,
         );
     for (0..organic_fraction_count) |fraction| inline for (
-        @typeInfo(litter_organic_update.OrganicPool).@"struct".fields,
+        ti_compat.fieldViews(litter_organic_update.OrganicPool),
         0..,
     ) |field, component|
         try std.testing.expectApproxEqAbs(
@@ -998,10 +999,10 @@ test "canonical adapter preserves no-transfer state and publishes zoned phosphat
     for (0..litter_species_count) |species| canonical_litter[species] = @floatFromInt(species + 1);
     for (0..soil_species_count) |species| canonical_soil[species] = @floatFromInt(species + 2);
     canonical_litter[canonical_species_count - 1] = 91;
-    canonical_soil[@intFromEnum(transport_species.AqueousSpecies.non_band_hpo4)] = 2;
-    canonical_soil[@intFromEnum(transport_species.AqueousSpecies.non_band_h2po4)] = 3;
-    canonical_soil[@intFromEnum(transport_species.AqueousSpecies.band_hpo4)] = 5;
-    canonical_soil[@intFromEnum(transport_species.AqueousSpecies.band_h2po4)] = 7;
+    canonical_soil[@backingInt(transport_species.AqueousSpecies.non_band_hpo4)] = 2;
+    canonical_soil[@backingInt(transport_species.AqueousSpecies.non_band_h2po4)] = 3;
+    canonical_soil[@backingInt(transport_species.AqueousSpecies.band_hpo4)] = 5;
+    canonical_soil[@backingInt(transport_species.AqueousSpecies.band_h2po4)] = 7;
     const litter_before = canonical_litter;
     const soil_before = canonical_soil;
     var litter_solute: [litter_species_count]f64 = undefined;
@@ -1011,10 +1012,10 @@ test "canonical adapter preserves no-transfer state and publishes zoned phosphat
     var soil_organic: [organic_fraction_count]litter_organic_update.OrganicPool = @splat(.{ .doc_g = 0, .don_g = 0, .dop_g = 0, .acetate_g = 0 });
     var litter_mineral: [mineral_species_count]f64 = @splat(0);
     var soil_mineral: [mineral_soil_zone_count]f64 = @splat(0);
-    soil_mineral[8] = canonical_soil[@intFromEnum(transport_species.AqueousSpecies.non_band_hpo4)];
-    soil_mineral[10] = canonical_soil[@intFromEnum(transport_species.AqueousSpecies.non_band_h2po4)];
-    soil_mineral[9] = canonical_soil[@intFromEnum(transport_species.AqueousSpecies.band_hpo4)];
-    soil_mineral[11] = canonical_soil[@intFromEnum(transport_species.AqueousSpecies.band_h2po4)];
+    soil_mineral[8] = canonical_soil[@backingInt(transport_species.AqueousSpecies.non_band_hpo4)];
+    soil_mineral[10] = canonical_soil[@backingInt(transport_species.AqueousSpecies.non_band_h2po4)];
+    soil_mineral[9] = canonical_soil[@backingInt(transport_species.AqueousSpecies.band_hpo4)];
+    soil_mineral[11] = canonical_soil[@backingInt(transport_species.AqueousSpecies.band_h2po4)];
     var parameters = fixtureParameters();
     parameters.litter_cover_fraction = 0;
     parameters.dispersivity_m = 0;
@@ -1095,7 +1096,7 @@ test "canonical litter transfer equals summed zoned recipient gain and is subste
     try std.testing.expectApproxEqAbs(@as(f64, 5), full.litter_solute[34] + full.soil_solute[34] + full.soil_solute[42], 2e-14);
     try std.testing.expectApproxEqAbs(@as(f64, 4), full.litter_mineral[4] + full.soil_mineral[8] + full.soil_mineral[9], 2e-14);
     try std.testing.expectApproxEqAbs(@as(f64, 2), full.litter_mineral[5] + full.soil_mineral[10] + full.soil_mineral[11], 2e-14);
-    inline for (@typeInfo(Outcome).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Outcome)) |field|
         for (@field(full, field.name), @field(halves, field.name)) |one, two|
             try std.testing.expectApproxEqAbs(one, two, 2e-14);
 }
@@ -1197,7 +1198,7 @@ fn sum(values: []const f64) f64 {
 fn organicSum(values: []const litter_organic_update.OrganicPool) f64 {
     var result: f64 = 0;
     for (values) |pool| {
-        inline for (@typeInfo(litter_organic_update.OrganicPool).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(litter_organic_update.OrganicPool)) |field|
             result += @field(pool, field.name);
     }
     return result;

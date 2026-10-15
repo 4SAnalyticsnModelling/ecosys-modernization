@@ -4,6 +4,7 @@
 const std = @import("std");
 const types = @import("solver_types.zig");
 const grid_module = @import("../../state/grid.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const maximum_bytes = 16 * 1024 * 1024;
 pub const file_name = "ecosys-ng-heat-failure.json";
@@ -29,7 +30,7 @@ fn writeData(stream: *std.json.Stringify, value: anytype) std.json.Stringify.Err
     switch (@typeInfo(@TypeOf(value))) {
         .@"struct" => |info| {
             try stream.beginObject();
-            inline for (info.fields) |field| {
+            inline for (ti_compat.fieldViewsFromInfo(info)) |field| {
                 if (comptime !omitted(field.name)) {
                     try stream.objectField(field.name);
                     try writeData(stream, @field(value, field.name));
@@ -78,7 +79,7 @@ fn readData(comptime T: type, allocator: std.mem.Allocator, value: std.json.Valu
             if (value != .object) return error.InvalidHeatSnapshotShape;
             var result: T = undefined;
             var expected: usize = 0;
-            inline for (info.fields) |field| {
+            inline for (ti_compat.fieldViewsFromInfo(info)) |field| {
                 if (comptime std.mem.eql(u8, field.name, "allocator")) {
                     @field(result, field.name) = allocator;
                 } else if (comptime omitted(field.name)) {
@@ -127,7 +128,7 @@ pub fn decode(arena: std.mem.Allocator, bytes: []const u8) !Input {
     const grid = result.grid;
     if (grid.cell_count == 0 or grid.soil_layer_capacity == 0 or
         grid.layer_count != try std.math.mul(usize, grid.cell_count, grid.soil_layer_capacity)) return error.InvalidHeatSnapshotShape;
-    inline for (@typeInfo(grid_module.GridState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(grid_module.GridState)) |field| {
         if (field.type == []f64 or field.type == []usize) {
             const count = if (comptime std.mem.eql(u8, field.name, "surface_temperature_k") or
                 std.mem.eql(u8, field.name, "active_soil_layer_count") or
@@ -228,11 +229,11 @@ test "heat evaluation cache is bitwise identical and resets between captured sol
         const a_result = try solve(&cached, &a.grid, a.faces, a.properties, a.water_fluxes, &a_flux, a.options);
         const b_result = try solve(&uncached, &b.grid, b.faces, b.properties, b.water_fluxes, &b_flux, b.options);
         try std.testing.expectEqualDeep(b_result, a_result);
-        inline for (std.meta.fields(types.Result)) |field| {
+        inline for (ti_compat.fieldViews(types.Result)) |field| {
             if (field.type == f64)
                 try std.testing.expectEqual(@as(u64, @bitCast(@field(b_result, field.name))), @as(u64, @bitCast(@field(a_result, field.name))));
         }
-        inline for (std.meta.fields(grid_module.GridState)) |field| {
+        inline for (ti_compat.fieldViews(grid_module.GridState)) |field| {
             if (field.type == []f64)
                 try std.testing.expectEqualSlices(u8, std.mem.sliceAsBytes(@field(b.grid, field.name)), std.mem.sliceAsBytes(@field(a.grid, field.name)));
         }

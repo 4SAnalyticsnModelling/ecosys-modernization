@@ -24,6 +24,7 @@
 // docs/traceability/redistribution_tillage_unbound_family_disposition.md
 //
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const phosphate_family_count = 20;
 pub const BandPair = struct { nonband: []f64, band: []f64 };
@@ -83,7 +84,7 @@ pub fn reset(allocator: std.mem.Allocator, inputs: Inputs, phosphate: PhosphateP
                 return error.InvalidTillageBandResetInput;
     }
     for (phosphate.families) |pair| try validatePair(pair, layers);
-    inline for (std.meta.fields(FertilizerPools)) |field| try validatePair(@field(fertilizer, field.name), layers);
+    inline for (ti_compat.fieldViews(FertilizerPools)) |field| try validatePair(@field(fertilizer, field.name), layers);
     inline for (.{ inputs.soil_mixing_remaining_fraction, inputs.mixing_gate_tolerance, inputs.tillage_depth_m }) |value|
         if (!std.math.isFinite(value)) return error.InvalidTillageBandResetInput;
     if (!finiteSlice(inputs.layer_bottom_depth_m) or inputs.mixing_gate_tolerance < 0 or inputs.tillage_depth_m < 0)

@@ -27,6 +27,7 @@ const plant_litter_salt_ingress = @import("../plant/salt/litter_ingress.zig");
 const group_nitrogen = @import("landscape_mass_inventory_nitrogen.zig");
 const group_support = @import("landscape_mass_inventory_support.zig");
 const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 const pending_litter_salt_species = [_]solute_species.AqueousSpecies{
     .aluminum,
@@ -273,9 +274,9 @@ fn aggregateProfilePhosphorusAndIonsRange(
                 try micropore.cellAmountsConst(profile_cell);
             const macro_amounts =
                 try macropore.cellAmountsConst(profile_cell);
-            inline for (@typeInfo(solute_species.AqueousSpecies).@"enum".fields) |field| {
+            inline for (ti_compat.enumFieldViews(solute_species.AqueousSpecies)) |field| {
                 const species: solute_species.AqueousSpecies =
-                    @enumFromInt(field.value);
+                    @fromBackingInt(@intCast(field.value));
                 const amount_mol =
                     matrix_amounts[field.value] + macro_amounts[field.value];
                 try element_moles.add(
@@ -449,8 +450,8 @@ pub fn debugIonSubcomponents(
 
             const matrix_amounts = try micropore.cellAmountsConst(profile_cell);
             const macro_amounts = try macropore.cellAmountsConst(profile_cell);
-            inline for (@typeInfo(solute_species.AqueousSpecies).@"enum".fields) |field| {
-                const species: solute_species.AqueousSpecies = @enumFromInt(field.value);
+            inline for (ti_compat.enumFieldViews(solute_species.AqueousSpecies)) |field| {
+                const species: solute_species.AqueousSpecies = @fromBackingInt(@intCast(field.value));
                 const amount_mol = matrix_amounts[field.value] + macro_amounts[field.value];
                 result.dissolved_aqueous_mol += amount_mol * aqueousIonAtomCount(species);
             }
@@ -517,8 +518,8 @@ pub fn debugDissolvedAqueousPerSpecies(
             const profile_cell = cell * grid.soil_layer_capacity + layer;
             const matrix_amounts = try micropore.cellAmountsConst(profile_cell);
             const macro_amounts = try macropore.cellAmountsConst(profile_cell);
-            inline for (@typeInfo(solute_species.AqueousSpecies).@"enum".fields) |field| {
-                const species: solute_species.AqueousSpecies = @enumFromInt(field.value);
+            inline for (ti_compat.enumFieldViews(solute_species.AqueousSpecies)) |field| {
+                const species: solute_species.AqueousSpecies = @fromBackingInt(@intCast(field.value));
                 const amount_mol = matrix_amounts[field.value] + macro_amounts[field.value];
                 result[field.value] += amount_mol * aqueousIonAtomCount(species);
             }
@@ -632,7 +633,7 @@ fn aqueousCarrierM3(
 
 fn extensiveGeochemistrySolids(state: anytype, water_m3: f64) @TypeOf(state) {
     var result = state;
-    inline for (@typeInfo(@TypeOf(state)).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(state))) |field|
         @field(result, field.name) = carrierAmount(@field(state, field.name), water_m3);
     return result;
 }
@@ -775,7 +776,7 @@ fn aggregatePendingSurfaceMineralsRange(
 fn validatePhosphateFractions(
     fractions: zone_classification.ZoneFractions,
 ) !void {
-    inline for (@typeInfo(zone_classification.ZoneFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(zone_classification.ZoneFractions)) |field| {
         const fraction = @field(fractions, field.name);
         if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1)
             return error.InvalidChemistryZoneFraction;

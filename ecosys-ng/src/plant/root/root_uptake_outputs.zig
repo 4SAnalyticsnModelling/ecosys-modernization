@@ -1,6 +1,7 @@
 const std = @import("std");
 const Grid = @import("../../state/grid.zig").GridState;
 const Roots = @import("plant_root_system.zig").State;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 pub const root_gas_count: usize = 6;
 pub const salt_species_count: usize = 8;
 pub const organic_fraction_count: usize = 5;
@@ -346,7 +347,7 @@ pub fn canopyGasBoundaryForCell(
         .methane_net_input_g_c_per_h = try atmosphereToRootForCellGPerH(state, grid, cell, 2) +
             root_gas_withdrawal_g_element_per_h_by_gas_and_cell[2][cell],
     };
-    inline for (@typeInfo(CanopyGasBoundary).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(CanopyGasBoundary)) |field|
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootGasTransactionLedger;
     return result;
 }

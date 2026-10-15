@@ -114,22 +114,22 @@ pub fn evaluatePhosphateExtentResiduals(
         parameters.aqueous_kinetics,
     );
     output[
-        @intFromEnum(
+        @backingInt(
             group_types.CoupledExtentReaction.aqueous_calcium_hydroxide_pairing,
         )
     ] = aqueous_fluxes.calcium_hydroxide_association;
     output[
-        @intFromEnum(
+        @backingInt(
             group_types.CoupledExtentReaction.aqueous_calcium_carbonate_pairing,
         )
     ] = aqueous_fluxes.calcium_carbonate_association;
     output[
-        @intFromEnum(
+        @backingInt(
             group_types.CoupledExtentReaction.aqueous_calcium_bicarbonate_pairing,
         )
     ] = aqueous_fluxes.calcium_bicarbonate_association;
     output[
-        @intFromEnum(
+        @backingInt(
             group_types.CoupledExtentReaction.aqueous_calcium_sulfate_pairing,
         )
     ] = aqueous_fluxes.calcium_sulfate_association;
@@ -142,7 +142,7 @@ pub fn applyPhosphateExtent(
     parameters: chemistry.ReactionParameters,
 ) bool {
     if (!std.math.isFinite(extent_mol_per_m3)) return false;
-    const ordinal: usize = @intFromEnum(reaction);
+    const ordinal: usize = @backingInt(reaction);
     if (ordinal >= 16) {
         switch (reaction) {
             .aqueous_calcium_hydroxide_pairing => group_apply.applyAqueousCalciumExtent(
@@ -323,7 +323,7 @@ pub fn maximumPhosphateExtent(
     direction: f64,
     parameters: chemistry.ReactionParameters,
 ) f64 {
-    const ordinal: usize = @intFromEnum(reaction);
+    const ordinal: usize = @backingInt(reaction);
     if (ordinal >= 16) return switch (reaction) {
         .aqueous_calcium_hydroxide_pairing => group_numerics2.maximumAqueousCalciumExtent(
             vector,
@@ -550,9 +550,9 @@ pub fn phosphatePackedIndex(
     comptime field_name: []const u8,
 ) usize {
     const aqueous_count =
-        @typeInfo(aqueous_network.State).@"struct".fields.len;
+        @typeInfo(aqueous_network.State).@"struct".field_names.len;
     const phosphate_count =
-        @typeInfo(phosphate_network.State).@"struct".fields.len;
+        @typeInfo(phosphate_network.State).@"struct".field_names.len;
     return aqueous_count + zone_index * phosphate_count +
         std.meta.fieldIndex(phosphate_network.State, field_name).?;
 }
@@ -564,8 +564,8 @@ pub fn phosphateTrustRegionFraction(
     maximum_relative_change: f64,
 ) f64 {
     if (maximum_relative_change <= 0) return 1;
-    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".fields.len;
-    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".fields.len;
+    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".field_names.len;
+    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".field_names.len;
     // Do not let the neighboring HPO4 branch prevent a conservative trial
     // from landing exactly on an H2PO4 nonnegativity boundary. The candidate
     // still must pass the same global monotonic merit test, and the next map

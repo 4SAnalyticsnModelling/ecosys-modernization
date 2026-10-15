@@ -9,6 +9,9 @@ const ecosys = @import("ecosys_ng");
 // TEMP_DIAGNOSTIC (`issue-108`): cation probe only.
 const diagnostics = @import("diagnostics.zig");
 
+const arr_compat = ecosys.array_compat;
+const ti_compat = @import("ecosys_ng").typeinfo_compat;
+
 pub fn applyRootNutrientUptake(context: anytype) !void {
     if (context.plant_roots.* == null or context.plant_water_workspace.* == null or context.plant_root_nutrient_workspace.* == null or context.plant_root_exudation_workspace.* == null) return;
     if (context.salinity_enabled_by_cell.len != context.grid.cell_count)
@@ -77,14 +80,14 @@ pub fn applyRootNutrientUptake(context: anytype) !void {
             // R*Y before either NITRO or UPTAKE reads it. Every contributor
             // therefore uses this immutable accepted-hour denominator.
             const total_previous = [ecosys.plant_root_nutrient_uptake.nutrient_pool_count]f64{
-                context.soil_nutrient_competition_history.soil_previous_total[@intFromEnum(ecosys.soil_nutrient_competition_history.SoilPool.ammonium_non_band)][soil],
-                context.soil_nutrient_competition_history.soil_previous_total[@intFromEnum(ecosys.soil_nutrient_competition_history.SoilPool.ammonium_band)][soil],
-                context.soil_nutrient_competition_history.soil_previous_total[@intFromEnum(ecosys.soil_nutrient_competition_history.SoilPool.nitrate_non_band)][soil],
-                context.soil_nutrient_competition_history.soil_previous_total[@intFromEnum(ecosys.soil_nutrient_competition_history.SoilPool.nitrate_band)][soil],
-                context.soil_nutrient_competition_history.soil_previous_total[@intFromEnum(ecosys.soil_nutrient_competition_history.SoilPool.h2po4_non_band)][soil],
-                context.soil_nutrient_competition_history.soil_previous_total[@intFromEnum(ecosys.soil_nutrient_competition_history.SoilPool.h2po4_band)][soil],
-                context.soil_nutrient_competition_history.soil_previous_total[@intFromEnum(ecosys.soil_nutrient_competition_history.SoilPool.hpo4_non_band)][soil],
-                context.soil_nutrient_competition_history.soil_previous_total[@intFromEnum(ecosys.soil_nutrient_competition_history.SoilPool.hpo4_band)][soil],
+                context.soil_nutrient_competition_history.soil_previous_total[@backingInt(ecosys.soil_nutrient_competition_history.SoilPool.ammonium_non_band)][soil],
+                context.soil_nutrient_competition_history.soil_previous_total[@backingInt(ecosys.soil_nutrient_competition_history.SoilPool.ammonium_band)][soil],
+                context.soil_nutrient_competition_history.soil_previous_total[@backingInt(ecosys.soil_nutrient_competition_history.SoilPool.nitrate_non_band)][soil],
+                context.soil_nutrient_competition_history.soil_previous_total[@backingInt(ecosys.soil_nutrient_competition_history.SoilPool.nitrate_band)][soil],
+                context.soil_nutrient_competition_history.soil_previous_total[@backingInt(ecosys.soil_nutrient_competition_history.SoilPool.h2po4_non_band)][soil],
+                context.soil_nutrient_competition_history.soil_previous_total[@backingInt(ecosys.soil_nutrient_competition_history.SoilPool.h2po4_band)][soil],
+                context.soil_nutrient_competition_history.soil_previous_total[@backingInt(ecosys.soil_nutrient_competition_history.SoilPool.hpo4_non_band)][soil],
+                context.soil_nutrient_competition_history.soil_previous_total[@backingInt(ecosys.soil_nutrient_competition_history.SoilPool.hpo4_band)][soil],
             };
 
             var competitor_count: usize = 0;
@@ -116,7 +119,7 @@ pub fn applyRootNutrientUptake(context: anytype) !void {
                 if (activity.protein <= 0 or activity.carbon <= 0) continue;
                 var competition: [ecosys.plant_root_nutrient_uptake.nutrient_pool_count]f64 = undefined;
                 for (0..ecosys.plant_root_nutrient_uptake.nutrient_pool_count) |pool_index| {
-                    const pool: ecosys.plant_root_nutrient_uptake.NutrientPool = @enumFromInt(pool_index);
+                    const pool: ecosys.plant_root_nutrient_uptake.NutrientPool = @fromBackingInt(@intCast(pool_index));
                     const biome = water.root_biome_fraction[root];
                     competition[pool_index] = if (total_previous[pool_index] > nutrientDemandPresenceLimit(context.config.physical_tolerance, pool, total_previous[pool_index]))
                         @max(context.runscript.root_nutrient_parameters.minimum_population_uptake_fraction_multiplier * biome, previousRootNutrientDemand(roots, pool, root) / total_previous[pool_index])
@@ -275,9 +278,9 @@ pub fn applyRootNutrientUptake(context: anytype) !void {
                     for (salt_transport_species, soil_salt_content_mol, soil_salt_content_before_mol) |species, after_mol, before_mol| {
                         const delta_mol = after_mol - before_mol;
                         if (delta_mol == 0) continue;
-                        const updated_mol = transport_amounts[@intFromEnum(species)] + delta_mol;
+                        const updated_mol = transport_amounts[@backingInt(species)] + delta_mol;
                         if (!std.math.isFinite(updated_mol) or updated_mol < 0) return error.InvalidRootSaltTransportPublication;
-                        transport_amounts[@intFromEnum(species)] = updated_mol;
+                        transport_amounts[@backingInt(species)] = updated_mol;
                     }
                 }
                 try diagnostics.traceIssue108Cation(context, "after_root_salt_writeback", soil, context.executed_weather_hours.* + 1);
@@ -305,7 +308,7 @@ pub fn applyRootNutrientUptake(context: anytype) !void {
                 const root = try roots.layerIndex(coordinate.plant, coordinate.biological_domain, layer);
                 var next_root_demand: [ecosys.plant_root_nutrient_uptake.nutrient_pool_count]f64 = undefined;
                 for (0..ecosys.plant_root_nutrient_uptake.nutrient_pool_count) |pool_index| {
-                    const pool: ecosys.plant_root_nutrient_uptake.NutrientPool = @enumFromInt(pool_index);
+                    const pool: ecosys.plant_root_nutrient_uptake.NutrientPool = @fromBackingInt(@intCast(pool_index));
                     next_root_demand[pool_index] = currentRootNutrientDemand(roots, pool, root);
                 }
                 try context.soil_nutrient_competition_attempt.addSoil(soil, next_root_demand);
@@ -361,18 +364,12 @@ pub fn applyRootNutrientUptake(context: anytype) !void {
                         .{},
                     );
                 }
-                const zero_nutrient_results = [_]ecosys.plant_root_nutrient_uptake.Result{.{
-                    .demand_g_element = 0,
-                    .uptake_g_element = 0,
-                    .oxygen_unlimited_uptake_g_element = 0,
-                    .carbon_unlimited_uptake_g_element = 0,
-                    .available_g_element = 0,
-                }} ** ecosys.plant_root_nutrient_uptake.nutrient_pool_count;
+                const zero_nutrient_results = @as([ecosys.plant_root_nutrient_uptake.nutrient_pool_count]ecosys.plant_root_nutrient_uptake.Result, @splat(@as(ecosys.plant_root_nutrient_uptake.Result, .{ .demand_g_element = 0, .uptake_g_element = 0, .oxygen_unlimited_uptake_g_element = 0, .carbon_unlimited_uptake_g_element = 0, .available_g_element = 0, })));
                 for (0..salt_competitor_count) |competitor_index| {
                     const competitor = salt_workspace.?.competitors[competitor_index];
                     var salts: ecosys.plant_root_ion_balance.SaltUptakeMol = .{};
-                    inline for (@typeInfo(ecosys.plant_root_system.SaltSpecies).@"enum".fields) |field| {
-                        const species: ecosys.plant_root_system.SaltSpecies = @enumFromInt(field.value);
+                    inline for (ti_compat.enumFieldViews(ecosys.plant_root_system.SaltSpecies)) |field| {
+                        const species: ecosys.plant_root_system.SaltSpecies = @fromBackingInt(@intCast(field.value));
                         @field(salts, field.name) = roots.salt_uptake_mol_per_h[try roots.saltIndex(competitor.plant, competitor.domain, competitor.layer, species)];
                     }
                     hydrogen_charge_mol += try ecosys.plant_root_ion_balance.hydrogenChargeMol(

@@ -301,18 +301,18 @@ fn requireBenchmarkAdmission(mode: std.builtin.OptimizeMode, enabled: ?[]const u
     const value = enabled orelse return error.SkipZigTest;
     if (!std.mem.eql(u8, value, "1")) return error.SkipZigTest;
     switch (mode) {
-        .ReleaseSafe, .ReleaseFast => {},
-        .Debug, .ReleaseSmall => return error.FreezingColumnRequiresReleaseSafeOrReleaseFast,
+        .safe, .fast => {},
+        .debug, .small => return error.FreezingColumnRequiresReleaseSafeOrReleaseFast,
     }
 }
 
 test "freezing benchmark admission is explicit and permits shipping ReleaseSafe" {
-    inline for (.{ .Debug, .ReleaseSafe, .ReleaseFast, .ReleaseSmall }) |mode| {
+    inline for (.{ .debug, .safe, .fast, .small }) |mode| {
         try std.testing.expectError(error.SkipZigTest, requireBenchmarkAdmission(mode, null));
         try std.testing.expectError(error.SkipZigTest, requireBenchmarkAdmission(mode, "0"));
     }
-    try requireBenchmarkAdmission(.ReleaseSafe, "1");
-    try requireBenchmarkAdmission(.ReleaseFast, "1");
-    try std.testing.expectError(error.FreezingColumnRequiresReleaseSafeOrReleaseFast, requireBenchmarkAdmission(.Debug, "1"));
-    try std.testing.expectError(error.FreezingColumnRequiresReleaseSafeOrReleaseFast, requireBenchmarkAdmission(.ReleaseSmall, "1"));
+    try requireBenchmarkAdmission(.safe, "1");
+    try requireBenchmarkAdmission(.fast, "1");
+    try std.testing.expectError(error.FreezingColumnRequiresReleaseSafeOrReleaseFast, requireBenchmarkAdmission(.debug, "1"));
+    try std.testing.expectError(error.FreezingColumnRequiresReleaseSafeOrReleaseFast, requireBenchmarkAdmission(.small, "1"));
 }

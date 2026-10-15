@@ -17,6 +17,7 @@
 
 const std = @import("std");
 const dissolved = @import("../chemistry/precipitation_irrigation_dissolved_gases.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// The temperature at which each `exp(a - b * T)` factor is unity, measured
 /// from the oracle's own coefficients rather than assumed.
@@ -132,7 +133,7 @@ pub fn henryDomain(
         // divergence between them would mean the translation lost that sharing.
         if (result.precipitation.carbon_dioxide_g_m3 != result.irrigation.carbon_dioxide_g_m3)
             return error.PrecipitationIrrigationSolubilityDisagreement;
-        inline for (std.meta.fields(dissolved.DissolvedGasConcentrations)) |field| {
+        inline for (ti_compat.fieldViews(dissolved.DissolvedGasConcentrations)) |field| {
             const value = @field(result.precipitation, field.name);
             if (!std.math.isFinite(value)) return error.NonFiniteHenryConcentration;
             if (value < 0) return error.NegativeHenryConcentration;

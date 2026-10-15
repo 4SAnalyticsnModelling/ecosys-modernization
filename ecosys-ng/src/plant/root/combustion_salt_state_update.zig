@@ -1,5 +1,6 @@
 const std = @import("std");
 
+
 pub const salt_species_count: usize = 8;
 
 pub const State = struct {
@@ -207,7 +208,7 @@ test "disabled and inactive cells publish zero without reading transactions" {
     defer state.deinit();
     @memset(state.released_mol_per_h_by_layer_and_salt, 7);
     @memset(state.total_released_mol_per_h_by_cell, 7);
-    const invalid = [_]f64{std.math.nan(f64)} ** salt_species_count;
+    const invalid = @as([salt_species_count]f64, @splat(@as(f64, std.math.nan(f64))));
     try refresh(&state, .{
         .salinity_enabled_by_cell = &.{false},
         .fire_active_by_cell = &.{true},
@@ -225,7 +226,7 @@ test "late invalid active root salt preserves complete state_update" {
     defer state.deinit();
     @memset(state.released_mol_per_h_by_layer_and_salt, 7);
     @memset(state.total_released_mol_per_h_by_cell, 7);
-    var released = [_]f64{1} ** (2 * salt_species_count);
+    var released = @as([(2 * salt_species_count)]f64, @splat(@as(f64, 1)));
     released[released.len - 1] = std.math.nan(f64);
     try std.testing.expectError(
         error.InvalidRootCombustionSaltStateUpdateInput,

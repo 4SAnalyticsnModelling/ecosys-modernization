@@ -1,4 +1,6 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const BranchInputs = struct {
     structural_carbon_g_c: f64,
@@ -79,7 +81,7 @@ pub fn calculateAll(
 }
 
 fn calculateOne(branch: BranchInputs, inputs: Inputs) !Fluxes {
-    inline for (@typeInfo(BranchInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(BranchInputs)) |field| {
         const value = @field(branch, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidCanopySymbioticRespirationState;
@@ -124,7 +126,7 @@ fn calculateOne(branch: BranchInputs, inputs: Inputs) !Fluxes {
         .nitrogen_fixation_respiration_g_c = fixation_respiration,
         .fixed_nitrogen_g_n = fixation_respiration * inputs.nitrogen_fixation_yield_g_n_per_g_c,
     };
-    inline for (@typeInfo(Fluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Fluxes)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteCanopySymbioticRespirationFlux;
     return result;
@@ -215,7 +217,7 @@ test "GROSUB root fixation type leaves canopy outputs and total unchanged" {
 }
 
 test "GROSUB fixation sweep supports runtime branches and atomically accumulates UPNFC" {
-    var branches = [_]BranchInputs{testBranch()} ** 43;
+    var branches = @as([43]BranchInputs, @splat(@as(BranchInputs, testBranch())));
     var outputs: [43]Fluxes = undefined;
     var total_g_n: f64 = 2;
     try calculateAll(&branches, &outputs, &total_g_n, testInputs());

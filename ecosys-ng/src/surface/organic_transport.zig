@@ -2,6 +2,7 @@ const std = @import("std");
 const organic = @import("../soil/organic/initialization.zig");
 const runoff_carrier = @import("runoff_carrier.zig");
 
+
 pub const Directions = struct {
     east_m3: []const f64,
     west_m3: []const f64,
@@ -180,8 +181,8 @@ test "surface organic runoff conserves internal transfer and reports source-cell
     var carbon = [_]f64{ 0, 0 };
     var nitrogen = [_]f64{ 0, 0 };
     var phosphorus = [_]f64{ 0, 0 };
-    var intercell_debit = [_]runoff_carrier.ElementMass{.{}} ** 2;
-    var intercell_credit = [_]runoff_carrier.ElementMass{.{}} ** 2;
+    var intercell_debit = @as([2]runoff_carrier.ElementMass, @splat(@as(runoff_carrier.ElementMass, .{})));
+    var intercell_credit = @as([2]runoff_carrier.ElementMass, @splat(@as(runoff_carrier.ElementMass, .{})));
     const zero = [_]f64{ 0, 0 };
     try advance(std.testing.allocator, &state, 2, 1, &.{ 0.5, 1 }, &.{ -0.5, 0 }, .{ .east_m3 = &.{ 0.5, 1 }, .west_m3 = &zero, .south_m3 = &zero, .north_m3 = &zero }, 1, .{
         .dissolved_organic_carbon_export_g_c_by_cell = &carbon,
@@ -207,8 +208,8 @@ test "surface organic failure preserves pools and previously accepted export dia
     var carbon = [_]f64{ 11, 12 };
     var nitrogen = [_]f64{ 13, 14 };
     var phosphorus = [_]f64{ 15, 16 };
-    var intercell_debit = [_]runoff_carrier.ElementMass{.{ .carbon_g = 17 }} ** 2;
-    var intercell_credit = [_]runoff_carrier.ElementMass{.{ .nitrogen_g = 18 }} ** 2;
+    var intercell_debit = @as([2]runoff_carrier.ElementMass, @splat(@as(runoff_carrier.ElementMass, .{ .carbon_g = 17 })));
+    var intercell_credit = @as([2]runoff_carrier.ElementMass, @splat(@as(runoff_carrier.ElementMass, .{ .nitrogen_g = 18 })));
     const zero = [_]f64{ 0, 0 };
     try std.testing.expectError(
         error.InvalidSurfaceOrganicPool,

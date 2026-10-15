@@ -2,6 +2,8 @@ const std = @import("std");
 const DailyFlux = @import("../../plant/accounting/daily_flux.zig").State;
 const RootSoilExchange = @import("../../plant/root/plant_root_soil_exchange_accumulation.zig").State;
 const salt_count = @import("../../plant/salt/harvest.zig").salt_count;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 const magic = "ECOSPACT";
 const version: u32 = 3;
@@ -43,9 +45,9 @@ pub fn write(writer: anytype, view: View) !void {
     try writer.writeInt(u16, exchange_array_count, .little);
     try writer.writeInt(u64, daily_schema_fingerprint, .little);
     try writer.writeInt(u64, exchange_schema_fingerprint, .little);
-    inline for (@typeInfo(DailyFlux).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(DailyFlux)) |field|
         if (field.type == []f64) try writeValues(writer, @field(view.daily_flux, field.name));
-    inline for (@typeInfo(RootSoilExchange).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(RootSoilExchange)) |field|
         if (field.type == []f64) try writeValues(writer, @field(view.root_soil_exchange, field.name));
     try writeValues(writer, view.cumulative_harvest_salt_mol_by_plant);
     try writeValues(writer, view.cumulative_water_source_m3_by_plant);
@@ -84,9 +86,9 @@ pub fn read(
     const cumulative_water_source_m3_by_plant = try allocator.alloc(f64, plant_count);
     errdefer allocator.free(cumulative_water_source_m3_by_plant);
 
-    inline for (@typeInfo(DailyFlux).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(DailyFlux)) |field|
         if (field.type == []f64) try readValues(reader, @field(daily_flux, field.name));
-    inline for (@typeInfo(RootSoilExchange).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(RootSoilExchange)) |field|
         if (field.type == []f64) try readValues(reader, @field(root_soil_exchange, field.name));
     try readValues(reader, cumulative_harvest_salt_mol_by_plant);
     try readValues(reader, cumulative_water_source_m3_by_plant);
@@ -145,7 +147,7 @@ pub fn validateOwned(owned: Owned, expected_plants: usize) !void {
 
 fn countArrays(comptime T: type) u16 {
     var result: u16 = 0;
-    for (@typeInfo(T).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(T)) |field| if (field.type == []f64) {
         result += 1;
     };
     return result;
@@ -153,7 +155,7 @@ fn countArrays(comptime T: type) u16 {
 
 fn schemaFingerprint(comptime T: type) u64 {
     var hash: u64 = 14695981039346656037;
-    for (@typeInfo(T).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(T)) |field| {
         for (field.name) |byte| {
             hash = (hash ^ byte) *% 1099511628211;
         }
@@ -168,7 +170,7 @@ fn schemaFingerprint(comptime T: type) u64 {
 
 fn validateStateSlices(comptime T: type, state: *const T, plant_count: usize) !void {
     try validateStateSliceDimensions(T, state, plant_count);
-    inline for (@typeInfo(T).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(T)) |field| if (field.type == []f64) {
         const values = @field(state, field.name);
         for (values) |value| if (!std.math.isFinite(value))
             return error.InvalidPlantAccountingCheckpointValue;
@@ -176,7 +178,7 @@ fn validateStateSlices(comptime T: type, state: *const T, plant_count: usize) !v
 }
 
 fn validateStateSliceDimensions(comptime T: type, state: *const T, plant_count: usize) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(T)) |field| if (field.type == []f64) {
         if (@field(state, field.name).len != plant_count)
             return error.PlantAccountingCheckpointShapeMismatch;
     };
@@ -200,13 +202,13 @@ test "plant accounting checkpoint round trips every annual carrier" {
     var cumulative_water_source_m3_by_plant: [plant_count]f64 = undefined;
 
     var seed: f64 = -17.25;
-    inline for (@typeInfo(DailyFlux).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(DailyFlux)) |field| if (field.type == []f64) {
         for (@field(daily_flux, field.name)) |*value| {
             value.* = seed;
             seed += 0.25;
         }
     };
-    inline for (@typeInfo(RootSoilExchange).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(RootSoilExchange)) |field| if (field.type == []f64) {
         for (@field(root_soil_exchange, field.name)) |*value| {
             value.* = seed;
             seed += 0.25;
@@ -228,9 +230,9 @@ test "plant accounting checkpoint round trips every annual carrier" {
     var restored = try read(std.testing.allocator, &reader, plant_count);
     defer restored.deinit();
 
-    inline for (@typeInfo(DailyFlux).@"struct".fields) |field| if (field.type == []f64)
+    inline for (ti_compat.fieldViews(DailyFlux)) |field| if (field.type == []f64)
         try std.testing.expectEqualSlices(f64, @field(daily_flux, field.name), @field(restored.daily_flux, field.name));
-    inline for (@typeInfo(RootSoilExchange).@"struct".fields) |field| if (field.type == []f64)
+    inline for (ti_compat.fieldViews(RootSoilExchange)) |field| if (field.type == []f64)
         try std.testing.expectEqualSlices(f64, @field(root_soil_exchange, field.name), @field(restored.root_soil_exchange, field.name));
     try std.testing.expectEqualSlices(f64, &salts, restored.cumulative_harvest_salt_mol_by_plant);
     try std.testing.expectEqualSlices(f64, &cumulative_water_source_m3_by_plant, restored.cumulative_water_source_m3_by_plant);
@@ -243,7 +245,7 @@ test "plant accounting checkpoint rejects invalid shape non-finite and negative 
     defer daily_flux.deinit();
     var root_soil_exchange = try RootSoilExchange.init(std.testing.allocator, 2);
     defer root_soil_exchange.deinit();
-    var salts = [_]f64{0} ** (2 * salt_count);
+    var salts = @as([(2 * salt_count)]f64, @splat(@as(f64, 0)));
     var water = [_]f64{ 0, -0.25 };
     const view: View = .{
         .daily_flux = &daily_flux,

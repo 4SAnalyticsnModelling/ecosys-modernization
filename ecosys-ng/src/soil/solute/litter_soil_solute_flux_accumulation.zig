@@ -17,6 +17,7 @@
 // disturbance fraction.
 const std = @import("std");
 
+
 pub const litter_species_count = 42;
 pub const soil_species_count = 50;
 const pre_phosphate_species_count = 34;
@@ -86,12 +87,12 @@ fn fixture(snow_litter: []const f64, snow_soil: []const f64, convective: []const
 }
 
 test "TRNSFRS accumulates increments without prior boundary totals" {
-    const snow_litter = [_]f64{2} ** litter_species_count;
-    const snow_soil = [_]f64{3} ** soil_species_count;
-    const convective = [_]f64{1} ** soil_species_count;
-    const diffusive = [_]f64{0.5} ** soil_species_count;
-    var litter = [_]f64{10} ** litter_species_count;
-    var soil = [_]f64{20} ** soil_species_count;
+    const snow_litter = @as([litter_species_count]f64, @splat(@as(f64, 2)));
+    const snow_soil = @as([soil_species_count]f64, @splat(@as(f64, 3)));
+    const convective = @as([soil_species_count]f64, @splat(@as(f64, 1)));
+    const diffusive = @as([soil_species_count]f64, @splat(@as(f64, 0.5)));
+    var litter = @as([litter_species_count]f64, @splat(@as(f64, 10)));
+    var soil = @as([soil_species_count]f64, @splat(@as(f64, 20)));
     try accumulate(fixture(&snow_litter, &snow_soil, &convective, &diffusive), &litter, &soil);
     try std.testing.expectEqual(@as(f64, 10.5), litter[0]);
     try std.testing.expectEqual(@as(f64, 9), litter[34]);
@@ -100,37 +101,37 @@ test "TRNSFRS accumulates increments without prior boundary totals" {
 }
 
 test "interface-only increments conserve phosphate across domains" {
-    const snow_litter = [_]f64{0} ** litter_species_count;
-    const snow_soil = [_]f64{0} ** soil_species_count;
-    var convective = [_]f64{0} ** soil_species_count;
-    var diffusive = [_]f64{0} ** soil_species_count;
+    const snow_litter = @as([litter_species_count]f64, @splat(@as(f64, 0)));
+    const snow_soil = @as([soil_species_count]f64, @splat(@as(f64, 0)));
+    var convective = @as([soil_species_count]f64, @splat(@as(f64, 0)));
+    var diffusive = @as([soil_species_count]f64, @splat(@as(f64, 0)));
     convective[34] = 2;
     convective[42] = 3;
     diffusive[34] = -0.5;
     diffusive[42] = 1;
-    var litter = [_]f64{0} ** litter_species_count;
-    var soil = [_]f64{0} ** soil_species_count;
+    var litter = @as([litter_species_count]f64, @splat(@as(f64, 0)));
+    var soil = @as([soil_species_count]f64, @splat(@as(f64, 0)));
     try accumulate(fixture(&snow_litter, &snow_soil, &convective, &diffusive), &litter, &soil);
     try std.testing.expectEqual(@as(f64, 0), litter[34] + soil[34] + soil[42]);
 }
 
 test "late non-finite accumulation is atomic" {
-    const snow_litter = [_]f64{2} ** litter_species_count;
-    const snow_soil = [_]f64{3} ** soil_species_count;
-    const convective = [_]f64{1} ** soil_species_count;
-    var diffusive = [_]f64{0.5} ** soil_species_count;
+    const snow_litter = @as([litter_species_count]f64, @splat(@as(f64, 2)));
+    const snow_soil = @as([soil_species_count]f64, @splat(@as(f64, 3)));
+    const convective = @as([soil_species_count]f64, @splat(@as(f64, 1)));
+    var diffusive = @as([soil_species_count]f64, @splat(@as(f64, 0.5)));
     diffusive[soil_species_count - 1] = std.math.inf(f64);
-    var litter = [_]f64{10} ** litter_species_count;
-    var soil = [_]f64{20} ** soil_species_count;
+    var litter = @as([litter_species_count]f64, @splat(@as(f64, 10)));
+    var soil = @as([soil_species_count]f64, @splat(@as(f64, 20)));
     try std.testing.expectError(error.NonFiniteLitterSoilSoluteAccumulationInput, accumulate(fixture(&snow_litter, &snow_soil, &convective, &diffusive), &litter, &soil));
     try std.testing.expectEqual(@as(f64, 10), litter[0]);
     try std.testing.expectEqual(@as(f64, 20), soil[0]);
 }
 
 test "accumulation rejects short snow-litter topology" {
-    const short_litter = [_]f64{0} ** (litter_species_count - 1);
-    const soil_values = [_]f64{0} ** soil_species_count;
-    var litter = [_]f64{0} ** litter_species_count;
-    var soil = [_]f64{0} ** soil_species_count;
+    const short_litter = @as([(litter_species_count - 1)]f64, @splat(@as(f64, 0)));
+    const soil_values = @as([soil_species_count]f64, @splat(@as(f64, 0)));
+    var litter = @as([litter_species_count]f64, @splat(@as(f64, 0)));
+    var soil = @as([soil_species_count]f64, @splat(@as(f64, 0)));
     try std.testing.expectError(error.LitterSoilSoluteAccumulationDimensionMismatch, accumulate(fixture(&short_litter, &soil_values, &soil_values, &soil_values), &litter, &soil));
 }

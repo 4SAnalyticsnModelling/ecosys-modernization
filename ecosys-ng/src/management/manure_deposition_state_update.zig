@@ -1,6 +1,8 @@
 const std = @import("std");
 const canopy = @import("../canopy/photosynthesis/photosynthesis.zig");
 const grazing_manure = @import("grazing_manure.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const fraction_count = grazing_manure.biochemical_fraction_count;
 
@@ -99,7 +101,7 @@ fn totalsForCell(
     cell: usize,
 ) !Totals {
     var totals: Totals = .{
-        .organic = [_]canopy.ElementalMass{.{}} ** fraction_count,
+        .organic = @as([fraction_count]canopy.ElementalMass, @splat(@as(canopy.ElementalMass, .{}))),
         .inorganic_n = 0,
         .inorganic_p = 0,
     };
@@ -108,7 +110,7 @@ fn totalsForCell(
         const products = products_by_plant[plant];
         for (0..fraction_count) |fraction| {
             const source = products.organic_by_biochemical_fraction[fraction];
-            inline for (@typeInfo(@TypeOf(source)).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(@TypeOf(source))) |field| {
                 const value = @field(source, field.name);
                 if (!std.math.isFinite(value) or value < 0)
                     return error.InvalidManureStateUpdateInput;
@@ -158,7 +160,7 @@ test "EXTRACT manure state_update preserves plant and fraction axes" {
 test "late invalid manure preserves all state_update arrays" {
     var state = try State.init(std.testing.allocator, 2, 1);
     defer state.deinit();
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64) @memset(@field(state, field.name), 7);
     var products = [_]grazing_manure.Products{ .{}, .{} };
     products[1].inorganic_phosphorus_g_p = std.math.nan(f64);
@@ -166,7 +168,7 @@ test "late invalid manure preserves all state_update arrays" {
         error.InvalidManureStateUpdateInput,
         refresh(&state, &products),
     );
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64)
             for (@field(state, field.name)) |value|
                 try std.testing.expectEqual(@as(f64, 7), value);

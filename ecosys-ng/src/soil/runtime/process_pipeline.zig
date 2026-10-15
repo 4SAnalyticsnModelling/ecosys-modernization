@@ -1,6 +1,7 @@
 const std = @import("std");
 const phase = @import("../water/phase_change.zig");
 const heat = @import("../heat/flux.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const RuntimeParameters = struct {
     vapor_equilibrium: phase.VaporEquilibriumParameters,
@@ -33,16 +34,16 @@ pub fn compatibilityParameters() RuntimeParameters {
 }
 
 pub fn validate(parameters: RuntimeParameters) !void {
-    inline for (@typeInfo(phase.VaporEquilibriumParameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(phase.VaporEquilibriumParameters)) |field| {
         const value = @field(parameters.vapor_equilibrium, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidSoilPhaseHeatParameters;
     }
-    inline for (@typeInfo(phase.FreezeThawParameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(phase.FreezeThawParameters)) |field| {
         const value = @field(parameters.freeze_thaw, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidSoilPhaseHeatParameters;
     }
     if (parameters.freeze_thaw.ice_density_megagrams_per_m3 >= 1) return error.InvalidSoilPhaseHeatParameters;
-    inline for (@typeInfo(heat.TurbulenceParameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(heat.TurbulenceParameters)) |field| {
         const value = @field(parameters.heat_turbulence, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidSoilPhaseHeatParameters;
     }

@@ -2,6 +2,7 @@
 
 const std = @import("std");
 
+
 pub const Domain = enum(u1) {
     matrix,
     macropore,
@@ -17,7 +18,7 @@ const Entry = struct {
 };
 
 const Set = struct {
-    entries: [associativity]Entry = [_]Entry{.{}} ** associativity,
+    entries: [associativity]Entry = @as([associativity]Entry, @splat(@as(Entry, .{}))),
     next_slot: u8 = 0,
 };
 
@@ -95,7 +96,7 @@ pub const Cache = struct {
     }
 
     fn setIndex(face_index: usize, domain: Domain) usize {
-        return 2 * face_index + @intFromEnum(domain);
+        return 2 * face_index + @backingInt(domain);
     }
 };
 

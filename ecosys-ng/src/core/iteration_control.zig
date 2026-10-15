@@ -1,5 +1,6 @@
 const std = @import("std");
 const SceneOptions = @import("options.zig").SceneOptions;
+const ti_compat = @import("typeinfo_compat.zig");
 
 /// Runtime nonlinear iteration ceilings derived from the old sub-hour control
 /// record. They are convergence budgets only: ecosys-ng never repeats a full
@@ -296,7 +297,7 @@ test "runtime maximum is a hard ceiling for every process budget" {
     options.water_heat_solute_iteration_limit = 60;
     options.gas_iterations_per_water_heat_solute_iteration = 4;
     const limits = try Limits.fromSceneOptions(options, 7);
-    inline for (@typeInfo(Limits).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Limits)) |field| {
         if (comptime !std.mem.eql(u8, field.name, "solute_reaction_max_iterations") and
             !std.mem.eql(u8, field.name, "initial_solute_reaction_max_iterations"))
         {

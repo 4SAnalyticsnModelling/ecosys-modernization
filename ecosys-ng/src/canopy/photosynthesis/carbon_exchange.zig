@@ -1,5 +1,6 @@
 const std = @import("std");
 const Canopy = @import("photosynthesis.zig").State;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Heap-owned HCNET-equivalent hourly branch ledger. Positive values denote
 /// atmospheric carbon fixed by the canopy; respiration, leakage, and
@@ -16,7 +17,7 @@ pub const State = struct {
         if (branch_count == 0) return error.ZeroCanopyCarbonExchangeBranches;
         var result: State = undefined;
         result.allocator = allocator;
-        inline for (@typeInfo(State).@"struct".fields[1..]) |field| {
+        inline for (ti_compat.fieldViews(State)[1..]) |field| {
             @field(result, field.name) = try allocator.alloc(f64, branch_count);
             errdefer allocator.free(@field(result, field.name));
             @memset(@field(result, field.name), 0);
@@ -25,20 +26,20 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields[1..]) |field| self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)[1..]) |field| self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
     pub fn clone(self: *const State, allocator: std.mem.Allocator) !State {
         var result = try State.init(allocator, self.branchCount());
         errdefer result.deinit();
-        inline for (@typeInfo(State).@"struct".fields[1..]) |field|
+        inline for (ti_compat.fieldViews(State)[1..]) |field|
             @memcpy(@field(result, field.name), @field(self, field.name));
         return result;
     }
 
     pub fn reset(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields[1..]) |field| @memset(@field(self, field.name), 0);
+        inline for (ti_compat.fieldViews(State)[1..]) |field| @memset(@field(self, field.name), 0);
     }
 
     pub fn branchCount(self: State) usize {

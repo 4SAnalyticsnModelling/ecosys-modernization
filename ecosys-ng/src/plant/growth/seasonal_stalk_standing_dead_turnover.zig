@@ -1,5 +1,6 @@
 const std = @import("std");
 const growth_stages = @import("../lifecycle/growth_stages.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ElementMass = struct {
     carbon_g_c: f64 = 0,
@@ -114,7 +115,7 @@ fn validate(state: State, inputs: Inputs) !usize {
         state.standing_dead_nitrogen_g_n.len != count or
         state.standing_dead_phosphorus_g_p.len != count)
         return error.SeasonalStalkTurnoverDimensionMismatch;
-    inline for (@typeInfo(KineticFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(KineticFractions)) |field| {
         var total: f64 = 0;
         for (@field(inputs.stalk_kinetics, field.name)) |value| {
             if (!std.math.isFinite(value) or value < 0 or value > 1)

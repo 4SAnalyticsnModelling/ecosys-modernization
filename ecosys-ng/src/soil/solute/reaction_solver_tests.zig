@@ -30,6 +30,7 @@ const group_solve = @import("reaction_solver_solve.zig");
 const group_types = @import("reaction_solver_types.zig");
 const diagnostic_control = @import("reaction_diagnostic_control.zig");
 const failure_snapshot = @import("failure_snapshot.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 test {
     _ = @import("reaction_solve.zig");
@@ -80,7 +81,7 @@ test "chemical quality rejects pH movement and dissolved errors hidden by solids
     state.aqueous[0].calcium = 1;
     state.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3 = 0.001;
     state.water_mol_per_m3[0] = 100;
-    var residual = [_]f64{0} ** chemistry.State.packedComponentCount();
+    var residual = @as([chemistry.State.packedComponentCount()]f64, @splat(@as(f64, 0)));
     residual[group_numerics2.aqueousPackedIndex("hydrogen")] = 0.1;
     const acidity = try physical.measure(&state, parameters, &residual, .{});
     try std.testing.expectApproxEqAbs(@log(@as(f64, 1.1)) / @log(@as(f64, 10)), acidity.pH_change, 1e-14);
@@ -93,7 +94,7 @@ test "chemical quality rejects pH movement and dissolved errors hidden by solids
     const with_solid = try physical.measure(&state, parameters, &residual, .{});
     try std.testing.expectEqual(mobile_only.maximum, with_solid.maximum);
     @memset(&residual, 0);
-    const phosphate_offset = @typeInfo(aqueous_network.State).@"struct".fields.len;
+    const phosphate_offset = @typeInfo(aqueous_network.State).@"struct".field_names.len;
     residual[phosphate_offset + 1] = 1e-5;
     const dissolved_p = try physical.measure(&state, parameters, &residual, .{});
     try std.testing.expect(dissolved_p.maximum > 90);
@@ -599,9 +600,9 @@ test "accepted-state charge gate detects element-neutral speciation and site lea
     state.aqueous[0] = group_numerics2.filled(aqueous_network.State, 1);
     state.non_band_phosphate[0] = group_numerics2.filled(phosphate_network.State, 1);
     state.carboxyl_bound_hydrogen_mol_per_megagram[0] = 0.5;
-    const aqueous_count = std.meta.fields(aqueous_network.State).len;
-    const phosphate_count = std.meta.fields(phosphate_network.State).len;
-    const carboxyl = aqueous_count + 2 * phosphate_count + std.meta.fields(cation_exchange.Cations).len;
+    const aqueous_count = ti_compat.fieldViews(aqueous_network.State).len;
+    const phosphate_count = ti_compat.fieldViews(phosphate_network.State).len;
+    const carboxyl = aqueous_count + 2 * phosphate_count + ti_compat.fieldViews(cation_exchange.Cations).len;
     const pairs = [_][2]usize{
         .{ group_numerics2.aqueousPackedIndex("aluminum"), group_numerics2.aqueousPackedIndex("aluminum_hydroxide_2") },
         .{ aqueous_count + std.meta.fieldIndex(phosphate_network.State, "dissolved_hpo4_mol_p_per_m3").?, aqueous_count + std.meta.fieldIndex(phosphate_network.State, "dissolved_h2po4_mol_p_per_m3").? },
@@ -664,8 +665,8 @@ test "accepted-state site gate rejects opposing phosphate-zone poison and rolls 
     const count = comptime chemistry.State.packedComponentCount();
     var original: [count]f64 = undefined;
     try state.packCell(0, &original);
-    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".fields.len;
-    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".fields.len;
+    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".field_names.len;
+    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".field_names.len;
     const site_index = std.meta.fieldIndex(
         phosphate_network.State,
         "deprotonated_site_mol_per_megagram",
@@ -696,8 +697,8 @@ test "accepted-state exchanger charge gate rejects element-neutral index poison 
     const count = comptime chemistry.State.packedComponentCount();
     var original: [count]f64 = undefined;
     try state.packCell(0, &original);
-    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".fields.len;
-    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".fields.len;
+    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".field_names.len;
+    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".field_names.len;
     const calcium_aqueous_index =
         std.meta.fieldIndex(aqueous_network.State, "calcium").?;
     const calcium_exchange_index = aqueous_count + 2 * phosphate_count +
@@ -742,8 +743,8 @@ test "accepted-state exchanger gate uses fraction-weighted ammonium site charge"
     // This is the former unweighted NH-vs-Ca basis. It preserves both
     // elemental inventories and unweighted exchanger charge, but changes the
     // physical CEC by (f_nonband - 1) * extent.
-    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".fields.len;
-    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".fields.len;
+    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".field_names.len;
+    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".field_names.len;
     const exchange_offset = aqueous_count + 2 * phosphate_count;
     try std.testing.expectError(
         error.SoluteReactionAcceptedStateConservationFailure,
@@ -1175,8 +1176,8 @@ test "trace reaction inventories do not inherit a one-unit relative floor" {
     const trace_residual = [_]f64{5e-12};
     try std.testing.expect(try group_numerics.scaledNorm(&trace_state, &trace_residual, options) > 1);
 
-    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".fields.len;
-    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".fields.len;
+    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".field_names.len;
+    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".field_names.len;
     const exchange_index = aqueous_count + 2 * phosphate_count;
     try std.testing.expectEqual(
         options.absolute_tolerance_mol_per_megagram + options.relative_tolerance * 1e-10,
@@ -1478,7 +1479,7 @@ test "physical chemical acceptance rejects captured false convergence without pu
     // A search preconditioner must never relax physical publication. Even
     // references large enough to hide every search defect leave this real
     // false-equilibrium endpoint rejected by the independent source gate.
-    const large_references = [_]f64{1e30} ** chemistry.State.packedComponentCount();
+    const large_references = @as([chemistry.State.packedComponentCount()]f64, @splat(@as(f64, 1e30)));
     var search_options = captured.options;
     search_options.search_reference_concentrations = &large_references;
     try std.testing.expect(try group_numerics.scaledNorm(&before, workspace.residual, search_options) < 1);
@@ -1641,7 +1642,7 @@ test "conserved hydroxide speciation resolves captured metal chains" {
     try candidate.unpackCell(0, &target);
     try group_solve.requireAcceptedStateConservation(&scratch, &candidate, 0, &original, captured.parameters);
     const mineral_rates = try phosphate_rates.calculate(candidate.aqueous[0], candidate.non_band_phosphate[0], coefficients, captured.parameters.non_band_phosphate_soil_mass_per_water_volume_megagrams_per_m3, captured.parameters.phosphate_constants, captured.parameters.phosphate_surface, captured.parameters.phosphate_minerals, captured.parameters.phosphate_kinetics);
-    inline for (@typeInfo(@TypeOf(mineral_rates.minerals)).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(mineral_rates.minerals))) |field|
         try std.testing.expect(@abs(@field(mineral_rates.minerals, field.name)) <= 128 * std.math.floatEps(f64) * scale);
     try std.testing.expect(mineral_budget.attempted_iterations < captured.options.max_iterations);
     try std.testing.expectEqualDeep(captured.state.band_phosphate[0], candidate.band_phosphate[0]);
@@ -2095,7 +2096,7 @@ fn requireCapturedCoupledSpeciationStage(encoded: []const u8, after_kinetics: bo
     std.debug.print("coupled surface mineral candidate: iterations={d} full_quality={e} pH={e}\n", .{ iterations, quality.maximum, quality.pH_change });
     const coefficients = try scratch.activityCoefficients(0, parameters.fractions);
     const fluxes = try phosphate_rates.calculate(scratch.aqueous[0], scratch.non_band_phosphate[0], coefficients, parameters.non_band_phosphate_soil_mass_per_water_volume_megagrams_per_m3, parameters.phosphate_constants, parameters.phosphate_surface, parameters.phosphate_minerals, parameters.phosphate_kinetics);
-    inline for (std.meta.fields(phosphate_network.MineralFluxes)) |field| {
+    inline for (ti_compat.fieldViews(phosphate_network.MineralFluxes)) |field| {
         std.debug.print("coupled mineral source {s}={e}\n", .{ field.name, @field(fluxes.minerals, field.name) });
     }
     try std.testing.expect(quality.maximum <= 1);
@@ -2498,8 +2499,8 @@ test "coordinate Anderson rebuilds current carrier after private boundary poison
     @memcpy(&poisoned_rollback, poisoned.rollback_state[0..count]);
 
     var pristine_seed: [count]f64 = undefined;
-    var pristine_candidate = [_]f64{-333} ** count;
-    var pristine_candidate_residual = [_]f64{-444} ** count;
+    var pristine_candidate = @as([count]f64, @splat(@as(f64, -333)));
+    var pristine_candidate_residual = @as([count]f64, @splat(@as(f64, -444)));
     const pristine_result = try group_network.tryCurrentSignCoordinateAndersonCandidate(
         &pristine,
         &scratch_pristine,
@@ -2514,8 +2515,8 @@ test "coordinate Anderson rebuilds current carrier after private boundary poison
         current_norm,
     );
     var poisoned_seed: [count]f64 = undefined;
-    var poisoned_candidate = [_]f64{-333} ** count;
-    var poisoned_candidate_residual = [_]f64{-444} ** count;
+    var poisoned_candidate = @as([count]f64, @splat(@as(f64, -333)));
+    var poisoned_candidate_residual = @as([count]f64, @splat(@as(f64, -444)));
     const poisoned_result = try group_network.tryCurrentSignCoordinateAndersonCandidate(
         &poisoned,
         &scratch_poisoned,
@@ -2567,7 +2568,7 @@ test "coordinate Anderson rebuilds current carrier after private boundary poison
         );
         var charge_before: f64 = 0;
         var charge_after: f64 = 0;
-        inline for (std.meta.fields(cation_exchange.Cations)) |field| {
+        inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| {
             const valence: f64 = if (comptime std.mem.eql(u8, field.name, "aluminum") or
                 std.mem.eql(u8, field.name, "iron"))
                 3
@@ -2751,8 +2752,8 @@ test "production iter34 active-row Newton is conservative bounded and ceiling-ac
     );
 
     const options: group_types.Options = .{};
-    var current = [_]f64{1} ** 43;
-    var residual = [_]f64{0} ** 43;
+    var current = @as([43]f64, @splat(@as(f64, 1)));
+    var residual = @as([43]f64, @splat(@as(f64, 0)));
     current[5] = 1.093521223583531e1;
     residual[5] = -3.9516422609158957;
     current[42] = 3.613715223162189e-1;
@@ -2963,7 +2964,7 @@ test "active-row recovery patience ignores floating-point noise" {
 
 test "line-search publication restores inorganic carbon roundoff" {
     const count = comptime chemistry.State.packedComponentCount();
-    var current = [_]f64{0} ** count;
+    var current = @as([count]f64, @splat(@as(f64, 0)));
     const carbon_dioxide = group_numerics2.aqueousPackedIndex("carbon_dioxide");
     const carbonate = group_numerics2.aqueousPackedIndex("carbonate");
     const bicarbonate = group_numerics2.aqueousPackedIndex("bicarbonate");
@@ -3008,7 +3009,7 @@ test "line-search publication restores phosphate affine roundoff" {
     var current: [count]f64 = undefined;
     try state.packCell(0, &current);
     var interpolated = current;
-    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".fields.len;
+    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".field_names.len;
     const h2po4_index = aqueous_count + std.meta.fieldIndex(
         phosphate_network.State,
         "dissolved_h2po4_mol_p_per_m3",
@@ -3959,8 +3960,8 @@ test "genuine Anderson target is damped before admissible merit publication" {
     var seed: [chemistry.State.packedComponentCount()]f64 = undefined;
     for (&seed, current, current_residual) |*value, initial, defect|
         value.* = initial + seed_scale * defect;
-    var first_defect = [_]f64{0} ** chemistry.State.packedComponentCount();
-    var second_defect = [_]f64{0} ** chemistry.State.packedComponentCount();
+    var first_defect = @as([chemistry.State.packedComponentCount()]f64, @splat(@as(f64, 0)));
+    var second_defect = @as([chemistry.State.packedComponentCount()]f64, @splat(@as(f64, 0)));
     first_defect[0] = -1;
     second_defect[0] = 1;
     var raw_anderson: [chemistry.State.packedComponentCount()]f64 = undefined;
@@ -4050,8 +4051,8 @@ test "phosphate trust region uses runtime Picard relaxation and limits only HPO4
     defer std.testing.allocator.free(target);
     @memset(current, 1);
     @memset(target, 1);
-    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".fields.len;
-    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".fields.len;
+    const aqueous_count = @typeInfo(aqueous_network.State).@"struct".field_names.len;
+    const phosphate_count = @typeInfo(phosphate_network.State).@"struct".field_names.len;
     target[aqueous_count + 1] = 3;
     target[aqueous_count + phosphate_count] = 1.0e12;
     const fraction = group_phosphate.phosphateTrustRegionFraction(
@@ -4576,7 +4577,12 @@ test "diagnostic suppression preserves solver error and rollback bytes" {
     defer state.deinit();
     state.water_mol_per_m3[0] = 1;
     state.aqueous[0].ammonium_non_band = 2;
-    const parameters = std.mem.zeroes(chemistry.ReactionParameters);
+    var parameters = std.mem.zeroes(chemistry.ReactionParameters);
+    // DEV-021 (r00050, 2026-09-30): the water-molarity bound skips a zone whose
+    // fraction is structurally absent (< 1e-12, reaction_solver_numerics.zig:30).
+    // This fixture needs the ammonium zone present for the bound to be exercised
+    // at all; the sibling "day 12 snapshot" test got the same update in DEV-021.
+    parameters.fractions.ammonium_non_band = 1;
     var before: [chemistry.State.packedComponentCount()]f64 = undefined;
     try state.packCell(0, &before);
 

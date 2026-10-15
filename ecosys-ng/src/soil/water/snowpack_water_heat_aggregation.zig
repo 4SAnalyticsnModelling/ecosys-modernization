@@ -52,6 +52,8 @@
 // snowpack face aggregation group of docs/traceability/a1b_snowpack_minimum_heat_capacity_unbound.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 /// Water-equivalent volumes and convective heat crossing a snow-layer face.
 /// Every field is signed and integrated over one model step.
@@ -172,7 +174,7 @@ fn validateInputs(inputs: Inputs, state: State, workspace: Workspace) !void {
 
 fn validateFiniteSlice(values: anytype) !void {
     for (values) |value| {
-        inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(@TypeOf(value))) |field|
             if (!std.math.isFinite(@field(value, field.name)))
                 return error.NonFiniteSnowpackAggregationInput;
     }
@@ -305,7 +307,7 @@ fn filledFlux(value: f64) LayerFlux {
 }
 
 fn expectFlux(actual: LayerFlux, expected: f64) !void {
-    inline for (@typeInfo(LayerFlux).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(LayerFlux)) |field|
         try std.testing.expectEqual(expected, @field(actual, field.name));
 }
 
@@ -316,8 +318,8 @@ test "active snow layers retain source divergence and update order" {
         filledFlux(6),
         filledFlux(2),
     };
-    const ground = [_]GroundTransfer{.{}} ** 3;
-    var totals = [_]LayerFlux{.{}} ** 3;
+    const ground = @as([3]GroundTransfer, @splat(@as(GroundTransfer, .{})));
+    var totals = @as([3]LayerFlux, @splat(@as(LayerFlux, .{})));
     var scratch: [3]LayerFlux = undefined;
     var state = State{ .net_flux_by_layer = &totals };
 
@@ -353,7 +355,7 @@ test "column water and heat balances close exactly at ground interfaces" {
             .heat_to_soil_megajoules_per_step = 2,
         },
     };
-    var totals = [_]LayerFlux{.{}} ** 3;
+    var totals = @as([3]LayerFlux, @splat(@as(LayerFlux, .{})));
     var scratch: [3]LayerFlux = undefined;
     var state = State{ .net_flux_by_layer = &totals };
 
@@ -366,7 +368,7 @@ test "column water and heat balances close exactly at ground interfaces" {
 
     var column = LayerFlux{};
     for (state.net_flux_by_layer) |layer| {
-        inline for (@typeInfo(LayerFlux).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(LayerFlux)) |field|
             @field(column, field.name) += @field(layer, field.name);
     }
     try std.testing.expectEqual(@as(f64, 10), column.solid_snow_m3_per_step);
@@ -383,7 +385,7 @@ test "inactive layers and gaps preserve REDIST capacity gates" {
         filledFlux(6),
         filledFlux(2),
     };
-    const ground = [_]GroundTransfer{.{}} ** 3;
+    const ground = @as([3]GroundTransfer, @splat(@as(GroundTransfer, .{})));
     var totals = [_]LayerFlux{ filledFlux(100), filledFlux(100), filledFlux(100) };
     var scratch: [3]LayerFlux = undefined;
     var state = State{ .net_flux_by_layer = &totals };
@@ -401,10 +403,10 @@ test "inactive layers and gaps preserve REDIST capacity gates" {
 }
 
 test "runtime snow layer extent is not a compile-time model parameter" {
-    const capacities = [_]f64{2} ** 7;
-    const transfers = [_]LayerFlux{filledFlux(1)} ** 7;
-    const ground = [_]GroundTransfer{.{}} ** 7;
-    var totals = [_]LayerFlux{.{}} ** 7;
+    const capacities = @as([7]f64, @splat(@as(f64, 2)));
+    const transfers = @as([7]LayerFlux, @splat(@as(LayerFlux, filledFlux(1))));
+    const ground = @as([7]GroundTransfer, @splat(@as(GroundTransfer, .{})));
+    var totals = @as([7]LayerFlux, @splat(@as(LayerFlux, .{})));
     var scratch: [7]LayerFlux = undefined;
     var state = State{ .net_flux_by_layer = &totals };
 
@@ -422,7 +424,7 @@ test "runtime snow layer extent is not a compile-time model parameter" {
 test "source arithmetic association is retained" {
     const capacities = [_]f64{ 2, 2 };
     const transfers = [_]LayerFlux{ filledFlux(-1.0e16), filledFlux(1) };
-    const ground = [_]GroundTransfer{.{}} ** 2;
+    const ground = @as([2]GroundTransfer, @splat(@as(GroundTransfer, .{})));
     var totals = [_]LayerFlux{ filledFlux(1.0e16), .{} };
     var scratch: [2]LayerFlux = undefined;
     var state = State{ .net_flux_by_layer = &totals };
@@ -441,8 +443,8 @@ test "nonfinite input and overflow preserve state atomically" {
     const capacities = [_]f64{ 2, 2 };
     var transfers = [_]LayerFlux{ filledFlux(1), filledFlux(1) };
     transfers[1].convective_heat_megajoules_per_step = std.math.nan(f64);
-    const ground = [_]GroundTransfer{.{}} ** 2;
-    var totals = [_]LayerFlux{filledFlux(3)} ** 2;
+    const ground = @as([2]GroundTransfer, @splat(@as(GroundTransfer, .{})));
+    var totals = @as([2]LayerFlux, @splat(@as(LayerFlux, filledFlux(3))));
     var scratch: [2]LayerFlux = undefined;
     var state = State{ .net_flux_by_layer = &totals };
     const workspace = Workspace{ .net_flux_by_layer = &scratch };
@@ -477,8 +479,8 @@ test "nonfinite input and overflow preserve state atomically" {
 test "dimension and workspace alias failures precede mutation" {
     const capacities = [_]f64{ 2, 2 };
     const transfers = [_]LayerFlux{ filledFlux(1), filledFlux(1) };
-    const ground = [_]GroundTransfer{.{}} ** 2;
-    var totals = [_]LayerFlux{filledFlux(5)} ** 2;
+    const ground = @as([2]GroundTransfer, @splat(@as(GroundTransfer, .{})));
+    var totals = @as([2]LayerFlux, @splat(@as(LayerFlux, filledFlux(5))));
     var state = State{ .net_flux_by_layer = &totals };
 
     try std.testing.expectError(

@@ -2,11 +2,13 @@ const std = @import("std");
 const canopy = @import("../canopy/photosynthesis/photosynthesis.zig");
 const management = @import("plant_management.zig");
 const organic = @import("../soil/organic/initialization.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const biochemical_fraction_count: usize = 4;
 
 pub const Products = struct {
-    organic_by_biochemical_fraction: [biochemical_fraction_count]canopy.ElementalMass = [_]canopy.ElementalMass{.{}} ** biochemical_fraction_count,
+    organic_by_biochemical_fraction: [biochemical_fraction_count]canopy.ElementalMass = @as([biochemical_fraction_count]canopy.ElementalMass, @splat(@as(canopy.ElementalMass, .{}))),
     inorganic_nitrogen_g_n: f64 = 0,
     inorganic_phosphorus_g_p: f64 = 0,
 };
@@ -21,7 +23,7 @@ pub fn biochemicalFractions(kind: management.HarvestKind) ![biochemical_fraction
 
 pub fn add(target: *Products, source: Products) !void {
     var next_products = target.*;
-    for (0..biochemical_fraction_count) |fraction| inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+    for (0..biochemical_fraction_count) |fraction| inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
         const next = @field(next_products.organic_by_biochemical_fraction[fraction], field.name) +
             @field(source.organic_by_biochemical_fraction[fraction], field.name);
         if (!std.math.isFinite(next) or next < 0) return error.GrazingManureOverflow;
@@ -72,12 +74,12 @@ pub fn state_updateOrganic(surface: *organic.State, cell: usize, products: Produ
 /// entirely organic; nitrogen and phosphorus split equally between organic
 /// manure and inorganic surface inputs.
 pub fn partition(kind: management.HarvestKind, returned: canopy.ElementalMass) !Products {
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(returned, field.name)) or @field(returned, field.name) < 0)
             return error.InvalidReturnedGrazingMass;
     const fractions = try biochemicalFractions(kind);
     var result: Products = .{
-        .organic_by_biochemical_fraction = [_]canopy.ElementalMass{.{}} ** biochemical_fraction_count,
+        .organic_by_biochemical_fraction = @as([biochemical_fraction_count]canopy.ElementalMass, @splat(@as(canopy.ElementalMass, .{}))),
         .inorganic_nitrogen_g_n = 0.5 * returned.nitrogen_g,
         .inorganic_phosphorus_g_p = 0.5 * returned.phosphorus_g,
     };

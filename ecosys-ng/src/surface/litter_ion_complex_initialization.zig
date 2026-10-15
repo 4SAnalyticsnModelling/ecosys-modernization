@@ -5,6 +5,7 @@ const ChemistryState = @import("../soil/solute/chemistry_state.zig").State;
 const aqueous_transport_bridge = @import("../soil/solute/aqueous_transport_bridge.zig");
 const surface_routing = @import("../soil/solute/surface_solute_routing.zig");
 const Species = @import("../soil/solute/transport_species.zig").AqueousSpecies;
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const SaltEquilibriumMode = enum {
     static,
@@ -87,7 +88,7 @@ pub const State = struct {
 
 fn validateAndScale(comptime T: type, input: T, water_m3: f64) !T {
     var result: T = undefined;
-    inline for (std.meta.fields(T)) |field| {
+    inline for (ti_compat.fieldViews(T)) |field| {
         const concentration = @field(input, field.name);
         if (!std.math.isFinite(concentration))
             return error.NonFiniteSurfaceIonComplexConcentration;
@@ -194,7 +195,7 @@ pub fn initializeTransportFromTopsoil(
             const concentration = aqueous_transport_bridge.concentration(
                 topsoil,
                 topsoil_cell,
-                @enumFromInt(species_index),
+                @fromBackingInt(@intCast(species_index)),
             );
             if (!std.math.isFinite(concentration) or concentration < 0)
                 return error.InvalidSurfaceIonComplexConcentration;
@@ -214,7 +215,7 @@ pub fn initializeTransportFromTopsoil(
                 aqueous_transport_bridge.concentration(
                     topsoil,
                     cell * soil_layer_capacity,
-                    @enumFromInt(species_index),
+                    @fromBackingInt(@intCast(species_index)),
                 ) * litter_water_m3[cell];
         }
     }
@@ -336,10 +337,10 @@ test "production surface complex owner follows mixed per-cell salinity and is at
     const zeros: [Species.count]f64 = @splat(0);
     try std.testing.expectEqualSlices(f64, &zeros, transport.amount_mol[0..Species.count]);
     const enabled = transport.amount_mol[Species.count..][0..Species.count];
-    try std.testing.expectEqual(@as(f64, 6), enabled[@intFromEnum(Species.aluminum_hydroxide_1)]);
-    try std.testing.expectEqual(@as(f64, 10), enabled[@intFromEnum(Species.potassium_sulfate)]);
-    try std.testing.expectEqual(@as(f64, 14), enabled[@intFromEnum(Species.non_band_iron_hpo4)]);
-    try std.testing.expectEqual(@as(f64, 22), enabled[@intFromEnum(Species.non_band_magnesium_hpo4)]);
+    try std.testing.expectEqual(@as(f64, 6), enabled[@backingInt(Species.aluminum_hydroxide_1)]);
+    try std.testing.expectEqual(@as(f64, 10), enabled[@backingInt(Species.potassium_sulfate)]);
+    try std.testing.expectEqual(@as(f64, 14), enabled[@backingInt(Species.non_band_iron_hpo4)]);
+    try std.testing.expectEqual(@as(f64, 22), enabled[@backingInt(Species.non_band_magnesium_hpo4)]);
     try std.testing.expectEqualSlices(f64, &.{ 0.5, 2 }, transport.carrier_volume_m3);
 
     const before = try std.testing.allocator.dupe(f64, transport.amount_mol);

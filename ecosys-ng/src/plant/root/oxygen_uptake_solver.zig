@@ -17,6 +17,7 @@
 // UPTAKE-RECONCILE-1872-2600 group of docs/traceability/a7b_reconcile_root_gas_cluster.md
 const std = @import("std");
 const numerics = @import("../../core/numerics.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     soil_aqueous_oxygen_g_o: f64,
@@ -218,7 +219,7 @@ fn solveQuadratic(
 }
 
 fn validate(inputs: Inputs, policy: SolverPolicy) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.InvalidRootOxygenUptakeInput;
     inline for (.{

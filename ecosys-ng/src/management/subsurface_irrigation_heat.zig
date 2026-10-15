@@ -1,5 +1,6 @@
 const std = @import("std");
 
+
 pub const Totals = struct {
     water_input_m3: f64,
     heat_input_megajoules: f64,
@@ -160,7 +161,7 @@ test "runtime layers use their owning cell temperature and conserve totals" {
         3,
         heat_capacity_megajoules_per_m3_k,
     );
-    var by_cell = [_]Totals{undefined} ** 2;
+    var by_cell = @as([2]Totals, @splat(@as(Totals, undefined)));
     try calculateByCell(&by_cell, &water_input_m3, &temperature_k, 3, heat_capacity_megajoules_per_m3_k);
     try std.testing.expectEqual(totals.water_input_m3, by_cell[0].water_input_m3 + by_cell[1].water_input_m3);
     try std.testing.expectApproxEqAbs(totals.heat_input_megajoules, by_cell[0].heat_input_megajoules + by_cell[1].heat_input_megajoules, 1e-12);

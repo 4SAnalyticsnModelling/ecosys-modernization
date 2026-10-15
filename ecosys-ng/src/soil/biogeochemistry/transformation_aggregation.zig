@@ -1,5 +1,7 @@
 const std = @import("std");
 const transport_flux = @import("transport_flux_aggregation.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Inputs = struct {
     complex_count: usize,
@@ -185,7 +187,7 @@ pub fn clearInactiveLayerStateUpdate(
 /// `docs/discrepancy_register.md`'s `GAS-STATE-UPDATE-DEAD-001` entry
 /// (same dead-shadow pattern as `NITRIFICATION-DENITRIFICATION-STATE-UPDATE-DEAD-001`).
 pub fn calculateGasStateUpdate(inputs: GasStateUpdateInputs) !GasStateUpdate {
-    inline for (std.meta.fields(GasStateUpdateInputs)) |field| {
+    inline for (ti_compat.fieldViews(GasStateUpdateInputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidTransformationAggregationInput;
@@ -215,7 +217,7 @@ pub fn calculateGasStateUpdate(inputs: GasStateUpdateInputs) !GasStateUpdate {
             inputs.band_nitrous_acid_reduction_g_n +
             inputs.nitrous_oxide_reduction_g_n,
     };
-    inline for (std.meta.fields(GasStateUpdate)) |field|
+    inline for (ti_compat.fieldViews(GasStateUpdate)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.InvalidTransformationAggregationResult;
     return result;
@@ -229,7 +231,7 @@ pub fn calculateSupplyLimited(inputs: SupplyLimitedInputs) !SupplyLimitedTotals 
         return error.InvalidTransformationAggregationDimensions;
     if (inputs.complex_count == 0 or inputs.population_count == 0)
         return error.InvalidTransformationAggregationDimensions;
-    inline for (std.meta.fields(SupplyLimitedInputs)) |field| if (field.type == []const f64) {
+    inline for (ti_compat.fieldViews(SupplyLimitedInputs)) |field| if (field.type == []const f64) {
         if (@field(inputs, field.name).len != item_count)
             return error.InvalidTransformationAggregationDimensions;
     };
@@ -242,7 +244,7 @@ pub fn calculateSupplyLimited(inputs: SupplyLimitedInputs) !SupplyLimitedTotals 
         if (!std.math.isFinite(oxygen) or oxygen < 0 or oxygen > 1 or
             !std.math.isFinite(redox) or redox < 0 or redox > 1)
             return error.InvalidTransformationAggregationInput;
-        inline for (std.meta.fields(SupplyLimitedInputs)) |field| if (field.type == []const f64 and
+        inline for (ti_compat.fieldViews(SupplyLimitedInputs)) |field| if (field.type == []const f64 and
             !std.mem.eql(u8, field.name, "oxygen_satisfaction_fraction") and
             !std.mem.eql(u8, field.name, "redox_satisfaction_fraction"))
         {
@@ -272,7 +274,7 @@ pub fn calculateSupplyLimited(inputs: SupplyLimitedInputs) !SupplyLimitedTotals 
         result.hpo4_exchange_g_p[1] += inputs.band_hpo4_exchange_g_p[item];
         result.fixed_dinitrogen_g_n += inputs.fixed_dinitrogen_g_n[item];
     };
-    inline for (std.meta.fields(SupplyLimitedTotals)) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(SupplyLimitedTotals)) |field| switch (@typeInfo(field.type)) {
         .float => if (!std.math.isFinite(@field(result, field.name)))
             return error.InvalidTransformationAggregationResult,
         .array => for (@field(result, field.name)) |value| if (!std.math.isFinite(value))
@@ -294,7 +296,7 @@ pub const AcidityInputs = struct {
 
 /// Exact NITRO.F 4110--4124 XZHYS source. Positive produces H+.
 pub fn acidityChangeMolH(inputs: AcidityInputs) !f64 {
-    inline for (std.meta.fields(AcidityInputs)) |field| {
+    inline for (ti_compat.fieldViews(AcidityInputs)) |field| {
         const value = @field(inputs, field.name);
         switch (@typeInfo(field.type)) {
             .float => if (!std.math.isFinite(value) or value < 0)
@@ -412,7 +414,7 @@ pub fn sourceEnabled(
 }
 
 fn ensureFiniteState(state: State) !void {
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (!std.math.isFinite(@field(state, field.name)))
             return error.InvalidTransformationAggregationResult;
 }
@@ -425,7 +427,7 @@ fn validate(inputs: Inputs) !void {
         return error.InvalidTransformationAggregationDimensions;
     const items = std.math.mul(usize, inputs.complex_count, inputs.population_count) catch
         return error.InvalidTransformationAggregationDimensions;
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (field.type == []const f64) {
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (field.type == []const f64) {
         const values = @field(inputs, field.name);
         if (values.len != items) return error.InvalidTransformationAggregationDimensions;
         for (values) |value| if (!std.math.isFinite(value))
@@ -434,7 +436,7 @@ fn validate(inputs: Inputs) !void {
         if (!signed) for (values) |value| if (value < 0)
             return error.InvalidTransformationAggregationInput;
     };
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (field.type == f64) {
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (field.type == f64) {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidTransformationAggregationInput;
@@ -442,7 +444,7 @@ fn validate(inputs: Inputs) !void {
 }
 
 fn fixture() Inputs {
-    const values = [_]f64{1} ** 6;
+    const values = @as([6]f64, @splat(@as(f64, 1)));
     return .{
         .complex_count = 6,
         .population_count = 1,
@@ -513,11 +515,11 @@ test "upper soil exchange is independent of the surface-litter complex gate" {
 }
 
 test "runtime entries outside the source six by seven role axes are ignored" {
-    const values = [_]f64{1} ** 56;
+    const values = @as([56]f64, @splat(@as(f64, 1)));
     var inputs = fixture();
     inputs.complex_count = 7;
     inputs.population_count = 8;
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (field.type == []const f64) @field(inputs, field.name) = &values;
     }
     var state: State = .{};
@@ -538,8 +540,8 @@ test "invalid input leaves state unchanged" {
 
 test "supply-limited state_update closes N and P and preserves source multipliers" {
     const count = 4;
-    const zero = [_]f64{0} ** count;
-    const one = [_]f64{1} ** count;
+    const zero = @as([count]f64, @splat(@as(f64, 0)));
+    const one = @as([count]f64, @splat(@as(f64, 1)));
     const oxygen = [_]f64{ 1, 0.5, 0.25, 0 };
     const redox = [_]f64{ 0, 0.25, 0.5, 1 };
     const totals = try calculateSupplyLimited(.{
@@ -739,7 +741,7 @@ test "NITRO 4142-4160 and 4247-4265 inactive branches share exact clearing" {
 
     clearInactiveLayerStateUpdate(&gas, &transport);
 
-    inline for (std.meta.fields(GasStateUpdate)) |field|
+    inline for (ti_compat.fieldViews(GasStateUpdate)) |field|
         try std.testing.expectEqual(@as(f64, 0), @field(gas, field.name));
     inline for (.{
         transport.non_band_ammonium_change_g_n,

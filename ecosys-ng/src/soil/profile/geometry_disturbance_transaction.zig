@@ -5,6 +5,7 @@ const std = @import("std");
 const Geometry = @import("layer_geometry.zig");
 const Assembly = @import("geometry_change_assembly.zig");
 
+
 pub const Workspace = struct {
     allocator: std.mem.Allocator,
     pond_boundary_change_m: []f64,
@@ -189,7 +190,7 @@ const ReentrantLegStateUpdateContext = struct {
     mutation_count: usize = 0,
 
     fn state_updateErosionLegSeparately(self: *ReentrantLegStateUpdateContext, changes: Geometry.DisturbanceChanges) anyerror!void {
-        const zero = [_]f64{0} ** 3;
+        const zero = @as([3]f64, @splat(@as(f64, 0)));
         const erosion_only = Geometry.DisturbanceChanges{
             .pond_m = &zero,
             .freeze_thaw_m = &zero,

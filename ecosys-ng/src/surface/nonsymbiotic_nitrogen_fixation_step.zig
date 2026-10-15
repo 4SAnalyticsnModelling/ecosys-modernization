@@ -5,6 +5,8 @@ const organic = @import("../soil/organic/initialization.zig");
 const metabolism = @import("../soil/microbial/metabolism.zig");
 const respiration = @import("microbial_respiration_step.zig");
 const maintenance = @import("microbial_maintenance_step.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -20,11 +22,11 @@ pub const State = struct {
         result.allocator = allocator;
         result.cell_count = cell_count;
         var allocated: usize = 0;
-        errdefer inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 and allocated > 0) {
+        errdefer inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 and allocated > 0) {
             allocated -= 1;
             allocator.free(@field(result, field.name));
         };
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -33,7 +35,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -58,7 +60,7 @@ pub const ApplyContext = struct {
 /// apportioned across the competing diazotroph populations by demand.
 pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
     try validate(context.*, range);
-    const n2_offset = @intFromEnum(gas.Species.nitrogen);
+    const n2_offset = @backingInt(gas.Species.nitrogen);
     for (range.first..range.end) |cell| {
         const dissolved_n2_g_n = @max(0, context.litter_gas.dissolved_mass_g[cell * gas.species_count + n2_offset]);
         const n2_concentration_g_n_per_m3 = if (context.litter_water_m3[cell] > 0) dissolved_n2_g_n / context.litter_water_m3[cell] else 0;
@@ -115,14 +117,14 @@ test "surface diazotrophs alone fix dissolved dinitrogen" {
     maintenance_state.growth_respiration_g_c[5] = 1;
     var litter_gas = try gas.State.init(std.testing.allocator, 1);
     defer litter_gas.deinit();
-    litter_gas.dissolved_mass_g[@intFromEnum(gas.Species.nitrogen)] = 1;
+    litter_gas.dissolved_mass_g[@backingInt(gas.Species.nitrogen)] = 1;
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
     var parameters: respiration.Parameters = undefined;
     parameters.nitrogen_fixation_yield_g_n_per_g_c = .{ 0, 0, 0, 0, 0, 0.25, 0.02 };
     parameters.dinitrogen_half_saturation_g_n_per_m3 = 0.14;
     parameters.nonstructural_to_structural_rate_per_h = 0.25;
-    const ratios = [_]f64{0.1} ** (organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
+    const ratios = @as([(organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.1)));
     var context: ApplyContext = .{ .result = &state, .surface_organic = &organic_state, .maintenance = &maintenance_state, .litter_gas = &litter_gas, .litter_water_m3 = &.{1}, .microbial_nitrogen_to_carbon_g_n_per_g_c = &ratios, .parameters = parameters, .timestep_h = 1 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(state.fixation_respiration_g_c[5] > 0);

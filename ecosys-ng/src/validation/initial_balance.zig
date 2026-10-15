@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Domain-integrated STARTS balance accumulators. Flux sign conventions are
 /// retained from the source: input and output owners remain separate.
@@ -70,7 +71,7 @@ pub fn initialize(state: *State) void {
 
 fn filled(value: f64) State {
     var state: State = undefined;
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         @field(state, field.name) = value;
     }
     return state;
@@ -80,7 +81,7 @@ test "STARTS initializes every balance field in lines 104 through 131" {
     var state = filled(7.0);
     initialize(&state);
 
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         try std.testing.expectEqual(@as(f64, 0.0), @field(state, field.name));
     }
 }
@@ -89,7 +90,7 @@ test "initialization replaces invalid prior storage rather than propagating it" 
     var state = filled(std.math.nan(f64));
     initialize(&state);
 
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         try std.testing.expect(std.math.isFinite(@field(state, field.name)));
         try std.testing.expectEqual(@as(f64, 0.0), @field(state, field.name));
     }

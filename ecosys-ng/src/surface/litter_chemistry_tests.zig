@@ -15,6 +15,7 @@ const group_phosphate_exchange = @import("litter_chemistry_phosphate_exchange.zi
 const group_solve = @import("litter_chemistry_solve.zig");
 const group_struct_arithmetic = @import("litter_chemistry_struct_arithmetic.zig");
 const group_types = @import("litter_chemistry_types.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 test "trace litter reaction inventories use unit-specific scales without a one-unit floor" {
     var state = std.mem.zeroes(group_types.Cell);
@@ -789,7 +790,7 @@ test "coupled phosphate exchange coordinates conserve elements and exchange char
         1e-15,
     );
     const after = group_phosphate_exchange.coupledPhosphateExchangeTotals(cell, density);
-    inline for (@typeInfo(group_phosphate_exchange.CoupledPhosphateExchangeTotals).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(group_phosphate_exchange.CoupledPhosphateExchangeTotals)) |field|
         try std.testing.expectApproxEqAbs(
             @field(totals, field.name),
             @field(after, field.name),

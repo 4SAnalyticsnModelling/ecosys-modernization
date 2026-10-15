@@ -9,6 +9,7 @@ const RootState = @import("../plant/root/plant_root_system.zig").State;
 const root_domain_count = @import("../plant/root/plant_root_system.zig").biological_domain_count;
 const std = @import("std");
 const plant_root_metabolism = @import("../plant/root/plant_root_metabolism.zig");
+
 test "GROSUB root axis sink strengths retain series equation and runtime axes" {
     const parameters = plant_root_metabolism.compatibilitySecondaryRootParameters();
     const first = try plant_root_metabolism.rootAxisSinkStrength(parameters, .{
@@ -26,7 +27,7 @@ test "GROSUB root axis sink strengths retain series equation and runtime axes" {
     const secondary_parallel = 8 * std.math.pow(f64, 1e-3, 2) / 0.2;
     try std.testing.expectApproxEqAbs(2 * 3 * std.math.pow(f64, 2e-3, 2) / 0.4, first.primary_m, 1.0e-15);
     try std.testing.expectApproxEqAbs(primary_series * secondary_parallel / (primary_series + secondary_parallel), first.secondary_m, 1.0e-15);
-    var strengths = [_]plant_root_metabolism.RootAxisSinkStrength{first} ** 7;
+    var strengths = @as([7]plant_root_metabolism.RootAxisSinkStrength, @splat(@as(plant_root_metabolism.RootAxisSinkStrength, first)));
     strengths[6] = .{ .primary_m = 0, .secondary_m = first.secondary_m };
     var primary_fractions: [7]f64 = undefined;
     var secondary_fractions: [7]f64 = undefined;
@@ -455,7 +456,7 @@ test "GROSUB secondary-root litter allocation and plant_root_metabolism.state_up
         .recyclable_nitrogen_g_n = 0.08,
         .recyclable_phosphorus_g_p = 0.008,
     };
-    const quarter = [_]f64{0.25} ** 4;
+    const quarter = @as([4]f64, @splat(@as(f64, 0.25)));
     const litter = try plant_root_metabolism.secondaryRootLitter(senescence, 2, 0.2, 0.02, .{ 0.4, 0.6 }, .{ 0.3, 0.7 }, .{ 0.2, 0.8 }, .{
         .woody_carbon = quarter,
         .woody_nitrogen = quarter,
@@ -522,7 +523,7 @@ test "GROSUB secondary-root litter allocation and plant_root_metabolism.state_up
 
 test "GROSUB nutrient uptake respiration retains 0.86 coefficient and three limits" {
     const result = NutrientResult{ .demand_g_element = 1, .uptake_g_element = 0.5, .oxygen_unlimited_uptake_g_element = 0.75, .carbon_unlimited_uptake_g_element = 1, .available_g_element = 2 };
-    const respiration = try plant_root_metabolism.nutrientUptakeRespiration(&([_]NutrientResult{result} ** 8), 0.86);
+    const respiration = try plant_root_metabolism.nutrientUptakeRespiration(&(@as([8]NutrientResult, @splat(@as(NutrientResult, result)))), 0.86);
     try std.testing.expectApproxEqAbs(@as(f64, 3.44), respiration.actual_g_c, 1.0e-12);
     try std.testing.expectApproxEqAbs(@as(f64, 5.16), respiration.oxygen_unlimited_g_c, 1.0e-12);
     try std.testing.expectApproxEqAbs(@as(f64, 6.88), respiration.carbon_unlimited_g_c, 1.0e-12);

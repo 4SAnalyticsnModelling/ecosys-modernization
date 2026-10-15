@@ -1,5 +1,6 @@
 const std = @import("std");
 
+
 pub const SaltEquilibriumMode = enum {
     static,
     dynamic,
@@ -51,7 +52,7 @@ pub const SaltSpecies = enum {
     magnesium_hydrogen_phosphate,
 };
 
-pub const salt_species_count = @typeInfo(SaltSpecies).@"enum".fields.len;
+pub const salt_species_count = @typeInfo(SaltSpecies).@"enum".field_names.len;
 
 pub const Inputs = struct {
     /// Current snow heat capacity [snow_layer], MJ K^-1.
@@ -200,8 +201,8 @@ fn expectLayerValue(values: []const f64, layer: usize, expected: f64) !void {
 
 test "dynamic internal salt divergence retains layer and species order" {
     const layer_count = 4;
-    const capacities = [_]f64{2} ** layer_count;
-    var face_fluxes = [_]f64{0} ** (layer_count * salt_species_count);
+    const capacities = @as([layer_count]f64, @splat(@as(f64, 2)));
+    var face_fluxes = @as([(layer_count * salt_species_count)]f64, @splat(@as(f64, 0)));
     for (layerValues(&face_fluxes, 0), 0..) |*value, species|
         value.* = 100 + @as(f64, @floatFromInt(species));
     for (layerValues(&face_fluxes, 1), 0..) |*value, species|
@@ -210,7 +211,7 @@ test "dynamic internal salt divergence retains layer and species order" {
         value.* = 70 + @as(f64, @floatFromInt(species));
     for (layerValues(&face_fluxes, 3), 0..) |*value, species|
         value.* = 65 + @as(f64, @floatFromInt(species));
-    var totals = [_]f64{0} ** (layer_count * salt_species_count);
+    var totals = @as([(layer_count * salt_species_count)]f64, @splat(@as(f64, 0)));
     var scratch: [layer_count * salt_species_count]f64 = undefined;
     var state = State{ .net_mol_per_step_by_layer_species = &totals };
 
@@ -228,13 +229,13 @@ test "dynamic internal salt divergence retains layer and species order" {
 
 test "internal faces conserve every salt species exactly" {
     const layer_count = 4;
-    const capacities = [_]f64{2} ** layer_count;
-    var face_fluxes = [_]f64{0} ** (layer_count * salt_species_count);
+    const capacities = @as([layer_count]f64, @splat(@as(f64, 2)));
+    var face_fluxes = @as([(layer_count * salt_species_count)]f64, @splat(@as(f64, 0)));
     @memset(layerValues(&face_fluxes, 0), 10);
     @memset(layerValues(&face_fluxes, 1), 6);
     @memset(layerValues(&face_fluxes, 2), 2);
     @memset(layerValues(&face_fluxes, 3), 1);
-    var totals = [_]f64{0} ** (layer_count * salt_species_count);
+    var totals = @as([(layer_count * salt_species_count)]f64, @splat(@as(f64, 0)));
     var scratch: [layer_count * salt_species_count]f64 = undefined;
     var state = State{ .net_mol_per_step_by_layer_species = &totals };
 
@@ -260,21 +261,21 @@ test "species layout and runtime snow layer extent are explicit" {
     try std.testing.expectEqual(@as(usize, 41), salt_species_count);
     try std.testing.expectEqual(
         @as(usize, 32),
-        @intFromEnum(SaltSpecies.potassium_sulfate),
+        @backingInt(SaltSpecies.potassium_sulfate),
     );
     try std.testing.expectEqual(
         @as(usize, 33),
-        @intFromEnum(SaltSpecies.phosphate),
+        @backingInt(SaltSpecies.phosphate),
     );
     try std.testing.expectEqual(
         @as(usize, 40),
-        @intFromEnum(SaltSpecies.magnesium_hydrogen_phosphate),
+        @backingInt(SaltSpecies.magnesium_hydrogen_phosphate),
     );
 
     const layer_count = 7;
-    const capacities = [_]f64{2} ** layer_count;
-    const face_fluxes = [_]f64{1} ** (layer_count * salt_species_count);
-    var totals = [_]f64{0} ** (layer_count * salt_species_count);
+    const capacities = @as([layer_count]f64, @splat(@as(f64, 2)));
+    const face_fluxes = @as([(layer_count * salt_species_count)]f64, @splat(@as(f64, 1)));
+    var totals = @as([(layer_count * salt_species_count)]f64, @splat(@as(f64, 0)));
     var scratch: [layer_count * salt_species_count]f64 = undefined;
     var state = State{ .net_mol_per_step_by_layer_species = &totals };
     try aggregate(.dynamic, .{
@@ -288,12 +289,12 @@ test "species layout and runtime snow layer extent are explicit" {
 test "inactive adjacent layers preserve source capacity gates" {
     const layer_count = 4;
     const capacities = [_]f64{ 2, 0, 2, 2 };
-    var face_fluxes = [_]f64{0} ** (layer_count * salt_species_count);
+    var face_fluxes = @as([(layer_count * salt_species_count)]f64, @splat(@as(f64, 0)));
     @memset(layerValues(&face_fluxes, 0), 10);
     @memset(layerValues(&face_fluxes, 1), 6);
     @memset(layerValues(&face_fluxes, 2), 4);
     @memset(layerValues(&face_fluxes, 3), 1);
-    var totals = [_]f64{100} ** (layer_count * salt_species_count);
+    var totals = @as([(layer_count * salt_species_count)]f64, @splat(@as(f64, 100)));
     var scratch: [layer_count * salt_species_count]f64 = undefined;
     var state = State{ .net_mol_per_step_by_layer_species = &totals };
 
@@ -324,11 +325,11 @@ test "static equilibrium bypasses dynamic dimensions and mutation" {
 
 test "source association and atomic failure behavior are retained" {
     const layer_count = 2;
-    const capacities = [_]f64{2} ** layer_count;
-    var face_fluxes = [_]f64{0} ** (layer_count * salt_species_count);
+    const capacities = @as([layer_count]f64, @splat(@as(f64, 2)));
+    var face_fluxes = @as([(layer_count * salt_species_count)]f64, @splat(@as(f64, 0)));
     @memset(layerValues(&face_fluxes, 0), -1.0e16);
     @memset(layerValues(&face_fluxes, 1), 1);
-    var totals = [_]f64{0} ** (layer_count * salt_species_count);
+    var totals = @as([(layer_count * salt_species_count)]f64, @splat(@as(f64, 0)));
     @memset(layerValues(&totals, 0), 1.0e16);
     var scratch: [layer_count * salt_species_count]f64 = undefined;
     var state = State{ .net_mol_per_step_by_layer_species = &totals };
@@ -369,8 +370,8 @@ test "source association and atomic failure behavior are retained" {
 
 test "dimension and workspace alias errors precede mutation" {
     const capacities = [_]f64{ 2, 2 };
-    const face_fluxes = [_]f64{1} ** (2 * salt_species_count);
-    var totals = [_]f64{5} ** (2 * salt_species_count);
+    const face_fluxes = @as([(2 * salt_species_count)]f64, @splat(@as(f64, 1)));
+    var totals = @as([(2 * salt_species_count)]f64, @splat(@as(f64, 5)));
     var state = State{ .net_mol_per_step_by_layer_species = &totals };
 
     try std.testing.expectError(

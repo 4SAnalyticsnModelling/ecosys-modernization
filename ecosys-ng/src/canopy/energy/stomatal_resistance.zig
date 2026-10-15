@@ -1,5 +1,6 @@
 const std = @import("std");
 const aqueous_gas = @import("../gas/aqueous_environment.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const GasEnvironment = struct {
     air_amount_mol_per_m3: f64,
@@ -65,7 +66,7 @@ pub fn gasEnvironment(
         .rubisco_co2_half_saturation_with_o2_umol_per_l = co2_half_saturation * (1.0 + source_gases.dissolved_o2_umol_per_l / o2_half_saturation),
         .rubisco_o2_half_saturation_umol_per_l = o2_half_saturation,
     };
-    inline for (@typeInfo(GasEnvironment).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteCanopyGasResult;
+    inline for (ti_compat.fieldViews(GasEnvironment)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteCanopyGasResult;
     return result;
 }
 
@@ -286,8 +287,14 @@ test "c3Capacity's CO2 compensation point uses the temperature-adjusted O2 Km, n
 test "zero intercellular CO2 retains explicit finite solubility" {
     const result = try gasEnvironment(298.15, 0, 400, 0, 210_000, 30, 300);
     try std.testing.expectEqual(@as(f64, 0), result.dissolved_co2_umol_per_l);
+    // Pinned bit-exactly rather than re-derived by a comptime `@exp`: on Zig
+    // 0.17 the comptime float `@exp` is one ulp away from the runtime `@exp`
+    // behind `gasEnvironment`, and the runtime value is the correctly-rounded
+    // one. exp(-3.413499999999999978683717927197) = 0.03292575831602317603304
+    // 2740972 exactly, nearer 0.03292575831602318 (0x3fa0dba51e539ea0) than its
+    // predecessor. See src/canopy/gas/aqueous_environment.zig for the same pin.
     try std.testing.expectEqual(
-        @exp(-2.621 - 0.0317 * 25.0),
+        @as(f64, 0.03292575831602318),
         result.co2_solubility_umol_per_l_per_umol_per_mol,
     );
 }

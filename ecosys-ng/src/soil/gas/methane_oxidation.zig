@@ -1,5 +1,6 @@
 const std = @import("std");
 const numerics = @import("../../core/numerics.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     gaseous_methane_g_c: f64,
@@ -275,8 +276,8 @@ fn picard(context: *const Context, aqueous_g_c: f64) f64 {
 }
 
 fn validate(inputs: Inputs, options: Options) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteMethaneOxidationInput;
-    inline for (@typeInfo(Options).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(options, field.name))) return error.NonFiniteMethaneOxidationOption;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteMethaneOxidationInput;
+    inline for (ti_compat.fieldViews(Options)) |field| if (field.type == f64 and !std.math.isFinite(@field(options, field.name))) return error.NonFiniteMethaneOxidationOption;
     if (inputs.gaseous_methane_g_c < 0 or inputs.aqueous_methane_g_c < 0 or inputs.water_volume_m3 <= 0 or inputs.air_volume_m3 < 0 or inputs.methane_solubility_water_to_air < 0 or inputs.gas_exchange_rate_per_step < 0 or inputs.methane_half_saturation_g_c_per_m3 <= 0 or inputs.maximum_methane_oxidation_g_c < 0 or inputs.biomass_conversion_efficiency_g_c_per_g_c < 0 or inputs.growth_respiration_g_c_per_g_c <= 0 or inputs.growth_respiration_g_c_per_g_c > 1 or inputs.maintenance_respiration_g_c < 0) return error.InvalidMethaneOxidationInput;
     if (inputs.gas_exchange_enabled and inputs.water_volume_m3 * inputs.methane_solubility_water_to_air + inputs.air_volume_m3 <= 0) return error.InvalidMethaneExchangeCapacity;
     if (options.absolute_tolerance_g_c <= 0 or options.relative_tolerance <= 0 or options.relative_tolerance >= 1 or options.derivative_floor <= 0 or options.picard_relaxation <= 0 or options.picard_relaxation > 1 or options.gas_max_iterations == 0) return error.InvalidMethaneOxidationOption;

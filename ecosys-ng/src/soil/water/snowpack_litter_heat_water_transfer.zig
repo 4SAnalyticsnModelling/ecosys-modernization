@@ -17,6 +17,7 @@
 const std = @import("std");
 const snow_transport = @import("../solute/snow_solute_transport.zig");
 const ice_units = @import("../../core/ice_units.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const LiveDestinations = struct {
     litter_liquid_water_m3: []f64,
@@ -575,7 +576,7 @@ fn validateLiveDimensions(
 }
 
 fn validateLiveParameters(parameters: LiveParameters) !void {
-    inline for (@typeInfo(snow_transport.ThermodynamicParameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(snow_transport.ThermodynamicParameters)) |field| {
         const value = @field(parameters.thermodynamics, field.name);
         if (!std.math.isFinite(value) or value <= 0)
             return error.InvalidSnowpackDisappearanceParameter;
@@ -1416,13 +1417,13 @@ pub fn transfer(inputs: Inputs) !Result {
             .layer_density_megagrams_per_m3 = p.reset_snow_density_megagrams_per_m3,
         },
     };
-    inline for (@typeInfo(UpdatedSnowLayer).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(UpdatedSnowLayer)) |field|
         if (!std.math.isFinite(@field(result.snow_layer, field.name)))
             return error.NonFiniteSnowpackLitterTransferResult;
-    inline for (@typeInfo(UpdatedLitter).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(UpdatedLitter)) |field|
         if (!std.math.isFinite(@field(result.litter, field.name)))
             return error.NonFiniteSnowpackLitterTransferResult;
-    inline for (@typeInfo(SnowpackTotals).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SnowpackTotals)) |field|
         if (!std.math.isFinite(@field(result.snowpack, field.name)))
             return error.NonFiniteSnowpackLitterTransferResult;
     if (result.snow_layer.heat_capacity_megajoules_per_k < 0 or
@@ -1440,23 +1441,23 @@ pub fn transfer(inputs: Inputs) !Result {
 }
 
 fn validateInputs(inputs: Inputs) !void {
-    inline for (@typeInfo(SnowLayer).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SnowLayer)) |field| {
         if (!std.math.isFinite(@field(inputs.snow_layer, field.name)))
             return error.NonFiniteSnowpackLitterTransferInput;
     }
-    inline for (@typeInfo(SurfaceLitter).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SurfaceLitter)) |field| {
         if (!std.math.isFinite(@field(inputs.litter, field.name)))
             return error.NonFiniteSnowpackLitterTransferInput;
     }
-    inline for (@typeInfo(LitterOrganic).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(LitterOrganic)) |field| {
         if (!std.math.isFinite(@field(inputs.litter_organic, field.name)))
             return error.NonFiniteSnowpackLitterTransferInput;
     }
-    inline for (@typeInfo(Fluxes).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Fluxes)) |field| {
         if (!std.math.isFinite(@field(inputs.fluxes, field.name)))
             return error.NonFiniteSnowpackLitterTransferInput;
     }
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         if (!std.math.isFinite(@field(inputs.parameters, field.name)))
             return error.NonFiniteSnowpackLitterTransferInput;
     }

@@ -1,5 +1,6 @@
 const std = @import("std");
 const grid_module = @import("../../state/grid.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const BoundaryFlux = struct {
     matrix_water_m3: f64,
@@ -177,7 +178,7 @@ pub fn state_updateFluxes(allocator: std.mem.Allocator, grid: *grid_module.GridS
     for (boundary_layer_index, direction_sign, fluxes) |layer, sign, flux| {
         if (layer >= grid.layer_count) return error.SoilWaterBoundaryLayerOutOfBounds;
         if (!std.math.isFinite(sign) or @abs(sign) != 1) return error.InvalidSoilWaterBoundaryDirectionSign;
-        inline for (@typeInfo(BoundaryFlux).@"struct".fields) |field| if (!std.math.isFinite(@field(flux, field.name))) return error.NonFiniteSoilWaterBoundaryFlux;
+        inline for (ti_compat.fieldViews(BoundaryFlux)) |field| if (!std.math.isFinite(@field(flux, field.name))) return error.NonFiniteSoilWaterBoundaryFlux;
         matrix_change_m3[layer] += sign * flux.matrix_water_m3;
         macropore_change_m3[layer] += sign * flux.macropore_water_m3;
         heat_change_megajoules[layer] += sign * flux.convective_heat_megajoules;
@@ -225,7 +226,7 @@ fn checkedBoundaryFlux(matrix: f64, macro: f64, temperature_k: f64) !BoundaryFlu
 }
 
 fn validateFiniteStruct(value: anytype) !void {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| if (!std.math.isFinite(@field(value, field.name))) return error.NonFiniteSoilWaterBoundaryInput;
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field| if (!std.math.isFinite(@field(value, field.name))) return error.NonFiniteSoilWaterBoundaryInput;
 }
 
 test "free drainage preserves WATSUB direction and donor bounds" {

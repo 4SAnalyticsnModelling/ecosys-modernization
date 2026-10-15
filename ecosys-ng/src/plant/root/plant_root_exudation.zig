@@ -2,6 +2,8 @@ const std = @import("std");
 const RootState = @import("plant_root_system.zig").State;
 const SoilState = @import("../../soil/organic/initialization.zig").State;
 const OrganicPool = @import("../../soil/organic/initialization.zig").ElementPool;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const substrate_count: usize = @import("plant_root_system.zig").organic_substrate_count;
 
@@ -12,7 +14,7 @@ pub const Parameters = struct {
     exchange_rate_per_h: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteRootExudationParameter;
+        inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteRootExudationParameter;
         if (self.maximum_root_carbon_concentration_g_c_per_m3 <= 0 or
             self.root_mobile_nitrogen_exchange_fraction < 0 or self.root_mobile_nitrogen_exchange_fraction > 1 or
             self.root_mobile_phosphorus_exchange_fraction < 0 or self.root_mobile_phosphorus_exchange_fraction > 1 or
@@ -56,7 +58,7 @@ pub fn mapTransactionResult(staged_results: []const Result) !TransactionMapping 
     if (staged_results.len != substrate_count) return error.RootExudationSubstrateCountMismatch;
     var mapped: TransactionMapping = undefined;
     for (staged_results, 0..) |result, substrate| {
-        inline for (@typeInfo(Result).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootExudationResult;
+        inline for (ti_compat.fieldViews(Result)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootExudationResult;
         mapped[substrate] = result;
     }
     return mapped;
@@ -256,7 +258,7 @@ pub const GridWorkspace = struct {
 };
 
 pub fn calculate(input: Input) !Result {
-    inline for (@typeInfo(Input).@"struct".fields) |field| if (!std.math.isFinite(@field(input, field.name))) return error.NonFiniteRootExudationInput;
+    inline for (ti_compat.fieldViews(Input)) |field| if (!std.math.isFinite(@field(input, field.name))) return error.NonFiniteRootExudationInput;
     if (input.soil_water_volume_m3 <= 0 or input.root_water_volume_m3 <= 0 or input.soil_dissolved_carbon_g_c < 0 or input.soil_dissolved_nitrogen_g_n < 0 or input.soil_dissolved_phosphorus_g_p < 0 or input.root_nonstructural_carbon_g_c < 0 or input.root_nonstructural_nitrogen_g_n < 0 or input.root_nonstructural_phosphorus_g_p < 0 or input.maximum_root_carbon_concentration_g_c_per_m3 <= 0 or input.root_mobile_nitrogen_exchange_fraction < 0 or input.root_mobile_nitrogen_exchange_fraction > 1 or input.root_mobile_phosphorus_exchange_fraction < 0 or input.root_mobile_phosphorus_exchange_fraction > 1 or input.exchange_rate_per_h < 0 or input.timestep_h < 0 or input.significance_threshold_g < 0) return error.InvalidRootExudationInput;
     const total_water = input.soil_water_volume_m3 + input.root_water_volume_m3;
     const exchange_fraction = input.exchange_rate_per_h * input.timestep_h;
@@ -272,7 +274,7 @@ pub fn calculate(input: Input) !Result {
         phosphorus = exchange_fraction * (input.soil_dissolved_phosphorus_g_p * input.root_nonstructural_carbon_g_c - exchangeable_phosphorus * input.soil_dissolved_carbon_g_c) / total_carbon;
     }
     const result = Result{ .carbon_g_c = carbon, .nitrogen_g_n = nitrogen, .phosphorus_g_p = phosphorus };
-    inline for (@typeInfo(Result).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootExudationResult;
+    inline for (ti_compat.fieldViews(Result)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootExudationResult;
     return result;
 }
 
@@ -293,7 +295,7 @@ pub fn state_update(
 ) !void {
     const current = .{ soil_dissolved_carbon_g_c.*, soil_dissolved_nitrogen_g_n.*, soil_dissolved_phosphorus_g_p.*, root_mobile_carbon_g_c.*, root_mobile_nitrogen_g_n.*, root_mobile_phosphorus_g_p.*, soil_carbon_change_g_c.*, soil_nitrogen_change_g_n.*, soil_phosphorus_change_g_p.* };
     inline for (current) |value| if (!std.math.isFinite(value)) return error.NonFiniteRootExudationStateUpdateInput;
-    inline for (@typeInfo(Result).@"struct".fields) |field| if (!std.math.isFinite(@field(exchange, field.name))) return error.NonFiniteRootExudationResult;
+    inline for (ti_compat.fieldViews(Result)) |field| if (!std.math.isFinite(@field(exchange, field.name))) return error.NonFiniteRootExudationResult;
     inline for (.{ soil_dissolved_carbon_g_c.*, soil_dissolved_nitrogen_g_n.*, soil_dissolved_phosphorus_g_p.*, root_mobile_carbon_g_c.*, root_mobile_nitrogen_g_n.*, root_mobile_phosphorus_g_p.* }) |value| if (value < 0) return error.InvalidRootExudationStateUpdateInput;
 
     const next_soil_c = soil_dissolved_carbon_g_c.* - exchange.carbon_g_c;
@@ -329,7 +331,7 @@ pub fn sumSubstrateExchange(carbon_g_c: []const f64, nitrogen_g_n: []const f64, 
         total.nitrogen_g_n += nitrogen;
         total.phosphorus_g_p += phosphorus;
     }
-    inline for (@typeInfo(Result).@"struct".fields) |field| if (!std.math.isFinite(@field(total, field.name))) return error.NonFiniteRootExudationResult;
+    inline for (ti_compat.fieldViews(Result)) |field| if (!std.math.isFinite(@field(total, field.name))) return error.NonFiniteRootExudationResult;
     return total;
 }
 
@@ -380,7 +382,7 @@ test "five-substrate exudation workspace supports runtime competitors and rolls 
         roots.mobile_phosphorus_g[root] = 0.02;
         workspace.competitors[plant] = .{ .plant = plant, .domain = 0, .layer = 0 };
     }
-    const fractions = [_]f64{0.2} ** substrate_count;
+    const fractions = @as([substrate_count]f64, @splat(@as(f64, 0.2)));
     var carbon_before: f64 = 0;
     for (soil.dissolved) |pool| carbon_before += pool.carbon_g_c;
     for (roots.mobile_carbon_g) |value| carbon_before += value;
@@ -434,7 +436,7 @@ test "RDFOM advance is bit-identical to immutable stage then state_update in sha
         combined_roots.mobile_phosphorus_g[combined_root] = 0.06;
         staged_roots.mobile_phosphorus_g[staged_root] = 0.06;
     }
-    const fractions = [_]f64{0.2} ** substrate_count;
+    const fractions = @as([substrate_count]f64, @splat(@as(f64, 0.2)));
     try combined.advanceLayer(&combined_roots, &combined_soil, 0, 1, &fractions, compatibilityParameters(), 1.0e-14, 1.0e-12, 2);
     const root_before_stage = try std.testing.allocator.dupe(f64, staged_roots.mobile_carbon_g);
     defer std.testing.allocator.free(root_before_stage);
@@ -484,7 +486,7 @@ test "RDFOM signed uptake and exudation conserve C N P with late rollback and di
     try std.testing.expectEqualSlices(f64, root_before, roots.mobile_carbon_g);
     var grid = try GridWorkspace.initWithAdmissionCapacity(std.testing.allocator, 1, 2, 4);
     defer grid.deinit();
-    try std.testing.expectEqualSlices(bool, &[_]bool{false} ** 4, try grid.transactionOrganicSelection(0));
+    try std.testing.expectEqualSlices(bool, &@as([4]bool, @splat(@as(bool, false))), try grid.transactionOrganicSelection(0));
 }
 
 test "root exudation rejects sub-legacy-tolerance soil overdraw atomically" {

@@ -1,5 +1,7 @@
 const std = @import("std");
 const canopy_senescence = @import("../../canopy/photosynthesis/photosynthesis_senescence.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const kinetic_fraction_count: usize = 4;
 pub const litter_position_count: usize = 2;
@@ -273,9 +275,9 @@ test "standing dead litterfall preserves five fractions and two positions" {
 test "woody deep-root rate preserves source branch" {
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    var carbon = [_]f64{1} ** kinetic_fraction_count;
-    var nitrogen = [_]f64{1} ** kinetic_fraction_count;
-    var phosphorus = [_]f64{1} ** kinetic_fraction_count;
+    var carbon = @as([kinetic_fraction_count]f64, @splat(@as(f64, 1)));
+    var nitrogen = @as([kinetic_fraction_count]f64, @splat(@as(f64, 1)));
+    var phosphorus = @as([kinetic_fraction_count]f64, @splat(@as(f64, 1)));
     try apply(
         &state,
         .{
@@ -304,9 +306,9 @@ test "late invalid plant preserves pools and state_update" {
     @memset(state.carbon_litterfall_g_c_by_plant_fraction_position, 7);
     @memset(state.nitrogen_litterfall_g_n_by_plant_fraction_position, 7);
     @memset(state.phosphorus_litterfall_g_p_by_plant_fraction_position, 7);
-    var carbon = [_]f64{1} ** (2 * kinetic_fraction_count);
-    var nitrogen = [_]f64{1} ** (2 * kinetic_fraction_count);
-    var phosphorus = [_]f64{1} ** (2 * kinetic_fraction_count);
+    var carbon = @as([(2 * kinetic_fraction_count)]f64, @splat(@as(f64, 1)));
+    var nitrogen = @as([(2 * kinetic_fraction_count)]f64, @splat(@as(f64, 1)));
+    var phosphorus = @as([(2 * kinetic_fraction_count)]f64, @splat(@as(f64, 1)));
     phosphorus[phosphorus.len - 1] = std.math.nan(f64);
     const original_carbon = carbon;
     const original_nitrogen = nitrogen;
@@ -337,7 +339,7 @@ test "late invalid plant preserves pools and state_update" {
         phosphorus[0 .. phosphorus.len - 1],
     );
     try std.testing.expect(std.math.isNan(phosphorus[phosphorus.len - 1]));
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64)
             for (@field(state, field.name)) |value|
                 try std.testing.expectEqual(@as(f64, 7), value);

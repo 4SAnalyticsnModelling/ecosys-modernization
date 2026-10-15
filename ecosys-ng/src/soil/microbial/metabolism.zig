@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ElementalPool = struct { carbon_g_c: f64, nitrogen_g_n: f64, phosphorus_g_p: f64 };
 
@@ -25,7 +26,7 @@ pub const EnvironmentalResult = struct {
 };
 
 pub fn environmentalResponse(inputs: EnvironmentalInputs) !EnvironmentalResult {
-    inline for (@typeInfo(EnvironmentalInputs).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteMicrobialEnvironmentalInput;
+    inline for (ti_compat.fieldViews(EnvironmentalInputs)) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteMicrobialEnvironmentalInput;
     const adapted_temperature_k = inputs.soil_temperature_k + inputs.thermal_adaptation_offset_k;
     if (inputs.soil_temperature_k <= 0 or adapted_temperature_k <= 0 or inputs.active_biomass_g_c < 0 or inputs.colonized_substrate_g_c < 0 or inputs.decomposition_density_half_saturation <= 0 or inputs.maintenance_density_half_saturation <= 0) return error.InvalidMicrobialEnvironmentalInput;
     const rt_kj_per_mol = 8.3143 * adapted_temperature_k;
@@ -130,7 +131,7 @@ pub const FixationInputs = struct {
 pub const FixationResult = struct { fixation_respiration_g_c: f64, fixed_nitrogen_g_n: f64, respiration_required_g_c: f64 };
 
 pub fn nonsymbioticNitrogenFixation(inputs: FixationInputs) !FixationResult {
-    inline for (@typeInfo(FixationInputs).@"struct".fields) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidNitrogenFixationInput;
+    inline for (ti_compat.fieldViews(FixationInputs)) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidNitrogenFixationInput;
     if (inputs.available_dissolved_dinitrogen_g_n) |available|
         if (!std.math.isFinite(available) or available < 0) return error.InvalidNitrogenFixationInput;
     if (!inputs.is_diazotroph) return .{ .fixation_respiration_g_c = 0, .fixed_nitrogen_g_n = 0, .respiration_required_g_c = 0 };
@@ -302,9 +303,9 @@ pub const SenescenceResult = struct { component: [2]DecompositionResult };
 
 pub fn acceleratedSenescence(inputs: SenescenceInputs) !SenescenceResult {
     for (inputs.structural) |pool| try validatePool(pool);
-    inline for (@typeInfo(SenescenceInputs).@"struct".fields) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidMicrobialSenescenceInput;
+    inline for (ti_compat.fieldViews(SenescenceInputs)) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidMicrobialSenescenceInput;
     inline for (inputs.component_maintenance_respiration_g_c) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidMicrobialSenescenceInput;
-    inline for (@typeInfo(RecyclingFractions).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs.recycling, field.name)) or @field(inputs.recycling, field.name) < 0 or @field(inputs.recycling, field.name) > 1) return error.InvalidMicrobialRecyclingFraction;
+    inline for (ti_compat.fieldViews(RecyclingFractions)) |field| if (!std.math.isFinite(@field(inputs.recycling, field.name)) or @field(inputs.recycling, field.name) < 0 or @field(inputs.recycling, field.name) > 1) return error.InvalidMicrobialRecyclingFraction;
     if (inputs.humification_fraction > 1) return error.InvalidMicrobialSenescenceInput;
     var result: SenescenceResult = .{ .component = undefined };
     const enabled = inputs.senescence_respiration_deficit_g_c > inputs.negligible_g_c and inputs.total_maintenance_respiration_g_c > inputs.negligible_g_c and inputs.recycling.carbon > 0;
@@ -323,8 +324,8 @@ pub fn acceleratedSenescence(inputs: SenescenceInputs) !SenescenceResult {
 
 pub fn decompose(inputs: DecompositionInputs) !DecompositionResult {
     try validatePool(inputs.pool);
-    inline for (@typeInfo(DecompositionInputs).@"struct".fields) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidMicrobialDecompositionInput;
-    inline for (@typeInfo(RecyclingFractions).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs.recycling, field.name)) or @field(inputs.recycling, field.name) < 0 or @field(inputs.recycling, field.name) > 1) return error.InvalidMicrobialRecyclingFraction;
+    inline for (ti_compat.fieldViews(DecompositionInputs)) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidMicrobialDecompositionInput;
+    inline for (ti_compat.fieldViews(RecyclingFractions)) |field| if (!std.math.isFinite(@field(inputs.recycling, field.name)) or @field(inputs.recycling, field.name) < 0 or @field(inputs.recycling, field.name) > 1) return error.InvalidMicrobialRecyclingFraction;
     if (inputs.timestep_h <= 0 or inputs.humification_fraction > 1) return error.InvalidMicrobialDecompositionInput;
     const rate = @sqrt(inputs.temperature_response) * inputs.water_response * inputs.basal_decomposition_rate_per_h * inputs.microbial_carbon_response * inputs.timestep_h;
     if (rate > 1) return error.MicrobialDecompositionExceedsPool;
@@ -353,7 +354,7 @@ fn validatePool(pool: ElementalPool) !void {
 }
 
 fn validateNonnegativeStruct(value: anytype, comptime failure: anyerror) !void {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| if (field.type == f64 and (!std.math.isFinite(@field(value, field.name)) or @field(value, field.name) < 0)) return failure;
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field| if (field.type == f64 and (!std.math.isFinite(@field(value, field.name)) or @field(value, field.name) < 0)) return failure;
 }
 
 test "maintenance separates growth and senescence deficit" {
@@ -399,10 +400,10 @@ test "microbial assimilation conserves nonstructural and structural elements" {
 
 test "decomposition partitions every element conservatively" {
     const result = try decompose(.{ .pool = .{ .carbon_g_c = 10, .nitrogen_g_n = 1, .phosphorus_g_p = 0.2 }, .temperature_response = 1, .water_response = 1, .basal_decomposition_rate_per_h = 0.1, .microbial_carbon_response = 1, .timestep_h = 1, .recycling = .{ .carbon = 0.3, .nitrogen = 0.4, .phosphorus = 0.5 }, .humification_fraction = 0.2, .humus_nitrogen_per_carbon_g_n_per_g_c = 0.1, .humus_phosphorus_per_carbon_g_p_per_g_c = 0.02 });
-    inline for (@typeInfo(ElementalPool).@"struct".fields) |field| try std.testing.expectApproxEqAbs(@field(result.decomposed, field.name), @field(result.recycled, field.name) + @field(result.humified, field.name) + @field(result.microbial_residue, field.name), 1e-14);
+    inline for (ti_compat.fieldViews(ElementalPool)) |field| try std.testing.expectApproxEqAbs(@field(result.decomposed, field.name), @field(result.recycled, field.name) + @field(result.humified, field.name) + @field(result.microbial_residue, field.name), 1e-14);
 }
 
 test "maintenance-deficit senescence conserves every structural element" {
     const result = try acceleratedSenescence(.{ .structural = .{ .{ .carbon_g_c = 10, .nitrogen_g_n = 1, .phosphorus_g_p = 0.2 }, .{ .carbon_g_c = 5, .nitrogen_g_n = 0.5, .phosphorus_g_p = 0.1 } }, .component_maintenance_respiration_g_c = .{ 0.6, 0.4 }, .total_maintenance_respiration_g_c = 1, .senescence_respiration_deficit_g_c = 0.2, .recycling = .{ .carbon = 0.4, .nitrogen = 0.5, .phosphorus = 0.6 }, .active_nitrogen_per_carbon_g_n_per_g_c = 0.1, .active_phosphorus_per_carbon_g_p_per_g_c = 0.02, .humification_fraction = 0.2, .humus_nitrogen_per_carbon_g_n_per_g_c = 0.1, .humus_phosphorus_per_carbon_g_p_per_g_c = 0.02, .negligible_g_c = 1e-12 });
-    for (result.component) |component| inline for (@typeInfo(ElementalPool).@"struct".fields) |field| try std.testing.expectApproxEqAbs(@field(component.decomposed, field.name), @field(component.recycled, field.name) + @field(component.humified, field.name) + @field(component.microbial_residue, field.name), 1e-14);
+    for (result.component) |component| inline for (ti_compat.fieldViews(ElementalPool)) |field| try std.testing.expectApproxEqAbs(@field(component.decomposed, field.name), @field(component.recycled, field.name) + @field(component.humified, field.name) + @field(component.microbial_residue, field.name), 1e-14);
 }

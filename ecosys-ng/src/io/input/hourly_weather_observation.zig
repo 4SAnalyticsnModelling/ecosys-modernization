@@ -12,6 +12,7 @@
 // docs/traceability/hourly_vapor_pressure_was_never_capped_at_saturation.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     shortwave_radiation_megajoules_per_m2_h: f64,
@@ -38,7 +39,7 @@ pub const Observation = struct {
 
 /// Exact hourly-record normalization from wthr.f:187-209.
 pub fn normalize(inputs: Inputs) !Observation {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteHourlyWeatherObservation;

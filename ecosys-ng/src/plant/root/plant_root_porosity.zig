@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     maximum_porosity_fraction: f64,
@@ -6,7 +7,7 @@ pub const Parameters = struct {
     relaxation_fraction_per_h: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteRootPorosityParameter;
+        inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteRootPorosityParameter;
         if (self.maximum_porosity_fraction <= 0 or self.maximum_porosity_fraction >= 1 or
             self.oxygen_stress_induction_fraction_per_h < 0 or self.relaxation_fraction_per_h < 0)
             return error.InvalidRootPorosityParameter;

@@ -6,6 +6,7 @@ const charge_classification = @import("../solute/charge_classification.zig");
 const surface_litter = @import("../../surface/litter_chemistry.zig");
 const carboxyl_exchange_initialization = @import("carboxyl_exchange_initialization.zig");
 const carboxyl_proton_exchange = @import("carboxyl_proton_exchange.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 const starte_surface_carboxyl_minimum_sites_mol_per_megagram: f64 = 1.0e-48;
 const starte_surface_carboxyl_maximum_exchange_mol_per_megagram_iteration: f64 = 1.0e-2;
@@ -500,7 +501,7 @@ pub fn initialPhosphateSpecies(total_phosphate_mol_p_per_m3: f64, hydrogen_mol_p
         .h2po4_mol_p_per_m3 = total_phosphate_mol_p_per_m3 * weight_h2 / weight_sum,
         .h3po4_mol_p_per_m3 = total_phosphate_mol_p_per_m3 * weight_h3 / weight_sum,
     };
-    inline for (@typeInfo(PhosphateSpecies).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteInitialPhosphateSpeciation;
+    inline for (ti_compat.fieldViews(PhosphateSpecies)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteInitialPhosphateSpeciation;
     return result;
 }
 
@@ -537,7 +538,7 @@ pub fn seedProfilePhosphate(state: *ChemistryState, layer: usize, soil_ph: f64, 
 /// hybrid solve rather than a full-model sub-hour cycle.
 pub fn seedProfilePrimaryState(state: *ChemistryState, layer: usize, inputs: ProfilePrimaryInputs, soil_mass_megagrams: f64, soil_water_volume_m3: f64, parameters: PrimaryInitializationParameters) !void {
     if (layer >= state.cell_count) return error.ChemistryCellIndexOutOfBounds;
-    inline for (@typeInfo(ProfilePrimaryInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ProfilePrimaryInputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value)) return error.InvalidProfileChemistryInitialization;
         if (comptime !std.mem.eql(u8, field.name, "soil_ph")) if (value < 0) {
@@ -545,7 +546,7 @@ pub fn seedProfilePrimaryState(state: *ChemistryState, layer: usize, inputs: Pro
             return error.InvalidProfileChemistryInitialization;
         };
     }
-    inline for (@typeInfo(ElementMolarMassesGPerMol).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters.molar_mass_g_per_mol, field.name)) or @field(parameters.molar_mass_g_per_mol, field.name) <= 0) return error.InvalidProfileChemistryInitialization;
+    inline for (ti_compat.fieldViews(ElementMolarMassesGPerMol)) |field| if (!std.math.isFinite(@field(parameters.molar_mass_g_per_mol, field.name)) or @field(parameters.molar_mass_g_per_mol, field.name) <= 0) return error.InvalidProfileChemistryInitialization;
     inline for (.{ soil_mass_megagrams, soil_water_volume_m3, parameters.minimum_ammonium_g_n_per_megagram, parameters.minimum_calcium_g_per_megagram, parameters.soil_ammonium_extract_multiplier, parameters.extract_mol_per_megagram_to_mol_per_m3 }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidProfileChemistryInitialization;
     if (soil_water_volume_m3 <= 0 or parameters.soil_ammonium_extract_multiplier > 1 or parameters.extract_mol_per_megagram_to_mol_per_m3 <= 0) return error.InvalidProfileChemistryInitialization;
     var staged = try ChemistryState.init(state.allocator, 1);
@@ -639,7 +640,7 @@ pub fn seedProfileCationExchange(
 ) !void {
     if (layer >= state.cell_count) return error.ChemistryCellIndexOutOfBounds;
     if (!std.math.isFinite(capacity_mol_charge_per_megagram) or capacity_mol_charge_per_megagram < 0) return error.InvalidProfileChemistryInitialization;
-    inline for (@typeInfo(cation_exchange.Selectivity).@"struct".fields) |field| if (!std.math.isFinite(@field(selectivity, field.name)) or @field(selectivity, field.name) < 0) return error.InvalidProfileChemistryInitialization;
+    inline for (ti_compat.fieldViews(cation_exchange.Selectivity)) |field| if (!std.math.isFinite(@field(selectivity, field.name)) or @field(selectivity, field.name) < 0) return error.InvalidProfileChemistryInitialization;
     if (capacity_mol_charge_per_megagram == 0) {
         state.cation_exchange_mol_per_megagram[layer] = std.mem.zeroes(cation_exchange.Cations);
         return;
@@ -678,7 +679,7 @@ pub fn seedProfileCationExchange(
     var charge = exchange.ammonium_non_band * fractions.ammonium_non_band + exchange.ammonium_band * fractions.ammonium_band + exchange.hydrogen + 3 * (exchange.aluminum + exchange.iron) + 2 * (exchange.calcium + exchange.magnesium) + exchange.sodium + exchange.potassium;
     if (!std.math.isFinite(charge) or charge <= 0) return error.InvalidCationExchangeEquilibrium;
     const source_normalization = capacity_mol_charge_per_megagram / charge;
-    inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field| @field(exchange.*, field.name) *= source_normalization;
+    inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| @field(exchange.*, field.name) *= source_normalization;
     charge = exchange.ammonium_non_band * fractions.ammonium_non_band + exchange.ammonium_band * fractions.ammonium_band + exchange.hydrogen + 3 * (exchange.aluminum + exchange.iron) + 2 * (exchange.calcium + exchange.magnesium) + exchange.sodium + exchange.potassium;
     if (!std.math.isFinite(charge) or @abs(charge - capacity_mol_charge_per_megagram) > 1e-10 * @max(1.0, capacity_mol_charge_per_megagram)) return error.NonConservativeCationExchangeInitialization;
 }

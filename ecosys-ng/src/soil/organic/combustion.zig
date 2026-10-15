@@ -1,6 +1,8 @@
 const std = @import("std");
 const SoilOrganic = @import("initialization.zig");
 const FireExchange = @import("../biogeochemistry/organic_matter_fire_exchange.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Parameters = struct {
     minimum_combustion_temperature_k: f64 = 473.15,
@@ -92,7 +94,7 @@ pub fn sourceSignedCombustionLoss(
         .nitrogen_change_g_n = -combusted_nitrogen_g_n,
         .phosphorus_change_g_p = -combusted_phosphorus_g_p,
     };
-    inline for (std.meta.fields(SourceSignedCombustionLoss)) |field|
+    inline for (ti_compat.fieldViews(SourceSignedCombustionLoss)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteCombustionLossDiagnostic;
     return result;
@@ -244,7 +246,7 @@ fn burnOrganicState(state: *SoilOrganic.State, fire_exchange: *FireExchange.Stat
         for (0..SoilOrganic.structural_fraction_count - 1) |structural_fraction| burnElementPoolWithAssociatedCarbon(&state.structural[structural_first + structural_fraction], &state.colonized_structural_carbon_g_c[structural_first + structural_fraction], fraction, carbon_presence_tolerance_g_c, &combusted_c_by_substrate[substrate], &combusted_n_by_substrate[substrate], &combusted_p_by_substrate[substrate]);
         burnElementPoolWithAssociatedCarbon(&state.structural[structural_first + SoilOrganic.structural_fraction_count - 1], &state.colonized_structural_carbon_g_c[structural_first + SoilOrganic.structural_fraction_count - 1], charcoal_fraction, carbon_presence_tolerance_g_c, &combusted_c_by_substrate[substrate], &combusted_n_by_substrate[substrate], &combusted_p_by_substrate[substrate]);
     }
-    const no_salts = [_]f64{0} ** FireExchange.salt_species_count;
+    const no_salts = @as([FireExchange.salt_species_count]f64, @splat(@as(f64, 0)));
     var combusted_c: f64 = 0;
     var combusted_n: f64 = 0;
     var combusted_p: f64 = 0;
@@ -366,12 +368,12 @@ fn burnElementPoolWithAssociatedCarbon(pool: *SoilOrganic.ElementPool, associate
 }
 
 fn validateLayer(inputs: LayerInputs) !void {
-    inline for (@typeInfo(LayerInputs).@"struct".fields) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidCombustionLayerInput;
+    inline for (ti_compat.fieldViews(LayerInputs)) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidCombustionLayerInput;
     if (inputs.soil_temperature_k <= 0 or inputs.maximum_arrhenius_response <= 0 or inputs.timestep_h <= 0) return error.InvalidCombustionLayerInput;
 }
 
 fn validatePool(pool: OrganicPool) !void {
-    inline for (@typeInfo(OrganicPool).@"struct".fields) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidCombustionPool;
+    inline for (ti_compat.fieldViews(OrganicPool)) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidCombustionPool;
     if (pool.carbon_g_c == 0 and (pool.associated_carbon_g_c > 0 or pool.nitrogen_g_n > 0 or pool.phosphorus_g_p > 0)) return error.CombustionPoolMissingPrimaryCarbon;
 }
 

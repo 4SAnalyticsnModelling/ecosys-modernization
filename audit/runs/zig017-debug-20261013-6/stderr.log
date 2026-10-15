@@ -1,0 +1,19 @@
+install
++- install ecosys_ng
+   +- compile exe ecosys_ng debug native 1 errors
+src/state/spatial_grid.zig:736:17: error: unable to resolve comptime value
+    inline for (ti_compat.fieldViews(BoundsDegrees)) |field| {
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/state/spatial_grid.zig:736:17: note: inline loop condition must be comptime-known
+referenced by:
+    init: src/state/spatial_grid.zig:55:27
+    parseHeaderRuntimeRecords: src/driver/runscript.zig:1817:62
+    7 reference(s) hidden; use '-freference-trace=9' to see all references
+error: 1 compilation errors
+failed command: /opt/homebrew/Cellar/zig/0.17.0/bin/zig build-exe -Odebug --dep ecosys_ng -Mroot=src/ecosys_ng.zig -Odebug -Mecosys_ng=src/module_index.zig --cache-dir .zig-cache --global-cache-dir .zig-cache-global --build-root . --name ecosys_ng --zig-lib-dir /opt/homebrew/Cellar/zig/0.17.0/lib/zig/ --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+install transitive failure
++- install ecosys_ng transitive failure
+   +- compile exe ecosys_ng debug native 1 errors
+

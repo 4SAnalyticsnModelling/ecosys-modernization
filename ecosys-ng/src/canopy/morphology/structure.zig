@@ -3,6 +3,8 @@ const CellRange = @import("../../core/compute.zig").CellRange;
 const PlantState = @import("../../state/grid.zig").PlantState;
 const Assignments = @import("../../state/plant_assignment.zig").Assignments;
 const Catalog = @import("../../state/plant_catalog.zig").Catalog;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -38,7 +40,7 @@ pub const State = struct {
         result.leaf_inclination_fraction = try allocator.alloc(f64, angle_slots);
         errdefer allocator.free(result.leaf_inclination_fraction);
         result.leaf_area_index_by_inclination_m2_m2 = try allocator.alloc(f64, angle_slots);
-        inline for (@typeInfo(State).@"struct".fields) |field| switch (field.type) {
+        inline for (ti_compat.fieldViews(State)) |field| switch (field.type) {
             []f64 => @memset(@field(result, field.name), 0),
             []bool => @memset(@field(result, field.name), false),
             else => {},
@@ -78,7 +80,7 @@ pub const State = struct {
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
             if (!std.math.isFinite(value)) {
                 std.log.err("non-finite canopy structure: field={s} index={d} value={e}", .{ field.name, index, value });
                 return error.NonFiniteCanopyStructure;
@@ -182,9 +184,9 @@ test "HOUR1 equal-area canopy redistribution supports runtime layer counts" {
     const layer_count = 13;
     var boundaries: [layer_count + 1]f64 = undefined;
     for (&boundaries, 0..) |*height, index| height.* = @as(f64, @floatFromInt(index)) / layer_count;
-    var leaf = [_]f64{1} ** layer_count;
+    var leaf = @as([layer_count]f64, @splat(@as(f64, 1)));
     leaf[layer_count - 1] = 5;
-    const zero = [_]f64{0} ** layer_count;
+    const zero = @as([layer_count]f64, @splat(@as(f64, 0)));
     const old_boundary = boundaries[layer_count - 1];
     try redistributeLayerBoundariesEqualArea(allocator, 1, 1.0e-12, &leaf, &zero, &zero, &boundaries);
     try std.testing.expect(boundaries[layer_count - 1] > old_boundary);

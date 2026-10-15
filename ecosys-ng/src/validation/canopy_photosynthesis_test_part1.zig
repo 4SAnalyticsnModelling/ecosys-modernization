@@ -19,6 +19,7 @@ const shoot_recycling_fraction = @import("../plant/growth/shoot_recycling_fracti
 const shoot_total_senescence_setup = @import("../plant/growth/shoot_total_senescence_setup.zig");
 const std = @import("std");
 const canopy_photosynthesis = @import("../canopy/photosynthesis/photosynthesis.zig");
+
 test "reconstruction preserves seed standing-dead charcoal and live acclimation owners" {
     var state = try canopy_photosynthesis.State.init(std.testing.allocator, 1, 1, &.{1}, &.{1}, &.{0});
     defer state.deinit();
@@ -143,10 +144,10 @@ test "replant topology compaction retains one branch and node without changing n
 }
 
 test "GROSUB runtime canopy-layer leaf allocation conserves area and C N P" {
-    var area = [_]f64{0} ** 3;
-    var carbon = [_]f64{0} ** 3;
-    var nitrogen = [_]f64{0} ** 3;
-    var phosphorus = [_]f64{0} ** 3;
+    var area = @as([3]f64, @splat(@as(f64, 0)));
+    var carbon = @as([3]f64, @splat(@as(f64, 0)));
+    var nitrogen = @as([3]f64, @splat(@as(f64, 0)));
+    var phosphorus = @as([3]f64, @splat(@as(f64, 0)));
     const height = try canopy_photosynthesis.allocateLeafAcrossCanopyLayers(2, 4, 0.4, 0.08, 100, 2, 0.2, 0.05, 2, &.{ 0, 0.25, 0.5, 2 }, &.{ 0.2, 0.5, 0.8, 1.0 }, &.{ 0.1, 0.2, 0.3, 0.4 }, .{ .area_m2 = &area, .carbon_g = &carbon, .nitrogen_g = &nitrogen, .phosphorus_g = &phosphorus });
     try std.testing.expect(height > 0.25);
     var area_sum: f64 = 0;
@@ -166,14 +167,14 @@ test "GROSUB runtime canopy-layer leaf allocation conserves area and C N P" {
 }
 
 test "GROSUB stalk geometry and runtime layer allocation conserve surface area" {
-    var layer_area = [_]f64{0} ** 3;
+    var layer_area = @as([3]f64, @splat(@as(f64, 0)));
     const result = try canopy_photosynthesis.allocateStalkAcrossCanopyLayers(20, 3, 10, 1.0e-6, 0.1, 1.6, true, false, &.{ 0, 0.5, 1.0, 2.0 }, &layer_area);
     try std.testing.expect(result.radius_m > 0);
     try std.testing.expectEqual(@as(f64, 20), result.sapwood_carbon_g);
     var sum: f64 = 0;
     for (layer_area) |area| sum += area;
     try std.testing.expectApproxEqAbs(result.surface_area_m2, sum, 1.0e-14);
-    var no_height_area = [_]f64{1} ** 3;
+    var no_height_area = @as([3]f64, @splat(@as(f64, 1)));
     const no_height = try canopy_photosynthesis.allocateStalkAcrossCanopyLayers(20, 3, 10, 1.0e-6, 0.1, 0.1, false, false, &.{ 0, 0.5, 1.0, 2.0 }, &no_height_area);
     try std.testing.expectEqual(@as(f64, 3), no_height.sapwood_carbon_g);
     try std.testing.expectEqualSlices(f64, &.{ 0, 0, 0 }, &no_height_area);
@@ -329,7 +330,7 @@ test "GROSUB branch pools and C4 transfer conserve internal carbon" {
 test "GROSUB leaf growth uses all runtime concurrent nodes without a ring" {
     const branch_counts = [_]usize{1};
     const node_counts = [_]usize{30};
-    const sample_counts = [_]usize{0} ** 30;
+    const sample_counts = @as([30]usize, @splat(@as(usize, 0)));
     var state = try canopy_photosynthesis.State.init(std.testing.allocator, 1, 1, &branch_counts, &node_counts, &sample_counts);
     defer state.deinit();
     try canopy_photosynthesis.distributeLeafGrowth(&state, 0, 29, 0, 5, .{ .carbon_g = 1, .nitrogen_g = 0.1, .phosphorus_g = 0.02 }, 2, 10, 1, 0.02, 0.01, 1, 0, 1);
@@ -364,8 +365,8 @@ test "organ growth state_update is atomic when a destination overflows" {
     state.branch_leaf_carbon_g[0] = 2;
     state.branch_sheath_carbon_g[0] = std.math.floatMax(f64);
     var growth: canopy_photosynthesis.OrganGrowth = .{ .carbon_g = @splat(0), .nitrogen_g = @splat(0), .phosphorus_g = @splat(0), .total_shoot_carbon_production_g = 2 };
-    growth.carbon_g[@intFromEnum(canopy_photosynthesis.Organ.leaf)] = 1;
-    growth.carbon_g[@intFromEnum(canopy_photosynthesis.Organ.sheath)] = std.math.floatMax(f64);
+    growth.carbon_g[@backingInt(canopy_photosynthesis.Organ.leaf)] = 1;
+    growth.carbon_g[@backingInt(canopy_photosynthesis.Organ.sheath)] = std.math.floatMax(f64);
     try std.testing.expectError(error.InvalidBranchOrganGrowthTransaction, canopy_photosynthesis.applyBranchOrganGrowth(&state, 0, growth));
     try std.testing.expectEqual(@as(f64, 2), state.branch_leaf_carbon_g[0]);
     try std.testing.expectEqual(std.math.floatMax(f64), state.branch_sheath_carbon_g[0]);

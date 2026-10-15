@@ -179,7 +179,7 @@ pub fn topologyFingerprint(topology: *const Topology.State) u64 {
     for (topology.faces) |face| {
         fingerprintMix(&hash, face.cell_index);
         fingerprintMix(&hash, face.layer_index);
-        fingerprintMix(&hash, @intFromEnum(face.direction));
+        fingerprintMix(&hash, @backingInt(face.direction));
         fingerprintMix(&hash, @as(u64, @bitCast(face.direction_sign)));
         fingerprintMix(&hash, @as(u64, @bitCast(face.directional_layer_width_m)));
         fingerprintMix(&hash, @as(u64, @bitCast(face.slope_sine)));

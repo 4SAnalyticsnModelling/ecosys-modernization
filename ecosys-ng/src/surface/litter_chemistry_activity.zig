@@ -9,6 +9,7 @@ const ledger = @import("litter_reaction_transformations.zig");
 const activity_coefficients = @import("../soil/solute/activity_coefficients.zig");
 const group_struct_arithmetic = @import("litter_chemistry_struct_arithmetic.zig");
 const group_types = @import("litter_chemistry_types.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// HOUR1 charge classes for surface litter. Concentration state is converted
 /// back to extensive mol before the shared Debye-Huckel calculation.
@@ -28,20 +29,20 @@ pub fn activityCoefficients(cell: group_types.Cell, litter_water_volume_m3: f64)
 }
 
 pub fn hasMineralInventory(cell: group_types.Cell) bool {
-    inline for (@typeInfo(@TypeOf(cell.phosphate_minerals)).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(cell.phosphate_minerals))) |field|
         if (@field(cell.phosphate_minerals, field.name) != 0) return true;
-    inline for (@typeInfo(@TypeOf(cell.salt_minerals)).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(cell.salt_minerals))) |field|
         if (@field(cell.salt_minerals, field.name) != 0) return true;
     return false;
 }
 
 pub fn validateMinerals(cell: group_types.Cell) !void {
-    inline for (@typeInfo(@TypeOf(cell.phosphate_minerals)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(cell.phosphate_minerals))) |field| {
         const value = @field(cell.phosphate_minerals, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidLitterMineralInventory;
     }
-    inline for (@typeInfo(@TypeOf(cell.salt_minerals)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(cell.salt_minerals))) |field| {
         const value = @field(cell.salt_minerals, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidLitterMineralInventory;
@@ -54,7 +55,7 @@ pub fn exchangeResidualsConvergedAtAqueousScale(
     density_megagrams_per_m3: f64,
     options: group_types.Options,
 ) bool {
-    inline for (@typeInfo(ledger.ExchangeAdsorption).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ledger.ExchangeAdsorption)) |field| {
         const exchange_inventory = @field(cell.exchange, field.name);
         const exchange_scale = options.scaleMolPerMegagram(exchange_inventory);
         const aqueous_inventory = exchangeAqueousInventory(

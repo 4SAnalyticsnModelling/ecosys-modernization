@@ -8,6 +8,7 @@
 // of the single consolidation refactor tracked as INIT-004, not an isolated wire.
 // Group INDEX of docs/traceability/plant_initialization_unbound_family_are_unwired_kernels_not_competing_owners.md
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const PhotosynthesisPathway = enum {
     c3,
@@ -60,7 +61,7 @@ pub fn initialize(
     parameters: Parameters,
 ) InitializationError!Result {
     if (!std.math.isFinite(initial_adaptation_zone)) return error.NonFiniteInput;
-    inline for (std.meta.fields(Parameters)) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         if (field.type == f64 and !std.math.isFinite(@field(parameters, field.name))) {
             return error.NonFiniteInput;
         }
@@ -127,7 +128,7 @@ pub fn initialize(
             parameters.high_temperature_zone_slope_c_per_zone * initial_adaptation_zone,
         .seed_set_temperature_sensitivity_per_c_h = sensitivity_per_c_h,
     };
-    inline for (std.meta.fields(Result)) |field| {
+    inline for (ti_compat.fieldViews(Result)) |field| {
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteResult;
     }
     return result;

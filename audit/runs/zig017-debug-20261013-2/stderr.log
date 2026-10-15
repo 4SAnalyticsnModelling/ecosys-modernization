@@ -1,0 +1,21 @@
+install
++- install ecosys_ng
+   +- compile exe ecosys_ng debug native 1 errors
+src/soil/gas/transport.zig:13:54: error: no field named 'fields' in struct 'lang.Type.Enum'
+pub const species_count = @typeInfo(Species).@"enum".fields.len;
+                                                     ^~~~~~
+/opt/homebrew/Cellar/zig/0.17.0/lib/zig/std/lang.zig:807:22: note: struct declared here
+    pub const Enum = struct {
+                     ^~~~~~
+referenced by:
+    soil.gas.transport_step.RuntimeParameters: src/soil/gas/transport_step.zig:19:40
+    driver.runscript.RunScript: src/driver/runscript.zig:180:59
+    6 reference(s) hidden; use '-freference-trace=8' to see all references
+error: 1 compilation errors
+failed command: /opt/homebrew/Cellar/zig/0.17.0/bin/zig build-exe -Odebug --dep ecosys_ng -Mroot=src/ecosys_ng.zig -Odebug -Mecosys_ng=src/module_index.zig --cache-dir .zig-cache --global-cache-dir .zig-cache-global --build-root . --name ecosys_ng --zig-lib-dir /opt/homebrew/Cellar/zig/0.17.0/lib/zig/ --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+install transitive failure
++- install ecosys_ng transitive failure
+   +- compile exe ecosys_ng debug native 1 errors
+

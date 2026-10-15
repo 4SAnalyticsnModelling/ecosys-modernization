@@ -12,6 +12,8 @@ const geometry_module = @import("../water/face_geometry.zig");
 const surface_precipitation = @import("../../surface/precipitation.zig");
 const boundary_topology = @import("../profile/boundary_topology.zig");
 const ice_units = @import("../../core/ice_units.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const RuntimeParameters = struct {
     reference_temperature_k: f64 = 298.15,
@@ -247,7 +249,7 @@ pub const State = struct {
     pub fn clone(self: *const State, allocator: std.mem.Allocator) !State {
         var result = try State.init(allocator, self.air_filled_porosity_m3_per_m3.len);
         errdefer result.deinit();
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (comptime isMutableSlice(field.type)) {
                 const source = @field(self, field.name);
                 var destination = @field(result, field.name);
@@ -267,7 +269,7 @@ pub const State = struct {
     /// untouched.
     pub fn restoreExact(self: *State, source: *const State) !void {
         var same_shape = true;
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (comptime isMutableSlice(field.type))
                 same_shape = same_shape and
                     @field(self, field.name).len == @field(source, field.name).len;
@@ -280,7 +282,7 @@ pub const State = struct {
             replacement = undefined;
             return;
         }
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (comptime isMutableSlice(field.type))
                 @memcpy(@field(self, field.name), @field(source, field.name));
         }
@@ -417,7 +419,7 @@ pub const State = struct {
                     // owner and must not be consumed by a generic gas cache
                     // normalization. Its two zones are handled below by the
                     // explicit same-base phase equations.
-                    if (species == @intFromEnum(gas.Species.ammonia)) continue;
+                    if (species == @backingInt(gas.Species.ammonia)) continue;
                     g.* += d.*;
                     d.* = 0;
                 }
@@ -428,7 +430,7 @@ pub const State = struct {
                 self.free_air_diffusivity_m2_per_step[component] = parameters.free_air_diffusivity_m2_per_h[species] * temperature_factor;
                 self.mass_solubility_ratio[component] = solubility[species];
                 self.gas_water_exchange_rate_per_step[component] = exchange.air_water_rate_per_step;
-                self.band_gas_water_exchange_rate_per_step[component] = if (species == @intFromEnum(gas.Species.ammonia)) exchange.air_water_rate_per_step else 0;
+                self.band_gas_water_exchange_rate_per_step[component] = if (species == @backingInt(gas.Species.ammonia)) exchange.air_water_rate_per_step else 0;
             }
             self.bubbling_enabled[layer] = true;
         }
@@ -699,7 +701,7 @@ test "soil gas vapor mirror synchronization is exact and atomic" {
 
 fn isMutableSlice(comptime T: type) bool {
     return switch (@typeInfo(T)) {
-        .pointer => |pointer| pointer.size == .slice and !pointer.is_const,
+        .pointer => |pointer| pointer.size == .slice and !pointer.attrs.@"const",
         else => false,
     };
 }
@@ -779,7 +781,7 @@ test "mapped soil gas step conserves internal gaseous inventory" {
     gas_state.gaseous_mass_g[0] = 2;
     var state = try State.init(std.testing.allocator, 2);
     defer state.deinit();
-    const solubility = gas.SurfaceSolubilityParameters{ .reference_water_to_air = [_]f64{1} ** gas.species_count, .log_intercept = [_]f64{0} ** gas.species_count, .temperature_coefficient_per_c = [_]f64{0} ** gas.species_count };
+    const solubility = gas.SurfaceSolubilityParameters{ .reference_water_to_air = @as([gas.species_count]f64, @splat(@as(f64, 1))), .log_intercept = @as([gas.species_count]f64, @splat(@as(f64, 0))), .temperature_coefficient_per_c = @as([gas.species_count]f64, @splat(@as(f64, 0))) };
     _ = try state.advance(.{
         .grid = &grid,
         .hydrology = &hydrology,
@@ -904,7 +906,7 @@ test "air-water exchange rate uses each layer's own field-capacity fraction of p
     defer gas_state.deinit();
     var state = try State.init(std.testing.allocator, 2);
     defer state.deinit();
-    const solubility = gas.SurfaceSolubilityParameters{ .reference_water_to_air = [_]f64{1} ** gas.species_count, .log_intercept = [_]f64{0} ** gas.species_count, .temperature_coefficient_per_c = [_]f64{0} ** gas.species_count };
+    const solubility = gas.SurfaceSolubilityParameters{ .reference_water_to_air = @as([gas.species_count]f64, @splat(@as(f64, 1))), .log_intercept = @as([gas.species_count]f64, @splat(@as(f64, 0))), .temperature_coefficient_per_c = @as([gas.species_count]f64, @splat(@as(f64, 0))) };
     _ = try state.advance(.{
         .grid = &grid,
         .hydrology = &hydrology,
@@ -964,8 +966,8 @@ test "VOLPM keeps surface gas capacity when matrix air is saturated but macropor
     defer gas_state.deinit();
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    const solubility = gas.SurfaceSolubilityParameters{ .reference_water_to_air = [_]f64{1} ** gas.species_count, .log_intercept = [_]f64{0} ** gas.species_count, .temperature_coefficient_per_c = [_]f64{0} ** gas.species_count };
-    var atmosphere = [_]f64{0} ** gas.species_count;
+    const solubility = gas.SurfaceSolubilityParameters{ .reference_water_to_air = @as([gas.species_count]f64, @splat(@as(f64, 1))), .log_intercept = @as([gas.species_count]f64, @splat(@as(f64, 0))), .temperature_coefficient_per_c = @as([gas.species_count]f64, @splat(@as(f64, 0))) };
+    var atmosphere = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     atmosphere[0] = 1;
     const result = try state.advance(.{
         .grid = &grid,
@@ -1075,9 +1077,9 @@ test "solver catch path preserves failure and publishes a readable snapshot" {
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
     const solubility: gas.SurfaceSolubilityParameters = .{
-        .reference_water_to_air = [_]f64{1} ** gas.species_count,
-        .log_intercept = [_]f64{0} ** gas.species_count,
-        .temperature_coefficient_per_c = [_]f64{0} ** gas.species_count,
+        .reference_water_to_air = @as([gas.species_count]f64, @splat(@as(f64, 1))),
+        .log_intercept = @as([gas.species_count]f64, @splat(@as(f64, 0))),
+        .temperature_coefficient_per_c = @as([gas.species_count]f64, @splat(@as(f64, 0))),
     };
     try std.testing.expectError(
         error.CoupledGasSolverDidNotConverge,
@@ -1176,7 +1178,7 @@ test "runtime perimeter face builds source geometry and exchange fraction" {
     const boundaries = try state.refreshSubsurfaceBoundaries(&grid, &.{true}, &.{8}, &.{0.5}, .{
         .topology = &topology,
         .layer_thickness_m = &.{1},
-        .external_concentration_g_per_m3 = &([_]f64{0} ** gas.species_count),
+        .external_concentration_g_per_m3 = &(@as([gas.species_count]f64, @splat(@as(f64, 0)))),
     }, .{});
     // AREA = bulk/path = 4 m2; conductance geometry is
     // exchange * air * 0.66 * air / porosity * AREA / path.
@@ -1187,19 +1189,19 @@ test "runtime perimeter face builds source geometry and exchange fraction" {
     const closed_subsurface = try state.refreshSubsurfaceBoundaries(&grid, &.{true}, &.{8}, &.{0.5}, .{
         .topology = &topology,
         .layer_thickness_m = &.{1},
-        .external_concentration_g_per_m3 = &([_]f64{0} ** gas.species_count),
+        .external_concentration_g_per_m3 = &(@as([gas.species_count]f64, @splat(@as(f64, 0)))),
     }, .{ .minimum_air_filled_porosity_m3_per_m3 = 0.25 });
     try std.testing.expectEqual(@as(usize, 0), closed_subsurface.len);
     const below_threshold_subsurface = try state.refreshSubsurfaceBoundaries(&grid, &.{true}, &.{8}, &.{0.5}, .{
         .topology = &topology,
         .layer_thickness_m = &.{1},
-        .external_concentration_g_per_m3 = &([_]f64{0} ** gas.species_count),
+        .external_concentration_g_per_m3 = &(@as([gas.species_count]f64, @splat(@as(f64, 0)))),
     }, .{ .minimum_air_filled_porosity_m3_per_m3 = 0.251 });
     try std.testing.expectEqual(@as(usize, 0), below_threshold_subsurface.len);
     const open_subsurface = try state.refreshSubsurfaceBoundaries(&grid, &.{true}, &.{8}, &.{0.5}, .{
         .topology = &topology,
         .layer_thickness_m = &.{1},
-        .external_concentration_g_per_m3 = &([_]f64{0} ** gas.species_count),
+        .external_concentration_g_per_m3 = &(@as([gas.species_count]f64, @splat(@as(f64, 0)))),
     }, .{ .minimum_air_filled_porosity_m3_per_m3 = 0.249 });
     try std.testing.expectEqual(@as(usize, 1), open_subsurface.len);
 
@@ -1207,7 +1209,7 @@ test "runtime perimeter face builds source geometry and exchange fraction" {
         .atmospheric_conductance_m3_per_step = &.{0.1},
         .cell_area_m2 = &.{4},
         .top_layer_thickness_m = &.{2},
-        .atmospheric_concentration_g_per_m3 = &([_]f64{0} ** gas.species_count),
+        .atmospheric_concentration_g_per_m3 = &(@as([gas.species_count]f64, @splat(@as(f64, 0)))),
     };
     const closed_surface = try state.refreshSurfaceBoundaries(&grid, &.{true}, &.{0.5}, surface_inputs, .{ .minimum_air_filled_porosity_m3_per_m3 = 0.25 });
     try std.testing.expectEqual(@as(usize, 0), closed_surface.len);

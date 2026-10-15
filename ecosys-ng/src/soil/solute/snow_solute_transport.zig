@@ -1,6 +1,8 @@
 const std = @import("std");
 const dynamic_salt = @import("snowpack_internal_salt_aggregation.zig");
 const transport_species = @import("transport_species.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const SaltSpecies = dynamic_salt.SaltSpecies;
 pub const salt_species_count = dynamic_salt.salt_species_count;
@@ -11,17 +13,17 @@ pub const salt_species_count = dynamic_salt.salt_species_count;
 /// atmospheric input, discharge, and drift one canonical species basis.
 pub fn aqueousSpeciesForSalt(species: SaltSpecies) transport_species.AqueousSpecies {
     comptime {
-        if (@intFromEnum(SaltSpecies.potassium_sulfate) != 32 or
-            @intFromEnum(transport_species.AqueousSpecies.potassium_sulfate) != 32 or
-            @intFromEnum(transport_species.AqueousSpecies.hydrogen_silicate) != 33 or
-            @intFromEnum(SaltSpecies.phosphate) != 33 or
-            @intFromEnum(transport_species.AqueousSpecies.non_band_phosphate) != 34 or
-            @intFromEnum(SaltSpecies.magnesium_hydrogen_phosphate) + 1 !=
-                @intFromEnum(transport_species.AqueousSpecies.non_band_magnesium_hpo4))
+        if (@backingInt(SaltSpecies.potassium_sulfate) != 32 or
+            @backingInt(transport_species.AqueousSpecies.potassium_sulfate) != 32 or
+            @backingInt(transport_species.AqueousSpecies.hydrogen_silicate) != 33 or
+            @backingInt(SaltSpecies.phosphate) != 33 or
+            @backingInt(transport_species.AqueousSpecies.non_band_phosphate) != 34 or
+            @backingInt(SaltSpecies.magnesium_hydrogen_phosphate) + 1 !=
+                @backingInt(transport_species.AqueousSpecies.non_band_magnesium_hpo4))
             @compileError("snow/aqueous salt species mapping changed");
     }
-    const snow_index = @intFromEnum(species);
-    return @enumFromInt(if (snow_index < 33) snow_index else snow_index + 1);
+    const snow_index = @backingInt(species);
+    return @fromBackingInt(@intCast(if (snow_index < 33) snow_index else snow_index + 1));
 }
 
 pub const Species = enum(u8) {
@@ -45,8 +47,8 @@ pub const Species = enum(u8) {
     chloride,
 };
 
-pub const species_count = @typeInfo(Species).@"enum".fields.len;
-pub const primary_species_count: usize = @intFromEnum(Species.aluminum);
+pub const species_count = @typeInfo(Species).@"enum".field_names.len;
+pub const primary_species_count: usize = @backingInt(Species.aluminum);
 pub const static_ion_species_count: usize = species_count - primary_species_count;
 pub const nitrogen_g_per_mol: f64 = 14;
 pub const phosphorus_g_per_mol: f64 = 31;
@@ -64,7 +66,7 @@ pub const ThermodynamicParameters = struct {
     pure_water_melting_temperature_k: f64,
 
     fn validate(self: ThermodynamicParameters) !void {
-        inline for (@typeInfo(ThermodynamicParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ThermodynamicParameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value <= 0) return error.InvalidSnowThermodynamicParameters;
         }
@@ -519,12 +521,12 @@ test "STARTE snow chemistry zero depth has zero inventory" {
     defer state.deinit();
     try state.initializePhysicalState(&.{0}, &.{2}, &.{268}, &.{ 0.05, 0.10 }, 0.1, test_thermodynamics);
     const concentrations: InitialChemicalConcentrations = .{
-        .primary_g_per_m3 = [_]f64{3} ** primary_species_count,
-        .salt_mol_per_m3 = [_]f64{5} ** salt_species_count,
+        .primary_g_per_m3 = @as([primary_species_count]f64, @splat(@as(f64, 3))),
+        .salt_mol_per_m3 = @as([salt_species_count]f64, @splat(@as(f64, 5))),
     };
     try initializeChemicalState(&state, &.{concentrations}, &.{true}, 0.917, 1e-15);
-    try std.testing.expectEqualSlices(f64, &([_]f64{0} ** (2 * species_count)), state.amount_g);
-    try std.testing.expectEqualSlices(f64, &([_]f64{0} ** (2 * salt_species_count)), state.salt_amount_mol);
+    try std.testing.expectEqualSlices(f64, &(@as([(2 * species_count)]f64, @splat(@as(f64, 0)))), state.amount_g);
+    try std.testing.expectEqualSlices(f64, &(@as([(2 * salt_species_count)]f64, @splat(@as(f64, 0)))), state.salt_amount_mol);
 }
 
 test "STARTE snow chemistry uses strict area-scaled VHCPWX activation" {
@@ -536,8 +538,8 @@ test "STARTE snow chemistry uses strict area-scaled VHCPWX activation" {
     state.heat_capacity_megajoules_per_k[1] =
         1.01 * activation_heat_capacity_megajoules_per_m2_k * state.horizontal_area_m2[1];
     const concentrations: InitialChemicalConcentrations = .{
-        .primary_g_per_m3 = [_]f64{2} ** primary_species_count,
-        .salt_mol_per_m3 = [_]f64{0.5} ** salt_species_count,
+        .primary_g_per_m3 = @as([primary_species_count]f64, @splat(@as(f64, 2))),
+        .salt_mol_per_m3 = @as([salt_species_count]f64, @splat(@as(f64, 0.5))),
     };
 
     try initializeChemicalState(
@@ -590,9 +592,9 @@ test "STARTE snow chemistry honors mixed per-cell salinity" {
     defer state.deinit();
     try state.initializePhysicalState(&.{ 0.1, 0.1 }, &.{ 1, 1 }, &.{ 268, 268 }, &.{0.2}, 0.1, test_thermodynamics);
     const concentrations: InitialChemicalConcentrations = .{
-        .primary_g_per_m3 = [_]f64{2} ** primary_species_count,
-        .static_ion_g_per_m3 = [_]f64{3} ** static_ion_species_count,
-        .salt_mol_per_m3 = [_]f64{4} ** salt_species_count,
+        .primary_g_per_m3 = @as([primary_species_count]f64, @splat(@as(f64, 2))),
+        .static_ion_g_per_m3 = @as([static_ion_species_count]f64, @splat(@as(f64, 3))),
+        .salt_mol_per_m3 = @as([salt_species_count]f64, @splat(@as(f64, 4))),
     };
     try initializeChemicalState(&state, &.{ concentrations, concentrations }, &.{ true, false }, 0.917, 1e-15);
     for (try state.saltAmountsConst(0, 0)) |inventory| try std.testing.expect(inventory > 0);
@@ -612,8 +614,8 @@ test "STARTE snow chemistry late invalid cell rolls back atomically" {
     @memset(state.salt_amount_mol, 11);
     @memset(state.dynamic_salts_by_cell, false);
     const valid: InitialChemicalConcentrations = .{
-        .primary_g_per_m3 = [_]f64{2} ** primary_species_count,
-        .salt_mol_per_m3 = [_]f64{4} ** salt_species_count,
+        .primary_g_per_m3 = @as([primary_species_count]f64, @splat(@as(f64, 2))),
+        .salt_mol_per_m3 = @as([salt_species_count]f64, @splat(@as(f64, 4))),
     };
     var invalid = valid;
     invalid.salt_mol_per_m3[salt_species_count - 1] = std.math.nan(f64);
@@ -641,12 +643,12 @@ pub const SurfaceDischarge = struct {
     /// water equivalent so concentration-backed litter pools can preserve the
     /// exact extensive amount through a frozen/dry interval.
     litter_dry_reference_carrier_m3: f64 = 0,
-    litter_g: [species_count]f64 = [_]f64{0} ** species_count,
-    soil_nonband_g: [species_count]f64 = [_]f64{0} ** species_count,
-    soil_band_g: [species_count]f64 = [_]f64{0} ** species_count,
-    litter_salt_mol: [salt_species_count]f64 = [_]f64{0} ** salt_species_count,
-    soil_nonband_salt_mol: [salt_species_count]f64 = [_]f64{0} ** salt_species_count,
-    soil_band_salt_mol: [salt_species_count]f64 = [_]f64{0} ** salt_species_count,
+    litter_g: [species_count]f64 = @as([species_count]f64, @splat(@as(f64, 0))),
+    soil_nonband_g: [species_count]f64 = @as([species_count]f64, @splat(@as(f64, 0))),
+    soil_band_g: [species_count]f64 = @as([species_count]f64, @splat(@as(f64, 0))),
+    litter_salt_mol: [salt_species_count]f64 = @as([salt_species_count]f64, @splat(@as(f64, 0))),
+    soil_nonband_salt_mol: [salt_species_count]f64 = @as([salt_species_count]f64, @splat(@as(f64, 0))),
+    soil_band_salt_mol: [salt_species_count]f64 = @as([salt_species_count]f64, @splat(@as(f64, 0))),
 };
 
 pub const Fluxes = struct {
@@ -674,7 +676,7 @@ pub const FluxTolerances = struct {
 /// nutrient inputs are mol/m3 and receive the exact 14 or 31 multipliers.
 pub fn atmosphericInputG(rain_water_m3: f64, irrigation_water_m3: f64, rain_first_five_g_per_m3: [5]f64, irrigation_first_five_g_per_m3: [5]f64, rain_nutrients_mol_per_m3: [5]f64, irrigation_nutrients_mol_per_m3: [5]f64, rain_ions_g_per_m3: [8]f64, irrigation_ions_g_per_m3: [8]f64) ![species_count]f64 {
     if (!std.math.isFinite(rain_water_m3) or rain_water_m3 < 0 or !std.math.isFinite(irrigation_water_m3) or irrigation_water_m3 < 0) return error.InvalidSnowAtmosphericInput;
-    var output = [_]f64{0} ** species_count;
+    var output = @as([species_count]f64, @splat(@as(f64, 0)));
     for (rain_first_five_g_per_m3, irrigation_first_five_g_per_m3, 0..) |rain, irrigation, species| {
         if (!std.math.isFinite(rain) or rain < 0 or !std.math.isFinite(irrigation) or irrigation < 0) return error.InvalidSnowAtmosphericInput;
         output[species] = rain_water_m3 * rain + irrigation_water_m3 * irrigation;
@@ -788,7 +790,7 @@ pub fn state_update(state: *State, atmospheric_top_input_g: []const f64, fluxes:
 fn routeSurface(amounts_g: []const f64, litter_fraction: f64, soil_fraction: f64, partition: SurfacePartition, output: *SurfaceDischarge) void {
     for (amounts_g, 0..) |amount, species| {
         output.litter_g[species] = amount * litter_fraction;
-        switch (@as(Species, @enumFromInt(species))) {
+        switch (@as(Species, @fromBackingInt(@intCast(species)))) {
             .ammonium_nitrogen, .ammonia_nitrogen => {
                 output.soil_nonband_g[species] = amount * soil_fraction * partition.nonband_ammonium_fraction;
                 output.soil_band_g[species] = amount * soil_fraction * partition.band_ammonium_fraction;
@@ -809,8 +811,8 @@ fn routeSurface(amounts_g: []const f64, litter_fraction: f64, soil_fraction: f64
 fn routeSurfaceSalt(amounts_mol: []const f64, litter_fraction: f64, soil_fraction: f64, partition: SurfacePartition, output: *SurfaceDischarge) void {
     for (amounts_mol, 0..) |amount, species| {
         output.litter_salt_mol[species] = amount * litter_fraction;
-        const salt_species: SaltSpecies = @enumFromInt(species);
-        if (@intFromEnum(salt_species) >= @intFromEnum(SaltSpecies.phosphate)) {
+        const salt_species: SaltSpecies = @fromBackingInt(@intCast(species));
+        if (@backingInt(salt_species) >= @backingInt(SaltSpecies.phosphate)) {
             output.soil_nonband_salt_mol[species] = amount * soil_fraction * partition.nonband_phosphate_fraction;
             output.soil_band_salt_mol[species] = amount * soil_fraction * partition.band_phosphate_fraction;
         } else {
@@ -826,7 +828,7 @@ fn validateState(state: *const State) !void {
 }
 
 fn validatePartition(partition: SurfacePartition) !void {
-    inline for (@typeInfo(SurfacePartition).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SurfacePartition)) |field| {
         const value = @field(partition, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidSnowSurfacePartition;
     }
@@ -854,11 +856,11 @@ fn refreshTestHeatCapacities(state: *State) void {
 }
 
 test "snow atmospheric nutrients and irrigation ions retain units" {
-    const input = try atmosphericInputG(2, 1, [_]f64{ 1, 2, 3, 4, 5 }, [_]f64{ 2, 3, 4, 5, 6 }, [_]f64{1} ** 5, [_]f64{2} ** 5, [_]f64{0} ** 8, [_]f64{1} ** 8);
+    const input = try atmosphericInputG(2, 1, [_]f64{ 1, 2, 3, 4, 5 }, [_]f64{ 2, 3, 4, 5, 6 }, @as([5]f64, @splat(@as(f64, 1))), @as([5]f64, @splat(@as(f64, 2))), @as([8]f64, @splat(@as(f64, 0))), @as([8]f64, @splat(@as(f64, 1))));
     try std.testing.expectEqual(@as(f64, 4), input[0]);
     try std.testing.expectEqual(@as(f64, 56), input[5]);
     try std.testing.expectEqual(@as(f64, 124), input[8]);
-    try std.testing.expectEqual(@as(f64, 1), input[@intFromEnum(Species.aluminum)]);
+    try std.testing.expectEqual(@as(f64, 1), input[@backingInt(Species.aluminum)]);
 }
 
 test "STARTS snow physical state uses runtime layer boundaries" {
@@ -999,7 +1001,7 @@ test "melt water and carried solute close independently at snow-column scale" {
     const water_before_m3 = state.liquid_water_volume_m3[0] + state.liquid_water_volume_m3[1];
 
     try state.state_updateMeltWater(&downward, &litter, &micropore, &macropore, test_melt_water_options);
-    try state_update(&state, &([_]f64{0} ** species_count), &solute_fluxes);
+    try state_update(&state, &(@as([species_count]f64, @splat(@as(f64, 0)))), &solute_fluxes);
 
     var solute_after_g: f64 = 0;
     for (state.amount_g) |amount_g| solute_after_g += amount_g;
@@ -1081,7 +1083,7 @@ test "pre-existing STARTE snow chemistry closes every species through first-hour
         &macropore,
         test_melt_water_options,
     );
-    try state_update(&state, &([_]f64{0} ** species_count), &fluxes);
+    try state_update(&state, &(@as([species_count]f64, @splat(@as(f64, 0)))), &fluxes);
 
     for (0..species_count) |species| {
         const discharged = fluxes.surface_discharge[0].litter_g[species] +
@@ -1169,7 +1171,7 @@ test "runtime snow layers route melt conservatively to lower layer and surface" 
     const partition = SurfacePartition{ .litter_cover_fraction = 0.25, .bare_soil_fraction = 0.75, .nonband_ammonium_fraction = 0.6, .band_ammonium_fraction = 0.4, .nonband_nitrate_fraction = 0.7, .band_nitrate_fraction = 0.3, .nonband_phosphate_fraction = 0.8, .band_phosphate_fraction = 0.2 };
     var fluxes = try calculateFluxes(std.testing.allocator, &state, &downward_water, &[_]f64{0.5}, &[_]f64{0.5}, &[_]f64{0}, &[_]SurfacePartition{partition}, .{ .water_absolute_m3 = 1e-12, .relative = 1e-10 });
     defer fluxes.deinit();
-    const zero_input = [_]f64{0} ** species_count;
+    const zero_input = @as([species_count]f64, @splat(@as(f64, 0)));
     try state_update(&state, &zero_input, &fluxes);
     var remaining: f64 = 0;
     for (state.amount_g) |amount| remaining += amount;
@@ -1222,7 +1224,7 @@ test "failed snow state_update does not modify state" {
     discharge[0] = .{};
     discharge[0].litter_g[0] = 2;
     const fluxes = Fluxes{ .allocator = std.testing.allocator, .downward_g = downward, .downward_salt_mol = downward_salt, .surface_discharge = discharge };
-    const zero_input = [_]f64{0} ** species_count;
+    const zero_input = @as([species_count]f64, @splat(@as(f64, 0)));
     try std.testing.expectError(error.InvalidSnowTransportCandidate, state_update(&state, &zero_input, &fluxes));
     try std.testing.expectEqual(@as(f64, 1), state.amount_g[0]);
 }

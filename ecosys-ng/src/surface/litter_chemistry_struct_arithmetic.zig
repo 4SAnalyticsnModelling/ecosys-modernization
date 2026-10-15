@@ -12,6 +12,7 @@ const group_fixtures = @import("litter_chemistry_fixtures.zig");
 const group_logging = @import("litter_chemistry_logging.zig");
 const group_phosphate_exchange = @import("litter_chemistry_phosphate_exchange.zig");
 const group_types = @import("litter_chemistry_types.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Applies the largest representable admissible fraction at or below the
 /// analytic shared-inventory bound. A mathematically exact endpoint can round
@@ -64,7 +65,7 @@ pub fn scaledCoordinateResidualNorm(
 
 pub fn maximumAdmissibleFraction(comptime T: type, current: T, changes: T) f64 {
     var result = std.math.inf(f64);
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const value = @field(current, field.name);
             const change = @field(changes, field.name);
@@ -85,7 +86,7 @@ pub fn maximumAdmissibleFraction(comptime T: type, current: T, changes: T) f64 {
 }
 
 pub fn valuesEqual(comptime T: type, left: T, right: T) bool {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => if (@field(left, field.name) != @field(right, field.name)) return false,
         .@"struct" => if (!valuesEqual(field.type, @field(left, field.name), @field(right, field.name))) return false,
         else => @compileError("litter chemistry contains a non-numeric field"),
@@ -133,7 +134,7 @@ pub fn interpolateCell(current: group_types.Cell, target: group_types.Cell, frac
 }
 
 fn interpolateValue(comptime T: type, destination: *T, target: T, fraction: f64) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const next = @field(destination.*, field.name) +
                 fraction * (@field(target, field.name) -
@@ -152,7 +153,7 @@ fn interpolateValue(comptime T: type, destination: *T, target: T, fraction: f64)
 }
 
 fn addScaled(comptime T: type, destination: *T, changes: T, fraction: f64) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const change = @field(changes, field.name) * fraction;
             if (!std.math.isFinite(change)) return error.NonFiniteLitterChemistryChange;
@@ -168,7 +169,7 @@ pub fn validateCell(cell: group_types.Cell) !void {
 }
 
 fn validateValue(comptime T: type, value: T) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const number = @field(value, field.name);
             if (!std.math.isFinite(number)) return error.NonFiniteLitterChemistryState;
@@ -186,7 +187,7 @@ pub fn scaledNorm(state_value: group_types.Cell, changes: group_types.Cell, opti
 }
 
 fn accumulateScaledNorm(comptime T: type, state_value: T, changes: T, options: group_types.Options, maximum: *f64) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const value = @field(state_value, field.name);
             const change = @field(changes, field.name);
@@ -220,7 +221,7 @@ pub fn andersonMixingRatio(comptime T: type, now_state: T, now_defect: T, before
 }
 
 fn accumulateLargestChange(comptime T: type, now_state: T, now_defect: T, before_defect: T, options: group_types.Options, largest_change: *f64) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const value = @field(now_state, field.name);
             const scale = options.scaleForField(field.name, value);
@@ -233,7 +234,7 @@ fn accumulateLargestChange(comptime T: type, now_state: T, now_defect: T, before
 }
 
 fn accumulateMixingProducts(comptime T: type, now_state: T, now_defect: T, before_defect: T, options: group_types.Options, largest_change: f64, numerator: *f64, denominator: *f64) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const value = @field(now_state, field.name);
             const scale = options.scaleForField(field.name, value);
@@ -249,7 +250,7 @@ fn accumulateMixingProducts(comptime T: type, now_state: T, now_defect: T, befor
 }
 
 pub fn directionalProducts(comptime T: type, base: T, probe: T, probe_fraction: f64, numerator: *f64, denominator: *f64) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const derivative = (@field(probe, field.name) - @field(base, field.name)) / probe_fraction;
             numerator.* += @field(base, field.name) * derivative;
@@ -262,7 +263,7 @@ pub fn directionalProducts(comptime T: type, base: T, probe: T, probe_fraction: 
 
 fn maximumDifference(comptime T: type, a: T, b: T) f64 {
     var maximum: f64 = 0;
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => maximum = @max(maximum, @abs(@field(a, field.name) - @field(b, field.name))),
         .@"struct" => maximum = @max(maximum, maximumDifference(field.type, @field(a, field.name), @field(b, field.name))),
         else => unreachable,
@@ -272,7 +273,7 @@ fn maximumDifference(comptime T: type, a: T, b: T) f64 {
 
 fn maximumMagnitude(comptime T: type, value: T) f64 {
     var maximum: f64 = 0;
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => maximum = @max(maximum, @abs(@field(value, field.name))),
         .@"struct" => maximum = @max(maximum, maximumMagnitude(field.type, @field(value, field.name))),
         else => unreachable,
@@ -281,7 +282,7 @@ fn maximumMagnitude(comptime T: type, value: T) f64 {
 }
 
 pub fn zeroValue(comptime T: type, value: *T) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => @field(value.*, field.name) = 0,
         .@"struct" => zeroValue(field.type, &@field(value.*, field.name)),
         else => @compileError("litter chemistry contains a non-numeric field"),

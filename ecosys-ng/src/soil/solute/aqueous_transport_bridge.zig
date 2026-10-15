@@ -2,6 +2,7 @@ const std = @import("std");
 const chemistry = @import("chemistry_state.zig");
 const transport = @import("transport.zig");
 const species_module = @import("transport_species.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 const Species = species_module.AqueousSpecies;
 pub const ZoneFractions = species_module.ZoneFractions;
@@ -91,7 +92,7 @@ pub fn exportChemistry(chemistry_state: *const chemistry.State, transport_state:
             return error.InvalidAqueousTransportWaterVolume;
         const water_volume_m3 = carrierM3(live_water_volume_m3, dry_reference_water_m3, negligible_water_volume_m3);
         for (0..Species.count) |species_index| {
-            const species: Species = @enumFromInt(species_index);
+            const species: Species = @fromBackingInt(@intCast(species_index));
             const dissolved_mol_per_m3 = concentration(chemistry_state, cell, species);
             if (!std.math.isFinite(dissolved_mol_per_m3) or dissolved_mol_per_m3 < 0) return error.InvalidAqueousChemistryConcentration;
             const amount_mol = dissolved_mol_per_m3 * water_volume_m3 * species_module.zoneFraction(species, fractions);
@@ -106,7 +107,7 @@ pub fn exportChemistry(chemistry_state: *const chemistry.State, transport_state:
             negligible_water_volume_m3,
         );
         for (0..Species.count) |species_index| {
-            const species: Species = @enumFromInt(species_index);
+            const species: Species = @fromBackingInt(@intCast(species_index));
             transport_state.amount_mol[cell * Species.count + species_index] =
                 concentration(chemistry_state, cell, species) * water_volume_m3 * species_module.zoneFraction(species, fractions);
         }
@@ -121,7 +122,7 @@ pub fn exportConcentrations(chemistry_state: *const chemistry.State, output_mol_
     if (output_mol_per_m3.len != try std.math.mul(usize, chemistry_state.cell_count, Species.count)) return error.AqueousTransportDimensionMismatch;
     for (0..chemistry_state.cell_count) |cell| {
         for (0..Species.count) |species_index| {
-            const species: Species = @enumFromInt(species_index);
+            const species: Species = @fromBackingInt(@intCast(species_index));
             const value = concentration(chemistry_state, cell, species);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidAqueousChemistryConcentration;
             output_mol_per_m3[cell * Species.count + species_index] = value;
@@ -159,7 +160,7 @@ pub fn importChemistry(transport_state: *const transport.State, chemistry_state:
             return error.InvalidAqueousTransportWaterVolume;
         const water_volume_m3 = carrierM3(live_water_volume_m3, dry_reference_water_m3, negligible_water_volume_m3);
         for (0..Species.count) |species_index| {
-            const species: Species = @enumFromInt(species_index);
+            const species: Species = @fromBackingInt(@intCast(species_index));
             const amount_mol = transport_state.amount_mol[cell * Species.count + species_index];
             if (!std.math.isFinite(amount_mol) or amount_mol < 0) return error.InvalidAqueousTransportAmount;
             _ = try concentrationFromAmount(amount_mol, water_volume_m3, species, fractions);
@@ -173,7 +174,7 @@ pub fn importChemistry(transport_state: *const transport.State, chemistry_state:
             negligible_water_volume_m3,
         );
         for (0..Species.count) |species_index| {
-            const species: Species = @enumFromInt(species_index);
+            const species: Species = @fromBackingInt(@intCast(species_index));
             const amount_mol = transport_state.amount_mol[cell * Species.count + species_index];
             setConcentration(&chemistry_state.aqueous[cell], &chemistry_state.non_band_phosphate[cell], &chemistry_state.band_phosphate[cell], species, concentrationFromAmount(amount_mol, water_volume_m3, species, fractions) catch unreachable);
         }
@@ -239,13 +240,13 @@ pub fn synchronizeCellAfterCarrierChange(
         if (!std.math.isFinite(amount_mol)) return error.InvalidAqueousTransportAmount;
     }
     for (0..Species.count) |species_index| {
-        const species: Species = @enumFromInt(species_index);
+        const species: Species = @fromBackingInt(@intCast(species_index));
         if (!containsSpecies(changed_species, species))
             _ = try concentrationFromAmount(amounts[species_index], water_volume_m3, species, fractions);
     }
 
     for (0..Species.count) |species_index| {
-        const species: Species = @enumFromInt(species_index);
+        const species: Species = @fromBackingInt(@intCast(species_index));
         if (containsSpecies(changed_species, species)) {
             amounts[species_index] = concentration(chemistry_state, cell, species) * water_volume_m3 * species_module.zoneFraction(species, fractions);
         } else {
@@ -280,7 +281,7 @@ fn validateDimensions(chemistry_state: *const chemistry.State, transport_state: 
 }
 
 fn validateZoneFractions(fractions: ZoneFractions) !void {
-    inline for (@typeInfo(ZoneFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ZoneFractions)) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.InvalidAqueousTransportZoneFraction;
@@ -459,9 +460,9 @@ test "recharge reservoir captures unweighted chemistry concentrations" {
 
     try exportConcentrations(&chemistry_state, &reservoir);
 
-    try std.testing.expectEqual(@as(f64, 11), reservoir[@intFromEnum(Species.calcium)]);
-    try std.testing.expectEqual(@as(f64, 3), reservoir[@intFromEnum(Species.non_band_hpo4)]);
-    try std.testing.expectEqual(@as(f64, 7), reservoir[@intFromEnum(Species.band_hpo4)]);
+    try std.testing.expectEqual(@as(f64, 11), reservoir[@backingInt(Species.calcium)]);
+    try std.testing.expectEqual(@as(f64, 3), reservoir[@backingInt(Species.non_band_hpo4)]);
+    try std.testing.expectEqual(@as(f64, 7), reservoir[@backingInt(Species.band_hpo4)]);
 }
 
 test "all TRNSFRS species round trip between concentration and runtime amount" {
@@ -471,16 +472,16 @@ test "all TRNSFRS species round trip between concentration and runtime amount" {
     defer transport_state.deinit();
     transport_state.water_volume_m3[0] = 2;
     transport_state.water_volume_m3[1] = 0.5;
-    for (0..Species.count) |species_index| setConcentration(&chemistry_state.aqueous[0], &chemistry_state.non_band_phosphate[0], &chemistry_state.band_phosphate[0], @enumFromInt(species_index), @as(f64, @floatFromInt(species_index + 1)));
+    for (0..Species.count) |species_index| setConcentration(&chemistry_state.aqueous[0], &chemistry_state.non_band_phosphate[0], &chemistry_state.band_phosphate[0], @fromBackingInt(@intCast(species_index)), @as(f64, @floatFromInt(species_index + 1)));
     const fractions: ZoneFractions = .{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 };
     try exportChemistry(&chemistry_state, &transport_state, fractions, 0);
     for (0..Species.count) |species_index| {
-        const species: Species = @enumFromInt(species_index);
+        const species: Species = @fromBackingInt(@intCast(species_index));
         try std.testing.expectEqual(@as(f64, @floatFromInt(2 * (species_index + 1))) * species_module.zoneFraction(species, fractions), transport_state.amount_mol[species_index]);
     }
     @memcpy(transport_state.amount_mol[Species.count .. 2 * Species.count], transport_state.amount_mol[0..Species.count]);
     try importChemistry(&transport_state, &chemistry_state, fractions, 0);
-    for (0..Species.count) |species_index| try std.testing.expectEqual(@as(f64, @floatFromInt(4 * (species_index + 1))), concentration(&chemistry_state, 1, @enumFromInt(species_index)));
+    for (0..Species.count) |species_index| try std.testing.expectEqual(@as(f64, @floatFromInt(4 * (species_index + 1))), concentration(&chemistry_state, 1, @fromBackingInt(@intCast(species_index))));
 }
 
 test "bare HPO4 and H2PO4 have distinct non-band and band transport owners" {
@@ -496,15 +497,15 @@ test "bare HPO4 and H2PO4 have distinct non-band and band transport owners" {
 
     const fractions: ZoneFractions = .{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 };
     try exportChemistry(&chemistry_state, &transport_state, fractions, 0);
-    try std.testing.expectEqual(@as(f64, 1.5), transport_state.amount_mol[@intFromEnum(Species.non_band_hpo4)]);
-    try std.testing.expectEqual(@as(f64, 2.5), transport_state.amount_mol[@intFromEnum(Species.non_band_h2po4)]);
-    try std.testing.expectEqual(@as(f64, 10.5), transport_state.amount_mol[@intFromEnum(Species.band_hpo4)]);
-    try std.testing.expectEqual(@as(f64, 16.5), transport_state.amount_mol[@intFromEnum(Species.band_h2po4)]);
+    try std.testing.expectEqual(@as(f64, 1.5), transport_state.amount_mol[@backingInt(Species.non_band_hpo4)]);
+    try std.testing.expectEqual(@as(f64, 2.5), transport_state.amount_mol[@backingInt(Species.non_band_h2po4)]);
+    try std.testing.expectEqual(@as(f64, 10.5), transport_state.amount_mol[@backingInt(Species.band_hpo4)]);
+    try std.testing.expectEqual(@as(f64, 16.5), transport_state.amount_mol[@backingInt(Species.band_h2po4)]);
 
-    transport_state.amount_mol[@intFromEnum(Species.non_band_hpo4)] = 6.5;
-    transport_state.amount_mol[@intFromEnum(Species.non_band_h2po4)] = 8.5;
-    transport_state.amount_mol[@intFromEnum(Species.band_hpo4)] = 28.5;
-    transport_state.amount_mol[@intFromEnum(Species.band_h2po4)] = 34.5;
+    transport_state.amount_mol[@backingInt(Species.non_band_hpo4)] = 6.5;
+    transport_state.amount_mol[@backingInt(Species.non_band_h2po4)] = 8.5;
+    transport_state.amount_mol[@backingInt(Species.band_hpo4)] = 28.5;
+    transport_state.amount_mol[@backingInt(Species.band_h2po4)] = 34.5;
     try importChemistry(&transport_state, &chemistry_state, fractions, 0);
     try std.testing.expectEqual(@as(f64, 13), chemistry_state.non_band_phosphate[0].dissolved_hpo4_mol_p_per_m3);
     try std.testing.expectEqual(@as(f64, 17), chemistry_state.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3);
@@ -544,16 +545,16 @@ test "issue-065: NEW exportChemistry preserves aqueous amount at hour 2894's exa
     try exportChemistry(&chemistry_state, &transport_state, fractions, negligible_water_volume_m3);
     try std.testing.expectEqual(
         chemistry_state.aqueous[0].carbonate * dry_reference_water_m3,
-        transport_state.amount_mol[@intFromEnum(Species.carbonate)],
+        transport_state.amount_mol[@backingInt(Species.carbonate)],
     );
-    try std.testing.expect(transport_state.amount_mol[@intFromEnum(Species.carbonate)] > 0);
+    try std.testing.expect(transport_state.amount_mol[@backingInt(Species.carbonate)] > 0);
 
     // Near-zero but still-below-floor live water behaves identically.
     transport_state.water_volume_m3[0] = 1.0e-9;
     try exportChemistry(&chemistry_state, &transport_state, fractions, negligible_water_volume_m3);
     try std.testing.expectEqual(
         chemistry_state.aqueous[0].carbonate * dry_reference_water_m3,
-        transport_state.amount_mol[@intFromEnum(Species.carbonate)],
+        transport_state.amount_mol[@backingInt(Species.carbonate)],
     );
 
     // Live water above the floor is used unchanged (no-op substitution).
@@ -561,7 +562,7 @@ test "issue-065: NEW exportChemistry preserves aqueous amount at hour 2894's exa
     try exportChemistry(&chemistry_state, &transport_state, fractions, negligible_water_volume_m3);
     try std.testing.expectEqual(
         @as(f64, 2) * chemistry_state.aqueous[0].carbonate,
-        transport_state.amount_mol[@intFromEnum(Species.carbonate)],
+        transport_state.amount_mol[@backingInt(Species.carbonate)],
     );
 }
 
@@ -579,7 +580,7 @@ test "failed import cannot partially overwrite chemistry" {
     var transport_state = try transport.State.init(std.testing.allocator, 1, Species.count);
     defer transport_state.deinit();
     transport_state.water_volume_m3[0] = 0;
-    transport_state.amount_mol[@intFromEnum(Species.calcium)] = 5;
+    transport_state.amount_mol[@backingInt(Species.calcium)] = 5;
     try std.testing.expectError(
         error.AqueousTransportAmountWithoutZoneCarrier,
         importChemistry(&transport_state, &chemistry_state, ZoneFractions{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 }, 0),
@@ -594,9 +595,9 @@ test "carrier synchronization preserves unchanged complexes and publishes transf
     defer transport_state.deinit();
     transport_state.water_volume_m3[0] = 1;
     const amounts = try transport_state.cellAmounts(0);
-    amounts[@intFromEnum(Species.carbonate)] = 7;
-    amounts[@intFromEnum(Species.bicarbonate)] = 11;
-    amounts[@intFromEnum(Species.calcium_carbonate)] = 13;
+    amounts[@backingInt(Species.carbonate)] = 7;
+    amounts[@backingInt(Species.bicarbonate)] = 11;
+    amounts[@backingInt(Species.calcium_carbonate)] = 13;
     chemistry_state.aqueous[0].carbonate = 5;
     chemistry_state.aqueous[0].bicarbonate = 7;
     chemistry_state.aqueous[0].calcium_carbonate = 13;
@@ -611,9 +612,9 @@ test "carrier synchronization preserves unchanged complexes and publishes transf
         0,
     );
 
-    try std.testing.expectEqual(@as(f64, 10), amounts[@intFromEnum(Species.carbonate)]);
-    try std.testing.expectEqual(@as(f64, 14), amounts[@intFromEnum(Species.bicarbonate)]);
-    try std.testing.expectEqual(@as(f64, 13), amounts[@intFromEnum(Species.calcium_carbonate)]);
+    try std.testing.expectEqual(@as(f64, 10), amounts[@backingInt(Species.carbonate)]);
+    try std.testing.expectEqual(@as(f64, 14), amounts[@backingInt(Species.bicarbonate)]);
+    try std.testing.expectEqual(@as(f64, 13), amounts[@backingInt(Species.calcium_carbonate)]);
     try std.testing.expectEqual(@as(f64, 6.5), chemistry_state.aqueous[0].calcium_carbonate);
     try std.testing.expectEqual(@as(f64, 2), transport_state.water_volume_m3[0]);
 }
@@ -628,13 +629,13 @@ test "zero-width phosphate zone round trip is exact and rejects phantom mass ato
     chemistry_state.band_phosphate[0].dissolved_hpo4_mol_p_per_m3 = 7;
     const fractions: ZoneFractions = .{ .phosphate_non_band = 1, .phosphate_band = 0 };
     try exportChemistry(&chemistry_state, &transport_state, fractions, 0);
-    try std.testing.expectEqual(@as(f64, 6), transport_state.amount_mol[@intFromEnum(Species.non_band_hpo4)]);
-    try std.testing.expectEqual(@as(f64, 0), transport_state.amount_mol[@intFromEnum(Species.band_hpo4)]);
+    try std.testing.expectEqual(@as(f64, 6), transport_state.amount_mol[@backingInt(Species.non_band_hpo4)]);
+    try std.testing.expectEqual(@as(f64, 0), transport_state.amount_mol[@backingInt(Species.band_hpo4)]);
     try importChemistry(&transport_state, &chemistry_state, fractions, 0);
     try std.testing.expectEqual(@as(f64, 3), chemistry_state.non_band_phosphate[0].dissolved_hpo4_mol_p_per_m3);
     try std.testing.expectEqual(@as(f64, 0), chemistry_state.band_phosphate[0].dissolved_hpo4_mol_p_per_m3);
 
-    transport_state.amount_mol[@intFromEnum(Species.band_hpo4)] = 1;
+    transport_state.amount_mol[@backingInt(Species.band_hpo4)] = 1;
     const before = chemistry_state.non_band_phosphate[0];
     try std.testing.expectError(error.AqueousTransportAmountWithoutZoneCarrier, importChemistry(&transport_state, &chemistry_state, fractions, 0));
     try std.testing.expectEqualDeep(before, chemistry_state.non_band_phosphate[0]);
@@ -665,7 +666,7 @@ test "issue-074: NEW importChemistry preserves concentration at exact and near-z
     chemistry_state.dry_reference_water_m3[0] = dry_reference_water_m3;
     const fractions: ZoneFractions = .{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 };
     const carbonate_amount_mol: f64 = 1.238685811953962e0 * dry_reference_water_m3;
-    transport_state.amount_mol[@intFromEnum(Species.carbonate)] = carbonate_amount_mol;
+    transport_state.amount_mol[@backingInt(Species.carbonate)] = carbonate_amount_mol;
 
     // Exactly zero live water: substitutes the dry reference rather than
     // erroring or dividing by zero.
@@ -689,7 +690,7 @@ test "issue-074: NEW importChemistry preserves concentration at exact and near-z
 
     // Live water above the floor is used unchanged (no-op substitution).
     transport_state.water_volume_m3[0] = 2;
-    transport_state.amount_mol[@intFromEnum(Species.carbonate)] = 2 * 1.238685811953962e0;
+    transport_state.amount_mol[@backingInt(Species.carbonate)] = 2 * 1.238685811953962e0;
     try importChemistry(&transport_state, &chemistry_state, fractions, negligible_water_volume_m3);
     try std.testing.expectApproxEqRel(
         @as(f64, 1.238685811953962e0),
@@ -734,7 +735,7 @@ test "issue-074: NEW synchronizeCellAfterCarrierChange substitutes the dry refer
     chemistry_state.dry_reference_water_m3[0] = dry_reference_water_m3;
     transport_state.water_volume_m3[0] = 1;
     const amounts = try transport_state.cellAmounts(0);
-    amounts[@intFromEnum(Species.bicarbonate)] = 8;
+    amounts[@backingInt(Species.bicarbonate)] = 8;
     chemistry_state.aqueous[0].bicarbonate = 8;
     chemistry_state.aqueous[0].hydrogen = 5;
     const fractions = ZoneFractions{ .phosphate_non_band = 0.25, .phosphate_band = 0.75 };
@@ -757,11 +758,11 @@ test "issue-074: NEW synchronizeCellAfterCarrierChange substitutes the dry refer
     try std.testing.expectApproxEqRel(@as(f64, 8) / dry_reference_water_m3, chemistry_state.aqueous[0].bicarbonate, 1.0e-12);
     // Changed species (hydrogen) publishes its new extensive amount on the
     // same substituted carrier.
-    try std.testing.expectApproxEqRel(@as(f64, 5) * dry_reference_water_m3, amounts[@intFromEnum(Species.hydrogen)], 1.0e-12);
+    try std.testing.expectApproxEqRel(@as(f64, 5) * dry_reference_water_m3, amounts[@backingInt(Species.hydrogen)], 1.0e-12);
 
     // Near-zero-but-nonzero water carrier behaves identically to exact zero.
     transport_state.water_volume_m3[0] = dry_reference_water_m3;
-    amounts[@intFromEnum(Species.bicarbonate)] = 8;
+    amounts[@backingInt(Species.bicarbonate)] = 8;
     chemistry_state.aqueous[0].bicarbonate = 2;
     chemistry_state.aqueous[0].hydrogen = 5;
     try synchronizeCellAfterCarrierChange(

@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Runtime-sized EXTRACT `TRNP/TLEP/TSHP/TGHP` state_update. Values are
 /// extensive MJ per hour for one plant population in one horizontal cell.
@@ -66,7 +67,7 @@ const Candidate = struct {
 /// followed by standing dead for each runtime plant. Storage retains the
 /// legacy sign `TGHP -= HFLXC - VFLXC`.
 pub fn refresh(state: *State, inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (@field(inputs, field.name).len != state.plant_count)
             return error.InvalidPlantEnergyStateUpdateDimensions;
     for (0..state.plant_count) |plant| _ = try candidate(inputs, plant);
@@ -80,7 +81,7 @@ pub fn refresh(state: *State, inputs: Inputs) !void {
 }
 
 fn candidate(inputs: Inputs, plant: usize) !Candidate {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name)[plant];
         if (!std.math.isFinite(value))
             return error.NonFinitePlantEnergyStateUpdateInput;
@@ -97,7 +98,7 @@ fn candidate(inputs: Inputs, plant: usize) !Candidate {
             (inputs.standing_dead_storage_heat_megajoules[plant] -
                 inputs.standing_dead_convective_water_heat_megajoules[plant]),
     };
-    inline for (@typeInfo(Candidate).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Candidate)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFinitePlantEnergyStateUpdate;
     return result;

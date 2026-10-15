@@ -5,6 +5,7 @@ const surface_fertilizer_module = @import("litter_fertilizer.zig");
 const soil_fertilizer_module = @import("../management/fertilizer_nitrogen_inventory.zig");
 const mineral_fertilizer_module = @import("../management/mineral_fertilizer_inventory.zig");
 const conservation_sidecar = @import("pond_conservation_sidecar.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Owners = struct {
     surface_organic: *organic_module.State,
@@ -52,8 +53,8 @@ pub fn acceptedSurfaceTransfer(owners: Owners, inputs: Inputs) !conservation_sid
         owners.surface_nitrogen_fertilizer.cells[inputs.cell].urea_mol_n +
         owners.surface_nitrogen_fertilizer.cells[inputs.cell].nitrate_mol_n);
     const base = inputs.cell * gas_module.species_count;
-    inline for (@typeInfo(gas_module.Species).@"enum".fields) |field| {
-        const species: gas_module.Species = @enumFromInt(field.value);
+    inline for (ti_compat.enumFieldViews(gas_module.Species)) |field| {
+        const species: gas_module.Species = @fromBackingInt(@intCast(field.value));
         // Dissolved NH3 in this gas state is a derived mirror: aqueous NH3 is
         // owned and transferred by litter/soil chemistry.  The canonical gas
         // censuses therefore count gaseous NH3 only.  Other species retain
@@ -139,7 +140,7 @@ fn addMineralFertilizer(
     fraction: f64,
     particulate_only: bool,
 ) !void {
-    inline for (std.meta.fields(mineral_fertilizer_module.Inventory)) |field| {
+    inline for (ti_compat.fieldViews(mineral_fertilizer_module.Inventory)) |field| {
         const included_in_particulate = comptime std.mem.eql(u8, field.name, "broadcast_monocalcium_phosphate_mol") or
             std.mem.eql(u8, field.name, "hydroxyapatite_mol");
         const moved = fraction * @field(source, field.name) *
@@ -370,7 +371,7 @@ fn transferParticulateMineralFertilizer(state: *mineral_fertilizer_module.State,
 }
 
 fn validateStructPair(comptime T: type, source: T, destination: T, fraction: f64) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| try validateNumberPair(@field(source, field.name), @field(destination, field.name), fraction);
+    inline for (ti_compat.fieldViews(T)) |field| try validateNumberPair(@field(source, field.name), @field(destination, field.name), fraction);
 }
 
 fn validateNumberPair(source: f64, destination: f64, fraction: f64) !void {
@@ -378,7 +379,7 @@ fn validateNumberPair(source: f64, destination: f64, fraction: f64) !void {
 }
 
 fn transferStruct(comptime T: type, source: *T, destination: *T, fraction: f64) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| transferNumber(&@field(source.*, field.name), &@field(destination.*, field.name), fraction);
+    inline for (ti_compat.fieldViews(T)) |field| transferNumber(&@field(source.*, field.name), &@field(destination.*, field.name), fraction);
 }
 
 fn transferNumber(source: *f64, destination: *f64, fraction: f64) void {
@@ -439,8 +440,8 @@ test "pond sidecars count canonical gas and chemistry mirrors exactly once" {
     var soil_chemistry = try soil_chemistry_module.State.init(std.testing.allocator, 1);
     defer soil_chemistry.deinit();
 
-    const ammonia = @intFromEnum(gas_module.Species.ammonia);
-    const carbon_dioxide = @intFromEnum(gas_module.Species.carbon_dioxide);
+    const ammonia = @backingInt(gas_module.Species.ammonia);
+    const carbon_dioxide = @backingInt(gas_module.Species.carbon_dioxide);
     surface_gas.gaseous_mass_g[ammonia] = 7;
     surface_gas.dissolved_mass_g[ammonia] = 11; // non-owning gas mirror
     surface_chemistry.cells[0].ammonia_mol_per_m3 = 13; // canonical aqueous owner

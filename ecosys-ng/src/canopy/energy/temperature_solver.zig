@@ -33,6 +33,7 @@ const AtmosphericState = @import("../../atmosphere/atmospheric_forcing.zig").Sta
 const ExposureState = @import("../radiation/exposure.zig").State;
 const InterceptionState = @import("interception.zig").State;
 const numerics = @import("../../core/numerics.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Settings = struct {
     timestep_hours: f64,
@@ -65,7 +66,7 @@ pub const State = struct {
         result.species_count = species_count;
         var f64_allocated: usize = 0;
         errdefer freeF64Allocated(&result, f64_allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
             f64_allocated += 1;
@@ -82,7 +83,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.allocator.free(self.iteration_count);
         self.allocator.free(self.newton_raphson_step_count);
         self.allocator.free(self.picard_step_count);
@@ -90,7 +91,7 @@ pub const State = struct {
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| if (!std.math.isFinite(value)) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| if (!std.math.isFinite(value)) {
             std.log.err("non-finite canopy temperature solve: field={s} index={d} value={e}", .{ field.name, index, value });
             return error.NonFiniteCanopyTemperatureSolve;
         };
@@ -209,7 +210,7 @@ fn validateSettings(settings: Settings) !void {
 
 fn freeF64Allocated(state: *State, count: usize) void {
     var visited: usize = 0;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         if (visited < count) state.allocator.free(@field(state, field.name));
         visited += 1;
     };

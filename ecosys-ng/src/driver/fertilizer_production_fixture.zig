@@ -1,6 +1,8 @@
 const std = @import("std");
 const ecosys = @import("ecosys_ng");
 
+const arr_compat = ecosys.array_compat;
+
 /// Calls the actual composition-root phase with real scientific owners. Only
 /// unrelated driver configuration is reduced to the fields that phase reads.
 pub fn verifyLimeOnly(comptime advance: anytype, comptime Hour: type) !void {
@@ -47,11 +49,11 @@ fn verifyApplication(comptime advance: anytype, comptime Hour: type, application
         .layer_thickness_m = properties.layer_thickness_m,
         .initial_band_fraction_by_family = .{ 0, 0, 0 },
         // Init requires a positive row spacing; 1 m as in the band-state tests.
-        .row_spacing_m_by_cell_family = &(.{@as(f64, 1)} ** (cells * 3)),
+        .row_spacing_m_by_cell_family = &@as([(cells * 3)]f64, @splat(@as(f64, 1))),
     });
     defer band.deinit();
-    var exchange = [_]ecosys.solute_cation_exchange.Cations{std.mem.zeroes(ecosys.solute_cation_exchange.Cations)} ** (cells * layers);
-    var aqueous = [_]ecosys.solute_aqueous_network.State{std.mem.zeroes(ecosys.solute_aqueous_network.State)} ** (cells * layers);
+    var exchange = @as([(cells * layers)]ecosys.solute_cation_exchange.Cations, @splat(@as(ecosys.solute_cation_exchange.Cations, std.mem.zeroes(ecosys.solute_cation_exchange.Cations))));
+    var aqueous = @as([(cells * layers)]ecosys.solute_aqueous_network.State, @splat(@as(ecosys.solute_aqueous_network.State, std.mem.zeroes(ecosys.solute_aqueous_network.State))));
     var chemistry = .{
         .cation_exchange_mol_per_megagram = @as([]ecosys.solute_cation_exchange.Cations, &exchange),
         .aqueous = @as([]ecosys.solute_aqueous_network.State, &aqueous),
@@ -82,10 +84,10 @@ fn verifyApplication(comptime advance: anytype, comptime Hour: type, application
     defer surface_organic.deinit();
     var parameters = try ecosys.soil_organic_parameters.sourceParameters(allocator);
     defer parameters.deinit();
-    var organic_c = [_]f64{0} ** cells;
-    var biome_c = [_]f64{0} ** cells;
-    var organic_n = [_]f64{0} ** cells;
-    var organic_p = [_]f64{0} ** cells;
+    var organic_c = @as([cells]f64, @splat(@as(f64, 0)));
+    var biome_c = @as([cells]f64, @splat(@as(f64, 0)));
+    var organic_n = @as([cells]f64, @splat(@as(f64, 0)));
+    var organic_p = @as([cells]f64, @splat(@as(f64, 0)));
     const organic_c_slice: []f64 = &organic_c;
     const biome_c_slice: []f64 = &biome_c;
     const organic_n_slice: []f64 = &organic_n;

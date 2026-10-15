@@ -20,6 +20,8 @@ const methane_step = @import("../gas/methane_step.zig");
 const transformation_aggregation = @import("../biogeochemistry/transformation_aggregation.zig");
 const biochemical_acidity = @import("../chemistry/biochemical_acidity.zig");
 const scoped_conservation = @import("../../validation/scoped_conservation.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const ApplyContext = struct {
     reactive_nitrogen: *reactive.State,
@@ -364,7 +366,7 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
     if (!hydrogen_closure.accepted) return error.SoilHydrogenTransformationImbalance;
 
     var residue_total_g_c: f64 = 0;
-    var residue_by_complex_g_c: [organic.substrate_count]f64 = .{0} ** organic.substrate_count;
+    var residue_by_complex_g_c: [organic.substrate_count]f64 = @as([organic.substrate_count]f64, @splat(@as(f64, 0)));
     var dissolved_after: [organic.substrate_count]organic.ElementPool = undefined;
     var dissolved_acetate_after_g_c: [organic.substrate_count]f64 = undefined;
     var adsorbed_after: [organic.substrate_count]organic.ElementPool = undefined;
@@ -414,7 +416,7 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
         dissolved_acetate_after_g_c[complex] = dissolved_acetate_before_sorption - sorbed.acetate_g_c;
         adsorbed_after[complex] = .{ .carbon_g_c = current_adsorbed.carbon_g_c - decomposed_sorbed.carbon_g_c + sorbed.doc_g_c, .nitrogen_g_n = current_adsorbed.nitrogen_g_n - decomposed_sorbed.nitrogen_g_n + sorbed.don_g_n, .phosphorus_g_p = current_adsorbed.phosphorus_g_p - decomposed_sorbed.phosphorus_g_p + sorbed.dop_g_p };
         adsorbed_acetate_after_g_c[complex] = adsorbed_acetate_before_sorption + sorbed.acetate_g_c;
-        inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(organic.ElementPool)) |field| {
             const source_value = @field(source_dissolved, field.name);
             const priming_value = @field(priming_dissolved, field.name);
             const decomposition_value =
@@ -468,7 +470,7 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
             std.log.warn("invalid dissolved acetate state_update: layer={d} complex={d} value_g_c={e}", .{ layer, complex, dissolved_acetate_after_g_c[complex] });
             return error.InvalidSoilNitrogenStateUpdate;
         }
-        inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(organic.ElementPool)) |field| {
             const raw_adsorbed = @field(adsorbed_after[complex], field.name);
             @field(adsorbed_after[complex], field.name) =
                 normalizeNonnegativeRoundoff(
@@ -506,7 +508,7 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
     }
     var residue_after: [organic.substrate_count * organic.residue_fraction_count]organic.ElementPool = undefined;
     @memcpy(&residue_after, context.organic_state.residue[layer * organic.substrate_count * organic.residue_fraction_count ..][0 .. organic.substrate_count * organic.residue_fraction_count]);
-    var heterotrophic_residue_carbon_g_c: [organic.substrate_count - 1]f64 = .{0} ** (organic.substrate_count - 1);
+    var heterotrophic_residue_carbon_g_c: [organic.substrate_count - 1]f64 = @as([(organic.substrate_count - 1)]f64, @splat(@as(f64, 0)));
     var total_heterotrophic_residue_carbon_g_c: f64 = 0;
     for (0..organic.substrate_count - 1) |complex| for (0..organic.residue_fraction_count) |component| {
         const carbon = residue_after[complex * organic.residue_fraction_count + component].carbon_g_c;
@@ -601,7 +603,7 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
             const structural_current: @TypeOf(source_structural) = .{ .carbon_g_c = source_structural.carbon_g_c + priming_structural.carbon_g_c, .nitrogen_g_n = source_structural.nitrogen_g_n + priming_structural.nitrogen_g_n, .phosphorus_g_p = source_structural.phosphorus_g_p + priming_structural.phosphorus_g_p };
             const structural_assimilation: @TypeOf(current) = if (component == 0) .{ .carbon_g_c = context.flux_workspace.labile_assimilation_g_c[unit], .nitrogen_g_n = context.flux_workspace.labile_assimilation_g_n[unit], .phosphorus_g_p = context.flux_workspace.labile_assimilation_g_p[unit] } else .{ .carbon_g_c = context.flux_workspace.resistant_assimilation_g_c[unit], .nitrogen_g_n = context.flux_workspace.resistant_assimilation_g_n[unit], .phosphorus_g_p = context.flux_workspace.resistant_assimilation_g_p[unit] };
             const candidate_structural: @TypeOf(current) = .{ .carbon_g_c = structural_current.carbon_g_c + structural_assimilation.carbon_g_c - basal.decomposed.carbon_g_c - senescence.decomposed.carbon_g_c, .nitrogen_g_n = structural_current.nitrogen_g_n + structural_assimilation.nitrogen_g_n - basal.decomposed.nitrogen_g_n - senescence.decomposed.nitrogen_g_n, .phosphorus_g_p = structural_current.phosphorus_g_p + structural_assimilation.phosphorus_g_p - basal.decomposed.phosphorus_g_p - senescence.decomposed.phosphorus_g_p };
-            inline for (@typeInfo(@TypeOf(candidate_structural)).@"struct".fields) |field| if (!std.math.isFinite(@field(candidate_structural, field.name)) or @field(candidate_structural, field.name) < 0) return error.InvalidSoilMicrobialStateUpdate;
+            inline for (ti_compat.fieldViews(@TypeOf(candidate_structural))) |field| if (!std.math.isFinite(@field(candidate_structural, field.name)) or @field(candidate_structural, field.name) < 0) return error.InvalidSoilMicrobialStateUpdate;
             next_structural[(unit - first) * 2 + component] = candidate_structural;
         }
         const methane_nonstructural_gain_g_c: f64 = if (context.methane) |methane_result|
@@ -685,7 +687,7 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
         // produces. The warning is retained at `.info` so the event stays visible
         // without being terminal, and the always-on hourly conservation gate
         // remains the guarantee that nothing is silently created or destroyed.
-        inline for (@typeInfo(@TypeOf(next)).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(@TypeOf(next))) |field| {
             const value = @field(next, field.name);
             if (!std.math.isFinite(value)) {
                 std.log.warn(
@@ -715,9 +717,9 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
         );
         respiratory_carbon_dioxide_g_c = @max(0, respiratory_carbon_dioxide_g_c - microbial_carbon_clamp_g_c);
     }
-    for (residue_after) |pool| inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidSoilMicrobialStateUpdate;
-    for (structural_after) |pool| inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidSoilOrganicDecompositionStateUpdate;
-    for (humus_after) |pool| inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidSoilMicrobialStateUpdate;
+    for (residue_after) |pool| inline for (ti_compat.fieldViews(organic.ElementPool)) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidSoilMicrobialStateUpdate;
+    for (structural_after) |pool| inline for (ti_compat.fieldViews(organic.ElementPool)) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidSoilOrganicDecompositionStateUpdate;
+    for (humus_after) |pool| inline for (ti_compat.fieldViews(organic.ElementPool)) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidSoilMicrobialStateUpdate;
     for (&colonized_after, structural_after) |*colonized, pool| {
         colonized.* = try nonnegativeCandidate(
             colonized.*,
@@ -1543,7 +1545,7 @@ fn applyMicrobialExchange(pool_g_n: *f64, exchange_g_n: f64) !void {
 /// either the split itself or this file's hand-duplicated consumption of it
 /// is caught here instead of silently drifting.
 fn validateMicrobialDecompositionBalance(decomposition: anytype) !void {
-    inline for (@typeInfo(@TypeOf(decomposition.decomposed)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(decomposition.decomposed))) |field| {
         const decomposed = @field(decomposition.decomposed, field.name);
         const products = @field(decomposition.recycled, field.name) +
             @field(decomposition.humified, field.name) +
@@ -1778,7 +1780,7 @@ test "layer nitrogen state_update conserves zones gases and DON atomically" {
     chemistry_state.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3 = 1;
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.nitrogen)] = 0.1;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.nitrogen)] = 0.1;
     var organic_state = try organic.State.init(std.testing.allocator, 1);
     defer organic_state.deinit();
     var microbial_state = try microbial.State.init(std.testing.allocator, 1, 1, 1, 1);
@@ -1821,7 +1823,7 @@ test "layer nitrogen state_update conserves zones gases and DON atomically" {
     const phosphorus_before = 31.02;
     var context: ApplyContext = .{ .reactive_nitrogen = &reactive_state, .phosphorus_history = &phosphorus_state, .chemistry_state = &chemistry_state, .gas_state = &gas_state, .organic_state = &organic_state, .microbial_state = &microbial_state, .flux_workspace = &workspace, .microbial_turnover = &turnover_state, .litter_colonization = &colonization_state, .organic_sorption = &sorption_state, .organic_decomposition = &decomposition_state, .humus_partition_by_layer = &.{.{ 0.5, 0.5 }}, .water_volume_m3 = &.{1}, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .oxygen_satisfaction_fraction = &.{1}, .redox_satisfaction_fraction = &.{1}, .nitrogen_molar_mass_g_per_mol = 14, .phosphorus_molar_mass_g_per_mol = 31, .negligible_hydrogen_mol = 1e-12, .negligible_carbon_g_c = 1e-12, .fraction_tolerance = 1e-12, .salinity_enabled_by_cell = &.{true}, .soil_layer_capacity = 1 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
-    const after = chemistry_state.aqueous[0].ammonium_non_band * 14 + chemistry_state.aqueous[0].nitrate_non_band * 14 + reactive_state.non_band_nitrite_g_n[0] + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.nitrous_oxide)] + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.nitrogen)] + organic_state.dissolved[0].nitrogen_g_n + microbial_state.nonstructural[0].nitrogen_g_n + microbial_state.structural[0].nitrogen_g_n + microbial_state.structural[1].nitrogen_g_n + organic_state.residue[0].nitrogen_g_n + organic_state.structural[20].nitrogen_g_n + organic_state.structural[21].nitrogen_g_n;
+    const after = chemistry_state.aqueous[0].ammonium_non_band * 14 + chemistry_state.aqueous[0].nitrate_non_band * 14 + reactive_state.non_band_nitrite_g_n[0] + gas_state.dissolved_mass_g[@backingInt(gas.Species.nitrous_oxide)] + gas_state.dissolved_mass_g[@backingInt(gas.Species.nitrogen)] + organic_state.dissolved[0].nitrogen_g_n + microbial_state.nonstructural[0].nitrogen_g_n + microbial_state.structural[0].nitrogen_g_n + microbial_state.structural[1].nitrogen_g_n + organic_state.residue[0].nitrogen_g_n + organic_state.structural[20].nitrogen_g_n + organic_state.structural[21].nitrogen_g_n;
     try std.testing.expectApproxEqAbs(before, after, 1e-12);
     const phosphorus_after = chemistry_state.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3 * 31 + microbial_state.nonstructural[0].phosphorus_g_p + microbial_state.structural[0].phosphorus_g_p + microbial_state.structural[1].phosphorus_g_p + organic_state.residue[0].phosphorus_g_p + organic_state.structural[20].phosphorus_g_p + organic_state.structural[21].phosphorus_g_p;
     try std.testing.expectApproxEqAbs(phosphorus_before, phosphorus_after, 1e-12);
@@ -1833,7 +1835,7 @@ test "layer nitrogen state_update conserves zones gases and DON atomically" {
     try std.testing.expectEqual(@as(f64, 0.025), reactive_state.previous_non_band_microbial_ammonium_capacity_g_n[0]);
     try std.testing.expectEqual(@as(f64, 0.025), phosphorus_state.previous_non_band_h2po4_capacity_g_p[0]);
     try std.testing.expectEqual(@as(f64, 0.025), phosphorus_state.previous_total_non_band_h2po4_demand_g_p[0]);
-    const carbon_after = organic_state.dissolved[0].carbon_g_c + organic_state.dissolved_acetate_carbon_g_c[0] + microbial_state.nonstructural[0].carbon_g_c + microbial_state.structural[0].carbon_g_c + microbial_state.structural[1].carbon_g_c + organic_state.residue[0].carbon_g_c + organic_state.structural[20].carbon_g_c + organic_state.structural[21].carbon_g_c + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)];
+    const carbon_after = organic_state.dissolved[0].carbon_g_c + organic_state.dissolved_acetate_carbon_g_c[0] + microbial_state.nonstructural[0].carbon_g_c + microbial_state.structural[0].carbon_g_c + microbial_state.structural[1].carbon_g_c + organic_state.residue[0].carbon_g_c + organic_state.structural[20].carbon_g_c + organic_state.structural[21].carbon_g_c + gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)];
     try std.testing.expectApproxEqAbs(@as(f64, 3.5), carbon_after, 1e-12);
     try std.testing.expectApproxEqAbs(@as(f64, 0.06), microbial_state.structural[0].carbon_g_c, 1e-15);
     try std.testing.expectApproxEqAbs(@as(f64, 0.09), microbial_state.structural[1].carbon_g_c, 1e-15);
@@ -2025,10 +2027,10 @@ test "methane carbon routes to authoritative K5 methanogen and methanotroph owne
     chemistry_state.aqueous[0].hydrogen = 1;
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] = 2;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.methane)] = 1;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.hydrogen)] = 0.2;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.oxygen)] = 2;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] = 2;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.methane)] = 1;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.hydrogen)] = 0.2;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.oxygen)] = 2;
     var organic_state = try organic.State.init(std.testing.allocator, 1);
     defer organic_state.deinit();
     var microbial_state = try microbial.State.init(std.testing.allocator, 1, 1, substrate_count, population_count);
@@ -2057,7 +2059,7 @@ test "methane carbon routes to authoritative K5 methanogen and methanotroph owne
     methane_state.methanotroph_methane_uptake_g_c[0] = 0.3;
     methane_state.methanotroph_nonstructural_carbon_gain_g_c[0] = 0.25;
     methane_state.oxygen_demand_g_o[0] = 5.333 * 0.2 + 2.667 * 0.05;
-    const satisfaction = [_]f64{1} ** units;
+    const satisfaction = @as([units]f64, @splat(@as(f64, 1)));
     var hourly_carbon_dioxide_production = [1]f64{0};
     var context: ApplyContext = .{
         .reactive_nitrogen = &reactive_state,
@@ -2092,13 +2094,13 @@ test "methane carbon routes to authoritative K5 methanogen and methanotroph owne
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expectApproxEqAbs(@as(f64, 1.1), microbial_state.nonstructural[hydrogenotroph_unit].carbon_g_c, 1e-15);
     try std.testing.expectApproxEqAbs(@as(f64, 1.25), microbial_state.nonstructural[methanotroph_unit].carbon_g_c, 1e-15);
-    try std.testing.expectApproxEqAbs(@as(f64, 2.05), gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)], 1e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, 2.05), gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)], 1e-15);
     // Gross source diagnostics retain RGOMD, while the gas owner waits for
     // autotrophic_carbon_step to commit the paired CGOMD-RGOMD net uptake.
     try std.testing.expectApproxEqAbs(@as(f64, 0.35), hourly_carbon_dioxide_production[0], 1e-15);
-    try std.testing.expectApproxEqAbs(@as(f64, 0.6), gas_state.dissolved_mass_g[@intFromEnum(gas.Species.methane)], 1e-15);
-    const after = gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] +
-        gas_state.dissolved_mass_g[@intFromEnum(gas.Species.methane)] +
+    try std.testing.expectApproxEqAbs(@as(f64, 0.6), gas_state.dissolved_mass_g[@backingInt(gas.Species.methane)], 1e-15);
+    const after = gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] +
+        gas_state.dissolved_mass_g[@backingInt(gas.Species.methane)] +
         microbial_state.nonstructural[hydrogenotroph_unit].carbon_g_c +
         microbial_state.nonstructural[methanotroph_unit].carbon_g_c;
     try std.testing.expectApproxEqAbs(@as(f64, 5), after, 1e-14);
@@ -2106,11 +2108,11 @@ test "methane carbon routes to authoritative K5 methanogen and methanotroph owne
     // K=5 is the nitrifier-autotroph complex independently of optional
     // methane science. Its RGOMD remains gross diagnostic activity here but
     // is committed only with its paired CGOMD by autotrophic_carbon_step.
-    const co2_before_methane_disabled = gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)];
+    const co2_before_methane_disabled = gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)];
     context.methane = null;
     hourly_carbon_dioxide_production[0] = 0;
     try applyTile(&context, .{ .first = 0, .end = 1 });
-    try std.testing.expectEqual(co2_before_methane_disabled, gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)]);
+    try std.testing.expectEqual(co2_before_methane_disabled, gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)]);
     try std.testing.expectEqual(@as(f64, 0.1), hourly_carbon_dioxide_production[0]);
 }
 

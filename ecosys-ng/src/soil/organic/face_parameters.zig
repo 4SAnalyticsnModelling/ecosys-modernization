@@ -3,6 +3,7 @@ const grid_module = @import("../../state/grid.zig");
 const hydrology_module = @import("../../transport/hydrology.zig");
 const geometry_module = @import("../water/face_geometry.zig");
 const organic = @import("initialization.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const components_per_substrate: usize = 4;
 pub const component_count: usize = organic.substrate_count * components_per_substrate;
@@ -97,8 +98,8 @@ pub const State = struct {
             const water_velocity_m_per_step = @abs(faces.micropore_water_flux_m3_per_step[face_index]) / area_m2;
             const dispersion_m2_per_step = parameters.dispersivity_coefficient * std.math.pow(f64, mean_distance_m, parameters.dispersivity_distance_exponent) * step_h * @min(step_h, water_velocity_m_per_step);
             const temperature_factor = std.math.pow(f64, model_grid.soil_temperature_k[destination] / parameters.reference_temperature_k, parameters.temperature_exponent);
-            for (0..organic.substrate_count) |substrate| inline for (@typeInfo(Component).@"enum".fields) |field| {
-                const component: Component = @enumFromInt(field.value);
+            for (0..organic.substrate_count) |substrate| inline for (ti_compat.enumFieldViews(Component)) |field| {
+                const component: Component = @fromBackingInt(@intCast(field.value));
                 const index = face_index * component_count + substrate * components_per_substrate + field.value;
                 const diffusivity_m2_per_step = referenceDiffusivity(component, parameters) * temperature_factor * step_h;
                 self.micropore_conductance_m3_per_step[index] = (diffusivity_m2_per_step * micro_tortuosity_per_m + dispersion_m2_per_step) * area_m2;
@@ -152,8 +153,8 @@ test "HOUR1 organic diffusivities distinguish acetate from DOC DON and DOP" {
     var state = try State.init(std.testing.allocator, faces.micropore_faces.len);
     defer state.deinit();
     try state.refresh(&model_grid, &faces, &geometry, &.{ 1, 1 }, &.{ 1, 1 }, 1, .{});
-    const doc = @intFromEnum(Component.dissolved_organic_carbon);
-    const acetate = @intFromEnum(Component.dissolved_acetate_carbon);
+    const doc = @backingInt(Component.dissolved_organic_carbon);
+    const acetate = @backingInt(Component.dissolved_acetate_carbon);
     try std.testing.expect(state.micropore_conductance_m3_per_step[acetate] > state.micropore_conductance_m3_per_step[doc]);
     try std.testing.expect(state.macropore_conductance_m3_per_step[acetate] > state.macropore_conductance_m3_per_step[doc]);
     @memset(state.micropore_conductance_m3_per_step, 7);
@@ -184,7 +185,7 @@ test "active zero bulk volume uses flat WATSUB tortuosity for organic solutes" {
     defer state.deinit();
 
     try state.refresh(&grid, &faces, &geometry, &.{ 0, 1 }, &.{ 1, 1 }, 1, .{});
-    const doc = @intFromEnum(Component.dissolved_organic_carbon);
+    const doc = @backingInt(Component.dissolved_organic_carbon);
     try std.testing.expectApproxEqAbs(@as(f64, 3.5e-8), state.micropore_conductance_m3_per_step[doc], 1e-15);
     try std.testing.expectEqual(@as(f64, 0), state.macropore_conductance_m3_per_step[doc]);
     try state.refresh(&grid, &faces, &geometry, &.{ 1, 1 }, &.{ 0, 1 }, 1, .{});

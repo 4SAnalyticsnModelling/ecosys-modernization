@@ -15,6 +15,7 @@ const water_boundary = @import("../water/boundary.zig");
 const enthalpy = @import("../water/enthalpy_balance.zig");
 const retention = @import("../water/retention.zig");
 const group_types = @import("solver_types.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const minimum_physical_temperature_k: f64 = 173.15;
 pub const maximum_physical_temperature_k: f64 = 373.15;
@@ -50,7 +51,7 @@ pub fn validateSoilTemperaturePhysicalDomain(temperature_k: []const f64) !void {
 pub fn validateInputs(grid: *const grid_module.GridState, faces: []const group_types.Face, properties: group_types.Properties, water_fluxes: group_types.WaterHeatFluxes, heat_flux_megajoules: []const f64, options: group_types.Options) !void {
     const cells = grid.layer_count;
     try validateSoilTemperaturePhysicalDomain(grid.soil_temperature_k);
-    inline for (@typeInfo(group_types.Properties).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(group_types.Properties)) |field| {
         if (field.type == []const f64 and @field(properties, field.name).len != cells) return error.SoilHeatSolverDimensionMismatch;
         if (field.type == []const bool and @field(properties, field.name).len != 0 and @field(properties, field.name).len != cells) return error.SoilHeatSolverDimensionMismatch;
     }

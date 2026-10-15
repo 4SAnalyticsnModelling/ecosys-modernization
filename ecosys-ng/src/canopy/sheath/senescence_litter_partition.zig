@@ -2,6 +2,7 @@
 // publication is called into transaction-local accumulators by the selected-
 // node production path before its atomic commit.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ElementSlices = struct {
     carbon: []const f64,
@@ -83,17 +84,17 @@ pub fn publish(snapshot: Snapshot, composition: Composition, kinetics: Kinetics,
 
 fn validateDimensions(kinetics: Kinetics, output: Accumulators, count: usize) !void {
     inline for (.{ kinetics.woody, kinetics.sheath }) |family|
-        inline for (@typeInfo(ElementSlices).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(ElementSlices)) |field|
             if (@field(family, field.name).len != count)
                 return error.SheathSenescenceKineticDimensionMismatch;
     inline for (.{ output.woody, output.sheath }) |family|
-        inline for (@typeInfo(ElementAccumulators).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(ElementAccumulators)) |field|
             if (@field(family, field.name).len != count)
                 return error.SheathSenescenceKineticDimensionMismatch;
 }
 
 fn validateInputs(snapshot: Snapshot, composition: Composition, kinetics: Kinetics) !void {
-    inline for (@typeInfo(Snapshot).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Snapshot)) |field| {
         const value = @field(snapshot, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidSheathSenescenceLitterSnapshot;
     }
@@ -109,7 +110,7 @@ fn validateInputs(snapshot: Snapshot, composition: Composition, kinetics: Kineti
             return error.InvalidSheathSenescenceComposition;
     }
     inline for (.{ kinetics.woody, kinetics.sheath }) |family|
-        inline for (@typeInfo(ElementSlices).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ElementSlices)) |field| {
             var total: f64 = 0;
             for (@field(family, field.name)) |value| {
                 if (!std.math.isFinite(value) or value < 0 or value > 1)

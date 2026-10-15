@@ -14,6 +14,8 @@ const soil_properties_module = @import("../soil/water/solver_properties.zig");
 const charge_classification = @import("../soil/solute/charge_classification.zig");
 const conservation_sidecar = @import("pond_conservation_sidecar.zig");
 const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const SeparatedSurfaceGeometry = settling.SeparatedSurfaceGeometry;
 pub const MineralColumnGeometry = settling.MineralColumnGeometry;
@@ -526,7 +528,7 @@ fn particulateCarriers(owners: ParticulateChemistryOwners, cell: usize, destinat
         .surface_mineral_reference_water_m3 = owners.surface.mineral_reference_water_m3[cell],
         .soil_phosphate_non_band_water_m3 = phosphate_water_m3,
     };
-    inline for (@typeInfo(chemistry.ParticulateCarriers).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(chemistry.ParticulateCarriers)) |field|
         if (!std.math.isFinite(@field(carriers, field.name)))
             return error.InvalidSurfacePondChemistryCarrier;
     if (carriers.surface_dry_mass_megagrams < 0 or
@@ -581,8 +583,8 @@ test "REDIST L0 settles surface particulates without consuming EROSION suspensio
         attached_layout,
     );
     defer attached.deinit();
-    var receiving_attached = [_]f64{1} ** 9;
-    var attached_before = [_]f64{0} ** 9;
+    var receiving_attached = @as([9]f64, @splat(@as(f64, 1)));
+    var attached_before = @as([9]f64, @splat(@as(f64, 0)));
     for (attached.pools, 0..) |*value, index| {
         value.* = 10 * @as(f64, @floatFromInt(index + 1));
         attached_before[index] = value.*;
@@ -972,7 +974,7 @@ test "late particulate chemistry failure rolls back the complete settling domain
     for (attached.pools, 0..) |*value, index|
         value.* = @as(f64, @floatFromInt(index + 1));
     const attached_before = [_]f64{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 };
-    var receiving_attached = [_]f64{2} ** 18;
+    var receiving_attached = @as([18]f64, @splat(@as(f64, 2)));
     const receiving_before = receiving_attached;
     var soil_dry_mass = [_]f64{ 1, 1 };
     try std.testing.expectError(

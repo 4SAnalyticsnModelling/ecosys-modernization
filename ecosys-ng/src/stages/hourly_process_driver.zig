@@ -146,6 +146,9 @@ fn starteDynamicInput(
 }
 const group_snow_energy = @import("hourly_snow_energy.zig");
 
+const arr_compat = ecosys.array_compat;
+const ti_compat = @import("ecosys_ng").typeinfo_compat;
+
 /// Reads the eight rain-ion weather-header concentrations in
 /// `snow_solute_transport.Species` order (`.aluminum` through `.chloride`),
 /// for `atmosphericInputG`'s `rain_ions_g_per_m3` argument. PRECIP-ION-FEED-001:
@@ -156,8 +159,8 @@ const group_snow_energy = @import("hourly_snow_energy.zig");
 /// ion into the wrong `Species` slot.
 fn rainIonsGPerM3(weather_header: ecosys.weather.Header) [8]f64 {
     const Species = ecosys.snow_solute_transport.Species;
-    const species_fields = @typeInfo(Species).@"enum".fields;
-    const ion_offset = @intFromEnum(Species.aluminum);
+    const species_fields = ti_compat.enumFieldViews(Species);
+    const ion_offset = @backingInt(Species.aluminum);
     comptime {
         if (species_fields.len - ion_offset != 8)
             @compileError("PRECIP-ION-FEED-001: expected exactly eight rain-ion Species starting at .aluminum");
@@ -592,7 +595,7 @@ pub fn executeHourlyScience(
     );
     for (0..context.grid.cell_count) |cell| {
         const weather_header = weather_header_by_cell[cell];
-        var rain_gas_concentration = [_]f64{0} ** 5;
+        var rain_gas_concentration = @as([5]f64, @splat(@as(f64, 0)));
         {
             const surface_parameters = context.surface_gas_parameters.*;
             const solubility = try ecosys.gas_transport.surfaceSolubilityWaterToAir(context.atmosphere.air_temperature_k[cell], surface_parameters.solubility);
@@ -649,8 +652,8 @@ pub fn executeHourlyScience(
             solute_routes.irrigation_remaining_m3
         else
             0;
-        var irrigation_nutrients = [_]f64{0} ** 5;
-        var irrigation_ions_g_per_m3 = [_]f64{0} ** 8;
+        var irrigation_nutrients = @as([5]f64, @splat(@as(f64, 0)));
+        var irrigation_ions_g_per_m3 = @as([8]f64, @splat(@as(f64, 0)));
         var irrigation_ph: f64 = 7;
         var irrigation_ammonium_g_n_per_m3: f64 = 0;
         var irrigation_nitrate_g_n_per_m3: f64 = 0;
@@ -671,7 +674,7 @@ pub fn executeHourlyScience(
             }, reaction_parameters.aqueous_constants, reaction_parameters.phosphate_constants);
             for (&irrigation_ions_g_per_m3, 0..) |*ion, index| ion.* = concentration[3 + index] / irrigation_depth_m;
         }
-        var input = try ecosys.snow_solute_transport.atmosphericInputG(rain_to_snow_m3, irrigation_to_snow_m3, rain_gas_concentration, [_]f64{0} ** 5, nutrients, irrigation_nutrients, rain_ions_g_per_m3, irrigation_ions_g_per_m3);
+        var input = try ecosys.snow_solute_transport.atmosphericInputG(rain_to_snow_m3, irrigation_to_snow_m3, rain_gas_concentration, @as([5]f64, @splat(@as(f64, 0))), nutrients, irrigation_nutrients, rain_ions_g_per_m3, irrigation_ions_g_per_m3);
         if (context.snow_transport.dynamic_salts_by_cell[cell] and rain_to_snow_m3 + irrigation_to_snow_m3 > 0) {
             const effective_soil_hydrogen = try resolveDynamicInputSoilHydrogen(
                 speciation_state,
@@ -728,8 +731,8 @@ pub fn executeHourlyScience(
         const direct_irrigation_m3 = solute_routes.irrigation_to_litter_m3 + irrigation_to_soil_m3;
         const direct_carrier_m3 = direct_litter_m3 + direct_soil_m3;
         if (direct_carrier_m3 > 0) {
-            var direct_input = try ecosys.snow_solute_transport.atmosphericInputG(direct_rain_m3, direct_irrigation_m3, rain_gas_concentration, [_]f64{0} ** 5, nutrients, irrigation_nutrients, rain_ions_g_per_m3, irrigation_ions_g_per_m3);
-            var direct_salt_mol = [_]f64{0} ** ecosys.snow_solute_transport.salt_species_count;
+            var direct_input = try ecosys.snow_solute_transport.atmosphericInputG(direct_rain_m3, direct_irrigation_m3, rain_gas_concentration, @as([5]f64, @splat(@as(f64, 0))), nutrients, irrigation_nutrients, rain_ions_g_per_m3, irrigation_ions_g_per_m3);
+            var direct_salt_mol = @as([ecosys.snow_solute_transport.salt_species_count]f64, @splat(@as(f64, 0)));
             if (context.snow_transport.dynamic_salts_by_cell[cell]) {
                 const effective_soil_hydrogen = try resolveDynamicInputSoilHydrogen(
                     speciation_state,
@@ -756,7 +759,7 @@ pub fn executeHourlyScience(
             const soil_fraction = 1 - litter_fraction;
             for (direct_input, 0..) |amount_g, species| {
                 context.direct_surface_solute_input[cell].litter_g[species] = amount_g * litter_fraction;
-                const band_fraction = switch (@as(ecosys.snow_solute_transport.Species, @enumFromInt(species))) {
+                const band_fraction = switch (@as(ecosys.snow_solute_transport.Species, @fromBackingInt(@intCast(species)))) {
                     .ammonium_nitrogen, .ammonia_nitrogen => top_soil_zone_fractions.ammonium_band,
                     .nitrate_nitrogen => top_soil_zone_fractions.nitrate_band,
                     .hydrogen_phosphate_phosphorus, .dihydrogen_phosphate_phosphorus => top_soil_zone_fractions.phosphate_band,
@@ -767,7 +770,7 @@ pub fn executeHourlyScience(
             }
             for (direct_salt_mol, 0..) |amount_mol, species| {
                 context.direct_surface_solute_input[cell].litter_salt_mol[species] = amount_mol * litter_fraction;
-                const band_fraction = if (species >= @intFromEnum(ecosys.snow_solute_transport.SaltSpecies.phosphate))
+                const band_fraction = if (species >= @backingInt(ecosys.snow_solute_transport.SaltSpecies.phosphate))
                     top_soil_zone_fractions.phosphate_band
                 else
                     0;
@@ -933,18 +936,18 @@ test "rainIonsGPerM3 output feeds atmosphericInputG's rain channel, matching the
         .precipitation_chloride_g_per_m3 = 0,
     };
     const rain_ions_g_per_m3 = rainIonsGPerM3(header);
-    const irrigation_ions_g_per_m3 = [_]f64{0} ** 8;
+    const irrigation_ions_g_per_m3 = @as([8]f64, @splat(@as(f64, 0)));
     const output = try ecosys.snow_solute_transport.atmosphericInputG(
         2, // rain_water_m3
         0, // irrigation_water_m3
-        [_]f64{0} ** 5,
-        [_]f64{0} ** 5,
-        [_]f64{0} ** 5,
-        [_]f64{0} ** 5,
+        @as([5]f64, @splat(@as(f64, 0))),
+        @as([5]f64, @splat(@as(f64, 0))),
+        @as([5]f64, @splat(@as(f64, 0))),
+        @as([5]f64, @splat(@as(f64, 0))),
         rain_ions_g_per_m3,
         irrigation_ions_g_per_m3,
     );
-    const aluminum_species: usize = @intFromEnum(ecosys.snow_solute_transport.Species.aluminum);
+    const aluminum_species: usize = @backingInt(ecosys.snow_solute_transport.Species.aluminum);
     try std.testing.expectApproxEqAbs(@as(f64, 2), output[aluminum_species], 1e-12);
 }
 
@@ -992,15 +995,15 @@ test "starteDynamicInput speciates rain and irrigation at fixed pH and linearly 
     // Verify uncoupled linear flux superposition of hydrogen (fixed pH, no blending solve):
     const expected_h_mol = rain_m3 * std.math.pow(f64, 10.0, -(7.0 - 3.0)) +
         irr_m3 * std.math.pow(f64, 10.0, -(7.5 - 3.0));
-    try std.testing.expectEqual(expected_h_mol, dynamic.salt_mol[@intFromEnum(ecosys.snow_solute_transport.SaltSpecies.hydrogen)]);
+    try std.testing.expectEqual(expected_h_mol, dynamic.salt_mol[@backingInt(ecosys.snow_solute_transport.SaltSpecies.hydrogen)]);
 
     // Verify linear chloride flux:
     const expected_cl_mol = rain_m3 * 0.03 + irr_m3 * 0.05;
-    try std.testing.expectEqual(expected_cl_mol, dynamic.salt_mol[@intFromEnum(ecosys.snow_solute_transport.SaltSpecies.chloride)]);
+    try std.testing.expectEqual(expected_cl_mol, dynamic.salt_mol[@backingInt(ecosys.snow_solute_transport.SaltSpecies.chloride)]);
 
     // Verify irrigation now seeds carbonate and bicarbonate pairs (R2):
-    try std.testing.expect(dynamic.salt_mol[@intFromEnum(ecosys.snow_solute_transport.SaltSpecies.calcium_bicarbonate)] > 0);
-    try std.testing.expect(dynamic.salt_mol[@intFromEnum(ecosys.snow_solute_transport.SaltSpecies.carbonate)] > 0);
+    try std.testing.expect(dynamic.salt_mol[@backingInt(ecosys.snow_solute_transport.SaltSpecies.calcium_bicarbonate)] > 0);
+    try std.testing.expect(dynamic.salt_mol[@backingInt(ecosys.snow_solute_transport.SaltSpecies.carbonate)] > 0);
 
     // Verify zero total water returns empty:
     const empty = try starteDynamicInput(
@@ -1012,8 +1015,8 @@ test "starteDynamicInput speciates rain and irrigation at fixed pH and linearly 
         atca,
         cco2ei,
     );
-    try std.testing.expectEqualSlices(f64, &([_]f64{0} ** ecosys.snow_solute_transport.species_count), &empty.primary_g);
-    try std.testing.expectEqualSlices(f64, &([_]f64{0} ** ecosys.snow_solute_transport.salt_species_count), &empty.salt_mol);
+    try std.testing.expectEqualSlices(f64, &(@as([ecosys.snow_solute_transport.species_count]f64, @splat(@as(f64, 0)))), &empty.primary_g);
+    try std.testing.expectEqualSlices(f64, &(@as([ecosys.snow_solute_transport.salt_species_count]f64, @splat(@as(f64, 0)))), &empty.salt_mol);
 }
 
 test "hourly change in topsoil hydrogen on the same day does not re-speciate" {
@@ -1302,10 +1305,10 @@ test "production refreshes the site boundary mask before snow drift can run" {
 
 test "surface boundary mask is rebuilt from site edges without prior runtime state" {
     const Site = struct { surface_runoff_boundary_fraction: [4]f64, compass_aspect_degrees: f64 };
-    var east = [_]bool{true} ** 4;
-    var west = [_]bool{true} ** 4;
-    var south = [_]bool{true} ** 4;
-    var north = [_]bool{true} ** 4;
+    var east = @as([4]bool, @splat(@as(bool, true)));
+    var west = @as([4]bool, @splat(@as(bool, true)));
+    var south = @as([4]bool, @splat(@as(bool, true)));
+    var north = @as([4]bool, @splat(@as(bool, true)));
     // Aspects chosen so each cell's topographic gate (starts.f:274-303) does
     // not disable any direction this test already expects open, isolating
     // this test to edge/fraction detection; the dedicated gate test below
@@ -1362,10 +1365,10 @@ test "surface boundary mask closes an uphill direction even when the user-set fr
     // south-facing slope (aspect 225, quadrant [180,270): south enabled,
     // north forbidden) with a nonzero north fraction must still close north.
     const Site = struct { surface_runoff_boundary_fraction: [4]f64, compass_aspect_degrees: f64 };
-    var east = [_]bool{false} ** 1;
-    var west = [_]bool{false} ** 1;
-    var south = [_]bool{false} ** 1;
-    var north = [_]bool{true} ** 1;
+    var east = @as([1]bool, @splat(@as(bool, false)));
+    var west = @as([1]bool, @splat(@as(bool, false)));
+    var south = @as([1]bool, @splat(@as(bool, false)));
+    var north = @as([1]bool, @splat(@as(bool, true)));
     const sites = [_]Site{
         .{ .surface_runoff_boundary_fraction = .{ 1, 1, 1, 1 }, .compass_aspect_degrees = 225 },
     };

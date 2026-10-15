@@ -11,6 +11,7 @@
 // composition, so it never reuses the runoff variables.
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const SaltEquilibriumMode = enum {
     static,
@@ -31,7 +32,7 @@ pub const Face = enum(u8) {
     south,
     north,
 
-    pub const count: usize = @typeInfo(Face).@"enum".fields.len;
+    pub const count: usize = @typeInfo(Face).@"enum".field_names.len;
 };
 
 pub const PhaseFlux = struct {
@@ -179,7 +180,7 @@ pub fn apply(inputs: Inputs, state: *State) !void {
             const cell = row * inputs.lon_count + column;
             for (std.meta.tags(Face)) |face| {
                 if (!isExternalFace(face, column, row, window)) continue;
-                const flux = inputs.flux_by_face[@intFromEnum(face)][cell];
+                const flux = inputs.flux_by_face[@backingInt(face)][cell];
                 const direction = inwardSign(face);
                 const water_equivalent_m3 = calculateSignedWaterEquivalent(
                     flux.phases,
@@ -387,7 +388,7 @@ fn preflightUpdates(inputs: Inputs, state: State) !void {
             var cell_ledger = state.outward_by_cell[cell];
             for (std.meta.tags(Face)) |face| {
                 if (!isExternalFace(face, column, row, window)) continue;
-                const flux = inputs.flux_by_face[@intFromEnum(face)][cell];
+                const flux = inputs.flux_by_face[@backingInt(face)][cell];
                 const direction = inwardSign(face);
                 const water_equivalent_m3 = try calculateSignedWaterEquivalent(
                     flux.phases,
@@ -485,7 +486,7 @@ fn signedSourceSum(direction: f64, values: []const f64) !f64 {
 
 fn sourceStructSum(value: anytype) !f64 {
     var total: f64 = 0;
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field|
         total = try checkedSum(total, @field(value, field.name));
     return total;
 }
@@ -511,7 +512,7 @@ fn checkedSum(current: f64, increment: f64) !f64 {
 }
 
 fn validateFiniteStruct(value: anytype) !void {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field|
         if (!std.math.isFinite(@field(value, field.name)))
             return error.InvalidSnowBoundaryInput;
 }
@@ -526,7 +527,7 @@ fn nonnegativeFinite(value: f64) bool {
 
 fn filled(comptime T: type, value: f64) T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(T)) |field|
         @field(result, field.name) = value;
     return result;
 }

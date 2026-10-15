@@ -10,6 +10,7 @@
 // UPTAKE-RECONCILE-2855-3862 group of docs/traceability/a7b_reconcile_nutrient_uptake_cluster.md
 const std = @import("std");
 
+
 pub const Inputs = struct {
     gas_transfer_active: bool,
     oxygen_from_internal_root_g_o_per_step: f64,
@@ -188,7 +189,7 @@ test "runtime axes fail atomically when a deep layer lacks preceding state" {
         .{ .oxygen_demand_g_o_per_step = 0, .oxygen_uptake_g_o_per_step = 0 },
     };
     var scratch: [2]Result = undefined;
-    var destination = [_]Result{std.mem.zeroes(Result)} ** 2;
+    var destination = @as([2]Result, @splat(@as(Result, std.mem.zeroes(Result))));
     destination[0].root_process_constraint = 0.41;
     destination[1].root_process_constraint = 0.42;
     try std.testing.expectError(

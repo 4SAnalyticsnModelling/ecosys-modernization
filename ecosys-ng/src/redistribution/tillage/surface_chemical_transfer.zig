@@ -25,6 +25,7 @@
 //
 const std = @import("std");
 const ice_units = @import("../../core/ice_units.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const core_family_count = 31;
 pub const dynamic_salt_family_count = 42;
@@ -90,7 +91,7 @@ pub fn transferCell(allocator: std.mem.Allocator, cell: usize, surface_remaining
     const cells = state.surface_water_m3.len;
     const expected_salt_families: usize = if (dynamic_salts) dynamic_salt_family_count else 0;
     if (cells == 0 or cell >= cells or state.core_families.len != core_family_count or state.dynamic_salt_families.len != expected_salt_families) return error.TillageChemicalTransferDimensionMismatch;
-    inline for (std.meta.fields(State)) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         if (comptime std.mem.eql(u8, field.name, "core_families") or std.mem.eql(u8, field.name, "dynamic_salt_families")) continue;
         if (@field(state, field.name).len != cells) return error.TillageChemicalTransferDimensionMismatch;
         if (!finiteSlice(@field(state, field.name))) return error.InvalidTillageChemicalTransferInput;
@@ -98,7 +99,7 @@ pub fn transferCell(allocator: std.mem.Allocator, cell: usize, surface_remaining
     for (state.core_families) |family| try validateFamily(family, cells);
     for (state.dynamic_salt_families) |family| try validateFamily(family, cells);
     if (!std.math.isFinite(surface_remaining_fraction) or surface_remaining_fraction < 0 or surface_remaining_fraction > 1) return error.InvalidTillageChemicalTransferInput;
-    inline for (std.meta.fields(OrganicTotals)) |field| if (!std.math.isFinite(@field(totals, field.name)) or @field(totals, field.name) < 0) return error.InvalidTillageChemicalTransferInput;
+    inline for (ti_compat.fieldViews(OrganicTotals)) |field| if (!std.math.isFinite(@field(totals, field.name)) or @field(totals, field.name) < 0) return error.InvalidTillageChemicalTransferInput;
     if (!std.math.isFinite(thermodynamics.dry_organic_heat_capacity_megajoules_per_g_c_k) or thermodynamics.dry_organic_heat_capacity_megajoules_per_g_c_k <= 0 or !std.math.isFinite(thermodynamics.liquid_water_heat_capacity_megajoules_per_m3_k) or thermodynamics.liquid_water_heat_capacity_megajoules_per_m3_k <= 0) return error.InvalidTillageChemicalTransferInput;
     const ice_heat_capacity_per_water_equivalent_m3_k = ice_units.heatCapacityPerWaterEquivalentM3K(
         thermodynamics.physical_ice_heat_capacity_megajoules_per_m3_k,

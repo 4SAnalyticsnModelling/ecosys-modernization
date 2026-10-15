@@ -3,6 +3,7 @@
 const std = @import("std");
 const chemistry = @import("chemistry_state.zig");
 const phosphate = @import("phosphate_network.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Criteria = struct {
     /// A hundredth of a pH unit is about 2.3% hydrogen-activity movement.
@@ -63,7 +64,7 @@ fn mobileReference(name: []const u8, mobile: anytype, own: f64) f64 {
 fn mobilePhosphorus(zone: phosphate.State) f64 {
     @setEvalBranchQuota(20000);
     var total: f64 = 0;
-    inline for (std.meta.fields(phosphate.State)) |field| {
+    inline for (ti_compat.fieldViews(phosphate.State)) |field| {
         if (comptime std.mem.indexOf(u8, field.name, "solid") == null and !std.mem.endsWith(u8, field.name, "megagram")) total += @field(zone, field.name);
     }
     return total;
@@ -77,7 +78,7 @@ pub fn measure(state: *const chemistry.State, parameters: chemistry.ReactionPara
     defer profile_scope.end();
     if (state.cell_count != 1 or residual.len != chemistry.State.packedComponentCount()) return error.InvalidChemicalQualityState;
     for (residual) |value| if (!std.math.isFinite(value)) return error.InvalidChemicalQualityState;
-    inline for (std.meta.fields(Criteria)) |field| {
+    inline for (ti_compat.fieldViews(Criteria)) |field| {
         const value = @field(criteria, field.name);
         if (!std.math.isFinite(value) or value <= 0 or value > 1) return error.InvalidChemicalQualityCriteria;
     }
@@ -85,7 +86,7 @@ pub fn measure(state: *const chemistry.State, parameters: chemistry.ReactionPara
     const aqueous = state.aqueous[0];
     var quality: Quality = .{};
     var cursor: usize = 0;
-    inline for (std.meta.fields(@TypeOf(aqueous))) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(aqueous))) |field| {
         const own = @field(aqueous, field.name);
         if (comptime std.mem.eql(u8, field.name, "hydrogen") or std.mem.eql(u8, field.name, "hydroxide")) {
             const next = own + residual[cursor];
@@ -101,7 +102,7 @@ pub fn measure(state: *const chemistry.State, parameters: chemistry.ReactionPara
     for ([_]phosphate.State{ state.non_band_phosphate[0], state.band_phosphate[0] }, 0..) |zone, zone_index| {
         const phosphorus = mobilePhosphorus(zone);
         const capacity = try phosphate.siteInventory(zone);
-        inline for (std.meta.fields(phosphate.State)) |field| {
+        inline for (ti_compat.fieldViews(phosphate.State)) |field| {
             const own = @field(zone, field.name);
             var reference = if (comptime std.mem.endsWith(u8, field.name, "megagram")) capacity else phosphorus;
             if (comptime std.mem.indexOf(u8, field.name, "pair") != null) {
@@ -113,13 +114,13 @@ pub fn measure(state: *const chemistry.State, parameters: chemistry.ReactionPara
             cursor += 1;
         }
     }
-    inline for (std.meta.fields(@TypeOf(state.cation_exchange_mol_per_megagram[0]))) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(state.cation_exchange_mol_per_megagram[0]))) |field| {
         quality.include(try relativeChange(residual[cursor], @field(state.cation_exchange_mol_per_megagram[0], field.name), parameters.cation_exchange_capacity_mol_charge_per_megagram, criteria), cursor);
         cursor += 1;
     }
     quality.include(try relativeChange(residual[cursor], state.carboxyl_bound_hydrogen_mol_per_megagram[0], parameters.total_carboxyl_sites_mol_per_megagram, criteria), cursor);
     cursor += 1;
-    inline for (std.meta.fields(@TypeOf(state.geochemistry_solids[0]))) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(state.geochemistry_solids[0]))) |field| {
         const own = @field(state.geochemistry_solids[0], field.name);
         quality.include(try relativeChange(residual[cursor], own, mobileReference(field.name, mobile, own), criteria), cursor);
         cursor += 1;

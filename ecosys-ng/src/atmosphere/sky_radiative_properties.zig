@@ -12,6 +12,7 @@
 //! forcing value, or CLD can exceed the source's value.
 
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     outdoors: bool,
@@ -31,7 +32,7 @@ pub const Properties = struct {
 
 /// Exact WTHR atmospheric radiative properties from wthr.f:238-263.
 pub fn derive(inputs: Inputs) !Properties {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (field.type == bool) continue;
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value))

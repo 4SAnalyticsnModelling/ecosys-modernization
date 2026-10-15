@@ -1,6 +1,7 @@
 const std = @import("std");
 const SoilProfile = @import("../../state/soil_profile.zig").SoilProfile;
 const profile_derivation = @import("derivation.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const SoilMaterial = struct {
     allocator: std.mem.Allocator,
@@ -31,7 +32,7 @@ pub const SoilMaterial = struct {
         result.layer_count = layer_count;
         var allocated: usize = 0;
         errdefer freeAllocated(&result, allocated);
-        inline for (@typeInfo(SoilMaterial).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SoilMaterial)) |field| {
             if (field.type == []f64) {
                 @field(result, field.name) = try allocator.alloc(f64, layer_count);
                 allocated += 1;
@@ -95,14 +96,14 @@ pub const SoilMaterial = struct {
     }
 
     pub fn deinit(self: *SoilMaterial) void {
-        inline for (@typeInfo(SoilMaterial).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SoilMaterial)) |field| {
             if (field.type == []f64) self.allocator.free(@field(self, field.name));
         }
         self.* = undefined;
     }
 
     pub fn validateFinite(self: SoilMaterial) !void {
-        inline for (@typeInfo(SoilMaterial).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SoilMaterial)) |field| {
             if (field.type == []f64) {
                 for (@field(self, field.name), 0..) |value, layer| {
                     if (!std.math.isFinite(value)) {
@@ -117,7 +118,7 @@ pub const SoilMaterial = struct {
 
 fn freeAllocated(material: *SoilMaterial, count: usize) void {
     var visited: usize = 0;
-    inline for (@typeInfo(SoilMaterial).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SoilMaterial)) |field| {
         if (field.type == []f64) {
             if (visited < count) material.allocator.free(@field(material, field.name));
             visited += 1;
@@ -126,7 +127,7 @@ fn freeAllocated(material: *SoilMaterial, count: usize) void {
 }
 
 test "initialize soil material in model units from self-contained profile" {
-    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(std.testing.allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".fields.len);
+    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(std.testing.allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".field_names.len);
     defer std.testing.allocator.free(source);
     var profile = try @import("../../state/soil_profile.zig").parsePhysicalProfile(std.testing.allocator, source);
     defer profile.deinit();
@@ -144,13 +145,13 @@ test "initialize soil material in model units from self-contained profile" {
 
 test "negative READI organic and CEC sentinels resolve before catalog state_update" {
     const allocator = std.testing.allocator;
-    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".fields.len);
+    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".field_names.len);
     defer allocator.free(source);
     var profile = try @import("../../state/soil_profile.zig").parsePhysicalProfile(allocator, source);
     defer profile.deinit();
-    profile.layer_properties[@intFromEnum(@import("../../state/soil_profile.zig").LayerProperty.particulate_organic_carbon_kg_per_megagram) * profile.total_layer_count] = -1;
-    profile.layer_properties[@intFromEnum(@import("../../state/soil_profile.zig").LayerProperty.organic_nitrogen_g_per_megagram) * profile.total_layer_count] = -1;
-    profile.layer_properties[@intFromEnum(@import("../../state/soil_profile.zig").LayerProperty.organic_phosphorus_g_per_megagram) * profile.total_layer_count] = -1;
+    profile.layer_properties[@backingInt(@import("../../state/soil_profile.zig").LayerProperty.particulate_organic_carbon_kg_per_megagram) * profile.total_layer_count] = -1;
+    profile.layer_properties[@backingInt(@import("../../state/soil_profile.zig").LayerProperty.organic_nitrogen_g_per_megagram) * profile.total_layer_count] = -1;
+    profile.layer_properties[@backingInt(@import("../../state/soil_profile.zig").LayerProperty.organic_phosphorus_g_per_megagram) * profile.total_layer_count] = -1;
     profile.cation_exchange_capacity_cmol_kg[0] = -1;
     var material = try SoilMaterial.init(allocator, profile, profile_derivation.compatibilityParameters());
     defer material.deinit();

@@ -1,6 +1,7 @@
 const std = @import("std");
 const canopy = @import("../../canopy/photosynthesis/photosynthesis.zig");
 const root = @import("../root/plant_root_metabolism.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ElementalMass = struct {
     carbon_g_c: f64 = 0,
@@ -24,7 +25,7 @@ pub fn totals(
     roots: root.RootLitter,
     management_shoot: ElementalMass,
 ) !Result {
-    inline for (@typeInfo(ElementalMass).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ElementalMass)) |field| {
         const value = @field(management_shoot, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidManagementLitterStateUpdate;
@@ -59,7 +60,7 @@ pub fn totals(
 
 fn validateResult(result: Result) !void {
     inline for (.{ result.aboveground, result.belowground }) |mass|
-        inline for (@typeInfo(ElementalMass).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ElementalMass)) |field| {
             const value = @field(mass, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidPlantLitterfallStateUpdate;

@@ -34,6 +34,8 @@
 // Keep this module as the specification of the annual cadence now
 // implemented at the owner. PLANT-CADENCE-001 of docs/discrepancy_register.md
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const BalanceInputs = struct {
     net_carbon_g_c: []const f64,
@@ -98,15 +100,15 @@ pub fn apply(
                         state.salt_species_count,
                     ))))
         return error.AnnualPlantRolloverDimensionMismatch;
-    inline for (@typeInfo(BalanceInputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(BalanceInputs)) |field|
         if (@field(inputs, field.name).len != plants)
             return error.AnnualPlantRolloverDimensionMismatch;
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         if (field.type == []f64) for (@field(state, field.name)) |value|
             if (!std.math.isFinite(value))
                 return error.NonFiniteAnnualPlantRolloverState;
     }
-    inline for (@typeInfo(BalanceInputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(BalanceInputs)) |field|
         for (@field(inputs, field.name)) |value|
             if (!std.math.isFinite(value))
                 return error.NonFiniteAnnualPlantRolloverInput;
@@ -166,16 +168,16 @@ pub fn apply(
 
 test "DAY annual rollover preserves equations for seven runtime plants" {
     const plants = 7;
-    var carbon_reset = [_]f64{1} ** plants;
-    var nitrogen_reset = [_]f64{1} ** plants;
-    var phosphorus_reset = [_]f64{1} ** plants;
-    var harvest_c = [_]f64{10} ** plants;
-    var harvest_n = [_]f64{10} ** plants;
-    var harvest_p = [_]f64{10} ** plants;
-    var fluxes = [_]f64{9} ** (plants * 12);
-    var salts = [_]f64{8} ** (plants * 11);
-    const one = [_]f64{1} ** plants;
-    const two = [_]f64{2} ** plants;
+    var carbon_reset = @as([plants]f64, @splat(@as(f64, 1)));
+    var nitrogen_reset = @as([plants]f64, @splat(@as(f64, 1)));
+    var phosphorus_reset = @as([plants]f64, @splat(@as(f64, 1)));
+    var harvest_c = @as([plants]f64, @splat(@as(f64, 10)));
+    var harvest_n = @as([plants]f64, @splat(@as(f64, 10)));
+    var harvest_p = @as([plants]f64, @splat(@as(f64, 10)));
+    var fluxes = @as([(plants * 12)]f64, @splat(@as(f64, 9)));
+    var salts = @as([(plants * 11)]f64, @splat(@as(f64, 8)));
+    const one = @as([plants]f64, @splat(@as(f64, 1)));
+    const two = @as([plants]f64, @splat(@as(f64, 2)));
     try apply(.{
         .carbon_reset_balance_g_c = &carbon_reset,
         .nitrogen_reset_balance_g_n = &nitrogen_reset,

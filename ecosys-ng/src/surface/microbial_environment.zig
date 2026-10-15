@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     litter_water_m3: f64,
@@ -22,7 +23,7 @@ pub const Result = struct {
 /// calculation; respiration activity TOQCK is produced by the microbial
 /// reaction ledger and deliberately is not inferred here.
 pub fn calculate(inputs: Inputs) !Result {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfaceMicrobialEnvironment;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfaceMicrobialEnvironment;
     if (inputs.litter_water_m3 < 0 or inputs.reference_litter_volume_m3 < 0 or inputs.surface_porosity_m3_per_m3 < 0 or inputs.surface_porosity_m3_per_m3 > 1 or inputs.field_capacity_m3_per_m3 < 0 or inputs.field_capacity_m3_per_m3 > 1 or inputs.inactive_water_threshold_m3_per_m3 < 0 or inputs.negligible_reference_volume_m3 < 0 or inputs.litter_temperature_k <= 0 or inputs.litter_temperature_k + inputs.thermal_adaptation_offset_k <= 0) return error.InvalidSurfaceMicrobialEnvironment;
 
     var active_water_m3: f64 = 0;

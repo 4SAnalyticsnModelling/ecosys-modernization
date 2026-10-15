@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     dissolved_first_mol_per_m3: f64,
@@ -100,7 +101,7 @@ test "zero partner activity produces finite inventory-bounded dissolution" {
 }
 
 fn validateState(state: State) !void {
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         const value = @field(state, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteMineralState;
         if (value < 0) return error.NegativeMineralState;

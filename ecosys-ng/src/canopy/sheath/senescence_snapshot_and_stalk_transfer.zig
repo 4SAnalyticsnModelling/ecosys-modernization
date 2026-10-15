@@ -3,6 +3,7 @@
 // by `photosynthesis_node_layer.state_updateSelectedNodeSenescence`, reached
 // from `shoot_growth_runtime.applyTile`.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     sheath_carbon_g_c: []const f64,
@@ -94,7 +95,7 @@ pub fn preview(
         return error.SheathSenescenceNodeIndexOutOfBounds;
     if (!std.math.isFinite(structural_presence_threshold_g_c) or structural_presence_threshold_g_c < 0)
         return error.InvalidSheathSenescenceThreshold;
-    inline for (@typeInfo(RecyclingFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RecyclingFractions)) |field| {
         const value = @field(recycling, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.InvalidSheathSenescenceRecyclingFraction;

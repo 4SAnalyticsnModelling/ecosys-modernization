@@ -1,5 +1,7 @@
 const std = @import("std");
 const organic = @import("../organic/initialization.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -133,7 +135,7 @@ fn validate(state: State, inputs: Inputs) !void {
 }
 
 fn validatePool(pool: organic.ElementPool) !void {
-    inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidOrganicPrimingState;
+    inline for (ti_compat.fieldViews(organic.ElementPool)) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidOrganicPrimingState;
 }
 
 test "priming exchange conserves every extensive pool across runtime substrates" {
@@ -148,8 +150,8 @@ test "priming exchange conserves every extensive pool across runtime substrates"
         .{ .carbon_g_c = 3, .nitrogen_g_n = 0.3, .phosphorus_g_p = 0.03 },
     };
     const acetate = [_]f64{ 1, 2, 3, 4 };
-    const microbial = [_]organic.ElementPool{.{ .carbon_g_c = 1, .nitrogen_g_n = 0.1, .phosphorus_g_p = 0.01 }} ** 24;
-    const response = [_]f64{1} ** 8;
+    const microbial = @as([24]organic.ElementPool, @splat(@as(organic.ElementPool, .{ .carbon_g_c = 1, .nitrogen_g_n = 0.1, .phosphorus_g_p = 0.01 })));
+    const response = @as([8]f64, @splat(@as(f64, 1)));
     try deriveCell(&state, 0, .{ .substrate_carbon_g_c = &substrate, .microbial_activity_g_c_per_step = &activity, .dissolved = &dissolved, .dissolved_available_after_uptake = &dissolved, .dissolved_acetate_carbon_g_c = &acetate, .dissolved_acetate_available_after_uptake_g_c = &acetate, .microbial = &microbial, .microbial_temperature_water_response = &response, .dissolved_priming_rate_per_h = 0.01, .microbial_priming_rate_per_h = 0.001, .decomposition_temperature_response = 1, .timestep_h = 1, .negligible_carbon_g_c = 1e-12 });
     var activity_sum: f64 = 0;
     var acetate_sum: f64 = 0;

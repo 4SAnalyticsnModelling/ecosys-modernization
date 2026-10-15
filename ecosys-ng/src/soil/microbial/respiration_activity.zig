@@ -1,5 +1,7 @@
 const std = @import("std");
 const organic = @import("../organic/initialization.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Metabolism = enum {
     aerobic_heterotroph,
@@ -63,7 +65,7 @@ pub const AerobicSubstrateResult = struct {
 /// heterotroph. This preserves the distinction between unlimited ROQCD used
 /// by fertilizer hydrolysis and substrate-limited respiration used for O2.
 pub fn aerobicSubstrateLimitedRespiration(inputs: AerobicSubstrateInputs) !AerobicSubstrateResult {
-    inline for (@typeInfo(AerobicSubstrateInputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteAerobicSubstrateInput;
+    inline for (ti_compat.fieldViews(AerobicSubstrateInputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteAerobicSubstrateInput;
     if (inputs.unlimited_respiration_g_c < 0 or inputs.dissolved_organic_carbon_g_c < 0 or inputs.dissolved_acetate_carbon_g_c < 0 or inputs.biologically_active_water_m3 < 0 or inputs.substrate_complex_fraction < 0 or inputs.substrate_complex_fraction > 1 or inputs.doc_half_saturation_g_c_per_m3 <= 0 or inputs.acetate_half_saturation_g_c_per_m3 <= 0 or inputs.doc_biological_demand_fraction < 0 or inputs.doc_biological_demand_fraction > 1 or inputs.acetate_biological_demand_fraction < 0 or inputs.acetate_biological_demand_fraction > 1 or inputs.doc_respiration_requirement_g_c_per_g_c < 0 or inputs.acetate_respiration_requirement_g_c_per_g_c < 0 or inputs.temperature_response < 0 or inputs.timestep_h <= 0) return error.InvalidAerobicSubstrateInput;
     const effective_water = inputs.biologically_active_water_m3 * inputs.substrate_complex_fraction;
     const doc_concentration = if (inputs.biologically_active_water_m3 > 0) inputs.dissolved_organic_carbon_g_c / (if (effective_water > 0) effective_water else inputs.biologically_active_water_m3) else 0;
@@ -79,7 +81,7 @@ pub fn aerobicSubstrateLimitedRespiration(inputs: AerobicSubstrateInputs) !Aerob
     const acetate_respiration = @min(acetate_supply, acetate_unconstrained);
     const substrate_limited = doc_respiration + acetate_respiration;
     const result: AerobicSubstrateResult = .{ .doc_concentration_g_c_per_m3 = doc_concentration, .acetate_concentration_g_c_per_m3 = acetate_concentration, .doc_fraction = doc_fraction, .acetate_fraction = acetate_fraction, .doc_respiration_g_c = doc_respiration, .acetate_respiration_g_c = acetate_respiration, .substrate_limited_respiration_g_c = substrate_limited, .potential_oxygen_demand_g_o = 2.667 * substrate_limited };
-    inline for (@typeInfo(AerobicSubstrateResult).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteAerobicSubstrateResult;
+    inline for (ti_compat.fieldViews(AerobicSubstrateResult)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteAerobicSubstrateResult;
     return result;
 }
 
@@ -202,9 +204,9 @@ test "aerobic substrate limitation reproduces NITRO RGOMP and ROXYP" {
 }
 
 test "activity aggregation supports runtime population counts beyond legacy seven" {
-    const populations = [_]PopulationParameters{.{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 1 }} ** 11;
-    const values = [_]f64{1} ** 22;
-    const biomass = [_]f64{2} ** 22;
+    const populations = @as([11]PopulationParameters, @splat(@as(PopulationParameters, .{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 1 })));
+    const values = @as([22]f64, @splat(@as(f64, 1)));
+    const biomass = @as([22]f64, @splat(@as(f64, 2)));
     try std.testing.expectEqual(@as(f64, 44), try totalActivity_g_c_per_step(.{ .carbon_pool_count = 2, .population_parameters = &populations, .nutrient_limitation_fraction = &values, .water_stress_fraction = &values, .active_biomass_g_c = &biomass, .oxygen_limitation_fraction = &values, .timestep_h = 1 }));
 }
 
@@ -220,9 +222,9 @@ test "surface activity derives OMA and nutrient limitation from litter pools" {
         .{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0.125 },
         .{ .metabolism = .fermenting_heterotroph, .substrate_unlimited_respiration_per_h = 0.125 },
     };
-    const target_n = [_]f64{0.1} ** 21;
-    const target_p = [_]f64{0.01} ** 21;
-    const oxygen = [_]f64{1} ** 21;
+    const target_n = @as([21]f64, @splat(@as(f64, 0.1)));
+    const target_p = @as([21]f64, @splat(@as(f64, 0.01)));
+    const oxygen = @as([21]f64, @splat(@as(f64, 1)));
     state.microbial[0] = .{ .carbon_g_c = 5.5, .nitrogen_g_n = 0.55, .phosphorus_g_p = 0.055 };
     const result = try totalSurfaceActivity_g_c_per_step(&state, 0, 0, &oxygen, .{ .population_parameters = &populations, .target_nitrogen_per_carbon_g_n_per_g_c = &target_n, .target_phosphorus_per_carbon_g_p_per_g_c = &target_p, .labile_biomass_fraction = 0.55 }, 1);
     try std.testing.expectApproxEqAbs(@as(f64, 1.25), result, 1e-14);

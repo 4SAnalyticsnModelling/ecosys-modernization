@@ -1,6 +1,7 @@
 const std = @import("std");
 const admission = @import("rooted_layer_eligibility.zig");
 
+
 pub const nutrient_pool_count = 8;
 pub const salt_species_count = 8;
 
@@ -238,10 +239,10 @@ fn copyState(destination: State, source: State) void {
 const TestStorage = struct {
     mobile: [2]CarbonNitrogenPhosphorus = .{ .{ .carbon_g_c = 10, .nitrogen_g_n = 1, .phosphorus_g_p = 1 }, .{ .carbon_g_c = 10, .nitrogen_g_n = 1, .phosphorus_g_p = 1 } },
     respiration: [2]RespirationFlux = .{ .{}, .{} },
-    root_salt: [16]f64 = .{1} ** 16,
-    mineral: [8]f64 = .{10} ** 8,
+    root_salt: [16]f64 = @as([16]f64, @splat(@as(f64, 1))),
+    mineral: [8]f64 = @as([8]f64, @splat(@as(f64, 10))),
     organic: [2]CarbonNitrogenPhosphorus = .{ .{ .carbon_g_c = 5, .nitrogen_g_n = 5, .phosphorus_g_p = 5 }, .{ .carbon_g_c = 5, .nitrogen_g_n = 5, .phosphorus_g_p = 5 } },
-    soil_salt: [8]f64 = .{10} ** 8,
+    soil_salt: [8]f64 = @as([8]f64, @splat(@as(f64, 10))),
     charge: [1]f64 = .{0},
 
     fn state(self: *TestStorage, tuple_count: usize) State {
@@ -254,7 +255,7 @@ const TestStorage = struct {
 };
 
 fn testStaged(coordinate: admission.Coordinate, organic: []const CarbonNitrogenPhosphorus) StagedTuple {
-    return .{ .coordinate = coordinate, .selected = .{ .nutrient = true, .organic = true, .dynamic_salt = true }, .nutrient_uptake_g_element = .{1} ** 8, .nutrient_respiration_cost = .{ .actual_cost_g_c = 1, .oxygen_unlimited_g_c = 2, .carbon_unlimited_g_c = 3 }, .organic_exchange_by_substrate = organic, .salt_exchange_mol = .{0.5} ** 8, .hydrogen_charge_mol = 0.25 };
+    return .{ .coordinate = coordinate, .selected = .{ .nutrient = true, .organic = true, .dynamic_salt = true }, .nutrient_uptake_g_element = @splat(1), .nutrient_respiration_cost = .{ .actual_cost_g_c = 1, .oxygen_unlimited_g_c = 2, .carbon_unlimited_g_c = 3 }, .organic_exchange_by_substrate = organic, .salt_exchange_mol = @splat(0.5), .hydrogen_charge_mol = 0.25 };
 }
 
 test "combined replay preserves respiration organic mineral salt order and closure" {
@@ -292,8 +293,8 @@ test "sequential shared depletion fails late and rolls back authoritative state"
     const coordinates = [_]admission.Coordinate{ .{ .plant = 0, .biological_domain = 0, .soil_layer = 0 }, .{ .plant = 0, .biological_domain = 1, .soil_layer = 0 } };
     const organic = [_]CarbonNitrogenPhosphorus{ .{}, .{} };
     var stages = [_]StagedTuple{ testStaged(coordinates[0], &organic), testStaged(coordinates[1], &organic) };
-    stages[0].nutrient_uptake_g_element = .{6} ** 8;
-    stages[1].nutrient_uptake_g_element = .{6} ** 8;
+    stages[0].nutrient_uptake_g_element = @splat(6);
+    stages[1].nutrient_uptake_g_element = @splat(6);
     var state_store = TestStorage{};
     const before = state_store;
     var scratch_store = TestStorage{};
@@ -306,8 +307,8 @@ test "any negative intermediate fails without a silent tolerance clamp" {
     const organic = [_]CarbonNitrogenPhosphorus{ .{}, .{} };
     var stage = testStaged(coordinate, &organic);
     stage.nutrient_respiration_cost.actual_cost_g_c = 1.0e-15;
-    stage.nutrient_uptake_g_element = .{0} ** 8;
-    stage.salt_exchange_mol = .{0} ** 8;
+    stage.nutrient_uptake_g_element = @splat(0);
+    stage.salt_exchange_mol = @splat(0);
     stage.hydrogen_charge_mol = 0;
     var state_store = TestStorage{};
     state_store.mobile[0].carbon_g_c = 0;
@@ -322,7 +323,7 @@ test "disabled salt leaves ion and charge state unchanged" {
     const organic = [_]CarbonNitrogenPhosphorus{ .{}, .{} };
     var stage = testStaged(coordinates[0], &organic);
     stage.selected.dynamic_salt = false;
-    stage.salt_exchange_mol = .{0} ** 8;
+    stage.salt_exchange_mol = @splat(0);
     stage.hydrogen_charge_mol = 0;
     var state_store = TestStorage{};
     const salt_before = state_store.root_salt;
@@ -336,8 +337,8 @@ test "ordered tuple decomposition is identical to one combined replay" {
     const coordinates = [_]admission.Coordinate{ .{ .plant = 0, .biological_domain = 0, .soil_layer = 0 }, .{ .plant = 0, .biological_domain = 1, .soil_layer = 0 } };
     const organic = [_]CarbonNitrogenPhosphorus{ .{ .carbon_g_c = 0.25, .nitrogen_g_n = 0.1, .phosphorus_g_p = 0.05 }, .{ .carbon_g_c = -0.1, .nitrogen_g_n = 0, .phosphorus_g_p = 0 } };
     var stages = [_]StagedTuple{ testStaged(coordinates[0], &organic), testStaged(coordinates[1], &organic) };
-    stages[0].nutrient_uptake_g_element = .{0.5} ** 8;
-    stages[1].nutrient_uptake_g_element = .{0.25} ** 8;
+    stages[0].nutrient_uptake_g_element = @splat(0.5);
+    stages[1].nutrient_uptake_g_element = @splat(0.25);
     var whole = TestStorage{};
     var split = TestStorage{};
     var whole_scratch = TestStorage{};

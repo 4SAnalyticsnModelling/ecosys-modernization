@@ -6,6 +6,7 @@ const stages_module = @import("growth_stages.zig");
 const potential_seed_site_accumulation = @import("../growth/potential_seed_site_accumulation.zig");
 const final_grain_number = @import("../growth/final_grain_number.zig");
 const maximum_individual_grain_size = @import("../growth/maximum_individual_grain_size.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Controls = struct {
     allocator: std.mem.Allocator,
@@ -21,11 +22,11 @@ pub const Controls = struct {
         var result: Controls = undefined;
         result.allocator = allocator;
         var allocated: usize = 0;
-        errdefer inline for (@typeInfo(Controls).@"struct".fields) |field| if (field.type == []f64 and allocated > 0) {
+        errdefer inline for (ti_compat.fieldViews(Controls)) |field| if (field.type == []f64 and allocated > 0) {
             allocated -= 1;
             allocator.free(@field(result, field.name));
         };
-        inline for (@typeInfo(Controls).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(Controls)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, plant_count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -37,7 +38,7 @@ pub const Controls = struct {
 
     pub fn deinit(self: *Controls) void {
         self.allocator.free(self.shallow_root_profile);
-        inline for (@typeInfo(Controls).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(Controls)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 

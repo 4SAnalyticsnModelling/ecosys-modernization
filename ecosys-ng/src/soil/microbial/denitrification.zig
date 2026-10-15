@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     minimum_competition_fraction: f64,
@@ -12,7 +13,7 @@ pub const Parameters = struct {
     nitrate_n_per_unmet_oxygen_g_n_per_g_o: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteDenitrificationParameter;
+        inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteDenitrificationParameter;
         if (self.minimum_competition_fraction < 0 or self.nitrate_half_saturation_g_n_per_m3 <= 0 or self.nitrite_half_saturation_g_n_per_m3 <= 0 or self.nitrous_oxide_half_saturation_g_n_per_m3 <= 0 or self.product_inhibition_rate_g_n_per_m3_step <= 0 or self.carbon_per_nitrate_n_g_c_per_g_n <= 0 or self.carbon_per_nitrite_n_g_c_per_g_n <= 0 or self.carbon_per_nitrous_oxide_n_g_c_per_g_n <= 0 or self.nitrate_n_per_unmet_oxygen_g_n_per_g_o < 0) return error.InvalidDenitrificationParameter;
     }
 };
@@ -190,8 +191,8 @@ pub const AutotrophicPotential = struct {
 /// constrained by NO2, NH4 electron donor, CO2, and unmet O2 demand.
 pub fn calculateAutotrophicPotential(inputs: AutotrophicInputs, parameters: Parameters) !AutotrophicPotential {
     try parameters.validate();
-    inline for (@typeInfo(AutotrophicInputs).@"struct".fields) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidAutotrophicDenitrificationInput;
-    inline for (.{ inputs.non_band, inputs.band }) |zone| inline for (@typeInfo(AutotrophicZone).@"struct".fields) |field| if (!std.math.isFinite(@field(zone, field.name)) or @field(zone, field.name) < 0) return error.InvalidAutotrophicDenitrificationZone;
+    inline for (ti_compat.fieldViews(AutotrophicInputs)) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidAutotrophicDenitrificationInput;
+    inline for (.{ inputs.non_band, inputs.band }) |zone| inline for (ti_compat.fieldViews(AutotrophicZone)) |field| if (!std.math.isFinite(@field(zone, field.name)) or @field(zone, field.name) < 0) return error.InvalidAutotrophicDenitrificationZone;
     if (inputs.timestep_h <= 0 or inputs.additional_ammonium_oxidation_per_nitrite_reduction <= 0 or inputs.ammonium_supply_per_nitrite_reduction <= 0) return error.InvalidAutotrophicDenitrificationInput;
     const zones = [_]AutotrophicZone{ inputs.non_band, inputs.band };
     const unmet_oxygen_g_o = @max(0, inputs.oxygen_demand_g_o - inputs.oxygen_reduction_g_o);
@@ -227,7 +228,7 @@ pub const AutotrophicState = struct { ammonium_g_n: f64, nitrite_g_n: f64, nitro
 /// `applyZone`, an independently-maintained reimplementation. A fix applied
 /// only here has no effect on the simulation.
 pub fn state_updateAutotrophicZone(state: *AutotrophicState, potential_nitrite_reduction_g_n: f64, redox_limitation_fraction: f64, additional_ammonium_oxidation_per_nitrite_reduction: f64) !f64 {
-    inline for (@typeInfo(AutotrophicState).@"struct".fields) |field| if (!std.math.isFinite(@field(state.*, field.name)) or @field(state.*, field.name) < 0) return error.InvalidAutotrophicDenitrificationState;
+    inline for (ti_compat.fieldViews(AutotrophicState)) |field| if (!std.math.isFinite(@field(state.*, field.name)) or @field(state.*, field.name) < 0) return error.InvalidAutotrophicDenitrificationState;
     if (!std.math.isFinite(potential_nitrite_reduction_g_n) or potential_nitrite_reduction_g_n < 0 or !std.math.isFinite(redox_limitation_fraction) or redox_limitation_fraction < 0 or redox_limitation_fraction > 1 or !std.math.isFinite(additional_ammonium_oxidation_per_nitrite_reduction) or additional_ammonium_oxidation_per_nitrite_reduction <= 0 or additional_ammonium_oxidation_per_nitrite_reduction >= 1) return error.InvalidAutotrophicDenitrificationStateUpdate;
     const requested = potential_nitrite_reduction_g_n * redox_limitation_fraction;
     const reduction = @min(requested, state.ammonium_g_n / additional_ammonium_oxidation_per_nitrite_reduction, state.nitrite_g_n / (1 - additional_ammonium_oxidation_per_nitrite_reduction));
@@ -265,9 +266,9 @@ pub const Actual = struct {
 /// `applyZone`, an independently-maintained reimplementation. A fix applied
 /// only here has no effect on the simulation.
 pub fn state_update(state: *State, potential: Potential, redox_limitation_fraction: f64) !Actual {
-    inline for (@typeInfo(State).@"struct".fields) |field| if (!std.math.isFinite(@field(state.*, field.name)) or @field(state.*, field.name) < 0) return error.InvalidDenitrificationState;
+    inline for (ti_compat.fieldViews(State)) |field| if (!std.math.isFinite(@field(state.*, field.name)) or @field(state.*, field.name) < 0) return error.InvalidDenitrificationState;
     if (!std.math.isFinite(redox_limitation_fraction) or redox_limitation_fraction < 0 or redox_limitation_fraction > 1) return error.InvalidDenitrificationStateUpdate;
-    inline for (@typeInfo(Potential).@"struct".fields) |field| if (!std.math.isFinite(@field(potential, field.name)) or @field(potential, field.name) < 0) return error.InvalidDenitrificationPotential;
+    inline for (ti_compat.fieldViews(Potential)) |field| if (!std.math.isFinite(@field(potential, field.name)) or @field(potential, field.name) < 0) return error.InvalidDenitrificationPotential;
     const nitrate_non_band = @min(state.non_band_nitrate_g_n, potential.non_band_nitrate_reduction_g_n * redox_limitation_fraction);
     const nitrate_band = @min(state.band_nitrate_g_n, potential.band_nitrate_reduction_g_n * redox_limitation_fraction);
     const nitrite_non_band_available = state.non_band_nitrite_g_n + nitrate_non_band;
@@ -299,8 +300,8 @@ fn monod(concentration: f64, half_saturation: f64) f64 {
 }
 
 fn validateInputs(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidDenitrificationInput;
-    inline for (.{ inputs.non_band, inputs.band }) |zone| inline for (@typeInfo(Zone).@"struct".fields) |field| if (!std.math.isFinite(@field(zone, field.name)) or @field(zone, field.name) < 0) return error.InvalidDenitrificationZone;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidDenitrificationInput;
+    inline for (.{ inputs.non_band, inputs.band }) |zone| inline for (ti_compat.fieldViews(Zone)) |field| if (!std.math.isFinite(@field(zone, field.name)) or @field(zone, field.name) < 0) return error.InvalidDenitrificationZone;
     if (inputs.nitrous_oxide_competition_fraction) |fraction| if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1) return error.InvalidDenitrificationInput;
     if (inputs.timestep_h <= 0) return error.InvalidDenitrificationInput;
 }

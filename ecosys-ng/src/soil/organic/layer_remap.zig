@@ -1,5 +1,6 @@
 const std = @import("std");
 const organic = @import("initialization.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// REDIST ponding for OMC/OMN/OMP, ORC/ORN/ORP, OQC/OQN/OQP/OQA,
 /// OHC/OHN/OHP/OHA, and OSC/OSA/OSN/OSP. Every runtime substrate,
@@ -46,7 +47,7 @@ pub fn validateLayerFraction(state: *const organic.State, source: usize, destina
 fn validateElementLayer(values: []const organic.ElementPool, layer_count: usize, source: usize, destination: usize, fraction: f64) !void {
     if (values.len % layer_count != 0) return error.OrganicLayerRemapDimensionMismatch;
     const per_layer = values.len / layer_count;
-    for (0..per_layer) |offset| inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| {
+    for (0..per_layer) |offset| inline for (ti_compat.fieldViews(organic.ElementPool)) |field| {
         try validatePair(@field(values[source * per_layer + offset], field.name), @field(values[destination * per_layer + offset], field.name), fraction);
     };
 }
@@ -59,7 +60,7 @@ fn validateScalarLayer(values: []const f64, layer_count: usize, source: usize, d
 
 fn transferElementLayer(values: []organic.ElementPool, layer_count: usize, source: usize, destination: usize, fraction: f64) void {
     const per_layer = values.len / layer_count;
-    for (0..per_layer) |offset| inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| {
+    for (0..per_layer) |offset| inline for (ti_compat.fieldViews(organic.ElementPool)) |field| {
         const moved = fraction * @field(values[source * per_layer + offset], field.name);
         @field(values[source * per_layer + offset], field.name) -= moved;
         @field(values[destination * per_layer + offset], field.name) += moved;

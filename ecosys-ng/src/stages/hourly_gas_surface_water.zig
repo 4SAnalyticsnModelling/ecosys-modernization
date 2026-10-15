@@ -283,7 +283,7 @@ pub fn transportDissolvedGasAndSurfaceWater(
             for (0..context.grid.layer_count) |layer| {
                 const base = layer * ecosys.gas_transport.species_count;
                 inline for ([_]ecosys.gas_transport.Species{ .nitrogen, .nitrous_oxide, .ammonia }) |species|
-                    diagnostic_boundary_n_g += context.soil_dissolved_gas_transport.boundary_net_flux_g[base + @intFromEnum(species)];
+                    diagnostic_boundary_n_g += context.soil_dissolved_gas_transport.boundary_net_flux_g[base + @backingInt(species)];
             }
             const diagnostic_after_g = try group_support.diagnosticGasNitrogen_g(context.gas_transport);
             std.log.debug("dissolved gas nitrogen transaction: delta_g={e} boundary_g={e} residual_g={e}", .{ diagnostic_after_g - diagnostic_dissolved_transport_n_before_g, diagnostic_boundary_n_g, diagnostic_after_g - diagnostic_dissolved_transport_n_before_g - diagnostic_boundary_n_g });
@@ -373,10 +373,10 @@ pub fn transportDissolvedGasAndSurfaceWater(
                     inline for ([_]ecosys.gas_transport.Species{ .nitrogen, .nitrous_oxide, .ammonia }) |species| {
                         for (0..context.grid.layer_count) |layer| {
                             diagnostic_boundary_n_g += context.soil_gas_transport.atmospheric_flux_g_per_h[
-                                layer * ecosys.gas_transport.species_count + @intFromEnum(species)
+                                layer * ecosys.gas_transport.species_count + @backingInt(species)
                             ];
                             diagnostic_boundary_n_g += context.soil_gas_transport.subsurface_flux_g_per_h[
-                                layer * ecosys.gas_transport.species_count + @intFromEnum(species)
+                                layer * ecosys.gas_transport.species_count + @backingInt(species)
                             ];
                         }
                     }

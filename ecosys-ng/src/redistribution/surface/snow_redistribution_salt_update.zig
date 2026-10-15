@@ -6,6 +6,7 @@
 // This scalar REDIST update remains only as a reference kernel.
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Snowpack ion species pool (mol). redist.f lines 5393--5433, 41 fields.
 pub const SnowIonPools = struct {
@@ -123,10 +124,10 @@ pub fn redistributionIsActive(
 ///
 /// Caller must check both TQS != 0.0 and ISALTG != 0 before invoking.
 pub fn update(pools: SnowIonPools, fluxes: SnowIonFluxes) !SnowIonPools {
-    inline for (@typeInfo(SnowIonPools).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SnowIonPools)) |field|
         if (!std.math.isFinite(@field(pools, field.name)))
             return error.InvalidSnowIonPool;
-    inline for (@typeInfo(SnowIonFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SnowIonFluxes)) |field|
         if (!std.math.isFinite(@field(fluxes, field.name)))
             return error.InvalidSnowIonFlux;
 
@@ -173,7 +174,7 @@ pub fn update(pools: SnowIonPools, fluxes: SnowIonFluxes) !SnowIonPools {
         .ca2p_mol = pools.ca2p_mol + fluxes.ca2p_mol,
         .mg1p_mol = pools.mg1p_mol + fluxes.mg1p_mol,
     };
-    inline for (@typeInfo(SnowIonPools).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SnowIonPools)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteSnowIonPool;
     return result;
@@ -217,12 +218,12 @@ test "REDIST snow salt rejects non-finite flux" {
 test "REDIST snow salt redistribution maps all 41 source species" {
     var fluxes = std.mem.zeroes(SnowIonFluxes);
     var expected_value: f64 = 1.0;
-    inline for (@typeInfo(SnowIonFluxes).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SnowIonFluxes)) |field| {
         @field(fluxes, field.name) = expected_value;
         expected_value += 1.0;
     }
     const result = try update(std.mem.zeroes(SnowIonPools), fluxes);
-    inline for (@typeInfo(SnowIonPools).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SnowIonPools)) |field|
         try std.testing.expectEqual(@field(fluxes, field.name), @field(result, field.name));
 }
 

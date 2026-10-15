@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 const liquid_water_heat_capacity_megajoules_per_m3_k: f64 = 4.19;
 
@@ -16,7 +17,7 @@ pub const CellActivity = struct {
     residual_heat_output_megajoules: f64 = 0,
 
     pub fn validate(self: CellActivity) !void {
-        inline for (std.meta.fields(CellActivity)) |field| {
+        inline for (ti_compat.fieldViews(CellActivity)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidCanopyConservationActivity;
@@ -83,7 +84,7 @@ pub fn refresh(state: *State, inputs: Inputs) !void {
     if (inputs.air_temperature_k_by_cell.len != state.cell_count or
         inputs.thflxc_megajoules_per_h_by_cell.len != state.cell_count)
         return error.InvalidCanopyConservationDimensions;
-    inline for (std.meta.fields(Inputs)[1 .. std.meta.fields(Inputs).len - 1]) |field|
+    inline for (ti_compat.fieldViews(Inputs)[1 .. ti_compat.fieldViews(Inputs).len - 1]) |field|
         if (@field(inputs, field.name).len != plant_count)
             return error.InvalidCanopyConservationDimensions;
 

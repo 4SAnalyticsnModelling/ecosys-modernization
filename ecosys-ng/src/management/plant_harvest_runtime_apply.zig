@@ -34,6 +34,7 @@ const group_misc = @import("plant_harvest_runtime_misc.zig");
 const group_mortality = @import("plant_harvest_runtime_mortality.zig");
 const group_types = @import("plant_harvest_runtime_types.zig");
 const group_validation = @import("plant_harvest_runtime_validation.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Rebuild the cell aggregate from its authoritative per-plant owners after a
 /// management change.  Subtract-and-zero publication can hide a stale local
@@ -373,7 +374,7 @@ pub fn applyStartOfSeasonResidue(
     staged_context.canopy_state = &staged_canopy;
     staged_context.products_by_plant = staged_products;
     try applyStartOfSeasonResidueStaged(&staged_context, plant, biomass_turnover_type, root_profile_type);
-    inline for (@typeInfo(canopy.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(canopy.State)) |field| {
         if (field.type == []f64) @memcpy(@field(context.canopy_state, field.name), @field(staged_canopy, field.name));
     }
     @memcpy(context.products_by_plant, staged_products);
@@ -805,7 +806,7 @@ pub fn applyAbovegroundTillage(context: *group_misc.Context, plant: usize, remai
         .phosphorus_g = grain_before.phosphorus_g * removed_fraction,
     } else .{};
     if (winter_annual) {
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
             const next = @field(context.products_by_plant[plant].nonfoliar.litter, field.name) - @field(grain_to_storage, field.name);
             if (!std.math.isFinite(next) or next < 0) return error.InvalidPlantTillageStorage;
             @field(context.products_by_plant[plant].nonfoliar.litter, field.name) = next;
@@ -888,7 +889,7 @@ pub fn applyEventInternal(context: *group_misc.Context, plant: usize, source_eve
     if (event.kind == .animal_grazing or event.kind == .insect_grazing) return error.GrazingRequiresDemandDrivenKernel;
     const state = context.canopy_state;
     if (plant >= context.science_by_plant.len or plant >= context.products_by_plant.len) return error.PlantHarvestIndexOutOfBounds;
-    if (@intFromEnum(event.kind) <= @intFromEnum(management.HarvestKind.above_ground) and event.cutting_height_m_or_lai_fraction < 0) {
+    if (@backingInt(event.kind) <= @backingInt(management.HarvestKind.above_ground) and event.cutting_height_m_or_lai_fraction < 0) {
         const layers = context.canopy_layer_state orelse return error.IncompleteLeafAreaHarvestContext;
         const cell = plant / state.species_count;
         if (cell >= layers.cell_count or layers.species_count != state.species_count) return error.PlantHarvestIndexOutOfBounds;

@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const TurbulenceParameters = struct {
     water_fraction_threshold: f64,
@@ -24,8 +25,8 @@ pub const CellConductivityInputs = struct {
 /// Exact WATSUB TCND calculation, including Rayleigh/Nusselt enhancement of
 /// liquid-water and air conductivity across the current face.
 pub fn calculateCellConductivity(inputs: CellConductivityInputs, parameters: TurbulenceParameters) !f64 {
-    inline for (@typeInfo(CellConductivityInputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSoilHeatInput;
-    inline for (@typeInfo(TurbulenceParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteSoilHeatParameter;
+    inline for (ti_compat.fieldViews(CellConductivityInputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSoilHeatInput;
+    inline for (ti_compat.fieldViews(TurbulenceParameters)) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteSoilHeatParameter;
     if (inputs.bulk_density_megagrams_per_m3 < 0 or inputs.liquid_water_fraction < 0 or inputs.ice_fraction < 0 or inputs.air_fraction < 0 or inputs.fraction_of_pore_volume_air_filled < 0 or inputs.solid_conductivity_numerator_m_megajoules_per_h_k < 0 or inputs.solid_conductivity_denominator < 0 or parameters.water_fraction_threshold < 0 or parameters.air_fraction_threshold < 0 or parameters.water_rayleigh_coefficient < 0 or parameters.air_rayleigh_coefficient < 0 or parameters.water_nusselt_denominator <= 0 or parameters.air_nusselt_denominator <= 0 or parameters.maximum_rayleigh_number <= 0) return error.InvalidSoilHeatInput;
     if (inputs.bulk_density_megagrams_per_m3 == 0 and inputs.liquid_water_fraction + inputs.ice_fraction == 0) return 0;
     const scaled_temperature_difference = @abs(inputs.temperature_difference_k) * 1.0e-6;
@@ -95,7 +96,7 @@ pub const FaceFlux = struct {
 /// Exact HFLWL face calculation after liquid, vapor and macropore water fluxes
 /// have been determined. Positive heat moves source to destination.
 pub fn calculateFaceFlux(inputs: FaceInputs) !FaceFlux {
-    inline for (@typeInfo(FaceInputs).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSoilHeatInput;
+    inline for (ti_compat.fieldViews(FaceInputs)) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSoilHeatInput;
     if (inputs.source_temperature_k <= 0 or inputs.destination_temperature_k <= 0 or inputs.source_heat_capacity_megajoules_per_k <= 0 or inputs.destination_heat_capacity_megajoules_per_k <= 0 or inputs.source_minimum_heat_capacity_megajoules_per_k < 0 or inputs.destination_minimum_heat_capacity_megajoules_per_k < 0 or inputs.top_snow_heat_capacity_megajoules_per_k < 0 or inputs.maximum_negligible_snow_heat_capacity_megajoules_per_k < 0 or inputs.liquid_water_heat_capacity_megajoules_per_m3_k <= 0 or inputs.source_thermal_conductivity_m_megajoules_per_h_k < 0 or inputs.destination_thermal_conductivity_m_megajoules_per_h_k < 0 or inputs.source_path_length_m <= 0 or inputs.destination_path_length_m <= 0 or inputs.face_area_m2 < 0 or inputs.time_fraction <= 0 or inputs.time_fraction > 1) return error.InvalidSoilHeatInput;
     const vapor_donor_temperature = if (inputs.vapor_flux_m3 >= 0) inputs.source_temperature_k else inputs.destination_temperature_k;
     const liquid_donor_temperature = if (inputs.liquid_water_flux_m3 >= 0) inputs.source_temperature_k else inputs.destination_temperature_k;

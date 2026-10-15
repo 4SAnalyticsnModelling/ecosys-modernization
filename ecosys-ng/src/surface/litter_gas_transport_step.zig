@@ -10,6 +10,7 @@ const precipitation = @import("precipitation.zig");
 const ice_units = @import("../core/ice_units.zig");
 const legacy_floor = @import("../core/legacy_water_negligible_floor.zig");
 
+
 pub const RuntimeParameters = struct {
     reference_temperature_k: f64 = 298.15,
     temperature_exponent: f64 = 1.75,
@@ -290,7 +291,7 @@ pub const State = struct {
         // owning wrapper before any chemistry mirror can obscure which side
         // introduced a conservation defect.
         for (0..self.cell_count) |cell| for (0..gas.species_count) |species| {
-            if (species == @intFromEnum(gas.Species.ammonia)) continue;
+            if (species == @backingInt(gas.Species.ammonia)) continue;
             const component = cell * gas.species_count + species;
             const before_total_g = gaseous_before[component] +
                 dissolved_before[component] +
@@ -346,9 +347,9 @@ test "PARR couples atmosphere and litter diffusivity in one local solve" {
     gas_state.temperature_k[0] = 298.15;
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    var atmospheric = [_]f64{0} ** gas.species_count;
+    var atmospheric = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     atmospheric[0] = 1;
-    const unit_solubility = gas.SurfaceSolubilityParameters{ .reference_water_to_air = [_]f64{1} ** gas.species_count, .log_intercept = [_]f64{0} ** gas.species_count, .temperature_coefficient_per_c = [_]f64{0} ** gas.species_count };
+    const unit_solubility = gas.SurfaceSolubilityParameters{ .reference_water_to_air = @as([gas.species_count]f64, @splat(@as(f64, 1))), .log_intercept = @as([gas.species_count]f64, @splat(@as(f64, 0))), .temperature_coefficient_per_c = @as([gas.species_count]f64, @splat(@as(f64, 0))) };
     const result = try state.advance(&gas_state, .{ .chemistry = &chemistry_state, .nitrogen_molar_mass_g_per_mol = 14, .absolute_tolerance_g_n = 1e-12, .relative_tolerance = 1e-9 }, &geometry, &.{0.5}, &.{0}, &.{2}, &.{0.1}, &atmospheric, unit_solubility, .{ .reference_time_h = 1, .wet_exponent = 12, .dry_exponent = 12, .transition_water_fraction = 0.5, .iteration_fraction = 0, .aqueous_tortuosity_coefficient = 0.7 }, .{}, .{ .max_iterations = 80 });
     try std.testing.expect(state.boundaries[0].interior_conductance_m3_per_step[0] > 0);
     try std.testing.expect(state.gas_water_exchange_rate_per_step[0] > 0);
@@ -375,8 +376,8 @@ test "litter ammonia phase exchange conserves chemistry plus gaseous owner" {
     chemistry_state.cells[0].ammonia_mol_per_m3 = 1;
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    const atmosphere_zero = [_]f64{0} ** gas.species_count;
-    const unit_solubility = gas.SurfaceSolubilityParameters{ .reference_water_to_air = [_]f64{1} ** gas.species_count, .log_intercept = [_]f64{0} ** gas.species_count, .temperature_coefficient_per_c = [_]f64{0} ** gas.species_count };
+    const atmosphere_zero = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    const unit_solubility = gas.SurfaceSolubilityParameters{ .reference_water_to_air = @as([gas.species_count]f64, @splat(@as(f64, 1))), .log_intercept = @as([gas.species_count]f64, @splat(@as(f64, 0))), .temperature_coefficient_per_c = @as([gas.species_count]f64, @splat(@as(f64, 0))) };
     const initial_g_n: f64 = 0.5 * 14;
     _ = try state.advance(
         &gas_state,
@@ -392,7 +393,7 @@ test "litter ammonia phase exchange conserves chemistry plus gaseous owner" {
         .{},
         .{ .absolute_tolerance_g = 1e-12, .relative_tolerance = 1e-9, .max_iterations = 80 },
     );
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const ammonia = @backingInt(gas.Species.ammonia);
     const aqueous_g_n = chemistry_state.cells[0].ammonia_mol_per_m3 * 0.5 * 14;
     try std.testing.expect(gas_state.gaseous_mass_g[ammonia] > 0);
     // Pressure displacement is an atmospheric boundary input even when the
@@ -441,8 +442,8 @@ test "surface litter gas transaction rolls back gas chemistry and workspaces on 
     defer std.testing.allocator.free(water_before);
     const flux_before = try std.testing.allocator.dupe(f64, state.atmospheric_flux_g_per_h);
     defer std.testing.allocator.free(flux_before);
-    const atmospheric = [_]f64{0} ** (2 * gas.species_count);
-    const unit_solubility = gas.SurfaceSolubilityParameters{ .reference_water_to_air = [_]f64{1} ** gas.species_count, .log_intercept = [_]f64{0} ** gas.species_count, .temperature_coefficient_per_c = [_]f64{0} ** gas.species_count };
+    const atmospheric = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    const unit_solubility = gas.SurfaceSolubilityParameters{ .reference_water_to_air = @as([gas.species_count]f64, @splat(@as(f64, 1))), .log_intercept = @as([gas.species_count]f64, @splat(@as(f64, 0))), .temperature_coefficient_per_c = @as([gas.species_count]f64, @splat(@as(f64, 0))) };
     try std.testing.expectError(error.InvalidSurfaceLitterGasState, state.advance(
         &gas_state,
         .{ .chemistry = &chemistry_state, .nitrogen_molar_mass_g_per_mol = 14, .absolute_tolerance_g_n = 1e-12, .relative_tolerance = 1e-9 },

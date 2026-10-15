@@ -5,13 +5,15 @@ const surface_water_flow = @import("water_flow.zig");
 const retention = @import("../soil/water/retention.zig");
 const snow_cover = @import("../soil/water/snow_cover_fraction.zig");
 const ice_units = @import("../core/ice_units.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const ThermodynamicParameters = struct {
     solid_snow_heat_capacity_megajoules_per_m3_k: f64,
     liquid_water_heat_capacity_megajoules_per_m3_k: f64,
 
     fn validate(self: ThermodynamicParameters) !void {
-        inline for (@typeInfo(ThermodynamicParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ThermodynamicParameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value <= 0) return error.InvalidSurfacePrecipitationThermodynamics;
         }
@@ -60,7 +62,7 @@ pub const RuntimeState = struct {
     /// cleanup copy per fallible allocation.
     noinline fn deinitAllocatedPrefix(self: *RuntimeState, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(RuntimeState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(RuntimeState)) |field| {
             if (field.type == []f64 or field.type == []bool) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -76,7 +78,7 @@ pub const RuntimeState = struct {
         result.cell_count = cell_count;
         var allocated: usize = 0;
         errdefer result.deinitAllocatedPrefix(allocated);
-        inline for (@typeInfo(RuntimeState).@"struct".fields) |field| if (field.type == []f64 or field.type == []bool) {
+        inline for (ti_compat.fieldViews(RuntimeState)) |field| if (field.type == []f64 or field.type == []bool) {
             @field(result, field.name) = try allocator.alloc(std.meta.Elem(field.type), cell_count);
             @memset(@field(result, field.name), if (field.type == []bool) false else 0);
             allocated += 1;
@@ -86,7 +88,7 @@ pub const RuntimeState = struct {
     }
 
     pub fn deinit(self: *RuntimeState) void {
-        inline for (@typeInfo(RuntimeState).@"struct".fields) |field| if (field.type == []f64 or field.type == []bool) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(RuntimeState)) |field| if (field.type == []f64 or field.type == []bool) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -94,7 +96,7 @@ pub const RuntimeState = struct {
 test "surface precipitation state releases every mixed-slice allocation prefix" {
     const allocation_count = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(RuntimeState).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(RuntimeState)) |field| {
             if (field.type == []f64 or field.type == []bool) count += 1;
         }
         break :count count;
@@ -280,7 +282,7 @@ pub fn state_updateLitterHeatIngress(
     const cells = state.cell_count;
     if (cells == 0 or state.heat_to_litter_megajoules_per_h.len != cells or direct_water_m3_per_h.len != cells)
         return error.SurfaceIngressDimensionMismatch;
-    inline for (std.meta.fields(LitterHeatDestinations)) |field|
+    inline for (ti_compat.fieldViews(LitterHeatDestinations)) |field|
         if (@field(destination, field.name).len != cells) return error.SurfaceIngressDimensionMismatch;
     if (!std.math.isFinite(timestep_h) or timestep_h <= 0 or timestep_h > 1)
         return error.InvalidSurfaceIngressTimestep;
@@ -511,7 +513,7 @@ fn validComplementaryFractions(left: f64, right: f64) bool {
 /// iteration ceilings are deliberately absent from this interface.
 pub fn partitionAtmosphericWater(inputs: SurfacePartitionInputs, thermodynamics: ThermodynamicParameters) !SurfacePartition {
     try thermodynamics.validate();
-    inline for (@typeInfo(SurfacePartitionInputs).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfacePrecipitationInput;
+    inline for (ti_compat.fieldViews(SurfacePartitionInputs)) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfacePrecipitationInput;
     // TFLWC is signed: canopy water above its current capacity drains and
     // appears as negative retention, increasing water delivered below canopy.
     if (inputs.rain_and_irrigation_m3_per_h < 0 or inputs.intercepted_rain_m3_per_h > inputs.rain_and_irrigation_m3_per_h or inputs.snowfall_water_equivalent_m3_per_h < 0 or inputs.snow_cover_fraction < 0 or inputs.snow_cover_fraction > 1 or inputs.snow_free_fraction < 0 or inputs.snow_free_fraction > 1 or inputs.litter_cover_fraction < 0 or inputs.litter_cover_fraction > 1 or inputs.litter_water_capacity_m3 < 0 or inputs.litter_water_m3 < 0 or inputs.atmospheric_temperature_k <= 0 or inputs.matrix_fraction < 0 or inputs.macropore_fraction < 0 or !validComplementaryFractions(inputs.snow_cover_fraction, inputs.snow_free_fraction) or !validComplementaryFractions(inputs.matrix_fraction, inputs.macropore_fraction)) return error.InvalidSurfacePrecipitationInput;
@@ -620,7 +622,7 @@ pub const Redistribution = struct {
 
 pub fn redistribute(inputs: RedistributionInputs, thermodynamics: ThermodynamicParameters) !Redistribution {
     try thermodynamics.validate();
-    inline for (@typeInfo(RedistributionInputs).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfacePrecipitationInput;
+    inline for (ti_compat.fieldViews(RedistributionInputs)) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfacePrecipitationInput;
     if (inputs.rain_and_irrigation_to_matrix_m3 < 0 or inputs.rain_and_irrigation_to_macropore_m3 < 0 or inputs.rain_and_irrigation_to_litter_m3 < 0 or inputs.matrix_air_capacity_m3 < 0 or inputs.macropore_air_capacity_m3 < 0 or inputs.snow_free_fraction < 0 or inputs.snow_free_fraction > 1 or inputs.atmospheric_temperature_k <= 0) return error.InvalidSurfacePrecipitationInput;
     if (!inputs.soil_surface_present) return .{ .litter_water_m3 = inputs.rain_and_irrigation_to_litter_m3, .matrix_water_m3 = inputs.rain_and_irrigation_to_matrix_m3, .macropore_water_m3 = inputs.rain_and_irrigation_to_macropore_m3, .litter_heat_megajoules = inputs.litter_input_heat_megajoules, .soil_heat_megajoules = inputs.soil_input_heat_megajoules };
     const matrix_excess = @max(0.0, inputs.rain_and_irrigation_to_matrix_m3 - inputs.matrix_air_capacity_m3 * inputs.snow_free_fraction);
@@ -642,7 +644,7 @@ pub const GasExchange = struct { air_water_rate_per_step: f64, aqueous_tortuosit
 
 pub fn litterGasExchange(total_pore_volume_m3: f64, physical_ice_volume_m3: f64, water_m3: f64, air_m3: f64, water_retention_capacity_m3: f64, parameters: GasExchangeParameters) !GasExchange {
     inline for (.{ total_pore_volume_m3, physical_ice_volume_m3, water_m3, air_m3, water_retention_capacity_m3 }) |value| if (!std.math.isFinite(value)) return error.NonFiniteSurfacePrecipitationInput;
-    inline for (@typeInfo(GasExchangeParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteSurfacePrecipitationInput;
+    inline for (ti_compat.fieldViews(GasExchangeParameters)) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteSurfacePrecipitationInput;
     if (total_pore_volume_m3 < 0 or physical_ice_volume_m3 < 0 or water_m3 < 0 or air_m3 < 0 or water_retention_capacity_m3 < 0 or parameters.reference_time_h <= 0 or parameters.transition_water_fraction < 0 or parameters.transition_water_fraction > 1 or parameters.iteration_fraction < 0 or parameters.iteration_fraction > 1 or parameters.aqueous_tortuosity_coefficient < 0) return error.InvalidSurfacePrecipitationInput;
     const available_pores = total_pore_volume_m3 - physical_ice_volume_m3;
     var rate: f64 = 0;
@@ -713,8 +715,8 @@ pub fn rainfallConductivityMultiplier(cumulative_energy_j_per_m2: f64, surface_s
 
 pub fn rainfallImpact(previous_cumulative_energy_j: f64, inputs: RainfallImpactInputs, parameters: RainfallImpactParameters) !RainfallImpact {
     if (!std.math.isFinite(previous_cumulative_energy_j) or previous_cumulative_energy_j < 0) return error.InvalidSurfacePrecipitationInput;
-    inline for (@typeInfo(RainfallImpactInputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfacePrecipitationInput;
-    inline for (@typeInfo(RainfallImpactParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteSurfacePrecipitationInput;
+    inline for (ti_compat.fieldViews(RainfallImpactInputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfacePrecipitationInput;
+    inline for (ti_compat.fieldViews(RainfallImpactParameters)) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteSurfacePrecipitationInput;
     if (inputs.direct_precipitation_mm_per_h < 0 or inputs.throughfall_mm_per_h < 0 or inputs.total_precipitation_mm_per_h <= 0 or inputs.canopy_height_m < 0 or inputs.excess_surface_storage_m3 < 0 or inputs.ground_surface_retention_m3 < 0 or inputs.surface_area_m2 <= 0 or inputs.bare_soil_fraction < 0 or inputs.bare_soil_fraction > 1 or inputs.time_fraction <= 0 or inputs.time_fraction > 1 or inputs.surface_silt_megagrams_per_megagram < 0 or inputs.surface_clay_megagrams_per_megagram < 0 or parameters.maximum_canopy_height_m < 0 or parameters.ponding_attenuation_per_mm < 0 or parameters.conductivity_damage_per_j_per_megagram_per_megagram < 0 or parameters.conductivity_recovery_fraction_per_h < 0) return error.InvalidSurfacePrecipitationInput;
     const direct_energy = if (inputs.direct_precipitation_mm_per_h > 0) @max(0.0, parameters.direct_energy_intercept_j_per_mm + parameters.direct_energy_log_coefficient_j_per_mm * @log(inputs.total_precipitation_mm_per_h)) else 0;
     const throughfall_energy = if (inputs.throughfall_mm_per_h > 0) @max(0.0, parameters.throughfall_energy_height_coefficient_j_per_mm_sqrt_m * @sqrt(@min(parameters.maximum_canopy_height_m, inputs.canopy_height_m)) - parameters.throughfall_energy_intercept_j_per_mm) else 0;
@@ -955,7 +957,7 @@ test "direct precipitation heat pairs with current soil ingress carrier at every
             }
             const dt = 1 / @as(f64, @floatFromInt(substeps));
             for (0..substeps) |step| {
-                var source = [_]f64{0.05} ** 6;
+                var source = @as([6]f64, @splat(@as(f64, 0.05)));
                 var before_liquid_heat: [3]f64 = undefined;
                 for (0..3) |cell| {
                     const top = cell * grid.soil_layer_capacity;
@@ -1102,9 +1104,9 @@ test "precipitation heat uses explicit non-default thermodynamic coefficients" {
 }
 
 test "nonlinear iteration ceilings cannot affect precipitation partition physics" {
-    inline for (@typeInfo(SurfacePartitionInputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SurfacePartitionInputs)) |field|
         try std.testing.expect(!std.mem.eql(u8, field.name, "maximum_iterations"));
-    inline for (@typeInfo(RuntimeInputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(RuntimeInputs)) |field|
         try std.testing.expect(!std.mem.eql(u8, field.name, "maximum_iterations"));
 
     const result = try partitionAtmosphericWater(.{

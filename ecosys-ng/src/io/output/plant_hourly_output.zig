@@ -1,5 +1,6 @@
 const std = @import("std");
 
+
 pub const Carbon = struct {
     canopy_carbon_dioxide_flux_umol_per_m2_s: f64,
     gross_primary_productivity_g_c_per_m2_h: f64,
@@ -254,7 +255,7 @@ test "OUTPH carbon water and heat equations preserve exact conversions with runt
     const carbon_output = try carbon(12, 6, 3, 0.1, 0.2, 0.3, 4, 2);
     try std.testing.expectApproxEqAbs(6 * 23.148, carbon_output.canopy_carbon_dioxide_flux_umol_per_m2_s, 1e-12);
     try std.testing.expectApproxEqAbs(0.2 * 1.56 * 3600, carbon_output.stomatal_resistance_s_per_m, 1e-12);
-    const roots = [_]f64{1} ** 23;
+    const roots = @as([23]f64, @splat(@as(f64, 1)));
     var water_output = try water(std.testing.allocator, -1, 0.2, 0.1, 0.2, 0.004, 0.8, &roots, 2);
     defer water_output.deinit();
     try std.testing.expectEqual(@as(usize, 29), water_output.valueCount());

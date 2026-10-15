@@ -10,6 +10,7 @@ const NutrientResult = @import("plant_root_nutrient_uptake.zig").Result;
 const root_domain_count = @import("plant_root_system.zig").biological_domain_count;
 const group_growth = @import("plant_root_metabolism_growth.zig");
 const group_misc = @import("plant_root_metabolism_misc.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const RecyclingFractions = struct {
     carbon: f64,
@@ -91,7 +92,7 @@ pub fn secondaryRootRecyclingFractions(
         .nitrogen = nitrogen_constraint * parameters.maximum_nitrogen_recycling_fraction,
         .phosphorus = phosphorus_constraint * parameters.maximum_phosphorus_recycling_fraction,
     };
-    inline for (@typeInfo(RecyclingFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RecyclingFractions)) |field| {
         const value = @field(result, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidSecondaryRootRecyclingFraction;
     }
@@ -126,14 +127,14 @@ pub const SecondaryRootSenescence = struct {
 
 /// Exact GROSUB SNCRM/SNCR/SNCZ and RCCR/RCZR/RCPR/FSNC2 block.
 pub fn secondaryRootSenescence(inputs: SecondaryRootSenescenceInputs, recycling: RecyclingFractions) !SecondaryRootSenescence {
-    inline for (@typeInfo(SecondaryRootSenescenceInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SecondaryRootSenescenceInputs)) |field| {
         if (field.type == bool) continue;
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteSecondaryRootSenescenceInput;
     }
     inline for (.{ inputs.root_carbon_g_c, inputs.root_nitrogen_g_n, inputs.root_phosphorus_g_p, inputs.oxygen_limitation, inputs.storage_exchange_fraction_per_h, inputs.remobilization_elapsed_h, inputs.full_senescence_h, inputs.biological_timestep_h, inputs.structural_presence_threshold_g_c }) |value| if (value < 0) return error.InvalidSecondaryRootSenescenceInput;
     if (inputs.full_senescence_h == 0 or inputs.biological_timestep_h == 0 or inputs.oxygen_limitation > 1) return error.InvalidSecondaryRootSenescenceInput;
-    inline for (@typeInfo(RecyclingFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RecyclingFractions)) |field| {
         const value = @field(recycling, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidSecondaryRootRecyclingFraction;
     }
@@ -233,13 +234,13 @@ pub fn mycorrhizalLossWithSecondaryRoots(
         if (!std.math.isFinite(value)) return error.NonFiniteMycorrhizalLossInput;
     if (host_secondary_carbon_g_c < 0 or host_active_root_carbon_g_c < 0 or presence_threshold_g_c < 0)
         return error.InvalidMycorrhizalLossInput;
-    inline for (@typeInfo(MycorrhizalLossState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(MycorrhizalLossState)) |field| {
         const value = @field(state, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidMycorrhizalLossInput;
     }
     for (woody_fraction) |fractions| for (fractions) |value|
         if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidMycorrhizalLossInput;
-    inline for (@typeInfo(RootLitterFractions).@"struct".fields) |field| for (@field(kinetics, field.name)) |value|
+    inline for (ti_compat.fieldViews(RootLitterFractions)) |field| for (@field(kinetics, field.name)) |value|
         if (!std.math.isFinite(value) or value < 0) return error.InvalidMycorrhizalLossInput;
 
     const deficit_g_c = @max(0, -negative_primary_growth_g_c);
@@ -289,7 +290,7 @@ pub const LayerPairRootLitter = struct {
 };
 
 fn addRootLitter(total: *RootLitter, addition: RootLitter) !void {
-    inline for (@typeInfo(RootLitter).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RootLitter)) |field| {
         for (&@field(total.*, field.name), @field(addition, field.name)) |*destination, value| {
             destination.* += value;
             if (!std.math.isFinite(destination.*) or destination.* < 0) return error.NonFiniteMycorrhizalLoss;
@@ -418,8 +419,8 @@ pub fn secondaryRootLitter(
 ) !RootLitter {
     inline for (.{ root_carbon_g_c, root_nitrogen_g_n, root_phosphorus_g_p }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSecondaryRootLitterInput;
     inline for (.{ woody_carbon_fraction, woody_nitrogen_fraction, woody_phosphorus_fraction }) |fractions| for (fractions) |value| if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidSecondaryRootLitterInput;
-    inline for (@typeInfo(RootLitterFractions).@"struct".fields) |field| for (@field(kinetics, field.name)) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSecondaryRootLitterInput;
-    inline for (@typeInfo(SecondaryRootSenescence).@"struct".fields) |field| if (!std.math.isFinite(@field(senescence, field.name)) or @field(senescence, field.name) < 0) return error.InvalidSecondaryRootLitterInput;
+    inline for (ti_compat.fieldViews(RootLitterFractions)) |field| for (@field(kinetics, field.name)) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSecondaryRootLitterInput;
+    inline for (ti_compat.fieldViews(SecondaryRootSenescence)) |field| if (!std.math.isFinite(@field(senescence, field.name)) or @field(senescence, field.name) < 0) return error.InvalidSecondaryRootLitterInput;
     if (senescence.senesced_fraction > 1 or
         senescence.recyclable_carbon_g_c > root_carbon_g_c or
         senescence.recyclable_nitrogen_g_n > root_nitrogen_g_n or
@@ -435,7 +436,7 @@ pub fn secondaryRootLitter(
         result.nonwoody_nitrogen_g_n[kinetic] = kinetics.nonwoody_nitrogen[kinetic] * senescence.senesced_fraction * (root_nitrogen_g_n - senescence.recyclable_nitrogen_g_n) * woody_nitrogen_fraction[1];
         result.nonwoody_phosphorus_g_p[kinetic] = kinetics.nonwoody_phosphorus[kinetic] * senescence.senesced_fraction * (root_phosphorus_g_p - senescence.recyclable_phosphorus_g_p) * woody_phosphorus_fraction[1];
     }
-    inline for (@typeInfo(RootLitter).@"struct".fields) |field| for (@field(result, field.name)) |value| if (!std.math.isFinite(value) or value < 0) return error.NonFiniteSecondaryRootLitter;
+    inline for (ti_compat.fieldViews(RootLitter)) |field| for (@field(result, field.name)) |value| if (!std.math.isFinite(value) or value < 0) return error.NonFiniteSecondaryRootLitter;
     return result;
 }
 

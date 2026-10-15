@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     dissociation_constant_mol_per_m3: f64,
@@ -47,11 +48,11 @@ pub const SourceIterationStage = enum {
 /// protonates a carboxyl site and consumes the same amount of aqueous hydrogen
 /// after conversion from mol/Mg to mol/m3 with the soil-mass:water ratio.
 pub fn calculateChangeMolPerMg(inputs: Inputs, parameters: Parameters) !f64 {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidCarboxylExchangeInput;
     }
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         const value = @field(parameters, field.name);
         if (field.type == bool) continue;
         if (!std.math.isFinite(value) or value < 0) return error.InvalidCarboxylExchangeParameter;
@@ -168,7 +169,7 @@ pub fn calculateSourceOrderSurface(
         .hydrogen_adsorption_mol_per_megagram_step = change,
         .open_site_floor_was_applied = unconstrained_open < controls.minimum_open_sites_mol_per_megagram,
     };
-    inline for (@typeInfo(SurfaceSourceOrderResult).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SurfaceSourceOrderResult)) |field| {
         if (@typeInfo(field.type) == .bool) continue;
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteSurfaceCarboxylExchangeResult;
@@ -181,12 +182,12 @@ fn validateSurfaceInputs(
     parameters: Parameters,
     controls: SurfaceControls,
 ) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidSurfaceCarboxylExchangeInput;
     }
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         const value = @field(parameters, field.name);
         if (field.type == bool) continue;
         if (!std.math.isFinite(value) or value < 0)

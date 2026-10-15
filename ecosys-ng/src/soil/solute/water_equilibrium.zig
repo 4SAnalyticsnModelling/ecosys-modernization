@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     hydrogen_concentration_mol_per_m3: f64,
@@ -74,7 +75,7 @@ pub const FixedPhReset = struct {
 /// subtracts both the current activity and the preceding transformation so
 /// that their sum reaches the prescribed activity in this iteration.
 pub fn calculateFixedPhResetSourceOrder(inputs: FixedPhResetInputs) !FixedPhReset {
-    inline for (@typeInfo(FixedPhResetInputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(FixedPhResetInputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteWaterEquilibriumInput;
     if (inputs.monovalent_activity_coefficient <= 0 or
@@ -97,7 +98,7 @@ pub fn calculateFixedPhResetSourceOrder(inputs: FixedPhResetInputs) !FixedPhRese
             inputs.current_hydroxide_activity_mol_per_m3 -
             inputs.preceding_hydroxide_transformation_mol_per_m3,
     };
-    inline for (@typeInfo(FixedPhReset).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(FixedPhReset)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteWaterEquilibriumSolution;
     if (target_hydrogen_activity <= 0 or target_hydroxide_activity <= 0)
@@ -111,8 +112,11 @@ pub fn calculateFixedPhResetSourceOrder(inputs: FixedPhResetInputs) !FixedPhRese
 /// smaller ion by division from Kw; this remains accurate for the extreme
 /// acid/base ratios that lose the smaller source-form root.
 pub fn solve(inputs: Inputs) !Result {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteWaterEquilibriumInput;
-    if (inputs.hydrogen_concentration_mol_per_m3 < 0 or inputs.hydroxide_concentration_mol_per_m3 < 0 or inputs.monovalent_activity_coefficient <= 0 or inputs.water_activity_product_mol2_per_m6 <= 0 or inputs.negligible_concentration_mol_per_m3 < 0) return error.InvalidWaterEquilibriumInput;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteWaterEquilibriumInput;
+    if (inputs.hydrogen_concentration_mol_per_m3 < 0 or inputs.hydroxide_concentration_mol_per_m3 < 0 or inputs.monovalent_activity_coefficient <= 0 or inputs.water_activity_product_mol2_per_m6 <= 0 or inputs.negligible_concentration_mol_per_m3 < 0) {
+        std.debug.print("TMPDBG WE h={d} oh={d} gamma={d} kw={d} negl={d}\n", .{ inputs.hydrogen_concentration_mol_per_m3, inputs.hydroxide_concentration_mol_per_m3, inputs.monovalent_activity_coefficient, inputs.water_activity_product_mol2_per_m6, inputs.negligible_concentration_mol_per_m3 });
+        return error.InvalidWaterEquilibriumInput;
+    }
     const hydrogen_activity = if (inputs.hydrogen_concentration_mol_per_m3 > inputs.negligible_concentration_mol_per_m3) inputs.hydrogen_concentration_mol_per_m3 * inputs.monovalent_activity_coefficient else inputs.hydrogen_concentration_mol_per_m3;
     const hydroxide_activity = if (inputs.hydroxide_concentration_mol_per_m3 > inputs.negligible_concentration_mol_per_m3) inputs.hydroxide_concentration_mol_per_m3 * inputs.monovalent_activity_coefficient else inputs.hydroxide_concentration_mol_per_m3;
     const activity_difference = hydrogen_activity - hydroxide_activity;
@@ -152,7 +156,7 @@ pub fn solve(inputs: Inputs) !Result {
 pub fn calculateSourceOrderSurfaceReset(
     inputs: Inputs,
 ) !SourceOrderSurfaceReset {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteWaterEquilibriumInput;
     }
@@ -226,7 +230,7 @@ pub fn calculateSourceOrderSurfaceReset(
         .hydroxide_floor_was_applied = unconstrained_hydroxide_activity <
             inputs.negligible_concentration_mol_per_m3,
     };
-    inline for (@typeInfo(SourceOrderSurfaceReset).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderSurfaceReset)) |field| {
         switch (@typeInfo(field.type)) {
             .float => if (!std.math.isFinite(@field(result, field.name)))
                 return error.NonFiniteWaterEquilibriumSolution,
@@ -302,7 +306,7 @@ pub fn projectProvisional(
 /// totals. The returned published concentrations expose this dimensional
 /// mismatch for attribution; production uses `solve`/`projectProvisional`.
 pub fn calculateSourceOrderFinalReset(inputs: FinalResetInputs) !SourceOrderFinalReset {
-    inline for (@typeInfo(FinalResetInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(FinalResetInputs)) |field| {
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteWaterEquilibriumInput;
     }
@@ -353,7 +357,7 @@ pub fn calculateSourceOrderFinalReset(inputs: FinalResetInputs) !SourceOrderFina
         .published_hydroxide_concentration_mol_per_m3 = inputs.initial_hydroxide_concentration_mol_per_m3 +
             hydroxide_change,
     };
-    inline for (@typeInfo(SourceOrderFinalReset).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderFinalReset)) |field| {
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteWaterEquilibriumSolution;
     }

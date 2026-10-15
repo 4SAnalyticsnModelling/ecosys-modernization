@@ -7,6 +7,8 @@ const retention = @import("retention.zig");
 const ice_units = @import("../../core/ice_units.zig");
 const scoped_conservation = @import("../../validation/scoped_conservation.zig");
 const heat_solver = @import("../heat/solver.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 /// DEV-014 at the iteration ceiling is enabled only for the hour-recovery
 /// ladder's terminal attempt (mirrors DEV-011/DEV-015), so every hour the
@@ -1520,7 +1522,7 @@ test "phase endpoint requires energy closure independently of nonlinear converge
         .energy_conservation_absolute_tolerance_megajoules_per_m2 = 1.0e-12,
         .energy_conservation_relative_tolerance = 1.0e-9,
     };
-    var residual = [_]f64{0} ** 6;
+    var residual = @as([6]f64, @splat(@as(f64, 0)));
     residual[5] = -5.0e-10;
     try std.testing.expect(try scaledNorm(&base, &candidate, &residual, options) <= 1);
     var zeros = [_]f64{0};
@@ -3539,7 +3541,7 @@ test "phase convergence scales material correction independently of inventory si
 
 fn validateInputs(grid: *const grid_module.GridState, properties: Properties, outputs: Outputs, options: Options) !void {
     const cells = grid.layer_count;
-    inline for (@typeInfo(Properties).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Properties)) |field| {
         if (field.type == []const f64) {
             const values = @field(properties, field.name);
             if (comptime std.mem.eql(u8, field.name, "conservation_cell_area_m2")) {

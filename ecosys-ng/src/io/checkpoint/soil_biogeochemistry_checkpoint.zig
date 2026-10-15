@@ -11,6 +11,7 @@ const NutrientCompetition = @import("../../soil/nutrients/competition_history.zi
 const FertilizerBand = @import("../../management/fertilizer_band_state.zig").State;
 const MicrobialThermalAdaptation = @import("../../soil/biogeochemistry/microbial_thermal_adaptation_initialization.zig").State;
 const fertilizer_band_checkpoint = @import("../../management/fertilizer_band_state.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 const magic = "ECOSBIOG";
 const version: u32 = 12;
 pub const View = struct { microbial: *const Microbial, microbial_thermal_adaptation: *const MicrobialThermalAdaptation, chemistry: *const Chemistry, available_nutrients: *const AvailableNutrients, fertilizer: *const Fertilizer, mineral_fertilizer: *const MineralFertilizer, fertilizer_band: *const FertilizerBand, reactive_nitrogen: *const ReactiveNitrogen, microbial_phosphorus: *const MicrobialPhosphorus, nutrient_competition: *const NutrientCompetition.State };
@@ -64,8 +65,8 @@ pub fn write(writer: anytype, view: View) !void {
     for (view.chemistry.pending_non_band_phosphate_mol) |value| try writeStructF64(writer, value);
     for (view.chemistry.pending_band_phosphate_mol) |value| try writeStructF64(writer, value);
     for (view.chemistry.pending_geochemistry_solids_mol) |value| try writeStructF64(writer, value);
-    inline for (@typeInfo(AvailableNutrients).@"struct".fields) |field| if (field.type == []f64) try writeF64Slice(writer, @field(view.available_nutrients, field.name));
-    for (view.fertilizer.soil) |inventory| inline for (@typeInfo(@TypeOf(inventory)).@"struct".fields) |field| try writer.writeInt(u64, @bitCast(@field(inventory, field.name)), .little);
+    inline for (ti_compat.fieldViews(AvailableNutrients)) |field| if (field.type == []f64) try writeF64Slice(writer, @field(view.available_nutrients, field.name));
+    for (view.fertilizer.soil) |inventory| inline for (ti_compat.fieldViews(@TypeOf(inventory))) |field| try writer.writeInt(u64, @bitCast(@field(inventory, field.name)), .little);
     try writeF64Slice(writer, view.fertilizer.initial_urease_inhibition_fraction);
     try writeF64Slice(writer, view.fertilizer.current_urease_inhibition_fraction);
     try writer.writeAll(view.fertilizer.formulation);
@@ -73,8 +74,8 @@ pub fn write(writer: anytype, view: View) !void {
     for (view.mineral_fertilizer.surface) |inventory| try writeStructF64(writer, inventory);
     try writeF64Slice(writer, view.mineral_fertilizer.daily_phosphorus_input_g_p);
     try fertilizer_band_checkpoint.writeCheckpoint(writer, view.fertilizer_band);
-    inline for (@typeInfo(ReactiveNitrogen).@"struct".fields) |field| if (field.type == []f64) try writeF64Slice(writer, @field(view.reactive_nitrogen, field.name));
-    inline for (@typeInfo(MicrobialPhosphorus).@"struct".fields) |field| if (field.type == []f64) try writeF64Slice(writer, @field(view.microbial_phosphorus, field.name));
+    inline for (ti_compat.fieldViews(ReactiveNitrogen)) |field| if (field.type == []f64) try writeF64Slice(writer, @field(view.reactive_nitrogen, field.name));
+    inline for (ti_compat.fieldViews(MicrobialPhosphorus)) |field| if (field.type == []f64) try writeF64Slice(writer, @field(view.microbial_phosphorus, field.name));
     for (view.nutrient_competition.soil_previous_total) |values| try writeF64Slice(writer, values);
     for (view.nutrient_competition.surface_previous_total) |values| try writeF64Slice(writer, values);
     for (view.nutrient_competition.surface_mineral_previous_capacity) |values| try writeF64Slice(writer, values);
@@ -121,7 +122,7 @@ pub fn read(allocator: std.mem.Allocator, reader: *std.Io.Reader, limits: Limits
     for (chemistry.pending_geochemistry_solids_mol) |*value| try readStructF64(reader, value);
     var available_nutrients = try AvailableNutrients.init(allocator, chemistry_cells);
     errdefer available_nutrients.deinit();
-    inline for (@typeInfo(AvailableNutrients).@"struct".fields) |field| if (field.type == []f64) try readF64Slice(reader, @field(available_nutrients, field.name));
+    inline for (ti_compat.fieldViews(AvailableNutrients)) |field| if (field.type == []f64) try readF64Slice(reader, @field(available_nutrients, field.name));
     var fertilizer = try Fertilizer.init(allocator, cells, layers);
     errdefer fertilizer.deinit();
     var mineral_fertilizer = try MineralFertilizer.init(allocator, cells, layers);
@@ -134,7 +135,7 @@ pub fn read(allocator: std.mem.Allocator, reader: *std.Io.Reader, limits: Limits
     var nutrient_competition = try NutrientCompetition.State.init(allocator, chemistry_cells, cells);
     errdefer nutrient_competition.deinit();
     for (fertilizer.soil) |*inventory| {
-        inline for (@typeInfo(@TypeOf(inventory.*)).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(@TypeOf(inventory.*))) |field| {
             @field(inventory, field.name) = @bitCast(try reader.takeInt(u64, .little));
         }
     }
@@ -151,8 +152,8 @@ pub fn read(allocator: std.mem.Allocator, reader: *std.Io.Reader, limits: Limits
         .{ .maximum_cells = limits.maximum_cells, .maximum_layers = limits.maximum_layers },
     );
     errdefer fertilizer_band.deinit();
-    inline for (@typeInfo(ReactiveNitrogen).@"struct".fields) |field| if (field.type == []f64) try readF64Slice(reader, @field(reactive_nitrogen, field.name));
-    inline for (@typeInfo(MicrobialPhosphorus).@"struct".fields) |field| if (field.type == []f64) try readF64Slice(reader, @field(microbial_phosphorus, field.name));
+    inline for (ti_compat.fieldViews(ReactiveNitrogen)) |field| if (field.type == []f64) try readF64Slice(reader, @field(reactive_nitrogen, field.name));
+    inline for (ti_compat.fieldViews(MicrobialPhosphorus)) |field| if (field.type == []f64) try readF64Slice(reader, @field(microbial_phosphorus, field.name));
     for (nutrient_competition.soil_previous_total) |values| try readF64Slice(reader, values);
     for (nutrient_competition.surface_previous_total) |values| try readF64Slice(reader, values);
     for (nutrient_competition.surface_mineral_previous_capacity) |values| try readF64Slice(reader, values);
@@ -198,13 +199,13 @@ fn validate(view: View) !void {
     for (view.chemistry.pending_non_band_phosphate_mol) |value| try validateStructF64(value);
     for (view.chemistry.pending_band_phosphate_mol) |value| try validateStructF64(value);
     for (view.chemistry.pending_geochemistry_solids_mol) |value| try validateStructF64(value);
-    inline for (@typeInfo(AvailableNutrients).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(AvailableNutrients)) |field| if (field.type == []f64) {
         for (@field(view.available_nutrients, field.name)) |value| {
             if (!std.math.isFinite(value)) return error.NonFiniteSoilBiogeochemistryCheckpoint;
             if (!std.mem.endsWith(u8, field.name, "change_g_c_per_h") and !std.mem.endsWith(u8, field.name, "change_g_n_per_h") and !std.mem.endsWith(u8, field.name, "change_g_p_per_h") and value < -1e-14) return error.InvalidSoilBiogeochemistryCheckpointPool;
         }
     };
-    for (view.fertilizer.soil) |inventory| inline for (@typeInfo(@TypeOf(inventory)).@"struct".fields) |field| {
+    for (view.fertilizer.soil) |inventory| inline for (ti_compat.fieldViews(@TypeOf(inventory))) |field| {
         const value = @field(inventory, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteSoilBiogeochemistryCheckpoint;
         if (value < -1e-14) return error.InvalidSoilBiogeochemistryCheckpointPool;
@@ -217,11 +218,11 @@ fn validate(view: View) !void {
     for (view.mineral_fertilizer.surface) |inventory| try validateStructF64(inventory);
     for (view.mineral_fertilizer.daily_phosphorus_input_g_p) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSoilFertilizerCheckpointState;
     for (0..view.chemistry.cell_count) |layer| try view.reactive_nitrogen.validateLayer(layer);
-    inline for (@typeInfo(MicrobialPhosphorus).@"struct".fields) |field| if (field.type == []f64) for (@field(view.microbial_phosphorus, field.name)) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSoilMicrobialPhosphorusCheckpointState;
+    inline for (ti_compat.fieldViews(MicrobialPhosphorus)) |field| if (field.type == []f64) for (@field(view.microbial_phosphorus, field.name)) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSoilMicrobialPhosphorusCheckpointState;
     try view.nutrient_competition.validate();
 }
 fn validatePool(pool: ElementalPool) !void {
-    inline for (@typeInfo(ElementalPool).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ElementalPool)) |field| {
         const value = @field(pool, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteSoilBiogeochemistryCheckpoint;
         if (value < -1e-14) return error.NegativeSoilBiogeochemistryPool;
@@ -229,22 +230,22 @@ fn validatePool(pool: ElementalPool) !void {
 }
 fn writePool(writer: anytype, pool: ElementalPool) !void {
     try validatePool(pool);
-    inline for (@typeInfo(ElementalPool).@"struct".fields) |field| try writer.writeInt(u64, @bitCast(@field(pool, field.name)), .little);
+    inline for (ti_compat.fieldViews(ElementalPool)) |field| try writer.writeInt(u64, @bitCast(@field(pool, field.name)), .little);
 }
 fn readPool(reader: *std.Io.Reader) !ElementalPool {
     var pool: ElementalPool = undefined;
-    inline for (@typeInfo(ElementalPool).@"struct".fields) |field| @field(pool, field.name) = @bitCast(try reader.takeInt(u64, .little));
+    inline for (ti_compat.fieldViews(ElementalPool)) |field| @field(pool, field.name) = @bitCast(try reader.takeInt(u64, .little));
     try validatePool(pool);
     return pool;
 }
 fn writeStructF64(writer: anytype, value: anytype) !void {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| try writer.writeInt(u64, @bitCast(@field(value, field.name)), .little);
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field| try writer.writeInt(u64, @bitCast(@field(value, field.name)), .little);
 }
 fn readStructF64(reader: *std.Io.Reader, value: anytype) !void {
-    inline for (@typeInfo(@TypeOf(value.*)).@"struct".fields) |field| @field(value, field.name) = @bitCast(try reader.takeInt(u64, .little));
+    inline for (ti_compat.fieldViews(@TypeOf(value.*))) |field| @field(value, field.name) = @bitCast(try reader.takeInt(u64, .little));
 }
 fn validateStructF64(value: anytype) !void {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| if (!std.math.isFinite(@field(value, field.name)) or @field(value, field.name) < 0) return error.InvalidSoilFertilizerCheckpointState;
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field| if (!std.math.isFinite(@field(value, field.name)) or @field(value, field.name) < 0) return error.InvalidSoilFertilizerCheckpointState;
 }
 fn bounded(reader: *std.Io.Reader, limit: usize, comptime too_large: anyerror) !usize {
     const value = try reader.takeInt(u64, .little);
@@ -346,10 +347,10 @@ test "soil biogeochemistry checkpoint round trips microbial populations and comp
     reactive_nitrogen.previous_band_nitrite_reduction_capacity_g_n[119] = 0.25;
     microbial_phosphorus.previous_total_band_hpo4_demand_g_p[5] = 0.375;
     microbial_phosphorus.previous_non_band_h2po4_capacity_g_p[119] = 0.5;
-    nutrient_competition.soil_previous_total[@intFromEnum(NutrientCompetition.SoilPool.ammonium_non_band)][5] = 0.625;
-    nutrient_competition.surface_previous_total[@intFromEnum(NutrientCompetition.SurfacePool.nitrate)][1] = 0.6875;
-    nutrient_competition.surface_mineral_previous_capacity[@intFromEnum(NutrientCompetition.SurfacePool.h2po4)][NutrientCompetition.surface_mineral_competitor_count + 3] = 0.75;
-    nutrient_competition.topsoil_residual_previous_capacity[@intFromEnum(NutrientCompetition.SurfacePool.hpo4)][NutrientCompetition.surface_mineral_competitor_count + 4] = 0.8125;
+    nutrient_competition.soil_previous_total[@backingInt(NutrientCompetition.SoilPool.ammonium_non_band)][5] = 0.625;
+    nutrient_competition.surface_previous_total[@backingInt(NutrientCompetition.SurfacePool.nitrate)][1] = 0.6875;
+    nutrient_competition.surface_mineral_previous_capacity[@backingInt(NutrientCompetition.SurfacePool.h2po4)][NutrientCompetition.surface_mineral_competitor_count + 3] = 0.75;
+    nutrient_competition.topsoil_residual_previous_capacity[@backingInt(NutrientCompetition.SurfacePool.hpo4)][NutrientCompetition.surface_mineral_competitor_count + 4] = 0.8125;
     nutrient_competition.surface_ammonia_oxidation_previous_capacity[1] = 0.875;
     nutrient_competition.surface_denitrification_previous_capacity[NutrientCompetition.surface_denitrifier_count + 2] = 0.9375;
     var bytes: std.Io.Writer.Allocating = .init(std.testing.allocator);
@@ -397,10 +398,10 @@ test "soil biogeochemistry checkpoint round trips microbial populations and comp
     try std.testing.expectEqual(@as(f64, 0.25), restored.reactive_nitrogen.previous_band_nitrite_reduction_capacity_g_n[119]);
     try std.testing.expectEqual(@as(f64, 0.375), restored.microbial_phosphorus.previous_total_band_hpo4_demand_g_p[5]);
     try std.testing.expectEqual(@as(f64, 0.5), restored.microbial_phosphorus.previous_non_band_h2po4_capacity_g_p[119]);
-    try std.testing.expectEqual(@as(f64, 0.625), restored.nutrient_competition.soil_previous_total[@intFromEnum(NutrientCompetition.SoilPool.ammonium_non_band)][5]);
-    try std.testing.expectEqual(@as(f64, 0.6875), restored.nutrient_competition.surface_previous_total[@intFromEnum(NutrientCompetition.SurfacePool.nitrate)][1]);
-    try std.testing.expectEqual(@as(f64, 0.75), restored.nutrient_competition.surface_mineral_previous_capacity[@intFromEnum(NutrientCompetition.SurfacePool.h2po4)][NutrientCompetition.surface_mineral_competitor_count + 3]);
-    try std.testing.expectEqual(@as(f64, 0.8125), restored.nutrient_competition.topsoil_residual_previous_capacity[@intFromEnum(NutrientCompetition.SurfacePool.hpo4)][NutrientCompetition.surface_mineral_competitor_count + 4]);
+    try std.testing.expectEqual(@as(f64, 0.625), restored.nutrient_competition.soil_previous_total[@backingInt(NutrientCompetition.SoilPool.ammonium_non_band)][5]);
+    try std.testing.expectEqual(@as(f64, 0.6875), restored.nutrient_competition.surface_previous_total[@backingInt(NutrientCompetition.SurfacePool.nitrate)][1]);
+    try std.testing.expectEqual(@as(f64, 0.75), restored.nutrient_competition.surface_mineral_previous_capacity[@backingInt(NutrientCompetition.SurfacePool.h2po4)][NutrientCompetition.surface_mineral_competitor_count + 3]);
+    try std.testing.expectEqual(@as(f64, 0.8125), restored.nutrient_competition.topsoil_residual_previous_capacity[@backingInt(NutrientCompetition.SurfacePool.hpo4)][NutrientCompetition.surface_mineral_competitor_count + 4]);
     try std.testing.expectEqual(@as(f64, 0.875), restored.nutrient_competition.surface_ammonia_oxidation_previous_capacity[1]);
     try std.testing.expectEqual(@as(f64, 0.9375), restored.nutrient_competition.surface_denitrification_previous_capacity[NutrientCompetition.surface_denitrifier_count + 2]);
 }

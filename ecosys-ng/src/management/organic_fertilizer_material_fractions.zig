@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Fractions = struct {
     protein: f64,
@@ -63,7 +64,7 @@ fn validate(parameters: Parameters) !void {
 
 fn validateFractions(fractions: Fractions) !void {
     var total: f64 = 0;
-    inline for (@typeInfo(Fractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Fractions)) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteOrganicMaterialFraction;

@@ -2,6 +2,7 @@ const std = @import("std");
 const organic = @import("../organic/initialization.zig");
 const constituents = @import("../../erosion/eroded_constituents.zig");
 const erosion = @import("erosion.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ExportedElementsG = struct {
     carbon_g_c: f64 = 0,
@@ -446,7 +447,7 @@ pub fn unpackSurfaceMapped(state: *organic.State, cells: usize, soil_layer_capac
 
 fn packElementLayer(values: []const organic.ElementPool, layer_count: usize, layer: usize, output: []f64, cursor: *usize) !void {
     const per_layer = values.len / layer_count;
-    for (values[layer * per_layer ..][0..per_layer]) |pool| inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| {
+    for (values[layer * per_layer ..][0..per_layer]) |pool| inline for (ti_compat.fieldViews(organic.ElementPool)) |field| {
         const value = @field(pool, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidOrganicErosionState;
         output[cursor.*] = value;
@@ -456,7 +457,7 @@ fn packElementLayer(values: []const organic.ElementPool, layer_count: usize, lay
 
 fn unpackElementLayer(values: []organic.ElementPool, layer_count: usize, layer: usize, input: []const f64, cursor: *usize) !void {
     const per_layer = values.len / layer_count;
-    for (values[layer * per_layer ..][0..per_layer]) |*pool| inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| {
+    for (values[layer * per_layer ..][0..per_layer]) |*pool| inline for (ti_compat.fieldViews(organic.ElementPool)) |field| {
         @field(pool, field.name) = input[cursor.*];
         cursor.* += 1;
     };

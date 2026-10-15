@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Heap-owned ZCNET/ZHNET/ZONET canopy contributions. Positive exchange is
 /// uptake from canopy air into the ecosystem, matching EXTRACT/REDIST.
@@ -15,7 +16,7 @@ pub const State = struct {
         if (cell_count == 0) return error.ZeroDailyCanopyGasCells;
         var result: State = undefined;
         result.allocator = allocator;
-        inline for (@typeInfo(State).@"struct".fields[1..]) |field| {
+        inline for (ti_compat.fieldViews(State)[1..]) |field| {
             @field(result, field.name) = try allocator.alloc(f64, cell_count);
             errdefer allocator.free(@field(result, field.name));
             @memset(@field(result, field.name), 0);
@@ -24,12 +25,12 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields[1..]) |field| self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)[1..]) |field| self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
     pub fn reset(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields[1..]) |field| @memset(@field(self, field.name), 0);
+        inline for (ti_compat.fieldViews(State)[1..]) |field| @memset(@field(self, field.name), 0);
     }
 
     pub fn accumulateHour(

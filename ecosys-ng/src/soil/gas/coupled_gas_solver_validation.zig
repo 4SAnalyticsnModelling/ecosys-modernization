@@ -10,6 +10,7 @@ const atmosphere = @import("atmosphere_exchange.zig");
 const numerics = @import("../../core/numerics.zig");
 const group_misc = @import("coupled_gas_solver_misc.zig");
 
+
 pub fn validate(state: *const gas.State, inputs: group_misc.Inputs, options: group_misc.Options) !void {
     try state.validateFinite();
     const n = std.math.mul(usize, state.cell_count, gas.species_count) catch
@@ -90,9 +91,9 @@ pub fn validationTestInputs() group_misc.Inputs {
         .atmospheric_boundaries = &.{},
         .water_volume_m3 = &.{0},
         .band_water_volume_m3 = &.{0},
-        .mass_solubility_ratio = &([_]f64{1} ** gas.species_count),
-        .gas_water_exchange_rate_per_step = &([_]f64{0} ** gas.species_count),
-        .band_gas_water_exchange_rate_per_step = &([_]f64{0} ** gas.species_count),
+        .mass_solubility_ratio = &(@as([gas.species_count]f64, @splat(@as(f64, 1)))),
+        .gas_water_exchange_rate_per_step = &(@as([gas.species_count]f64, @splat(@as(f64, 0)))),
+        .band_gas_water_exchange_rate_per_step = &(@as([gas.species_count]f64, @splat(@as(f64, 0)))),
         .bubbling_enabled = &.{false},
     };
 }

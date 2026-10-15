@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -53,7 +54,7 @@ pub fn refresh(state: *State, inputs: Inputs) !void {
         state.cell_count,
         state.plant_species_per_cell,
     );
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (@field(inputs, field.name).len != plant_count)
             return error.InvalidCellLitterStateUpdateDimensions;
 
@@ -98,7 +99,7 @@ fn totalsForCell(state: *const State, inputs: Inputs, cell: usize) !Totals {
         totals.litter_nitrogen += values[1];
         totals.litter_phosphorus += values[2];
         totals.standing_dead_carbon += values[3];
-        inline for (@typeInfo(Totals).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(Totals)) |field|
             if (!std.math.isFinite(@field(totals, field.name)))
                 return error.NonFiniteCellLitterStateUpdate;
     }
@@ -123,7 +124,7 @@ test "EXTRACT litter and standing dead state_update preserves plant order" {
 test "late invalid plant preserves all cell state_update owners" {
     var state = try State.init(std.testing.allocator, 2, 2);
     defer state.deinit();
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64) @memset(@field(state, field.name), 9);
     try std.testing.expectError(
         error.InvalidCellLitterStateUpdateInput,
@@ -134,7 +135,7 @@ test "late invalid plant preserves all cell state_update owners" {
             .standing_dead_carbon_g_c_by_plant = &.{ 1, 2, 3, std.math.nan(f64) },
         }),
     );
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64)
             for (@field(state, field.name)) |value|
                 try std.testing.expectEqual(@as(f64, 9), value);

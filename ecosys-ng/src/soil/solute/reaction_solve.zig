@@ -14,6 +14,7 @@ const reaction_span = @import("reaction_search_span.zig");
 const reaction_progress = @import("reaction_progress.zig");
 const reaction_charge = @import("reaction_charge.zig");
 const __parent = @import("reaction_solver.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 const ComplementaritySearchInputs = __parent.ComplementaritySearchInputs;
 const CoupledExtentReaction = __parent.CoupledExtentReaction;
 const CandidateKind = __parent.CandidateKind;
@@ -445,7 +446,7 @@ fn phosphateZoneInventory(
     if (!std.math.isFinite(soil_mass_per_water_volume_megagrams_per_m3) or
         soil_mass_per_water_volume_megagrams_per_m3 < 0)
         return error.InvalidSoluteReactionConservationBasis;
-    inline for (std.meta.fields(@TypeOf(zone))) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(zone))) |field| {
         const value = @field(zone, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidSoluteReactionConservationInventory;
@@ -490,7 +491,7 @@ fn phosphateZoneInventory(
         .magnesium_mol_per_m3 = zone.magnesium_hpo4_pair_mol_per_m3,
         .sites_mol_per_megagram = sites,
     };
-    inline for (std.meta.fields(PhosphateZoneInventory)) |field| {
+    inline for (ti_compat.fieldViews(PhosphateZoneInventory)) |field| {
         const value = @field(result, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidSoluteReactionConservationInventory;
@@ -501,7 +502,7 @@ fn phosphateZoneInventory(
 fn inventoryPhosphateZone(zone: phosphate_network.State, comptime include_immobile: bool) phosphate_network.State {
     @setEvalBranchQuota(20000);
     var result = zone;
-    if (!include_immobile) inline for (std.meta.fields(phosphate_network.State)) |field| {
+    if (!include_immobile) inline for (ti_compat.fieldViews(phosphate_network.State)) |field| {
         if (comptime std.mem.indexOf(u8, field.name, "solid") != null or std.mem.endsWith(u8, field.name, "megagram")) @field(result, field.name) = 0;
     };
     return result;
@@ -525,13 +526,13 @@ fn stateInventory(
     if (cell_index >= state.cell_count)
         return error.ChemistryCellIndexOutOfBounds;
     const fractions = parameters.fractions;
-    inline for (std.meta.fields(@TypeOf(fractions))) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(fractions))) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.InvalidSoluteReactionConservationBasis;
     }
     const ratios = parameters.cation_exchange_water_ratios;
-    inline for (std.meta.fields(@TypeOf(ratios))) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(ratios))) |field| {
         const value = @field(ratios, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidSoluteReactionConservationBasis;
@@ -541,7 +542,7 @@ fn stateInventory(
     const exchange = if (include_immobile) state.cation_exchange_mol_per_megagram[cell_index] else std.mem.zeroes(cation_exchange.Cations);
     const solids = if (include_geochemistry) state.geochemistry_solids[cell_index] else std.mem.zeroes(geochemistry.SolidState);
     inline for (.{ aqueous, exchange, solids }) |value| {
-        inline for (std.meta.fields(@TypeOf(value))) |field| {
+        inline for (ti_compat.fieldViews(@TypeOf(value))) |field| {
             const component = @field(value, field.name);
             if (!std.math.isFinite(component) or component < 0)
                 return error.InvalidSoluteReactionConservationInventory;
@@ -643,7 +644,7 @@ fn stateInventory(
         .non_band_phosphate_sites_mol_per_megagram = non_band.sites_mol_per_megagram,
         .band_phosphate_sites_mol_per_megagram = band.sites_mol_per_megagram,
     };
-    inline for (std.meta.fields(AcceptedStateInventory)) |field| {
+    inline for (ti_compat.fieldViews(AcceptedStateInventory)) |field| {
         const value = @field(result, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidSoluteReactionConservationInventory;
@@ -664,7 +665,7 @@ fn acceptedStateConservationTolerance(before: f64, after: f64) scoped_conservati
 }
 
 pub fn requireConservedInventories(before: AcceptedStateInventory, after: AcceptedStateInventory) !void {
-    inline for (std.meta.fields(AcceptedStateInventory)) |field| {
+    inline for (ti_compat.fieldViews(AcceptedStateInventory)) |field| {
         const before_value = @field(before, field.name);
         const after_value = @field(after, field.name);
         const closure = scoped_conservation.evaluate(.{
@@ -748,7 +749,7 @@ pub fn requireAcceptedStateConservation(
     const after = acceptedStateInventory(state, cell_index, parameters) catch
         return error.SoluteReactionAcceptedStateConservationFailure;
     try reaction_charge.requireConservedStates(scratch, 0, state, cell_index, parameters);
-    inline for (std.meta.fields(AcceptedStateInventory)) |field| {
+    inline for (ti_compat.fieldViews(AcceptedStateInventory)) |field| {
         const before_value = @field(before, field.name);
         const after_value = @field(after, field.name);
         const closure = scoped_conservation.evaluate(.{
@@ -1050,7 +1051,7 @@ const solute_legacy_zeroc_mol_per_m3: f64 = 1.0e-32;
 fn initializeSearchReferences(state: *const chemistry.State, cell_index: usize, parameters: chemistry.ReactionParameters, inventory: AcceptedStateInventory, water_ion_reference: f64, output: []f64) !void {
     try state.packCell(cell_index, output);
     var cursor: usize = 0;
-    inline for (std.meta.fields(@TypeOf(state.aqueous[cell_index]))) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(state.aqueous[cell_index]))) |field| {
         const reference = if (comptime std.mem.eql(u8, field.name, "hydrogen") or std.mem.eql(u8, field.name, "hydroxide")) water_ion_reference else elementSearchReference(field.name, inventory, output[cursor]);
         // SOLUTE.F:131 ZEROC=1.0E-32 floors every working concentration
         // (solute.f:378-556 AMAX1(ZEROC,...)); STARTE's own ZEROC=1.0E-48
@@ -1063,19 +1064,19 @@ fn initializeSearchReferences(state: *const chemistry.State, cell_index: usize, 
     for ([_]@TypeOf(state.non_band_phosphate[cell_index]){ state.non_band_phosphate[cell_index], state.band_phosphate[cell_index] }, 0..) |zone, zone_index| {
         const density = if (zone_index == 0) parameters.non_band_phosphate_soil_mass_per_water_volume_megagrams_per_m3 else parameters.band_phosphate_soil_mass_per_water_volume_megagrams_per_m3;
         const totals = try phosphateZoneInventory(zone, density);
-        inline for (std.meta.fields(@TypeOf(zone))) |field| {
+        inline for (ti_compat.fieldViews(@TypeOf(zone))) |field| {
             const reference = if (comptime std.mem.endsWith(u8, field.name, "megagram")) totals.sites_mol_per_megagram else totals.phosphorus_mol_per_m3;
             output[cursor] = @max(output[cursor], reference);
             cursor += 1;
         }
     }
-    inline for (std.meta.fields(@TypeOf(state.cation_exchange_mol_per_megagram[cell_index]))) |_| {
+    inline for (ti_compat.fieldViews(@TypeOf(state.cation_exchange_mol_per_megagram[cell_index]))) |_| {
         output[cursor] = @max(output[cursor], inventory.cation_exchange_charge_mol_per_megagram);
         cursor += 1;
     }
     output[cursor] = @max(output[cursor], parameters.total_carboxyl_sites_mol_per_megagram);
     cursor += 1;
-    inline for (std.meta.fields(@TypeOf(state.geochemistry_solids[cell_index]))) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(state.geochemistry_solids[cell_index]))) |field| {
         output[cursor] = @max(output[cursor], elementSearchReference(field.name, inventory, output[cursor]));
         cursor += 1;
     }
@@ -3009,7 +3010,7 @@ pub fn solveBoundedPhosphateExtents(
     const active_bounds = workspace.phosphate_extent_active_bounds;
     @memset(solution, 0);
     for (active_bounds, 0..) |*status, column| {
-        const reaction: CoupledExtentReaction = @enumFromInt(column);
+        const reaction: CoupledExtentReaction = @fromBackingInt(@intCast(column));
         status.* = if (coupledExtentReactionEnabled(
             reaction,
             limiting_index,
@@ -3066,7 +3067,7 @@ pub fn solveBoundedPhosphateExtents(
             if (status != 0) continue;
             const bounds = phosphateExtentBounds(
                 current,
-                @enumFromInt(column),
+                @fromBackingInt(@intCast(column)),
                 parameters,
                 options,
             );
@@ -3095,7 +3096,7 @@ pub fn solveBoundedPhosphateExtents(
         if (violating_column) |column| {
             const bounds = phosphateExtentBounds(
                 current,
-                @enumFromInt(column),
+                @fromBackingInt(@intCast(column)),
                 parameters,
                 options,
             );

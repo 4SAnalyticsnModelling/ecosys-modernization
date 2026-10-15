@@ -29,13 +29,14 @@ const surface_nutrients = @import("../soil/biogeochemistry/organic_matter_fire_e
 const spring_reproductive_litterfall = @import("../plant/growth/spring_reproductive_litterfall.zig");
 const group_harvest = @import("plant_harvest_runtime_harvest.zig");
 const group_source_order_exports = @import("plant_harvest_runtime_source_order_exports.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub fn sumHarvestProductComponents(
     components: [group_harvest.harvest_product_component_count]canopy.ElementalMass,
 ) !canopy.ElementalMass {
     var total: canopy.ElementalMass = .{};
     for (components) |mass| {
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
             const value = @field(mass, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidDisturbanceRemovalInput;
@@ -58,7 +59,7 @@ pub fn remainingShootPools(
     burned: group_source_order_exports.SourceOrderShootCombustionBranchPools,
 ) group_source_order_exports.SourceOrderShootCombustionBranchPools {
     var result: group_source_order_exports.SourceOrderShootCombustionBranchPools = undefined;
-    inline for (@typeInfo(group_source_order_exports.SourceOrderShootCombustionBranchPools).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(group_source_order_exports.SourceOrderShootCombustionBranchPools)) |field| {
         const pool = @field(pools, field.name);
         const loss = @field(burned, field.name);
         @field(result, field.name) = .{
@@ -115,7 +116,7 @@ pub fn scaleSaltInventory(
     fraction: f64,
 ) group_source_order_exports.SourceOrderShootSaltInventory {
     var result: group_source_order_exports.SourceOrderShootSaltInventory = undefined;
-    inline for (@typeInfo(group_source_order_exports.SourceOrderShootSaltInventory).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(group_source_order_exports.SourceOrderShootSaltInventory)) |field|
         @field(result, field.name) = @field(inventory, field.name) * fraction;
     return result;
 }
@@ -125,7 +126,7 @@ pub fn subtractSaltInventory(
     loss: group_source_order_exports.SourceOrderShootSaltInventory,
 ) group_source_order_exports.SourceOrderShootSaltInventory {
     var result: group_source_order_exports.SourceOrderShootSaltInventory = undefined;
-    inline for (@typeInfo(group_source_order_exports.SourceOrderShootSaltInventory).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(group_source_order_exports.SourceOrderShootSaltInventory)) |field|
         @field(result, field.name) = @field(inventory, field.name) - @field(loss, field.name);
     return result;
 }

@@ -1,5 +1,6 @@
 const std = @import("std");
 const aqueous_network = @import("../solute/aqueous_network.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const LayerReactionAdmissionInputs = struct {
     /// Legacy DLYR(3,L,NY,NX), soil-layer thickness (m).
@@ -16,7 +17,7 @@ pub const LayerReactionAdmissionInputs = struct {
 /// the layer preparation and reactions beginning at line 163. Equality with
 /// either threshold is inactive because the source uses strict `.GT.` tests.
 pub fn admitsLayerReactions(inputs: LayerReactionAdmissionInputs) !bool {
-    inline for (@typeInfo(LayerReactionAdmissionInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(LayerReactionAdmissionInputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidLayerReactionAdmissionInput;
@@ -136,7 +137,7 @@ fn validateLayerZonePreparationInputs(inputs: LayerZonePreparationInputs) !void 
         !std.math.isFinite(inputs.soil_volume_m3) or inputs.soil_volume_m3 < 0 or
         !std.math.isFinite(inputs.positive_soil_mass_threshold_megagrams) or inputs.positive_soil_mass_threshold_megagrams < 0)
         return error.InvalidLayerZonePreparationInput;
-    inline for (@typeInfo(LayerZoneFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(LayerZoneFractions)) |field| {
         const fraction = @field(inputs.fractions, field.name);
         if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1)
             return error.InvalidLayerZoneFraction;
@@ -241,8 +242,8 @@ pub const DissolutionFlux = struct {
 /// Direct source-order translation of SOLUTE.F lines 326--338.
 pub fn dissolution(state: FertilizerState, hydrolysis: UreaResult, fractions: ZoneFractions, rates: DissolutionRates, water_content_m3_per_m3: f64, timestep_h: f64) !DissolutionFlux {
     try validateFertilizerState(state);
-    inline for (@typeInfo(ZoneFractions).@"struct".fields) |field| if (!std.math.isFinite(@field(fractions, field.name)) or @field(fractions, field.name) < 0 or @field(fractions, field.name) > 1) return error.InvalidFertilizerZoneFraction;
-    inline for (@typeInfo(DissolutionRates).@"struct".fields) |field| if (!std.math.isFinite(@field(rates, field.name)) or @field(rates, field.name) < 0) return error.InvalidFertilizerDissolutionRate;
+    inline for (ti_compat.fieldViews(ZoneFractions)) |field| if (!std.math.isFinite(@field(fractions, field.name)) or @field(fractions, field.name) < 0 or @field(fractions, field.name) > 1) return error.InvalidFertilizerZoneFraction;
+    inline for (ti_compat.fieldViews(DissolutionRates)) |field| if (!std.math.isFinite(@field(rates, field.name)) or @field(rates, field.name) < 0) return error.InvalidFertilizerDissolutionRate;
     if (!std.math.isFinite(water_content_m3_per_m3) or water_content_m3_per_m3 < 0 or !std.math.isFinite(timestep_h) or timestep_h <= 0) return error.InvalidFertilizerDissolutionInput;
     const ammonium_rate = rates.ammonium_per_h * timestep_h;
     const ammonia_rate = rates.ammonia_per_h * timestep_h;
@@ -299,7 +300,7 @@ pub fn state_updateToRecipients(
         nitrogen_molar_mass_g_per_mol <= 0 or
         !std.math.isFinite(gaseous_ammonia_g_n.*) or gaseous_ammonia_g_n.* < 0)
         return error.InvalidFertilizerRecipientWaterVolume;
-    inline for (@typeInfo(ZoneFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ZoneFractions)) |field| {
         const fraction = @field(fractions, field.name);
         if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1)
             return error.InvalidFertilizerZoneFraction;
@@ -352,7 +353,7 @@ pub fn state_updateToRecipients(
         nitrogen_molar_mass_g_per_mol;
     next_aqueous.nitrate_non_band += nitrate_to_non_band_mol_n / nonzeroOrOne(nitrate_non_band_water);
     next_aqueous.nitrate_band += nitrate_to_band_mol_n / nonzeroOrOne(nitrate_band_water);
-    inline for (@typeInfo(aqueous_network.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(aqueous_network.State)) |field| {
         const value = @field(next_aqueous, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidFertilizerRecipientAqueousState;
@@ -388,18 +389,18 @@ fn scaledPhysicalThreshold(absolute: f64, relative: f64, representative_scale: f
 }
 
 fn validateUrea(inputs: UreaInputs, parameters: UreaParameters) !void {
-    inline for (@typeInfo(UreaInputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0) return error.InvalidUreaHydrolysisInput;
-    inline for (@typeInfo(UreaParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) < 0) return error.InvalidUreaHydrolysisParameter;
+    inline for (ti_compat.fieldViews(UreaInputs)) |field| if (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0) return error.InvalidUreaHydrolysisInput;
+    inline for (ti_compat.fieldViews(UreaParameters)) |field| if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) < 0) return error.InvalidUreaHydrolysisParameter;
     if (parameters.physical_relative_tolerance >= 1) return error.InvalidUreaHydrolysisParameter;
     if (inputs.current_inhibitor_activity > 1 or inputs.timestep_h <= 0 or parameters.minimum_half_saturation_mol_n_per_megagram <= 0 or parameters.microbial_activity_inhibition_g_c_per_m3_h <= 0) return error.InvalidUreaHydrolysisInput;
 }
 
 fn validateFertilizerState(state: FertilizerState) !void {
-    inline for (@typeInfo(FertilizerState).@"struct".fields) |field| if (!std.math.isFinite(@field(state, field.name)) or @field(state, field.name) < 0) return error.InvalidFertilizerState;
+    inline for (ti_compat.fieldViews(FertilizerState)) |field| if (!std.math.isFinite(@field(state, field.name)) or @field(state, field.name) < 0) return error.InvalidFertilizerState;
 }
 
 fn validateFluxAgainstState(flux: DissolutionFlux, state: FertilizerState) !void {
-    inline for (@typeInfo(DissolutionFlux).@"struct".fields) |field| if (!std.math.isFinite(@field(flux, field.name)) or @field(flux, field.name) < 0) return error.InvalidFertilizerDissolutionFlux;
+    inline for (ti_compat.fieldViews(DissolutionFlux)) |field| if (!std.math.isFinite(@field(flux, field.name)) or @field(flux, field.name) < 0) return error.InvalidFertilizerDissolutionFlux;
     if (flux.broadcast_ammonium_non_band_mol_n + flux.broadcast_ammonium_band_mol_n > state.broadcast_ammonium_mol_n or flux.broadcast_ammonia_non_band_mol_n + flux.broadcast_ammonia_band_mol_n > state.broadcast_ammonia_mol_n or flux.broadcast_urea_non_band_mol_n + flux.broadcast_urea_band_mol_n > state.broadcast_urea_mol_n or flux.broadcast_nitrate_non_band_mol_n + flux.broadcast_nitrate_band_mol_n > state.broadcast_nitrate_mol_n or flux.banded_ammonium_mol_n > state.banded_ammonium_mol_n or flux.banded_ammonia_mol_n > state.banded_ammonia_mol_n or flux.banded_urea_mol_n > state.banded_urea_mol_n or flux.banded_nitrate_mol_n > state.banded_nitrate_mol_n) return error.FertilizerDissolutionExceedsPool;
 }
 
@@ -522,13 +523,13 @@ test "SOLUTE fertilizer state_update conserves nitrogen and is transactional" {
 }
 fn sumState(state: FertilizerState) f64 {
     var total: f64 = 0;
-    inline for (@typeInfo(FertilizerState).@"struct".fields) |field| total += @field(state, field.name);
+    inline for (ti_compat.fieldViews(FertilizerState)) |field| total += @field(state, field.name);
     return total;
 }
 
 fn sumFlux(flux: DissolutionFlux) f64 {
     var total: f64 = 0;
-    inline for (@typeInfo(DissolutionFlux).@"struct".fields) |field| total += @field(flux, field.name);
+    inline for (ti_compat.fieldViews(DissolutionFlux)) |field| total += @field(flux, field.name);
     return total;
 }
 

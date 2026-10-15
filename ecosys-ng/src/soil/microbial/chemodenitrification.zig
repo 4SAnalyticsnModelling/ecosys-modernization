@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     reaction_rate_per_h: f64,
@@ -92,7 +93,7 @@ fn calculateZone(
 }
 
 fn validateCalculation(inputs: CalculationInputs, parameters: Parameters) !void {
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         const value = @field(parameters, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidChemodenitrificationInput;
@@ -109,7 +110,7 @@ fn validateCalculation(inputs: CalculationInputs, parameters: Parameters) !void 
     }) |value| if (!std.math.isFinite(value) or value < 0)
         return error.InvalidChemodenitrificationInput;
     inline for (.{ inputs.non_band, inputs.band }) |zone| {
-        inline for (@typeInfo(Zone).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Zone)) |field| {
             const value = @field(zone, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidChemodenitrificationInput;
@@ -167,14 +168,14 @@ pub const State = struct {
         state.total_band_competition = 0;
         var allocated: usize = 0;
         errdefer {
-            inline for (@typeInfo(State).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(State)) |field| {
                 if (field.type == []f64 and allocated > 0) {
                     allocated -= 1;
                     allocator.free(@field(state, field.name));
                 }
             }
         }
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(state, field.name) = try allocator.alloc(f64, unit_count);
             @memset(@field(state, field.name), 0);
             allocated += 1;
@@ -183,7 +184,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(State)) |field|
             if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
@@ -252,7 +253,7 @@ pub fn calculateBatch(state: *State, inputs: Inputs) !void {
         return error.NonFiniteChemodenitrificationResult;
     state.total_non_band_competition = total_non_band;
     state.total_band_competition = total_band;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         const index = comptime stateFieldIndex(field.name);
         for (temporary, 0..) |values, unit| @field(state, field.name)[unit] = values[index];
     };
@@ -260,7 +261,7 @@ pub fn calculateBatch(state: *State, inputs: Inputs) !void {
 
 fn stateFieldIndex(comptime name: []const u8) usize {
     var index: usize = 0;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         if (comptime std.mem.eql(u8, field.name, name)) return index;
         index += 1;
     };
@@ -274,7 +275,7 @@ fn validate(state: *const State, inputs: Inputs) !void {
         inputs.preceding_total_band_competition,
     }) |value| if (!std.math.isFinite(value) or value < 0)
         return error.InvalidChemodenitrificationInput;
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (field.type == []const f64) {
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (field.type == []const f64) {
         const values = @field(inputs, field.name);
         if (values.len != n) return error.InvalidChemodenitrificationDimensions;
         for (values) |value| if (!std.math.isFinite(value) or value < 0)

@@ -476,8 +476,8 @@ test "pond carrier synchronization preserves untouched phosphate species" {
     );
     defer transport.deinit();
     transport.water_volume_m3[0] = 1;
-    transport.amount_mol[@intFromEnum(aqueous_species_module.AqueousSpecies.non_band_phosphate)] = 7;
-    transport.amount_mol[@intFromEnum(aqueous_species_module.AqueousSpecies.non_band_hpo4)] = 3;
+    transport.amount_mol[@backingInt(aqueous_species_module.AqueousSpecies.non_band_phosphate)] = 7;
+    transport.amount_mol[@backingInt(aqueous_species_module.AqueousSpecies.non_band_hpo4)] = 3;
     soil_chemistry.non_band_phosphate[0].dissolved_po4_mol_p_per_m3 = 99;
     soil_chemistry.non_band_phosphate[0].dissolved_hpo4_mol_p_per_m3 = 5;
 
@@ -496,7 +496,7 @@ test "pond carrier synchronization preserves untouched phosphate species" {
 
     try std.testing.expectEqual(
         @as(f64, 7),
-        transport.amount_mol[@intFromEnum(aqueous_species_module.AqueousSpecies.non_band_phosphate)],
+        transport.amount_mol[@backingInt(aqueous_species_module.AqueousSpecies.non_band_phosphate)],
     );
     try std.testing.expectEqual(
         @as(f64, 14),
@@ -504,7 +504,7 @@ test "pond carrier synchronization preserves untouched phosphate species" {
     );
     try std.testing.expectEqual(
         @as(f64, 2.5),
-        transport.amount_mol[@intFromEnum(aqueous_species_module.AqueousSpecies.non_band_hpo4)],
+        transport.amount_mol[@backingInt(aqueous_species_module.AqueousSpecies.non_band_hpo4)],
     );
     try std.testing.expectEqual(
         @as(f64, 5),
@@ -541,7 +541,7 @@ test "issue-074 Finding B: pond-domain-collapse carrier reconciliation no longer
     // takes the "unchanged" (dilute-onto-the-new-carrier) path -- the same
     // path every routine, non-collapsing hour exercises for the bulk of the
     // transport-owned species.
-    transport.amount_mol[@intFromEnum(aqueous_species_module.AqueousSpecies.calcium_carbonate)] = 6;
+    transport.amount_mol[@backingInt(aqueous_species_module.AqueousSpecies.calcium_carbonate)] = 6;
     soil_chemistry.aqueous[0].calcium_carbonate = 6;
     // `carbonate` is in `pond_carbonate_changed_species`, so its chemistry
     // concentration is authoritative input and its extensive amount is what
@@ -572,14 +572,14 @@ test "issue-074 Finding B: pond-domain-collapse carrier reconciliation no longer
     );
     try std.testing.expectApproxEqRel(
         @as(f64, 9) * dry_reference_water_m3,
-        transport.amount_mol[@intFromEnum(aqueous_species_module.AqueousSpecies.carbonate)],
+        transport.amount_mol[@backingInt(aqueous_species_module.AqueousSpecies.carbonate)],
         1.0e-12,
     );
 
     // Near-zero-but-nonzero remainder behaves identically, not like a real
     // carrier.
     transport.water_volume_m3[0] = dry_reference_water_m3;
-    transport.amount_mol[@intFromEnum(aqueous_species_module.AqueousSpecies.calcium_carbonate)] = 6;
+    transport.amount_mol[@backingInt(aqueous_species_module.AqueousSpecies.calcium_carbonate)] = 6;
     soil_chemistry.aqueous[0].calcium_carbonate = 6;
     soil_chemistry.aqueous[0].carbonate = 9;
     try aqueous_bridge.synchronizeCellAfterCarrierChange(
@@ -599,7 +599,7 @@ test "issue-074 Finding B: pond-domain-collapse carrier reconciliation no longer
     );
     try std.testing.expectApproxEqRel(
         @as(f64, 9) * dry_reference_water_m3,
-        transport.amount_mol[@intFromEnum(aqueous_species_module.AqueousSpecies.carbonate)],
+        transport.amount_mol[@backingInt(aqueous_species_module.AqueousSpecies.carbonate)],
         1.0e-12,
     );
 }

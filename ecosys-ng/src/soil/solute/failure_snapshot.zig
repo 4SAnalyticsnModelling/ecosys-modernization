@@ -2,6 +2,7 @@ const std = @import("std");
 const chemistry = @import("chemistry_state.zig");
 const solver = @import("reaction_solver.zig");
 
+
 const magic = "ECOSSOL!";
 const legacy_format_version: u32 = 1;
 const format_version: u32 = 2;
@@ -277,7 +278,7 @@ test "solute failure snapshot is self contained checksummed and replayable" {
     var state = try chemistry.State.init(std.testing.allocator, 1);
     defer state.deinit();
     var packed_values: [chemistry.State.packedComponentCount()]f64 =
-        [_]f64{1} ** chemistry.State.packedComponentCount();
+        @as([chemistry.State.packedComponentCount()]f64, @splat(@as(f64, 1)));
     try state.unpackCell(0, &packed_values);
     var parameters = std.mem.zeroes(chemistry.ReactionParameters);
     parameters.fractions = .{
@@ -361,7 +362,7 @@ test "v1 solute failure snapshot upgrades one absolute tolerance to both units" 
     legacy_options.divergence_growth_factor = 500;
     legacy_options.anderson_recovery = true;
     const packed_values =
-        [_]f64{1} ** chemistry.State.packedComponentCount();
+        @as([chemistry.State.packedComponentCount()]f64, @splat(@as(f64, 1)));
 
     var payload: std.Io.Writer.Allocating = .init(std.testing.allocator);
     defer payload.deinit();
@@ -431,7 +432,7 @@ test "v1 expanded solute snapshot preserves distinct unit tolerances" {
     snapshot_options.divergence_growth_factor = 800;
     snapshot_options.anderson_recovery = true;
     const packed_values =
-        [_]f64{1} ** chemistry.State.packedComponentCount();
+        @as([chemistry.State.packedComponentCount()]f64, @splat(@as(f64, 1)));
 
     var payload: std.Io.Writer.Allocating = .init(std.testing.allocator);
     defer payload.deinit();

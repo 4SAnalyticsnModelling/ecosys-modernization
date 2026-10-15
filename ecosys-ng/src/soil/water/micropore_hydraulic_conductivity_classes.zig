@@ -30,6 +30,7 @@
 // docs/traceability/hour1_micropore_conductivity_classes_are_owned_by_hydraulic_conductivity.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     porosity_m3_m3: f64,
@@ -155,7 +156,7 @@ fn validate(inputs: Inputs, outputs: Outputs) !usize {
         outputs.lateral_y_conductivity_m2_h_megapascal.len != count or
         outputs.vertical_conductivity_m2_h_megapascal.len != count)
         return error.SoilHydraulicClassDimensionMismatch;
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteSoilHydraulicClassInput;
     if (inputs.porosity_m3_m3 <= 0 or inputs.field_capacity_m3_m3 <= 0 or

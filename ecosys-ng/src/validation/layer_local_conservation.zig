@@ -37,15 +37,17 @@ const organic_fire = @import("../soil/biogeochemistry/organic_matter_fire_exchan
 const soil_relayering_activity = @import("../soil/profile/relayering_activity.zig");
 const tillage_activity = @import("../redistribution/tillage/activity.zig");
 const chemistry_water_rebase = @import("../soil/chemistry/water_carrier_rebase.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 // The runtime conservation traversals below intentionally replace reflected
 // `inline for` expansion. Keep this guard next to the imports so a future enum
 // reordering or explicit discriminant cannot silently change traversal order.
 comptime {
-    for (@typeInfo(snow.Species).@"enum".fields, 0..) |field, index| {
+    for (ti_compat.enumFieldViews(snow.Species), 0..) |field, index| {
         if (field.value != index) @compileError("snow.Species must remain contiguous and declaration ordered");
     }
-    for (@typeInfo(snow.SaltSpecies).@"enum".fields, 0..) |field, index| {
+    for (ti_compat.enumFieldViews(snow.SaltSpecies), 0..) |field, index| {
         if (field.value != index) @compileError("snow.SaltSpecies must remain contiguous and declaration ordered");
     }
 }
@@ -120,7 +122,7 @@ pub const ActivityFamily = enum(u8) {
 
 fn activityMask(comptime values: anytype) u32 {
     var result: u32 = 0;
-    inline for (values) |value| result |= @as(u32, 1) << @intFromEnum(value);
+    inline for (values) |value| result |= @as(u32, 1) << @backingInt(value);
     return result;
 }
 
@@ -787,7 +789,7 @@ pub fn accumulateSoilRelayeringActivity(
         for (0..cap) |upper| {
             const record = try sidecar.record(cell, upper);
             try record.transfer.validate();
-            inline for (std.meta.fields(inventory.Storage)) |field| {
+            inline for (ti_compat.fieldViews(inventory.Storage)) |field| {
                 const value = @field(record.transfer, field.name);
                 if (value < 0) return error.InvalidLayerConservationActivity;
             }
@@ -2217,7 +2219,7 @@ pub const SedimentMolarMassesGPerMol = struct {
     phosphorus: f64,
 
     fn validate(self: SedimentMolarMassesGPerMol) !void {
-        inline for (std.meta.fields(SedimentMolarMassesGPerMol)) |field| {
+        inline for (ti_compat.fieldViews(SedimentMolarMassesGPerMol)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value <= 0)
                 return error.InvalidLayerConservationMolarMass;
@@ -2360,7 +2362,7 @@ pub fn accumulateFertilizerLocalActivity(
 }
 
 fn fertilizerBoundaryActivity(fragment: fertilizer_dispatch.FertilizerActivity) !hourly.BoundaryActivity {
-    inline for (std.meta.fields(fertilizer_dispatch.FertilizerActivity)) |field| {
+    inline for (ti_compat.fieldViews(fertilizer_dispatch.FertilizerActivity)) |field| {
         const value = @field(fragment, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidLayerConservationActivity;
@@ -2600,7 +2602,7 @@ pub fn accumulateAqueousFaces(
                 macropore_face_flux_mol[start + species_index];
             if (!std.math.isFinite(flux)) return error.InvalidLayerConservationActivity;
             if (flux != 0) {
-                const formula = surface_aqueous.formula(@enumFromInt(species_index));
+                const formula = surface_aqueous.formula(@fromBackingInt(@intCast(species_index)));
                 const magnitude = @abs(flux);
                 const transfer: hourly.IntercellTransfer = .{
                     .carbon_g = magnitude * formula.carbon_mol * carbon_g_per_mol,
@@ -2646,11 +2648,11 @@ pub fn accumulateGasFaces(
             face.first_cell == face.second_cell)
             return error.InvalidLayerConservationFaceTopology;
         const start = face_index * gas_transport.species_count;
-        inline for (@typeInfo(gas_transport.Species).@"enum".fields) |field| {
+        inline for (ti_compat.enumFieldViews(gas_transport.Species)) |field| {
             const flux = state.accepted_face_flux_g_per_h[start + field.value];
             if (!std.math.isFinite(flux)) return error.InvalidLayerConservationActivity;
             if (flux != 0) {
-                const transfer: hourly.IntercellTransfer = switch (@as(gas_transport.Species, @enumFromInt(field.value))) {
+                const transfer: hourly.IntercellTransfer = switch (@as(gas_transport.Species, @fromBackingInt(@intCast(field.value)))) {
                     .carbon_dioxide, .methane => .{ .carbon_g = @abs(flux) },
                     .oxygen => .{ .oxygen_g = @abs(flux) },
                     .nitrogen, .nitrous_oxide, .ammonia => .{ .nitrogen_g = @abs(flux) },
@@ -2729,8 +2731,8 @@ pub fn accumulateDissolvedGasFaces(
     for (faces.micropore_faces, 0..) |face, face_index| {
         if (!faces.active_by_face[face_index]) continue;
         const start = face_index * gas_transport.species_count;
-        inline for (@typeInfo(gas_transport.Species).@"enum".fields) |field| {
-            const species: gas_transport.Species = @enumFromInt(field.value);
+        inline for (ti_compat.enumFieldViews(gas_transport.Species)) |field| {
+            const species: gas_transport.Species = @fromBackingInt(@intCast(field.value));
             if (species == .ammonia) continue;
             const flux = micropore_face_flux_g[start + field.value] +
                 macropore_face_flux_g[start + field.value];
@@ -2787,8 +2789,8 @@ pub fn accumulateSoilSurfaceGasAtmosphere(
             const flat = cell * ledger.layout.soil_layer_capacity + local_layer;
             const active = local_layer < active_layers;
             const address: ScopeAddress = .{ .kind = .soil_layer, .cell = cell, .layer = local_layer };
-            inline for (@typeInfo(gas_transport.Species).@"enum".fields) |field| {
-                const species: gas_transport.Species = @enumFromInt(field.value);
+            inline for (ti_compat.enumFieldViews(gas_transport.Species)) |field| {
+                const species: gas_transport.Species = @fromBackingInt(@intCast(field.value));
                 const component = flat * gas_transport.species_count + field.value;
                 inline for (.{
                     soil_atmospheric_flux_g[component],
@@ -2803,8 +2805,8 @@ pub fn accumulateSoilSurfaceGasAtmosphere(
             }
         }
         const surface: ScopeAddress = .{ .kind = .surface, .cell = cell };
-        inline for (@typeInfo(gas_transport.Species).@"enum".fields) |field| {
-            const species: gas_transport.Species = @enumFromInt(field.value);
+        inline for (ti_compat.enumFieldViews(gas_transport.Species)) |field| {
+            const species: gas_transport.Species = @fromBackingInt(@intCast(field.value));
             const signed = litter_atmospheric_flux_g[cell * gas_transport.species_count + field.value];
             try accumulateExternalGain(
                 &candidate,
@@ -3011,7 +3013,7 @@ pub fn accumulateSoilExternalBoundaries(
         const aqueous_start = flat_layer * solute_species.AqueousSpecies.count;
         for (0..solute_species.AqueousSpecies.count) |species_index| {
             const signed = inputs.aqueous_boundary_net_input_mol[aqueous_start + species_index];
-            const formula = surface_aqueous.formula(@enumFromInt(species_index));
+            const formula = surface_aqueous.formula(@fromBackingInt(@intCast(species_index)));
             const amount = @abs(signed);
             try accumulateExternalGain(&candidate, address, active, signed, .{
                 .carbon_g = amount * formula.carbon_mol * inputs.carbon_g_per_mol,
@@ -3052,8 +3054,8 @@ pub fn accumulateSoilExternalBoundaries(
         );
 
         const gas_start = flat_layer * gas_transport.species_count;
-        inline for (@typeInfo(gas_transport.Species).@"enum".fields) |field| {
-            const species: gas_transport.Species = @enumFromInt(field.value);
+        inline for (ti_compat.enumFieldViews(gas_transport.Species)) |field| {
+            const species: gas_transport.Species = @fromBackingInt(@intCast(field.value));
             const signed = inputs.dissolved_gas_boundary_net_input_g[gas_start + field.value];
             if (species == .ammonia) {
                 if (!std.math.isFinite(signed)) return error.InvalidLayerConservationActivity;
@@ -3332,7 +3334,7 @@ pub fn accumulateSnowTransportActivity(
     inline for (.{ inputs.molar_mass_g_per_mol.nitrogen, inputs.molar_mass_g_per_mol.phosphorus }) |value|
         if (!std.math.isFinite(value) or value <= 0)
             return error.InvalidLayerConservationMolarMass;
-    inline for (@typeInfo(@TypeOf(inputs.molar_mass_g_per_mol.ions)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(inputs.molar_mass_g_per_mol.ions))) |field| {
         const value = @field(inputs.molar_mass_g_per_mol.ions, field.name);
         if (!std.math.isFinite(value) or value <= 0)
             return error.InvalidLayerConservationMolarMass;
@@ -3393,7 +3395,7 @@ pub fn accumulateSnowTransportActivity(
                     try candidate.accumulateTransfer(
                         .{ .kind = .snow_layer, .cell = cell, .layer = local_layer },
                         .{ .kind = .snow_layer, .cell = cell, .layer = local_layer + 1 },
-                        try snowPrimaryTransfer(@enumFromInt(species_index), amount_g, inputs.molar_mass_g_per_mol),
+                        try snowPrimaryTransfer(@fromBackingInt(@intCast(species_index)), amount_g, inputs.molar_mass_g_per_mol),
                     );
                 }
             }
@@ -3408,7 +3410,7 @@ pub fn accumulateSnowTransportActivity(
                     try candidate.accumulateTransfer(
                         .{ .kind = .snow_layer, .cell = cell, .layer = local_layer },
                         .{ .kind = .snow_layer, .cell = cell, .layer = local_layer + 1 },
-                        snowSaltTransfer(@enumFromInt(salt_species_index), amount_mol, inputs.molar_mass_g_per_mol.phosphorus),
+                        snowSaltTransfer(@fromBackingInt(@intCast(salt_species_index)), amount_mol, inputs.molar_mass_g_per_mol.phosphorus),
                     );
                 }
             }
@@ -3533,14 +3535,14 @@ pub fn accumulateSnowRelayeringActivity(ledger: *Ledger, inputs: SnowRelayeringA
         !std.math.isFinite(inputs.latent_heat_of_fusion_megajoules_per_m3) or
         inputs.latent_heat_of_fusion_megajoules_per_m3 <= 0)
         return error.InvalidLayerConservationThermodynamics;
-    inline for (@typeInfo(snow.ThermodynamicParameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(snow.ThermodynamicParameters)) |field| {
         const value = @field(inputs.thermodynamics, field.name);
         if (!std.math.isFinite(value) or value <= 0)
             return error.InvalidLayerConservationThermodynamics;
     }
     inline for (.{ inputs.molar_mass_g_per_mol.nitrogen, inputs.molar_mass_g_per_mol.phosphorus }) |value|
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidLayerConservationMolarMass;
-    inline for (@typeInfo(@TypeOf(inputs.molar_mass_g_per_mol.ions)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(inputs.molar_mass_g_per_mol.ions))) |field| {
         const value = @field(inputs.molar_mass_g_per_mol.ions, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidLayerConservationMolarMass;
     }
@@ -3630,7 +3632,7 @@ fn accumulateSnowRelayeringDirection(
             return error.OverlappingSnowLayerConservationSaltActivity;
         transfer = try addIntercellTransfers(
             transfer,
-            try snowPrimaryTransfer(@enumFromInt(species_index), amount, inputs.molar_mass_g_per_mol),
+            try snowPrimaryTransfer(@fromBackingInt(@intCast(species_index)), amount, inputs.molar_mass_g_per_mol),
         );
     }
     for (0..snow.salt_species_count) |salt_species_index| {
@@ -3640,7 +3642,7 @@ fn accumulateSnowRelayeringDirection(
             return error.OverlappingSnowLayerConservationSaltActivity;
         transfer = try addIntercellTransfers(
             transfer,
-            snowSaltTransfer(@enumFromInt(salt_species_index), amount, inputs.molar_mass_g_per_mol.phosphorus),
+            snowSaltTransfer(@fromBackingInt(@intCast(salt_species_index)), amount, inputs.molar_mass_g_per_mol.phosphorus),
         );
     }
     try validateTransfer(transfer);
@@ -3733,7 +3735,7 @@ fn accumulateSnowExternalDirectionOracle(
         return error.LayerConservationActivityDimensionMismatch;
     inline for (.{ inputs.molar_mass_g_per_mol.nitrogen, inputs.molar_mass_g_per_mol.phosphorus }) |value|
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidLayerConservationMolarMass;
-    inline for (@typeInfo(@TypeOf(inputs.molar_mass_g_per_mol.ions)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(inputs.molar_mass_g_per_mol.ions))) |field| {
         const value = @field(inputs.molar_mass_g_per_mol.ions, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidLayerConservationMolarMass;
     }
@@ -3791,7 +3793,7 @@ fn accumulateSnowExternalDirectionOracle(
                 if (!inputs.active_by_layer[base] and amount != 0) return error.InactiveLayerConservationActivity;
                 if (amount != 0) try candidate.accumulate(
                     top_address,
-                    transferActivity(try snowPrimaryTransfer(@enumFromInt(species_index), amount, inputs.molar_mass_g_per_mol), .input),
+                    transferActivity(try snowPrimaryTransfer(@fromBackingInt(@intCast(species_index)), amount, inputs.molar_mass_g_per_mol), .input),
                 );
             }
             for (0..snow.salt_species_count) |salt_species_index| {
@@ -3802,7 +3804,7 @@ fn accumulateSnowExternalDirectionOracle(
                 if (!inputs.active_by_layer[base] and amount != 0) return error.InactiveLayerConservationActivity;
                 if (amount != 0) try candidate.accumulate(
                     top_address,
-                    transferActivity(snowSaltTransfer(@enumFromInt(salt_species_index), amount, inputs.molar_mass_g_per_mol.phosphorus), .input),
+                    transferActivity(snowSaltTransfer(@fromBackingInt(@intCast(salt_species_index)), amount, inputs.molar_mass_g_per_mol.phosphorus), .input),
                 );
             }
         }
@@ -3825,7 +3827,7 @@ fn accumulateSnowExternalDirectionOracle(
                 if (!inputs.active_by_layer[layer] and amount != 0) return error.InactiveLayerConservationActivity;
                 if (amount != 0) try candidate.accumulate(
                     address,
-                    transferActivity(try snowPrimaryTransfer(@enumFromInt(species_index), amount, inputs.molar_mass_g_per_mol), .output),
+                    transferActivity(try snowPrimaryTransfer(@fromBackingInt(@intCast(species_index)), amount, inputs.molar_mass_g_per_mol), .output),
                 );
             }
             for (0..snow.salt_species_count) |salt_species_index| {
@@ -3836,7 +3838,7 @@ fn accumulateSnowExternalDirectionOracle(
                 if (!inputs.active_by_layer[layer] and amount != 0) return error.InactiveLayerConservationActivity;
                 if (amount != 0) try candidate.accumulate(
                     address,
-                    transferActivity(snowSaltTransfer(@enumFromInt(salt_species_index), amount, inputs.molar_mass_g_per_mol.phosphorus), .output),
+                    transferActivity(snowSaltTransfer(@fromBackingInt(@intCast(salt_species_index)), amount, inputs.molar_mass_g_per_mol.phosphorus), .output),
                 );
             }
         }
@@ -3886,7 +3888,7 @@ pub fn accumulateSnowSurfaceSoilTransferActivity(
         return error.LayerConservationActivityDimensionMismatch;
     inline for (.{ inputs.molar_mass_g_per_mol.nitrogen, inputs.molar_mass_g_per_mol.phosphorus }) |value|
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidLayerConservationMolarMass;
-    inline for (@typeInfo(@TypeOf(inputs.molar_mass_g_per_mol.ions)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(inputs.molar_mass_g_per_mol.ions))) |field| {
         const value = @field(inputs.molar_mass_g_per_mol.ions, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidLayerConservationMolarMass;
     }
@@ -3935,7 +3937,7 @@ pub fn accumulateSnowSurfaceSoilTransferActivity(
                 donor_g[species_index] = try checkedAddFinite(donor_g[species_index], amount);
                 if (amount != 0) try candidate.accumulate(
                     donor_address,
-                    transferActivity(try snowPrimaryTransfer(@enumFromInt(species_index), amount, inputs.molar_mass_g_per_mol), .output),
+                    transferActivity(try snowPrimaryTransfer(@fromBackingInt(@intCast(species_index)), amount, inputs.molar_mass_g_per_mol), .output),
                 );
             }
             for (0..snow.salt_species_count) |salt_species_index| {
@@ -3948,7 +3950,7 @@ pub fn accumulateSnowSurfaceSoilTransferActivity(
                 donor_salt[salt_species_index] = try checkedAddFinite(donor_salt[salt_species_index], amount);
                 if (amount != 0) try candidate.accumulate(
                     donor_address,
-                    transferActivity(snowSaltTransfer(@enumFromInt(salt_species_index), amount, inputs.molar_mass_g_per_mol.phosphorus), .output),
+                    transferActivity(snowSaltTransfer(@fromBackingInt(@intCast(salt_species_index)), amount, inputs.molar_mass_g_per_mol.phosphorus), .output),
                 );
             }
         }
@@ -3983,12 +3985,12 @@ pub fn accumulateSnowSurfaceSoilTransferActivity(
             try requireSnowTransferRoundoffClosure(donor_g[species_index], litter + nonband + band);
             if (litter != 0) try candidate.accumulate(
                 surface_address,
-                transferActivity(try snowPrimaryTransfer(@enumFromInt(species_index), litter, inputs.molar_mass_g_per_mol), .input),
+                transferActivity(try snowPrimaryTransfer(@fromBackingInt(@intCast(species_index)), litter, inputs.molar_mass_g_per_mol), .input),
             );
             const soil_amount = try checkedAddFinite(nonband, band);
             if (soil_amount != 0) try candidate.accumulate(
                 soil_address,
-                transferActivity(try snowPrimaryTransfer(@enumFromInt(species_index), soil_amount, inputs.molar_mass_g_per_mol), .input),
+                transferActivity(try snowPrimaryTransfer(@fromBackingInt(@intCast(species_index)), soil_amount, inputs.molar_mass_g_per_mol), .input),
             );
         }
         for (0..snow.salt_species_count) |salt_species_index| {
@@ -4003,12 +4005,12 @@ pub fn accumulateSnowSurfaceSoilTransferActivity(
             try requireSnowTransferRoundoffClosure(donor_salt[salt_species_index], litter + nonband + band);
             if (litter != 0) try candidate.accumulate(
                 surface_address,
-                transferActivity(snowSaltTransfer(@enumFromInt(salt_species_index), litter, inputs.molar_mass_g_per_mol.phosphorus), .input),
+                transferActivity(snowSaltTransfer(@fromBackingInt(@intCast(salt_species_index)), litter, inputs.molar_mass_g_per_mol.phosphorus), .input),
             );
             const soil_amount = try checkedAddFinite(nonband, band);
             if (soil_amount != 0) try candidate.accumulate(
                 soil_address,
-                transferActivity(snowSaltTransfer(@enumFromInt(salt_species_index), soil_amount, inputs.molar_mass_g_per_mol.phosphorus), .input),
+                transferActivity(snowSaltTransfer(@fromBackingInt(@intCast(salt_species_index)), soil_amount, inputs.molar_mass_g_per_mol.phosphorus), .input),
             );
         }
     }
@@ -4245,14 +4247,14 @@ fn snowSaltTransfer(
 }
 
 test "runtime snow conservation traversal preserves reflected enum order" {
-    inline for (@typeInfo(snow.Species).@"enum".fields, 0..) |field, index| {
-        const reflected_species: snow.Species = @enumFromInt(field.value);
-        const runtime_species: snow.Species = @enumFromInt(index);
+    inline for (ti_compat.enumFieldViews(snow.Species), 0..) |field, index| {
+        const reflected_species: snow.Species = @fromBackingInt(@intCast(field.value));
+        const runtime_species: snow.Species = @fromBackingInt(@intCast(index));
         try std.testing.expectEqual(reflected_species, runtime_species);
     }
-    inline for (@typeInfo(snow.SaltSpecies).@"enum".fields, 0..) |field, index| {
-        const reflected_species: snow.SaltSpecies = @enumFromInt(field.value);
-        const runtime_species: snow.SaltSpecies = @enumFromInt(index);
+    inline for (ti_compat.enumFieldViews(snow.SaltSpecies), 0..) |field, index| {
+        const reflected_species: snow.SaltSpecies = @fromBackingInt(@intCast(field.value));
+        const runtime_species: snow.SaltSpecies = @fromBackingInt(@intCast(index));
         try std.testing.expectEqual(reflected_species, runtime_species);
     }
 }
@@ -4470,7 +4472,7 @@ test "accepted terminal recovery producer commits explain exact deep-layer closu
         tolerances,
     );
     defer layer_report.deinit(std.testing.allocator);
-    const water_index: usize = @intFromEnum(hourly.Quantity.water);
+    const water_index: usize = @backingInt(hourly.Quantity.water);
     const closure = layer_report.cells[0].closure[water_index];
     try std.testing.expectEqual(expected_residual, closure.residual);
     try std.testing.expect(!closure.physical_accepted);
@@ -4593,7 +4595,7 @@ test "spatial heat provenance remains local and cannot admit historical phase de
         tolerances,
     );
     defer report.deinit(std.testing.allocator);
-    const heat_index: usize = @intFromEnum(hourly.Quantity.heat);
+    const heat_index: usize = @backingInt(hourly.Quantity.heat);
     try std.testing.expect(!report.cells[0].closure[heat_index].physical_accepted);
     try std.testing.expect(!report.cells[0].closure[heat_index].accepted);
 
@@ -5005,7 +5007,7 @@ pub fn evaluateAndCommitAccumulated(
 }
 
 fn validateTransfer(transfer: hourly.IntercellTransfer) !void {
-    inline for (std.meta.fields(hourly.IntercellTransfer)) |field| {
+    inline for (ti_compat.fieldViews(hourly.IntercellTransfer)) |field| {
         const value = @field(transfer, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidLayerConservationTransfer;
@@ -5017,7 +5019,7 @@ fn addIntercellTransfers(
     right: hourly.IntercellTransfer,
 ) !hourly.IntercellTransfer {
     var result: hourly.IntercellTransfer = .{};
-    inline for (std.meta.fields(hourly.IntercellTransfer)) |field| {
+    inline for (ti_compat.fieldViews(hourly.IntercellTransfer)) |field| {
         const value = @field(left, field.name) + @field(right, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidLayerConservationTransfer;
@@ -5191,7 +5193,7 @@ test "suspended local exchange maps packed canonical composition by source layer
     var state = try suspended.State.init(std.testing.allocator, 1, .{
         .organic_cnp_count = try eroded_organic.componentCount(&organic_profile),
         .nitrogen_fertilizer_count = eroded_fertilizer.component_count,
-        .dry_mineral_fertilizer_count = @typeInfo(dry_fertilizer.Inventory).@"struct".fields.len,
+        .dry_mineral_fertilizer_count = @typeInfo(dry_fertilizer.Inventory).@"struct".field_names.len,
         .chemistry_live_and_pending_count = eroded_chemistry.component_count,
     });
     defer state.deinit();
@@ -5698,7 +5700,7 @@ test "layer acceptance rejects exact within-column cancellation" {
     );
     defer report.deinit(std.testing.allocator);
     try std.testing.expect(!report.accepted());
-    try std.testing.expectEqual(@as(usize, 2), report.failing_cell_count[@intFromEnum(hourly.Quantity.water)]);
+    try std.testing.expectEqual(@as(usize, 2), report.failing_cell_count[@backingInt(hourly.Quantity.water)]);
 }
 
 test "snow accepted producer activity closes each layer without column cancellation" {
@@ -5721,13 +5723,13 @@ test "snow accepted producer activity closes each layer without column cancellat
     const process_heat = [_]f64{ 0, 0, 0, 0, 4, 0 };
     const inactive_reference_heat = [_]f64{ 0, -2, 0, 0, 0, 0 };
     var accepted_g: [6 * snow.species_count]f64 = @splat(0);
-    accepted_g[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = 2;
-    accepted_g[@intFromEnum(snow.Species.oxygen)] = 3;
-    accepted_g[@intFromEnum(snow.Species.sulfate_sulfur)] = 32;
+    accepted_g[@backingInt(snow.Species.carbon_dioxide_carbon)] = 2;
+    accepted_g[@backingInt(snow.Species.oxygen)] = 3;
+    accepted_g[@backingInt(snow.Species.sulfate_sulfur)] = 32;
     var accepted_salt: [6 * snow.salt_species_count]f64 = @splat(0);
     const dynamic_source = 3 * snow.salt_species_count;
-    accepted_salt[dynamic_source + @intFromEnum(snow.SaltSpecies.calcium_carbonate)] = 2;
-    accepted_salt[dynamic_source + @intFromEnum(snow.SaltSpecies.phosphate)] = 1;
+    accepted_salt[dynamic_source + @backingInt(snow.SaltSpecies.calcium_carbonate)] = 2;
+    accepted_salt[dynamic_source + @backingInt(snow.SaltSpecies.phosphate)] = 1;
     const molar_mass: inventory.SnowMolarMassesGPerMol = .{
         .nitrogen = 14,
         .phosphorus = 31,
@@ -5786,7 +5788,7 @@ test "snow accepted producer activity closes each layer without column cancellat
 
     const before = try std.testing.allocator.dupe(hourly.BoundaryActivity, ledger.activity);
     defer std.testing.allocator.free(before);
-    accepted_salt[(3 + 1) * snow.salt_species_count + @intFromEnum(snow.SaltSpecies.calcium)] = 1;
+    accepted_salt[(3 + 1) * snow.salt_species_count + @backingInt(snow.SaltSpecies.calcium)] = 1;
     try std.testing.expectError(
         error.InactiveLayerConservationActivity,
         accumulateSnowTransportActivity(&ledger, .{
@@ -5825,16 +5827,16 @@ test "snow relayering publishes gross bidirectional phase heat and chemistry tra
     transfers.downward.vapor_water_equivalent_m3[1] = 0.05;
     transfers.downward.ice_volume_m3[1] = 0.02;
     transfers.downward.sensible_heat_megajoules[1] = 20;
-    transfers.downward.amount_g[@intFromEnum(snow.Species.carbon_dioxide_carbon) + snow.species_count] = 10;
-    transfers.downward.salt_amount_mol[@intFromEnum(snow.SaltSpecies.calcium_carbonate) + snow.salt_species_count] = 2;
+    transfers.downward.amount_g[@backingInt(snow.Species.carbon_dioxide_carbon) + snow.species_count] = 10;
+    transfers.downward.salt_amount_mol[@backingInt(snow.SaltSpecies.calcium_carbonate) + snow.salt_species_count] = 2;
 
     transfers.upward.solid_snow_water_equivalent_m3[1] = 0.3;
     transfers.upward.liquid_water_m3[1] = 0.2;
     transfers.upward.vapor_water_equivalent_m3[1] = 0.1;
     transfers.upward.ice_volume_m3[1] = 0.04;
     transfers.upward.sensible_heat_megajoules[1] = 30;
-    transfers.upward.amount_g[@intFromEnum(snow.Species.carbon_dioxide_carbon) + snow.species_count] = 4;
-    transfers.upward.salt_amount_mol[@intFromEnum(snow.SaltSpecies.calcium_carbonate) + snow.salt_species_count] = 0.5;
+    transfers.upward.amount_g[@backingInt(snow.Species.carbon_dioxide_carbon) + snow.species_count] = 4;
+    transfers.upward.salt_amount_mol[@backingInt(snow.SaltSpecies.calcium_carbonate) + snow.salt_species_count] = 0.5;
 
     const molar_mass: inventory.SnowMolarMassesGPerMol = .{
         .nitrogen = 14,
@@ -5926,11 +5928,11 @@ test "snow external direction oracle preserves top directions and accepted botto
     var ledger = try Ledger.init(std.testing.allocator, layout);
     defer ledger.deinit();
     var atmospheric_g: [snow.species_count]f64 = @splat(0);
-    atmospheric_g[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = 7;
-    atmospheric_g[@intFromEnum(snow.Species.sulfate_sulfur)] = 64;
+    atmospheric_g[@backingInt(snow.Species.carbon_dioxide_carbon)] = 7;
+    atmospheric_g[@backingInt(snow.Species.sulfate_sulfur)] = 64;
     var discharge_g: [2 * snow.species_count]f64 = @splat(0);
-    discharge_g[snow.species_count + @intFromEnum(snow.Species.carbon_dioxide_carbon)] = 10;
-    discharge_g[snow.species_count + @intFromEnum(snow.Species.sulfate_sulfur)] = 32;
+    discharge_g[snow.species_count + @backingInt(snow.Species.carbon_dioxide_carbon)] = 10;
+    discharge_g[snow.species_count + @backingInt(snow.Species.sulfate_sulfur)] = 32;
     const atmospheric_salt: [snow.salt_species_count]f64 = @splat(0);
     const discharge_salt: [2 * snow.salt_species_count]f64 = @splat(0);
     const molar_mass: inventory.SnowMolarMassesGPerMol = .{
@@ -5974,17 +5976,17 @@ test "snow surface soil transfer pairs accepted donor layer with exact physical 
     var ledger = try Ledger.init(std.testing.allocator, layout);
     defer ledger.deinit();
     var donor_g: [2 * snow.species_count]f64 = @splat(0);
-    donor_g[snow.species_count + @intFromEnum(snow.Species.carbon_dioxide_carbon)] = 10;
-    donor_g[snow.species_count + @intFromEnum(snow.Species.ammonium_nitrogen)] = 14;
-    donor_g[snow.species_count + @intFromEnum(snow.Species.sulfate_sulfur)] = 32;
+    donor_g[snow.species_count + @backingInt(snow.Species.carbon_dioxide_carbon)] = 10;
+    donor_g[snow.species_count + @backingInt(snow.Species.ammonium_nitrogen)] = 14;
+    donor_g[snow.species_count + @backingInt(snow.Species.sulfate_sulfur)] = 32;
     const donor_salt: [2 * snow.salt_species_count]f64 = @splat(0);
     var discharge: [1]snow.SurfaceDischarge = .{.{}};
-    discharge[0].litter_g[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = 4;
-    discharge[0].soil_nonband_g[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = 5;
-    discharge[0].soil_band_g[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = 1;
-    discharge[0].litter_g[@intFromEnum(snow.Species.ammonium_nitrogen)] = 7;
-    discharge[0].soil_band_g[@intFromEnum(snow.Species.ammonium_nitrogen)] = 7;
-    discharge[0].soil_nonband_g[@intFromEnum(snow.Species.sulfate_sulfur)] = 32;
+    discharge[0].litter_g[@backingInt(snow.Species.carbon_dioxide_carbon)] = 4;
+    discharge[0].soil_nonband_g[@backingInt(snow.Species.carbon_dioxide_carbon)] = 5;
+    discharge[0].soil_band_g[@backingInt(snow.Species.carbon_dioxide_carbon)] = 1;
+    discharge[0].litter_g[@backingInt(snow.Species.ammonium_nitrogen)] = 7;
+    discharge[0].soil_band_g[@backingInt(snow.Species.ammonium_nitrogen)] = 7;
+    discharge[0].soil_nonband_g[@backingInt(snow.Species.sulfate_sulfur)] = 32;
     const molar_mass: inventory.SnowMolarMassesGPerMol = .{
         .nitrogen = 14,
         .phosphorus = 31,
@@ -6052,13 +6054,13 @@ test "snow surface soil transfer preserves dynamic salt stoichiometry and inacti
     defer ledger.deinit();
     const donor_g: [snow.species_count]f64 = @splat(0);
     var donor_salt: [snow.salt_species_count]f64 = @splat(0);
-    donor_salt[@intFromEnum(snow.SaltSpecies.calcium_carbonate)] = 2;
-    donor_salt[@intFromEnum(snow.SaltSpecies.phosphate)] = 1;
+    donor_salt[@backingInt(snow.SaltSpecies.calcium_carbonate)] = 2;
+    donor_salt[@backingInt(snow.SaltSpecies.phosphate)] = 1;
     var discharge: [1]snow.SurfaceDischarge = .{.{}};
-    discharge[0].litter_salt_mol[@intFromEnum(snow.SaltSpecies.calcium_carbonate)] = 0.5;
-    discharge[0].soil_nonband_salt_mol[@intFromEnum(snow.SaltSpecies.calcium_carbonate)] = 1;
-    discharge[0].soil_band_salt_mol[@intFromEnum(snow.SaltSpecies.calcium_carbonate)] = 0.5;
-    discharge[0].litter_salt_mol[@intFromEnum(snow.SaltSpecies.phosphate)] = 1;
+    discharge[0].litter_salt_mol[@backingInt(snow.SaltSpecies.calcium_carbonate)] = 0.5;
+    discharge[0].soil_nonband_salt_mol[@backingInt(snow.SaltSpecies.calcium_carbonate)] = 1;
+    discharge[0].soil_band_salt_mol[@backingInt(snow.SaltSpecies.calcium_carbonate)] = 0.5;
+    discharge[0].litter_salt_mol[@backingInt(snow.SaltSpecies.phosphate)] = 1;
     const molar_mass: inventory.SnowMolarMassesGPerMol = .{
         .nitrogen = 14,
         .phosphorus = 31,
@@ -6508,10 +6510,10 @@ test "aqueous face formula closes sulfur without aggregate ion cancellation" {
         .vapor_flux_m3_per_step = &zero_face,
         .heat_flux_megajoules_per_step = &zero_face,
     };
-    var micro_flux = [_]f64{0} ** solute_species.AqueousSpecies.count;
-    var macro_flux = [_]f64{0} ** solute_species.AqueousSpecies.count;
-    micro_flux[@intFromEnum(solute_species.AqueousSpecies.sulfate)] = 2;
-    micro_flux[@intFromEnum(solute_species.AqueousSpecies.calcium_sulfate)] = -1;
+    var micro_flux = @as([solute_species.AqueousSpecies.count]f64, @splat(@as(f64, 0)));
+    var macro_flux = @as([solute_species.AqueousSpecies.count]f64, @splat(@as(f64, 0)));
+    micro_flux[@backingInt(solute_species.AqueousSpecies.sulfate)] = 2;
+    micro_flux[@backingInt(solute_species.AqueousSpecies.calcium_sulfate)] = -1;
     try accumulateAqueousFaces(&ledger, &faces, &micro_flux, &macro_flux, 12, 31);
     const upper = try layout.index(.{ .kind = .soil_layer, .cell = 0, .layer = 0 });
     const lower = try layout.index(.{ .kind = .soil_layer, .cell = 0, .layer = 1 });
@@ -6528,22 +6530,22 @@ test "accepted soil external producers close independently at their owning layer
     const active = [_]bool{ true, true };
     const water = [_]f64{ 1.5, 0 };
     const heat = [_]f64{ -2, 0 };
-    var aqueous = [_]f64{0} ** (2 * solute_species.AqueousSpecies.count);
-    aqueous[@intFromEnum(solute_species.AqueousSpecies.sulfate)] = 2;
-    aqueous[@intFromEnum(solute_species.AqueousSpecies.calcium_sulfate)] = -1;
-    var organic = [_]f64{0} ** (2 * organic_transport.component_count);
+    var aqueous = @as([(2 * solute_species.AqueousSpecies.count)]f64, @splat(@as(f64, 0)));
+    aqueous[@backingInt(solute_species.AqueousSpecies.sulfate)] = 2;
+    aqueous[@backingInt(solute_species.AqueousSpecies.calcium_sulfate)] = -1;
+    var organic = @as([(2 * organic_transport.component_count)]f64, @splat(@as(f64, 0)));
     organic[0] = 3;
     organic[1] = -4;
     organic[2] = 5;
     organic[3] = -6;
     const mineral = [_]f64{ 7, 0 };
-    var dissolved_gas = [_]f64{0} ** (2 * gas_transport.species_count);
-    dissolved_gas[@intFromEnum(gas_transport.Species.carbon_dioxide)] = 8;
-    dissolved_gas[@intFromEnum(gas_transport.Species.methane)] = -9;
-    dissolved_gas[@intFromEnum(gas_transport.Species.oxygen)] = 10;
-    dissolved_gas[@intFromEnum(gas_transport.Species.nitrogen)] = -11;
-    dissolved_gas[@intFromEnum(gas_transport.Species.nitrous_oxide)] = 12;
-    dissolved_gas[@intFromEnum(gas_transport.Species.hydrogen)] = -13;
+    var dissolved_gas = @as([(2 * gas_transport.species_count)]f64, @splat(@as(f64, 0)));
+    dissolved_gas[@backingInt(gas_transport.Species.carbon_dioxide)] = 8;
+    dissolved_gas[@backingInt(gas_transport.Species.methane)] = -9;
+    dissolved_gas[@backingInt(gas_transport.Species.oxygen)] = 10;
+    dissolved_gas[@backingInt(gas_transport.Species.nitrogen)] = -11;
+    dissolved_gas[@backingInt(gas_transport.Species.nitrous_oxide)] = 12;
+    dissolved_gas[@backingInt(gas_transport.Species.hydrogen)] = -13;
     try accumulateSoilExternalBoundaries(&ledger, .{
         .active_by_layer = &active,
         .boundary_water_gain_m3 = &water,
@@ -6637,9 +6639,9 @@ test "soil external publication rejects inactive activity atomically" {
     const inactive = [_]bool{false};
     const water = [_]f64{1};
     const zero = [_]f64{0};
-    const aqueous = [_]f64{0} ** solute_species.AqueousSpecies.count;
-    const organic = [_]f64{0} ** organic_transport.component_count;
-    const gas = [_]f64{0} ** gas_transport.species_count;
+    const aqueous = @as([solute_species.AqueousSpecies.count]f64, @splat(@as(f64, 0)));
+    const organic = @as([organic_transport.component_count]f64, @splat(@as(f64, 0)));
+    const gas = @as([gas_transport.species_count]f64, @splat(@as(f64, 0)));
     try std.testing.expectError(
         error.InactiveLayerConservationActivity,
         accumulateSoilExternalBoundaries(&ledger, .{
@@ -6661,14 +6663,14 @@ test "dry gas boundaries retain exact layer surface and direction provenance" {
     const layout = try Layout.init(1, 2, 1);
     var ledger = try Ledger.init(std.testing.allocator, layout);
     defer ledger.deinit();
-    var soil_atmospheric = [_]f64{0} ** (2 * gas_transport.species_count);
-    var soil_subsurface = [_]f64{0} ** (2 * gas_transport.species_count);
-    var litter_atmospheric = [_]f64{0} ** gas_transport.species_count;
-    soil_atmospheric[@intFromEnum(gas_transport.Species.carbon_dioxide)] = 2;
-    soil_subsurface[@intFromEnum(gas_transport.Species.methane)] = -3;
-    litter_atmospheric[@intFromEnum(gas_transport.Species.oxygen)] = 4;
-    litter_atmospheric[@intFromEnum(gas_transport.Species.ammonia)] = -5;
-    litter_atmospheric[@intFromEnum(gas_transport.Species.hydrogen)] = 6;
+    var soil_atmospheric = @as([(2 * gas_transport.species_count)]f64, @splat(@as(f64, 0)));
+    var soil_subsurface = @as([(2 * gas_transport.species_count)]f64, @splat(@as(f64, 0)));
+    var litter_atmospheric = @as([gas_transport.species_count]f64, @splat(@as(f64, 0)));
+    soil_atmospheric[@backingInt(gas_transport.Species.carbon_dioxide)] = 2;
+    soil_subsurface[@backingInt(gas_transport.Species.methane)] = -3;
+    litter_atmospheric[@backingInt(gas_transport.Species.oxygen)] = 4;
+    litter_atmospheric[@backingInt(gas_transport.Species.ammonia)] = -5;
+    litter_atmospheric[@backingInt(gas_transport.Species.hydrogen)] = 6;
     try accumulateSoilSurfaceGasAtmosphere(
         &ledger,
         &.{1},
@@ -6688,7 +6690,7 @@ test "dry gas boundaries retain exact layer surface and direction provenance" {
 
     const before = try std.testing.allocator.dupe(hourly.BoundaryActivity, ledger.activity);
     defer std.testing.allocator.free(before);
-    soil_atmospheric[gas_transport.species_count + @intFromEnum(gas_transport.Species.oxygen)] = 1;
+    soil_atmospheric[gas_transport.species_count + @backingInt(gas_transport.Species.oxygen)] = 1;
     try std.testing.expectError(
         error.InactiveLayerConservationActivity,
         accumulateSoilSurfaceGasAtmosphere(
@@ -6817,7 +6819,7 @@ test "surface biogeochemistry retains four exact topsoil transfer paths" {
     turnover.basal[0].humified = .{ .carbon_g_c = 7, .nitrogen_g_n = 8, .phosphorus_g_p = 9 };
     autotrophic.topsoil_ammonium_exchange_g_n[0] = 10;
     autotrophic.topsoil_hpo4_exchange_g_p[0] = 11;
-    var accepted_autotrophic_topsoil_organic = [_]organic_state.ElementPool{.{}} ** surface_autotrophic.active_population_count;
+    var accepted_autotrophic_topsoil_organic = @as([surface_autotrophic.active_population_count]organic_state.ElementPool, @splat(@as(organic_state.ElementPool, .{})));
     accepted_autotrophic_topsoil_organic[0] = .{ .carbon_g_c = 12, .nitrogen_g_n = 13, .phosphorus_g_p = 14 };
     try accumulateSurfaceBiogeochemicalActivity(
         &ledger,
@@ -7093,25 +7095,25 @@ test "all dedicated face transports retain layer and element provenance" {
 
     var gas_state: gas_transport_step.State = undefined;
     var gas_faces = [_]gas_transport.Face{.{ .first_cell = 0, .second_cell = 1 }};
-    var gas_flux = [_]f64{0} ** gas_transport.species_count;
-    gas_flux[@intFromEnum(gas_transport.Species.oxygen)] = 3;
+    var gas_flux = @as([gas_transport.species_count]f64, @splat(@as(f64, 0)));
+    gas_flux[@backingInt(gas_transport.Species.oxygen)] = 3;
     gas_state.accepted_faces = &gas_faces;
     gas_state.accepted_face_flux_g_per_h = &gas_flux;
     try accumulateGasFaces(&ledger, &gas_state);
 
-    var dissolved_micro = [_]f64{0} ** gas_transport.species_count;
-    var dissolved_macro = [_]f64{0} ** gas_transport.species_count;
-    dissolved_micro[@intFromEnum(gas_transport.Species.hydrogen)] = 2;
-    dissolved_micro[@intFromEnum(gas_transport.Species.ammonia)] = 99;
+    var dissolved_micro = @as([gas_transport.species_count]f64, @splat(@as(f64, 0)));
+    var dissolved_macro = @as([gas_transport.species_count]f64, @splat(@as(f64, 0)));
+    dissolved_micro[@backingInt(gas_transport.Species.hydrogen)] = 2;
+    dissolved_micro[@backingInt(gas_transport.Species.ammonia)] = 99;
     try accumulateDissolvedGasFaces(&ledger, &faces, &dissolved_micro, &dissolved_macro);
 
-    var organic_micro = [_]f64{0} ** organic_transport.component_count;
-    var organic_macro = [_]f64{0} ** organic_transport.component_count;
+    var organic_micro = @as([organic_transport.component_count]f64, @splat(@as(f64, 0)));
+    var organic_macro = @as([organic_transport.component_count]f64, @splat(@as(f64, 0)));
     organic_micro[0] = 4;
     try accumulateOrganicFaces(&ledger, &faces, &organic_micro, &organic_macro);
 
-    var mineral_micro = [_]f64{0} ** mineral_nitrogen_transport.species_count;
-    var mineral_macro = [_]f64{0} ** mineral_nitrogen_transport.species_count;
+    var mineral_micro = @as([mineral_nitrogen_transport.species_count]f64, @splat(@as(f64, 0)));
+    var mineral_macro = @as([mineral_nitrogen_transport.species_count]f64, @splat(@as(f64, 0)));
     mineral_micro[0] = 0.5;
     try accumulateMineralNitrogenFaces(&ledger, &faces, &mineral_micro, &mineral_macro, 14);
 

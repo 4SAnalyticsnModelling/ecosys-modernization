@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     natural_rock_mol_per_m3: f64,
@@ -143,7 +144,7 @@ test "zero dissolved silicate gives finite hydrogen and inventory bounded weathe
 }
 
 fn validateState(state: State) !void {
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         const value = @field(state, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteSilicateWeatheringState;
         if (value < 0) return error.NegativeSilicateWeatheringState;

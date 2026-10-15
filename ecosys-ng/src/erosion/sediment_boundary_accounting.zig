@@ -16,6 +16,8 @@
 // Group E of docs/traceability/erosion_unbound_family_disposition.md
 
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const DisturbanceMode = enum {
     no_effects,
@@ -48,7 +50,7 @@ pub const Face = enum(u8) {
     south,
     north,
 
-    pub const count: usize = @typeInfo(Face).@"enum".fields.len;
+    pub const count: usize = @typeInfo(Face).@"enum".field_names.len;
 };
 
 pub const OrganicDimensions = struct {
@@ -220,7 +222,7 @@ pub fn apply(inputs: Inputs, state: *State) !void {
             const cell = row * inputs.lon_count + column;
             for (std.meta.tags(Face)) |face| {
                 if (!isExternalFace(face, column, row, window)) continue;
-                const flux = inputs.flux_by_face[@intFromEnum(face)][cell];
+                const flux = inputs.flux_by_face[@backingInt(face)][cell];
                 if (@abs(flux.sediment_megagrams_per_step) <=
                     inputs.negligible_sediment_megagrams_by_cell[cell]) continue;
                 const transfer = calculateTransfer(
@@ -679,7 +681,7 @@ fn preflightUpdates(inputs: Inputs, state: State) !void {
             var cell_ledger = state.outward_by_cell[cell];
             for (std.meta.tags(Face)) |face| {
                 if (!isExternalFace(face, column, row, window)) continue;
-                const flux = inputs.flux_by_face[@intFromEnum(face)][cell];
+                const flux = inputs.flux_by_face[@backingInt(face)][cell];
                 if (@abs(flux.sediment_megagrams_per_step) <=
                     inputs.negligible_sediment_megagrams_by_cell[cell]) continue;
                 const transfer = try calculateTransfer(
@@ -848,7 +850,7 @@ fn addSigned(current: f64, direction: f64, value: f64) !f64 {
 
 fn sourceStructSum(value: anytype) !f64 {
     var total: f64 = 0;
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field|
         total = try checkedSum(total, @field(value, field.name));
     return total;
 }
@@ -874,7 +876,7 @@ fn checkedSum(current: f64, increment: f64) !f64 {
 }
 
 fn validateFiniteStruct(value: anytype) !void {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field|
         if (!std.math.isFinite(@field(value, field.name)))
             return error.InvalidSedimentBoundaryInput;
 }
@@ -889,7 +891,7 @@ fn nonnegativeFinite(value: f64) bool {
 
 fn filled(comptime T: type, value: f64) T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(T)) |field|
         @field(result, field.name) = value;
     return result;
 }
@@ -971,14 +973,14 @@ test "REDIST erosion fixture preserves source pool extents and weights" {
         .residue_component_count = 2,
         .soil_organic_component_count = 5,
     };
-    const microbial_one = [_]f64{1} ** 126;
-    const residue_one = [_]f64{1} ** 10;
-    const adsorbed_one = [_]f64{1} ** 5;
-    const soil_one = [_]f64{1} ** 25;
-    const microbial_zero = [_]f64{0} ** 126;
-    const residue_zero = [_]f64{0} ** 10;
-    const adsorbed_zero = [_]f64{0} ** 5;
-    const soil_zero = [_]f64{0} ** 25;
+    const microbial_one = @as([126]f64, @splat(@as(f64, 1)));
+    const residue_one = @as([10]f64, @splat(@as(f64, 1)));
+    const adsorbed_one = @as([5]f64, @splat(@as(f64, 1)));
+    const soil_one = @as([25]f64, @splat(@as(f64, 1)));
+    const microbial_zero = @as([126]f64, @splat(@as(f64, 0)));
+    const residue_zero = @as([10]f64, @splat(@as(f64, 0)));
+    const adsorbed_zero = @as([5]f64, @splat(@as(f64, 0)));
+    const soil_zero = @as([25]f64, @splat(@as(f64, 0)));
     const east = [_]BoundaryFlux{testFlux(
         1,
         1,

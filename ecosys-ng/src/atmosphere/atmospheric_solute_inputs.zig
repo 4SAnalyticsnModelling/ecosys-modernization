@@ -1,6 +1,7 @@
 const std = @import("std");
 const snow = @import("../soil/solute/snow_solute_transport.zig");
 
+
 /// Runtime-sized accepted precipitation and irrigation chemistry before it
 /// branches into snow, litter, non-band soil, and band soil destinations.
 /// Values retain each carrier's tracked-element grams.
@@ -114,7 +115,7 @@ pub const State = struct {
         if (cell >= self.cell_count)
             return error.AtmosphericSoluteInputCellOutOfBounds;
         return self.daily_input_g[
-            cell * snow.species_count + @intFromEnum(species)
+            cell * snow.species_count + @backingInt(species)
         ];
     }
 };
@@ -122,19 +123,19 @@ pub const State = struct {
 test "accepted atmospheric input recombines snow litter and both soil zones" {
     var state = try State.init(std.testing.allocator, 2);
     defer state.deinit();
-    var snow_input = [_]f64{0} ** (2 * snow.species_count);
+    var snow_input = @as([(2 * snow.species_count)]f64, @splat(@as(f64, 0)));
     var direct = [_]snow.SurfaceDischarge{ .{}, .{} };
-    const species = @intFromEnum(snow.Species.ammonium_nitrogen);
+    const species = @backingInt(snow.Species.ammonium_nitrogen);
     snow_input[species] = 1;
     direct[0].litter_g[species] = 2;
     direct[0].soil_nonband_g[species] = 3;
     direct[0].soil_band_g[species] = 4;
     direct[1].soil_band_g[species] = 5;
-    var snow_salt_input = [_]f64{0} ** (2 * snow.salt_species_count);
-    snow_salt_input[@intFromEnum(snow.SaltSpecies.calcium_sulfate)] = 6;
-    direct[0].litter_salt_mol[@intFromEnum(snow.SaltSpecies.calcium_sulfate)] = 7;
-    direct[0].soil_nonband_salt_mol[@intFromEnum(snow.SaltSpecies.calcium_sulfate)] = 8;
-    direct[0].soil_band_salt_mol[@intFromEnum(snow.SaltSpecies.calcium_sulfate)] = 9;
+    var snow_salt_input = @as([(2 * snow.salt_species_count)]f64, @splat(@as(f64, 0)));
+    snow_salt_input[@backingInt(snow.SaltSpecies.calcium_sulfate)] = 6;
+    direct[0].litter_salt_mol[@backingInt(snow.SaltSpecies.calcium_sulfate)] = 7;
+    direct[0].soil_nonband_salt_mol[@backingInt(snow.SaltSpecies.calcium_sulfate)] = 8;
+    direct[0].soil_band_salt_mol[@backingInt(snow.SaltSpecies.calcium_sulfate)] = 9;
     try state.accumulateAcceptedHour(&snow_input, &snow_salt_input, &direct);
     try std.testing.expectEqual(
         @as(f64, 10),
@@ -144,19 +145,19 @@ test "accepted atmospheric input recombines snow litter and both soil zones" {
         @as(f64, 5),
         try state.speciesInputG(1, .ammonium_nitrogen),
     );
-    try std.testing.expectEqual(@as(f64, 30), state.daily_salt_input_mol[@intFromEnum(snow.SaltSpecies.calcium_sulfate)]);
+    try std.testing.expectEqual(@as(f64, 30), state.daily_salt_input_mol[@backingInt(snow.SaltSpecies.calcium_sulfate)]);
 }
 
 test "invalid late atmospheric carrier leaves the daily ledger unchanged" {
     var state = try State.init(std.testing.allocator, 2);
     defer state.deinit();
     state.daily_input_g[0] = 7;
-    var snow_input = [_]f64{0} ** (2 * snow.species_count);
+    var snow_input = @as([(2 * snow.species_count)]f64, @splat(@as(f64, 0)));
     snow_input[snow.species_count + 3] = std.math.nan(f64);
     const direct = [_]snow.SurfaceDischarge{ .{}, .{} };
     try std.testing.expectError(
         error.InvalidAtmosphericSoluteInput,
-        state.accumulateAcceptedHour(&snow_input, &([_]f64{0} ** (2 * snow.salt_species_count)), &direct),
+        state.accumulateAcceptedHour(&snow_input, &(@as([(2 * snow.salt_species_count)]f64, @splat(@as(f64, 0)))), &direct),
     );
     try std.testing.expectEqual(@as(f64, 7), state.daily_input_g[0]);
 }
@@ -166,8 +167,8 @@ test "invalid late dynamic salt leaves both atmospheric ledgers unchanged" {
     defer state.deinit();
     state.daily_input_g[0] = 7;
     state.daily_salt_input_mol[0] = 11;
-    const snow_input = [_]f64{0} ** (2 * snow.species_count);
-    var snow_salt_input = [_]f64{0} ** (2 * snow.salt_species_count);
+    const snow_input = @as([(2 * snow.species_count)]f64, @splat(@as(f64, 0)));
+    var snow_salt_input = @as([(2 * snow.salt_species_count)]f64, @splat(@as(f64, 0)));
     snow_salt_input[snow_salt_input.len - 1] = std.math.nan(f64);
     const direct = [_]snow.SurfaceDischarge{ .{}, .{} };
     try std.testing.expectError(

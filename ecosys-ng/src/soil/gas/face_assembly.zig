@@ -3,6 +3,7 @@ const gas = @import("transport.zig");
 const hydrology_module = @import("../../transport/hydrology.zig");
 const soil_geometry_module = @import("../water/face_geometry.zig");
 
+
 pub const Dimensions = struct {
     columns: usize,
     rows: usize,
@@ -163,12 +164,12 @@ fn validateGeometry(cell_count: usize, geometry: Geometry) !void {
 test "runtime 3-D assembly emits every active face once" {
     const dimensions = Dimensions{ .columns = 2, .rows = 2, .layers = 2 };
     const cells = try dimensions.cellCount();
-    const active = [_]bool{true} ** 8;
-    const air = [_]f64{0.25} ** 8;
-    const porosity = [_]f64{0.5} ** 8;
-    const areas = [_]f64{1} ** 24;
-    const lengths = [_]f64{1} ** 24;
-    const diffusivity = [_]f64{0.1} ** (8 * gas.species_count);
+    const active = @as([8]bool, @splat(@as(bool, true)));
+    const air = @as([8]f64, @splat(@as(f64, 0.25)));
+    const porosity = @as([8]f64, @splat(@as(f64, 0.5)));
+    const areas = @as([24]f64, @splat(@as(f64, 1)));
+    const lengths = @as([24]f64, @splat(@as(f64, 1)));
+    const diffusivity = @as([(8 * gas.species_count)]f64, @splat(@as(f64, 0.1)));
     var set = try build(std.testing.allocator, dimensions, .{ .active = &active, .air_filled_porosity_m3_per_m3 = &air, .total_porosity_m3_per_m3 = &porosity, .positive_face_area_m2 = &areas, .positive_face_path_length_m = &lengths, .free_air_diffusivity_m2_per_step = &diffusivity, .penman_tortuosity = 0.66, .minimum_air_filled_porosity_m3_per_m3 = 0.01 });
     defer set.deinit();
     try std.testing.expectEqual(@as(usize, 12), set.faces.len);
@@ -180,10 +181,10 @@ test "runtime 3-D assembly emits every active face once" {
 test "inactive cells and dry cells remove faces" {
     const active = [_]bool{ true, false, true };
     const air = [_]f64{ 0.2, 0.2, 0.0 };
-    const porosity = [_]f64{0.5} ** 3;
-    const areas = [_]f64{1} ** 9;
-    const lengths = [_]f64{1} ** 9;
-    const diffusivity = [_]f64{0.1} ** (3 * gas.species_count);
+    const porosity = @as([3]f64, @splat(@as(f64, 0.5)));
+    const areas = @as([9]f64, @splat(@as(f64, 1)));
+    const lengths = @as([9]f64, @splat(@as(f64, 1)));
+    const diffusivity = @as([(3 * gas.species_count)]f64, @splat(@as(f64, 0.1)));
     var set = try build(std.testing.allocator, .{ .columns = 3, .rows = 1, .layers = 1 }, .{ .active = &active, .air_filled_porosity_m3_per_m3 = &air, .total_porosity_m3_per_m3 = &porosity, .positive_face_area_m2 = &areas, .positive_face_path_length_m = &lengths, .free_air_diffusivity_m2_per_step = &diffusivity, .penman_tortuosity = 0.66, .minimum_air_filled_porosity_m3_per_m3 = 0.01 });
     defer set.deinit();
     try std.testing.expectEqual(@as(usize, 0), set.faces.len);

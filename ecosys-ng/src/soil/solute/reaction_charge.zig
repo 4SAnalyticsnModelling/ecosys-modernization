@@ -6,6 +6,7 @@ const chemistry = @import("chemistry_state.zig");
 const classification = @import("charge_classification.zig");
 const conservation = @import("../../validation/scoped_conservation.zig");
 const diagnostics = @import("reaction_diagnostic_control.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inventory = struct {
     positive_mol_charge_per_m3: f64,
@@ -31,7 +32,7 @@ pub fn inventory(state: *const chemistry.State, cell: usize, parameters: chemist
         if (!std.math.isFinite(density) or density < 0) return error.InvalidSoluteReactionChargeInventory;
     }
     const exchange = state.cation_exchange_mol_per_megagram[cell];
-    inline for (std.meta.fields(@TypeOf(exchange))) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(exchange))) |field| {
         const value = @field(exchange, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidSoluteReactionChargeInventory;
     }

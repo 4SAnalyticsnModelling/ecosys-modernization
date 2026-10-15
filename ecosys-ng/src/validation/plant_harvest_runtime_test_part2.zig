@@ -28,6 +28,7 @@ const std = @import("std");
 const surface_nutrients = @import("../soil/biogeochemistry/organic_matter_fire_exchange.zig");
 const symbiotic_fixation = @import("../canopy/symbiosis/plant_symbiotic_fixation.zig");
 const plant_harvest_runtime = @import("../management/plant_harvest_runtime.zig");
+
 test "source-order tillage population reduction scales all population fields" {
     const result = try plant_harvest_runtime.sourceOrderTillagePopulationReduction(.{
         .hour_of_day = 12,
@@ -667,7 +668,7 @@ test "source-order dead branch reset preserves selector and runtime branch loop"
     try std.testing.expectEqual(@as(f64, 1), branches[0].carbon_fixation_feedback);
     try std.testing.expect(branches[0].leafout_initialization_enabled);
     try std.testing.expect(branches[0].emergence_initialization_disabled);
-    try std.testing.expectEqual([_]u16{0} ** 10, branches[0].stage_day_of_year);
+    try std.testing.expectEqual(@as([10]u16, @splat(@as(u16, 0))), branches[0].stage_day_of_year);
     try std.testing.expectEqualDeep(live_before, branches[1]);
 
     var unselected = [_]plant_harvest_runtime.SourceOrderDeadBranchPhenologyState{stale};

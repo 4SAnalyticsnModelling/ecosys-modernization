@@ -4,6 +4,7 @@
 // are published by `stages/hourly_snow_energy.zig`; the former independent
 // living-canopy `canopy/energy/energy.zig` writer is no longer dispatched.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const IterationPolicy = struct {
     maximum_iterations: usize,
@@ -67,14 +68,14 @@ pub fn calculate(inputs: Inputs) !Result {
         .net_canopy_longwave_megajoules_per_step = net_longwave,
         .net_canopy_radiation_megajoules_per_step = net_radiation,
     };
-    inline for (@typeInfo(Result).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Result)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteCanopyEnergyRadiationIteration;
     return result;
 }
 
 fn validate(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.InvalidCanopyEnergyRadiationIterationInput;
     if (inputs.legacy_substep_multiplier < 0 or

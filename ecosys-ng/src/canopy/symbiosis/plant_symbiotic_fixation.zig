@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Pool = struct { carbon_g_c: f64, nitrogen_g_n: f64, phosphorus_g_p: f64 };
 
@@ -102,7 +103,7 @@ pub fn accumulateExternalInput(total: *Pool, input: Pool) !void {
 }
 
 fn validateExternalInput(input: Pool) !void {
-    inline for (@typeInfo(Pool).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Pool)) |field| {
         const value = @field(input, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidSymbioticExternalInput;
@@ -216,7 +217,7 @@ pub const RuntimeParameters = struct {
     decomposition_control_ratio_by_fixation_type: [6]f64,
 
     pub fn validate(self: RuntimeParameters) !void {
-        inline for (@typeInfo(RuntimeParameters).@"struct".fields) |field| if (field.type == f64) {
+        inline for (ti_compat.fieldViews(RuntimeParameters)) |field| if (field.type == f64) {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidSymbioticRuntimeParameter;
         };
@@ -371,14 +372,14 @@ fn scale(pool: Pool, fraction: f64) Pool {
 }
 
 fn validatePool(pool: Pool) !void {
-    inline for (@typeInfo(Pool).@"struct".fields) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidSymbioticPool;
+    inline for (ti_compat.fieldViews(Pool)) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidSymbioticPool;
 }
 
 fn validate(inputs: Inputs, parameters: Parameters) !void {
     try validatePool(inputs.structural);
     try validatePool(inputs.nonstructural);
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidSymbioticFixationInput;
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) < 0) return error.InvalidSymbioticFixationParameter;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidSymbioticFixationInput;
+    inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) < 0) return error.InvalidSymbioticFixationParameter;
     if (inputs.timestep_h <= 0 or inputs.oxygen_constraint_fraction > 1 or parameters.target_nitrogen_per_carbon_g_n_per_g_c <= 0 or parameters.target_phosphorus_per_carbon_g_p_per_g_c <= 0 or parameters.nitrogen_inhibition_g_n_per_g_c <= 0 or parameters.phosphorus_inhibition_g_p_per_g_c <= 0 or parameters.nitrogen_fixation_yield_g_n_per_g_c <= 0 or parameters.growth_yield_g_c_per_g_c < 0 or parameters.growth_yield_g_c_per_g_c >= 1 or parameters.nonstructural_nitrogen_half_saturation_g_n_per_g_c <= 0 or parameters.nonstructural_phosphorus_half_saturation_g_p_per_g_c <= 0 or parameters.excess_nitrogen_inhibition_g_n_per_g_c <= 0 or parameters.excess_nitrogen_to_phosphorus_inhibition_g_n_per_g_p <= 0 or parameters.bacteria_to_host_decomposition_ratio <= 0) return error.InvalidSymbioticFixationParameter;
 }
 

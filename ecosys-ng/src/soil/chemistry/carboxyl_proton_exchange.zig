@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Source = enum(u8) {
     precipitation = 1,
@@ -49,11 +50,11 @@ pub fn step(
         .diagnostics = null,
     };
 
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         if (!std.math.isFinite(@field(state.*, field.name)))
             return error.NonFiniteCarboxylProtonExchangeState;
     }
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         if (!std.math.isFinite(@field(parameters, field.name)))
             return error.NonFiniteCarboxylProtonExchangeParameter;
     }
@@ -120,11 +121,11 @@ pub fn surfaceStep(
     parameters: SurfaceParameters,
     state: *State,
 ) !StepResult {
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         if (!std.math.isFinite(@field(state.*, field.name)))
             return error.NonFiniteCarboxylProtonExchangeState;
     }
-    inline for (@typeInfo(SurfaceParameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SurfaceParameters)) |field| {
         if (!std.math.isFinite(@field(parameters, field.name)))
             return error.NonFiniteCarboxylProtonExchangeParameter;
     }

@@ -7,6 +7,7 @@
 // below-threshold overdraw remains an explicit failure instead of a negative
 // pool.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const NodeState = struct {
     leaf_carbon_g_c: []const f64,
@@ -58,7 +59,7 @@ pub fn prepare(
         if (!std.math.isFinite(value)) return error.NonFiniteLeafSenescenceSnapshotInput;
     if (leaf_presence_threshold_g_c < 0 or requested_remobilization_fraction < 0)
         return error.InvalidLeafSenescenceSnapshotInput;
-    inline for (@typeInfo(RecyclingFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RecyclingFractions)) |field| {
         const value = @field(recycling, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.InvalidLeafSenescenceRecyclingFraction;

@@ -18,6 +18,7 @@
 // atmospheric input transaction and therefore feeds both accepted routes.
 
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Baseline = struct {
     atmospheric_co2_umol_per_mol: f64,
@@ -42,14 +43,14 @@ pub const Forcing = struct {
 /// CO2EI, CN4RI, and CNORI are immutable baselines. Climate multipliers are
 /// applied to them each hour; previously modified carriers are never reused.
 pub fn derive(baseline: Baseline, multipliers: Multipliers) !Forcing {
-    inline for (@typeInfo(Baseline).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Baseline)) |field| {
         const value = @field(baseline, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteAtmosphericChemistryBaseline;
         if (value < 0)
             return error.InvalidAtmosphericChemistryBaseline;
     }
-    inline for (@typeInfo(Multipliers).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Multipliers)) |field| {
         const value = @field(multipliers, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteAtmosphericChemistryMultiplier;
@@ -64,7 +65,7 @@ pub fn derive(baseline: Baseline, multipliers: Multipliers) !Forcing {
         .precipitation_nitrate_g_n_per_m3 = baseline.precipitation_nitrate_g_n_per_m3 *
             multipliers.precipitation_nitrate_fraction,
     };
-    inline for (@typeInfo(Forcing).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Forcing)) |field|
         if (!std.math.isFinite(@field(forcing, field.name)))
             return error.AtmosphericChemistryForcingOverflow;
     return forcing;

@@ -11,6 +11,7 @@ const std = @import("std");
 const builtin = @import("builtin");
 const snow = @import("../solute/snow_solute_transport.zig");
 const ice_units = @import("../../core/ice_units.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     vapor_volume_prefactor_k: f64,
@@ -758,7 +759,7 @@ pub fn calculateNetRadiation(inputs: RadiationInputs) !Radiation {
 }
 
 fn validateParameters(parameters: Parameters) !void {
-    inline for (@typeInfo(Parameters).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Parameters)) |field|
         if (!std.math.isFinite(@field(parameters, field.name)))
             return error.NonFiniteSnowSurfaceExchangeParameter;
     if (parameters.vapor_volume_prefactor_k <= 0 or

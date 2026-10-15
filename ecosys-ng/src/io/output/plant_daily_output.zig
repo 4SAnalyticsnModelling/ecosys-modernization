@@ -1,4 +1,6 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Water = struct {
     transpiration_mm: f64,
@@ -69,7 +71,7 @@ pub const CarbonBalanceInputs = struct {
 /// Exact GROSUB BALC accounting identity. Signed exchange, oxidation, and NPP
 /// values must be supplied with their source conventions.
 pub fn carbonBalance(inputs: CarbonBalanceInputs) !f64 {
-    inline for (std.meta.fields(CarbonBalanceInputs)) |field|
+    inline for (ti_compat.fieldViews(CarbonBalanceInputs)) |field|
         try finite(@field(inputs, field.name));
     const result =
         inputs.shoot_carbon_g +
@@ -228,7 +230,7 @@ pub const NutrientBalanceInputs = struct {
 };
 
 fn baseNutrientBalance(inputs: NutrientBalanceInputs) !f64 {
-    inline for (std.meta.fields(NutrientBalanceInputs)) |field|
+    inline for (ti_compat.fieldViews(NutrientBalanceInputs)) |field|
         try finite(@field(inputs, field.name));
     const result =
         inputs.shoot_g +
@@ -298,7 +300,7 @@ pub fn phosphorus(inputs: NutrientInputs) !Phosphorus {
 fn validateNutrientInputs(inputs: NutrientInputs) !void {
     try validateArea(inputs.cell_area_m2);
     if (inputs.minimum_leaf_carbon_g < 0) return error.InvalidPlantDailyNutrientOutput;
-    inline for (std.meta.fields(NutrientInputs)) |field| try finite(@field(inputs, field.name));
+    inline for (ti_compat.fieldViews(NutrientInputs)) |field| try finite(@field(inputs, field.name));
 }
 
 pub const DevelopmentPhase = enum {
@@ -357,7 +359,7 @@ pub fn development(inputs: DevelopmentInputs) !Development {
     while (reverse_index > 0) {
         reverse_index -= 1;
         if (inputs.milestone_day_by_stage[reverse_index] == 0) continue;
-        phase = @enumFromInt(@intFromEnum(DevelopmentPhase.emergence) + reverse_index);
+        phase = @fromBackingInt(@intCast(@backingInt(DevelopmentPhase.emergence) + reverse_index));
         break;
     }
     const denominator = inputs.leaf_structural_carbon_g + inputs.plant_nonstructural_carbon_g;
@@ -496,7 +498,7 @@ test "OUTPD development selects latest attained stage and guarded nutrient ratio
 }
 
 test "OUTPD dead plant emits explicit not-alive status" {
-    const output = try development(.{ .alive = false, .milestone_day_by_stage = &([_]u32{0} ** 10), .branch_count = 99, .main_branch_stage = 1, .development_feedback = 1, .leaf_structural_carbon_g = 1, .leaf_structural_nitrogen_g = 1, .leaf_structural_phosphorus_g = 1, .plant_nonstructural_carbon_g = 1, .plant_nonstructural_nitrogen_g = 1, .plant_nonstructural_phosphorus_g = 1, .minimum_leaf_carbon_g = 0, .minimum_daily_canopy_water_potential_megapascal = -1, .oxygen_stress_factor = 1, .temperature_function = 1 });
+    const output = try development(.{ .alive = false, .milestone_day_by_stage = &(@as([10]u32, @splat(@as(u32, 0)))), .branch_count = 99, .main_branch_stage = 1, .development_feedback = 1, .leaf_structural_carbon_g = 1, .leaf_structural_nitrogen_g = 1, .leaf_structural_phosphorus_g = 1, .plant_nonstructural_carbon_g = 1, .plant_nonstructural_nitrogen_g = 1, .plant_nonstructural_phosphorus_g = 1, .minimum_leaf_carbon_g = 0, .minimum_daily_canopy_water_potential_megapascal = -1, .oxygen_stress_factor = 1, .temperature_function = 1 });
     try std.testing.expectEqual(DevelopmentPhase.not_alive, output.phase);
     try std.testing.expectEqual(@as(usize, 0), output.branch_count);
 }

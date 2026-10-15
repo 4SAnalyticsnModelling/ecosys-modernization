@@ -2,6 +2,7 @@ const std = @import("std");
 const numerics = @import("../../core/numerics.zig");
 const snow = @import("../solute/snow_solute_transport.zig");
 
+
 pub const Inputs = struct {
     atmospheric_top_input_g: []const f64,
     /// Dynamic precipitation-equilibrium input, cell-major in snow salt
@@ -444,12 +445,12 @@ fn absoluteToleranceForSpecies(options: Options, species: usize) f64 {
 
 test "snow transport preserves species-specific nonlinear floors" {
     var tolerances: [snow.species_count]f64 = @splat(1e-12);
-    tolerances[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = 1e-9;
-    tolerances[@intFromEnum(snow.Species.ammonium_nitrogen)] = 2e-10;
+    tolerances[@backingInt(snow.Species.carbon_dioxide_carbon)] = 1e-9;
+    tolerances[@backingInt(snow.Species.ammonium_nitrogen)] = 2e-10;
     const options: Options = .{ .absolute_tolerance_g_by_species = tolerances };
-    try std.testing.expectEqual(@as(f64, 1e-9), absoluteToleranceForSpecies(options, @intFromEnum(snow.Species.carbon_dioxide_carbon)));
-    try std.testing.expectEqual(@as(f64, 2e-10), absoluteToleranceForSpecies(options, @intFromEnum(snow.Species.ammonium_nitrogen)));
-    try std.testing.expectEqual(@as(f64, 1e-12), absoluteToleranceForSpecies(options, @intFromEnum(snow.Species.calcium)));
+    try std.testing.expectEqual(@as(f64, 1e-9), absoluteToleranceForSpecies(options, @backingInt(snow.Species.carbon_dioxide_carbon)));
+    try std.testing.expectEqual(@as(f64, 2e-10), absoluteToleranceForSpecies(options, @backingInt(snow.Species.ammonium_nitrogen)));
+    try std.testing.expectEqual(@as(f64, 1e-12), absoluteToleranceForSpecies(options, @backingInt(snow.Species.calcium)));
 }
 
 fn testPartition() snow.SurfacePartition {
@@ -465,7 +466,7 @@ test "snow hybrid converges before legacy 20 iteration ceiling" {
     state.liquid_water_volume_m3[1] = 2;
     @memset(try state.amounts(0, 0), 10);
     var discharge: [1]snow.SurfaceDischarge = undefined;
-    const zero_input = [_]f64{0} ** snow.species_count;
+    const zero_input = @as([snow.species_count]f64, @splat(@as(f64, 0)));
     const result = try solve(std.testing.allocator, &state, .{ .atmospheric_top_input_g = &zero_input, .transport_water_volume_m3 = state.liquid_water_volume_m3, .water_flux_to_lower_m3 = &[_]f64{ 0, 0.2 }, .litter_water_flux_m3 = &[_]f64{0.1}, .soil_micropore_water_flux_m3 = &[_]f64{0.1}, .soil_macropore_water_flux_m3 = &[_]f64{0}, .surface_partitions = &[_]snow.SurfacePartition{testPartition()} }, .{}, &discharge);
     try std.testing.expect(result.iterations < 20);
     try std.testing.expect(result.newton_raphson_steps + result.picard_steps > 0);
@@ -477,7 +478,7 @@ test "snow transport first fallback is Anderson accelerated" {
     // A private test seam rejects the first Newton attempt without weakening
     // any production bound or tolerance. The accepted Anderson candidate must
     // then be followed immediately by a real Newton retry.
-    const zero_input = [_]f64{0} ** snow.species_count;
+    const zero_input = @as([snow.species_count]f64, @splat(@as(f64, 0)));
     const partitions = [_]snow.SurfacePartition{testPartition()};
     const forced_recovery: Options = .{ .max_iterations = 20 };
     var control: TestControl = .{ .forced_initial_newton_failures = 1 };
@@ -501,7 +502,7 @@ test "snow transport first fallback is Anderson accelerated" {
 }
 
 test "snow transport final-slot Anderson is rejected atomically" {
-    const zero_input = [_]f64{0} ** snow.species_count;
+    const zero_input = @as([snow.species_count]f64, @splat(@as(f64, 0)));
     var state = try snow.State.init(std.testing.allocator, 1, 2);
     defer state.deinit();
     state.active[0] = true;
@@ -525,7 +526,7 @@ test "snow transport rejects disabled Anderson recovery" {
     state.active[0] = true;
     state.liquid_water_volume_m3[0] = 1;
     var discharge: [1]snow.SurfaceDischarge = undefined;
-    const zero_input = [_]f64{0} ** snow.species_count;
+    const zero_input = @as([snow.species_count]f64, @splat(@as(f64, 0)));
     try std.testing.expectError(error.InvalidSnowTransportSolverOptions, solve(std.testing.allocator, &state, .{ .atmospheric_top_input_g = &zero_input, .transport_water_volume_m3 = state.liquid_water_volume_m3, .water_flux_to_lower_m3 = &[_]f64{0}, .litter_water_flux_m3 = &[_]f64{0}, .soil_micropore_water_flux_m3 = &[_]f64{0}, .soil_macropore_water_flux_m3 = &[_]f64{0}, .surface_partitions = &[_]snow.SurfacePartition{testPartition()} }, .{ .anderson_recovery = false }, &discharge));
 }
 
@@ -546,7 +547,7 @@ test "snow transport conserves mass regardless of accepted convergence slack" {
     @memset(try state.amounts(0, 0), 10);
     @memset(try state.amounts(0, 1), 4);
     var discharge: [1]snow.SurfaceDischarge = undefined;
-    const input = [_]f64{0.5} ** snow.species_count;
+    const input = @as([snow.species_count]f64, @splat(@as(f64, 0.5)));
     var before: f64 = 0;
     for (state.amount_g) |value| before += value;
     for (input) |value| before += value;
@@ -594,9 +595,9 @@ test "production-scale retained snow nitrogen closes at the deck audit tolerance
     const top_nitrogen_g = [_]f64{ 0.01, 0.004, 0.02, 0.00084523, 0.03 };
     const lower_nitrogen_g = [_]f64{ 0.002, 0.001, 0.003, 0.001, 0.003 };
     const input_nitrogen_g = [_]f64{ 0.002, 0.001, 0.004, 0.00111294, 0.004 };
-    var atmospheric_input = [_]f64{0} ** snow.species_count;
+    var atmospheric_input = @as([snow.species_count]f64, @splat(@as(f64, 0)));
     for (nitrogen_species, top_nitrogen_g, lower_nitrogen_g, input_nitrogen_g) |species, top, lower, input| {
-        const species_index = @intFromEnum(species);
+        const species_index = @backingInt(species);
         (try state.amounts(0, 0))[species_index] = top;
         (try state.amounts(0, 1))[species_index] = lower;
         atmospheric_input[species_index] = input;
@@ -623,7 +624,7 @@ test "production-scale retained snow nitrogen closes at the deck audit tolerance
     var observed_nitrogen_g: f64 = 0;
     for (state.amount_g) |value| observed_nitrogen_g += value;
     for (discharge[0].litter_g, discharge[0].soil_nonband_g, discharge[0].soil_band_g, 0..) |litter, nonband, band, species_index| {
-        const species: snow.Species = @enumFromInt(species_index);
+        const species: snow.Species = @fromBackingInt(@intCast(species_index));
         switch (species) {
             .dinitrogen_nitrogen, .nitrous_oxide_nitrogen, .ammonium_nitrogen, .ammonia_nitrogen, .nitrate_nitrogen => observed_nitrogen_g += litter + nonband + band,
             else => {},
@@ -648,7 +649,7 @@ test "snow surface discharge never exceeds what storage gave up" {
     state.liquid_water_volume_m3[0] = 1;
     @memset(try state.amounts(0, 0), 1e-9);
     var discharge: [1]snow.SurfaceDischarge = undefined;
-    const zero_input = [_]f64{0} ** snow.species_count;
+    const zero_input = @as([snow.species_count]f64, @splat(@as(f64, 0)));
     var before: f64 = 0;
     for (state.amount_g) |value| before += value;
     _ = try solve(std.testing.allocator, &state, .{
@@ -682,10 +683,10 @@ test "accepted internal transfer ledger equals committed donor and recipient cha
     defer std.testing.allocator.free(before_g);
     const before_salt = try std.testing.allocator.dupe(f64, state.salt_amount_mol);
     defer std.testing.allocator.free(before_salt);
-    var accepted_g = [_]f64{-1} ** (2 * snow.species_count);
-    var accepted_salt = [_]f64{-1} ** (2 * snow.salt_species_count);
+    var accepted_g = @as([(2 * snow.species_count)]f64, @splat(@as(f64, -1)));
+    var accepted_salt = @as([(2 * snow.salt_species_count)]f64, @splat(@as(f64, -1)));
     var discharge: [1]snow.SurfaceDischarge = undefined;
-    const zero_input = [_]f64{0} ** snow.species_count;
+    const zero_input = @as([snow.species_count]f64, @splat(@as(f64, 0)));
     _ = try solve(std.testing.allocator, &state, .{
         .atmospheric_top_input_g = &zero_input,
         .transport_water_volume_m3 = state.liquid_water_volume_m3,
@@ -773,9 +774,9 @@ test "snow transport accepts convergence reached by the final allowed update" {
     state.liquid_water_volume_m3[0] = 1;
     state.amount_g[0] = 1;
     var discharge: [1]snow.SurfaceDischarge = undefined;
-    const zero_input = [_]f64{0} ** snow.species_count;
-    var accepted_g = [_]f64{17} ** snow.species_count;
-    var accepted_salt = [_]f64{19} ** snow.salt_species_count;
+    const zero_input = @as([snow.species_count]f64, @splat(@as(f64, 0)));
+    var accepted_g = @as([snow.species_count]f64, @splat(@as(f64, 17)));
+    var accepted_salt = @as([snow.salt_species_count]f64, @splat(@as(f64, 19)));
     const result = try solve(std.testing.allocator, &state, .{ .atmospheric_top_input_g = &zero_input, .transport_water_volume_m3 = state.liquid_water_volume_m3, .water_flux_to_lower_m3 = &[_]f64{0}, .litter_water_flux_m3 = &[_]f64{0.2}, .soil_micropore_water_flux_m3 = &[_]f64{0}, .soil_macropore_water_flux_m3 = &[_]f64{0}, .surface_partitions = &[_]snow.SurfacePartition{testPartition()}, .accepted_downward_g = &accepted_g, .accepted_downward_salt_mol = &accepted_salt }, .{ .max_iterations = 1 }, &discharge);
     try std.testing.expectEqual(@as(u16, 1), result.iterations);
     try std.testing.expectEqual(@as(u16, 1), result.newton_raphson_steps);
@@ -792,9 +793,9 @@ test "failed snow hybrid leaves caller state unchanged after final audit" {
     state.amount_g[0] = 1;
     var discharge = [_]snow.SurfaceDischarge{.{}};
     const discharge_before = discharge;
-    const zero_input = [_]f64{0} ** snow.species_count;
-    var accepted_g = [_]f64{17} ** snow.species_count;
-    var accepted_salt = [_]f64{19} ** snow.salt_species_count;
+    const zero_input = @as([snow.species_count]f64, @splat(@as(f64, 0)));
+    var accepted_g = @as([snow.species_count]f64, @splat(@as(f64, 17)));
+    var accepted_salt = @as([snow.salt_species_count]f64, @splat(@as(f64, 19)));
     try std.testing.expectError(error.SnowTransportSolverDidNotConverge, solve(std.testing.allocator, &state, .{ .atmospheric_top_input_g = &zero_input, .transport_water_volume_m3 = state.liquid_water_volume_m3, .water_flux_to_lower_m3 = &[_]f64{0}, .litter_water_flux_m3 = &[_]f64{0.2}, .soil_micropore_water_flux_m3 = &[_]f64{0}, .soil_macropore_water_flux_m3 = &[_]f64{0}, .surface_partitions = &[_]snow.SurfacePartition{testPartition()}, .accepted_downward_g = &accepted_g, .accepted_downward_salt_mol = &accepted_salt }, .{ .max_iterations = 1, .minimum_newton_fraction = 0.5, .maximum_newton_fraction = 0.5 }, &discharge));
     try std.testing.expectEqual(@as(f64, 1), state.amount_g[0]);
     try std.testing.expectEqualSlices(u8, std.mem.asBytes(&discharge_before), std.mem.asBytes(&discharge));
@@ -816,7 +817,7 @@ test "snow transport rejects degenerate divergence watch options" {
     state.liquid_water_volume_m3[0] = 1;
     state.amount_g[0] = 1;
     var discharge: [1]snow.SurfaceDischarge = undefined;
-    const zero_input = [_]f64{0} ** snow.species_count;
+    const zero_input = @as([snow.species_count]f64, @splat(@as(f64, 0)));
     const inputs: Inputs = .{
         .atmospheric_top_input_g = &zero_input,
         .transport_water_volume_m3 = state.liquid_water_volume_m3,

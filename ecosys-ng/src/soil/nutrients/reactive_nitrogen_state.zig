@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Runtime storage for NITRO intermediates that are not members of the
 /// equilibrium aqueous-ion network. Ammonium and nitrate remain authoritative
@@ -49,7 +50,7 @@ pub const State = struct {
     /// at every fallible allocation edge in `init`.
     noinline fn deinitAllocatedPrefix(self: *State, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -67,7 +68,7 @@ pub const State = struct {
         result.process_unit_count_per_layer = process_unit_count_per_layer;
         var allocated: usize = 0;
         errdefer result.deinitAllocatedPrefix(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             const count = if (isLayerField(field.name)) layer_count else try std.math.mul(usize, layer_count, process_unit_count_per_layer);
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
@@ -77,7 +78,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
@@ -88,7 +89,7 @@ pub const State = struct {
 
     pub fn validateLayer(self: State, layer: usize) !void {
         if (layer >= self.layer_count) return error.ReactiveNitrogenIndexOutOfBounds;
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             if (isLayerField(field.name)) {
                 const value = @field(self, field.name)[layer];
                 if (!std.math.isFinite(value) or value < 0) return error.InvalidReactiveNitrogenState;
@@ -130,7 +131,7 @@ test "reactive nitrogen validation rejects NaN before process execution" {
 test "reactive nitrogen state releases every partial allocation prefix" {
     const allocation_count = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(State).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) count += 1;
         }
         break :count count;

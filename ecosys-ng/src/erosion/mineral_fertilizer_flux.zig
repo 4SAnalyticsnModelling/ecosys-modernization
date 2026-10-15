@@ -13,6 +13,7 @@
 // Group B of docs/traceability/erosion_unbound_family_disposition.md
 
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const SurfacePools = struct {
     sand_megagrams: f64,
@@ -50,9 +51,9 @@ pub fn transportedFraction(cumulative_sediment_megagrams: f64, surface_soil_mass
 
 pub fn calculateFromFraction(transported_fraction: f64, pools: SurfacePools) !Fluxes {
     if (!std.math.isFinite(transported_fraction) or transported_fraction < 0 or transported_fraction > 1) return error.InvalidErosionMineralFertilizerInput;
-    inline for (@typeInfo(SurfacePools).@"struct".fields) |field| try validateFiniteNonnegative(@field(pools, field.name));
+    inline for (ti_compat.fieldViews(SurfacePools)) |field| try validateFiniteNonnegative(@field(pools, field.name));
     var result: Fluxes = undefined;
-    inline for (@typeInfo(SurfacePools).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SurfacePools)) |field| {
         @field(result, field.name) = transported_fraction * @field(pools, field.name);
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteErosionMineralFertilizerResult;
     }

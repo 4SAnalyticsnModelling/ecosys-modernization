@@ -10,6 +10,7 @@
 // hour's gas mass concentrations and downstream atmospheric boundary science.
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     /// TKQGX. Ground surface air temperature (K).
@@ -59,7 +60,7 @@ pub fn blend(inputs: Inputs) !Result {
         .bulk_vapor_m3_per_m3 = inputs.ground_vapor_m3_per_m3 * f +
             inputs.canopy_vapor_m3_per_m3 * (1.0 - f),
     };
-    inline for (@typeInfo(Result).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Result)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteBulkAirResult;
     return result;

@@ -1,6 +1,7 @@
 const std = @import("std");
 const chemistry = @import("../solute/chemistry_state.zig");
 const legacy_water_negligible_floor = @import("../../core/legacy_water_negligible_floor.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// `ZEROS2(NY,NX) = ZERO2*DH(NY,NX)*DV(NY,NX)` (`starts.f:270`, `ZERO2=1.0E-06`
 /// at `starts.f:94`), the legacy noise floor `solute.f:610`'s
@@ -38,7 +39,7 @@ pub const RoundoffAllowance = struct {
     silicon_mol: f64 = 0,
 
     pub noinline fn add(self: *RoundoffAllowance, contribution: RoundoffAllowance) !void {
-        inline for (std.meta.fields(RoundoffAllowance)) |field| {
+        inline for (ti_compat.fieldViews(RoundoffAllowance)) |field| {
             const value = @field(contribution, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidSoilChemistryWaterCarrierRoundoff;
@@ -52,7 +53,7 @@ pub const RoundoffAllowance = struct {
     }
 
     pub noinline fn validate(self: RoundoffAllowance) !void {
-        inline for (std.meta.fields(RoundoffAllowance)) |field| {
+        inline for (ti_compat.fieldViews(RoundoffAllowance)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidSoilChemistryWaterCarrierRoundoff;
@@ -158,7 +159,7 @@ pub const InventoryFractions = struct {
     phosphate_band: f64,
 
     pub fn validate(self: InventoryFractions) !void {
-        inline for (std.meta.fields(InventoryFractions)) |field| {
+        inline for (ti_compat.fieldViews(InventoryFractions)) |field| {
             const fraction = @field(self, field.name);
             if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1)
                 return error.InvalidSoilChemistryInventoryFraction;
@@ -465,7 +466,7 @@ fn commitScaledLayer(
 }
 
 fn validateScalable(value: anytype, old_water_m3: f64, new_water_m3: f64) !void {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| if (comptime scalable(field.name)) {
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field| if (comptime scalable(field.name)) {
         const concentration = @field(value, field.name);
         if (!std.math.isFinite(concentration) or concentration < 0)
             return error.InvalidSoilChemistryWaterNormalizedPool;
@@ -475,7 +476,7 @@ fn validateScalable(value: anytype, old_water_m3: f64, new_water_m3: f64) !void 
 }
 
 fn scaleScalable(value: anytype, scale: f64) void {
-    inline for (@typeInfo(@TypeOf(value.*)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(value.*))) |field| {
         if (comptime scalable(field.name)) @field(value, field.name) *= scale;
     }
 }
@@ -727,7 +728,7 @@ noinline fn accumulateCertifiedDiscrepancy(
     // only one or two nonzero coefficients, and an exactly preserved endpoint
     // has no contribution at all.
     if (discrepancy == 0) return;
-    inline for (std.meta.fields(RoundoffAllowance)) |field| {
+    inline for (ti_compat.fieldViews(RoundoffAllowance)) |field| {
         const coefficient = @field(coefficients, field.name);
         if (coefficient != 0) {
             const contribution = try multiplyRoundUp(
@@ -964,7 +965,7 @@ fn seedImmobilePhosphate(state: *chemistry.State) void {
 
 fn seedGeochemistrySolids(state: *chemistry.State) void {
     const amount = 31.596673933440005;
-    inline for (@typeInfo(GeochemistrySolidState).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(GeochemistrySolidState)) |field|
         @field(state.geochemistry_solids[0], field.name) = amount;
 }
 
@@ -1000,7 +1001,7 @@ noinline fn geochemistryInventoryShape(
     water_m3: f64,
 ) RoundoffAllowance {
     var extensive = state;
-    inline for (@typeInfo(GeochemistrySolidState).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(GeochemistrySolidState)) |field|
         @field(extensive, field.name) *= water_m3;
     const aluminum_silicate = extensive.aluminum_natural_silicate_mol_per_m3 +
         extensive.aluminum_ground_silicate_mol_per_m3;
@@ -1216,7 +1217,7 @@ test "SOLUTE extensive mineral pools require the water-carrier translation" {
     state.aqueous[0].calcium = 2;
     state.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3 = 3;
     state.non_band_phosphate[0].adsorbed_h2po4_mol_p_per_megagram = 5;
-    inline for (@typeInfo(GeochemistrySolidState).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(GeochemistrySolidState)) |field|
         @field(state.geochemistry_solids[0], field.name) = 7;
     try rebaseLayer(&state, 0, 4, 2, test_negligible_water_volume_m3);
     try std.testing.expectEqual(@as(f64, 4), state.aqueous[0].calcium);
@@ -1226,7 +1227,7 @@ test "SOLUTE extensive mineral pools require the water-carrier translation" {
     // pools as extensive mol, then divides each by VOLW for its solve state.
     // Every corresponding Zig concentration must therefore retain its old
     // extensive amount across the carrier-only change.
-    inline for (@typeInfo(GeochemistrySolidState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(GeochemistrySolidState)) |field| {
         const concentration = @field(state.geochemistry_solids[0], field.name);
         try std.testing.expectEqual(@as(f64, 14), concentration);
         try std.testing.expectEqual(@as(f64, 28), concentration * 2);
@@ -1299,7 +1300,7 @@ test "roundoff provenance exposes exactly the authoritative element lanes" {
         "chloride_mol",
         "silicon_mol",
     };
-    const fields = std.meta.fields(RoundoffAllowance);
+    const fields = ti_compat.fieldViews(RoundoffAllowance);
     try std.testing.expectEqual(expected_names.len, fields.len);
     inline for (expected_names, fields) |expected, field|
         try std.testing.expectEqualStrings(expected, field.name);
@@ -1351,7 +1352,7 @@ test "audited rebase is bitwise literal arithmetic and preview is mutation-free"
     try std.testing.expectEqualDeep(expected.non_band_phosphate[0], audited.non_band_phosphate[0]);
     try std.testing.expectEqualDeep(expected.band_phosphate[0], audited.band_phosphate[0]);
     try std.testing.expectEqualDeep(expected.geochemistry_solids[0], audited.geochemistry_solids[0]);
-    inline for (std.meta.fields(RoundoffAllowance)) |field| {
+    inline for (ti_compat.fieldViews(RoundoffAllowance)) |field| {
         if (comptime std.mem.eql(u8, field.name, "nitrogen_g") or
             std.mem.eql(u8, field.name, "nitrogen_mol") or
             std.mem.eql(u8, field.name, "chloride_mol"))
@@ -1417,7 +1418,7 @@ test "allowance bounds authoritative fraction-weighted phosphate inventory" {
     );
     try std.testing.expect(allowance.phosphorus_g >=
         @abs(after_grouped.phosphorus_g - before_grouped.phosphorus_g));
-    inline for (std.meta.fields(RoundoffAllowance)) |field| {
+    inline for (ti_compat.fieldViews(RoundoffAllowance)) |field| {
         const before = @field(before_non_band, field.name) +
             @field(before_band, field.name);
         const after = @field(after_non_band, field.name) +
@@ -1464,7 +1465,7 @@ test "allowance bounds exact landscape geochemistry inventory stoichiometry" {
             31,
             test_negligible_water_volume_m3,
         );
-        inline for (std.meta.fields(RoundoffAllowance)) |field| {
+        inline for (ti_compat.fieldViews(RoundoffAllowance)) |field| {
             const coefficient = @field(case[1], field.name);
             if (coefficient == 0)
                 try std.testing.expectEqual(@as(f64, 0), @field(allowance, field.name))
@@ -1527,7 +1528,7 @@ test "grouped certification retains independent member anti-masking bounds" {
         31,
         test_negligible_water_volume_m3,
     );
-    inline for (std.meta.fields(RoundoffAllowance)) |field| {
+    inline for (ti_compat.fieldViews(RoundoffAllowance)) |field| {
         const member_sum = try addCertifiedBounds(
             @field(phosphate_members, field.name),
             @field(geochemistry_members, field.name),
@@ -1653,7 +1654,7 @@ test "repeated fraction-weighted carrier chains retain certificate" {
         old_water_m3,
         fractions.phosphate_band,
     );
-    inline for (std.meta.fields(RoundoffAllowance)) |field| {
+    inline for (ti_compat.fieldViews(RoundoffAllowance)) |field| {
         const initial = @field(initial_non_band, field.name) +
             @field(initial_band, field.name);
         const final = @field(final_non_band, field.name) +
@@ -1826,7 +1827,7 @@ test "issue-061: BEFORE -- the old exact-zero guard manufactured a non-finite re
             const source_water_m3 = if (old_water_m3 > 0) old_water_m3 else state.dry_reference_water_m3[layer];
             const scale = if (source_water_m3 == 0) 0 else source_water_m3 / new_water_m3;
             if (!std.math.isFinite(scale) or scale < 0) return error.InvalidSoilChemistryWaterCarrier;
-            inline for (@typeInfo(GeochemistrySolidState).@"struct".fields) |field|
+            inline for (ti_compat.fieldViews(GeochemistrySolidState)) |field|
                 @field(state.geochemistry_solids[layer], field.name) *= scale;
             state.dry_reference_water_m3[layer] = 0;
         }

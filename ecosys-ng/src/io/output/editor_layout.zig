@@ -55,6 +55,7 @@
 
 const std = @import("std");
 
+
 const log = std.log.scoped(.output_editor);
 
 pub const source_domain_choice_count: usize = 50;
@@ -333,7 +334,7 @@ fn valuesPerLayerTotal(layout: []const Run) usize {
 fn layoutCoversEachSlotOnce(layout: []const Run) bool {
     const extent = layoutExtent(layout);
     if (extent == 0 or extent > source_domain_choice_count) return false;
-    var seen = [_]bool{false} ** source_domain_choice_count;
+    var seen = @as([source_domain_choice_count]bool, @splat(@as(bool, false)));
     for (layout) |run| {
         var slot = switch (run) {
             .fixed => |fixed| fixed.source_slot,
@@ -553,7 +554,7 @@ pub fn resolve(
 /// Turns a one-based slot list into a 100-entry source choice vector, so a test
 /// reads the same way as the `YES` lines of a real editor file.
 fn sourceChoices(soil_slots: []const usize, plant_slots: []const usize) [source_total_choice_count]bool {
-    var choices = [_]bool{false} ** source_total_choice_count;
+    var choices = @as([source_total_choice_count]bool, @splat(@as(bool, false)));
     for (soil_slots) |slot| choices[slot - 1] = true;
     for (plant_slots) |slot| choices[source_domain_choice_count + slot - 1] = true;
     return choices;

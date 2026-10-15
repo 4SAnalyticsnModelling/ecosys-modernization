@@ -10,6 +10,8 @@ const geochemistry_rates = @import("../solute/geochemistry_reaction_rates.zig");
 const activity_coefficients = @import("../solute/activity_coefficients.zig");
 const surface_litter_rates = @import("../../surface/litter_reaction_rates.zig");
 const surface_fertilizer = @import("../../surface/litter_fertilizer.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const SurfaceLitterParameters = struct {
     carboxyl_dissociation_constant: f64,
@@ -187,7 +189,7 @@ const Record = enum {
 
 pub noinline fn parse(source: []const u8) !Parameters {
     var result: Parameters = undefined;
-    var seen = [_]bool{false} ** @typeInfo(Record).@"enum".fields.len;
+    var seen = @as([@typeInfo(Record).@"enum".field_names.len]bool, @splat(@as(bool, false)));
     var lines = std.mem.splitScalar(u8, source, '\n');
     while (lines.next()) |line| {
         if (hasEmptyExplicitField(line))
@@ -196,7 +198,7 @@ pub noinline fn parse(source: []const u8) !Parameters {
         const label = tokens.next() orelse continue;
         if (label[0] == '#') continue;
         const record = recordFromLabel(label) orelse return error.UnknownChemistryParameterRecord;
-        const index: usize = @intFromEnum(record);
+        const index: usize = @backingInt(record);
         if (seen[index]) return error.DuplicateChemistryParameterRecord;
         seen[index] = true;
         switch (record) {
@@ -254,7 +256,7 @@ fn hasEmptyExplicitField(line: []const u8) bool {
 
 fn parseStruct(comptime T: type, tokens: anytype) !T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| @field(result, field.name) = try nextFinite(tokens);
+    inline for (ti_compat.fieldViews(T)) |field| @field(result, field.name) = try nextFinite(tokens);
     if (tokens.next() != null) return error.TooManyChemistryParameterValues;
     return result;
 }
@@ -267,16 +269,16 @@ fn nextFinite(tokens: anytype) !f64 {
 }
 
 fn recordFromLabel(label: []const u8) ?Record {
-    inline for (@typeInfo(Record).@"enum".fields) |field| if (std.ascii.eqlIgnoreCase(label, field.name)) return @enumFromInt(field.value);
+    inline for (ti_compat.enumFieldViews(Record)) |field| if (std.ascii.eqlIgnoreCase(label, field.name)) return @fromBackingInt(@intCast(field.value));
     return null;
 }
 
 fn validate(parameters: Parameters) !void {
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         const value = @field(parameters, field.name);
         switch (@typeInfo(field.type)) {
             .float => if (!std.math.isFinite(value) or value < 0) return error.InvalidChemistryParameter,
-            .@"struct" => inline for (@typeInfo(field.type).@"struct".fields) |nested| if (!std.math.isFinite(@field(value, nested.name)) or @field(value, nested.name) < 0) return error.InvalidChemistryParameter,
+            .@"struct" => inline for (ti_compat.fieldViews(field.type)) |nested| if (!std.math.isFinite(@field(value, nested.name)) or @field(value, nested.name) < 0) return error.InvalidChemistryParameter,
             else => @compileError("unsupported chemistry parameter field"),
         }
     }

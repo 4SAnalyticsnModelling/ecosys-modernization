@@ -29,7 +29,7 @@ pub fn refreshTransientFromChemistry(
             return error.InvalidLitterAmmoniaInventory;
     }
     for (chemistry_state.cells, litter_water_m3, cell_area_m2, 0..) |cell, water, area_m2, cell_index| {
-        const index = cell_index * gas.species_count + @intFromEnum(gas.Species.ammonia);
+        const index = cell_index * gas.species_count + @backingInt(gas.Species.ammonia);
         const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(area_m2);
         const water_carrier = try litterAmmoniaCarrierM3(water, chemistry_state.dry_reference_water_m3[cell_index], negligible_water_volume_m3);
         gas_state.dissolved_mass_g[index] = cell.ammonia_mol_per_m3 * water_carrier * nitrogen_molar_mass_g_per_mol;
@@ -52,7 +52,7 @@ pub fn publishTransientToChemistry(
         !std.math.isFinite(relative_tolerance) or relative_tolerance < 0)
         return error.InvalidLitterAmmoniaBridgeTolerance;
     for (litter_water_m3, cell_area_m2, 0..) |water, area_m2, cell_index| {
-        const index = cell_index * gas.species_count + @intFromEnum(gas.Species.ammonia);
+        const index = cell_index * gas.species_count + @backingInt(gas.Species.ammonia);
         const dissolved = gas_state.dissolved_mass_g[index];
         if (!std.math.isFinite(dissolved) or dissolved < 0)
             return error.InvalidTransientLitterAmmoniaInventory;
@@ -73,7 +73,7 @@ pub fn publishTransientToChemistry(
         const negligible_water_volume_m3 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(area_m2);
         const water_carrier = try litterAmmoniaCarrierM3(water, chemistry_state.dry_reference_water_m3[cell_index], negligible_water_volume_m3);
         if (water_carrier == 0) continue;
-        const index = cell_index * gas.species_count + @intFromEnum(gas.Species.ammonia);
+        const index = cell_index * gas.species_count + @backingInt(gas.Species.ammonia);
         chemistry_state.cells[cell_index].ammonia_mol_per_m3 =
             gas_state.dissolved_mass_g[index] / nitrogen_molar_mass_g_per_mol / water_carrier;
     }
@@ -83,7 +83,7 @@ pub fn publishTransientToChemistry(
 pub fn clearTransient(gas_state: *gas.State) !void {
     try gas_state.validateShape();
     for (0..gas_state.cell_count) |cell| {
-        const index = cell * gas.species_count + @intFromEnum(gas.Species.ammonia);
+        const index = cell * gas.species_count + @backingInt(gas.Species.ammonia);
         gas_state.dissolved_mass_g[index] = 0;
         gas_state.macropore_dissolved_mass_g[index] = 0;
         gas_state.band_dissolved_mass_g[index] = 0;
@@ -144,7 +144,7 @@ test "litter chemistry ammonia is sole aqueous owner and transient round trip is
     chemistry_state.cells[0].ammonia_mol_per_m3 = 2;
     chemistry_state.cells[1].ammonia_mol_per_m3 = 5;
     try refreshTransientFromChemistry(&chemistry_state, &gas_state, &.{ 3, 4 }, &.{ 1, 1 }, 14.01);
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const ammonia = @backingInt(gas.Species.ammonia);
     try std.testing.expectApproxEqAbs(@as(f64, 84.06), gas_state.dissolved_mass_g[ammonia], 1e-13);
     gas_state.dissolved_mass_g[ammonia] -= 14.01;
     gas_state.dissolved_mass_g[gas.species_count + ammonia] += 14.01;
@@ -169,7 +169,7 @@ test "dry retained ammonia is packed onto the dry-reference carrier and round-tr
     chemistry_state.cells[0].ammonia_mol_per_m3 = 4;
     chemistry_state.dry_reference_water_m3[0] = 2;
     try refreshTransientFromChemistry(&chemistry_state, &gas_state, &.{0}, &.{1}, 14);
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const ammonia = @backingInt(gas.Species.ammonia);
     try std.testing.expectApproxEqAbs(@as(f64, 112), gas_state.dissolved_mass_g[ammonia], 1e-12);
     try publishTransientToChemistry(&chemistry_state, &gas_state, &.{0}, &.{1}, 14, 1e-12, 1e-9);
     try std.testing.expectApproxEqAbs(@as(f64, 4), chemistry_state.cells[0].ammonia_mol_per_m3, 1e-12);
@@ -183,7 +183,7 @@ test "invalid later transient leaves all litter chemistry owners unchanged" {
     chemistry_state.cells[0].ammonia_mol_per_m3 = 2;
     chemistry_state.cells[1].ammonia_mol_per_m3 = 5;
     try refreshTransientFromChemistry(&chemistry_state, &gas_state, &.{ 1, 1 }, &.{ 1, 1 }, 14);
-    gas_state.dissolved_mass_g[gas.species_count + @intFromEnum(gas.Species.ammonia)] = std.math.nan(f64);
+    gas_state.dissolved_mass_g[gas.species_count + @backingInt(gas.Species.ammonia)] = std.math.nan(f64);
     try std.testing.expectError(error.InvalidTransientLitterAmmoniaInventory, publishTransientToChemistry(&chemistry_state, &gas_state, &.{ 1, 1 }, &.{ 1, 1 }, 14, 1e-12, 1e-9));
     try std.testing.expectEqual(@as(f64, 2), chemistry_state.cells[0].ammonia_mol_per_m3);
     try std.testing.expectEqual(@as(f64, 5), chemistry_state.cells[1].ammonia_mol_per_m3);
@@ -242,7 +242,7 @@ test "issue-066: NEW refreshTransientFromChemistry/publishTransientToChemistry r
     const litter_water_m3 = [_]f64{ 1.0e-9, 4 };
     const cell_area_m2 = [_]f64{ 1, 1 };
     try refreshTransientFromChemistry(&chemistry_state, &gas_state, &litter_water_m3, &cell_area_m2, 14);
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const ammonia = @backingInt(gas.Species.ammonia);
     try std.testing.expectApproxEqAbs(@as(f64, 112), gas_state.dissolved_mass_g[ammonia], 1e-9);
     try std.testing.expectApproxEqAbs(@as(f64, 280), gas_state.dissolved_mass_g[gas.species_count + ammonia], 1e-9);
 

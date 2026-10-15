@@ -13,6 +13,7 @@
 // Group B of docs/traceability/erosion_unbound_family_disposition.md
 
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const SurfacePools = struct {
     aluminum_hydroxide_precipitate_mol: f64, // PALOH
@@ -49,7 +50,7 @@ pub const Fluxes = SurfacePools;
 pub fn calculate(transported_surface_mass_fraction: f64, pools: SurfacePools) !Fluxes {
     if (!std.math.isFinite(transported_surface_mass_fraction) or transported_surface_mass_fraction < 0 or transported_surface_mass_fraction > 1) return error.InvalidErosionPrecipitateSilicateFraction;
     var result: Fluxes = undefined;
-    inline for (@typeInfo(SurfacePools).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SurfacePools)) |field| {
         const pool_mol = @field(pools, field.name);
         if (!std.math.isFinite(pool_mol) or pool_mol < 0) return error.InvalidErosionPrecipitateSilicatePool;
         @field(result, field.name) = transported_surface_mass_fraction * pool_mol;
@@ -60,7 +61,7 @@ pub fn calculate(transported_surface_mass_fraction: f64, pools: SurfacePools) !F
 
 fn fixture() SurfacePools {
     var result: SurfacePools = undefined;
-    inline for (@typeInfo(SurfacePools).@"struct".fields, 1..) |field, value| @field(result, field.name) = @floatFromInt(value);
+    inline for (ti_compat.fieldViews(SurfacePools), 1..) |field, value| @field(result, field.name) = @floatFromInt(value);
     return result;
 }
 

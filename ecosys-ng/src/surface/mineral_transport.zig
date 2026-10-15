@@ -2,6 +2,7 @@ const std = @import("std");
 const Chemistry = @import("litter_chemistry.zig").State;
 const runoff_carrier = @import("runoff_carrier.zig");
 
+
 pub const Directions = struct {
     east_m3: []const f64,
     west_m3: []const f64,
@@ -19,7 +20,7 @@ pub const Output = struct {
 };
 
 const Species = enum(u8) { ammonium, ammonia, nitrate, nitrite, hpo4, h2po4 };
-const species_count = @typeInfo(Species).@"enum".fields.len;
+const species_count = @typeInfo(Species).@"enum".field_names.len;
 
 /// Translates the TRNSFR surface `VFLW * pool` donor transaction without
 /// repeating a full sub-hour model cycle. All directional transfers use the
@@ -87,7 +88,7 @@ pub fn advance(
         const concentrations = [_]f64{ state.ammonium_mol_per_m3, state.ammonia_mol_per_m3, state.nitrate_mol_per_m3, 0, state.hpo4_mol_p_per_m3, state.h2po4_mol_p_per_m3 };
         for (concentrations, 0..) |concentration, species| {
             if (!std.math.isFinite(concentration) or concentration < 0) return error.InvalidSurfaceMineralChemistryState;
-            original[cell * species_count + species] = if (species == @intFromEnum(Species.nitrite)) blk: {
+            original[cell * species_count + species] = if (species == @backingInt(Species.nitrite)) blk: {
                 if (!std.math.isFinite(nitrite_g_n[cell]) or nitrite_g_n[cell] < 0) return error.InvalidSurfaceMineralChemistryState;
                 break :blk nitrite_g_n[cell] / nitrogen_molar_mass_g_per_mol;
             } else concentration * pre_runoff_water[cell];
@@ -131,10 +132,10 @@ pub fn advance(
             boundary_export_mol[cell * species_count + species];
         const debit_mol = intercell_debit_mol[cell * species_count + species];
         const credit_mol = intercell_credit_mol[cell * species_count + species];
-        switch (@as(Species, @enumFromInt(species))) {
+        switch (@as(Species, @fromBackingInt(@intCast(species)))) {
             .ammonium, .ammonia, .nitrate, .nitrite => {
                 nitrogen_export_candidate[cell] += exported_mol * nitrogen_molar_mass_g_per_mol;
-                ion_export_candidate[cell] += exported_mol * switch (@as(Species, @enumFromInt(species))) {
+                ion_export_candidate[cell] += exported_mol * switch (@as(Species, @fromBackingInt(@intCast(species)))) {
                     .ammonium => @as(f64, 2),
                     .ammonia, .nitrate, .nitrite => @as(f64, 1),
                     else => unreachable,
@@ -144,7 +145,7 @@ pub fn advance(
             },
             .hpo4, .h2po4 => {
                 phosphorus_export_candidate[cell] += exported_mol * phosphorus_molar_mass_g_per_mol;
-                ion_export_candidate[cell] += exported_mol * switch (@as(Species, @enumFromInt(species))) {
+                ion_export_candidate[cell] += exported_mol * switch (@as(Species, @fromBackingInt(@intCast(species)))) {
                     .hpo4 => @as(f64, 2),
                     .h2po4 => @as(f64, 3),
                     else => unreachable,
@@ -204,7 +205,7 @@ pub fn advance(
     for (0..cells) |cell| {
         const water = post_runoff_water_m3[cell];
         nitrite_candidate_g_n[cell] =
-            candidate[cell * species_count + @intFromEnum(Species.nitrite)] *
+            candidate[cell * species_count + @backingInt(Species.nitrite)] *
             nitrogen_molar_mass_g_per_mol;
         if (!std.math.isFinite(nitrite_candidate_g_n[cell]))
             return error.NonFiniteSurfaceMineralTransportCandidate;
@@ -217,11 +218,11 @@ pub fn advance(
             continue;
         }
         const inverse_water = 1.0 / water;
-        chemistry_candidate.cells[cell].ammonium_mol_per_m3 = candidate[cell * species_count + @intFromEnum(Species.ammonium)] * inverse_water;
-        chemistry_candidate.cells[cell].ammonia_mol_per_m3 = candidate[cell * species_count + @intFromEnum(Species.ammonia)] * inverse_water;
-        chemistry_candidate.cells[cell].nitrate_mol_per_m3 = candidate[cell * species_count + @intFromEnum(Species.nitrate)] * inverse_water;
-        chemistry_candidate.cells[cell].hpo4_mol_p_per_m3 = candidate[cell * species_count + @intFromEnum(Species.hpo4)] * inverse_water;
-        chemistry_candidate.cells[cell].h2po4_mol_p_per_m3 = candidate[cell * species_count + @intFromEnum(Species.h2po4)] * inverse_water;
+        chemistry_candidate.cells[cell].ammonium_mol_per_m3 = candidate[cell * species_count + @backingInt(Species.ammonium)] * inverse_water;
+        chemistry_candidate.cells[cell].ammonia_mol_per_m3 = candidate[cell * species_count + @backingInt(Species.ammonia)] * inverse_water;
+        chemistry_candidate.cells[cell].nitrate_mol_per_m3 = candidate[cell * species_count + @backingInt(Species.nitrate)] * inverse_water;
+        chemistry_candidate.cells[cell].hpo4_mol_p_per_m3 = candidate[cell * species_count + @backingInt(Species.hpo4)] * inverse_water;
+        chemistry_candidate.cells[cell].h2po4_mol_p_per_m3 = candidate[cell * species_count + @backingInt(Species.h2po4)] * inverse_water;
         inline for (.{
             chemistry_candidate.cells[cell].ammonium_mol_per_m3,
             chemistry_candidate.cells[cell].ammonia_mol_per_m3,
@@ -268,8 +269,8 @@ test "surface mineral runoff conserves internal transfer and reports external N 
     var nitrogen_export = [_]f64{ 0, 0 };
     var phosphorus_export = [_]f64{ 0, 0 };
     var ion_export = [_]f64{ 0, 0 };
-    var intercell_debit = [_]runoff_carrier.ElementMass{.{}} ** 2;
-    var intercell_credit = [_]runoff_carrier.ElementMass{.{}} ** 2;
+    var intercell_debit = @as([2]runoff_carrier.ElementMass, @splat(@as(runoff_carrier.ElementMass, .{})));
+    var intercell_credit = @as([2]runoff_carrier.ElementMass, @splat(@as(runoff_carrier.ElementMass, .{})));
     var nitrite = [_]f64{ 14, 0 };
     const zero = [_]f64{ 0, 0 };
     try advance(std.testing.allocator, &chemistry, &nitrite, 2, 1, &.{ 0.5, 1.25 }, &.{ -0.5, 0.25 }, .{
@@ -368,8 +369,8 @@ test "late mineral carrier failure rolls back chemistry nitrite and exports" {
     const references_before = chemistry.mineral_reference_water_m3[0..2].*;
     var nitrogen_export = [_]f64{ 7, 8 };
     var phosphorus_export = [_]f64{ 9, 10 };
-    var intercell_debit = [_]runoff_carrier.ElementMass{.{ .nitrogen_g = 21 }} ** 2;
-    var intercell_credit = [_]runoff_carrier.ElementMass{.{ .phosphorus_g = 22 }} ** 2;
+    var intercell_debit = @as([2]runoff_carrier.ElementMass, @splat(@as(runoff_carrier.ElementMass, .{ .nitrogen_g = 21 })));
+    var intercell_credit = @as([2]runoff_carrier.ElementMass, @splat(@as(runoff_carrier.ElementMass, .{ .phosphorus_g = 22 })));
     var nitrite = [_]f64{ 11, 12 };
     const nitrite_before = nitrite;
     const zero = [_]f64{ 0, 0 };

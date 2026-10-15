@@ -5,6 +5,7 @@ const Growth = @import("../../plant/lifecycle/growth_stages.zig").State;
 const GrowthBranch = @import("../../plant/lifecycle/growth_stages.zig").BranchState;
 const Dormancy = @import("../../plant/lifecycle/dormancy.zig").RuntimeState;
 const DormancyBranch = @import("../../plant/lifecycle/dormancy.zig").State;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 const magic = "ECOSDEVP";
 // Version 8 persists branch-local IFLGR and FLGQ end-of-season state.
@@ -54,7 +55,7 @@ pub fn write(writer: anytype, view: View) !void {
     try writer.writeInt(u64, @intCast(view.growth.plant_count), .little);
     try writer.writeInt(u64, @intCast(view.growth.branches.len), .little);
     for (view.growth.plant_branch_offsets) |value| try writer.writeInt(u64, @intCast(value), .little);
-    inline for (@typeInfo(Phenology).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(Phenology)) |field| switch (field.type) {
         []bool => try writeBoolSlice(writer, @field(view.phenology, field.name)),
         []u16 => try writeU16Slice(writer, @field(view.phenology, field.name)),
         []f64 => try writeF64Slice(writer, @field(view.phenology, field.name)),
@@ -62,7 +63,7 @@ pub fn write(writer: anytype, view: View) !void {
     };
     for (view.growth.branches) |branch| try writeStruct(writer, branch);
     for (view.dormancy.branches) |branch| try writeStruct(writer, branch);
-    inline for (@typeInfo(BranchDevelopment).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(BranchDevelopment)) |field| switch (field.type) {
         []f64 => try writeF64Slice(writer, @field(view.branch_development, field.name)),
         []usize => try writeUsizeSlice(writer, @field(view.branch_development, field.name)),
         []u32 => try writeU32Slice(writer, @field(view.branch_development, field.name)),
@@ -103,7 +104,7 @@ pub fn read(allocator: std.mem.Allocator, reader: *std.Io.Reader, limits: Limits
     errdefer dormancy.deinit();
     var development = try BranchDevelopment.init(allocator, branches);
     errdefer development.deinit();
-    inline for (@typeInfo(Phenology).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(Phenology)) |field| switch (field.type) {
         []bool => if ((file_version >= 3 or (!std.mem.eql(u8, field.name, "emerged") and !std.mem.eql(u8, field.name, "lifecycle_initialized"))) and
             (file_version >= 4 or !std.mem.eql(u8, field.name, "reseed_pending")) and
             (file_version >= 7 or !std.mem.eql(u8, field.name, "death_replant_pending")))
@@ -142,7 +143,7 @@ pub fn read(allocator: std.mem.Allocator, reader: *std.Io.Reader, limits: Limits
             };
         } else branch.* = try readStruct(DormancyBranch, reader);
     }
-    inline for (@typeInfo(BranchDevelopment).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(BranchDevelopment)) |field| switch (field.type) {
         []f64 => try readF64Slice(reader, @field(development, field.name)),
         []usize => try readUsizeSlice(reader, @field(development, field.name)),
         []u32 => try readU32Slice(reader, @field(development, field.name)),
@@ -222,7 +223,7 @@ fn readU16Slice(reader: *std.Io.Reader, values: []u16) !void {
 }
 
 fn writeStruct(writer: anytype, value: anytype) !void {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field| switch (field.type) {
         f64 => {
             const number = @field(value, field.name);
             if (!std.math.isFinite(number)) return error.NonFinitePlantDevelopmentCheckpoint;
@@ -236,7 +237,7 @@ fn writeStruct(writer: anytype, value: anytype) !void {
 }
 fn readStruct(comptime T: type, reader: *std.Io.Reader) !T {
     var value: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (field.type) {
         f64 => {
             @field(value, field.name) = @bitCast(try reader.takeInt(u64, .little));
             if (!std.math.isFinite(@field(value, field.name))) return error.NonFinitePlantDevelopmentCheckpoint;
@@ -330,7 +331,7 @@ test "version seven restart defaults new reproductive turnover state" {
     try bytes.writer.writeInt(u64, 1, .little);
     try bytes.writer.writeInt(u64, 1, .little);
     for (growth.plant_branch_offsets) |value| try bytes.writer.writeInt(u64, @intCast(value), .little);
-    inline for (@typeInfo(Phenology).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(Phenology)) |field| switch (field.type) {
         []bool => try writeBoolSlice(&bytes.writer, @field(phenology, field.name)),
         []u16 => try writeU16Slice(&bytes.writer, @field(phenology, field.name)),
         []f64 => try writeF64Slice(&bytes.writer, @field(phenology, field.name)),
@@ -349,7 +350,7 @@ test "version seven restart defaults new reproductive turnover state" {
         .phenological_remobilization_enabled = old.phenological_remobilization_enabled,
         .remobilization_elapsed_h = old.remobilization_elapsed_h,
     });
-    inline for (@typeInfo(BranchDevelopment).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(BranchDevelopment)) |field| switch (field.type) {
         []f64 => try writeF64Slice(&bytes.writer, @field(development, field.name)),
         []usize => try writeUsizeSlice(&bytes.writer, @field(development, field.name)),
         []u32 => try writeU32Slice(&bytes.writer, @field(development, field.name)),

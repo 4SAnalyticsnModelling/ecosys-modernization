@@ -2,6 +2,7 @@ const std = @import("std");
 const geometry_module = @import("hourly_fertilizer_band_geometry.zig");
 const repartition_module = @import("fertilizer_band_inventory_repartition.zig");
 
+
 pub const Family = enum(u2) {
     ammonium = 0,
     nitrate = 1,
@@ -119,7 +120,7 @@ pub const Coordinator = struct {
         workspace: *geometry_module.Workspace,
     ) !void {
         try self.requireTokenAndPhase(token, .preparing);
-        const family_index = @intFromEnum(family);
+        const family_index = @backingInt(family);
         if (family_index != self.next_prepare_family)
             return error.FertilizerBandPrepareOrderViolation;
         if (state.band_depth_m.len != self.layer_count or
@@ -168,7 +169,7 @@ pub const Coordinator = struct {
         pools_in_source_order: []const repartition_module.Pool,
     ) !repartition_module.Result {
         try self.requireTokenAndPhase(token, .consuming);
-        const family_index = @intFromEnum(family);
+        const family_index = @backingInt(family);
         if (family_index != self.next_consume_family)
             return error.FertilizerBandConsumeOrderViolation;
         const result = try repartition_module.repartition(.{
@@ -256,7 +257,7 @@ pub const Coordinator = struct {
         if (!self.pre_prepare_band_fraction_exact or self.phase == .idle or
             self.phase == .preparing or layer >= self.layer_count)
             return null;
-        return self.pre_prepare_band_fraction[@as(usize, @intFromEnum(family)) * self.layer_count + layer];
+        return self.pre_prepare_band_fraction[@as(usize, @backingInt(family)) * self.layer_count + layer];
     }
 
     pub fn persistentRelativeChanges(
@@ -283,12 +284,12 @@ pub const Coordinator = struct {
     }
 
     fn relativeSlice(self: *Coordinator, family: Family) []f64 {
-        const start = @intFromEnum(family) * self.layer_count;
+        const start = @backingInt(family) * self.layer_count;
         return self.relative_non_band_change[start..][0..self.layer_count];
     }
 
     fn disappearedSlice(self: *Coordinator, family: Family) []bool {
-        const start = @intFromEnum(family) * self.layer_count;
+        const start = @backingInt(family) * self.layer_count;
         return self.band_disappeared[start..][0..self.layer_count];
     }
 };
@@ -556,8 +557,8 @@ test "tokens and source family order prevent stale or double consumption" {
 test "completed idle coordinator checkpoint restores after a nonzero token" {
     var coordinator = try Coordinator.init(std.testing.allocator, 1);
     defer coordinator.deinit();
-    const relative = [_]f64{0} ** 3;
-    const disappeared = [_]bool{false} ** 3;
+    const relative = @as([3]f64, @splat(@as(f64, 0)));
+    const disappeared = @as([3]bool, @splat(@as(bool, false)));
     const completed: PersistentMetadata = .{
         .phase = .idle,
         .current_token = 0,

@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ReactionState = struct {
     free_first_mol_per_m3: f64,
@@ -74,7 +75,7 @@ fn bounded(driving_force: f64, maximum: f64, association_limit: f64, dissociatio
 
 fn validate(state: ReactionState, activities: Activities, parameters: Parameters) !void {
     try validateState(state);
-    inline for (@typeInfo(Activities).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Activities)) |field| {
         const value = @field(activities, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidIonPairingActivity;
     }
@@ -86,7 +87,7 @@ fn validate(state: ReactionState, activities: Activities, parameters: Parameters
 }
 
 fn validateState(state: ReactionState) !void {
-    inline for (@typeInfo(ReactionState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ReactionState)) |field| {
         const value = @field(state, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteIonPairingState;
         if (value < 0) return error.NegativeIonPairingState;

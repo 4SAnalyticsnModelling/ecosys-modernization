@@ -22,6 +22,7 @@ const group_newton = @import("solver_newton.zig");
 const group_residual = @import("solver_residual.zig");
 const group_types = @import("solver_types.zig");
 
+
 /// Conservative whole-hour dual-domain Richards solve. Every face evaluates
 /// one common nonlinear trial state, while an order-independent conservative
 /// target accumulator enforces aggregate donor and receiver bounds. The
@@ -171,7 +172,7 @@ fn colorDenseJacobianCells(
 
     var color_count: usize = 0;
     for (0..cells) |cell| {
-        var forbidden = [_]bool{false} ** (group_types.maximum_dense_newton_components / 2);
+        var forbidden = @as([(group_types.maximum_dense_newton_components / 2)]bool, @splat(@as(bool, false)));
         for (0..cell) |prior| {
             var shares_row = false;
             for (0..cells) |row| {
@@ -1850,15 +1851,15 @@ test "colored dense Richards Jacobian matches independent columns exactly" {
     @memset(grid.macropore_pore_capacity_m3, 0.1);
 
     const fixtures = @import("solver_fixtures.zig");
-    const curves = [_]retention.ResolvedCurve{fixtures.testCurve()} ** cell_count;
-    const matrix_parameters = [_]retention.MualemVanGenuchtenParameters{fixtures.testMatrixMualemVanGenuchten()} ** cell_count;
-    const macropore_parameters = [_]retention.MualemVanGenuchtenParameters{fixtures.testMacroporeMualemVanGenuchten()} ** cell_count;
-    const bulk = [_]f64{1} ** cell_count;
-    const zero = [_]f64{0} ** cell_count;
-    const thickness = [_]f64{0.1} ** cell_count;
-    const spacing = [_]f64{0.2} ** cell_count;
-    const radius = [_]f64{0.001} ** cell_count;
-    const exchange_enabled = [_]bool{true} ** cell_count;
+    const curves = @as([cell_count]retention.ResolvedCurve, @splat(@as(retention.ResolvedCurve, fixtures.testCurve())));
+    const matrix_parameters = @as([cell_count]retention.MualemVanGenuchtenParameters, @splat(@as(retention.MualemVanGenuchtenParameters, fixtures.testMatrixMualemVanGenuchten())));
+    const macropore_parameters = @as([cell_count]retention.MualemVanGenuchtenParameters, @splat(@as(retention.MualemVanGenuchtenParameters, fixtures.testMacroporeMualemVanGenuchten())));
+    const bulk = @as([cell_count]f64, @splat(@as(f64, 1)));
+    const zero = @as([cell_count]f64, @splat(@as(f64, 0)));
+    const thickness = @as([cell_count]f64, @splat(@as(f64, 0.1)));
+    const spacing = @as([cell_count]f64, @splat(@as(f64, 0.2)));
+    const radius = @as([cell_count]f64, @splat(@as(f64, 0.001)));
+    const exchange_enabled = @as([cell_count]bool, @splat(@as(bool, true)));
     const faces = [_]group_types.Face{
         .{ .source_cell = 0, .destination_cell = 1, .axis = .z, .direction = .vertical, .source_path_length_m = 0.05, .destination_path_length_m = 0.05, .face_area_m2 = 0.01 },
         .{ .source_cell = 1, .destination_cell = 2, .axis = .z, .direction = .vertical, .source_path_length_m = 0.05, .destination_path_length_m = 0.05, .face_area_m2 = 0.01 },
@@ -2339,7 +2340,7 @@ pub fn solveAndBindTransportFaces(allocator: std.mem.Allocator, grid: *grid_modu
     const faces = try allocator.alloc(group_types.Face, count);
     defer allocator.free(faces);
     for (faces, 0..) |*face, index| {
-        const axis: group_types.Axis = @enumFromInt(shared_faces.direction_axis[index]);
+        const axis: group_types.Axis = @fromBackingInt(@intCast(shared_faces.direction_axis[index]));
         face.* = .{ .active = shared_faces.active_by_face[index], .source_cell = shared_faces.micropore_faces[index].first_cell, .destination_cell = shared_faces.micropore_faces[index].second_cell, .axis = axis, .direction = if (axis == .z) .vertical else .horizontal, .source_path_length_m = geometry.source_path_length_m[index], .destination_path_length_m = geometry.destination_path_length_m[index], .face_area_m2 = geometry.face_area_m2[index] };
     }
     const artificial_drainage = try allocator.alloc(f64, grid.cell_count);

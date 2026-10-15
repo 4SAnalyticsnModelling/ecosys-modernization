@@ -10,6 +10,7 @@ const atmosphere = @import("atmosphere_exchange.zig");
 const numerics = @import("../../core/numerics.zig");
 const group_misc = @import("coupled_gas_solver_misc.zig");
 
+
 const PhaseAllocation = struct {
     gas_remaining_g: f64,
     nonband_flux_g: f64,
@@ -280,7 +281,7 @@ pub fn residualAtCapturing(allocator: std.mem.Allocator, scratch: *gas.State, ba
             inputs.band_air_volume_m3[cell];
         for (0..gas.species_count) |species| {
             const index = start + species;
-            const is_ammonia = species == @intFromEnum(gas.Species.ammonia);
+            const is_ammonia = species == @backingInt(gas.Species.ammonia);
             const primary_air_volume_m3 = if (is_ammonia) nonband_air_volume_m3 else scratch.air_volume_m3[cell];
             const primary_water_volume_m3 = if (is_ammonia)
                 inputs.water_volume_m3[cell] - inputs.band_water_volume_m3[cell]
@@ -396,16 +397,16 @@ test "NH3 zones exchange from the same base gas and share the bounded donor" {
     defer scratch.deinit();
     state.air_volume_m3[0] = 2;
     state.temperature_k[0] = 298.15;
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const ammonia = @backingInt(gas.Species.ammonia);
     state.gaseous_mass_g[ammonia] = 10;
     const count = gas.species_count * 3;
     var base: [count]f64 = undefined;
     var target: [count]f64 = undefined;
     var residual: [count]f64 = undefined;
     copyStateToVector(&state, &base);
-    var solubility = [_]f64{1} ** gas.species_count;
+    var solubility = @as([gas.species_count]f64, @splat(@as(f64, 1)));
     solubility[ammonia] = 9;
-    var exchange = [_]f64{0} ** gas.species_count;
+    var exchange = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     exchange[ammonia] = 1;
     try residualAt(std.testing.allocator, &scratch, &base, &base, .{
         .faces = &.{},
@@ -453,7 +454,7 @@ test "conservative publication phase image remains nonnegative and closed" {
     defer scratch.deinit();
     state.air_volume_m3[0] = 1;
     state.temperature_k[0] = 298.15;
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const ammonia = @backingInt(gas.Species.ammonia);
     state.gaseous_mass_g[ammonia] = 0.1;
     const count = gas.species_count * 3;
     var base: [count]f64 = undefined;
@@ -461,9 +462,9 @@ test "conservative publication phase image remains nonnegative and closed" {
     var publication_target: [count]f64 = undefined;
     var residual: [count]f64 = undefined;
     copyStateToVector(&state, &base);
-    var solubility = [_]f64{1} ** gas.species_count;
+    var solubility = @as([gas.species_count]f64, @splat(@as(f64, 1)));
     solubility[ammonia] = 100;
-    var exchange = [_]f64{0} ** gas.species_count;
+    var exchange = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     exchange[ammonia] = 1;
     const inputs: group_misc.Inputs = .{
         .faces = &.{},
@@ -499,7 +500,7 @@ test "phase-released non-ammonia gas closes atmospheric and subsurface boundary 
     state.temperature_k[0] = 298.15;
     scratch.air_volume_m3[0] = state.air_volume_m3[0];
     scratch.temperature_k[0] = state.temperature_k[0];
-    const species = @intFromEnum(gas.Species.carbon_dioxide);
+    const species = @backingInt(gas.Species.carbon_dioxide);
     state.dissolved_mass_g[species] = 2;
 
     const count = gas.species_count * 3;
@@ -514,13 +515,13 @@ test "phase-released non-ammonia gas closes atmospheric and subsurface boundary 
     // only through the aqueous phase release below.
     trial[species] = 1;
 
-    var solubility = [_]f64{1} ** gas.species_count;
+    var solubility = @as([gas.species_count]f64, @splat(@as(f64, 1)));
     solubility[species] = 1;
-    var exchange = [_]f64{0} ** gas.species_count;
+    var exchange = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     exchange[species] = 1;
-    const band_exchange = [_]f64{0} ** gas.species_count;
-    const zero_atmosphere = [_]f64{0} ** gas.species_count;
-    const interior = [_]f64{0.05} ** gas.species_count;
+    const band_exchange = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    const zero_atmosphere = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    const interior = @as([gas.species_count]f64, @splat(@as(f64, 0.05)));
     const atmospheric = atmosphere.Boundary{
         .cell_index = 0,
         .aerodynamic_conductance_m3_per_step = 0.05,
@@ -535,8 +536,8 @@ test "phase-released non-ammonia gas closes atmospheric and subsurface boundary 
         .atmospheric_concentration_g_per_m3 = zero_atmosphere,
         .pressure_exchange_fraction = 0,
     };
-    var atmospheric_ledger = [_]f64{0} ** gas.species_count;
-    var subsurface_ledger = [_]f64{0} ** gas.species_count;
+    var atmospheric_ledger = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    var subsurface_ledger = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     try residualAtCapturing(std.testing.allocator, &scratch, &base, &trial, .{
         .faces = &.{},
         .face_conductance_m3_per_step = &.{},
@@ -575,7 +576,7 @@ test "identical subsurface boundaries retain sequential donor bounds" {
     state.temperature_k[0] = 298.15;
     scratch.air_volume_m3[0] = state.air_volume_m3[0];
     scratch.temperature_k[0] = state.temperature_k[0];
-    const species = @intFromEnum(gas.Species.carbon_dioxide);
+    const species = @backingInt(gas.Species.carbon_dioxide);
     state.gaseous_mass_g[species] = 1;
 
     const count = gas.species_count * 3;
@@ -587,14 +588,14 @@ test "identical subsurface boundaries retain sequential donor bounds" {
     const boundary: atmosphere.Boundary = .{
         .cell_index = 0,
         .aerodynamic_conductance_m3_per_step = std.math.floatMax(f64),
-        .interior_conductance_m3_per_step = [_]f64{1} ** gas.species_count,
-        .atmospheric_concentration_g_per_m3 = [_]f64{0} ** gas.species_count,
+        .interior_conductance_m3_per_step = @as([gas.species_count]f64, @splat(@as(f64, 1))),
+        .atmospheric_concentration_g_per_m3 = @as([gas.species_count]f64, @splat(@as(f64, 0))),
         .pressure_exchange_fraction = 0,
     };
-    const boundaries = [_]atmosphere.Boundary{boundary} ** 4;
-    const solubility = [_]f64{1} ** gas.species_count;
-    const no_exchange = [_]f64{0} ** gas.species_count;
-    var subsurface_ledger = [_]f64{0} ** gas.species_count;
+    const boundaries = @as([4]atmosphere.Boundary, @splat(@as(atmosphere.Boundary, boundary)));
+    const solubility = @as([gas.species_count]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    var subsurface_ledger = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     try residualAtCapturing(std.testing.allocator, &scratch, &base, &base, .{
         .faces = &.{},
         .face_conductance_m3_per_step = &.{},
@@ -629,24 +630,24 @@ test "zero-air face cannot source gaseous inventory or a face ledger flow" {
     scratch.air_volume_m3[0] = state.air_volume_m3[0];
     scratch.temperature_k[0] = state.temperature_k[0];
     scratch.temperature_k[1] = state.temperature_k[1];
-    const nitrogen = @intFromEnum(gas.Species.nitrogen);
+    const nitrogen = @backingInt(gas.Species.nitrogen);
     state.gaseous_mass_g[nitrogen] = 1;
     const count = 2 * gas.species_count * 3;
     var base: [count]f64 = undefined;
     var target: [count]f64 = undefined;
     var residual: [count]f64 = undefined;
-    var face_ledger = [_]f64{0} ** gas.species_count;
+    var face_ledger = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     copyStateToVector(&state, &base);
     const faces = [_]gas.Face{.{
         .first_cell = 0,
         .second_cell = 1,
     }};
-    var conductance = [_]f64{0} ** gas.species_count;
+    var conductance = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     conductance[nitrogen] = 0.1;
     const water = [_]f64{ 0, 0 };
     const n = 2 * gas.species_count;
-    const solubility = [_]f64{1} ** n;
-    const no_exchange = [_]f64{0} ** n;
+    const solubility = @as([n]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([n]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{ false, false };
     try residualAtCapturing(
         std.testing.allocator,
@@ -691,9 +692,9 @@ test "escaping bubbling reaches daily atmosphere without a second carbon drainag
         state.temperature_k[cell] = 300;
         state.air_volume_m3[cell] = 0;
     }
-    const co2 = @intFromEnum(gas.Species.carbon_dioxide);
-    const ch4 = @intFromEnum(gas.Species.methane);
-    const nh3 = @intFromEnum(gas.Species.ammonia);
+    const co2 = @backingInt(gas.Species.carbon_dioxide);
+    const ch4 = @backingInt(gas.Species.methane);
+    const nh3 = @backingInt(gas.Species.ammonia);
     state.dissolved_mass_g[co2] = 2;
     state.dissolved_mass_g[gas.species_count + ch4] = 3;
     state.band_dissolved_mass_g[gas.species_count + nh3] = 4;
@@ -702,8 +703,8 @@ test "escaping bubbling reaches daily atmosphere without a second carbon drainag
     var target: [3 * n]f64 = undefined;
     var residual: [3 * n]f64 = undefined;
     copyStateToVector(&state, &base);
-    const solubility = [_]f64{1} ** n;
-    const no_exchange = [_]f64{0} ** n;
+    const solubility = @as([n]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([n]f64, @splat(@as(f64, 0)));
     // Loss of liquid capacity releases the complete dissolved inventory;
     // neither layer has a viable gas receiver (the source LG=0 branch).
     try residualAtCapturing(std.testing.allocator, &scratch, &base, &base, .{
@@ -729,7 +730,7 @@ test "escaping bubbling reaches daily atmosphere without a second carbon drainag
     }
     var daily_gas = try @import("../diagnostics/daily_gas_flux.zig").State.init(std.testing.allocator, 1);
     defer daily_gas.deinit();
-    const no_litter = [_]f64{0} ** gas.species_count;
+    const no_litter = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     try daily_gas.accumulateHour(null, 1, 2, transport.atmospheric_flux_g_per_h, &no_litter);
     try std.testing.expectEqual(@as(f64, -2), try daily_gas.getSoilLitterBoundary(0, .carbon_dioxide));
     try std.testing.expectEqual(@as(f64, -3), try daily_gas.getSoilLitterBoundary(0, .methane));
@@ -762,7 +763,7 @@ test "accepted bubbling exposes exact modeled source to receiver transfer" {
         state.air_volume_m3[cell] = 1;
         scratch.air_volume_m3[cell] = 1;
     }
-    const oxygen = @intFromEnum(gas.Species.oxygen);
+    const oxygen = @backingInt(gas.Species.oxygen);
     const source_component = gas.species_count + oxygen;
     state.dissolved_mass_g[source_component] = 2;
     const count = 2 * gas.species_count * 3;
@@ -772,9 +773,9 @@ test "accepted bubbling exposes exact modeled source to receiver transfer" {
     copyStateToVector(&state, &base);
     const water = [_]f64{ 0, 0 };
     const n = 2 * gas.species_count;
-    const solubility = [_]f64{1} ** n;
-    const no_exchange = [_]f64{0} ** n;
-    var bubble_transfer = [_]f64{0} ** n;
+    const solubility = @as([n]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([n]f64, @splat(@as(f64, 0)));
+    var bubble_transfer = @as([n]f64, @splat(@as(f64, 0)));
     try residualAtCapturing(
         std.testing.allocator,
         &scratch,

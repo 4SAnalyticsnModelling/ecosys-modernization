@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     canopy_temperature_c: f64,
@@ -35,7 +36,7 @@ pub fn compute(inputs: Inputs) !Result {
         inputs.air_amount_mol_per_m3 *
         (inputs.atmospheric_co2_umol_per_mol -
             inputs.intercellular_co2_umol_per_mol);
-    inline for (@typeInfo(Result).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Result)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteCanopyAqueousGasResult;
     return result;
@@ -54,7 +55,7 @@ pub fn computeRuntimeAxes(
 }
 
 fn validate(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteCanopyAqueousGasInput;
     if (inputs.canopy_temperature_c <= -273.15 or
@@ -78,8 +79,15 @@ fn testInputs() Inputs {
 test "aqueous gas environment preserves all five source assignments" {
     const inputs = testInputs();
     const result = try compute(inputs);
-    const expected_co2_solubility = @exp(-2.621 - 0.0317 * 25);
-    const expected_o2_solubility = @exp(-6.175 - 0.0211 * 25);
+    // Pinned bit-exactly rather than re-derived by a comptime `@exp`: on Zig
+    // 0.17 the comptime float `@exp` is one ulp away from the runtime `@exp`
+    // that `compute` actually calls at the CO2 argument, and the runtime value
+    // is the correctly-rounded one. exp(-3.413499999999999978683717927197) =
+    // 0.032925758316023176033042740972 exactly, which is nearer
+    // 0.03292575831602318 (0x3fa0dba51e539ea0) than its predecessor;
+    // exp(-6.702499999999999680255768907955) -> 0x3f541ded83af797d.
+    const expected_co2_solubility: f64 = 0.03292575831602318;
+    const expected_o2_solubility: f64 = 0.0012278384663129964;
     try std.testing.expectEqual(
         expected_co2_solubility,
         result.co2_solubility_umol_per_l_per_umol_per_mol,

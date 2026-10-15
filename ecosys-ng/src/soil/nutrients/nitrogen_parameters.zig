@@ -3,6 +3,7 @@ const delimited_input = @import("../../io/input/delimited_input.zig");
 const nitrification = @import("../microbial/nitrification.zig");
 const denitrification = @import("../microbial/denitrification.zig");
 const chemodenitrification = @import("../microbial/chemodenitrification.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const AutotrophicDenitrificationParameters = struct {
     anaerobic_growth_respiration_fraction: f64,
@@ -388,12 +389,12 @@ pub noinline fn parse(source: []const u8) !Parameters {
             var methane: MethaneParameters = undefined;
             methane.hydrogenotroph_population_index = try nextUnsigned(&tokens);
             methane.methanotroph_population_index = try nextUnsigned(&tokens);
-            inline for (@typeInfo(MethaneParameters).@"struct".fields[2..]) |field| @field(methane, field.name) = try nextFloat(&tokens);
+            inline for (ti_compat.fieldViews(MethaneParameters)[2..]) |field| @field(methane, field.name) = try nextFloat(&tokens);
             result.methane = methane;
         } else if (std.ascii.eqlIgnoreCase(record, "soil_anaerobic_growth_energy")) {
             if (has_anaerobic_growth_energy) return error.DuplicateSoilNitrogenParameter;
             var energy: AnaerobicGrowthEnergyParameters = undefined;
-            inline for (@typeInfo(AnaerobicGrowthEnergyParameters).@"struct".fields) |field|
+            inline for (ti_compat.fieldViews(AnaerobicGrowthEnergyParameters)) |field|
                 @field(energy, field.name) = try nextFloat(&tokens);
             result.anaerobic_growth_energy = energy;
             has_anaerobic_growth_energy = true;
@@ -476,7 +477,7 @@ fn validateAnaerobicEnergyParameters(parameters: AnaerobicEnergyParameters) !voi
     const fermenter = parameters.fermenter;
     if (fermenter.fermenter_population_index == fermenter.anaerobic_diazotroph_population_index)
         return error.InvalidSoilNitrogenParameter;
-    inline for (@typeInfo(FermenterRespirationParameters).@"struct".fields[2..]) |field| {
+    inline for (ti_compat.fieldViews(FermenterRespirationParameters)[2..]) |field| {
         const value = @field(fermenter, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidSoilNitrogenParameter;
     }
@@ -484,7 +485,7 @@ fn validateAnaerobicEnergyParameters(parameters: AnaerobicEnergyParameters) !voi
         fermenter.diazotroph_minimum_respiration_requirement_g_c_per_g_c > 1)
         return error.InvalidSoilNitrogenParameter;
     const acetotrophic = parameters.acetotrophic_methanogenesis;
-    inline for (@typeInfo(AcetotrophicMethanogenesisParameters).@"struct".fields[1..]) |field| {
+    inline for (ti_compat.fieldViews(AcetotrophicMethanogenesisParameters)[1..]) |field| {
         const value = @field(acetotrophic, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidSoilNitrogenParameter;
     }
@@ -556,7 +557,7 @@ fn expectedRecordValueCount(label: []const u8) ?usize {
 }
 
 fn structFieldCount(comptime T: type) usize {
-    return @typeInfo(T).@"struct".fields.len;
+    return @typeInfo(T).@"struct".field_names.len;
 }
 
 pub fn validate(parameters: Parameters) !void {
@@ -565,31 +566,31 @@ pub fn validate(parameters: Parameters) !void {
     const autotrophic = parameters.autotrophic_denitrification;
     if (!std.math.isFinite(autotrophic.anaerobic_growth_respiration_fraction) or autotrophic.anaerobic_growth_respiration_fraction < 0 or autotrophic.anaerobic_growth_respiration_fraction > 1 or !std.math.isFinite(autotrophic.additional_ammonium_oxidation_per_nitrite_reduction) or autotrophic.additional_ammonium_oxidation_per_nitrite_reduction <= 0 or autotrophic.additional_ammonium_oxidation_per_nitrite_reduction >= 1) return error.InvalidSoilNitrogenParameter;
     const chemo = parameters.chemodenitrification;
-    inline for (@typeInfo(chemodenitrification.Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(chemo, field.name)) or @field(chemo, field.name) < 0) return error.InvalidSoilNitrogenParameter;
+    inline for (ti_compat.fieldViews(chemodenitrification.Parameters)) |field| if (!std.math.isFinite(@field(chemo, field.name)) or @field(chemo, field.name) < 0) return error.InvalidSoilNitrogenParameter;
     if (chemo.negligible_demand_g_n <= 0 or @abs(chemo.nitrous_oxide_product_fraction + chemo.dinitrogen_product_fraction + chemo.dissolved_organic_nitrogen_product_fraction - 1) > 1e-12) return error.InvalidSoilNitrogenParameter;
     if (!std.math.isFinite(parameters.nitrous_acid_dissociation_mol_per_m3) or parameters.nitrous_acid_dissociation_mol_per_m3 <= 0) return error.InvalidSoilNitrogenParameter;
     if (!std.math.isFinite(parameters.microbial_thermal_adaptation_offset_k)) return error.InvalidSoilNitrogenParameter;
     if (parameters.nitrifier_indices.ammonia_oxidizer_population_index == parameters.nitrifier_indices.nitrite_oxidizer_population_index) return error.InvalidSoilNitrogenParameter;
-    inline for (@typeInfo(NitrifierEnvironmentParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters.nitrifier_environment, field.name)) or @field(parameters.nitrifier_environment, field.name) <= 0) return error.InvalidSoilNitrogenParameter;
+    inline for (ti_compat.fieldViews(NitrifierEnvironmentParameters)) |field| if (!std.math.isFinite(@field(parameters.nitrifier_environment, field.name)) or @field(parameters.nitrifier_environment, field.name) <= 0) return error.InvalidSoilNitrogenParameter;
     if (parameters.nitrifier_environment.labile_biomass_fraction > 1) return error.InvalidSoilNitrogenParameter;
-    inline for (@typeInfo(OxygenUptakeParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters.oxygen_uptake, field.name))) return error.InvalidSoilNitrogenParameter;
+    inline for (ti_compat.fieldViews(OxygenUptakeParameters)) |field| if (!std.math.isFinite(@field(parameters.oxygen_uptake, field.name))) return error.InvalidSoilNitrogenParameter;
     const oxygen = parameters.oxygen_uptake;
     if (oxygen.microbial_radius_m <= 0 or oxygen.microbial_count_per_g_c < 0 or oxygen.oxygen_half_saturation_g_o_per_m3 <= 0 or oxygen.hygroscopic_water_potential_megapascal >= 0 or oxygen.air_water_exchange_reference_time_h <= 0 or oxygen.minimum_transition_water_fraction < 0 or oxygen.minimum_transition_water_fraction > 1 or oxygen.aqueous_tortuosity_coefficient < 0 or oxygen.minimum_allocation_fraction < 0 or oxygen.negligible_oxygen_demand_g_o < 0) return error.InvalidSoilNitrogenParameter;
-    inline for (@typeInfo(HeterotrophicRespirationParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters.heterotrophic_respiration, field.name)) or @field(parameters.heterotrophic_respiration, field.name) <= 0) return error.InvalidSoilNitrogenParameter;
-    inline for (@typeInfo(MicrobialMineralExchangeParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters.microbial_mineral_exchange, field.name)) or @field(parameters.microbial_mineral_exchange, field.name) <= 0) return error.InvalidSoilNitrogenParameter;
+    inline for (ti_compat.fieldViews(HeterotrophicRespirationParameters)) |field| if (!std.math.isFinite(@field(parameters.heterotrophic_respiration, field.name)) or @field(parameters.heterotrophic_respiration, field.name) <= 0) return error.InvalidSoilNitrogenParameter;
+    inline for (ti_compat.fieldViews(MicrobialMineralExchangeParameters)) |field| if (!std.math.isFinite(@field(parameters.microbial_mineral_exchange, field.name)) or @field(parameters.microbial_mineral_exchange, field.name) <= 0) return error.InvalidSoilNitrogenParameter;
     const fixation = parameters.nonsymbiotic_nitrogen_fixation;
     if (fixation.aerobic_diazotroph_population_index == fixation.anaerobic_diazotroph_population_index) return error.InvalidSoilNitrogenParameter;
     inline for (.{ fixation.aerobic_yield_g_n_per_g_c, fixation.anaerobic_yield_g_n_per_g_c, fixation.dinitrogen_half_saturation_g_n_per_m3, fixation.nonstructural_to_structural_rate_per_h }) |value| if (!std.math.isFinite(value) or value <= 0) return error.InvalidSoilNitrogenParameter;
     const turnover = parameters.microbial_turnover;
-    inline for (@typeInfo(MicrobialTurnoverParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(turnover, field.name)) or @field(turnover, field.name) < 0) return error.InvalidSoilNitrogenParameter;
+    inline for (ti_compat.fieldViews(MicrobialTurnoverParameters)) |field| if (!std.math.isFinite(@field(turnover, field.name)) or @field(turnover, field.name) < 0) return error.InvalidSoilNitrogenParameter;
     if (!std.math.isFinite(parameters.microbial_layer_mixing_rate_per_h) or parameters.microbial_layer_mixing_rate_per_h < 0) return error.InvalidSoilNitrogenParameter;
     if (parameters.methane) |methane| {
         if (methane.hydrogenotroph_population_index == methane.methanotroph_population_index) return error.InvalidSoilNitrogenParameter;
-        inline for (@typeInfo(MethaneParameters).@"struct".fields[2..]) |field| if (!std.math.isFinite(@field(methane, field.name)) or @field(methane, field.name) < 0) return error.InvalidSoilNitrogenParameter;
+        inline for (ti_compat.fieldViews(MethaneParameters)[2..]) |field| if (!std.math.isFinite(@field(methane, field.name)) or @field(methane, field.name) < 0) return error.InvalidSoilNitrogenParameter;
         if (methane.hydrogen_half_saturation_g_h_per_m3 <= 0 or methane.methanogen_growth_energy_requirement_kj_per_g_c <= 0 or methane.hydrogen_supply_conversion_g_c_per_g_h <= 0 or methane.methane_half_saturation_g_c_per_m3 <= 0 or methane.minimum_growth_respiration_fraction > 1) return error.InvalidSoilNitrogenParameter;
     }
     const energy = parameters.anaerobic_growth_energy;
-    inline for (@typeInfo(AnaerobicGrowthEnergyParameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(AnaerobicGrowthEnergyParameters)) |field| {
         const value = @field(energy, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidSoilNitrogenParameter;
     }
@@ -607,7 +608,7 @@ pub fn validate(parameters: Parameters) !void {
 }
 
 fn fillStruct(comptime T: type, value: *T, tokens: anytype) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| @field(value, field.name) = try nextFloat(tokens);
+    inline for (ti_compat.fieldViews(T)) |field| @field(value, field.name) = try nextFloat(tokens);
 }
 
 fn expectRecord(tokens: anytype, expected: []const u8) !void {

@@ -1,6 +1,7 @@
 const std = @import("std");
 const chemistry = @import("litter_chemistry.zig");
 const rates = @import("litter_reaction_rates.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const ExchangeChanges = struct {
     ammonium_mol: f64,
@@ -267,7 +268,7 @@ fn zeroCell() chemistry.Cell {
 }
 
 fn zeroStruct(comptime T: type, value: *T) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => @field(value.*, field.name) = 0,
         .@"struct" => zeroStruct(field.type, &@field(value.*, field.name)),
         else => unreachable,

@@ -10,6 +10,8 @@
 // Group C of docs/traceability/erosion_unbound_family_disposition.md
 
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const DisturbanceMode = enum {
     no_effects,
@@ -115,7 +117,7 @@ pub fn reset(
 ) ResetError!void {
     if (!mode.includesErosion()) return;
 
-    const scalar_count = std.meta.fields(ScalarFlux).len;
+    const scalar_count = ti_compat.enumFieldViews(ScalarFlux).len;
     const organic_count = dimensions.organic_matter_classes * dimensions.organic_components;
     const organic_component_count = organic_count * 2;
     const residue_count = dimensions.residue_classes * dimensions.residue_components;
@@ -179,9 +181,9 @@ test "erosion-enabled mode clears every runtime-sized accumulator" {
     };
     var slices: [15][]f64 = undefined;
     const lengths = [_]usize{
-        std.meta.fields(ScalarFlux).len, 12, 24, 24, 24,
-        6,                               6,  6,  2,  2,
-        2,                               10, 10, 10, 10,
+        ti_compat.enumFieldViews(ScalarFlux).len, 12, 24, 24, 24,
+        6,                                    6,  6,  2,  2,
+        2,                                    10, 10, 10, 10,
     };
     for (&slices, lengths) |*slice, length| {
         slice.* = try allocator.alloc(f64, length);
@@ -213,7 +215,7 @@ test "erosion-enabled mode clears every runtime-sized accumulator" {
 }
 
 test "erosion-disabled mode preserves accumulators" {
-    var scalar_fluxes = [_]f64{3.0} ** std.meta.fields(ScalarFlux).len;
+    var scalar_fluxes = @as([ti_compat.enumFieldViews(ScalarFlux).len]f64, @splat(@as(f64, 3.0)));
     var accumulators: Accumulators = undefined;
     accumulators.scalar_fluxes = &scalar_fluxes;
     try reset(.freeze_thaw, undefined, &accumulators);

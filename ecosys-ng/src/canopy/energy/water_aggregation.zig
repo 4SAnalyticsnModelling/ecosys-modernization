@@ -19,6 +19,7 @@
 // does not multiply flux or change a converged answer. This module remains only
 // to guard the reference ordering; binding it would double-count the hour.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Aggregates = struct {
     net_radiation_flux_megajoules_per_step: f64,
@@ -88,7 +89,7 @@ pub fn calculate(inputs: Inputs) !Result {
         .aggregates = aggregates,
         .wet_canopy_heat_capacity_megajoules_per_k = wet_heat_capacity,
     };
-    inline for (@typeInfo(Aggregates).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Aggregates)) |field|
         if (!std.math.isFinite(@field(result.aggregates, field.name)))
             return error.NonFiniteCanopyEnergyWaterAggregationResult;
     if (!std.math.isFinite(result.wet_canopy_heat_capacity_megajoules_per_k))
@@ -97,10 +98,10 @@ pub fn calculate(inputs: Inputs) !Result {
 }
 
 fn validate(inputs: Inputs) !void {
-    inline for (@typeInfo(Aggregates).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Aggregates)) |field|
         if (!std.math.isFinite(@field(inputs.aggregates, field.name)))
             return error.InvalidCanopyEnergyWaterAggregationInput;
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (field.type == Aggregates) continue;
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.InvalidCanopyEnergyWaterAggregationInput;

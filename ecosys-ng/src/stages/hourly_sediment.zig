@@ -1207,7 +1207,7 @@ noinline fn routeBiogeochemistryAndSolutes(
             for (0..context.grid.cell_count) |cell| {
                 const base = cell * ecosys.gas_transport.species_count;
                 inline for ([_]ecosys.gas_transport.Species{ .nitrogen, .nitrous_oxide, .ammonia }) |species|
-                    diagnostic_litter_boundary_n_g += context.surface_litter_gas_transport.atmospheric_flux_g_per_h[base + @intFromEnum(species)];
+                    diagnostic_litter_boundary_n_g += context.surface_litter_gas_transport.atmospheric_flux_g_per_h[base + @backingInt(species)];
             }
             const diagnostic_litter_after_g = try group_support.diagnosticGasNitrogen_g(context.litter_gas_transport);
             std.log.debug("litter gas nitrogen transaction: delta_g={e} boundary_g={e} residual_g={e}", .{ diagnostic_litter_after_g - diagnostic_litter_gas_n_before_g, diagnostic_litter_boundary_n_g, diagnostic_litter_after_g - diagnostic_litter_gas_n_before_g - diagnostic_litter_boundary_n_g });

@@ -83,7 +83,7 @@ fn makeZone(context: ApplyContext, layer: usize, unit: usize, water_m3: f64, ban
     const previous_nitrite_capacity = if (band) context.reactive_nitrogen.previous_band_nitrite_reduction_capacity_g_n[unit] else context.reactive_nitrogen.previous_non_band_nitrite_reduction_capacity_g_n[unit];
     const previous_nitrite_total = if (band) context.reactive_nitrogen.previous_total_band_nitrite_demand_g_n[layer] else context.reactive_nitrogen.previous_total_non_band_nitrite_demand_g_n[layer];
     const previous_ammonia_capacity = if (band) context.reactive_nitrogen.previous_band_ammonia_oxidation_capacity_g_n[unit] else context.reactive_nitrogen.previous_non_band_ammonia_oxidation_capacity_g_n[unit];
-    const previous_ammonia_total = if (context.nutrient_competition) |history| history.soil_previous_total[@intFromEnum(if (band) competition_history.SoilPool.ammonium_band else competition_history.SoilPool.ammonium_non_band)][layer] else if (band) context.reactive_nitrogen.previous_total_band_ammonium_demand_g_n[layer] else context.reactive_nitrogen.previous_total_non_band_ammonium_demand_g_n[layer];
+    const previous_ammonia_total = if (context.nutrient_competition) |history| history.soil_previous_total[@backingInt(if (band) competition_history.SoilPool.ammonium_band else competition_history.SoilPool.ammonium_non_band)][layer] else if (band) context.reactive_nitrogen.previous_total_band_ammonium_demand_g_n[layer] else context.reactive_nitrogen.previous_total_non_band_ammonium_demand_g_n[layer];
     const active_fraction = context.environment.microbial_active_fraction[unit];
     return .{
         .nitrite_fraction = nitrite_fraction,

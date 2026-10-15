@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const NodeState = struct {
     leaf_carbon_g_c: []const f64,
@@ -60,7 +61,7 @@ pub fn calculate(
     inline for (.{ pass_senescence_respiration_g_c_per_timestep, leaf_presence_threshold_g_c }) |value|
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidNodeSenescenceRequestInput;
-    inline for (@typeInfo(RecyclingFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RecyclingFractions)) |field| {
         const value = @field(recycling, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.InvalidNodeSenescenceRecyclingFraction;
@@ -103,7 +104,7 @@ pub fn calculate(
         1.0;
     result.leaf_area_removal_fraction = result.leaf_mass_removal_fraction;
 
-    inline for (@typeInfo(Request).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Request)) |field|
         if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0)
             return error.InvalidNodeSenescenceRequestResult;
     return result;
@@ -161,7 +162,7 @@ test "absent leaf leaves the entire request zero" {
         .leaf_nitrogen_g_n = &.{0},
         .leaf_phosphorus_g_p = &.{0},
     }, 0, 3, 0, sample_recycling);
-    inline for (@typeInfo(Request).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Request)) |field|
         try std.testing.expectEqual(@as(f64, 0), @field(result, field.name));
 }
 

@@ -6,6 +6,8 @@
 
 const std = @import("std");
 const ecosys = @import("ecosys_ng");
+
+const arr_compat = ecosys.array_compat;
 /// Dispatches cell-local science across either the resident domain or the
 /// non-contiguous Morton-owned cells of one loaded tile. Complete vertical
 /// columns remain indivisible worker units.
@@ -104,7 +106,7 @@ test "tile driver preserves serial plan order" {
         }
     };
     const KernelContext = struct {
-        visits: [6]u8 = .{0} ** 6,
+        visits: [6]u8 = @as([6]u8, @splat(@as(u8, 0))),
 
         fn apply(self: *@This(), cells: []const usize) !void {
             for (cells) |cell| {
@@ -167,7 +169,7 @@ test "tile driver preserves serial plan order" {
     );
     try std.testing.expectEqual(@as(usize, 3), executor.count);
     try std.testing.expectEqualSlices(usize, &.{ 0, 1, 2 }, &executor.order);
-    const expected_visits = [_]u8{1} ** 6;
+    const expected_visits = @as([6]u8, @splat(@as(u8, 1)));
     try std.testing.expectEqualSlices(u8, &expected_visits, &kernel_context.visits);
 
     executor.count = 0;

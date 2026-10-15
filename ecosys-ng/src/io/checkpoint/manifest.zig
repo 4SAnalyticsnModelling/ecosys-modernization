@@ -1,5 +1,7 @@
 const std = @import("std");
 const execution_calendar_date = @import("../../driver/execution_calendar_date.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 const magic = "ECOSBNDL";
 const version: u32 = 3;
@@ -24,7 +26,7 @@ pub const Section = enum(u8) {
     plant_accounting,
 };
 
-pub const section_count = @typeInfo(Section).@"enum".fields.len;
+pub const section_count = @typeInfo(Section).@"enum".field_names.len;
 
 pub const SimulationInstant = struct {
     year: i32,
@@ -166,10 +168,10 @@ pub fn write(writer: anytype, manifest: Manifest) !void {
     try writer.writeAll(manifest.output.canonical_root);
     try writer.writeInt(u64, manifest.output.run_identity, .little);
     try writer.writeInt(u64, manifest.output.fingerprint, .little);
-    inline for (@typeInfo(RuntimeShape).@"struct".fields) |field| try writer.writeInt(u64, @intCast(@field(manifest.shape, field.name)), .little);
+    inline for (ti_compat.fieldViews(RuntimeShape)) |field| try writer.writeInt(u64, @intCast(@field(manifest.shape, field.name)), .little);
     try writer.writeInt(u16, @intCast(manifest.entries.len), .little);
     for (manifest.entries) |entry_value| {
-        try writer.writeByte(@intFromEnum(entry_value.section));
+        try writer.writeByte(@backingInt(entry_value.section));
         try writer.writeInt(u32, @intCast(entry_value.file_name.len), .little);
         try writer.writeAll(entry_value.file_name);
         try writer.writeInt(u64, entry_value.byte_length, .little);
@@ -311,11 +313,11 @@ fn validate(manifest: Manifest) !void {
         manifest.output.run_identity,
         manifest.output.canonical_root,
     )) return error.CheckpointOutputIdentityMismatch;
-    inline for (@typeInfo(RuntimeShape).@"struct".fields) |field| if (@field(manifest.shape, field.name) == 0) return error.InvalidCheckpointRuntimeShape;
+    inline for (ti_compat.fieldViews(RuntimeShape)) |field| if (@field(manifest.shape, field.name) == 0) return error.InvalidCheckpointRuntimeShape;
     if (manifest.entries.len != section_count) return error.IncompleteCheckpointBundle;
-    var seen = [_]bool{false} ** section_count;
+    var seen = @as([section_count]bool, @splat(@as(bool, false)));
     for (manifest.entries) |entry_value| {
-        const index = @intFromEnum(entry_value.section);
+        const index = @backingInt(entry_value.section);
         if (seen[index]) return error.DuplicateCheckpointSection;
         seen[index] = true;
         if (!safeFileName(entry_value.file_name)) return error.InvalidCheckpointFileName;
@@ -336,7 +338,7 @@ fn safeFileName(name: []const u8) bool {
 }
 
 fn validateLimits(limits: Limits) !void {
-    inline for (@typeInfo(Limits).@"struct".fields) |field| if (@field(limits, field.name) == 0) return error.InvalidCheckpointManifestLimits;
+    inline for (ti_compat.fieldViews(Limits)) |field| if (@field(limits, field.name) == 0) return error.InvalidCheckpointManifestLimits;
     if (limits.maximum_output_root_bytes > maximum_output_root_bytes)
         return error.InvalidCheckpointManifestLimits;
 }
@@ -378,7 +380,7 @@ fn bounded(reader: *std.Io.Reader, limit: usize, comptime too_large: anyerror) !
 
 fn testSources() [section_count]EntrySource {
     var result: [section_count]EntrySource = undefined;
-    inline for (@typeInfo(Section).@"enum".fields, 0..) |field, index| result[index] = .{ .section = @enumFromInt(field.value), .file_name = field.name ++ ".bin", .bytes = field.name };
+    inline for (ti_compat.enumFieldViews(Section), 0..) |field, index| result[index] = .{ .section = @fromBackingInt(@intCast(field.value)), .file_name = field.name ++ ".bin", .bytes = field.name };
     return result;
 }
 

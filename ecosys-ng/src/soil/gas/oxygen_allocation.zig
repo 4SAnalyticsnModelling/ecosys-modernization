@@ -1,5 +1,6 @@
 const std = @import("std");
 const oxygen_solver = @import("oxygen_solver.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -137,14 +138,14 @@ pub fn solveLayer(state: *State, cell_index: usize, layer_index: usize, shared: 
 }
 
 fn validateShared(shared: SharedLayer, parameters: Parameters) !void {
-    inline for (@typeInfo(SharedLayer).@"struct".fields) |field| if (!std.math.isFinite(@field(shared, field.name))) return error.NonFiniteSharedOxygenState;
+    inline for (ti_compat.fieldViews(SharedLayer)) |field| if (!std.math.isFinite(@field(shared, field.name))) return error.NonFiniteSharedOxygenState;
     if (!std.math.isFinite(parameters.minimum_allocation_fraction) or !std.math.isFinite(parameters.negligible_demand_g_o)) return error.NonFiniteOxygenAllocationParameter;
     if (shared.gaseous_oxygen_g_o < 0 or shared.aqueous_oxygen_g_o < 0 or shared.water_volume_m3 <= 0 or shared.air_volume_m3 < 0 or shared.oxygen_solubility_water_to_air < 0 or shared.gas_exchange_rate_per_step < 0 or shared.maximum_aqueous_oxygen_concentration_g_o_per_m3 <= 0 or parameters.minimum_allocation_fraction < 0 or parameters.negligible_demand_g_o < 0) return error.InvalidSharedOxygenState;
     if (shared.gaseous_oxygen_g_o + shared.gaseous_flux_g_o < 0 or shared.aqueous_oxygen_g_o + shared.aqueous_flux_g_o < 0) return error.NegativeAvailableOxygen;
 }
 
 fn validatePopulation(population: Population) !void {
-    inline for (@typeInfo(Population).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(population, field.name))) return error.NonFiniteOxygenPopulation;
+    inline for (ti_compat.fieldViews(Population)) |field| if (field.type == f64 and !std.math.isFinite(@field(population, field.name))) return error.NonFiniteOxygenPopulation;
     if (population.previous_oxygen_demand_g_o < 0 or population.fallback_active_fraction < 0 or population.uptake_conductance_m3_per_step < 0 or population.oxygen_half_saturation_g_o_per_m3 <= 0 or population.maximum_oxygen_uptake_g_o < 0) return error.InvalidOxygenPopulation;
 }
 

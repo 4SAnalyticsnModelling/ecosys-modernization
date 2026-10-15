@@ -127,13 +127,13 @@ pub const State = struct {
                 self.bulk_temperature_k[cell],
             );
             const first = cell * gas.species_count;
-            candidate[first + @intFromEnum(gas.Species.carbon_dioxide)] = converted.carbon_dioxide_g_m3;
-            candidate[first + @intFromEnum(gas.Species.methane)] = converted.methane_g_m3;
-            candidate[first + @intFromEnum(gas.Species.oxygen)] = converted.oxygen_g_m3;
-            candidate[first + @intFromEnum(gas.Species.nitrogen)] = converted.nitrogen_g_m3;
-            candidate[first + @intFromEnum(gas.Species.nitrous_oxide)] = converted.nitrous_oxide_g_m3;
-            candidate[first + @intFromEnum(gas.Species.ammonia)] = converted.ammonia_g_m3;
-            candidate[first + @intFromEnum(gas.Species.hydrogen)] = converted.hydrogen_g_m3;
+            candidate[first + @backingInt(gas.Species.carbon_dioxide)] = converted.carbon_dioxide_g_m3;
+            candidate[first + @backingInt(gas.Species.methane)] = converted.methane_g_m3;
+            candidate[first + @backingInt(gas.Species.oxygen)] = converted.oxygen_g_m3;
+            candidate[first + @backingInt(gas.Species.nitrogen)] = converted.nitrogen_g_m3;
+            candidate[first + @backingInt(gas.Species.nitrous_oxide)] = converted.nitrous_oxide_g_m3;
+            candidate[first + @backingInt(gas.Species.ammonia)] = converted.ammonia_g_m3;
+            candidate[first + @backingInt(gas.Species.hydrogen)] = converted.hydrogen_g_m3;
         }
         @memcpy(self.mass_concentration_g_per_m3, candidate);
     }
@@ -375,8 +375,8 @@ test "DAY resets only canopy exchange diagnostics and preserves next-hour carrie
 test "HOUR1 carrier is per-cell and applies prior TKQ before current closeout" {
     var state = try State.init(std.testing.allocator, &.{ 273.15, 303.15 }, &.{ 0.01, 0.02 }, &.{ ratios(400), ratios(410) });
     defer state.deinit();
-    const first_before = (try state.concentrationsForCell(0))[@intFromEnum(gas.Species.carbon_dioxide)];
-    const second_before = (try state.concentrationsForCell(1))[@intFromEnum(gas.Species.carbon_dioxide)];
+    const first_before = (try state.concentrationsForCell(0))[@backingInt(gas.Species.carbon_dioxide)];
+    const second_before = (try state.concentrationsForCell(1))[@backingInt(gas.Species.carbon_dioxide)];
     try std.testing.expect(first_before > second_before);
     const old_mass = try std.testing.allocator.dupe(f64, state.mass_concentration_g_per_m3);
     defer std.testing.allocator.free(old_mass);

@@ -9,9 +9,10 @@ const ledger = @import("litter_reaction_transformations.zig");
 const activity_coefficients = @import("../soil/solute/activity_coefficients.zig");
 const numerics = @import("../core/numerics.zig");
 const group_types = @import("litter_chemistry_types.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub fn logAdmissibleLimits(comptime T: type, comptime prefix: []const u8, current: T, changes: T, limiting_fraction: f64) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const change = @field(changes, field.name);
             if (change < 0) {
@@ -26,7 +27,7 @@ pub fn logAdmissibleLimits(comptime T: type, comptime prefix: []const u8, curren
 }
 
 pub fn logUnconvergedFields(comptime T: type, comptime prefix: []const u8, current: T, changes: T, options: group_types.Options) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const value = @field(current, field.name);
             const change = @field(changes, field.name);
@@ -40,7 +41,7 @@ pub fn logUnconvergedFields(comptime T: type, comptime prefix: []const u8, curre
 }
 
 pub fn logInadmissibleDirections(comptime T: type, comptime prefix: []const u8, current: T, changes: T) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const value = @field(current, field.name);
             const change = @field(changes, field.name);

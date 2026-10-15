@@ -54,6 +54,8 @@
 
 const std = @import("std");
 const retention = @import("retention.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 /// Heads closer to saturation than this are treated as the saturated end.
 /// Only needed because the quadrature runs in `ln(-h)`, which is undefined at
@@ -118,7 +120,7 @@ pub const Cache = struct {
         conductivity_m_per_h: f64,
     };
 
-    entries: [capacity]?Entry = [_]?Entry{null} ** capacity,
+    entries: [capacity]?Entry = @as([capacity]?Entry, @splat(@as(?Entry, null))),
     hits: usize = 0,
     misses: usize = 0,
     collisions: usize = 0,
@@ -180,7 +182,7 @@ pub const Cache = struct {
         left: retention.MualemVanGenuchtenParameters,
         right: retention.MualemVanGenuchtenParameters,
     ) bool {
-        inline for (@typeInfo(retention.MualemVanGenuchtenParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(retention.MualemVanGenuchtenParameters)) |field| {
             if (@field(left, field.name) != @field(right, field.name)) return false;
         }
         return true;
@@ -192,7 +194,7 @@ pub const Cache = struct {
         high_head_m: f64,
     ) usize {
         var hash: u64 = 0x9e3779b97f4a7c15;
-        inline for (@typeInfo(retention.MualemVanGenuchtenParameters).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(retention.MualemVanGenuchtenParameters)) |field|
             hash = mix(hash, floatBits(@field(parameters, field.name)));
         hash = mix(hash, floatBits(low_head_m));
         hash = mix(hash, floatBits(high_head_m));

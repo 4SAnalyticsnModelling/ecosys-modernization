@@ -9,6 +9,8 @@ const grid_module = @import("../../state/grid.zig");
 const hydrology_module = @import("../../transport/hydrology.zig");
 const geometry_module = @import("../water/face_geometry.zig");
 const nutrient_parameters_module = @import("../../plant/root/plant_root_nutrient_uptake.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Species = enum(u8) {
     ammonium_non_band,
@@ -21,7 +23,7 @@ pub const Species = enum(u8) {
     nitrite_band,
 };
 
-pub const species_count = @typeInfo(Species).@"enum".fields.len;
+pub const species_count = @typeInfo(Species).@"enum".field_names.len;
 
 pub const ZoneFractions = struct {
     ammonium_non_band: f64,
@@ -324,7 +326,7 @@ pub const FaceParameters = struct {
             const mean_distance_m = 0.5 * path_m;
             const dispersion_m2_per_step = 0.20 * std.math.pow(f64, mean_distance_m, 1.07) * step_h * @min(step_h, water_velocity_m_per_step);
             for (0..species_count) |species_index| {
-                const nutrient_index: usize = switch (@as(Species, @enumFromInt(species_index))) {
+                const nutrient_index: usize = switch (@as(Species, @fromBackingInt(@intCast(species_index)))) {
                     .ammonium_non_band, .ammonium_band, .ammonia_non_band, .ammonia_band => 0,
                     .nitrate_non_band, .nitrate_band, .nitrite_non_band, .nitrite_band => 1,
                 };
@@ -362,10 +364,10 @@ test "active zero bulk volume uses flat WATSUB tortuosity for mineral nitrogen" 
     defer parameters.deinit();
 
     try parameters.refresh(&grid, &faces, &geometry, &.{ 0, 1 }, &.{ 1, 1 }, nutrient_parameters_module.compatibilityRuntimeParameters(), 1);
-    try std.testing.expectApproxEqAbs(@as(f64, 1.4e-5), parameters.matrix_conductance_m3_per_step[@intFromEnum(Species.ammonium_non_band)], 1e-12);
-    try std.testing.expectEqual(@as(f64, 0), parameters.macropore_conductance_m3_per_step[@intFromEnum(Species.ammonium_non_band)]);
+    try std.testing.expectApproxEqAbs(@as(f64, 1.4e-5), parameters.matrix_conductance_m3_per_step[@backingInt(Species.ammonium_non_band)], 1e-12);
+    try std.testing.expectEqual(@as(f64, 0), parameters.macropore_conductance_m3_per_step[@backingInt(Species.ammonium_non_band)]);
     try parameters.refresh(&grid, &faces, &geometry, &.{ 1, 1 }, &.{ 0, 1 }, nutrient_parameters_module.compatibilityRuntimeParameters(), 1);
-    try std.testing.expectApproxEqAbs(@as(f64, 1.4e-5), parameters.matrix_conductance_m3_per_step[@intFromEnum(Species.ammonium_non_band)], 1e-12);
+    try std.testing.expectApproxEqAbs(@as(f64, 1.4e-5), parameters.matrix_conductance_m3_per_step[@backingInt(Species.ammonium_non_band)], 1e-12);
 }
 
 pub const AdvanceInputs = struct {
@@ -619,7 +621,7 @@ fn requireLocalConservation(
             if (!closure.accepted) {
                 if (!builtin.is_test) std.log.err(
                     "mineral-N local conservation failure: layer={d} species={s} residual_mol_n={e} absolute_mol_n={e} normalized_relative={e} limit_mol_n={e}",
-                    .{ cell, @tagName(@as(Species, @enumFromInt(species_index))), closure.residual, closure.absolute, closure.normalized_relative, closure.acceptance_limit },
+                    .{ cell, @tagName(@as(Species, @fromBackingInt(@intCast(species_index)))), closure.residual, closure.absolute, closure.normalized_relative, closure.acceptance_limit },
                 );
                 return error.MineralNitrogenLocalConservationFailure;
             }
@@ -681,7 +683,7 @@ fn validateAdvanceInputs(state: *const State, inputs: AdvanceInputs) !void {
 }
 
 fn index(species: Species) usize {
-    return @intFromEnum(species);
+    return @backingInt(species);
 }
 
 /// ISSUE-065 (twelfth addendum): mirrors `erosion_chemistry_bridge.zig`'s
@@ -729,7 +731,7 @@ fn concentration(amount_mol: f64, water_m3: f64, fraction: f64, species: []const
 }
 
 fn validateFractions(fractions: ZoneFractions) !void {
-    inline for (@typeInfo(ZoneFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ZoneFractions)) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidMineralNitrogenZoneFraction;
     }
@@ -746,10 +748,10 @@ test "matrix and macropore mineral nitrogen remain distinct and conservative" {
     defer state.deinit();
     state.matrix.amount_mol[index(.nitrate_non_band)] = 2;
     const face = [_]transport.Face{.{ .first_cell = 0, .second_cell = 1, .water_flux_m3_per_step = 0 }};
-    const conductance = [_]f64{0.1} ** species_count;
-    const mobility = [_]f64{1} ** species_count;
-    var matrix_face_flux = [_]f64{0} ** species_count;
-    var macropore_face_flux = [_]f64{0} ** species_count;
+    const conductance = @as([species_count]f64, @splat(@as(f64, 0.1)));
+    const mobility = @as([species_count]f64, @splat(@as(f64, 1)));
+    var matrix_face_flux = @as([species_count]f64, @splat(@as(f64, 0)));
+    var macropore_face_flux = @as([species_count]f64, @splat(@as(f64, 0)));
     const result = try advance(std.testing.allocator, &state, .{
         .active_by_layer = &.{ true, true },
         .matrix_water_volume_m3 = &.{ 1, 1 },
@@ -849,10 +851,10 @@ test "failed advance rolls back boundary export ledger, not just amount_mol" {
     const matrix_before = try std.testing.allocator.dupe(f64, state.matrix.amount_mol);
     defer std.testing.allocator.free(matrix_before);
     const face = [_]transport.Face{.{ .first_cell = 0, .second_cell = 1, .water_flux_m3_per_step = 0 }};
-    const conductance = [_]f64{0.1} ** species_count;
-    const mobility = [_]f64{1} ** species_count;
-    var unpublished_matrix_face_flux = [_]f64{31} ** species_count;
-    var unpublished_macropore_face_flux = [_]f64{37} ** species_count;
+    const conductance = @as([species_count]f64, @splat(@as(f64, 0.1)));
+    const mobility = @as([species_count]f64, @splat(@as(f64, 1)));
+    var unpublished_matrix_face_flux = @as([species_count]f64, @splat(@as(f64, 31)));
+    var unpublished_macropore_face_flux = @as([species_count]f64, @splat(@as(f64, 37)));
     try std.testing.expectError(error.SoluteTransportSolverDidNotConverge, advance(std.testing.allocator, &state, .{
         .active_by_layer = &.{ true, true },
         .matrix_water_volume_m3 = &.{ 1, 1 },
@@ -900,16 +902,16 @@ test "local conservation rejects cancelling defects and publishes no failed tran
     const matrix_water_before = state.matrix.water_volume_m3[0..2].*;
     const macropore_water_before = state.macropore.water_volume_m3[0..2].*;
     const boundary_before = state.boundary_export_g_n_per_step[0..2].*;
-    var matrix_face_output = [_]f64{47} ** species_count;
-    var macropore_face_output = [_]f64{53} ** species_count;
+    var matrix_face_output = @as([species_count]f64, @splat(@as(f64, 47)));
+    var macropore_face_output = @as([species_count]f64, @splat(@as(f64, 53)));
     const matrix_face_before = matrix_face_output;
     const macropore_face_before = macropore_face_output;
-    var perturbation = [_]f64{0} ** (2 * species_count);
+    var perturbation = @as([(2 * species_count)]f64, @splat(@as(f64, 0)));
     perturbation[nitrate] = 0.1;
     perturbation[species_count + nitrate] = -0.1;
     const face = [_]transport.Face{.{ .first_cell = 0, .second_cell = 1, .water_flux_m3_per_step = 0 }};
-    const zero_conductance = [_]f64{0} ** species_count;
-    const mobility = [_]f64{1} ** species_count;
+    const zero_conductance = @as([species_count]f64, @splat(@as(f64, 0)));
+    const mobility = @as([species_count]f64, @splat(@as(f64, 1)));
     try std.testing.expectError(error.MineralNitrogenLocalConservationFailure, advance(std.testing.allocator, &state, .{
         .active_by_layer = &.{ true, true },
         .matrix_water_volume_m3 = &.{ 1, 1 },

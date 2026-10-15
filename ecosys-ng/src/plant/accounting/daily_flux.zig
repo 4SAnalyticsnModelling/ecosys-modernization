@@ -3,6 +3,7 @@ const builtin = @import("builtin");
 const plant_output = @import("../../io/output/plant_daily_output.zig");
 const scoped_conservation = @import("../../validation/scoped_conservation.zig");
 const tolerance_config = @import("../../core/conservation_tolerance.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Complete living/dead plant inventory used by the independent accepted-hour
 /// C/N/P gate. These are sums of the same authoritative shoot, root, symbiont,
@@ -32,7 +33,7 @@ pub const ElementalInventory = struct {
                 phosphorus.nodule_g + phosphorus.storage_g +
                 phosphorus.standing_dead_g + charcoal.phosphorus_g,
         };
-        inline for (std.meta.fields(ElementalInventory)) |field| {
+        inline for (ti_compat.fieldViews(ElementalInventory)) |field| {
             const value = @field(result, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidPlantElementalInventory;
@@ -86,7 +87,7 @@ pub const ConservationLedgerSnapshot = struct {
             .phosphorus_oxidation_g_p = ledger.phosphorus_oxidation_g[plant],
             .harvested_phosphorus_g_p = ledger.harvested_phosphorus_g[plant],
         };
-        inline for (std.meta.fields(ConservationLedgerSnapshot)) |field|
+        inline for (ti_compat.fieldViews(ConservationLedgerSnapshot)) |field|
             if (!std.math.isFinite(@field(result, field.name)))
                 return error.NonFinitePlantConservationLedger;
         return result;
@@ -102,7 +103,7 @@ pub const AcceptedHourSnapshot = struct {
         plant: usize,
         inventory: ElementalInventory,
     ) !AcceptedHourSnapshot {
-        inline for (std.meta.fields(ElementalInventory)) |field| {
+        inline for (ti_compat.fieldViews(ElementalInventory)) |field| {
             const value = @field(inventory, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidPlantElementalInventory;
@@ -212,7 +213,7 @@ pub fn evaluateAcceptedHour(
     try tolerances.validate();
     if (!std.math.isFinite(cell_area_m2) or cell_area_m2 <= 0)
         return error.InvalidPlantConservationArea;
-    inline for (std.meta.fields(ElementalInventory)) |field| inline for (.{
+    inline for (ti_compat.fieldViews(ElementalInventory)) |field| inline for (.{
         @field(before.inventory, field.name),
         @field(inventory_after, field.name),
         @field(manure_output, field.name),
@@ -342,7 +343,7 @@ pub fn evaluateLifecycleBoundary(
     try tolerances.validate();
     if (!std.math.isFinite(cell_area_m2) or cell_area_m2 <= 0)
         return error.InvalidPlantConservationArea;
-    inline for (std.meta.fields(ElementalInventory)) |field| inline for (.{
+    inline for (ti_compat.fieldViews(ElementalInventory)) |field| inline for (.{
         @field(inventory_before, field.name),
         @field(inventory_after, field.name),
         @field(external_input, field.name),
@@ -469,7 +470,7 @@ pub const State = struct {
     /// expanding it at every allocation failure edge in the initializer.
     noinline fn deinitAllocatedPrefix(self: *State, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -485,7 +486,7 @@ pub const State = struct {
         result.plant_count = plant_count;
         var allocated: usize = 0;
         errdefer result.deinitAllocatedPrefix(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 @field(result, field.name) = try allocator.alloc(f64, plant_count);
                 @memset(@field(result, field.name), 0);
@@ -496,7 +497,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(State)) |field|
             if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
@@ -513,7 +514,7 @@ pub const State = struct {
     /// legacy CTRAN has its own owner in plant/state_update/water.zig.
     pub fn accumulateHourlyExchange(self: *State, plant: usize, exchange: HourlyExchange) !void {
         if (plant >= self.plant_count) return error.PlantDailyFluxLedgerIndexOutOfBounds;
-        inline for (std.meta.fields(HourlyExchange)) |field| {
+        inline for (ti_compat.fieldViews(HourlyExchange)) |field| {
             if (!std.math.isFinite(@field(exchange, field.name))) return error.NonFinitePlantDailyFluxLedgerInput;
         }
         self.net_carbon_change_g[plant] += exchange.net_canopy_carbon_g;
@@ -709,7 +710,7 @@ pub const State = struct {
             self.cumulative_harvested_nitrogen_g[plant] += self.harvested_nitrogen_g[plant];
             self.cumulative_harvested_phosphorus_g[plant] += self.harvested_phosphorus_g[plant];
         }
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64 and !std.mem.startsWith(u8, field.name, "cumulative_"))
                 @memset(@field(self, field.name), 0);
         }
@@ -717,7 +718,7 @@ pub const State = struct {
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) for (@field(self, field.name), 0..) |value, plant| {
                 if (!std.math.isFinite(value)) {
                     if (!builtin.is_test) std.log.err("non-finite daily plant ledger: field={s} plant={d} value={e}", .{ field.name, plant, value });
@@ -731,7 +732,7 @@ pub const State = struct {
 test "daily plant flux state releases every partial allocation prefix" {
     const allocation_count = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(State).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) count += 1;
         }
         break :count count;

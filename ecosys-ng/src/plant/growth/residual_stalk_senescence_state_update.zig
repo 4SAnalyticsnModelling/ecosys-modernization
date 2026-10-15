@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Elements = struct { carbon: f64, nitrogen: f64, phosphorus: f64 };
 pub const Fractions = struct { carbon: []const f64, nitrogen: []const f64, phosphorus: []const f64 };
@@ -107,7 +108,7 @@ fn project(state: State, inputs: Inputs) !Projection {
         .remaining_respiration = inputs.respiration_demand_g_c_per_timestep - consumed_recyclable_carbon,
         .reduced_maximum_height_m = maximum_height_m - f * maximum_height_m,
     };
-    inline for (.{ p.residual_before, p.branch_after, p.residual_after, p.reserve_after }) |values| inline for (@typeInfo(Elements).@"struct".fields) |field| {
+    inline for (.{ p.residual_before, p.branch_after, p.residual_after, p.reserve_after }) |values| inline for (ti_compat.fieldViews(Elements)) |field| {
         const value = @field(values, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidResidualStalkStateUpdateResult;
     };
@@ -118,19 +119,19 @@ fn project(state: State, inputs: Inputs) !Projection {
 fn validateTopology(state: State, inputs: Inputs) !usize {
     inline for (.{ inputs.removal_fraction, inputs.respiration_demand_g_c_per_timestep, inputs.phenological_senescence_fraction }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidResidualStalkStateUpdateInput;
     if (inputs.removal_fraction > 1 or inputs.phenological_senescence_fraction > 1) return error.InvalidResidualStalkStateUpdateInput;
-    inline for (.{ inputs.recyclable, inputs.woody_fraction, inputs.nonwoody_fraction }) |values| inline for (@typeInfo(Elements).@"struct".fields) |field| {
+    inline for (.{ inputs.recyclable, inputs.woody_fraction, inputs.nonwoody_fraction }) |values| inline for (ti_compat.fieldViews(Elements)) |field| {
         const value = @field(values, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidResidualStalkStateUpdateInput;
     };
-    inline for (@typeInfo(Elements).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Elements)) |field| {
         if (@field(inputs.recyclable, field.name) > @field(Elements{ .carbon = state.residual_stalk_carbon_g_c.*, .nitrogen = state.residual_stalk_nitrogen_g_n.*, .phosphorus = state.residual_stalk_phosphorus_g_p.* }, field.name)) return error.InvalidResidualStalkStateUpdateInput;
         if (@abs(@field(inputs.woody_fraction, field.name) + @field(inputs.nonwoody_fraction, field.name) - 1) > 1e-12) return error.InvalidResidualStalkStateUpdateInput;
     }
     const count = inputs.woody_kinetics.carbon.len;
     if (count == 0) return error.ZeroResidualStalkKineticPools;
     inline for (.{ inputs.woody_kinetics.nitrogen, inputs.woody_kinetics.phosphorus, inputs.stalk_kinetics.carbon, inputs.stalk_kinetics.nitrogen, inputs.stalk_kinetics.phosphorus }) |values| if (values.len != count) return error.ResidualStalkKineticDimensionMismatch;
-    inline for (@typeInfo(Litter).@"struct".fields) |field| if (@field(state.litter, field.name).len != count) return error.ResidualStalkKineticDimensionMismatch;
-    inline for (.{ inputs.woody_kinetics, inputs.stalk_kinetics }) |kinetics| inline for (@typeInfo(Fractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Litter)) |field| if (@field(state.litter, field.name).len != count) return error.ResidualStalkKineticDimensionMismatch;
+    inline for (.{ inputs.woody_kinetics, inputs.stalk_kinetics }) |kinetics| inline for (ti_compat.fieldViews(Fractions)) |field| {
         var total: f64 = 0;
         for (@field(kinetics, field.name)) |value| {
             if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidResidualStalkKineticFraction;
@@ -155,14 +156,14 @@ fn additions(state: State, inputs: Inputs, p: Projection, k: usize) [6]f64 {
 }
 fn validateLitter(state: State, inputs: Inputs, p: Projection, k: usize) !void {
     const add = additions(state, inputs, p, k);
-    inline for (@typeInfo(Litter).@"struct".fields, 0..) |field, i| {
+    inline for (ti_compat.fieldViews(Litter), 0..) |field, i| {
         const current = @field(state.litter, field.name)[k];
         if (!std.math.isFinite(current) or current < 0 or !std.math.isFinite(add[i]) or add[i] < 0 or !std.math.isFinite(current + add[i])) return error.InvalidResidualStalkLitterResult;
     }
 }
 fn state_updateLitter(state: State, inputs: Inputs, p: Projection, k: usize) void {
     const add = additions(state, inputs, p, k);
-    inline for (@typeInfo(Litter).@"struct".fields, 0..) |field, i| @field(state.litter, field.name)[k] += add[i];
+    inline for (ti_compat.fieldViews(Litter), 0..) |field, i| @field(state.litter, field.name)[k] += add[i];
 }
 
 fn fixture(heights: []f64, scalars: *[9]f64, litter_store: *[6][2]f64) State {

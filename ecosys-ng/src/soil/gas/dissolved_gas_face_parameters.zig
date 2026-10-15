@@ -4,6 +4,7 @@ const grid_module = @import("../../state/grid.zig");
 const hydrology_module = @import("../../transport/hydrology.zig");
 const geometry_module = @import("../water/face_geometry.zig");
 
+
 pub const RuntimeParameters = struct {
     reference_temperature_k: f64 = 298.15,
     temperature_exponent: f64 = 6,
@@ -132,8 +133,8 @@ test "HOUR1 dissolved gas diffusivity ordering is retained" {
     var state = try State.init(std.testing.allocator, faces.micropore_faces.len);
     defer state.deinit();
     try state.refresh(&model_grid, &faces, &geometry, &.{ 1, 1 }, &.{ 1, 1 }, 1, .{});
-    try std.testing.expect(state.micropore_conductance_m3_per_step[@intFromEnum(gas.Species.oxygen)] > state.micropore_conductance_m3_per_step[@intFromEnum(gas.Species.ammonia)]);
-    try std.testing.expect(state.macropore_conductance_m3_per_step[@intFromEnum(gas.Species.methane)] > state.macropore_conductance_m3_per_step[@intFromEnum(gas.Species.carbon_dioxide)]);
+    try std.testing.expect(state.micropore_conductance_m3_per_step[@backingInt(gas.Species.oxygen)] > state.micropore_conductance_m3_per_step[@backingInt(gas.Species.ammonia)]);
+    try std.testing.expect(state.macropore_conductance_m3_per_step[@backingInt(gas.Species.methane)] > state.macropore_conductance_m3_per_step[@backingInt(gas.Species.carbon_dioxide)]);
 }
 
 test "DLYRM-inactive zero-volume layer publishes zero dissolved-gas conductance" {
@@ -172,12 +173,12 @@ test "DLYRM-inactive zero-volume layer publishes zero dissolved-gas conductance"
     try state.refresh(&model_grid, &faces, &geometry, &.{ 0, 1 }, &.{ 1, 1 }, 1, .{});
     try std.testing.expectEqualSlices(
         f64,
-        &([_]f64{0} ** gas.species_count),
+        &(@as([gas.species_count]f64, @splat(@as(f64, 0)))),
         state.micropore_conductance_m3_per_step,
     );
     try std.testing.expectEqualSlices(
         f64,
-        &([_]f64{0} ** gas.species_count),
+        &(@as([gas.species_count]f64, @splat(@as(f64, 0)))),
         state.macropore_conductance_m3_per_step,
     );
 }
@@ -202,7 +203,7 @@ test "active zero bulk volume uses flat WATSUB tortuosity for dissolved gases" {
     defer state.deinit();
 
     try state.refresh(&grid, &faces, &geometry, &.{ 0, 1 }, &.{ 1, 1 }, 1, .{});
-    const carbon_dioxide = @intFromEnum(gas.Species.carbon_dioxide);
+    const carbon_dioxide = @backingInt(gas.Species.carbon_dioxide);
     try std.testing.expectApproxEqAbs(@as(f64, 1.4875e-5), state.micropore_conductance_m3_per_step[carbon_dioxide], 1e-12);
     try std.testing.expectEqual(@as(f64, 0), state.macropore_conductance_m3_per_step[carbon_dioxide]);
     try state.refresh(&grid, &faces, &geometry, &.{ 1, 1 }, &.{ 0, 1 }, 1, .{});

@@ -30,6 +30,8 @@
 // sole writer and publishes both the factor and the explicit branch identity.
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const SoilOrigin = enum {
     natural,
@@ -133,7 +135,7 @@ fn calculateCandidate(inputs: Inputs) Candidate {
 }
 
 fn validateInputs(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (field.type == f64 and
             !std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteHumusPartitionInput;
@@ -148,7 +150,7 @@ fn validateInputs(inputs: Inputs) !void {
 }
 
 fn validateCandidate(candidate: Candidate) !void {
-    inline for (@typeInfo(Candidate).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Candidate)) |field| {
         for (@field(candidate, field.name)) |fraction| {
             if (!std.math.isFinite(fraction))
                 return error.NonFiniteHumusPartitionResult;
@@ -181,8 +183,8 @@ pub fn initialize(state: State, inputs: Inputs) !void {
 }
 
 test "STARTS natural dryland humus partition follows nutrient and depth effects" {
-    var humus = [_]f64{9.0} ** 4;
-    var detritus = [_]f64{9.0} ** 2;
+    var humus = @as([4]f64, @splat(@as(f64, 9.0)));
+    var detritus = @as([2]f64, @splat(@as(f64, 9.0)));
     const inputs: Inputs = .{
         .soil_origin = .natural,
         .layer_midpoint_depth_m = 0.5,
@@ -212,8 +214,8 @@ test "STARTS natural dryland humus partition follows nutrient and depth effects"
 }
 
 test "STARTS natural wetland uses invariant twenty percent partition" {
-    var humus = [_]f64{9.0} ** 4;
-    var detritus = [_]f64{9.0} ** 2;
+    var humus = @as([4]f64, @splat(@as(f64, 9.0)));
+    var detritus = @as([2]f64, @splat(@as(f64, 9.0)));
     try initialize(.{
         .humus_kinetic_fraction = &humus,
         .microbial_detritus_humus_fraction = &detritus,
@@ -236,8 +238,8 @@ test "STARTS natural wetland uses invariant twenty percent partition" {
 }
 
 test "invalid input leaves partition state unchanged" {
-    var humus = [_]f64{7.0} ** 4;
-    var detritus = [_]f64{8.0} ** 2;
+    var humus = @as([4]f64, @splat(@as(f64, 7.0)));
+    var detritus = @as([2]f64, @splat(@as(f64, 8.0)));
     try std.testing.expectError(
         error.InvalidHumusPartitionInput,
         initialize(.{

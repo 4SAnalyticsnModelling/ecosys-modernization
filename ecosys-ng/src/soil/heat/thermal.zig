@@ -3,6 +3,7 @@ const ice_units = @import("../../core/ice_units.zig");
 const CellRange = @import("../../core/compute.zig").CellRange;
 const GridState = @import("../../state/grid.zig").GridState;
 const SoilCatalogEntry = @import("../profile/catalog.zig").Entry;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -35,7 +36,7 @@ pub const State = struct {
         result.soil_layer_capacity = grid.soil_layer_capacity;
         var allocated: usize = 0;
         errdefer freeAllocated(&result, allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, grid.layer_count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -64,12 +65,12 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
             if (!std.math.isFinite(value)) {
                 std.log.err("non-finite soil thermal state: field={s} index={d} value={e}", .{ field.name, index, value });
                 return error.NonFiniteSoilThermalState;
@@ -200,7 +201,7 @@ pub fn updateTile(context: *UpdateContext, range: CellRange) !void {
 
 fn freeAllocated(state: *State, count: usize) void {
     var visited: usize = 0;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         if (visited < count) state.allocator.free(@field(state, field.name));
         visited += 1;
     };
@@ -208,7 +209,7 @@ fn freeAllocated(state: *State, count: usize) void {
 
 test "soil thermal state updates from mapped example water and ice" {
     const allocator = std.testing.allocator;
-    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".fields.len);
+    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".field_names.len);
     defer allocator.free(source);
     var catalog = @import("../profile/catalog.zig").Catalog.init(allocator);
     defer catalog.deinit();

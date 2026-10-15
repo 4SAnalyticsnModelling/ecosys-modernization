@@ -12,6 +12,7 @@ const transport_species = @import("../soil/solute/transport_species.zig");
 const overland_litter_salt = @import("../redistribution/surface/overland_flow_litter_salt_update.zig");
 const daily_litter_salt = @import("../redistribution/inventory/daily_litter_salt.zig");
 const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Directions = runoff_carrier.Directions;
 pub const ElementMass = runoff_carrier.ElementMass;
@@ -32,15 +33,15 @@ pub const surface_species_count: usize = overland_litter_salt.legacy_surface_spe
 pub const TillageSurfaceAmounts = [surface_species_count]f64;
 
 comptime {
-    if (@intFromEnum(Species.aluminum) != 0 or
-        @intFromEnum(Species.iron) != 1 or
-        @intFromEnum(Species.hydrogen) != 2 or
-        @intFromEnum(Species.hydroxide) != 7 or
-        @intFromEnum(Species.bicarbonate) != 11 or
-        @intFromEnum(Species.aluminum_hydroxide_1) != 12 or
-        @intFromEnum(Species.hydrogen_silicate) != 33 or
-        @intFromEnum(Species.non_band_phosphate) != 34 or
-        @intFromEnum(Species.non_band_magnesium_hpo4) != 41)
+    if (@backingInt(Species.aluminum) != 0 or
+        @backingInt(Species.iron) != 1 or
+        @backingInt(Species.hydrogen) != 2 or
+        @backingInt(Species.hydroxide) != 7 or
+        @backingInt(Species.bicarbonate) != 11 or
+        @backingInt(Species.aluminum_hydroxide_1) != 12 or
+        @backingInt(Species.hydrogen_silicate) != 33 or
+        @backingInt(Species.non_band_phosphate) != 34 or
+        @backingInt(Species.non_band_magnesium_hpo4) != 41)
         @compileError("REDIST tillage surface-salt coordinate order changed");
 }
 
@@ -196,7 +197,7 @@ pub const Components = struct {
     oxygen_mol: f64 = 0,
 
     fn addScaled(self: *Components, coefficients: Components, amount_mol: f64) !void {
-        inline for (@typeInfo(Components).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Components)) |field| {
             const next = @field(self, field.name) +
                 @field(coefficients, field.name) * amount_mol;
             if (!std.math.isFinite(next) or next < 0)
@@ -427,7 +428,7 @@ pub fn advance(
         for (concentrations, 0..) |concentration, species_index| {
             if (!std.math.isFinite(concentration) or concentration < 0)
                 return error.InvalidSurfaceAqueousRunoffChemistry;
-            const species: Species = @enumFromInt(species_index);
+            const species: Species = @fromBackingInt(@intCast(species_index));
             if (routesSpecies(species)) {
                 const amount = concentration * pre_water;
                 if (!std.math.isFinite(amount) or amount < 0)
@@ -439,7 +440,7 @@ pub fn advance(
             const amount = extensive.amount_mol[cell * species_count + species_index];
             if (!std.math.isFinite(amount) or amount < 0)
                 return error.InvalidSurfaceAqueousRunoffState;
-            const species: Species = @enumFromInt(species_index);
+            const species: Species = @fromBackingInt(@intCast(species_index));
             if (routesSpecies(species) and species_index >= 12)
                 original[cell * species_count + species_index] = amount;
         }
@@ -486,7 +487,7 @@ pub fn advance(
 
     for (0..cells) |cell| {
         for (0..species_count) |species_index| {
-            const species: Species = @enumFromInt(species_index);
+            const species: Species = @fromBackingInt(@intCast(species_index));
             if (!routesSpecies(species)) {
                 species_export[cell * species_count + species_index] = 0;
                 continue;
@@ -503,7 +504,7 @@ pub fn advance(
         if (post_water > 0) {
             var concentrations: [12]f64 = undefined;
             for (0..12) |species_index| {
-                const species: Species = @enumFromInt(species_index);
+                const species: Species = @fromBackingInt(@intCast(species_index));
                 const value = if (routesSpecies(species))
                     accepted[cell * species_count + species_index] / post_water
                 else
@@ -593,8 +594,8 @@ fn accumulateIntercellComponents(
             const destination = destination_optional orelse continue;
             if (water_m3 == 0) continue;
             const direction_fraction = transported_fraction * water_m3 / total_water_m3;
-            inline for (@typeInfo(Species).@"enum".fields) |field| {
-                const species: Species = @enumFromInt(field.value);
+            inline for (ti_compat.enumFieldViews(Species)) |field| {
+                const species: Species = @fromBackingInt(@intCast(field.value));
                 if (comptime !routesSpecies(species)) continue;
                 const transfer_mol = original_amount_mol[source * species_count + field.value] * direction_fraction;
                 try debit[source].addScaled(formula(species), transfer_mol);
@@ -922,7 +923,7 @@ test "REDIST tillage surface adapter binds all 42 authoritative coordinates in s
     chemistry.dry_reference_water_m3[0] = 2;
     for (12..surface_species_count) |species_index|
         extensive.amount_mol[species_index] = @floatFromInt(species_index + 1);
-    extensive.amount_mol[@intFromEnum(Species.band_phosphate)] = 99;
+    extensive.amount_mol[@backingInt(Species.band_phosphate)] = 99;
 
     const gathered = try gatherTillageSurfaceAmounts(&chemistry, &extensive, 0, 0, 0);
     for (0..12) |species_index|
@@ -949,7 +950,7 @@ test "REDIST tillage surface adapter binds all 42 authoritative coordinates in s
         try std.testing.expectEqual(remaining[species_index], extensive.amount_mol[species_index]);
     try std.testing.expectEqual(
         @as(f64, 99),
-        extensive.amount_mol[@intFromEnum(Species.band_phosphate)],
+        extensive.amount_mol[@backingInt(Species.band_phosphate)],
     );
     try std.testing.expectEqualDeep(
         remaining,
@@ -965,7 +966,7 @@ test "REDIST tillage surface owner publish rejects a late invalid coordinate ato
     chemistry.cells[0].aluminum_mol_per_m3 = 4;
     chemistry.dry_reference_water_m3[0] = 0.5;
     extensive.carrier_volume_m3[0] = 0.25;
-    extensive.amount_mol[@intFromEnum(Species.aluminum_hydroxide_1)] = 7;
+    extensive.amount_mol[@backingInt(Species.aluminum_hydroxide_1)] = 7;
     const chemistry_before = chemistry.cells[0];
     const dry_before = chemistry.dry_reference_water_m3[0];
     const carrier_before = extensive.carrier_volume_m3[0];
@@ -1047,7 +1048,7 @@ test "issue-069 Finding B: near-zero-but-nonzero actual_water_m3 no longer manuf
     // for the near-zero raw carrier, matching the physically correct basis
     // exactly, and stays stable across the ZEROS2-equivalent floor.
     const gathered = try gatherTillageSurfaceAmounts(&chemistry, &extensive, 0, near_zero_raw_carrier, negligible);
-    try std.testing.expectEqual(true_mol, gathered[@intFromEnum(Species.aluminum)]);
+    try std.testing.expectEqual(true_mol, gathered[@backingInt(Species.aluminum)]);
 }
 
 /// Molecular formula of every runtime aqueous coordinate. `*_phosphate` is
@@ -1158,8 +1159,8 @@ test "surface aqueous runoff routes every authoritative species once and publish
     );
 
     var expected_components: Components = .{};
-    inline for (@typeInfo(Species).@"enum".fields) |field| {
-        const species: Species = @enumFromInt(field.value);
+    inline for (ti_compat.enumFieldViews(Species)) |field| {
+        const species: Species = @fromBackingInt(@intCast(field.value));
         const index: usize = field.value;
         if (routesSpecies(species)) {
             const original = @as(f64, @floatFromInt(index + 1));
@@ -1171,7 +1172,7 @@ test "surface aqueous runoff routes every authoritative species once and publish
             try std.testing.expectEqual(@as(f64, 0), species_export[index]);
         }
     }
-    inline for (@typeInfo(Components).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Components)) |field|
         try std.testing.expectEqual(@field(expected_components, field.name), @field(components[0], field.name));
     try std.testing.expectEqual(@as(f64, 0.5), extensive.carrier_volume_m3[0]);
     // Water and every represented routed amount halve together, so their
@@ -1184,8 +1185,8 @@ test "all 54 aqueous registry coordinates have exactly one runoff owner or physi
     var generic_count: usize = 0;
     var mineral_count: usize = 0;
     var soil_only_count: usize = 0;
-    inline for (@typeInfo(Species).@"enum".fields) |field| {
-        const species: Species = @enumFromInt(field.value);
+    inline for (ti_compat.enumFieldViews(Species)) |field| {
+        const species: Species = @fromBackingInt(@intCast(field.value));
         const ownership = runoffOwnership(species);
         switch (ownership) {
             .generic_aqueous => generic_count += 1,
@@ -1238,15 +1239,15 @@ test "surface aqueous runoff internal all-species routing conserves every coordi
         1,
         .{ .boundary_export_mol_by_cell_species = &species_export, .boundary_components_by_cell = &components, .intercell_debit_components_by_cell = &debit, .intercell_credit_components_by_cell = &credit },
     );
-    inline for (@typeInfo(Species).@"enum".fields) |field| {
+    inline for (ti_compat.enumFieldViews(Species)) |field| {
         const index: usize = field.value;
-        const species: Species = @enumFromInt(field.value);
+        const species: Species = @fromBackingInt(@intCast(field.value));
         const total = extensive.amount_mol[index] + extensive.amount_mol[species_count + index];
         try std.testing.expectEqual(@as(f64, @floatFromInt(index + 1)), total);
         if (routesSpecies(species))
             try std.testing.expectEqual(@as(f64, 0), species_export[index]);
     }
-    inline for (@typeInfo(Components).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Components)) |field| {
         try std.testing.expectEqual(@field(debit[0], field.name), @field(credit[1], field.name));
         try std.testing.expectEqual(@as(f64, 0), @field(credit[0], field.name));
         try std.testing.expectEqual(@as(f64, 0), @field(debit[1], field.name));
@@ -1266,9 +1267,9 @@ test "surface aqueous runoff late component failure rolls back state chemistry r
     // Three independently valid Al-bearing complex exports overflow only when
     // formula components are accumulated, after the routing candidate exists.
     // This exercises the latest fallible stage before the atomic commit.
-    extensive.amount_mol[@intFromEnum(Species.aluminum_hydroxide_1)] = std.math.floatMax(f64) / 2;
-    extensive.amount_mol[@intFromEnum(Species.aluminum_hydroxide_2)] = std.math.floatMax(f64) / 2;
-    extensive.amount_mol[@intFromEnum(Species.aluminum_hydroxide_3)] = std.math.floatMax(f64) / 2;
+    extensive.amount_mol[@backingInt(Species.aluminum_hydroxide_1)] = std.math.floatMax(f64) / 2;
+    extensive.amount_mol[@backingInt(Species.aluminum_hydroxide_2)] = std.math.floatMax(f64) / 2;
+    extensive.amount_mol[@backingInt(Species.aluminum_hydroxide_3)] = std.math.floatMax(f64) / 2;
     const amounts_before = try std.testing.allocator.dupe(f64, extensive.amount_mol);
     defer std.testing.allocator.free(amounts_before);
     const carriers_before = try std.testing.allocator.dupe(f64, extensive.carrier_volume_m3);
@@ -1372,12 +1373,12 @@ test "surface runoff transaction merges complex carbon and phosphorus boundary e
     var aqueous = try surface_routing.State.init(std.testing.allocator, 1, 1, species_count);
     defer aqueous.deinit();
     aqueous.carrier_volume_m3[0] = 1;
-    aqueous.amount_mol[@intFromEnum(Species.non_band_iron_hpo4)] = 4;
+    aqueous.amount_mol[@backingInt(Species.non_band_iron_hpo4)] = 4;
     var organic_state = try organic.State.init(std.testing.allocator, 1);
     defer organic_state.deinit();
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] = 8;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] = 8;
     var output: TransactionTestOutputs = .{};
     const half = [_]f64{0.5};
     const zero = [_]f64{0};
@@ -1414,13 +1415,13 @@ test "late gas failure rolls back the complete surface runoff owner transaction"
     var aqueous = try surface_routing.State.init(std.testing.allocator, 1, 1, species_count);
     defer aqueous.deinit();
     aqueous.carrier_volume_m3[0] = 1;
-    aqueous.amount_mol[@intFromEnum(Species.aluminum_hydroxide_1)] = 3;
+    aqueous.amount_mol[@backingInt(Species.aluminum_hydroxide_1)] = 3;
     var organic_state = try organic.State.init(std.testing.allocator, 1);
     defer organic_state.deinit();
     organic_state.dissolved[0].carbon_g_c = 5;
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.oxygen)] = std.math.nan(f64);
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.oxygen)] = std.math.nan(f64);
     var output: TransactionTestOutputs = .{
         .nitrogen = @splat(41),
         .phosphorus = @splat(41),
@@ -1444,7 +1445,7 @@ test "late gas failure rolls back the complete surface runoff owner transaction"
     const mineral_reference_before = chemistry.mineral_reference_water_m3[0];
     const dry_reference_before = chemistry.dry_reference_water_m3[0];
     const nitrite_before = nitrite;
-    const aqueous_amount_before = aqueous.amount_mol[@intFromEnum(Species.aluminum_hydroxide_1)];
+    const aqueous_amount_before = aqueous.amount_mol[@backingInt(Species.aluminum_hydroxide_1)];
     const aqueous_carrier_before = aqueous.carrier_volume_m3[0];
     const organic_before = organic_state.dissolved[0];
     const output_before = output;
@@ -1468,7 +1469,7 @@ test "late gas failure rolls back the complete surface runoff owner transaction"
     try std.testing.expectEqual(mineral_reference_before, chemistry.mineral_reference_water_m3[0]);
     try std.testing.expectEqual(dry_reference_before, chemistry.dry_reference_water_m3[0]);
     try std.testing.expectEqualSlices(f64, &nitrite_before, &nitrite);
-    try std.testing.expectEqual(aqueous_amount_before, aqueous.amount_mol[@intFromEnum(Species.aluminum_hydroxide_1)]);
+    try std.testing.expectEqual(aqueous_amount_before, aqueous.amount_mol[@backingInt(Species.aluminum_hydroxide_1)]);
     try std.testing.expectEqual(aqueous_carrier_before, aqueous.carrier_volume_m3[0]);
     try std.testing.expectEqual(organic_before, organic_state.dissolved[0]);
     try std.testing.expect(std.mem.eql(u8, std.mem.asBytes(&output_before), std.mem.asBytes(&output)));

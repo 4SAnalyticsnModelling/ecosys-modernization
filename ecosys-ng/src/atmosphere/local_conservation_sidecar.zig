@@ -3,6 +3,8 @@ const hourly = @import("../validation/hourly_cell_conservation.zig");
 const inventory = @import("../validation/landscape_mass_inventory.zig");
 const snow = @import("../soil/solute/snow_solute_transport.zig");
 const snow_discharge = @import("../soil/water/snow_surface_discharge.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 /// Accepted atmospheric activity after precipitation, canopy drainage and
 /// surface-vapor routing have selected their actual storage owners.  The three
@@ -61,8 +63,8 @@ pub const SurfaceExchangeInputs = struct {
 };
 
 pub const ChemistryInputs = struct {
-    top_snow_input_g: [snow.species_count]f64 = [_]f64{0} ** snow.species_count,
-    top_snow_input_salt_mol: [snow.salt_species_count]f64 = [_]f64{0} ** snow.salt_species_count,
+    top_snow_input_g: [snow.species_count]f64 = @as([snow.species_count]f64, @splat(@as(f64, 0))),
+    top_snow_input_salt_mol: [snow.salt_species_count]f64 = @as([snow.salt_species_count]f64, @splat(@as(f64, 0))),
     direct_surface_and_soil: snow.SurfaceDischarge = .{},
     ion_molar_mass_g_per_mol: snow_discharge.IonMolarMassesGPerMol,
 };
@@ -73,7 +75,7 @@ pub fn acceptedCellActivity(
     chemistry: ChemistryInputs,
 ) !CellActivity {
     try validatePrecipitation(precipitation);
-    inline for (std.meta.fields(SurfaceExchangeInputs)) |field| {
+    inline for (ti_compat.fieldViews(SurfaceExchangeInputs)) |field| {
         const value = @field(exchange, field.name);
         if (!std.math.isFinite(value) or (!std.mem.endsWith(u8, field.name, "heat_megajoules") and value < 0)) {
             if (!@import("builtin").is_test) std.log.err("invalid atmospheric local activity: field={s} value={e}", .{ field.name, value });
@@ -158,8 +160,8 @@ pub fn acceptedCellActivity(
     var surface_direct: snow.SurfaceDischarge = .{};
     surface_direct.litter_g = chemistry.direct_surface_and_soil.litter_g;
     surface_direct.litter_salt_mol = chemistry.direct_surface_and_soil.litter_salt_mol;
-    const zero_g = [_]f64{0} ** snow.species_count;
-    const zero_salt = [_]f64{0} ** snow.salt_species_count;
+    const zero_g = @as([snow.species_count]f64, @splat(@as(f64, 0)));
+    const zero_salt = @as([snow.salt_species_count]f64, @splat(@as(f64, 0)));
     const surface_chemistry = try hourly.atmosphericSoluteActivity(
         0,
         1,
@@ -188,11 +190,11 @@ pub fn acceptedCellActivity(
 }
 
 fn validatePrecipitation(inputs: PrecipitationInputs) !void {
-    if (!@import("builtin").is_test) inline for (std.meta.fields(PrecipitationInputs)) |field| {
+    if (!@import("builtin").is_test) inline for (ti_compat.fieldViews(PrecipitationInputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0) std.log.err("invalid atmospheric precipitation input: field={s} value={e}", .{ field.name, value });
     };
-    inline for (std.meta.fields(PrecipitationInputs)) |field|
+    inline for (ti_compat.fieldViews(PrecipitationInputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name))) return error.InvalidAtmosphericLocalActivity;
     inline for (.{
         inputs.liquid_precipitation_m3,
@@ -276,9 +278,9 @@ test "solid precipitation and snow exchange book canonical frozen heat exactly o
 
 test "gross ground vapor directions and chemistry retain actual local owners" {
     var chemistry: ChemistryInputs = .{ .ion_molar_mass_g_per_mol = ionMasses() };
-    chemistry.top_snow_input_g[@intFromEnum(snow.Species.ammonium_nitrogen)] = 2;
-    chemistry.direct_surface_and_soil.litter_g[@intFromEnum(snow.Species.nitrate_nitrogen)] = 3;
-    chemistry.direct_surface_and_soil.soil_band_g[@intFromEnum(snow.Species.hydrogen_phosphate_phosphorus)] = 5;
+    chemistry.top_snow_input_g[@backingInt(snow.Species.ammonium_nitrogen)] = 2;
+    chemistry.direct_surface_and_soil.litter_g[@backingInt(snow.Species.nitrate_nitrogen)] = 3;
+    chemistry.direct_surface_and_soil.soil_band_g[@backingInt(snow.Species.hydrogen_phosphate_phosphorus)] = 5;
     const activity = try acceptedCellActivity(.{
         .liquid_precipitation_m3 = 0,
         .solid_precipitation_water_equivalent_m3 = 0,

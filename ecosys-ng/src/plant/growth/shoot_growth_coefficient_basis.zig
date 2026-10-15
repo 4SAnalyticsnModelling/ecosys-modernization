@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const EmergenceState = enum {
     pre_emergence,
@@ -35,7 +36,7 @@ pub const Coefficients = struct {
 /// After emergence, each uses its shoot-organ coefficient. This selection
 /// precedes the seven-organ weighted coefficients at source line 883.
 pub fn select(inputs: Inputs) !Coefficients {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (field.type == f64) {
             const value = @field(inputs, field.name);
             if (!std.math.isFinite(value) or value < 0)

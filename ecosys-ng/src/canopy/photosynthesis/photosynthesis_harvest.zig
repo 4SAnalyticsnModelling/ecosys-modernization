@@ -20,6 +20,7 @@ const residual_stalk_senescence_request = @import("../../plant/growth/residual_s
 const residual_stalk_senescence_state_update = @import("../../plant/growth/residual_stalk_senescence_state_update.zig");
 const group_reproductive = @import("photosynthesis_reproductive.zig");
 const group_state = @import("photosynthesis_state.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const HarvestProducts = struct { ecosystem_export: group_state.ElementalMass = .{}, litter: group_state.ElementalMass = .{} };
 
@@ -80,9 +81,9 @@ pub fn cuttingHeightForLeafAreaRemoval(removal_fraction: f64, layer_boundary_hei
 
 fn partitionHarvest(mass: group_state.ElementalMass, remaining_fraction: f64, unexported_fraction: f64) !HarvestPartition {
     if (!std.math.isFinite(remaining_fraction) or !std.math.isFinite(unexported_fraction) or remaining_fraction < 0 or unexported_fraction < remaining_fraction or unexported_fraction > 1) return error.InvalidHarvestRetentionFraction;
-    inline for (@typeInfo(group_state.ElementalMass).@"struct".fields) |field| if (!std.math.isFinite(@field(mass, field.name)) or @field(mass, field.name) < 0) return error.InvalidHarvestMass;
+    inline for (ti_compat.fieldViews(group_state.ElementalMass)) |field| if (!std.math.isFinite(@field(mass, field.name)) or @field(mass, field.name) < 0) return error.InvalidHarvestMass;
     var result: HarvestPartition = .{ .remaining = .{}, .products = .{} };
-    inline for (@typeInfo(group_state.ElementalMass).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(group_state.ElementalMass)) |field| {
         const value = @field(mass, field.name);
         @field(result.remaining, field.name) = remaining_fraction * value;
         @field(result.products.ecosystem_export, field.name) = (1.0 - unexported_fraction) * value;

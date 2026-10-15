@@ -3,6 +3,7 @@ const gas = @import("transport.zig");
 const hydrology = @import("../../transport/hydrology.zig");
 const transport = @import("aqueous_extensive_transport.zig");
 
+
 pub const State = struct {
     allocator: std.mem.Allocator,
     layer_count: usize,
@@ -70,7 +71,7 @@ pub fn advance(allocator: std.mem.Allocator, state: *State, gas_state: *gas.Stat
         if (start + gas.species_count <= macro_conductance.len)
             @memset(macro_conductance[start..][0..gas.species_count], 0);
     }
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const ammonia = @backingInt(gas.Species.ammonia);
     const matrix_ammonia = try allocator.alloc(f64, state.layer_count);
     defer allocator.free(matrix_ammonia);
     const macropore_ammonia = try allocator.alloc(f64, state.layer_count);
@@ -121,8 +122,8 @@ pub fn advance(allocator: std.mem.Allocator, state: *State, gas_state: *gas.Stat
 test "CO2 and CH4 boundary losses retain tracked-carbon grams and source sign" {
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] = 8;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.methane)] = 4;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] = 8;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.methane)] = 4;
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
     const config = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 });
@@ -133,7 +134,7 @@ test "CO2 and CH4 boundary losses retain tracked-carbon grams and source sign" {
     defer hydro.deinit();
     var faces = try hydrology.buildSoilFaces(std.testing.allocator, &hydro, &model_grid);
     defer faces.deinit();
-    const zero_recharge = [_]f64{0} ** gas.species_count;
+    const zero_recharge = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     _ = try advance(std.testing.allocator, &state, &gas_state, .{
         .faces = &faces,
         .micropore_conductance_m3_per_step = &.{},
@@ -145,14 +146,14 @@ test "CO2 and CH4 boundary losses retain tracked-carbon grams and source sign" {
         .macropore_external_water_flux_m3_per_step = &.{0},
         .recharge_concentration_g_per_m3 = &zero_recharge,
     }, .{ .absolute_tolerance = 1e-12, .relative_tolerance = 1e-8, .picard_relaxation = 0.5, .max_iterations = 20, .pore_exchange_fraction = 0 });
-    try std.testing.expectEqual(@as(f64, -2), state.boundary_net_flux_g[@intFromEnum(gas.Species.carbon_dioxide)]);
-    try std.testing.expectEqual(@as(f64, -1), state.boundary_net_flux_g[@intFromEnum(gas.Species.methane)]);
+    try std.testing.expectEqual(@as(f64, -2), state.boundary_net_flux_g[@backingInt(gas.Species.carbon_dioxide)]);
+    try std.testing.expectEqual(@as(f64, -1), state.boundary_net_flux_g[@backingInt(gas.Species.methane)]);
 }
 
 test "aqueous ammonia mirror never enters generic spatial or boundary transport" {
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const ammonia = @backingInt(gas.Species.ammonia);
     gas_state.dissolved_mass_g[ammonia] = 8;
     gas_state.macropore_dissolved_mass_g[ammonia] = 3;
     var state = try State.init(std.testing.allocator, 1);
@@ -165,7 +166,7 @@ test "aqueous ammonia mirror never enters generic spatial or boundary transport"
     defer hydro.deinit();
     var faces = try hydrology.buildSoilFaces(std.testing.allocator, &hydro, &model_grid);
     defer faces.deinit();
-    var recharge = [_]f64{0} ** gas.species_count;
+    var recharge = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     recharge[ammonia] = 100;
     _ = try advance(std.testing.allocator, &state, &gas_state, .{
         .faces = &faces,
@@ -186,7 +187,7 @@ test "aqueous ammonia mirror never enters generic spatial or boundary transport"
 test "DLYRM inactive dissolved-gas layer has no boundary or pore exchange" {
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    const carbon_dioxide = @intFromEnum(gas.Species.carbon_dioxide);
+    const carbon_dioxide = @backingInt(gas.Species.carbon_dioxide);
     gas_state.dissolved_mass_g[carbon_dioxide] = 8;
     gas_state.macropore_dissolved_mass_g[carbon_dioxide] = 4;
     var state = try State.init(std.testing.allocator, 1);
@@ -199,7 +200,7 @@ test "DLYRM inactive dissolved-gas layer has no boundary or pore exchange" {
     var faces = try hydrology.buildSoilFaces(std.testing.allocator, &hydro, &model_grid);
     defer faces.deinit();
     faces.active_by_layer[0] = false;
-    var recharge = [_]f64{0} ** gas.species_count;
+    var recharge = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     recharge[carbon_dioxide] = 100;
     _ = try advance(std.testing.allocator, &state, &gas_state, .{
         .faces = &faces,

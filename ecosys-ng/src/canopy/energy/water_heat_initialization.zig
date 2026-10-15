@@ -4,6 +4,7 @@
 // The complete result stays local until the coupled canopy/root transaction
 // validates, preserving the module's atomic initialization contract.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     foliar_water_retention_m3_per_h: f64,
@@ -115,7 +116,7 @@ pub fn calculate(inputs: Inputs) !Result {
         .trial_canopy_temperature_k = trial_temperature,
         .canopy_temperature_step_k = temperature_step,
     };
-    inline for (@typeInfo(Result).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Result)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteCanopyWaterHeatInitialization;
     if (result.dry_matter_fraction <= 0)
@@ -124,7 +125,7 @@ pub fn calculate(inputs: Inputs) !Result {
 }
 
 fn validateInputs(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.InvalidCanopyWaterHeatInitializationInput;
     if (inputs.water_flux_timestep_h < 0 or

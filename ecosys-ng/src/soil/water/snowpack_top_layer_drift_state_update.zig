@@ -12,6 +12,7 @@
 // fictitious zero drift.
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     solid_snow_heat_capacity_megajoules_per_m3_k: f64,
@@ -178,18 +179,18 @@ fn validateInputs(
     accepted: AcceptedDrift,
     parameters: Parameters,
 ) !void {
-    inline for (@typeInfo(TopLayerState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(TopLayerState)) |field| {
         if (field.type == f64 and
             !std.math.isFinite(@field(state, field.name)))
         {
             return error.NonFiniteSnowDriftStateUpdateInput;
         }
     }
-    inline for (@typeInfo(AcceptedDrift).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(AcceptedDrift)) |field| {
         if (!std.math.isFinite(@field(accepted, field.name)))
             return error.NonFiniteSnowDriftStateUpdateInput;
     }
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         if (!std.math.isFinite(@field(parameters, field.name)))
             return error.NonFiniteSnowDriftStateUpdateInput;
     }

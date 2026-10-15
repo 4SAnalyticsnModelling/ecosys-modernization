@@ -16,6 +16,7 @@ const group_newton_steps = @import("coupled_gas_solver_newton_steps.zig");
 const group_residual = @import("coupled_gas_solver_residual.zig");
 const group_validation = @import("coupled_gas_solver_validation.zig");
 
+
 /// Forms a depth-`history.len + 1` Anderson extrapolate from the accepted
 /// iterate history (oldest first) plus the fresh evaluated Picard seed, then
 /// backtracks that extrapolate toward the seed just enough to remain inside
@@ -1511,12 +1512,12 @@ test "recovery orders Newton then Anderson then immediate Newton retry" {
     state.dissolved_mass_g[0] = 1;
 
     const inventory_count = 2 * gas.species_count;
-    const conductance = [_]f64{0.01} ** gas.species_count;
+    const conductance = @as([gas.species_count]f64, @splat(@as(f64, 0.01)));
     const water = [_]f64{ 1, 1 };
     const no_band_water = [_]f64{ 0, 0 };
-    const solubility = [_]f64{1} ** inventory_count;
-    const exchange = [_]f64{0.1} ** inventory_count;
-    const no_exchange = [_]f64{0} ** inventory_count;
+    const solubility = @as([inventory_count]f64, @splat(@as(f64, 1)));
+    const exchange = @as([inventory_count]f64, @splat(@as(f64, 0.1)));
+    const no_exchange = @as([inventory_count]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{ false, false };
     var trace: SolverTrace = .{};
 
@@ -1588,14 +1589,14 @@ test "published conservative target independently satisfies nonlinear tolerance"
     const boundary = atmosphere.Boundary{
         .cell_index = 0,
         .aerodynamic_conductance_m3_per_step = 0,
-        .interior_conductance_m3_per_step = [_]f64{0} ** gas.species_count,
-        .atmospheric_concentration_g_per_m3 = [_]f64{0} ** gas.species_count,
+        .interior_conductance_m3_per_step = @as([gas.species_count]f64, @splat(@as(f64, 0))),
+        .atmospheric_concentration_g_per_m3 = @as([gas.species_count]f64, @splat(@as(f64, 0))),
     };
     const water = [_]f64{0};
-    const solubility = [_]f64{1} ** inventory_count;
-    const no_exchange = [_]f64{0} ** inventory_count;
+    const solubility = @as([inventory_count]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([inventory_count]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{false};
-    var atmospheric_ledger = [_]f64{0} ** inventory_count;
+    var atmospheric_ledger = @as([inventory_count]f64, @splat(@as(f64, 0)));
     const inputs: group_misc.Inputs = .{
         .faces = &.{},
         .face_conductance_m3_per_step = &.{},
@@ -1697,12 +1698,12 @@ test "final counted slot may publish within explicit physical ceiling" {
     const boundary = atmosphere.Boundary{
         .cell_index = 0,
         .aerodynamic_conductance_m3_per_step = 0,
-        .interior_conductance_m3_per_step = [_]f64{0} ** gas.species_count,
-        .atmospheric_concentration_g_per_m3 = [_]f64{0} ** gas.species_count,
+        .interior_conductance_m3_per_step = @as([gas.species_count]f64, @splat(@as(f64, 0))),
+        .atmospheric_concentration_g_per_m3 = @as([gas.species_count]f64, @splat(@as(f64, 0))),
     };
     const water = [_]f64{0};
-    const solubility = [_]f64{1} ** inventory_count;
-    const no_exchange = [_]f64{0} ** inventory_count;
+    const solubility = @as([inventory_count]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([inventory_count]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{false};
     const inputs: group_misc.Inputs = .{
         .faces = &.{},
@@ -1746,7 +1747,7 @@ test "invalid publication image is an atomic counted rejection" {
     @memcpy(&before_gaseous, state.gaseous_mass_g);
     @memcpy(&before_dissolved, state.dissolved_mass_g);
     @memcpy(&before_band, state.band_dissolved_mass_g);
-    var atmospheric_ledger = [_]f64{0} ** inventory_count;
+    var atmospheric_ledger = @as([inventory_count]f64, @splat(@as(f64, 0)));
     var inputs = group_validation.validationTestInputs();
     inputs.atmospheric_flux_g_by_component = &atmospheric_ledger;
     var trace: SolverTrace = .{};
@@ -1913,12 +1914,12 @@ test "rejected speculative Anderson retries Newton in the next counted slot" {
     state.dissolved_mass_g[0] = 1;
 
     const inventory_count = 2 * gas.species_count;
-    const conductance = [_]f64{0.01} ** gas.species_count;
+    const conductance = @as([gas.species_count]f64, @splat(@as(f64, 0.01)));
     const water = [_]f64{ 1, 1 };
     const no_band_water = [_]f64{ 0, 0 };
-    const solubility = [_]f64{1} ** inventory_count;
-    const exchange = [_]f64{0.1} ** inventory_count;
-    const no_exchange = [_]f64{0} ** inventory_count;
+    const solubility = @as([inventory_count]f64, @splat(@as(f64, 1)));
+    const exchange = @as([inventory_count]f64, @splat(@as(f64, 0.1)));
+    const no_exchange = @as([inventory_count]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{ false, false };
     const total_before = state.gaseous_mass_g[0] + state.dissolved_mass_g[0];
     var trace: SolverTrace = .{

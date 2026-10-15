@@ -25,6 +25,9 @@ const hourly_vegetation = @import("stages/hourly_vegetation.zig");
 const diagnostics = @import("stages/diagnostics.zig");
 const run_support = @import("stages/run_support.zig");
 
+const arr_compat = ecosys.array_compat;
+const ti_compat = @import("ecosys_ng").typeinfo_compat;
+
 /// Diagnostics go to the run's own `logs/run.log` as well as standard error,
 /// so a run's record of what it did travels with its outputs.
 pub const std_options: std.Options = .{ .logFn = run_support.logToRunLogAndStderr };
@@ -367,7 +370,7 @@ fn recordConservationSurveyReport(
     scope_name: []const u8,
 ) bool {
     var breached = false;
-    inline for (@typeInfo(ecosys.hourly_cell_conservation.Quantity).@"enum".fields) |field| {
+    inline for (ti_compat.enumFieldViews(ecosys.hourly_cell_conservation.Quantity)) |field| {
         const index: usize = @intCast(field.value);
         // Report this quantity's activity whether or not it breached, so the
         // summary can tell a conserved-while-active pass from a vacuous one.
@@ -782,7 +785,7 @@ noinline fn writeAcceptedHourlyOutputs(driver_context: anytype, accepted_context
                     const layer = try driver_context.state.*.layerIndex(cell, local_layer);
                     const water_m3 = driver_context.state.*.liquid_water_m3[layer];
                     inline for (.{ ecosys.gas_transport.Species.carbon_dioxide, ecosys.gas_transport.Species.methane, ecosys.gas_transport.Species.oxygen }) |species| {
-                        const component = layer * ecosys.gas_transport.species_count + @intFromEnum(species);
+                        const component = layer * ecosys.gas_transport.species_count + @backingInt(species);
                         const concentration = try ecosys.soil_biogeochemistry_output.dissolvedGasConcentration(driver_context.gas_transport_state.*.dissolved_mass_g[component], water_m3);
                         switch (species) {
                             .carbon_dioxide => carbon_dioxide_concentration[local_layer] = concentration,
@@ -794,7 +797,7 @@ noinline fn writeAcceptedHourlyOutputs(driver_context: anytype, accepted_context
                 }
                 var ground_flux_g: [ecosys.gas_transport.species_count]f64 = @splat(0);
                 inline for (.{ ecosys.gas_transport.Species.carbon_dioxide, ecosys.gas_transport.Species.methane, ecosys.gas_transport.Species.oxygen }) |species|
-                    ground_flux_g[@intFromEnum(species)] = try ecosys.soil_hourly_output_binding.gasBoundaryExchangeG(
+                    ground_flux_g[@backingInt(species)] = try ecosys.soil_hourly_output_binding.gasBoundaryExchangeG(
                         driver_context.soil_gas_transport_state.*.atmospheric_flux_g_per_h,
                         driver_context.surface_litter_gas_transport_state.*.atmospheric_flux_g_per_h,
                         try driver_context.state.*.layerIndex(cell, 0),
@@ -803,7 +806,7 @@ noinline fn writeAcceptedHourlyOutputs(driver_context: anytype, accepted_context
                         species,
                     );
                 const litter_oxygen = try ecosys.soil_biogeochemistry_output.dissolvedGasConcentration(
-                    driver_context.litter_gas_transport_state.*.dissolved_mass_g[cell * ecosys.gas_transport.species_count + @intFromEnum(ecosys.gas_transport.Species.oxygen)],
+                    driver_context.litter_gas_transport_state.*.dissolved_mass_g[cell * ecosys.gas_transport.species_count + @backingInt(ecosys.gas_transport.Species.oxygen)],
                     driver_context.surface_litter_gas_transport_state.*.water_volume_m3[cell],
                 );
                 const canopy_net_fixation_g_c_per_h = if (driver_context.canopy_carbon_exchange_state.*) |ledger|
@@ -814,10 +817,10 @@ noinline fn writeAcceptedHourlyOutputs(driver_context: anytype, accepted_context
                 const root_atmospheric_oxygen_g_o_per_h = try ecosys.root_uptake_ledger.atmosphereToRootForCellGPerH(&driver_context.root_uptake_ledger_state.*, &driver_context.state.*, cell, 1);
                 const root_atmospheric_methane_g_c_per_h = try ecosys.root_uptake_ledger.atmosphereToRootForCellGPerH(&driver_context.root_uptake_ledger_state.*, &driver_context.state.*, cell, 2);
                 try ecosys.soil_biogeochemistry_output.calculateCarbonInto(.{
-                    .carbon_dioxide_emission_g_c_per_h = ground_flux_g[@intFromEnum(ecosys.gas_transport.Species.carbon_dioxide)] + root_gas_withdrawal.carbon_dioxide_g_c_per_h - root_atmospheric_co2_g_c_per_h,
-                    .net_carbon_exchange_g_c_per_h = canopy_net_fixation_g_c_per_h + ground_flux_g[@intFromEnum(ecosys.gas_transport.Species.carbon_dioxide)] + root_gas_withdrawal.carbon_dioxide_g_c_per_h - root_atmospheric_co2_g_c_per_h,
-                    .methane_emission_g_c_per_h = ground_flux_g[@intFromEnum(ecosys.gas_transport.Species.methane)] + root_gas_withdrawal.methane_g_c_per_h - root_atmospheric_methane_g_c_per_h,
-                    .oxygen_exchange_g_o2_per_h = ground_flux_g[@intFromEnum(ecosys.gas_transport.Species.oxygen)] + root_gas_withdrawal.oxygen_g_o_per_h - root_atmospheric_oxygen_g_o_per_h,
+                    .carbon_dioxide_emission_g_c_per_h = ground_flux_g[@backingInt(ecosys.gas_transport.Species.carbon_dioxide)] + root_gas_withdrawal.carbon_dioxide_g_c_per_h - root_atmospheric_co2_g_c_per_h,
+                    .net_carbon_exchange_g_c_per_h = canopy_net_fixation_g_c_per_h + ground_flux_g[@backingInt(ecosys.gas_transport.Species.carbon_dioxide)] + root_gas_withdrawal.carbon_dioxide_g_c_per_h - root_atmospheric_co2_g_c_per_h,
+                    .methane_emission_g_c_per_h = ground_flux_g[@backingInt(ecosys.gas_transport.Species.methane)] + root_gas_withdrawal.methane_g_c_per_h - root_atmospheric_methane_g_c_per_h,
+                    .oxygen_exchange_g_o2_per_h = ground_flux_g[@backingInt(ecosys.gas_transport.Species.oxygen)] + root_gas_withdrawal.oxygen_g_o_per_h - root_atmospheric_oxygen_g_o_per_h,
                     .local_surface_area_m2 = driver_context.canopy_cell_area_m2.*[cell],
                     .carbon_dioxide_concentration_by_layer = carbon_dioxide_concentration,
                     .canopy_air_carbon_dioxide_umol_per_mol = driver_context.atmospheric_canopy_gas_state.*.canopy_co2_umol_mol[cell],
@@ -1036,7 +1039,7 @@ noinline fn writeAcceptedHourlyOutputs(driver_context: anytype, accepted_context
                 for (0..driver_context.config.*.soil_layers) |local_layer| {
                     const layer = try driver_context.state.*.layerIndex(cell, local_layer);
                     const water_m3 = driver_context.state.*.liquid_water_m3[layer];
-                    const n2o_component = layer * ecosys.gas_transport.species_count + @intFromEnum(ecosys.gas_transport.Species.nitrous_oxide);
+                    const n2o_component = layer * ecosys.gas_transport.species_count + @backingInt(ecosys.gas_transport.Species.nitrous_oxide);
                     nitrous_oxide_concentration[local_layer] = try ecosys.soil_biogeochemistry_output.dissolvedGasConcentration(driver_context.gas_transport_state.*.dissolved_mass_g[n2o_component], water_m3);
                 }
                 const first_soil_layer = try driver_context.state.*.layerIndex(cell, 0);
@@ -1073,7 +1076,7 @@ noinline fn writeAcceptedHourlyOutputs(driver_context: anytype, accepted_context
                 );
                 const litter_base = cell * ecosys.gas_transport.species_count;
                 const litter_nitrous_oxide = try ecosys.soil_biogeochemistry_output.dissolvedGasConcentration(
-                    driver_context.litter_gas_transport_state.*.dissolved_mass_g[litter_base + @intFromEnum(ecosys.gas_transport.Species.nitrous_oxide)],
+                    driver_context.litter_gas_transport_state.*.dissolved_mass_g[litter_base + @backingInt(ecosys.gas_transport.Species.nitrous_oxide)],
                     driver_context.surface_litter_gas_transport_state.*.water_volume_m3[cell],
                 );
                 // The retained dry-reference pair owns extensive
@@ -1271,8 +1274,8 @@ noinline fn writeAcceptedHourlyOutputs(driver_context: anytype, accepted_context
                 for (0..driver_context.config.*.soil_layers) |local_layer| {
                     const layer = try driver_context.state.*.layerIndex(cell, local_layer);
                     const base = layer * driver_context.aqueous_species_count.*;
-                    inline for (@typeInfo(ecosys.solute_transport_species.AqueousSpecies).@"enum".fields) |field| {
-                        const species: ecosys.solute_transport_species.AqueousSpecies = @enumFromInt(field.value);
+                    inline for (ti_compat.enumFieldViews(ecosys.solute_transport_species.AqueousSpecies)) |field| {
+                        const species: ecosys.solute_transport_species.AqueousSpecies = @fromBackingInt(@intCast(field.value));
                         if (ecosys.solute_transport_species.diffusivityClass(species) == .phosphate) {
                             dissolved_inorganic_phosphorus_drainage_g_p_per_h += @max(0, -driver_context.soil_solute_boundary_net_flux_mol.*[base + field.value]) * driver_context.runscript.*.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol;
                         }
@@ -1718,8 +1721,8 @@ noinline fn writeAcceptedDailyCarbonOutput(
                     driver_context.surface_litter_chemistry_state.*.dry_reference_water_m3[cell],
                 );
                 values[tail + 8] = try ecosys.soil_inorganic_carbon_storage.calculate(.{
-                    .carbon_dioxide_and_methane_g_c = gas_inventory_g[@intFromEnum(ecosys.gas_transport.Species.carbon_dioxide)] +
-                        gas_inventory_g[@intFromEnum(ecosys.gas_transport.Species.methane)],
+                    .carbon_dioxide_and_methane_g_c = gas_inventory_g[@backingInt(ecosys.gas_transport.Species.carbon_dioxide)] +
+                        gas_inventory_g[@backingInt(ecosys.gas_transport.Species.methane)],
                     .soil_water_volume_m3 = driver_context.state.*.matrix_liquid_water_m3[first_layer .. first_layer + active_layers],
                     .soil_bulk_volume_m3 = driver_context.soil_solver_property_state.*.matrix_bulk_volume_m3[first_layer .. first_layer + active_layers],
                     .carbonate_mol_per_m3 = active_carbonate,
@@ -2065,7 +2068,7 @@ noinline fn writeAcceptedDailySoilNitrogenOutput(
                     const layer = first_layer + local_layer;
                     for (0..ecosys.gas_transport.species_count) |species| {
                         const component = layer * ecosys.gas_transport.species_count + species;
-                        if (species == @intFromEnum(ecosys.gas_transport.Species.nitrogen)) {
+                        if (species == @backingInt(ecosys.gas_transport.Species.nitrogen)) {
                             dissolved_dinitrogen_g_n +=
                                 driver_context.gas_transport_state.*.dissolved_mass_g[component] +
                                 driver_context.gas_transport_state.*.macropore_dissolved_mass_g[component] +
@@ -2075,7 +2078,7 @@ noinline fn writeAcceptedDailySoilNitrogenOutput(
                 }
                 for (0..ecosys.gas_transport.species_count) |species| {
                     const component = cell * ecosys.gas_transport.species_count + species;
-                    if (species == @intFromEnum(ecosys.gas_transport.Species.nitrogen)) {
+                    if (species == @backingInt(ecosys.gas_transport.Species.nitrogen)) {
                         dissolved_dinitrogen_g_n +=
                             driver_context.litter_gas_transport_state.*.dissolved_mass_g[component] +
                             driver_context.litter_gas_transport_state.*.macropore_dissolved_mass_g[component] +
@@ -2596,7 +2599,7 @@ noinline fn writeAcceptedDailyPlantOutputs(
                     .temperature_function = canopy.plant_uptake_growth_temperature_response[plant],
                 });
                 const values = try driver_context.daily_plant_development_bank.*.row(plant);
-                values[0] = @floatFromInt(@intFromEnum(output.phase));
+                values[0] = @floatFromInt(@backingInt(output.phase));
                 values[1] = @floatFromInt(output.branch_count);
                 values[2] = output.main_branch_stage;
                 values[3] = output.development_feedback;
@@ -3515,9 +3518,9 @@ noinline fn postScienceManagementAndGasAccounting(driver_context: anytype, advan
     for (0..driver_context.state.*.cell_count) |cell| {
         const first_layer = cell * driver_context.config.*.soil_layers;
         const layer_count = driver_context.state.*.active_soil_layer_count[cell];
-        const co2_species = @intFromEnum(ecosys.gas_transport.Species.carbon_dioxide);
-        const ch4_species = @intFromEnum(ecosys.gas_transport.Species.methane);
-        const o2_species = @intFromEnum(ecosys.gas_transport.Species.oxygen);
+        const co2_species = @backingInt(ecosys.gas_transport.Species.carbon_dioxide);
+        const ch4_species = @backingInt(ecosys.gas_transport.Species.methane);
+        const o2_species = @backingInt(ecosys.gas_transport.Species.oxygen);
         var co2_soil_surface_flux: f64 = 0;
         var ch4_soil_surface_flux: f64 = 0;
         var o2_soil_surface_flux: f64 = 0;
@@ -3573,22 +3576,22 @@ noinline fn postScienceManagementAndGasAccounting(driver_context: anytype, advan
                     .carbon_dioxide_g_m3 = driver_context.atmospheric_canopy_gas_state.*.mass_concentration_g_per_m3[cell * ecosys.gas_transport.species_count + co2_species],
                     .methane_g_m3 = driver_context.atmospheric_canopy_gas_state.*.mass_concentration_g_per_m3[cell * ecosys.gas_transport.species_count + ch4_species],
                     .oxygen_g_m3 = driver_context.atmospheric_canopy_gas_state.*.mass_concentration_g_per_m3[cell * ecosys.gas_transport.species_count + o2_species],
-                    .nitrogen_g_m3 = driver_context.atmospheric_canopy_gas_state.*.mass_concentration_g_per_m3[cell * ecosys.gas_transport.species_count + @intFromEnum(ecosys.gas_transport.Species.nitrogen)],
-                    .nitrous_oxide_g_m3 = driver_context.atmospheric_canopy_gas_state.*.mass_concentration_g_per_m3[cell * ecosys.gas_transport.species_count + @intFromEnum(ecosys.gas_transport.Species.nitrous_oxide)],
+                    .nitrogen_g_m3 = driver_context.atmospheric_canopy_gas_state.*.mass_concentration_g_per_m3[cell * ecosys.gas_transport.species_count + @backingInt(ecosys.gas_transport.Species.nitrogen)],
+                    .nitrous_oxide_g_m3 = driver_context.atmospheric_canopy_gas_state.*.mass_concentration_g_per_m3[cell * ecosys.gas_transport.species_count + @backingInt(ecosys.gas_transport.Species.nitrous_oxide)],
                 },
                 .{
                     .carbon_dioxide_ratio = parameters.solubility.reference_water_to_air[co2_species],
                     .methane_ratio = parameters.solubility.reference_water_to_air[ch4_species],
                     .oxygen_ratio = parameters.solubility.reference_water_to_air[o2_species],
-                    .nitrogen_ratio = parameters.solubility.reference_water_to_air[@intFromEnum(ecosys.gas_transport.Species.nitrogen)],
-                    .nitrous_oxide_ratio = parameters.solubility.reference_water_to_air[@intFromEnum(ecosys.gas_transport.Species.nitrous_oxide)],
+                    .nitrogen_ratio = parameters.solubility.reference_water_to_air[@backingInt(ecosys.gas_transport.Species.nitrogen)],
+                    .nitrous_oxide_ratio = parameters.solubility.reference_water_to_air[@backingInt(ecosys.gas_transport.Species.nitrous_oxide)],
                 },
                 .{
                     .carbon_dioxide = parameters.precipitation_activity_log[co2_species],
                     .methane = parameters.precipitation_activity_log[ch4_species],
                     .oxygen = parameters.precipitation_activity_log[o2_species],
-                    .nitrogen = parameters.precipitation_activity_log[@intFromEnum(ecosys.gas_transport.Species.nitrogen)],
-                    .nitrous_oxide = parameters.precipitation_activity_log[@intFromEnum(ecosys.gas_transport.Species.nitrous_oxide)],
+                    .nitrogen = parameters.precipitation_activity_log[@backingInt(ecosys.gas_transport.Species.nitrogen)],
+                    .nitrous_oxide = parameters.precipitation_activity_log[@backingInt(ecosys.gas_transport.Species.nitrous_oxide)],
                 },
                 driver_context.atmospheric_state.*.air_temperature_k[cell] - 273.15,
             );
@@ -4301,9 +4304,9 @@ noinline fn postScienceManureAndPlantExchange(driver_context: anytype, advance_c
                 .cumulative_exchange_g_n_by_plant,
             driver_context.plant_daily_flux_ledger.*.ammonia_exchange_g_n,
         );
-        inline for (@typeInfo(
+        inline for (ti_compat.fieldViews(
             ecosys.grid_cell_litter_standing_dead_state_update.State,
-        ).@"struct".fields) |field|
+        )) |field|
             if (field.type == []f64)
                 @memset(
                     @field(
@@ -5524,9 +5527,9 @@ noinline fn postScienceFireAndCloseout(driver_context: anytype, advance_context:
             },
         );
     } else {
-        inline for (@typeInfo(
+        inline for (ti_compat.fieldViews(
             ecosys.canopy_fire_state_update.State,
-        ).@"struct".fields) |field|
+        )) |field|
             if (field.type == []f64)
                 @memset(
                     @field(driver_context.canopy_fire_state_update_state.*, field.name),
@@ -6241,7 +6244,7 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
                 },
             );
             for (per_layer_quantities) |quantity| {
-                const closure = scope_report.closure[@intFromEnum(quantity)];
+                const closure = scope_report.closure[@backingInt(quantity)];
                 std.log.info(
                     "DRY_CARRIER_TRACE site=per_layer_closure hour={d} cell=0 layer={d} quantity={s} residual={e} absolute={e} acceptance_limit={e} arithmetic_roundoff_allowance={e} effective_acceptance_limit={e} physical_accepted={} accepted={}",
                     .{
@@ -6297,7 +6300,7 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
         const surface_after = driver_context.hourly_layer_storage_after.*[surface_scope];
         const surface_activity = driver_context.hourly_layer_boundary_ledger.*.activity[surface_scope];
         const surface_closure = hourly_layer_conservation_report.cells[surface_scope]
-            .closure[@intFromEnum(ecosys.hourly_cell_conservation.Quantity.heat)];
+            .closure[@backingInt(ecosys.hourly_cell_conservation.Quantity.heat)];
         // PHOSPHORUS-SURFACE-CLOSURE-HOUR-2658-001, following the heat
         // precedent. `hourly_cell_conservation.totalPhosphorus` (`:2490`) is a
         // compensated sum of exactly four lanes, so printing them separately
@@ -6311,7 +6314,7 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
         const phosphorus_before = driver_context.hourly_layer_storage_before.*[surface_scope];
         const phosphorus_after = driver_context.hourly_layer_storage_after.*[surface_scope];
         const phosphorus_closure = hourly_layer_conservation_report.cells[surface_scope]
-            .closure[@intFromEnum(ecosys.hourly_cell_conservation.Quantity.phosphorus)];
+            .closure[@backingInt(ecosys.hourly_cell_conservation.Quantity.phosphorus)];
         std.log.info(
             "hourly surface phosphorus lanes: cell={d} hour={d} residue_before_g={e} residue_after_g={e} organic_before_g={e} organic_after_g={e} phosphate_before_g={e} phosphate_after_g={e} plant_before_g={e} plant_after_g={e} residual_g={e} accepted={}",
             .{
@@ -6440,10 +6443,10 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
             },
         );
     };
-    if (hourly_cell_conservation_report.failing_cell_count[@intFromEnum(ecosys.hourly_cell_conservation.Quantity.heat)] != 0) {
+    if (hourly_cell_conservation_report.failing_cell_count[@backingInt(ecosys.hourly_cell_conservation.Quantity.heat)] != 0) {
         for (hourly_layer_conservation_report.cells, 0..) |scope_report, index| {
             const address = try driver_context.layer_conservation_layout.*.address(index);
-            const heat = scope_report.closure[@intFromEnum(ecosys.hourly_cell_conservation.Quantity.heat)];
+            const heat = scope_report.closure[@backingInt(ecosys.hourly_cell_conservation.Quantity.heat)];
             std.log.err("hourly heat failure scope: kind={s} cell={d} layer={d} residual={e} physical_limit={e} arithmetic_roundoff_allowance={e} accepted={}", .{
                 @tagName(address.kind), address.cell,                       address.layer, heat.residual,
                 heat.acceptance_limit,  heat.arithmetic_roundoff_allowance, heat.accepted,
@@ -6567,7 +6570,7 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
         try driver_context.landscape_mass_balance_state.*.hourly_layer_closure.recordAccepted(
             hourly_layer_conservation_report,
         );
-        inline for (@typeInfo(ecosys.hourly_cell_conservation.Quantity).@"enum".fields) |quantity| {
+        inline for (ti_compat.enumFieldViews(ecosys.hourly_cell_conservation.Quantity)) |quantity| {
             const index: usize = @intCast(quantity.value);
             std.log.debug(
                 "accepted hourly and accumulated cell/layer closure: hour={d} quantity={s} cell_hourly_maximum_absolute={e} cell_hourly_maximum_normalized_relative={e} cell_historical_hourly_maximum_absolute={e} cell_historical_hourly_maximum_normalized_relative={e} cell_accumulated_maximum_absolute={e} cell_accumulated_maximum_normalized_relative={e} layer_hourly_maximum_absolute={e} layer_hourly_maximum_normalized_relative={e} layer_historical_hourly_maximum_absolute={e} layer_historical_hourly_maximum_normalized_relative={e} layer_accumulated_maximum_absolute={e} layer_accumulated_maximum_normalized_relative={e}",
@@ -6626,7 +6629,7 @@ noinline fn acceptHourAndPublish(driver_context: anytype, timeline_state: *Timel
         );
         std.log.debug("hourly ion subcomponent trace: hour={d} dissolved_aqueous_mol={e} immobile_phosphate_ion_mol={e} cation_exchange_mol={e} geochemistry_solids_mol={e} pending_fertilizer_ion_mol={e}", .{ advance_context.scene_weather_hours.* + 1, ion_subcomponents.dissolved_aqueous_mol, ion_subcomponents.immobile_phosphate_ion_mol, ion_subcomponents.cation_exchange_mol, ion_subcomponents.geochemistry_solids_mol, ion_subcomponents.pending_fertilizer_ion_mol });
         const per_species = try ecosys.landscape_mass_inventory.debugDissolvedAqueousPerSpecies(driver_context.hourly_science_context.*.grid, driver_context.hourly_science_context.*.micropore_solute_state, driver_context.hourly_science_context.*.macropore_solute_state);
-        inline for (@typeInfo(ecosys.solute_transport_species.AqueousSpecies).@"enum".fields) |field| if (per_species[field.value] != 0)
+        inline for (ti_compat.enumFieldViews(ecosys.solute_transport_species.AqueousSpecies)) |field| if (per_species[field.value] != 0)
             std.log.debug("hourly dissolved-aqueous per-species trace: hour={d} species={s} mol={e}", .{ advance_context.scene_weather_hours.* + 1, field.name, per_species[field.value] });
     }
     const completed_day_timestamp = advance_context.previous_weather_timestamp.*;
@@ -7211,7 +7214,7 @@ noinline fn advancePlantLifecycleManagement(
                     driver_context.plant_state.*.shoot_carbon_g_m2[plant] = 0;
                     @memset(driver_context.plant_state.*.root_carbon_g_m2[plant * driver_context.config.*.soil_layers .. (plant + 1) * driver_context.config.*.soil_layers], 0);
                     const retention_state = &driver_context.canopy_precipitation_retention_state.*.?;
-                    inline for (@typeInfo(ecosys.canopy_precipitation_retention.State).@"struct".fields) |field| {
+                    inline for (ti_compat.fieldViews(ecosys.canopy_precipitation_retention.State)) |field| {
                         if (field.type == []f64 and !std.mem.startsWith(u8, field.name, "cell_")) @field(retention_state, field.name)[plant] = 0;
                     }
                     retention_state.standing_dead_surface_water_m3[plant] = carried_standing_dead_surface_water_m3;
@@ -8139,9 +8142,9 @@ noinline fn runTimeline(driver_context: anytype, evidence_writer: ?*std.Io.Write
                 defer driver_context.allocator.*.free(concentration_by_cell);
                 for (concentration_by_cell, 0..) |*concentration, cell| {
                     concentration.* = .{
-                        .primary_g_per_m3 = [_]f64{0} ** ecosys.snow_solute_transport.primary_species_count,
-                        .static_ion_g_per_m3 = [_]f64{0} ** ecosys.snow_solute_transport.static_ion_species_count,
-                        .salt_mol_per_m3 = [_]f64{0} ** ecosys.snow_solute_transport.salt_species_count,
+                        .primary_g_per_m3 = @as([ecosys.snow_solute_transport.primary_species_count]f64, @splat(@as(f64, 0))),
+                        .static_ion_g_per_m3 = @as([ecosys.snow_solute_transport.static_ion_species_count]f64, @splat(@as(f64, 0))),
+                        .salt_mol_per_m3 = @as([ecosys.snow_solute_transport.salt_species_count]f64, @splat(@as(f64, 0))),
                     };
                     const first = cell * driver_context.snow_transport_state.*.layer_capacity;
                     var has_initial_snow = false;
@@ -10264,7 +10267,7 @@ noinline fn prepareStartupSoilChemistry(
             context.chemistry_state.water_mol_per_m3[layer_cell] = reaction_parameters.water_concentration_mol_per_m3;
             context.chemistry_layer_parameters[layer_cell] = reaction_parameters.forLayer(context.fractions, phosphate_non_band_ratio, phosphate_band_ratio, cation_exchange_capacity_mol_charge_per_megagram, total_carboxyl_sites_mol_per_megagram, .{ .shared_megagrams_per_m3 = shared_soil_mass_per_water_volume_megagrams_per_m3, .ammonium_non_band_megagrams_per_m3 = ammonium_non_band_ratio, .ammonium_band_megagrams_per_m3 = ammonium_band_ratio }, selectivity);
             // STARTE lines 234--248: seed dissolved CO2 before equilibrium.
-            const co2 = @intFromEnum(ecosys.gas_transport.Species.carbon_dioxide);
+            const co2 = @backingInt(ecosys.gas_transport.Species.carbon_dioxide);
             const sol = try ecosys.gas_transport.surfaceSolubilityWaterToAir(context.mean_annual_temperature_k_by_cell[cell], context.surface_gas_parameters.solubility);
             const dissolved_co2_mol_per_m3 = context.initial_atmospheric_gas_concentration_g_per_m3[cell * ecosys.gas_transport.species_count + co2] * sol[co2] / ecosys.gas_transport.g_per_mol_tracked[co2];
             if (!std.math.isFinite(dissolved_co2_mol_per_m3) or dissolved_co2_mol_per_m3 < 0)
@@ -10367,8 +10370,8 @@ noinline fn solveStartupSoilChemistryLayers(
                         ecosys.solute_reaction_solver.diagnosticStrategyCallCount(.ternary_correction_face),
                         ecosys.solute_reaction_solver.diagnosticStrategyCallCount(.current_sign_coordinate_anderson),
                     });
-                    inline for (@typeInfo(ecosys.solute_reaction_solver.DiagnosticStrategy).@"enum".fields) |field| {
-                        const strategy: ecosys.solute_reaction_solver.DiagnosticStrategy = @enumFromInt(field.value);
+                    inline for (ti_compat.enumFieldViews(ecosys.solute_reaction_solver.DiagnosticStrategy)) |field| {
+                        const strategy: ecosys.solute_reaction_solver.DiagnosticStrategy = @fromBackingInt(@intCast(field.value));
                         const evaluations = ecosys.solute_reaction_solver.diagnosticStrategyEvaluationCounts(strategy);
                         std.log.info("STARTE chemistry failed strategy evaluations: cell={d} layer={d} strategy={s} full_network_evaluations={d} reaction_span_evaluations={d}", .{ cell, layer, field.name, evaluations.full_network, evaluations.reaction_span });
                     }
@@ -10402,8 +10405,8 @@ noinline fn solveStartupSoilChemistryLayers(
                     ecosys.solute_reaction_solver.diagnosticStrategyCallCount(.ternary_correction_face),
                     ecosys.solute_reaction_solver.diagnosticStrategyCallCount(.current_sign_coordinate_anderson),
                 });
-                inline for (@typeInfo(ecosys.solute_reaction_solver.DiagnosticStrategy).@"enum".fields) |field| {
-                    const strategy: ecosys.solute_reaction_solver.DiagnosticStrategy = @enumFromInt(field.value);
+                inline for (ti_compat.enumFieldViews(ecosys.solute_reaction_solver.DiagnosticStrategy)) |field| {
+                    const strategy: ecosys.solute_reaction_solver.DiagnosticStrategy = @fromBackingInt(@intCast(field.value));
                     const strategy_evaluations = ecosys.solute_reaction_solver.diagnosticStrategyEvaluationCounts(strategy);
                     std.log.info("STARTE chemistry strategy evaluations: cell={d} layer={d} strategy={s} full_network_evaluations={d} reaction_span_evaluations={d}", .{
                         cell,
@@ -10421,8 +10424,8 @@ noinline fn solveStartupSoilChemistryLayers(
                     backtrack_stats.total_attempts,
                     backtrack_stats.max_attempts,
                 });
-                inline for (@typeInfo(ecosys.solute_reaction_solver.DiagnosticReactionSpanBoundsSite).@"enum".fields) |field| {
-                    const site: ecosys.solute_reaction_solver.DiagnosticReactionSpanBoundsSite = @enumFromInt(field.value);
+                inline for (ti_compat.enumFieldViews(ecosys.solute_reaction_solver.DiagnosticReactionSpanBoundsSite)) |field| {
+                    const site: ecosys.solute_reaction_solver.DiagnosticReactionSpanBoundsSite = @fromBackingInt(@intCast(field.value));
                     const site_stats = ecosys.solute_reaction_solver.diagnosticReactionSpanBoundsSiteStats(site);
                     std.log.info("STARTE reaction-span bounds site: cell={d} layer={d} site={s} calls={d} full_network_evaluations={d} reaction_span_evaluations={d}", .{
                         cell,
@@ -12318,9 +12321,9 @@ noinline fn initializePlantStateUpdateOwners(
 pub fn main(init: std.process.Init) !void {
     var debug_allocator: std.heap.DebugAllocator(.{}) = .init;
     defer {
-        if (comptime builtin.mode == .Debug) _ = debug_allocator.deinit();
+        if (comptime builtin.mode == .debug) _ = debug_allocator.deinit();
     }
-    const allocator = if (comptime builtin.mode == .Debug)
+    const allocator = if (comptime builtin.mode == .debug)
         debug_allocator.allocator()
     else
         std.heap.smp_allocator;
@@ -13177,7 +13180,7 @@ pub fn main(init: std.process.Init) !void {
         .intercellular_to_atmospheric_co2_ratio = 0.7,
     });
     const inactive_nutrient_trait: ecosys.plant_traits.NutrientUptake = .{ .maximum_rate_g_per_m2_h = 0, .half_saturation_umol_per_l = 0, .minimum_concentration_umol_per_l = 0 };
-    @memset(root_nutrient_traits, .{inactive_nutrient_trait} ** 3);
+    @memset(root_nutrient_traits, @as([3]ecosys.plant_traits.NutrientUptake, @splat(inactive_nutrient_trait)));
     const root_nutrient_feedback_enabled = try allocator.alloc(bool, runtime_plant_count);
     resources.ownFree(&root_nutrient_feedback_enabled);
     @memset(root_nutrient_feedback_enabled, false);
@@ -13828,7 +13831,7 @@ pub fn main(init: std.process.Init) !void {
     // from the audit's own `Quantity` enum, so the survey cannot drift out of
     // step with the list of things being audited.
     var conservation_quantity_names: [ecosys.hourly_cell_conservation.quantity_count][]const u8 = undefined;
-    inline for (@typeInfo(ecosys.hourly_cell_conservation.Quantity).@"enum".fields) |field| {
+    inline for (ti_compat.enumFieldViews(ecosys.hourly_cell_conservation.Quantity)) |field| {
         conservation_quantity_names[@as(usize, @intCast(field.value))] = field.name;
     }
     var conservation_survey_storage: ?ecosys.conservation_survey.Survey =
@@ -14813,7 +14816,7 @@ noinline fn initializeSiteEnvironmentPlan(
     );
     resources.ownFree(&owners.lateral_connection_mode_by_cell);
     for (owners.lateral_connection_mode_by_cell, 0..) |*mode, cell| {
-        mode.* = @intFromEnum(owners.site_catalog.entries.items[
+        mode.* = @backingInt(owners.site_catalog.entries.items[
             owners.grid_environment.site_catalog_index_by_cell[cell]
         ].site.lateral_connection_mode);
     }

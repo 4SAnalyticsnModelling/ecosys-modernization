@@ -6,10 +6,11 @@ const geochemistry = @import("../solute/geochemistry_network.zig");
 const ZoneFractions = @import("../solute/charge_classification.zig").ZoneFractions;
 const constituents = @import("../../erosion/eroded_constituents.zig");
 const legacy_water_negligible_floor = @import("../../core/legacy_water_negligible_floor.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
-pub const component_count: usize = @typeInfo(cation.Cations).@"struct".fields.len +
+pub const component_count: usize = @typeInfo(cation.Cations).@"struct".field_names.len +
     2 * phosphateErodibleFieldCount() +
-    @typeInfo(geochemistry.SolidState).@"struct".fields.len + 1;
+    @typeInfo(geochemistry.SolidState).@"struct".field_names.len + 1;
 
 pub const Exported = struct {
     nitrogen_g_n: f64 = 0,
@@ -55,7 +56,7 @@ pub noinline fn exported(
     var result: Exported = .{};
     for (0..workspace.cell_count) |cell| {
         var cursor = cell * component_count;
-        inline for (@typeInfo(cation.Cations).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(cation.Cations)) |field| {
             const amount = try exportedAmount(workspace.exported[cursor]);
             cursor += 1;
             // Mineral N (ammonium) is tracked in its own nitrogen_g_n balance,
@@ -74,7 +75,7 @@ pub noinline fn exported(
         // Carboxyl-bound hydrogen.
         result.ion_mol += try exportedAmount(workspace.exported[cursor]);
         cursor += 1;
-        inline for (0..2) |_| inline for (@typeInfo(phosphate.State).@"struct".fields) |field| {
+        inline for (0..2) |_| inline for (ti_compat.fieldViews(phosphate.State)) |field| {
             if (comptime isErodiblePhosphateField(field.name)) {
                 const amount = try exportedAmount(workspace.exported[cursor]);
                 cursor += 1;
@@ -83,7 +84,7 @@ pub noinline fn exported(
                 result.ion_mol += amount * phosphateIonAtoms(field.name);
             }
         };
-        inline for (@typeInfo(geochemistry.SolidState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(geochemistry.SolidState)) |field| {
             const amount = try exportedAmount(workspace.exported[cursor]);
             cursor += 1;
             result.ion_mol += amount * geochemistryIonAtoms(field.name);
@@ -93,7 +94,7 @@ pub noinline fn exported(
         if (cursor != (cell + 1) * component_count)
             return error.ChemistryErosionDimensionMismatch;
     }
-    inline for (std.meta.fields(Exported)) |field|
+    inline for (ti_compat.fieldViews(Exported)) |field|
         if (!std.math.isFinite(@field(result, field.name)) or
             @field(result, field.name) < 0)
             return error.ChemistryErosionExportOverflow;
@@ -164,7 +165,7 @@ pub fn packMapped(cells: usize, layer_capacity: usize, top_layer_by_cell: []cons
         const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(cell_area_m2[cell]);
         const water_carrier = try erosionWaterCarrierM3(water, chemistry.dry_reference_water_m3[layer], negligible_water_volume_m3);
         var cursor = cell * component_count;
-        inline for (@typeInfo(cation.Cations).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(cation.Cations)) |field| {
             try put(
                 @field(chemistry.cation_exchange_mol_per_megagram[layer], field.name) *
                     cationCarrier(field.name, soil_mass, fractions) +
@@ -177,13 +178,13 @@ pub fn packMapped(cells: usize, layer_capacity: usize, top_layer_by_cell: []cons
         inline for (.{
             .{ chemistry.non_band_phosphate[layer], chemistry.pending_non_band_phosphate_mol[layer], fractions.phosphate_non_band },
             .{ chemistry.band_phosphate[layer], chemistry.pending_band_phosphate_mol[layer], fractions.phosphate_band },
-        }) |zone| inline for (@typeInfo(phosphate.State).@"struct".fields) |field| {
+        }) |zone| inline for (ti_compat.fieldViews(phosphate.State)) |field| {
             if (comptime isErodiblePhosphateField(field.name)) {
                 const scale = (if (comptime std.mem.endsWith(u8, field.name, "_per_megagram")) soil_mass else water_carrier) * zone[2];
                 try put(@field(zone[0], field.name) * scale + @field(zone[1], field.name), output, &cursor);
             }
         };
-        inline for (@typeInfo(geochemistry.SolidState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(geochemistry.SolidState)) |field| {
             try put(@field(chemistry.geochemistry_solids[layer], field.name) * water_carrier + @field(chemistry.pending_geochemistry_solids_mol[layer], field.name), output, &cursor);
         }
         if (cursor != (cell + 1) * component_count) return error.ChemistryErosionDimensionMismatch;
@@ -209,7 +210,7 @@ pub fn unpackMapped(cells: usize, layer_capacity: usize, top_layer_by_cell: []co
         const negligible_water_volume_m3 = legacyNegligibleWaterVolumeM3(cell_area_m2[cell]);
         const water_carrier = try erosionWaterCarrierM3(water, chemistry.dry_reference_water_m3[layer], negligible_water_volume_m3);
         var cursor = cell * component_count;
-        inline for (@typeInfo(cation.Cations).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(cation.Cations)) |field| {
             const next = try ownedConcentration(input[cursor], cationCarrier(field.name, soil_mass, fractions));
             @field(chemistry.cation_exchange_mol_per_megagram[layer], field.name) = next.concentration;
             @field(chemistry.pending_cation_exchange_mol[layer], field.name) = next.pending_mol;
@@ -222,7 +223,7 @@ pub fn unpackMapped(cells: usize, layer_capacity: usize, top_layer_by_cell: []co
         inline for (.{
             .{ &chemistry.non_band_phosphate[layer], &chemistry.pending_non_band_phosphate_mol[layer], fractions.phosphate_non_band },
             .{ &chemistry.band_phosphate[layer], &chemistry.pending_band_phosphate_mol[layer], fractions.phosphate_band },
-        }) |zone| inline for (@typeInfo(phosphate.State).@"struct".fields) |field| {
+        }) |zone| inline for (ti_compat.fieldViews(phosphate.State)) |field| {
             if (comptime isErodiblePhosphateField(field.name)) {
                 const scale = (if (comptime std.mem.endsWith(u8, field.name, "_per_megagram")) soil_mass else water_carrier) * zone[2];
                 const next = try ownedConcentration(input[cursor], scale);
@@ -231,7 +232,7 @@ pub fn unpackMapped(cells: usize, layer_capacity: usize, top_layer_by_cell: []co
                 cursor += 1;
             }
         };
-        inline for (@typeInfo(geochemistry.SolidState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(geochemistry.SolidState)) |field| {
             const next = try ownedConcentration(input[cursor], water_carrier);
             @field(chemistry.geochemistry_solids[layer], field.name) = next.concentration;
             @field(chemistry.pending_geochemistry_solids_mol[layer], field.name) = next.pending_mol;
@@ -307,7 +308,7 @@ fn cationCarrier(comptime name: []const u8, soil_mass: f64, fractions: ZoneFract
 }
 
 fn validateFractions(fractions: ZoneFractions) !void {
-    inline for (std.meta.fields(ZoneFractions)) |field| {
+    inline for (ti_compat.fieldViews(ZoneFractions)) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.InvalidChemistryErosionState;
@@ -327,7 +328,7 @@ fn isErodiblePhosphateField(comptime name: []const u8) bool {
 
 fn phosphateErodibleFieldCount() usize {
     comptime var count: usize = 0;
-    inline for (@typeInfo(phosphate.State).@"struct".fields) |field| if (isErodiblePhosphateField(field.name)) {
+    inline for (ti_compat.fieldViews(phosphate.State)) |field| if (isErodiblePhosphateField(field.name)) {
         count += 1;
     };
     return count;

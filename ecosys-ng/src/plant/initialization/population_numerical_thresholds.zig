@@ -8,6 +8,7 @@
 // of the single consolidation refactor tracked as INIT-004, not an isolated wire.
 // Group INDEX of docs/traceability/plant_initialization_unbound_family_are_unwired_kernels_not_competing_owners.md
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     plant_population_count: f64,
@@ -32,7 +33,7 @@ pub const CalculationError = error{
 
 /// Translates `startq.f` lines 886--888 for one plant species.
 pub fn calculate(inputs: Inputs) CalculationError!Thresholds {
-    inline for (std.meta.fields(Inputs)) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteInput;
     }
     if (inputs.plant_population_count < 0.0) return error.NegativePopulation;
@@ -55,7 +56,7 @@ pub fn calculate(inputs: Inputs) CalculationError!Thresholds {
         .area_normalized_primary_per_m2 = area_normalized_primary_per_m2,
         .population_scaled_secondary = population_scaled_secondary,
     };
-    inline for (std.meta.fields(Thresholds)) |field| {
+    inline for (ti_compat.fieldViews(Thresholds)) |field| {
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteResult;
     }
     return result;

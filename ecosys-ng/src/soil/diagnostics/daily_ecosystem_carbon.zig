@@ -1,6 +1,8 @@
 const std = @import("std");
 const grid_module = @import("../../state/grid.zig");
 const export_module = @import("daily_carbon_export.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Inputs = struct {
     net_primary_productivity_g_c: f64,
@@ -98,7 +100,7 @@ pub const State = struct {
 /// gross outward amounts, so their separately recorded inward transport must
 /// be added here. Precipitation and irrigation use separate input ledgers.
 pub fn calculate(inputs: Inputs) !Result {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteDailyEcosystemCarbon;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteDailyEcosystemCarbon;
     inline for (.{
         inputs.dissolved_organic_carbon_runoff_g_c,
         inputs.dissolved_inorganic_carbon_runoff_g_c,
@@ -184,23 +186,23 @@ test "TNBP includes inward carbon transport while retaining gross drainage" {
     defer exports.deinit();
     var doc = try organic.State.init(std.testing.allocator, grid.layer_count);
     defer doc.deinit();
-    doc.boundary_net_flux_g[@intFromEnum(organic.Component.dissolved_organic_carbon)] = -10;
-    doc.boundary_net_flux_g[organic.component_count + @intFromEnum(organic.Component.dissolved_acetate_carbon)] = 17;
+    doc.boundary_net_flux_g[@backingInt(organic.Component.dissolved_organic_carbon)] = -10;
+    doc.boundary_net_flux_g[organic.component_count + @backingInt(organic.Component.dissolved_acetate_carbon)] = 17;
     try exports.accumulateOrganicDrainageHour(&grid, &doc);
     var aqueous = try dissolved.State.init(std.testing.allocator, grid.layer_count);
     defer aqueous.deinit();
-    aqueous.boundary_net_flux_g[@intFromEnum(gas.Species.carbon_dioxide)] = 11;
-    aqueous.boundary_net_flux_g[gas.species_count + @intFromEnum(gas.Species.methane)] = -13;
+    aqueous.boundary_net_flux_g[@backingInt(gas.Species.carbon_dioxide)] = 11;
+    aqueous.boundary_net_flux_g[gas.species_count + @backingInt(gas.Species.methane)] = -13;
     try exports.accumulateDissolvedInorganicDrainageHour(&grid, &aqueous);
     var air = try gaseous.State.init(std.testing.allocator, grid.layer_count);
     defer air.deinit();
-    air.subsurface_flux_g_per_h[@intFromEnum(gas.Species.methane)] = 7;
-    air.subsurface_flux_g_per_h[gas.species_count + @intFromEnum(gas.Species.carbon_dioxide)] = -5;
-    air.atmospheric_flux_g_per_h[@intFromEnum(gas.Species.carbon_dioxide)] = -100;
+    air.subsurface_flux_g_per_h[@backingInt(gas.Species.methane)] = 7;
+    air.subsurface_flux_g_per_h[gas.species_count + @backingInt(gas.Species.carbon_dioxide)] = -5;
+    air.atmospheric_flux_g_per_h[@backingInt(gas.Species.carbon_dioxide)] = -100;
     try exports.accumulateGaseousInorganicDrainageHour(&grid, &air);
-    var carbonate = [_]f64{0} ** (2 * solutes.AqueousSpecies.count);
-    carbonate[@intFromEnum(solutes.AqueousSpecies.bicarbonate)] = 2;
-    carbonate[solutes.AqueousSpecies.count + @intFromEnum(solutes.AqueousSpecies.calcium_carbonate)] = -3;
+    var carbonate = @as([(2 * solutes.AqueousSpecies.count)]f64, @splat(@as(f64, 0)));
+    carbonate[@backingInt(solutes.AqueousSpecies.bicarbonate)] = 2;
+    carbonate[solutes.AqueousSpecies.count + @backingInt(solutes.AqueousSpecies.calcium_carbonate)] = -3;
     try exports.accumulateSoluteCarbonateDrainageHour(&grid, &carbonate, solutes.AqueousSpecies.count, 12);
 
     var state = try State.init(std.testing.allocator, 1);

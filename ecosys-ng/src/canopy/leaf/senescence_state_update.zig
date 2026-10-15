@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Tissue = struct {
     area_m2: f64,
@@ -36,13 +37,13 @@ pub const Result = struct {
 /// GROSUB 2630--2654. Calculates the complete leaf-state state_update before
 /// the caller mutates branch, node, or mobile pools.
 pub fn calculate(inputs: Inputs) !Result {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name);
         if (field.type == f64 and (!std.math.isFinite(value) or value < 0))
             return error.InvalidLeafSenescenceStateUpdateInput;
     }
     inline for (.{ inputs.branch, inputs.node, inputs.senescing_snapshot }) |tissue|
-        inline for (@typeInfo(Tissue).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Tissue)) |field| {
             const value = @field(tissue, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidLeafSenescenceStateUpdateInput;
@@ -70,7 +71,7 @@ pub fn calculate(inputs: Inputs) !Result {
         .branch_mobile_phosphorus_g_p = inputs.branch_mobile_phosphorus_g_p + inputs.recycled_phosphorus_g_p,
     };
     inline for (.{ result.branch, result.node }) |tissue|
-        inline for (@typeInfo(Tissue).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Tissue)) |field| {
             const value = @field(tissue, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.LeafSenescenceStateUpdateOverdraw;

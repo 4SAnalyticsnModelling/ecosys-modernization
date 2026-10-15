@@ -1,6 +1,7 @@
 const std = @import("std");
 const chemistry = @import("chemistry_state.zig");
 const phosphate = @import("phosphate_network.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Preserves extensive water-carried chemistry amounts when matrix-water
 /// volume changes. This includes persistent solids and the authoritative
@@ -53,10 +54,10 @@ fn oldCarrier(new: f64, change: f64) !f64 {
 fn validateCell(state: *const chemistry.State, cell: usize, old: f64, new: f64) !void {
     if (!std.math.isFinite(old) or !std.math.isFinite(new) or old < 0 or new < 0)
         return error.InvalidSolidCarrierVolume;
-    inline for (@typeInfo(@TypeOf(state.geochemistry_solids[cell])).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(state.geochemistry_solids[cell]))) |field| {
         try validatePool(@field(state.geochemistry_solids[cell], field.name), old, new);
     }
-    inline for (@typeInfo(phosphate.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(phosphate.State)) |field| {
         if (comptime isPersistentWaterCarriedPhosphate(field.name)) {
             try validatePool(@field(state.non_band_phosphate[cell], field.name), old, new);
             try validatePool(@field(state.band_phosphate[cell], field.name), old, new);
@@ -73,10 +74,10 @@ fn validatePool(concentration_mol_per_m3: f64, old: f64, new: f64) !void {
 
 fn applyCell(state: *chemistry.State, cell: usize, old: f64, new: f64) void {
     const scale = if (old == 0) 0.0 else old / new;
-    inline for (@typeInfo(@TypeOf(state.geochemistry_solids[cell])).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(state.geochemistry_solids[cell]))) |field| {
         @field(state.geochemistry_solids[cell], field.name) *= scale;
     }
-    inline for (@typeInfo(phosphate.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(phosphate.State)) |field| {
         if (comptime isPersistentWaterCarriedPhosphate(field.name)) {
             @field(state.non_band_phosphate[cell], field.name) *= scale;
             @field(state.band_phosphate[cell], field.name) *= scale;

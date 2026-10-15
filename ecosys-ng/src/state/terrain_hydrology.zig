@@ -1,6 +1,7 @@
 const std = @import("std");
 const topography_module = @import("topography.zig");
 const soil_geometry_module = @import("../soil/profile/layer_geometry.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -43,7 +44,7 @@ pub const State = struct {
         result.rows = rows;
         var allocated: usize = 0;
         errdefer result.freeAllocated(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 @field(result, field.name) = try allocator.alloc(f64, count);
                 allocated += 1;
@@ -168,17 +169,17 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 or field.type == []bool) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 or field.type == []bool) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
     pub fn validateFinite(self: *const State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name)) |value| if (!std.math.isFinite(value)) return error.NonFiniteTerrainHydrology;
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name)) |value| if (!std.math.isFinite(value)) return error.NonFiniteTerrainHydrology;
     }
 
     fn freeAllocated(self: *State, count: usize) void {
         var visited: usize = 0;
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 or field.type == []bool) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 or field.type == []bool) {
             if (visited < count) self.allocator.free(@field(self, field.name));
             visited += 1;
         };

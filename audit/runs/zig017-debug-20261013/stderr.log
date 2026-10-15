@@ -1,0 +1,22 @@
+install
++- install ecosys_ng
+   +- compile exe ecosys_ng debug native 1 errors
+src/ecosys_ng.zig:12323:53: error: no field named 'Debug' in enum 'lang.Optimize'
+    const allocator = if (comptime builtin.mode == .Debug)
+                                                   ~^~~~~
+/opt/homebrew/Cellar/zig/0.17.0/lib/zig/std/lang.zig:113:22: note: enum declared here
+pub const Optimize = enum {
+                     ^~~~
+referenced by:
+    callMain [inlined]: /opt/homebrew/Cellar/zig/0.17.0/lib/zig/std/start.zig:827:30
+    callMainWithArgs [inlined]: /opt/homebrew/Cellar/zig/0.17.0/lib/zig/std/start.zig:729:20
+    main: /opt/homebrew/Cellar/zig/0.17.0/lib/zig/std/start.zig:754:28
+    1 reference(s) hidden; use '-freference-trace=4' to see all references
+error: 1 compilation errors
+failed command: /opt/homebrew/Cellar/zig/0.17.0/bin/zig build-exe -Odebug --dep ecosys_ng -Mroot=src/ecosys_ng.zig -Odebug -Mecosys_ng=src/module_index.zig --cache-dir .zig-cache --global-cache-dir .zig-cache-global --build-root . --name ecosys_ng --zig-lib-dir /opt/homebrew/Cellar/zig/0.17.0/lib/zig/ --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+install transitive failure
++- install ecosys_ng transitive failure
+   +- compile exe ecosys_ng debug native 1 errors
+

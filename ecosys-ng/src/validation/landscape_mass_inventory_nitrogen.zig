@@ -24,6 +24,7 @@ const solute_species = @import("../soil/solute/transport_species.zig");
 const zone_classification = @import("../soil/solute/charge_classification.zig");
 const plant_roots = @import("../plant/root/plant_root_system.zig");
 const group_support = @import("landscape_mass_inventory_support.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// REDIST profile mineral-N inventory. Aqueous matrix and macropore amounts
 /// are transport-owned extensive mol N; exchangeable ammonium is chemistry-
@@ -217,7 +218,7 @@ fn inventoryFractionsAt(source: anytype, profile_cell: usize) !zone_classificati
 }
 
 fn validateInventoryFractions(fractions: zone_classification.ZoneFractions) !void {
-    inline for (std.meta.fields(zone_classification.ZoneFractions)) |field| {
+    inline for (ti_compat.fieldViews(zone_classification.ZoneFractions)) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.InvalidMineralNitrogenZoneFraction;
@@ -234,6 +235,6 @@ fn nitrogenAmount(
     macropore: []const f64,
     species: mineral_nitrogen.Species,
 ) f64 {
-    const species_index = @intFromEnum(species);
+    const species_index = @backingInt(species);
     return matrix[species_index] + macropore[species_index];
 }

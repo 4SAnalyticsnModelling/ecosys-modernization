@@ -9,6 +9,7 @@ const RootState = @import("plant_root_system.zig").State;
 const NutrientResult = @import("plant_root_nutrient_uptake.zig").Result;
 const root_domain_count = @import("plant_root_system.zig").biological_domain_count;
 const group_growth = @import("plant_root_metabolism_growth.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const PrimaryRootAxisScaling = struct {
     retained_root_carbon_g_c_per_plant: f64,
@@ -94,7 +95,7 @@ pub fn secondaryRootAxisActive(
 pub fn rootAxisSinkStrength(parameters: group_growth.SecondaryRootParameters, inputs: RootAxisSinkInputs) !RootAxisSinkStrength {
     try parameters.validate();
     if (inputs.root_profile_type > 3) return error.InvalidRootProfileType;
-    inline for (@typeInfo(RootAxisSinkInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RootAxisSinkInputs)) |field| {
         if (field.type == bool or field.type == u8) continue;
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidRootAxisSinkInput;
@@ -132,7 +133,7 @@ pub fn rootAxisSinkStrength(parameters: group_growth.SecondaryRootParameters, in
 pub fn sourceOrderRootAxisSinkStrength(parameters: group_growth.SecondaryRootParameters, inputs: SourceOrderRootAxisSinkInputs) !RootAxisSinkStrength {
     try parameters.validate();
     if (inputs.root_profile_type > 3) return error.InvalidRootProfileType;
-    inline for (@typeInfo(SourceOrderRootAxisSinkInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderRootAxisSinkInputs)) |field| {
         if (field.type == bool or field.type == u8) continue;
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidRootAxisSinkInput;
@@ -189,7 +190,7 @@ pub fn normalizeRootAxisSinkFractions(
     if (!std.math.isFinite(negligible_sink_m) or negligible_sink_m < 0) return error.InvalidRootAxisSinkThreshold;
     var total: f64 = 0;
     for (strengths) |strength| {
-        inline for (@typeInfo(RootAxisSinkStrength).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(RootAxisSinkStrength)) |field| {
             const value = @field(strength, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidRootAxisSinkStrength;
             total += value;

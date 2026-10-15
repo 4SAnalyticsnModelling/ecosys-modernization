@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Layer totals accumulated from the runtime-sized microbial populations and
 /// substrate complexes before NITRO publishes its REDIST gas-flux arrays.
@@ -40,7 +41,7 @@ pub const Result = struct {
 /// Exact NITRO aggregation following labels 640/645:
 /// RCO2O, RCH4O, RH2GO, RUPOXO, RN2G, and RN2O.
 pub fn aggregate(inputs: Inputs) !Result {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteSoilBiogeochemicalGasFlux;
         if (value < 0) return error.NegativeSoilBiogeochemicalGasComponent;
@@ -62,7 +63,7 @@ pub fn aggregate(inputs: Inputs) !Result {
             inputs.chemodenitrification_nitrous_oxide_production_g_n +
             inputs.nitrous_oxide_reduction_g_n,
     };
-    inline for (@typeInfo(Result).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Result)) |field| {
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteSoilBiogeochemicalGasFlux;
     }
     return result;

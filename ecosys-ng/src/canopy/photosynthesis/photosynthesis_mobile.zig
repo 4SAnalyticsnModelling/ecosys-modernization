@@ -19,6 +19,7 @@ const internode_senescence_state_update = @import("../sheath/internode_senescenc
 const residual_stalk_senescence_request = @import("../../plant/growth/residual_stalk_senescence_request.zig");
 const residual_stalk_senescence_state_update = @import("../../plant/growth/residual_stalk_senescence_state_update.zig");
 const group_state = @import("photosynthesis_state.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const BranchMobilePoolFluxes = struct {
     fixed_carbon_g: f64,
@@ -35,7 +36,7 @@ pub const BranchMobilePools = struct { carbon_g_c: f64, nitrogen_g_n: f64, phosp
 
 pub fn previewBranchMobilePools(state: *const group_state.State, branch: usize, fluxes: BranchMobilePoolFluxes) !BranchMobilePools {
     if (branch >= state.branch_mobile_carbon_g.len) return error.CanopyBranchIndexOutOfBounds;
-    inline for (@typeInfo(BranchMobilePoolFluxes).@"struct".fields) |field| if (!std.math.isFinite(@field(fluxes, field.name))) return error.NonFiniteBranchPoolFlux;
+    inline for (ti_compat.fieldViews(BranchMobilePoolFluxes)) |field| if (!std.math.isFinite(@field(fluxes, field.name))) return error.NonFiniteBranchPoolFlux;
     inline for (.{ state.branch_mobile_carbon_g[branch], state.branch_mobile_nitrogen_g[branch], state.branch_mobile_phosphorus_g[branch] }) |pool|
         if (!std.math.isFinite(pool) or pool < 0) return error.InvalidBranchMobilePoolState;
     const carbon = state.branch_mobile_carbon_g[branch] + fluxes.fixed_carbon_g - @min(fluxes.maintenance_respiration_demand_g_c, fluxes.available_respirable_carbon_g_c) - fluxes.growth_and_respiration_g_c - fluxes.nitrogen_assimilation_respiration_g_c;

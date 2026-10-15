@@ -1,4 +1,6 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 /// Fixed scientific species identity from TRNSFRS.F. Grid, layer, face, and
 /// state extents remain runtime values; this enum prevents anonymous indices
@@ -61,7 +63,7 @@ pub const AqueousSpecies = enum(u8) {
     band_hpo4,
     band_h2po4,
 
-    pub const count = @typeInfo(AqueousSpecies).@"enum".fields.len;
+    pub const count = @typeInfo(AqueousSpecies).@"enum".field_names.len;
 };
 
 pub const DiffusivityClass = enum(u8) {
@@ -104,7 +106,7 @@ pub const ZoneFractions = struct {
 };
 
 pub fn index(species: AqueousSpecies) usize {
-    return @intFromEnum(species);
+    return @backingInt(species);
 }
 
 /// Fraction of matrix water occupied by this chemistry coordinate. Runtime
@@ -215,7 +217,7 @@ fn legacyBoundaryIonDirection(net_flux_mol: []const f64, input: bool) !f64 {
     for (net_flux_mol, 0..) |flux_mol, component| {
         if (!std.math.isFinite(flux_mol)) return error.NonFiniteTransportBoundaryFlux;
         if ((input and flux_mol <= 0) or (!input and flux_mol >= 0)) continue;
-        const species: AqueousSpecies = @enumFromInt(component % AqueousSpecies.count);
+        const species: AqueousSpecies = @fromBackingInt(@intCast(component % AqueousSpecies.count));
         total += @abs(flux_mol) * legacyIonCount(species);
         if (!std.math.isFinite(total)) return error.NonFiniteTransportBoundaryFlux;
     }
@@ -244,8 +246,8 @@ pub fn diffusivityClass(species: AqueousSpecies) DiffusivityClass {
 pub fn fillFaceParameters(conductance: DiffusiveConductance, fractions: ZoneFractions, output_conductance_m3_per_step: []f64, output_mobility_fraction: []f64) !void {
     if (output_conductance_m3_per_step.len != AqueousSpecies.count or output_mobility_fraction.len != AqueousSpecies.count) return error.TransportSpeciesCountMismatch;
     try validate(conductance, fractions);
-    inline for (@typeInfo(AqueousSpecies).@"enum".fields) |field| {
-        const species: AqueousSpecies = @enumFromInt(field.value);
+    inline for (ti_compat.enumFieldViews(AqueousSpecies)) |field| {
+        const species: AqueousSpecies = @fromBackingInt(@intCast(field.value));
         output_conductance_m3_per_step[index(species)] = conductanceForClass(conductance, diffusivityClass(species));
         output_mobility_fraction[index(species)] = transportMobilityFraction(species, fractions);
     }
@@ -271,8 +273,8 @@ fn conductanceForClass(values: DiffusiveConductance, class: DiffusivityClass) f6
 }
 
 fn validate(conductance: DiffusiveConductance, fractions: ZoneFractions) !void {
-    inline for (@typeInfo(DiffusiveConductance).@"struct".fields) |field| if (!std.math.isFinite(@field(conductance, field.name)) or @field(conductance, field.name) < 0) return error.InvalidTransportConductance;
-    inline for (@typeInfo(ZoneFractions).@"struct".fields) |field| if (!std.math.isFinite(@field(fractions, field.name)) or @field(fractions, field.name) < 0 or @field(fractions, field.name) > 1) return error.InvalidTransportZoneFraction;
+    inline for (ti_compat.fieldViews(DiffusiveConductance)) |field| if (!std.math.isFinite(@field(conductance, field.name)) or @field(conductance, field.name) < 0) return error.InvalidTransportConductance;
+    inline for (ti_compat.fieldViews(ZoneFractions)) |field| if (!std.math.isFinite(@field(fractions, field.name)) or @field(fractions, field.name) < 0 or @field(fractions, field.name) > 1) return error.InvalidTransportZoneFraction;
 }
 
 test "all named TRNSFRS species receive conductance and mobility" {
@@ -292,7 +294,7 @@ test "all named TRNSFRS species receive conductance and mobility" {
 }
 
 test "boundary ion outflow uses the exact inventory coefficient map" {
-    var flux = [_]f64{0} ** AqueousSpecies.count;
+    var flux = @as([AqueousSpecies.count]f64, @splat(@as(f64, 0)));
     flux[index(.aluminum)] = -2;
     flux[index(.aluminum_hydroxide_4)] = -3;
     flux[index(.non_band_hpo4)] = -5;

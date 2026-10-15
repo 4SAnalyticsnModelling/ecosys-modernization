@@ -3,6 +3,7 @@ const CanopyState = @import("../../canopy/photosynthesis/photosynthesis.zig").St
 const RootState = @import("../root/plant_root_system.zig").State;
 const LitterPartition = @import("../partition/litter.zig");
 const RootLitter = @import("../root/plant_root_metabolism.zig").RootLitter;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const StorageElementMass = struct {
     carbon_g_c: f64,
@@ -121,7 +122,7 @@ pub const Parameters = struct {
     depleted_storage_threshold_g_c_per_g_root_c: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Parameters)) |field| {
             if (field.type == f64) {
                 const value = @field(self, field.name);
                 if (!std.math.isFinite(value) or value < 0) return error.InvalidStorageRemobilizationParameter;
@@ -439,14 +440,14 @@ pub const BranchMobileReserveExchangeResult = struct {
 /// GROSUB 4966-5020 signed branch-mobile/stalk-reserve equilibration. Carbon
 /// is state_updateted conceptually before the N/P gradients and excess corrections.
 pub fn equilibrateBranchMobileAndReserve(inputs: BranchMobileReserveExchangeInputs) !BranchMobileReserveExchangeResult {
-    inline for (@typeInfo(BranchMobileReserveExchangeInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(BranchMobileReserveExchangeInputs)) |field| {
         if (field.type == f64) {
             const value = @field(inputs, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidBranchMobileReserveExchangeInput;
         }
     }
     inline for (.{ inputs.branch_mobile, inputs.branch_reserve }) |pool|
-        inline for (@typeInfo(ElementTransfer).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ElementTransfer)) |field| {
             const value = @field(pool, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidBranchMobileReserveExchangeInput;
         };
@@ -484,7 +485,7 @@ pub fn equilibrateBranchMobileAndReserve(inputs: BranchMobileReserveExchangeInpu
     const next_mobile = subtractElements(inputs.branch_mobile, transfer);
     const next_reserve = addElements(inputs.branch_reserve, transfer);
     inline for (.{ next_mobile, next_reserve }) |pool|
-        inline for (@typeInfo(ElementTransfer).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ElementTransfer)) |field| {
             const value = @field(pool, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.BranchMobileReserveExchangeWouldOverdraw;
         };
@@ -494,14 +495,14 @@ pub fn equilibrateBranchMobileAndReserve(inputs: BranchMobileReserveExchangeInpu
 /// GROSUB 5050-5110 annual grain-fill transfer from one host-root layer into
 /// stalk reserve. The source updates carbon before evaluating N and P.
 pub fn transferAnnualRootMobileToBranchReserve(inputs: AnnualRootReserveExchangeInputs) !AnnualRootReserveExchangeResult {
-    inline for (@typeInfo(AnnualRootReserveExchangeInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(AnnualRootReserveExchangeInputs)) |field| {
         if (field.type == f64) {
             const value = @field(inputs, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidAnnualRootReserveExchangeInput;
         }
     }
     inline for (.{ inputs.root_mobile, inputs.branch_reserve }) |pool|
-        inline for (@typeInfo(ElementTransfer).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ElementTransfer)) |field| {
             const value = @field(pool, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidAnnualRootReserveExchangeInput;
         };
@@ -537,7 +538,7 @@ pub fn transferAnnualRootMobileToBranchReserve(inputs: AnnualRootReserveExchange
     const next_root = subtractElements(inputs.root_mobile, transfer);
     const next_reserve = addElements(inputs.branch_reserve, transfer);
     inline for (.{ next_root, next_reserve }) |pool|
-        inline for (@typeInfo(ElementTransfer).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ElementTransfer)) |field| {
             const value = @field(pool, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.AnnualRootReserveExchangeWouldOverdraw;
         };
@@ -550,7 +551,7 @@ pub fn transferAnnualRootMobileToBranchReserve(inputs: AnnualRootReserveExchange
 pub fn remobilizeBranchPoolsToSeasonalStorage(parameters: Parameters, inputs: BranchStorageRemobilizationInputs) !BranchStorageRemobilizationResult {
     try parameters.validate();
     inline for (.{ inputs.branch_reserve, inputs.branch_mobile, inputs.seasonal_storage }) |pool|
-        inline for (@typeInfo(ElementTransfer).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ElementTransfer)) |field| {
             const value = @field(pool, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidBranchStorageRemobilizationInput;
         };
@@ -586,7 +587,7 @@ pub fn remobilizeBranchPoolsToSeasonalStorage(parameters: Parameters, inputs: Br
     const next_mobile = subtractElements(inputs.branch_mobile, mobile_transfer);
     const next_storage = addElements(addElements(inputs.seasonal_storage, reserve_transfer), mobile_transfer);
     inline for (.{ next_reserve, next_mobile, next_storage }) |pool|
-        inline for (@typeInfo(ElementTransfer).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ElementTransfer)) |field| {
             const value = @field(pool, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.BranchStorageRemobilizationWouldOverdraw;
         };
@@ -618,7 +619,7 @@ fn subtractElements(a: ElementTransfer, b: ElementTransfer) ElementTransfer {
 /// GROSUB 5021-5047 seasonal-storage replenishment of a low branch reserve.
 /// The source transfer `XFRC` is positive from whole-plant storage to branch.
 pub fn replenishLowBranchReserve(inputs: LowBranchReserveInputs) !LowBranchReserveResult {
-    inline for (@typeInfo(LowBranchReserveInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(LowBranchReserveInputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidLowBranchReserveInput;
     }
@@ -657,7 +658,7 @@ pub fn replenishLowBranchReserve(inputs: LowBranchReserveInputs) !LowBranchReser
 /// seasonal storage. This preserves the source's operation order and one-way
 /// `AMIN1(0, ...)` gate; the reported transfer is positive root-to-storage.
 pub fn replenishDepletedSeasonalStorage(inputs: DepletedStorageInputs) !DepletedStorageResult {
-    inline for (@typeInfo(DepletedStorageInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(DepletedStorageInputs)) |field| {
         if (field.type == f64) {
             const value = @field(inputs, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidDepletedStorageInput;
@@ -721,7 +722,7 @@ pub fn rootToSeasonalStorage(
     const nitrogen = @min(unconstrained_n, @min(carbon * parameters.maximum_mobile_nitrogen_per_carbon_g_n_per_g_c, unconstrained_p * parameters.maximum_mobile_nitrogen_per_carbon_g_n_per_g_c / parameters.minimum_mobile_phosphorus_per_carbon_g_p_per_g_c));
     const phosphorus = @min(unconstrained_p, @min(carbon * parameters.maximum_mobile_phosphorus_per_carbon_g_p_per_g_c, unconstrained_n * parameters.maximum_mobile_phosphorus_per_carbon_g_p_per_g_c / parameters.minimum_mobile_nitrogen_per_carbon_g_n_per_g_c));
     const result: ElementTransfer = .{ .carbon_g_c = carbon, .nitrogen_g_n = nitrogen, .phosphorus_g_p = phosphorus };
-    inline for (@typeInfo(ElementTransfer).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteRootSeasonalStorageTransfer;
+    inline for (ti_compat.fieldViews(ElementTransfer)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteRootSeasonalStorageTransfer;
     return result;
 }
 
@@ -732,7 +733,7 @@ pub fn state_updateRootToSeasonalStorage(canopy: *CanopyState, roots: *RootState
     var total: ElementTransfer = .{};
     for (root_layer_indices, transfers) |root, transfer| {
         if (root >= roots.mobile_carbon_g.len) return error.RootSeasonalStorageDimensionMismatch;
-        inline for (@typeInfo(ElementTransfer).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ElementTransfer)) |field| {
             const value = @field(transfer, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidRootSeasonalStorageTransfer;
             @field(total, field.name) += value;
@@ -762,7 +763,7 @@ pub fn state_updateRootToSeasonalStorage(canopy: *CanopyState, roots: *RootState
 pub fn calculate(parameters: Parameters, inputs: Inputs) !Transfers {
     try parameters.validate();
     if (inputs.growth_habit > 1 or inputs.aboveground_turnover_type >= 6) return error.InvalidStorageRemobilizationCode;
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (field.type == bool or field.type == u8) continue;
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidStorageRemobilizationInput;
@@ -821,7 +822,7 @@ pub fn calculate(parameters: Parameters, inputs: Inputs) !Transfers {
     const phosphorus_total = shoot_p + root_p;
     if (nitrogen_total > inputs.storage_nitrogen_g_n or phosphorus_total > inputs.storage_phosphorus_g_p) return error.StorageRemobilizationWouldOverdrawNutrients;
     const result: Transfers = .{ .oxidized_storage_carbon_g_c = oxidized_storage_carbon_g_c, .shoot_carbon_g_c = shoot_c, .root_carbon_g_c = root_c, .shoot_nitrogen_g_n = shoot_n, .root_nitrogen_g_n = root_n, .shoot_phosphorus_g_p = shoot_p, .root_phosphorus_g_p = root_p };
-    inline for (@typeInfo(Transfers).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteStorageRemobilizationResult;
+    inline for (ti_compat.fieldViews(Transfers)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteStorageRemobilizationResult;
     return result;
 }
 

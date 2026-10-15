@@ -18,6 +18,7 @@ const perennial_stalk_senescence_setup = @import("../../plant/growth/perennial_s
 const internode_senescence_state_update = @import("../sheath/internode_senescence_state_update.zig");
 const residual_stalk_senescence_request = @import("../../plant/growth/residual_stalk_senescence_request.zig");
 const residual_stalk_senescence_state_update = @import("../../plant/growth/residual_stalk_senescence_state_update.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Compact heap-owned canopy topology. Prefix offsets permit different branch,
 /// node, layer/orientation sample counts for every runtime plant population.
@@ -381,7 +382,7 @@ pub const State = struct {
         }
         var replacement = try State.init(self.allocator, self.cell_count, self.species_count, branch_counts, node_counts, sample_counts);
         errdefer replacement.deinit();
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             if (comptime std.mem.indexOf(u8, field.name, "_by_species_") != null and std.mem.startsWith(u8, field.name, "branch_"))
                 copyRemovingRange(@field(replacement, field.name), @field(self, field.name), branch_remove_first * 8, branch_remove_end * 8)
             else if (comptime std.mem.startsWith(u8, field.name, "branch_"))
@@ -429,7 +430,7 @@ pub const State = struct {
 
         var replacement = try State.init(self.allocator, self.cell_count, self.species_count, branch_counts, node_counts, sample_counts);
         errdefer replacement.deinit();
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             if (comptime std.mem.indexOf(u8, field.name, "_by_species_") != null and std.mem.startsWith(u8, field.name, "branch_"))
                 copyAroundInsertion(@field(replacement, field.name), @field(self, field.name), inserted_branch * 8, 8)
             else if (comptime std.mem.startsWith(u8, field.name, "branch_"))
@@ -474,7 +475,7 @@ pub const State = struct {
 
         var replacement = try State.init(self.allocator, self.cell_count, self.species_count, branch_counts, node_counts, sample_counts);
         errdefer replacement.deinit();
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             if (comptime std.mem.startsWith(u8, field.name, "node_"))
                 copyAroundInsertion(@field(replacement, field.name), @field(self, field.name), inserted_node, 1)
             else if (comptime std.mem.startsWith(u8, field.name, "sample_"))
@@ -520,7 +521,7 @@ const FloatFieldExtent = enum(u8) { plant, plant_kinetic, branch, branch_species
 
 const float_field_count = count: {
     var count: usize = 0;
-    for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         count += 1;
     };
     break :count count;
@@ -533,7 +534,7 @@ const float_field_extent_kinds: [float_field_count]FloatFieldExtent = kinds: {
     @setEvalBranchQuota(100_000);
     var result: [float_field_count]FloatFieldExtent = undefined;
     var index: usize = 0;
-    for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         result[index] = floatFieldExtentKind(field.name);
         index += 1;
     };
@@ -543,7 +544,7 @@ const float_field_extent_kinds: [float_field_count]FloatFieldExtent = kinds: {
 const float_field_names: [float_field_count][]const u8 = names: {
     var result: [float_field_count][]const u8 = undefined;
     var index: usize = 0;
-    for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         result[index] = field.name;
         index += 1;
     };
@@ -563,7 +564,7 @@ fn floatFieldExtentKind(comptime field_name: []const u8) FloatFieldExtent {
 noinline fn floatFieldPointers(state: *State) FloatFieldPointers {
     var result: FloatFieldPointers = undefined;
     comptime var index: usize = 0;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         result[index] = &@field(state, field.name);
         index += 1;
     };
@@ -573,7 +574,7 @@ noinline fn floatFieldPointers(state: *State) FloatFieldPointers {
 noinline fn constFloatFieldPointers(state: *const State) ConstFloatFieldPointers {
     var result: ConstFloatFieldPointers = undefined;
     comptime var index: usize = 0;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         result[index] = &@field(state, field.name);
         index += 1;
     };

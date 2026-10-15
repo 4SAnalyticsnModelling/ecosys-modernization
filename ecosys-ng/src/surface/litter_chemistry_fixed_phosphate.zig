@@ -510,7 +510,7 @@ fn fixedPhosphateActiveSetResidual(
         if (mineralIsActive(mask, mineral_index)) {
             residual[row] = group_phosphate_minerals.phosphateMineralExtent(
                 extents.phosphate_minerals,
-                @enumFromInt(mineral_index),
+                @fromBackingInt(@intCast(mineral_index)),
             );
             row += 1;
         }
@@ -532,7 +532,7 @@ fn activeSetResidualScale(
         if (active_row == row) {
             const inventory = group_phosphate_minerals.phosphateMineralInventory(
                 cell,
-                @enumFromInt(mineral_index),
+                @fromBackingInt(@intCast(mineral_index)),
             );
             return options.scaleMolPerM3(inventory);
         }
@@ -587,7 +587,7 @@ fn fixedPhosphateActiveSetIsAdmissible(
     const saturation = try calculate(evaluator.context, cell);
     for (0..group_types.fixed_phosphate_mineral_count) |mineral_index| {
         const reaction: group_phosphate_minerals.PhosphateMineralReaction =
-            @enumFromInt(mineral_index);
+            @fromBackingInt(@intCast(mineral_index));
         const inventory = group_phosphate_minerals.phosphateMineralInventory(cell, reaction);
         const scale = options.scaleMolPerM3(inventory);
         if (mineralIsActive(mask, mineral_index)) {

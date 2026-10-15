@@ -26,6 +26,7 @@
 
 const std = @import("std");
 const numerics = @import("../../core/numerics.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Original van Genuchten (1980) retention curve coupled to the Mualem
 /// conductivity model. This intentionally does not implement the Ippisch
@@ -39,7 +40,7 @@ pub const MualemVanGenuchtenParameters = struct {
     saturated_hydraulic_conductivity_m_per_h: f64,
 
     pub fn validate(self: MualemVanGenuchtenParameters) !void {
-        inline for (@typeInfo(MualemVanGenuchtenParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(MualemVanGenuchtenParameters)) |field| {
             if (!std.math.isFinite(@field(self, field.name)))
                 return error.NonFiniteMualemVanGenuchtenParameter;
         }
@@ -306,7 +307,7 @@ pub const MualemVanGenuchtenFitOptions = struct {
     maximum_iterations: u16,
 
     pub fn validate(self: MualemVanGenuchtenFitOptions) !void {
-        inline for (@typeInfo(MualemVanGenuchtenFitOptions).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(MualemVanGenuchtenFitOptions)) |field| {
             if (field.type == f64 and !std.math.isFinite(@field(self, field.name)))
                 return error.NonFiniteMualemVanGenuchtenFitOption;
         }
@@ -486,7 +487,7 @@ pub fn fitOriginalMualemVanGenuchten(
     options: MualemVanGenuchtenFitOptions,
 ) !MualemVanGenuchtenFitResult {
     try options.validate();
-    inline for (@typeInfo(MualemVanGenuchtenFitInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(MualemVanGenuchtenFitInputs)) |field| {
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteMualemVanGenuchtenFitInput;
     }
@@ -665,7 +666,7 @@ pub const Parameters = struct {
     below_wilting_shape: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteSoilRetentionParameter;
+        inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteSoilRetentionParameter;
         if (self.saturation_water_potential_megapascal >= 0 or self.minimum_water_potential_megapascal >= self.saturation_water_potential_megapascal or self.organic_soil_threshold_g_per_megagram < 0 or self.organic_bulk_density_threshold_1_megagrams_per_m3 <= 0 or self.organic_bulk_density_threshold_2_megagrams_per_m3 <= self.organic_bulk_density_threshold_1_megagrams_per_m3 or self.maximum_field_capacity_fraction_of_porosity <= 0 or self.maximum_field_capacity_fraction_of_porosity > 1 or self.maximum_wilting_point_fraction_of_field_capacity <= 0 or self.maximum_wilting_point_fraction_of_field_capacity > 1 or self.saturation_to_field_shape <= 0 or self.below_wilting_shape <= 0) return error.InvalidSoilRetentionParameter;
     }
 };

@@ -3,6 +3,7 @@ const harvest = @import("harvest.zig");
 const surface_chemistry = @import("../../surface/litter_chemistry.zig");
 const soil_chemistry = @import("../../soil/solute/chemistry_state.zig");
 const solute_transport = @import("../../soil/solute/transport.zig");
+
 const AqueousSpecies = @import("../../soil/solute/transport_species.zig").AqueousSpecies;
 
 pub const salt_count = harvest.salt_count;
@@ -132,8 +133,8 @@ pub fn apply(
                 const amounts = try micropore.cellAmountsConst(soil_index);
                 for (0..salt_count) |salt| {
                     const ingress_index = ((cell * (state.soil_layer_capacity + 1) + layer + 1) * salt_count) + salt;
-                    const species = transportSpecies(@enumFromInt(salt));
-                    const next = amounts[@intFromEnum(species)] + state.staged_mol[ingress_index];
+                    const species = transportSpecies(@fromBackingInt(@intCast(salt)));
+                    const next = amounts[@backingInt(species)] + state.staged_mol[ingress_index];
                     if (!std.math.isFinite(next) or next < 0)
                         return error.NonFinitePlantLitterSaltTransportInventory;
                 }
@@ -168,7 +169,7 @@ pub fn apply(
                 const amounts = micropore.cellAmounts(soil_index) catch unreachable;
                 for (0..salt_count) |salt| {
                     const ingress_index = ((cell * (state.soil_layer_capacity + 1) + layer + 1) * salt_count) + salt;
-                    amounts[@intFromEnum(transportSpecies(@enumFromInt(salt)))] += state.staged_mol[ingress_index];
+                    amounts[@backingInt(transportSpecies(@fromBackingInt(@intCast(salt))))] += state.staged_mol[ingress_index];
                 }
             }
         }
@@ -243,9 +244,9 @@ fn preflightExchangeLayer(
     for (0..salt_count) |salt| {
         const index = ((cell * (state.soil_layer_capacity + 1) + exchange_layer) * salt_count) + salt;
         const existing = if (surface) |value|
-            surfaceConcentration(value, @enumFromInt(salt))
+            surfaceConcentration(value, @fromBackingInt(@intCast(salt)))
         else
-            soilConcentration(soil.?, @enumFromInt(salt));
+            soilConcentration(soil.?, @fromBackingInt(@intCast(salt)));
         if (!std.math.isFinite(existing) or existing < 0)
             return error.InvalidPlantLitterSaltChemistryState;
         if (!present(water_m3, water_absolute_tolerance_m3, physical_relative_tolerance)) continue;
@@ -273,7 +274,7 @@ fn state_updateExchangeLayer(
         return;
     }
     for (0..salt_count) |salt| {
-        const species: harvest.Salt = @enumFromInt(salt);
+        const species: harvest.Salt = @fromBackingInt(@intCast(salt));
         const index = ((cell * (state.soil_layer_capacity + 1) + exchange_layer) * salt_count) + salt;
         const increment = state.staged_mol[index] / water_m3;
         if (surface) |value| addSurfaceConcentration(value, species, increment) else addSoilConcentration(soil.?, species, increment);
@@ -376,13 +377,13 @@ test "plant litter salt ingress conserves eight salts and defers dry layers" {
         }
         const water = if (layer == 0) surface_water[cell] else soil_water[cell * 2 + layer - 1];
         const concentration = if (layer == 0)
-            surfaceConcentration(surface.cells[cell], @enumFromInt(salt))
+            surfaceConcentration(surface.cells[cell], @fromBackingInt(@intCast(salt)))
         else
-            soilConcentration(soil.aqueous[cell * 2 + layer - 1], @enumFromInt(salt));
+            soilConcentration(soil.aqueous[cell * 2 + layer - 1], @fromBackingInt(@intCast(salt)));
         const pending = state.pending_mol[(cell * 3 + layer) * salt_count + salt];
         try std.testing.expectApproxEqAbs(expected_mol, concentration * water + pending, 1e-15);
         if (layer > 0) {
-            const transported = micropore.amount_mol[((cell * 2 + layer - 1) * AqueousSpecies.count) + @intFromEnum(transportSpecies(@enumFromInt(salt)))];
+            const transported = micropore.amount_mol[((cell * 2 + layer - 1) * AqueousSpecies.count) + @backingInt(transportSpecies(@fromBackingInt(@intCast(salt))))];
             try std.testing.expectApproxEqAbs(expected_mol - pending, transported, 1e-15);
         }
     };
@@ -402,7 +403,7 @@ test "plant litter salt ingress conserves eight salts and defers dry layers" {
         try std.testing.expectEqual(@as(f64, 0), state.pending_mol[(2 * salt_count) + salt]);
     for (0..salt_count) |salt| {
         const expected_mol = @as(f64, @floatFromInt(42 + 2 * salt)) * 1e-6;
-        const transported = micropore.amount_mol[AqueousSpecies.count + @intFromEnum(transportSpecies(@enumFromInt(salt)))];
+        const transported = micropore.amount_mol[AqueousSpecies.count + @backingInt(transportSpecies(@fromBackingInt(@intCast(salt))))];
         try std.testing.expectApproxEqAbs(expected_mol, transported, 1e-15);
     }
 }
@@ -417,7 +418,7 @@ test "plant litter salt ingress rejects a late invalid value atomically" {
     defer soil.deinit();
     var micropore = try solute_transport.State.init(allocator, 1, AqueousSpecies.count);
     defer micropore.deinit();
-    var source = [_]f64{0} ** (2 * salt_count);
+    var source = @as([(2 * salt_count)]f64, @splat(@as(f64, 0)));
     source[source.len - 1] = std.math.nan(f64);
     surface.cells[0].calcium_mol_per_m3 = 7;
     const active = [_]usize{1};

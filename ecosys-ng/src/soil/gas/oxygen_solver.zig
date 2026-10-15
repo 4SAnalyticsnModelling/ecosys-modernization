@@ -1,5 +1,6 @@
 const std = @import("std");
 const numerics = @import("../../core/numerics.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const DiffusionInputs = struct {
     microbial_radius_m: f64,
@@ -12,7 +13,7 @@ pub const DiffusionInputs = struct {
 
 /// Ports NITRO DIFOX, including the spherical microbial surface factor 12.57.
 pub fn uptakeConductance_m3_per_step(inputs: DiffusionInputs) !f64 {
-    inline for (@typeInfo(DiffusionInputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteOxygenDiffusionInput;
+    inline for (ti_compat.fieldViews(DiffusionInputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteOxygenDiffusionInput;
     if (inputs.microbial_radius_m <= 0 or inputs.water_film_thickness_m <= 0 or inputs.tortuosity < 0 or inputs.aqueous_oxygen_diffusivity_m2_per_step < 0 or inputs.microbial_count_per_g_c < 0 or inputs.active_biomass_g_c < 0) return error.InvalidOxygenDiffusionInput;
     const radial_factor_m = inputs.microbial_radius_m * (inputs.water_film_thickness_m + inputs.microbial_radius_m) / inputs.water_film_thickness_m;
     const conductance = inputs.tortuosity * inputs.aqueous_oxygen_diffusivity_m2_per_step * 12.57 * inputs.microbial_count_per_g_c * inputs.active_biomass_g_c * radial_factor_m;
@@ -255,8 +256,8 @@ fn picard(context: *const Context, aqueous_mass_g_o: f64) f64 {
 }
 
 fn validate(inputs: Inputs, options: Options) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteOxygenSolverInput;
-    inline for (@typeInfo(Options).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(options, field.name))) return error.NonFiniteOxygenSolverOption;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteOxygenSolverInput;
+    inline for (ti_compat.fieldViews(Options)) |field| if (field.type == f64 and !std.math.isFinite(@field(options, field.name))) return error.NonFiniteOxygenSolverOption;
     if (inputs.allocated_gaseous_oxygen_g_o < 0 or inputs.allocated_aqueous_oxygen_g_o < 0 or inputs.water_volume_m3 <= 0 or inputs.air_volume_m3 < 0 or inputs.population_allocation_fraction <= 0 or inputs.population_allocation_fraction > 1 or inputs.oxygen_solubility_water_to_air < 0 or inputs.gas_exchange_rate_per_step < 0 or inputs.uptake_conductance_m3_per_step < 0 or inputs.oxygen_half_saturation_g_o_per_m3 <= 0 or inputs.maximum_oxygen_uptake_g_o < 0 or inputs.maximum_aqueous_oxygen_concentration_g_o_per_m3 <= 0) return error.InvalidOxygenSolverInput;
     if (inputs.water_volume_m3 * inputs.oxygen_solubility_water_to_air + inputs.air_volume_m3 <= 0 or options.absolute_tolerance_g_o <= 0 or options.relative_tolerance <= 0 or options.relative_tolerance >= 1 or options.derivative_floor <= 0 or options.picard_relaxation <= 0 or options.picard_relaxation > 1 or options.gas_max_iterations == 0) return error.InvalidOxygenSolverOption;
 }

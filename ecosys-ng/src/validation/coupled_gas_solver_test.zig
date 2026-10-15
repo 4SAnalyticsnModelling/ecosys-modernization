@@ -9,6 +9,7 @@ const gas = @import("../soil/gas/transport.zig");
 const numerics = @import("../core/numerics.zig");
 const std = @import("std");
 const coupled_gas_solver = @import("../soil/gas/coupled_gas_solver.zig");
+
 test "coupled coupled_gas_solver.solve converges before NPH times NPG and conserves closed system" {
     var state = try gas.State.init(std.testing.allocator, 2);
     defer state.deinit();
@@ -19,14 +20,14 @@ test "coupled coupled_gas_solver.solve converges before NPH times NPG and conser
     state.gaseous_mass_g[0] = 2;
     state.dissolved_mass_g[0] = 1;
     const n = 2 * gas.species_count;
-    const conductance = [_]f64{0.01} ** gas.species_count;
+    const conductance = @as([gas.species_count]f64, @splat(@as(f64, 0.01)));
     const water = [_]f64{ 1, 1 };
     const no_band_water = [_]f64{ 0, 0 };
-    const solubility = [_]f64{1} ** n;
-    const exchange = [_]f64{0.1} ** n;
-    const no_exchange = [_]f64{0} ** n;
+    const solubility = @as([n]f64, @splat(@as(f64, 1)));
+    const exchange = @as([n]f64, @splat(@as(f64, 0.1)));
+    const no_exchange = @as([n]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{ false, false };
-    var accepted_face_flux_g = [_]f64{0} ** gas.species_count;
+    var accepted_face_flux_g = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     const result = try coupled_gas_solver.solve(std.testing.allocator, &state, .{ .faces = &[_]gas.Face{.{ .first_cell = 0, .second_cell = 1 }}, .face_conductance_m3_per_step = &conductance, .atmospheric_boundaries = &.{}, .water_volume_m3 = &water, .band_water_volume_m3 = &no_band_water, .mass_solubility_ratio = &solubility, .gas_water_exchange_rate_per_step = &exchange, .band_gas_water_exchange_rate_per_step = &no_exchange, .bubbling_enabled = &no_bubbling, .face_flux_g_by_component = &accepted_face_flux_g }, .{ .max_iterations = 80 });
     try std.testing.expect(result.iterations < 80);
     try std.testing.expect(accepted_face_flux_g[0] > 0);
@@ -40,8 +41,8 @@ test "dimensionless dense Newton resolves gram gas beside hundred-megagram disso
     defer state.deinit();
     state.air_volume_m3[0] = 1;
     state.temperature_k[0] = 300;
-    const oxygen = @intFromEnum(gas.Species.oxygen);
-    const nitrogen = @intFromEnum(gas.Species.nitrogen);
+    const oxygen = @backingInt(gas.Species.oxygen);
+    const nitrogen = @backingInt(gas.Species.nitrogen);
     state.gaseous_mass_g[oxygen] = 2;
     state.dissolved_mass_g[oxygen] = 1.0e8;
     state.gaseous_mass_g[nitrogen] = 1.8;
@@ -52,9 +53,9 @@ test "dimensionless dense Newton resolves gram gas beside hundred-megagram disso
         state.gaseous_mass_g[nitrogen] + state.dissolved_mass_g[nitrogen];
     const water = [_]f64{1.0e8};
     const no_band_water = [_]f64{0};
-    const solubility = [_]f64{1} ** gas.species_count;
-    const exchange = [_]f64{1} ** gas.species_count;
-    const no_exchange = [_]f64{0} ** gas.species_count;
+    const solubility = @as([gas.species_count]f64, @splat(@as(f64, 1)));
+    const exchange = @as([gas.species_count]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{false};
     const result = try coupled_gas_solver.solve(
         std.testing.allocator,
@@ -94,8 +95,8 @@ test "scale-separated face converges two pressure-coupled donor species conserva
     defer state.deinit();
     @memset(state.air_volume_m3, 1);
     @memset(state.temperature_k, 300);
-    const carbon_dioxide = @intFromEnum(gas.Species.carbon_dioxide);
-    const methane = @intFromEnum(gas.Species.methane);
+    const carbon_dioxide = @backingInt(gas.Species.carbon_dioxide);
+    const methane = @backingInt(gas.Species.methane);
     state.gaseous_mass_g[carbon_dioxide] = 1;
     state.gaseous_mass_g[methane] = 2;
     state.gaseous_mass_g[gas.species_count + carbon_dioxide] = 1.0e8;
@@ -106,13 +107,13 @@ test "scale-separated face converges two pressure-coupled donor species conserva
     const initial_methane =
         state.gaseous_mass_g[methane] +
         state.gaseous_mass_g[gas.species_count + methane];
-    var conductance = [_]f64{0} ** gas.species_count;
+    var conductance = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     conductance[carbon_dioxide] = 1.0e-9;
     conductance[methane] = 1.0e-9;
     const n = 2 * gas.species_count;
     const zero_water = [_]f64{ 0, 0 };
-    const solubility = [_]f64{1} ** n;
-    const no_exchange = [_]f64{0} ** n;
+    const solubility = @as([n]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([n]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{ false, false };
     const result = try coupled_gas_solver.solve(
         std.testing.allocator,
@@ -153,19 +154,19 @@ test "scale-separated face closes a sub-inventory oxygen residual conservatively
     defer state.deinit();
     @memset(state.air_volume_m3, 1);
     @memset(state.temperature_k, 300);
-    const oxygen = @intFromEnum(gas.Species.oxygen);
+    const oxygen = @backingInt(gas.Species.oxygen);
     state.gaseous_mass_g[oxygen] = 2.9218919364755397e-1;
     state.gaseous_mass_g[gas.species_count + oxygen] =
         4.596233521006912e7;
     const initial_oxygen_g =
         state.gaseous_mass_g[oxygen] +
         state.gaseous_mass_g[gas.species_count + oxygen];
-    var conductance = [_]f64{0} ** gas.species_count;
+    var conductance = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     conductance[oxygen] = 5.165116406442861e-12;
     const n = 2 * gas.species_count;
     const zero_water = [_]f64{ 0, 0 };
-    const solubility = [_]f64{1} ** n;
-    const no_exchange = [_]f64{0} ** n;
+    const solubility = @as([n]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([n]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{ false, false };
     const result = try coupled_gas_solver.solve(
         std.testing.allocator,
@@ -205,8 +206,8 @@ test "six-cell pressure-coupled gaseous manifold converges within the hard ceili
     @memset(state.air_volume_m3, 1);
     @memset(state.temperature_k, 300);
 
-    const carbon_dioxide = @intFromEnum(gas.Species.carbon_dioxide);
-    const nitrogen = @intFromEnum(gas.Species.nitrogen);
+    const carbon_dioxide = @backingInt(gas.Species.carbon_dioxide);
+    const nitrogen = @backingInt(gas.Species.nitrogen);
     const carbon_profile = [_]f64{ 2.2, 3.3, 11.0, 3.38, 3.37, 3.38 };
     const nitrogen_profile = [_]f64{ 1.1, 4.8, 2.0, 5.6, 2.4, 4.1 };
     for (carbon_profile, nitrogen_profile, 0..) |carbon, nitrogen_mass, cell| {
@@ -217,7 +218,7 @@ test "six-cell pressure-coupled gaseous manifold converges within the hard ceili
     var initial_total_g: f64 = 0;
     for (state.gaseous_mass_g) |mass| initial_total_g += mass;
 
-    var conductance = [_]f64{0} ** (5 * gas.species_count);
+    var conductance = @as([(5 * gas.species_count)]f64, @splat(@as(f64, 0)));
     const face_conductances = [_]f64{ 0.2716, 0.1047, 0.0785, 0.0784, 0.0783 };
     for (face_conductances, 0..) |face_conductance, face| {
         conductance[face * gas.species_count + carbon_dioxide] = face_conductance;
@@ -230,12 +231,12 @@ test "six-cell pressure-coupled gaseous manifold converges within the hard ceili
         .{ .first_cell = 3, .second_cell = 4 },
         .{ .first_cell = 4, .second_cell = 5 },
     };
-    const water = [_]f64{0} ** 6;
+    const water = @as([6]f64, @splat(@as(f64, 0)));
     const n = 6 * gas.species_count;
-    const solubility = [_]f64{1} ** n;
-    const no_exchange = [_]f64{0} ** n;
-    const no_bubbling = [_]bool{false} ** 6;
-    var accepted_face_flux_g = [_]f64{0} ** (5 * gas.species_count);
+    const solubility = @as([n]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([n]f64, @splat(@as(f64, 0)));
+    const no_bubbling = @as([6]bool, @splat(@as(bool, false)));
+    var accepted_face_flux_g = @as([(5 * gas.species_count)]f64, @splat(@as(f64, 0)));
 
     const result = try coupled_gas_solver.solve(
         std.testing.allocator,
@@ -275,17 +276,17 @@ test "low-air receiver releases a pressure-coupled zero gas bound within the har
     state.air_volume_m3[0] = 1.5e-2;
     state.air_volume_m3[1] = 5.5e-4;
     @memset(state.temperature_k, 300);
-    const nitrous_oxide = @intFromEnum(gas.Species.nitrous_oxide);
+    const nitrous_oxide = @backingInt(gas.Species.nitrous_oxide);
     state.gaseous_mass_g[nitrous_oxide] = 51;
     const initial_total_g = state.gaseous_mass_g[nitrous_oxide];
-    var conductance = [_]f64{0} ** gas.species_count;
+    var conductance = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     conductance[nitrous_oxide] = 3.1e-7;
     const water = [_]f64{ 0, 0 };
     const n = 2 * gas.species_count;
-    const solubility = [_]f64{1} ** n;
-    const no_exchange = [_]f64{0} ** n;
+    const solubility = @as([n]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([n]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{ false, false };
-    var face_flux = [_]f64{0} ** gas.species_count;
+    var face_flux = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     const result = try coupled_gas_solver.solve(
         std.testing.allocator,
         &state,
@@ -322,14 +323,14 @@ test "low-air aqueous release activates a zero gas bound conservatively" {
     defer state.deinit();
     state.air_volume_m3[0] = 7.812971757631404e-5;
     state.temperature_k[0] = 300;
-    const nitrogen = @intFromEnum(gas.Species.nitrogen);
+    const nitrogen = @backingInt(gas.Species.nitrogen);
     state.dissolved_mass_g[nitrogen] = 5.352569637558869;
     const initial_total_g = state.dissolved_mass_g[nitrogen];
     const water = [_]f64{0.1};
     const no_band_water = [_]f64{0};
-    const solubility = [_]f64{1} ** gas.species_count;
-    const exchange = [_]f64{1} ** gas.species_count;
-    const no_exchange = [_]f64{0} ** gas.species_count;
+    const solubility = @as([gas.species_count]f64, @splat(@as(f64, 1)));
+    const exchange = @as([gas.species_count]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{false};
     const result = try coupled_gas_solver.solve(
         std.testing.allocator,
@@ -361,18 +362,18 @@ test "simultaneous atmospheric sources release every zero-inventory bound" {
     defer state.deinit();
     @memset(state.air_volume_m3, 1);
     @memset(state.temperature_k, 300);
-    const oxygen = @intFromEnum(gas.Species.oxygen);
-    var external = [_]f64{0} ** gas.species_count;
+    const oxygen = @backingInt(gas.Species.oxygen);
+    var external = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     external[oxygen] = 0.01;
-    const conductance = [_]f64{0.1} ** gas.species_count;
+    const conductance = @as([gas.species_count]f64, @splat(@as(f64, 0.1)));
     const boundaries = [_]atmosphere.Boundary{
         .{ .cell_index = 0, .aerodynamic_conductance_m3_per_step = 0.1, .interior_conductance_m3_per_step = conductance, .atmospheric_concentration_g_per_m3 = external },
         .{ .cell_index = 1, .aerodynamic_conductance_m3_per_step = 0.1, .interior_conductance_m3_per_step = conductance, .atmospheric_concentration_g_per_m3 = external },
     };
     const n = 2 * gas.species_count;
     const water = [_]f64{ 0, 0 };
-    const solubility = [_]f64{1} ** n;
-    const no_exchange = [_]f64{0} ** n;
+    const solubility = @as([n]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([n]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{ false, false };
     const result = try coupled_gas_solver.solve(std.testing.allocator, &state, .{
         .faces = &.{},
@@ -395,15 +396,15 @@ test "surface and subsurface boundary fluxes remain independently classified" {
     defer state.deinit();
     state.air_volume_m3[0] = 1;
     state.temperature_k[0] = 300;
-    const carbon_dioxide = @intFromEnum(gas.Species.carbon_dioxide);
+    const carbon_dioxide = @backingInt(gas.Species.carbon_dioxide);
     // Ideal-capacity inventory suppresses the pressure correction so this
     // test isolates the two boundary ledgers.
     state.gaseous_mass_g[carbon_dioxide] = 1.2194e4 / 300.0 * 12.0;
     const initial_mass_g = state.gaseous_mass_g[carbon_dioxide];
-    var high_external = [_]f64{0} ** gas.species_count;
+    var high_external = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     high_external[carbon_dioxide] = initial_mass_g + 1;
-    const zero_external = [_]f64{0} ** gas.species_count;
-    const conductance = [_]f64{0.1} ** gas.species_count;
+    const zero_external = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    const conductance = @as([gas.species_count]f64, @splat(@as(f64, 0.1)));
     const surface = atmosphere.Boundary{
         .cell_index = 0,
         .aerodynamic_conductance_m3_per_step = 0.1,
@@ -418,11 +419,11 @@ test "surface and subsurface boundary fluxes remain independently classified" {
     };
     const n = gas.species_count;
     const water = [_]f64{0};
-    const solubility = [_]f64{1} ** n;
-    const no_exchange = [_]f64{0} ** n;
+    const solubility = @as([n]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([n]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{false};
-    var surface_flux = [_]f64{0} ** n;
-    var subsurface_flux = [_]f64{0} ** n;
+    var surface_flux = @as([n]f64, @splat(@as(f64, 0)));
+    var subsurface_flux = @as([n]f64, @splat(@as(f64, 0)));
     _ = try coupled_gas_solver.solve(std.testing.allocator, &state, .{
         .faces = &.{},
         .face_conductance_m3_per_step = &.{},
@@ -451,15 +452,15 @@ test "TRNSFRS bubbling transfers dissolved mass to the REDIST release layer" {
     defer state.deinit();
     @memset(state.air_volume_m3, 1);
     @memset(state.temperature_k, 300);
-    const carbon_dioxide = @intFromEnum(gas.Species.carbon_dioxide);
+    const carbon_dioxide = @backingInt(gas.Species.carbon_dioxide);
     const source = gas.species_count + carbon_dioxide;
     state.dissolved_mass_g[source] = 600;
     const initial_total_g = state.dissolved_mass_g[source];
     const n = 2 * gas.species_count;
     const water = [_]f64{ 1, 1 };
     const no_band_water = [_]f64{ 0, 0 };
-    const solubility = [_]f64{1} ** n;
-    const no_exchange = [_]f64{0} ** n;
+    const solubility = @as([n]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([n]f64, @splat(@as(f64, 0)));
     const bubbling = [_]bool{ false, true };
     const receivers = [_]?usize{ 0, 0 };
     _ = try coupled_gas_solver.solve(std.testing.allocator, &state, .{
@@ -487,13 +488,13 @@ test "bubble without a gas release layer is published as a boundary loss" {
     defer state.deinit();
     state.air_volume_m3[0] = 1;
     state.temperature_k[0] = 300;
-    const carbon_dioxide = @intFromEnum(gas.Species.carbon_dioxide);
+    const carbon_dioxide = @backingInt(gas.Species.carbon_dioxide);
     state.dissolved_mass_g[carbon_dioxide] = 600;
     const initial_total_g = state.dissolved_mass_g[carbon_dioxide];
     const water = [_]f64{1};
     const no_band_water = [_]f64{0};
-    const solubility = [_]f64{1} ** gas.species_count;
-    const no_exchange = [_]f64{0} ** gas.species_count;
+    const solubility = @as([gas.species_count]f64, @splat(@as(f64, 1)));
+    const no_exchange = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     const bubbling = [_]bool{true};
     const receivers = [_]?usize{null};
     // `redist.f:6541-6549` is the oracle for the missing release layer: on the
@@ -502,8 +503,8 @@ test "bubble without a gas release layer is published as a boundary loss" {
     // CO2GIN/HCO2G/UCO2G/XCNET. It is surface gas exchange, not profile
     // drainage, so the subsurface ledger must stay untouched. `X*BBL` is
     // `AMIN1(0.0, ...)` in `trnsfr.f:5842-5849`, so the published sign is a loss.
-    var atmospheric_flux = [_]f64{0} ** gas.species_count;
-    var subsurface_flux = [_]f64{0} ** gas.species_count;
+    var atmospheric_flux = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    var subsurface_flux = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     _ = try coupled_gas_solver.solve(std.testing.allocator, &state, .{
         .faces = &.{},
         .face_conductance_m3_per_step = &.{},
@@ -549,11 +550,11 @@ test "failed coupled coupled_gas_solver.solve rolls back all three phases" {
     defer state.deinit();
     @memset(state.air_volume_m3, 1);
     @memset(state.temperature_k, 300);
-    const carbon_dioxide = @intFromEnum(gas.Species.carbon_dioxide);
-    const methane = @intFromEnum(gas.Species.methane);
-    const oxygen = @intFromEnum(gas.Species.oxygen);
-    const nitrogen = @intFromEnum(gas.Species.nitrogen);
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const carbon_dioxide = @backingInt(gas.Species.carbon_dioxide);
+    const methane = @backingInt(gas.Species.methane);
+    const oxygen = @backingInt(gas.Species.oxygen);
+    const nitrogen = @backingInt(gas.Species.nitrogen);
+    const ammonia = @backingInt(gas.Species.ammonia);
     const n = 2 * gas.species_count;
     // Every phase holds inventory, so the rollback comparison below is a real
     // comparison of a restored state rather than a comparison of zeros.
@@ -576,26 +577,26 @@ test "failed coupled coupled_gas_solver.solve rolls back all three phases" {
     @memcpy(&before_dissolved, state.dissolved_mass_g);
     @memcpy(&before_band, state.band_dissolved_mass_g);
 
-    var external = [_]f64{0} ** gas.species_count;
+    var external = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     external[oxygen] = 0.28;
     external[carbon_dioxide] = 2.0e-4;
     external[nitrogen] = 0.92;
-    const conductance = [_]f64{0.1} ** gas.species_count;
+    const conductance = @as([gas.species_count]f64, @splat(@as(f64, 0.1)));
     const boundaries = [_]atmosphere.Boundary{
         .{ .cell_index = 0, .aerodynamic_conductance_m3_per_step = 0.1, .interior_conductance_m3_per_step = conductance, .atmospheric_concentration_g_per_m3 = external },
         .{ .cell_index = 1, .aerodynamic_conductance_m3_per_step = 0.1, .interior_conductance_m3_per_step = conductance, .atmospheric_concentration_g_per_m3 = external },
     };
     const faces = [_]gas.Face{.{ .first_cell = 0, .second_cell = 1 }};
-    const face_conductance = [_]f64{0.05} ** gas.species_count;
+    const face_conductance = @as([gas.species_count]f64, @splat(@as(f64, 0.05)));
     const water = [_]f64{ 0.2, 0.3 };
     const band_water = [_]f64{ 0.05, 0.1 };
-    const solubility = [_]f64{1} ** n;
-    const exchange = [_]f64{0.3} ** n;
-    const band_exchange = [_]f64{0.2} ** n;
-    const bubbling = [_]bool{true} ** 2;
+    const solubility = @as([n]f64, @splat(@as(f64, 1)));
+    const exchange = @as([n]f64, @splat(@as(f64, 0.3)));
+    const band_exchange = @as([n]f64, @splat(@as(f64, 0.2)));
+    const bubbling = @as([2]bool, @splat(@as(bool, true)));
     const receivers = [_]?usize{ 0, 0 };
-    var atmospheric_ledger = [_]f64{7} ** n;
-    var subsurface_ledger = [_]f64{8} ** n;
+    var atmospheric_ledger = @as([n]f64, @splat(@as(f64, 7)));
+    var subsurface_ledger = @as([n]f64, @splat(@as(f64, 8)));
     try std.testing.expectError(
         error.CoupledGasSolverDidNotConverge,
         coupled_gas_solver.solve(std.testing.allocator, &state, .{

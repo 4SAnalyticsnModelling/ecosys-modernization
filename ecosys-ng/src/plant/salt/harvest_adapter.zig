@@ -2,6 +2,7 @@ const std = @import("std");
 const canopy_module = @import("../../canopy/photosynthesis/photosynthesis.zig");
 const root_module = @import("../root/plant_root_system.zig");
 const removal = @import("harvest.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const salt_count = removal.salt_count;
 
@@ -113,8 +114,8 @@ pub fn applyPlant(
             const staged_root = layer * active_domains + domain;
             const owner_root = try roots.layerIndex(plant, domain, layer);
             workspace.root_carbon_g_c[staged_root] = roots.total_carbon_g[owner_root];
-            inline for (@typeInfo(root_module.SaltSpecies).@"enum".fields) |field| {
-                const species: root_module.SaltSpecies = @enumFromInt(field.value);
+            inline for (ti_compat.enumFieldViews(root_module.SaltSpecies)) |field| {
+                const species: root_module.SaltSpecies = @fromBackingInt(@intCast(field.value));
                 workspace.root_salt_mol[staged_root * salt_count + field.value] =
                     roots.salt_content_mol[try roots.saltIndex(plant, domain, layer, species)];
             }
@@ -146,8 +147,8 @@ pub fn applyPlant(
     for (0..layer_count) |layer| {
         for (0..active_domains) |domain| {
             const staged_root = layer * active_domains + domain;
-            inline for (@typeInfo(root_module.SaltSpecies).@"enum".fields) |field| {
-                const species: root_module.SaltSpecies = @enumFromInt(field.value);
+            inline for (ti_compat.enumFieldViews(root_module.SaltSpecies)) |field| {
+                const species: root_module.SaltSpecies = @fromBackingInt(@intCast(field.value));
                 roots.salt_content_mol[try roots.saltIndex(plant, domain, layer, species)] =
                     workspace.root_salt_mol[staged_root * salt_count + field.value];
             }
@@ -221,7 +222,7 @@ test "ownership adapter conserves each plant layer and corrects ZEROP X ownershi
         canopy.branch_salt_content_by_species_mol[2 * salt_count + salt] = 1;
         for (0..2) |layer| {
             for (0..root_module.biological_domain_count) |domain| {
-                const species: root_module.SaltSpecies = @enumFromInt(salt);
+                const species: root_module.SaltSpecies = @fromBackingInt(@intCast(salt));
                 roots.salt_content_mol[try roots.saltIndex(1, domain, layer, species)] = @floatFromInt(domain + 1);
             }
         }
@@ -259,7 +260,7 @@ test "ownership adapter conserves each plant layer and corrects ZEROP X ownershi
             canopy.branch_salt_content_by_species_mol[2 * salt_count + salt];
         try std.testing.expectApproxEqAbs(4, shoot_after + harvest[salt_count + salt] + litter[3 * salt_count + salt], 1e-13);
         var root_after: f64 = 0;
-        const species: root_module.SaltSpecies = @enumFromInt(salt);
+        const species: root_module.SaltSpecies = @fromBackingInt(@intCast(salt));
         for (0..2) |layer| {
             for (0..2) |domain| {
                 root_after += roots.salt_content_mol[try roots.saltIndex(1, domain, layer, species)];

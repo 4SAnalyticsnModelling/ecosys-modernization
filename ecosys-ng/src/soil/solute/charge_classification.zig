@@ -2,6 +2,7 @@ const std = @import("std");
 const activity = @import("activity_coefficients.zig");
 const aqueous_network = @import("aqueous_network.zig");
 const phosphate_network = @import("phosphate_network.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ZoneFractions = struct {
     ammonium_non_band: f64,
@@ -43,11 +44,11 @@ fn weighted(non_band: f64, band: f64, non_band_fraction: f64, band_fraction: f64
 }
 
 fn validate(aqueous: aqueous_network.State, non_band: phosphate_network.State, band: phosphate_network.State, fractions: ZoneFractions) !void {
-    inline for (@typeInfo(aqueous_network.State).@"struct".fields) |field| if (!std.math.isFinite(@field(aqueous, field.name)) or @field(aqueous, field.name) < 0) return error.InvalidAqueousChargeState;
-    inline for (@typeInfo(phosphate_network.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(aqueous_network.State)) |field| if (!std.math.isFinite(@field(aqueous, field.name)) or @field(aqueous, field.name) < 0) return error.InvalidAqueousChargeState;
+    inline for (ti_compat.fieldViews(phosphate_network.State)) |field| {
         if (!std.math.isFinite(@field(non_band, field.name)) or @field(non_band, field.name) < 0 or !std.math.isFinite(@field(band, field.name)) or @field(band, field.name) < 0) return error.InvalidPhosphateChargeState;
     }
-    inline for (@typeInfo(ZoneFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ZoneFractions)) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidChargeZoneFraction;
     }
@@ -55,7 +56,7 @@ fn validate(aqueous: aqueous_network.State, non_band: phosphate_network.State, b
 
 fn filled(comptime T: type, value: f64) T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| @field(result, field.name) = value;
+    inline for (ti_compat.fieldViews(T)) |field| @field(result, field.name) = value;
     return result;
 }
 

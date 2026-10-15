@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Gas boundary fluxes for one species at the soil-atmosphere interface
 /// (g step-1 or g C step-1).
@@ -181,7 +182,7 @@ pub fn computeCarbonGas(inp: CarbonGasInputs) !CarbonGasIncrements {
         .total_subsurface_carbon_flux_g = co + cx -
             inp.litter_subsurface_co2_transfer_g,
     };
-    inline for (@typeInfo(CarbonGasIncrements).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(CarbonGasIncrements)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteSurfaceGasFluxIncrement;
     return result;
@@ -237,7 +238,7 @@ pub fn computeOxygenHydrogen(inp: OxygenHydrogenInputs) !OxygenHydrogenIncrement
         .h2_surface_input_g = hi,
         .h2_subsurface_out_g = inp.litter_h2_output_g,
     };
-    inline for (@typeInfo(OxygenHydrogenIncrements).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(OxygenHydrogenIncrements)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteSurfaceGasFluxIncrement;
     return result;

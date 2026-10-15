@@ -1,6 +1,7 @@
 const std = @import("std");
 const canopy_photosynthesis = @import("../../canopy/photosynthesis/photosynthesis.zig");
 const PlantState = @import("../../state/grid.zig").PlantState;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const SeedStorage = struct {
     carbon_g: f64,
@@ -15,7 +16,7 @@ pub const ShootControlParameters = struct {
     c4_intercellular_oxygen_umol_per_mol: f64,
 
     pub fn validate(self: ShootControlParameters) !void {
-        inline for (@typeInfo(ShootControlParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name)) or @field(self, field.name) <= 0) return error.InvalidShootControlParameters;
+        inline for (ti_compat.fieldViews(ShootControlParameters)) |field| if (!std.math.isFinite(@field(self, field.name)) or @field(self, field.name) <= 0) return error.InvalidShootControlParameters;
     }
 };
 
@@ -40,13 +41,13 @@ pub fn seedStorage(
         .nitrogen_g = grain_nitrogen_to_carbon_g_per_g * carbon_g,
         .phosphorus_g = grain_phosphorus_to_carbon_g_per_g * carbon_g,
     };
-    inline for (@typeInfo(SeedStorage).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteSeedStorageResult;
+    inline for (ti_compat.fieldViews(SeedStorage)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteSeedStorageResult;
     return result;
 }
 
 pub fn initializeSeedStorage(state: *canopy_photosynthesis.State, plant: usize, storage: SeedStorage) !void {
     if (plant >= state.plant_seed_storage_carbon_g.len) return error.CanopyPlantIndexOutOfBounds;
-    inline for (@typeInfo(SeedStorage).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SeedStorage)) |field| {
         const value = @field(storage, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteSeedStorageInput;
         if (value < 0) return error.InvalidSeedStorageInput;
@@ -188,7 +189,7 @@ pub const PlantHeatWaterParameters = struct {
     initial_total_water_potential_megapascal: f64,
 
     pub fn validate(self: PlantHeatWaterParameters) !void {
-        inline for (@typeInfo(PlantHeatWaterParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFinitePlantHeatWaterParameter;
+        inline for (ti_compat.fieldViews(PlantHeatWaterParameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFinitePlantHeatWaterParameter;
         if (self.kelvin_offset_k <= 0 or self.vapor_pressure_numerator_kpa_k <= 0 or self.initial_relative_humidity < 0 or self.initial_relative_humidity > 1 or self.vapor_pressure_exponent_temperature_k <= 0 or self.vapor_pressure_reference_inverse_temperature_per_k <= 0 or self.initial_total_water_potential_megapascal > 0) return error.InvalidPlantHeatWaterParameter;
     }
 };
@@ -292,7 +293,7 @@ pub fn adjustedPhenology(traits: @import("../../state/plant_traits.zig").PlantTr
         .floral_initiation_node_count_after_seed = (source.floral_initiation_node_count - source.seed_initial_node_count) * scale,
         .seed_initial_node_count = source.seed_initial_node_count * scale,
     };
-    inline for (@typeInfo(AdjustedPhenology).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFinitePhenologyResult;
+    inline for (ti_compat.fieldViews(AdjustedPhenology)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFinitePhenologyResult;
     if (result.node_initiation_per_h < 0 or result.leaf_appearance_per_h <= 0 or result.floral_initiation_node_count_after_seed < 0 or result.seed_initial_node_count < 0) return error.InvalidPhenologyResult;
     return result;
 }
@@ -332,7 +333,7 @@ pub const ThermalAcclimationParameters = struct {
     other_c4_loss_fraction_per_c_h: f64,
 
     pub fn validate(self: ThermalAcclimationParameters) !void {
-        inline for (@typeInfo(ThermalAcclimationParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.InvalidThermalAcclimationParameters;
+        inline for (ti_compat.fieldViews(ThermalAcclimationParameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.InvalidThermalAcclimationParameters;
         if (self.adaptation_zone_pivot < 0 or self.cold_zone_offset_per_zone_c < 0 or self.warm_zone_offset_per_zone_c < 0 or self.maximum_leafoff_threshold_c < self.base_leafoff_threshold_c or self.seed_set_adaptation_increment_c_per_zone < 0 or self.soybean_loss_fraction_per_c_h < 0 or self.other_c3_loss_fraction_per_c_h < 0 or self.maize_loss_fraction_per_c_h < 0 or self.other_c4_loss_fraction_per_c_h < 0) return error.InvalidThermalAcclimationParameters;
     }
 };
@@ -358,7 +359,7 @@ pub fn thermalAcclimation(plant_profile_name: []const u8, photosynthesis_pathway
 
 pub fn initializeThermalAcclimation(state: *canopy_photosynthesis.State, plant: usize, values: ThermalAcclimation) !void {
     if (plant >= state.plant_thermal_adaptation_offset_c.len) return error.CanopyPlantIndexOutOfBounds;
-    inline for (@typeInfo(ThermalAcclimation).@"struct".fields) |field| if (!std.math.isFinite(@field(values, field.name))) return error.NonFiniteThermalAcclimation;
+    inline for (ti_compat.fieldViews(ThermalAcclimation)) |field| if (!std.math.isFinite(@field(values, field.name))) return error.NonFiniteThermalAcclimation;
     state.plant_thermal_adaptation_offset_c[plant] = values.adaptation_offset_c;
     state.plant_leafout_threshold_c[plant] = values.leafout_threshold_c;
     state.plant_leafoff_threshold_c[plant] = values.leafoff_threshold_c;
@@ -385,7 +386,7 @@ pub const PlantGeometryParameters = struct {
     root_pi: f64,
 
     pub fn validate(self: PlantGeometryParameters) !void {
-        inline for (@typeInfo(PlantGeometryParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(PlantGeometryParameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value <= 0) return error.InvalidPlantGeometryParameter;
         }

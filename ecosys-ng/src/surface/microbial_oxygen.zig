@@ -4,6 +4,7 @@ const allocation = @import("../soil/gas/oxygen_allocation.zig");
 const oxygen_solver = @import("../soil/gas/oxygen_solver.zig");
 const compute = @import("../core/compute.zig");
 
+
 pub fn aqueousOxygenDiffusivity_m2_per_step(reference_m2_per_h: f64, litter_temperature_k: f64, timestep_h: f64) !f64 {
     inline for (.{ reference_m2_per_h, litter_temperature_k, timestep_h }) |value| if (!std.math.isFinite(value)) return error.NonFiniteSurfaceOxygenDiffusivityInput;
     if (reference_m2_per_h < 0 or litter_temperature_k <= 0 or timestep_h <= 0) return error.InvalidSurfaceOxygenDiffusivityInput;
@@ -32,7 +33,7 @@ pub const ApplyContext = struct {
 pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
     try validate(context.*, range);
     const population_count = context.result.population_count;
-    const oxygen_offset = @intFromEnum(gas_transport.Species.oxygen);
+    const oxygen_offset = @backingInt(gas_transport.Species.oxygen);
     for (range.first..range.end) |cell| {
         const gas_index = cell * gas_transport.species_count + oxygen_offset;
         var shared: allocation.SharedLayer = .{
@@ -65,7 +66,7 @@ test "surface oxygen tile supports runtime populations and conserves oxygen" {
     defer gas.deinit();
     var result = try allocation.State.init(std.testing.allocator, 2, 1, 8);
     defer result.deinit();
-    var populations = [_]allocation.Population{.{ .is_aerobic = true, .previous_oxygen_demand_g_o = 1, .fallback_active_fraction = 1, .uptake_conductance_m3_per_step = 0.02, .oxygen_half_saturation_g_o_per_m3 = 0.1, .maximum_oxygen_uptake_g_o = 0.01 }} ** 16;
+    var populations = @as([16]allocation.Population, @splat(@as(allocation.Population, .{ .is_aerobic = true, .previous_oxygen_demand_g_o = 1, .fallback_active_fraction = 1, .uptake_conductance_m3_per_step = 0.02, .oxygen_half_saturation_g_o_per_m3 = 0.1, .maximum_oxygen_uptake_g_o = 0.01 })));
     gas.air_volume_m3[1] = 2;
     const oxygen = try gas_transport.massIndex(1, .oxygen, 2);
     gas.gaseous_mass_g[oxygen] = 1;

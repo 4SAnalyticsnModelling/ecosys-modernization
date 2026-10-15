@@ -8,21 +8,22 @@ const phosphate_rates = @import("phosphate_reaction_rates.zig");
 const cation_exchange = @import("cation_exchange.zig");
 const geochemistry = @import("geochemistry_network.zig");
 const geochemistry_rates = @import("geochemistry_reaction_rates.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const aqueous_reaction_count =
-    @typeInfo(aqueous_network.Fluxes).@"struct".fields.len;
+    @typeInfo(aqueous_network.Fluxes).@"struct".field_names.len;
 pub const phosphate_mineral_reaction_count =
-    @typeInfo(phosphate_network.MineralFluxes).@"struct".fields.len;
+    @typeInfo(phosphate_network.MineralFluxes).@"struct".field_names.len;
 pub const phosphate_surface_reaction_count =
-    @typeInfo(phosphate_exchange.Flux).@"struct".fields.len;
+    @typeInfo(phosphate_exchange.Flux).@"struct".field_names.len;
 pub const phosphate_aqueous_reaction_count =
-    @typeInfo(phosphate_network.DissociationAndPairingFluxes).@"struct".fields.len;
+    @typeInfo(phosphate_network.DissociationAndPairingFluxes).@"struct".field_names.len;
 pub const phosphate_zone_reaction_count =
     phosphate_mineral_reaction_count +
     phosphate_surface_reaction_count +
     phosphate_aqueous_reaction_count;
 pub const equilibrium_mineral_reaction_count =
-    @typeInfo(geochemistry.MineralExtents).@"struct".fields.len;
+    @typeInfo(geochemistry.MineralExtents).@"struct".field_names.len;
 
 pub const aqueous_reaction_offset: usize = 0;
 pub const non_band_phosphate_reaction_offset =
@@ -43,7 +44,7 @@ pub const band_phosphate_aqueous_offset =
 pub const gapon_reaction_offset =
     band_phosphate_reaction_offset + phosphate_zone_reaction_count;
 pub const gapon_reaction_count =
-    @typeInfo(cation_exchange.Cations).@"struct".fields.len - 1;
+    @typeInfo(cation_exchange.Cations).@"struct".field_names.len - 1;
 pub const carboxyl_reaction_index =
     gapon_reaction_offset + gapon_reaction_count;
 pub const equilibrium_mineral_reaction_offset = carboxyl_reaction_index + 1;
@@ -90,14 +91,14 @@ pub const ReactionIdentity = struct {
 /// Returns the scientific ledger identity for one reaction-span column.
 pub fn reactionIdentity(column: usize) ?ReactionIdentity {
     inline for (
-        @typeInfo(aqueous_network.Fluxes).@"struct".fields,
+        ti_compat.fieldViews(aqueous_network.Fluxes),
         0..,
     ) |field, index| {
         if (column == aqueous_reaction_offset + index)
             return .{ .domain = .aqueous, .name = field.name };
     }
     inline for (
-        @typeInfo(phosphate_network.MineralFluxes).@"struct".fields,
+        ti_compat.fieldViews(phosphate_network.MineralFluxes),
         0..,
     ) |field, index| {
         if (column == non_band_phosphate_mineral_offset + index)
@@ -112,7 +113,7 @@ pub fn reactionIdentity(column: usize) ?ReactionIdentity {
             };
     }
     inline for (
-        @typeInfo(phosphate_exchange.Flux).@"struct".fields,
+        ti_compat.fieldViews(phosphate_exchange.Flux),
         0..,
     ) |field, index| {
         if (column == non_band_phosphate_surface_offset + index)
@@ -127,7 +128,7 @@ pub fn reactionIdentity(column: usize) ?ReactionIdentity {
             };
     }
     inline for (
-        @typeInfo(phosphate_network.DissociationAndPairingFluxes).@"struct".fields,
+        ti_compat.fieldViews(phosphate_network.DissociationAndPairingFluxes),
         0..,
     ) |field, index| {
         if (column == non_band_phosphate_aqueous_offset + index)
@@ -153,7 +154,7 @@ pub fn reactionIdentity(column: usize) ?ReactionIdentity {
             .name = "hydrogen_protonation",
         };
     inline for (
-        @typeInfo(geochemistry.MineralExtents).@"struct".fields,
+        ti_compat.fieldViews(geochemistry.MineralExtents),
         0..,
     ) |field, index| {
         if (column == equilibrium_mineral_reaction_offset + index)
@@ -344,7 +345,7 @@ pub fn evaluateRates(
         parameters,
     );
     comptime var gapon_basis_index: usize = 0;
-    inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| {
         if (comptime std.mem.eql(u8, field.name, "calcium")) continue;
         const owner_is_active = if (comptime std.mem.eql(
             u8,
@@ -631,7 +632,7 @@ fn addCationExchangeBasisExtent(
         return error.SoluteReactionColumnOutOfBounds;
     var change = std.mem.zeroes(cation_exchange.Cations);
     comptime var basis_index: usize = 0;
-    inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| {
         if (comptime std.mem.eql(u8, field.name, "calcium")) continue;
         if (local_column == basis_index) {
             @field(change, field.name) = native_extent;
@@ -725,7 +726,7 @@ fn cationCharge(
     fractions: @import("charge_classification.zig").ZoneFractions,
 ) f64 {
     var charge: f64 = 0;
-    inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field|
         charge += cationSiteChargeWeight(field.name, fractions) * @field(value, field.name);
     return charge;
 }
@@ -750,7 +751,7 @@ fn writeStruct(
     output: []f64,
     offset: usize,
 ) void {
-    inline for (@typeInfo(T).@"struct".fields, 0..) |field, index|
+    inline for (ti_compat.fieldViews(T), 0..) |field, index|
         output[offset + index] = @field(value, field.name);
 }
 
@@ -760,24 +761,24 @@ fn setStructField(
     index: usize,
     value: f64,
 ) void {
-    inline for (@typeInfo(T).@"struct".fields, 0..) |field, field_index| {
+    inline for (ti_compat.fieldViews(T), 0..) |field, field_index| {
         if (index == field_index) @field(target.*, field.name) = value;
     }
 }
 
 fn addStruct(comptime T: type, target: *T, change: T) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(T)) |field| {
         const next = @field(target.*, field.name) + @field(change, field.name);
         if (!std.math.isFinite(next))
             return error.NonFiniteSoluteReactionTransformation;
     }
-    inline for (@typeInfo(T).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(T)) |field|
         @field(target.*, field.name) += @field(change, field.name);
 }
 
 fn filled(comptime T: type, value: f64) T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(T)) |field|
         @field(result, field.name) = value;
     return result;
 }
@@ -1128,7 +1129,7 @@ test "Gapon basis axes are charge conservative and reconstruct the complete sour
     };
     var target = zeroTransformations(parameters);
     comptime var basis_index: usize = 0;
-    inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| {
         if (comptime std.mem.eql(u8, field.name, "calcium")) continue;
         var axis = zeroTransformations(parameters);
         const extent = @field(
@@ -1181,7 +1182,7 @@ test "Gapon source rates reconstruct adsorption and conserve every aqueous-excha
         zeroTransformations(parameters),
         parameters,
     );
-    inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| {
         try std.testing.expectApproxEqAbs(
             @field(adsorption, field.name),
             @field(transformations.cation_adsorption_mol_per_megagram, field.name),
@@ -1192,7 +1193,7 @@ test "Gapon source rates reconstruct adsorption and conserve every aqueous-excha
     const aqueous_before = state.aqueous[0];
     const exchange_before = state.cation_exchange_mol_per_megagram[0];
     try state.state_updateCell(0, transformations);
-    inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| {
         const ratio = if (comptime std.mem.eql(u8, field.name, "ammonium_non_band"))
             parameters.cation_exchange_water_ratios.ammonium_non_band_megagrams_per_m3
         else if (comptime std.mem.eql(u8, field.name, "ammonium_band"))

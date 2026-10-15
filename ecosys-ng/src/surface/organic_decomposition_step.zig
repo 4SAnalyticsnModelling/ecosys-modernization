@@ -4,6 +4,8 @@ const organic = @import("../soil/organic/initialization.zig");
 const decomposition = @import("../soil/biogeochemistry/organic_substrate_decomposition.zig");
 const respiration = @import("microbial_respiration_step.zig");
 const priming = @import("organic_priming_step.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const Parameters = struct {
     structural_rate_g_c_per_g_activity_h: [respiration.litter_complex_count][organic.structural_fraction_count]f64,
@@ -64,7 +66,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 or field.type == []organic.ElementPool) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 or field.type == []organic.ElementPool) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -169,9 +171,9 @@ test "surface structural residue and sorbed decomposition are derived together" 
     defer priming_state.deinit();
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    const n = [_]f64{0.1} ** (organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
-    const p = [_]f64{0.01} ** (organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
-    const structural_rates = [_][organic.structural_fraction_count]f64{.{ 7.5, 7.5, 1.5, 0.5, 0.0015 }} ** respiration.litter_complex_count;
+    const n = @as([(organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.1)));
+    const p = @as([(organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.01)));
+    const structural_rates = @as([respiration.litter_complex_count][organic.structural_fraction_count]f64, @splat(@as([organic.structural_fraction_count]f64, .{ 7.5, 7.5, 1.5, 0.5, 0.0015 })));
     var context: ApplyContext = .{ .result = &state, .surface_organic = &organic_state, .respiration = &respiration_state, .priming = &priming_state, .biologically_active_water_m3 = &.{1}, .litter_bulk_volume_m3 = &.{1}, .growth_temperature_response = &.{1}, .microbial_nitrogen_to_carbon_g_n_per_g_c = &n, .microbial_phosphorus_to_carbon_g_p_per_g_c = &p, .particulate_nitrogen_per_carbon_g_n_per_g_c = 0.05, .particulate_phosphorus_per_carbon_g_p_per_g_c = 0.005, .labile_biomass_fraction = 0.55, .timestep_h = 1, .negligible_carbon_g_c = 1e-12, .parameters = .{ .structural_rate_g_c_per_g_activity_h = structural_rates, .microbial_residue_rate_g_c_per_g_activity_h = .{ 7.5, 1.5 }, .sorbed_organic_rate_g_c_per_g_activity_h = 0.25, .sorbed_acetate_rate_g_c_per_g_activity_h = 0.25, .environment = .{ .surface_activity_half_saturation_g_c_per_m3 = 10, .soil_activity_half_saturation_g_c_per_m3 = 10, .surface_activity_inhibition_g_c_per_m3_per_step = 50, .soil_activity_inhibition_g_c_per_m3_per_step = 50, .dissolved_carbon_product_inhibition_g_c_per_m3 = 1200 } } };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(state.structural_decomposition[3].carbon_g_c > 0);

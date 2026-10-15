@@ -3,6 +3,7 @@ const schedule = @import("fertilizer_schedule.zig");
 const surface = @import("../surface/litter_fertilizer.zig");
 const soil_dissolution = @import("../soil/nutrients/fertilizer_dissolution.zig");
 const reactive_nitrogen_state = @import("../soil/nutrients/reactive_nitrogen_state.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Heap-owned undissolved nitrogen fertilizer for every runtime soil layer.
 /// Surface broadcast material remains in `surface_litter_fertilizer.State`;
@@ -214,8 +215,8 @@ fn zeroSoilInventory() soil_dissolution.FertilizerState {
 }
 
 fn validateFiniteInventory(surface_inventory: surface.Inventory, soil_inventory: soil_dissolution.FertilizerState) !void {
-    inline for (@typeInfo(surface.Inventory).@"struct".fields) |field| if (!std.math.isFinite(@field(surface_inventory, field.name)) or @field(surface_inventory, field.name) < 0) return error.FertilizerApplicationOverflow;
-    inline for (@typeInfo(soil_dissolution.FertilizerState).@"struct".fields) |field| if (!std.math.isFinite(@field(soil_inventory, field.name)) or @field(soil_inventory, field.name) < 0) return error.FertilizerApplicationOverflow;
+    inline for (ti_compat.fieldViews(surface.Inventory)) |field| if (!std.math.isFinite(@field(surface_inventory, field.name)) or @field(surface_inventory, field.name) < 0) return error.FertilizerApplicationOverflow;
+    inline for (ti_compat.fieldViews(soil_dissolution.FertilizerState)) |field| if (!std.math.isFinite(@field(soil_inventory, field.name)) or @field(soil_inventory, field.name) < 0) return error.FertilizerApplicationOverflow;
 }
 
 test "fertilizer event conversion conserves nitrogen and honors depth and bands" {

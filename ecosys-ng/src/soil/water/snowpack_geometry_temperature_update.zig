@@ -68,6 +68,7 @@
 // snowpack group of docs/traceability/a1b_snowpack_minimum_heat_capacity_unbound.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     solid_snow_heat_capacity_megajoules_per_m3_k: f64,
@@ -311,7 +312,7 @@ fn addActiveLayerToTotals(
     totals.ice_volume_m3 += layer.ice_volume_m3;
     totals.snowpack_volume_m3 += layer.total_layer_volume_m3;
     totals.snowpack_depth_m += layer.layer_thickness_m;
-    inline for (@typeInfo(ColumnTotals).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ColumnTotals)) |field| {
         if (!std.math.isFinite(@field(totals.*, field.name)))
             return error.NonFiniteSnowpackStateUpdateResult;
     }
@@ -363,7 +364,7 @@ fn state_updateCandidates(state: LayerState, candidates: []const LayerCandidate)
 fn validateDimensions(state: LayerState, workspace: []LayerCandidate) !void {
     const layer_count = state.active.len;
     if (layer_count == 0) return error.InvalidSnowpackStateUpdateDimensions;
-    inline for (@typeInfo(LayerState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(LayerState)) |field| {
         if (@field(state, field.name).len != layer_count)
             return error.SnowpackStateUpdateDimensionMismatch;
     }
@@ -372,11 +373,11 @@ fn validateDimensions(state: LayerState, workspace: []LayerCandidate) !void {
 }
 
 fn validateParameters(inputs: CellInputs, parameters: Parameters) !void {
-    inline for (@typeInfo(CellInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(CellInputs)) |field| {
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteSnowpackStateUpdateParameter;
     }
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         if (!std.math.isFinite(@field(parameters, field.name)))
             return error.NonFiniteSnowpackStateUpdateParameter;
     }
@@ -437,13 +438,13 @@ fn requireConsistentHeatCapacity(
 }
 
 fn validateReport(report: Report) !void {
-    inline for (@typeInfo(ColumnTotals).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ColumnTotals)) |field| {
         const value = @field(report.column_totals, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteSnowpackStateUpdateResult;
         if (value < 0) return error.InvalidSnowpackStateUpdateResult;
     }
-    inline for (@typeInfo(ClearedInactiveStorage).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ClearedInactiveStorage)) |field| {
         const value = @field(report.cleared_inactive_storage, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteSnowpackStateUpdateResult;
@@ -461,7 +462,7 @@ fn validateWorkspaceOwnership(
         workspace.len,
         @sizeOf(LayerCandidate),
     ) catch return error.SnowpackStateUpdateDimensionOverflow;
-    inline for (@typeInfo(LayerState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(LayerState)) |field| {
         const values = @field(state, field.name);
         const value_type = @typeInfo(@TypeOf(values)).pointer.child;
         const state_bytes = std.math.mul(
@@ -498,20 +499,20 @@ const TestStorage = struct {
     fn init(allocator: std.mem.Allocator, layer_count: usize) !TestStorage {
         var storage: TestStorage = undefined;
         storage.allocator = allocator;
-        inline for (@typeInfo(LayerState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(LayerState)) |field| {
             const slice_type = field.type;
             const value_type = @typeInfo(slice_type).pointer.child;
             @field(storage.state, field.name) =
                 try allocator.alloc(value_type, layer_count);
         }
         @memset(storage.state.active, false);
-        inline for (@typeInfo(LayerState).@"struct".fields[1..]) |field|
+        inline for (ti_compat.fieldViews(LayerState)[1..]) |field|
             @memset(@field(storage.state, field.name), 0);
         return storage;
     }
 
     fn deinit(self: *TestStorage) void {
-        inline for (@typeInfo(LayerState).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(LayerState)) |field|
             self.allocator.free(@field(self.state, field.name));
         self.* = undefined;
     }

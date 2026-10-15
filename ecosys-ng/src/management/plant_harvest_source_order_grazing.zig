@@ -12,6 +12,7 @@ const litter_partition = @import("../plant/partition/litter.zig");
 const grazing_manure = @import("grazing_manure.zig");
 const __parent = @import("plant_harvest_runtime.zig");
 const group_harvest = @import("plant_harvest_source_order_harvest.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const SourceOrderGrazingLitterLedgerState = struct {
     hourly_litter: canopy.ElementalMass,
@@ -41,7 +42,7 @@ pub fn sourceOrderGrazingLitterLedgers(
     };
     const residue = try group_harvest.sumHarvestProductComponents(residue_by_component);
     const direct = try group_harvest.sumHarvestProductComponents(direct_litter_by_component);
-    inline for (@typeInfo(SourceOrderGrazingLitterLedgerState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderGrazingLitterLedgerState)) |field| {
         if (field.type == canopy.ElementalMass) {
             const mass = @field(current, field.name);
             inline for (.{ mass.carbon_g, mass.nitrogen_g, mass.phosphorus_g }) |value|
@@ -59,7 +60,7 @@ pub fn sourceOrderGrazingLitterLedgers(
         .phosphorus_g = residue.phosphorus_g + direct.phosphorus_g,
     };
     var next = current;
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
         @field(next.hourly_litter, field.name) += @field(returned, field.name);
         @field(next.cumulative_litter, field.name) += @field(returned, field.name);
         @field(next.accumulated_application, field.name) += @field(returned, field.name);
@@ -72,7 +73,7 @@ pub fn sourceOrderGrazingLitterLedgers(
     next.cumulative_aboveground_litter.phosphorus_g =
         next.cumulative_litter.phosphorus_g + returned.phosphorus_g;
     next.surface_litter_carbon_g_c += returned.carbon_g;
-    inline for (@typeInfo(SourceOrderGrazingLitterLedgerState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderGrazingLitterLedgerState)) |field| {
         if (field.type == canopy.ElementalMass) {
             const mass = @field(next, field.name);
             inline for (.{ mass.carbon_g, mass.nitrogen_g, mass.phosphorus_g }) |value|

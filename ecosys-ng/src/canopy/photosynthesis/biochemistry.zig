@@ -8,6 +8,7 @@ const BranchDevelopment = @import("../../plant/lifecycle/phenology.zig").BranchD
 const GrowthStages = @import("../../plant/lifecycle/growth_stages.zig").State;
 const growth_temperature = @import("../../plant/response/growth_temperature.zig");
 const c4_capacity = @import("c4_capacity.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     pathway: enum { c3, c4 },
@@ -28,7 +29,7 @@ pub const Parameters = struct {
     intercellular_to_atmospheric_co2_ratio: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| if (field.type == f64) {
+        inline for (ti_compat.fieldViews(Parameters)) |field| if (field.type == f64) {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidCanopyBiochemistryParameter;
         };

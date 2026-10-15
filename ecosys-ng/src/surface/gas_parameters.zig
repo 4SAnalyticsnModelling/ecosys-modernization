@@ -13,6 +13,8 @@ const microbial_turnover = @import("microbial_turnover_step.zig");
 const organic_decomposition = @import("organic_decomposition_step.zig");
 const organic_sorption = @import("organic_sorption_step.zig");
 const litter_colonization = @import("litter_colonization_step.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const Parameters = struct {
     atmospheric_concentration_g_per_m3: [gas.species_count]f64,
@@ -132,9 +134,9 @@ pub noinline fn parse(source: []const u8) !Parameters {
         .nitrate_n_per_unmet_oxygen_g_n_per_g_o = try nextFloat(&tokens),
     };
     try expectRecord(&tokens, "surface_chemodenitrification");
-    inline for (@typeInfo(surface_denitrification.ChemodenitrificationParameters).@"struct".fields) |field| @field(result.chemodenitrification, field.name) = try nextFloat(&tokens);
+    inline for (ti_compat.fieldViews(surface_denitrification.ChemodenitrificationParameters)) |field| @field(result.chemodenitrification, field.name) = try nextFloat(&tokens);
     try expectRecord(&tokens, "surface_mineral_nutrient_exchange");
-    inline for (@typeInfo(mineral_exchange.Parameters).@"struct".fields) |field| @field(result.mineral_exchange, field.name) = try nextFloat(&tokens);
+    inline for (ti_compat.fieldViews(mineral_exchange.Parameters)) |field| @field(result.mineral_exchange, field.name) = try nextFloat(&tokens);
     try expectRecord(&tokens, "surface_microbial_turnover");
     for (&result.microbial_turnover.basal_decomposition_rate_per_h) |*value| value.* = try nextFloat(&tokens);
     result.microbial_turnover.minimum_carbon_recycling_fraction = try nextFloat(&tokens);
@@ -150,9 +152,9 @@ pub noinline fn parse(source: []const u8) !Parameters {
     for (&result.organic_decomposition.microbial_residue_rate_g_c_per_g_activity_h) |*value| value.* = try nextFloat(&tokens);
     result.organic_decomposition.sorbed_organic_rate_g_c_per_g_activity_h = try nextFloat(&tokens);
     result.organic_decomposition.sorbed_acetate_rate_g_c_per_g_activity_h = try nextFloat(&tokens);
-    inline for (@typeInfo(@TypeOf(result.organic_decomposition.environment)).@"struct".fields) |field| @field(result.organic_decomposition.environment, field.name) = try nextFloat(&tokens);
+    inline for (ti_compat.fieldViews(@TypeOf(result.organic_decomposition.environment))) |field| @field(result.organic_decomposition.environment, field.name) = try nextFloat(&tokens);
     try expectRecord(&tokens, "surface_organic_sorption");
-    inline for (@typeInfo(organic_sorption.Parameters).@"struct".fields) |field| @field(result.organic_sorption, field.name) = try nextFloat(&tokens);
+    inline for (ti_compat.fieldViews(organic_sorption.Parameters)) |field| @field(result.organic_sorption, field.name) = try nextFloat(&tokens);
     try expectRecord(&tokens, "surface_litter_colonization");
     for (&result.litter_colonization.colonization_per_g_activity) |*value| value.* = try nextFloat(&tokens);
     if (tokens.next() != null) return error.UnexpectedSurfaceGasParameter;
@@ -224,7 +226,7 @@ fn scalarCount(comptime T: type) usize {
         .array => |array| array.len * scalarCount(array.child),
         .@"struct" => |structure| count: {
             var count: usize = 0;
-            inline for (structure.fields) |field|
+            inline for (ti_compat.fieldViewsFromInfo(structure)) |field|
                 count += scalarCount(field.type);
             break :count count;
         },
@@ -252,7 +254,7 @@ fn validate(parameters: Parameters) !void {
     if (parameters.exchange.iteration_fraction != 1) return error.SurfaceGasIterationFractionMustBeWholeHour;
     _ = try litter_geometry.calculate(.{ .carbon_by_pool_g_c = .{ 0, 0, 0, 0, 0 }, .signed_charcoal_change_g_c = 0, .water_m3 = 0, .ice_m3 = 0 }, parameters.litter_geometry);
     const water_environment = parameters.litter_water_environment;
-    inline for (@typeInfo(litter_water_environment.Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(water_environment, field.name))) return error.NonFiniteSurfaceGasParameter;
+    inline for (ti_compat.fieldViews(litter_water_environment.Parameters)) |field| if (!std.math.isFinite(@field(water_environment, field.name))) return error.NonFiniteSurfaceGasParameter;
     if (water_environment.saturation_water_potential_megapascal >= 0 or water_environment.minimum_water_potential_megapascal >= water_environment.saturation_water_potential_megapascal or water_environment.hygroscopic_water_potential_megapascal >= 0 or water_environment.saturation_to_field_shape <= 0 or water_environment.below_wilting_shape <= 0) return error.InvalidSurfaceGasParameter;
     inline for (parameters.microbial_respiration.target_nitrogen_per_carbon_g_n_per_g_c ++ parameters.microbial_respiration.target_phosphorus_per_carbon_g_p_per_g_c ++ parameters.microbial_respiration.doc_respiration_requirement_g_c_per_g_c ++ parameters.microbial_respiration.acetate_respiration_requirement_g_c_per_g_c) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSurfaceGasParameter;
     for (parameters.microbial_respiration.target_nitrogen_per_carbon_g_n_per_g_c ++ parameters.microbial_respiration.target_phosphorus_per_carbon_g_p_per_g_c) |value| if (value <= 0) return error.InvalidSurfaceGasParameter;
@@ -267,9 +269,9 @@ fn validate(parameters: Parameters) !void {
     if (parameters.microbial_respiration.labile_biomass_fraction > 1) return error.InvalidSurfaceGasParameter;
     if (!std.math.isFinite(parameters.microbial_respiration.dinitrogen_half_saturation_g_n_per_m3) or parameters.microbial_respiration.dinitrogen_half_saturation_g_n_per_m3 <= 0 or !std.math.isFinite(parameters.microbial_respiration.nonstructural_to_structural_rate_per_h) or parameters.microbial_respiration.nonstructural_to_structural_rate_per_h <= 0 or !std.math.isFinite(parameters.microbial_respiration.denitrification_growth_respiration_requirement_g_c_per_g_c) or parameters.microbial_respiration.denitrification_growth_respiration_requirement_g_c_per_g_c <= 0) return error.InvalidSurfaceGasParameter;
     parameters.denitrification.validate() catch return error.InvalidSurfaceGasParameter;
-    inline for (@typeInfo(surface_denitrification.ChemodenitrificationParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters.chemodenitrification, field.name)) or @field(parameters.chemodenitrification, field.name) < 0) return error.InvalidSurfaceGasParameter;
+    inline for (ti_compat.fieldViews(surface_denitrification.ChemodenitrificationParameters)) |field| if (!std.math.isFinite(@field(parameters.chemodenitrification, field.name)) or @field(parameters.chemodenitrification, field.name) < 0) return error.InvalidSurfaceGasParameter;
     if (parameters.chemodenitrification.nitrous_acid_dissociation_mol_per_m3 <= 0 or @abs(parameters.chemodenitrification.nitrous_oxide_yield_g_n_per_g_n + parameters.chemodenitrification.dissolved_organic_nitrogen_yield_g_n_per_g_n - 1) > 1e-12) return error.InvalidSurfaceGasParameter;
-    inline for (@typeInfo(mineral_exchange.Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters.mineral_exchange, field.name)) or @field(parameters.mineral_exchange, field.name) <= 0) return error.InvalidSurfaceGasParameter;
+    inline for (ti_compat.fieldViews(mineral_exchange.Parameters)) |field| if (!std.math.isFinite(@field(parameters.mineral_exchange, field.name)) or @field(parameters.mineral_exchange, field.name) <= 0) return error.InvalidSurfaceGasParameter;
     for (parameters.microbial_turnover.basal_decomposition_rate_per_h) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSurfaceGasParameter;
     inline for (.{ parameters.microbial_turnover.minimum_carbon_recycling_fraction, parameters.microbial_turnover.carbon_recycling_range_fraction, parameters.microbial_turnover.maximum_nitrogen_recycling_fraction, parameters.microbial_turnover.maximum_phosphorus_recycling_fraction }) |value| if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidSurfaceGasParameter;
     inline for (.{ parameters.microbial_turnover.dissolved_priming_rate_per_h, parameters.microbial_turnover.microbial_priming_rate_per_h }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSurfaceGasParameter;
@@ -279,8 +281,8 @@ fn validate(parameters: Parameters) !void {
     }
     for (parameters.organic_decomposition.microbial_residue_rate_g_c_per_g_activity_h) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSurfaceGasParameter;
     inline for (.{ parameters.organic_decomposition.sorbed_organic_rate_g_c_per_g_activity_h, parameters.organic_decomposition.sorbed_acetate_rate_g_c_per_g_activity_h }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSurfaceGasParameter;
-    inline for (@typeInfo(@TypeOf(parameters.organic_decomposition.environment)).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters.organic_decomposition.environment, field.name)) or @field(parameters.organic_decomposition.environment, field.name) <= 0) return error.InvalidSurfaceGasParameter;
-    inline for (@typeInfo(organic_sorption.Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters.organic_sorption, field.name)) or @field(parameters.organic_sorption, field.name) <= 0) return error.InvalidSurfaceGasParameter;
+    inline for (ti_compat.fieldViews(@TypeOf(parameters.organic_decomposition.environment))) |field| if (!std.math.isFinite(@field(parameters.organic_decomposition.environment, field.name)) or @field(parameters.organic_decomposition.environment, field.name) <= 0) return error.InvalidSurfaceGasParameter;
+    inline for (ti_compat.fieldViews(organic_sorption.Parameters)) |field| if (!std.math.isFinite(@field(parameters.organic_sorption, field.name)) or @field(parameters.organic_sorption, field.name) <= 0) return error.InvalidSurfaceGasParameter;
     for (parameters.litter_colonization.colonization_per_g_activity) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSurfaceGasParameter;
 }
 
@@ -409,7 +411,7 @@ pub fn atmosphericConcentrationForCell(
         concentrations_g_per_m3.len != cell_count * gas.species_count)
         return error.AtmosphericGasCarrierDimensionMismatch;
     return concentrations_g_per_m3[
-        cell * gas.species_count + @intFromEnum(species)
+        cell * gas.species_count + @backingInt(species)
     ];
 }
 
@@ -417,7 +419,7 @@ test "surface gas runtime parameters accept flexible delimiters and casing" {
     const source = source_parameter_text;
     const parameters = try parse(source);
     try std.testing.expectEqual(@as(f64, 0.064), parameters.oxygen_half_saturation_g_o_per_m3);
-    try std.testing.expectEqual(@as(f64, 285.2), parameters.solubility.reference_water_to_air[@intFromEnum(gas.Species.ammonia)]);
+    try std.testing.expectEqual(@as(f64, 285.2), parameters.solubility.reference_water_to_air[@backingInt(gas.Species.ammonia)]);
 }
 
 test "surface gas records accept comments with exact runtime array counts" {
@@ -494,12 +496,12 @@ test "surface gas parameters reject a sub-hourly gas iteration fraction" {
 
 test "READI atmospheric mixing ratios convert to tracked gas mass units" {
     const result = try atmosphericConcentrationsFromUmolPerMol(.{ 420, 1.9, 210_000, 780_000, 0.33, 0.01, 0 }, 298.15);
-    try std.testing.expectApproxEqRel(@as(f64, 274.7), result[@intFromEnum(gas.Species.oxygen)], 2e-3);
-    try std.testing.expect(result[@intFromEnum(gas.Species.carbon_dioxide)] > 0);
+    try std.testing.expectApproxEqRel(@as(f64, 274.7), result[@backingInt(gas.Species.oxygen)], 2e-3);
+    try std.testing.expect(result[@backingInt(gas.Species.carbon_dioxide)] > 0);
 }
 
 test "two-cell site atmosphere remains distinct through initialization and runtime lookup" {
-    var carrier = [_]f64{0} ** (2 * gas.species_count);
+    var carrier = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
     try writeAtmosphericConcentrationsForCell(
         &carrier,
         0,

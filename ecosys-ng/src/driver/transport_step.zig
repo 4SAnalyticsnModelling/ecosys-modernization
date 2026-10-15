@@ -14,6 +14,8 @@ const external_solute = @import("../soil/solute/external_boundaries.zig");
 const charge_classification = @import("../soil/solute/charge_classification.zig");
 const transport_species = @import("../soil/solute/transport_species.zig");
 const scoped_conservation = @import("../validation/scoped_conservation.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const ZoneFractionProvider = struct {
     context: *const anyopaque,
@@ -460,8 +462,8 @@ fn rechargeConcentrationsForLayer(
         return error.TransportStepDimensionMismatch;
     const fractions = try source.at(source.context, layer);
     try validateRechargeZoneFractions(fractions);
-    inline for (@typeInfo(transport_species.AqueousSpecies).@"enum".fields) |field| {
-        const species: transport_species.AqueousSpecies = @enumFromInt(field.value);
+    inline for (ti_compat.enumFieldViews(transport_species.AqueousSpecies)) |field| {
+        const species: transport_species.AqueousSpecies = @fromBackingInt(@intCast(field.value));
         const concentration = base_mol_per_m3[field.value];
         if (!std.math.isFinite(concentration) or concentration < 0)
             return error.InvalidRechargeConcentration;
@@ -516,13 +518,13 @@ test "recharge applies live per-layer phosphate fractions without mutating its b
     };
 
     const layer_zero = try rechargeConcentrationsForLayer(&base, 0, provider, &scratch);
-    try std.testing.expectEqual(@as(f64, 1), layer_zero[@intFromEnum(transport_species.AqueousSpecies.calcium)]);
-    try std.testing.expectApproxEqAbs(@as(f64, 0.8), layer_zero[@intFromEnum(transport_species.AqueousSpecies.non_band_hpo4)], 64 * std.math.floatEps(f64));
-    try std.testing.expectApproxEqAbs(@as(f64, 0.2), layer_zero[@intFromEnum(transport_species.AqueousSpecies.band_hpo4)], 64 * std.math.floatEps(f64));
+    try std.testing.expectEqual(@as(f64, 1), layer_zero[@backingInt(transport_species.AqueousSpecies.calcium)]);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.8), layer_zero[@backingInt(transport_species.AqueousSpecies.non_band_hpo4)], 64 * std.math.floatEps(f64));
+    try std.testing.expectApproxEqAbs(@as(f64, 0.2), layer_zero[@backingInt(transport_species.AqueousSpecies.band_hpo4)], 64 * std.math.floatEps(f64));
 
     const layer_one = try rechargeConcentrationsForLayer(&base, 1, provider, &scratch);
-    try std.testing.expectApproxEqAbs(@as(f64, 0.2), layer_one[@intFromEnum(transport_species.AqueousSpecies.non_band_hpo4)], 64 * std.math.floatEps(f64));
-    try std.testing.expectApproxEqAbs(@as(f64, 0.8), layer_one[@intFromEnum(transport_species.AqueousSpecies.band_hpo4)], 64 * std.math.floatEps(f64));
+    try std.testing.expectApproxEqAbs(@as(f64, 0.2), layer_one[@backingInt(transport_species.AqueousSpecies.non_band_hpo4)], 64 * std.math.floatEps(f64));
+    try std.testing.expectApproxEqAbs(@as(f64, 0.8), layer_one[@backingInt(transport_species.AqueousSpecies.band_hpo4)], 64 * std.math.floatEps(f64));
     try std.testing.expectEqualSlices(f64, &base_before, &base);
 }
 
@@ -787,11 +789,11 @@ test "soil solute transaction publishes both accepted runtime-species face ledge
     );
     defer std.testing.allocator.free(mobility);
     @memset(mobility, 1);
-    const recharge = [_]f64{0} ** (2 * runtime_species_count);
+    const recharge = @as([(2 * runtime_species_count)]f64, @splat(@as(f64, 0)));
     var micropore_face_flux =
-        [_]f64{0} ** runtime_species_count;
+        @as([runtime_species_count]f64, @splat(@as(f64, 0)));
     var macropore_face_flux =
-        [_]f64{0} ** runtime_species_count;
+        @as([runtime_species_count]f64, @splat(@as(f64, 0)));
     _ = try advanceSoilSolutes(
         std.testing.allocator,
         &grid,
@@ -809,7 +811,7 @@ test "soil solute transaction publishes both accepted runtime-species face ledge
             .micropore_diffusivity_m2_per_h = &.{ 0, 0 },
             .maximum_convective_fraction = 1,
             .pore_exchange_step_fraction = 0,
-            .boundary_mobility_fraction = &([_]f64{1} ** runtime_species_count),
+            .boundary_mobility_fraction = &(@as([runtime_species_count]f64, @splat(@as(f64, 1)))),
             .recharge_concentration_mol_per_m3 = &recharge,
             .micropore_face_flux_mol_by_component = &micropore_face_flux,
             .macropore_face_flux_mol_by_component = &macropore_face_flux,
@@ -1054,10 +1056,10 @@ test "hourly transport coupling advances pore domains and snow atomically" {
     var snow_drift_export: [snow.species_count]f64 = undefined;
     var snow_drift_salt_export: [snow.salt_species_count]f64 = undefined;
     const no = [_]bool{ false, false };
-    const zero_snow_input = [_]f64{0} ** (2 * snow.species_count);
+    const zero_snow_input = @as([(2 * snow.species_count)]f64, @splat(@as(f64, 0)));
     const gas_water = [_]f64{ 0, 0 };
-    const gas_solubility = [_]f64{1} ** (2 * gas.species_count);
-    const gas_exchange = [_]f64{0} ** (2 * gas.species_count);
+    const gas_solubility = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 1)));
+    const gas_exchange = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{ false, false };
     const result = try advance(std.testing.allocator, &grid, &hydrology, &micro, &macro, &gas_state, &snowpack, &surface_water, .{
         .micropore_diffusive_conductance_m3_per_step = &[_]f64{0.1},
@@ -1115,10 +1117,10 @@ test "late transport failure rolls back earlier pore solve" {
     var snow_drift_export: [snow.species_count]f64 = undefined;
     var snow_drift_salt_export: [snow.salt_species_count]f64 = undefined;
     const no = [_]bool{ false, false };
-    const zero_snow_input = [_]f64{0} ** (2 * snow.species_count);
+    const zero_snow_input = @as([(2 * snow.species_count)]f64, @splat(@as(f64, 0)));
     const gas_water = [_]f64{ 0, 0 };
-    const gas_solubility = [_]f64{1} ** (2 * gas.species_count);
-    const gas_exchange = [_]f64{0} ** (2 * gas.species_count);
+    const gas_solubility = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 1)));
+    const gas_exchange = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)));
     const no_bubbling = [_]bool{ false, false };
     try std.testing.expectError(error.SoluteTransportSolverDidNotConverge, advance(std.testing.allocator, &grid, &hydrology, &micro, &macro, &gas_state, &snowpack, &surface_water, .{
         .micropore_diffusive_conductance_m3_per_step = &[_]f64{0.1},

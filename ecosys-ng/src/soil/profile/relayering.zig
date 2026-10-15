@@ -32,6 +32,7 @@ const root_remap = @import("../../plant/root/plant_root_layer_remap.zig");
 const relayering_activity = @import("relayering_activity.zig");
 const legacy_water_negligible_floor = @import("../../core/legacy_water_negligible_floor.zig");
 
+
 test {
     _ = relayering_activity;
 }
@@ -860,7 +861,7 @@ fn validateMicroporeSoluteLayerFraction(
     const source_first = source * state.species_count;
     const destination_first = destination * state.species_count;
     inline for (std.enums.values(solute_transport_species.AqueousSpecies)) |species| {
-        const component = @intFromEnum(species);
+        const component = @backingInt(species);
         try validateTransferPair(
             state.amount_mol[source_first + component],
             state.amount_mol[destination_first + component],
@@ -941,7 +942,7 @@ fn validateMineralNitrogenLayerFraction(
     const source_first = source * state.species_count;
     const destination_first = destination * state.species_count;
     inline for (std.enums.values(mineral_nitrogen_transport_module.Species)) |species| {
-        const component = @intFromEnum(species);
+        const component = @backingInt(species);
         try validateTransferPair(
             state.amount_mol[source_first + component],
             state.amount_mol[destination_first + component],
@@ -961,7 +962,7 @@ fn transferMineralNitrogenLayerFraction(
     const source_first = source * state.species_count;
     const destination_first = destination * state.species_count;
     inline for (std.enums.values(mineral_nitrogen_transport_module.Species)) |species| {
-        const component = @intFromEnum(species);
+        const component = @backingInt(species);
         transferPair(
             state.amount_mol,
             source_first + component,
@@ -1011,7 +1012,7 @@ fn transferMicroporeSoluteLayerFraction(
     const source_first = source * state.species_count;
     const destination_first = destination * state.species_count;
     inline for (std.enums.values(solute_transport_species.AqueousSpecies)) |species| {
-        const component = @intFromEnum(species);
+        const component = @backingInt(species);
         transferPair(
             state.amount_mol,
             source_first + component,
@@ -1305,7 +1306,7 @@ test "REDIST live DLYR exposes prior but not future boundary changes" {
     var geometry = try Geometry.State.init(std.testing.allocator, 1, 3);
     defer geometry.deinit();
     try Geometry.initializeCell(&geometry, 0, 0, &.{ 0.1, 0.2, 0.3 }, 0, 1e-9);
-    const zero = [_]f64{0} ** 4;
+    const zero = @as([4]f64, @splat(@as(f64, 0)));
     const boundary_change = [_]f64{ 0, 0.02, 0.03, 0 };
     const changes: Geometry.DisturbanceChanges = .{
         .pond_m = &zero,
@@ -1386,10 +1387,10 @@ test "sub-floor nonzero layer redistribution conserves and moves water" {
 
     // Simulate layer 0 expanding (bottom boundary pushes down 0.02 m):
     // DDLYRX > 0 at boundary between layer 0 and layer 1 → pull from layer 1.
-    var ft_change = [_]f64{0} ** 4; // 1 cell × (3+1) boundaries
+    var ft_change = @as([4]f64, @splat(@as(f64, 0))); // 1 cell × (3+1) boundaries
     ft_change[1] = 0.001; // nonzero movement below the 0.01 m geometry floor
 
-    var zero_change = [_]f64{0} ** 4;
+    var zero_change = @as([4]f64, @splat(@as(f64, 0)));
     // SOC-driven (CDPTHY) movement: freeze-thaw alone moves no soil material.
     const geometry_changes = Geometry.DisturbanceChanges{
         .pond_m = &zero_change,
@@ -1522,7 +1523,7 @@ test "REDIST freeze-thaw moves soil boundaries without transferring soil materia
     defer mfert_state.deinit();
     // Cumulative (bottom-anchored) freeze-thaw boundary movement.
     const thaw = [_]f64{ -0.0012, -0.0011, -0.0006, 0 };
-    const zero = [_]f64{0} ** 4;
+    const zero = @as([4]f64, @splat(@as(f64, 0)));
     const water_before = [_]f64{ grid.matrix_liquid_water_m3[0], grid.matrix_liquid_water_m3[1], grid.matrix_liquid_water_m3[2] };
     const dry_before = [_]f64{ thermal_dry[0] * thermal_lv[0], thermal_dry[1] * thermal_lv[1], thermal_dry[2] * thermal_lv[2] };
     try applyLayerRedistribution(.{
@@ -1750,9 +1751,9 @@ test "DISC-WATSUB-002 relayering refills a recipient emptied earlier in the same
 
     // A boundary change at the layer1/layer2 face, which would select the emptied
     // layer 1 as one endpoint.
-    var ft_change = [_]f64{0} ** 4;
+    var ft_change = @as([4]f64, @splat(@as(f64, 0)));
     ft_change[2] = 0.01;
-    var zero_change = [_]f64{0} ** 4;
+    var zero_change = @as([4]f64, @splat(@as(f64, 0)));
 
     var gas_state = try gas.State.init(allocator, 3);
     defer gas_state.deinit();
@@ -1853,9 +1854,9 @@ test "DISC-WATSUB-002 zero-matrix donor still transfers FHOL macropore owners" {
     var mfert_state = try mineral_fertilizer.State.init(allocator, 1, 3);
     defer mfert_state.deinit();
 
-    var boundary_change = [_]f64{0} ** 4;
+    var boundary_change = @as([4]f64, @splat(@as(f64, 0)));
     boundary_change[2] = -0.01;
-    var zero = [_]f64{0} ** 4;
+    var zero = @as([4]f64, @splat(@as(f64, 0)));
     const macro_water_before = grid.macropore_liquid_water_m3[1] + grid.macropore_liquid_water_m3[2];
     const macro_ice_before = grid.macropore_ice_water_m3[1] + grid.macropore_ice_water_m3[2];
     try applyLayerRedistribution(.{
@@ -1908,7 +1909,7 @@ test "REDIST pore transport owners follow matrix FX and macropore FHO without ma
     micropore.amount_mol[0] = 8;
     macropore.amount_mol[0] = 12;
     mineral_nitrogen.matrix.amount_mol[0] = 16;
-    mineral_nitrogen.matrix.amount_mol[@intFromEnum(mineral_nitrogen_transport_module.Species.ammonium_band)] = 8;
+    mineral_nitrogen.matrix.amount_mol[@backingInt(mineral_nitrogen_transport_module.Species.ammonium_band)] = 8;
     mineral_nitrogen.macropore.amount_mol[0] = 20;
     organic_transport.micropore_amount_g[0] = 24;
     organic_transport.macropore_amount_g[0] = 28;
@@ -1925,8 +1926,8 @@ test "REDIST pore transport owners follow matrix FX and macropore FHO without ma
     try std.testing.expectEqual(@as(f64, 6), macropore.amount_mol[2]);
     try std.testing.expectEqual(@as(f64, 12), mineral_nitrogen.matrix.amount_mol[0]);
     try std.testing.expectEqual(@as(f64, 4), mineral_nitrogen.matrix.amount_mol[mineral_nitrogen_transport_module.species_count]);
-    try std.testing.expectEqual(@as(f64, 6), mineral_nitrogen.matrix.amount_mol[@intFromEnum(mineral_nitrogen_transport_module.Species.ammonium_band)]);
-    try std.testing.expectEqual(@as(f64, 2), mineral_nitrogen.matrix.amount_mol[mineral_nitrogen_transport_module.species_count + @intFromEnum(mineral_nitrogen_transport_module.Species.ammonium_band)]);
+    try std.testing.expectEqual(@as(f64, 6), mineral_nitrogen.matrix.amount_mol[@backingInt(mineral_nitrogen_transport_module.Species.ammonium_band)]);
+    try std.testing.expectEqual(@as(f64, 2), mineral_nitrogen.matrix.amount_mol[mineral_nitrogen_transport_module.species_count + @backingInt(mineral_nitrogen_transport_module.Species.ammonium_band)]);
     try std.testing.expectEqual(@as(f64, 10), mineral_nitrogen.macropore.amount_mol[0]);
     try std.testing.expectEqual(@as(f64, 10), mineral_nitrogen.macropore.amount_mol[mineral_nitrogen_transport_module.species_count]);
     try std.testing.expectEqual(@as(f64, 18), organic_transport.micropore_amount_g[0]);
@@ -1947,7 +1948,7 @@ test "REDIST micropore transport retains every phosphate species for an absent r
     );
     defer state.deinit();
     inline for (std.enums.values(solute_transport_species.AqueousSpecies)) |species| {
-        const component = @intFromEnum(species);
+        const component = @backingInt(species);
         if (microporeSoluteTransferFraction(species, 0.25, .{
             .ammonium_non_band = 1,
             .ammonium_band = 0,
@@ -1957,7 +1958,7 @@ test "REDIST micropore transport retains every phosphate species for an absent r
             .phosphate_band = 0,
         }) == 0) state.amount_mol[component] = 1 + @as(f64, @floatFromInt(component));
     }
-    state.amount_mol[@intFromEnum(solute_transport_species.AqueousSpecies.non_band_phosphate)] = 8;
+    state.amount_mol[@backingInt(solute_transport_species.AqueousSpecies.non_band_phosphate)] = 8;
     const water = [_]f64{ 0.5, 0.5 };
     const destination_fractions: NutrientZoneFractions = .{
         .ammonium_non_band = 1,
@@ -1970,13 +1971,13 @@ test "REDIST micropore transport retains every phosphate species for an absent r
     try validateMicroporeSoluteLayerFraction(&state, 0, 1, 0.25, destination_fractions);
     transferMicroporeSoluteLayerFraction(&state, 0, 1, 0.25, &water, destination_fractions);
     inline for (std.enums.values(solute_transport_species.AqueousSpecies)) |species| {
-        const component = @intFromEnum(species);
+        const component = @backingInt(species);
         if (microporeSoluteTransferFraction(species, 0.25, destination_fractions) == 0) {
             try std.testing.expectEqual(@as(f64, 1) + @as(f64, @floatFromInt(component)), state.amount_mol[component]);
             try std.testing.expectEqual(@as(f64, 0), state.amount_mol[state.species_count + component]);
         }
     }
-    const non_band = @intFromEnum(solute_transport_species.AqueousSpecies.non_band_phosphate);
+    const non_band = @backingInt(solute_transport_species.AqueousSpecies.non_band_phosphate);
     try std.testing.expectEqual(@as(f64, 6), state.amount_mol[non_band]);
     try std.testing.expectEqual(@as(f64, 2), state.amount_mol[state.species_count + non_band]);
 }
@@ -1984,7 +1985,7 @@ test "REDIST micropore transport retains every phosphate species for an absent r
 test "REDIST mineral nitrogen mirror does not enter an absent recipient band" {
     var state = try mineral_nitrogen_transport_module.State.init(std.testing.allocator, 2);
     defer state.deinit();
-    const band = @intFromEnum(mineral_nitrogen_transport_module.Species.ammonium_band);
+    const band = @backingInt(mineral_nitrogen_transport_module.Species.ammonium_band);
     state.matrix.amount_mol[band] = 8;
     const water = [_]f64{ 0.5, 0.5 };
     const destination_fractions: NutrientZoneFractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 };

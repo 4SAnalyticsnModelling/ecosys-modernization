@@ -1,5 +1,6 @@
 const std = @import("std");
 const compute = @import("../core/compute.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const BoundsDegrees = struct {
     minimum_latitude_degrees_north: f64,
@@ -68,7 +69,7 @@ pub const RegularGrid = struct {
         result.bounds = bounds;
         var allocated: usize = 0;
         errdefer result.freeAllocated(allocated);
-        inline for (@typeInfo(RegularGrid).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(RegularGrid)) |field| {
             if (field.type != []f64) continue;
             @field(result, field.name) = try allocator.alloc(f64, cell_count);
             allocated += 1;
@@ -184,7 +185,7 @@ pub const RegularGrid = struct {
 
     fn freeAllocated(self: *RegularGrid, allocated: usize) void {
         var visited: usize = 0;
-        inline for (@typeInfo(RegularGrid).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(RegularGrid)) |field| {
             if (field.type != []f64) continue;
             if (visited < allocated) self.allocator.free(@field(self, field.name));
             visited += 1;
@@ -732,7 +733,7 @@ fn wgs84RadiiOfCurvature(latitude_degrees_north: f64) !CurvatureRadii {
 }
 
 fn validateBounds(bounds: BoundsDegrees) !void {
-    inline for (@typeInfo(BoundsDegrees).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(BoundsDegrees)) |field| {
         if (!std.math.isFinite(@field(bounds, field.name)))
             return error.NonFiniteGeospatialGrid;
     }

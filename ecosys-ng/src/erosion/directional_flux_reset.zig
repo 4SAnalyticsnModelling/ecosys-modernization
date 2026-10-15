@@ -11,6 +11,7 @@
 
 const std = @import("std");
 const organic = @import("organic_matter_flux.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const sediment_and_capacity_count = 5;
 pub const fertilizer_count = 8;
@@ -92,7 +93,7 @@ const test_dimensions: organic.Dimensions = .{ .microbial_substrate_class_count 
 test "EROSION directional zero branch resets exact scalar and runtime organic topology" {
     var fixture: Fixture = .{};
     try reset(test_dimensions, fixture.state());
-    inline for (@typeInfo(Fixture).@"struct".fields) |field| for (@field(fixture, field.name)) |value| {
+    inline for (ti_compat.fieldViews(Fixture)) |field| for (@field(fixture, field.name)) |value| {
         if (@TypeOf(value) == f64) try std.testing.expectEqual(@as(f64, 0), value) else for (value) |nested| try std.testing.expectEqual(@as(f64, 0), nested);
     };
 }

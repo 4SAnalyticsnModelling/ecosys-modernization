@@ -132,7 +132,7 @@ pub fn advance(
                 inline for (non_oxygen_gases) |gas| {
                     const environment = try root_exchange.gasEnvironment(parameters, gas, grid.soil_temperature_k[soil], 0);
                     const gas_species = transportSpecies(gas);
-                    const gas_slot = @intFromEnum(gas);
+                    const gas_slot = @backingInt(gas);
                     const root_gas = rootGaseousPool(roots, gas);
                     const root_aqueous = rootAqueousPool(roots, gas);
                     const result = try root_exchange.solveRootPhaseAtmosphereExchangeG(.{
@@ -141,7 +141,7 @@ pub fn advance(
                         .gaseous_volume_m3 = roots.gaseous_volume_m3[root],
                         .aqueous_volume_m3 = roots.aqueous_volume_m3[root],
                         .water_to_air_mass_solubility_ratio = environment.water_to_air_mass_solubility_ratio,
-                        .atmosphere_concentration_g_per_m3 = atmospheric_concentration_g_per_m3[cell * gas_transport.species_count + @intFromEnum(gas_species)],
+                        .atmosphere_concentration_g_per_m3 = atmospheric_concentration_g_per_m3[cell * gas_transport.species_count + @backingInt(gas_species)],
                         .atmosphere_conductance_m3_per_h = environment.gaseous_diffusivity_m2_per_h * cross_section_m,
                         .phase_equilibration_fraction = std.math.clamp(
                             roots.current_porosity_fraction_by_domain[try roots.domainIndex(plant, 0)],
@@ -475,7 +475,7 @@ fn exchangeSoilAqueous(
         .plant_population_count = population,
         .equilibration_fraction = 1,
     });
-    const ledger = root * root_system.transported_root_gas_count + @intFromEnum(gas);
+    const ledger = root * root_system.transported_root_gas_count + @backingInt(gas);
     try root_exchange.state_updateSoilRootAqueousExchangeWithLedgerG(
         soil_pool,
         root_pool,
@@ -733,7 +733,7 @@ test "NH3 nonband and band root exchange conserves one canonical donor exactly o
     var grid = try grid_module.GridState.init(allocator, cfg);
     grid.soil_temperature_k[0] = 298.15;
     var soil_gas = try gas_transport.State.init(allocator, 1);
-    const ammonia = @intFromEnum(gas_transport.Species.ammonia);
+    const ammonia = @backingInt(gas_transport.Species.ammonia);
     soil_gas.dissolved_mass_g[ammonia] = 1;
     soil_gas.band_dissolved_mass_g[ammonia] = 0.5;
     var roots = try root_system.State.init(allocator, 1, 1, 1);
@@ -751,7 +751,7 @@ test "NH3 nonband and band root exchange conserves one canonical donor exactly o
     const after = soil_gas.dissolved_mass_g[ammonia] + soil_gas.band_dissolved_mass_g[ammonia] + roots.aqueous_ammonia_g_n[root];
     const tolerance = 64 * std.math.floatEps(f64) * @max(1, @abs(before));
     try std.testing.expectApproxEqAbs(before, after, tolerance);
-    const ledger = root * root_system.transported_root_gas_count + @intFromEnum(root_exchange.TransportedGas.ammonia);
+    const ledger = root * root_system.transported_root_gas_count + @backingInt(root_exchange.TransportedGas.ammonia);
     try std.testing.expectApproxEqAbs(
         roots.aqueous_ammonia_g_n[root] - 0.1,
         roots.soil_to_root_gas_exchange_g_per_h[ledger],

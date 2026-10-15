@@ -4,11 +4,16 @@
   "toolchains": {
     "zig": {
       "mandated_version": "0.17.x",
-      "mandate": "protocol.md §8 / gate G1, pin .agent/toolchain.json, check `uv run ecosys-audit/scripts/preflight.py`. The migration is not yet executed: ecosys-ng/build.zig.zon still declares minimum_zig_version = \"0.16.0\", so a 0.17.x build of the current tree is expected to fail until .agent/migrations/zig-0.17.md is carried out.",
+      "mandate": "protocol.md §8 / gate G1, pin .agent/toolchain.json, check `uv run ecosys-audit/scripts/preflight.py`. UPDATE 2026-10-15 (cycle 00001): the 0.17 migration IS executed — ecosys-ng/build.zig.zon declares minimum_zig_version = \"0.17.0\" and the tree builds and tests green on 0.17.0 (receipts audit/runs/zig017-{debug,releasesafe,releasefast}-20261015-1, audit/runs/zig017-test-20261014-4). Work order .agent/migrations/zig-0.17.md; cycle record .agent/cycles/cycle_00001.md.",
       "recorded_version": "0.16.0",
       "recorded_version_status": "RETIRED — host observation of 2026-09-21, kept as dated evidence",
       "source": "zig version",
-      "verified_utc": "2026-09-21"
+      "verified_utc": "2026-09-21",
+      "current_version": "0.17.0",
+      "current_version_path": "/opt/homebrew/bin/zig",
+      "current_version_source": "zig version",
+      "current_version_status": "CURRENT — measured 2026-10-15 on the macOS host; preflight zig-version PASS, build-zon-pin PASS",
+      "current_verified_utc": "2026-10-15"
     },
     "fortran": {
       "legacy_reference_compiler": "ifort",
@@ -53,7 +58,9 @@
       ],
       "completion_condition": "exit 0 and totals.unclosed_loops == 0",
       "last_verified_evidence": "2026-09-21: 95 files, 95 units, 53 COMMON blocks, 1520 loops, 0 unclosed, 53803 executable statements. All 41 program units re-extract by recorded line ranges and compile standalone under the oracle flags.",
-      "note": "Refuses to overwrite an existing output; delete or choose a new path to rebuild."
+      "note": "Refuses to overwrite an existing output; delete or choose a new path to rebuild.",
+      "reverified_utc": "2026-10-15",
+      "recent_status": "audit/manifest/f77index.json was FOUND MISSING on 2026-10-15 (untracked and lost from the working tree), which silently disabled f77query.py for any agent that tried it — a G4 blocker. Rebuilt with the recorded argv; totals reproduced the 2026-10-09 record exactly: 95 files, 95 units, 53 COMMON blocks, 1520 loops, 0 unclosed, 53803 executable statements, 55704 logical statements. That identity is also independent evidence that nothing under f77src/ has drifted. NOTE: the file is gitignored/untracked, so it must be rebuilt after any fresh clone; it is not durable evidence."
     },
     "f77_query": {
       "cwd": ".",
@@ -309,6 +316,53 @@
       "completion_condition": "exit 0 and zero failures across all 115 tests",
       "last_verified_evidence": "2026-09-24 (issue-104, audit/runs/issue-104-exe-root-full2/): compiles after the fixture fix; 109 of 115 started, 107 OK, 1 FAIL (test 71, stale NFH=4 expectation, issue-106), test 109 spins in the run-log lock and was stopped (issue-107); tests 110-115 NOT RUN. NOT a pass.",
       "note": "Second test root from build.zig:39 (src/ecosys_ng.zig; every stages/*.zig test block). The module-index root never runs these. BACKSLASH module paths are required on this host: forward slashes fail with \"found another zig file '.zig' after root source file\". The test binary is a child process named root.exe; judge liveness from it, not from zig.exe. Add --test-filter <substring> to scope."
+    },
+    "zig017_build_all_modes": {
+      "added_utc": "2026-10-15",
+      "cwd": "ecosys-ng",
+      "argv": [
+        "zig",
+        "build",
+        "-Doptimize=<Debug|ReleaseSafe|ReleaseFast>",
+        "--cache-dir",
+        ".zig-cache"
+      ],
+      "environment": {
+        "TMPDIR": "<repo>/.tmp",
+        "XDG_CACHE_HOME": "<repo>/.cache",
+        "UV_CACHE_DIR": "<repo>/.uv-cache",
+        "ZIG_GLOBAL_CACHE_DIR": "<repo>/ecosys-ng/.zig-cache-global"
+      },
+      "toolchain": "zig 0.17.0 (/opt/homebrew/bin/zig)",
+      "expected_artifacts": [
+        "ecosys-ng/zig-out/bin/ecosys_ng (verified 2026-10-15: 10,847,800 bytes, macOS host)"
+      ],
+      "completion_condition": "exit 0 recorded by run_logged.py; zig version printed in the cycle record",
+      "last_verified_evidence": "2026-10-15 cycle 00001, all exit 0 on zig 0.17.0: Debug 28.1 s audit/runs/zig017-debug-20261015-1; ReleaseSafe 163.6 s audit/runs/zig017-releasesafe-20261015-1; ReleaseFast 168.4 s audit/runs/zig017-releasefast-20261015-1. NOTE `zig build` on 0.17 rejects --global-cache-dir: the global cache moves by ZIG_GLOBAL_CACHE_DIR only.",
+      "supersedes": "zig_releasesafe_build / zig_releasefast_build for any gate closed from 2026-10-13 onward"
+    },
+    "zig017_full_test_suite": {
+      "added_utc": "2026-10-15",
+      "cwd": "ecosys-ng",
+      "argv": [
+        "zig",
+        "build",
+        "test",
+        "--cache-dir",
+        ".zig-cache",
+        "--summary",
+        "all"
+      ],
+      "environment": {
+        "TMPDIR": "<repo>/.tmp",
+        "XDG_CACHE_HOME": "<repo>/.cache",
+        "UV_CACHE_DIR": "<repo>/.uv-cache",
+        "ZIG_GLOBAL_CACHE_DIR": "<repo>/ecosys-ng/.zig-cache-global"
+      },
+      "toolchain": "zig 0.17.0 (/opt/homebrew/bin/zig)",
+      "completion_condition": "read the `Build Summary` line of stderr (test counts) — receipt exit code alone is not test acceptance; ~9 min wall clock. Filters are NOT forwarded by build.zig on 0.17 (`zig build test --test-filter X` is rejected: unrecognized argument), so a bounded run is `zig test src/module_index.zig --cache-dir .zig-cache --test-filter \"<test name>\"` from ecosys-ng/ (measured 2026-10-15 by the cycle-00001 G7 verifier; `zig test <leaf file>` fails with 'import of file outside module path').",
+      "last_verified_evidence": "2026-10-14 audit/runs/zig017-test-20261014-4/stderr.log:2498 — 4518/4520 tests passed (1 skipped: the env-gated production_freezing_column_validation benchmark admission; 1 crashed: tracked issue-106 fixture OOB at src/stages/hourly_heat_water_solute.zig:10686), zero assertion failures.",
+      "verified_utc": "2026-10-15"
     }
   },
   "swarm": {

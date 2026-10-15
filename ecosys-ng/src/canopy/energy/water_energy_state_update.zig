@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 const water_heat_capacity_megajoules_per_m3_k = 4.19;
 
@@ -92,7 +93,7 @@ pub fn refresh(
     if (inputs.air_temperature_k_by_cell.len != state.cell_count or
         previous_water_energy_megajoules_by_plant.len != plant_count)
         return error.InvalidCanopyWaterEnergyStateUpdateDimensions;
-    inline for (@typeInfo(Inputs).@"struct".fields[1..]) |field|
+    inline for (ti_compat.fieldViews(Inputs)[1..]) |field|
         if (@field(inputs, field.name).len != plant_count)
             return error.InvalidCanopyWaterEnergyStateUpdateDimensions;
 

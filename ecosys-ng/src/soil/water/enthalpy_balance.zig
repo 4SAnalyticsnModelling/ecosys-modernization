@@ -2,6 +2,7 @@ const std = @import("std");
 const numerics = @import("../../core/numerics.zig");
 const phase_change = @import("phase_change.zig");
 const retention = @import("retention.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const SecondaryDomain = struct {
     porous_medium_volume_m3: f64,
@@ -24,7 +25,7 @@ pub const Parameters = struct {
     secondary_domain: ?SecondaryDomain = null,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Parameters)) |field| {
             if (field.type == f64 and !std.math.isFinite(@field(self, field.name)))
                 return error.NonFiniteSoilEnthalpyParameter;
         }
@@ -40,7 +41,7 @@ pub const Parameters = struct {
             return error.InvalidSoilEnthalpyParameter;
         try self.mualem_van_genuchten.validate();
         if (self.secondary_domain) |secondary| {
-            inline for (@typeInfo(SecondaryDomain).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(SecondaryDomain)) |field| {
                 if (field.type == f64 and
                     !std.math.isFinite(@field(secondary, field.name)))
                     return error.NonFiniteSoilEnthalpyParameter;
@@ -631,8 +632,7 @@ test "issue-024: legacy top-layer freeze-rate ceiling versus unconstrained equil
     const parameters: Parameters = .{
         .porous_medium_volume_m3 = porous_medium_volume_m3,
         .total_water_equivalent_m3 = total_water_m3,
-        .unfrozen_pressure_head_m =
-            try curve.pressureHeadAtWaterContent(initial_water_fraction),
+        .unfrozen_pressure_head_m = try curve.pressureHeadAtWaterContent(initial_water_fraction),
         .gravitational_water_potential_mpa_per_m = 0.00980665,
         .pure_water_melting_temperature_k = 273.15,
         // Sensible-heat terms do not enter the partition at a fixed temperature;

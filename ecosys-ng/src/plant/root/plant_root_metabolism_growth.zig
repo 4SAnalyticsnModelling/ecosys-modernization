@@ -9,6 +9,7 @@ const RootState = @import("plant_root_system.zig").State;
 const NutrientResult = @import("plant_root_nutrient_uptake.zig").Result;
 const root_domain_count = @import("plant_root_system.zig").biological_domain_count;
 const group_respiration = @import("plant_root_metabolism_respiration.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Components = struct {
     maintenance_demand_g_c: f64,
@@ -60,7 +61,7 @@ pub const SecondaryRootParameters = struct {
     full_senescence_duration_h: f64,
 
     pub fn validate(self: SecondaryRootParameters) !void {
-        inline for (@typeInfo(SecondaryRootParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SecondaryRootParameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidSecondaryRootMetabolismParameter;
         }
@@ -163,7 +164,7 @@ pub const RuntimePlantParameters = struct {
 
     pub fn validate(self: RuntimePlantParameters) !void {
         if (self.root_profile_type > 3 or self.mycorrhizal_type > 2 or self.growth_habit > 1 or self.leaf_phenology_type > 5) return error.InvalidRootMetabolismPlantCode;
-        inline for (@typeInfo(RuntimePlantParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(RuntimePlantParameters)) |field| {
             if (field.type == u8) continue;
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0 or
@@ -207,7 +208,7 @@ pub const PrimaryRootInputs = struct {
 /// acidity, oxygen, and feedback responses so this kernel remains reusable.
 fn rootMetabolism(parameters: SecondaryRootParameters, inputs: SecondaryRootInputs, cap_substrate_to_current_maintenance: bool) !SecondaryRootResult {
     try parameters.validate();
-    inline for (@typeInfo(SecondaryRootInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SecondaryRootInputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidSecondaryRootMetabolismInput;
     }
@@ -276,7 +277,7 @@ fn rootMetabolism(parameters: SecondaryRootParameters, inputs: SecondaryRootInpu
         .nitrogen_assimilation_respiration_oxygen_unlimited_g_c_per_h = parameters.nitrogen_assimilation_respiration_g_c_per_g_n * nitrogen_growth_demand,
         .nitrogen_assimilation_respiration_actual_g_c_per_h = parameters.nitrogen_assimilation_respiration_g_c_per_g_n * nitrogen_growth_actual,
     };
-    inline for (@typeInfo(SecondaryRootResult).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteSecondaryRootMetabolism;
+    inline for (ti_compat.fieldViews(SecondaryRootResult)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteSecondaryRootMetabolism;
     return result;
 }
 

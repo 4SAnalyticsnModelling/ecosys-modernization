@@ -1,0 +1,2 @@
+pass 1: changed=4 rewrites=46  (typed [_]T{v}: 34, typed decl: 0, place assign: 12)
+pass 2: changed=0 rewrites=0  (typed [_]T{v}: 0, typed decl: 0, place assign: 0)

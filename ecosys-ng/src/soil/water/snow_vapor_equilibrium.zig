@@ -2,6 +2,7 @@ const std = @import("std");
 const snow = @import("../solute/snow_solute_transport.zig");
 const ice_units = @import("../../core/ice_units.zig");
 const surface_exchange = @import("snow_surface_atmosphere_exchange.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     vapor_volume_prefactor_k: f64,
@@ -182,7 +183,7 @@ fn censusEnthalpyMegajoules(
 pub fn solve(allocator: std.mem.Allocator, state: *snow.State, parameters: Parameters, options: Options) !Report {
     inline for (.{ parameters.vapor_volume_prefactor_k, parameters.equilibrium_relative_humidity, parameters.clausius_clapeyron_temperature_k, parameters.reference_inverse_temperature_per_k, parameters.liquid_evaporation_latent_heat_megajoules_per_m3, parameters.snow_sublimation_latent_heat_megajoules_per_m3, options.donor_availability_fraction, options.energy_conservation_absolute_tolerance_megajoules_per_m2, options.energy_conservation_relative_tolerance }) |value| if (!std.math.isFinite(value)) return error.NonFiniteSnowVaporParameter;
     if (options.donor_availability_fraction <= 0 or options.donor_availability_fraction > 1 or parameters.vapor_volume_prefactor_k <= 0 or parameters.equilibrium_relative_humidity < 0 or parameters.equilibrium_relative_humidity > 1 or parameters.clausius_clapeyron_temperature_k <= 0 or parameters.reference_inverse_temperature_per_k <= 0 or parameters.liquid_evaporation_latent_heat_megajoules_per_m3 <= 0 or parameters.snow_sublimation_latent_heat_megajoules_per_m3 <= 0 or parameters.latent_heat_of_fusion_megajoules_per_m3 <= 0 or parameters.solid_snow_heat_capacity_megajoules_per_m3_k <= 0 or parameters.liquid_water_heat_capacity_megajoules_per_m3_k <= 0 or parameters.ice_heat_capacity_megajoules_per_m3_k <= 0 or parameters.ice_density_megagrams_per_m3 <= 0 or parameters.ice_density_megagrams_per_m3 > 1 or parameters.pure_water_melting_temperature_k <= 0 or options.energy_conservation_absolute_tolerance_megajoules_per_m2 < 0 or options.energy_conservation_relative_tolerance < 0) return error.InvalidSnowVaporParameter;
-    inline for (std.meta.fields(Parameters)) |field|
+    inline for (ti_compat.fieldViews(Parameters)) |field|
         if (!std.math.isFinite(@field(parameters, field.name))) return error.InvalidSnowVaporParameter;
     if (options.local_layer_index) |layer|
         if (layer == 0 or layer >= state.layer_capacity) return error.SnowVaporEquilibriumLayerOutOfBounds;

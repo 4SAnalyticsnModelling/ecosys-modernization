@@ -1,5 +1,7 @@
 const std = @import("std");
 const CellRange = @import("../../core/compute.zig").CellRange;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Parameters = struct {
     minimum_richardson_number: f64,
@@ -46,12 +48,12 @@ pub const State = struct {
         state.latent_boundary_numerator_m2_per_h = try allocator.alloc(f64, cell_count);
         errdefer allocator.free(state.latent_boundary_numerator_m2_per_h);
         state.sensible_boundary_numerator_megajoules_per_m_h_k = try allocator.alloc(f64, cell_count);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) @memset(@field(state, field.name), 0);
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) @memset(@field(state, field.name), 0);
         return state;
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -82,7 +84,7 @@ pub fn applyTile(context: *ApplyContext, range: CellRange) !void {
     const species_values = try std.math.mul(usize, state.cell_count, state.species_count);
     inline for (.{ context.cell_area_m2, context.total_canopy_area_m2, context.biome_canopy_height_m, context.surface_roughness_height_m, context.atmospheric_vapor_diffusivity_m2_per_h, context.atmospheric_temperature_k, context.ground_air_temperature_k, context.bulk_richardson_coefficient_k }) |values| if (values.len != state.cell_count) return error.CanopyAirflowDimensionMismatch;
     inline for (.{ context.species_canopy_height_m, context.standing_dead_height_m, context.species_canopy_air_temperature_k, context.standing_dead_air_temperature_k }) |values| if (values.len != species_values) return error.CanopyAirflowDimensionMismatch;
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(p, field.name))) return error.NonFiniteCanopyAirflowParameter;
+    inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(p, field.name))) return error.NonFiniteCanopyAirflowParameter;
     if (p.maximum_richardson_number < p.minimum_richardson_number or p.richardson_resistance_multiplier <= 0 or p.minimum_canopy_resistance_h_per_m <= 0 or p.maximum_canopy_resistance_h_per_m < p.minimum_canopy_resistance_h_per_m or p.canopy_drag_length_m < 0 or p.volumetric_air_heat_capacity_megajoules_per_m3_k <= 0) return error.InvalidCanopyAirflowParameter;
 
     for (range.first..range.end) |cell| {
@@ -154,7 +156,7 @@ test "WATSUB canopy airflow supports runtime species and HOUR1 numerators" {
     var state = try State.init(std.testing.allocator, 1, species_count);
     defer state.deinit();
     const heights = [_]f64{ 1, 2, 3, 4, 5, 6, 7 };
-    const temperatures = [_]f64{290} ** species_count;
+    const temperatures = @as([species_count]f64, @splat(@as(f64, 290)));
     var context: ApplyContext = .{
         .state = &state,
         .cell_area_m2 = &.{10},

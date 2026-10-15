@@ -1,5 +1,6 @@
 const std = @import("std");
 const ice_units = @import("../../core/ice_units.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const StorageLocation = union(enum) {
     surface_pond,
@@ -112,7 +113,7 @@ pub const SeparatedSurfaceInputs = struct {
 /// Unlike Fortran's NU/NUI bookkeeping, the soil array remains zero-based and
 /// the external surface owner transfers directly into the current topsoil.
 pub fn selectSeparatedSurfacePondTransfer(inputs: SeparatedSurfaceInputs) !?Transition {
-    inline for (@typeInfo(SeparatedSurfaceInputs).@"struct".fields) |field| if (field.type == f64) {
+    inline for (ti_compat.fieldViews(SeparatedSurfaceInputs)) |field| if (field.type == f64) {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value)) return error.NonFinitePondTransitionInput;
     };

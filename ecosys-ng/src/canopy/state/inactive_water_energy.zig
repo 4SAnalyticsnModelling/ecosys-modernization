@@ -27,6 +27,7 @@
 // canopy-air exchange solve, so the two activity branches no longer disagree
 // about temperature ownership. The snow-buried temperature selection is live.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     intercepted_water_volume_m3: f64,
@@ -162,14 +163,14 @@ pub fn calculate(inputs: Inputs) !Result {
         .aerodynamic_resistance_h_per_m = inputs.biome_boundary_resistance_h_per_m,
         .dry_canopy_heat_capacity_megajoules_per_k = dry_heat_capacity,
     };
-    inline for (@typeInfo(Result).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Result)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteInactiveCanopyStateResult;
     return result;
 }
 
 fn validate(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.InvalidInactiveCanopyStateInput;
     if (inputs.intercepted_water_volume_m3 < 0 or

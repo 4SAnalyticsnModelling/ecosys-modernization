@@ -8,6 +8,7 @@ const SoilProperties = SoilPropertiesModule.State;
 const SoilThermal = @import("../heat/thermal.zig").State;
 const initialization = @import("initialization.zig");
 const charcoal_adjustment = @import("../../management/charcoal_soil_property_adjustment.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Context = struct {
     allocator: std.mem.Allocator,
@@ -411,7 +412,7 @@ fn validateDimensions(context: *const Context) !void {
     if (context.cation_exchange_capacity_delta_mol_by_layer) |values|
         if (values.len != layers or context.anion_exchange_capacity_delta_mol_by_layer.?.len != layers)
             return error.RuntimeMaterialRefreshDimensionMismatch;
-    inline for (@typeInfo(SoilProperties).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SoilProperties)) |field| {
         if (field.type == []f64 or
             field.type == []@import("../water/retention.zig").ResolvedCurve or
             field.type == []@import("../water/retention.zig").MualemVanGenuchtenParameters)
@@ -430,7 +431,7 @@ test "accepted material refresh is atomic and updates retention and solid therma
 
     const one_layer_source = try test_fixtures.soilProfileSource(
         allocator,
-        @typeInfo(soil_profile.LayerProperty).@"enum".fields.len,
+        @typeInfo(soil_profile.LayerProperty).@"enum".field_names.len,
     );
     defer allocator.free(one_layer_source);
     var two_layer_source: std.ArrayList(u8) = .empty;

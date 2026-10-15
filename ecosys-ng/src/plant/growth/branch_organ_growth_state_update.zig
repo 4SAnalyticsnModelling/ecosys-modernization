@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ElementGrowth = struct {
     leaf: f64,
@@ -41,15 +42,15 @@ pub const Pools = struct {
 /// are calculated at lines 2211/2219/2226 but are not state_updateted in this block.
 pub fn publish(pools: Pools, branch: usize, growth: Growth) !void {
     const branch_count = pools.leaf_carbon_g_c.len;
-    inline for (@typeInfo(Pools).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Pools)) |field| {
         if (@field(pools, field.name).len != branch_count)
             return error.BranchOrganGrowthDimensionMismatch;
     }
     if (branch >= branch_count) return error.BranchOrganGrowthIndexOutOfBounds;
 
-    inline for (@typeInfo(Growth).@"struct".fields) |element_field| {
+    inline for (ti_compat.fieldViews(Growth)) |element_field| {
         const element = @field(growth, element_field.name);
-        inline for (@typeInfo(ElementGrowth).@"struct".fields) |organ_field| {
+        inline for (ti_compat.fieldViews(ElementGrowth)) |organ_field| {
             const value = @field(element, organ_field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidBranchOrganGrowth;

@@ -60,6 +60,8 @@
 // snowpack surface input group of docs/traceability/a1b_snowpack_minimum_heat_capacity_unbound.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const SaltEquilibriumMode = enum {
     static,
@@ -111,7 +113,7 @@ pub const SaltSpecies = enum {
 };
 
 pub const salt_species_count: usize =
-    @typeInfo(SaltSpecies).@"enum".fields.len;
+    @typeInfo(SaltSpecies).@"enum".field_names.len;
 
 pub const WaterHeatFlux = struct {
     solid_snow_m3_per_step: f64 = 0,
@@ -253,7 +255,7 @@ fn validateInputs(
 }
 
 fn validateStruct(value: anytype) !void {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field|
         if (!std.math.isFinite(@field(value, field.name)))
             return error.NonFiniteSnowpackSurfaceInput;
 }
@@ -265,7 +267,7 @@ fn validateFinite(values: []const f64) !void {
 }
 
 fn addStruct(candidate: anytype, contribution: @TypeOf(candidate.*)) !void {
-    inline for (@typeInfo(@TypeOf(candidate.*)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(candidate.*))) |field| {
         @field(candidate.*, field.name) = try add(
             @field(candidate.*, field.name),
             @field(contribution, field.name),
@@ -294,19 +296,19 @@ fn overlap(left: []const f64, right: []const f64) bool {
 
 fn filled(comptime T: type, value: f64) T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(T)) |field|
         @field(result, field.name) = value;
     return result;
 }
 
 fn expectStructValue(actual: anytype, expected: f64) !void {
-    inline for (@typeInfo(@TypeOf(actual)).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(actual))) |field|
         try std.testing.expectEqual(expected, @field(actual, field.name));
 }
 
 test "absent top layer receives coupled dynamic surface input in source order" {
-    const salt_input = [_]f64{3} ** salt_species_count;
-    var salt_state = [_]f64{100} ** salt_species_count;
+    const salt_input = @as([salt_species_count]f64, @splat(@as(f64, 3)));
+    var salt_state = @as([salt_species_count]f64, @splat(@as(f64, 100)));
     var salt_scratch: [salt_species_count]f64 = undefined;
     var state = State{
         .top_layer_water_heat = filled(WaterHeatFlux, 100),
@@ -332,8 +334,8 @@ test "absent top layer receives coupled dynamic surface input in source order" {
 }
 
 test "surface input changes equal every external input exactly" {
-    const salt_input = [_]f64{7} ** salt_species_count;
-    var salt_state = [_]f64{0} ** salt_species_count;
+    const salt_input = @as([salt_species_count]f64, @splat(@as(f64, 7)));
+    var salt_state = @as([salt_species_count]f64, @splat(@as(f64, 0)));
     var salt_scratch: [salt_species_count]f64 = undefined;
     var state = State{
         .top_layer_water_heat = .{},
@@ -368,8 +370,8 @@ test "surface input changes equal every external input exactly" {
 }
 
 test "source solid snow and absent-layer gates are exact" {
-    const salt_input = [_]f64{3} ** salt_species_count;
-    var salt_state = [_]f64{100} ** salt_species_count;
+    const salt_input = @as([salt_species_count]f64, @splat(@as(f64, 3)));
+    var salt_state = @as([salt_species_count]f64, @splat(@as(f64, 100)));
     var salt_scratch: [salt_species_count]f64 = undefined;
     var state = State{
         .top_layer_water_heat = filled(WaterHeatFlux, 100),
@@ -423,9 +425,9 @@ test "static salt mode still accounts water heat and non-salt solutes" {
 }
 
 test "late invalid input and overflow preserve coupled state atomically" {
-    var salt_input = [_]f64{1} ** salt_species_count;
+    var salt_input = @as([salt_species_count]f64, @splat(@as(f64, 1)));
     salt_input[salt_species_count - 1] = std.math.nan(f64);
-    var salt_state = [_]f64{3} ** salt_species_count;
+    var salt_state = @as([salt_species_count]f64, @splat(@as(f64, 3)));
     var salt_scratch: [salt_species_count]f64 = undefined;
     var state = State{
         .top_layer_water_heat = filled(WaterHeatFlux, 3),
@@ -476,8 +478,8 @@ test "late invalid input and overflow preserve coupled state atomically" {
 }
 
 test "dynamic salt shape and workspace alias errors precede mutation" {
-    const salt_input = [_]f64{1} ** salt_species_count;
-    var salt_state = [_]f64{5} ** salt_species_count;
+    const salt_input = @as([salt_species_count]f64, @splat(@as(f64, 1)));
+    var salt_state = @as([salt_species_count]f64, @splat(@as(f64, 5)));
     var state = State{
         .top_layer_water_heat = filled(WaterHeatFlux, 5),
         .top_layer_solute = filled(SoluteFlux, 5),

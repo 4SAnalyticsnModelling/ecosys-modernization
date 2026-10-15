@@ -1,6 +1,7 @@
 const std = @import("std");
 const exchange = @import("phosphate_exchange.zig");
 const diagnostic_control = @import("reaction_diagnostic_control.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const MineralFluxes = struct {
     aluminum_phosphate_mol_per_m3: f64,
@@ -92,7 +93,7 @@ pub const SourceIterationStage = enum {
 pub fn state_update(state: *State, transformations: Transformations) !void {
     try validateState(state.*);
     var next = state.*;
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         const change = @field(transformations, field.name);
         if (!std.math.isFinite(change)) return error.NonFinitePhosphateNetworkTransformation;
         @field(next, field.name) += change;
@@ -115,7 +116,7 @@ pub fn state_updateRealized(
         soil_mass_per_water_volume_megagrams_per_m3 < 0)
         return error.InvalidPhosphateNetworkDensity;
     if (soil_mass_per_water_volume_megagrams_per_m3 == 0) {
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             const change = @field(transformations, field.name);
             if (!std.math.isFinite(change))
                 return error.NonFinitePhosphateNetworkTransformation;
@@ -136,7 +137,7 @@ pub fn state_updateRealized(
     );
 
     var realized = transformations;
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         const change = @field(next, field.name) - @field(before, field.name);
         if (!std.math.isFinite(change))
             return error.NonFinitePhosphateNetworkTransformation;
@@ -530,7 +531,7 @@ fn touchedPhosphorusStorageScale(
     density: f64,
 ) f64 {
     var touched = std.mem.zeroes(State);
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         if (@field(transformations, field.name) != 0)
             @field(touched, field.name) = @abs(@field(before, field.name));
     }
@@ -676,7 +677,7 @@ fn reconcilePhosphorusOwnerExact(
 
 fn realizedStateChange(before: State, after: State) Transformations {
     var result = std.mem.zeroes(Transformations);
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         @field(result, field.name) =
             @field(after, field.name) - @field(before, field.name);
     return result;
@@ -834,7 +835,7 @@ pub fn applySourceOrderAqueousUpdate(
     if (!std.math.isFinite(minimum_concentration_mol_per_m3) or
         minimum_concentration_mol_per_m3 <= 0)
         return error.InvalidPhosphateConcentrationFloor;
-    inline for (@typeInfo(Transformations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Transformations)) |field|
         if (!std.math.isFinite(@field(transformations, field.name)))
             return error.NonFinitePhosphateNetworkTransformation;
     if (stage == .iteration_ceiling) return current;
@@ -869,7 +870,7 @@ pub fn applySourceOrderSurfaceUpdate(
     stage: SourceIterationStage,
 ) !State {
     try validateState(current);
-    inline for (@typeInfo(Transformations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Transformations)) |field|
         if (!std.math.isFinite(@field(transformations, field.name)))
             return error.NonFinitePhosphateNetworkTransformation;
     if (stage == .iteration_ceiling) return current;
@@ -899,7 +900,7 @@ pub fn applySourceOrderMineralUpdate(
     stage: SourceIterationStage,
 ) !State {
     try validateState(current);
-    inline for (@typeInfo(Transformations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Transformations)) |field|
         if (!std.math.isFinite(@field(transformations, field.name)))
             return error.NonFinitePhosphateNetworkTransformation;
     if (stage == .iteration_ceiling) return current;
@@ -985,14 +986,14 @@ fn assembleWithSiteFactor(
 }
 
 fn validate(fluxes: Fluxes) !void {
-    inline for (@typeInfo(MineralFluxes).@"struct".fields) |field| if (!std.math.isFinite(@field(fluxes.minerals, field.name))) return error.NonFinitePhosphateNetworkFlux;
-    inline for (@typeInfo(exchange.Flux).@"struct".fields) |field| if (!std.math.isFinite(@field(fluxes.surface, field.name))) return error.NonFinitePhosphateNetworkFlux;
-    inline for (@typeInfo(DissociationAndPairingFluxes).@"struct".fields) |field| if (!std.math.isFinite(@field(fluxes.aqueous, field.name))) return error.NonFinitePhosphateNetworkFlux;
+    inline for (ti_compat.fieldViews(MineralFluxes)) |field| if (!std.math.isFinite(@field(fluxes.minerals, field.name))) return error.NonFinitePhosphateNetworkFlux;
+    inline for (ti_compat.fieldViews(exchange.Flux)) |field| if (!std.math.isFinite(@field(fluxes.surface, field.name))) return error.NonFinitePhosphateNetworkFlux;
+    inline for (ti_compat.fieldViews(DissociationAndPairingFluxes)) |field| if (!std.math.isFinite(@field(fluxes.aqueous, field.name))) return error.NonFinitePhosphateNetworkFlux;
     if (!std.math.isFinite(fluxes.soil_mass_per_water_volume_megagrams_per_m3) or fluxes.soil_mass_per_water_volume_megagrams_per_m3 <= 0) return error.InvalidPhosphateNetworkDensity;
 }
 
 fn validateState(state: State) !void {
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         const value = @field(state, field.name);
         if (!std.math.isFinite(value)) return error.NonFinitePhosphateNetworkState;
         if (value < 0) return error.NegativePhosphateNetworkState;
@@ -1001,13 +1002,13 @@ fn validateState(state: State) !void {
 
 fn filledState(value: f64) State {
     var state: State = undefined;
-    inline for (@typeInfo(State).@"struct".fields) |field| @field(state, field.name) = value;
+    inline for (ti_compat.fieldViews(State)) |field| @field(state, field.name) = value;
     return state;
 }
 
 fn filledTransformations(value: f64) Transformations {
     var transformations: Transformations = undefined;
-    inline for (@typeInfo(Transformations).@"struct".fields) |field| @field(transformations, field.name) = value;
+    inline for (ti_compat.fieldViews(Transformations)) |field| @field(transformations, field.name) = value;
     return transformations;
 }
 

@@ -21,6 +21,7 @@ const group_residual = @import("solver_residual.zig");
 const group_solve = @import("solver_solve.zig");
 const group_types = @import("solver_types.zig");
 
+
 test "runtime NPH hybrid water solve exits early and conserves both pore domains" {
     const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 2, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 2 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 });
     var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
@@ -416,11 +417,11 @@ test "simultaneous Richards residual is independent of face ordering" {
         .face_area_m2 = 1,
     };
     const trial = [_]f64{ 0.38, 0.24, 0.12, 0, 0, 0 };
-    var target_a = [_]f64{0} ** 6;
-    var residual_a = [_]f64{0} ** 6;
-    var scratch_a = [_]f64{0} ** 6;
-    var matrix_flux_a = [_]f64{0} ** 2;
-    var macropore_flux_a = [_]f64{0} ** 2;
+    var target_a = @as([6]f64, @splat(@as(f64, 0)));
+    var residual_a = @as([6]f64, @splat(@as(f64, 0)));
+    var scratch_a = @as([6]f64, @splat(@as(f64, 0)));
+    var matrix_flux_a = @as([2]f64, @splat(@as(f64, 0)));
+    var macropore_flux_a = @as([2]f64, @splat(@as(f64, 0)));
     try group_residual.residualAt(
         &grid,
         &.{ face_01, face_12 },
@@ -433,11 +434,11 @@ test "simultaneous Richards residual is independent of face ordering" {
         &matrix_flux_a,
         &macropore_flux_a,
     );
-    var target_b = [_]f64{0} ** 6;
-    var residual_b = [_]f64{0} ** 6;
-    var scratch_b = [_]f64{0} ** 6;
-    var matrix_flux_b = [_]f64{0} ** 2;
-    var macropore_flux_b = [_]f64{0} ** 2;
+    var target_b = @as([6]f64, @splat(@as(f64, 0)));
+    var residual_b = @as([6]f64, @splat(@as(f64, 0)));
+    var scratch_b = @as([6]f64, @splat(@as(f64, 0)));
+    var matrix_flux_b = @as([2]f64, @splat(@as(f64, 0)));
+    var macropore_flux_b = @as([2]f64, @splat(@as(f64, 0)));
     try group_residual.residualAt(
         &grid,
         &.{ face_12, face_01 },
@@ -497,7 +498,7 @@ test "water warm Jacobian rejection rebuilds without changing accepted physics" 
     const expected = try group_solve.solve(std.testing.allocator, &baseline, &faces, properties, &baseline_micro, &baseline_macro, options);
     // Deliberately unusable numerical scratch, never scientific state. The
     // failed warm direction must rebuild within the existing outer attempt.
-    var values = [_]f64{std.math.nan(f64)} ** 16;
+    var values = @as([16]f64, @splat(@as(f64, std.math.nan(f64))));
     var cache: group_types.DenseJacobianCache = .{ .values = &values, .dimension = 4, .valid = true };
     properties.dense_jacobian_cache = &cache;
     const actual = try group_solve.solve(std.testing.allocator, &warm, &faces, properties, &warm_micro, &warm_macro, options);
@@ -669,10 +670,10 @@ test "reduced Newton coordinates remove pore-domain conservation nullspaces" {
         0,  0,  1,  -1,
     };
     const residual = [_]f64{ 1, -1, 2, -2 };
-    var delta = [_]f64{0} ** 4;
-    var reduced_jacobian = [_]f64{0} ** 16;
-    var reduced_rhs = [_]f64{0} ** 4;
-    var reduced_index = [_]usize{0} ** 4;
+    var delta = @as([4]f64, @splat(@as(f64, 0)));
+    var reduced_jacobian = @as([16]f64, @splat(@as(f64, 0)));
+    var reduced_rhs = @as([4]f64, @splat(@as(f64, 0)));
+    var reduced_index = @as([4]usize, @splat(@as(usize, 0)));
     var micro_parent = [_]usize{ 0, 0 };
     var macro_parent = [_]usize{ 0, 0 };
     const component_size = [_]usize{ 2, 1 };

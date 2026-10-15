@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Exact extensive transfer published by an accepted pond/sediment producer.
 /// Nitrogen and phosphorus have both native-mole and organic-gram lanes: the
@@ -32,7 +33,7 @@ pub const Transfer = struct {
     anion_exchange_capacity_mol: f64 = 0,
 
     pub fn validate(self: Transfer) !void {
-        inline for (std.meta.fields(Transfer)) |field| {
+        inline for (ti_compat.fieldViews(Transfer)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidPondAcceptedTransfer;
@@ -43,7 +44,7 @@ pub const Transfer = struct {
         try self.validate();
         try other.validate();
         var result: Transfer = .{};
-        inline for (std.meta.fields(Transfer)) |field| {
+        inline for (ti_compat.fieldViews(Transfer)) |field| {
             @field(result, field.name) = @field(self, field.name) + @field(other, field.name);
             if (!std.math.isFinite(@field(result, field.name)))
                 return error.PondAcceptedTransferOverflow;

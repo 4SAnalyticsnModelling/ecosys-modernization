@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     calculation_floor: f64,
@@ -24,7 +25,7 @@ pub const State = struct {
 /// enters through runtime configuration. `DENSI` and `DENSJ` retain the source
 /// equations, generalized to the configured pure-ice density.
 pub fn initialize(inputs: Inputs) !State {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteSoilInitializationScale;
     }

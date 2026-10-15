@@ -26,6 +26,8 @@
 // docs/traceability/a8a_plant_response_reaudit.md
 const std = @import("std");
 const Dormancy = @import("../lifecycle/dormancy.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const CellState = struct {
     mean_annual_air_temperature_c: f64,
@@ -70,7 +72,7 @@ pub fn apply(
         return error.InvalidClimateAcclimationSourceHour;
     if (!inputs.incremental_climate_change or inputs.source_hour != 1)
         return false;
-    inline for (@typeInfo(CellState).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(CellState)) |field|
         if (!std.math.isFinite(@field(cell.*, field.name)))
             return error.NonFiniteClimateAcclimationState;
     inline for (.{
@@ -117,7 +119,7 @@ pub fn apply(
         }) |value| if (!std.math.isFinite(value))
             return error.NonFiniteClimateAcclimationPlantInput;
         const candidate = derivePlant(plant_inputs, plant, inputs);
-        inline for (@typeInfo(PlantCandidate).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(PlantCandidate)) |field|
             if (!std.math.isFinite(@field(candidate, field.name)))
                 return error.ClimateAcclimationOverflow;
     }
@@ -363,12 +365,12 @@ fn derivePlant(
 
 test "incremental climate acclimates arbitrary plants at source hour one" {
     const count = 7;
-    var zone = [_]f64{0} ** count;
-    var offset = [_]f64{0} ** count;
-    var lower = [_]f64{0} ** count;
-    var upper = [_]f64{0} ** count;
-    var heat = [_]f64{0} ** count;
-    var group = [_]f64{0} ** count;
+    var zone = @as([count]f64, @splat(@as(f64, 0)));
+    var offset = @as([count]f64, @splat(@as(f64, 0)));
+    var lower = @as([count]f64, @splat(@as(f64, 0)));
+    var upper = @as([count]f64, @splat(@as(f64, 0)));
+    var heat = @as([count]f64, @splat(@as(f64, 0)));
+    var group = @as([count]f64, @splat(@as(f64, 0)));
     var cell: CellState = .{
         .mean_annual_air_temperature_c = 0,
         .mean_annual_soil_temperature_c = 0,
@@ -518,11 +520,11 @@ test "invalid late plant rolls back cell and all plant outputs" {
 
 test "daily refresh publishes canopy and GROUPI fields per cell and per plant" {
     const std_testing = std.testing;
-    var offset = [_]f64{0} ** 4;
-    var lower = [_]f64{0} ** 4;
-    var upper = [_]f64{0} ** 4;
-    var heat = [_]f64{0} ** 4;
-    var group = [_]f64{0} ** 4;
+    var offset = @as([4]f64, @splat(@as(f64, 0)));
+    var lower = @as([4]f64, @splat(@as(f64, 0)));
+    var upper = @as([4]f64, @splat(@as(f64, 0)));
+    var heat = @as([4]f64, @splat(@as(f64, 0)));
+    var group = @as([4]f64, @splat(@as(f64, 0)));
     const entry_parameter: Dormancy.Parameters = .{
         .required_leafout_h = 2,
         .required_leafoff_h = 2,
@@ -538,7 +540,7 @@ test "daily refresh publishes canopy and GROUPI fields per cell and per plant" {
         .deciduous_leafoff_remobilization_start_fraction = 0.5,
         .full_senescence_duration_h = 480,
     };
-    var dormancy_parameters = [_]Dormancy.Parameters{entry_parameter} ** 4;
+    var dormancy_parameters = @as([4]Dormancy.Parameters, @splat(@as(Dormancy.Parameters, entry_parameter)));
     try applyDaily(std_testing.allocator, .{
         .cell_count = 2,
         .plants_per_cell = 2,
@@ -787,10 +789,10 @@ test "daily refresh is a no-op outside incremental climate change" {
 }
 
 test "daily refresh rejects a plant array that does not cover every cell" {
-    var offset = [_]f64{0} ** 4;
-    var lower = [_]f64{0} ** 4;
-    var upper = [_]f64{0} ** 4;
-    var heat = [_]f64{0} ** 4;
+    var offset = @as([4]f64, @splat(@as(f64, 0)));
+    var lower = @as([4]f64, @splat(@as(f64, 0)));
+    var upper = @as([4]f64, @splat(@as(f64, 0)));
+    var heat = @as([4]f64, @splat(@as(f64, 0)));
     try std.testing.expectError(error.ClimateAcclimationDailyRefreshDimensionMismatch, applyDaily(std.testing.allocator, .{
         .cell_count = 2,
         .plants_per_cell = 2,

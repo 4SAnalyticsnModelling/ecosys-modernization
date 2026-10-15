@@ -1,6 +1,7 @@
 const std = @import("std");
 const plant_salt = @import("../../plant/salt/harvest.zig");
 
+
 pub const salt_count = plant_salt.salt_count;
 
 /// Current-hour EXTRACT `ALSNT..CLSNT` owners. Exchange layer zero is
@@ -119,7 +120,7 @@ test "EXTRACT litter salts retain runtime plant layer and salt order" {
     var state = try State.init(std.testing.allocator, 2, 2, 2);
     defer state.deinit();
     const exchange_layers: usize = 3;
-    var source = [_]f64{0} ** (4 * exchange_layers * salt_count);
+    var source = @as([(4 * exchange_layers * salt_count)]f64, @splat(@as(f64, 0)));
     for (0..4) |plant|
         for (0..exchange_layers) |layer|
             for (0..salt_count) |salt| {
@@ -148,7 +149,7 @@ test "late invalid litter salt preserves complete state_update" {
     var state = try State.init(std.testing.allocator, 2, 2, 1);
     defer state.deinit();
     @memset(state.mol_by_cell_exchange_layer_salt, 9);
-    var source = [_]f64{1} ** (4 * 2 * salt_count);
+    var source = @as([(4 * 2 * salt_count)]f64, @splat(@as(f64, 1)));
     source[source.len - 1] = std.math.nan(f64);
     try std.testing.expectError(
         error.InvalidLitterSaltStateUpdateInput,

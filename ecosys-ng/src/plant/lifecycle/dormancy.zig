@@ -1,6 +1,7 @@
 const std = @import("std");
 const execution_calendar_date = @import("../../driver/execution_calendar_date.zig");
 const stages = @import("growth_stages.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     accumulated_leafout_h: f64 = 0,
@@ -99,7 +100,7 @@ pub const Parameters = struct {
     full_senescence_duration_h: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteDormancyParameter;
+        inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteDormancyParameter;
         if (self.required_leafout_h < 0 or self.required_leafoff_h < 0 or self.maximum_photoperiod_counter_h < 0 or self.full_senescence_duration_h <= 0 or self.evergreen_leafoff_remobilization_start_fraction < 0 or self.evergreen_leafoff_remobilization_start_fraction > 1 or self.deciduous_leafoff_remobilization_start_fraction < 0 or self.deciduous_leafoff_remobilization_start_fraction > 1) return error.InvalidDormancyParameter;
     }
 };
@@ -261,7 +262,7 @@ fn solsticeDay(latitude_deg_n: f64, day: u16, north_day: u16, south_day: u16) bo
 
 fn validateStateAndInputs(state: State, inputs: Inputs) !void {
     try validateState(state);
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteDormancyInput;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteDormancyInput;
     _ = execution_calendar_date.fromDayOfYear(
         inputs.day_of_year,
         inputs.execution_year,
@@ -270,7 +271,7 @@ fn validateStateAndInputs(state: State, inputs: Inputs) !void {
 }
 
 fn validateState(state: State) !void {
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == f64 and (!std.math.isFinite(@field(state, field.name)) or @field(state, field.name) < 0)) return error.InvalidDormancyState;
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == f64 and (!std.math.isFinite(@field(state, field.name)) or @field(state, field.name) < 0)) return error.InvalidDormancyState;
 }
 
 fn testParameters() Parameters {

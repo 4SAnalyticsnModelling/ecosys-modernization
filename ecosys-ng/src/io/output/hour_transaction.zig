@@ -1,6 +1,7 @@
 const std = @import("std");
 const execution_calendar_date = @import("../../driver/execution_calendar_date.zig");
 
+
 const journal_magic = "ECOUTH01";
 const bank_magic = "ECOUTBN1";
 const cursor_magic = "ECOUTCR1";
@@ -9,7 +10,7 @@ const checksum_seed: u64 = 0x45434f5554484f55;
 const cursor_file_name = ".ecosys-output-cursor.bin";
 const entry_tag: u8 = 0xe1;
 const trailer_tag: u8 = 0xff;
-const category_count = @typeInfo(Category).@"enum".fields.len;
+const category_count = @typeInfo(Category).@"enum".field_names.len;
 
 /// The five stable output directories. One root-scoped coordinator owns the
 /// commit boundary across all of them.
@@ -220,12 +221,12 @@ pub const Coordinator = struct {
     limits: Limits,
     cursor: Cursor = .{},
     states: [category_count]std.StringHashMapUnmanaged(TrackedFile) =
-        [_]std.StringHashMapUnmanaged(TrackedFile){.empty} ** category_count,
+        @as([category_count]std.StringHashMapUnmanaged(TrackedFile), @splat(@as(std.StringHashMapUnmanaged(TrackedFile), .empty))),
     /// Retained read-write handles for the derived output files, keyed exactly
     /// like `states`. Purely a cost cache: it changes no byte, offset, order,
     /// or synchronization point. See `Limits.maximum_open_output_files`.
     open_output_files: [category_count]std.StringHashMapUnmanaged(std.Io.File) =
-        [_]std.StringHashMapUnmanaged(std.Io.File){.empty} ** category_count,
+        @as([category_count]std.StringHashMapUnmanaged(std.Io.File), @splat(@as(std.StringHashMapUnmanaged(std.Io.File), .empty))),
     active: ?Active = null,
     /// Assignable after `init` so restoring the exhaustive per-checkpoint
     /// re-read never requires changing the constructor signature.
@@ -291,7 +292,7 @@ pub const Coordinator = struct {
     /// retained lock would instead make the file unreadable by anything else
     /// for the whole run.
     fn openOutputFile(self: *Coordinator, category: Category, file_name: []const u8) !std.Io.File {
-        const cache = &self.open_output_files[@intFromEnum(category)];
+        const cache = &self.open_output_files[@backingInt(category)];
         if (cache.get(file_name)) |file| return file;
         if (cache.count() >= self.limits.maximum_open_output_files)
             self.evictOpenOutputFile(category);
@@ -311,7 +312,7 @@ pub const Coordinator = struct {
     /// of live handles is bounded; correctness never depends on which handle
     /// is resident, because every use reopens on demand.
     fn evictOpenOutputFile(self: *Coordinator, category: Category) void {
-        const cache = &self.open_output_files[@intFromEnum(category)];
+        const cache = &self.open_output_files[@backingInt(category)];
         var iterator = cache.iterator();
         const victim = iterator.next() orelse return;
         const owned_name = victim.key_ptr.*;
@@ -642,7 +643,7 @@ pub const Coordinator = struct {
     }
 
     fn preflightBase(self: *Coordinator, category: Category, file_name: []const u8, header: []const u8) !FileCursor {
-        const map = &self.states[@intFromEnum(category)];
+        const map = &self.states[@backingInt(category)];
         const schema_checksum = checksum(header);
         if (map.get(file_name)) |tracked| {
             const expected = tracked.cursor;
@@ -654,7 +655,7 @@ pub const Coordinator = struct {
         // materialized without advancing state opens a file without tracking
         // it, so consult the handles too rather than reporting a file this
         // coordinator itself created as absent.
-        if (self.open_output_files[@intFromEnum(category)].contains(file_name))
+        if (self.open_output_files[@backingInt(category)].contains(file_name))
             return error.UntrackedExistingOutputFile;
         const file = self.dirs.get(category).openFile(self.io, file_name, .{}) catch |err| switch (err) {
             error.FileNotFound => return .{
@@ -697,7 +698,7 @@ pub const Coordinator = struct {
         try file.lock(self.io, .exclusive);
         defer file.unlock(self.io);
         const existing = if (advance_state)
-            self.states[@intFromEnum(entry.category)].get(entry.file_name)
+            self.states[@backingInt(entry.category)].get(entry.file_name)
         else
             null;
         var current_length = try file.length(self.io);
@@ -762,7 +763,7 @@ pub const Coordinator = struct {
     }
 
     fn validateLogicalBase(self: *Coordinator, entry: Entry) !void {
-        const existing = self.states[@intFromEnum(entry.category)].get(entry.file_name);
+        const existing = self.states[@backingInt(entry.category)].get(entry.file_name);
         if (existing) |tracked| {
             if (!sameCursor(tracked.cursor, entry.base)) return error.OutputJournalBaseCursorMismatch;
         } else if (entry.base.byte_length != 0 or entry.base.row_count != 0 or
@@ -774,7 +775,7 @@ pub const Coordinator = struct {
     }
 
     fn putState(self: *Coordinator, category: Category, file_name: []const u8, tracked_file: TrackedFile) !void {
-        const map = &self.states[@intFromEnum(category)];
+        const map = &self.states[@backingInt(category)];
         if (map.getPtr(file_name)) |existing| {
             existing.* = tracked_file;
             return;
@@ -810,7 +811,7 @@ pub const Coordinator = struct {
             try parser.readHashed(entry_name);
             if (!safeFileName(entry_name)) return error.InvalidOutputFileName;
             const value = try readHashedFileCursor(&parser);
-            const map = &self.states[@intFromEnum(category)];
+            const map = &self.states[@backingInt(category)];
             const bank_entry = try map.getOrPut(self.allocator, entry_name);
             if (bank_entry.found_existing) {
                 self.allocator.free(entry_name);
@@ -945,7 +946,7 @@ pub const Coordinator = struct {
             var iterator = map.iterator();
             while (iterator.next()) |entry_ptr| {
                 const expected = entry_ptr.value_ptr.cursor;
-                const file = try self.openOutputFile(@enumFromInt(raw_category), entry_ptr.key_ptr.*);
+                const file = try self.openOutputFile(@fromBackingInt(@intCast(raw_category)), entry_ptr.key_ptr.*);
                 const file_length = try file.length(self.io);
                 if (file_length < expected.byte_length) return error.AcceptedOutputPrefixTruncated;
                 if (check.exact_length and file_length != expected.byte_length)
@@ -962,7 +963,7 @@ pub const Coordinator = struct {
         for (&self.states, 0..) |*map, raw_category| {
             var iterator = map.iterator();
             while (iterator.next()) |entry_ptr| {
-                const file = try self.openOutputFile(@enumFromInt(raw_category), entry_ptr.key_ptr.*);
+                const file = try self.openOutputFile(@fromBackingInt(@intCast(raw_category)), entry_ptr.key_ptr.*);
                 try file.lock(self.io, .exclusive);
                 defer file.unlock(self.io);
                 try file.setLength(self.io, entry_ptr.value_ptr.cursor.byte_length);
@@ -974,7 +975,7 @@ pub const Coordinator = struct {
         for (&self.states, 0..) |*map, raw_category| {
             var iterator = map.iterator();
             while (iterator.next()) |entry_ptr| {
-                const file = try self.openOutputFile(@enumFromInt(raw_category), entry_ptr.key_ptr.*);
+                const file = try self.openOutputFile(@fromBackingInt(@intCast(raw_category)), entry_ptr.key_ptr.*);
                 try file.lock(self.io, .exclusive);
                 defer file.unlock(self.io);
                 try file.sync(self.io);
@@ -1152,7 +1153,7 @@ fn readJournalHeader(parser: *HashedFileReader, run_identity: u64) !struct { gen
 
 fn writeJournalEntry(journal: *NewJournal, category: Category, file_name: []const u8, header: []const u8, row: []const u8, base: FileCursor) !void {
     try writeHashedByte(&journal.writer.interface, &journal.hasher, entry_tag);
-    try writeHashedByte(&journal.writer.interface, &journal.hasher, @intFromEnum(category));
+    try writeHashedByte(&journal.writer.interface, &journal.hasher, @backingInt(category));
     try writeHashedInt(&journal.writer.interface, &journal.hasher, u32, @intCast(file_name.len));
     try writeHashedInt(&journal.writer.interface, &journal.hasher, u32, @intCast(header.len));
     try writeHashedInt(&journal.writer.interface, &journal.hasher, u32, @intCast(row.len));
@@ -1379,7 +1380,7 @@ fn safeFileName(name: []const u8) bool {
 
 fn fileIdentity(category: Category, file_name: []const u8) u64 {
     var hasher = std.hash.Wyhash.init(checksum_seed);
-    hasher.update(&.{@intFromEnum(category)});
+    hasher.update(&.{@backingInt(category)});
     hasher.update(file_name);
     return hasher.final();
 }

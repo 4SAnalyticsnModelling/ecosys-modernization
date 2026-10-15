@@ -6,6 +6,7 @@ const FireScience = @import("../root/plant_root_disturbance.zig");
 const PlantSoilExchange = @import("../exchange/soil.zig");
 const SoilOrganic = @import("../../soil/organic/initialization.zig");
 const OrganicMatterFireExchange = @import("../../soil/biogeochemistry/organic_matter_fire_exchange.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 const Totals = struct {
     mobile_c: f64 = 0,
@@ -293,7 +294,7 @@ fn charcoalCombustionFraction(total_standing_dead_carbon_g_c: f64, temperature_k
 }
 
 fn validatePlant(canopy: *const Canopy.State, plant: usize, fractions: Fractions, dynamic_salts: bool) !void {
-    inline for (@typeInfo(Fractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Fractions)) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidShootFireFraction;
     }

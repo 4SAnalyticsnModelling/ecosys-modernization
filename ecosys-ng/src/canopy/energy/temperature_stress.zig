@@ -25,6 +25,7 @@
 // CANOPY-TKC-001 group of
 // docs/traceability/canopy_surface_temperature_is_never_updated_hourly.md
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     canopy_surface_temperature_c: f64,
@@ -46,7 +47,7 @@ pub const Result = struct {
 /// UPTAKE.F 1601--1610. Updates canopy chilling and heating stress in the
 /// exact source branch order using runtime thresholds and rates.
 pub fn calculate(inputs: Inputs) !Result {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.InvalidCanopyTemperatureStressInput;
     if (inputs.accumulated_chilling_h < 0 or

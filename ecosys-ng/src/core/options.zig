@@ -1,6 +1,7 @@
 const std = @import("std");
 const delimited_input = @import("../io/input/delimited_input.zig");
 const execution_calendar_date = @import("../driver/execution_calendar_date.zig");
+const ti_compat = @import("typeinfo_compat.zig");
 
 pub const Date = struct {
     day: u8,
@@ -69,7 +70,7 @@ pub const SceneOptions = struct {
         if (self.visualization_end_year < self.visualization_start_year)
             return error.InvalidVisualizationYearWindow;
         inline for (self.seasonal_weather_changes) |change| {
-            inline for (@typeInfo(SeasonalWeatherChange).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(SeasonalWeatherChange)) |field| {
                 const value = @field(change, field.name);
                 if (!std.math.isFinite(value)) return error.NonFiniteWeatherChange;
                 if (comptime !std.mem.endsWith(u8, field.name, "temperature_c")) if (value < 0) return error.NegativeWeatherChangeMultiplier;
@@ -221,7 +222,7 @@ test "reject impossible and reversed scene dates" {
     try std.testing.expectError(error.InvalidCompactDate, Date.parse("31042024"));
     const valid_source =
         "02012024\n01012024\n01012024\nNO\nNO\nNO\n" ++
-        ("1 1 1 1 1 1 1 1 1 1\n" ** 4) ++
+        ("1 1 1 1 1 1 1 1 1 1\n" ++ "1 1 1 1 1 1 1 1 1 1\n" ++ "1 1 1 1 1 1 1 1 1 1\n" ++ "1 1 1 1 1 1 1 1 1 1\n") ++
         "1 1 1 1 1 0\nweather_phase -0.25 0.0001\n" ++
         "visualization_year_window 2024 2024\n";
     try std.testing.expectError(error.SceneEndsBeforeItStarts, parse(valid_source));
@@ -265,7 +266,7 @@ test "options records reject empty explicit delimiter fields" {
 test "options parser follows source modulo-four leap-year rule" {
     const century_source =
         "29021900\n01031900\n29021900\nNO\nYES\nNO\n" ++
-        ("1,0,0,1,1,1,1,1,1,1\n" ** 4) ++
+        ("1,0,0,1,1,1,1,1,1,1\n" ++ "1,0,0,1,1,1,1,1,1,1\n" ++ "1,0,0,1,1,1,1,1,1,1\n" ++ "1,0,0,1,1,1,1,1,1,1\n") ++
         "20 4 1 1 10 1\n" ++
         "WeAtHeR_PhAsE|-1.5|0.0002\n" ++
         "ViSuAlIzAtIoN_YeAr_WiNdOw|1900|1900\n";
@@ -275,7 +276,7 @@ test "options parser follows source modulo-four leap-year rule" {
 
     const non_leap_source =
         "29021901\n01031901\n29021901\nNO\nYES\nNO\n" ++
-        ("1,0,0,1,1,1,1,1,1,1\n" ** 4) ++
+        ("1,0,0,1,1,1,1,1,1,1\n" ++ "1,0,0,1,1,1,1,1,1,1\n" ++ "1,0,0,1,1,1,1,1,1,1\n" ++ "1,0,0,1,1,1,1,1,1,1\n") ++
         "20 4 1 1 10 1\n" ++
         "WeAtHeR_PhAsE|-1.5|0.0002\n" ++
         "ViSuAlIzAtIoN_YeAr_WiNdOw|1901|1901\n";

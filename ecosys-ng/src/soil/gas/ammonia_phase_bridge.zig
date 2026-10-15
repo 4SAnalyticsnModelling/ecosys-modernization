@@ -12,6 +12,7 @@ const hydrology_module = @import("../../transport/hydrology.zig");
 const geometry_module = @import("../water/face_geometry.zig");
 const mineral = @import("../biogeochemistry/mineral_nitrogen_transport.zig");
 
+
 pub fn refreshTransientFromMineral(
     mineral_state: *const mineral.State,
     gas_state: *gas.State,
@@ -20,17 +21,17 @@ pub fn refreshTransientFromMineral(
     try validateDimensions(mineral_state, gas_state, nitrogen_molar_mass_g_per_mol);
     for (0..mineral_state.cell_count) |cell| {
         const mineral_first = cell * mineral.species_count;
-        const nonband = mineral_state.matrix.amount_mol[mineral_first + @intFromEnum(mineral.Species.ammonia_non_band)] * nitrogen_molar_mass_g_per_mol;
-        const band = mineral_state.matrix.amount_mol[mineral_first + @intFromEnum(mineral.Species.ammonia_band)] * nitrogen_molar_mass_g_per_mol;
+        const nonband = mineral_state.matrix.amount_mol[mineral_first + @backingInt(mineral.Species.ammonia_non_band)] * nitrogen_molar_mass_g_per_mol;
+        const band = mineral_state.matrix.amount_mol[mineral_first + @backingInt(mineral.Species.ammonia_band)] * nitrogen_molar_mass_g_per_mol;
         inline for (.{ nonband, band }) |value|
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidMineralAmmoniaInventory;
     }
     for (0..mineral_state.cell_count) |cell| {
         const mineral_first = cell * mineral.species_count;
-        const gas_index = cell * gas.species_count + @intFromEnum(gas.Species.ammonia);
-        gas_state.dissolved_mass_g[gas_index] = mineral_state.matrix.amount_mol[mineral_first + @intFromEnum(mineral.Species.ammonia_non_band)] * nitrogen_molar_mass_g_per_mol;
-        gas_state.band_dissolved_mass_g[gas_index] = mineral_state.matrix.amount_mol[mineral_first + @intFromEnum(mineral.Species.ammonia_band)] * nitrogen_molar_mass_g_per_mol;
+        const gas_index = cell * gas.species_count + @backingInt(gas.Species.ammonia);
+        gas_state.dissolved_mass_g[gas_index] = mineral_state.matrix.amount_mol[mineral_first + @backingInt(mineral.Species.ammonia_non_band)] * nitrogen_molar_mass_g_per_mol;
+        gas_state.band_dissolved_mass_g[gas_index] = mineral_state.matrix.amount_mol[mineral_first + @backingInt(mineral.Species.ammonia_band)] * nitrogen_molar_mass_g_per_mol;
         // ZNH3SH/ZNH3BH are owned by the mineral macropore state.  The gas
         // solver has no independent macropore NH3 phase-exchange equation.
         gas_state.macropore_dissolved_mass_g[gas_index] = 0;
@@ -44,7 +45,7 @@ pub fn publishTransientToMineral(
 ) !void {
     try validateDimensions(mineral_state, gas_state, nitrogen_molar_mass_g_per_mol);
     for (0..mineral_state.cell_count) |cell| {
-        const gas_index = cell * gas.species_count + @intFromEnum(gas.Species.ammonia);
+        const gas_index = cell * gas.species_count + @backingInt(gas.Species.ammonia);
         inline for (.{ gas_state.dissolved_mass_g[gas_index], gas_state.band_dissolved_mass_g[gas_index] }) |value|
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidTransientAmmoniaInventory;
@@ -54,10 +55,10 @@ pub fn publishTransientToMineral(
     }
     for (0..mineral_state.cell_count) |cell| {
         const mineral_first = cell * mineral.species_count;
-        const gas_index = cell * gas.species_count + @intFromEnum(gas.Species.ammonia);
-        mineral_state.matrix.amount_mol[mineral_first + @intFromEnum(mineral.Species.ammonia_non_band)] =
+        const gas_index = cell * gas.species_count + @backingInt(gas.Species.ammonia);
+        mineral_state.matrix.amount_mol[mineral_first + @backingInt(mineral.Species.ammonia_non_band)] =
             gas_state.dissolved_mass_g[gas_index] / nitrogen_molar_mass_g_per_mol;
-        mineral_state.matrix.amount_mol[mineral_first + @intFromEnum(mineral.Species.ammonia_band)] =
+        mineral_state.matrix.amount_mol[mineral_first + @backingInt(mineral.Species.ammonia_band)] =
             gas_state.band_dissolved_mass_g[gas_index] / nitrogen_molar_mass_g_per_mol;
     }
 }
@@ -66,7 +67,7 @@ pub fn publishTransientToMineral(
 pub fn clearTransient(gas_state: *gas.State) !void {
     try gas_state.validateShape();
     for (0..gas_state.cell_count) |cell| {
-        const index = cell * gas.species_count + @intFromEnum(gas.Species.ammonia);
+        const index = cell * gas.species_count + @backingInt(gas.Species.ammonia);
         gas_state.dissolved_mass_g[index] = 0;
         gas_state.band_dissolved_mass_g[index] = 0;
         gas_state.macropore_dissolved_mass_g[index] = 0;
@@ -87,21 +88,21 @@ test "mineral ammonia is the sole owner and transient round trip is exact" {
     defer mineral_state.deinit();
     var gas_state = try gas.State.init(std.testing.allocator, 2);
     defer gas_state.deinit();
-    mineral_state.matrix.amount_mol[@intFromEnum(mineral.Species.ammonia_non_band)] = 2;
-    mineral_state.matrix.amount_mol[@intFromEnum(mineral.Species.ammonia_band)] = 3;
+    mineral_state.matrix.amount_mol[@backingInt(mineral.Species.ammonia_non_band)] = 2;
+    mineral_state.matrix.amount_mol[@backingInt(mineral.Species.ammonia_band)] = 3;
     const second = mineral.species_count;
-    mineral_state.matrix.amount_mol[second + @intFromEnum(mineral.Species.ammonia_non_band)] = 5;
-    mineral_state.matrix.amount_mol[second + @intFromEnum(mineral.Species.ammonia_band)] = 7;
+    mineral_state.matrix.amount_mol[second + @backingInt(mineral.Species.ammonia_non_band)] = 5;
+    mineral_state.matrix.amount_mol[second + @backingInt(mineral.Species.ammonia_band)] = 7;
 
     try refreshTransientFromMineral(&mineral_state, &gas_state, 14.01);
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const ammonia = @backingInt(gas.Species.ammonia);
     try std.testing.expectApproxEqAbs(@as(f64, 28.02), gas_state.dissolved_mass_g[ammonia], 1e-14);
     try std.testing.expectApproxEqAbs(@as(f64, 42.03), gas_state.band_dissolved_mass_g[ammonia], 1e-14);
     gas_state.dissolved_mass_g[ammonia] -= 1.401;
     gas_state.band_dissolved_mass_g[ammonia] += 1.401;
     try publishTransientToMineral(&mineral_state, &gas_state, 14.01);
-    try std.testing.expectApproxEqAbs(@as(f64, 1.9), mineral_state.matrix.amount_mol[@intFromEnum(mineral.Species.ammonia_non_band)], 1e-14);
-    try std.testing.expectApproxEqAbs(@as(f64, 3.1), mineral_state.matrix.amount_mol[@intFromEnum(mineral.Species.ammonia_band)], 1e-14);
+    try std.testing.expectApproxEqAbs(@as(f64, 1.9), mineral_state.matrix.amount_mol[@backingInt(mineral.Species.ammonia_non_band)], 1e-14);
+    try std.testing.expectApproxEqAbs(@as(f64, 3.1), mineral_state.matrix.amount_mol[@backingInt(mineral.Species.ammonia_band)], 1e-14);
 }
 
 test "same-hour reaction ammonia refresh reaches the root gas consumer" {
@@ -118,8 +119,8 @@ test "same-hour reaction ammonia refresh reaches the root gas consumer" {
 
     // Represent an hour-start mirror which predates NITRO, then publish the
     // current reaction result. The production bridge must consume the latter.
-    mineral_state.matrix.amount_mol[@intFromEnum(mineral.Species.ammonia_non_band)] = 99;
-    mineral_state.matrix.amount_mol[@intFromEnum(mineral.Species.ammonia_band)] = 88;
+    mineral_state.matrix.amount_mol[@backingInt(mineral.Species.ammonia_non_band)] = 99;
+    mineral_state.matrix.amount_mol[@backingInt(mineral.Species.ammonia_band)] = 88;
     chemistry.aqueous[0].ammonia_non_band = 3;
     chemistry.aqueous[0].ammonia_band = 4;
     const fractions: mineral.ZoneFractions = .{
@@ -138,7 +139,7 @@ test "same-hour reaction ammonia refresh reaches the root gas consumer" {
     );
     try refreshTransientFromMineral(&mineral_state, &gas_state, 14);
 
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const ammonia = @backingInt(gas.Species.ammonia);
     try std.testing.expectEqual(@as(f64, 3 * 2 * 0.75 * 14), gas_state.dissolved_mass_g[ammonia]);
     try std.testing.expectEqual(@as(f64, 4 * 2 * 0.25 * 14), gas_state.band_dissolved_mass_g[ammonia]);
 }
@@ -148,10 +149,10 @@ test "invalid later transient cell leaves every mineral ammonia owner unchanged"
     defer mineral_state.deinit();
     var gas_state = try gas.State.init(std.testing.allocator, 2);
     defer gas_state.deinit();
-    mineral_state.matrix.amount_mol[@intFromEnum(mineral.Species.ammonia_non_band)] = 2;
-    mineral_state.matrix.amount_mol[mineral.species_count + @intFromEnum(mineral.Species.ammonia_non_band)] = 5;
+    mineral_state.matrix.amount_mol[@backingInt(mineral.Species.ammonia_non_band)] = 2;
+    mineral_state.matrix.amount_mol[mineral.species_count + @backingInt(mineral.Species.ammonia_non_band)] = 5;
     try refreshTransientFromMineral(&mineral_state, &gas_state, 14);
-    const bad = gas.species_count + @intFromEnum(gas.Species.ammonia);
+    const bad = gas.species_count + @backingInt(gas.Species.ammonia);
     gas_state.dissolved_mass_g[bad] = std.math.nan(f64);
     const before = try std.testing.allocator.dupe(f64, mineral_state.matrix.amount_mol);
     defer std.testing.allocator.free(before);
@@ -187,28 +188,28 @@ test "accepted volatilization debits the sole mineral ammonia owner and books th
     var step = try gas_step.State.init(std.testing.allocator, 1);
     defer step.deinit();
 
-    const ammonia = @intFromEnum(gas.Species.ammonia);
-    const nitrogen = @intFromEnum(gas.Species.nitrogen);
+    const ammonia = @backingInt(gas.Species.ammonia);
+    const nitrogen = @backingInt(gas.Species.nitrogen);
     const nitrogen_molar_mass_g_per_mol = 14.0;
     // Fill the pore air to its ideal-gas dry-air capacity with N2 so the
     // boundary response measures NH3 volatilization, not initialization of an
     // artificially empty air phase.
     const dry_air_capacity_mol = 1.2194e4 * grid.matrix_air_volume_m3[0] / grid.soil_temperature_k[0];
     gas_state.gaseous_mass_g[nitrogen] = dry_air_capacity_mol * gas.g_per_mol_tracked[nitrogen];
-    mineral_state.matrix.amount_mol[@intFromEnum(mineral.Species.ammonia_non_band)] = 0.1;
-    mineral_state.matrix.amount_mol[@intFromEnum(mineral.Species.ammonia_band)] = 0.05;
+    mineral_state.matrix.amount_mol[@backingInt(mineral.Species.ammonia_non_band)] = 0.1;
+    mineral_state.matrix.amount_mol[@backingInt(mineral.Species.ammonia_band)] = 0.05;
     try refreshTransientFromMineral(&mineral_state, &gas_state, nitrogen_molar_mass_g_per_mol);
     const initial_nitrogen_g = gas_state.gaseous_mass_g[ammonia] +
         gas_state.dissolved_mass_g[ammonia] + gas_state.band_dissolved_mass_g[ammonia];
 
-    var reference_water_to_air = [_]f64{1e-12} ** gas.species_count;
+    var reference_water_to_air = @as([gas.species_count]f64, @splat(@as(f64, 1e-12)));
     reference_water_to_air[ammonia] = 1;
     const solubility = gas.SurfaceSolubilityParameters{
         .reference_water_to_air = reference_water_to_air,
-        .log_intercept = [_]f64{0} ** gas.species_count,
-        .temperature_coefficient_per_c = [_]f64{0} ** gas.species_count,
+        .log_intercept = @as([gas.species_count]f64, @splat(@as(f64, 0))),
+        .temperature_coefficient_per_c = @as([gas.species_count]f64, @splat(@as(f64, 0))),
     };
-    var atmosphere = [_]f64{0} ** gas.species_count;
+    var atmosphere = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     atmosphere[nitrogen] = gas_state.gaseous_mass_g[nitrogen] / grid.matrix_air_volume_m3[0];
     var request: gas_step.AdvanceRequest = .{
         .grid = &grid,
@@ -251,8 +252,8 @@ test "accepted volatilization debits the sole mineral ammonia owner and books th
     try publishTransientToMineral(&mineral_state, &gas_state, nitrogen_molar_mass_g_per_mol);
 
     const final_mineral_nitrogen_g = nitrogen_molar_mass_g_per_mol *
-        (mineral_state.matrix.amount_mol[@intFromEnum(mineral.Species.ammonia_non_band)] +
-            mineral_state.matrix.amount_mol[@intFromEnum(mineral.Species.ammonia_band)]);
+        (mineral_state.matrix.amount_mol[@backingInt(mineral.Species.ammonia_non_band)] +
+            mineral_state.matrix.amount_mol[@backingInt(mineral.Species.ammonia_band)]);
     const final_nitrogen_g = gas_state.gaseous_mass_g[ammonia] + final_mineral_nitrogen_g;
     const boundary_input_g = step.atmospheric_flux_g_per_h[ammonia];
     try std.testing.expect(boundary_input_g < 0);

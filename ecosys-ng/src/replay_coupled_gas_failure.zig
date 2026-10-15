@@ -6,9 +6,9 @@ const ecosys = @import("ecosys_ng");
 pub fn main(init: std.process.Init) !void {
     var debug_allocator: std.heap.DebugAllocator(.{}) = .init;
     defer {
-        if (comptime builtin.mode == .Debug) _ = debug_allocator.deinit();
+        if (comptime builtin.mode == .debug) _ = debug_allocator.deinit();
     }
-    const allocator = if (comptime builtin.mode == .Debug)
+    const allocator = if (comptime builtin.mode == .debug)
         debug_allocator.allocator()
     else
         std.heap.smp_allocator;

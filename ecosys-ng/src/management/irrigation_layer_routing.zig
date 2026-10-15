@@ -1,6 +1,7 @@
 const std = @import("std");
 const irrigation = @import("irrigation_schedule.zig");
 
+
 pub const dissolved_species_count = 11;
 
 /// Heap-owned hourly irrigation loads. Surface carriers remain indexed by
@@ -190,7 +191,7 @@ pub const Loads = struct {
             !std.math.isFinite(next_hydrogen))
             return error.IrrigationRoutingOverflow;
         const first = cell * dissolved_species_count;
-        var candidate = [_]f64{0} ** dissolved_species_count;
+        var candidate = @as([dissolved_species_count]f64, @splat(@as(f64, 0)));
         for (&candidate, concentrations, 0..) |*next, concentration, species| {
             next.* = self.surface_dissolved_mass_g[first + species] +
                 water_volume_m3 * concentration;

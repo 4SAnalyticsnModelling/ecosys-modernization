@@ -24,7 +24,7 @@ pub const LeafGrowth = struct { carbon_g: f64, nitrogen_g: f64, phosphorus_g: f6
 
 pub const Organ = enum(u8) { leaf, sheath, stalk, reserve, husk, ear, grain };
 
-pub const organ_count = @typeInfo(Organ).@"enum".fields.len;
+pub const organ_count = @typeInfo(Organ).@"enum".field_names.len;
 
 pub const OrganGrowth = struct {
     carbon_g: [organ_count]f64,
@@ -33,7 +33,7 @@ pub const OrganGrowth = struct {
     total_shoot_carbon_production_g: f64,
 
     pub fn value(self: OrganGrowth, organ: Organ) LeafGrowth {
-        const index = @intFromEnum(organ);
+        const index = @backingInt(organ);
         return .{ .carbon_g = self.carbon_g[index], .nitrogen_g = self.nitrogen_g[index], .phosphorus_g = self.phosphorus_g[index] };
     }
 };
@@ -48,7 +48,7 @@ pub fn calculateOrganGrowth(total_growth_carbon_consumption_g: f64, partition_fr
         inline for (.{ partition_fraction[index], carbon_growth_yield_g_per_g_consumed[index], nitrogen_to_carbon_g_per_g[index], phosphorus_to_carbon_g_per_g[index] }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidOrganGrowthInput;
         partition_sum += partition_fraction[index];
         result.carbon_g[index] = partition_fraction[index] * total_growth_carbon_consumption_g * carbon_growth_yield_g_per_g_consumed[index];
-        const nutrient_factor = if (index == @intFromEnum(Organ.leaf)) minimum_leaf_nutrient_fraction + (1.0 - minimum_leaf_nutrient_fraction) * nutrient_growth_constraint else 1.0;
+        const nutrient_factor = if (index == @backingInt(Organ.leaf)) minimum_leaf_nutrient_fraction + (1.0 - minimum_leaf_nutrient_fraction) * nutrient_growth_constraint else 1.0;
         result.nitrogen_g[index] = result.carbon_g[index] * nitrogen_to_carbon_g_per_g[index] * nutrient_factor;
         result.phosphorus_g[index] = result.carbon_g[index] * phosphorus_to_carbon_g_per_g[index] * nutrient_factor;
         inline for (.{ result.carbon_g[index], result.nitrogen_g[index], result.phosphorus_g[index] }) |value| if (!std.math.isFinite(value)) return error.NonFiniteOrganGrowthResult;
@@ -90,12 +90,12 @@ pub fn applyBranchOrganGrowth(state: *group_state.State, branch: usize, growth: 
 
 fn organGrowthElement(values: [organ_count]f64) branch_organ_growth_state_update.ElementGrowth {
     return .{
-        .leaf = values[@intFromEnum(Organ.leaf)],
-        .sheath = values[@intFromEnum(Organ.sheath)],
-        .stalk = values[@intFromEnum(Organ.stalk)],
-        .reserve = values[@intFromEnum(Organ.reserve)],
-        .husk = values[@intFromEnum(Organ.husk)],
-        .ear = values[@intFromEnum(Organ.ear)],
+        .leaf = values[@backingInt(Organ.leaf)],
+        .sheath = values[@backingInt(Organ.sheath)],
+        .stalk = values[@backingInt(Organ.stalk)],
+        .reserve = values[@backingInt(Organ.reserve)],
+        .husk = values[@backingInt(Organ.husk)],
+        .ear = values[@backingInt(Organ.ear)],
     };
 }
 
@@ -123,7 +123,7 @@ pub fn validateBranchOrganGrowthTransaction(state: *const group_state.State, bra
     // Validate the complete transaction before publishing any organ. This
     // prevents a late overflow from leaving earlier organs state_updateted.
     inline for (mappings) |mapping| {
-        const index = @intFromEnum(mapping[0]);
+        const index = @backingInt(mapping[0]);
         inline for (.{
             @field(state, mapping[1])[branch] + growth.carbon_g[index],
             @field(state, mapping[2])[branch] + growth.nitrogen_g[index],

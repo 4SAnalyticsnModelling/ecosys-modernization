@@ -1,6 +1,7 @@
 const std = @import("std");
 const gas_transport = @import("../gas/transport.zig");
 
+
 /// Projects the HOUR1/OUTSH aqueous concentration convention:
 /// tracked-element mass (g) divided by liquid-water volume (m3).
 pub fn writeDissolvedGasConcentrationProfile(
@@ -14,7 +15,7 @@ pub fn writeDissolvedGasConcentrationProfile(
     if (output_g_per_m3.len != layer_count or liquid_water_volume_m3.len * gas_transport.species_count != dissolved_mass_g.len or first_layer > liquid_water_volume_m3.len or layer_count > liquid_water_volume_m3.len - first_layer) return error.GasConcentrationDimensionMismatch;
     for (output_g_per_m3, 0..) |*concentration, local_layer| {
         const layer = first_layer + local_layer;
-        const mass = dissolved_mass_g[layer * gas_transport.species_count + @intFromEnum(species)];
+        const mass = dissolved_mass_g[layer * gas_transport.species_count + @backingInt(species)];
         const water = liquid_water_volume_m3[layer];
         if (!std.math.isFinite(mass) or mass < 0 or !std.math.isFinite(water) or water < 0) return error.InvalidGasConcentrationState;
         if (water == 0) {
@@ -26,8 +27,8 @@ pub fn writeDissolvedGasConcentrationProfile(
 }
 
 pub fn dissolvedGasConcentration(mass_g: f64, liquid_water_volume_m3: f64) !f64 {
-    var mass = [_]f64{0} ** gas_transport.species_count;
-    mass[@intFromEnum(gas_transport.Species.carbon_dioxide)] = mass_g;
+    var mass = @as([gas_transport.species_count]f64, @splat(@as(f64, 0)));
+    mass[@backingInt(gas_transport.Species.carbon_dioxide)] = mass_g;
     var output: [1]f64 = undefined;
     try writeDissolvedGasConcentrationProfile(&mass, &.{liquid_water_volume_m3}, 0, 1, .carbon_dioxide, &output);
     return output[0];
@@ -253,7 +254,7 @@ fn duplicateFinite(allocator: std.mem.Allocator, values: []const f64) ![]f64 {
 }
 
 test "OUTSH carbon diagnostics preserve exact factors across runtime layers" {
-    const layers = [_]f64{1} ** 23;
+    const layers = @as([23]f64, @splat(@as(f64, 1)));
     var output = try calculateCarbon(std.testing.allocator, .{ .carbon_dioxide_emission_g_c_per_h = 100, .net_carbon_exchange_g_c_per_h = -50, .methane_emission_g_c_per_h = 25, .oxygen_exchange_g_o2_per_h = 32, .local_surface_area_m2 = 100, .carbon_dioxide_concentration_by_layer = &layers, .canopy_air_carbon_dioxide_umol_per_mol = 2, .methane_concentration_by_layer = &layers, .oxygen_concentration_by_layer = &layers, .litter_oxygen_concentration = 4 });
     defer output.deinit();
     try std.testing.expectEqual(@as(usize, 23), output.oxygen_concentration_by_layer.len);
@@ -304,9 +305,9 @@ test "allocation-free carbon and nitrogen projections match owned diagnostics" {
 }
 
 test "OUTSH dissolved gas concentration uses runtime water volume and fails on impossible dry mass" {
-    var dissolved = [_]f64{0} ** (2 * gas_transport.species_count);
-    dissolved[@intFromEnum(gas_transport.Species.carbon_dioxide)] = 6;
-    dissolved[gas_transport.species_count + @intFromEnum(gas_transport.Species.carbon_dioxide)] = 4;
+    var dissolved = @as([(2 * gas_transport.species_count)]f64, @splat(@as(f64, 0)));
+    dissolved[@backingInt(gas_transport.Species.carbon_dioxide)] = 6;
+    dissolved[gas_transport.species_count + @backingInt(gas_transport.Species.carbon_dioxide)] = 4;
     var profile: [2]f64 = undefined;
     try writeDissolvedGasConcentrationProfile(&dissolved, &.{ 2, 0.5 }, 0, 2, .carbon_dioxide, &profile);
     try std.testing.expectEqual([2]f64{ 3, 8 }, profile);

@@ -5,6 +5,7 @@ const layered = @import("../../state/tile_layer_face_contributions.zig");
 const solute_transport = @import("../../soil/solute/transport.zig");
 const gas_transport = @import("../../soil/gas/transport.zig");
 
+
 pub const Workspace = struct {
     io: std.Io,
     root: std.Io.Dir,
@@ -797,8 +798,7 @@ test "hourly accepted ledgers publish and gather by serial Morton tile" {
         carrier_count,
         &flux,
     );
-    var state_updateted_amount = [_]f64{100} **
-        (4 * soil_layer_capacity * carrier_count);
+    var state_updateted_amount = @as([(4 * soil_layer_capacity * carrier_count)]f64, @splat(@as(f64, 100)));
     var expected_amount = state_updateted_amount;
     for (faces, 0..) |face, face_index| {
         for (0..carrier_count) |carrier| {
@@ -860,8 +860,7 @@ test "hourly accepted ledgers publish and gather by serial Morton tile" {
         32,
         33,
     );
-    var rejected_delta = [_]f64{0} **
-        (4 * soil_layer_capacity * carrier_count);
+    var rejected_delta = @as([(4 * soil_layer_capacity * carrier_count)]f64, @splat(@as(f64, 0)));
     rejected_delta[0] = 1;
     rejected_delta[
         3 * soil_layer_capacity * carrier_count
@@ -874,8 +873,7 @@ test "hourly accepted ledgers publish and gather by serial Morton tile" {
         carrier_count,
         &rejected_delta,
     );
-    var unchanged = [_]f64{0} **
-        (4 * soil_layer_capacity * carrier_count);
+    var unchanged = @as([(4 * soil_layer_capacity * carrier_count)]f64, @splat(@as(f64, 0)));
     try std.testing.expectError(
         error.InvalidLateralContributionStateUpdate,
         state_updateTransportGeneration(

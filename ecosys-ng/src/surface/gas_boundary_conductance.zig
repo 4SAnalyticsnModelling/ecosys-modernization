@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// WATSUB `RAHG=RAHW` and `RAE` (`watsub.f:119-120`). These are ground/snow
 /// surface resistances, not the similarly valued canopy resistance record.
@@ -97,7 +98,7 @@ pub const SurfaceExchangeResult = struct {
 /// complete external hour commits; the runscript's legacy scalar surface
 /// conductance is deliberately not part of this resistance network.
 pub fn calculateSurfaceExchange(inputs: SurfaceExchangeInputs) !SurfaceExchangeResult {
-    inline for (@typeInfo(SurfaceExchangeInputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfaceExchangeInput;
+    inline for (ti_compat.fieldViews(SurfaceExchangeInputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSurfaceExchangeInput;
     if (inputs.cell_area_m2 <= 0 or inputs.flux_timestep_h <= 0 or inputs.snow_flux_timestep_h <= 0 or inputs.litter_flux_timestep_h <= 0 or inputs.snow_depth_m < 0 or inputs.full_snow_cover_depth_m <= 0 or inputs.nominal_bare_soil_fraction < 0 or inputs.nominal_bare_soil_fraction > 1 or inputs.surface_excess_water_m3 < 0 or inputs.surface_water_capacity_m3 < 0 or inputs.current_ground_surface_resistance_h_per_m <= 0 or inputs.current_snow_surface_resistance_h_per_m <= 0 or inputs.litter_porous_resistance_h_per_m < 0 or inputs.litter_air_fraction < 0 or inputs.litter_porosity_m3_per_m3 <= 0 or inputs.litter_tortuosity <= 0 or inputs.minimum_air_transport_factor <= 0 or inputs.soil_evaporation_pore_resistance_h_per_m < 0 or inputs.soil_surface_air_fraction < 0 or inputs.evaporation_surface_resistance_h_per_m < 0) return error.InvalidSurfaceExchangeInput;
 
     var snow_cover = @min(1, @sqrt(inputs.snow_depth_m / inputs.full_snow_cover_depth_m));
@@ -131,7 +132,7 @@ pub fn calculateSurfaceExchange(inputs: SurfaceExchangeInputs) !SurfaceExchangeR
         .soil_latent_conductance_m3_per_step = latent_area_time_m2_h * snow_free * bare / (combined_ground_resistance + inputs.evaporation_surface_resistance_h_per_m + soil_evaporation_resistance),
         .soil_sensible_conductance_megajoules_per_k_step = sensible_area_time_megajoules_m_per_k * snow_free * bare / combined_ground_resistance,
     };
-    inline for (@typeInfo(SurfaceExchangeResult).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.InvalidSurfaceExchangeResult;
+    inline for (ti_compat.fieldViews(SurfaceExchangeResult)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.InvalidSurfaceExchangeResult;
     return result;
 }
 
@@ -178,7 +179,7 @@ pub fn calculate(inputs: Inputs, parameters: Parameters) !Result {
         .atmospheric_litter_gas_conductance_m3_per_h = inputs.cell_area_m2 / (atmosphere_to_ground + current_surface_resistance + snowpack_resistance),
         .atmospheric_gas_conductance_m3_per_h = inputs.cell_area_m2 / total_resistance,
     };
-    inline for (@typeInfo(Result).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.InvalidSurfaceGasResistanceResult;
+    inline for (ti_compat.fieldViews(Result)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.InvalidSurfaceGasResistanceResult;
     return result;
 }
 

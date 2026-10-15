@@ -7,6 +7,7 @@
 const std = @import("std");
 const aqueous_network = @import("../solute/aqueous_network.zig");
 const dissolution_module = @import("fertilizer_dissolution.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 test "SOLUTE layer admission preserves strict thickness and water gates" {
     const active: dissolution_module.LayerReactionAdmissionInputs = .{
@@ -167,7 +168,7 @@ test "SOLUTE lines 327-338 retain fertilizer flux assignment order" {
         "banded_urea_mol_n",
         "banded_nitrate_mol_n",
     };
-    inline for (@typeInfo(dissolution_module.DissolutionFlux).@"struct".fields, 0..) |field, index|
+    inline for (ti_compat.fieldViews(dissolution_module.DissolutionFlux), 0..) |field, index|
         try std.testing.expectEqualStrings(expected_names[index], field.name);
 }
 

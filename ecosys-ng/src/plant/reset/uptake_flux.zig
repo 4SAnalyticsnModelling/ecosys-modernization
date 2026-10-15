@@ -11,6 +11,7 @@
 // Do not bind this module.
 // uptake reset group of docs/traceability/plant_reset_unbound_family_disposition.md
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const SaltMode = enum {
     disabled,
@@ -141,14 +142,14 @@ fn allocateFields(comptime T: type, allocator: std.mem.Allocator, count: usize) 
     var result: T = undefined;
     var allocated: usize = 0;
     errdefer {
-        inline for (@typeInfo(T).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(T)) |field| {
             if (allocated > 0) {
                 allocated -= 1;
                 allocator.free(@field(result, field.name));
             }
         }
     }
-    inline for (@typeInfo(T).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(T)) |field| {
         @field(result, field.name) = try allocator.alloc(f64, count);
         @memset(@field(result, field.name), 0);
         allocated += 1;
@@ -157,17 +158,17 @@ fn allocateFields(comptime T: type, allocator: std.mem.Allocator, count: usize) 
 }
 
 fn freeFields(comptime T: type, allocator: std.mem.Allocator, value: *T) void {
-    inline for (@typeInfo(T).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(T)) |field|
         allocator.free(@field(value, field.name));
 }
 
 fn clearFields(comptime T: type, value: *T) void {
-    inline for (@typeInfo(T).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(T)) |field|
         @memset(@field(value, field.name), 0);
 }
 
 fn validateFields(comptime T: type, value: *const T, expected_count: usize) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(T)) |field|
         if (@field(value, field.name).len != expected_count)
             return error.InvalidPlantUptakeFluxDimensions;
 }
@@ -180,23 +181,23 @@ test "UPTAKE reset clears runtime species and ragged root units" {
         .root_axis_count_by_species = &axes,
     });
     defer state.deinit();
-    inline for (@typeInfo(SpeciesTotals).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SpeciesTotals)) |field|
         @memset(@field(state.species, field.name), 3);
-    inline for (@typeInfo(RootFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(RootFluxes)) |field|
         @memset(@field(state.root, field.name), -2);
-    inline for (@typeInfo(SaltFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SaltFluxes)) |field|
         @memset(@field(state.salts, field.name), 5);
 
     try state.clear(.dynamic);
 
     try std.testing.expectEqual(@as(usize, 24), state.root_unit_count);
-    inline for (@typeInfo(SpeciesTotals).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SpeciesTotals)) |field|
         for (@field(state.species, field.name)) |value|
             try std.testing.expectEqual(@as(f64, 0), value);
-    inline for (@typeInfo(RootFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(RootFluxes)) |field|
         for (@field(state.root, field.name)) |value|
             try std.testing.expectEqual(@as(f64, 0), value);
-    inline for (@typeInfo(SaltFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SaltFluxes)) |field|
         for (@field(state.salts, field.name)) |value|
             try std.testing.expectEqual(@as(f64, 0), value);
 }

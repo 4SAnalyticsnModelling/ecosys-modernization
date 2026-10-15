@@ -1,0 +1,135 @@
+test
++- run test
+   +- compile test debug native 6 errors
+src/core/options.zig:225:34: error: incompatible types: '*const [20:0]u8' and 'comptime_int'
+        ("1 1 1 1 1 1 1 1 1 1\n" * 4) ++
+         ~~~~~~~~~~~~~~~~~~~~~~~~^~~
+src/core/options.zig:225:10: note: type '*const [20:0]u8' here
+        ("1 1 1 1 1 1 1 1 1 1\n" * 4) ++
+         ^~~~~~~~~~~~~~~~~~~~~~~
+src/core/options.zig:225:36: note: type 'comptime_int' here
+        ("1 1 1 1 1 1 1 1 1 1\n" * 4) ++
+                                   ^
+referenced by:
+    options: src/module_index.zig:55:29
+    test_0: src/index/core_test_index.zig:57:15
+    1 reference(s) hidden; use '-freference-trace=3' to see all references
+src/core/options.zig:269:34: error: incompatible types: '*const [20:0]u8' and 'comptime_int'
+        ("1,0,0,1,1,1,1,1,1,1\n" * 4) ++
+         ~~~~~~~~~~~~~~~~~~~~~~~~^~~
+src/core/options.zig:269:10: note: type '*const [20:0]u8' here
+        ("1,0,0,1,1,1,1,1,1,1\n" * 4) ++
+         ^~~~~~~~~~~~~~~~~~~~~~~
+src/core/options.zig:269:36: note: type 'comptime_int' here
+        ("1,0,0,1,1,1,1,1,1,1\n" * 4) ++
+                                   ^
+src/core/typeinfo_compat.zig:42:17: error: typeinfo_compat.fieldViews: erosion.transport_accumulator_reset.ScalarFlux is not a struct or union
+        else => @compileError("typeinfo_compat.fieldViews: " ++ @typeName(T) ++ " is not a struct or union"),
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/core/typeinfo_compat.zig:57:51: note: called at comptime here
+pub fn fieldViews(comptime T: type) [fieldViewsLen(T)]FieldView {
+                                     ~~~~~~~~~~~~~^~~
+src/erosion/transport_accumulator_reset.zig:185:29: note: generic function instantiated here
+        ti_compat.fieldViews(ScalarFlux).len, 12, 24, 24, 24,
+        ~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+src/core/typeinfo_compat.zig:42:17: error: typeinfo_compat.fieldViews: erosion.transport_accumulator_reset.ScalarFlux is not a struct or union
+        else => @compileError("typeinfo_compat.fieldViews: " ++ @typeName(T) ++ " is not a struct or union"),
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/core/typeinfo_compat.zig:57:51: note: called at comptime here
+pub fn fieldViews(comptime T: type) [fieldViewsLen(T)]FieldView {
+                                     ~~~~~~~~~~~~~^~~
+src/erosion/transport_accumulator_reset.zig:219:63: note: generic function instantiated here
+    var scalar_fluxes = arr_compat.filled(ti_compat.fieldViews(ScalarFlux).len, f64, @as(f64, 3.0));
+                                          ~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+src/core/typeinfo_compat.zig:79:9: error: evaluation exceeded 1000 backwards branches
+        for (info.field_names, info.field_types, 0..) |name, field_type, i| {
+        ^~~
+src/core/typeinfo_compat.zig:79:9: note: use @setEvalBranchQuota() to raise the branch limit from 1000
+src/core/typeinfo_compat.zig:59:45: note: called at comptime here
+        .@"struct" => |s| fieldViewsFromInfo(s),
+                          ~~~~~~~~~~~~~~~~~~^~~
+src/plant/reset/uptake_flux.zig:145:41: note: called at comptime here
+        inline for (ti_compat.fieldViews(T)) |field| {
+                    ~~~~~~~~~~~~~~~~~~~~^~~
+src/validation/hourly_cell_conservation.zig:666:16: error: evaluation exceeded 1000 backwards branches
+        inline for (ti_compat.fieldViews(inventory.ElementMoles)) |element| {
+        ~~~~~~~^~~
+src/validation/hourly_cell_conservation.zig:666:16: note: use @setEvalBranchQuota() to raise the branch limit from 1000
+error: 6 compilation errors
+failed command: /opt/homebrew/Cellar/zig/0.17.0/bin/zig test -Odebug -Mroot=src/module_index.zig --cache-dir .zig-cache --global-cache-dir .zig-cache-global --build-root . --name test --zig-lib-dir /opt/homebrew/Cellar/zig/0.17.0/lib/zig/ --listen=-
+
+test
++- run test 119 pass, 1 crash (120 total)
+info: integer=42 text='exact'
+error(soil_water): hex=0x12ab
+info: thread=3 line=0 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=1 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=2 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=3 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=4 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=5 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=6 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=7 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=0 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=1 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=2 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=3 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=4 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=5 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=6 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=7 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=0 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=1 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=2 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=3 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=4 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=5 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=6 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=7 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=0 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=1 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=2 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=3 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=4 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=5 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=6 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=7 payload=abcdefghijklmnopqrstuvwxyz0123456789
+error(grid_test): worker=0
+error(grid_test): worker=1
+warning: first-owner-still-active
+error: 'stages.hourly_heat_water_solute.test.fixed external hour recovery escalates through the full chain and stops on hard defects' terminated with signal ABRT with stderr:
+       thread 5698704 panic: index out of bounds: index 4, len 4
+       /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:10686:27: 0x104a04147 in run (test)
+                   self.schedules[self.attempts] = substep_count;
+                                 ^
+       /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:12168:16: 0x104a041db in runBoundedRecoveryAttempt__func_1772 (test)
+           attempt.run(substep_count) catch |err| {
+                      ^
+       /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:12263:46: 0x104a0473f in recoverFixedExternalHourAdaptively__func_1771 (test)
+                   if (try runBoundedRecoveryAttempt(attempt, substep_count)) |final_error| return final_error;
+                                                    ^
+       /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:11966:46: 0x104a04b1f in recoverFixedExternalHour__func_1769 (test)
+           return recoverFixedExternalHourAdaptively(
+                                                    ^
+       /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:10696:33: 0x104a05923 in test.fixed external hour recovery escalates through the full chain and stops on hard defects (test)
+               recoverFixedExternalHour(&retryable),
+                                       ^
+       /opt/homebrew/Cellar/zig/0.17.0/lib/zig/compiler/test_runner.zig:143:68: 0x1048ca71b in mainServer (test)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       /opt/homebrew/Cellar/zig/0.17.0/lib/zig/compiler/test_runner.zig:72:26: 0x1048cad27 in main (test)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       /opt/homebrew/Cellar/zig/0.17.0/lib/zig/std/start.zig:789:88: 0x1048c8c73 in callMain (test)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+                                                                                              ^
+       ???:?:?: 0x18ca7fe7f in start (/usr/lib/dyld)
+failed command: ./.zig-cache/o/bbb60266255917494ae24489a786afc4/test --cache-dir=./.zig-cache --seed=0x91af597 --listen=-
+
+Build Summary: 1/5 steps succeeded (2 failed); 119/120 tests passed (1 crashed)
+test transitive failure
++- run test transitive failure
+|  +- compile test debug native 6 errors
++- run test 119 pass, 1 crash (120 total)
+   +- compile test debug native success 6s MaxRSS:660M
+

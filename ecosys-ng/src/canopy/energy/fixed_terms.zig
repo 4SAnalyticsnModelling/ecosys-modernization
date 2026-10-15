@@ -4,6 +4,7 @@
 // residual. The emitted, canopy-ground, sky, and lateral longwave terms are
 // therefore evaluated by one owner rather than the retired diagnostic writer.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     canopy_total_water_potential_megapascal: f64,
@@ -108,7 +109,7 @@ pub fn calculate(inputs: Inputs) !Result {
 }
 
 fn validateInputs(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.InvalidCanopyEnergyFixedTermInput;
     if (inputs.heat_flux_timestep_h < 0 or
@@ -125,11 +126,11 @@ fn validateInputs(inputs: Inputs) !void {
 }
 
 fn validateResult(result: Result) !void {
-    inline for (@typeInfo(Result).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Result)) |field| {
         if (field.type == f64 and !std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteCanopyEnergyFixedTerm;
     }
-    inline for (@typeInfo(FluxAccumulators).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(FluxAccumulators)) |field|
         if (!std.math.isFinite(@field(result.fluxes, field.name)))
             return error.NonFiniteCanopyEnergyFixedTerm;
 }
@@ -167,7 +168,7 @@ test "UPTAKE fixed canopy energy terms preserve source operation order" {
     try std.testing.expectApproxEqAbs(@as(f64, 253.2), result.osmotic_molar_mass_g_per_mol, 1e-12);
     try std.testing.expectEqual(@as(f64, 2), result.latent_boundary_conductance_m2_per_step);
     try std.testing.expectApproxEqAbs(@as(f64, 2.4), result.sensible_boundary_conductance_megajoules_per_m_k_step, 1e-15);
-    inline for (@typeInfo(FluxAccumulators).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(FluxAccumulators)) |field|
         try std.testing.expectEqual(@as(f64, 0), @field(result.fluxes, field.name));
 }
 

@@ -9,6 +9,7 @@ const RootState = @import("../plant/root/plant_root_system.zig").State;
 const root_domain_count = @import("../plant/root/plant_root_system.zig").biological_domain_count;
 const std = @import("std");
 const plant_root_metabolism = @import("../plant/root/plant_root_metabolism.zig");
+
 test "negative primary growth removes concurrent mycorrhizal structure and mobile pools" {
     const kinetics: plant_root_metabolism.RootLitterFractions = .{
         .woody_carbon = .{ 0.1, 0.2, 0.3, 0.4 },
@@ -80,8 +81,8 @@ test "live GROSUB mycorrhizal loss follows current then upper host-root deficits
     roots.axis_secondary_length_m[current_axis] = 8;
     roots.mobile_carbon_g[upper_root] = 8;
     roots.mobile_carbon_g[current_root] = 10;
-    const unit = [_]f64{1} ** 4;
-    const zero = [_]f64{0} ** 4;
+    const unit = @as([4]f64, @splat(@as(f64, 1)));
+    const zero = @as([4]f64, @splat(@as(f64, 0)));
     const litter = try plant_root_metabolism.state_updateMycorrhizalLossWithSecondaryRoots(
         &roots,
         0,

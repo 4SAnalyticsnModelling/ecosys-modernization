@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Cations = struct {
     ammonium_non_band: f64,
@@ -77,7 +78,7 @@ pub fn calculate(inputs: Inputs, parameters: Parameters) !Cations {
     const rate_fraction_per_megagram = parameters.substrate_limit_fraction / inputs.soil_mass_per_water_volume_megagrams_per_m3;
     const maximum_per_megagram = parameters.maximum_adsorption_mol_charge_per_m3_step / inputs.soil_mass_per_water_volume_megagrams_per_m3;
     var raw: Cations = undefined;
-    inline for (@typeInfo(Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Cations)) |field| {
         const name = field.name;
         // SOLUTE.F applies XMIN in charge equivalents:
         //   Al/Fe: FIONC * 3 * min(exchange ion mol, aqueous ion mol)
@@ -110,7 +111,7 @@ pub fn applySourceOrderStateUpdate(
     changes: Cations,
     stage: SourceIterationStage,
 ) !Cations {
-    inline for (@typeInfo(Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Cations)) |field| {
         if (!std.math.isFinite(@field(current, field.name)) or
             @field(current, field.name) < 0 or
             !std.math.isFinite(@field(changes, field.name)))
@@ -297,7 +298,7 @@ fn closeSiteChargeAndConvertToIonMoles(
         changes.ammonium_band = 0;
     var total: f64 = 0;
     var magnitude: f64 = 0;
-    inline for (@typeInfo(Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Cations)) |field| {
         const weight = siteCoordinateWeight(
             field.name,
             ammonium_non_band_fraction,
@@ -310,7 +311,7 @@ fn closeSiteChargeAndConvertToIonMoles(
         changes.* = zeroCations();
         return;
     }
-    inline for (@typeInfo(Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Cations)) |field| {
         const value = @field(changes.*, field.name);
         @field(changes.*, field.name) -= total * @abs(value) / magnitude;
     }
@@ -493,7 +494,7 @@ fn normalizeSiteCharge(
     ammonium_band_fraction: f64,
 ) void {
     var total: f64 = 0;
-    inline for (@typeInfo(Cations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Cations)) |field|
         total += siteCoordinateWeight(
             field.name,
             ammonium_non_band_fraction,
@@ -504,7 +505,7 @@ fn normalizeSiteCharge(
         return;
     }
     const scale = capacity / total;
-    inline for (@typeInfo(Cations).@"struct".fields) |field| @field(values.*, field.name) *= scale;
+    inline for (ti_compat.fieldViews(Cations)) |field| @field(values.*, field.name) *= scale;
 }
 
 fn siteCoordinateWeight(
@@ -525,13 +526,13 @@ fn zeroCations() Cations {
 }
 
 fn validate(inputs: Inputs, parameters: Parameters) !void {
-    inline for (@typeInfo(Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Cations)) |field| {
         if (!std.math.isFinite(@field(inputs.aqueous_concentration_mol_per_m3, field.name)) or @field(inputs.aqueous_concentration_mol_per_m3, field.name) < 0 or
             !std.math.isFinite(@field(inputs.aqueous_activity_mol_per_m3, field.name)) or @field(inputs.aqueous_activity_mol_per_m3, field.name) < 0 or
             !std.math.isFinite(@field(inputs.exchange_concentration_mol_per_megagram, field.name)) or @field(inputs.exchange_concentration_mol_per_megagram, field.name) < 0)
             return error.InvalidCationExchangeInput;
     }
-    inline for (@typeInfo(Selectivity).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Selectivity)) |field|
         if (!std.math.isFinite(@field(parameters.selectivity, field.name)) or @field(parameters.selectivity, field.name) < 0) return error.InvalidCationExchangeParameter;
     if (!std.math.isFinite(inputs.cation_exchange_capacity_mol_charge_per_megagram) or inputs.cation_exchange_capacity_mol_charge_per_megagram < 0 or
         !std.math.isFinite(inputs.soil_mass_per_water_volume_megagrams_per_m3) or inputs.soil_mass_per_water_volume_megagrams_per_m3 <= 0 or
@@ -598,7 +599,7 @@ test "exposed Gapon equilibrium target has zero clipped exchange flux" {
         .substrate_limit_fraction = 0.2,
         .maximum_adsorption_mol_charge_per_m3_step = 0.1,
     });
-    inline for (@typeInfo(Cations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Cations)) |field|
         try std.testing.expectApproxEqAbs(
             @as(f64, 0),
             @field(flux, field.name),
@@ -620,14 +621,14 @@ test "source-order Gapon target retains trivalent exponent and activity root bou
         var input: Inputs = .{ .cation_exchange_capacity_mol_charge_per_megagram = 2, .aqueous_concentration_mol_per_m3 = aqueous, .aqueous_activity_mol_per_m3 = aqueous, .exchange_concentration_mol_per_megagram = zeroCations(), .ammonium_non_band_fraction = 0.7, .ammonium_band_fraction = 0.3, .soil_mass_per_water_volume_megagrams_per_m3 = 1.4 };
         input.exchange_concentration_mol_per_megagram = try sourceOrderEquilibriumIonConcentration(input, selectivity, controls);
         const rates = try calculateSourceOrder(input, .{ .selectivity = selectivity, .substrate_limit_fraction = 0.2, .maximum_adsorption_mol_charge_per_m3_step = 0.1 }, controls);
-        inline for (std.meta.fields(Cations)) |field| try std.testing.expect(@abs(@field(rates, field.name)) <= 64 * std.math.floatEps(f64) * input.cation_exchange_capacity_mol_charge_per_megagram);
+        inline for (ti_compat.fieldViews(Cations)) |field| try std.testing.expect(@abs(@field(rates, field.name)) <= 64 * std.math.floatEps(f64) * input.cation_exchange_capacity_mol_charge_per_megagram);
         var charge = input.exchange_concentration_mol_per_megagram;
         charge.aluminum *= 3;
         charge.iron *= 3;
         charge.calcium *= 2;
         charge.magnesium *= 2;
         var total: f64 = 0;
-        inline for (std.meta.fields(Cations)) |field| total += siteCoordinateWeight(field.name, 0.7, 0.3) * @field(charge, field.name);
+        inline for (ti_compat.fieldViews(Cations)) |field| total += siteCoordinateWeight(field.name, 0.7, 0.3) * @field(charge, field.name);
         try std.testing.expectApproxEqAbs(input.cation_exchange_capacity_mol_charge_per_megagram, total, 64 * std.math.floatEps(f64) * input.cation_exchange_capacity_mol_charge_per_megagram);
     }
 }

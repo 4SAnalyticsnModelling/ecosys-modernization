@@ -19,6 +19,7 @@ const internode_senescence_state_update = @import("../sheath/internode_senescenc
 const residual_stalk_senescence_request = @import("../../plant/growth/residual_stalk_senescence_request.zig");
 const residual_stalk_senescence_state_update = @import("../../plant/growth/residual_stalk_senescence_state_update.zig");
 const group_state = @import("photosynthesis_state.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const C4CarbonFluxes = struct {
     mesophyll_to_bundle_sheath_g_c: f64,
@@ -39,7 +40,7 @@ pub const C4CarbonParameters = struct {
     electron_requirement_umol_e_per_umol_co2: f64,
 
     pub fn validate(self: C4CarbonParameters) !void {
-        inline for (@typeInfo(C4CarbonParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(C4CarbonParameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidC4CarbonParameter;
         }

@@ -2,6 +2,7 @@ const std = @import("std");
 const plant_root_system = @import("plant_root_system.zig");
 const rooted_layer_eligibility = @import("rooted_layer_eligibility.zig");
 const numerics = @import("../../core/numerics.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 const PlantRootState = plant_root_system.State;
 
 pub const TransportedGas = enum(u8) {
@@ -12,7 +13,7 @@ pub const TransportedGas = enum(u8) {
     hydrogen,
     oxygen,
 };
-pub const transported_gas_count = @typeInfo(TransportedGas).@"enum".fields.len;
+pub const transported_gas_count = @typeInfo(TransportedGas).@"enum".field_names.len;
 
 pub const RuntimeParameters = struct {
     reference_temperature_k: f64,
@@ -77,7 +78,7 @@ pub const OxygenEnvironment = struct {
 };
 
 pub fn validateRuntimeParameters(parameters: RuntimeParameters) !void {
-    inline for (@typeInfo(RuntimeParameters).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteRootGasParameter;
+    inline for (ti_compat.fieldViews(RuntimeParameters)) |field| if (field.type == f64 and !std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteRootGasParameter;
     inline for (.{
         parameters.gaseous_diffusivity_m2_per_h_at_reference,
         parameters.aqueous_diffusivity_m2_per_h_at_reference,
@@ -104,7 +105,7 @@ pub const GasEnvironment = struct {
 pub fn gasEnvironment(parameters: RuntimeParameters, gas: TransportedGas, soil_temperature_k: f64, total_ion_activity_mol_per_m3: f64) !GasEnvironment {
     try validateRuntimeParameters(parameters);
     if (!std.math.isFinite(soil_temperature_k) or soil_temperature_k <= 0 or !std.math.isFinite(total_ion_activity_mol_per_m3) or total_ion_activity_mol_per_m3 < 0) return error.InvalidRootGasEnvironment;
-    const index = @intFromEnum(gas);
+    const index = @backingInt(gas);
     const temperature_c = soil_temperature_k - 273.15;
     const water_solute_fraction = parameters.pure_water_solute_concentration_mol_per_m3 /
         (parameters.pure_water_solute_concentration_mol_per_m3 + total_ion_activity_mol_per_m3);
@@ -118,7 +119,7 @@ pub fn gasEnvironment(parameters: RuntimeParameters, gas: TransportedGas, soil_t
             @exp(parameters.solubility_temperature_intercept[index] - parameters.solubility_temperature_coefficient_per_c[index] * temperature_c) *
             water_solute_fraction,
     };
-    inline for (@typeInfo(GasEnvironment).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteRootGasEnvironment;
+    inline for (ti_compat.fieldViews(GasEnvironment)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteRootGasEnvironment;
     return result;
 }
 
@@ -406,7 +407,7 @@ pub const AqueousExchangeInput = struct {
 /// root -> soil. The concentration-gradient candidate is bounded by the exact
 /// two-compartment equal-concentration extent before any state is changed.
 pub fn soilRootAqueousExchangeG(input: AqueousExchangeInput) !f64 {
-    inline for (@typeInfo(AqueousExchangeInput).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(AqueousExchangeInput)) |field| {
         const value = @field(input, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteRootAqueousExchangeInput;
     }
@@ -507,7 +508,7 @@ const AtmosphereSolveContext = struct {
 /// atmosphere transaction is solved locally by Newton–Raphson/Picard and exits
 /// immediately on convergence; no other model state is cycled.
 pub fn solveRootPhaseAtmosphereExchangeG(input: RootPhaseAtmosphereInput) !RootPhaseAtmosphereResult {
-    inline for (@typeInfo(RootPhaseAtmosphereInput).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(RootPhaseAtmosphereInput)) |field| switch (field.type) {
         f64 => if (!std.math.isFinite(@field(input, field.name))) return error.NonFiniteRootPhaseAtmosphereInput,
         else => {},
     };
@@ -587,7 +588,7 @@ pub fn solveRootPhaseAtmosphereExchangeG(input: RootPhaseAtmosphereInput) !RootP
 /// smaller quadratic root as (-B-sqrt(B^2-4C))/2; the equivalent expression
 /// 2C/(-B+sqrt(...)) avoids catastrophic cancellation when uptake is small.
 pub fn solveOxygenUptake(input: OxygenUptakeInput) !OxygenUptakeResult {
-    inline for (@typeInfo(OxygenUptakeInput).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(OxygenUptakeInput)) |field| {
         const value = @field(input, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteRootOxygenInput;
         if (value < 0) return error.InvalidRootOxygenInput;
@@ -634,7 +635,7 @@ pub fn solveOxygenUptake(input: OxygenUptakeInput) !OxygenUptakeResult {
         .soil_to_root_flux_g_o_per_plant_step = soil_flux,
         .internal_root_flux_g_o_per_plant_step = internal_flux,
     };
-    inline for (@typeInfo(OxygenUptakeResult).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootOxygenResult;
+    inline for (ti_compat.fieldViews(OxygenUptakeResult)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootOxygenResult;
     return result;
 }
 
@@ -651,7 +652,7 @@ pub fn state_updateOxygenUptake(
     soil_aqueous_oxygen_g_o: *f64,
 ) !void {
     if (!std.math.isFinite(plant_population_count) or plant_population_count <= 0 or !std.math.isFinite(soil_aqueous_oxygen_g_o.*) or soil_aqueous_oxygen_g_o.* < 0) return error.InvalidRootOxygenStateUpdateInput;
-    inline for (@typeInfo(OxygenUptakeResult).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootOxygenResult;
+    inline for (ti_compat.fieldViews(OxygenUptakeResult)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootOxygenResult;
     if (result.soil_to_root_flux_g_o_per_plant_step < 0 or result.internal_root_flux_g_o_per_plant_step < 0 or result.uptake_g_o_per_plant_step < 0) return error.InvalidRootOxygenFlux;
 
     const index = try roots.layerIndex(plant, domain, layer);
@@ -976,8 +977,8 @@ test "accepted aqueous gas transaction is checkpoint-ready and atomic" {
 
 test "HOUR1 runtime environments cover every transported root gas" {
     const parameters = compatibilityParameters();
-    inline for (@typeInfo(TransportedGas).@"enum".fields, 0..) |field, index| {
-        const environment = try gasEnvironment(parameters, @enumFromInt(field.value), parameters.reference_temperature_k, 0);
+    inline for (ti_compat.enumFieldViews(TransportedGas), 0..) |field, index| {
+        const environment = try gasEnvironment(parameters, @fromBackingInt(@intCast(field.value)), parameters.reference_temperature_k, 0);
         try std.testing.expectApproxEqAbs(parameters.gaseous_diffusivity_m2_per_h_at_reference[index], environment.gaseous_diffusivity_m2_per_h, 1e-15);
         try std.testing.expectApproxEqAbs(parameters.aqueous_diffusivity_m2_per_h_at_reference[index], environment.aqueous_diffusivity_m2_per_h, 1e-15);
         const expected_solubility = parameters.water_to_air_mass_solubility_at_25c[index] /

@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     particulate_carbon_fraction: f64,
@@ -20,7 +21,7 @@ pub const Parameters = struct {
     minimum_calcium_g_per_megagram: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Parameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidSoilProfileDerivationParameter;
         }
@@ -97,7 +98,7 @@ pub fn resolve(parameters: Parameters, total_organic_carbon_g_per_megagram: f64,
         .ammonium_g_per_megagram = @max(parameters.minimum_ammonium_g_per_megagram, supplied_ammonium_g_per_megagram),
         .calcium_g_per_megagram = @max(parameters.minimum_calcium_g_per_megagram, supplied_calcium_g_per_megagram),
     };
-    inline for (@typeInfo(Resolved).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.InvalidResolvedSoilProfileProperty;
+    inline for (ti_compat.fieldViews(Resolved)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.InvalidResolvedSoilProfileProperty;
     return result;
 }
 

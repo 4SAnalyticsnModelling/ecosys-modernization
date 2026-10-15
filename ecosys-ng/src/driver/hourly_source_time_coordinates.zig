@@ -6,6 +6,7 @@
 // This module's two exported fields therefore have no possible consumer.
 // Group C of docs/traceability/driver_unbound_family_disposition.md
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     source_day_of_year: u16,
@@ -37,7 +38,7 @@ pub fn compute(inputs: Inputs) !Result {
         result.source_hour_real / 24;
     result.source_subhourly_iteration_real =
         @floatFromInt(inputs.source_subhourly_iteration);
-    inline for (@typeInfo(Result).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Result)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteHourlySourceTimeCoordinate;
     return result;

@@ -7,6 +7,7 @@
 //! all six ground-rock pools start at zero exactly as in STARTE.
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ProfileSource = enum { atmospheric_equilibrium, supplied_profile };
 pub const Control = struct { profile_source: ProfileSource, gas_initialization_index: usize };
@@ -50,7 +51,7 @@ fn zeroElements() ElementInventories {
 pub fn initialize(control: Control, texture: Texture, soil_mass_megagrams: f64, ph: f64) !?Inventories {
     if (control.profile_source != .atmospheric_equilibrium or
         control.gas_initialization_index != 0) return null;
-    inline for (@typeInfo(Texture).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Texture)) |field| {
         const value = @field(texture, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidSoilTexture;
     }
@@ -95,7 +96,7 @@ pub fn initializePerWaterVolume(
         return error.InvalidSilicateWaterVolume;
     var soil = inventories.soil_silicates;
     var ground = inventories.ground_rock_silicates;
-    inline for (@typeInfo(ElementInventories).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ElementInventories)) |field| {
         @field(soil, field.name) /= water_volume_m3;
         @field(ground, field.name) /= water_volume_m3;
         if (!std.math.isFinite(@field(soil, field.name)) or
@@ -143,7 +144,7 @@ test "STARTE silicate concentrations preserve every extensive source inventory" 
     const texture: Texture = .{ .sand_mass_fraction = 0.4, .silt_mass_fraction = 0.35, .clay_mass_fraction = 0.25 };
     const inventory = (try initialize(control, texture, 2, 6.5)).?;
     const concentrations = (try initializePerWaterVolume(control, texture, 2, water_volume_m3, 6.5)).?;
-    inline for (@typeInfo(ElementInventories).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ElementInventories)) |field| {
         try std.testing.expectEqual(
             @field(inventory.soil_silicates, field.name),
             @field(concentrations.soil_silicates_mol_per_m3, field.name) * water_volume_m3,

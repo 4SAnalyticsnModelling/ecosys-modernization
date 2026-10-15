@@ -1,5 +1,6 @@
 const std = @import("std");
 const PlantLedger = @import("../../plant/accounting/daily_flux.zig").State;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Result = struct {
     gross_primary_productivity_g_c: f64 = 0,
@@ -25,7 +26,7 @@ pub fn calculate(ledger: *const PlantLedger, cell: usize, species_count: usize) 
         result.harvested_carbon_g_c += ledger.harvested_carbon_g[plant];
     }
     result.net_primary_productivity_g_c = result.gross_primary_productivity_g_c + result.autotrophic_respiration_g_c;
-    inline for (@typeInfo(Result).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteDailyPlantCarbonFlux;
+    inline for (ti_compat.fieldViews(Result)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteDailyPlantCarbonFlux;
     if (result.gross_primary_productivity_g_c < 0 or result.plant_litterfall_g_c < 0 or result.harvested_carbon_g_c < 0) return error.InvalidDailyPlantCarbonFlux;
     return result;
 }

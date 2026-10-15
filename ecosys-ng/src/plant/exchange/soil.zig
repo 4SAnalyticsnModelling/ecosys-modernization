@@ -1,4 +1,6 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 /// Runtime layout for the opening aggregation block in extract.f. Species is
 /// always the outer dimension; biochemical fractions, material phases, and
@@ -128,7 +130,7 @@ pub const CanopyAmmoniaExchangeParameters = struct {
     solubility_temperature_coefficient_per_c: f64,
 
     pub fn validate(self: CanopyAmmoniaExchangeParameters) !void {
-        inline for (@typeInfo(CanopyAmmoniaExchangeParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteCanopyAmmoniaExchangeParameter;
+        inline for (ti_compat.fieldViews(CanopyAmmoniaExchangeParameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteCanopyAmmoniaExchangeParameter;
         if (self.minimum_canopy_dry_matter_fraction <= 0 or self.water_potential_dry_matter_increment < 0 or self.water_potential_denominator_per_megapascal < 0 or self.water_potential_denominator_offset <= 0 or self.canopy_air_volume_ratio_m3_per_g_c < 0 or self.maximum_mobile_nitrogen_transfer_fraction_per_step < 0 or self.maximum_mobile_nitrogen_transfer_fraction_per_step > 1 or self.solubility_temperature_coefficient_per_c < 0) return error.InvalidCanopyAmmoniaExchangeParameter;
     }
 };
@@ -179,7 +181,7 @@ pub const CanopyAmmoniaExchangeInputs = struct {
 /// UPTAKE RNH3B: signed atmospheric NH3-N transfer for one shoot branch.
 /// Positive flux enters the plant mobile-N pool; negative flux is emission.
 pub fn canopyAmmoniaExchangeGNPerStep(inputs: CanopyAmmoniaExchangeInputs) !f64 {
-    inline for (@typeInfo(CanopyAmmoniaExchangeInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(CanopyAmmoniaExchangeInputs)) |field| {
         if (field.type != f64) continue;
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteCanopyAmmoniaExchangeInput;
@@ -253,7 +255,7 @@ pub const RootBoundaryFlux = enum(usize) {
     band_dihydrogen_phosphate_uptake_g_phosphorus_per_h,
     band_hydrogen_phosphate_uptake_g_phosphorus_per_h,
 };
-pub const root_boundary_flux_count = @typeInfo(RootBoundaryFlux).@"enum".fields.len;
+pub const root_boundary_flux_count = @typeInfo(RootBoundaryFlux).@"enum".field_names.len;
 
 /// Aggregates the named root boundary fluxes across runtime root axes. EXTRACT
 /// stores root aqueous CO2 production with the opposite sign; all other named
@@ -265,7 +267,7 @@ pub fn aggregateRootBoundaryFluxes(root_axis_count: usize, soil_layer_count: usi
         if (species_fluxes[flux].len != value_count or totals_by_layer[flux].len != soil_layer_count) return error.RootBoundaryFluxDimensionMismatch;
         for (species_fluxes[flux]) |value| if (!std.math.isFinite(value)) return error.NonFiniteRootBoundaryFlux;
         for (0..root_axis_count) |axis| for (0..soil_layer_count) |layer| {
-            const sign: f64 = if (flux == @intFromEnum(RootBoundaryFlux.aqueous_carbon_dioxide_production_g_per_h)) -1 else 1;
+            const sign: f64 = if (flux == @backingInt(RootBoundaryFlux.aqueous_carbon_dioxide_production_g_per_h)) -1 else 1;
             totals_by_layer[flux][layer] += sign * species_fluxes[flux][axis * soil_layer_count + layer];
             if (!std.math.isFinite(totals_by_layer[flux][layer])) return error.NonFiniteRootBoundaryFlux;
         };
@@ -312,7 +314,7 @@ pub const CompetitionDemand = enum(usize) {
     band_dihydrogen_phosphate_g_phosphorus_per_h,
     band_hydrogen_phosphate_g_phosphorus_per_h,
 };
-pub const competition_demand_count = @typeInfo(CompetitionDemand).@"enum".fields.len;
+pub const competition_demand_count = @typeInfo(CompetitionDemand).@"enum".field_names.len;
 
 /// Adds root/mycorrhizal potential demand into the shared competition arrays
 /// used alongside microbial demand in NITRO and SOLUTE.
@@ -399,7 +401,7 @@ pub fn aggregateSpeciesBalances(species_count: usize, final_iteration: bool, oxy
 fn validateSpeciesBalanceFinite(inputs: SpeciesBalanceInputs, species_ammonia: []const f64, totals: SpeciesBalanceTotals) !void {
     inline for (.{ inputs.hourly_canopy_carbon_fixation_g_per_h, inputs.canopy_carbon_exchange_g_per_h, inputs.leaf_area_m2, inputs.stalk_area_m2, inputs.root_soil_carbon_exchange_g_per_h, inputs.root_soil_nitrogen_exchange_g_per_h, inputs.root_soil_phosphorus_exchange_g_per_h, inputs.carbon_balance_g, inputs.nitrogen_balance_g, inputs.phosphorus_balance_g, inputs.branch_ammonia_exchange_g_nitrogen_per_h, species_ammonia }) |values| for (values) |value| if (!std.math.isFinite(value)) return error.NonFiniteSpeciesBalance;
     for (0..root_gas_count) |gas| for (inputs.root_gas_loss_g_per_h[gas]) |value| if (!std.math.isFinite(value)) return error.NonFiniteSpeciesBalance;
-    inline for (@typeInfo(SpeciesBalanceTotals).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SpeciesBalanceTotals)) |field| {
         if (field.type == f64) {
             if (!std.math.isFinite(@field(totals, field.name))) return error.NonFiniteSpeciesBalance;
         } else for (@field(totals, field.name)) |value| if (!std.math.isFinite(value)) return error.NonFiniteSpeciesBalance;
@@ -653,7 +655,7 @@ pub fn combustPlantPools(carbon_g: []const f64, nitrogen_g: []const f64, phospho
             for (0..8) |salt| result.released_salt_mol[salt] += salt_mol[pool * 8 + salt];
         }
     }
-    inline for (@typeInfo(CombustedPoolResult).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(CombustedPoolResult)) |field| {
         if (field.type == f64) {
             if (!std.math.isFinite(@field(result, field.name))) return error.NonFinitePlantCombustionResult;
         } else for (@field(result, field.name)) |value| if (!std.math.isFinite(value)) return error.NonFinitePlantCombustionResult;
@@ -712,7 +714,7 @@ pub fn canopyFireCombustion(total_combusted_carbon_g: f64, negligible_carbon_g: 
         .anaerobic_fraction_of_noncharcoal = methane_produced_g_carbon / noncharcoal_g,
         .combustion_temperature_response = temperature_response,
     };
-    inline for (@typeInfo(CanopyFireResult).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteCanopyFireResult;
+    inline for (ti_compat.fieldViews(CanopyFireResult)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteCanopyFireResult;
     try validateOxygenPartition(result, parameters.oxygen_g_per_g_carbon);
     return result;
 }
@@ -769,7 +771,7 @@ pub fn subsurfaceOrganicMatterFire(total_combusted_carbon_g: f64, negligible_car
         .anaerobic_fraction_of_noncharcoal = if (noncharcoal_g > 0) methane_produced_g_carbon / noncharcoal_g else 0,
         .combustion_temperature_response = combustion_temperature_response,
     };
-    inline for (@typeInfo(CanopyFireResult).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteSubsurfaceFireResult;
+    inline for (ti_compat.fieldViews(CanopyFireResult)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteSubsurfaceFireResult;
     try validateOxygenPartition(result, parameters.oxygen_g_per_g_carbon);
     return result;
 }
@@ -825,12 +827,12 @@ fn validateTotals(totals: Totals) !void {
 
 test "extract aggregation accepts more than five plant species" {
     const layout: Layout = .{ .species_count = 7, .biochemical_fraction_count = 1, .material_phase_count = 1, .exchange_layer_count = 1 };
-    const sevens = [_]f64{1} ** 7;
-    const salts = [_]f64{1} ** 56;
+    const sevens = @as([7]f64, @splat(@as(f64, 1)));
+    const salts = @as([56]f64, @splat(@as(f64, 1)));
     var litter_c = [_]f64{0};
     var litter_n = [_]f64{0};
     var litter_p = [_]f64{0};
-    var total_salts = [_]f64{0} ** 8;
+    var total_salts = @as([8]f64, @splat(@as(f64, 0)));
     var manure_c = [_]f64{0};
     var manure_n = [_]f64{0};
     var manure_p = [_]f64{0};
@@ -935,7 +937,7 @@ test "subsurface fire below the negligible carbon threshold exports zero parts" 
 
 test "extract plant pool combustion conserves carbon nitrogen and phosphorus" {
     const canopy = try canopyFireCombustion(10, 0, 600, 100_000, 12, 2, .{ .oxygen_half_saturation_umol_per_mol = 10_000, .methane_half_saturation_umol_per_mol = 1, .aerobic_combustion_energy_megajoules_per_g_carbon = 0.03, .anaerobic_combustion_energy_megajoules_per_g_carbon = 0.01, .methane_combustion_energy_megajoules_per_g_carbon = 0.05 });
-    const salts = [_]f64{1} ** 16;
+    const salts = @as([16]f64, @splat(@as(f64, 1)));
     const result = try combustPlantPools(&.{ 3, 7 }, &.{ 0.2, 0.3 }, &.{ 0.04, 0.06 }, &salts, true, 0.25, canopyPlantCombustionFractions(canopy));
     try std.testing.expectApproxEqAbs(@as(f64, 10), result.carbon_dioxide_g_carbon + result.methane_g_carbon + result.charcoal_g_carbon, 1e-12);
     try std.testing.expectApproxEqAbs(@as(f64, 0.5), result.gaseous_nitrogen_g + result.ammonium_nitrogen_g, 1e-12);
@@ -948,7 +950,7 @@ test "extract root combustion uses layer aerobic and anaerobic limits" {
     try std.testing.expectApproxEqAbs(@as(f64, 0.2), fractions.charcoal, 1e-12);
     try std.testing.expectApproxEqAbs(@as(f64, 0.75), fractions.aerobic_noncharcoal, 1e-12);
     try std.testing.expectApproxEqAbs(@as(f64, 0.25), fractions.anaerobic_noncharcoal, 1e-12);
-    const salts = [_]f64{0} ** 8;
+    const salts = @as([8]f64, @splat(@as(f64, 0)));
     const result = try combustPlantPools(&.{10}, &.{1}, &.{0.2}, &salts, false, 0.5, fractions);
     try std.testing.expectApproxEqAbs(@as(f64, 10), result.carbon_dioxide_g_carbon + result.methane_g_carbon + result.charcoal_g_carbon, 1e-12);
 }
@@ -979,7 +981,7 @@ test "extract root exchange cancels internal gas phase transfer" {
     var heat = [_]f64{0};
     var state: RootExchangeState = .{ .gaseous_content_g = gaseous, .aqueous_content_g = aqueous, .total_content_by_layer_g = gas_totals, .total_root_length_density_m_per_m3 = &density, .total_water_uptake_m3_per_h = &water, .convective_water_heat_megajoules_per_h = &heat };
     try aggregateRootExchange(2, 1, 10, &.{2}, &.{280}, .{ .root_length_density_per_plant_m_per_m3 = &.{ 4, 9 }, .water_uptake_m3_per_h = &.{ 0.1, 0.2 }, .gaseous_atmosphere_exchange_g_per_h = atmosphere_inputs, .aqueous_to_gaseous_exchange_g_per_h = dissolved_inputs, .aqueous_biological_change_g_per_h = biological_inputs }, &state);
-    try std.testing.expectApproxEqAbs(@as(f64, 7), state.total_content_by_layer_g[@intFromEnum(RootGas.carbon_dioxide)][0], 1e-12);
+    try std.testing.expectApproxEqAbs(@as(f64, 7), state.total_content_by_layer_g[@backingInt(RootGas.carbon_dioxide)][0], 1e-12);
     try std.testing.expectEqual(@as(f64, 20), density[0]);
     try std.testing.expectApproxEqAbs(@as(f64, 0.3), water[0], 1e-12);
     try std.testing.expectApproxEqAbs(@as(f64, 0.3 * 4.19 * 280), heat[0], 1e-12);
@@ -995,11 +997,11 @@ test "extract root boundary solute salt and exudate totals preserve signs" {
         totals[flux] = &total_backing[flux];
     }
     try aggregateRootBoundaryFluxes(2, 1, fluxes, totals);
-    try std.testing.expectEqual(@as(f64, 3), totals[@intFromEnum(RootBoundaryFlux.atmospheric_oxygen_g_per_h)][0]);
-    try std.testing.expectEqual(@as(f64, -3), totals[@intFromEnum(RootBoundaryFlux.aqueous_carbon_dioxide_production_g_per_h)][0]);
+    try std.testing.expectEqual(@as(f64, 3), totals[@backingInt(RootBoundaryFlux.atmospheric_oxygen_g_per_h)][0]);
+    try std.testing.expectEqual(@as(f64, -3), totals[@backingInt(RootBoundaryFlux.aqueous_carbon_dioxide_production_g_per_h)][0]);
 
-    const salt_uptake = [_]f64{1} ** 16;
-    var salt_totals = [_]f64{0} ** 8;
+    const salt_uptake = @as([16]f64, @splat(@as(f64, 1)));
+    var salt_totals = @as([8]f64, @splat(@as(f64, 0)));
     try aggregateRootSaltUptake(2, 1, true, &salt_uptake, &salt_totals);
     try std.testing.expectEqual(@as(f64, 2), salt_totals[7]);
 
@@ -1023,7 +1025,7 @@ test "extract competition fixation and final species balances aggregate dynamica
         shared[index] = &shared_backing[index];
     }
     try aggregateCompetitionDemand(2, 1, demand, shared);
-    try std.testing.expectEqual(@as(f64, 3), shared[@intFromEnum(CompetitionDemand.band_nitrate_g_nitrogen_per_h)][0]);
+    try std.testing.expectEqual(@as(f64, 3), shared[@backingInt(CompetitionDemand.band_nitrate_g_nitrogen_per_h)][0]);
     var fixation = [_]f64{ 0, 0 };
     try aggregateRootNitrogenFixation(3, 2, &.{ 1, 2, 3, 4, 5, 6 }, &fixation);
     try std.testing.expectEqualSlices(f64, &.{ 9, 12 }, &fixation);

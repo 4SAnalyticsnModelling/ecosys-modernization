@@ -19,6 +19,7 @@
 // Group HOLD-1 of docs/traceability/transport_unbound_family_was_already_dispositioned_elsewhere.md
 const std = @import("std");
 
+
 pub const macropore_species_count = 49;
 pub const micropore_species_count = 50;
 
@@ -51,16 +52,16 @@ pub fn resetIfThin(
 }
 
 test "thin layer clears both external pore-domain instantaneous families" {
-    var macropore_flux = [_]f64{3} ** macropore_species_count;
-    var micropore_flux = [_]f64{4} ** micropore_species_count;
+    var macropore_flux = @as([macropore_species_count]f64, @splat(@as(f64, 3)));
+    var micropore_flux = @as([micropore_species_count]f64, @splat(@as(f64, 4)));
     try std.testing.expect(try resetIfThin(0.01, 0.01, &macropore_flux, &micropore_flux));
-    try std.testing.expectEqualSlices(f64, &([_]f64{0} ** macropore_species_count), &macropore_flux);
-    try std.testing.expectEqualSlices(f64, &([_]f64{0} ** micropore_species_count), &micropore_flux);
+    try std.testing.expectEqualSlices(f64, &(@as([macropore_species_count]f64, @splat(@as(f64, 0)))), &macropore_flux);
+    try std.testing.expectEqualSlices(f64, &(@as([micropore_species_count]f64, @splat(@as(f64, 0)))), &micropore_flux);
 }
 
 test "TRNSFRS layer below threshold clears compact P endpoints" {
-    var macropore_flux = [_]f64{3} ** macropore_species_count;
-    var micropore_flux = [_]f64{4} ** micropore_species_count;
+    var macropore_flux = @as([macropore_species_count]f64, @splat(@as(f64, 3)));
+    var micropore_flux = @as([micropore_species_count]f64, @splat(@as(f64, 4)));
     try std.testing.expect(try resetIfThin(0.005, 0.01, &macropore_flux, &micropore_flux));
     try std.testing.expectEqual(@as(f64, 0), macropore_flux[32]);
     try std.testing.expectEqual(@as(f64, 0), macropore_flux[33]);
@@ -69,24 +70,24 @@ test "TRNSFRS layer below threshold clears compact P endpoints" {
 }
 
 test "TRNSFRS strict thickness pass leaves flux untouched" {
-    var macropore_flux = [_]f64{3} ** macropore_species_count;
-    var micropore_flux = [_]f64{4} ** micropore_species_count;
+    var macropore_flux = @as([macropore_species_count]f64, @splat(@as(f64, 3)));
+    var micropore_flux = @as([micropore_species_count]f64, @splat(@as(f64, 4)));
     try std.testing.expect(!try resetIfThin(0.0101, 0.01, &macropore_flux, &micropore_flux));
-    try std.testing.expectEqualSlices(f64, &([_]f64{3} ** macropore_species_count), &macropore_flux);
-    try std.testing.expectEqualSlices(f64, &([_]f64{4} ** micropore_species_count), &micropore_flux);
+    try std.testing.expectEqualSlices(f64, &(@as([macropore_species_count]f64, @splat(@as(f64, 3)))), &macropore_flux);
+    try std.testing.expectEqualSlices(f64, &(@as([micropore_species_count]f64, @splat(@as(f64, 4)))), &micropore_flux);
 }
 
 test "active thin reset rejects runtime topology mismatch atomically" {
-    var short_flux = [_]f64{3} ** (macropore_species_count - 1);
-    var micropore_flux = [_]f64{4} ** micropore_species_count;
+    var short_flux = @as([(macropore_species_count - 1)]f64, @splat(@as(f64, 3)));
+    var micropore_flux = @as([micropore_species_count]f64, @splat(@as(f64, 4)));
     try std.testing.expectError(error.ThinExternalMacroporeFluxDimensionMismatch, resetIfThin(0.01, 0.01, &short_flux, &micropore_flux));
-    try std.testing.expectEqualSlices(f64, &([_]f64{3} ** (macropore_species_count - 1)), &short_flux);
-    try std.testing.expectEqualSlices(f64, &([_]f64{4} ** micropore_species_count), &micropore_flux);
+    try std.testing.expectEqualSlices(f64, &(@as([(macropore_species_count - 1)]f64, @splat(@as(f64, 3)))), &short_flux);
+    try std.testing.expectEqualSlices(f64, &(@as([micropore_species_count]f64, @splat(@as(f64, 4)))), &micropore_flux);
 }
 
 test "late invalid value prevents partial thin reset" {
-    var macropore_flux = [_]f64{3} ** macropore_species_count;
-    var micropore_flux = [_]f64{4} ** micropore_species_count;
+    var macropore_flux = @as([macropore_species_count]f64, @splat(@as(f64, 3)));
+    var micropore_flux = @as([micropore_species_count]f64, @splat(@as(f64, 4)));
     micropore_flux[49] = std.math.inf(f64);
     try std.testing.expectError(error.NonFiniteThinExternalMacroporeFluxInput, resetIfThin(0.01, 0.01, &macropore_flux, &micropore_flux));
     try std.testing.expectEqual(@as(f64, 3), macropore_flux[0]);

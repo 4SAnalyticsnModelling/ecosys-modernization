@@ -65,6 +65,7 @@
 // matches, but "matches on reading" is weaker than "agrees at runtime" and is
 // not upgraded here.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Schedule = struct {
     event_count: usize,
@@ -103,12 +104,12 @@ fn finiteSlice(values: []const f64) bool {
     return true;
 }
 fn validBoundaryDimensions(parameters: ArtificialBoundaryParameters, cell_count: usize) bool {
-    inline for (std.meta.fields(ArtificialBoundaryParameters)) |field|
+    inline for (ti_compat.fieldViews(ArtificialBoundaryParameters)) |field|
         if (@field(parameters, field.name).len != cell_count) return false;
     return true;
 }
 fn finiteBoundaryParameters(parameters: ArtificialBoundaryParameters) bool {
-    inline for (std.meta.fields(ArtificialBoundaryParameters)) |field|
+    inline for (ti_compat.fieldViews(ArtificialBoundaryParameters)) |field|
         if (!finiteSlice(@field(parameters, field.name))) return false;
     return true;
 }
@@ -128,7 +129,7 @@ pub fn applyCell(first_daily_cycle: i32, hour: i32, event: usize, cell: usize, s
         schedule.configured_water_table_depth_m.len != schedule.event_count * schedule.cell_count or
         schedule.solar_noon_h.len != schedule.cell_count)
         return error.ArtificialDrainageResetDimensionMismatch;
-    inline for (std.meta.fields(Geometry)) |field|
+    inline for (ti_compat.fieldViews(Geometry)) |field|
         if (@field(geometry, field.name).len != schedule.cell_count) return error.ArtificialDrainageResetDimensionMismatch;
     inline for (.{ state.water_table_type, state.artificial_water_table_input_depth_m, state.artificial_water_table_reference_depth_m, state.artificial_water_table_current_depth_m }) |values|
         if (values.len != schedule.cell_count) return error.ArtificialDrainageResetDimensionMismatch;
@@ -136,7 +137,7 @@ pub fn applyCell(first_daily_cycle: i32, hour: i32, event: usize, cell: usize, s
         return error.ArtificialDrainageResetDimensionMismatch;
     if (!finiteSlice(schedule.configured_water_table_depth_m) or !finiteSlice(schedule.solar_noon_h))
         return error.InvalidArtificialDrainageResetInput;
-    inline for (std.meta.fields(Geometry)) |field|
+    inline for (ti_compat.fieldViews(Geometry)) |field|
         if (!finiteSlice(@field(geometry, field.name))) return error.InvalidArtificialDrainageResetInput;
     inline for (.{ state.artificial_water_table_input_depth_m, state.artificial_water_table_reference_depth_m, state.artificial_water_table_current_depth_m }) |values|
         if (!finiteSlice(values)) return error.InvalidArtificialDrainageResetInput;
@@ -162,7 +163,7 @@ pub fn applyCell(first_daily_cycle: i32, hour: i32, event: usize, cell: usize, s
     state.artificial_water_table_input_depth_m[cell] = depth_with_surface_m;
     state.artificial_water_table_reference_depth_m[cell] = reference_depth_m;
     state.artificial_water_table_current_depth_m[cell] = reference_depth_m;
-    inline for (std.meta.fields(ArtificialBoundaryParameters)) |field|
+    inline for (ti_compat.fieldViews(ArtificialBoundaryParameters)) |field|
         @field(state.boundary_parameters, field.name)[cell] = @field(state.baseline_boundary_parameters, field.name)[cell];
     return true;
 }

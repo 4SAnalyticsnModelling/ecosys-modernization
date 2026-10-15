@@ -7,6 +7,8 @@ const chemistry = @import("litter_chemistry.zig");
 const respiration = @import("microbial_respiration_step.zig");
 const oxygen = @import("microbial_oxygen_driver.zig");
 const competition_history = @import("../soil/nutrients/competition_history.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const denitrifier_population: usize = 1; // NITRO N=2
 
@@ -38,7 +40,7 @@ pub const State = struct {
 
     noinline fn deinitAllocatedPrefix(self: *State, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -54,7 +56,7 @@ pub const State = struct {
         result.cell_count = cell_count;
         var allocated: usize = 0;
         errdefer result.deinitAllocatedPrefix(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             const count = if (std.mem.eql(u8, field.name, "nitrite_g_n") or std.mem.startsWith(u8, field.name, "previous_total_") or std.mem.startsWith(u8, field.name, "previous_chemo") or std.mem.startsWith(u8, field.name, "chemodenitrification_")) cell_count else try std.math.mul(usize, cell_count, respiration.litter_complex_count);
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
@@ -64,7 +66,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -72,7 +74,7 @@ pub const State = struct {
 test "surface denitrification state releases every partial allocation prefix" {
     const allocation_count = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(State).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) count += 1;
         }
         break :count count;
@@ -125,14 +127,14 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
         const nitrate_g_n = nitrate_concentration_g_n_per_m3 * water_m3;
         const nitrite_g_n = context.result.nitrite_g_n[cell];
         const nitrite_concentration_g_n_per_m3 = if (water_m3 > 0) nitrite_g_n / water_m3 else 0;
-        const n2o_index = cell * gas.species_count + @intFromEnum(gas.Species.nitrous_oxide);
+        const n2o_index = cell * gas.species_count + @backingInt(gas.Species.nitrous_oxide);
         const n2o_g_n = context.litter_gas.dissolved_mass_g[n2o_index];
         const n2o_concentration_g_n_per_m3 = if (water_m3 > 0) n2o_g_n / water_m3 else 0;
 
         var total_active_g_c: f64 = 0;
         var complex_active_g_c: [respiration.litter_complex_count]f64 = undefined;
-        var total_doc_demand_g_c: [respiration.litter_complex_count]f64 = .{0} ** respiration.litter_complex_count;
-        var total_raw_doc_share: [respiration.litter_complex_count]f64 = .{0} ** respiration.litter_complex_count;
+        var total_doc_demand_g_c: [respiration.litter_complex_count]f64 = @as([respiration.litter_complex_count]f64, @splat(@as(f64, 0)));
+        var total_raw_doc_share: [respiration.litter_complex_count]f64 = @as([respiration.litter_complex_count]f64, @splat(@as(f64, 0)));
         for (0..respiration.litter_complex_count) |complex| {
             var active: f64 = 0;
             for (0..respiration.source_population_count) |population| {
@@ -266,7 +268,7 @@ test "surface denitrification derives source sequential respiration without muta
     litter_chemistry.cells[0].hydrogen_mol_per_m3 = 0.45;
     var litter_gas = try gas.State.init(std.testing.allocator, 1);
     defer litter_gas.deinit();
-    litter_gas.dissolved_mass_g[@intFromEnum(gas.Species.nitrous_oxide)] = 1;
+    litter_gas.dissolved_mass_g[@backingInt(gas.Species.nitrous_oxide)] = 1;
     var respiration_state = try respiration.State.init(std.testing.allocator, 1);
     defer respiration_state.deinit();
     respiration_state.potential_oxygen_demand_g_o[denitrifier_population] = 4;

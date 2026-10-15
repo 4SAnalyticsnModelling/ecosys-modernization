@@ -11,6 +11,7 @@ const numerics = @import("../core/numerics.zig");
 const group_activity = @import("litter_chemistry_activity.zig");
 const group_phosphate_minerals = @import("litter_chemistry_phosphate_minerals.zig");
 const group_struct_arithmetic = @import("litter_chemistry_struct_arithmetic.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// All litter chemistry storage is allocated by runtime horizontal cell count.
 /// Field units are inherited from the explicit reaction ledger: aqueous and
@@ -129,9 +130,9 @@ pub const State = struct {
         // concentration/reference pair as an exact extensive inventory.
         if (water_m3 == 0) return;
         const scale = old_water_m3 / water_m3;
-        inline for (@typeInfo(@TypeOf(cell.phosphate_minerals)).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(@TypeOf(cell.phosphate_minerals))) |field|
             @field(cell.phosphate_minerals, field.name) *= scale;
-        inline for (@typeInfo(@TypeOf(cell.salt_minerals)).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(@TypeOf(cell.salt_minerals))) |field|
             @field(cell.salt_minerals, field.name) *= scale;
         try group_activity.validateMinerals(cell);
         self.cells[cell_index] = cell;

@@ -21,6 +21,7 @@
 // redistribution_surface_litter_removal_group_is_a_second_translation_of_a_gap.md
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Totals = struct {
     remaining_carbon_g_c: f64, // DC
@@ -63,7 +64,7 @@ pub const State = struct {
 };
 
 fn finiteStruct(value: anytype) bool {
-    inline for (std.meta.fields(@TypeOf(value))) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field|
         if (!std.math.isFinite(@field(value, field.name))) return false;
     return true;
 }
@@ -73,11 +74,11 @@ pub fn closeout(removal_fraction: f64, initial: Totals, state: *State) !void {
     if (!std.math.isFinite(removal_fraction) or removal_fraction < 0 or removal_fraction > 0.999 or
         !finiteStruct(initial) or !finiteStruct(state.fertilizer.*))
         return error.InvalidSurfaceLitterCloseoutInput;
-    inline for (std.meta.fields(Totals)) |field|
+    inline for (ti_compat.fieldViews(Totals)) |field|
         if (@field(initial, field.name) < 0) return error.InvalidSurfaceLitterCloseoutInput;
-    inline for (std.meta.fields(FertilizerPools)) |field|
+    inline for (ti_compat.fieldViews(FertilizerPools)) |field|
         if (@field(state.fertilizer.*, field.name) < 0) return error.InvalidSurfaceLitterCloseoutInput;
-    inline for (std.meta.fields(State)) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         if (comptime std.mem.eql(u8, field.name, "fertilizer")) continue;
         if (!std.math.isFinite(@field(state.*, field.name))) return error.InvalidSurfaceLitterCloseoutInput;
     }
@@ -88,7 +89,7 @@ pub fn closeout(removal_fraction: f64, initial: Totals, state: *State) !void {
     totals.removed_nitrogen_g_n += removal_fraction * (fertilizer.ammonium_g_n + fertilizer.ammonia_g_n + fertilizer.nitrate_g_n + fertilizer.nitrite_g_n);
     totals.removed_phosphorus_g_p += removal_fraction * (fertilizer.monohydrogen_phosphate_g_p + fertilizer.dihydrogen_phosphate_g_p);
     const remaining_fraction = 1.0 - removal_fraction;
-    inline for (std.meta.fields(FertilizerPools)) |field|
+    inline for (ti_compat.fieldViews(FertilizerPools)) |field|
         @field(fertilizer, field.name) = remaining_fraction * @field(fertilizer, field.name);
     const heat_flux_megajoules = 2.496e-6 * (state.initial_organic_carbon_g_c - totals.remaining_carbon_g_c - totals.charcoal_remaining_carbon_g_c) * state.surface_temperature_k;
     const next_heat = state.heat_output_megajoules + heat_flux_megajoules;

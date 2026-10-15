@@ -1,5 +1,6 @@
 const std = @import("std");
 const retention = @import("retention.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const VaporEquilibriumParameters = struct {
     vapor_density_temperature_coefficient: f64,
@@ -22,7 +23,7 @@ pub const VaporEquilibrium = struct {
 /// evaporate liquid. This is WATSUB's below-surface VOLV/VOLW equilibrium.
 pub fn vaporLiquidEquilibrium(temperature_k: f64, matric_plus_osmotic_potential_megapascal: f64, vapor_volume_m3: f64, air_volume_m3: f64, liquid_water_m3: f64, time_fraction: f64, parameters: VaporEquilibriumParameters) !VaporEquilibrium {
     inline for (.{ temperature_k, matric_plus_osmotic_potential_megapascal, vapor_volume_m3, air_volume_m3, liquid_water_m3, time_fraction }) |value| if (!std.math.isFinite(value)) return error.NonFiniteSoilPhaseInput;
-    inline for (@typeInfo(VaporEquilibriumParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteSoilPhaseInput;
+    inline for (ti_compat.fieldViews(VaporEquilibriumParameters)) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteSoilPhaseInput;
     if (temperature_k <= 0 or vapor_volume_m3 < 0 or air_volume_m3 < 0 or liquid_water_m3 < 0 or time_fraction <= 0 or time_fraction > 1 or parameters.vapor_density_temperature_coefficient <= 0 or parameters.molecular_weight_ratio <= 0 or parameters.clausius_clapeyron_coefficient_k <= 0 or parameters.reference_inverse_temperature_per_k <= 0 or parameters.water_molar_mass_g_per_mol <= 0 or parameters.gas_constant_j_per_mol_k <= 0 or parameters.latent_heat_of_vaporization_megajoules_per_m3 <= 0) return error.InvalidSoilPhaseInput;
     const saturation = parameters.vapor_density_temperature_coefficient / temperature_k * parameters.molecular_weight_ratio * @exp(parameters.clausius_clapeyron_coefficient_k * (parameters.reference_inverse_temperature_per_k - 1.0 / temperature_k)) * @exp(parameters.water_molar_mass_g_per_mol * matric_plus_osmotic_potential_megapascal / (parameters.gas_constant_j_per_mol_k * temperature_k));
     const unlimited = vapor_volume_m3 - saturation * air_volume_m3;
@@ -74,7 +75,7 @@ pub const DallAmicoEquilibrium = struct {
 /// frost-heave volume is a separate geometry process and must not alter this
 /// conservative closure.
 pub fn dallAmicoEquilibrium(inputs: DallAmicoEquilibriumInputs) !DallAmicoEquilibrium {
-    inline for (@typeInfo(DallAmicoEquilibriumInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(DallAmicoEquilibriumInputs)) |field| {
         if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteDallAmicoInput;
     }
@@ -224,7 +225,7 @@ pub fn endpointTemperatureFromPhaseEnthalpy(
     parameters: PhaseEnthalpyParameters,
 ) !f64 {
     inline for (.{ initial_temperature_k, initial_heat_capacity_megajoules_per_k, non_phase_heat_megajoules, parameters.liquid_heat_capacity_megajoules_per_m3_k, parameters.ice_heat_capacity_megajoules_per_m3_k, parameters.vaporization_latent_heat_megajoules_per_m3, parameters.fusion_latent_heat_megajoules_per_m3 }) |value| if (!std.math.isFinite(value)) return error.NonFiniteSoilPhaseInput;
-    inline for (@typeInfo(PhaseEnthalpyState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(PhaseEnthalpyState)) |field| {
         if (!std.math.isFinite(@field(initial, field.name)) or !std.math.isFinite(@field(endpoint, field.name)) or @field(initial, field.name) < 0 or @field(endpoint, field.name) < 0) return error.InvalidSoilPhaseInput;
     }
     if (initial_temperature_k <= 0 or initial_heat_capacity_megajoules_per_k <= 0 or parameters.liquid_heat_capacity_megajoules_per_m3_k <= 0 or parameters.ice_heat_capacity_megajoules_per_m3_k <= 0 or parameters.vaporization_latent_heat_megajoules_per_m3 <= 0 or parameters.fusion_latent_heat_megajoules_per_m3 <= 0) return error.InvalidSoilPhaseInput;
@@ -285,7 +286,7 @@ pub fn macroporeFreezeThaw(temperature_k: f64, matric_plus_osmotic_potential_meg
 
 fn freezeThaw(temperature_k: f64, potential_megapascal: f64, liquid_m3: f64, ice_m3: f64, capacity_megajoules_per_k: f64, time_fraction: f64, macropore: bool, parameters: FreezeThawParameters) !FreezeThaw {
     inline for (.{ temperature_k, potential_megapascal, liquid_m3, ice_m3, capacity_megajoules_per_k, time_fraction }) |value| if (!std.math.isFinite(value)) return error.NonFiniteSoilPhaseInput;
-    inline for (@typeInfo(FreezeThawParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteSoilPhaseInput;
+    inline for (ti_compat.fieldViews(FreezeThawParameters)) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteSoilPhaseInput;
     if (temperature_k <= 0 or liquid_m3 < 0 or ice_m3 < 0 or capacity_megajoules_per_k < 0 or time_fraction <= 0 or time_fraction > 1 or parameters.freezing_potential_numerator_k_megapascal <= 0 or parameters.latent_heat_of_fusion_megajoules_per_m3 <= 0 or parameters.ice_density_megagrams_per_m3 <= 0 or parameters.heat_capacity_temperature_feedback_per_k < 0 or parameters.pure_water_freezing_temperature_k <= 0 or potential_megapascal == parameters.latent_heat_of_fusion_megajoules_per_m3) return error.InvalidSoilPhaseInput;
     const freezing_temperature = -parameters.freezing_potential_numerator_k_megapascal / (potential_megapascal - parameters.latent_heat_of_fusion_megajoules_per_m3);
     const threshold_temperature = if (macropore) parameters.pure_water_freezing_temperature_k else freezing_temperature;
@@ -317,7 +318,7 @@ pub const PoreExchangeInputs = struct {
 
 /// FINHL: positive transfers macropore water into matrix; negative reverses.
 pub fn macroporeMatrixExchange(inputs: PoreExchangeInputs) !f64 {
-    inline for (@typeInfo(PoreExchangeInputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSoilPhaseInput;
+    inline for (ti_compat.fieldViews(PoreExchangeInputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSoilPhaseInput;
     if (inputs.saturated_lateral_matrix_conductivity_m2_per_h_megapascal < 0 or inputs.face_area_m2 < 0 or inputs.macropore_spacing_m <= inputs.macropore_radius_m or inputs.macropore_radius_m <= 0 or inputs.time_fraction <= 0 or inputs.time_fraction > 1 or inputs.matrix_water_m3 < 0 or inputs.matrix_air_m3 < 0 or inputs.macropore_water_m3 < 0 or inputs.macropore_air_m3 < 0) return error.InvalidSoilPhaseInput;
     const unlimited = 6.283 * inputs.saturated_lateral_matrix_conductivity_m2_per_h_megapascal * inputs.face_area_m2 * (inputs.saturation_water_potential_megapascal - inputs.current_matric_potential_megapascal) / @log(inputs.macropore_spacing_m / inputs.macropore_radius_m) * inputs.time_fraction;
     const limited = if (unlimited > 0) @max(0.0, @min(unlimited, @min(inputs.macropore_water_m3, inputs.matrix_air_m3))) else @min(0.0, @max(unlimited, @max(-inputs.macropore_air_m3, -inputs.matrix_water_m3)));

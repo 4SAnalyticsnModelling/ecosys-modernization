@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     photosynthesis_active: bool,
@@ -57,7 +58,7 @@ pub fn computeRuntimePlants(
 }
 
 fn validate(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteMinimumStomatalResistanceInput;
     }

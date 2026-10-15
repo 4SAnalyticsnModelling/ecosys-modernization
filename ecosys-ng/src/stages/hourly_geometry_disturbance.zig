@@ -4,6 +4,7 @@ const std = @import("std");
 const ecosys = @import("ecosys_ng");
 const tile_kernels = @import("tile_kernels.zig");
 const diagnostics = @import("diagnostics.zig");
+const ti_compat = @import("ecosys_ng").typeinfo_compat;
 
 const HourlyGeometryCarrier = struct {
     matrix_zone_fraction: f64,
@@ -386,7 +387,7 @@ const GeometryRollbackSnapshot = struct {
         var self: GeometryRollbackSnapshot = .{ .allocator = allocator };
         errdefer self.deinit();
         const Context = @TypeOf(context);
-        inline for (@typeInfo(Context).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(Context)) |field|
             if (comptime isGeometryTransactionalField(field.name))
                 try self.captureTopValue(@field(context, field.name));
         return self;
@@ -417,7 +418,7 @@ const GeometryRollbackSnapshot = struct {
         const T = @TypeOf(value);
         switch (@typeInfo(T)) {
             .pointer => |pointer| {
-                if (pointer.is_const) return;
+                if (pointer.attrs.@"const") return;
                 switch (pointer.size) {
                     .slice => try self.captureSlice(T, value),
                     .one => switch (@typeInfo(pointer.child)) {
@@ -436,7 +437,7 @@ const GeometryRollbackSnapshot = struct {
 
     fn captureSlice(self: *GeometryRollbackSnapshot, comptime Slice: type, values: Slice) !void {
         const pointer = @typeInfo(Slice).pointer;
-        if (pointer.is_const) return;
+        if (pointer.attrs.@"const") return;
         try self.saveBytes(std.mem.sliceAsBytes(values));
         if (comptime typeMayOwnBuffers(pointer.child))
             for (values) |*value| try self.captureOwnedBuffers(pointer.child, value);
@@ -444,9 +445,9 @@ const GeometryRollbackSnapshot = struct {
 
     fn captureOwnedBuffers(self: *GeometryRollbackSnapshot, comptime T: type, value: *T) !void {
         switch (@typeInfo(T)) {
-            .pointer => |pointer| if (pointer.size == .slice and !pointer.is_const)
+            .pointer => |pointer| if (pointer.size == .slice and !pointer.attrs.@"const")
                 try self.captureSlice(T, value.*),
-            .@"struct" => |structure| inline for (structure.fields) |field|
+            .@"struct" => |structure| inline for (ti_compat.fieldViewsFromInfo(structure)) |field|
                 if (comptime typeMayOwnBuffers(field.type))
                     try self.captureOwnedBuffers(field.type, &@field(value.*, field.name)),
             .optional => |optional| if (value.*) |*payload|
@@ -461,9 +462,9 @@ const GeometryRollbackSnapshot = struct {
 
 fn typeMayOwnBuffers(comptime T: type) bool {
     return switch (@typeInfo(T)) {
-        .pointer => |pointer| pointer.size == .slice and !pointer.is_const,
+        .pointer => |pointer| pointer.size == .slice and !pointer.attrs.@"const",
         .@"struct" => |structure| blk: {
-            inline for (structure.fields) |field|
+            inline for (ti_compat.fieldViewsFromInfo(structure)) |field|
                 if (typeMayOwnBuffers(field.type)) break :blk true;
             break :blk false;
         },

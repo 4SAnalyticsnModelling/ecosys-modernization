@@ -220,13 +220,13 @@ test "oxygen-limited nitrifier carbon uptake preserves NITRO maintenance-growth 
     try std.testing.expectApproxEqAbs(@as(f64, 0.06), state.nonstructural_carbon_gain_g_c[0], 1e-15);
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] = 1;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] = 1;
     var microbial_state = try microbial.State.init(std.testing.allocator, 1, 1, 1, 1);
     defer microbial_state.deinit();
-    const carbon_before = gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] + microbial_state.nonstructural[0].carbon_g_c;
+    const carbon_before = gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] + microbial_state.nonstructural[0].carbon_g_c;
     var state_update_context: StateUpdateContext = .{ .state = &state, .gas_state = &gas_state, .microbial_state = &microbial_state, .autotrophic_substrate_index = 0, .absolute_tolerance_g_c = 1e-12, .relative_tolerance = 1e-10 };
     try state_updateTile(&state_update_context, .{ .first = 0, .end = 1 });
-    const carbon_after = gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] + microbial_state.nonstructural[0].carbon_g_c;
+    const carbon_after = gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] + microbial_state.nonstructural[0].carbon_g_c;
     try std.testing.expectApproxEqAbs(carbon_before, carbon_after, 1e-15);
 }
 
@@ -237,7 +237,7 @@ test "autotrophic carbon roundoff projection cannot create recipient carbon" {
     state.nonstructural_carbon_gain_g_c[1] = 0.6000000005;
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] = 1;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] = 1;
     var microbial_state = try microbial.State.init(std.testing.allocator, 1, 1, 1, 2);
     defer microbial_state.deinit();
     var context: StateUpdateContext = .{ .state = &state, .gas_state = &gas_state, .microbial_state = &microbial_state, .autotrophic_substrate_index = 0, .absolute_tolerance_g_c = 1e-6, .relative_tolerance = 1e-9 };
@@ -245,7 +245,7 @@ test "autotrophic carbon roundoff projection cannot create recipient carbon" {
     try state_updateTile(&context, .{ .first = 0, .end = 1 });
 
     const recipient_total = microbial_state.nonstructural[0].carbon_g_c + microbial_state.nonstructural[1].carbon_g_c;
-    try std.testing.expectEqual(@as(f64, 0), gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)]);
+    try std.testing.expectEqual(@as(f64, 0), gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)]);
     try std.testing.expectApproxEqAbs(@as(f64, 1), recipient_total, 8.0 * std.math.floatEps(f64));
 }
 
@@ -256,15 +256,15 @@ test "autotrophic carbon deficit rejects the complete tile atomically" {
     state.nonstructural_carbon_gain_g_c[1] = 0.2;
     var gas_state = try gas.State.init(std.testing.allocator, 2);
     defer gas_state.deinit();
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] = 1;
-    gas_state.dissolved_mass_g[gas.species_count + @intFromEnum(gas.Species.carbon_dioxide)] = 0.1;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] = 1;
+    gas_state.dissolved_mass_g[gas.species_count + @backingInt(gas.Species.carbon_dioxide)] = 0.1;
     var microbial_state = try microbial.State.init(std.testing.allocator, 1, 2, 1, 1);
     defer microbial_state.deinit();
     var context: StateUpdateContext = .{ .state = &state, .gas_state = &gas_state, .microbial_state = &microbial_state, .autotrophic_substrate_index = 0, .absolute_tolerance_g_c = 1e-6, .relative_tolerance = 1e-9 };
 
     try std.testing.expectError(error.InsufficientAutotrophicCarbonDioxide, state_updateTile(&context, .{ .first = 0, .end = 2 }));
-    try std.testing.expectEqual(@as(f64, 1), gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)]);
-    try std.testing.expectEqual(@as(f64, 0.1), gas_state.dissolved_mass_g[gas.species_count + @intFromEnum(gas.Species.carbon_dioxide)]);
+    try std.testing.expectEqual(@as(f64, 1), gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)]);
+    try std.testing.expectEqual(@as(f64, 0.1), gas_state.dissolved_mass_g[gas.species_count + @backingInt(gas.Species.carbon_dioxide)]);
     try std.testing.expectEqual(@as(f64, 0), microbial_state.nonstructural[0].carbon_g_c);
     try std.testing.expectEqual(@as(f64, 0), microbial_state.nonstructural[1].carbon_g_c);
 }

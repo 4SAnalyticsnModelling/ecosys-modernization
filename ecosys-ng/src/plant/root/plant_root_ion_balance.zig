@@ -1,5 +1,7 @@
 const std = @import("std");
 const nutrient_uptake = @import("plant_root_nutrient_uptake.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const SaltUptakeMol = struct {
     aluminum: f64 = 0,
@@ -25,24 +27,24 @@ pub fn hydrogenChargeMol(
     if (!std.math.isFinite(nitrogen_molar_mass_g_per_mol) or nitrogen_molar_mass_g_per_mol <= 0 or
         !std.math.isFinite(phosphorus_molar_mass_g_per_mol) or phosphorus_molar_mass_g_per_mol <= 0)
         return error.InvalidRootIonMolarMass;
-    inline for (@typeInfo(SaltUptakeMol).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SaltUptakeMol)) |field| {
         const value = @field(salts, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteRootSaltUptake;
     }
     for (results) |result| {
-        inline for (@typeInfo(nutrient_uptake.Result).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(nutrient_uptake.Result)) |field|
             if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0)
                 return error.InvalidRootIonNutrientUptake;
     }
 
-    const nh4_g_n = results[@intFromEnum(nutrient_uptake.NutrientPool.ammonium_nonband)].uptake_g_element +
-        results[@intFromEnum(nutrient_uptake.NutrientPool.ammonium_band)].uptake_g_element;
-    const no3_g_n = results[@intFromEnum(nutrient_uptake.NutrientPool.nitrate_nonband)].uptake_g_element +
-        results[@intFromEnum(nutrient_uptake.NutrientPool.nitrate_band)].uptake_g_element;
-    const h2po4_g_p = results[@intFromEnum(nutrient_uptake.NutrientPool.phosphate_h2_nonband)].uptake_g_element +
-        results[@intFromEnum(nutrient_uptake.NutrientPool.phosphate_h2_band)].uptake_g_element;
-    const hpo4_g_p = results[@intFromEnum(nutrient_uptake.NutrientPool.phosphate_h_nonband)].uptake_g_element +
-        results[@intFromEnum(nutrient_uptake.NutrientPool.phosphate_h_band)].uptake_g_element;
+    const nh4_g_n = results[@backingInt(nutrient_uptake.NutrientPool.ammonium_nonband)].uptake_g_element +
+        results[@backingInt(nutrient_uptake.NutrientPool.ammonium_band)].uptake_g_element;
+    const no3_g_n = results[@backingInt(nutrient_uptake.NutrientPool.nitrate_nonband)].uptake_g_element +
+        results[@backingInt(nutrient_uptake.NutrientPool.nitrate_band)].uptake_g_element;
+    const h2po4_g_p = results[@backingInt(nutrient_uptake.NutrientPool.phosphate_h2_nonband)].uptake_g_element +
+        results[@backingInt(nutrient_uptake.NutrientPool.phosphate_h2_band)].uptake_g_element;
+    const hpo4_g_p = results[@backingInt(nutrient_uptake.NutrientPool.phosphate_h_nonband)].uptake_g_element +
+        results[@backingInt(nutrient_uptake.NutrientPool.phosphate_h_band)].uptake_g_element;
     const charge = (nh4_g_n - no3_g_n) / nitrogen_molar_mass_g_per_mol -
         (2 * h2po4_g_p + hpo4_g_p) / phosphorus_molar_mass_g_per_mol +
         3 * (salts.aluminum + salts.iron) +
@@ -62,14 +64,14 @@ pub fn sourceOrderHydrogenChargeMol(
     salts: SaltUptakeMol,
 ) !f64 {
     _ = try hydrogenChargeMol(results, 14, 31, salts);
-    const nh4_g_n = results[@intFromEnum(nutrient_uptake.NutrientPool.ammonium_nonband)].uptake_g_element +
-        results[@intFromEnum(nutrient_uptake.NutrientPool.ammonium_band)].uptake_g_element;
-    const no3_g_n = results[@intFromEnum(nutrient_uptake.NutrientPool.nitrate_nonband)].uptake_g_element +
-        results[@intFromEnum(nutrient_uptake.NutrientPool.nitrate_band)].uptake_g_element;
-    const h2po4_g_p = results[@intFromEnum(nutrient_uptake.NutrientPool.phosphate_h2_nonband)].uptake_g_element +
-        results[@intFromEnum(nutrient_uptake.NutrientPool.phosphate_h2_band)].uptake_g_element;
-    const hpo4_g_p = results[@intFromEnum(nutrient_uptake.NutrientPool.phosphate_h_nonband)].uptake_g_element +
-        results[@intFromEnum(nutrient_uptake.NutrientPool.phosphate_h_band)].uptake_g_element;
+    const nh4_g_n = results[@backingInt(nutrient_uptake.NutrientPool.ammonium_nonband)].uptake_g_element +
+        results[@backingInt(nutrient_uptake.NutrientPool.ammonium_band)].uptake_g_element;
+    const no3_g_n = results[@backingInt(nutrient_uptake.NutrientPool.nitrate_nonband)].uptake_g_element +
+        results[@backingInt(nutrient_uptake.NutrientPool.nitrate_band)].uptake_g_element;
+    const h2po4_g_p = results[@backingInt(nutrient_uptake.NutrientPool.phosphate_h2_nonband)].uptake_g_element +
+        results[@backingInt(nutrient_uptake.NutrientPool.phosphate_h2_band)].uptake_g_element;
+    const hpo4_g_p = results[@backingInt(nutrient_uptake.NutrientPool.phosphate_h_nonband)].uptake_g_element +
+        results[@backingInt(nutrient_uptake.NutrientPool.phosphate_h_band)].uptake_g_element;
     const charge = 0.0714 * nh4_g_n -
         0.0714 * no3_g_n -
         0.0645 * h2po4_g_p -
@@ -129,22 +131,22 @@ pub fn state_updateHydrogenCharge(
 }
 
 test "GROSUB XZHYS preserves nutrient and eight-salt charge equivalents" {
-    var results = [_]nutrient_uptake.Result{.{ .demand_g_element = 0, .uptake_g_element = 0, .oxygen_unlimited_uptake_g_element = 0, .carbon_unlimited_uptake_g_element = 0, .available_g_element = 0 }} ** nutrient_uptake.nutrient_pool_count;
-    results[@intFromEnum(nutrient_uptake.NutrientPool.ammonium_nonband)].uptake_g_element = 14;
-    results[@intFromEnum(nutrient_uptake.NutrientPool.nitrate_band)].uptake_g_element = 7;
-    results[@intFromEnum(nutrient_uptake.NutrientPool.phosphate_h2_nonband)].uptake_g_element = 31;
-    results[@intFromEnum(nutrient_uptake.NutrientPool.phosphate_h_band)].uptake_g_element = 15.5;
+    var results = @as([nutrient_uptake.nutrient_pool_count]nutrient_uptake.Result, @splat(@as(nutrient_uptake.Result, .{ .demand_g_element = 0, .uptake_g_element = 0, .oxygen_unlimited_uptake_g_element = 0, .carbon_unlimited_uptake_g_element = 0, .available_g_element = 0 })));
+    results[@backingInt(nutrient_uptake.NutrientPool.ammonium_nonband)].uptake_g_element = 14;
+    results[@backingInt(nutrient_uptake.NutrientPool.nitrate_band)].uptake_g_element = 7;
+    results[@backingInt(nutrient_uptake.NutrientPool.phosphate_h2_nonband)].uptake_g_element = 31;
+    results[@backingInt(nutrient_uptake.NutrientPool.phosphate_h_band)].uptake_g_element = 15.5;
     const salts: SaltUptakeMol = .{ .aluminum = 1, .iron = 2, .calcium = 3, .magnesium = 4, .sodium = 5, .potassium = 6, .sulfate = 7, .chloride = 8 };
     const expected = 1.0 - 0.5 - 2.0 - 0.5 + 3.0 * 3.0 + 2.0 * 7.0 + 5.0 + 6.0 - 2.0 * 7.0 - 8.0;
     try std.testing.expectApproxEqAbs(expected, try hydrogenChargeMol(&results, 14, 31, salts), 1.0e-12);
 }
 
 test "GROSUB XZHYS source comparator retains literal conversion coefficients" {
-    var results = [_]nutrient_uptake.Result{.{ .demand_g_element = 0, .uptake_g_element = 0, .oxygen_unlimited_uptake_g_element = 0, .carbon_unlimited_uptake_g_element = 0, .available_g_element = 0 }} ** nutrient_uptake.nutrient_pool_count;
-    results[@intFromEnum(nutrient_uptake.NutrientPool.ammonium_nonband)].uptake_g_element = 14;
-    results[@intFromEnum(nutrient_uptake.NutrientPool.nitrate_band)].uptake_g_element = 7;
-    results[@intFromEnum(nutrient_uptake.NutrientPool.phosphate_h2_nonband)].uptake_g_element = 31;
-    results[@intFromEnum(nutrient_uptake.NutrientPool.phosphate_h_band)].uptake_g_element = 15.5;
+    var results = @as([nutrient_uptake.nutrient_pool_count]nutrient_uptake.Result, @splat(@as(nutrient_uptake.Result, .{ .demand_g_element = 0, .uptake_g_element = 0, .oxygen_unlimited_uptake_g_element = 0, .carbon_unlimited_uptake_g_element = 0, .available_g_element = 0 })));
+    results[@backingInt(nutrient_uptake.NutrientPool.ammonium_nonband)].uptake_g_element = 14;
+    results[@backingInt(nutrient_uptake.NutrientPool.nitrate_band)].uptake_g_element = 7;
+    results[@backingInt(nutrient_uptake.NutrientPool.phosphate_h2_nonband)].uptake_g_element = 31;
+    results[@backingInt(nutrient_uptake.NutrientPool.phosphate_h_band)].uptake_g_element = 15.5;
     const salts: SaltUptakeMol = .{};
     const source = 0.0714 * 14 - 0.0714 * 7 - 0.0645 * 31 - 0.0323 * 15.5;
     try std.testing.expectEqual(source, try sourceOrderHydrogenChargeMol(&results, salts));

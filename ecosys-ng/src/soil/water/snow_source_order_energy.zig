@@ -1,6 +1,7 @@
 const std = @import("std");
 const snow = @import("../solute/snow_solute_transport.zig");
 const ice_units = @import("../../core/ice_units.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Deep copy used by the fused WATSUB transaction. No accepted producer is
 /// allowed to mutate the live snow state until the complete top-down schedule
@@ -79,7 +80,7 @@ pub fn apply(
     thermodynamics: snow.ThermodynamicParameters,
     steps: []const LayerStep,
 ) !void {
-    inline for (std.meta.fields(snow.ThermodynamicParameters)) |field| {
+    inline for (ti_compat.fieldViews(snow.ThermodynamicParameters)) |field| {
         const value = @field(thermodynamics, field.name);
         if (!std.math.isFinite(value) or value <= 0)
             return error.InvalidSnowSourceOrderThermodynamics;
@@ -110,7 +111,7 @@ pub fn apply(
             step.local_layer != next_local_layer[step.cell])
             return error.InvalidSnowSourceLayerOrder;
         next_local_layer[step.cell] += 1;
-        inline for (std.meta.fields(LayerStep)) |field| {
+        inline for (ti_compat.fieldViews(LayerStep)) |field| {
             if (field.type == f64 and !std.math.isFinite(@field(step, field.name)))
                 return error.NonFiniteSnowSourceOrderStep;
         }

@@ -1,5 +1,7 @@
 const std = @import("std");
 const organic = @import("../organic/initialization.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const EnvironmentParameters = struct {
     surface_activity_half_saturation_g_c_per_m3: f64,
@@ -30,8 +32,8 @@ pub const Environment = struct {
 };
 
 pub fn environment(inputs: EnvironmentInputs, parameters: EnvironmentParameters) !Environment {
-    inline for (@typeInfo(EnvironmentInputs).@"struct".fields) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidOrganicDecompositionEnvironment;
-    inline for (@typeInfo(EnvironmentParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) <= 0) return error.InvalidOrganicDecompositionParameter;
+    inline for (ti_compat.fieldViews(EnvironmentInputs)) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidOrganicDecompositionEnvironment;
+    inline for (ti_compat.fieldViews(EnvironmentParameters)) |field| if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) <= 0) return error.InvalidOrganicDecompositionParameter;
     if (inputs.timestep_h <= 0) return error.InvalidOrganicDecompositionEnvironment;
     if (inputs.total_colonized_carbon_g_c <= inputs.negligible_carbon_g_c) return .{ .activity_concentration_g_c_per_m3_per_h = 0, .decomposition_half_saturation_g_c_per_m3 = 0, .effective_colonized_concentration_sqrt_g_c_per_megagram = 0, .microbial_density_response = 0, .dissolved_carbon_product_response = 0 };
     const activity_concentration = if (inputs.biologically_active_water_m3 > inputs.negligible_carbon_g_c) @min(1.0e5, inputs.microbial_activity_g_c_per_step / (inputs.biologically_active_water_m3 * inputs.timestep_h)) else 1.0e5;
@@ -44,7 +46,7 @@ pub fn environment(inputs: EnvironmentInputs, parameters: EnvironmentParameters)
     const density_response = effective_concentration / (effective_concentration + half_saturation);
     const product_response = 1 / (1 + inputs.dissolved_carbon_concentration_g_c_per_m3 / parameters.dissolved_carbon_product_inhibition_g_c_per_m3);
     const result: Environment = .{ .activity_concentration_g_c_per_m3_per_h = activity_concentration, .decomposition_half_saturation_g_c_per_m3 = half_saturation, .effective_colonized_concentration_sqrt_g_c_per_megagram = effective_concentration, .microbial_density_response = density_response, .dissolved_carbon_product_response = product_response };
-    inline for (@typeInfo(Environment).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteOrganicDecompositionEnvironment;
+    inline for (ti_compat.fieldViews(Environment)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteOrganicDecompositionEnvironment;
     return result;
 }
 
@@ -94,7 +96,7 @@ pub const StructuralProducts = struct {
 pub fn partitionStructuralProducts(decomposed: [organic.structural_fraction_count]organic.ElementPool, allow_particulate_humification: bool, particulate_nitrogen_per_carbon_g_n_per_g_c: f64, particulate_phosphorus_per_carbon_g_p_per_g_c: f64) !StructuralProducts {
     if (!std.math.isFinite(particulate_nitrogen_per_carbon_g_n_per_g_c) or !std.math.isFinite(particulate_phosphorus_per_carbon_g_p_per_g_c) or particulate_nitrogen_per_carbon_g_n_per_g_c <= 0 or particulate_phosphorus_per_carbon_g_p_per_g_c <= 0) return error.InvalidParticulateOrganicRatio;
     for (decomposed) |pool| try validatePool(pool);
-    var result: StructuralProducts = .{ .particulate = .{organic.ElementPool{}} ** organic.structural_fraction_count, .dissolved = undefined };
+    var result: StructuralProducts = .{ .particulate = @as([organic.structural_fraction_count]organic.ElementPool, @splat(organic.ElementPool{})), .dissolved = undefined };
     if (allow_particulate_humification) {
         const lignin = decomposed[3];
         result.particulate[3].carbon_g_c = @max(0, @min(lignin.nitrogen_g_n / particulate_nitrogen_per_carbon_g_n_per_g_c, lignin.phosphorus_g_p / particulate_phosphorus_per_carbon_g_p_per_g_c, lignin.carbon_g_c));
@@ -128,7 +130,7 @@ pub fn decomposeSorbed(organic_pool: organic.ElementPool, acetate_carbon_g_c: f6
 
 fn validateRateInputs(inputs: RateInputs) !void {
     try validatePool(inputs.pool);
-    inline for (@typeInfo(RateInputs).@"struct".fields) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidOrganicDecompositionInput;
+    inline for (ti_compat.fieldViews(RateInputs)) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidOrganicDecompositionInput;
     if (inputs.timestep_h <= 0 or inputs.nutrient_limitation.nitrogen <= 0 or inputs.nutrient_limitation.nitrogen > 1 or inputs.nutrient_limitation.phosphorus <= 0 or inputs.nutrient_limitation.phosphorus > 1) return error.InvalidOrganicDecompositionInput;
 }
 
@@ -141,7 +143,7 @@ fn subtract(a: organic.ElementPool, b: organic.ElementPool) organic.ElementPool 
 }
 
 fn validatePool(pool: organic.ElementPool) !void {
-    inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidOrganicDecompositionPool;
+    inline for (ti_compat.fieldViews(organic.ElementPool)) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.InvalidOrganicDecompositionPool;
 }
 
 test "NITRO substrate decomposition reproduces density product and nutrient limitations" {
@@ -162,6 +164,6 @@ test "lignin humification and dissolved remainder conserve C N P" {
         .{ .carbon_g_c = 0.5, .nitrogen_g_n = 0.05, .phosphorus_g_p = 0.005 },
     };
     const products = try partitionStructuralProducts(decomposed, true, 0.05, 0.005);
-    for (0..organic.structural_fraction_count) |fraction| inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| try std.testing.expectApproxEqAbs(@field(decomposed[fraction], field.name), @field(products.particulate[fraction], field.name) + @field(products.dissolved[fraction], field.name), 1e-14);
+    for (0..organic.structural_fraction_count) |fraction| inline for (ti_compat.fieldViews(organic.ElementPool)) |field| try std.testing.expectApproxEqAbs(@field(decomposed[fraction], field.name), @field(products.particulate[fraction], field.name) + @field(products.dissolved[fraction], field.name), 1e-14);
     try std.testing.expect(products.particulate[3].carbon_g_c > 0);
 }

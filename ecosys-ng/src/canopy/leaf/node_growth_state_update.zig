@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     leaf_carbon_g_c: []f64,
@@ -39,7 +40,7 @@ pub fn publish(state: State, inputs: Inputs) !void {
         return error.LeafNodeGrowthDimensionMismatch;
     if (inputs.first_node > inputs.last_node or inputs.last_node >= node_count)
         return error.LeafNodeGrowthIndexOutOfBounds;
-    inline for (@typeInfo(Inputs).@"struct".fields[2..]) |field| {
+    inline for (ti_compat.fieldViews(Inputs)[2..]) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteLeafNodeGrowthInput;
     }

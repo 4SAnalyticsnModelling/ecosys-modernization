@@ -5,6 +5,7 @@ const Growth = @import("../lifecycle/growth_stages.zig");
 const Roots = @import("../root/plant_root_system.zig");
 const RootMetabolism = @import("../root/plant_root_metabolism.zig");
 const InternalActivity = @import("../accounting/internal_root_shoot_activity.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     minimum_partner_structural_ratio: f64,
@@ -13,7 +14,7 @@ pub const Parameters = struct {
     salt_exchange_fraction_per_h: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Parameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidShootRootExchangeParameter;
         }
@@ -76,7 +77,7 @@ pub fn calculate(parameters: Parameters, inputs: Inputs) !Transfer {
 
 fn calculateWithThreshold(parameters: Parameters, inputs: Inputs, mobile_carbon_presence_threshold_g_c: f64) !Transfer {
     try parameters.validate();
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (field.type == f64) {
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (field.type == f64) {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidShootRootExchangeInput;
     };
@@ -113,7 +114,7 @@ fn calculateWithThreshold(parameters: Parameters, inputs: Inputs, mobile_carbon_
         phosphorus = inputs.base_exchange_fraction_per_h * (branch_p * root_c - root_p * branch_c) / mobile_carbon_total * inputs.timestep_h;
     }
     const result: Transfer = .{ .carbon_g_c = carbon, .nitrogen_g_n = nitrogen, .phosphorus_g_p = phosphorus };
-    inline for (@typeInfo(Transfer).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteShootRootExchange;
+    inline for (ti_compat.fieldViews(Transfer)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteShootRootExchange;
     return result;
 }
 

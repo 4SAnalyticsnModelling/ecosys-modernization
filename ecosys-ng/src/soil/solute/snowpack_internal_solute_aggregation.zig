@@ -1,4 +1,6 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 /// Non-salt solute transport across a snow-layer face. Carbon, nitrogen,
 /// oxygen, and phosphorus carriers use the elemental gram basis tracked by
@@ -99,7 +101,7 @@ fn validateInputs(inputs: Inputs, state: State, workspace: Workspace) !void {
 
 fn validateFinite(values: []const SoluteFlux) !void {
     for (values) |value| {
-        inline for (@typeInfo(SoluteFlux).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(SoluteFlux)) |field|
             if (!std.math.isFinite(@field(value, field.name)))
                 return error.NonFiniteSnowpackSoluteInput;
     }
@@ -110,7 +112,7 @@ fn updateLayer(
     upper_face: SoluteFlux,
     lower_face: SoluteFlux,
 ) !void {
-    inline for (@typeInfo(SoluteFlux).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SoluteFlux)) |field| {
         const after_upper = @field(candidate.*, field.name) +
             @field(upper_face, field.name);
         if (!std.math.isFinite(after_upper))
@@ -136,13 +138,13 @@ fn overlap(left: []const SoluteFlux, right: []const SoluteFlux) bool {
 
 fn filledFlux(value: f64) SoluteFlux {
     var result: SoluteFlux = undefined;
-    inline for (@typeInfo(SoluteFlux).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SoluteFlux)) |field|
         @field(result, field.name) = value;
     return result;
 }
 
 fn expectFlux(actual: SoluteFlux, expected: f64) !void {
-    inline for (@typeInfo(SoluteFlux).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SoluteFlux)) |field|
         try std.testing.expectEqual(expected, @field(actual, field.name));
 }
 
@@ -154,7 +156,7 @@ test "internal snow solute faces retain source species and layer order" {
         filledFlux(2),
         filledFlux(1),
     };
-    var totals = [_]SoluteFlux{.{}} ** 4;
+    var totals = @as([4]SoluteFlux, @splat(@as(SoluteFlux, .{})));
     var scratch: [4]SoluteFlux = undefined;
     var state = State{ .net_flux_by_layer = &totals };
 
@@ -178,7 +180,7 @@ test "internal face cancellation closes every elemental carrier exactly" {
         filledFlux(2),
         filledFlux(1),
     };
-    var totals = [_]SoluteFlux{.{}} ** 4;
+    var totals = @as([4]SoluteFlux, @splat(@as(SoluteFlux, .{})));
     var scratch: [4]SoluteFlux = undefined;
     var state = State{ .net_flux_by_layer = &totals };
 
@@ -190,10 +192,10 @@ test "internal face cancellation closes every elemental carrier exactly" {
 
     var column_total = filledFlux(0);
     for (state.net_flux_by_layer) |layer_flux| {
-        inline for (@typeInfo(SoluteFlux).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(SoluteFlux)) |field|
             @field(column_total, field.name) += @field(layer_flux, field.name);
     }
-    inline for (@typeInfo(SoluteFlux).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SoluteFlux)) |field| {
         const top_input = @field(face_fluxes[0], field.name);
         const lower_export = @field(face_fluxes[3], field.name);
         try std.testing.expectEqual(
@@ -211,7 +213,7 @@ test "inactive adjacent layers preserve REDIST snow presence gates" {
         filledFlux(4),
         filledFlux(1),
     };
-    var totals = [_]SoluteFlux{filledFlux(100)} ** 4;
+    var totals = @as([4]SoluteFlux, @splat(@as(SoluteFlux, filledFlux(100))));
     var scratch: [4]SoluteFlux = undefined;
     var state = State{ .net_flux_by_layer = &totals };
 
@@ -230,11 +232,11 @@ test "inactive adjacent layers preserve REDIST snow presence gates" {
 test "runtime snow layer extent and ten source species are explicit" {
     try std.testing.expectEqual(
         @as(usize, 10),
-        @typeInfo(SoluteFlux).@"struct".fields.len,
+        @typeInfo(SoluteFlux).@"struct".field_names.len,
     );
-    const capacities = [_]f64{2} ** 7;
-    const face_fluxes = [_]SoluteFlux{filledFlux(1)} ** 7;
-    var totals = [_]SoluteFlux{.{}} ** 7;
+    const capacities = @as([7]f64, @splat(@as(f64, 2)));
+    const face_fluxes = @as([7]SoluteFlux, @splat(@as(SoluteFlux, filledFlux(1))));
+    var totals = @as([7]SoluteFlux, @splat(@as(SoluteFlux, .{})));
     var scratch: [7]SoluteFlux = undefined;
     var state = State{ .net_flux_by_layer = &totals };
 
@@ -267,7 +269,7 @@ test "invalid late input and overflow preserve state atomically" {
     const capacities = [_]f64{ 2, 2 };
     var face_fluxes = [_]SoluteFlux{ filledFlux(1), filledFlux(1) };
     face_fluxes[1].dihydrogen_phosphate_g_p_per_step = std.math.nan(f64);
-    var totals = [_]SoluteFlux{filledFlux(3)} ** 2;
+    var totals = @as([2]SoluteFlux, @splat(@as(SoluteFlux, filledFlux(3))));
     var scratch: [2]SoluteFlux = undefined;
     var state = State{ .net_flux_by_layer = &totals };
     const workspace = Workspace{ .net_flux_by_layer = &scratch };
@@ -300,7 +302,7 @@ test "invalid late input and overflow preserve state atomically" {
 test "dimension and workspace alias errors precede mutation" {
     const capacities = [_]f64{ 2, 2 };
     const face_fluxes = [_]SoluteFlux{ filledFlux(1), filledFlux(1) };
-    var totals = [_]SoluteFlux{filledFlux(5)} ** 2;
+    var totals = @as([2]SoluteFlux, @splat(@as(SoluteFlux, filledFlux(5))));
     var state = State{ .net_flux_by_layer = &totals };
 
     try std.testing.expectError(

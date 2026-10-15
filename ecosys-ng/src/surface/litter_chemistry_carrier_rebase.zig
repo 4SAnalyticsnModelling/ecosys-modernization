@@ -1,6 +1,7 @@
 const std = @import("std");
 const litter_chemistry = @import("litter_chemistry.zig");
 const carrier_certification = @import("../soil/chemistry/water_carrier_rebase.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const RoundoffAllowance = carrier_certification.RoundoffAllowance;
 
@@ -19,7 +20,7 @@ pub const InventoryInputs = struct {
     denitrification_nitrite_g_n: f64 = 0,
 
     fn validate(self: InventoryInputs) !void {
-        inline for (std.meta.fields(InventoryInputs)) |field| {
+        inline for (ti_compat.fieldViews(InventoryInputs)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidLitterChemistryCarrier;
@@ -73,9 +74,9 @@ pub noinline fn rebaseMineralCellForAcceptedWater(
         !std.math.isFinite(new_live_water_m3) or new_live_water_m3 < 0)
         return error.InvalidLitterChemistryCarrier;
     var candidate = cell.*;
-    inline for (@typeInfo(litter_chemistry.Cell).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(litter_chemistry.Cell)) |field| {
         if (comptime isMineralStruct(field.name)) {
-            inline for (@typeInfo(field.type).@"struct".fields) |nested|
+            inline for (ti_compat.fieldViews(field.type)) |nested|
                 try validatePool(@field(@field(candidate, field.name), nested.name), mineral_reference_before_m3);
         }
     }
@@ -84,9 +85,9 @@ pub noinline fn rebaseMineralCellForAcceptedWater(
         &candidate,
         if (mineral_reference_before_m3 == 0) 0 else mineral_reference_before_m3 / new_live_water_m3,
     );
-    inline for (@typeInfo(litter_chemistry.Cell).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(litter_chemistry.Cell)) |field| {
         if (comptime isMineralStruct(field.name)) {
-            inline for (@typeInfo(field.type).@"struct".fields) |nested|
+            inline for (ti_compat.fieldViews(field.type)) |nested|
                 try validatePool(@field(@field(candidate, field.name), nested.name), new_live_water_m3);
         }
     }
@@ -413,9 +414,9 @@ pub noinline fn previewMineralCellRoundoff(
         return error.InvalidLitterChemistryCarrier;
     try validateCell(cell, aqueous_carrier_m3, old_reference_water_m3);
     var after = cell;
-    inline for (@typeInfo(litter_chemistry.Cell).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(litter_chemistry.Cell)) |field| {
         if (comptime isMineralStruct(field.name)) {
-            inline for (@typeInfo(field.type).@"struct".fields) |nested|
+            inline for (ti_compat.fieldViews(field.type)) |nested|
                 try validatePool(@field(@field(cell, field.name), nested.name), old_reference_water_m3);
         }
     }
@@ -428,9 +429,9 @@ pub noinline fn previewMineralCellRoundoff(
         return error.InvalidLitterChemistryCarrier;
     applyMineralScale(&after, scale);
     try validateCell(after, aqueous_carrier_m3, new_live_water_m3);
-    inline for (@typeInfo(litter_chemistry.Cell).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(litter_chemistry.Cell)) |field| {
         if (comptime isMineralStruct(field.name)) {
-            inline for (@typeInfo(field.type).@"struct".fields) |nested|
+            inline for (ti_compat.fieldViews(field.type)) |nested|
                 try validatePool(@field(@field(after, field.name), nested.name), new_live_water_m3);
         }
     }
@@ -605,7 +606,7 @@ noinline fn carrierOwnedInventory(
                         cell.phosphate_surface.adsorbed_h2po4_mol_p_per_megagram)),
         .elements = elements,
     };
-    inline for (std.meta.fields(CarrierOwnedInventory)) |field| {
+    inline for (ti_compat.fieldViews(CarrierOwnedInventory)) |field| {
         if (comptime !std.mem.eql(u8, field.name, "elements")) {
             const value = @field(result, field.name);
             if (!std.math.isFinite(value) or value < 0)
@@ -715,12 +716,12 @@ fn validateDryCarrier(old: f64, new: f64) !void {
 }
 
 noinline fn validateDryNormalizedCell(cell: litter_chemistry.Cell, old: f64, new: f64) !void {
-    inline for (@typeInfo(litter_chemistry.Cell).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(litter_chemistry.Cell)) |field| {
         const Field = field.type;
         if (comptime isDryNormalized(field.name, Field)) {
             try validateDryPool(@field(cell, field.name), old, new);
         } else if (comptime isDryNormalizedStruct(field.name)) {
-            inline for (@typeInfo(Field).@"struct".fields) |nested|
+            inline for (ti_compat.fieldViews(Field)) |nested|
                 try validateDryPool(@field(@field(cell, field.name), nested.name), old, new);
         }
     }
@@ -734,12 +735,12 @@ fn validateDryPool(value: f64, old: f64, new: f64) !void {
 }
 
 noinline fn applyDryScale(cell: *litter_chemistry.Cell, scale: f64) void {
-    inline for (@typeInfo(litter_chemistry.Cell).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(litter_chemistry.Cell)) |field| {
         const Field = field.type;
         if (comptime isDryNormalized(field.name, Field)) {
             @field(cell, field.name) *= scale;
         } else if (comptime isDryNormalizedStruct(field.name)) {
-            inline for (@typeInfo(Field).@"struct".fields) |nested|
+            inline for (ti_compat.fieldViews(Field)) |nested|
                 @field(@field(cell, field.name), nested.name) *= scale;
         }
     }
@@ -767,7 +768,7 @@ noinline fn validateCell(cell: litter_chemistry.Cell, aqueous_reference: f64, mi
     if (!std.math.isFinite(aqueous_reference) or aqueous_reference < 0 or
         !std.math.isFinite(mineral_reference) or mineral_reference < 0)
         return error.InvalidLitterChemistryCarrier;
-    inline for (@typeInfo(litter_chemistry.Cell).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(litter_chemistry.Cell)) |field| {
         const Field = field.type;
         if (comptime isSolventWater(field.name)) {
             // Intensive: no carrier owns it, so `validatePool`'s
@@ -779,7 +780,7 @@ noinline fn validateCell(cell: litter_chemistry.Cell, aqueous_reference: f64, mi
         } else if (comptime isWaterNormalized(field.name, Field)) {
             try validatePool(@field(cell, field.name), aqueous_reference);
         } else if (comptime isMineralStruct(field.name)) {
-            inline for (@typeInfo(Field).@"struct".fields) |nested| {
+            inline for (ti_compat.fieldViews(Field)) |nested| {
                 try validatePool(@field(@field(cell, field.name), nested.name), mineral_reference);
             }
         } else if (comptime @typeInfo(Field) == .float) {
@@ -787,7 +788,7 @@ noinline fn validateCell(cell: litter_chemistry.Cell, aqueous_reference: f64, mi
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidDryNormalizedLitterChemistryPool;
         } else {
-            inline for (@typeInfo(Field).@"struct".fields) |nested| {
+            inline for (ti_compat.fieldViews(Field)) |nested| {
                 const value = @field(@field(cell, field.name), nested.name);
                 if (!std.math.isFinite(value) or value < 0)
                     return error.InvalidDryNormalizedLitterChemistryPool;
@@ -804,7 +805,7 @@ fn validatePool(value: f64, reference: f64) !void {
 }
 
 noinline fn applyAqueousScale(cell: *litter_chemistry.Cell, scale: f64) void {
-    inline for (@typeInfo(litter_chemistry.Cell).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(litter_chemistry.Cell)) |field| {
         const Field = field.type;
         if (comptime isWaterNormalized(field.name, Field)) {
             @field(cell, field.name) *= scale;
@@ -813,10 +814,10 @@ noinline fn applyAqueousScale(cell: *litter_chemistry.Cell, scale: f64) void {
 }
 
 noinline fn applyMineralScale(cell: *litter_chemistry.Cell, scale: f64) void {
-    inline for (@typeInfo(litter_chemistry.Cell).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(litter_chemistry.Cell)) |field| {
         const Field = field.type;
         if (comptime isMineralStruct(field.name)) {
-            inline for (@typeInfo(Field).@"struct".fields) |nested|
+            inline for (ti_compat.fieldViews(Field)) |nested|
                 @field(@field(cell, field.name), nested.name) *= scale;
         }
     }

@@ -14,6 +14,7 @@
 // M1 organic-amendment group of
 // docs/traceability/management_unbound_family_is_superseded_by_the_schedule_dispatchers.md
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Properties = struct {
     field_capacity_m3_m3: f64,
@@ -65,7 +66,7 @@ pub fn adjust(
     effective_soil_volume_m3: f64,
     volume_threshold_m3: f64,
 ) AdjustmentError!Properties {
-    inline for (std.meta.fields(Properties)) |field| {
+    inline for (ti_compat.fieldViews(Properties)) |field| {
         const value = @field(properties, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteInput;
         if (value < 0.0) return error.NegativeInput;
@@ -81,7 +82,7 @@ pub fn adjust(
         .cation_exchange_capacity_mol_per_megagram = properties.cation_exchange_capacity_mol_per_megagram + delta.exchange_capacity_mol_per_megagram,
         .anion_exchange_capacity_mol_per_megagram = properties.anion_exchange_capacity_mol_per_megagram + delta.exchange_capacity_mol_per_megagram,
     };
-    inline for (std.meta.fields(Properties)) |field| {
+    inline for (ti_compat.fieldViews(Properties)) |field| {
         if (!std.math.isFinite(@field(adjusted, field.name))) return error.NonFiniteResult;
     }
     if (adjusted.field_capacity_m3_m3 < 0 or adjusted.wilting_point_m3_m3 < 0 or

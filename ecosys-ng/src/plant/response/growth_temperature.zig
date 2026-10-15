@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     gas_constant_j_per_mol_k: f64,
@@ -9,7 +10,7 @@ pub const Parameters = struct {
     high_temperature_inactivation_j_per_mol: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.InvalidPlantGrowthTemperatureParameter;
+        inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.InvalidPlantGrowthTemperatureParameter;
         if (self.gas_constant_j_per_mol_k <= 0 or self.temperature_scale_k <= 0 or self.activation_energy_j_per_mol <= 0 or self.low_temperature_inactivation_j_per_mol <= 0 or self.high_temperature_inactivation_j_per_mol <= 0) return error.InvalidPlantGrowthTemperatureParameter;
     }
 };

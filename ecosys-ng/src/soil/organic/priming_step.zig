@@ -5,6 +5,8 @@ const microbial = @import("../microbial/state.zig");
 const fluxes = @import("../nutrients/nitrogen_flux_workspace.zig");
 const priming = @import("../biogeochemistry/organic_priming_exchange.zig");
 const metabolism = @import("../microbial/metabolism.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -54,8 +56,8 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
     const microbial_per_layer = organic.substrate_count * populations * organic.kinetic_fraction_count;
     const response_per_layer = organic.substrate_count * populations;
     for (range.first..range.end) |layer| {
-        var substrate_carbon_g_c: [organic.substrate_count]f64 = .{0} ** organic.substrate_count;
-        var activity_g_c: [organic.substrate_count]f64 = .{0} ** organic.substrate_count;
+        var substrate_carbon_g_c: [organic.substrate_count]f64 = @as([organic.substrate_count]f64, @splat(@as(f64, 0)));
+        var activity_g_c: [organic.substrate_count]f64 = @as([organic.substrate_count]f64, @splat(@as(f64, 0)));
         var dissolved_available_after_uptake: [organic.substrate_count]organic.ElementPool = undefined;
         var acetate_available_after_uptake_g_c: [organic.substrate_count]f64 = undefined;
         const snapshot = context.result.microbial_snapshot[layer * microbial_per_layer ..][0..microbial_per_layer];
@@ -88,7 +90,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
                 const water_sensitivity: f64 = if (population == 2) 0.05 else 0.10;
                 response[substrate * populations + population] = growth_temperature * @exp(water_sensitivity * context.matric_plus_osmotic_potential_megapascal[layer]);
             }
-            inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| if (@field(dissolved_available_after_uptake[substrate], field.name) < -context.negligible_carbon_g_c) {
+            inline for (ti_compat.fieldViews(organic.ElementPool)) |field| if (@field(dissolved_available_after_uptake[substrate], field.name) < -context.negligible_carbon_g_c) {
                 std.log.err(
                     "soil microbial uptake overdraw before priming: layer={d} substrate={d} pool={s} source={e} aggregate_uptake={e} remainder={e}",
                     .{ layer, substrate, field.name, @field(context.organic_state.dissolved[mobile], field.name), @field(context.organic_state.dissolved[mobile], field.name) - @field(dissolved_available_after_uptake[substrate], field.name), @field(dissolved_available_after_uptake[substrate], field.name) },

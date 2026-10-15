@@ -1,5 +1,6 @@
 const std = @import("std");
 
+
 /// Runtime-sized hourly soil-water diagnostics translated from OUTSH choices
 /// 1..50. Layer profiles are no longer truncated to the source's 20 layers.
 pub const HourlyDiagnostics = struct {
@@ -180,7 +181,7 @@ test "allocation-free soil-water projection matches owned diagnostics" {
 }
 
 test "allocation-free soil-water projection supports in-place profile workspace" {
-    var row = [_]f64{0} ** 14;
+    var row = @as([14]f64, @splat(@as(f64, 0)));
     row[6..8].* = .{ 0.2, 0.3 };
     row[9..11].* = .{ 0.01, 0.02 };
     try calculateInto(.{

@@ -8,6 +8,7 @@
 // of the single consolidation refactor tracked as INIT-004, not an isolated wire.
 // Group INDEX of docs/traceability/plant_initialization_unbound_family_are_unwired_kernels_not_competing_owners.md
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const StateSource = enum {
     new_simulation,
@@ -87,11 +88,11 @@ pub fn initialize(
 
 fn filledLedger(value: f64) PlantLedger {
     var result: PlantLedger = undefined;
-    inline for (std.meta.fields(PlantLedger)) |outer| {
+    inline for (ti_compat.fieldViews(PlantLedger)) |outer| {
         if (outer.type == f64) {
             @field(result, outer.name) = value;
         } else {
-            inline for (std.meta.fields(outer.type)) |inner|
+            inline for (ti_compat.fieldViews(outer.type)) |inner|
                 @field(@field(result, outer.name), inner.name) = value;
         }
     }
@@ -99,11 +100,11 @@ fn filledLedger(value: f64) PlantLedger {
 }
 
 fn expectAll(value: PlantLedger, expected: f64) !void {
-    inline for (std.meta.fields(PlantLedger)) |outer| {
+    inline for (ti_compat.fieldViews(PlantLedger)) |outer| {
         if (outer.type == f64) {
             try std.testing.expectEqual(expected, @field(value, outer.name));
         } else {
-            inline for (std.meta.fields(outer.type)) |inner|
+            inline for (ti_compat.fieldViews(outer.type)) |inner|
                 try std.testing.expectEqual(
                     expected,
                     @field(@field(value, outer.name), inner.name),

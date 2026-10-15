@@ -15,6 +15,7 @@ const phosphate_rates = @import("phosphate_reaction_rates.zig");
 const geochemistry_rates = @import("geochemistry_reaction_rates.zig");
 const water_equilibrium = @import("water_equilibrium.zig");
 const reaction_span = @import("reaction_search_span.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Includes every positive f64 power-of-two fraction down to the minimum
 /// subnormal. This is an admissibility search bound, not a nonlinear
@@ -121,7 +122,7 @@ pub fn scaled(transformations: chemistry.CellTransformations, fraction: f64) che
 }
 
 fn scaleStruct(comptime T: type, value: *T, fraction: f64) void {
-    const fields = @typeInfo(T).@"struct".fields;
+    const fields = ti_compat.fieldViews(T);
     comptime {
         if (@sizeOf(T) != fields.len * @sizeOf(f64))
             @compileError("reaction transformation fields must be contiguous f64 values");
@@ -141,15 +142,15 @@ noinline fn scaleComponents(components: []f64, fraction: f64) void {
 fn scaledSourceOrderReferenceForTest(transformations: chemistry.CellTransformations, fraction: f64) chemistry.CellTransformations {
     if (fraction == 1) return transformations;
     var result = transformations;
-    inline for (@typeInfo(aqueous_network.Transformations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(aqueous_network.Transformations)) |field|
         @field(result.aqueous, field.name) *= fraction;
-    inline for (@typeInfo(phosphate_network.Transformations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(phosphate_network.Transformations)) |field|
         @field(result.non_band_phosphate, field.name) *= fraction;
-    inline for (@typeInfo(phosphate_network.Transformations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(phosphate_network.Transformations)) |field|
         @field(result.band_phosphate, field.name) *= fraction;
-    inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field|
         @field(result.cation_adsorption_mol_per_megagram, field.name) *= fraction;
-    inline for (@typeInfo(geochemistry.Transformations).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(geochemistry.Transformations)) |field|
         @field(result.geochemistry, field.name) *= fraction;
     result.carboxyl_hydrogen_change_mol_per_megagram *= fraction;
     return result;
@@ -157,7 +158,7 @@ fn scaledSourceOrderReferenceForTest(transformations: chemistry.CellTransformati
 
 pub fn filled(comptime T: type, value: f64) T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| @field(result, field.name) = value;
+    inline for (ti_compat.fieldViews(T)) |field| @field(result, field.name) = value;
     return result;
 }
 

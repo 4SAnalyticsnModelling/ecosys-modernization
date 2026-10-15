@@ -1,0 +1,26 @@
+install
++- install ecosys_ng
+   +- compile exe ecosys_ng debug native 2 errors
+src/core/typeinfo_compat.zig:48:16: error: variable of type '[6]core.typeinfo_compat.FieldView' must be const or comptime
+    var views: [info.field_names.len]FieldView = undefined;
+               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/core/typeinfo_compat.zig:17:11: note: struct requires comptime because of this field
+    type: type,
+          ^~~~
+src/core/typeinfo_compat.zig:17:11: note: types are not available at runtime
+referenced by:
+    fieldViews__func_866: src/core/typeinfo_compat.zig:30:45
+    validateBounds: src/state/spatial_grid.zig:736:37
+    9 reference(s) hidden; use '-freference-trace=11' to see all references
+src/state/spatial_grid.zig:736:17: error: unable to resolve comptime value
+    inline for (ti_compat.fieldViews(BoundsDegrees)) |field| {
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/state/spatial_grid.zig:736:17: note: inline loop condition must be comptime-known
+error: 2 compilation errors
+failed command: /opt/homebrew/Cellar/zig/0.17.0/bin/zig build-exe -Odebug --dep ecosys_ng -Mroot=src/ecosys_ng.zig -Odebug -Mecosys_ng=src/module_index.zig --cache-dir .zig-cache --global-cache-dir .zig-cache-global --build-root . --name ecosys_ng --zig-lib-dir /opt/homebrew/Cellar/zig/0.17.0/lib/zig/ --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+install transitive failure
++- install ecosys_ng transitive failure
+   +- compile exe ecosys_ng debug native 2 errors
+

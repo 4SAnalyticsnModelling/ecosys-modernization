@@ -11,6 +11,7 @@ const std = @import("std");
 const biomass_module = @import("litter_microbial_biomass_removal.zig");
 const soluble_module = @import("litter_soluble_removal.zig");
 const som_module = @import("litter_som_removal.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Totals = biomass_module.RemovalTotals;
 pub const Pools = struct {
@@ -60,7 +61,7 @@ fn somIndex(layers: usize, k: usize, m: usize) usize {
     return (k * 5 + m) * layers;
 }
 fn validateTotals(t: Totals) !void {
-    inline for (std.meta.fields(Totals)) |field|
+    inline for (ti_compat.fieldViews(Totals)) |field|
         if (!std.math.isFinite(@field(t, field.name))) return error.NonFiniteSurfaceLitterCompatibilityResult;
 }
 fn validatePools(pools: Pools, destination_layer: usize) !void {
@@ -69,14 +70,14 @@ fn validatePools(pools: Pools, destination_layer: usize) !void {
         pools.biomass.carbon_g_c.len != 63 * layers or pools.biomass.nitrogen_g_n.len != 63 * layers or pools.biomass.phosphorus_g_p.len != 63 * layers or
         pools.som.soil_organic_carbon_g_c.len != 15 * layers or pools.som.colonized_soil_organic_carbon_g_c.len != 15 * layers or pools.som.soil_organic_nitrogen_g_n.len != 15 * layers or pools.som.soil_organic_phosphorus_g_p.len != 15 * layers)
         return error.SurfaceLitterCompatibilityDimensionMismatch;
-    inline for (std.meta.fields(soluble_module.Pools)) |field| {
+    inline for (ti_compat.fieldViews(soluble_module.Pools)) |field| {
         const values = @field(pools.soluble, field.name);
         const expected = if (std.mem.startsWith(u8, field.name, "residue_")) 6 * layers else 3 * layers;
         if (values.len != expected) return error.SurfaceLitterCompatibilityDimensionMismatch;
     }
     inline for (.{ pools.biomass.carbon_g_c, pools.biomass.nitrogen_g_n, pools.biomass.phosphorus_g_p, pools.som.soil_organic_carbon_g_c, pools.som.colonized_soil_organic_carbon_g_c, pools.som.soil_organic_nitrogen_g_n, pools.som.soil_organic_phosphorus_g_p }) |values|
         for (values) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSurfaceLitterCompatibilityInput;
-    inline for (std.meta.fields(soluble_module.Pools)) |field|
+    inline for (ti_compat.fieldViews(soluble_module.Pools)) |field|
         for (@field(pools.soluble, field.name)) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSurfaceLitterCompatibilityInput;
 }
 
@@ -189,9 +190,9 @@ pub fn removeAtomic(allocator: std.mem.Allocator, removal_fraction: f64, destina
         try removeSolubleK(k, staged.biomass.layer_count, removal_fraction, staged.soluble, &totals);
         try removeSomK(k, removal_fraction, staged.som, &totals);
     }
-    inline for (std.meta.fields(biomass_module.Pools)) |field| if (comptime !std.mem.eql(u8, field.name, "layer_count")) @memcpy(@field(pools.biomass, field.name), @field(staged.biomass, field.name));
-    inline for (std.meta.fields(soluble_module.Pools)) |field| @memcpy(@field(pools.soluble, field.name), @field(staged.soluble, field.name));
-    inline for (std.meta.fields(som_module.Pools)) |field| if (comptime !std.mem.eql(u8, field.name, "layer_count")) @memcpy(@field(pools.som, field.name), @field(staged.som, field.name));
+    inline for (ti_compat.fieldViews(biomass_module.Pools)) |field| if (comptime !std.mem.eql(u8, field.name, "layer_count")) @memcpy(@field(pools.biomass, field.name), @field(staged.biomass, field.name));
+    inline for (ti_compat.fieldViews(soluble_module.Pools)) |field| @memcpy(@field(pools.soluble, field.name), @field(staged.soluble, field.name));
+    inline for (ti_compat.fieldViews(som_module.Pools)) |field| if (comptime !std.mem.eql(u8, field.name, "layer_count")) @memcpy(@field(pools.som, field.name), @field(staged.som, field.name));
     return totals;
 }
 

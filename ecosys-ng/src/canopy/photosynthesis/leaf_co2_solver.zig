@@ -1,5 +1,6 @@
 const std = @import("std");
 const numerics = @import("../../core/numerics.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Runtime inputs shared by the direct/diffuse C3 and C4 convergence blocks in
 /// GROSUB. Compensation point and electron requirement select pathway science.
@@ -83,7 +84,7 @@ fn picard(context: Context, intercellular_co2_umol_per_mol: f64) f64 {
 }
 
 fn validate(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteLeafCo2Input;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteLeafCo2Input;
     if (inputs.canopy_air_co2_umol_per_mol <= 0 or inputs.co2_solubility_umol_per_l_per_umol_per_mol <= 0 or inputs.compensation_point_umol_per_l < 0 or inputs.electron_requirement_umol_e_per_umol_co2 <= 0 or inputs.maximum_carboxylation_umol_per_m2_s < 0 or inputs.carboxylation_half_saturation_umol_per_l <= 0 or inputs.electron_transport_umol_e_per_m2_s < 0 or inputs.water_stress_fraction < 0 or inputs.water_stress_fraction > 1 or inputs.biochemical_feedback_fraction < 0 or inputs.biochemical_feedback_fraction > 1 or inputs.stomatal_conductance_mol_per_m2_s <= 0) return error.InvalidLeafCo2Input;
 }
 

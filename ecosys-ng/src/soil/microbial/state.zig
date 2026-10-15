@@ -1,5 +1,6 @@
 const std = @import("std");
 const metabolism = @import("metabolism.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ElementalPool = metabolism.ElementalPool;
 
@@ -121,7 +122,7 @@ pub fn calculateNonstructuralStateUpdate(inputs: NonstructuralStateUpdate) !Elem
 /// The structural, residue, humus and flux pools keep the strict `validatePool`,
 /// because the oracle's `AMAX1` appears only on `OMC(3,...)`.
 fn validateNonstructuralPool(pool: ElementalPool) !void {
-    inline for (@typeInfo(ElementalPool).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(ElementalPool)) |field|
         if (!std.math.isFinite(@field(pool, field.name))) return error.InvalidMicrobialStatePool;
 }
 
@@ -206,7 +207,7 @@ fn validatePool(pool: ElementalPool) !void {
     // element and by how much decides whether the producer is over-drawing a real
     // pool or a rounding floor is too tight. Name it in the log rather than
     // inferring it.
-    inline for (@typeInfo(ElementalPool).@"struct".fields) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < -1e-14) {
+    inline for (ti_compat.fieldViews(ElementalPool)) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < -1e-14) {
         std.log.info("microbial pool rejected: field={s} value={e} carbon_g_c={e} nitrogen_g_n={e} phosphorus_g_p={e}", .{
             field.name,
             @field(pool, field.name),
@@ -223,7 +224,7 @@ fn validateDecomposition(value: metabolism.DecompositionResult) !void {
     try validatePool(value.recycled);
     try validatePool(value.humified);
     try validatePool(value.microbial_residue);
-    inline for (@typeInfo(ElementalPool).@"struct".fields) |field| if (@abs(@field(value.decomposed, field.name) - @field(value.recycled, field.name) - @field(value.humified, field.name) - @field(value.microbial_residue, field.name)) > 1e-12 * @max(1, @field(value.decomposed, field.name))) return error.InvalidMicrobialDecompositionBalance;
+    inline for (ti_compat.fieldViews(ElementalPool)) |field| if (@abs(@field(value.decomposed, field.name) - @field(value.recycled, field.name) - @field(value.humified, field.name) - @field(value.microbial_residue, field.name)) > 1e-12 * @max(1, @field(value.decomposed, field.name))) return error.InvalidMicrobialDecompositionBalance;
 }
 
 fn emptyDecomposition() metabolism.DecompositionResult {

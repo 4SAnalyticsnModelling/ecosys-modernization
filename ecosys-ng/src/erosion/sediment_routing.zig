@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const BoundaryConditions = struct {
     east_open: []const bool,
@@ -38,7 +39,7 @@ pub const RoutingState = struct {
         result.rows = rows;
         var allocated: usize = 0;
         errdefer freeAllocated(&result, allocated);
-        inline for (@typeInfo(RoutingState).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(RoutingState)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -47,7 +48,7 @@ pub const RoutingState = struct {
     }
 
     pub fn deinit(self: *RoutingState) void {
-        inline for (@typeInfo(RoutingState).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(RoutingState)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -126,7 +127,7 @@ fn cellsExchange(first: usize, second: usize, modes: []const u8) bool {
 
 fn freeAllocated(state: *RoutingState, count: usize) void {
     var visited: usize = 0;
-    inline for (@typeInfo(RoutingState).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(RoutingState)) |field| if (field.type == []f64) {
         if (visited < count) state.allocator.free(@field(state, field.name));
         visited += 1;
     };

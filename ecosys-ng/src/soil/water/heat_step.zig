@@ -21,6 +21,8 @@ const charge_classification_module = @import("../solute/charge_classification.zi
 const ice_units = @import("../../core/ice_units.zig");
 const water_solver_conserved = @import("solver_conserved.zig");
 const retention_module = @import("retention.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const TemporaryProfileCounters = struct {
     setup_ns: i96 = 0,
@@ -2943,7 +2945,7 @@ fn stateSliceKind(comptime Slice: type) StateSliceKind {
 
 fn stateSliceCount(comptime T: type) usize {
     var count: usize = 0;
-    for (@typeInfo(T).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(T)) |field| {
         if (isSlice(field.type)) count += 1;
     }
     return count;
@@ -2952,7 +2954,7 @@ fn stateSliceCount(comptime T: type) usize {
 fn stateSliceDescriptors(comptime T: type) [stateSliceCount(T)]StateSliceDescriptor {
     var descriptors: [stateSliceCount(T)]StateSliceDescriptor = undefined;
     var index: usize = 0;
-    for (@typeInfo(T).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(T)) |field| {
         if (!isSlice(field.type)) continue;
         descriptors[index] = .{
             .offset = @offsetOf(T, field.name),
@@ -3049,7 +3051,7 @@ noinline fn cloneState(
 
 fn restoreState(comptime T: type, destination: *T, source: *const T) void {
     @setEvalBranchQuota(10_000);
-    inline for (@typeInfo(T).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(T)) |field| {
         if (comptime isSlice(field.type))
             @memcpy(@field(destination, field.name), @field(source, field.name))
         else
@@ -3077,7 +3079,7 @@ fn thermalCloneTestState(
     state.cell_count = 1;
     state.soil_layer_capacity = thermal_clone_test_layer_count;
     var field_index: usize = 0;
-    inline for (@typeInfo(thermal_module.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(thermal_module.State)) |field| {
         if (comptime field.type != []f64) continue;
         @field(state, field.name) = backing[field_index][0..];
         field_index += 1;
@@ -3090,7 +3092,7 @@ fn fillCoefficientCloneTestSources(
     thermal_backing: *[thermal_clone_test_slice_count][thermal_clone_test_layer_count]f64,
 ) void {
     var field_index: usize = 0;
-    inline for (@typeInfo(workspace_module.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(workspace_module.State)) |field| {
         if (comptime !isSlice(field.type)) continue;
         if (comptime field.type == []f64) {
             for (@field(workspace, field.name), 0..) |*value, element|
@@ -3149,7 +3151,7 @@ test "coefficient snapshot runtime table clones every field without aliasing nei
     try std.testing.expectEqual(thermal.soil_layer_capacity, snapshot.thermal.soil_layer_capacity);
 
     var workspace_field_index: usize = 0;
-    inline for (@typeInfo(workspace_module.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(workspace_module.State)) |field| {
         if (comptime !isSlice(field.type)) continue;
         const source = @field(workspace, field.name);
         const cloned = @field(snapshot.workspace, field.name);
@@ -3187,7 +3189,7 @@ test "coefficient snapshot runtime table clones every field without aliasing nei
     }
 
     var thermal_field_index: usize = 0;
-    inline for (@typeInfo(thermal_module.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(thermal_module.State)) |field| {
         if (comptime field.type != []f64) continue;
         const source = @field(thermal, field.name);
         const cloned = @field(snapshot.thermal, field.name);
@@ -3251,7 +3253,7 @@ const Snapshot = struct {
         result.allocator = allocator;
         var allocated: usize = 0;
         errdefer result.freeAllocated(allocated);
-        inline for (@typeInfo(Snapshot).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Snapshot)) |field| {
             if (field.type == []f64) {
                 const source: []const f64 = snapshotF64Source(field.name, grid, hydrology, faces);
                 @field(result, field.name) = try allocator.dupe(f64, source);
@@ -3403,13 +3405,13 @@ const Snapshot = struct {
     }
 
     noinline fn deinit(self: *Snapshot) void {
-        inline for (@typeInfo(Snapshot).@"struct".fields) |field| if (field.type == []f64 or field.type == []solute.Face) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(Snapshot)) |field| if (field.type == []f64 or field.type == []solute.Face) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
     noinline fn freeAllocated(self: *Snapshot, count: usize) void {
         var visited: usize = 0;
-        inline for (@typeInfo(Snapshot).@"struct".fields) |field| if (field.type == []f64 or field.type == []solute.Face) {
+        inline for (ti_compat.fieldViews(Snapshot)) |field| if (field.type == []f64 or field.type == []solute.Face) {
             if (visited < count) self.allocator.free(@field(self, field.name));
             visited += 1;
         };
@@ -4808,12 +4810,12 @@ test "live accepted delta removes exactly one 38-allocation snapshot" {
         .succeed_without_solving = true,
         .exact_substep_count = 1,
     };
-    var phase_displacement = [_]PhaseDisplacement{.{}} ** 2;
-    var phase_reference_heat = [_]f64{0} ** 2;
+    var phase_displacement = @as([2]PhaseDisplacement, @splat(@as(PhaseDisplacement, .{})));
+    var phase_reference_heat = @as([2]f64, @splat(@as(f64, 0)));
 
     const snapshot_allocation_count = comptime count: {
         var allocations: usize = 0;
-        for (@typeInfo(Snapshot).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(Snapshot)) |field| {
             if (field.type == []f64 or field.type == []solute.Face) {
                 allocations += 1;
             }

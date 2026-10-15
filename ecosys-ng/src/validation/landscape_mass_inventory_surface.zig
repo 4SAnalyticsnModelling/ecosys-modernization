@@ -30,6 +30,7 @@ const surface_aqueous = @import("../surface/aqueous_runoff_transport.zig");
 const daily_litter_salt = @import("../redistribution/inventory/daily_litter_salt.zig");
 const fire_exchange = @import("../soil/biogeochemistry/organic_matter_fire_exchange.zig");
 const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub var diagnostic_surface_ice_water_equivalent_m3: f64 = 0;
 
@@ -167,7 +168,7 @@ fn aggregateSurfaceTransportComplexesRange(
             const amount_mol = state.amount_mol[cell * state.species_count + species_index];
             if (!std.math.isFinite(amount_mol) or amount_mol < 0)
                 return error.InvalidSurfaceTransportInventory;
-            const species: surface_aqueous.Species = @enumFromInt(species_index);
+            const species: surface_aqueous.Species = @fromBackingInt(@intCast(species_index));
             const formula = surface_aqueous.formula(species);
             result.carbon_dioxide_carbon_g +=
                 amount_mol * formula.carbon_mol * carbon_g_per_mol;
@@ -303,7 +304,7 @@ fn aggregateSurfaceChemistryRange(
         const cell = chemistry.cells[cell_index];
         try group_support.validateNumericStruct(cell);
         const solid_fertilizer = fertilizer.cells[cell_index];
-        inline for (std.meta.fields(litter_fertilizer.Inventory)) |field| {
+        inline for (ti_compat.fieldViews(litter_fertilizer.Inventory)) |field| {
             const value = @field(solid_fertilizer, field.name);
             if (!std.math.isFinite(value))
                 return error.NonFiniteSurfaceChemistryInventory;
@@ -498,7 +499,7 @@ fn aggregateSurfacePhysicalAndGasRange(
         grid.cell_count != cells or grid.surface_temperature_k.len != cells or
         gas_state.cell_count != cells or surface_organic.layer_count != cells)
         return error.SurfacePhysicalInventoryDimensionMismatch;
-    inline for (std.meta.fields(SurfacePhysicalParameters)) |field| {
+    inline for (ti_compat.fieldViews(SurfacePhysicalParameters)) |field| {
         const value = @field(parameters, field.name);
         if (!std.math.isFinite(value) or value <= 0)
             return error.InvalidSurfacePhysicalInventoryParameter;
@@ -594,7 +595,7 @@ fn aggregateSurfacePhysicalAndGasRange(
             group_support.fourPhaseGas(gaseous, dissolved, macropore, band, .nitrous_oxide);
         // Aqueous litter NH3 is already counted from the authoritative
         // chemistry owner above. Only `ZNH3G(0)` is gas-owned storage.
-        result.ammonium_nitrogen_g += gaseous[@intFromEnum(gas.Species.ammonia)];
+        result.ammonium_nitrogen_g += gaseous[@backingInt(gas.Species.ammonia)];
     }
     result.diagnostic_surface_heat_megajoules = result.heat_megajoules;
     try result.validate();

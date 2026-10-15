@@ -4,6 +4,8 @@ const root_pool_transaction_replay = @import("pool_transaction_replay.zig");
 const PlantRootState = @import("plant_root_system.zig").State;
 const NutrientUptakeTraits = @import("../../state/plant_traits.zig").NutrientUptake;
 const growth_temperature = @import("../response/growth_temperature.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const RuntimeParameters = struct {
     reference_temperature_k: f64,
@@ -103,7 +105,7 @@ pub fn activityFractions(
         );
     }
     const result: ActivityFractions = .{ .protein = protein, .carbon = carbon, .nitrogen = nitrogen, .phosphorus = phosphorus };
-    inline for (@typeInfo(ActivityFractions).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteRootNutrientActivity;
+    inline for (ti_compat.fieldViews(ActivityFractions)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteRootNutrientActivity;
     return result;
 }
 
@@ -117,7 +119,7 @@ pub const NutrientPool = enum(u8) {
     phosphate_h_nonband,
     phosphate_h_band,
 };
-pub const nutrient_pool_count = @typeInfo(NutrientPool).@"enum".fields.len;
+pub const nutrient_pool_count = @typeInfo(NutrientPool).@"enum".field_names.len;
 
 pub const Input = struct {
     soil_concentration_g_element_per_m3: f64,
@@ -370,7 +372,7 @@ pub fn buildLayerInputs(request: LayerInputRequest, outputs: []Input) !void {
     inline for (.{ request.total_soil_water_volume_m3, request.liquid_tortuosity, request.timestep_h, request.soil_path_length_m, request.root_cylinder_radius_m, request.root_surface_area_per_radius_m, request.root_surface_area_m2_per_plant, request.root_activity_fraction, request.oxygen_limitation_fraction, request.root_water_uptake_m3_per_plant_step, request.plant_population_count, request.carbon_uptake_limitation_fraction }) |value| if (!std.math.isFinite(value)) return error.NonFiniteRootNutrientLayerInput;
     if (request.total_soil_water_volume_m3 < 0 or request.liquid_tortuosity < 0 or request.timestep_h <= 0 or request.root_water_uptake_m3_per_plant_step < 0) return error.InvalidRootNutrientLayerInput;
     for (0..nutrient_pool_count) |pool_index| {
-        const pool: NutrientPool = @enumFromInt(pool_index);
+        const pool: NutrientPool = @fromBackingInt(@intCast(pool_index));
         const element = elementIndex(pool);
         const zone_fraction = request.zone_fraction_by_pool[pool_index];
         const zone_water_m3 = request.total_soil_water_volume_m3 * zone_fraction;
@@ -445,11 +447,11 @@ pub fn rootGrowthTemperatureResponse(soil_temperature_k: f64, thermal_adaptation
 /// in umol L-1; numerically that is mol m-3, so multiplication by molar mass
 /// produces g element m-3 without an additional power-of-ten conversion.
 pub fn inputFromTraits(input: TraitInput) !Input {
-    inline for (@typeInfo(TraitInput).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(TraitInput)) |field| {
         if (field.type == NutrientUptakeTraits) continue;
         if (!std.math.isFinite(@field(input, field.name))) return error.NonFiniteRootNutrientTraitInput;
     }
-    inline for (@typeInfo(NutrientUptakeTraits).@"struct".fields) |field| if (!std.math.isFinite(@field(input.traits, field.name))) return error.NonFiniteRootNutrientTraitInput;
+    inline for (ti_compat.fieldViews(NutrientUptakeTraits)) |field| if (!std.math.isFinite(@field(input.traits, field.name))) return error.NonFiniteRootNutrientTraitInput;
     if (input.element_molar_mass_g_per_mol <= 0 or
         input.root_surface_area_m2_per_plant < 0 or
         input.root_activity_fraction < 0 or input.root_activity_fraction > 1 or
@@ -502,7 +504,7 @@ fn transportMichaelisRoot(maximum_uptake: f64, diffusion: f64, mass_flow_term: f
 /// The source's `water_mass_flow_term` is retained algebraically as written,
 /// including its placement beside diffusive conductance in X.
 pub fn solve(input: Input) !Result {
-    inline for (@typeInfo(Input).@"struct".fields) |field| if (!std.math.isFinite(@field(input, field.name))) return error.NonFiniteRootNutrientInput;
+    inline for (ti_compat.fieldViews(Input)) |field| if (!std.math.isFinite(@field(input, field.name))) return error.NonFiniteRootNutrientInput;
     if (input.soil_concentration_g_element_per_m3 < 0 or input.soil_pool_g_element < 0 or input.total_soil_water_volume_m3 < 0 or input.soil_zone_fraction < 0 or input.soil_zone_fraction > 1 or input.water_mass_flow_term < 0 or input.diffusive_conductance_m3_per_step < 0 or input.minimum_residual_concentration_g_element_per_m3 < 0 or input.michaelis_half_saturation_g_element_per_m3 < 0 or input.maximum_uptake_g_element_per_plant_step < 0 or input.oxygen_unlimited_maximum_uptake_g_element_per_plant_step < 0 or input.plant_population_count <= 0 or input.population_competition_fraction < 0 or input.time_fraction < 0 or input.time_fraction > 1 or input.carbon_uptake_limitation_fraction <= 0 or input.carbon_uptake_limitation_fraction > 1) return error.InvalidRootNutrientInput;
     if (input.soil_zone_fraction == 0 or input.soil_concentration_g_element_per_m3 <= input.minimum_residual_concentration_g_element_per_m3) return .{ .demand_g_element = 0, .uptake_g_element = 0, .oxygen_unlimited_uptake_g_element = 0, .carbon_unlimited_uptake_g_element = 0, .available_g_element = 0 };
 
@@ -514,7 +516,7 @@ pub fn solve(input: Input) !Result {
     const uptake = @min(available, demand);
     const oxygen_unlimited = @min(available, @max(0.0, unlimited_per_plant * input.plant_population_count));
     const result = Result{ .demand_g_element = demand, .uptake_g_element = uptake, .oxygen_unlimited_uptake_g_element = oxygen_unlimited, .carbon_unlimited_uptake_g_element = uptake / input.carbon_uptake_limitation_fraction, .available_g_element = available };
-    inline for (@typeInfo(Result).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootNutrientResult;
+    inline for (ti_compat.fieldViews(Result)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootNutrientResult;
     return result;
 }
 
@@ -568,7 +570,7 @@ pub fn state_updateLayerUptake(roots: *PlantRootState, plant: usize, domain: usi
     var nitrate_total: f64 = roots.nitrate_uptake_g_n_per_h[plant];
     var phosphate_total: f64 = roots.phosphate_uptake_g_p_per_h[plant];
     for (0..nutrient_pool_count) |pool_index| {
-        const pool: NutrientPool = @enumFromInt(pool_index);
+        const pool: NutrientPool = @fromBackingInt(@intCast(pool_index));
         const uptake = results[pool_index].uptake_g_element;
         if (!std.math.isFinite(soil_pool_g_element[pool_index]) or soil_pool_g_element[pool_index] < 0 or !std.math.isFinite(uptake) or uptake < 0) return error.InvalidRootNutrientStateUpdate;
         next_soil[pool_index] = soil_pool_g_element[pool_index] - uptake;
@@ -583,7 +585,7 @@ pub fn state_updateLayerUptake(roots: *PlantRootState, plant: usize, domain: usi
     }
     inline for (.{ ammonium_total, nitrate_total, phosphate_total }) |value| if (!std.math.isFinite(value)) return error.NonFiniteRootNutrientStateUpdate;
     for (0..nutrient_pool_count) |pool_index| {
-        const pool: NutrientPool = @enumFromInt(pool_index);
+        const pool: NutrientPool = @fromBackingInt(@intCast(pool_index));
         soil_pool_g_element[pool_index] = next_soil[pool_index];
         layerUptakeField(roots, pool)[layer_index] = next_layer[pool_index];
         layerDemandField(roots, pool)[layer_index] = next_demand[pool_index];
@@ -629,7 +631,7 @@ pub fn stageCompetingLayer(
     const result_count = try std.math.mul(usize, competitors.len, nutrient_pool_count);
     if (staged_results.len != result_count) return error.RootNutrientCompetitionWorkspaceSizeMismatch;
 
-    var total_uptake = [_]f64{0} ** nutrient_pool_count;
+    var total_uptake = @as([nutrient_pool_count]f64, @splat(@as(f64, 0)));
     for (competitors, 0..) |competitor, competitor_index| {
         if (competitor.input_by_pool.len != nutrient_pool_count) return error.RootNutrientPoolCountMismatch;
         _ = try roots.layerIndex(competitor.plant, competitor.domain, competitor.layer);
@@ -697,7 +699,7 @@ fn state_updateStagedCompetingLayerTransaction(
     if (respiration_coefficient) |coefficient| if (!std.math.isFinite(coefficient) or coefficient < 0) return error.InvalidRootNutrientRespirationCoefficient;
     const result_count = try std.math.mul(usize, competitors.len, nutrient_pool_count);
     if (staged_results.len != result_count) return error.RootNutrientCompetitionWorkspaceSizeMismatch;
-    var total_uptake = [_]f64{0} ** nutrient_pool_count;
+    var total_uptake = @as([nutrient_pool_count]f64, @splat(@as(f64, 0)));
     for (competitors, 0..) |competitor, competitor_index| {
         _ = try roots.layerIndex(competitor.plant, competitor.domain, competitor.layer);
         const result_base = competitor_index * nutrient_pool_count;
@@ -722,7 +724,7 @@ fn state_updateStagedCompetingLayerTransaction(
         var nitrate_total = roots.nitrate_uptake_g_n_per_h[competitor.plant];
         var phosphate_total = roots.phosphate_uptake_g_p_per_h[competitor.plant];
         for (0..nutrient_pool_count) |pool_index| {
-            const pool: NutrientPool = @enumFromInt(pool_index);
+            const pool: NutrientPool = @fromBackingInt(@intCast(pool_index));
             const uptake = staged_results[result_base + pool_index].uptake_g_element;
             const next_layer = layerUptakeField(roots, pool)[layer_index] + uptake;
             if (!std.math.isFinite(next_layer)) return error.NonFiniteRootNutrientStateUpdate;
@@ -764,7 +766,7 @@ fn state_updateStagedCompetingLayerTransaction(
         const layer_index = try roots.layerIndex(competitor.plant, competitor.domain, competitor.layer);
         const result_base = competitor_index * nutrient_pool_count;
         for (0..nutrient_pool_count) |pool_index| {
-            const pool: NutrientPool = @enumFromInt(pool_index);
+            const pool: NutrientPool = @fromBackingInt(@intCast(pool_index));
             const uptake = staged_results[result_base + pool_index].uptake_g_element;
             layerUptakeField(roots, pool)[layer_index] += uptake;
             layerDemandField(roots, pool)[layer_index] += staged_results[result_base + pool_index].demand_g_element;
@@ -821,7 +823,7 @@ test "eight-pool builder preserves zone mass flow and phosphate charge scaling" 
         .oxygen_limitation_fraction = 0.75,
         .root_water_uptake_m3_per_plant_step = 0.1,
         .plant_population_count = 10,
-        .population_competition_fraction_by_pool = .{1} ** nutrient_pool_count,
+        .population_competition_fraction_by_pool = @splat(1),
         .carbon_uptake_limitation_fraction = 0.5,
     }, &outputs);
     try std.testing.expectApproxEqAbs(@as(f64, 5), outputs[0].soil_concentration_g_element_per_m3, 1e-15);
@@ -834,8 +836,8 @@ test "eight-pool builder preserves zone mass flow and phosphate charge scaling" 
 test "UPTAKE eight-pool layer state_update updates runtime root and PFT totals atomically" {
     var roots = try PlantRootState.init(std.testing.allocator, 2, 2, 3);
     defer roots.deinit();
-    var soil = [_]f64{2} ** nutrient_pool_count;
-    var results = [_]Result{.{ .demand_g_element = 0.2, .uptake_g_element = 0.2, .oxygen_unlimited_uptake_g_element = 0.3, .carbon_unlimited_uptake_g_element = 0.4, .available_g_element = 1 }} ** nutrient_pool_count;
+    var soil = @as([nutrient_pool_count]f64, @splat(@as(f64, 2)));
+    var results = @as([nutrient_pool_count]Result, @splat(@as(Result, .{ .demand_g_element = 0.2, .uptake_g_element = 0.2, .oxygen_unlimited_uptake_g_element = 0.3, .carbon_unlimited_uptake_g_element = 0.4, .available_g_element = 1 })));
     try state_updateLayerUptake(&roots, 1, 1, 1, &soil, &results);
     const index = try roots.layerIndex(1, 1, 1);
     try std.testing.expectApproxEqAbs(@as(f64, 0.2), roots.ammonium_uptake_nonband_g_n_per_h[index], 1.0e-12);
@@ -851,7 +853,7 @@ test "UPTAKE eight-pool layer state_update updates runtime root and PFT totals a
 test "runtime competitors stage against one layer snapshot and state_update conservatively" {
     var roots = try PlantRootState.init(std.testing.allocator, 3, 1, 1);
     defer roots.deinit();
-    var soil = [_]f64{12} ** nutrient_pool_count;
+    var soil = @as([nutrient_pool_count]f64, @splat(@as(f64, 12)));
     var inputs: [3][nutrient_pool_count]Input = undefined;
     for (&inputs) |*plant_inputs| {
         for (plant_inputs) |*input| input.* = .{
@@ -881,7 +883,7 @@ test "runtime competitors stage against one layer snapshot and state_update cons
     try advanceCompetingLayer(&roots, &soil, &competitors, &staged);
     for (0..nutrient_pool_count) |pool_index| {
         var root_total: f64 = 0;
-        const pool: NutrientPool = @enumFromInt(pool_index);
+        const pool: NutrientPool = @fromBackingInt(@intCast(pool_index));
         for (0..3) |plant| root_total += layerUptakeField(&roots, pool)[try roots.layerIndex(plant, 0, 0)];
         try std.testing.expectApproxEqAbs(initial[pool_index], soil[pool_index] + root_total, 1.0e-12);
     }
@@ -892,7 +894,7 @@ test "GROSUB nutrient assimilation atomically couples extraction mobile pools an
     defer roots.deinit();
     var workspace = try Workspace.init(std.testing.allocator, 1);
     defer workspace.deinit();
-    var soil = [_]f64{10} ** nutrient_pool_count;
+    var soil = @as([nutrient_pool_count]f64, @splat(@as(f64, 10)));
     const root = try roots.layerIndex(0, 0, 0);
     roots.mobile_carbon_g[root] = 10;
     const inputs = try workspace.inputs(0);
@@ -964,7 +966,7 @@ test "combined nutrient advance is bit-identical to stage then state_update for 
             combined_roots.mobile_carbon_g[try combined_roots.layerIndex(competitor, 0, 0)] = 10;
             staged_roots.mobile_carbon_g[try staged_roots.layerIndex(competitor, 0, 0)] = 10;
         }
-        var combined_soil = [_]f64{20} ** nutrient_pool_count;
+        var combined_soil = @as([nutrient_pool_count]f64, @splat(@as(f64, 20)));
         var staged_soil = combined_soil;
         try combined_workspace.advanceAssimilating(&combined_roots, &combined_soil, competitor_count, 0.86);
         try staged_workspace.stage(&staged_roots, &staged_soil, competitor_count);
@@ -987,7 +989,7 @@ test "late staged nutrient state_update failure rolls back root and shared soil"
         workspace.competitors[competitor] = .{ .plant = competitor, .domain = 0, .layer = 0, .input_by_pool = inputs };
         roots.mobile_carbon_g[try roots.layerIndex(competitor, 0, 0)] = 10;
     }
-    var soil = [_]f64{2} ** nutrient_pool_count;
+    var soil = @as([nutrient_pool_count]f64, @splat(@as(f64, 2)));
     try workspace.stage(&roots, &soil, 2);
     workspace.staged_results[nutrient_pool_count].uptake_g_element = 3;
     const soil_before = soil;
@@ -1010,7 +1012,7 @@ test "runtime competitor over-1.0 competition fractions are rescaled down, not a
     // plant_root_salt_exchange.zig's constrainSpeciesExchange.
     var roots = try PlantRootState.init(std.testing.allocator, 2, 1, 1);
     defer roots.deinit();
-    var soil = [_]f64{1} ** nutrient_pool_count;
+    var soil = @as([nutrient_pool_count]f64, @splat(@as(f64, 1)));
     var inputs: [2][nutrient_pool_count]Input = undefined;
     for (&inputs) |*plant_inputs| {
         for (plant_inputs) |*input| input.* = .{
@@ -1052,7 +1054,7 @@ test "runtime competitor over-1.0 competition fractions are rescaled down, not a
 test "runtime single competitor below the pool ceiling is never rescaled" {
     var roots = try PlantRootState.init(std.testing.allocator, 1, 1, 1);
     defer roots.deinit();
-    var soil = [_]f64{10} ** nutrient_pool_count;
+    var soil = @as([nutrient_pool_count]f64, @splat(@as(f64, 10)));
     var inputs: [nutrient_pool_count]Input = undefined;
     for (&inputs) |*input| input.* = .{
         .soil_concentration_g_element_per_m3 = 4,

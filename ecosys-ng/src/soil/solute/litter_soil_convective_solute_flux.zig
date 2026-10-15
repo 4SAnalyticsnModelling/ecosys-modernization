@@ -17,6 +17,7 @@
 // disturbance fraction.
 const std = @import("std");
 
+
 pub const pre_phosphate_species_count = 34;
 pub const phosphate_species_count = 8;
 pub const litter_species_count = 42;
@@ -114,9 +115,9 @@ fn baseInputs(litter: []const f64, soil: []const f64, water_flux: f64) Inputs {
 }
 
 test "TRNSFRS downward flow uses litter and partitions phosphate" {
-    const litter = [_]f64{8} ** litter_species_count;
-    const soil = [_]f64{99} ** soil_species_count;
-    var flux = [_]f64{0} ** soil_species_count;
+    const litter = @as([litter_species_count]f64, @splat(@as(f64, 8)));
+    const soil = @as([soil_species_count]f64, @splat(@as(f64, 99)));
+    var flux = @as([soil_species_count]f64, @splat(@as(f64, 0)));
     try calculate(baseInputs(&litter, &soil, 2), &flux);
     try std.testing.expectEqual(@as(f64, 4), flux[0]);
     try std.testing.expectEqual(@as(f64, 1), flux[34]);
@@ -124,11 +125,11 @@ test "TRNSFRS downward flow uses litter and partitions phosphate" {
 }
 
 test "TRNSFRS upward flow uses distinct soil non-band and band inventories" {
-    const litter = [_]f64{99} ** litter_species_count;
-    var soil = [_]f64{4} ** soil_species_count;
+    const litter = @as([litter_species_count]f64, @splat(@as(f64, 99)));
+    var soil = @as([soil_species_count]f64, @splat(@as(f64, 4)));
     soil[34] = 8;
     soil[42] = 12;
-    var flux = [_]f64{0} ** soil_species_count;
+    var flux = @as([soil_species_count]f64, @splat(@as(f64, 0)));
     try calculate(baseInputs(&litter, &soil, -1), &flux);
     try std.testing.expectEqual(@as(f64, -2), flux[0]);
     try std.testing.expectEqual(@as(f64, -4), flux[34]);
@@ -136,10 +137,10 @@ test "TRNSFRS upward flow uses distinct soil non-band and band inventories" {
 }
 
 test "dry donor uses signed maximum fraction and clamps negative inventory" {
-    var litter = [_]f64{8} ** litter_species_count;
+    var litter = @as([litter_species_count]f64, @splat(@as(f64, 8)));
     litter[0] = -3;
-    const soil = [_]f64{4} ** soil_species_count;
-    var flux = [_]f64{9} ** soil_species_count;
+    const soil = @as([soil_species_count]f64, @splat(@as(f64, 4)));
+    var flux = @as([soil_species_count]f64, @splat(@as(f64, 9)));
     var inputs = baseInputs(&litter, &soil, 2);
     inputs.litter_water_m3 = 0;
     try calculate(inputs, &flux);
@@ -148,13 +149,13 @@ test "dry donor uses signed maximum fraction and clamps negative inventory" {
 }
 
 test "late invalid input leaves output atomic" {
-    var litter = [_]f64{8} ** litter_species_count;
+    var litter = @as([litter_species_count]f64, @splat(@as(f64, 8)));
     litter[litter_species_count - 1] = std.math.inf(f64);
-    const soil = [_]f64{4} ** soil_species_count;
-    var flux = [_]f64{9} ** soil_species_count;
+    const soil = @as([soil_species_count]f64, @splat(@as(f64, 4)));
+    var flux = @as([soil_species_count]f64, @splat(@as(f64, 9)));
     try std.testing.expectError(
         error.NonFiniteLitterSoilConvectiveSoluteInput,
         calculate(baseInputs(&litter, &soil, 2), &flux),
     );
-    try std.testing.expectEqualSlices(f64, &([_]f64{9} ** soil_species_count), &flux);
+    try std.testing.expectEqualSlices(f64, &(@as([soil_species_count]f64, @splat(@as(f64, 9)))), &flux);
 }

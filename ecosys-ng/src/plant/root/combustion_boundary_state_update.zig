@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Products = struct {
     carbon_dioxide_g_c: f64,
@@ -25,10 +26,10 @@ pub const Ledger = struct {
 /// charcoal products enter ecosystem inventories, while atmospheric fire
 /// products are subtracted from the source's signed ecosystem flux ledgers.
 pub fn publish(ledger: *Ledger, products: Products) !void {
-    inline for (std.meta.fields(Ledger)) |field|
+    inline for (ti_compat.fieldViews(Ledger)) |field|
         if (!std.math.isFinite(@field(ledger.*, field.name)))
             return error.NonFiniteRootCombustionBoundaryLedger;
-    inline for (std.meta.fields(Products)) |field| {
+    inline for (ti_compat.fieldViews(Products)) |field| {
         const value = @field(products, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteRootCombustionBoundaryProduct;
@@ -50,7 +51,7 @@ pub fn publish(ledger: *Ledger, products: Products) !void {
         .signed_phosphorus_oxide_fire_flux_g_p = ledger.signed_phosphorus_oxide_fire_flux_g_p -
             products.phosphorus_oxide_g_p,
     };
-    inline for (std.meta.fields(Ledger)) |field|
+    inline for (ti_compat.fieldViews(Ledger)) |field|
         if (!std.math.isFinite(@field(next, field.name)))
             return error.NonFiniteRootCombustionBoundaryResult;
     ledger.* = next;

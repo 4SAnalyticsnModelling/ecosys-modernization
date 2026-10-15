@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const DisturbanceChanges = struct {
     pond_m: []const f64,
@@ -40,7 +41,7 @@ pub const State = struct {
         errdefer allocator.free(result.active_layer_count);
         var f64_allocated: usize = 0;
         errdefer freeF64Allocated(&result, f64_allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             const length = if (std.mem.indexOf(u8, field.name, "boundary") != null) boundary_count else layer_count;
             @field(result, field.name) = try allocator.alloc(f64, length);
             @memset(@field(result, field.name), 0);
@@ -69,7 +70,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.allocator.free(self.active_layer_count);
         self.allocator.free(self.first_active_layer);
         self.* = undefined;
@@ -186,7 +187,7 @@ fn validateAndCalculateDerived(state: *State, minimum_layer_thickness_m: f64) !v
 
 fn freeF64Allocated(state: *State, count: usize) void {
     var visited: usize = 0;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         if (visited < count) state.allocator.free(@field(state, field.name));
         visited += 1;
     };

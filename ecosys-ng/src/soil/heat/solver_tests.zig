@@ -25,6 +25,7 @@ const group_types = @import("solver_types.zig");
 // production text these assertions read back from disk.
 const source_scan = @import("../../core/source_scan.zig");
 
+
 fn readSolverSolveSource() ![]u8 {
     return std.Io.Dir.cwd().readFileAlloc(
         std.testing.io,
@@ -2286,8 +2287,8 @@ test "dense signed enthalpy Newton solves connected 2x2 graph and failure stays 
         .n = 2.5,
         .saturated_hydraulic_conductivity_m_per_h = 1,
     };
-    const curves = [_]retention.MualemVanGenuchtenParameters{curve_value} ** 4;
-    const volume = [_]f64{0.01} ** 4;
+    const curves = @as([4]retention.MualemVanGenuchtenParameters, @splat(@as(retention.MualemVanGenuchtenParameters, curve_value)));
+    const volume = @as([4]f64, @splat(@as(f64, 0.01)));
     const liquid_capacity = 0.6 / 1.43e-7 * 1.0e-6;
     const ice_capacity = 2.117;
     const phase_parameters: enthalpy.Parameters = .{
@@ -2315,15 +2316,15 @@ test "dense signed enthalpy Newton solves connected 2x2 graph and failure stays 
     }
     const heat_capacity_value = liquid_capacity * grid.matrix_liquid_water_m3[0] +
         ice_capacity * grid.matrix_ice_water_m3[0];
-    const heat_capacity = [_]f64{heat_capacity_value} ** 4;
-    const zero = [_]f64{0} ** 4;
-    const one = [_]f64{1} ** 4;
-    const conductivity_numerator = [_]f64{0.01} ** 4;
+    const heat_capacity = @as([4]f64, @splat(@as(f64, heat_capacity_value)));
+    const zero = @as([4]f64, @splat(@as(f64, 0)));
+    const one = @as([4]f64, @splat(@as(f64, 1)));
+    const conductivity_numerator = @as([4]f64, @splat(@as(f64, 0.01)));
     const liquid_fraction_value = grid.matrix_liquid_water_m3[0] / volume[0];
     const ice_fraction_value = grid.matrix_ice_water_m3[0] / volume[0];
-    const liquid_fraction = [_]f64{liquid_fraction_value} ** 4;
-    const ice_fraction = [_]f64{ice_fraction_value} ** 4;
-    const top = [_]bool{true} ** 4;
+    const liquid_fraction = @as([4]f64, @splat(@as(f64, liquid_fraction_value)));
+    const ice_fraction = @as([4]f64, @splat(@as(f64, ice_fraction_value)));
+    const top = @as([4]bool, @splat(@as(bool, true)));
     const failure_source = [_]f64{ -0.1, 0, 0, 0 };
     const source = [_]f64{
         -13.829135169240894 * (1e-13 + 1e-11),
@@ -2382,11 +2383,11 @@ test "dense signed enthalpy Newton solves connected 2x2 graph and failure stays 
         .{ .source_cell = 1, .destination_cell = 3, .source_path_length_m = 0.01, .destination_path_length_m = 0.01, .face_area_m2 = 1 },
         .{ .source_cell = 2, .destination_cell = 3, .source_path_length_m = 0.01, .destination_path_length_m = 0.01, .face_area_m2 = 1 },
     };
-    const zero_face_flux = [_]f64{0} ** faces.len;
-    var heat_flux = [_]f64{99} ** faces.len;
-    const initial_temperature = [_]f64{272.7082120237665} ** 4;
-    const initial_matrix_liquid = [_]f64{grid.matrix_liquid_water_m3[0]} ** 4;
-    const initial_matrix_ice = [_]f64{grid.matrix_ice_water_m3[0]} ** 4;
+    const zero_face_flux = @as([faces.len]f64, @splat(@as(f64, 0)));
+    var heat_flux = @as([faces.len]f64, @splat(@as(f64, 99)));
+    const initial_temperature = @as([4]f64, @splat(@as(f64, 272.7082120237665)));
+    const initial_matrix_liquid = @as([4]f64, @splat(@as(f64, grid.matrix_liquid_water_m3[0])));
+    const initial_matrix_ice = @as([4]f64, @splat(@as(f64, grid.matrix_ice_water_m3[0])));
 
     try std.testing.expectError(
         error.SoilHeatSolverDidNotConverge,
@@ -2408,7 +2409,7 @@ test "dense signed enthalpy Newton solves connected 2x2 graph and failure stays 
     try std.testing.expectEqualSlices(f64, &initial_temperature, grid.soil_temperature_k);
     try std.testing.expectEqualSlices(f64, &initial_matrix_liquid, grid.matrix_liquid_water_m3);
     try std.testing.expectEqualSlices(f64, &initial_matrix_ice, grid.matrix_ice_water_m3);
-    try std.testing.expectEqualSlices(f64, &([_]f64{99} ** faces.len), &heat_flux);
+    try std.testing.expectEqualSlices(f64, &(@as([faces.len]f64, @splat(@as(f64, 99)))), &heat_flux);
 
     properties.cell_heat_source_megajoules = &source;
     var initial_total_enthalpy: f64 = 0;

@@ -1,0 +1,106 @@
+install
++- install ecosys_ng
+   +- compile exe ecosys_ng debug native 29 errors
+src/canopy/energy/precipitation_retention.zig:108:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(State)) |field| {
+        ^~~~~~
+src/canopy/photosynthesis/photosynthesis_state.zig:524:5: error: redundant inline keyword in comptime scope
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
+    ^~~~~~
+src/canopy/photosynthesis/photosynthesis_state.zig:537:5: error: redundant inline keyword in comptime scope
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
+    ^~~~~~
+src/canopy/photosynthesis/photosynthesis_state.zig:547:5: error: redundant inline keyword in comptime scope
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
+    ^~~~~~
+src/canopy/radiation/layer_distribution.zig:588:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(State)) |field| {
+        ^~~~~~
+src/canopy/radiation/layer_distribution.zig:595:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(Workspace)) |field| {
+        ^~~~~~
+src/io/checkpoint/plant_root_checkpoint.zig:36:5: error: redundant inline keyword in comptime scope
+    inline for (ti_compat.fieldViews(RootState)) |field| switch (field.type) {
+    ^~~~~~
+src/io/checkpoint/plant_root_checkpoint.zig:50:5: error: redundant inline keyword in comptime scope
+    inline for (ti_compat.fieldViews(RootState)) |field| {
+    ^~~~~~
+src/management/disturbance_management_dispatch.zig:535:5: error: redundant inline keyword in comptime scope
+    inline for (ti_compat.fieldViews(Canopy.State)) |field| if (field.type == []f64) {
+    ^~~~~~
+src/management/disturbance_management_dispatch.zig:547:5: error: redundant inline keyword in comptime scope
+    inline for (ti_compat.fieldViews(Canopy.State)) |field| if (field.type == []f64) {
+    ^~~~~~
+src/plant/accounting/daily_flux.zig:735:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(State)) |field| {
+        ^~~~~~
+src/plant/lifecycle/phenology.zig:299:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(BranchDevelopmentState)) |field| {
+        ^~~~~~
+src/plant/root/plant_root_system.zig:990:5: error: redundant inline keyword in comptime scope
+    inline for (ti_compat.fieldViews(State)) |field| {
+    ^~~~~~
+src/plant/root/plant_root_system.zig:1002:5: error: redundant inline keyword in comptime scope
+    inline for (ti_compat.fieldViews(State)) |field| {
+    ^~~~~~
+src/redistribution/tillage/runtime_adapter.zig:2120:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(T), 0..) |field, index| {
+        ^~~~~~
+src/soil/gas/methane_step.zig:108:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(State)) |field| {
+        ^~~~~~
+src/soil/microbial/phosphorus_state.zig:61:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(State)) |field| {
+        ^~~~~~
+src/soil/nutrients/nitrogen_flux_workspace.zig:166:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(State)) |field| {
+        ^~~~~~
+src/soil/nutrients/reactive_nitrogen_state.zig:134:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(State)) |field| {
+        ^~~~~~
+src/soil/water/heat_step.zig:4819:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(Snapshot)) |field| {
+        ^~~~~~
+src/surface/autotrophic_complex_step.zig:108:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(State)) |field| {
+        ^~~~~~
+src/surface/denitrification_step.zig:78:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(State)) |field| {
+        ^~~~~~
+src/surface/litter_geometry_step.zig:60:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(State)) |field| {
+        ^~~~~~
+src/surface/precipitation.zig:100:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(RuntimeState)) |field| {
+        ^~~~~~
+src/surface/runoff.zig:120:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(State)) |field| {
+        ^~~~~~
+src/validation/ecosystem_energy_budget.zig:65:9: error: redundant inline keyword in comptime scope
+        inline for (ti_compat.fieldViews(State)) |field| {
+        ^~~~~~
+src/validation/layer_local_conservation.zig:48:5: error: redundant inline keyword in comptime scope
+    inline for (ti_compat.enumFieldViews(snow.Species), 0..) |field, index| {
+    ^~~~~~
+src/validation/layer_local_conservation.zig:51:5: error: redundant inline keyword in comptime scope
+    inline for (ti_compat.enumFieldViews(snow.SaltSpecies), 0..) |field, index| {
+    ^~~~~~
+src/io/checkpoint/canopy_state_checkpoint.zig:239:12: error: evaluation exceeded 1000 backwards branches
+    inline for (ti_compat.fieldViews(T)) |field| if (field.type == []f64) {
+    ~~~~~~~^~~
+src/io/checkpoint/canopy_state_checkpoint.zig:239:12: note: use @setEvalBranchQuota() to raise the branch limit from 1000
+src/io/checkpoint/canopy_state_checkpoint.zig:246:39: note: called at comptime here
+const state_float_fields = floatFields(State);
+                           ~~~~~~~~~~~^~~~~~~
+referenced by:
+    readPayload: src/io/checkpoint/canopy_state_checkpoint.zig:139:50
+    read: src/io/checkpoint/canopy_state_checkpoint.zig:71:20
+    9 reference(s) hidden; use '-freference-trace=11' to see all references
+error: 29 compilation errors
+failed command: /opt/homebrew/Cellar/zig/0.17.0/bin/zig build-exe -Odebug --dep ecosys_ng -Mroot=src/ecosys_ng.zig -Odebug -Mecosys_ng=src/module_index.zig --cache-dir .zig-cache --global-cache-dir .zig-cache-global --build-root . --name ecosys_ng --zig-lib-dir /opt/homebrew/Cellar/zig/0.17.0/lib/zig/ --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+install transitive failure
++- install ecosys_ng transitive failure
+   +- compile exe ecosys_ng debug native 29 errors
+

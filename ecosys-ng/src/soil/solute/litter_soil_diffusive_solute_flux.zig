@@ -17,6 +17,7 @@
 // disturbance fraction.
 const std = @import("std");
 
+
 pub const litter_species_count = 42;
 pub const soil_species_count = 50;
 pub const conductance_class_count = 14;
@@ -107,13 +108,13 @@ fn fixture(litter: []const f64, soil: []const f64, conductance: []const f64) Inp
 }
 
 test "TRNSFRS preserves species-class mapping and signed concentration gradient" {
-    var litter = [_]f64{10} ** litter_species_count;
-    var soil = [_]f64{2} ** soil_species_count;
+    var litter = @as([litter_species_count]f64, @splat(@as(f64, 10)));
+    var soil = @as([soil_species_count]f64, @splat(@as(f64, 2)));
     var conductance: [conductance_class_count]f64 = undefined;
     for (&conductance, 0..) |*value, index| value.* = @floatFromInt(index + 1);
     litter[0] = 1;
     soil[0] = 3;
-    var flux = [_]f64{0} ** soil_species_count;
+    var flux = @as([soil_species_count]f64, @splat(@as(f64, 0)));
     try calculate(fixture(&litter, &soil, &conductance), &flux);
     try std.testing.expectEqual(@as(f64, -4), flux[0]); // Al class index 1 => 2.
     try std.testing.expectEqual(@as(f64, 16), flux[12]);
@@ -123,34 +124,34 @@ test "TRNSFRS preserves species-class mapping and signed concentration gradient"
 }
 
 test "closed legacy gate explicitly zeroes all fifty fluxes" {
-    const litter = [_]f64{10} ** litter_species_count;
-    const soil = [_]f64{2} ** soil_species_count;
-    const conductance = [_]f64{1} ** conductance_class_count;
-    var flux = [_]f64{9} ** soil_species_count;
+    const litter = @as([litter_species_count]f64, @splat(@as(f64, 10)));
+    const soil = @as([soil_species_count]f64, @splat(@as(f64, 2)));
+    const conductance = @as([conductance_class_count]f64, @splat(@as(f64, 1)));
+    var flux = @as([soil_species_count]f64, @splat(@as(f64, 9)));
     var inputs = fixture(&litter, &soil, &conductance);
     inputs.exchange_active = false;
     try calculate(inputs, &flux);
-    try std.testing.expectEqualSlices(f64, &([_]f64{0} ** soil_species_count), &flux);
+    try std.testing.expectEqualSlices(f64, &(@as([soil_species_count]f64, @splat(@as(f64, 0)))), &flux);
 }
 
 test "late invalid concentration leaves output atomic" {
-    const litter = [_]f64{10} ** litter_species_count;
-    var soil = [_]f64{2} ** soil_species_count;
+    const litter = @as([litter_species_count]f64, @splat(@as(f64, 10)));
+    var soil = @as([soil_species_count]f64, @splat(@as(f64, 2)));
     soil[soil_species_count - 1] = std.math.inf(f64);
-    const conductance = [_]f64{1} ** conductance_class_count;
-    var flux = [_]f64{9} ** soil_species_count;
+    const conductance = @as([conductance_class_count]f64, @splat(@as(f64, 1)));
+    var flux = @as([soil_species_count]f64, @splat(@as(f64, 9)));
     try std.testing.expectError(
         error.InvalidLitterSoilDiffusiveSoluteInput,
         calculate(fixture(&litter, &soil, &conductance), &flux),
     );
-    try std.testing.expectEqualSlices(f64, &([_]f64{9} ** soil_species_count), &flux);
+    try std.testing.expectEqualSlices(f64, &(@as([soil_species_count]f64, @splat(@as(f64, 9)))), &flux);
 }
 
 test "diffusive topology rejects a missing conductance class" {
-    const litter = [_]f64{10} ** litter_species_count;
-    const soil = [_]f64{2} ** soil_species_count;
-    const conductance = [_]f64{1} ** (conductance_class_count - 1);
-    var flux = [_]f64{9} ** soil_species_count;
+    const litter = @as([litter_species_count]f64, @splat(@as(f64, 10)));
+    const soil = @as([soil_species_count]f64, @splat(@as(f64, 2)));
+    const conductance = @as([(conductance_class_count - 1)]f64, @splat(@as(f64, 1)));
+    var flux = @as([soil_species_count]f64, @splat(@as(f64, 9)));
     try std.testing.expectError(
         error.LitterSoilDiffusiveSoluteDimensionMismatch,
         calculate(fixture(&litter, &soil, &conductance), &flux),

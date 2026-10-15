@@ -4,6 +4,7 @@ const organic = @import("../soil/organic/initialization.zig");
 const metabolism = @import("../soil/microbial/metabolism.zig");
 const respiration = @import("microbial_respiration_step.zig");
 
+
 pub const structural_component_count: usize = 2;
 
 pub const State = struct {
@@ -79,8 +80,8 @@ test "surface assimilation reproduces CGOMS split and conserves elements" {
     organic_state.microbial[2] = .{ .carbon_g_c = 10, .nitrogen_g_n = 1, .phosphorus_g_p = 0.2 };
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    const n = [_]f64{0.1} ** (organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
-    const p = [_]f64{0.02} ** (organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
+    const n = @as([(organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.1)));
+    const p = @as([(organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.02)));
     var context: ApplyContext = .{ .result = &state, .surface_organic = &organic_state, .growth_temperature_response = &.{1}, .matric_plus_osmotic_potential_megapascal = &.{0}, .microbial_nitrogen_to_carbon_g_n_per_g_c = &n, .microbial_phosphorus_to_carbon_g_p_per_g_c = &p, .labile_structural_fraction = 0.55, .transfer_rate_per_h = 0.25, .timestep_h = 1 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expectApproxEqAbs(@as(f64, 1.375), state.transfer[0].carbon_g_c, 1e-15);

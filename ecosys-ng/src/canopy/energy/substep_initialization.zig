@@ -5,6 +5,7 @@
 // Delayed combustion heat stays with the separately bound canopy-air solve, so
 // the production call passes zero here and avoids booking the same heat twice.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const IterationPolicy = struct {
     maximum_iterations: usize,
@@ -68,14 +69,14 @@ pub fn calculate(inputs: Inputs) !Result {
         .canopy_surface_water_m3 = canopy_surface_water_m3,
         .retained_foliar_water_heat_megajoules_per_step = retained_heat,
     };
-    inline for (@typeInfo(Result).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Result)) |field|
         if (field.type == f64 and !std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteCanopyEnergySubstepInitialization;
     return result;
 }
 
 fn validate(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.InvalidCanopyEnergySubstepInput;
     if (inputs.canopy_air_temperature_k <= 0 or

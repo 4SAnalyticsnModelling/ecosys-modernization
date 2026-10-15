@@ -1,4 +1,6 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Species = enum(u8) {
     carbon_dioxide,
@@ -10,11 +12,11 @@ pub const Species = enum(u8) {
     hydrogen,
 };
 
-pub const species_count = @typeInfo(Species).@"enum".fields.len;
+pub const species_count = @typeInfo(Species).@"enum".field_names.len;
 
 pub fn massIndex(cell: usize, species: Species, cell_count: usize) !usize {
     if (cell >= cell_count) return error.GasTransportCellIndexOutOfBounds;
-    return try std.math.add(usize, try std.math.mul(usize, cell, species_count), @intFromEnum(species));
+    return try std.math.add(usize, try std.math.mul(usize, cell, species_count), @backingInt(species));
 }
 
 /// ecosys stores each gas as the mass of its tracked element: C for CO2/CH4,
@@ -54,7 +56,7 @@ pub fn initializeSurfaceCell(state: *State, cell: usize, air_volume_m3: f64, ini
     for (&gaseous, &dissolved, atmospheric_concentration_g_per_m3, solubility, 0..) |*gas_mass, *water_mass, concentration, ratio, species_index| {
         if (!std.math.isFinite(concentration) or concentration < 0) return error.InvalidSurfaceGasInitialization;
         gas_mass.* = concentration * air_volume_m3;
-        water_mass.* = if (species_index == @intFromEnum(Species.ammonia)) 0 else concentration * ratio * initial_water_volume_m3;
+        water_mass.* = if (species_index == @backingInt(Species.ammonia)) 0 else concentration * ratio * initial_water_volume_m3;
         if (!std.math.isFinite(gas_mass.*) or !std.math.isFinite(water_mass.*)) return error.NonFiniteSurfaceGasInitialization;
     }
     const first = cell * species_count;
@@ -108,8 +110,8 @@ pub fn initializeSoilLayerCell(
         const ionic_divisor = @exp(activity * ionic_strength);
         if (!std.math.isFinite(ionic_divisor) or ionic_divisor <= 0) return error.NonFiniteSoilGasInitialization;
         state.gaseous_mass_g[index] = concentration * air_volume_m3;
-        const suppressed = species == @intFromEnum(Species.ammonia) or
-            (species == @intFromEnum(Species.oxygen) and !above_water_table);
+        const suppressed = species == @backingInt(Species.ammonia) or
+            (species == @backingInt(Species.oxygen) and !above_water_table);
         state.dissolved_mass_g[index] = if (suppressed)
             0
         else
@@ -138,7 +140,7 @@ test "soil layer above the water table receives dissolved oxygen" {
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
     try initializeSoilLayerCell(&state, 0, 0.15, 0.25, 0.1, 1.5, 279.65, test_atmosphere, test_solubility, 0, starte_activity_coefficient);
-    const oxygen = @intFromEnum(Species.oxygen);
+    const oxygen = @backingInt(Species.oxygen);
     try std.testing.expectApproxEqRel(@as(f64, 300.3 * 0.15), state.gaseous_mass_g[oxygen], 1e-15);
     try std.testing.expectApproxEqRel(
         300.3 * 0.02925 * @exp(0.516 - 0.0172 * 6.5) * 0.25,
@@ -153,19 +155,19 @@ test "soil layer at or below the water table starts anoxic in the aqueous phase 
     // Upper face exactly at the water table: the source condition is a strict
     // `<`, so this layer must be suppressed.
     try initializeSoilLayerCell(&state, 0, 0.02, 0.4, 1.5, 1.5, 279.65, test_atmosphere, test_solubility, 0, starte_activity_coefficient);
-    try std.testing.expectEqual(@as(f64, 0), state.dissolved_mass_g[@intFromEnum(Species.oxygen)]);
+    try std.testing.expectEqual(@as(f64, 0), state.dissolved_mass_g[@backingInt(Species.oxygen)]);
     // Gaseous oxygen is unaffected, and other dissolved species are still seeded.
-    try std.testing.expect(state.gaseous_mass_g[@intFromEnum(Species.oxygen)] > 0);
-    try std.testing.expect(state.dissolved_mass_g[@intFromEnum(Species.carbon_dioxide)] > 0);
-    try std.testing.expect(state.dissolved_mass_g[@intFromEnum(Species.nitrogen)] > 0);
+    try std.testing.expect(state.gaseous_mass_g[@backingInt(Species.oxygen)] > 0);
+    try std.testing.expect(state.dissolved_mass_g[@backingInt(Species.carbon_dioxide)] > 0);
+    try std.testing.expect(state.dissolved_mass_g[@backingInt(Species.nitrogen)] > 0);
 }
 
 test "aqueous ammonia is never seeded in soil layers" {
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
     try initializeSoilLayerCell(&state, 0, 0.1, 0.3, 0, 5, 279.65, test_atmosphere, test_solubility, 0, starte_activity_coefficient);
-    try std.testing.expectEqual(@as(f64, 0), state.dissolved_mass_g[@intFromEnum(Species.ammonia)]);
-    try std.testing.expect(state.gaseous_mass_g[@intFromEnum(Species.ammonia)] > 0);
+    try std.testing.expectEqual(@as(f64, 0), state.dissolved_mass_g[@backingInt(Species.ammonia)]);
+    try std.testing.expect(state.gaseous_mass_g[@backingInt(Species.ammonia)] > 0);
 }
 
 test "ionic strength divides dissolved mass and is a no-op when zero" {
@@ -175,7 +177,7 @@ test "ionic strength divides dissolved mass and is a no-op when zero" {
     defer saline.deinit();
     try initializeSoilLayerCell(&fresh, 0, 0.15, 0.25, 0.1, 1.5, 279.65, test_atmosphere, test_solubility, 0, starte_activity_coefficient);
     try initializeSoilLayerCell(&saline, 0, 0.15, 0.25, 0.1, 1.5, 279.65, test_atmosphere, test_solubility, 2.0, starte_activity_coefficient);
-    const oxygen = @intFromEnum(Species.oxygen);
+    const oxygen = @backingInt(Species.oxygen);
     // Zero ionic strength must leave the plain Henry expression untouched, which
     // is why this term is invisible in the non-saline Ottawa example.
     try std.testing.expectApproxEqRel(
@@ -193,7 +195,7 @@ test "ionic strength divides dissolved mass and is a no-op when zero" {
     try std.testing.expectEqual(fresh.gaseous_mass_g[oxygen], saline.gaseous_mass_g[oxygen]);
     // Each species uses its own coefficient, so CO2 (0.14) is divided less than
     // oxygen (0.31) at the same ionic strength.
-    const co2 = @intFromEnum(Species.carbon_dioxide);
+    const co2 = @backingInt(Species.carbon_dioxide);
     try std.testing.expectApproxEqRel(
         fresh.dissolved_mass_g[co2] / @exp(0.14 * 2.0),
         saline.dissolved_mass_g[co2],
@@ -280,7 +282,7 @@ pub const State = struct {
     ) !State {
         var result = try State.init(allocator, self.cell_count);
         errdefer result.deinit();
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64)
                 @memcpy(@field(&result, field.name), @field(self, field.name));
         }
@@ -324,7 +326,7 @@ pub const State = struct {
 
     pub fn validateFinite(self: *const State) !void {
         try self.validateShape();
-        inline for (@typeInfo(State).@"struct".fields) |declared| {
+        inline for (ti_compat.fieldViews(State)) |declared| {
             if (declared.type == []f64) {
                 for (@field(self, declared.name), 0..) |value, index| {
                     if (!std.math.isFinite(value)) {
@@ -495,10 +497,10 @@ test "surface gas initialization reproduces STARTE and HOUR1 solubility" {
     const atmosphere = [species_count]f64{ 0.2, 0.001, 0.3, 0.8, 0.0001, 0.00001, 0.000001 };
     try initializeSurfaceCell(&state, 1, 2, 0.5, 293.15, atmosphere, .{ .reference_water_to_air = reference, .log_intercept = intercept, .temperature_coefficient_per_c = coefficient });
     const first = species_count;
-    try std.testing.expectApproxEqAbs(@as(f64, 0.6), state.gaseous_mass_g[first + @intFromEnum(Species.oxygen)], 1e-15);
-    const oxygen_solubility = reference[@intFromEnum(Species.oxygen)] * @exp(0.516 - 0.0172 * 20);
-    try std.testing.expectApproxEqAbs(atmosphere[@intFromEnum(Species.oxygen)] * oxygen_solubility * 0.5, state.dissolved_mass_g[first + @intFromEnum(Species.oxygen)], 1e-15);
-    try std.testing.expectEqual(@as(f64, 0), state.dissolved_mass_g[first + @intFromEnum(Species.ammonia)]);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.6), state.gaseous_mass_g[first + @backingInt(Species.oxygen)], 1e-15);
+    const oxygen_solubility = reference[@backingInt(Species.oxygen)] * @exp(0.516 - 0.0172 * 20);
+    try std.testing.expectApproxEqAbs(atmosphere[@backingInt(Species.oxygen)] * oxygen_solubility * 0.5, state.dissolved_mass_g[first + @backingInt(Species.oxygen)], 1e-15);
+    try std.testing.expectEqual(@as(f64, 0), state.dissolved_mass_g[first + @backingInt(Species.ammonia)]);
 }
 
 /// Pressure/temperature correction from TRNSFRS. Fluxes are positive into the
@@ -724,7 +726,7 @@ test "internal face diffusion conserves all seven gases" {
     state.air_volume_m3[1] = 2;
     @memcpy(try state.gaseousMasses(0), &[_]f64{ 2, 3, 4, 5, 6, 7, 8 });
     var flux: [species_count]f64 = undefined;
-    try calculateFaceDiffusiveFluxesG(&state, .{ .first_cell = 0, .second_cell = 1 }, &([_]f64{0.1} ** species_count), .{ 1e-9, 1e-9 }, &flux);
+    try calculateFaceDiffusiveFluxesG(&state, .{ .first_cell = 0, .second_cell = 1 }, &(@as([species_count]f64, @splat(@as(f64, 0.1)))), .{ 1e-9, 1e-9 }, &flux);
     try state_updateFaceFluxesG(&state, .{ .first_cell = 0, .second_cell = 1 }, &flux);
     const first = try state.gaseousMassesConst(0);
     const second = try state.gaseousMassesConst(1);
@@ -754,7 +756,7 @@ test "gas face transfer rejects a sub-tolerance overdraw without clipping" {
     defer state.deinit();
     state.gaseous_mass_g[0] = 1;
     state.gaseous_mass_g[species_count] = 2;
-    var flux = [_]f64{0} ** species_count;
+    var flux = @as([species_count]f64, @splat(@as(f64, 0)));
     flux[0] = 1.0 + 1.0e-15;
     try std.testing.expectError(
         error.InsufficientGasForTransport,
@@ -769,7 +771,7 @@ test "bubbling only removes supersaturated dissolved gas" {
     const dissolved = [_]f64{ 12, 12, 32, 28, 28, 14, 2 };
     // A resolvable carrier well above the floor whose molar content greatly
     // exceeds `1.2194e4 * water / T` still evacuates proportionally.
-    try bubblingFluxesG(1e-5, 1e-6, 300, &dissolved, &([_]f64{1} ** species_count), 0.25, &flux);
+    try bubblingFluxesG(1e-5, 1e-6, 300, &dissolved, &(@as([species_count]f64, @splat(@as(f64, 1)))), 0.25, &flux);
     var released_mol: f64 = 0;
     for (flux, dissolved, g_per_mol_tracked) |value, mass, molar_mass| {
         try std.testing.expect(value < 0);
@@ -794,7 +796,7 @@ test "bubbling only removes supersaturated dissolved gas" {
 // CO2/CH4/O2 that the source does not contain.
 test "an unresolvable aqueous carrier bubbles nothing instead of degassing everything" {
     const dissolved = [_]f64{ 12, 12, 32, 28, 28, 14, 2 };
-    const solubility = [_]f64{1} ** species_count;
+    const solubility = @as([species_count]f64, @splat(@as(f64, 1)));
     var floored: [species_count]f64 = undefined;
     try bubblingFluxesG(1.43e-35, 1e-6, 300, &dissolved, &solubility, 0.25, &floored);
     for (floored) |value| try std.testing.expectEqual(@as(f64, 0), value);
@@ -835,7 +837,7 @@ test "face diffusion is absent below the gaseous ZEROS2 minimum" {
     state.air_volume_m3[1] = 0.4;
     @memcpy(try state.gaseousMasses(0), &[_]f64{ 2, 3, 4, 5, 6, 7, 8 });
     const face: Face = .{ .first_cell = 0, .second_cell = 1 };
-    const conductance = [_]f64{0.1} ** species_count;
+    const conductance = @as([species_count]f64, @splat(@as(f64, 0.1)));
     var flux: [species_count]f64 = undefined;
     try calculateFaceDiffusiveFluxesG(&state, face, &conductance, .{ 1e-6, 1e-6 }, &flux);
     for (flux) |value| try std.testing.expectEqual(@as(f64, 0), value);
@@ -872,7 +874,7 @@ test "STARTE activity coefficients match every source PARAMETER slot" {
     };
     try std.testing.expectEqual(species_count, expected.len);
     for (expected) |pair|
-        try std.testing.expectEqual(pair[1], starte_activity_coefficient[@intFromEnum(pair[0])]);
+        try std.testing.expectEqual(pair[1], starte_activity_coefficient[@backingInt(pair[0])]);
 }
 
 test "STARTE hydrogen activity coefficient reaches dissolved H2 mass" {
@@ -885,7 +887,7 @@ test "STARTE hydrogen activity coefficient reaches dissolved H2 mass" {
     // aqueous H2 inventory by exp((0.23 - 0.14) * CSTR1). Freshwater runs hid
     // it because CSTR1 = 0 makes the divisor exactly one for any coefficient.
     const ionic_strength = 2.0;
-    const hydrogen = @intFromEnum(Species.hydrogen);
+    const hydrogen = @backingInt(Species.hydrogen);
 
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();

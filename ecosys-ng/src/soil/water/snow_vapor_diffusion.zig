@@ -1,6 +1,7 @@
 const std = @import("std");
 const snow = @import("../solute/snow_solute_transport.zig");
 const snow_cover_fraction = @import("snow_cover_fraction.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     reference_vapor_diffusivity_m2_per_h: f64,
@@ -52,7 +53,7 @@ pub const Report = struct { iterations: u16, converged: bool, maximum_interface_
 pub fn solve(allocator: std.mem.Allocator, state: *snow.State, parameters: Parameters, options: Options) !Report {
     inline for (.{ parameters.reference_vapor_diffusivity_m2_per_h, parameters.reference_temperature_k, parameters.temperature_exponent, parameters.minimum_air_fraction, parameters.vapor_sensible_heat_capacity_megajoules_per_m3_k, options.physical_time_step_hours, options.donor_availability_fraction, options.full_snow_cover_depth_m }) |value| if (!std.math.isFinite(value)) return error.NonFiniteSnowVaporDiffusionParameter;
     if (parameters.reference_vapor_diffusivity_m2_per_h < 0 or parameters.reference_temperature_k <= 0 or parameters.temperature_exponent < 0 or parameters.minimum_air_fraction < 0 or parameters.minimum_air_fraction > 1 or parameters.vapor_sensible_heat_capacity_megajoules_per_m3_k <= 0 or options.physical_time_step_hours <= 0 or options.physical_time_step_hours > 1 or options.donor_availability_fraction <= 0 or options.donor_availability_fraction > 1 or options.full_snow_cover_depth_m <= 0) return error.InvalidSnowVaporDiffusionParameter;
-    inline for (std.meta.fields(snow.ThermodynamicParameters)) |field| {
+    inline for (ti_compat.fieldViews(snow.ThermodynamicParameters)) |field| {
         const value = @field(options.thermodynamics, field.name);
         if (!std.math.isFinite(value) or value <= 0)
             return error.InvalidSnowVaporDiffusionThermodynamics;

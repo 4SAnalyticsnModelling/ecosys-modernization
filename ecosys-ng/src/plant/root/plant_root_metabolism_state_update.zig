@@ -12,6 +12,8 @@ const group_growth = @import("plant_root_metabolism_growth.zig");
 const group_litter = @import("plant_root_metabolism_litter.zig");
 const group_misc = @import("plant_root_metabolism_misc.zig");
 const group_respiration = @import("plant_root_metabolism_respiration.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const SecondaryRootStateUpdateInputs = struct {
     metabolism: group_growth.SecondaryRootResult,
@@ -123,7 +125,7 @@ pub fn absorbPrimaryDeficitFromSecondaryRoots(
         if (std.mem.eql(u8, field_name, "upper"))
             result.upper_entering_carbon_deficit_g_c = result.residual_carbon_deficit_g_c;
         var pool = &@field(result, field_name);
-        inline for (@typeInfo(SecondaryRootDeficitLayer).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SecondaryRootDeficitLayer)) |field| {
             const value = @field(pool.*, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidSecondaryRootDeficitPool;
         }
@@ -138,7 +140,7 @@ pub fn absorbPrimaryDeficitFromSecondaryRoots(
         pool.phosphorus_g_p -= phosphorus_removed;
         result.residual_phosphorus_deficit_g_p -= phosphorus_removed;
     }
-    inline for (@typeInfo(SecondaryRootDeficitAbsorption).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(SecondaryRootDeficitAbsorption)) |field| switch (field.type) {
         f64 => if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFinitePrimaryRootDeficitAbsorption,
         else => {},
     };
@@ -163,7 +165,7 @@ fn stagedSecondaryRootLayer(
             (if (active) metabolism.root_growth_actual_g_c_per_h * specific_length_m_per_g_c * extension_water_response else 0) -
             fraction * roots.axis_secondary_length_m[axis_layer],
     };
-    inline for (@typeInfo(SecondaryRootDeficitLayer).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SecondaryRootDeficitLayer)) |field| {
         const value = @field(result, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.StagedRootStateUpdateWouldOverdrawPool;
     }
@@ -257,7 +259,7 @@ pub fn state_updateStagedLayerAxes(
     parameters: StagedLayerStateUpdateParameters,
 ) !void {
     if (active_axis_count > workspace.axis_capacity or active_axis_count > roots.root_axis_count) return error.RootMetabolismWorkspaceCapacityExceeded;
-    inline for (@typeInfo(StagedLayerStateUpdateParameters).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(StagedLayerStateUpdateParameters)) |field|
         if (field.type == f64) {
             const value = @field(parameters, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidStagedRootStateUpdateParameter;
@@ -278,7 +280,7 @@ pub fn state_updateStagedLayerAxes(
     @memset(workspace.primary_respiration_actual_delta_by_layer[0..roots.soil_layer_count], 0);
     @memset(workspace.primary_respiration_oxygen_unlimited_delta_by_layer[0..roots.soil_layer_count], 0);
     @memset(workspace.primary_respiration_carbon_unlimited_delta_by_layer[0..roots.soil_layer_count], 0);
-    var mobile_change = [_]f64{0} ** 3;
+    var mobile_change = @as([3]f64, @splat(@as(f64, 0)));
     var protein_change_current: f64 = 0;
     var protein_change_next: f64 = 0;
     var crossing_transfer_retained_fraction: f64 = 1;
@@ -809,7 +811,7 @@ pub fn state_updateSecondaryRoot(
 
 /// GROSUB RCO2T/RCO2TM assembly for primary and secondary roots.
 pub fn assemble(components: group_growth.Components) !group_respiration.Respiration {
-    inline for (@typeInfo(group_growth.Components).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(group_growth.Components)) |field| {
         const value = @field(components, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidRootRespirationComponent;
     }
@@ -830,7 +832,7 @@ pub fn assemble(components: group_growth.Components) !group_respiration.Respirat
         // compared with the mobile-C pool by UPTAKE's FCUP.
         .carbon_unlimited_g_c = actual,
     };
-    inline for (@typeInfo(group_respiration.Respiration).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootRespiration;
+    inline for (ti_compat.fieldViews(group_respiration.Respiration)) |field| if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootRespiration;
     return result;
 }
 
@@ -838,7 +840,7 @@ pub fn assemble(components: group_growth.Components) !group_respiration.Respirat
 /// carbon and is recorded as a positive CO2 production rate.
 pub fn state_update(roots: *RootState, root_layer: usize, respiration: group_respiration.Respiration) !void {
     if (root_layer >= roots.mobile_carbon_g.len) return error.PlantRootIndexOutOfBounds;
-    inline for (@typeInfo(group_respiration.Respiration).@"struct".fields) |field| if (!std.math.isFinite(@field(respiration, field.name)) or @field(respiration, field.name) < 0) return error.InvalidRootRespirationStateUpdate;
+    inline for (ti_compat.fieldViews(group_respiration.Respiration)) |field| if (!std.math.isFinite(@field(respiration, field.name)) or @field(respiration, field.name) < 0) return error.InvalidRootRespirationStateUpdate;
     const next_mobile = roots.mobile_carbon_g[root_layer] - respiration.actual_g_c;
     const next_actual = roots.actual_respiration_g_c_per_h[root_layer] + respiration.actual_g_c;
     const next_oxygen_unlimited = roots.respiration_unlimited_by_oxygen_g_c_per_h[root_layer] + respiration.oxygen_unlimited_g_c;

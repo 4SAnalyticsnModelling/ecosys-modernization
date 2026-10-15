@@ -7,6 +7,7 @@
 //! snow therefore retains its separate explicit aerodynamic override.
 const std = @import("std");
 const organic = @import("../soil/organic/initialization.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     organic_carbon_g: f64,
@@ -76,7 +77,7 @@ pub const CalculationError = error{
 
 /// Translates `hour1.f` lines 2927--2967 in legacy operation order.
 pub fn calculate(inputs: Inputs) CalculationError!Result {
-    inline for (std.meta.fields(Inputs)) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteInput;
         if (value < 0.0) return error.NegativeInput;
@@ -140,7 +141,7 @@ pub fn calculate(inputs: Inputs) CalculationError!Result {
         .soil_surface_roughness_m = soil_surface_roughness_m,
         .total_surface_roughness_m = total_surface_roughness_m,
     };
-    inline for (std.meta.fields(Result)) |field| {
+    inline for (ti_compat.fieldViews(Result)) |field| {
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteResult;
     }
     return result;

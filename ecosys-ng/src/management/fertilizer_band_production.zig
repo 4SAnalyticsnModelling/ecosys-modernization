@@ -11,6 +11,7 @@ const cation_exchange = @import("../soil/solute/cation_exchange.zig");
 const aqueous_network = @import("../soil/solute/aqueous_network.zig");
 const reactive_nitrogen_module = @import("../soil/nutrients/reactive_nitrogen_state.zig");
 const phosphate_network = @import("../soil/solute/phosphate_network.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Workspace = struct {
     allocator: std.mem.Allocator,
@@ -90,7 +91,7 @@ pub fn prepareHour(
         const coordinator = try state.coordinator(cell);
         try coordinator.beginHour(token);
         inline for (std.enums.values(phase.Family)) |family| {
-            const nutrient_index: usize = @intFromEnum(family);
+            const nutrient_index: usize = @backingInt(family);
             const view = try state.geometry(cell, family);
             const uniform_profile = view.active and
                 @abs(view.upper_edge_depth_m) <= 1.0e-12 and
@@ -137,7 +138,7 @@ pub fn consumeUndissolved(
         if (metadata.phase != .intervening_science) return error.InvalidFertilizerBandCoordinatorPhase;
     }
     for (nitrogen_state.soil, mineral_state.soil) |nitrogen_inventory, mineral_inventory| {
-        inline for (@typeInfo(@TypeOf(nitrogen_inventory)).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(@TypeOf(nitrogen_inventory))) |field| {
             const value = @field(nitrogen_inventory, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidBandInventoryState;
         }
@@ -370,7 +371,7 @@ pub fn preserveZoneAmountsAfterPrepare(
             }
         }
         if (now.phosphate_band < old.phosphate_band) {
-            inline for (@typeInfo(phosphate_network.State).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(phosphate_network.State)) |field| {
                 try preserveZonePair(
                     &@field(chemistry.non_band_phosphate[index], field.name),
                     &@field(chemistry.band_phosphate[index], field.name),

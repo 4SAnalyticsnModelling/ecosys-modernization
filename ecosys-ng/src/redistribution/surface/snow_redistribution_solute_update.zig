@@ -6,6 +6,7 @@
 // `TQS` update remains a reference kernel and must not become a second writer.
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Snowpack dissolved gas and nutrient pools (g).
 pub const SnowSolutePools = struct {
@@ -68,10 +69,10 @@ pub fn redistributionIsActive(net_snow_redistribution_m3: f64) !bool {
 ///
 /// Caller must check TQS != 0.0 before invoking.
 pub fn update(pools: SnowSolutePools, fluxes: SnowSoluteFluxes) !SnowSolutePools {
-    inline for (@typeInfo(SnowSolutePools).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SnowSolutePools)) |field|
         if (!std.math.isFinite(@field(pools, field.name)))
             return error.InvalidSnowSolutePool;
-    inline for (@typeInfo(SnowSoluteFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SnowSoluteFluxes)) |field|
         if (!std.math.isFinite(@field(fluxes, field.name)))
             return error.InvalidSnowSoluteFlux;
 
@@ -87,7 +88,7 @@ pub fn update(pools: SnowSolutePools, fluxes: SnowSoluteFluxes) !SnowSolutePools
         .hpo4_g = pools.hpo4_g + fluxes.hpo4_g,
         .h2po4_g = pools.h2po4_g + fluxes.h2po4_g,
     };
-    inline for (@typeInfo(SnowSolutePools).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SnowSolutePools)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteSnowSolutePool;
     return result;
@@ -96,12 +97,12 @@ pub fn update(pools: SnowSolutePools, fluxes: SnowSoluteFluxes) !SnowSolutePools
 test "REDIST snow solute redistribution updates all 10 pools" {
     var fluxes = std.mem.zeroes(SnowSoluteFluxes);
     var expected_value: f64 = 1.0;
-    inline for (@typeInfo(SnowSoluteFluxes).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SnowSoluteFluxes)) |field| {
         @field(fluxes, field.name) = expected_value;
         expected_value += 1.0;
     }
     const result = try update(std.mem.zeroes(SnowSolutePools), fluxes);
-    inline for (@typeInfo(SnowSolutePools).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SnowSolutePools)) |field|
         try std.testing.expectEqual(@field(fluxes, field.name), @field(result, field.name));
 }
 

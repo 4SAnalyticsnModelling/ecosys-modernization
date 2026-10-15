@@ -7,6 +7,8 @@ const face_parameters = @import("face_parameters.zig");
 const numerics = @import("../../core/numerics.zig");
 const scoped_conservation = @import("../../validation/scoped_conservation.zig");
 const solute_transport = @import("../solute/transport.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 const maximum_dense_newton_components: usize = 256;
 
@@ -55,10 +57,10 @@ pub const State = struct {
             const acetate = profile.dissolved_acetate_carbon_g_c[layer * organic.substrate_count + substrate];
             try validatePool(pool, acetate);
             const base = substrateBase(layer, substrate);
-            self.micropore_amount_g[base + @intFromEnum(Component.dissolved_organic_carbon)] = pool.carbon_g_c;
-            self.micropore_amount_g[base + @intFromEnum(Component.dissolved_organic_nitrogen)] = pool.nitrogen_g_n;
-            self.micropore_amount_g[base + @intFromEnum(Component.dissolved_organic_phosphorus)] = pool.phosphorus_g_p;
-            self.micropore_amount_g[base + @intFromEnum(Component.dissolved_acetate_carbon)] = acetate;
+            self.micropore_amount_g[base + @backingInt(Component.dissolved_organic_carbon)] = pool.carbon_g_c;
+            self.micropore_amount_g[base + @backingInt(Component.dissolved_organic_nitrogen)] = pool.nitrogen_g_n;
+            self.micropore_amount_g[base + @backingInt(Component.dissolved_organic_phosphorus)] = pool.phosphorus_g_p;
+            self.micropore_amount_g[base + @backingInt(Component.dissolved_acetate_carbon)] = acetate;
         };
     }
 
@@ -68,11 +70,11 @@ pub const State = struct {
         for (0..self.layer_count) |layer| for (0..organic.substrate_count) |substrate| {
             const base = substrateBase(layer, substrate);
             profile.dissolved[layer * organic.substrate_count + substrate] = .{
-                .carbon_g_c = self.micropore_amount_g[base + @intFromEnum(Component.dissolved_organic_carbon)],
-                .nitrogen_g_n = self.micropore_amount_g[base + @intFromEnum(Component.dissolved_organic_nitrogen)],
-                .phosphorus_g_p = self.micropore_amount_g[base + @intFromEnum(Component.dissolved_organic_phosphorus)],
+                .carbon_g_c = self.micropore_amount_g[base + @backingInt(Component.dissolved_organic_carbon)],
+                .nitrogen_g_n = self.micropore_amount_g[base + @backingInt(Component.dissolved_organic_nitrogen)],
+                .phosphorus_g_p = self.micropore_amount_g[base + @backingInt(Component.dissolved_organic_phosphorus)],
             };
-            profile.dissolved_acetate_carbon_g_c[layer * organic.substrate_count + substrate] = self.micropore_amount_g[base + @intFromEnum(Component.dissolved_acetate_carbon)];
+            profile.dissolved_acetate_carbon_g_c[layer * organic.substrate_count + substrate] = self.micropore_amount_g[base + @backingInt(Component.dissolved_acetate_carbon)];
         };
     }
 };
@@ -332,11 +334,11 @@ const DomainFailureCapture = struct {
 
     pub fn jsonStringify(self: @This(), stream: *std.json.Stringify) !void {
         try stream.beginObject();
-        inline for (std.meta.fields(@This())) |field| {
+        inline for (ti_compat.fieldViews(@This())) |field| {
             try stream.objectField(field.name);
             if (comptime std.mem.eql(u8, field.name, "options")) {
                 try stream.beginObject();
-                inline for (std.meta.fields(Options)) |option| {
+                inline for (ti_compat.fieldViews(Options)) |option| {
                     if (comptime std.mem.eql(u8, option.name, "absolute_tolerance_g")) continue;
                     try stream.objectField(option.name);
                     if (comptime std.mem.eql(u8, option.name, "absolute_tolerance_g_by_component")) {
@@ -1194,12 +1196,12 @@ test "captured frozen-dry Ottawa columns diffuse no organic matter but still lea
 }
 
 test "organic transport branch Newton preserves signed flux and dry endpoint equations" {
-    const component = @intFromEnum(Component.dissolved_organic_phosphorus);
-    var base = [_]f64{0} ** (2 * component_count);
+    const component = @backingInt(Component.dissolved_organic_phosphorus);
+    var base = @as([(2 * component_count)]f64, @splat(@as(f64, 0)));
     base[component] = 2;
     base[component_count + component] = 1;
     const options: Options = .{ .relative_tolerance = 1e-8, .picard_relaxation = 0.5, .max_iterations = 20 };
-    var conductance = [_]f64{0} ** component_count;
+    var conductance = @as([component_count]f64, @splat(@as(f64, 0)));
     conductance[component] = 0.25;
     for ([_][2]f64{ .{ 1, 1 }, .{ 0, 1 }, .{ 1, 0 } }) |water| {
         for ([_]f64{ -0.5, 0, 0.5 }) |water_flux| {
@@ -1255,7 +1257,7 @@ test "organic transport dense Newton keeps trace-pool probes on the residual bra
     const delta_g = denseProbeDelta(
         amount_g,
         residual_g,
-        @intFromEnum(Component.dissolved_organic_carbon),
+        @backingInt(Component.dissolved_organic_carbon),
         options,
     );
     try std.testing.expect(delta_g < 0);
@@ -1265,9 +1267,9 @@ test "organic transport dense Newton keeps trace-pool probes on the residual bra
 }
 
 test "organic transport trace pool converges through scaled dense Newton" {
-    var amounts = [_]f64{0} ** (2 * component_count);
+    var amounts = @as([(2 * component_count)]f64, @splat(@as(f64, 0)));
     const component = components_per_substrate * 3 +
-        @intFromEnum(Component.dissolved_organic_carbon);
+        @backingInt(Component.dissolved_organic_carbon);
     amounts[component] = 1.0335066763646247e-9;
     const initial_total_g = amounts[component];
     const water = [_]f64{ 1, 1 };
@@ -1276,9 +1278,9 @@ test "organic transport trace pool converges through scaled dense Newton" {
         .second_cell = 1,
         .water_flux_m3_per_step = 0,
     }};
-    var conductance = [_]f64{0} ** component_count;
+    var conductance = @as([component_count]f64, @splat(@as(f64, 0)));
     conductance[component] = 0.831_167_660_817_185;
-    var accepted_face_flux = [_]f64{0} ** component_count;
+    var accepted_face_flux = @as([component_count]f64, @splat(@as(f64, 0)));
     const result = try solveDomain(
         std.testing.allocator,
         &amounts,
@@ -1311,10 +1313,10 @@ test "organic transport preserves element-specific nonlinear floors" {
         .picard_relaxation = 0.5,
         .max_iterations = 20,
     };
-    try std.testing.expectEqual(@as(f64, 1e-9), absoluteToleranceForComponent(options, @intFromEnum(Component.dissolved_organic_carbon)));
-    try std.testing.expectEqual(@as(f64, 2e-10), absoluteToleranceForComponent(options, @intFromEnum(Component.dissolved_organic_nitrogen)));
-    try std.testing.expectEqual(@as(f64, 3e-11), absoluteToleranceForComponent(options, @intFromEnum(Component.dissolved_organic_phosphorus)));
-    try std.testing.expectEqual(@as(f64, 4e-12), absoluteToleranceForComponent(options, @intFromEnum(Component.dissolved_acetate_carbon)));
+    try std.testing.expectEqual(@as(f64, 1e-9), absoluteToleranceForComponent(options, @backingInt(Component.dissolved_organic_carbon)));
+    try std.testing.expectEqual(@as(f64, 2e-10), absoluteToleranceForComponent(options, @backingInt(Component.dissolved_organic_nitrogen)));
+    try std.testing.expectEqual(@as(f64, 3e-11), absoluteToleranceForComponent(options, @backingInt(Component.dissolved_organic_phosphorus)));
+    try std.testing.expectEqual(@as(f64, 4e-12), absoluteToleranceForComponent(options, @backingInt(Component.dissolved_acetate_carbon)));
 }
 
 test "runtime organic pore transport state_updates exact signed boundary loss" {
@@ -1325,7 +1327,7 @@ test "runtime organic pore transport state_updates exact signed boundary loss" {
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
     try state.initializeFromProfile(&profile);
-    state.macropore_amount_g[@intFromEnum(Component.dissolved_organic_carbon)] = 4;
+    state.macropore_amount_g[@backingInt(Component.dissolved_organic_carbon)] = 4;
 
     const config = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 });
     var model_grid = try grid_module.GridState.init(std.testing.allocator, config);
@@ -1335,7 +1337,7 @@ test "runtime organic pore transport state_updates exact signed boundary loss" {
     defer hydrology.deinit();
     var no_faces = try hydrology_module.buildSoilFaces(std.testing.allocator, &hydrology, &model_grid);
     defer no_faces.deinit();
-    const zero_recharge = [_]f64{0} ** component_count;
+    const zero_recharge = @as([component_count]f64, @splat(@as(f64, 0)));
     const result = try advance(std.testing.allocator, &state, &profile, &no_faces, .{
         .micropore_conductance_m3_per_step = &.{},
         .macropore_conductance_m3_per_step = &.{},
@@ -1358,8 +1360,8 @@ test "runtime organic pore transport state_updates exact signed boundary loss" {
     try std.testing.expectApproxEqAbs(@as(f64, 3), profile.dissolved[0].nitrogen_g_n, 1e-15);
     try std.testing.expectApproxEqAbs(@as(f64, 1.5), profile.dissolved[0].phosphorus_g_p, 1e-15);
     try std.testing.expectApproxEqAbs(@as(f64, 4.5), profile.dissolved_acetate_carbon_g_c[0], 1e-15);
-    try std.testing.expectApproxEqAbs(@as(f64, -2), state.boundary_net_flux_g[@intFromEnum(Component.dissolved_organic_carbon)], 1e-15);
-    try std.testing.expectApproxEqAbs(@as(f64, 4), state.macropore_amount_g[@intFromEnum(Component.dissolved_organic_carbon)], 1e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, -2), state.boundary_net_flux_g[@backingInt(Component.dissolved_organic_carbon)], 1e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, 4), state.macropore_amount_g[@backingInt(Component.dissolved_organic_carbon)], 1e-15);
 }
 
 test "soil organic local gate rejects domain cancellation and rolls back all publications" {
@@ -1390,9 +1392,9 @@ test "soil organic local gate rejects domain cancellation and rolls back all pub
     const macro_face_output = try std.testing.allocator.alloc(f64, face_components);
     defer std.testing.allocator.free(macro_face_output);
     @memset(macro_face_output, 7);
-    const zero_recharge = [_]f64{0} ** (2 * component_count);
-    var perturbation = [_]f64{0} ** (2 * component_count);
-    const doc = @intFromEnum(Component.dissolved_organic_carbon);
+    const zero_recharge = @as([(2 * component_count)]f64, @splat(@as(f64, 0)));
+    var perturbation = @as([(2 * component_count)]f64, @splat(@as(f64, 0)));
+    const doc = @backingInt(Component.dissolved_organic_carbon);
     perturbation[doc] = 0.1;
     perturbation[component_count + doc] = -0.1;
     const micropore_before = state.micropore_amount_g[doc];
@@ -1446,7 +1448,7 @@ test "soil organic transport rejects degenerate divergence watch options" {
     defer hydrology.deinit();
     var no_faces = try hydrology_module.buildSoilFaces(std.testing.allocator, &hydrology, &model_grid);
     defer no_faces.deinit();
-    const zero_recharge = [_]f64{0} ** component_count;
+    const zero_recharge = @as([component_count]f64, @splat(@as(f64, 0)));
     const inputs: Inputs = .{
         .micropore_conductance_m3_per_step = &.{},
         .macropore_conductance_m3_per_step = &.{},
@@ -1467,8 +1469,8 @@ test "soil organic transport rejects degenerate divergence watch options" {
 }
 
 test "organic transport verifies conservative publication before commit" {
-    var amounts = [_]f64{0} ** (2 * component_count);
-    const doc = @intFromEnum(Component.dissolved_organic_carbon);
+    var amounts = @as([(2 * component_count)]f64, @splat(@as(f64, 0)));
+    const doc = @backingInt(Component.dissolved_organic_carbon);
     amounts[doc] = 2;
     amounts[component_count + doc] = 1;
     const base = amounts;
@@ -1478,8 +1480,8 @@ test "organic transport verifies conservative publication before commit" {
         .second_cell = 1,
         .water_flux_m3_per_step = 0,
     }};
-    const conductance = [_]f64{0.75} ** component_count;
-    var accepted_face_flux = [_]f64{0} ** component_count;
+    const conductance = @as([component_count]f64, @splat(@as(f64, 0.75)));
+    var accepted_face_flux = @as([component_count]f64, @splat(@as(f64, 0)));
     const options: Options = .{
         .absolute_tolerance_g = 0.8,
         .relative_tolerance = 1e-12,
@@ -1501,8 +1503,8 @@ test "organic transport verifies conservative publication before commit" {
     try std.testing.expect(result.iterations > 1);
     try std.testing.expect(result.newton_steps > 0);
 
-    var target = [_]f64{0} ** (2 * component_count);
-    var residual = [_]f64{0} ** (2 * component_count);
+    var target = @as([(2 * component_count)]f64, @splat(@as(f64, 0)));
+    var residual = @as([(2 * component_count)]f64, @splat(@as(f64, 0)));
     try residualAt(&base, &amounts, &water, &faces, &conductance, options, &target, &residual);
     try std.testing.expect(try scaledNorm(&amounts, &residual, options) <= 1);
     try std.testing.expectApproxEqAbs(amounts[component_count + doc] - base[component_count + doc], accepted_face_flux[doc], 1e-14);
@@ -1516,9 +1518,9 @@ test "XFRS pore exchange conserves organic mass" {
 }
 
 test "accepted internal solve removes tolerance-sized component mass drift" {
-    var base = [_]f64{0} ** (2 * component_count);
-    var current = [_]f64{0} ** (2 * component_count);
-    const doc = @intFromEnum(Component.dissolved_organic_carbon);
+    var base = @as([(2 * component_count)]f64, @splat(@as(f64, 0)));
+    var current = @as([(2 * component_count)]f64, @splat(@as(f64, 0)));
+    const doc = @backingInt(Component.dissolved_organic_carbon);
     const humus_doc = components_per_substrate * 4 + doc;
     base[doc] = 8;
     base[component_count + doc] = 2;
@@ -1539,7 +1541,7 @@ test "organic transport scaled norm rejects per-mille residuals" {
         .picard_relaxation = 0.5,
         .max_iterations = 20,
     };
-    const doc = @intFromEnum(Component.dissolved_organic_carbon);
+    const doc = @backingInt(Component.dissolved_organic_carbon);
     const state = [_]f64{1.0};
     const residual = [_]f64{1.0e-3};
 

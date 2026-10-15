@@ -4,11 +4,20 @@
 **Zig 0.17.x. Zig 0.16 is retired.** No build, test, benchmark or parity evidence produced with a 0.16
 compiler may be cited as current after this migration closes; it stays valid only as dated history.
 
-This file is a *work order*, not a result. **Nothing here has been executed**: the tree is still on the
-0.16-era build description and the migration is one full cycle of work (compile, test, re-establish parity).
+**STATUS 2026-10-15 (cycle 00001) — the compile half is EXECUTED and green; the parity half below is not.**
+`build.zig` lost the `b.args` passthrough, the `**` codemod landed (1197 repeats / 188 files) along with
+`std.meta.fields` → `ti_compat.fieldViews`, `pointer.attrs.const` and `zig fmt`'s own `@backingInt` /
+`@fromBackingInt` rewrites. Debug 28.1 s, ReleaseSafe 163.6 s, ReleaseFast 168.4 s — all exit 0 on 0.17.0 — and
+`zig build test` is **4518/4520 passed with zero assertion failures** (1 skip, 1 tracked issue-106 crash).
+Receipts, the five hand fixes and the G7 verification: `.agent/cycles/cycle_00001.md`.
+**Still open: everything in "After it compiles" below** — the bounded strict run that re-derives G3/G4/G5 parity on
+the 0.17 artefact. Read the 2026-10-09 table below as dated pre-migration history.
+
+This file is a *work order*, not a result. **Nothing here had been executed** when it was written: the tree was still
+on the 0.16-era build description and the migration is one full cycle of work (compile, test, re-establish parity).
 It is the first item in `.agent/backlog.md`.
 
-## Current state (recorded 2026-10-09, preflight)
+## Current state (recorded 2026-10-09, preflight — dated pre-migration history)
 
 | Fact | Value | Proof |
 | --- | --- | --- |
@@ -32,7 +41,17 @@ It is the first item in `.agent/backlog.md`.
    `uv run ecosys-audit/scripts/zig017_repeat_migration.py --dry-run ecosys-ng/src` (writes nothing).
    Measured 2026-10-12 at this commit: **1197 `**` repeats in 188 files** under `ecosys-ng/src`; re-run the
    dry-run at the start of the migration cycle and treat a different number as a change in scope.
-3. **Expect more.** Anything the compiler rejects next is part of this same migration: fix it forward, fix it
+3. **`zig fmt` itself performs two more 0.17 builtin codemods** (measured 2026-10-13 on `ecosys-ng/src`,
+   cycle 1; probe: `.tmp/zigprobe/probe.zig` behaviour, repo-contained):
+   - `@intFromEnum(e)` is gone → `@backingInt(e)` (enum value → its backing integer; same numeric result
+     for the plain enums in this tree). `zig fmt` rewrote **1563** occurrences.
+   - `@enumFromInt(v)` is gone → `@fromBackingInt(@intCast(v))` (integer → enum, cast to the backing type
+     first). `zig fmt` rewrote **165** occurrences (each adding the `@intCast`).
+   - These rewrites are done by `zig fmt` itself, not by the repeat codemod, so the mechanical-diff review
+     must expect them. Semantics are unchanged for the enums in this tree; a bitwise-different case would be
+     a real finding, not a formatting side effect.
+
+4. **Expect more.** Anything the compiler rejects next is part of this same migration: fix it forward, fix it
    in the same cycle, and list each language/API change you hit in the cycle file. Never "fix" it by keeping
    or reinstalling a 0.16 compiler, and never gate a 0.17 result against 0.16 evidence.
 

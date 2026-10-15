@@ -54,6 +54,7 @@ const seasonal_stalk_standing_dead_turnover = @import("seasonal_stalk_standing_d
 
 const CarbonExchange = @import("../../canopy/photosynthesis/carbon_exchange.zig").State;
 const InternalRootShootActivity = @import("../accounting/internal_root_shoot_activity.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const PlantParameters = struct {
     photosynthesis_pathway: u8,
@@ -253,7 +254,7 @@ pub const NodeGrowthParameters = struct {
     leaf_storage_exchange_fraction_per_h_by_turnover: [6]f64,
 
     pub fn validate(self: NodeGrowthParameters) !void {
-        inline for (@typeInfo(NodeGrowthParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(NodeGrowthParameters)) |field| {
             if (field.type == f64) {
                 if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteShootNodeGrowthParameter;
             }
@@ -293,7 +294,7 @@ pub const BranchMobileExchangeParameters = struct {
     remobilization_redistribution_fraction_per_h: f64,
 
     pub fn validate(self: BranchMobileExchangeParameters) !void {
-        inline for (@typeInfo(BranchMobileExchangeParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(BranchMobileExchangeParameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value)) return error.NonFiniteBranchMobileExchangeParameter;
             if (value < 0 or value > 1) return error.InvalidBranchMobileExchangeParameter;
@@ -342,10 +343,10 @@ pub const SenescenceRecyclingParameters = struct {
 /// GROSUB DATA RCCZ/RCCY/RCCX/RCCQ, indexed by IGTYP=0:5.
 pub fn sourceSenescenceRecyclingParameters() SenescenceRecyclingParameters {
     return .{
-        .minimum_carbon_fraction_by_root_profile = .{0.167} ** shoot_recycling_profile_count,
-        .responsive_carbon_fraction_by_root_profile = .{0.333} ** shoot_recycling_profile_count,
-        .maximum_nitrogen_fraction_by_root_profile = .{0.667} ** shoot_recycling_profile_count,
-        .maximum_phosphorus_fraction_by_root_profile = .{0.667} ** shoot_recycling_profile_count,
+        .minimum_carbon_fraction_by_root_profile = @splat(0.167),
+        .responsive_carbon_fraction_by_root_profile = @splat(0.333),
+        .maximum_nitrogen_fraction_by_root_profile = @splat(0.667),
+        .maximum_phosphorus_fraction_by_root_profile = @splat(0.667),
     };
 }
 
@@ -1437,7 +1438,7 @@ pub fn applyTile(context: *ApplyContext, range: CellRange) !void {
                     .aqueous_carbon_dioxide_g_c = context.roots.aqueous_carbon_dioxide_g_c[planting_root],
                     .aqueous_carbon_dioxide_reaction_g_c_per_h = context.roots.aqueous_carbon_dioxide_reaction_g_c_per_h[planting_root],
                 };
-                inline for (@typeInfo(PreEmergenceRootStateUpdate).@"struct".fields) |field| {
+                inline for (ti_compat.fieldViews(PreEmergenceRootStateUpdate)) |field| {
                     if (!std.math.isFinite(@field(state_update, field.name)) or @field(state_update, field.name) < 0)
                         return error.NonFinitePreEmergenceRootStateUpdate;
                 }

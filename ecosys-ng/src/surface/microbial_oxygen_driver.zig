@@ -12,6 +12,7 @@ const litter_water_environment = @import("litter_water_environment.zig");
 const precipitation = @import("precipitation.zig");
 const gas_parameters = @import("gas_parameters.zig");
 const ice_units = @import("../core/ice_units.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const heterotrophic_unit_count_per_cell: usize = respiration.unit_count_per_cell;
 pub const unit_count_per_cell: usize = heterotrophic_unit_count_per_cell + autotrophic.active_population_count;
@@ -34,7 +35,7 @@ pub const State = struct {
 
     noinline fn deinitAllocatedF64Prefix(self: *State, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -57,7 +58,7 @@ pub const State = struct {
         result.populations = populations;
         var allocated: usize = 0;
         errdefer result.deinitAllocatedF64Prefix(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, cell_count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -67,7 +68,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.allocator.free(self.populations);
         self.allocation.deinit();
         self.* = undefined;
@@ -117,7 +118,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
     try validate(context.*, range);
     for (range.first..range.end) |cell| {
         const solubility = try gas_transport.surfaceSolubilityWaterToAir(context.litter_gas.temperature_k[cell], context.parameters.solubility);
-        context.result.oxygen_solubility_water_to_air[cell] = solubility[@intFromEnum(gas_transport.Species.oxygen)];
+        context.result.oxygen_solubility_water_to_air[cell] = solubility[@backingInt(gas_transport.Species.oxygen)];
         // Keep the existing zero-valued solver work arrays and checkpoint
         // layout. Neither is a new boundary source in this production owner.
         context.result.gaseous_oxygen_flux_g_o[cell] = 0;
@@ -291,7 +292,7 @@ test "surface oxygen driver consumes accepted precipitation inventory without a 
     defer gas.deinit();
     gas.temperature_k[0] = 298.15;
     gas.air_volume_m3[0] = 1;
-    gas.gaseous_mass_g[@intFromEnum(gas_transport.Species.oxygen)] = 0.001;
+    gas.gaseous_mass_g[@backingInt(gas_transport.Species.oxygen)] = 0.001;
     var surface_organic = try organic.State.init(std.testing.allocator, 1);
     defer surface_organic.deinit();
     for (0..respiration.unit_count_per_cell) |unit| surface_organic.microbial[unit * organic.kinetic_fraction_count].carbon_g_c = 0.55;
@@ -317,10 +318,10 @@ test "surface oxygen driver consumes accepted precipitation inventory without a 
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
     var parameters: gas_parameters.Parameters = undefined;
-    parameters.atmospheric_concentration_g_per_m3 = .{0} ** gas_transport.species_count;
-    parameters.atmospheric_concentration_g_per_m3[@intFromEnum(gas_transport.Species.oxygen)] = 0.2;
-    parameters.solubility = .{ .reference_water_to_air = .{1} ** gas_transport.species_count, .log_intercept = .{0} ** gas_transport.species_count, .temperature_coefficient_per_c = .{0} ** gas_transport.species_count };
-    parameters.precipitation_activity_log = .{0} ** gas_transport.species_count;
+    parameters.atmospheric_concentration_g_per_m3 = @splat(0);
+    parameters.atmospheric_concentration_g_per_m3[@backingInt(gas_transport.Species.oxygen)] = 0.2;
+    parameters.solubility = .{ .reference_water_to_air = @splat(1), .log_intercept = @splat(0), .temperature_coefficient_per_c = @splat(0) };
+    parameters.precipitation_activity_log = @splat(0);
     // Compatibility input must not fractionate this once-per-hour local solve.
     parameters.exchange = .{ .reference_time_h = 1, .wet_exponent = 12, .dry_exponent = 12, .transition_water_fraction = 0.5, .iteration_fraction = 0, .aqueous_tortuosity_coefficient = 0.7 };
     parameters.oxygen_half_saturation_g_o_per_m3 = 0.064;
@@ -358,7 +359,7 @@ test "surface oxygen driver consumes accepted precipitation inventory without a 
     var surface_aqueous = try surface_routing.State.init(std.testing.allocator, 1, 1, species.AqueousSpecies.count);
     defer surface_aqueous.deinit();
     var discharge = [_]snow.SurfaceDischarge{.{}};
-    discharge[0].litter_g[@intFromEnum(snow.Species.oxygen)] = 0.1 * 0.2;
+    discharge[0].litter_g[@backingInt(snow.Species.oxygen)] = 0.1 * 0.2;
     try discharge_owner.state_update(std.testing.allocator, .{
         .discharge = &discharge,
         .litter_water_volume_m3 = &.{1},
@@ -369,9 +370,9 @@ test "surface oxygen driver consumes accepted precipitation inventory without a 
         .ion_molar_mass_g_per_mol = .{ .aluminum = 27, .iron = 55.8, .calcium = 40, .magnesium = 24.3, .sodium = 23, .potassium = 39.1, .sulfur = 32, .chloride = 35.5 },
         .surface_aqueous = &surface_aqueous,
     }, &gas, &soil_gas, &litter_chemistry, &soil_chemistry);
-    try std.testing.expectEqual(discharge[0].litter_g[@intFromEnum(snow.Species.oxygen)], gas.dissolved_mass_g[@intFromEnum(gas_transport.Species.oxygen)]);
+    try std.testing.expectEqual(discharge[0].litter_g[@backingInt(snow.Species.oxygen)], gas.dissolved_mass_g[@backingInt(gas_transport.Species.oxygen)]);
     var context: ApplyContext = .{ .result = &state, .litter_gas = &gas, .surface_organic = &surface_organic, .respiration = &respiration_state, .autotrophic = &autotrophic_state, .geometry = &geometry, .water_environment = &water_environment, .litter_water_m3 = &.{1}, .litter_ice_m3 = &.{0}, .parameters = parameters, .timestep_h = 1, .solver_options = .{ .absolute_tolerance_g_o = 1e-12, .relative_tolerance = 1e-8, .derivative_floor = 1e-14, .picard_relaxation = 0.5, .gas_max_iterations = 80 } };
-    const oxygen_before = gas.gaseous_mass_g[@intFromEnum(gas_transport.Species.oxygen)] + gas.dissolved_mass_g[@intFromEnum(gas_transport.Species.oxygen)];
+    const oxygen_before = gas.gaseous_mass_g[@backingInt(gas_transport.Species.oxygen)] + gas.dissolved_mass_g[@backingInt(gas_transport.Species.oxygen)];
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(state.gas_exchange_rate_per_step[0] > 0);
     // Six anaerobic units (two populations x three complexes) retain WFN=1.
@@ -400,6 +401,6 @@ test "surface oxygen driver consumes accepted precipitation inventory without a 
     try std.testing.expectEqual(@as(f64, 0), state.allocation.oxygen_uptake_g_o[first_autotroph + 3]);
     var oxygen_uptake: f64 = 0;
     for (state.allocation.oxygen_uptake_g_o) |value| oxygen_uptake += value;
-    const oxygen_after = gas.gaseous_mass_g[@intFromEnum(gas_transport.Species.oxygen)] + gas.dissolved_mass_g[@intFromEnum(gas_transport.Species.oxygen)];
+    const oxygen_after = gas.gaseous_mass_g[@backingInt(gas_transport.Species.oxygen)] + gas.dissolved_mass_g[@backingInt(gas_transport.Species.oxygen)];
     try std.testing.expectApproxEqAbs(oxygen_before, oxygen_after + oxygen_uptake, 1e-10);
 }

@@ -28,6 +28,8 @@ const std = @import("std");
 const surface_nutrients = @import("../soil/biogeochemistry/organic_matter_fire_exchange.zig");
 const symbiotic_fixation = @import("../canopy/symbiosis/plant_symbiotic_fixation.zig");
 const plant_harvest_runtime = @import("../management/plant_harvest_runtime.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 test "production harvest composition contract preserves current FWOOD FWODR provenance" {
     const composition = try plant_harvest_runtime.sourceOrderBelowgroundHarvestComposition(
@@ -102,9 +104,9 @@ test "GROSUB belowground harvest scales every root field and conserves element-s
         .nitrogen = .{ 1, 0, 0, 0 },
         .phosphorus = .{ 1, 0, 0, 0 },
     };
-    partitions.by_plant_and_organ[@intFromEnum(litter_partition.Organ.fine_root)] = single_component;
-    partitions.by_plant_and_organ[@intFromEnum(litter_partition.Organ.coarse_wood)] = single_component;
-    partitions.by_plant_and_organ[@intFromEnum(litter_partition.Organ.nonstructural)] = single_component;
+    partitions.by_plant_and_organ[@backingInt(litter_partition.Organ.fine_root)] = single_component;
+    partitions.by_plant_and_organ[@backingInt(litter_partition.Organ.coarse_wood)] = single_component;
+    partitions.by_plant_and_organ[@backingInt(litter_partition.Organ.nonstructural)] = single_component;
     const config = try @import("../core/config.zig").SimulationConfig.init(
         .{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 },
         .{ .worker_threads = 1, .tile_cells = 1 },
@@ -377,7 +379,7 @@ test "source-order shoot combustion fractions preserve pool gates and routing" {
         2,
     );
     try std.testing.expectEqual(@as(f64, 0), gated.leaf);
-    inline for (@typeInfo(plant_harvest_runtime.SourceOrderShootCombustionFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(plant_harvest_runtime.SourceOrderShootCombustionFractions)) |field| {
         const value = @field(woody, field.name);
         try std.testing.expect(value >= 0 and value <= 1);
     }
@@ -459,7 +461,7 @@ test "source-order shoot salt combustion conserves all eight species" {
     try std.testing.expectEqual(@as(f64, 0.25), result[0].combusted.aluminum_mol);
     try std.testing.expectEqual(@as(f64, 2), result[0].combusted.chloride_mol);
     try std.testing.expectEqual(@as(f64, 6), result[0].remaining.chloride_mol);
-    inline for (@typeInfo(plant_harvest_runtime.SourceOrderShootSaltInventory).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(plant_harvest_runtime.SourceOrderShootSaltInventory)) |field| {
         try std.testing.expectEqual(
             @field(branch, field.name),
             @field(result[0].combusted, field.name) +
@@ -573,7 +575,7 @@ test "source-order standing dead combustion conserves components and ledgers" {
     try std.testing.expectEqual(@as(f64, 195), result.disturbance_emission_ledger.nitrogen_g);
     try std.testing.expectEqual(@as(f64, 292.5), result.disturbance_emission_ledger.phosphorus_g);
     for (components, result.components) |before, after| {
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
             try std.testing.expectEqual(
                 @field(before, field.name),
                 @field(after.combusted, field.name) +
@@ -607,7 +609,7 @@ test "source-order charcoal combustion preserves response fraction and ledgers" 
     try std.testing.expectEqual(@as(f64, 19), result.disturbance_emission_ledger.nitrogen_g);
     try std.testing.expectEqual(@as(f64, 9.5), result.disturbance_emission_ledger.phosphorus_g);
     try std.testing.expectEqual(@as(f64, 115), result.grid_total_combustion_g_c);
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         try std.testing.expectEqual(
             @field(result.combusted, field.name) +
                 @field(result.remaining, field.name),
@@ -629,7 +631,7 @@ test "source-order no-combustion branch resets every combustion rate" {
     try std.testing.expectEqual(@as(usize, 3), result.branch_combustion.len);
     try std.testing.expectEqual(@as(usize, 5), result.standing_dead_combustion.len);
     for (result.branch_combustion) |branch|
-        inline for (@typeInfo(plant_harvest_runtime.SourceOrderShootCombustionBranchPools).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(plant_harvest_runtime.SourceOrderShootCombustionBranchPools)) |field|
             try std.testing.expectEqual(
                 std.mem.zeroes(canopy.ElementalMass),
                 @field(branch, field.name),
@@ -637,7 +639,7 @@ test "source-order no-combustion branch resets every combustion rate" {
     const salts = result.branch_salt_combustion.?;
     try std.testing.expectEqual(@as(usize, 3), salts.len);
     for (salts) |salt|
-        inline for (@typeInfo(plant_harvest_runtime.SourceOrderShootSaltInventory).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(plant_harvest_runtime.SourceOrderShootSaltInventory)) |field|
             try std.testing.expectEqual(@as(f64, 0), @field(salt, field.name));
     for (result.standing_dead_combustion) |component|
         try std.testing.expectEqual(std.mem.zeroes(canopy.ElementalMass), component);
@@ -691,7 +693,7 @@ test "source-order root and surface storage combustion preserves source fraction
     try std.testing.expectEqual(@as(f64, 4.5), result.storage_remaining.carbon_g);
     try std.testing.expectEqual(@as(f64, 11.5), result.layer_combustion_g_c);
     try std.testing.expectEqual(@as(f64, 98.5), result.disturbance_emission_ledger.carbon_g);
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         try std.testing.expectEqual(
             @field(result.storage_combusted, field.name) +
                 @field(result.storage_remaining, field.name),
@@ -823,7 +825,7 @@ test "source-order root-nodule combustion conserves pools and source ledgers" {
         result.biomass_remaining,
         canopy.ElementalMass{ .carbon_g = 12, .nitrogen_g = 6, .phosphorus_g = 3 },
     } }) |pools|
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
             try std.testing.expectEqual(
                 @field(pools[2], field.name),
                 @field(pools[0], field.name) + @field(pools[1], field.name),
@@ -848,7 +850,7 @@ test "source-order cold-soil reset preserves heterogeneous runtime topology" {
         try std.testing.expectEqual(std.mem.zeroes(canopy.ElementalMass), domain.nonstructural);
         try std.testing.expectEqual(std.mem.zeroes(canopy.ElementalMass), domain.structural);
         const salts = domain.salts.?;
-        inline for (@typeInfo(plant_harvest_runtime.SourceOrderShootSaltInventory).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(plant_harvest_runtime.SourceOrderShootSaltInventory)) |field|
             try std.testing.expectEqual(@as(f64, 0), @field(salts, field.name));
     }
     for (result.axes) |axis| {
@@ -983,14 +985,14 @@ test "source-order litterfall accumulation preserves position fraction layer ord
 }
 
 test "source-order litterfall accumulation rejects a late invalid value atomically" {
-    var values = [_]f64{0} ** 10;
+    var values = @as([10]f64, @splat(@as(f64, 0)));
     values[9] = std.math.nan(f64);
     try std.testing.expectError(
         error.InvalidLitterfallAccumulationInput,
         plant_harvest_runtime.sourceOrderAccumulateLitterfall(std.testing.allocator, .{
             .carbon_g_c_by_position_fraction_layer = &values,
-            .nitrogen_g_n_by_position_fraction_layer = &([_]f64{0} ** 10),
-            .phosphorus_g_p_by_position_fraction_layer = &([_]f64{0} ** 10),
+            .nitrogen_g_n_by_position_fraction_layer = &(@as([10]f64, @splat(@as(f64, 0)))),
+            .phosphorus_g_p_by_position_fraction_layer = &(@as([10]f64, @splat(@as(f64, 0)))),
             .layer_count_including_surface = 1,
             .preceding_cumulative_surface_litter = .{},
             .preceding_hourly_litter = .{},

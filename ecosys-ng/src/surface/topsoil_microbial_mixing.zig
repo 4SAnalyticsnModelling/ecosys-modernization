@@ -3,6 +3,7 @@ const compute = @import("../core/compute.zig");
 const organic = @import("../soil/organic/initialization.zig");
 const microbial = @import("../soil/microbial/state.zig");
 const metabolism = @import("../soil/microbial/metabolism.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 const source_complex_count: usize = 6;
 const source_population_count: usize = 7;
@@ -99,7 +100,7 @@ fn validateCellTotals(context: ApplyContext, cell: usize) !void {
                 context.soil_microbial.structural[soil_index * 2 + component]
             else
                 context.soil_microbial.nonstructural[soil_index];
-            inline for (.{ surface, soil }) |pool| inline for (std.meta.fields(organic.ElementPool)) |field| {
+            inline for (.{ surface, soil }) |pool| inline for (ti_compat.fieldViews(organic.ElementPool)) |field| {
                 const value = @field(pool, field.name);
                 // MICROBIAL-POOL-CARBON-OVERDRAW-HOUR-2678-001. The oracle writes
                 // every microbial carbon pool unclamped (`nitro.f:3824`, `:3832`)
@@ -164,7 +165,7 @@ fn validateCandidates(context: ApplyContext, cell: usize, fraction: f64) !void {
                 context.soil_microbial.nonstructural[soil_index];
             try validatePool(surface);
             try validatePool(soil);
-            inline for (std.meta.fields(metabolism.ElementalPool)) |field| {
+            inline for (ti_compat.fieldViews(metabolism.ElementalPool)) |field| {
                 const donor_value = if (surface_is_donor)
                     @field(surface, field.name)
                 else
@@ -200,7 +201,7 @@ fn mixPool(
     fraction: f64,
 ) SignedElementTransfer {
     var result: SignedElementTransfer = .{};
-    inline for (std.meta.fields(organic.ElementPool)) |field| {
+    inline for (ti_compat.fieldViews(organic.ElementPool)) |field| {
         const donor_value = if (surface_is_donor)
             @field(surface.*, field.name)
         else
@@ -246,7 +247,7 @@ fn validate(context: ApplyContext, range: compute.CellRange) !void {
         context.topsoil_bulk_density_megagrams_per_m3.len,
         context.topsoil_organic_carbon_g_per_megagram.len,
     }) |length| if (length != layers) return error.InvalidSurfaceTopsoilMicrobialMixingDimensions;
-    inline for (std.meta.fields(Parameters)) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         const value = @field(context.parameters, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidSurfaceTopsoilMicrobialMixingParameter;
@@ -284,7 +285,7 @@ fn validatePool(pool: anytype) !void {
     // are written unclamped (`nitro.f:3824`, `:3832`) and read through
     // `AMAX1(0.0, ...)` (`:431`, `:454`, `:2094`, `:2532`), so a negative stored
     // pool is oracle-permitted. Non-finite stays fatal.
-    inline for (std.meta.fields(@TypeOf(pool))) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(pool))) |field|
         if (!std.math.isFinite(@field(pool, field.name)))
             return error.InvalidSurfaceTopsoilMicrobialMixingPool;
 }

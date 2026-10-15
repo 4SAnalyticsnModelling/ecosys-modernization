@@ -1,6 +1,7 @@
 const std = @import("std");
 const daily_gas_flux = @import("daily_gas_flux.zig");
 
+
 pub const CarbonInputs = struct {
     cell_area_m2: f64,
     grid_area_m2: f64,
@@ -520,7 +521,7 @@ test "OUTSD UH2GG projects daily hydrogen flux rather than hydrogen storage" {
     var flux = try daily_gas_flux.State.init(std.testing.allocator, 1);
     defer flux.deinit();
     flux.soil_litter_boundary_mass_g_by_cell_and_species[
-        @intFromEnum(@import("../gas/transport.zig").Species.hydrogen)
+        @backingInt(@import("../gas/transport.zig").Species.hydrogen)
     ] = 6;
     try std.testing.expectEqual(
         @as(f64, 1.5),
@@ -629,9 +630,9 @@ test "OUTSD sorbed phosphate converts mol per Mg through runtime dry density" {
 }
 
 test "OUTSD water reproduces historical count and expands every profile" {
-    const liquid = [_]f64{0.2} ** 13;
-    const ice = [_]f64{0.1} ** 13;
-    const potential = [_]f64{-0.5} ** 10;
+    const liquid = @as([13]f64, @splat(@as(f64, 0.2)));
+    const ice = @as([13]f64, @splat(@as(f64, 0.1)));
+    const potential = @as([10]f64, @splat(@as(f64, -0.5)));
     const inputs: WaterInputs = .{ .cell_area_m2 = 2, .grid_area_m2 = 4, .rainfall_m3 = 0.002, .evaporation_m3 = 0.001, .runoff_m3 = 0.004, .soil_water_storage_m3 = 0.01, .outflow_m3 = 0.002, .snow_depth_m = 0.03, .liquid_water_fraction_by_layer = &liquid, .surface_excess_liquid_water_depth_m = 0.004, .ice_fraction_by_layer = &ice, .surface_excess_ice_water_depth_m = 0.002, .matric_plus_osmotic_potential_mpa_by_layer = &potential, .surface_matric_potential_megapascal = -0.2, .lateral_water_outflow_m3 = 0.004, .sediment_outflow_m3 = 0.008, .mineral_soil_surface_depth_m = 0.1, .surface_litter_thickness_m = 0.05, .active_layer_bottom_depth_m = 1.1, .water_table_depth_m = 2.1 };
     var output = try water(std.testing.allocator, inputs);
     defer output.deinit();
@@ -650,9 +651,9 @@ test "OUTSD water reproduces historical count and expands every profile" {
 }
 
 test "OUTSD heat reproduces historical fifty choices without fixed ceilings" {
-    const maximum = [_]f64{20} ** 14;
-    const minimum = [_]f64{10} ** 14;
-    const conductivity = [_]f64{1} ** 12;
+    const maximum = @as([14]f64, @splat(@as(f64, 20)));
+    const minimum = @as([14]f64, @splat(@as(f64, 10)));
+    const conductivity = @as([12]f64, @splat(@as(f64, 1)));
     const inputs: HeatInputs = .{ .total_radiation_megajoules_m2 = 5, .maximum_air_temperature_c = 25, .minimum_air_temperature_c = 5, .maximum_atmospheric_vapor_pressure_kpa = 0.9, .minimum_atmospheric_vapor_pressure_kpa = 0.3, .cumulative_wind_m = 2000, .total_precipitation_mm = 1, .maximum_soil_temperature_c_by_layer = &maximum, .minimum_soil_temperature_c_by_layer = &minimum, .surface_maximum_soil_temperature_c = 30, .surface_minimum_soil_temperature_c = 8, .electrical_conductivity_by_layer = &conductivity, .ionic_outflow_mol = 2, .grid_area_m2 = 4 };
     var output = try heat(std.testing.allocator, inputs);
     defer output.deinit();

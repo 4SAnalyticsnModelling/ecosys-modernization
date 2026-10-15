@@ -17,6 +17,7 @@ const GridState = @import("../../state/grid.zig").GridState;
 const PlantState = @import("../../state/grid.zig").PlantState;
 const RootState = @import("../../plant/root/plant_root_system.zig").State;
 const SoilGeometryState = @import("../../soil/profile/layer_geometry.zig").State;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Limits = struct {
     manifest: manifest_module.Limits,
@@ -227,7 +228,7 @@ pub fn read(
     try validateConfigShape(runtime_config, manifest.shape);
 
     // Verify the complete generation before allocating or parsing model state.
-    inline for (@typeInfo(manifest_module.Section).@"enum".fields) |field| try bundle_io.verifySectionFile(allocator, io, directory, manifest, @enumFromInt(field.value), settings.section_verify_buffer_bytes);
+    inline for (ti_compat.enumFieldViews(manifest_module.Section)) |field| try bundle_io.verifySectionFile(allocator, io, directory, manifest, @fromBackingInt(@intCast(field.value)), settings.section_verify_buffer_bytes);
 
     var grid = try GridState.init(allocator, runtime_config);
     errdefer grid.deinit();

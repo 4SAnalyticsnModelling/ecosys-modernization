@@ -5,6 +5,7 @@ const phosphate_exchange = @import("phosphate_exchange.zig");
 const ion_pairing = @import("ion_pairing.zig");
 const activity_coefficients = @import("activity_coefficients.zig");
 const precipitation = @import("phosphate_precipitation.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const EquilibriumConstants = struct {
     hpo4: f64,
@@ -99,7 +100,7 @@ pub const RestrictedH2po4DissociationInputs = struct {
 pub fn calculateRestrictedH2po4DissociationSourceOrder(
     input: RestrictedH2po4DissociationInputs,
 ) !f64 {
-    inline for (@typeInfo(RestrictedH2po4DissociationInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RestrictedH2po4DissociationInputs)) |field| {
         const value = @field(input, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidRestrictedPhosphateDissociationInput;
@@ -137,13 +138,13 @@ pub fn calculateRestrictedH2po4DissociationSourceOrder(
 pub fn calculateRestrictedMineralsSourceOrder(
     input: RestrictedMineralInputs,
 ) !phosphate_network.MineralFluxes {
-    inline for (@typeInfo(RestrictedMineralInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RestrictedMineralInputs)) |field| {
         if (field.type == phosphate_network.MineralFluxes) continue;
         const value = @field(input, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidRestrictedPhosphateMineralInput;
     }
-    inline for (@typeInfo(phosphate_network.MineralFluxes).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(phosphate_network.MineralFluxes)) |field| {
         const value = @field(input.solids, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidRestrictedPhosphateMineralInput;
@@ -231,7 +232,7 @@ pub fn calculateRestrictedMineralsSourceOrder(
         .hydroxyapatite_mol_per_m3 = apatite,
         .monocalcium_phosphate_mol_per_m3 = monocalcium,
     };
-    inline for (@typeInfo(phosphate_network.MineralFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(phosphate_network.MineralFluxes)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteRestrictedPhosphateMineralResult;
     return result;
@@ -243,13 +244,13 @@ pub fn calculateRestrictedMineralsSourceOrder(
 pub fn calculateRestrictedBandMineralsSourceOrder(
     input: RestrictedMineralInputs,
 ) !phosphate_network.MineralFluxes {
-    inline for (@typeInfo(RestrictedMineralInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RestrictedMineralInputs)) |field| {
         if (field.type == phosphate_network.MineralFluxes) continue;
         const value = @field(input, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidRestrictedPhosphateMineralInput;
     }
-    inline for (@typeInfo(phosphate_network.MineralFluxes).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(phosphate_network.MineralFluxes)) |field| {
         const value = @field(input.solids, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidRestrictedPhosphateMineralInput;
@@ -293,7 +294,7 @@ pub fn calculateRestrictedBandMineralsSourceOrder(
         .hydroxyapatite_mol_per_m3 = sourceRestrictedExtent(input.solids.hydroxyapatite_mol_per_m3, input.h2po4_activity_mol_p_per_m3, apatite_target, input.monovalent_activity_coefficient, fraction * @min(input.calcium_activity_mol_per_m3, input.h2po4_concentration_mol_p_per_m3), input.apatite_maximum_mol_per_m3_step, input.apatite_maximum_mol_per_m3_step),
         .monocalcium_phosphate_mol_per_m3 = sourceRestrictedExtent(input.solids.monocalcium_phosphate_mol_per_m3, input.h2po4_activity_mol_p_per_m3, monocalcium_target, input.monovalent_activity_coefficient, fraction * @min(input.calcium_activity_mol_per_m3, input.h2po4_concentration_mol_p_per_m3), input.phosphate_maximum_mol_per_m3_step, input.hydroxide_mineral_maximum_mol_per_m3_step),
     };
-    inline for (@typeInfo(phosphate_network.MineralFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(phosphate_network.MineralFluxes)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteRestrictedPhosphateMineralResult;
     return result;
@@ -403,7 +404,7 @@ pub fn calculateSourceOrderForWaterVolume(
 }
 
 fn calculateMinerals(shared: aqueous_network.State, zone: phosphate_network.State, coefficients: activity_coefficients.Result, constants: EquilibriumConstants, parameters: MineralParameters, substrate_limit_fraction: f64) !phosphate_network.MineralFluxes {
-    inline for (@typeInfo(MineralParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) <= 0) return error.InvalidPhosphateMineralParameter;
+    inline for (ti_compat.fieldViews(MineralParameters)) |field| if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) <= 0) return error.InvalidPhosphateMineralParameter;
     const g1 = coefficients.monovalent_activity_coefficient;
     const g2 = coefficients.divalent_activity_coefficient;
     const g3 = coefficients.trivalent_activity_coefficient;
@@ -461,7 +462,7 @@ pub fn calculateMineralsSourceOrder(
             .maximum_pairing_mol_per_m3_step = 0,
         },
     );
-    inline for (@typeInfo(MineralParameters).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(MineralParameters)) |field|
         if (!std.math.isFinite(@field(inputs.parameters, field.name)) or
             @field(inputs.parameters, field.name) <= 0)
             return error.InvalidPhosphateMineralParameter;
@@ -556,16 +557,16 @@ fn reaction(free_first: f64, free_second: f64, paired: f64, first_activity: f64,
 }
 
 fn validate(shared: aqueous_network.State, zone: phosphate_network.State, coefficients: activity_coefficients.Result, density: f64, constants: EquilibriumConstants, kinetics: Kinetics) !void {
-    inline for (@typeInfo(aqueous_network.State).@"struct".fields) |field| if (!std.math.isFinite(@field(shared, field.name)) or @field(shared, field.name) < 0) return error.InvalidSharedPhosphateState;
-    inline for (@typeInfo(phosphate_network.State).@"struct".fields) |field| if (!std.math.isFinite(@field(zone, field.name)) or @field(zone, field.name) < 0) return error.InvalidZonePhosphateState;
+    inline for (ti_compat.fieldViews(aqueous_network.State)) |field| if (!std.math.isFinite(@field(shared, field.name)) or @field(shared, field.name) < 0) return error.InvalidSharedPhosphateState;
+    inline for (ti_compat.fieldViews(phosphate_network.State)) |field| if (!std.math.isFinite(@field(zone, field.name)) or @field(zone, field.name) < 0) return error.InvalidZonePhosphateState;
     if (!std.math.isFinite(coefficients.monovalent_activity_coefficient) or coefficients.monovalent_activity_coefficient <= 0 or !std.math.isFinite(coefficients.divalent_activity_coefficient) or coefficients.divalent_activity_coefficient <= 0 or !std.math.isFinite(coefficients.trivalent_activity_coefficient) or coefficients.trivalent_activity_coefficient <= 0 or !std.math.isFinite(density) or density <= 0) return error.InvalidPhosphateReactionInput;
-    inline for (@typeInfo(EquilibriumConstants).@"struct".fields) |field| if (!std.math.isFinite(@field(constants, field.name)) or @field(constants, field.name) < 0) return error.InvalidPhosphateEquilibriumConstant;
+    inline for (ti_compat.fieldViews(EquilibriumConstants)) |field| if (!std.math.isFinite(@field(constants, field.name)) or @field(constants, field.name) < 0) return error.InvalidPhosphateEquilibriumConstant;
     if (!std.math.isFinite(kinetics.substrate_limit_fraction) or kinetics.substrate_limit_fraction < 0 or kinetics.substrate_limit_fraction > 1 or !std.math.isFinite(kinetics.maximum_pairing_mol_per_m3_step) or kinetics.maximum_pairing_mol_per_m3_step < 0) return error.InvalidPhosphateKinetics;
 }
 
 fn filled(comptime T: type, value: f64) T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| @field(result, field.name) = value;
+    inline for (ti_compat.fieldViews(T)) |field| @field(result, field.name) = value;
     return result;
 }
 
@@ -669,7 +670,7 @@ test "runtime phosphate water gate clears only aqueous reaction rates" {
             .minimum_water_volume_m3 = 1.0e-12,
         },
     );
-    inline for (@typeInfo(phosphate_network.DissociationAndPairingFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(phosphate_network.DissociationAndPairingFluxes)) |field|
         try std.testing.expectEqual(@as(f64, 0), @field(result.aqueous, field.name));
     const ungated = try calculate(
         shared,
@@ -709,19 +710,19 @@ test "five phosphate minerals are evaluated with distinct stoichiometry and ceil
 test "phosphate aqueous rates match every SOLUTE source equation" {
     var shared: aqueous_network.State = undefined;
     var shared_value: f64 = 0.2;
-    inline for (@typeInfo(aqueous_network.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(aqueous_network.State)) |field| {
         @field(shared, field.name) = shared_value;
         shared_value += 0.031;
     }
     var zone: phosphate_network.State = undefined;
     var zone_value: f64 = 0.3;
-    inline for (@typeInfo(phosphate_network.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(phosphate_network.State)) |field| {
         @field(zone, field.name) = zone_value;
         zone_value += 0.029;
     }
     var constants: EquilibriumConstants = undefined;
     var constant_value: f64 = 0.1;
-    inline for (@typeInfo(EquilibriumConstants).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(EquilibriumConstants)) |field| {
         @field(constants, field.name) = constant_value;
         constant_value += 0.017;
     }
@@ -924,7 +925,7 @@ test "source-order phosphate minerals retain distinct dissolution ceilings" {
         parameters,
         0.5,
     );
-    inline for (@typeInfo(phosphate_network.MineralFluxes).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(phosphate_network.MineralFluxes)) |field|
         try std.testing.expectApproxEqAbs(
             @field(source, field.name),
             @field(production, field.name),

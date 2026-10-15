@@ -4,6 +4,7 @@ const output_selection = @import("selection.zig");
 const output_stream_bank = @import("stream_bank.zig");
 const output_hour_transaction = @import("hour_transaction.zig");
 
+
 pub const Catalog = struct {
     allocator: std.mem.Allocator,
     variables: []output_record.Variable,
@@ -731,11 +732,11 @@ fn finiteSlice(values: []const f64) !void {
 test "VISUAL hourly expands beyond three species and eleven layers" {
     const species = [_]f64{ 3600, 7200, 10800, 14400, 18000, 21600, 25200 };
     const respiration = [_]f64{ 360, 720, 1080, 1440, 1800, 2160, 2520 };
-    const liquid = [_]f64{1} ** 13;
-    const air = [_]f64{2} ** 13;
-    const macro = [_]f64{0.5} ** 13;
-    const volume = [_]f64{10} ** 13;
-    const temperature = [_]f64{280} ** 13;
+    const liquid = @as([13]f64, @splat(@as(f64, 1)));
+    const air = @as([13]f64, @splat(@as(f64, 2)));
+    const macro = @as([13]f64, @splat(@as(f64, 0.5)));
+    const volume = @as([13]f64, @splat(@as(f64, 10)));
+    const temperature = @as([13]f64, @splat(@as(f64, 280)));
     var output = try hourly(std.testing.allocator, .{ .cell_area_m2 = 2, .species_cumulative_gross_carbon_g = &species, .species_cumulative_respired_carbon_g = &respiration, .ecosystem_gross_primary_productivity_g = 0, .ecosystem_net_primary_productivity_g = 0, .ecosystem_autotrophic_respiration_g = 0, .ecosystem_heterotrophic_respiration_g = 0, .net_biome_productivity_g = 0, .carbon_dioxide_flux_g = 0, .methane_flux_g = 0, .net_radiation_megajoules_h = 2, .latent_heat_flux_megajoules_h = 1, .sensible_heat_flux_megajoules_h = 0.5, .liquid_water_m3_by_layer = &liquid, .air_volume_m3_by_layer = &air, .macropore_water_m3_by_layer = &macro, .total_volume_m3_by_layer = &volume, .soil_temperature_k_by_layer = &temperature });
     defer output.deinit();
     try std.testing.expectEqual(@as(usize, 50), output.values.len);
@@ -784,7 +785,7 @@ test "VISUAL hourly allocation-free kernel exactly matches owned record" {
 }
 
 test "VISUAL kernels reject complete invalid records before mutating reusable rows" {
-    var hourly_row = [_]f64{42} ** 14;
+    var hourly_row = @as([14]f64, @splat(@as(f64, 42)));
     const invalid_temperature = [_]f64{std.math.nan(f64)};
     try std.testing.expectError(
         error.NonFiniteVisualizationOutput,
@@ -811,11 +812,11 @@ test "VISUAL kernels reject complete invalid records before mutating reusable ro
     );
     try std.testing.expectEqualSlices(
         f64,
-        &([_]f64{42} ** 14),
+        &(@as([14]f64, @splat(@as(f64, 42)))),
         &hourly_row,
     );
 
-    var daily_row = [_]f64{24} ** 12;
+    var daily_row = @as([12]f64, @splat(@as(f64, 24)));
     try std.testing.expectError(
         error.InvalidVisualizationCarbonPool,
         dailyInto(&daily_row, .{
@@ -836,14 +837,14 @@ test "VISUAL kernels reject complete invalid records before mutating reusable ro
     );
     try std.testing.expectEqualSlices(
         f64,
-        &([_]f64{24} ** 12),
+        &(@as([12]f64, @splat(@as(f64, 24)))),
         &daily_row,
     );
 }
 
 test "VISUAL daily residual evaporation sums arbitrary species" {
     const transpiration = [_]f64{ -0.001, -0.002, -0.003, -0.004, -0.005, -0.006, -0.007 };
-    const zeros = [_]f64{0} ** 7;
+    const zeros = @as([7]f64, @splat(@as(f64, 0)));
     const soc = [_]f64{ 1000, 2000, 3000 };
     var output = try daily(std.testing.allocator, .{ .cell_area_m2 = 2, .cumulative_transpiration_source_m3_by_species = &transpiration, .cumulative_evapotranspiration_m3 = 0.03, .cumulative_runoff_m3 = 0.002, .cumulative_outflow_m3 = 0.004, .water_table_bottom_depth_m = 2, .active_surface_depth_m = 0.2, .snow_depth_m = 0.1, .total_leaf_area_m2 = 4, .leaf_carbon_g_by_species = &zeros, .stalk_carbon_g_by_species = &zeros, .root_carbon_g_by_species = &zeros, .organic_carbon_g_by_layer_including_surface = &soc });
     defer output.deinit();
@@ -896,8 +897,8 @@ test "VISUAL streams are bounded tab delimited and year gated" {
         64,
     );
     defer streams.deinit();
-    const hourly_values = [_]f64{1} ** 20;
-    const daily_values = [_]f64{2} ** 19;
+    const hourly_values = @as([20]f64, @splat(@as(f64, 1)));
+    const daily_values = @as([19]f64, @splat(@as(f64, 2)));
     try streams.configureScene(false, 2001, 2002);
     try std.testing.expect(!try streams.writeHourly(
         0,
@@ -993,7 +994,7 @@ test "VISUAL output identity separates co-located cells and repeated-year scenes
     for (1..3) |scene| {
         const pass: output_record.PassOrdinals = .{ .execution_number = 1, .scenario_number = 1, .repeat_number = 1, .scene_number = @intCast(scene) };
         for (0..2) |cell| {
-            const values = [_]f64{@floatFromInt(scene * 10 + cell)} ** 20;
+            const values = @as([20]f64, @splat(@as(f64, @floatFromInt(scene * 10 + cell))));
             try std.testing.expect(try streams.writeHourly(cell, -75.7, 45.3, timestamp, pass, &values));
         }
     }

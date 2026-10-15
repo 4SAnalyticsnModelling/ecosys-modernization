@@ -15,6 +15,7 @@ const group_aliases = @import("reaction_try_aliases.zig");
 const reaction_solver_numerics = @import("reaction_solver_numerics.zig");
 const reaction_solver_numerics2 = @import("reaction_solver_numerics2.zig");
 
+
 pub fn meaningfulNewtonMeritDecrease(
     current_norm: f64,
     candidate_norm: f64,
@@ -788,8 +789,8 @@ pub fn topTwoScaledResidualRows(
     options: group_aliases.Options,
 ) ?[2]usize {
     if (current.len != residual.len or current.len < 2) return null;
-    var rows = [_]usize{std.math.maxInt(usize)} ** 2;
-    var magnitudes = [_]f64{-std.math.inf(f64)} ** 2;
+    var rows = @as([2]usize, @splat(@as(usize, std.math.maxInt(usize))));
+    var magnitudes = @as([2]f64, @splat(@as(f64, -std.math.inf(f64))));
     for (current, residual, 0..) |value, change, row| {
         const magnitude = @abs(
             change / group_aliases.residualScale(value, row, options),
@@ -1619,8 +1620,8 @@ pub fn tryActiveBoundarySurfaceRecoveryCandidateFiltered(
         workspace.reaction_span_rates,
     );
     const coefficients = try scratch.activityCoefficients(0, parameters.fractions);
-    var reactions = [_]usize{0} ** active_boundary_surface_axis_limit;
-    var native_extents = [_]f64{0} ** active_boundary_surface_axis_limit;
+    var reactions = @as([active_boundary_surface_axis_limit]usize, @splat(@as(usize, 0)));
+    var native_extents = @as([active_boundary_surface_axis_limit]f64, @splat(@as(f64, 0)));
     var axis_count: usize = 0;
     for (workspace.reaction_span_rates, 0..) |rate, reaction| {
         if (axis_count == active_boundary_surface_axis_limit) break;
@@ -1727,9 +1728,9 @@ fn tryBoundedTwoAxisNewtonCandidate(
     positive_valid: []const bool,
 ) !bool {
     var top_columns =
-        [_]usize{std.math.maxInt(usize)} ** two_axis_newton_top_column_count;
+        @as([two_axis_newton_top_column_count]usize, @splat(@as(usize, std.math.maxInt(usize))));
     var top_scores =
-        [_]f64{-std.math.inf(f64)} ** two_axis_newton_top_column_count;
+        @as([two_axis_newton_top_column_count]f64, @splat(@as(f64, -std.math.inf(f64))));
     var top_count: usize = 0;
     for (0..active_count) |column| {
         var score: f64 = 0;
@@ -1898,8 +1899,7 @@ noinline fn tryReducedBlockNewtonCandidate(
         global_residual,
         options,
     );
-    var ranked = [_]ReducedBlockFace{.{}} **
-        reduced_block_newton_max_column_count;
+    var ranked = @as([reduced_block_newton_max_column_count]ReducedBlockFace, @splat(@as(ReducedBlockFace, .{})));
     var ranked_count: usize = 0;
     for (0..active_count) |column| {
         var selected = ReducedBlockFace{};
@@ -2126,7 +2126,7 @@ const CorrectionFace = enum(u2) {
 fn ternaryCorrectionFace(pattern: usize, face_index: usize) CorrectionFace {
     var divisor: usize = 1;
     for (0..face_index) |_| divisor *= 3;
-    return @enumFromInt((pattern / divisor) % 3);
+    return @fromBackingInt(@intCast((pattern / divisor) % 3));
 }
 
 fn ternaryCorrectionPatternCount(face_count: usize) usize {
@@ -3000,7 +3000,7 @@ pub fn tryTernaryCorrectionFaceNewtonCandidate(
         entry.ternary_correction_discovery_rank =
             workspace.reaction_span_last_rank;
 
-    var base_faces = [_]i8{0} ** reaction_span.reaction_count;
+    var base_faces = @as([reaction_span.reaction_count]i8, @splat(@as(i8, 0)));
     var ambiguous_columns: [maximum_ternary_correction_faces]usize = undefined;
     var ambiguous_count: usize = 0;
     for (workspace.reaction_span_solution[0..column_count], 0..) |
@@ -3394,8 +3394,8 @@ fn tryActiveRowNewtonCandidateImpl(
         .monovalent_activity_coefficient = coefficients.monovalent_activity_coefficient,
         .column_count = active_count,
     };
-    var negative_valid = [_]bool{false} ** reaction_span.reaction_count;
-    var positive_valid = [_]bool{false} ** reaction_span.reaction_count;
+    var negative_valid = @as([reaction_span.reaction_count]bool, @splat(@as(bool, false)));
+    var positive_valid = @as([reaction_span.reaction_count]bool, @splat(@as(bool, false)));
     var negative_projection: [reaction_span.reaction_count]ActiveRowFaceProjection = undefined;
     var positive_projection: [reaction_span.reaction_count]ActiveRowFaceProjection = undefined;
     var derivative_probes: usize = 0;
@@ -4170,9 +4170,9 @@ pub fn tryAnalyticCoordinateNewtonCandidate(
     };
     var best = CoordinateNewtonPrice{};
     var negative_valid =
-        [_]bool{false} ** reaction_span.reaction_count;
+        @as([reaction_span.reaction_count]bool, @splat(@as(bool, false)));
     var positive_valid =
-        [_]bool{false} ** reaction_span.reaction_count;
+        @as([reaction_span.reaction_count]bool, @splat(@as(bool, false)));
     var directions: [2 * reaction_span.reaction_count]CoordinateNewtonDirection = undefined;
     var direction_count: usize = 0;
     for (0..active_count) |column| {
@@ -6093,13 +6093,13 @@ test "captured five-face topology deterministically represents three pinned corr
 test "eight-face ternary topology exhaustively covers its bounded pattern space" {
     const pattern_count = ternaryCorrectionPatternCount(8);
     try std.testing.expectEqual(@as(usize, 6561), pattern_count);
-    var seen = [_]bool{false} ** 6561;
+    var seen = @as([6561]bool, @splat(@as(bool, false)));
     var pinned_pattern_count: usize = 0;
     for (0..pattern_count) |pattern| {
         var encoded: usize = 0;
         var place: usize = 1;
         for (0..8) |face_index| {
-            encoded += @intFromEnum(
+            encoded += @backingInt(
                 ternaryCorrectionFace(pattern, face_index),
             ) * place;
             place *= 3;
@@ -6238,7 +6238,7 @@ test "implicit pin promotion accepts eight axes and reports complete overflow" {
     @memset(positive, 1);
     @memset(workspace.reaction_span_solution[0..column_count], 0);
     workspace.reaction_span_rhs[0] = 1;
-    const base_faces = [_]i8{0} ** column_count;
+    const base_faces = @as([column_count]i8, @splat(@as(i8, 0)));
     var ambiguous_columns: [maximum_ternary_correction_faces]usize = undefined;
     var ambiguous_count: usize = 0;
 

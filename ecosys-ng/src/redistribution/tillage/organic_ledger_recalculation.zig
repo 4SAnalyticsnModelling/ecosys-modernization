@@ -22,6 +22,7 @@
 // docs/traceability/redistribution_tillage_unbound_family_disposition.md
 //
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Pools = struct {
     layer_count: usize,
@@ -137,7 +138,7 @@ pub fn recalculate(layer: usize, pools: Pools) !Result {
             }
         }
     }
-    inline for (std.meta.fields(Totals)) |field| if (!std.math.isFinite(@field(t, field.name))) return error.NonFiniteTillageOrganicLedgerResult;
+    inline for (ti_compat.fieldViews(Totals)) |field| if (!std.math.isFinite(@field(t, field.name))) return error.NonFiniteTillageOrganicLedgerResult;
     return .{ .totals = t, .ledgers = .{ .organic_carbon_g_c = t.excluding_fraction_4_carbon_g_c + t.all_fractions_carbon_g_c, .organic_nitrogen_g_n = t.excluding_fraction_4_nitrogen_g_n + t.all_fractions_nitrogen_g_n, .charcoal_organic_carbon_g_c = t.excluding_fraction_4_charcoal_carbon_g_c + t.fraction_4_charcoal_carbon_g_c, .charcoal_organic_nitrogen_g_n = t.excluding_fraction_4_charcoal_nitrogen_g_n + t.fraction_4_charcoal_nitrogen_g_n, .residue_organic_carbon_g_c = t.excluding_fraction_4_carbon_g_c } };
 }
 

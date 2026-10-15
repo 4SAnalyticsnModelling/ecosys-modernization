@@ -33,6 +33,7 @@ const group_misc = @import("plant_harvest_runtime_misc.zig");
 const group_mortality = @import("plant_harvest_runtime_mortality.zig");
 const group_types = @import("plant_harvest_runtime_types.zig");
 
+
 test "harvest product subtraction rejects sub-legacy-tolerance overdraw atomically" {
     var target: canopy.ElementalMass = .{ .carbon_g = 1, .nitrogen_g = 2, .phosphorus_g = 3 };
     const before = target;
@@ -706,15 +707,9 @@ test "post-harvest topology guard still rejects direct tillage of an unassigned 
     defer growth.deinit();
     var dormancy_state = try dormancy.RuntimeState.init(std.testing.allocator, 1);
     defer dormancy_state.deinit();
-    const science = [_]group_types.ScienceParameters{.{
-        .carbon_woody_fraction = .{ 1, 0 },
-        .leaf_nitrogen_woody_fraction = .{ 1, 0 },
-        .sheath_nitrogen_woody_fraction = .{ 1, 0 },
-        .leaf_phosphorus_woody_fraction = .{ 1, 0 },
-        .sheath_phosphorus_woody_fraction = .{ 1, 0 },
-    }} ** 5;
-    var products = [_]group_types.ProductLedger{.{}} ** 5;
-    var parameters = [_]dormancy.Parameters{std.mem.zeroes(dormancy.Parameters)} ** 5;
+    const science = @as([5]group_types.ScienceParameters, @splat(@as(group_types.ScienceParameters, .{ .carbon_woody_fraction = .{ 1, 0 }, .leaf_nitrogen_woody_fraction = .{ 1, 0 }, .sheath_nitrogen_woody_fraction = .{ 1, 0 }, .leaf_phosphorus_woody_fraction = .{ 1, 0 }, .sheath_phosphorus_woody_fraction = .{ 1, 0 }, })));
+    var products = @as([5]group_types.ProductLedger, @splat(@as(group_types.ProductLedger, .{})));
+    var parameters = @as([5]dormancy.Parameters, @splat(@as(dormancy.Parameters, std.mem.zeroes(dormancy.Parameters))));
     for (&parameters) |*parameter| parameter.full_senescence_duration_h = 720;
     var context: group_misc.Context = .{
         .canopy_state = &state,
@@ -873,8 +868,8 @@ test "thinning then complete mortality conserves host and nodule roots and publi
         .nitrogen = .{ 0.25, 0.25, 0.25, 0.25 },
         .phosphorus = .{ 0.25, 0.25, 0.25, 0.25 },
     };
-    partitions.by_plant_and_organ[@intFromEnum(litter_partition.Organ.fine_root)] = uniform;
-    partitions.by_plant_and_organ[@intFromEnum(litter_partition.Organ.nonstructural)] = uniform;
+    partitions.by_plant_and_organ[@backingInt(litter_partition.Organ.fine_root)] = uniform;
+    partitions.by_plant_and_organ[@backingInt(litter_partition.Organ.nonstructural)] = uniform;
     const config = try @import("../core/config.zig").SimulationConfig.init(
         .{ .lon_count = 1, .lat_count = 1, .soil_layers = 2, .plant_populations = 1 },
         .{ .worker_threads = 1, .tile_cells = 1 },

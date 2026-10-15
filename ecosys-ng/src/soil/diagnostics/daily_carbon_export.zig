@@ -5,6 +5,8 @@ const dissolved_gas_transport = @import("../gas/dissolved_gas_transport.zig");
 const gaseous_transport = @import("../gas/transport_step.zig");
 const gas = @import("../gas/transport.zig");
 const solute_species = @import("../solute/transport_species.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -70,8 +72,8 @@ pub const State = struct {
                 const layer = try model_grid.layerIndex(cell, local_layer);
                 for (0..@import("../organic/initialization.zig").substrate_count) |substrate| {
                     const base = layer * organic_transport.component_count + substrate * organic_transport.components_per_substrate;
-                    const doc_flux = transport.boundary_net_flux_g[base + @intFromEnum(organic_transport.Component.dissolved_organic_carbon)];
-                    const acetate_flux = transport.boundary_net_flux_g[base + @intFromEnum(organic_transport.Component.dissolved_acetate_carbon)];
+                    const doc_flux = transport.boundary_net_flux_g[base + @backingInt(organic_transport.Component.dissolved_organic_carbon)];
+                    const acetate_flux = transport.boundary_net_flux_g[base + @backingInt(organic_transport.Component.dissolved_acetate_carbon)];
                     inward_g_c += @max(0, doc_flux) + @max(0, acetate_flux);
                     outward_g_c += @max(0, -doc_flux) + @max(0, -acetate_flux);
                 }
@@ -110,8 +112,8 @@ pub const State = struct {
             for (0..model_grid.active_soil_layer_count[cell]) |local_layer| {
                 const layer = try model_grid.layerIndex(cell, local_layer);
                 const base = layer * gas.species_count;
-                const co2_flux = transport.boundary_net_flux_g[base + @intFromEnum(gas.Species.carbon_dioxide)];
-                const ch4_flux = transport.boundary_net_flux_g[base + @intFromEnum(gas.Species.methane)];
+                const co2_flux = transport.boundary_net_flux_g[base + @backingInt(gas.Species.carbon_dioxide)];
+                const ch4_flux = transport.boundary_net_flux_g[base + @backingInt(gas.Species.methane)];
                 inward_g_c += @max(0, co2_flux) + @max(0, ch4_flux);
                 outward_g_c += @max(0, -co2_flux) + @max(0, -ch4_flux);
             }
@@ -130,8 +132,8 @@ pub const State = struct {
             for (0..model_grid.active_soil_layer_count[cell]) |local_layer| {
                 const layer = try model_grid.layerIndex(cell, local_layer);
                 const base = layer * gas.species_count;
-                const co2_flux = transport.subsurface_flux_g_per_h[base + @intFromEnum(gas.Species.carbon_dioxide)];
-                const ch4_flux = transport.subsurface_flux_g_per_h[base + @intFromEnum(gas.Species.methane)];
+                const co2_flux = transport.subsurface_flux_g_per_h[base + @backingInt(gas.Species.carbon_dioxide)];
+                const ch4_flux = transport.subsurface_flux_g_per_h[base + @backingInt(gas.Species.methane)];
                 inward_g_c += @max(0, co2_flux) + @max(0, ch4_flux);
                 outward_g_c += @max(0, -co2_flux) + @max(0, -ch4_flux);
             }
@@ -160,9 +162,9 @@ pub const State = struct {
             for (0..model_grid.active_soil_layer_count[cell]) |local_layer| {
                 const layer = try model_grid.layerIndex(cell, local_layer);
                 const base = layer * aqueous_species_count;
-                inline for (@typeInfo(solute_species.AqueousSpecies).@"enum".fields) |field| {
+                inline for (ti_compat.enumFieldViews(solute_species.AqueousSpecies)) |field| {
                     if (field.value < aqueous_species_count) {
-                        const species: solute_species.AqueousSpecies = @enumFromInt(field.value);
+                        const species: solute_species.AqueousSpecies = @fromBackingInt(@intCast(field.value));
                         if (isCarbonateCarrier(species)) {
                             const flux = boundary_flux_mol[base + field.value];
                             inward_g_c += @max(0, flux) * carbon_g_per_mol;
@@ -212,10 +214,10 @@ test "UDOCD sums DOC and acetate outward losses over runtime layers and complexe
     defer transport.deinit();
     const first = 0;
     const second = organic_transport.component_count;
-    transport.boundary_net_flux_g[first + @intFromEnum(organic_transport.Component.dissolved_organic_carbon)] = -2;
-    transport.boundary_net_flux_g[first + @intFromEnum(organic_transport.Component.dissolved_acetate_carbon)] = -3;
-    transport.boundary_net_flux_g[second + organic_transport.components_per_substrate + @intFromEnum(organic_transport.Component.dissolved_organic_carbon)] = -5;
-    transport.boundary_net_flux_g[second + @intFromEnum(organic_transport.Component.dissolved_organic_carbon)] = 17;
+    transport.boundary_net_flux_g[first + @backingInt(organic_transport.Component.dissolved_organic_carbon)] = -2;
+    transport.boundary_net_flux_g[first + @backingInt(organic_transport.Component.dissolved_acetate_carbon)] = -3;
+    transport.boundary_net_flux_g[second + organic_transport.components_per_substrate + @backingInt(organic_transport.Component.dissolved_organic_carbon)] = -5;
+    transport.boundary_net_flux_g[second + @backingInt(organic_transport.Component.dissolved_organic_carbon)] = 17;
     var daily = try State.init(std.testing.allocator, model_grid.cell_count);
     defer daily.deinit();
     try daily.accumulateOrganicDrainageHour(&model_grid, &transport);
@@ -228,11 +230,11 @@ test "subsurface gas ledger separates inward carbon from UDICD output" {
     defer model_grid.deinit();
     var transport = try gaseous_transport.State.init(std.testing.allocator, model_grid.layer_count);
     defer transport.deinit();
-    transport.subsurface_flux_g_per_h[@intFromEnum(gas.Species.carbon_dioxide)] = -2;
-    transport.subsurface_flux_g_per_h[@intFromEnum(gas.Species.methane)] = 7;
-    transport.subsurface_flux_g_per_h[gas.species_count + @intFromEnum(gas.Species.methane)] = -3;
+    transport.subsurface_flux_g_per_h[@backingInt(gas.Species.carbon_dioxide)] = -2;
+    transport.subsurface_flux_g_per_h[@backingInt(gas.Species.methane)] = 7;
+    transport.subsurface_flux_g_per_h[gas.species_count + @backingInt(gas.Species.methane)] = -3;
     // Surface exchange must never enter profile drainage.
-    transport.atmospheric_flux_g_per_h[@intFromEnum(gas.Species.carbon_dioxide)] = -100;
+    transport.atmospheric_flux_g_per_h[@backingInt(gas.Species.carbon_dioxide)] = -100;
     var daily = try State.init(std.testing.allocator, model_grid.cell_count);
     defer daily.deinit();
     try daily.accumulateGaseousInorganicDrainageHour(&model_grid, &transport);
@@ -244,9 +246,9 @@ test "carbonate boundary ledger separates recharge from drainage" {
     const config = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 });
     var model_grid = try grid_module.GridState.init(std.testing.allocator, config);
     defer model_grid.deinit();
-    var flux = [_]f64{0} ** solute_species.AqueousSpecies.count;
-    flux[@intFromEnum(solute_species.AqueousSpecies.bicarbonate)] = 2;
-    flux[@intFromEnum(solute_species.AqueousSpecies.calcium_carbonate)] = -3;
+    var flux = @as([solute_species.AqueousSpecies.count]f64, @splat(@as(f64, 0)));
+    flux[@backingInt(solute_species.AqueousSpecies.bicarbonate)] = 2;
+    flux[@backingInt(solute_species.AqueousSpecies.calcium_carbonate)] = -3;
     var daily = try State.init(std.testing.allocator, model_grid.cell_count);
     defer daily.deinit();
     try daily.accumulateSoluteCarbonateDrainageHour(&model_grid, &flux, solute_species.AqueousSpecies.count, 12);

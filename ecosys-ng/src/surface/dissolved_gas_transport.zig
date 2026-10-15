@@ -2,6 +2,7 @@ const std = @import("std");
 const gas = @import("../soil/gas/transport.zig");
 const runoff_carrier = @import("runoff_carrier.zig");
 
+
 pub const Directions = struct {
     east_m3: []const f64,
     west_m3: []const f64,
@@ -43,7 +44,7 @@ pub fn advance(
     defer allocator.free(original);
     const candidate = try allocator.dupe(f64, original);
     defer allocator.free(candidate);
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const ammonia = @backingInt(gas.Species.ammonia);
     const ammonia_mirror = try allocator.alloc(f64, cells);
     defer allocator.free(ammonia_mirror);
     for (0..cells) |cell|
@@ -118,7 +119,7 @@ pub fn advance(
     for (0..cells) |cell|
         candidate[cell * gas.species_count + ammonia] = ammonia_mirror[cell];
     for (0..cells) |cell| for (0..gas.species_count) |species_index| {
-        const species: gas.Species = @enumFromInt(species_index);
+        const species: gas.Species = @fromBackingInt(@intCast(species_index));
         if (species == .ammonia) continue;
         const index = cell * gas.species_count + species_index;
         const exported = boundary_export[index];
@@ -168,15 +169,15 @@ pub fn advance(
 test "aqueous litter ammonia mirror never enters generic runoff transport" {
     var state = try gas.State.init(std.testing.allocator, 2);
     defer state.deinit();
-    const ammonia = @intFromEnum(gas.Species.ammonia);
+    const ammonia = @backingInt(gas.Species.ammonia);
     state.dissolved_mass_g[ammonia] = 8;
     state.dissolved_mass_g[gas.species_count + ammonia] = 2;
     var carbon_export = [_]f64{ 7, 7 };
     var oxygen_export = [_]f64{ 11, 11 };
     var nitrogen_export = [_]f64{ 13, 13 };
     var hydrogen_export = [_]f64{ 17, 17 };
-    var intercell_debit = [_]runoff_carrier.ElementMass{.{}} ** 2;
-    var intercell_credit = [_]runoff_carrier.ElementMass{.{}} ** 2;
+    var intercell_debit = @as([2]runoff_carrier.ElementMass, @splat(@as(runoff_carrier.ElementMass, .{})));
+    var intercell_credit = @as([2]runoff_carrier.ElementMass, @splat(@as(runoff_carrier.ElementMass, .{})));
     const zero = [_]f64{ 0, 0 };
     try advance(std.testing.allocator, &state, 2, 1, &.{ 0.5, 1 }, &.{ -0.5, 0 }, .{
         .east_m3 = &.{ 0.5, 1 },
@@ -197,8 +198,8 @@ test "aqueous litter ammonia mirror never enters generic runoff transport" {
 test "surface dissolved gas routing rejects sub-tolerance negative water without mutation" {
     var state = try gas.State.init(std.testing.allocator, 1);
     defer state.deinit();
-    state.dissolved_mass_g[@intFromEnum(gas.Species.oxygen)] = 1;
-    const before = state.dissolved_mass_g[@intFromEnum(gas.Species.oxygen)];
+    state.dissolved_mass_g[@backingInt(gas.Species.oxygen)] = 1;
+    const before = state.dissolved_mass_g[@backingInt(gas.Species.oxygen)];
     var carbon_export = [_]f64{7};
     var oxygen_export = [_]f64{11};
     var nitrogen_export = [_]f64{13};
@@ -223,7 +224,7 @@ test "surface dissolved gas routing rejects sub-tolerance negative water without
             .intercell = .{ .debit_by_cell = &intercell_debit, .credit_by_cell = &intercell_credit },
         },
     ));
-    try std.testing.expectEqual(before, state.dissolved_mass_g[@intFromEnum(gas.Species.oxygen)]);
+    try std.testing.expectEqual(before, state.dissolved_mass_g[@backingInt(gas.Species.oxygen)]);
     try std.testing.expectEqual(@as(f64, 7), carbon_export[0]);
     try std.testing.expectEqual(@as(f64, 11), oxygen_export[0]);
     try std.testing.expectEqual(@as(f64, 13), nitrogen_export[0]);
@@ -235,23 +236,23 @@ test "surface dissolved gas routing rejects sub-tolerance negative water without
 test "surface dissolved gases conserve internal routing and publish landscape nitrogen hydrogen exports" {
     var state = try gas.State.init(std.testing.allocator, 2);
     defer state.deinit();
-    state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] = 8;
-    state.dissolved_mass_g[@intFromEnum(gas.Species.methane)] = 4;
-    state.dissolved_mass_g[@intFromEnum(gas.Species.oxygen)] = 2;
-    state.dissolved_mass_g[@intFromEnum(gas.Species.nitrogen)] = 6;
-    state.dissolved_mass_g[@intFromEnum(gas.Species.nitrous_oxide)] = 2;
-    state.dissolved_mass_g[@intFromEnum(gas.Species.hydrogen)] = 10;
+    state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] = 8;
+    state.dissolved_mass_g[@backingInt(gas.Species.methane)] = 4;
+    state.dissolved_mass_g[@backingInt(gas.Species.oxygen)] = 2;
+    state.dissolved_mass_g[@backingInt(gas.Species.nitrogen)] = 6;
+    state.dissolved_mass_g[@backingInt(gas.Species.nitrous_oxide)] = 2;
+    state.dissolved_mass_g[@backingInt(gas.Species.hydrogen)] = 10;
     const second = gas.species_count;
-    state.dissolved_mass_g[second + @intFromEnum(gas.Species.carbon_dioxide)] = 2;
-    state.dissolved_mass_g[second + @intFromEnum(gas.Species.nitrogen)] = 2;
-    state.dissolved_mass_g[second + @intFromEnum(gas.Species.nitrous_oxide)] = 1;
-    state.dissolved_mass_g[second + @intFromEnum(gas.Species.hydrogen)] = 4;
+    state.dissolved_mass_g[second + @backingInt(gas.Species.carbon_dioxide)] = 2;
+    state.dissolved_mass_g[second + @backingInt(gas.Species.nitrogen)] = 2;
+    state.dissolved_mass_g[second + @backingInt(gas.Species.nitrous_oxide)] = 1;
+    state.dissolved_mass_g[second + @backingInt(gas.Species.hydrogen)] = 4;
     var export_g_c = [_]f64{ 0, 0 };
     var export_g_o = [_]f64{ 0, 0 };
     var export_g_n = [_]f64{ 0, 0 };
     var export_g_h = [_]f64{ 0, 0 };
-    var intercell_debit = [_]runoff_carrier.ElementMass{.{}} ** 2;
-    var intercell_credit = [_]runoff_carrier.ElementMass{.{}} ** 2;
+    var intercell_debit = @as([2]runoff_carrier.ElementMass, @splat(@as(runoff_carrier.ElementMass, .{})));
+    var intercell_credit = @as([2]runoff_carrier.ElementMass, @splat(@as(runoff_carrier.ElementMass, .{})));
     const zero = [_]f64{ 0, 0 };
     try advance(std.testing.allocator, &state, 2, 1, &.{ 0.5, 1 }, &.{ -0.5, 0 }, .{
         .east_m3 = &.{ 0.5, 1 },
@@ -269,14 +270,14 @@ test "surface dissolved gases conserve internal routing and publish landscape ni
     // Simultaneous routing does not cascade cell 0's incoming mass through
     // cell 1 during the same accepted transport step.
     try std.testing.expectApproxEqAbs(@as(f64, 2), export_g_c[1], 1e-15);
-    try std.testing.expectApproxEqAbs(@as(f64, 1), state.dissolved_mass_g[second + @intFromEnum(gas.Species.oxygen)], 1e-15);
-    try std.testing.expectApproxEqAbs(@as(f64, 6), state.dissolved_mass_g[second + @intFromEnum(gas.Species.carbon_dioxide)] + state.dissolved_mass_g[second + @intFromEnum(gas.Species.methane)], 1e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, 1), state.dissolved_mass_g[second + @backingInt(gas.Species.oxygen)], 1e-15);
+    try std.testing.expectApproxEqAbs(@as(f64, 6), state.dissolved_mass_g[second + @backingInt(gas.Species.carbon_dioxide)] + state.dissolved_mass_g[second + @backingInt(gas.Species.methane)], 1e-15);
     // PR-O2-01D: the O2 that left the grid must be reported, not dropped.
     // Cell 0 starts with 2 g O2, cell 1 with none; 1 g ends up retained in
     // cell 1 and the remainder crosses the eastern boundary.
     try std.testing.expectApproxEqAbs(@as(f64, 0), export_g_o[0], 1e-15);
-    const oxygen_retained = state.dissolved_mass_g[@intFromEnum(gas.Species.oxygen)] +
-        state.dissolved_mass_g[second + @intFromEnum(gas.Species.oxygen)];
+    const oxygen_retained = state.dissolved_mass_g[@backingInt(gas.Species.oxygen)] +
+        state.dissolved_mass_g[second + @backingInt(gas.Species.oxygen)];
     try std.testing.expectApproxEqAbs(@as(f64, 2), oxygen_retained + export_g_o[0] + export_g_o[1], 1e-15);
     try std.testing.expectApproxEqAbs(@as(f64, 4), intercell_debit[0].nitrogen_g, 1e-15);
     try std.testing.expectApproxEqAbs(intercell_debit[0].nitrogen_g, intercell_credit[1].nitrogen_g, 1e-15);
@@ -291,9 +292,9 @@ test "surface dissolved gases conserve internal routing and publish landscape ni
     var retained_h: f64 = 0;
     for (0..2) |cell| {
         const first = cell * gas.species_count;
-        retained_n += state.dissolved_mass_g[first + @intFromEnum(gas.Species.nitrogen)] +
-            state.dissolved_mass_g[first + @intFromEnum(gas.Species.nitrous_oxide)];
-        retained_h += state.dissolved_mass_g[first + @intFromEnum(gas.Species.hydrogen)];
+        retained_n += state.dissolved_mass_g[first + @backingInt(gas.Species.nitrogen)] +
+            state.dissolved_mass_g[first + @backingInt(gas.Species.nitrous_oxide)];
+        retained_h += state.dissolved_mass_g[first + @backingInt(gas.Species.hydrogen)];
     }
     try std.testing.expectEqual(@as(f64, 11), retained_n + ledger.cumulative.nitrogen_output_g_n);
     try std.testing.expectEqual(@as(f64, 14), retained_h + ledger.cumulative.hydrogen_output_g);

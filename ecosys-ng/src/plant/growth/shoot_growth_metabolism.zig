@@ -1,6 +1,8 @@
 const std = @import("std");
 const partition_module = @import("../partition/organ.zig");
 const nutrient_limitation = @import("shoot_growth_nutrient_limitation.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Parameters = struct {
     maximum_mobile_carbon_oxidation_per_h: f64,
@@ -13,7 +15,7 @@ pub const Parameters = struct {
     mobile_phosphorus_inhibition_g_p_per_g_c: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name)) or @field(self, field.name) < 0) return error.InvalidShootGrowthMetabolismParameter;
+        inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(self, field.name)) or @field(self, field.name) < 0) return error.InvalidShootGrowthMetabolismParameter;
         if (self.mobile_carbon_respiration_half_saturation_g_c_per_g_c <= 0 or self.minimum_leaf_nutrient_fraction > 1) return error.InvalidShootGrowthMetabolismParameter;
     }
 };
@@ -181,7 +183,7 @@ pub const StructuralNitrogenInputs = struct {
 /// GROSUB 904-918 structural N basis for branch maintenance respiration.
 /// Stalk contribution is CNSTK times sapwood C, not total stalk N.
 pub fn structuralNitrogenForMaintenance(inputs: StructuralNitrogenInputs) !f64 {
-    inline for (@typeInfo(StructuralNitrogenInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(StructuralNitrogenInputs)) |field| {
         if (field.type == f64) {
             const value = @field(inputs, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidShootStructuralNitrogenInput;
@@ -288,8 +290,8 @@ pub fn calculatePreEmergence(
     inputs: PreEmergenceInputs,
 ) !PreEmergenceFluxes {
     try parameters.validate();
-    inline for (@typeInfo(Coefficients).@"struct".fields) |field| if (!std.math.isFinite(@field(growth, field.name)) or @field(growth, field.name) < 0) return error.InvalidPreEmergenceMetabolismInput;
-    inline for (@typeInfo(PreEmergenceInputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0) return error.InvalidPreEmergenceMetabolismInput;
+    inline for (ti_compat.fieldViews(Coefficients)) |field| if (!std.math.isFinite(@field(growth, field.name)) or @field(growth, field.name) < 0) return error.InvalidPreEmergenceMetabolismInput;
+    inline for (ti_compat.fieldViews(PreEmergenceInputs)) |field| if (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0) return error.InvalidPreEmergenceMetabolismInput;
     // TFN4 and TFN6 are Arrhenius responses, not [0, 1] fractions.
     inline for (.{ inputs.growth_water_fraction, inputs.maintenance_water_fraction, inputs.termination_fraction, inputs.nutrient_growth_fraction, inputs.oxygen_limitation_fraction }) |fraction| if (fraction > 1) return error.InvalidPreEmergenceMetabolismInput;
     if (inputs.maintenance_temperature_fraction > 1.0e3) return error.InvalidPreEmergenceMetabolismInput;
@@ -338,7 +340,7 @@ pub fn calculatePreEmergence(
         .total_respiration_oxygen_unlimited_g_c = maintenance + limited_growth_unlimited + maintenance_deficit_unlimited + nitrogen_respiration_unlimited,
         .total_respiration_actual_g_c = maintenance + limited_growth_actual + maintenance_deficit_actual + nitrogen_respiration_actual,
     };
-    inline for (@typeInfo(PreEmergenceFluxes).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFinitePreEmergenceMetabolism;
+    inline for (ti_compat.fieldViews(PreEmergenceFluxes)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFinitePreEmergenceMetabolism;
     return result;
 }
 
@@ -501,8 +503,8 @@ pub fn plantScaledPresenceThresholdG(
 
 pub fn calculate(parameters: Parameters, growth: Coefficients, inputs: Inputs) !Fluxes {
     try parameters.validate();
-    inline for (@typeInfo(Coefficients).@"struct".fields) |field| if (!std.math.isFinite(@field(growth, field.name)) or @field(growth, field.name) < 0) return error.InvalidShootGrowthCoefficient;
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidShootGrowthMetabolismInput;
+    inline for (ti_compat.fieldViews(Coefficients)) |field| if (!std.math.isFinite(@field(growth, field.name)) or @field(growth, field.name) < 0) return error.InvalidShootGrowthCoefficient;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (field.type == f64 and (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0)) return error.InvalidShootGrowthMetabolismInput;
     inline for (.{ inputs.growth_temperature_fraction, inputs.maintenance_temperature_fraction, inputs.growth_water_fraction, inputs.maintenance_water_fraction, inputs.termination_fraction, inputs.nutrient_growth_fraction }) |fraction| if (fraction > 1) return error.InvalidShootGrowthMetabolismInput;
     if (inputs.timestep_h <= 0 or growth.respiration_fraction_g_c_per_g_c <= 0) return error.InvalidShootGrowthMetabolismInput;
     if (!inputs.metabolically_active) return std.mem.zeroes(Fluxes);
@@ -544,16 +546,16 @@ pub fn calculate(parameters: Parameters, growth: Coefficients, inputs: Inputs) !
         .nitrogen_assimilation_respiration_g_c = nitrogen_respiration,
         .total_respiration_g_c = total_respiration,
     };
-    inline for (@typeInfo(Fluxes).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteShootGrowthMetabolismResult;
+    inline for (ti_compat.fieldViews(Fluxes)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteShootGrowthMetabolismResult;
     return result;
 }
 
 test "GROSUB shoot respiration and nutrient limitation preserve source equations" {
     const parameters = compatibilityParameters();
     const partition = [_]f64{ 0.5, 0.2, 0.1, 0.1, 0.05, 0.05, 0 };
-    const yields = [_]f64{0.8} ** partition_module.organ_count;
-    const n = [_]f64{0.04} ** partition_module.organ_count;
-    const p = [_]f64{0.004} ** partition_module.organ_count;
+    const yields = @as([partition_module.organ_count]f64, @splat(@as(f64, 0.8)));
+    const n = @as([partition_module.organ_count]f64, @splat(@as(f64, 0.04)));
+    const p = @as([partition_module.organ_count]f64, @splat(@as(f64, 0.004)));
     const growth = try coefficients(partition, yields, n, p, parameters.minimum_leaf_nutrient_fraction);
     const result = try calculate(parameters, growth, .{
         .mobile_carbon_g_c = 100,
@@ -744,7 +746,7 @@ fn testPreEmergenceInputs() PreEmergenceInputs {
 
 test "GROSUB pre-emergence metabolism preserves dual oxygen paths" {
     const parameters = compatibilityParameters();
-    const growth = try coefficients(.{ 0.5, 0.2, 0.1, 0.1, 0.05, 0.05, 0 }, .{0.8} ** partition_module.organ_count, .{0.04} ** partition_module.organ_count, .{0.004} ** partition_module.organ_count, parameters.minimum_leaf_nutrient_fraction);
+    const growth = try coefficients(.{ 0.5, 0.2, 0.1, 0.1, 0.05, 0.05, 0 }, @as([partition_module.organ_count]f64, @splat(0.8)), @as([partition_module.organ_count]f64, @splat(0.04)), @as([partition_module.organ_count]f64, @splat(0.004)), parameters.minimum_leaf_nutrient_fraction);
     const inputs = testPreEmergenceInputs();
     const result = try calculatePreEmergence(parameters, growth, inputs);
     try std.testing.expectApproxEqAbs(result.substrate_respiration_oxygen_unlimited_g_c * inputs.oxygen_limitation_fraction, result.substrate_respiration_actual_g_c, 1.0e-15);
@@ -755,7 +757,7 @@ test "GROSUB pre-emergence metabolism preserves dual oxygen paths" {
 
 test "GROSUB pre-emergence zero oxygen retains source maintenance deficit order" {
     const parameters = compatibilityParameters();
-    const growth = try coefficients(.{ 0.5, 0.2, 0.1, 0.1, 0.05, 0.05, 0 }, .{0.8} ** partition_module.organ_count, .{0.04} ** partition_module.organ_count, .{0.004} ** partition_module.organ_count, parameters.minimum_leaf_nutrient_fraction);
+    const growth = try coefficients(.{ 0.5, 0.2, 0.1, 0.1, 0.05, 0.05, 0 }, @as([partition_module.organ_count]f64, @splat(0.8)), @as([partition_module.organ_count]f64, @splat(0.04)), @as([partition_module.organ_count]f64, @splat(0.004)), parameters.minimum_leaf_nutrient_fraction);
     var inputs = testPreEmergenceInputs();
     inputs.oxygen_limitation_fraction = 0;
     const result = try calculatePreEmergence(parameters, growth, inputs);
@@ -768,7 +770,7 @@ test "GROSUB pre-emergence zero oxygen retains source maintenance deficit order"
 
 test "GROSUB pre-emergence metabolism rejects invalid state" {
     const parameters = compatibilityParameters();
-    const growth = try coefficients(.{ 0.5, 0.2, 0.1, 0.1, 0.05, 0.05, 0 }, .{0.8} ** partition_module.organ_count, .{0.04} ** partition_module.organ_count, .{0.004} ** partition_module.organ_count, parameters.minimum_leaf_nutrient_fraction);
+    const growth = try coefficients(.{ 0.5, 0.2, 0.1, 0.1, 0.05, 0.05, 0 }, @as([partition_module.organ_count]f64, @splat(0.8)), @as([partition_module.organ_count]f64, @splat(0.04)), @as([partition_module.organ_count]f64, @splat(0.004)), parameters.minimum_leaf_nutrient_fraction);
     var inputs = testPreEmergenceInputs();
     inputs.oxygen_limitation_fraction = 1.1;
     try std.testing.expectError(error.InvalidPreEmergenceMetabolismInput, calculatePreEmergence(parameters, growth, inputs));
@@ -786,8 +788,8 @@ test "GROSUB growth nutrient ratios copy reserve ratios only to grain" {
 }
 
 test "GROSUB growth nutrient ratios reject invalid organ values" {
-    var nitrogen = [_]f64{0.01} ** partition_module.organ_count;
-    const phosphorus = [_]f64{0.001} ** partition_module.organ_count;
+    var nitrogen = @as([partition_module.organ_count]f64, @splat(@as(f64, 0.01)));
+    const phosphorus = @as([partition_module.organ_count]f64, @splat(@as(f64, 0.001)));
     nitrogen[5] = std.math.nan(f64);
     try std.testing.expectError(error.InvalidShootGrowthNutrientRatio, growthNutrientRatios(nitrogen, phosphorus));
     nitrogen[5] = -0.01;

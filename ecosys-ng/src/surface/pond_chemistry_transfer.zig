@@ -5,6 +5,7 @@ const carrier_rebase = @import("litter_chemistry_carrier_rebase.zig");
 const soil_module = @import("../soil/solute/chemistry_state.zig");
 const conservation_sidecar = @import("pond_conservation_sidecar.zig");
 const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const CarrierVolumes = struct {
     surface_water_before_m3: f64,
@@ -132,7 +133,7 @@ fn calculateParticulate(
 ) !ParticulateCandidate {
     if (cell >= surface.cells.len or destination >= soil.cell_count)
         return error.SurfacePondChemistryIndexOutOfBounds;
-    inline for (@typeInfo(ParticulateCarriers).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(ParticulateCarriers)) |field|
         if (!std.math.isFinite(@field(carriers, field.name)))
             return error.InvalidSurfacePondChemistryCarrier;
     if (carriers.surface_dry_mass_megagrams < 0 or
@@ -374,7 +375,7 @@ pub fn acceptedSoilParticulateTransfer(
     var result: conservation_sidecar.Transfer = .{};
     const cations = soil.cation_exchange_mol_per_megagram[source];
     const pending_cations = soil.pending_cation_exchange_mol[source];
-    inline for (@typeInfo(@TypeOf(cations)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(cations))) |field| {
         if (comptime std.mem.eql(u8, field.name, "ammonium_band")) continue;
         const carrier = if (comptime std.mem.eql(u8, field.name, "ammonium_non_band"))
             source_soil_mass_megagrams * source_zone.ammonium_non_band
@@ -392,7 +393,7 @@ pub fn acceptedSoilParticulateTransfer(
 
     const phosphate = soil.non_band_phosphate[source];
     const pending_phosphate = soil.pending_non_band_phosphate_mol[source];
-    inline for (@typeInfo(@TypeOf(phosphate)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(phosphate))) |field| {
         const per_mass = comptime std.mem.endsWith(u8, field.name, "_per_megagram");
         const solid = comptime std.mem.indexOf(u8, field.name, "_solid_mol_per_m3") != null;
         if (!per_mass and !solid) continue;
@@ -424,7 +425,7 @@ pub fn acceptedSoilParticulateTransfer(
 
     const solids = soil.geochemistry_solids[source];
     const pending_solids = soil.pending_geochemistry_solids_mol[source];
-    inline for (@typeInfo(@TypeOf(solids)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(solids))) |field| {
         const moved = fraction * (@field(solids, field.name) * source_water_m3 + @field(pending_solids, field.name));
         if (comptime std.mem.eql(u8, field.name, "gibbsite_solid_mol_per_m3")) result.aluminum_mol += moved else if (comptime std.mem.eql(u8, field.name, "iron_hydroxide_solid_mol_per_m3")) result.iron_mol += moved else if (comptime std.mem.eql(u8, field.name, "calcite_solid_mol_per_m3")) {
             result.calcium_mol += moved;
@@ -475,7 +476,7 @@ fn calculate(
     if (surface.mineral_reference_water_m3.len != surface.cells.len or
         surface.dry_reference_water_m3.len != surface.cells.len)
         return error.SurfacePondChemistryDimensionMismatch;
-    inline for (@typeInfo(CarrierVolumes).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(CarrierVolumes)) |field| {
         const value = @field(carriers, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidSurfacePondChemistryCarrier;
     }

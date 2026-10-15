@@ -1,5 +1,6 @@
 const std = @import("std");
 const retention = @import("retention.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const FaceDirection = enum { horizontal, vertical };
 
@@ -132,7 +133,7 @@ pub const DualDomainExchangeInputs = struct {
 /// transfer is macropore to matrix. The interface conductivity is the
 /// published arithmetic mean evaluated at both domain pressure heads.
 pub fn calculateDualDomainExchange(inputs: DualDomainExchangeInputs) !f64 {
-    inline for (@typeInfo(DualDomainExchangeInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(DualDomainExchangeInputs)) |field| {
         if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteDualDomainExchangeInput;
     }
@@ -203,7 +204,7 @@ pub const VaporFaceFlux = struct {
 /// XNPHX is already contained in the unlimited flux and is not reapplied to
 /// the donor-vapor availability bound in the source model.
 pub fn calculateVaporFaceFlux(inputs: VaporFaceInputs) !VaporFaceFlux {
-    inline for (@typeInfo(VaporFaceInputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSoilWaterFluxInput;
+    inline for (ti_compat.fieldViews(VaporFaceInputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSoilWaterFluxInput;
     if (inputs.source_air_volume_m3 < 0 or inputs.destination_air_volume_m3 < 0 or inputs.source_vapor_volume_m3 < 0 or inputs.destination_vapor_volume_m3 < 0 or inputs.source_vapor_diffusivity_m2_per_h < 0 or inputs.destination_vapor_diffusivity_m2_per_h < 0 or inputs.source_air_fraction < 0 or inputs.destination_air_fraction < 0 or inputs.source_porosity_fraction <= 0 or inputs.destination_porosity_fraction <= 0 or inputs.tortuosity < 0 or inputs.source_path_length_m <= 0 or inputs.destination_path_length_m <= 0 or inputs.face_area_m2 < 0 or inputs.time_fraction <= 0 or inputs.time_fraction > 1) return error.InvalidSoilWaterFluxInput;
     if (inputs.source_air_volume_m3 == 0 or inputs.destination_air_volume_m3 == 0) return .{ .unlimited_vapor_m3 = 0, .limited_vapor_m3 = 0, .conductance_m_per_h = 0 };
     const source_concentration = @max(0.0, inputs.source_vapor_volume_m3 / inputs.source_air_volume_m3);
@@ -222,7 +223,7 @@ pub fn calculateVaporFaceFlux(inputs: VaporFaceInputs) !VaporFaceFlux {
 }
 
 fn validateMatrixInputs(inputs: MatrixFaceInputs) !void {
-    inline for (@typeInfo(MatrixFaceInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(MatrixFaceInputs)) |field| {
         if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSoilWaterFluxInput;
     }
     if (inputs.source_water_m3 < 0 or inputs.destination_water_m3 < 0 or inputs.source_air_m3 < 0 or inputs.destination_air_m3 < 0 or inputs.source_micropore_volume_m3 <= 0 or inputs.destination_micropore_volume_m3 <= 0 or inputs.source_water_fraction < 0 or inputs.destination_water_fraction < 0 or inputs.source_hydraulic_conductivity_m2_per_h_megapascal < 0 or inputs.destination_hydraulic_conductivity_m2_per_h_megapascal < 0 or inputs.source_path_length_m <= 0 or inputs.destination_path_length_m <= 0 or inputs.face_area_m2 < 0 or inputs.time_fraction <= 0 or inputs.time_fraction > 1) return error.InvalidSoilWaterFluxInput;

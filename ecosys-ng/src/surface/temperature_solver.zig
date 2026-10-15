@@ -12,6 +12,7 @@ const SoilThermalState = @import("../soil/heat/thermal.zig").State;
 const phase_change = @import("../soil/water/phase_change.zig");
 const retention = @import("../soil/water/retention.zig");
 const SimulationConfig = @import("../core/config.zig").SimulationConfig;
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Settings = struct {
     sensible_heat_conductance_megajoules_per_m2_h_k: f64,
@@ -875,7 +876,7 @@ const SnowFreeAtmosphericTerms = struct {
 };
 
 fn snowFreeAtmosphericTerms(inputs: SnowFreeAtmosphericInputs) !SnowFreeAtmosphericTerms {
-    inline for (@typeInfo(SnowFreeAtmosphericInputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SnowFreeAtmosphericInputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteSnowFreeAtmosphericInput;
     if (inputs.snow_free_fraction < 0 or inputs.snow_free_fraction > 1 or
         inputs.incident_shortwave_megajoules_per_m2 < 0 or inputs.soil_albedo < 0 or inputs.soil_albedo > 1 or

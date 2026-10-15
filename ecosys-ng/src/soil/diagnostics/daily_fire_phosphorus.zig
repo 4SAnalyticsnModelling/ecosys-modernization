@@ -1,4 +1,5 @@
 const std = @import("std");
+
 /// OUTSD `VPOXG + VPOXR` for one runtime grid cell. Organic combustion
 /// emissions have already been accumulated with their negative source sign,
 /// and EXTRACT plant oxidation also retains its negative source sign.
@@ -16,7 +17,7 @@ pub fn sourceSignedFlux_g_p(
 }
 
 test "VPOXG plus VPOXR preserves source signs across runtime species" {
-    var plants = [_]f64{0} ** 14;
+    var plants = @as([14]f64, @splat(@as(f64, 0)));
     plants[7] = -5;
     plants[13] = -7;
     const result = try sourceSignedFlux_g_p(1, &.{ -100, -14 }, &plants, 7);

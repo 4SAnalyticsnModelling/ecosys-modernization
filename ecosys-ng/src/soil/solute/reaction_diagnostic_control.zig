@@ -6,12 +6,13 @@
 
 const std = @import("std");
 const builtin = @import("builtin");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// The fine-grained counters below sit on the innermost reaction-evaluation
 /// paths and can execute millions of times for one cell solve. Keep them for
 /// tests and diagnostic builds, but compile them out of the production
 /// ReleaseFast binary. They do not participate in solver state or acceptance.
-pub const runtime_profiling_enabled = builtin.is_test or builtin.mode != .ReleaseFast;
+pub const runtime_profiling_enabled = builtin.is_test or builtin.mode != .fast;
 
 threadlocal var enabled = true;
 
@@ -66,7 +67,7 @@ pub const Phase = enum {
     inventory_ledger,
 };
 
-const phase_count = @typeInfo(Phase).@"enum".fields.len;
+const phase_count = @typeInfo(Phase).@"enum".field_names.len;
 threadlocal var phase_cycles: [phase_count]u64 = @splat(0);
 threadlocal var phase_calls: [phase_count]u64 = @splat(0);
 threadlocal var solve_total_cycles: u64 = 0;
@@ -99,7 +100,7 @@ pub const PhaseScope = struct {
         self.active = false;
         const now = tick();
         const top = phase_depth - 1;
-        phase_cycles[@intFromEnum(phase_stack[top])] +|=
+        phase_cycles[@backingInt(phase_stack[top])] +|=
             now -| phase_stack_start[top];
         phase_depth = top;
         if (phase_depth > 0) phase_stack_start[phase_depth - 1] = now;
@@ -112,13 +113,13 @@ pub inline fn beginPhase(phase: Phase) PhaseScope {
     const now = tick();
     if (phase_depth > 0) {
         const top = phase_depth - 1;
-        phase_cycles[@intFromEnum(phase_stack[top])] +|=
+        phase_cycles[@backingInt(phase_stack[top])] +|=
             now -| phase_stack_start[top];
     }
     phase_stack[phase_depth] = phase;
     phase_stack_start[phase_depth] = now;
     phase_depth += 1;
-    phase_calls[@intFromEnum(phase)] +|= 1;
+    phase_calls[@backingInt(phase)] +|= 1;
     return .{ .active = true };
 }
 
@@ -149,7 +150,7 @@ pub fn reportPhaseProfile(cell_index: usize) void {
             100 * (total - @as(f64, @floatFromInt(attributed))) / total,
         },
     );
-    inline for (@typeInfo(Phase).@"enum".fields) |field| {
+    inline for (ti_compat.enumFieldViews(Phase)) |field| {
         const index = field.value;
         std.log.err(
             "TEMPPROF_SOLUTE_PHASE phase={s} calls={d} cycles={d} percent={d:.2} cycles_per_call={d}",
@@ -173,21 +174,21 @@ pub fn reportPhaseProfile(cell_index: usize) void {
 threadlocal var full_network_evaluation_count: u64 = 0;
 threadlocal var reaction_span_evaluation_count: u64 = 0;
 threadlocal var active_strategy: ?Strategy = null;
-threadlocal var strategy_full_network_evaluation_counts: [@typeInfo(Strategy).@"enum".fields.len]u64 = @splat(0);
-threadlocal var strategy_reaction_span_evaluation_counts: [@typeInfo(Strategy).@"enum".fields.len]u64 = @splat(0);
+threadlocal var strategy_full_network_evaluation_counts: [@typeInfo(Strategy).@"enum".field_names.len]u64 = @splat(0);
+threadlocal var strategy_reaction_span_evaluation_counts: [@typeInfo(Strategy).@"enum".field_names.len]u64 = @splat(0);
 
 pub fn recordFullNetworkEvaluation() void {
     if (!runtime_profiling_enabled) return;
     full_network_evaluation_count +|= 1;
     if (active_strategy) |strategy|
-        strategy_full_network_evaluation_counts[@intFromEnum(strategy)] +|= 1;
+        strategy_full_network_evaluation_counts[@backingInt(strategy)] +|= 1;
 }
 
 pub fn recordReactionSpanEvaluation() void {
     if (!runtime_profiling_enabled) return;
     reaction_span_evaluation_count +|= 1;
     if (active_strategy) |strategy|
-        strategy_reaction_span_evaluation_counts[@intFromEnum(strategy)] +|= 1;
+        strategy_reaction_span_evaluation_counts[@backingInt(strategy)] +|= 1;
 }
 
 pub const EvaluationCounts = struct {
@@ -226,9 +227,9 @@ pub const ReactionSpanBoundsSiteStats = struct {
     reaction_span_evaluations: u64,
 };
 
-threadlocal var reaction_span_bounds_site_calls: [@typeInfo(ReactionSpanBoundsSite).@"enum".fields.len]u64 = @splat(0);
-threadlocal var reaction_span_bounds_site_full_network_evaluations: [@typeInfo(ReactionSpanBoundsSite).@"enum".fields.len]u64 = @splat(0);
-threadlocal var reaction_span_bounds_site_reaction_span_evaluations: [@typeInfo(ReactionSpanBoundsSite).@"enum".fields.len]u64 = @splat(0);
+threadlocal var reaction_span_bounds_site_calls: [@typeInfo(ReactionSpanBoundsSite).@"enum".field_names.len]u64 = @splat(0);
+threadlocal var reaction_span_bounds_site_full_network_evaluations: [@typeInfo(ReactionSpanBoundsSite).@"enum".field_names.len]u64 = @splat(0);
+threadlocal var reaction_span_bounds_site_reaction_span_evaluations: [@typeInfo(ReactionSpanBoundsSite).@"enum".field_names.len]u64 = @splat(0);
 
 pub fn resetReactionSpanBoundsSiteStats() void {
     reaction_span_bounds_site_calls = @splat(0);
@@ -241,7 +242,7 @@ pub fn recordReactionSpanBoundsSite(
     before: EvaluationCounts,
 ) void {
     if (!runtime_profiling_enabled) return;
-    const index = @intFromEnum(site);
+    const index = @backingInt(site);
     reaction_span_bounds_site_calls[index] +|= 1;
     reaction_span_bounds_site_full_network_evaluations[index] +|=
         full_network_evaluation_count -| before.full_network;
@@ -252,7 +253,7 @@ pub fn recordReactionSpanBoundsSite(
 pub fn reactionSpanBoundsSiteStats(
     site: ReactionSpanBoundsSite,
 ) ReactionSpanBoundsSiteStats {
-    const index = @intFromEnum(site);
+    const index = @backingInt(site);
     return .{
         .calls = reaction_span_bounds_site_calls[index],
         .full_network_evaluations = reaction_span_bounds_site_full_network_evaluations[index],
@@ -282,11 +283,11 @@ pub const Strategy = enum {
     ternary_correction_face,
     current_sign_coordinate_anderson,
 };
-threadlocal var strategy_call_counts: [@typeInfo(Strategy).@"enum".fields.len]u64 = @splat(0);
+threadlocal var strategy_call_counts: [@typeInfo(Strategy).@"enum".field_names.len]u64 = @splat(0);
 
 pub fn recordStrategyCall(strategy: Strategy) void {
     if (!runtime_profiling_enabled) return;
-    strategy_call_counts[@intFromEnum(strategy)] +|= 1;
+    strategy_call_counts[@backingInt(strategy)] +|= 1;
 }
 
 pub const StrategyScope = struct {
@@ -313,7 +314,7 @@ pub fn enterStrategy(strategy: Strategy) StrategyScope {
 }
 
 pub fn strategyEvaluationCounts(strategy: Strategy) EvaluationCounts {
-    const index = @intFromEnum(strategy);
+    const index = @backingInt(strategy);
     return .{
         .full_network = strategy_full_network_evaluation_counts[index],
         .reaction_span = strategy_reaction_span_evaluation_counts[index],
@@ -325,7 +326,7 @@ pub fn resetStrategyCallCounts() void {
 }
 
 pub fn strategyCallCount(strategy: Strategy) u64 {
-    return strategy_call_counts[@intFromEnum(strategy)];
+    return strategy_call_counts[@backingInt(strategy)];
 }
 
 /// Accepted nonlinear iterate families.  This deliberately mirrors the
@@ -345,7 +346,7 @@ pub const SelectedCandidate = enum {
     coordinate_anderson,
 };
 
-threadlocal var selected_candidate_counts: [@typeInfo(SelectedCandidate).@"enum".fields.len]u64 = @splat(0);
+threadlocal var selected_candidate_counts: [@typeInfo(SelectedCandidate).@"enum".field_names.len]u64 = @splat(0);
 
 pub fn resetSelectedCandidateCounts() void {
     selected_candidate_counts = @splat(0);
@@ -353,11 +354,11 @@ pub fn resetSelectedCandidateCounts() void {
 
 pub fn recordSelectedCandidate(candidate: SelectedCandidate) void {
     if (!runtime_profiling_enabled) return;
-    selected_candidate_counts[@intFromEnum(candidate)] +|= 1;
+    selected_candidate_counts[@backingInt(candidate)] +|= 1;
 }
 
 pub fn selectedCandidateCount(candidate: SelectedCandidate) u64 {
-    return selected_candidate_counts[@intFromEnum(candidate)];
+    return selected_candidate_counts[@backingInt(candidate)];
 }
 
 // Tracks how deep `transformedVectorAdmissibleWithMonovalentActivityCoefficient`'s

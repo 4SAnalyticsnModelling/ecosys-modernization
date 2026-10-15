@@ -39,6 +39,7 @@ const config_module = @import("../core/config.zig");
 const grid_module = @import("../state/grid.zig");
 const heat_flux = @import("../soil/heat/flux.zig");
 const heat_solver = @import("../soil/heat/solver.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// One vertical column of uniform-thickness layers held between two Dirichlet
 /// thermal boundaries. Defaults are ordinary temperate-soil magnitudes; none of
@@ -78,7 +79,7 @@ pub const Parameters = struct {
     solver_relative_tolerance: f64 = 1e-10,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(Parameters)) |field|
             if (field.type == f64 and !std.math.isFinite(@field(self, field.name)))
                 return error.NonFiniteSteadyStateParameter;
         // Two layers is the smallest column with an interior face, and an

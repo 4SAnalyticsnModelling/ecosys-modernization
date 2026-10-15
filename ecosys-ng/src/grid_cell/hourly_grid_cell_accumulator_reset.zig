@@ -31,6 +31,7 @@
 //! comparison oracle for the range above. Full argument and the census behind
 //! it: `docs/traceability/hour1_2039_5200_binding_survey.md`.
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Per-grid-cell values reset by HOUR1 before hourly process accumulation.
 /// Mass totals use legacy grid-cell units (g element), water uses m3, canopy
@@ -107,13 +108,13 @@ pub fn reset(accumulators: *GridCellAccumulators) void {
 
 test "reset clears every hourly grid-cell accumulator" {
     var accumulators: GridCellAccumulators = undefined;
-    inline for (std.meta.fields(GridCellAccumulators), 0..) |field, index| {
+    inline for (ti_compat.fieldViews(GridCellAccumulators), 0..) |field, index| {
         @field(accumulators, field.name) = @floatFromInt(index + 1);
     }
 
     reset(&accumulators);
 
-    inline for (std.meta.fields(GridCellAccumulators)) |field| {
+    inline for (ti_compat.fieldViews(GridCellAccumulators)) |field| {
         try std.testing.expectEqual(@as(f64, 0.0), @field(accumulators, field.name));
     }
 }

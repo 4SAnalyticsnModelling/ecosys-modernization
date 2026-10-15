@@ -13,6 +13,8 @@ const activity_coefficients = @import("../solute/activity_coefficients.zig");
 const AqueousSpecies = @import("../solute/transport_species.zig").AqueousSpecies;
 const snow = @import("../solute/snow_solute_transport.zig");
 const gas_transport = @import("../gas/transport.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Inputs = struct {
     precipitation_ph: f64,
@@ -244,10 +246,10 @@ fn carrierFreeSpeciesAtHydrogen(
     zone.dissolved_h2po4_mol_p_per_m3 = phosphate[1];
     zone.dissolved_hpo4_mol_p_per_m3 = phosphate[2];
     zone.dissolved_po4_mol_p_per_m3 = phosphate[3];
-    inline for (@typeInfo(aqueous_network.State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(aqueous_network.State)) |field|
         if (!std.math.isFinite(@field(aqueous, field.name)) or @field(aqueous, field.name) < 0)
             return error.InvalidCarrierFreeEquilibrium;
-    inline for (@typeInfo(phosphate_network.State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(phosphate_network.State)) |field|
         if (!std.math.isFinite(@field(zone, field.name)) or @field(zone, field.name) < 0)
             return error.InvalidCarrierFreeEquilibrium;
     return .{ .aqueous = aqueous, .phosphate = zone };
@@ -351,12 +353,12 @@ fn carrierFreeOutput(
         .static_ion_g_per_m3 = inputs.free_ion_g_per_m3,
         .salt_mol_per_m3 = @splat(0),
     };
-    output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydrogen)] = state.aqueous.hydrogen;
-    output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydroxide)] = state.aqueous.hydroxide;
-    output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.carbonate)] = state.aqueous.carbonate;
-    output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.bicarbonate)] = state.aqueous.bicarbonate;
-    output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphate)] = state.phosphate.dissolved_po4_mol_p_per_m3;
-    output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphoric_acid)] = state.phosphate.dissolved_h3po4_mol_p_per_m3;
+    output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydrogen)] = state.aqueous.hydrogen;
+    output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydroxide)] = state.aqueous.hydroxide;
+    output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.carbonate)] = state.aqueous.carbonate;
+    output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.bicarbonate)] = state.aqueous.bicarbonate;
+    output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphate)] = state.phosphate.dissolved_po4_mol_p_per_m3;
+    output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphoric_acid)] = state.phosphate.dissolved_h3po4_mol_p_per_m3;
     for (output.primary_g_per_m3) |value|
         if (!std.math.isFinite(value) or value < 0) return error.InvalidCarrierFreeEquilibrium;
     for (output.salt_mol_per_m3) |value|
@@ -710,16 +712,16 @@ pub fn fromEquilibratedState(
         state.non_band_phosphate[0].dissolved_h2po4_mol_p_per_m3 * molar_mass_g_per_mol.phosphorus,
     };
     comptime {
-        if (@intFromEnum(snow.SaltSpecies.potassium_sulfate) != 32 or
-            @intFromEnum(AqueousSpecies.potassium_sulfate) != 32 or
-            @intFromEnum(AqueousSpecies.non_band_phosphate) != 34 or
+        if (@backingInt(snow.SaltSpecies.potassium_sulfate) != 32 or
+            @backingInt(AqueousSpecies.potassium_sulfate) != 32 or
+            @backingInt(AqueousSpecies.non_band_phosphate) != 34 or
             snow.salt_species_count != 41)
             @compileError("snow/aqueous precipitation-equilibrium species mapping changed");
     }
     for (0..33) |index|
-        output.salt_mol_per_m3[index] = aqueous_bridge.concentration(state, 0, @enumFromInt(index));
+        output.salt_mol_per_m3[index] = aqueous_bridge.concentration(state, 0, @fromBackingInt(@intCast(index)));
     for (33..snow.salt_species_count) |index|
-        output.salt_mol_per_m3[index] = aqueous_bridge.concentration(state, 0, @enumFromInt(index + 1));
+        output.salt_mol_per_m3[index] = aqueous_bridge.concentration(state, 0, @fromBackingInt(@intCast(index + 1)));
     for (output.primary_g_per_m3) |value|
         if (!std.math.isFinite(value) or value < 0) return error.InvalidInitialSnowEquilibrium;
     for (output.static_ion_g_per_m3) |value|
@@ -766,7 +768,7 @@ pub const SpeciationCache = struct {
         valid: bool = false,
     };
 
-    slots: [8]Slot = [_]Slot{.{ .key = undefined, .value = undefined, .valid = false }} ** 8,
+    slots: [8]Slot = @as([8]Slot, @splat(@as(Slot, .{ .key = undefined, .value = undefined, .valid = false }))),
     next_slot: usize = 0,
 
     pub fn clear(self: *SpeciationCache) void {
@@ -808,8 +810,8 @@ pub const DynamicInputSpeciationState = struct {
 
     cache: SpeciationCache = .{},
     last_starte_day: ?u16 = null,
-    event_topsoil_ph: [max_cells]?f64 = [_]?f64{null} ** max_cells,
-    event_topsoil_activity_hydrogen: [max_cells]f64 = [_]f64{0.0} ** max_cells,
+    event_topsoil_ph: [max_cells]?f64 = @as([max_cells]?f64, @splat(@as(?f64, null))),
+    event_topsoil_activity_hydrogen: [max_cells]f64 = @as([max_cells]f64, @splat(@as(f64, 0.0))),
 
     pub fn invalidate(self: *DynamicInputSpeciationState) void {
         self.cache.clear();
@@ -985,47 +987,47 @@ fn packSpeciatedSource(
     result.primary_g_per_m3[8] = CH1P1 * molar_mass_g_per_mol.phosphorus;
     result.primary_g_per_m3[9] = CH2P1 * molar_mass_g_per_mol.phosphorus;
 
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum)] = CAL1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron)] = CFE1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydrogen)] = CHY1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)] = CCA1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium)] = CMG1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium)] = CNA1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium)] = CKA1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydroxide)] = COH1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sulfate)] = CSO41;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.chloride)] = CCL1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.carbonate)] = CCO31;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.bicarbonate)] = CHCO31;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_monohydroxide)] = CALO1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_dihydroxide)] = CALO2;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_trihydroxide)] = CALO3;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_tetrahydroxide)] = CALO4;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_sulfate)] = CALS1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_monohydroxide)] = CFEO1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_dihydroxide)] = CFEO2;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_trihydroxide)] = CFEO3;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_tetrahydroxide)] = CFEO4;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_sulfate)] = CFES1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydroxide)] = CCAO1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_carbonate)] = CCAC1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_bicarbonate)] = CCAH1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_sulfate)] = CCAS1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydroxide)] = CMGO1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_carbonate)] = CMGC1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_bicarbonate)] = CMGH1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_sulfate)] = CMGS1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_carbonate)] = CNAC1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_sulfate)] = CNAS1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium_sulfate)] = CKAS1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphate)] = CH0P1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphoric_acid)] = CH3P1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_hydrogen_phosphate)] = CF1P1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_dihydrogen_phosphate)] = CF2P1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_phosphate)] = CC0P1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydrogen_phosphate)] = CC1P1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_dihydrogen_phosphate)] = CC2P1;
-    result.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydrogen_phosphate)] = CM1P1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum)] = CAL1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron)] = CFE1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydrogen)] = CHY1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)] = CCA1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium)] = CMG1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium)] = CNA1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium)] = CKA1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydroxide)] = COH1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sulfate)] = CSO41;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.chloride)] = CCL1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.carbonate)] = CCO31;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.bicarbonate)] = CHCO31;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_monohydroxide)] = CALO1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_dihydroxide)] = CALO2;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_trihydroxide)] = CALO3;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_tetrahydroxide)] = CALO4;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_sulfate)] = CALS1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_monohydroxide)] = CFEO1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_dihydroxide)] = CFEO2;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_trihydroxide)] = CFEO3;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_tetrahydroxide)] = CFEO4;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_sulfate)] = CFES1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydroxide)] = CCAO1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_carbonate)] = CCAC1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_bicarbonate)] = CCAH1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_sulfate)] = CCAS1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydroxide)] = CMGO1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_carbonate)] = CMGC1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_bicarbonate)] = CMGH1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_sulfate)] = CMGS1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_carbonate)] = CNAC1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_sulfate)] = CNAS1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium_sulfate)] = CKAS1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphate)] = CH0P1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphoric_acid)] = CH3P1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_hydrogen_phosphate)] = CF1P1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_dihydrogen_phosphate)] = CF2P1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_phosphate)] = CC0P1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydrogen_phosphate)] = CC1P1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_dihydrogen_phosphate)] = CC2P1;
+    result.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydrogen_phosphate)] = CM1P1;
     return result;
 }
 
@@ -1057,7 +1059,7 @@ pub fn speciateFixedPhSourceBoundedWithHook(
     if (!std.math.isFinite(cco2ei) or cco2ei <= 0)
         return error.InvalidInitialSnowEquilibriumInput;
     if (mrxn == 0) return error.InvalidPicardIterationCount;
-    inline for (@typeInfo(initialization.ElementMolarMassesGPerMol).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(initialization.ElementMolarMassesGPerMol)) |field| {
         const value = @field(molar_mass_g_per_mol, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidInitialSnowEquilibriumInput;
     }
@@ -1638,7 +1640,7 @@ fn validateInputs(inputs: Inputs) !void {
             return error.InvalidInitialSnowEquilibriumInput;
     inline for (.{ inputs.ammonium_g_n_per_m3, inputs.nitrate_g_n_per_m3, inputs.phosphate_g_p_per_m3 }) |value|
         if (!std.math.isFinite(value) or value < 0) return error.InvalidInitialSnowEquilibriumInput;
-    inline for (@typeInfo(initialization.ElementMolarMassesGPerMol).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(initialization.ElementMolarMassesGPerMol)) |field| {
         const value = @field(inputs.molar_mass_g_per_mol, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidInitialSnowEquilibriumInput;
     }
@@ -1646,18 +1648,18 @@ fn validateInputs(inputs: Inputs) !void {
 
 fn filled(comptime T: type, value: f64) T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| @field(result, field.name) = value;
+    inline for (ti_compat.fieldViews(T)) |field| @field(result, field.name) = value;
     return result;
 }
 
 test "first-header snow gas solubility includes STARTE activity divisor" {
     const atmospheric = [5]f64{ 2, 3, 4, 5, 6 };
     const parameters: gas_transport.SurfaceSolubilityParameters = .{
-        .reference_water_to_air = [_]f64{0.5} ** gas_transport.species_count,
-        .log_intercept = [_]f64{0.2} ** gas_transport.species_count,
-        .temperature_coefficient_per_c = [_]f64{0.01} ** gas_transport.species_count,
+        .reference_water_to_air = @as([gas_transport.species_count]f64, @splat(@as(f64, 0.5))),
+        .log_intercept = @as([gas_transport.species_count]f64, @splat(@as(f64, 0.2))),
+        .temperature_coefficient_per_c = @as([gas_transport.species_count]f64, @splat(@as(f64, 0.01))),
     };
-    const activity_log = [_]f64{0.3} ** gas_transport.species_count;
+    const activity_log = @as([gas_transport.species_count]f64, @splat(@as(f64, 0.3)));
     const dissolved = try initialPrecipitationDissolvedGasGPerM3(
         atmospheric,
         298.15,
@@ -1704,12 +1706,12 @@ test "first-header equilibrium derives nonzero complexes instead of dropping the
     }, parameters, .{ .absolute_tolerance_mol_per_m3 = 1e-6, .absolute_tolerance_mol_per_megagram = 1e-6, .relative_tolerance = 1e-5, .max_iterations = 100 });
     for (output.primary_g_per_m3[0..5]) |value| try std.testing.expect(value > 0);
     try std.testing.expectEqualSlices(f64, &[_]f64{ 0, 0, 0.40, 0, 0, 0, 0.32, 0 }, &output.static_ion_g_per_m3);
-    try std.testing.expect(output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_sulfate)] > 0);
+    try std.testing.expect(output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_sulfate)] > 0);
     // Substitute the published answer into independent elemental balances
     // and mass-action equations, not merely the solver's convergence score.
     var aqueous = std.mem.zeroes(aqueous_network.State);
     inline for (.{ "hydrogen", "hydroxide", "calcium", "carbonate", "bicarbonate", "sulfate", "calcium_hydroxide", "calcium_carbonate", "calcium_bicarbonate", "calcium_sulfate" }) |field| {
-        @field(aqueous, field) = output.salt_mol_per_m3[@intFromEnum(@field(snow.SaltSpecies, field))];
+        @field(aqueous, field) = output.salt_mol_per_m3[@backingInt(@field(snow.SaltSpecies, field))];
     }
     aqueous.carbon_dioxide = output.primary_g_per_m3[0] / 12;
     const calcium_total = aqueous.calcium + aqueous.calcium_hydroxide + aqueous.calcium_carbonate + aqueous.calcium_bicarbonate + aqueous.calcium_sulfate;
@@ -1798,7 +1800,7 @@ test "acidic phosphate-bearing precipitation reaches carrier-free equilibrium" {
 
         var phosphate_g_p_per_m3 = output.primary_g_per_m3[8] +
             output.primary_g_per_m3[9];
-        for (output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphate)..]) |value|
+        for (output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphate)..]) |value|
             phosphate_g_p_per_m3 += value * masses.phosphorus;
         try std.testing.expectApproxEqAbs(
             @as(f64, 0.2),
@@ -1815,17 +1817,17 @@ test "equilibrated precipitation maps all 41 snow salt species without dropping 
     state.aqueous[0].ammonium_non_band = 3;
     state.aqueous[0].ammonia_non_band = 4;
     state.aqueous[0].nitrate_non_band = 5;
-    inline for (@typeInfo(@TypeOf(state.aqueous[0])).@"struct".fields, 0..) |field, index| {
+    inline for (ti_compat.fieldViews(@TypeOf(state.aqueous[0])), 0..) |field, index| {
         if (@field(state.aqueous[0], field.name) == 0)
             @field(state.aqueous[0], field.name) = @floatFromInt(index + 1);
     }
-    inline for (@typeInfo(@TypeOf(state.non_band_phosphate[0])).@"struct".fields, 0..) |field, index|
+    inline for (ti_compat.fieldViews(@TypeOf(state.non_band_phosphate[0])), 0..) |field, index|
         @field(state.non_band_phosphate[0], field.name) = @floatFromInt(index + 1);
     const masses: initialization.ElementMolarMassesGPerMol = .{ .nitrogen = 14, .phosphorus = 31, .aluminum = 27, .iron = 56, .calcium = 40, .magnesium = 24.3, .sodium = 23, .potassium = 39.1, .sulfur = 32, .chloride = 35.5 };
     const output = try fromEquilibratedState(&state, .{ 0, 6, 7, 8, 9 }, masses);
     for (output.primary_g_per_m3) |value| try std.testing.expect(value > 0);
     for (output.salt_mol_per_m3) |value| try std.testing.expect(value > 0);
-    try std.testing.expectEqual(state.non_band_phosphate[0].magnesium_hpo4_pair_mol_per_m3, output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydrogen_phosphate)]);
+    try std.testing.expectEqual(state.non_band_phosphate[0].magnesium_hpo4_pair_mol_per_m3, output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydrogen_phosphate)]);
 }
 
 /// Ottawa runtime parameters as the production deck parses them, for the
@@ -1929,19 +1931,19 @@ test "carrier-free analytical equilibrium matches generic solver and conserves i
 
         const system = try buildCarrierFreeSystem(inputs, parameters);
         var aqueous = std.mem.zeroes(aqueous_network.State);
-        aqueous.hydrogen = analytical.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydrogen)];
-        aqueous.hydroxide = analytical.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydroxide)];
+        aqueous.hydrogen = analytical.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydrogen)];
+        aqueous.hydroxide = analytical.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydroxide)];
         aqueous.carbon_dioxide = analytical.primary_g_per_m3[0] / 12;
         aqueous.ammonium_non_band = analytical.primary_g_per_m3[5] / masses.nitrogen;
         aqueous.ammonia_non_band = analytical.primary_g_per_m3[6] / masses.nitrogen;
         aqueous.nitrate_non_band = analytical.primary_g_per_m3[7] / masses.nitrogen;
-        aqueous.carbonate = analytical.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.carbonate)];
-        aqueous.bicarbonate = analytical.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.bicarbonate)];
+        aqueous.carbonate = analytical.salt_mol_per_m3[@backingInt(snow.SaltSpecies.carbonate)];
+        aqueous.bicarbonate = analytical.salt_mol_per_m3[@backingInt(snow.SaltSpecies.bicarbonate)];
         var phosphate = std.mem.zeroes(phosphate_network.State);
-        phosphate.dissolved_po4_mol_p_per_m3 = analytical.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphate)];
+        phosphate.dissolved_po4_mol_p_per_m3 = analytical.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphate)];
         phosphate.dissolved_hpo4_mol_p_per_m3 = analytical.primary_g_per_m3[8] / masses.phosphorus;
         phosphate.dissolved_h2po4_mol_p_per_m3 = analytical.primary_g_per_m3[9] / masses.phosphorus;
-        phosphate.dissolved_h3po4_mol_p_per_m3 = analytical.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphoric_acid)];
+        phosphate.dissolved_h3po4_mol_p_per_m3 = analytical.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphoric_acid)];
         const invariant_scale = @abs(aqueous.hydrogen) + @abs(aqueous.hydroxide) +
             system.total_ammoniacal_n_mol_per_m3 + system.nitrate_mol_n_per_m3 +
             2 * system.total_carbon_mol_per_m3 + 3 * system.total_phosphate_mol_p_per_m3;
@@ -2012,19 +2014,19 @@ test "carrier-free analytical equilibrium satisfies every network zero-flux cond
         const output = try carrierFreeAnalyticalEquilibrium(inputs, parameters);
 
         var aqueous = std.mem.zeroes(aqueous_network.State);
-        aqueous.hydrogen = output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydrogen)];
-        aqueous.hydroxide = output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydroxide)];
+        aqueous.hydrogen = output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydrogen)];
+        aqueous.hydroxide = output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydroxide)];
         aqueous.carbon_dioxide = output.primary_g_per_m3[0] / 12;
         aqueous.ammonium_non_band = output.primary_g_per_m3[5] / masses.nitrogen;
         aqueous.ammonia_non_band = output.primary_g_per_m3[6] / masses.nitrogen;
         aqueous.nitrate_non_band = output.primary_g_per_m3[7] / masses.nitrogen;
-        aqueous.carbonate = output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.carbonate)];
-        aqueous.bicarbonate = output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.bicarbonate)];
+        aqueous.carbonate = output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.carbonate)];
+        aqueous.bicarbonate = output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.bicarbonate)];
         var phosphate = std.mem.zeroes(phosphate_network.State);
-        phosphate.dissolved_po4_mol_p_per_m3 = output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphate)];
+        phosphate.dissolved_po4_mol_p_per_m3 = output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphate)];
         phosphate.dissolved_hpo4_mol_p_per_m3 = output.primary_g_per_m3[8] / masses.phosphorus;
         phosphate.dissolved_h2po4_mol_p_per_m3 = output.primary_g_per_m3[9] / masses.phosphorus;
-        phosphate.dissolved_h3po4_mol_p_per_m3 = output.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphoric_acid)];
+        phosphate.dissolved_h3po4_mol_p_per_m3 = output.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphoric_acid)];
 
         // The coefficients are rebuilt from the published state, so this is a
         // genuine substitution and not a replay of the solver's own scratch.
@@ -2287,7 +2289,7 @@ test "T-00053 bounded matched-state replay packet: legacy reads.f -> starte.f vs
         .molar_mass_g_per_mol = masses,
     };
     const analytical = try carrierFreeAnalyticalEquilibrium(inputs, parameters);
-    const analytical_hydrogen = analytical.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydrogen)];
+    const analytical_hydrogen = analytical.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydrogen)];
     const analytical_ph = -std.math.log10(analytical_hydrogen / 1000.0);
 
     // In legacy starte.f, pH is CONSTANT at 7.0 (legacy_chy1 = 1.0e-4).
@@ -2307,12 +2309,12 @@ fn printZigTraceK1(step: usize, state: *const SpeciatedDynamicSource) void {
     if (step >= 980 and step <= 1000) {
         std.debug.print("ZIG_TRAJ K=1 M={d} Ca={e} Mg={e} Al={e} Na={e} KA={e} SO4={e}\n", .{
             step,
-            state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)],
-            state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium)],
-            state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum)],
-            state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium)],
-            state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium)],
-            state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sulfate)],
+            state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)],
+            state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium)],
+            state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum)],
+            state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium)],
+            state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium)],
+            state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sulfate)],
         });
     }
 }
@@ -2324,12 +2326,12 @@ fn printZigTraceK2(step: usize, state: *const SpeciatedDynamicSource) void {
     if (step >= 980 and step <= 1000) {
         std.debug.print("ZIG_TRAJ K=2 M={d} Ca={e} Mg={e} Al={e} Na={e} KA={e} SO4={e}\n", .{
             step,
-            state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)],
-            state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium)],
-            state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum)],
-            state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium)],
-            state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium)],
-            state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sulfate)],
+            state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)],
+            state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium)],
+            state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum)],
+            state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium)],
+            state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium)],
+            state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sulfate)],
         });
     }
 }
@@ -2338,49 +2340,49 @@ fn printZigCycle(k: usize, step: usize, state: *const SpeciatedDynamicSource) vo
     std.debug.print("ZG_CYCLE,{d},{d},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e}", .{
         k,
         step,
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydrogen)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydroxide)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sulfate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.chloride)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.carbonate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.bicarbonate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_monohydroxide)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_dihydroxide)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_trihydroxide)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_tetrahydroxide)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_sulfate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_monohydroxide)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_dihydroxide)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_trihydroxide)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_tetrahydroxide)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_sulfate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydrogen)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydroxide)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sulfate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.chloride)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.carbonate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.bicarbonate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_monohydroxide)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_dihydroxide)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_trihydroxide)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_tetrahydroxide)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_sulfate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_monohydroxide)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_dihydroxide)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_trihydroxide)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_tetrahydroxide)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_sulfate)],
     });
     std.debug.print(",{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e},{e}\n", .{
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydroxide)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_carbonate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_bicarbonate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_sulfate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydroxide)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_carbonate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_bicarbonate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_sulfate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_carbonate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_sulfate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium_sulfate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphoric_acid)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_hydrogen_phosphate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_dihydrogen_phosphate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_phosphate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydrogen_phosphate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_dihydrogen_phosphate)],
-        state.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydrogen_phosphate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydroxide)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_carbonate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_bicarbonate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_sulfate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydroxide)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_carbonate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_bicarbonate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_sulfate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_carbonate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_sulfate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium_sulfate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphoric_acid)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_hydrogen_phosphate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_dihydrogen_phosphate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_phosphate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydrogen_phosphate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_dihydrogen_phosphate)],
+        state.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydrogen_phosphate)],
         state.primary_g_per_m3[5],
         state.primary_g_per_m3[6],
         state.primary_g_per_m3[7],
@@ -2480,47 +2482,47 @@ test "T-00060 matched-state STARTE oracle test for K=1 and K=2 dynamic inputs" {
         cco2ei,
         20,
     );
-    try std.testing.expectApproxEqRel(@as(f64, 1.00000000000000005e-04), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydrogen)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 9.99999999999999912e-05), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.77058086671893232e-07), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 8.49437248823603454e-12), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 3.93349094929564339e-02), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.84059198077216983e-02), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 2.99069097201462644e-02), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 9.97117696238482981e-03), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 3.73940130650242883e-02), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sulfate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 2.99999999999999989e-02), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.chloride)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 4.88914599049841621e-05), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.carbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 8.73061784017574311e-02), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.bicarbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 9.74767368236650936e-06), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_monohydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 4.18773293811957399e-04), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_dihydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 6.79679554991288151e-04), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_trihydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.88242050942660820e-03), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_tetrahydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 4.32536734881597879e-08), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_sulfate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 5.25655229096231222e-09), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_monohydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 4.33600975341981090e-07), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_dihydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 3.42107122601107810e-07), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_trihydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.20690550768946788e-06), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_tetrahydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 3.12241353576726891e-12), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_sulfate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.38015414224303432e-06), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 3.95237766422875777e-05), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_carbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 9.70028852139919948e-03), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_bicarbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.13734494208921457e-03), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_sulfate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.41556530274167303e-06), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 7.52823412360610161e-06), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_carbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 5.82704660227202875e-05), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_bicarbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.35330658562992029e-03), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_sulfate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 9.88059766854918007e-06), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_carbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 8.64691128455135342e-05), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_sulfate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 2.88230376151711758e-05), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium_sulfate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 2.88407622449050458e-09), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 2.88995615696181656e-07), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphoric_acid)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 3.55020256647524183e-13), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_hydrogen_phosphate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 5.58759118839112666e-12), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_dihydrogen_phosphate)], tight_tol);
-    try std.testing.expectApproxEqAbs(@as(f64, 0.0), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_phosphate)], 1.0e-30);
-    try std.testing.expectApproxEqRel(@as(f64, 9.88335815907293730e-05), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydrogen_phosphate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.14785931670481174e-05), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_dihydrogen_phosphate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 2.02478189206354789e-04), k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydrogen_phosphate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.00000000000000005e-04), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydrogen)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 9.99999999999999912e-05), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.77058086671893232e-07), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 8.49437248823603454e-12), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.93349094929564339e-02), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.84059198077216983e-02), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 2.99069097201462644e-02), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 9.97117696238482981e-03), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.73940130650242883e-02), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sulfate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 2.99999999999999989e-02), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.chloride)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 4.88914599049841621e-05), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.carbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 8.73061784017574311e-02), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.bicarbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 9.74767368236650936e-06), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_monohydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 4.18773293811957399e-04), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_dihydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 6.79679554991288151e-04), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_trihydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.88242050942660820e-03), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_tetrahydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 4.32536734881597879e-08), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_sulfate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 5.25655229096231222e-09), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_monohydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 4.33600975341981090e-07), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_dihydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.42107122601107810e-07), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_trihydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.20690550768946788e-06), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_tetrahydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.12241353576726891e-12), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_sulfate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.38015414224303432e-06), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.95237766422875777e-05), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_carbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 9.70028852139919948e-03), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_bicarbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.13734494208921457e-03), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_sulfate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.41556530274167303e-06), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 7.52823412360610161e-06), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_carbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 5.82704660227202875e-05), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_bicarbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.35330658562992029e-03), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_sulfate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 9.88059766854918007e-06), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_carbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 8.64691128455135342e-05), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_sulfate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 2.88230376151711758e-05), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium_sulfate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 2.88407622449050458e-09), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 2.88995615696181656e-07), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphoric_acid)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.55020256647524183e-13), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_hydrogen_phosphate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 5.58759118839112666e-12), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_dihydrogen_phosphate)], tight_tol);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.0), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_phosphate)], 1.0e-30);
+    try std.testing.expectApproxEqRel(@as(f64, 9.88335815907293730e-05), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydrogen_phosphate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.14785931670481174e-05), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_dihydrogen_phosphate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 2.02478189206354789e-04), k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydrogen_phosphate)], tight_tol);
     try std.testing.expectApproxEqRel(@as(f64, 2.49574856582852944e-01), k1_bounded_20.primary_g_per_m3[5], tight_tol);
     try std.testing.expectApproxEqRel(@as(f64, 4.25143417146992843e-04), k1_bounded_20.primary_g_per_m3[6], tight_tol);
     try std.testing.expectApproxEqRel(@as(f64, 7.50000000000000000e-01), k1_bounded_20.primary_g_per_m3[7], tight_tol);
@@ -2529,11 +2531,11 @@ test "T-00060 matched-state STARTE oracle test for K=1 and K=2 dynamic inputs" {
     try std.testing.expectApproxEqRel(@as(f64, 2.49446224005021228e-01), k1_bounded_20.primary_g_per_m3[0], tight_tol);
 
     // Production 1000-cycle exit verification:
-    try std.testing.expectApproxEqRel(@as(f64, 1.00000000000000005e-04), k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydrogen)], invariant_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 9.99999999999999912e-05), k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydroxide)], invariant_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 2.99999999999999989e-02), k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.chloride)], invariant_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 4.88914599049841621e-05), k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.carbonate)], invariant_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 8.73061784017574311e-02), k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.bicarbonate)], invariant_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.00000000000000005e-04), k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydrogen)], invariant_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 9.99999999999999912e-05), k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydroxide)], invariant_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 2.99999999999999989e-02), k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.chloride)], invariant_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 4.88914599049841621e-05), k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.carbonate)], invariant_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 8.73061784017574311e-02), k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.bicarbonate)], invariant_tol);
     try std.testing.expectApproxEqRel(@as(f64, 7.50000000000000000e-01), k1_actual.primary_g_per_m3[7], invariant_tol);
     try std.testing.expectApproxEqRel(@as(f64, 2.49446224005021228e-01), k1_actual.primary_g_per_m3[0], invariant_tol);
 
@@ -2549,76 +2551,76 @@ test "T-00060 matched-state STARTE oracle test for K=1 and K=2 dynamic inputs" {
         k1_actual.primary_g_per_m3[8] <= 4.19345232273651905e-02);
     try std.testing.expect(k1_actual.primary_g_per_m3[9] >= 1.24562708625299112e-01 and
         k1_actual.primary_g_per_m3[9] <= 1.60498775946132682e-01);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum)] >= 1.22829817021793913e-07 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum)] <= 1.78148163472035789e-07);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron)] >= 2.01470008742945290e-12 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron)] <= 9.20591035763897347e-12);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)] >= 3.96285516309918887e-02 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)] <= 4.85293072639019080e-02);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium)] >= 1.60687455193920838e-02 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium)] <= 1.96647967880106064e-02);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium)] >= 2.58787550621084120e-02 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium)] <= 2.99979669997024745e-02);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium)] >= 7.99607086936238338e-03 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium)] <= 9.99508858670297880e-03);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sulfate)] >= 2.95888375911554750e-02 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sulfate)] <= 3.80726312615163182e-02);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_monohydroxide)] >= 9.72653226500892816e-06 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_monohydroxide)] <= 1.03062697112317396e-05);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_dihydroxide)] >= 3.97889847347133768e-04 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_dihydroxide)] <= 4.18814551032881154e-04);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_trihydroxide)] >= 6.79599485680445429e-04 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_trihydroxide)] <= 7.20087507215232603e-04);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_tetrahydroxide)] >= 1.86216052033576869e-03 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_tetrahydroxide)] <= 1.88252278311365462e-03);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_sulfate)] >= 2.08545551071153970e-08 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum_sulfate)] <= 5.97689818995328116e-08);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_monohydroxide)] >= 5.23956889922518488e-09 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_monohydroxide)] <= 6.57004712580316341e-09);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_dihydroxide)] >= 3.45233212681699507e-07 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_dihydroxide)] <= 4.33582567161190148e-07);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_trihydroxide)] >= 3.41587703129924222e-07 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_trihydroxide)] <= 5.35724225268621579e-07);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_tetrahydroxide)] >= 1.10013918003668171e-06 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_tetrahydroxide)] <= 1.20755344713309100e-06);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_sulfate)] >= 2.20435853958330938e-12 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_sulfate)] <= 4.70379140917005651e-12);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydroxide)] >= 9.48954588021236285e-08 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydroxide)] <= 2.00948954608008575e-05);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_carbonate)] >= 3.19801926562634083e-05 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_carbonate)] <= 5.29633716718018636e-05);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_bicarbonate)] >= 2.32528708961700023e-04 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_bicarbonate)] <= 8.32666944654770688e-03);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_sulfate)] >= 9.61679058387167828e-04 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_sulfate)] <= 8.22207935527227880e-03);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydroxide)] >= 7.29349125191216793e-07 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydroxide)] <= 2.07293491330470418e-05);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_carbonate)] >= 1.98521943112064538e-06 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_carbonate)] <= 1.23720837639014050e-05);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_bicarbonate)] >= 1.95309630223821158e-05 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_bicarbonate)] <= 2.13109888517192805e-03);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_sulfate)] >= 2.16558288291244036e-04 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_sulfate)] <= 3.64100655414505538e-03);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_carbonate)] >= 2.59483221470372036e-06 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_carbonate)] <= 1.23731241964881970e-05);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_sulfate)] >= 2.27550280312750108e-06 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_sulfate)] <= 6.00088852847789189e-03);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium_sulfate)] >= 4.91141329702143793e-06 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium_sulfate)] <= 2.00392913063761726e-03);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphate)] >= 1.45209748635711413e-09 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphate)] <= 2.27647276385300108e-09);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphoric_acid)] >= 1.85838707063575934e-07 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphoric_acid)] <= 2.01861846914135736e-05);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_hydrogen_phosphate)] >= 1.04624190263047540e-13 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_hydrogen_phosphate)] <= 1.90310293443049059e-12);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_dihydrogen_phosphate)] >= 6.56817797910693844e-12 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron_dihydrogen_phosphate)] <= 9.17814774168796529e-12);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydrogen_phosphate)] >= 1.84417898707127190e-05 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydrogen_phosphate)] <= 2.90760665582509722e-04);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_dihydrogen_phosphate)] >= 3.80749005354692133e-06 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_dihydrogen_phosphate)] <= 1.03355626409585557e-03);
-    try std.testing.expect(k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydrogen_phosphate)] >= 1.14335090404916574e-05 and
-        k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydrogen_phosphate)] <= 2.59967897375001076e-04);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum)] >= 1.22829817021793913e-07 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum)] <= 1.78148163472035789e-07);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron)] >= 2.01470008742945290e-12 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron)] <= 9.20591035763897347e-12);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)] >= 3.96285516309918887e-02 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)] <= 4.85293072639019080e-02);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium)] >= 1.60687455193920838e-02 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium)] <= 1.96647967880106064e-02);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium)] >= 2.58787550621084120e-02 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium)] <= 2.99979669997024745e-02);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium)] >= 7.99607086936238338e-03 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium)] <= 9.99508858670297880e-03);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sulfate)] >= 2.95888375911554750e-02 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sulfate)] <= 3.80726312615163182e-02);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_monohydroxide)] >= 9.72653226500892816e-06 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_monohydroxide)] <= 1.03062697112317396e-05);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_dihydroxide)] >= 3.97889847347133768e-04 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_dihydroxide)] <= 4.18814551032881154e-04);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_trihydroxide)] >= 6.79599485680445429e-04 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_trihydroxide)] <= 7.20087507215232603e-04);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_tetrahydroxide)] >= 1.86216052033576869e-03 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_tetrahydroxide)] <= 1.88252278311365462e-03);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_sulfate)] >= 2.08545551071153970e-08 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum_sulfate)] <= 5.97689818995328116e-08);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_monohydroxide)] >= 5.23956889922518488e-09 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_monohydroxide)] <= 6.57004712580316341e-09);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_dihydroxide)] >= 3.45233212681699507e-07 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_dihydroxide)] <= 4.33582567161190148e-07);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_trihydroxide)] >= 3.41587703129924222e-07 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_trihydroxide)] <= 5.35724225268621579e-07);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_tetrahydroxide)] >= 1.10013918003668171e-06 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_tetrahydroxide)] <= 1.20755344713309100e-06);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_sulfate)] >= 2.20435853958330938e-12 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_sulfate)] <= 4.70379140917005651e-12);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydroxide)] >= 9.48954588021236285e-08 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydroxide)] <= 2.00948954608008575e-05);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_carbonate)] >= 3.19801926562634083e-05 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_carbonate)] <= 5.29633716718018636e-05);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_bicarbonate)] >= 2.32528708961700023e-04 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_bicarbonate)] <= 8.32666944654770688e-03);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_sulfate)] >= 9.61679058387167828e-04 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_sulfate)] <= 8.22207935527227880e-03);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydroxide)] >= 7.29349125191216793e-07 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydroxide)] <= 2.07293491330470418e-05);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_carbonate)] >= 1.98521943112064538e-06 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_carbonate)] <= 1.23720837639014050e-05);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_bicarbonate)] >= 1.95309630223821158e-05 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_bicarbonate)] <= 2.13109888517192805e-03);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_sulfate)] >= 2.16558288291244036e-04 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_sulfate)] <= 3.64100655414505538e-03);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_carbonate)] >= 2.59483221470372036e-06 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_carbonate)] <= 1.23731241964881970e-05);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_sulfate)] >= 2.27550280312750108e-06 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_sulfate)] <= 6.00088852847789189e-03);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium_sulfate)] >= 4.91141329702143793e-06 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium_sulfate)] <= 2.00392913063761726e-03);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphate)] >= 1.45209748635711413e-09 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphate)] <= 2.27647276385300108e-09);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphoric_acid)] >= 1.85838707063575934e-07 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphoric_acid)] <= 2.01861846914135736e-05);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_hydrogen_phosphate)] >= 1.04624190263047540e-13 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_hydrogen_phosphate)] <= 1.90310293443049059e-12);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_dihydrogen_phosphate)] >= 6.56817797910693844e-12 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron_dihydrogen_phosphate)] <= 9.17814774168796529e-12);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydrogen_phosphate)] >= 1.84417898707127190e-05 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydrogen_phosphate)] <= 2.90760665582509722e-04);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_dihydrogen_phosphate)] >= 3.80749005354692133e-06 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_dihydrogen_phosphate)] <= 1.03355626409585557e-03);
+    try std.testing.expect(k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydrogen_phosphate)] >= 1.14335090404916574e-05 and
+        k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydrogen_phosphate)] <= 2.59967897375001076e-04);
 
     // Emit Zig per-cycle trace (M=20..1000) and trajectory (M=980..1000) for K=1:
     _ = try speciateFixedPhSourceBoundedWithHook(
@@ -2644,7 +2646,7 @@ test "T-00060 matched-state STARTE oracle test for K=1 and K=2 dynamic inputs" {
 
     // Explicit falsification check: prove that a 20-cycle solve strictly FAILS the production check:
     // K=1 Ca at M=20 (0.0393) differs from M=1000 (0.0452) by 13%, strictly outside the 0.035 envelope:
-    try std.testing.expect(@abs(k1_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)] - k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)]) / k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)] > 0.10);
+    try std.testing.expect(@abs(k1_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)] - k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)]) / k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)] > 0.10);
 
     // -------------------------------------------------------------------------
     // 2. K=2 (Irrigation) STARTE Oracle Comparison
@@ -2695,35 +2697,35 @@ test "T-00060 matched-state STARTE oracle test for K=1 and K=2 dynamic inputs" {
         cco2ei,
         20,
     );
-    try std.testing.expectApproxEqRel(@as(f64, 3.16227766016837953e-05), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydrogen)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 3.16227766016837939e-04), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydroxide)], tight_tol);
-    try std.testing.expectApproxEqAbs(@as(f64, 0.0), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum)], 1.0e-30);
-    try std.testing.expectApproxEqAbs(@as(f64, 0.0), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron)], 1.0e-30);
-    try std.testing.expectApproxEqRel(@as(f64, 9.02558553930743884e-02), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 3.90527281362670203e-02), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 7.98085192230304635e-02), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.99423539247696596e-02), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 4.64083641122659332e-02), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sulfate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 5.00000000000000028e-02), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.chloride)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 4.88914599049841540e-04), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.carbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 2.76086377554552564e-01), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.bicarbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.16227766016837953e-05), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydrogen)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.16227766016837939e-04), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydroxide)], tight_tol);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.0), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum)], 1.0e-30);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.0), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron)], 1.0e-30);
+    try std.testing.expectApproxEqRel(@as(f64, 9.02558553930743884e-02), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.90527281362670203e-02), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 7.98085192230304635e-02), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.99423539247696596e-02), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 4.64083641122659332e-02), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sulfate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 5.00000000000000028e-02), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.chloride)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 4.88914599049841540e-04), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.carbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 2.76086377554552564e-01), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.bicarbonate)], tight_tol);
 
-    try std.testing.expectApproxEqRel(@as(f64, 2.59418371712788244e-05), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 6.79119329058306916e-04), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_carbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 3.70899803794551763e-03), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_bicarbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 7.05445379665365323e-03), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_sulfate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 2.62309016204873982e-05), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydroxide)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 6.45862743803661733e-05), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_carbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 4.47040643964938256e-03), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_bicarbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 6.30659779015903515e-03), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_sulfate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.05460702220700828e-04), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_carbonate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.72938225691027068e-04), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_sulfate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 5.76460752303423516e-05), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium_sulfate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 8.66478020529213571e-09), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.77229108013606080e-06), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphoric_acid)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 3.08112605192538695e-04), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydrogen_phosphate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 1.57022380837417437e-05), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_dihydrogen_phosphate)], tight_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 3.08112605192538695e-04), k2_bounded_20.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydrogen_phosphate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 2.59418371712788244e-05), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 6.79119329058306916e-04), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_carbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.70899803794551763e-03), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_bicarbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 7.05445379665365323e-03), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_sulfate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 2.62309016204873982e-05), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydroxide)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 6.45862743803661733e-05), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_carbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 4.47040643964938256e-03), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_bicarbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 6.30659779015903515e-03), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_sulfate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.05460702220700828e-04), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_carbonate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.72938225691027068e-04), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_sulfate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 5.76460752303423516e-05), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium_sulfate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 8.66478020529213571e-09), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.77229108013606080e-06), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphoric_acid)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.08112605192538695e-04), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydrogen_phosphate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 1.57022380837417437e-05), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_dihydrogen_phosphate)], tight_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.08112605192538695e-04), k2_bounded_20.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydrogen_phosphate)], tight_tol);
 
     try std.testing.expectApproxEqRel(@as(f64, 9.84675677061242483e-01), k2_bounded_20.primary_g_per_m3[5], tight_tol);
     try std.testing.expectApproxEqRel(@as(f64, 1.53243229387563726e-02), k2_bounded_20.primary_g_per_m3[6], tight_tol);
@@ -2733,16 +2735,16 @@ test "T-00060 matched-state STARTE oracle test for K=1 and K=2 dynamic inputs" {
     try std.testing.expectApproxEqRel(@as(f64, 2.49446224005021228e-01), k2_bounded_20.primary_g_per_m3[0], tight_tol);
 
     // Production 1000-cycle exit verification for K=2:
-    try std.testing.expectApproxEqRel(@as(f64, 3.16227766016837953e-05), k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydrogen)], invariant_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 3.16227766016837939e-04), k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.hydroxide)], invariant_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 5.00000000000000028e-02), k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.chloride)], invariant_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 4.88914599049841540e-04), k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.carbonate)], invariant_tol);
-    try std.testing.expectApproxEqRel(@as(f64, 2.76086377554552564e-01), k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.bicarbonate)], invariant_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.16227766016837953e-05), k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydrogen)], invariant_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 3.16227766016837939e-04), k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.hydroxide)], invariant_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 5.00000000000000028e-02), k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.chloride)], invariant_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 4.88914599049841540e-04), k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.carbonate)], invariant_tol);
+    try std.testing.expectApproxEqRel(@as(f64, 2.76086377554552564e-01), k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.bicarbonate)], invariant_tol);
     try std.testing.expectApproxEqRel(@as(f64, 2.00000000000000000e+00), k2_actual.primary_g_per_m3[7], invariant_tol);
     try std.testing.expectApproxEqRel(@as(f64, 2.49446224005021228e-01), k2_actual.primary_g_per_m3[0], invariant_tol);
 
-    try std.testing.expectApproxEqAbs(@as(f64, 0.0), k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.aluminum)], 1.0e-30);
-    try std.testing.expectApproxEqAbs(@as(f64, 0.0), k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.iron)], 1.0e-30);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.0), k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.aluminum)], 1.0e-30);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.0), k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.iron)], 1.0e-30);
 
     // All non-invariant species match legacy gfortran oracle (starte_mloop_oracle.f) measured sensitivity:
     // Assertions verify that Zig's M=1000 value lies strictly within [min, max] of the union of gfortran
@@ -2756,48 +2758,48 @@ test "T-00060 matched-state STARTE oracle test for K=1 and K=2 dynamic inputs" {
         k2_actual.primary_g_per_m3[8] <= 1.28556853535579690e-01);
     try std.testing.expect(k2_actual.primary_g_per_m3[9] >= 2.88456421981101219e-01 and
         k2_actual.primary_g_per_m3[9] <= 3.63823922381410536e-01);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)] >= 6.79882586842436437e-02 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)] <= 9.64114010847940267e-02);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium)] >= 3.84255515145338344e-02 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium)] <= 4.86670059269039001e-02);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium)] >= 7.10090088992466756e-02 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium)] <= 8.00116936660132810e-02);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium)] >= 1.59878813111866205e-02 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium)] <= 1.99848516389832739e-02);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sulfate)] >= 3.87132283552507062e-02 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sulfate)] <= 5.59310397579145385e-02);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydroxide)] >= 9.79890954497588831e-08 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydroxide)] <= 6.33435726342892769e-05);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_carbonate)] >= 6.22914568756910729e-04 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_carbonate)] <= 9.24735041451790665e-04);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_bicarbonate)] >= 1.31389584782847066e-03 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_bicarbonate)] <= 1.78963237375355452e-02);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_sulfate)] >= 2.38142501396744781e-03 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_sulfate)] <= 1.41233250793036183e-02);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydroxide)] >= 7.37701285541987740e-07 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydroxide)] <= 6.41703069213365215e-05);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_carbonate)] >= 4.77032107557447726e-05 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_carbonate)] <= 1.57766612980598945e-04);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_bicarbonate)] >= 1.46403288337667410e-04 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_bicarbonate)] <= 8.85756017948926069e-03);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_sulfate)] >= 6.52698312696317899e-04 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_sulfate)] <= 1.02480903813690592e-02);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_carbonate)] >= 6.78385568329319198e-05 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_carbonate)] <= 1.65621476642900325e-04);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_sulfate)] >= 7.38592809615753049e-06 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_sulfate)] <= 8.91228777505279762e-03);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium_sulfate)] >= 1.51483610166864462e-05 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.potassium_sulfate)] <= 4.01211868881334172e-03);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphate)] >= 2.74890485843051332e-09 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphate)] <= 3.65521157351943141e-09);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphoric_acid)] >= 7.60782338102887369e-07 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.phosphoric_acid)] <= 7.08533765843964882e-06);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydrogen_phosphate)] >= 1.19534359980930262e-04 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_hydrogen_phosphate)] <= 9.68554768128560917e-04);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_dihydrogen_phosphate)] >= 2.13793187047502871e-05 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_dihydrogen_phosphate)] <= 2.35502935477905273e-03);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydrogen_phosphate)] >= 9.03908126294534543e-05 and
-        k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_hydrogen_phosphate)] <= 9.06237039386363370e-04);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)] >= 6.79882586842436437e-02 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)] <= 9.64114010847940267e-02);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium)] >= 3.84255515145338344e-02 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium)] <= 4.86670059269039001e-02);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium)] >= 7.10090088992466756e-02 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium)] <= 8.00116936660132810e-02);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium)] >= 1.59878813111866205e-02 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium)] <= 1.99848516389832739e-02);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sulfate)] >= 3.87132283552507062e-02 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sulfate)] <= 5.59310397579145385e-02);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydroxide)] >= 9.79890954497588831e-08 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydroxide)] <= 6.33435726342892769e-05);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_carbonate)] >= 6.22914568756910729e-04 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_carbonate)] <= 9.24735041451790665e-04);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_bicarbonate)] >= 1.31389584782847066e-03 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_bicarbonate)] <= 1.78963237375355452e-02);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_sulfate)] >= 2.38142501396744781e-03 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_sulfate)] <= 1.41233250793036183e-02);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydroxide)] >= 7.37701285541987740e-07 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydroxide)] <= 6.41703069213365215e-05);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_carbonate)] >= 4.77032107557447726e-05 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_carbonate)] <= 1.57766612980598945e-04);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_bicarbonate)] >= 1.46403288337667410e-04 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_bicarbonate)] <= 8.85756017948926069e-03);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_sulfate)] >= 6.52698312696317899e-04 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_sulfate)] <= 1.02480903813690592e-02);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_carbonate)] >= 6.78385568329319198e-05 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_carbonate)] <= 1.65621476642900325e-04);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_sulfate)] >= 7.38592809615753049e-06 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_sulfate)] <= 8.91228777505279762e-03);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium_sulfate)] >= 1.51483610166864462e-05 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.potassium_sulfate)] <= 4.01211868881334172e-03);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphate)] >= 2.74890485843051332e-09 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphate)] <= 3.65521157351943141e-09);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphoric_acid)] >= 7.60782338102887369e-07 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.phosphoric_acid)] <= 7.08533765843964882e-06);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydrogen_phosphate)] >= 1.19534359980930262e-04 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_hydrogen_phosphate)] <= 9.68554768128560917e-04);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_dihydrogen_phosphate)] >= 2.13793187047502871e-05 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_dihydrogen_phosphate)] <= 2.35502935477905273e-03);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydrogen_phosphate)] >= 9.03908126294534543e-05 and
+        k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_hydrogen_phosphate)] <= 9.06237039386363370e-04);
 
     // Emit Zig per-cycle trace (M=20..1000) and trajectory (M=980..1000) for K=2:
     _ = try speciateFixedPhSourceBoundedWithHook(
@@ -2822,11 +2824,11 @@ test "T-00060 matched-state STARTE oracle test for K=1 and K=2 dynamic inputs" {
     try std.testing.expect(@abs(k2_bounded_20.primary_g_per_m3[5] - k2_actual.primary_g_per_m3[5]) / k2_actual.primary_g_per_m3[5] > 0.01);
 
     // Verify non-zero carbonate pairs for irrigation (R2 resolution):
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_bicarbonate)] > 0);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium_carbonate)] > 0);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_bicarbonate)] > 0);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.magnesium_carbonate)] > 0);
-    try std.testing.expect(k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.sodium_carbonate)] > 0);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_bicarbonate)] > 0);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium_carbonate)] > 0);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_bicarbonate)] > 0);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.magnesium_carbonate)] > 0);
+    try std.testing.expect(k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.sodium_carbonate)] > 0);
 
     for (10..18) |species| {
         try std.testing.expectEqual(@as(f64, 0.0), k2_actual.primary_g_per_m3[species]);
@@ -2849,9 +2851,9 @@ test "T-00060 matched-state STARTE oracle test for K=1 and K=2 dynamic inputs" {
 
     // Verify linear flow-weighted superposition with zero post-mix solve:
     const expected_h_mol = rain_m3 * (1.0e-4) + irrigation_m3 * (std.math.pow(f64, 10.0, -(7.5 - 3.0)));
-    try std.testing.expectEqual(expected_h_mol, mixed_salt[@intFromEnum(snow.SaltSpecies.hydrogen)]);
+    try std.testing.expectEqual(expected_h_mol, mixed_salt[@backingInt(snow.SaltSpecies.hydrogen)]);
 
-    const expected_ca_mol = rain_m3 * k1_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)] +
-        irrigation_m3 * k2_actual.salt_mol_per_m3[@intFromEnum(snow.SaltSpecies.calcium)];
-    try std.testing.expectEqual(expected_ca_mol, mixed_salt[@intFromEnum(snow.SaltSpecies.calcium)]);
+    const expected_ca_mol = rain_m3 * k1_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)] +
+        irrigation_m3 * k2_actual.salt_mol_per_m3[@backingInt(snow.SaltSpecies.calcium)];
+    try std.testing.expectEqual(expected_ca_mol, mixed_salt[@backingInt(snow.SaltSpecies.calcium)]);
 }

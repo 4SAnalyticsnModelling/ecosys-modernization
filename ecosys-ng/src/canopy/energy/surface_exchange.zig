@@ -1,5 +1,7 @@
 const std = @import("std");
 const CellRange = @import("../../core/compute.zig").CellRange;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Parameters = struct {
     minimum_richardson_number: f64,
@@ -73,7 +75,7 @@ pub const State = struct {
         state.species_count = species_count;
         var allocated: usize = 0;
         errdefer freeAllocated(&state, allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(state, field.name) = try allocator.alloc(f64, count);
             @memset(@field(state, field.name), 0);
             allocated += 1;
@@ -82,12 +84,12 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             for (@field(self, field.name), 0..) |value, index| if (!std.math.isFinite(value)) {
                 std.log.err("non-finite canopy surface exchange: field={s} index={d} value={e}", .{ field.name, index, value });
                 return error.NonFiniteCanopySurfaceExchangeState;
@@ -217,7 +219,7 @@ pub fn applyTile(context: *ApplyContext, range: CellRange) !void {
     for (range.first..range.end) |cell| for (0..state.species_count) |species| {
         const index = cell * state.species_count + species;
         if (context.inputs.species_canopy_radiation_fraction[index] <= 0) {
-            inline for (@typeInfo(State).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(State)) |field| {
                 if (field.type == []f64) @field(state, field.name)[index] = 0;
             }
             continue;
@@ -240,7 +242,7 @@ pub fn applyTile(context: *ApplyContext, range: CellRange) !void {
             .canopy_total_water_potential_megapascal = context.inputs.canopy_total_water_potential_megapascal[index],
             .intercepted_water_volume_m3 = context.inputs.intercepted_water_volume_m3[index],
         }, context.parameters);
-        inline for (@typeInfo(Result).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Result)) |field| {
             if (@hasField(State, field.name)) @field(state, field.name)[index] = @field(result, field.name);
         }
     };
@@ -270,7 +272,7 @@ pub fn addGroundAirSourcesTile(state: State, range: CellRange, sensible_heat_sou
 /// the canopy; negative values are evaporation. Transpiration is non-positive.
 pub fn calculate(inputs: Inputs, parameters: Parameters) !Result {
     try validateParameters(parameters);
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteCanopySurfaceExchangeInput;
     }
     if (inputs.atmospheric_temperature_k <= 0 or inputs.canopy_air_temperature_k <= 0 or inputs.canopy_surface_temperature_k <= 0 or
@@ -358,7 +360,7 @@ pub fn calculate(inputs: Inputs, parameters: Parameters) !Result {
 }
 
 fn validateParameters(parameters: Parameters) !void {
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteCanopySurfaceExchangeParameter;
     }
     if (parameters.maximum_richardson_number < parameters.minimum_richardson_number or
@@ -373,7 +375,7 @@ fn validateParameters(parameters: Parameters) !void {
 
 fn freeAllocated(state: *State, count: usize) void {
     var visited: usize = 0;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         if (visited < count) state.allocator.free(@field(state, field.name));
         visited += 1;
     };
@@ -446,20 +448,20 @@ test "runtime tiled canopy exchange supports more than five species and conserve
     const species_count: usize = 7;
     var state = try State.init(std.testing.allocator, 1, species_count);
     defer state.deinit();
-    const temperatures = [_]f64{310} ** species_count;
-    const below_species = [_]f64{0.004} ** species_count;
-    const radiation_fraction = [_]f64{0.1} ** species_count;
-    const sensible_resistance = [_]f64{0.004} ** species_count;
-    const latent_resistance = [_]f64{0.002} ** species_count;
-    const stomatal_resistance = [_]f64{0.01} ** species_count;
-    const water_potential = [_]f64{-1} ** species_count;
-    const intercepted_water = [_]f64{0.0001} ** species_count;
+    const temperatures = @as([species_count]f64, @splat(@as(f64, 310)));
+    const below_species = @as([species_count]f64, @splat(@as(f64, 0.004)));
+    const radiation_fraction = @as([species_count]f64, @splat(@as(f64, 0.1)));
+    const sensible_resistance = @as([species_count]f64, @splat(@as(f64, 0.004)));
+    const latent_resistance = @as([species_count]f64, @splat(@as(f64, 0.002)));
+    const stomatal_resistance = @as([species_count]f64, @splat(@as(f64, 0.01)));
+    const water_potential = @as([species_count]f64, @splat(@as(f64, -1)));
+    const intercepted_water = @as([species_count]f64, @splat(@as(f64, 0.0001)));
     var context: ApplyContext = .{
         .state = &state,
         .inputs = .{
             .atmospheric_temperature_k_by_cell = &.{300},
             .canopy_air_temperature_k = &temperatures,
-            .canopy_air_vapor_fraction = &([_]f64{0.000001} ** species_count),
+            .canopy_air_vapor_fraction = &(@as([species_count]f64, @splat(@as(f64, 0.000001)))),
             .bulk_richardson_coefficient_k_by_cell = &.{0},
             .biome_isothermal_boundary_resistance_h_per_m_by_cell = &.{0.005},
             .latent_boundary_numerator_m2_per_h_by_cell = &.{0.1},

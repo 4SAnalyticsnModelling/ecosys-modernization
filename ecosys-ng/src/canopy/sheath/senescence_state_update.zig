@@ -2,6 +2,7 @@
 // atomic selected-node transaction in `photosynthesis_node_layer`, preserving
 // branch-before-node/mobile values and original-snapshot protein demand.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     branch_sheath_carbon_g_c: *f64,
@@ -97,7 +98,7 @@ fn validateInputs(inputs: Inputs) !void {
         inputs.nonwoody_nitrogen_fraction < 0 or inputs.nonwoody_nitrogen_fraction > 1 or
         inputs.nonwoody_phosphorus_fraction < 0 or inputs.nonwoody_phosphorus_fraction > 1)
         return error.InvalidSheathSenescenceStateInput;
-    inline for (@typeInfo(Snapshot).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Snapshot)) |field| {
         const value = @field(inputs.snapshot, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidSheathSenescenceStateSnapshot;
     }
@@ -132,7 +133,7 @@ pub fn calculate(state: State, inputs: Inputs) !Result {
         .mobile_nitrogen_g_n = state.branch_mobile_nitrogen_g_n.* + fraction * snapshot.remobilizable_nitrogen_g_n * inputs.nonwoody_nitrogen_fraction,
         .mobile_phosphorus_g_p = state.branch_mobile_phosphorus_g_p.* + fraction * snapshot.remobilizable_phosphorus_g_p * inputs.nonwoody_phosphorus_fraction,
     };
-    inline for (@typeInfo(Result).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Result)) |field| {
         const value = @field(result, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidSheathSenescenceStateResult;

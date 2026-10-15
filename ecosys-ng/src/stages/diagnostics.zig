@@ -5,6 +5,7 @@
 
 const std = @import("std");
 const ecosys = @import("ecosys_ng");
+const ti_compat = @import("ecosys_ng").typeinfo_compat;
 
 /// Temporary, observation-only trace of the first wet-surface heat/O2 frontier.
 /// Keep the individual canonical carriers visible; do not call a reconstruction
@@ -31,7 +32,7 @@ const ecosys = @import("ecosys_ng");
 pub fn traceSurfaceFrontier(context: anytype, stage: []const u8, dt_hours: f64) !void {
     if (comptime @import("builtin").is_test) return;
     if (context.executed_weather_hours.* < 2656 or context.executed_weather_hours.* >= 2659) return;
-    const oxygen = @intFromEnum(ecosys.gas_transport.Species.oxygen);
+    const oxygen = @backingInt(ecosys.gas_transport.Species.oxygen);
     for (0..context.grid.cell_count) |cell| {
         const component = cell * ecosys.gas_transport.species_count + oxygen;
         const gas = context.litter_gas_transport;
@@ -58,14 +59,18 @@ pub fn traceSurfaceFrontier(context: anytype, stage: []const u8, dt_hours: f64) 
             context.executed_weather_hours.* + 1,
             dt_hours,
             cell,
-            context.grid.surface_temperature_k[cell],  context.surface_heat_capacity_megajoules_per_k[cell], context.surface_precipitation.litter_water_m3[cell],
+            context.grid.surface_temperature_k[cell],
+            context.surface_heat_capacity_megajoules_per_k[cell],
+            context.surface_precipitation.litter_water_m3[cell],
             context.surface_litter_ice_m3[cell],
             gas.water_vapor_mol[cell],
             organic,
             gas.gaseous_mass_g[component],
             gas.dissolved_mass_g[component],
-            gas.macropore_dissolved_mass_g[component], gas.band_dissolved_mass_g[component],
-            context.snow_surface_discharge[cell].litter_g[oxygen], gas.air_volume_m3[cell],
+            gas.macropore_dissolved_mass_g[component],
+            gas.band_dissolved_mass_g[component],
+            context.snow_surface_discharge[cell].litter_g[oxygen],
+            gas.air_volume_m3[cell],
             surface_activity.phosphorus_input_g,
             surface_activity.phosphorus_output_g,
         });
@@ -249,10 +254,10 @@ pub fn traceStageBoundaryLayer0Carbon(context: anytype, comptime stage: []const 
             context.soil_chemistry.dry_reference_water_m3[0],
             context.soil_chemistry.aqueous[0].ammonium_non_band,
             context.soil_chemistry.aqueous[0].nitrate_non_band,
-            mineral_amounts[@intFromEnum(ecosys.mineral_nitrogen_transport.Species.ammonium_non_band)],
-            mineral_amounts[@intFromEnum(ecosys.mineral_nitrogen_transport.Species.ammonium_band)],
-            mineral_amounts[@intFromEnum(ecosys.mineral_nitrogen_transport.Species.nitrate_non_band)],
-            mineral_amounts[@intFromEnum(ecosys.mineral_nitrogen_transport.Species.nitrate_band)],
+            mineral_amounts[@backingInt(ecosys.mineral_nitrogen_transport.Species.ammonium_non_band)],
+            mineral_amounts[@backingInt(ecosys.mineral_nitrogen_transport.Species.ammonium_band)],
+            mineral_amounts[@backingInt(ecosys.mineral_nitrogen_transport.Species.nitrate_non_band)],
+            mineral_amounts[@backingInt(ecosys.mineral_nitrogen_transport.Species.nitrate_band)],
             context.mineral_nitrogen_transport.matrix.water_volume_m3[0],
         },
     );
@@ -625,8 +630,8 @@ pub fn tracePhosphateAqueousTransportTermLayer0(context: anytype, comptime site:
     const p_mass = context.runscript.root_nutrient_parameters.phosphorus_molar_mass_g_per_mol;
     var micro_mol: f64 = 0;
     var macro_mol: f64 = 0;
-    inline for (@typeInfo(ecosys.solute_transport_species.AqueousSpecies).@"enum".fields) |field| {
-        const species: ecosys.solute_transport_species.AqueousSpecies = @enumFromInt(field.value);
+    inline for (ti_compat.enumFieldViews(ecosys.solute_transport_species.AqueousSpecies)) |field| {
+        const species: ecosys.solute_transport_species.AqueousSpecies = @fromBackingInt(@intCast(field.value));
         if (ecosys.solute_transport_species.diffusivityClass(species) == .phosphate) {
             micro_mol += micro_amounts[field.value];
             macro_mol += macro_amounts[field.value];
@@ -685,8 +690,8 @@ pub fn traceImpliedPhosphateExportLayer0(context: anytype, comptime site: []cons
     const carrier_m3 = if (live_water_m3 > negligible_water_volume_m3) live_water_m3 else if (dry_reference_water_m3 > 0) dry_reference_water_m3 else live_water_m3;
     var non_band_conc_sum: f64 = 0;
     var band_conc_sum: f64 = 0;
-    inline for (@typeInfo(ecosys.solute_transport_species.AqueousSpecies).@"enum".fields) |field| {
-        const species: ecosys.solute_transport_species.AqueousSpecies = @enumFromInt(field.value);
+    inline for (ti_compat.enumFieldViews(ecosys.solute_transport_species.AqueousSpecies)) |field| {
+        const species: ecosys.solute_transport_species.AqueousSpecies = @fromBackingInt(@intCast(field.value));
         if (ecosys.solute_transport_species.diffusivityClass(species) == .phosphate) {
             const dissolved_mol_per_m3 = ecosys.soil_aqueous_transport_bridge.concentration(chemistry_state, 0, species);
             if (comptime std.mem.startsWith(u8, field.name, "band_")) {
@@ -718,7 +723,7 @@ pub fn traceImpliedPhosphateExportLayer0(context: anytype, comptime site: []cons
 
 fn sumStructFieldsF64(value: anytype) f64 {
     var total: f64 = 0;
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field| {
         total += @field(value, field.name);
     }
     return total;
@@ -925,7 +930,7 @@ pub fn traceIssue100LayerAmmonium(context: anytype, label: []const u8, hour: usi
     const S = ecosys.mineral_nitrogen_transport.Species;
     const aq = struct {
         fn get(m: anytype, p: anytype, s: S) f64 {
-            return m[@intFromEnum(s)] + p[@intFromEnum(s)];
+            return m[@backingInt(s)] + p[@backingInt(s)];
         }
     };
     const fractions = try context.fertilizer_band.scienceZoneFractionsForFlatIndex(layer);
@@ -992,12 +997,12 @@ pub fn traceIssue103LayerNitrate(context: anytype, label: []const u8, hour: usiz
                 totals.residue_nitrogen_g + totals.organic_nitrogen_g + totals.dinitrogen_nitrogen_g +
                     totals.ammonium_nitrogen_g + totals.nitrate_nitrogen_g + totals.plant_nitrogen_g,
                 totals.nitrate_nitrogen_g,
-                matrix[@intFromEnum(S.nitrate_non_band)] * n,
-                matrix[@intFromEnum(S.nitrate_band)] * n,
-                matrix[@intFromEnum(S.nitrite_non_band)] * n,
-                matrix[@intFromEnum(S.nitrite_band)] * n,
-                macro[@intFromEnum(S.nitrate_non_band)] * n,
-                macro[@intFromEnum(S.nitrate_band)] * n,
+                matrix[@backingInt(S.nitrate_non_band)] * n,
+                matrix[@backingInt(S.nitrate_band)] * n,
+                matrix[@backingInt(S.nitrite_non_band)] * n,
+                matrix[@backingInt(S.nitrite_band)] * n,
+                macro[@backingInt(S.nitrate_non_band)] * n,
+                macro[@backingInt(S.nitrate_band)] * n,
                 fractions.nitrate_non_band,
                 fractions.nitrate_band,
                 water,
@@ -1082,7 +1087,7 @@ pub fn diagnosticAmmoniumOwners_g_n(context: anytype) ![6]f64 {
     for (0..context.grid.layer_count) |layer| {
         const matrix = try context.mineral_nitrogen_transport.matrix.cellAmountsConst(layer);
         const macro = try context.mineral_nitrogen_transport.macropore.cellAmountsConst(layer);
-        inline for ([_]ecosys.mineral_nitrogen_transport.Species{ .ammonium_non_band, .ammonium_band, .ammonia_non_band, .ammonia_band }) |species| result[3] += (matrix[@intFromEnum(species)] + macro[@intFromEnum(species)]) * molar_mass;
+        inline for ([_]ecosys.mineral_nitrogen_transport.Species{ .ammonium_non_band, .ammonium_band, .ammonia_non_band, .ammonia_band }) |species| result[3] += (matrix[@backingInt(species)] + macro[@backingInt(species)]) * molar_mass;
         const exchange = context.soil_chemistry.cation_exchange_mol_per_megagram[layer];
         result[4] += context.soil_solver_properties.matrix_bulk_volume_m3[layer] * context.soil_solver_properties.bulk_density_megagrams_per_m3[layer] * (exchange.ammonium_non_band + exchange.ammonium_band) * molar_mass;
         const fertilizer = context.soil_fertilizer_inventory.soil[layer];
@@ -1106,7 +1111,7 @@ pub fn diagnosticSnowSpeciesNitrogen_g(amounts: []const f64) f64 {
             .ammonium_nitrogen,
             .ammonia_nitrogen,
             .nitrate_nitrogen,
-        }) |species| total_g_n += amounts[first + @intFromEnum(species)];
+        }) |species| total_g_n += amounts[first + @backingInt(species)];
     }
     return total_g_n;
 }
@@ -1177,9 +1182,11 @@ fn debugCarbonComponents(context: anytype, totals: ecosys.mass_balance_audit.Tot
     }
     std.log.debug("{s} surf subpools: microbial={e} residue_fracs={e} structural={e} excluded_resid={e} excluded_micro4={e}", .{
         label,
-            surf_microbial / area,
-            surf_residue / area, surf_structural / area,
-        surf_excluded_resid / area, surf_microbial_sub4 / area,
+        surf_microbial / area,
+        surf_residue / area,
+        surf_structural / area,
+        surf_excluded_resid / area,
+        surf_microbial_sub4 / area,
     });
     // Fine-grained soil microbial by substrate category (active layers only)
     const grid = context.grid;
@@ -1215,14 +1222,14 @@ fn debugCarbonComponents(context: anytype, totals: ecosys.mass_balance_audit.Tot
             const dissolved = gas_state_dbg.dissolved_mass_g[first..end];
             const macropore = gas_state_dbg.macropore_dissolved_mass_g[first..end];
             const band = gas_state_dbg.band_dissolved_mass_g[first..end];
-            gas_co2_g += gaseous[@intFromEnum(ecosys.gas_transport.Species.carbon_dioxide)] +
-                dissolved[@intFromEnum(ecosys.gas_transport.Species.carbon_dioxide)] +
-                macropore[@intFromEnum(ecosys.gas_transport.Species.carbon_dioxide)] +
-                band[@intFromEnum(ecosys.gas_transport.Species.carbon_dioxide)];
-            gas_ch4_g += gaseous[@intFromEnum(ecosys.gas_transport.Species.methane)] +
-                dissolved[@intFromEnum(ecosys.gas_transport.Species.methane)] +
-                macropore[@intFromEnum(ecosys.gas_transport.Species.methane)] +
-                band[@intFromEnum(ecosys.gas_transport.Species.methane)];
+            gas_co2_g += gaseous[@backingInt(ecosys.gas_transport.Species.carbon_dioxide)] +
+                dissolved[@backingInt(ecosys.gas_transport.Species.carbon_dioxide)] +
+                macropore[@backingInt(ecosys.gas_transport.Species.carbon_dioxide)] +
+                band[@backingInt(ecosys.gas_transport.Species.carbon_dioxide)];
+            gas_ch4_g += gaseous[@backingInt(ecosys.gas_transport.Species.methane)] +
+                dissolved[@backingInt(ecosys.gas_transport.Species.methane)] +
+                macropore[@backingInt(ecosys.gas_transport.Species.methane)] +
+                band[@backingInt(ecosys.gas_transport.Species.methane)];
         }
     }
     // Bicarbonate/carbonate from micropore + macropore solute amounts.
@@ -1235,8 +1242,8 @@ fn debugCarbonComponents(context: anytype, totals: ecosys.mass_balance_audit.Tot
             const layer_cell = cell * grid.soil_layer_capacity + layer;
             const micro_amounts = try micro.cellAmountsConst(layer_cell);
             const macro_amounts = try macro.cellAmountsConst(layer_cell);
-            inline for (@typeInfo(ecosys.solute_transport_species.AqueousSpecies).@"enum".fields) |field| {
-                const species: ecosys.solute_transport_species.AqueousSpecies = @enumFromInt(field.value);
+            inline for (ti_compat.enumFieldViews(ecosys.solute_transport_species.AqueousSpecies)) |field| {
+                const species: ecosys.solute_transport_species.AqueousSpecies = @fromBackingInt(@intCast(field.value));
                 const is_carbonate_carrier = switch (species) {
                     .carbonate,
                     .bicarbonate,
@@ -1286,7 +1293,7 @@ fn debugCarbonComponents(context: anytype, totals: ecosys.mass_balance_audit.Tot
     }
     {
         const litter_gas = context.litter_gas_transport;
-        const co2_species = @intFromEnum(ecosys.gas_transport.Species.carbon_dioxide);
+        const co2_species = @backingInt(ecosys.gas_transport.Species.carbon_dioxide);
         for (0..grid.cell_count) |cell| {
             const base = cell * ecosys.gas_transport.species_count;
             litter_gas_co2_g += litter_gas.gaseous_mass_g[base + co2_species] +
@@ -1295,9 +1302,13 @@ fn debugCarbonComponents(context: anytype, totals: ecosys.mass_balance_audit.Tot
     }
     std.log.debug("{s} co2 split: gas_co2={e} gas_ch4={e} bicarbonate={e} chem_co2={e} chem_bicarb={e} litter_chem_co2={e} litter_chem_bicarb={e} litter_gas_co2={e}", .{
         label,
-            gas_co2_g / area,
-            gas_ch4_g / area,
-            bicarbonate_g / area, chem_co2_g / area, chem_bicarb_g / area,
-        litter_chem_co2_g / area, litter_chem_bicarb_g / area, litter_gas_co2_g / area,
+        gas_co2_g / area,
+        gas_ch4_g / area,
+        bicarbonate_g / area,
+        chem_co2_g / area,
+        chem_bicarb_g / area,
+        litter_chem_co2_g / area,
+        litter_chem_bicarb_g / area,
+        litter_gas_co2_g / area,
     });
 }

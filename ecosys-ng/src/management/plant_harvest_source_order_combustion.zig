@@ -14,6 +14,7 @@ const __parent = @import("plant_harvest_runtime.zig");
 const group_complete_death = @import("plant_harvest_source_order_complete_death.zig");
 const group_dead_root = @import("plant_harvest_source_order_dead_root.zig");
 const group_misc = @import("plant_harvest_source_order_misc.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 const boundedCombustionFraction = __parent.boundedCombustionFraction;
 pub const validateCombustionNode = __parent.validateCombustionNode;
@@ -87,7 +88,7 @@ pub fn sourceOrderAggregateFireCarbonInventory(
         if (plant.root_nonstructural_by_layer_domain_g_c.len != domain_layers or
             plant.root_structural_by_layer_domain_axis.len != axis_layers)
             return error.InvalidFireInventoryDimensions;
-        inline for (@typeInfo(SourceOrderFireShootCarbon).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SourceOrderFireShootCarbon)) |field| {
             const value = @field(plant.shoot, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidFireInventory;
@@ -145,10 +146,10 @@ pub fn sourceOrderAggregateFireCarbonInventory(
             }
         }
     }
-    inline for (@typeInfo(SourceOrderFireShootCarbon).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SourceOrderFireShootCarbon)) |field|
         if (!std.math.isFinite(@field(shoot, field.name)))
             return error.NonFiniteFireInventory;
-    for (layers) |layer| inline for (@typeInfo(SourceOrderFireLayerCarbon).@"struct".fields) |field|
+    for (layers) |layer| inline for (ti_compat.fieldViews(SourceOrderFireLayerCarbon)) |field|
         if (!std.math.isFinite(@field(layer, field.name)))
             return error.NonFiniteFireInventory;
     return .{ .shoot = shoot, .layers = layers };
@@ -191,7 +192,7 @@ pub fn sourceOrderCombustionRates(
         biological_timestep_h,
     }) |value| if (!std.math.isFinite(value) or value < 0)
         return error.InvalidCombustionRateInput;
-    inline for (@typeInfo(SourceOrderCombustionSpecificRates).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderCombustionSpecificRates)) |field| {
         const value = @field(specific, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidCombustionRateInput;
@@ -228,7 +229,7 @@ pub fn sourceOrderCombustionRates(
         result.standing_dead_g_c_step =
             specific.standing_dead_g_c_m2_h * base_rate;
     }
-    inline for (@typeInfo(SourceOrderCombustionRates).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SourceOrderCombustionRates)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteCombustionRate;
     return result;
@@ -271,12 +272,12 @@ pub fn sourceOrderShootCombustionFractions(
 ) !SourceOrderShootCombustionFractions {
     if (!std.math.isFinite(negligible_carbon_g_c) or negligible_carbon_g_c < 0)
         return error.InvalidShootCombustionFractionInput;
-    inline for (@typeInfo(SourceOrderShootCombustionTotals).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderShootCombustionTotals)) |field| {
         const value = @field(totals, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidShootCombustionFractionInput;
     }
-    inline for (@typeInfo(SourceOrderCombustionRates).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderCombustionRates)) |field| {
         const value = @field(rates, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidShootCombustionFractionInput;
@@ -384,15 +385,15 @@ pub fn sourceOrderShootCombustionLosses(
 ) !SourceOrderShootCombustionResult {
     if (!std.math.isFinite(preceding_cumulative_canopy_combustion_g_c))
         return error.InvalidShootCombustionLossInput;
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(preceding_disturbance_emission_ledger, field.name)))
             return error.InvalidShootCombustionLossInput;
-    inline for (@typeInfo(SourceOrderShootCombustionFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderShootCombustionFractions)) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.InvalidShootCombustionLossInput;
     }
-    for (pools) |branch| inline for (@typeInfo(SourceOrderShootCombustionBranchPools).@"struct".fields) |field|
+    for (pools) |branch| inline for (ti_compat.fieldViews(SourceOrderShootCombustionBranchPools)) |field|
         try group_complete_death.validateCompleteDeathMass(@field(branch, field.name));
 
     const branches = try allocator.alloc(SourceOrderShootCombustionBranchResult, pools.len);
@@ -422,7 +423,7 @@ pub fn sourceOrderShootCombustionLosses(
             ),
         };
         result.total_combusted = .{};
-        inline for (@typeInfo(SourceOrderShootCombustionBranchPools).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SourceOrderShootCombustionBranchPools)) |field| {
             const mass = @field(result.combusted, field.name);
             result.total_combusted.carbon_g += mass.carbon_g;
             result.total_combusted.nitrogen_g += mass.nitrogen_g;
@@ -435,7 +436,7 @@ pub fn sourceOrderShootCombustionLosses(
     }
     if (!std.math.isFinite(cumulative))
         return error.NonFiniteShootCombustionLoss;
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(emissions, field.name)))
             return error.NonFiniteShootCombustionLoss;
     return .{
@@ -462,7 +463,7 @@ pub fn sourceOrderShootSaltCombustion(
         canopy_nonstructural_combustion_fraction < 0 or
         canopy_nonstructural_combustion_fraction > 1)
         return error.InvalidShootSaltCombustionInput;
-    for (branches) |branch| inline for (@typeInfo(group_misc.SourceOrderShootSaltInventory).@"struct".fields) |field| {
+    for (branches) |branch| inline for (ti_compat.fieldViews(group_misc.SourceOrderShootSaltInventory)) |field| {
         const value = @field(branch, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidShootSaltCombustionInput;
@@ -494,7 +495,7 @@ pub fn sourceOrderShootSaltCombustion(
             .chloride_mol = branch.chloride_mol - branch_result.combusted.chloride_mol,
         };
         inline for (.{ branch_result.combusted, branch_result.remaining }) |inventory|
-            inline for (@typeInfo(group_misc.SourceOrderShootSaltInventory).@"struct".fields) |field|
+            inline for (ti_compat.fieldViews(group_misc.SourceOrderShootSaltInventory)) |field|
                 if (!std.math.isFinite(@field(inventory, field.name)))
                     return error.NonFiniteShootSaltCombustion;
     }
@@ -546,7 +547,7 @@ pub fn sourceOrderStandingDeadCombustion(
         combustion_fraction < 0 or combustion_fraction > 1 or
         !std.math.isFinite(preceding_cumulative_standing_dead_combustion_g_c))
         return error.InvalidStandingDeadCombustionInput;
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(preceding_disturbance_emission_ledger, field.name)))
             return error.InvalidStandingDeadCombustionInput;
     for (components) |component| try group_complete_death.validateCompleteDeathMass(component);
@@ -574,7 +575,7 @@ pub fn sourceOrderStandingDeadCombustion(
     }
     if (!std.math.isFinite(cumulative))
         return error.NonFiniteStandingDeadCombustion;
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(emissions, field.name)))
             return error.NonFiniteStandingDeadCombustion;
     return .{
@@ -626,7 +627,7 @@ pub fn sourceOrderCharcoalCombustion(
     if (standing_dead_temperature_k == 0)
         return error.InvalidCharcoalCombustionTemperature;
     try group_complete_death.validateCompleteDeathMass(charcoal);
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(preceding_disturbance_emission_ledger, field.name)))
             return error.InvalidCharcoalCombustionInput;
 
@@ -664,7 +665,7 @@ pub fn sourceOrderCharcoalCombustion(
             return error.NonFiniteCharcoalCombustion;
     try group_complete_death.validateCompleteDeathResultMass(combusted);
     try group_complete_death.validateCompleteDeathResultMass(remaining);
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(emissions, field.name)))
             return error.NonFiniteCharcoalCombustion;
     return .{
@@ -788,18 +789,18 @@ pub fn sourceOrderRootStorageCombustion(
         input.preceding_layer_combustion_g_c,
     }) |value| if (!std.math.isFinite(value) or value < 0)
         return error.InvalidRootStorageCombustionInput;
-    inline for (@typeInfo(SourceOrderCombustionSpecificRates).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderCombustionSpecificRates)) |field| {
         const value = @field(input.specific_rates, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidRootStorageCombustionInput;
     }
-    inline for (@typeInfo(SourceOrderRootCombustionLayerTotals).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderRootCombustionLayerTotals)) |field| {
         const value = @field(input.totals, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidRootStorageCombustionInput;
     }
     try group_complete_death.validateCompleteDeathMass(input.storage);
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(input.preceding_disturbance_emission_ledger, field.name)))
             return error.InvalidRootStorageCombustionInput;
 
@@ -864,17 +865,17 @@ pub fn sourceOrderRootStorageCombustion(
         result.disturbance_emission_ledger.phosphorus_g -=
             result.storage_combusted.phosphorus_g;
     }
-    inline for (@typeInfo(SourceOrderRootCombustionPotentialRates).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SourceOrderRootCombustionPotentialRates)) |field|
         if (!std.math.isFinite(@field(result.potential_rates, field.name)))
             return error.NonFiniteRootStorageCombustion;
-    inline for (@typeInfo(SourceOrderRootCombustionFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderRootCombustionFractions)) |field| {
         const value = @field(result.fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.NonFiniteRootStorageCombustion;
     }
     try group_complete_death.validateCompleteDeathResultMass(result.storage_combusted);
     try group_complete_death.validateCompleteDeathResultMass(result.storage_remaining);
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(result.disturbance_emission_ledger, field.name)))
             return error.NonFiniteRootStorageCombustion;
     if (!std.math.isFinite(result.temperature_response) or
@@ -939,12 +940,12 @@ pub fn sourceOrderApplyRootDomainCombustion(
             return error.InvalidRootDomainCombustionInput;
     if (!std.math.isFinite(preceding_layer_combustion_g_c))
         return error.InvalidRootDomainCombustionInput;
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(preceding_disturbance_emission_ledger, field.name)))
             return error.InvalidRootDomainCombustionInput;
     for (domains) |domain| {
         try group_complete_death.validateCompleteDeathMass(domain.nonstructural);
-        inline for (@typeInfo(group_misc.SourceOrderShootSaltInventory).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(group_misc.SourceOrderShootSaltInventory)) |field| {
             const value = @field(domain.salts, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidRootDomainCombustionInput;
@@ -1018,7 +1019,7 @@ pub fn sourceOrderApplyRootDomainCombustion(
             const secondary_loss = group_misc.scaleElementalMass(axis.secondary, active_root_fraction);
             axis.primary = group_misc.subtractElementalMass(axis.primary, primary_loss);
             axis.secondary = group_misc.subtractElementalMass(axis.secondary, secondary_loss);
-            inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
                 @field(loss.structural, field.name) +=
                     @field(primary_loss, field.name) + @field(secondary_loss, field.name);
                 @field(axis.whole_primary, field.name) *= remaining_active_fraction;
@@ -1034,7 +1035,7 @@ pub fn sourceOrderApplyRootDomainCombustion(
     }
     if (!std.math.isFinite(layer_combustion))
         return error.NonFiniteRootDomainCombustion;
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(emissions, field.name)))
             return error.NonFiniteRootDomainCombustion;
     return .{
@@ -1074,7 +1075,7 @@ pub fn sourceOrderRootNoduleCombustion(
         preceding_grid_layer_combustion_g_c,
     }) |value| if (!std.math.isFinite(value))
         return error.InvalidRootNoduleCombustionInput;
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(preceding_disturbance_emission_ledger, field.name)))
             return error.InvalidRootNoduleCombustionInput;
 
@@ -1108,7 +1109,7 @@ pub fn sourceOrderRootNoduleCombustion(
     try group_complete_death.validateCompleteDeathResultMass(result.biomass_remaining);
     if (!std.math.isFinite(plant_layer) or !std.math.isFinite(grid_layer))
         return error.NonFiniteRootNoduleCombustion;
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(emissions, field.name)))
             return error.NonFiniteRootNoduleCombustion;
     return result;

@@ -1,5 +1,6 @@
 const std = @import("std");
 const numerics = @import("../../core/numerics.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     minimum_richardson_number: f64,
@@ -113,8 +114,8 @@ pub const State = struct {
 };
 
 pub fn calculate(inputs: Inputs, parameters: Parameters) !Result {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteStandingDeadExchangeInput;
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteStandingDeadExchangeParameter;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteStandingDeadExchangeInput;
+    inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteStandingDeadExchangeParameter;
     if (parameters.maximum_richardson_number < parameters.minimum_richardson_number or parameters.richardson_resistance_multiplier <= 0 or parameters.minimum_boundary_resistance_h_per_m <= 0 or parameters.maximum_boundary_resistance_h_per_m < 5.0 * parameters.minimum_boundary_resistance_h_per_m or parameters.saturation_vapor_prefactor_k <= 0 or parameters.saturation_relative_humidity < 0 or parameters.saturation_relative_humidity > 1 or parameters.saturation_temperature_coefficient_k <= 0 or parameters.saturation_reference_inverse_temperature_per_k <= 0 or parameters.latent_heat_of_vaporization_megajoules_per_m3 <= 0 or parameters.liquid_water_heat_capacity_megajoules_per_m3_k <= 0) return error.InvalidStandingDeadExchangeParameter;
     if (inputs.atmospheric_temperature_k <= 0 or inputs.standing_dead_air_temperature_k <= 0 or inputs.standing_dead_surface_temperature_k <= 0 or inputs.standing_dead_air_vapor_fraction < 0 or inputs.biome_isothermal_boundary_resistance_h_per_m < 0 or inputs.aerodynamic_resistance_below_biome_h_per_m < 0 or inputs.aerodynamic_resistance_below_standing_dead_h_per_m <= 0 or inputs.standing_dead_radiation_fraction < 0 or inputs.latent_boundary_numerator_m2_per_h < 0 or inputs.sensible_boundary_numerator_megajoules_per_m_h_k < 0 or inputs.sensible_surface_resistance_h_per_m < 0 or inputs.latent_surface_resistance_h_per_m < 0 or inputs.intercepted_water_volume_m3 < 0) return error.InvalidStandingDeadExchangeInput;
 
@@ -235,7 +236,7 @@ fn surfaceEnergyAt(inputs: SurfaceEnergyInputs, parameters: Parameters, temperat
 }
 
 fn validateSurfaceEnergyInputs(inputs: SurfaceEnergyInputs, options: SurfaceSolverOptions) !void {
-    inline for (@typeInfo(SurfaceEnergyInputs).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteStandingDeadSurfaceEnergyInput;
+    inline for (ti_compat.fieldViews(SurfaceEnergyInputs)) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteStandingDeadSurfaceEnergyInput;
     if (inputs.ground_surface_temperature_k <= 0 or inputs.emission_coefficient_megajoules_per_h_k4 < 0 or inputs.dry_and_existing_water_heat_capacity_megajoules_per_k <= 0 or inputs.retained_precipitation_water_m3_per_h < 0 or inputs.minimum_effective_heat_capacity_megajoules_per_k < 0 or !std.math.isFinite(options.minimum_temperature_k) or !std.math.isFinite(options.maximum_temperature_k) or options.minimum_temperature_k <= 0 or options.maximum_temperature_k <= options.minimum_temperature_k) return error.InvalidStandingDeadSurfaceEnergyInput;
 }
 

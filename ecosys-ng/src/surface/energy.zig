@@ -5,6 +5,7 @@ const AtmosphericState = @import("../atmosphere/atmospheric_forcing.zig").State;
 const GroundRadiationState = @import("ground_radiation.zig").State;
 const ExposureState = @import("../canopy/radiation/exposure.zig").State;
 const snow_cover_fraction = @import("../soil/water/snow_cover_fraction.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Settings = struct {
     soil_longwave_emissivity: f64 = 0.97,
@@ -29,7 +30,7 @@ pub const State = struct {
         result.cell_count = cell_count;
         var allocated: usize = 0;
         errdefer freeAllocated(&result, allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, cell_count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -38,12 +39,12 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
             if (!std.math.isFinite(value)) {
                 std.log.err("non-finite surface energy: field={s} index={d} value={e}", .{ field.name, index, value });
                 return error.NonFiniteSurfaceEnergy;
@@ -115,7 +116,7 @@ fn validateSettings(settings: Settings) !void {
 
 fn freeAllocated(state: *State, count: usize) void {
     var visited: usize = 0;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         if (visited < count) state.allocator.free(@field(state, field.name));
         visited += 1;
     };

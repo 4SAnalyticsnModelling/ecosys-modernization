@@ -4,6 +4,7 @@ const geochemistry = @import("geochemistry_network.zig");
 const mineral_precipitation = @import("mineral_precipitation.zig");
 const silicate_weathering = @import("silicate_weathering.zig");
 const activity_coefficients = @import("activity_coefficients.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const SolubilityProducts = struct {
     gibbsite: f64,
@@ -236,7 +237,7 @@ fn sourceClippedExtent(first_activity: f64, equilibrium_first_activity: f64, fir
 }
 
 fn validateSourceMineralInputs(state: MineralCompletionState, coefficients: activity_coefficients.Result, products: SolubilityProducts, kinetics: Kinetics) !void {
-    inline for (@typeInfo(MineralCompletionState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(MineralCompletionState)) |field| {
         const value = @field(state, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidSourceOrderMineralState;
     }
@@ -256,23 +257,23 @@ fn validateSourceMineralInputs(state: MineralCompletionState, coefficients: acti
 }
 
 fn allFinite(state: MineralCompletionState) bool {
-    inline for (@typeInfo(MineralCompletionState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(MineralCompletionState)) |field| {
         if (!std.math.isFinite(@field(state, field.name))) return false;
     }
     return true;
 }
 
 fn validate(shared: aqueous_network.State, solids: geochemistry.SolidState, coefficients: activity_coefficients.Result, products: SolubilityProducts, kinetics: Kinetics) !void {
-    inline for (@typeInfo(aqueous_network.State).@"struct".fields) |field| if (!std.math.isFinite(@field(shared, field.name)) or @field(shared, field.name) < 0) return error.InvalidGeochemistryAqueousState;
-    inline for (@typeInfo(geochemistry.SolidState).@"struct".fields) |field| if (!std.math.isFinite(@field(solids, field.name)) or @field(solids, field.name) < 0) return error.InvalidGeochemistrySolidState;
-    inline for (@typeInfo(SolubilityProducts).@"struct".fields) |field| if (!std.math.isFinite(@field(products, field.name)) or @field(products, field.name) <= 0) return error.InvalidGeochemistrySolubilityProduct;
-    inline for (@typeInfo(Kinetics).@"struct".fields) |field| if (!std.math.isFinite(@field(kinetics, field.name)) or @field(kinetics, field.name) < 0) return error.InvalidGeochemistryKinetics;
+    inline for (ti_compat.fieldViews(aqueous_network.State)) |field| if (!std.math.isFinite(@field(shared, field.name)) or @field(shared, field.name) < 0) return error.InvalidGeochemistryAqueousState;
+    inline for (ti_compat.fieldViews(geochemistry.SolidState)) |field| if (!std.math.isFinite(@field(solids, field.name)) or @field(solids, field.name) < 0) return error.InvalidGeochemistrySolidState;
+    inline for (ti_compat.fieldViews(SolubilityProducts)) |field| if (!std.math.isFinite(@field(products, field.name)) or @field(products, field.name) <= 0) return error.InvalidGeochemistrySolubilityProduct;
+    inline for (ti_compat.fieldViews(Kinetics)) |field| if (!std.math.isFinite(@field(kinetics, field.name)) or @field(kinetics, field.name) < 0) return error.InvalidGeochemistryKinetics;
     if (kinetics.general_substrate_limit_fraction > 1 or kinetics.hydrogen_coupled_substrate_limit_fraction > 1 or kinetics.calcite_hydroxide_inhibition_constant_mol_per_m3 <= 0 or coefficients.monovalent_activity_coefficient <= 0 or coefficients.divalent_activity_coefficient <= 0 or coefficients.trivalent_activity_coefficient <= 0) return error.InvalidGeochemistryKinetics;
 }
 
 fn filled(comptime T: type, value: f64) T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| @field(result, field.name) = value;
+    inline for (ti_compat.fieldViews(T)) |field| @field(result, field.name) = value;
     return result;
 }
 
@@ -282,7 +283,7 @@ test "shared rate evaluator feeds conservative mineral-weathering ledger" {
     const coefficients = activity_coefficients.Result{ .ionic_strength_mol_per_l = 0, .monovalent_activity_coefficient = 1, .divalent_activity_coefficient = 1, .trivalent_activity_coefficient = 1, .total_ion_activity_mol_per_m3 = 1, .electrical_conductivity_dS_per_m = 0 };
     const changes = try calculate(shared, solids, coefficients, filled(SolubilityProducts, 1), .{ .general_substrate_limit_fraction = 0.2, .hydrogen_coupled_substrate_limit_fraction = 0.2, .maximum_hydroxide_mineral_mol_per_m3_step = 0.1, .maximum_general_mineral_mol_per_m3_step = 0.1, .calcite_hydroxide_inhibition_constant_mol_per_m3 = 1, .maximum_natural_weathering_mol_per_m3_step = 0.01, .maximum_ground_weathering_mol_per_m3_step = 0.02 });
     try std.testing.expectApproxEqAbs(@as(f64, 0), changes.dissolved_aluminum_mol_per_m3 + changes.gibbsite_solid_mol_per_m3 + changes.aluminum_natural_silicate_mol_per_m3 + changes.aluminum_ground_silicate_mol_per_m3, 1e-14);
-    inline for (@typeInfo(geochemistry.Transformations).@"struct".fields) |field| try std.testing.expect(std.math.isFinite(@field(changes, field.name)));
+    inline for (ti_compat.fieldViews(geochemistry.Transformations)) |field| try std.testing.expect(std.math.isFinite(@field(changes, field.name)));
 }
 
 test "source order applies calcite before gypsum" {

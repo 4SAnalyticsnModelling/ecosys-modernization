@@ -7,6 +7,7 @@
 const std = @import("std");
 const LitterPartition = @import("../partition/litter.zig");
 const remobilization = @import("storage_remobilization.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 test "GROSUB storage activation preserves planting and leafout lifecycle gates" {
     const base: remobilization.ActivationInputs = .{
@@ -222,7 +223,7 @@ test "GROSUB branch mobile reserve exchange uses post-carbon N P gradients" {
     const expected_p = 0.25 * (0.08 * 3.5 - 0.01 * 6.5) / 10.0;
     try std.testing.expectApproxEqAbs(expected_n, result.mobile_to_reserve.nitrogen_g_n, 1.0e-15);
     try std.testing.expectApproxEqAbs(expected_p, result.mobile_to_reserve.phosphorus_g_p, 1.0e-15);
-    inline for (@typeInfo(remobilization.ElementTransfer).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(remobilization.ElementTransfer)) |field|
         try std.testing.expectApproxEqAbs(@field(inputs.branch_mobile, field.name) + @field(inputs.branch_reserve, field.name), @field(result.next_branch_mobile, field.name) + @field(result.next_branch_reserve, field.name), 1.0e-15);
 }
 
@@ -289,7 +290,7 @@ test "GROSUB annual root to stalk reserve preserves C N P sequence and conservat
     try std.testing.expectApproxEqAbs(@as(f64, 1.5), result.root_to_reserve.carbon_g_c, 1.0e-15);
     try std.testing.expect(result.root_to_reserve.nitrogen_g_n > 0);
     try std.testing.expect(result.root_to_reserve.phosphorus_g_p > 0);
-    inline for (@typeInfo(remobilization.ElementTransfer).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(remobilization.ElementTransfer)) |field|
         try std.testing.expectApproxEqAbs(@field(inputs.root_mobile, field.name) + @field(inputs.branch_reserve, field.name), @field(result.next_root_mobile, field.name) + @field(result.next_branch_reserve, field.name), 1.0e-15);
 }
 
@@ -348,7 +349,7 @@ test "GROSUB branch reserve then mobile remobilization conserves C N P" {
     const result = try remobilization.remobilizeBranchPoolsToSeasonalStorage(remobilization.compatibilityParameters(), inputs);
     try std.testing.expectApproxEqAbs(@as(f64, 0.8), result.reserve_to_storage.carbon_g_c, 1.0e-15);
     try std.testing.expectApproxEqAbs(@as(f64, 0.5), result.mobile_to_storage.carbon_g_c, 1.0e-15);
-    inline for (@typeInfo(remobilization.ElementTransfer).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(remobilization.ElementTransfer)) |field| {
         const before = @field(inputs.branch_reserve, field.name) + @field(inputs.branch_mobile, field.name) + @field(inputs.seasonal_storage, field.name);
         const after = @field(result.next_branch_reserve, field.name) + @field(result.next_branch_mobile, field.name) + @field(result.next_seasonal_storage, field.name);
         try std.testing.expectApproxEqAbs(before, after, 1.0e-14);

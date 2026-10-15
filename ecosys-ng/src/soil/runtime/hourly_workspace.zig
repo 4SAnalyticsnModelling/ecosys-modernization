@@ -9,6 +9,7 @@ const chemistry_state_module = @import("../solute/chemistry_state.zig");
 const charge_classification_module = @import("../solute/charge_classification.zig");
 const ice_units = @import("../../core/ice_units.zig");
 const heat_flux = @import("../heat/flux.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const RuntimeParameters = struct {
     gravitational_water_potential_mpa_per_m: f64,
@@ -94,7 +95,7 @@ pub const State = struct {
         result.frozen_hydraulic_impedance_exponent = 0;
         var allocated: usize = 0;
         errdefer result.freeAllocated(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 @field(result, field.name) = try allocator.alloc(f64, layer_count);
                 @memset(@field(result, field.name), 0);
@@ -261,18 +262,18 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 or field.type == []bool or field.type == []retention_module.MualemVanGenuchtenParameters) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 or field.type == []bool or field.type == []retention_module.MualemVanGenuchtenParameters) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
     pub fn validateFinite(self: *const State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name)) |value| if (!std.math.isFinite(value)) return error.NonFiniteSoilHourlyWorkspace;
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name)) |value| if (!std.math.isFinite(value)) return error.NonFiniteSoilHourlyWorkspace;
         for (self.heat_capacity_megajoules_per_k) |capacity| if (capacity <= 0) return error.InvalidSoilHourlyHeatCapacity;
     }
 
     fn freeAllocated(self: *State, count: usize) void {
         var visited: usize = 0;
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 or field.type == []bool or field.type == []retention_module.MualemVanGenuchtenParameters) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 or field.type == []bool or field.type == []retention_module.MualemVanGenuchtenParameters) {
             if (visited < count) self.allocator.free(@field(self, field.name));
             visited += 1;
         };
@@ -290,13 +291,13 @@ fn workspaceFractionsAt(source: anytype, index: usize) !charge_classification_mo
 }
 
 pub fn validateRuntimeParameters(parameters: RuntimeParameters) !void {
-    inline for (@typeInfo(RuntimeParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteSoilHourlyParameters;
+    inline for (ti_compat.fieldViews(RuntimeParameters)) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteSoilHourlyParameters;
     if (parameters.gravitational_water_potential_mpa_per_m <= 0 or parameters.reference_water_vapor_diffusivity_m2_per_h < 0 or parameters.vapor_diffusivity_reference_temperature_k <= 0 or parameters.vapor_diffusivity_temperature_exponent < 0 or parameters.vapor_pore_tortuosity < 0 or parameters.osmotic_reflection_coefficient < 0 or parameters.osmotic_reflection_coefficient > 1 or parameters.macropore_radius_m <= 0 or parameters.macropore_residual_saturation < 0 or parameters.macropore_residual_saturation >= 1 or parameters.macropore_van_genuchten_alpha_per_m <= 0 or parameters.macropore_van_genuchten_n <= 1 or parameters.dual_domain_geometry_factor <= 0 or parameters.dual_domain_scaling_coefficient <= 0 or parameters.frozen_hydraulic_impedance_exponent < 0 or parameters.surface_residue_residual_water_content_m3_per_m3 < 0 or parameters.surface_residue_residual_water_content_m3_per_m3 >= 1 or parameters.surface_residue_van_genuchten_alpha_per_m <= 0 or parameters.surface_residue_van_genuchten_n <= 1 or parameters.reference_water_viscosity_megagrams_per_m_s <= 0 or parameters.water_viscosity_temperature_coefficient_per_c < 0) return error.InvalidSoilHourlyParameters;
 }
 
 test "hourly workspace refreshes gravity vapor fractions and extensive heat capacity" {
     const allocator = std.testing.allocator;
-    const fixture = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".fields.len);
+    const fixture = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".field_names.len);
     defer allocator.free(fixture);
     var catalog = @import("../profile/catalog.zig").Catalog.init(allocator);
     defer catalog.deinit();
@@ -359,7 +360,7 @@ test "hourly workspace refreshes gravity vapor fractions and extensive heat capa
 
 test "hourly workspace rejects negative or over-capacity phase state instead of clipping" {
     const allocator = std.testing.allocator;
-    const fixture = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".fields.len);
+    const fixture = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".field_names.len);
     defer allocator.free(fixture);
     var catalog = @import("../profile/catalog.zig").Catalog.init(allocator);
     defer catalog.deinit();

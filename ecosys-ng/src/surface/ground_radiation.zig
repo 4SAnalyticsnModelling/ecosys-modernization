@@ -10,6 +10,7 @@ const TerrainState = terrain_radiation.State;
 const Geometry = @import("../canopy/morphology/geometry.zig").Geometry;
 const snow_cover_fraction = @import("../soil/water/snow_cover_fraction.zig");
 const SnowTransportState = @import("../soil/solute/snow_solute_transport.zig").State;
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -32,7 +33,7 @@ pub const State = struct {
         result.cell_count = cell_count;
         var allocated: usize = 0;
         errdefer freeAllocated(&result, allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, cell_count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -55,12 +56,12 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
             if (!std.math.isFinite(value)) {
                 std.log.err("non-finite ground radiation: field={s} index={d} value={e}", .{ field.name, index, value });
                 return error.NonFiniteGroundRadiation;
@@ -306,7 +307,7 @@ fn snowCompositionAlbedo(solid_snow_water_equivalent_m3: f64, liquid_water_m3: f
 
 fn freeAllocated(state: *State, count: usize) void {
     var visited: usize = 0;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         if (visited < count) state.allocator.free(@field(state, field.name));
         visited += 1;
     };
@@ -379,7 +380,7 @@ test "applyTile re-blends surface albedo from live snow depth every hour, not ju
     var result: State = undefined;
     result.allocator = allocator;
     result.cell_count = 1;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         @field(result, field.name) = try allocator.alloc(f64, 1);
         @memset(@field(result, field.name), 0);
     };
@@ -393,7 +394,7 @@ test "applyTile re-blends surface albedo from live snow depth every hour, not ju
     terrain.allocator = allocator;
     terrain.cell_count = 1;
     terrain.sky_sector_count = 1;
-    inline for (@typeInfo(TerrainState).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(TerrainState)) |field| if (field.type == []f64) {
         @field(terrain, field.name) = try allocator.alloc(f64, 1);
         @memset(@field(terrain, field.name), 0);
     };
@@ -418,7 +419,7 @@ test "applyTile lowers snow-covered albedo as the top layer melts to wet/icy sno
     var result: State = undefined;
     result.allocator = allocator;
     result.cell_count = 1;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         @field(result, field.name) = try allocator.alloc(f64, 1);
         @memset(@field(result, field.name), 0);
     };
@@ -432,7 +433,7 @@ test "applyTile lowers snow-covered albedo as the top layer melts to wet/icy sno
     terrain.allocator = allocator;
     terrain.cell_count = 1;
     terrain.sky_sector_count = 1;
-    inline for (@typeInfo(TerrainState).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(TerrainState)) |field| if (field.type == []f64) {
         @field(terrain, field.name) = try allocator.alloc(f64, 1);
         @memset(@field(terrain, field.name), 0);
     };
@@ -501,7 +502,7 @@ fn flatTerrainIncidentShortwave(allocator: std.mem.Allocator, sky_sector_count: 
     var result: State = undefined;
     result.allocator = allocator;
     result.cell_count = 1;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         @field(result, field.name) = try allocator.alloc(f64, 1);
         @memset(@field(result, field.name), 0);
     };

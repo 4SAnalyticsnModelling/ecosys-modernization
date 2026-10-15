@@ -107,7 +107,7 @@ test "catalog caches repeated profile names" {
     const allocator = std.testing.allocator;
     const source = try testSoilProfileSource(
         allocator,
-        @typeInfo(soil_profile.LayerProperty).@"enum".fields.len,
+        @typeInfo(soil_profile.LayerProperty).@"enum".field_names.len,
     );
     defer allocator.free(source);
     var catalog = Catalog.init(allocator);
@@ -154,7 +154,7 @@ test "soil catalog rejects malformed compulsory input names" {
 test "soil catalog accepts extensionless and conventional file names" {
     const source = try testSoilProfileSource(
         std.testing.allocator,
-        @typeInfo(soil_profile.LayerProperty).@"enum".fields.len,
+        @typeInfo(soil_profile.LayerProperty).@"enum".field_names.len,
     );
     defer std.testing.allocator.free(source);
     inline for (.{ "soil_a", "soil-a.txt", "soil.a.csv" }) |name| {

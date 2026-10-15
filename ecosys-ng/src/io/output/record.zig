@@ -1,6 +1,7 @@
 const std = @import("std");
 const execution_calendar_date = @import("../../driver/execution_calendar_date.zig");
 const simulation_timeline = @import("../../core/simulation_timeline.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Delimiter = enum {
     comma,
@@ -183,7 +184,7 @@ pub fn buildOutputFileName(
     // be filed in their own directory. The output name identifies which editor
     // produced the rows, not where its selection file was kept, so only the
     // final component is used.
-    const editor_base = std.fs.path.basename(editor_name);
+    const editor_base = selectionBaseName(editor_name);
     if (year <= 0 or year > 9999 or !safeEditorName(editor_base))
         return error.InvalidOutputFileName;
     if (!std.math.isFinite(latitude_degrees_north) or
@@ -231,6 +232,28 @@ fn trimTextExtension(name: []const u8) []const u8 {
 
 fn hasTextExtension(name: []const u8) bool {
     return name.len > 4 and std.ascii.eqlIgnoreCase(name[name.len - 4 ..], ".txt");
+}
+
+/// Final component of an editor selection name, for either separator.
+///
+/// A runscript may select an editor by path because the selection files are
+/// filed in their own directory, and the decks carry Windows separators. The
+/// output name records which editor produced the rows, not where its selection
+/// file was kept, so the directory part is dropped on every host.
+/// `std.fs.path.basename` is host-native: on posix it stops at `/` only, so a
+/// Windows selection path would survive intact and then be rejected as an
+/// unsafe editor name — the same deck would fail to name its outputs on a
+/// posix host while working on Windows.
+fn selectionBaseName(name: []const u8) []const u8 {
+    const slash = std.mem.lastIndexOfScalar(u8, name, '/');
+    const backslash = std.mem.lastIndexOfScalar(u8, name, '\\');
+    const last = if (slash) |s|
+        if (backslash) |b| @max(s, b) else s
+    else if (backslash) |b|
+        b
+    else
+        return name;
+    return name[last + 1 ..];
 }
 
 fn safeEditorName(name: []const u8) bool {
@@ -495,7 +518,7 @@ test "output identity rejects zero storage slots and overflowing pass indices" {
     const pass = try PassOrdinals.fromScenePass(.{ .execution_iteration = 0, .scenario_index = 0, .scenario_iteration = 0, .scene_index = 0 });
     try std.testing.expectError(error.InvalidOutputFileName, buildOutputFileName(std.testing.allocator, 45.3, -75.7, .soil_or_eco, 1998, pass, 0, "hourly"));
     try std.testing.expectError(error.InvalidOutputFileName, buildOutputFileName(std.testing.allocator, 45.3, -75.7, .{ .species = .{ .name = "maize", .population_number = 0 } }, 1998, pass, 1, "hourly"));
-    inline for (std.meta.fields(simulation_timeline.ScenePass)) |field| {
+    inline for (ti_compat.fieldViews(simulation_timeline.ScenePass)) |field| {
         var source: simulation_timeline.ScenePass = .{ .execution_iteration = 0, .scenario_index = 0, .scenario_iteration = 0, .scene_index = 0 };
         @field(source, field.name) = std.math.maxInt(u32);
         try std.testing.expectError(error.InvalidOutputFileName, PassOrdinals.fromScenePass(source));

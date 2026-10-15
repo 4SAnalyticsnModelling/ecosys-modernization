@@ -107,7 +107,7 @@ pub fn seedCarbonDioxideFromGasInventory(
         return error.InvalidCarbonMolarMass;
     if (!std.math.isFinite(negligible_water_volume_m3) or negligible_water_volume_m3 <= 0)
         return error.InvalidLitterCarbonDioxideFloor;
-    const species = @intFromEnum(gas.Species.carbon_dioxide);
+    const species = @backingInt(gas.Species.carbon_dioxide);
     for (state.cells, 0..) |*cell, index| {
         const water_m3 = litter_water_m3[index];
         // With no resolvable water there is no aqueous phase to hold a
@@ -147,7 +147,7 @@ pub fn publishAcceptedCarbonDioxideChanges(
     if (!std.math.isFinite(negligible_carbon_g_c) or negligible_carbon_g_c < 0 or
         !std.math.isFinite(relative_tolerance) or relative_tolerance < 0)
         return error.InvalidLitterCarbonDioxideFloor;
-    const species = @intFromEnum(gas.Species.carbon_dioxide);
+    const species = @backingInt(gas.Species.carbon_dioxide);
     // Validate every cell before mutating any, so a rejection leaves the
     // inventory untouched. "invalid litter chemistry CO2 state_update is
     // atomic" pins that, and the clamp below must not weaken it: the clamp is
@@ -306,7 +306,7 @@ test "accepted litter chemistry CO2 change closes authoritative gas carbon" {
     defer gas_state.deinit();
     var diagnostics = try Diagnostics.init(std.testing.allocator, 2);
     defer diagnostics.deinit();
-    const co2 = @intFromEnum(gas.Species.carbon_dioxide);
+    const co2 = @backingInt(gas.Species.carbon_dioxide);
     gas_state.dissolved_mass_g[co2] = 10;
     gas_state.dissolved_mass_g[gas.species_count + co2] = 20;
     diagnostics.solved[0] = true;
@@ -327,7 +327,7 @@ test "litter CO2 seed makes gas state the single inventory of record" {
     defer state.deinit();
     var gas_state = try gas.State.init(std.testing.allocator, 2);
     defer gas_state.deinit();
-    const co2 = @intFromEnum(gas.Species.carbon_dioxide);
+    const co2 = @backingInt(gas.Species.carbon_dioxide);
     // A stale chemistry stock that the gas inventory does not support is
     // exactly the divergence that killed the deck at day 98: chemistry held
     // enough CO2 to run the reverse association, gas state did not.
@@ -350,7 +350,7 @@ test "litter CO2 seed rejects a negative inventory rather than importing it" {
     defer state.deinit();
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] = -5;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] = -5;
     try seedCarbonDioxideFromGasInventory(&state, &gas_state, &.{1}, 12, 1e-14);
     // Clamped at zero: a negative concentration is not a physical domain, and
     // importing one would put the equilibrium solver outside its own bounds.
@@ -370,7 +370,7 @@ test "invalid litter chemistry CO2 state_update is atomic" {
     defer gas_state.deinit();
     var diagnostics = try Diagnostics.init(std.testing.allocator, 2);
     defer diagnostics.deinit();
-    const co2 = @intFromEnum(gas.Species.carbon_dioxide);
+    const co2 = @backingInt(gas.Species.carbon_dioxide);
     gas_state.dissolved_mass_g[co2] = 10;
     gas_state.dissolved_mass_g[gas.species_count + co2] = 1;
     @memset(diagnostics.solved, true);

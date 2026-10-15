@@ -1,6 +1,7 @@
 const std = @import("std");
 const sediment_routing = @import("../../erosion/sediment_routing.zig");
 const numerics = @import("../../core/numerics.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const RuntimeState = struct {
     allocator: std.mem.Allocator,
@@ -29,12 +30,12 @@ pub const RuntimeState = struct {
         result.cell_count = count;
         var allocated: usize = 0;
         errdefer {
-            inline for (@typeInfo(RuntimeState).@"struct".fields) |field| if ((field.type == []f64 or field.type == []bool) and allocated > 0) {
+            inline for (ti_compat.fieldViews(RuntimeState)) |field| if ((field.type == []f64 or field.type == []bool) and allocated > 0) {
                 allocated -= 1;
                 allocator.free(@field(result, field.name));
             };
         }
-        inline for (@typeInfo(RuntimeState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(RuntimeState)) |field| {
             if (field.type == []f64) {
                 @field(result, field.name) = try allocator.alloc(f64, count);
                 @memset(@field(result, field.name), 0);
@@ -51,7 +52,7 @@ pub const RuntimeState = struct {
 
     pub fn deinit(self: *RuntimeState) void {
         self.routing.deinit();
-        inline for (@typeInfo(RuntimeState).@"struct".fields) |field| if (field.type == []f64 or field.type == []bool) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(RuntimeState)) |field| if (field.type == []f64 or field.type == []bool) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
@@ -112,7 +113,7 @@ pub const SourceShapedSurface = struct {
 /// The current five particle fractions all use BKVLNX independently; BKVLNU
 /// is deliberately not substituted as their denominator.
 pub fn deriveSourceShapedSurface(inputs: SourceShapedSurfaceInputs) !SourceShapedSurface {
-    inline for (@typeInfo(SourceShapedSurfaceInputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SourceShapedSurfaceInputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteErosionInput;
     if (inputs.canonical_matrix_soil_mass_megagrams <= 0 or
@@ -185,8 +186,8 @@ pub const SurfaceProperties = struct {
 /// HOUR1 surface cohesion and EUROSEM erosion properties. These are refreshed
 /// from runtime soil and organic state rather than frozen compile-time values.
 pub fn deriveSurfaceProperties(inputs: SurfacePropertyInputs, parameters: SurfacePropertyParameters) !SurfaceProperties {
-    inline for (@typeInfo(SurfacePropertyInputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteErosionInput;
-    inline for (@typeInfo(SurfacePropertyParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteErosionInput;
+    inline for (ti_compat.fieldViews(SurfacePropertyInputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteErosionInput;
+    inline for (ti_compat.fieldViews(SurfacePropertyParameters)) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteErosionInput;
     if (inputs.sand_mass_fraction < 0 or inputs.silt_mass_fraction < 0 or inputs.clay_mass_fraction < 0 or inputs.humus_mass_fraction < 0 or inputs.residue_mass_fraction < 0 or inputs.root_length_density_m_per_m3 < 0 or parameters.reference_water_viscosity_megagrams_per_m_s <= 0 or parameters.mineral_particle_density_megagrams_per_m3 <= 1 or parameters.organic_particle_density_megagrams_per_m3 <= 1 or parameters.gravitational_acceleration_m_per_s2 <= 0) return error.InvalidErosionInput;
     const diameter_um =
         parameters.clay_particle_diameter_um * inputs.clay_mass_fraction +
@@ -208,7 +209,7 @@ pub fn deriveSurfaceProperties(inputs: SurfacePropertyInputs, parameters: Surfac
         .transport_capacity_coefficient = std.math.pow(f64, (diameter_um + 5) / 0.32, -0.6),
         .transport_capacity_exponent = std.math.pow(f64, (diameter_um + 5) / 300, 0.25),
     };
-    inline for (@typeInfo(SurfaceProperties).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteErosionResult;
+    inline for (ti_compat.fieldViews(SurfaceProperties)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.NonFiniteErosionResult;
     return result;
 }
 
@@ -551,7 +552,7 @@ pub fn calculateConvergedHourlyLocalStep(
 }
 
 fn validate(inputs: StepInputs) !void {
-    inline for (@typeInfo(StepInputs).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteErosionInput;
+    inline for (ti_compat.fieldViews(StepInputs)) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteErosionInput;
     if (inputs.surface_soil_bulk_density_megagrams_per_m3 < 0 or inputs.surface_soil_mass_megagrams < 0 or inputs.surface_soil_water_m3 < 0 or inputs.surface_soil_pore_volume_m3 <= 0 or inputs.excess_surface_water_m3 < 0 or inputs.excess_surface_ice_m3 < 0 or inputs.surface_ponding_capacity_m3 <= 0 or inputs.sediment_in_surface_water_megagrams < 0 or inputs.rainfall_kinetic_energy_j < 0 or inputs.soil_rainfall_detachability_g_per_j < 0 or inputs.soil_runoff_detachability < 0 or inputs.sediment_settling_velocity_m_per_h < 0 or inputs.grid_cell_area_m2 <= 0 or inputs.soil_matrix_fraction < 0 or inputs.soil_matrix_fraction > 1 or inputs.snow_free_fraction < 0 or inputs.snow_free_fraction > 1 or inputs.surface_particle_density_megagrams_per_m3 < 0 or inputs.transport_capacity_coefficient < 0 or inputs.transport_capacity_exponent < 0 or inputs.maximum_erodible_soil_fraction_per_step < 0 or inputs.maximum_erodible_soil_fraction_per_step > 1 or inputs.water_transport_timestep_h <= 0 or inputs.negligible_volume_m3 < 0 or inputs.negligible_mass_megagrams < 0) return error.InvalidErosionInput;
 }
 

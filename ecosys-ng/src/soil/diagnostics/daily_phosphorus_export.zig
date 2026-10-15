@@ -3,6 +3,8 @@ const grid_module = @import("../../state/grid.zig");
 const organic = @import("../organic/initialization.zig");
 const organic_transport = @import("../organic/transport.zig");
 const solute_species = @import("../solute/transport_species.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -66,7 +68,7 @@ pub const State = struct {
                 const layer = try model_grid.layerIndex(cell, local_layer);
                 for (0..organic.substrate_count) |substrate| {
                     const base = layer * organic_transport.component_count + substrate * organic_transport.components_per_substrate;
-                    const flux_g_p = transport.boundary_net_flux_g[base + @intFromEnum(organic_transport.Component.dissolved_organic_phosphorus)];
+                    const flux_g_p = transport.boundary_net_flux_g[base + @backingInt(organic_transport.Component.dissolved_organic_phosphorus)];
                     outward_g_p += @max(0, -flux_g_p);
                     inward_g_p += @max(0, flux_g_p);
                 }
@@ -79,7 +81,7 @@ pub const State = struct {
     /// REDIST UDIPD: all transported aqueous phosphate forms crossing runtime
     /// profile boundaries, converted from mol P with the runtime molar mass.
     pub fn accumulateInorganicDrainageHour(self: *State, model_grid: *const grid_module.GridState, boundary_net_flux_mol: []const f64, phosphorus_molar_mass_g_per_mol: f64) !void {
-        const species_count = @typeInfo(solute_species.AqueousSpecies).@"enum".fields.len;
+        const species_count = @typeInfo(solute_species.AqueousSpecies).@"enum".field_names.len;
         if (boundary_net_flux_mol.len != try std.math.mul(usize, model_grid.layer_count, species_count) or self.dissolved_inorganic_phosphorus_drainage_g_p.len != model_grid.cell_count or !std.math.isFinite(phosphorus_molar_mass_g_per_mol) or phosphorus_molar_mass_g_per_mol <= 0) return error.DailyPhosphorusExportDimensionMismatch;
         for (0..model_grid.cell_count) |cell| {
             var outward_mol_p: f64 = 0;
@@ -87,8 +89,8 @@ pub const State = struct {
             for (0..model_grid.active_soil_layer_count[cell]) |local_layer| {
                 const layer = try model_grid.layerIndex(cell, local_layer);
                 const base = layer * species_count;
-                inline for (@typeInfo(solute_species.AqueousSpecies).@"enum".fields) |field| {
-                    const species: solute_species.AqueousSpecies = @enumFromInt(field.value);
+                inline for (ti_compat.enumFieldViews(solute_species.AqueousSpecies)) |field| {
+                    const species: solute_species.AqueousSpecies = @fromBackingInt(@intCast(field.value));
                     if (solute_species.diffusivityClass(species) == .phosphate) {
                         const flux_mol_p = boundary_net_flux_mol[base + field.value];
                         outward_mol_p += @max(0, -flux_mol_p);
@@ -127,13 +129,13 @@ test "UDOPD and UDIPD sum only outward phosphorus over runtime layers" {
     defer model_grid.deinit();
     var transport = try organic_transport.State.init(std.testing.allocator, model_grid.layer_count);
     defer transport.deinit();
-    transport.boundary_net_flux_g[@intFromEnum(organic_transport.Component.dissolved_organic_phosphorus)] = -2;
-    transport.boundary_net_flux_g[organic_transport.components_per_substrate + @intFromEnum(organic_transport.Component.dissolved_organic_phosphorus)] = 4;
-    transport.boundary_net_flux_g[organic_transport.component_count + organic_transport.components_per_substrate + @intFromEnum(organic_transport.Component.dissolved_organic_phosphorus)] = -3;
-    var boundary = [_]f64{0} ** (2 * @typeInfo(solute_species.AqueousSpecies).@"enum".fields.len);
-    boundary[@intFromEnum(solute_species.AqueousSpecies.non_band_phosphate)] = -0.1;
-    boundary[@intFromEnum(solute_species.AqueousSpecies.band_phosphate)] = 0.4;
-    boundary[@typeInfo(solute_species.AqueousSpecies).@"enum".fields.len + @intFromEnum(solute_species.AqueousSpecies.band_phosphoric_acid)] = -0.2;
+    transport.boundary_net_flux_g[@backingInt(organic_transport.Component.dissolved_organic_phosphorus)] = -2;
+    transport.boundary_net_flux_g[organic_transport.components_per_substrate + @backingInt(organic_transport.Component.dissolved_organic_phosphorus)] = 4;
+    transport.boundary_net_flux_g[organic_transport.component_count + organic_transport.components_per_substrate + @backingInt(organic_transport.Component.dissolved_organic_phosphorus)] = -3;
+    var boundary = @as([(2 * @typeInfo(solute_species.AqueousSpecies).@"enum".field_names.len)]f64, @splat(@as(f64, 0)));
+    boundary[@backingInt(solute_species.AqueousSpecies.non_band_phosphate)] = -0.1;
+    boundary[@backingInt(solute_species.AqueousSpecies.band_phosphate)] = 0.4;
+    boundary[@typeInfo(solute_species.AqueousSpecies).@"enum".field_names.len + @backingInt(solute_species.AqueousSpecies.band_phosphoric_acid)] = -0.2;
     var daily = try State.init(std.testing.allocator, 1);
     defer daily.deinit();
     try daily.accumulateOrganicDrainageHour(&model_grid, &transport);

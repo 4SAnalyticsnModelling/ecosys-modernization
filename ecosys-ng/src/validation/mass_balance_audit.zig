@@ -9,6 +9,7 @@ const legacy_zeroc_ion_floor_mol_m2: f64 = 1.0e-32;
 const conservation_tolerance = @import("../core/conservation_tolerance.zig");
 
 pub const scoped = @import("scoped_conservation.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 pub const AbsoluteTolerancePerArea = conservation_tolerance.AbsolutePerArea;
 
 /// Whole-landscape cumulative terms used by EXEC. Names retain direction and
@@ -291,7 +292,7 @@ pub fn balance(t: Totals) !Balance {
         .cation_exchange_capacity_mol = compensatedSum(&.{ t.cation_exchange_capacity_storage_mol, -t.cumulative_cation_exchange_capacity_input_mol, t.cumulative_cation_exchange_capacity_output_mol, -t.cumulative_internal_cation_exchange_capacity_production_mol, t.cumulative_internal_cation_exchange_capacity_consumption_mol }),
         .anion_exchange_capacity_mol = compensatedSum(&.{ t.anion_exchange_capacity_storage_mol, -t.cumulative_anion_exchange_capacity_input_mol, t.cumulative_anion_exchange_capacity_output_mol, -t.cumulative_internal_anion_exchange_capacity_production_mol, t.cumulative_internal_anion_exchange_capacity_consumption_mol }),
     };
-    inline for (std.meta.fields(Balance)) |field|
+    inline for (ti_compat.fieldViews(Balance)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteMassBalanceResult;
     return result;
@@ -692,7 +693,7 @@ fn checkOne(day: u64, year: i32, comptime domain: []const u8, value: f64, tolera
 
 fn validate(t: Totals) !void {
     if (!std.math.isFinite(t.landscape_area_m2) or t.landscape_area_m2 <= 0) return error.InvalidLandscapeArea;
-    inline for (std.meta.fields(Totals)) |field| if (!std.math.isFinite(@field(t, field.name))) return error.NonFiniteMassBalanceInput;
+    inline for (ti_compat.fieldViews(Totals)) |field| if (!std.math.isFinite(@field(t, field.name))) return error.NonFiniteMassBalanceInput;
 }
 
 test "domain mineral balances include erosion history and additive ROCK" {
@@ -998,7 +999,7 @@ fn cancellationScale(t: Totals) !BoundaryActivity {
 
 fn intervalActivity(current: BoundaryActivity, baseline: BoundaryActivity) !BoundaryActivity {
     var result: BoundaryActivity = undefined;
-    inline for (std.meta.fields(BoundaryActivity)) |field| {
+    inline for (ti_compat.fieldViews(BoundaryActivity)) |field| {
         const value = @field(current, field.name) - @field(baseline, field.name);
         // Accepted boundary ledgers are cumulative and may only advance. A
         // decrease means rollback/restart restored the ledger and monitor from
@@ -1348,7 +1349,7 @@ test "every cumulative Totals field is read by an identity, or is a named except
     const source: []const u8 = @embedFile("mass_balance_audit.zig");
     var declared: usize = 0;
     var unread: usize = 0;
-    inline for (std.meta.fields(Totals)) |field| {
+    inline for (ti_compat.fieldViews(Totals)) |field| {
         if (comptime !std.mem.startsWith(u8, field.name, "cumulative_")) continue;
         declared += 1;
         // One occurrence is the declaration itself. A field consumed by any
@@ -1393,7 +1394,7 @@ test "the unread-cumulative exception list names only real Totals fields" {
     // except something, which is how an allowlist stops being a ratchet.
     for (cumulative_fields_without_a_reader) |name| {
         var found = false;
-        inline for (std.meta.fields(Totals)) |field| {
+        inline for (ti_compat.fieldViews(Totals)) |field| {
             if (std.mem.eql(u8, field.name, name)) found = true;
         }
         if (!found) {
@@ -1425,7 +1426,7 @@ test "no cumulative Totals field is read by more than one identity" {
     // exist for the function to compile at all.
     const body_start = std.mem.indexOf(u8, source, "pub fn balance(t: Totals) !Balance {") orelse
         return error.BalanceFunctionNotFound;
-    const body_end = std.mem.indexOfPos(u8, source, body_start, "    inline for (std.meta.fields(Balance))") orelse
+    const body_end = std.mem.indexOfPos(u8, source, body_start, "    inline for (ti_compat.fieldViews(Balance))") orelse
         return error.BalanceFunctionNotFound;
     const body = source[body_start..body_end];
 
@@ -1444,7 +1445,7 @@ test "no cumulative Totals field is read by more than one identity" {
         segment_count += 1;
         scan = found + marker.len;
     }
-    const identity_count = std.meta.fields(Balance).len;
+    const identity_count = ti_compat.fieldViews(Balance).len;
     if (segment_count != identity_count) {
         std.debug.print(
             "identity segmentation found {d} assignments but Balance declares {d} fields; " ++
@@ -1455,7 +1456,7 @@ test "no cumulative Totals field is read by more than one identity" {
     }
 
     var checked: usize = 0;
-    inline for (std.meta.fields(Totals)) |field| {
+    inline for (ti_compat.fieldViews(Totals)) |field| {
         if (comptime !std.mem.startsWith(u8, field.name, "cumulative_")) continue;
         var identities_reading: usize = 0;
         var cursor: usize = 0;

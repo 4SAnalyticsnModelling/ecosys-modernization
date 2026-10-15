@@ -17,6 +17,7 @@
 // disturbance fraction.
 const std = @import("std");
 
+
 /// PO4, Al, Fe, H, Ca, Mg, Na, K, OH, SO4, Cl, CO3, HCO3, H4SiO4.
 pub const diffusivity_class_count = 14;
 
@@ -84,7 +85,7 @@ fn fixture(diffusivity: []const f64) Inputs {
 test "TRNSFRS preserves fourteen diffusivity classes and operation order" {
     var diffusivity: [diffusivity_class_count]f64 = undefined;
     for (&diffusivity, 0..) |*value, index| value.* = @floatFromInt(index + 1);
-    var conductance = [_]f64{0} ** diffusivity_class_count;
+    var conductance = @as([diffusivity_class_count]f64, @splat(@as(f64, 0)));
     try calculate(fixture(&diffusivity), &conductance);
     // TORTL=(2+2)/(1+3)*0.5=0.5; DISPN=2*min(1,abs(-8/4))=2.
     try std.testing.expectEqual(@as(f64, 10), conductance[0]);
@@ -92,8 +93,8 @@ test "TRNSFRS preserves fourteen diffusivity classes and operation order" {
 }
 
 test "minimum thickness is applied independently to both sides" {
-    const diffusivity = [_]f64{1} ** diffusivity_class_count;
-    var conductance = [_]f64{0} ** diffusivity_class_count;
+    const diffusivity = @as([diffusivity_class_count]f64, @splat(@as(f64, 1)));
+    var conductance = @as([diffusivity_class_count]f64, @splat(@as(f64, 0)));
     var inputs = fixture(&diffusivity);
     inputs.litter_thickness_m = 0;
     inputs.soil_surface_thickness_m = 0;
@@ -103,19 +104,19 @@ test "minimum thickness is applied independently to both sides" {
 }
 
 test "late invalid class leaves conductance output atomic" {
-    var diffusivity = [_]f64{1} ** diffusivity_class_count;
+    var diffusivity = @as([diffusivity_class_count]f64, @splat(@as(f64, 1)));
     diffusivity[diffusivity_class_count - 1] = std.math.inf(f64);
-    var conductance = [_]f64{9} ** diffusivity_class_count;
+    var conductance = @as([diffusivity_class_count]f64, @splat(@as(f64, 9)));
     try std.testing.expectError(
         error.InvalidLitterSoilSoluteDiffusivityInput,
         calculate(fixture(&diffusivity), &conductance),
     );
-    try std.testing.expectEqualSlices(f64, &([_]f64{9} ** diffusivity_class_count), &conductance);
+    try std.testing.expectEqualSlices(f64, &(@as([diffusivity_class_count]f64, @splat(@as(f64, 9)))), &conductance);
 }
 
 test "diffusivity topology rejects a missing class" {
-    const diffusivity = [_]f64{1} ** (diffusivity_class_count - 1);
-    var conductance = [_]f64{9} ** diffusivity_class_count;
+    const diffusivity = @as([(diffusivity_class_count - 1)]f64, @splat(@as(f64, 1)));
+    var conductance = @as([diffusivity_class_count]f64, @splat(@as(f64, 9)));
     try std.testing.expectError(
         error.LitterSoilSoluteDiffusivityDimensionMismatch,
         calculate(fixture(&diffusivity), &conductance),

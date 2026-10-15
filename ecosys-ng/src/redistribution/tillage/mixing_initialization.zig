@@ -24,6 +24,7 @@
 // docs/traceability/redistribution_tillage_unbound_family_disposition.md
 //
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const scalar_accumulator_count = 157;
 pub const CellState = struct {
@@ -59,7 +60,7 @@ fn finiteSlice(values: []const f64) bool {
 pub fn initializeCell(cell: usize, soil_mixing_remaining_fraction: f64, state: CellState, workspace: Workspace) !f64 {
     const cell_count = state.ammonium_band_depth_m.len;
     if (cell_count == 0 or cell >= cell_count) return error.TillageMixingInitializationDimensionMismatch;
-    inline for (std.meta.fields(CellState)) |field|
+    inline for (ti_compat.fieldViews(CellState)) |field|
         if (@field(state, field.name).len != cell_count) return error.TillageMixingInitializationDimensionMismatch;
     if (workspace.scalar_accumulators.len != scalar_accumulator_count or
         workspace.microbial_carbon_g_c.len != 6 * 7 * 3 or workspace.microbial_nitrogen_g_n.len != 6 * 7 * 3 or workspace.microbial_phosphorus_g_p.len != 6 * 7 * 3 or
@@ -67,11 +68,11 @@ pub fn initializeCell(cell: usize, soil_mixing_remaining_fraction: f64, state: C
         workspace.soluble_fraction_totals.len != 8 * 5 or workspace.som_fraction_totals.len != 4 * 5 * 5)
         return error.TillageMixingInitializationDimensionMismatch;
     if (!std.math.isFinite(soil_mixing_remaining_fraction)) return error.InvalidTillageMixingInitializationInput;
-    inline for (std.meta.fields(CellState)) |field| {
+    inline for (ti_compat.fieldViews(CellState)) |field| {
         if (comptime std.mem.eql(u8, field.name, "disturbance_flag")) continue;
         if (!finiteSlice(@field(state, field.name))) return error.InvalidTillageMixingInitializationInput;
     }
-    inline for (std.meta.fields(Workspace)) |field|
+    inline for (ti_compat.fieldViews(Workspace)) |field|
         if (!finiteSlice(@field(workspace, field.name))) return error.InvalidTillageMixingInitializationInput;
     const mixing_fraction = 1.0 - soil_mixing_remaining_fraction;
     if (!std.math.isFinite(mixing_fraction)) return error.NonFiniteTillageMixingInitializationResult;

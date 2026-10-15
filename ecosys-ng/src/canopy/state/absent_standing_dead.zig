@@ -1,5 +1,6 @@
 const std = @import("std");
 const canopy_default = @import("absent_species.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const FallbackInputs = canopy_default.Inputs;
 pub const State = canopy_default.State;
@@ -51,7 +52,7 @@ fn validateState(state: State) !void {
         state.canopy_surface_temperature_k <= 0 or
         !std.math.isFinite(state.canopy_surface_temperature_c))
         return error.InvalidStandingDeadCanopyState;
-    inline for (@typeInfo(canopy_default.EnergyFluxDiagnostics).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy_default.EnergyFluxDiagnostics)) |field|
         if (!std.math.isFinite(@field(state.energy_flux, field.name)))
             return error.InvalidStandingDeadCanopyState;
 }

@@ -22,6 +22,8 @@
 //! stay on in production.
 
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 /// Every stage whose execution is claimed but unproven.
 ///
@@ -93,7 +95,7 @@ pub const Stage = enum {
     census_positive_control,
 
     pub fn count() usize {
-        return @typeInfo(Stage).@"enum".fields.len;
+        return @typeInfo(Stage).@"enum".field_names.len;
     }
 
     /// Stages with a live `record` call site. Everything else is reported as
@@ -206,7 +208,7 @@ pub const Census = struct {
     observed_hours: u64 = 0,
 
     pub fn record(self: *Census, stage: Stage, simulated_hour: u64) void {
-        const slot = &self.records[@intFromEnum(stage)];
+        const slot = &self.records[@backingInt(stage)];
         if (slot.entries != std.math.maxInt(u64)) slot.entries += 1;
         if (slot.first_entry_hour == null) slot.first_entry_hour = simulated_hour;
         slot.last_entry_hour = simulated_hour;
@@ -234,11 +236,11 @@ pub const Census = struct {
     }
 
     pub fn get(self: *const Census, stage: Stage) Record {
-        return self.records[@intFromEnum(stage)];
+        return self.records[@backingInt(stage)];
     }
 
     pub fn executed(self: *const Census, stage: Stage) bool {
-        return self.records[@intFromEnum(stage)].entries != 0;
+        return self.records[@backingInt(stage)].entries != 0;
     }
 
     /// Counts only INSTRUMENTED stages that never ran. An uninstrumented stage
@@ -283,8 +285,8 @@ pub const Census = struct {
             );
         }
         try writer.writeAll("  never executed (instrumented, ran zero times -- this is the finding):\n");
-        inline for (@typeInfo(Stage).@"enum".fields) |field| {
-            const stage: Stage = @enumFromInt(field.value);
+        inline for (ti_compat.enumFieldViews(Stage)) |field| {
+            const stage: Stage = @fromBackingInt(@intCast(field.value));
             if (stage.isInstrumented() and !self.executed(stage))
                 try writer.print("    {s}\n", .{field.name});
         }
@@ -292,8 +294,8 @@ pub const Census = struct {
         // `if (...) { }` rather than `if (...) continue;`: `continue` in an
         // `inline for` is comptime control flow, which Zig rejects when the
         // condition is a runtime value.
-        inline for (@typeInfo(Stage).@"enum".fields) |field| {
-            const stage: Stage = @enumFromInt(field.value);
+        inline for (ti_compat.enumFieldViews(Stage)) |field| {
+            const stage: Stage = @fromBackingInt(@intCast(field.value));
             const slot = self.get(stage);
             if (slot.entries != 0) {
                 try writer.print(
@@ -305,8 +307,8 @@ pub const Census = struct {
         try writer.writeAll(
             "  NOT YET INSTRUMENTED (execution unknown -- absence of a record here is NOT evidence):\n",
         );
-        inline for (@typeInfo(Stage).@"enum".fields) |field| {
-            const stage: Stage = @enumFromInt(field.value);
+        inline for (ti_compat.enumFieldViews(Stage)) |field| {
+            const stage: Stage = @fromBackingInt(@intCast(field.value));
             if (!stage.isInstrumented()) try writer.print("    {s}\n", .{field.name});
         }
     }
@@ -391,7 +393,7 @@ test "the horizon advances on a bare hour observation with no stage entry" {
 
 test "the entry counter saturates instead of wrapping to never-executed" {
     var census: Census = .{};
-    census.records[@intFromEnum(Stage.root_water_uptake)].entries = std.math.maxInt(u64);
+    census.records[@backingInt(Stage.root_water_uptake)].entries = std.math.maxInt(u64);
     census.record(.root_water_uptake, 7);
     try std.testing.expectEqual(
         @as(u64, std.math.maxInt(u64)),
@@ -446,7 +448,7 @@ test "a live positive control with other stages at zero is a real finding" {
 test "every stage variant has a distinct name usable in a report" {
     // Guards against a duplicated or empty variant name making two stages
     // indistinguishable in the published list.
-    const fields = @typeInfo(Stage).@"enum".fields;
+    const fields = ti_compat.enumFieldViews(Stage);
     inline for (fields, 0..) |outer, i| {
         try std.testing.expect(outer.name.len > 0);
         inline for (fields, 0..) |inner, j| {
@@ -468,15 +470,15 @@ test "every stage is either instrumented or has a recorded reason why it cannot 
     // No variant may appear twice across the three lists, and every variant
     // must appear once. A count alone would pass if one stage were listed twice
     // and another omitted.
-    var seen = [_]u8{0} ** Stage.count();
-    for (Stage.instrumented) |stage| seen[@intFromEnum(stage)] += 1;
-    for (Stage.uninstrumented_reason.inside_a_parallel_tile_kernel) |stage| seen[@intFromEnum(stage)] += 1;
-    for (Stage.uninstrumented_reason.dispatch_returns_no_applied_count) |stage| seen[@intFromEnum(stage)] += 1;
+    var seen = @as([Stage.count()]u8, @splat(@as(u8, 0)));
+    for (Stage.instrumented) |stage| seen[@backingInt(stage)] += 1;
+    for (Stage.uninstrumented_reason.inside_a_parallel_tile_kernel) |stage| seen[@backingInt(stage)] += 1;
+    for (Stage.uninstrumented_reason.dispatch_returns_no_applied_count) |stage| seen[@backingInt(stage)] += 1;
     for (seen, 0..) |times, index| {
         if (times != 1) {
             std.debug.print(
                 "stage {s} appears {d} times across instrumented/blocked lists, expected exactly 1\n",
-                .{ @tagName(@as(Stage, @enumFromInt(index))), times },
+                .{ @tagName(@as(Stage, @fromBackingInt(@intCast(index)))), times },
             );
             return error.StageCensusCoverageIsNotAPartition;
         }
@@ -503,12 +505,12 @@ test "the two phenology-derived stages are instrumented and distinguish an empty
     census.observeHour(5);
     // Nothing recorded: both must still read as never executed rather than as
     // uninstrumented, because they now have live call sites.
-    try std.testing.expectEqual(@as(u64, 0), census.records[@intFromEnum(Stage.plant_pre_emergence)].entries);
-    try std.testing.expectEqual(@as(u64, 0), census.records[@intFromEnum(Stage.second_plant_species)].entries);
+    try std.testing.expectEqual(@as(u64, 0), census.records[@backingInt(Stage.plant_pre_emergence)].entries);
+    try std.testing.expectEqual(@as(u64, 0), census.records[@backingInt(Stage.second_plant_species)].entries);
 
     census.recordCurrent(.plant_pre_emergence);
-    try std.testing.expectEqual(@as(u64, 1), census.records[@intFromEnum(Stage.plant_pre_emergence)].entries);
-    try std.testing.expectEqual(@as(?u64, 5), census.records[@intFromEnum(Stage.plant_pre_emergence)].first_entry_hour);
+    try std.testing.expectEqual(@as(u64, 1), census.records[@backingInt(Stage.plant_pre_emergence)].entries);
+    try std.testing.expectEqual(@as(?u64, 5), census.records[@backingInt(Stage.plant_pre_emergence)].first_entry_hour);
     // Recording one must not disturb the other.
-    try std.testing.expectEqual(@as(u64, 0), census.records[@intFromEnum(Stage.second_plant_species)].entries);
+    try std.testing.expectEqual(@as(u64, 0), census.records[@backingInt(Stage.second_plant_species)].entries);
 }

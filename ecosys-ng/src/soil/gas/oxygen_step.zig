@@ -11,6 +11,7 @@ const reactive_nitrogen = @import("../nutrients/reactive_nitrogen_state.zig");
 const root_gas = @import("../../plant/root/plant_root_gas_exchange.zig");
 const surface_gas_parameters = @import("../../surface/gas_parameters.zig");
 
+
 pub const State = struct {
     allocator: std.mem.Allocator,
     staged_allocation: oxygen_allocation.State,
@@ -223,8 +224,8 @@ test "invalid soil oxygen input leaves authoritative gas and allocation unchange
     defer staging.deinit();
     result.demand_satisfaction_fraction[0] = 0.75;
     var context = testContext(&staging, &result, &flux, &reactive, &environment, &grid, &gas);
-    var invalid_atmosphere = [_]f64{0} ** gas_transport.species_count;
-    invalid_atmosphere[@intFromEnum(gas_transport.Species.oxygen)] = std.math.nan(f64);
+    var invalid_atmosphere = @as([gas_transport.species_count]f64, @splat(@as(f64, 0)));
+    invalid_atmosphere[@backingInt(gas_transport.Species.oxygen)] = std.math.nan(f64);
     context.atmospheric_concentration_g_per_m3 = &invalid_atmosphere;
     try std.testing.expectError(error.InvalidAtmosphericOxygenConcentration, applyTile(&context, .{ .first = 0, .end = 1 }));
     try std.testing.expectEqual(@as(f64, 0.75), result.demand_satisfaction_fraction[0]);

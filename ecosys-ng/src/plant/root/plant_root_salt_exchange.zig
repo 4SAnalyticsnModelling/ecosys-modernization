@@ -1,6 +1,8 @@
 const std = @import("std");
 const RootState = @import("plant_root_system.zig").State;
 const numerics = @import("../../core/numerics.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const species_count: usize = 8;
 pub const TransactionMapping = [species_count]f64;
@@ -43,7 +45,7 @@ pub const Parameters = struct {
 pub fn compatibilityParameters() Parameters {
     return .{
         .reference_temperature_k = 298.15,
-        .aqueous_diffusivity_m2_per_h_at_reference = .{5.0e-6} ** species_count,
+        .aqueous_diffusivity_m2_per_h_at_reference = @splat(5.0e-6),
         .aqueous_diffusivity_temperature_exponent = 6,
         .root_concentration_inhibition_mol_per_m3 = .{ 1.0e-5, 1.0e-3, 1, 1, 1.0e-3, 1, 1, 1.0e-3 },
     };
@@ -66,7 +68,7 @@ pub const Input = struct {
 /// release. The inhibition divisor is applied after the directional source
 /// bounds, matching each RUPZ* equation.
 pub fn calculateExchangeMol(input: Input) !f64 {
-    inline for (@typeInfo(Input).@"struct".fields) |field| if (!std.math.isFinite(@field(input, field.name))) return error.NonFiniteRootSaltExchangeInput;
+    inline for (ti_compat.fieldViews(Input)) |field| if (!std.math.isFinite(@field(input, field.name))) return error.NonFiniteRootSaltExchangeInput;
     if (input.soil_content_mol < 0 or input.root_content_mol < 0 or input.soil_water_volume_m3 <= 0 or input.root_water_volume_m3 <= 0 or input.water_advection_m3_per_step < 0 or input.diffusive_conductance_m3_per_step < 0 or input.plant_population_count <= 0 or input.equilibration_fraction < 0 or input.equilibration_fraction > 1 or input.root_concentration_inhibition_mol_per_m3 <= 0) return error.InvalidRootSaltExchangeInput;
     const soil_concentration = input.soil_content_mol / input.soil_water_volume_m3;
     const root_concentration = input.root_content_mol / input.root_water_volume_m3;
@@ -647,7 +649,7 @@ fn evaluateCoupledResidual(
 
 pub fn state_updateStagedCompetingLayer(roots: *RootState, soil_content_mol: []f64, competitors: []const LayerCompetitor, staged_exchange_mol: []const f64) !void {
     if (soil_content_mol.len != species_count or staged_exchange_mol.len != competitors.len * species_count) return error.RootSaltSpeciesCountMismatch;
-    var total_exchange = [_]f64{0} ** species_count;
+    var total_exchange = @as([species_count]f64, @splat(@as(f64, 0)));
     for (0..species_count) |species| {
         for (0..competitors.len) |competitor_index| total_exchange[species] += staged_exchange_mol[competitor_index * species_count + species];
     }
@@ -780,11 +782,11 @@ test "UPTAKE dynamic salt state_update is conservative and atomic" {
 }
 
 test "UPTAKE eight-salt layer transaction conserves every named species" {
-    var soil = [_]f64{8} ** 8;
-    var root = [_]f64{1} ** 8;
-    var uptake = [_]f64{0} ** 8;
-    const conductance = [_]f64{0.2} ** 8;
-    const inhibition = [_]f64{2} ** 8;
+    var soil = @as([8]f64, @splat(@as(f64, 8)));
+    var root = @as([8]f64, @splat(@as(f64, 1)));
+    var uptake = @as([8]f64, @splat(@as(f64, 0)));
+    const conductance = @as([8]f64, @splat(@as(f64, 0.2)));
+    const inhibition = @as([8]f64, @splat(@as(f64, 2)));
     const exchange = try advanceLayer(.{ .soil_content_mol = &soil, .root_content_mol = &root, .accumulated_root_uptake_mol = &uptake, .diffusive_conductance_m3_per_step = &conductance, .root_concentration_inhibition_mol_per_m3 = &inhibition, .soil_water_volume_m3 = 2, .root_water_volume_m3 = 1, .water_advection_m3_per_step = 0.1, .plant_population_count = 2, .equilibration_fraction = 0.5 });
     for (0..8) |species| {
         try std.testing.expectApproxEqAbs(@as(f64, 9), soil[species] + root[species], 1.0e-12);
@@ -797,7 +799,7 @@ test "dynamic salt competitors share one snapshot beyond legacy plant capacity" 
     defer roots.deinit();
     var workspace = try Workspace.init(std.testing.allocator, 7);
     defer workspace.deinit();
-    var soil = [_]f64{70} ** species_count;
+    var soil = @as([species_count]f64, @splat(@as(f64, 70)));
     const before = soil;
     for (0..7) |plant| {
         const root = try roots.layerIndex(plant, 0, 0);
@@ -837,7 +839,7 @@ test "root salt legacy explicit fallback conserves and replaces a failed implici
     roots.aqueous_volume_m3[root] = 0.1;
     for (0..species_count) |species| roots.salt_content_mol[root * species_count + species] = 0.01;
     workspace.competitors[0] = .{ .plant = 0, .domain = 0, .layer = 0, .soil_inventory_fraction = 1, .root_water_volume_m3 = 0.1, .water_advection_m3_per_step = 0.01, .diffusive_geometry_m = 10, .plant_population_count = 1 };
-    var soil = [_]f64{0.5} ** species_count;
+    var soil = @as([species_count]f64, @splat(@as(f64, 0.5)));
     const before = soil;
     // Impossible tolerance with one allowed update: the implicit solve fails.
     const options: SolverOptions = .{ .absolute_tolerance_mol = 1.0e-30, .relative_tolerance = 1.0e-30, .picard_relaxation = 0.5, .max_iterations = 1 };
@@ -873,8 +875,8 @@ test "root salt max one counts one full-vector Newton update" {
         .plant_population_count = 1,
     };
     var parameters = compatibilityParameters();
-    parameters.root_concentration_inhibition_mol_per_m3 = .{1.0e30} ** species_count;
-    var soil = [_]f64{8} ** species_count;
+    parameters.root_concentration_inhibition_mol_per_m3 = @splat(1.0e30);
+    var soil = @as([species_count]f64, @splat(@as(f64, 8)));
     const report = try workspace.advance(&roots, &soil, 1, 298.15, parameters, 1, .{
         .absolute_tolerance_mol = 1.0e-10,
         .relative_tolerance = 1.0e-10,
@@ -911,7 +913,7 @@ test "root salt max one failure rolls back every public bit" {
             roots.salt_uptake_mol_per_h[layer * species_count + species] = -@as(f64, @floatFromInt(plant * species_count + species + 1)) * 0.001;
         }
     }
-    var soil = [_]f64{8} ** species_count;
+    var soil = @as([species_count]f64, @splat(@as(f64, 8)));
     const soil_before = soil;
     const salt_before = try std.testing.allocator.dupe(f64, roots.salt_content_mol);
     defer std.testing.allocator.free(salt_before);
@@ -949,7 +951,7 @@ test "dynamic salt advance is bit-identical to stage then state_update for singl
                 staged_roots.salt_content_mol[root * species_count + species] = combined_roots.salt_content_mol[root * species_count + species];
             }
         }
-        var combined_soil = [_]f64{8} ** species_count;
+        var combined_soil = @as([species_count]f64, @splat(@as(f64, 8)));
         var staged_soil = combined_soil;
         const combined_report = try combined.advance(&combined_roots, &combined_soil, 1, 298.15, compatibilityParameters(), competitor_count, options);
         const staged_report = try staged.stage(&staged_roots, &staged_soil, 1, 298.15, compatibilityParameters(), competitor_count, options);
@@ -976,7 +978,7 @@ test "root salt solver rejects an unusable divergence watch" {
     var workspace = try Workspace.init(std.testing.allocator, 1);
     defer workspace.deinit();
     workspace.competitors[0] = .{ .plant = 0, .domain = 0, .layer = 0, .soil_inventory_fraction = 1, .root_water_volume_m3 = 0.1, .water_advection_m3_per_step = 0.01, .diffusive_geometry_m = 10, .plant_population_count = 1 };
-    var soil = [_]f64{8} ** species_count;
+    var soil = @as([species_count]f64, @splat(@as(f64, 8)));
     try std.testing.expectError(error.InvalidRootSaltSolverOptions, workspace.advance(&roots, &soil, 1, 298.15, compatibilityParameters(), 1, .{ .absolute_tolerance_mol = 1.0e-12, .relative_tolerance = 1.0e-10, .picard_relaxation = 0.5, .max_iterations = 40, .divergence_patience = 0 }));
     try std.testing.expectError(error.InvalidRootSaltSolverOptions, workspace.advance(&roots, &soil, 1, 298.15, compatibilityParameters(), 1, .{ .absolute_tolerance_mol = 1.0e-12, .relative_tolerance = 1.0e-10, .picard_relaxation = 0.5, .max_iterations = 40, .divergence_growth_factor = 0.5 }));
     try std.testing.expectError(error.InvalidRootSaltSolverOptions, workspace.advance(&roots, &soil, 1, 298.15, compatibilityParameters(), 1, .{ .absolute_tolerance_mol = 1.0e-12, .relative_tolerance = 1.0e-10, .picard_relaxation = 0.5, .max_iterations = 40, .anderson_recovery = false }));
@@ -988,7 +990,7 @@ test "late staged salt state_update failure rolls back every ion and disabled ma
     var workspace = try Workspace.init(std.testing.allocator, 2);
     defer workspace.deinit();
     for (0..2) |plant| workspace.competitors[plant] = .{ .plant = plant, .domain = 0, .layer = 0, .soil_inventory_fraction = 0.5, .root_water_volume_m3 = 0.1, .water_advection_m3_per_step = 0.01, .diffusive_geometry_m = 10, .plant_population_count = 1 };
-    var soil = [_]f64{8} ** species_count;
+    var soil = @as([species_count]f64, @splat(@as(f64, 8)));
     _ = try workspace.stage(&roots, &soil, 1, 298.15, compatibilityParameters(), 2, .{ .absolute_tolerance_mol = 1.0e-12, .relative_tolerance = 1.0e-10, .picard_relaxation = 0.5, .max_iterations = 40 });
     workspace.staged_exchange_mol[species_count + 7] = soil[7] + 1;
     const soil_before = soil;
@@ -1004,5 +1006,5 @@ test "late staged salt state_update failure rolls back every ion and disabled ma
     var grid = try GridWorkspace.initWithAdmissionCapacity(std.testing.allocator, 1, 2, 4);
     defer grid.deinit();
     const selected = try grid.transactionSaltSelection(0);
-    try std.testing.expectEqualSlices(bool, &[_]bool{false} ** 4, selected);
+    try std.testing.expectEqualSlices(bool, &@as([4]bool, @splat(@as(bool, false))), selected);
 }

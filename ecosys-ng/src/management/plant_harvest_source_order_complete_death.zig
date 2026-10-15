@@ -14,6 +14,7 @@ const __parent = @import("plant_harvest_runtime.zig");
 const group_dead_root = @import("plant_harvest_source_order_dead_root.zig");
 const group_misc = @import("plant_harvest_source_order_misc.zig");
 const group_tillage = @import("plant_harvest_source_order_tillage.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const validateCompleteDeathMass = __parent.validateCompleteDeathMass;
 pub const validateCompleteDeathResultMass = __parent.validateCompleteDeathResultMass;
@@ -133,7 +134,7 @@ pub fn sourceOrderCompleteDeathShootLitterfall(
 ) !SourceOrderCompleteDeathShootResult {
     try validateCompleteDeathMass(input.seasonal_storage);
     for (input.branches) |branch| {
-        inline for (@typeInfo(SourceOrderCompleteDeathBranchPools).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SourceOrderCompleteDeathBranchPools)) |field| {
             const value = @field(branch, field.name);
             if (field.type == f64) {
                 if (!std.math.isFinite(value) or value < 0)
@@ -145,7 +146,7 @@ pub fn sourceOrderCompleteDeathShootLitterfall(
         input.root_woody_fraction,
         input.leaf_woody_fraction,
         input.sheath_woody_fraction,
-    }) |composition| inline for (@typeInfo(group_tillage.TillageElementComposition).@"struct".fields) |field|
+    }) |composition| inline for (ti_compat.fieldViews(group_tillage.TillageElementComposition)) |field|
         for (@field(composition, field.name)) |fraction|
             if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1)
                 return error.InvalidCompleteDeathShootLitterfallInput;
@@ -155,7 +156,7 @@ pub fn sourceOrderCompleteDeathShootLitterfall(
         input.nonfoliar_kinetics,
         input.stalk_kinetics,
         input.coarse_wood_kinetics,
-    }) |kinetics| inline for (@typeInfo(litter_partition.ElementFractions).@"struct".fields) |field|
+    }) |kinetics| inline for (ti_compat.fieldViews(litter_partition.ElementFractions)) |field|
         for (@field(kinetics, field.name)) |fraction|
             if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1)
                 return error.InvalidCompleteDeathShootLitterfallInput;
@@ -175,9 +176,9 @@ pub fn sourceOrderCompleteDeathShootLitterfall(
     if (input.perennial_growth_habit or !input.deciduous_phenology) {
         result.plant_death_initialized = true;
         inline for (0..4) |component| {
-            inline for (@typeInfo(canopy.ElementalMass).@"struct".fields, 0..) |element, index| {
+            inline for (ti_compat.fieldViews(canopy.ElementalMass), 0..) |element, index| {
                 const name =
-                    @typeInfo(litter_partition.ElementFractions).@"struct".fields[index].name;
+                    @typeInfo(litter_partition.ElementFractions).@"struct".field_names[index];
                 const storage = @field(input.seasonal_storage, element.name);
                 const wood = @field(input.root_woody_fraction, name);
                 const kinetic = @field(input.nonstructural_kinetics, name)[component];
@@ -192,9 +193,9 @@ pub fn sourceOrderCompleteDeathShootLitterfall(
 
     inline for (0..4) |component| {
         for (input.branches) |branch| {
-            inline for (@typeInfo(canopy.ElementalMass).@"struct".fields, 0..) |element, index| {
+            inline for (ti_compat.fieldViews(canopy.ElementalMass), 0..) |element, index| {
                 const name =
-                    @typeInfo(litter_partition.ElementFractions).@"struct".fields[index].name;
+                    @typeInfo(litter_partition.ElementFractions).@"struct".field_names[index];
                 const leaf_wood = @field(input.leaf_woody_fraction, name);
                 const sheath_wood = @field(input.sheath_woody_fraction, name);
                 var mobile = @field(branch.host_mobile, element.name) +
@@ -229,7 +230,7 @@ pub fn sourceOrderCompleteDeathShootLitterfall(
             }
         }
     }
-    inline for (@typeInfo(SourceOrderCompleteDeathShootResult).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderCompleteDeathShootResult)) |field| {
         if (field.type == bool) continue;
         const value = @field(result, field.name);
         if (field.type == canopy.ElementalMass) {
@@ -279,11 +280,11 @@ pub fn sourceOrderCompleteDeathRootLitterfall(
         input.nonstructural_kinetics,
         input.fine_root_kinetics,
         input.coarse_root_kinetics,
-    }) |kinetics| inline for (@typeInfo(litter_partition.ElementFractions).@"struct".fields) |field|
+    }) |kinetics| inline for (ti_compat.fieldViews(litter_partition.ElementFractions)) |field|
         for (@field(kinetics, field.name)) |fraction|
             if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1)
                 return error.InvalidCompleteDeathRootLitterfallInput;
-    inline for (@typeInfo(group_tillage.TillageElementComposition).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(group_tillage.TillageElementComposition)) |field|
         for (@field(input.root_woody_fraction, field.name)) |fraction|
             if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1)
                 return error.InvalidCompleteDeathRootLitterfallInput;
@@ -309,9 +310,9 @@ pub fn sourceOrderCompleteDeathRootLitterfall(
         for (0..input.soil_layer_count) |layer| {
             for (0..input.root_domain_count) |domain| {
                 const domain_layer = domain * input.soil_layer_count + layer;
-                inline for (@typeInfo(canopy.ElementalMass).@"struct".fields, 0..) |element, index| {
+                inline for (ti_compat.fieldViews(canopy.ElementalMass), 0..) |element, index| {
                     const name =
-                        @typeInfo(litter_partition.ElementFractions).@"struct".fields[index].name;
+                        @typeInfo(litter_partition.ElementFractions).@"struct".field_names[index];
                     @field(result[layer].nonwoody[component], element.name) +=
                         @field(input.nonstructural_kinetics, name)[component] *
                         @field(input.mobile_by_domain_layer[domain_layer], element.name);
@@ -320,9 +321,9 @@ pub fn sourceOrderCompleteDeathRootLitterfall(
                     const pools = input.structural_by_domain_layer_axis[
                         domain_layer * input.root_axis_count + axis
                     ];
-                    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields, 0..) |element, index| {
+                    inline for (ti_compat.fieldViews(canopy.ElementalMass), 0..) |element, index| {
                         const name =
-                            @typeInfo(litter_partition.ElementFractions).@"struct".fields[index].name;
+                            @typeInfo(litter_partition.ElementFractions).@"struct".field_names[index];
                         const mass = @field(pools.primary, element.name) +
                             @field(pools.secondary, element.name);
                         const woody_fraction = @field(input.root_woody_fraction, name);
@@ -338,7 +339,7 @@ pub fn sourceOrderCompleteDeathRootLitterfall(
         }
     }
     for (result) |layer| inline for (.{ layer.woody, layer.nonwoody }) |position|
-        for (position) |mass| inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+        for (position) |mass| inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
             if (!std.math.isFinite(@field(mass, field.name)))
                 return error.NonFiniteCompleteDeathRootLitterfall;
     return result;
@@ -369,12 +370,12 @@ pub fn sourceOrderResetCompleteDeathBranches(
     branches: []SourceOrderCompleteDeathBranchState,
 ) !void {
     for (branches) |branch| {
-        inline for (@typeInfo(SourceOrderCompleteDeathBranchState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SourceOrderCompleteDeathBranchState)) |field| {
             const value = @field(branch, field.name);
             if (field.type == f64) {
                 if (!std.math.isFinite(value) or value < 0)
                     return error.InvalidCompleteDeathBranchState;
-            } else inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element| {
+            } else inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element| {
                 const mass = @field(value, element.name);
                 if (!std.math.isFinite(mass) or mass < 0)
                     return error.InvalidCompleteDeathBranchState;

@@ -5,6 +5,8 @@ const priming = @import("../soil/biogeochemistry/organic_priming_exchange.zig");
 const respiration = @import("microbial_respiration_step.zig");
 const environment = @import("microbial_environment_step.zig");
 const uptake = @import("microbial_substrate_uptake_step.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const substrate_count: usize = respiration.litter_complex_count;
 
@@ -70,7 +72,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
     try validate(context.*, range);
     for (range.first..range.end) |cell| {
         var substrate_carbon_g_c: [substrate_count]f64 = undefined;
-        var activity_g_c: [substrate_count]f64 = .{0} ** substrate_count;
+        var activity_g_c: [substrate_count]f64 = @as([substrate_count]f64, @splat(@as(f64, 0)));
         var microbial_response: [substrate_count * respiration.source_population_count]f64 = undefined;
         var dissolved_available_after_uptake: [substrate_count]organic.ElementPool = undefined;
         var acetate_available_after_uptake_g_c: [substrate_count]f64 = undefined;
@@ -109,7 +111,7 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
             // no tolerance at all. Reporting `withdrawal` and `limit` is what
             // makes a real breach diagnosable in one run instead of four.
             const overdraw_scale = @max(substrate_carbon_g_c[complex], @abs(acetate_available_after_uptake_g_c[complex]));
-            inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(organic.ElementPool)) |field| {
                 const remaining = @field(dissolved_available_after_uptake[complex], field.name);
                 if (remaining < 0) {
                     const absolute_floor = if (comptime std.mem.eql(u8, field.name, "carbon_g_c"))

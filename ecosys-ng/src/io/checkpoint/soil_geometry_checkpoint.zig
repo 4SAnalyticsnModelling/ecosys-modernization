@@ -11,6 +11,8 @@ const SurfaceBoundary = @import("surface_boundary_checkpoint.zig");
 const WaterTable = @import("water_table_checkpoint.zig");
 const SurfaceLitterGeometry = @import("../../surface/litter_geometry_step.zig").State;
 const AdaptiveHourSchedule = @import("../../state/adaptive_hour_schedule.zig").State;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 const magic = "ECOSGEOM";
 // Version 23 persists the adaptive fixed-hour schedule. Although it changes no
@@ -239,18 +241,18 @@ pub fn write(writer: anytype, view: View) !void {
     try writer.writeInt(u64, @intCast(view.delayed_live_canopy_combustion_heat_megajoules.len), .little);
     try writeUsizeSlice(writer, view.geometry.first_active_layer);
     try writeUsizeSlice(writer, view.geometry.active_layer_count);
-    inline for (@typeInfo(Geometry).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Geometry)) |field| {
         if (field.type == []f64) try writeF64Slice(writer, @field(view.geometry, field.name));
     }
-    inline for (@typeInfo(Hydrology).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Hydrology)) |field| {
         if (field.type == []f64) try writeF64Slice(writer, @field(view.hydrology, field.name));
     }
-    inline for (@typeInfo(Surface).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(Surface)) |field| switch (field.type) {
         []f64 => try writeF64Slice(writer, @field(view.surface, field.name)),
         []bool => try writeBoolSlice(writer, @field(view.surface, field.name)),
         else => {},
     };
-    inline for (@typeInfo(SurfaceLitterGeometry).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SurfaceLitterGeometry)) |field|
         if (field.type == []f64)
             try writeF64Slice(
                 writer,
@@ -265,7 +267,7 @@ pub fn write(writer: anytype, view: View) !void {
     try writer.writeInt(u64, @intCast(view.suspended.layout.dry_mineral_fertilizer_count), .little);
     try writer.writeInt(u64, @intCast(view.suspended.layout.chemistry_live_and_pending_count), .little);
     try writeF64Slice(writer, view.suspended.pools);
-    for (view.climate.modifiers) |modifier| inline for (@typeInfo(@TypeOf(modifier)).@"struct".fields) |field| {
+    for (view.climate.modifiers) |modifier| inline for (ti_compat.fieldViews(@TypeOf(modifier))) |field| {
         const value = @field(modifier, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteSoilGeometryCheckpoint;
         try writer.writeInt(u64, @bitCast(value), .little);
@@ -394,20 +396,20 @@ noinline fn readPrimaryState(
 }
 
 noinline fn readGeometrySlices(reader: *std.Io.Reader, geometry: *Geometry) !void {
-    inline for (@typeInfo(Geometry).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Geometry)) |field| {
         if (field.type == []f64) try readF64Slice(reader, @field(geometry, field.name));
     }
 }
 
 noinline fn readHydrologySlices(reader: *std.Io.Reader, hydrology: *Hydrology) !void {
-    inline for (@typeInfo(Hydrology).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Hydrology)) |field| {
         if (field.type == []f64)
             try readF64Slice(reader, @field(hydrology, field.name));
     }
 }
 
 noinline fn readSurfaceSlices(reader: *std.Io.Reader, surface: *Surface) !void {
-    inline for (@typeInfo(Surface).@"struct".fields) |field| switch (field.type) {
+    inline for (ti_compat.fieldViews(Surface)) |field| switch (field.type) {
         []f64 => try readF64Slice(reader, @field(surface, field.name)),
         []bool => try readBoolSlice(reader, @field(surface, field.name)),
         else => {},
@@ -418,7 +420,7 @@ noinline fn readSurfaceLitterGeometrySlices(
     reader: *std.Io.Reader,
     surface_litter_geometry: *SurfaceLitterGeometry,
 ) !void {
-    inline for (@typeInfo(SurfaceLitterGeometry).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SurfaceLitterGeometry)) |field|
         if (field.type == []f64)
             try readF64Slice(
                 reader,
@@ -427,7 +429,7 @@ noinline fn readSurfaceLitterGeometrySlices(
 }
 
 noinline fn readClimate(reader: *std.Io.Reader, climate: *Climate) !void {
-    for (&climate.modifiers) |*modifier| inline for (@typeInfo(@TypeOf(modifier.*)).@"struct".fields) |field| {
+    for (&climate.modifiers) |*modifier| inline for (ti_compat.fieldViews(@TypeOf(modifier.*))) |field| {
         @field(modifier.*, field.name) = @bitCast(try reader.takeInt(u64, .little));
         if (!std.math.isFinite(@field(modifier.*, field.name))) return error.NonFiniteSoilGeometryCheckpoint;
     };
@@ -473,7 +475,7 @@ noinline fn validate(view: View) !void {
             if (bottom <= top or bottom_without_freeze <= top_without_freeze or geometry.layer_thickness_m[layer_base + layer] <= 0) return error.InvalidCheckpointSoilLayerGeometry;
         }
     }
-    for (view.climate.modifiers) |modifier| inline for (@typeInfo(@TypeOf(modifier)).@"struct".fields) |field| {
+    for (view.climate.modifiers) |modifier| inline for (ti_compat.fieldViews(@TypeOf(modifier))) |field| {
         if (!std.math.isFinite(@field(modifier, field.name))) return error.NonFiniteSoilGeometryCheckpoint;
     };
     if (view.eroded_minerals.workspace.cell_count != cells or view.eroded_minerals.workspace.component_count != @import("../../soil/profile/erosion_mineral_bridge.zig").component_count) return error.InvalidSoilGeometryCheckpointDimensions;
@@ -485,7 +487,7 @@ noinline fn validate(view: View) !void {
     try validateFinite(view.delayed_root_uptake_heat_megajoules);
     try validateFinite(view.delayed_surface_combustion_heat_megajoules);
     try validateFinite(view.surface_litter_ice_m3);
-    inline for (@typeInfo(SurfaceLitterGeometry).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SurfaceLitterGeometry)) |field|
         if (field.type == []f64)
             try validateFinite(@field(view.surface_litter_geometry, field.name));
     for (0..cells) |cell| {
@@ -521,11 +523,11 @@ noinline fn validate(view: View) !void {
         return error.InvalidCheckpointSurfaceLitterIce;
     for (view.eroded_minerals.workspace.pools) |value| if (value < -1e-14) return error.InvalidSoilGeometryCheckpointInventory;
     for (view.eroded_minerals.workspace.exported) |value| if (value < -1e-14) return error.InvalidSoilGeometryCheckpointInventory;
-    inline for (@typeInfo(Geometry).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Geometry)) |field| {
         if (field.type == []f64) try validateFinite(@field(geometry, field.name));
     }
     try hydrology.validateFinite();
-    inline for (@typeInfo(Surface).@"struct".fields) |field| if (field.type == []f64) try validateFinite(@field(view.surface, field.name));
+    inline for (ti_compat.fieldViews(Surface)) |field| if (field.type == []f64) try validateFinite(@field(view.surface, field.name));
     if (view.runtime) |runtime| try Runtime.validateView(runtime);
     if (view.surface_boundary) |surface_boundary|
         try SurfaceBoundary.validateView(surface_boundary);
@@ -642,14 +644,14 @@ const TestRuntime = struct {
         errdefer allocator.free(result.chemistry_layer_parameters);
         result.properties = undefined;
         result.properties.layer_count = layer_count;
-        inline for (@typeInfo(Runtime.SolverField).@"enum".fields, 0..) |field, index|
+        inline for (ti_compat.enumFieldViews(Runtime.SolverField), 0..) |field, index|
             @field(result.properties, field.name) = result.solver_fields[index];
         result.properties.retention_curve = result.retention_curve;
         result.properties.mualem_van_genuchten_parameters = result.mualem_van_genuchten_parameters;
         result.thermal = undefined;
         result.thermal.cell_count = cell_count;
         result.thermal.soil_layer_capacity = layer_capacity;
-        inline for (@typeInfo(Runtime.ThermalField).@"enum".fields, 0..) |field, index|
+        inline for (ti_compat.enumFieldViews(Runtime.ThermalField), 0..) |field, index|
             @field(result.thermal, field.name) = result.thermal_fields[index];
         @memset(result.properties.matrix_bulk_volume_m3, 0.5);
         @memset(result.properties.layer_volume_m3, 1);
@@ -923,12 +925,12 @@ test "soil geometry checkpoint round trips arbitrary grid layers flux ledgers an
     climate.modifiers[2].precipitation = 1.25;
     eroded_minerals.initialized = true;
     eroded_minerals.workspace.pools[5] = 2.75;
-    var live_heat = [_]f64{0} ** 12;
-    var dead_heat = [_]f64{0} ** 12;
-    var subsurface_heat = [_]f64{0} ** 42;
-    var root_uptake_heat = [_]f64{0} ** 42;
-    var surface_heat = [_]f64{0} ** 6;
-    var surface_ice = [_]f64{0} ** 6;
+    var live_heat = @as([12]f64, @splat(@as(f64, 0)));
+    var dead_heat = @as([12]f64, @splat(@as(f64, 0)));
+    var subsurface_heat = @as([42]f64, @splat(@as(f64, 0)));
+    var root_uptake_heat = @as([42]f64, @splat(@as(f64, 0)));
+    var surface_heat = @as([6]f64, @splat(@as(f64, 0)));
+    var surface_ice = @as([6]f64, @splat(@as(f64, 0)));
     live_heat[11] = 1.25;
     dead_heat[10] = 2.5;
     subsurface_heat[41] = 3.75;
@@ -950,7 +952,7 @@ test "soil geometry checkpoint round trips arbitrary grid layers flux ledgers an
     try std.testing.expectEqualSlices(f64, hydrology.heat_face_flux_megajoules_per_step, restored.hydrology.heat_face_flux_megajoules_per_step);
     try std.testing.expectEqualSlices(f64, hydrology.snow_liquid_water_volume_m3, restored.hydrology.snow_liquid_water_volume_m3);
     try std.testing.expectEqualSlices(f64, surface.solid_snow_water_equivalent_m3, restored.surface.solid_snow_water_equivalent_m3);
-    inline for (@typeInfo(SurfaceLitterGeometry).@"struct".fields) |field| if (field.type == []f64)
+    inline for (ti_compat.fieldViews(SurfaceLitterGeometry)) |field| if (field.type == []f64)
         try std.testing.expectEqualSlices(f64, @field(surface_litter_geometry, field.name), @field(restored.surface_litter_geometry, field.name));
     try std.testing.expectEqualSlices(f64, erosion.surface_sediment_megagrams, restored.erosion.surface_sediment_megagrams);
     try std.testing.expectEqualSlices(f64, erosion.minimum_surface_mineral_mass_megagrams, restored.erosion.minimum_surface_mineral_mass_megagrams);
@@ -1038,33 +1040,33 @@ test "soil geometry checkpoint round trips arbitrary grid layers flux ledgers an
     );
     try std.testing.expect(
         target_surface_boundary.atmospheric_carrier.mass_concentration_g_per_m3[
-            @intFromEnum(@import("../../soil/gas/transport.zig").Species.ammonia)
+            @backingInt(@import("../../soil/gas/transport.zig").Species.ammonia)
         ] != target_surface_boundary.atmospheric_carrier.mass_concentration_g_per_m3[
             @import("../../soil/gas/transport.zig").species_count +
-                @intFromEnum(@import("../../soil/gas/transport.zig").Species.ammonia)
+                @backingInt(@import("../../soil/gas/transport.zig").Species.ammonia)
         ],
     );
     try std.testing.expectEqual(
         runtime.properties.matrix_bulk_volume_m3[41],
         restored.runtime.solver_fields[
-            @intFromEnum(Runtime.SolverField.matrix_bulk_volume_m3)
+            @backingInt(Runtime.SolverField.matrix_bulk_volume_m3)
         ][41],
     );
     try std.testing.expectEqual(
         runtime.properties.initial_layer_thickness_m[41],
         restored.runtime.solver_fields[
-            @intFromEnum(Runtime.SolverField.initial_layer_thickness_m)
+            @backingInt(Runtime.SolverField.initial_layer_thickness_m)
         ][41],
     );
     try std.testing.expectEqual(
         runtime.properties.reference_bulk_density_megagrams_per_m3[41],
         restored.runtime.solver_fields[
-            @intFromEnum(Runtime.SolverField.reference_bulk_density_megagrams_per_m3)
+            @backingInt(Runtime.SolverField.reference_bulk_density_megagrams_per_m3)
         ][41],
     );
     try std.testing.expectEqual(
         runtime.properties.charcoal_retention_increment_fraction[41],
-        restored.runtime.solver_fields[@intFromEnum(Runtime.SolverField.charcoal_retention_increment_fraction)][41],
+        restored.runtime.solver_fields[@backingInt(Runtime.SolverField.charcoal_retention_increment_fraction)][41],
     );
     try std.testing.expectEqual(
         runtime.properties.retention_curve[41],
@@ -1073,7 +1075,7 @@ test "soil geometry checkpoint round trips arbitrary grid layers flux ledgers an
     try std.testing.expectEqual(
         runtime.thermal.dry_solid_heat_capacity_megajoules_per_m3_k[41],
         restored.runtime.thermal_fields[
-            @intFromEnum(
+            @backingInt(
                 Runtime.ThermalField.dry_solid_heat_capacity_megajoules_per_m3_k,
             )
         ][41],
@@ -1166,9 +1168,9 @@ test "soil geometry checkpoint applies limits before allocation" {
     defer surface_boundary.deinit();
     var bytes: std.Io.Writer.Allocating = .init(std.testing.allocator);
     defer bytes.deinit();
-    const plant_heat = [_]f64{0} ** 12;
-    const subsurface_heat = [_]f64{0} ** 42;
-    const surface_heat = [_]f64{0} ** 6;
+    const plant_heat = @as([12]f64, @splat(@as(f64, 0)));
+    const subsurface_heat = @as([42]f64, @splat(@as(f64, 0)));
+    const surface_heat = @as([6]f64, @splat(@as(f64, 0)));
     try write(&bytes.writer, .{ .geometry = &geometry, .hydrology = &hydrology, .surface = &surface, .erosion = &erosion, .suspended = &suspended, .climate = &climate, .eroded_minerals = &eroded_minerals, .runtime = runtime.view(), .surface_boundary = surface_boundary.view(), .surface_litter_geometry = &surface_litter_geometry, .surface_litter_ice_m3 = &surface_heat, .delayed_live_canopy_combustion_heat_megajoules = &plant_heat, .delayed_standing_dead_combustion_heat_megajoules = &plant_heat, .delayed_subsurface_combustion_heat_megajoules = &subsurface_heat, .delayed_root_uptake_heat_megajoules = &subsurface_heat, .delayed_surface_combustion_heat_megajoules = &surface_heat });
     var reader: std.Io.Reader = .fixed(bytes.written());
     try std.testing.expectError(error.SoilGeometryCheckpointSoilLayerLimitExceeded, read(std.testing.allocator, &reader, .{ .maximum_columns = 3, .maximum_rows = 2, .maximum_soil_layers = 6, .maximum_snow_layers = 4, .maximum_plants = 12 }));

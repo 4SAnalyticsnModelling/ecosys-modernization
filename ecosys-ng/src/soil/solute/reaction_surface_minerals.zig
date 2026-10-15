@@ -8,6 +8,7 @@ const span = @import("conservative_reaction_span.zig");
 const ledger = @import("reaction_solve.zig");
 const charge_ledger = @import("reaction_charge.zig");
 const exchange = @import("cation_exchange.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 const dimension = 26; // Surface, metals, solids, exchange partners, carbonate and sulfate.
 /// Private iteration coordinates, never an accepted native chemistry state.
 /// The caller owns their lifetime within one outer equilibrium solve.
@@ -170,7 +171,7 @@ const Context = struct {
         }
         var exchange_aqueous: exchange.Cations = undefined;
         var exchange_activities: exchange.Cations = undefined;
-        inline for (std.meta.fields(exchange.Cations)) |field| {
+        inline for (ti_compat.fieldViews(exchange.Cations)) |field| {
             @field(exchange_aqueous, field.name) = @field(base.aqueous, field.name);
             const valence: f64 = if (comptime std.mem.eql(u8, field.name, "aluminum") or std.mem.eql(u8, field.name, "iron")) 3 else if (comptime std.mem.eql(u8, field.name, "calcium") or std.mem.eql(u8, field.name, "magnesium")) 2 else 1;
             @field(exchange_activities, field.name) = @field(exchange_aqueous, field.name) * (if (valence == 3) g3 else if (valence == 2) g2 else g1);
@@ -208,13 +209,13 @@ const Context = struct {
             const charge = e.ammonium_non_band * self.partner_fractions[0] + e.ammonium_band * self.partner_fractions[1] + e.hydrogen + 3 * (e.aluminum + e.iron) + 2 * (e.calcium + e.magnesium) + e.sodium + e.potassium;
             if (charge <= 0) return error.InvalidSurfaceMineralTrial;
             const fraction = self.exchange_total_charge / charge;
-            inline for (std.meta.fields(exchange.Cations)) |field| @field(result.exchange, field.name) *= fraction;
+            inline for (ti_compat.fieldViews(exchange.Cations)) |field| @field(result.exchange, field.name) *= fraction;
         }
         inline for (partners, 0..) |field, i| {
             if (self.partner_fractions[i] == 0) @field(result.exchange, field) = @field(self.initial_exchange, field);
             if (i != 2) base.invariant -= self.partner_fractions[i] * (@field(base.aqueous, field) - @field(self.base.aqueous, field));
         }
-        inline for (std.meta.fields(exchange.Cations)) |field| {
+        inline for (ti_compat.fieldViews(exchange.Cations)) |field| {
             const valence: f64 = if (comptime std.mem.eql(u8, field.name, "aluminum") or std.mem.eql(u8, field.name, "iron")) 3 else if (comptime std.mem.eql(u8, field.name, "calcium") or std.mem.eql(u8, field.name, "magnesium")) 2 else 1;
             const density = if (comptime std.mem.eql(u8, field.name, "ammonium_non_band")) self.partner_fractions[0] * self.partner_densities[0] else if (comptime std.mem.eql(u8, field.name, "ammonium_band")) self.partner_fractions[1] * self.partner_densities[1] else base.parameters.cation_exchange_water_ratios.shared_megagrams_per_m3;
             base.invariant -= valence * density * (@field(result.exchange, field.name) - @field(self.initial_exchange, field.name));
@@ -457,7 +458,7 @@ fn candidateWithMerit(scratch: *chemistry.State, current: []const f64, parameter
     if (capacity == 0) {
         // Zero configured capacity is eligible only with exactly zero stored
         // exchange. Otherwise retaining it could hide a geometry inconsistency.
-        inline for (std.meta.fields(exchange.Cations)) |field| {
+        inline for (ti_compat.fieldViews(exchange.Cations)) |field| {
             if (@field(scratch.cation_exchange_mol_per_megagram[0], field.name) != 0)
                 return error.UnsupportedSurfaceMineralInput;
         }
@@ -685,7 +686,7 @@ fn candidateWithMerit(scratch: *chemistry.State, current: []const f64, parameter
     }
     try span.addReactionExtent(&changes, 2, carbonate_association, zero_transformations, parameters);
     try span.addReactionExtent(&changes, 3, value.aqueous.carbon_dioxide - base.aqueous.carbon_dioxide, zero_transformations, parameters);
-    inline for (std.meta.fields(exchange.Cations)) |field| @field(changes.cation_adsorption_mol_per_megagram, field.name) = @field(value.exchange, field.name) - @field(context.initial_exchange, field.name);
+    inline for (ti_compat.fieldViews(exchange.Cations)) |field| @field(changes.cation_adsorption_mol_per_megagram, field.name) = @field(value.exchange, field.name) - @field(context.initial_exchange, field.name);
     inline for (hydroxide_fields, 0..) |chain, m| {
         var extent: f64 = 0;
         inline for (0..4) |reverse| {

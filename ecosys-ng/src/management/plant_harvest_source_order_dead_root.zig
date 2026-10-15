@@ -13,6 +13,7 @@ const grazing_manure = @import("grazing_manure.zig");
 const __parent = @import("plant_harvest_runtime.zig");
 const group_misc = @import("plant_harvest_source_order_misc.zig");
 const group_tillage = @import("plant_harvest_source_order_tillage.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 const validateDeadNoduleMass = __parent.validateDeadNoduleMass;
 const validateDeadRootDepthMass = __parent.validateDeadRootDepthMass;
@@ -64,13 +65,13 @@ pub fn sourceOrderDeadRootLitterfall(
         input.structural_by_domain_layer_axis.len != structural_count)
         return error.InvalidDeadRootLitterfallDimensions;
     inline for (.{ input.mobile_kinetics, input.fine_root_kinetics, input.coarse_root_kinetics }) |kinetics| {
-        inline for (@typeInfo(litter_partition.ElementFractions).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(litter_partition.ElementFractions)) |field| {
             for (@field(kinetics, field.name)) |fraction|
                 if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1)
                     return error.InvalidDeadRootLitterfallInput;
         }
     }
-    inline for (@typeInfo(group_tillage.TillageElementComposition).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(group_tillage.TillageElementComposition)) |field| {
         for (@field(input.root_woody_fraction, field.name)) |fraction|
             if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1)
                 return error.InvalidDeadRootLitterfallInput;
@@ -90,9 +91,9 @@ pub fn sourceOrderDeadRootLitterfall(
         for (0..input.soil_layer_count) |layer| {
             const domain_layer = domain * input.soil_layer_count + layer;
             inline for (0..4) |component| {
-                inline for (@typeInfo(canopy.ElementalMass).@"struct".fields, 0..) |element, element_index| {
+                inline for (ti_compat.fieldViews(canopy.ElementalMass), 0..) |element, element_index| {
                     const fraction_field =
-                        @typeInfo(litter_partition.ElementFractions).@"struct".fields[element_index].name;
+                        @typeInfo(litter_partition.ElementFractions).@"struct".field_names[element_index];
                     @field(result[layer].nonwoody[component], element.name) +=
                         @field(input.mobile_kinetics, fraction_field)[component] *
                         @field(input.mobile_by_domain_layer[domain_layer], element.name);
@@ -101,9 +102,9 @@ pub fn sourceOrderDeadRootLitterfall(
                     const pools = input.structural_by_domain_layer_axis[
                         domain_layer * input.root_axis_count + axis
                     ];
-                    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields, 0..) |element, element_index| {
+                    inline for (ti_compat.fieldViews(canopy.ElementalMass), 0..) |element, element_index| {
                         const fraction_field =
-                            @typeInfo(litter_partition.ElementFractions).@"struct".fields[element_index].name;
+                            @typeInfo(litter_partition.ElementFractions).@"struct".field_names[element_index];
                         const structural_mass =
                             @field(pools.primary, element.name) +
                             @field(pools.secondary, element.name);
@@ -120,7 +121,7 @@ pub fn sourceOrderDeadRootLitterfall(
         }
     }
     for (result) |layer| inline for (.{ layer.woody, layer.nonwoody }) |position| {
-        for (position) |mass| inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element|
+        for (position) |mass| inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element|
             if (!std.math.isFinite(@field(mass, element.name)))
                 return error.NonFiniteDeadRootLitterfall;
     };
@@ -147,13 +148,13 @@ pub fn sourceOrderReleaseDeadRootGases(
     domain_layer_phases: []SourceOrderRootGasPhases,
     current_disturbance_loss: SourceOrderRootGasInventory,
 ) !SourceOrderRootGasInventory {
-    inline for (@typeInfo(SourceOrderRootGasInventory).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderRootGasInventory)) |field| {
         if (!std.math.isFinite(@field(current_disturbance_loss, field.name)))
             return error.InvalidDeadRootGasReleaseInput;
     }
     for (domain_layer_phases) |phases| {
         inline for (.{ phases.gaseous, phases.aqueous }) |phase| {
-            inline for (@typeInfo(SourceOrderRootGasInventory).@"struct".fields) |field| {
+            inline for (ti_compat.fieldViews(SourceOrderRootGasInventory)) |field| {
                 const value = @field(phase, field.name);
                 if (!std.math.isFinite(value) or value < 0)
                     return error.InvalidDeadRootGasReleaseInput;
@@ -166,7 +167,7 @@ pub fn sourceOrderReleaseDeadRootGases(
     // The caller supplies domain-major/layer-minor storage, matching the
     // enclosing source loops. Preserve gaseous-then-aqueous subtraction.
     for (domain_layer_phases) |phases| {
-        inline for (@typeInfo(SourceOrderRootGasInventory).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SourceOrderRootGasInventory)) |field| {
             @field(disturbance_loss, field.name) =
                 @field(disturbance_loss, field.name) -
                 @field(phases.gaseous, field.name);
@@ -272,7 +273,7 @@ pub fn sourceOrderResetDeadRootState(
     for (state.domain_axis) |axis| try validateDeadRootResetMass(axis.primary_total);
     for (state.domain_layer) |layer| {
         try validateDeadRootResetMass(layer.mobile);
-        inline for (@typeInfo(SourceOrderDeadRootDomainLayerState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SourceOrderDeadRootDomainLayerState)) |field| {
             if (field.type != f64) continue;
             const value = @field(layer, field.name);
             if (!std.math.isFinite(value) or value < 0)
@@ -337,7 +338,7 @@ pub fn sourceOrderDeadNoduleLitterfall(
     if (input.root_domain_count == 0 or input.layer_pools.len == 0)
         return error.InvalidDeadNoduleLitterfallDimensions;
     inline for (.{ input.structural_kinetics, input.mobile_kinetics }) |kinetics| {
-        inline for (@typeInfo(litter_partition.ElementFractions).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(litter_partition.ElementFractions)) |field| {
             for (@field(kinetics, field.name)) |fraction|
                 if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1)
                     return error.InvalidDeadNoduleLitterfallInput;
@@ -359,9 +360,9 @@ pub fn sourceOrderDeadNoduleLitterfall(
         if (domain != 0) continue;
         for (input.layer_pools, 0..) |pools, layer| {
             inline for (0..4) |component| {
-                inline for (@typeInfo(canopy.ElementalMass).@"struct".fields, 0..) |element, element_index| {
+                inline for (ti_compat.fieldViews(canopy.ElementalMass), 0..) |element, element_index| {
                     const fraction_field =
-                        @typeInfo(litter_partition.ElementFractions).@"struct".fields[element_index].name;
+                        @typeInfo(litter_partition.ElementFractions).@"struct".field_names[element_index];
                     @field(litter[layer][component], element.name) +=
                         @field(input.structural_kinetics, fraction_field)[component] *
                         @field(pools.structural, element.name) +

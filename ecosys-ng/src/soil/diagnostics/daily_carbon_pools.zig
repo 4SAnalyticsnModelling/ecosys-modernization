@@ -1,5 +1,6 @@
 const std = @import("std");
 const Organic = @import("../organic/initialization.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Result = struct {
     residue_carbon_g_c: f64,
@@ -38,7 +39,7 @@ pub fn calculate(
         const microbial_count = Organic.microbial_substrate_count * Organic.microbial_population_count * Organic.kinetic_fraction_count;
         for (profile.microbial[microbial_first..][0..microbial_count]) |pool| result.microbial_carbon_g_c += pool.carbon_g_c;
     }
-    inline for (@typeInfo(Result).@"struct".fields) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.InvalidDailyCarbonPool;
+    inline for (ti_compat.fieldViews(Result)) |field| if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0) return error.InvalidDailyCarbonPool;
     for (noncharcoal_organic_carbon_g_c_by_layer) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidDailyCarbonPool;
     return result;
 }

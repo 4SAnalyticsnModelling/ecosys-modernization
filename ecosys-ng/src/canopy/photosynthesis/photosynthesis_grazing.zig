@@ -18,6 +18,7 @@ const perennial_stalk_senescence_setup = @import("../../plant/growth/perennial_s
 const internode_senescence_state_update = @import("../sheath/internode_senescence_state_update.zig");
 const residual_stalk_senescence_request = @import("../../plant/growth/residual_stalk_senescence_request.zig");
 const residual_stalk_senescence_state_update = @import("../../plant/growth/residual_stalk_senescence_state_update.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Exact GROSUB 9194-9217 non-grazing branch mobile retention ratio.
 pub fn sourceOrderNonGrazingMobileRetention(
@@ -81,7 +82,7 @@ pub fn sourceOrderAdditionalGrazingRemoval(
 }
 
 pub fn allocateGrazingDemand(total_demand_g_c: f64, harvested_leaf_fraction: f64, harvested_nonfoliar_fraction: f64, harvested_woody_fraction: f64, canopy_mobile_carbon_concentration_g_per_g: f64, symbiont_mobile_carbon_concentration_g_per_g: f64, pools: GrazingPools) !GrazingAllocation {
-    inline for (@typeInfo(GrazingPools).@"struct".fields) |field| if (!std.math.isFinite(@field(pools, field.name)) or @field(pools, field.name) < 0) return error.InvalidGrazingPool;
+    inline for (ti_compat.fieldViews(GrazingPools)) |field| if (!std.math.isFinite(@field(pools, field.name)) or @field(pools, field.name) < 0) return error.InvalidGrazingPool;
     inline for (.{ total_demand_g_c, harvested_leaf_fraction, harvested_nonfoliar_fraction, harvested_woody_fraction, canopy_mobile_carbon_concentration_g_per_g, symbiont_mobile_carbon_concentration_g_per_g }) |value| if (!std.math.isFinite(value)) return error.NonFiniteGrazingAllocationInput;
     if (total_demand_g_c < 0 or harvested_leaf_fraction < 0 or harvested_leaf_fraction > 1 or harvested_nonfoliar_fraction < 0 or harvested_nonfoliar_fraction > 1 or harvested_woody_fraction < 0 or harvested_woody_fraction > 1 or canopy_mobile_carbon_concentration_g_per_g < 0 or symbiont_mobile_carbon_concentration_g_per_g < 0) return error.InvalidGrazingAllocationInput;
     const mobile_fraction = canopy_mobile_carbon_concentration_g_per_g / (1.0 + canopy_mobile_carbon_concentration_g_per_g);

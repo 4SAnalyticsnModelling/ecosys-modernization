@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 const source_substrate_class_count = 5;
 const source_residue_fraction_count = 2;
@@ -178,7 +179,7 @@ pub fn calculate(state: *State, inputs: Inputs) !void {
     result.dinitrogen_fixation_g_n = inputs.fixed_dinitrogen_g_n;
     result.transport_temperature_response = inputs.temperature_response;
     result.transport_active_water_m3 = inputs.biologically_active_water_m3;
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         if (field.type == f64 and !std.math.isFinite(@field(result, field.name)))
             return error.InvalidTransportFluxResult;
     }
@@ -188,7 +189,7 @@ pub fn calculate(state: *State, inputs: Inputs) !void {
         state.dissolved_phosphorus_change_g_p[complex] = values[2];
         state.acetate_change_g_c[complex] = values[3];
     }
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         if (field.type == f64) @field(state, field.name) = @field(result, field.name);
     }
 }
@@ -243,7 +244,7 @@ fn validate(state: *const State, inputs: Inputs) !void {
         inputs.dissolved_phosphorus_uptake_g_p,     inputs.acetate_uptake_g_c,
         inputs.fermentation_acetate_production_g_c,
     }) |values| if (values.len != population_items) return error.InvalidTransportFluxDimensions;
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (field.type == []const f64) {
             for (@field(inputs, field.name)) |value| if (!std.math.isFinite(value))
                 return error.InvalidTransportFluxInput;

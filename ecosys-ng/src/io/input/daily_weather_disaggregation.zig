@@ -5,6 +5,7 @@ const DailyForcing = @import("weather.zig").DailyForcing;
 const HourlyForcing = @import("weather.zig").HourlyForcing;
 
 const PrecipitationPhase = @import("weather.zig").PrecipitationPhase;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Result = struct {
     forcing: HourlyForcing,
@@ -113,7 +114,7 @@ pub fn calculateDaylength(day_of_year: u16, latitude_degrees: f64) f64 {
 }
 
 fn validate(forcing: HourlyForcing) !void {
-    inline for (@typeInfo(HourlyForcing).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(forcing, field.name))) return error.NonFiniteDisaggregatedWeather;
+    inline for (ti_compat.fieldViews(HourlyForcing)) |field| if (field.type == f64 and !std.math.isFinite(@field(forcing, field.name))) return error.NonFiniteDisaggregatedWeather;
     if (forcing.air_temperature_c < -273.15 or forcing.vapor_pressure_kpa < 0 or forcing.precipitation_m < 0 or forcing.shortwave_radiation_megajoules_per_m2 < 0 or forcing.wind_speed_m_per_h < 0) return error.InvalidDisaggregatedWeather;
 }
 

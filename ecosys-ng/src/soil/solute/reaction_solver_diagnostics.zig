@@ -21,6 +21,7 @@ const group_numerics2 = @import("reaction_solver_numerics2.zig");
 const group_solve = @import("reaction_solver_solve.zig");
 const group_types = @import("reaction_solver_types.zig");
 const diagnostic_control = @import("reaction_diagnostic_control.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const TernaryCorrectionFaceStatus = enum {
     not_attempted,
@@ -704,7 +705,7 @@ fn logRejectedFullStep(
                 ) catch
                     return;
             const aqueous = scratch.aqueous[0];
-            inline for (@typeInfo(aqueous_network.State).@"struct".fields, 0..) |field, index| {
+            inline for (ti_compat.fieldViews(aqueous_network.State), 0..) |field, index| {
                 const value = @field(aqueous, field.name);
                 const change = @field(changes, field.name);
                 if (value + change < 0)

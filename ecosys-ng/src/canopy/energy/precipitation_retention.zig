@@ -4,6 +4,7 @@ const CanopyState = @import("../photosynthesis/photosynthesis.zig").State;
 const InterceptionState = @import("interception.zig").State;
 const BurialInputs = @import("interception.zig").BurialInputs;
 const source_order = @import("precipitation_retention_source_order.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     surface_water_capacity_m3_per_m2_by_root_profile: [4]f64,
@@ -57,7 +58,7 @@ pub const State = struct {
 
     noinline fn deinitAllocatedPrefix(self: *State, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -80,7 +81,7 @@ pub const State = struct {
         result.species_count = species_count;
         var allocated: usize = 0;
         errdefer result.deinitAllocatedPrefix(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 const count = if (comptime std.mem.startsWith(u8, field.name, "cell_"))
                     cell_count
@@ -95,7 +96,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(State)) |field|
             if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
@@ -104,7 +105,7 @@ pub const State = struct {
 test "canopy precipitation retention releases every partial allocation prefix" {
     const allocation_count = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(State).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) count += 1;
         }
         break :count count;
@@ -430,7 +431,7 @@ fn validateModelDimensions(
         if (area[cell] == 0 or solar_sine[cell] > 1)
             return error.InvalidCanopyRetentionInput;
     }
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64) for (@field(state, field.name)) |value|
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidCanopyRetentionState;

@@ -13,6 +13,8 @@ const runtime = @import("landscape_mass_balance_runtime.zig");
 const local = @import("layer_local_conservation.zig");
 const tillage_activity = @import("../redistribution/tillage/activity.zig");
 const litter_salt_ingress = @import("../plant/salt/litter_ingress.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 /// Reconstructs every independently accepted spatial scope from the same
 /// authoritative owners as `landscape_mass_balance_runtime.reconstructCells`.
@@ -270,10 +272,10 @@ pub fn requireExactCellPartition(
         for (storage_by_scope, 0..) |scope_storage, scope| {
             if ((try layout.address(scope)).cell != cell) continue;
             try observed.add(scope_storage);
-            inline for (std.meta.fields(inventory.Storage)) |field|
+            inline for (ti_compat.fieldViews(inventory.Storage)) |field|
                 @field(absolute_sum, field.name) += @abs(@field(scope_storage, field.name));
         }
-        inline for (std.meta.fields(inventory.Storage)) |field| {
+        inline for (ti_compat.fieldViews(inventory.Storage)) |field| {
             const actual = @field(observed, field.name);
             const target = @field(expected, field.name);
             const scale = @max(1, @max(@field(absolute_sum, field.name), @max(@abs(actual), @abs(target))));
@@ -285,14 +287,14 @@ pub fn requireExactCellPartition(
 }
 
 fn storageIsExactlyZero(storage: inventory.Storage) bool {
-    inline for (std.meta.fields(inventory.Storage)) |field|
+    inline for (ti_compat.fieldViews(inventory.Storage)) |field|
         if (@field(storage, field.name) != 0) return false;
     return true;
 }
 
 test "roundoff partition identity rejects an omitted owner field" {
     const layout = try local.Layout.init(1, 2, 1);
-    var scopes = [_]inventory.Storage{.{}} ** 5;
+    var scopes = @as([5]inventory.Storage, @splat(@as(inventory.Storage, .{})));
     scopes[try layout.index(.{ .kind = .soil_layer, .cell = 0, .layer = 0 })].water_m3 = 2;
     scopes[try layout.index(.{ .kind = .soil_layer, .cell = 0, .layer = 1 })].water_m3 = 3;
     const canonical = [_]inventory.Storage{.{ .water_m3 = 5 }};
@@ -320,7 +322,7 @@ test "dry pending litter salt closes through exact tillage layer activity" {
     const upper_aluminum = (1 * litter_salt_ingress.salt_count) + 0;
     pending.pending_mol[lower_aluminum] = 2;
 
-    var before = [_]inventory.Storage{.{}} ** 5;
+    var before = @as([5]inventory.Storage, @splat(@as(inventory.Storage, .{})));
     before[try layout.index(.{ .kind = .soil_layer, .cell = 0, .layer = 0 })] =
         try group_phosphorus.aggregatePendingPlantLitterSaltExchangeLayer(&pending, 0, 1);
     before[try layout.index(.{ .kind = .soil_layer, .cell = 0, .layer = 1 })] =
@@ -332,7 +334,7 @@ test "dry pending litter salt closes through exact tillage layer activity" {
 
     pending.pending_mol[lower_aluminum] = 1;
     pending.pending_mol[upper_aluminum] = 1;
-    var after = [_]inventory.Storage{.{}} ** 5;
+    var after = @as([5]inventory.Storage, @splat(@as(inventory.Storage, .{})));
     after[try layout.index(.{ .kind = .soil_layer, .cell = 0, .layer = 0 })] =
         try group_phosphorus.aggregatePendingPlantLitterSaltExchangeLayer(&pending, 0, 1);
     after[try layout.index(.{ .kind = .soil_layer, .cell = 0, .layer = 1 })] =

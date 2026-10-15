@@ -24,6 +24,7 @@
 //! comparison oracle for the range above. Full argument and the census behind
 //! it: `docs/traceability/hour1_2039_5200_binding_survey.md`.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const SaltMode = enum { static_equilibrium, dynamic_transport };
 
@@ -58,7 +59,7 @@ pub fn calculate(
     salt_mode: SaltMode,
     inputs: Inputs,
 ) CalculationError!Result {
-    inline for (std.meta.fields(Inputs)) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteInput;
         if (value < 0.0) return error.NegativeInput;
@@ -100,7 +101,7 @@ pub fn calculate(
         .clay_mass_fraction_megagrams_megagrams = clay_mass_fraction_megagrams_megagrams,
         .dynamic_salt_surface_area_m2_m3 = dynamic_salt_surface_area_m2_m3,
     };
-    inline for (std.meta.fields(Result)) |field| {
+    inline for (ti_compat.fieldViews(Result)) |field| {
         if (field.type == f64 and !std.math.isFinite(@field(result, field.name))) {
             return error.NonFiniteResult;
         }

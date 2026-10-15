@@ -18,6 +18,7 @@ const GridState = @import("../state/grid.zig").GridState;
 const PlantState = @import("../state/grid.zig").PlantState;
 const PlantWaterStateUpdate = @import("../plant/state_update/water.zig");
 const TillageActivity = @import("../redistribution/tillage/activity.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Reusable, memory-only transaction around one fixed external hour. Persistent
 /// owners are cloned through their versioned checkpoint codecs and restored by
@@ -433,7 +434,7 @@ noinline fn visit(journal: *StableJournal, pointer: anytype, excluded_ranges: *c
                 for (pointer) |*element| try visit(journal, element, excluded_ranges, targets, extra);
             }
         },
-        .@"struct" => |struct_info| inline for (struct_info.fields) |field| {
+        .@"struct" => |struct_info| inline for (ti_compat.fieldViewsFromInfo(struct_info)) |field| {
             if (field.type == std.mem.Allocator) continue;
             try visit(journal, &@field(pointer.*, field.name), excluded_ranges, targets, extra);
         },
@@ -445,7 +446,7 @@ noinline fn visit(journal: *StableJournal, pointer: anytype, excluded_ranges: *c
             if (pointer.*) |*payload| try visit(journal, payload, excluded_ranges, targets, extra);
         },
         .pointer => |pointer_info| switch (pointer_info.size) {
-            .slice => if (!pointer_info.is_const) {
+            .slice => if (!pointer_info.attrs.@"const") {
                 const bytes = std.mem.sliceAsBytes(pointer.*);
                 if (!excluded_ranges.overlaps(bytes)) {
                     try journal.appendBytes(bytes);
@@ -453,7 +454,7 @@ noinline fn visit(journal: *StableJournal, pointer: anytype, excluded_ranges: *c
                         for (pointer.*) |*element| try visit(journal, element, excluded_ranges, targets, extra);
                 }
             },
-            .one => if (!pointer_info.is_const and @typeInfo(pointer_info.child) != .@"opaque") {
+            .one => if (!pointer_info.attrs.@"const" and @typeInfo(pointer_info.child) != .@"opaque") {
                 const address = @intFromPtr(pointer.*);
                 const pointee = std.mem.asBytes(pointer.*);
                 if (!isExcludedOwner(address, targets, extra) and
@@ -569,7 +570,7 @@ noinline fn collectReachableRanges(excluded_ranges: *ExcludedRanges, value: anyt
         },
         .array => |array_info| if (comptime containsPointers(array_info.child))
             for (value) |element| try collectReachableRanges(excluded_ranges, element),
-        .@"struct" => |struct_info| inline for (struct_info.fields) |field| {
+        .@"struct" => |struct_info| inline for (ti_compat.fieldViewsFromInfo(struct_info)) |field| {
             if (field.type != std.mem.Allocator and comptime containsPointers(field.type))
                 try collectReachableRanges(excluded_ranges, @field(value, field.name));
         },
@@ -610,7 +611,7 @@ noinline fn valueTouchesRange(candidate: []u8, value: anytype) bool {
             break :blk false;
         },
         .@"struct" => |struct_info| blk: {
-            inline for (struct_info.fields) |field| if (valueTouchesRange(candidate, @field(value, field.name))) break :blk true;
+            inline for (ti_compat.fieldViewsFromInfo(struct_info)) |field| if (valueTouchesRange(candidate, @field(value, field.name))) break :blk true;
             break :blk false;
         },
         .optional => if (value) |payload| valueTouchesRange(candidate, payload) else false,
@@ -685,7 +686,7 @@ fn containsPointers(comptime T: type) bool {
         .pointer, .optional, .@"union" => true,
         .array => |info| containsPointers(info.child),
         .@"struct" => |info| blk: {
-            inline for (info.fields) |field| if (containsPointers(field.type)) break :blk true;
+            inline for (ti_compat.fieldViewsFromInfo(info)) |field| if (containsPointers(field.type)) break :blk true;
             break :blk false;
         },
         else => false,
@@ -896,7 +897,7 @@ fn cloneBundle(
 }
 
 fn exactCopyGas(destination: *@import("../soil/gas/transport.zig").State, source: *const @import("../soil/gas/transport.zig").State) void {
-    inline for (@typeInfo(@import("../soil/gas/transport.zig").State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@import("../soil/gas/transport.zig").State)) |field|
         if (field.type == []f64) @memcpy(@field(destination, field.name), @field(source, field.name));
 }
 
@@ -1419,7 +1420,7 @@ test "late outer failure restores plant water cumulative and dry diagnostic befo
 
     var stable: StableJournal = .{ .allocator = std.testing.allocator };
     defer stable.deinit();
-    inline for (@typeInfo(PlantWaterStateUpdate.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(PlantWaterStateUpdate.State)) |field| {
         if (field.type == []f64 and !std.mem.eql(u8, field.name, "cumulative_water_source_m3_by_plant"))
             try stable.appendBytes(std.mem.sliceAsBytes(@field(live, field.name)));
     }
@@ -1437,7 +1438,7 @@ test "late outer failure restores plant water cumulative and dry diagnostic befo
 
     try PlantWaterStateUpdate.refresh(&live, inputs);
     dry_branch.dry_branch_executions += 1;
-    inline for (@typeInfo(PlantWaterStateUpdate.State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(PlantWaterStateUpdate.State)) |field|
         if (field.type == []f64)
             try std.testing.expectEqualSlices(f64, @field(uninterrupted, field.name), @field(live, field.name));
     try std.testing.expectEqual(@as(u64, 42), dry_branch.dry_branch_executions);

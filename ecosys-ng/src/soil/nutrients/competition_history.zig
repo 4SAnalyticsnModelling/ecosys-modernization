@@ -15,12 +15,12 @@ pub const SoilPool = enum(u8) {
     hpo4_band,
 };
 
-pub const soil_pool_count: usize = @typeInfo(SoilPool).@"enum".fields.len;
+pub const soil_pool_count: usize = @typeInfo(SoilPool).@"enum".field_names.len;
 
 /// Surface litter has no fertilizer-band subdivision in the source L=0
 /// domain. These are RNH4Y/RNO3Y/RPO4Y/RP14Y at L=0.
 pub const SurfacePool = enum(u8) { ammonium, nitrate, h2po4, hpo4 };
-pub const surface_pool_count: usize = @typeInfo(SurfacePool).@"enum".fields.len;
+pub const surface_pool_count: usize = @typeInfo(SurfacePool).@"enum".field_names.len;
 
 /// Stable source-order slots: K=1..3,N=1..7 followed by K=5,N=1,2,3,5.
 /// Keeping the slots explicit preserves REDIST's serial accumulation order.
@@ -110,24 +110,24 @@ pub const State = struct {
 
     pub fn soilTotal(self: *const State, pool: SoilPool, layer: usize) !f64 {
         if (layer >= self.soil_layer_count) return error.NutrientCompetitionHistoryIndexOutOfBounds;
-        return self.soil_previous_total[@intFromEnum(pool)][layer];
+        return self.soil_previous_total[@backingInt(pool)][layer];
     }
 
     pub fn surfaceTotal(self: *const State, pool: SurfacePool, cell: usize) !f64 {
         if (cell >= self.surface_cell_count) return error.NutrientCompetitionHistoryIndexOutOfBounds;
-        return self.surface_previous_total[@intFromEnum(pool)][cell];
+        return self.surface_previous_total[@backingInt(pool)][cell];
     }
 
     pub fn surfaceMineralCapacity(self: *const State, pool: SurfacePool, cell: usize, competitor: usize) !f64 {
         if (cell >= self.surface_cell_count or competitor >= surface_mineral_competitor_count)
             return error.NutrientCompetitionHistoryIndexOutOfBounds;
-        return self.surface_mineral_previous_capacity[@intFromEnum(pool)][cell * surface_mineral_competitor_count + competitor];
+        return self.surface_mineral_previous_capacity[@backingInt(pool)][cell * surface_mineral_competitor_count + competitor];
     }
 
     pub fn topsoilResidualCapacity(self: *const State, pool: SurfacePool, cell: usize, competitor: usize) !f64 {
         if (cell >= self.surface_cell_count or competitor >= surface_mineral_competitor_count)
             return error.NutrientCompetitionHistoryIndexOutOfBounds;
-        return self.topsoil_residual_previous_capacity[@intFromEnum(pool)][cell * surface_mineral_competitor_count + competitor];
+        return self.topsoil_residual_previous_capacity[@backingInt(pool)][cell * surface_mineral_competitor_count + competitor];
     }
 
     pub fn surfaceAmmoniaOxidationCapacity(self: *const State, cell: usize) !f64 {
@@ -291,10 +291,10 @@ pub const Attempt = struct {
             return error.NutrientCompetitionHistoryIndexOutOfBounds;
         const index = cell * surface_mineral_competitor_count + competitor;
         const target = [_]usize{
-            @intFromEnum(SoilPool.ammonium_non_band),
-            @intFromEnum(SoilPool.nitrate_non_band),
-            @intFromEnum(SoilPool.h2po4_non_band),
-            @intFromEnum(SoilPool.hpo4_non_band),
+            @backingInt(SoilPool.ammonium_non_band),
+            @backingInt(SoilPool.nitrate_non_band),
+            @backingInt(SoilPool.h2po4_non_band),
+            @backingInt(SoilPool.hpo4_non_band),
         };
         for (capacities, 0..) |capacity, pool| {
             try validateContribution(capacity);
@@ -329,10 +329,10 @@ pub const Attempt = struct {
         for (0..self.surface_cell_count) |cell| {
             for (0..surface_mineral_competitor_count) |competitor| {
                 if (competitor == surface_heterotroph_count)
-                    try addChecked(&self.surface_next_total[@intFromEnum(SurfacePool.ammonium)][cell], self.surface_ammonia_oxidation_next_capacity[cell]);
+                    try addChecked(&self.surface_next_total[@backingInt(SurfacePool.ammonium)][cell], self.surface_ammonia_oxidation_next_capacity[cell]);
                 if (competitor < surface_heterotroph_count and competitor % 7 == 1) {
                     const complex = competitor / 7;
-                    try addChecked(&self.surface_next_total[@intFromEnum(SurfacePool.nitrate)][cell], self.surface_denitrification_next_capacity[cell * surface_denitrifier_count + complex]);
+                    try addChecked(&self.surface_next_total[@backingInt(SurfacePool.nitrate)][cell], self.surface_denitrification_next_capacity[cell * surface_denitrifier_count + complex]);
                 }
                 for (0..surface_pool_count) |pool|
                     try addChecked(&self.surface_next_total[pool][cell], self.surface_mineral_next_capacity[pool][cell * surface_mineral_competitor_count + competitor]);
@@ -370,14 +370,14 @@ pub const Attempt = struct {
         @memcpy(accepted.surface_ammonia_oxidation_previous_capacity, self.surface_ammonia_oxidation_next_capacity);
         @memcpy(accepted.surface_denitrification_previous_capacity, self.surface_denitrification_next_capacity);
 
-        @memcpy(reactive.previous_total_non_band_ammonium_demand_g_n, self.soil_next_total[@intFromEnum(SoilPool.ammonium_non_band)]);
-        @memcpy(reactive.previous_total_band_ammonium_demand_g_n, self.soil_next_total[@intFromEnum(SoilPool.ammonium_band)]);
-        @memcpy(reactive.previous_total_non_band_nitrate_demand_g_n, self.soil_next_total[@intFromEnum(SoilPool.nitrate_non_band)]);
-        @memcpy(reactive.previous_total_band_nitrate_demand_g_n, self.soil_next_total[@intFromEnum(SoilPool.nitrate_band)]);
-        @memcpy(phosphorus.previous_total_non_band_h2po4_demand_g_p, self.soil_next_total[@intFromEnum(SoilPool.h2po4_non_band)]);
-        @memcpy(phosphorus.previous_total_band_h2po4_demand_g_p, self.soil_next_total[@intFromEnum(SoilPool.h2po4_band)]);
-        @memcpy(phosphorus.previous_total_non_band_hpo4_demand_g_p, self.soil_next_total[@intFromEnum(SoilPool.hpo4_non_band)]);
-        @memcpy(phosphorus.previous_total_band_hpo4_demand_g_p, self.soil_next_total[@intFromEnum(SoilPool.hpo4_band)]);
+        @memcpy(reactive.previous_total_non_band_ammonium_demand_g_n, self.soil_next_total[@backingInt(SoilPool.ammonium_non_band)]);
+        @memcpy(reactive.previous_total_band_ammonium_demand_g_n, self.soil_next_total[@backingInt(SoilPool.ammonium_band)]);
+        @memcpy(reactive.previous_total_non_band_nitrate_demand_g_n, self.soil_next_total[@backingInt(SoilPool.nitrate_non_band)]);
+        @memcpy(reactive.previous_total_band_nitrate_demand_g_n, self.soil_next_total[@backingInt(SoilPool.nitrate_band)]);
+        @memcpy(phosphorus.previous_total_non_band_h2po4_demand_g_p, self.soil_next_total[@backingInt(SoilPool.h2po4_non_band)]);
+        @memcpy(phosphorus.previous_total_band_h2po4_demand_g_p, self.soil_next_total[@backingInt(SoilPool.h2po4_band)]);
+        @memcpy(phosphorus.previous_total_non_band_hpo4_demand_g_p, self.soil_next_total[@backingInt(SoilPool.hpo4_non_band)]);
+        @memcpy(phosphorus.previous_total_band_hpo4_demand_g_p, self.soil_next_total[@backingInt(SoilPool.hpo4_band)]);
         self.active = false;
     }
 };
@@ -411,11 +411,11 @@ test "mixed accepted history publishes atomically and failed retry cannot mutate
     try attempt.recordSurfaceAmmoniaOxidation(0, 97);
     try attempt.recordSurfaceDenitrification(0, 2, 101);
     try std.testing.expectEqual(@as(f64, 7), accepted.soil_previous_total[0][0]);
-    try std.testing.expectEqual(@as(f64, 66), attempt.soil_next_total[@intFromEnum(SoilPool.ammonium_non_band)][0]);
-    try std.testing.expectEqual(@as(f64, 121), attempt.soil_next_total[@intFromEnum(SoilPool.hpo4_non_band)][0]);
+    try std.testing.expectEqual(@as(f64, 66), attempt.soil_next_total[@backingInt(SoilPool.ammonium_non_band)][0]);
+    try std.testing.expectEqual(@as(f64, 121), attempt.soil_next_total[@backingInt(SoilPool.hpo4_non_band)][0]);
     try attempt.publishAccepted(&accepted, &reactive, &phosphorus);
-    try std.testing.expectEqual(@as(f64, 66), accepted.soil_previous_total[@intFromEnum(SoilPool.ammonium_non_band)][0]);
-    try std.testing.expectEqual(@as(f64, 180), accepted.surface_previous_total[@intFromEnum(SurfacePool.nitrate)][0]);
+    try std.testing.expectEqual(@as(f64, 66), accepted.soil_previous_total[@backingInt(SoilPool.ammonium_non_band)][0]);
+    try std.testing.expectEqual(@as(f64, 180), accepted.surface_previous_total[@backingInt(SurfacePool.nitrate)][0]);
 
     // A failed attempt is discarded simply by beginning the retry; accepted
     // state remains byte-for-byte unchanged.

@@ -25,6 +25,7 @@
 // docs/traceability/redistribution_tillage_unbound_family_disposition.md
 //
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     disturbance_type: i32, // ITILL
@@ -74,16 +75,16 @@ fn finiteSlice(values: []const f64) bool {
 pub fn reset(allocator: std.mem.Allocator, inputs: Inputs, geometry: Geometry, pools: NitrogenPools) !bool {
     const layer_count = inputs.layer_bottom_depth_m.len;
     if (layer_count == 0 or inputs.first_soil_layer >= layer_count) return error.TillageNitrogenBandDimensionMismatch;
-    inline for (std.meta.fields(Geometry)) |field|
+    inline for (ti_compat.fieldViews(Geometry)) |field|
         if (@field(geometry, field.name).len != layer_count) return error.TillageNitrogenBandDimensionMismatch;
-    inline for (std.meta.fields(NitrogenPools)) |field|
+    inline for (ti_compat.fieldViews(NitrogenPools)) |field|
         if (@field(pools, field.name).len != layer_count) return error.TillageNitrogenBandDimensionMismatch;
     inline for (.{ inputs.soil_mixing_remaining_fraction, inputs.mixing_gate_tolerance, inputs.tillage_depth_m }) |value|
         if (!std.math.isFinite(value)) return error.InvalidTillageNitrogenBandInput;
     if (!finiteSlice(inputs.layer_bottom_depth_m)) return error.InvalidTillageNitrogenBandInput;
-    inline for (std.meta.fields(Geometry)) |field|
+    inline for (ti_compat.fieldViews(Geometry)) |field|
         if (!finiteSlice(@field(geometry, field.name))) return error.InvalidTillageNitrogenBandInput;
-    inline for (std.meta.fields(NitrogenPools)) |field| {
+    inline for (ti_compat.fieldViews(NitrogenPools)) |field| {
         const values = @field(pools, field.name);
         if (!finiteSlice(values)) return error.InvalidTillageNitrogenBandInput;
         for (values) |value| if (value < 0) return error.InvalidTillageNitrogenBandInput;
@@ -104,7 +105,7 @@ pub fn reset(allocator: std.mem.Allocator, inputs: Inputs, geometry: Geometry, p
         result.exchangeable_ammonium_mol = pools.exchangeable_ammonium_nonband_mol[layer] + pools.exchangeable_ammonium_band_mol[layer];
         result.nitrate_g_n = pools.nitrate_nonband_g_n[layer] + pools.nitrate_band_g_n[layer];
         result.nitrite_g_n = pools.nitrite_nonband_g_n[layer] + pools.nitrite_band_g_n[layer];
-        inline for (std.meta.fields(LayerResult)) |field| {
+        inline for (ti_compat.fieldViews(LayerResult)) |field| {
             if (comptime std.mem.eql(u8, field.name, "eligible")) continue;
             if (!std.math.isFinite(@field(result.*, field.name))) return error.NonFiniteTillageNitrogenBandResult;
         }

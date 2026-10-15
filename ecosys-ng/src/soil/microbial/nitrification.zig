@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     minimum_competition_fraction: f64,
@@ -17,7 +18,7 @@ pub const Parameters = struct {
     oxygen_per_nitrite_n_g_o_per_g_n: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteNitrificationParameter;
+        inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteNitrificationParameter;
         if (self.minimum_competition_fraction < 0 or self.inhibition_decay_per_h < 0 or self.inhibition_decay_ammonium_constant_g_n_per_m3 <= 0 or self.ammonia_product_inhibition_g_n_per_m3 <= 0 or self.ammonium_half_saturation_g_n_per_m3 <= 0 or self.nitrite_half_saturation_g_n_per_m3 <= 0 or self.ammonia_oxidation_rate_g_n_per_g_c_h < 0 or self.nitrite_oxidation_rate_g_n_per_g_c_h < 0 or self.ammonia_oxidizer_carbon_efficiency_g_c_per_g_n < 0 or self.nitrite_oxidizer_carbon_efficiency_g_c_per_g_n < 0 or self.growth_respiration_fraction < 0 or self.oxygen_per_respired_carbon_g_o_per_g_c < 0 or self.oxygen_per_ammonium_n_g_o_per_g_n < 0 or self.oxygen_per_nitrite_n_g_o_per_g_n < 0) return error.InvalidNitrificationParameter;
     }
 };
@@ -138,7 +139,7 @@ pub const ActualFlux = struct { ammonium_oxidized_g_n: f64, nitrite_oxidized_g_n
 /// independently-maintained reimplementation. A fix applied only here has no
 /// effect on the simulation.
 pub fn state_updateZone(state: *MineralNitrogen, potential_ammonia_oxidation_g_n: f64, potential_nitrite_oxidation_g_n: f64, oxygen_limitation_fraction: f64) !ActualFlux {
-    inline for (@typeInfo(MineralNitrogen).@"struct".fields) |field| if (!std.math.isFinite(@field(state.*, field.name)) or @field(state.*, field.name) < 0) return error.InvalidMineralNitrogenState;
+    inline for (ti_compat.fieldViews(MineralNitrogen)) |field| if (!std.math.isFinite(@field(state.*, field.name)) or @field(state.*, field.name) < 0) return error.InvalidMineralNitrogenState;
     if (!std.math.isFinite(potential_ammonia_oxidation_g_n) or potential_ammonia_oxidation_g_n < 0 or !std.math.isFinite(potential_nitrite_oxidation_g_n) or potential_nitrite_oxidation_g_n < 0 or !std.math.isFinite(oxygen_limitation_fraction) or oxygen_limitation_fraction < 0 or oxygen_limitation_fraction > 1) return error.InvalidNitrificationStateUpdate;
     const ammonium_oxidized = @min(state.ammonium_g_n, potential_ammonia_oxidation_g_n * oxygen_limitation_fraction);
     const nitrite_available = state.nitrite_g_n + ammonium_oxidized;
@@ -158,8 +159,8 @@ fn monod(concentration: f64, half_saturation: f64) f64 {
 }
 
 fn validateInputs(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteNitrificationInput;
-    inline for (.{ inputs.non_band, inputs.band }) |zone| inline for (@typeInfo(Zone).@"struct".fields) |field| if (!std.math.isFinite(@field(zone, field.name)) or @field(zone, field.name) < 0) return error.InvalidNitrificationZone;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteNitrificationInput;
+    inline for (.{ inputs.non_band, inputs.band }) |zone| inline for (ti_compat.fieldViews(Zone)) |field| if (!std.math.isFinite(@field(zone, field.name)) or @field(zone, field.name) < 0) return error.InvalidNitrificationZone;
     if (inputs.temperature_water_activity < 0 or inputs.nitrogen_phosphorus_activity < 0 or inputs.aqueous_co2_activity < 0 or inputs.active_oxidizer_biomass_g_c < 0 or inputs.microbial_active_fraction < 0 or inputs.timestep_h <= 0 or inputs.initial_inhibition_activity < 0 or inputs.current_inhibition_activity < 0 or inputs.negligible_demand_g_n < 0) return error.InvalidNitrificationInput;
 }
 

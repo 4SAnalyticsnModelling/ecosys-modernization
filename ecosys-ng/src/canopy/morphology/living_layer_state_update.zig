@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Runtime EXTRACT `ARLFT/WGLFT/ARSTT` layer and `ARLFC/ARSTC` cell owner.
 /// Layer arrays are cell-major then canopy-layer-major; area is m2 and leaf
@@ -198,7 +199,7 @@ fn totalsFor(
             result.stalk_area_m2 += stalk_area;
         }
     }
-    inline for (@typeInfo(Totals).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Totals)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteLivingCanopyStateUpdate;
     return result;

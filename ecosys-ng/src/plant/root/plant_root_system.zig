@@ -1,5 +1,6 @@
 const std = @import("std");
 const PlantTraits = @import("../../state/plant_traits.zig").PlantTraits;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const biological_domain_count: usize = 2;
 pub const salt_species_count: usize = 8;
@@ -16,7 +17,7 @@ pub const InitializationParameters = struct {
     initial_water_fraction: f64,
 
     pub fn validate(self: InitializationParameters) !void {
-        inline for (@typeInfo(InitializationParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteRootInitializationParameter;
+        inline for (ti_compat.fieldViews(InitializationParameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteRootInitializationParameter;
         if (self.root_nitrogen_to_maximum_protein_multiplier <= 0 or self.root_phosphorus_to_maximum_protein_multiplier <= 0 or self.mycorrhizal_radius_m <= 0 or self.initial_total_water_potential_megapascal > 0 or self.osmotic_water_potential_decrement_megapascal > 0 or self.initial_active_length_m < 0 or self.initial_water_fraction < 0 or self.initial_water_fraction > 1) return error.InvalidRootInitializationParameter;
     }
 };
@@ -38,7 +39,7 @@ pub const MorphologyParameters = struct {
     root_elastic_modulus_megapascal: f64,
 
     pub fn validate(self: MorphologyParameters) !void {
-        inline for (@typeInfo(MorphologyParameters).@"struct".fields) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteRootMorphologyParameter;
+        inline for (ti_compat.fieldViews(MorphologyParameters)) |field| if (!std.math.isFinite(@field(self, field.name))) return error.NonFiniteRootMorphologyParameter;
         if (self.minimum_average_secondary_length_m <= 0 or self.root_elastic_modulus_megapascal <= 0) return error.InvalidRootMorphologyParameter;
     }
 };
@@ -81,7 +82,7 @@ pub fn uptakeCompetition(
     if (minimum_population_fraction < 0 or root_biome_fraction < 0 or significance_threshold_g < 0) return error.InvalidUptakeCompetitionInput;
 
     var result: UptakeCompetition = undefined;
-    inline for (@typeInfo(UptakeCompetition).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(UptakeCompetition)) |field| {
         const population_demand = @field(population_demand_g_per_h, field.name);
         const combined_demand = @field(combined_demand_g_per_h, field.name);
         if (!std.math.isFinite(population_demand) or population_demand < 0 or !std.math.isFinite(combined_demand) or combined_demand < 0) return error.InvalidUptakeCompetitionDemand;
@@ -448,7 +449,7 @@ pub const State = struct {
     }
 
     pub fn saltIndex(self: State, plant: usize, domain: usize, layer: usize, species: SaltSpecies) !usize {
-        return try std.math.add(usize, try std.math.mul(usize, try self.layerIndex(plant, domain, layer), salt_species_count), @intFromEnum(species));
+        return try std.math.add(usize, try std.math.mul(usize, try self.layerIndex(plant, domain, layer), salt_species_count), @backingInt(species));
     }
 
     pub fn substrateIndex(self: State, plant: usize, domain: usize, layer: usize, substrate: usize) !usize {
@@ -784,7 +785,7 @@ pub const State = struct {
                     return error.InvalidRootedLayerBounds;
             }
         }
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| if (!std.math.isFinite(value)) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| if (!std.math.isFinite(value)) {
             std.log.err("non-finite plant root state: field={s} index={d} value={e}", .{ field.name, index, value });
             return error.NonFinitePlantRootState;
         };
@@ -986,7 +987,7 @@ const FloatFieldExtent = enum(u8) {
 
 const float_field_count = count: {
     var count: usize = 0;
-    for (@typeInfo(State).@"struct".fields) |field| {
+    for (ti_compat.fieldViews(State)) |field| {
         if (field.type == []f64) count += 1;
     }
     break :count count;
@@ -998,7 +999,7 @@ const float_field_extent_kinds: [float_field_count]FloatFieldExtent = kinds: {
     @setEvalBranchQuota(20000);
     var result: [float_field_count]FloatFieldExtent = undefined;
     var index: usize = 0;
-    for (@typeInfo(State).@"struct".fields) |field| {
+    for (ti_compat.fieldViews(State)) |field| {
         if (field.type == []f64) {
             result[index] = floatFieldExtentKind(field.name);
             index += 1;
@@ -1034,7 +1035,7 @@ fn floatFieldExtentKind(comptime name: []const u8) FloatFieldExtent {
 noinline fn floatFieldPointers(state: *State) FloatFieldPointers {
     var result: FloatFieldPointers = undefined;
     comptime var index: usize = 0;
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         result[index] = &@field(state, field.name);
         index += 1;
     };

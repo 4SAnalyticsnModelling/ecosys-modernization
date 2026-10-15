@@ -1,5 +1,6 @@
 const std = @import("std");
 const execution_calendar_date = @import("../../driver/execution_calendar_date.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const GrowthHabit = enum { annual, perennial };
 pub const PhenologyType = enum { evergreen, winter_deciduous, drought_deciduous, winter_and_drought_deciduous, drought_shortening_day, drought_lengthening_day };
@@ -279,7 +280,7 @@ pub const State = struct {
     }
 
     pub fn validateFinite(self: State) !void {
-        for (self.branches, 0..) |branch, index| inline for (@typeInfo(BranchState).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(branch, field.name))) {
+        for (self.branches, 0..) |branch, index| inline for (ti_compat.fieldViews(BranchState)) |field| if (field.type == f64 and !std.math.isFinite(@field(branch, field.name))) {
             std.log.err("non-finite growth-stage state: branch={d} field={s} value={e}", .{ index, field.name, @field(branch, field.name) });
             return error.NonFiniteGrowthStageState;
         };
@@ -379,9 +380,9 @@ pub fn refreshActiveLeafIndex(state: *BranchState) void {
 }
 
 fn validate(state: BranchState, node_increment: f64, inputs: RuntimeInputs, parameters: SpeciesParameters) !void {
-    inline for (@typeInfo(BranchState).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(state, field.name))) return error.NonFiniteGrowthStageState;
-    inline for (@typeInfo(RuntimeInputs).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteGrowthStageInput;
-    inline for (@typeInfo(SpeciesParameters).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteGrowthStageParameter;
+    inline for (ti_compat.fieldViews(BranchState)) |field| if (field.type == f64 and !std.math.isFinite(@field(state, field.name))) return error.NonFiniteGrowthStageState;
+    inline for (ti_compat.fieldViews(RuntimeInputs)) |field| if (field.type == f64 and !std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteGrowthStageInput;
+    inline for (ti_compat.fieldViews(SpeciesParameters)) |field| if (field.type == f64 and !std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteGrowthStageParameter;
     if (!std.math.isFinite(node_increment) or node_increment < 0 or parameters.maturity_group_node_count <= 0 or parameters.branch_floral_node_requirement < 0 or parameters.vegetative_stage_duration <= 0 or parameters.reproductive_stage_duration <= 0) return error.InvalidGrowthStageInput;
     try validateRuntimeDate(inputs.day_of_year, inputs.current_year);
     try validateRuntimeDate(inputs.planting_day_of_year, inputs.planting_year);

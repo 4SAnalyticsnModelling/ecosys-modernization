@@ -2,13 +2,14 @@ const std = @import("std");
 const CellRange = @import("../../core/compute.zig").CellRange;
 const Roots = @import("plant_root_system.zig");
 const RootMetabolism = @import("plant_root_metabolism.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     minimum_partner_water_volume_ratio: f64,
     exchange_fraction_per_h: f64,
 
     pub fn validate(self: Parameters) !void {
-        inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Parameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value < 0 or value > 1)
                 return error.InvalidRootMycorrhizalExchangeParameter;
@@ -150,7 +151,7 @@ pub fn calculate(
         .nitrogen_g_n = rate_timestep * (root_nitrogen_g_n * mycorrhizal_carbon_g_c - mycorrhizal_nitrogen_g_n * root_carbon_g_c) / carbon_total,
         .phosphorus_g_p = rate_timestep * (root_phosphorus_g_p * mycorrhizal_carbon_g_c - mycorrhizal_phosphorus_g_p * root_carbon_g_c) / carbon_total,
     } else .{ .carbon_g_c = carbon, .nitrogen_g_n = 0, .phosphorus_g_p = 0 };
-    inline for (@typeInfo(Transfer).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Transfer)) |field|
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootMycorrhizalExchange;
     return result;
 }

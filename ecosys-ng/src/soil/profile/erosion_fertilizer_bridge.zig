@@ -2,8 +2,9 @@ const std = @import("std");
 const inventory_module = @import("../../management/fertilizer_nitrogen_inventory.zig");
 const fertilizer = @import("../nutrients/fertilizer_dissolution.zig");
 const constituents = @import("../../erosion/eroded_constituents.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
-pub const component_count: usize = @typeInfo(fertilizer.FertilizerState).@"struct".fields.len;
+pub const component_count: usize = @typeInfo(fertilizer.FertilizerState).@"struct".field_names.len;
 
 pub const Exported = struct {
     nitrogen_g_n: f64,
@@ -38,7 +39,7 @@ pub fn packSurfaceMapped(inventory: *const inventory_module.State, top_layer_by_
         const local = if (top_layer_by_cell.len == 0) 0 else top_layer_by_cell[cell];
         if (local >= inventory.layer_capacity) return error.FertilizerErosionDimensionMismatch;
         const top = cell * inventory.layer_capacity + local;
-        inline for (@typeInfo(fertilizer.FertilizerState).@"struct".fields, 0..) |field, component| {
+        inline for (ti_compat.fieldViews(fertilizer.FertilizerState), 0..) |field, component| {
             const value = @field(inventory.soil[top], field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidFertilizerErosionState;
             output[cell * component_count + component] = value;
@@ -60,7 +61,7 @@ pub fn unpackSurfaceMapped(inventory: *inventory_module.State, top_layer_by_cell
     for (0..inventory.cell_count) |cell| {
         const local = if (top_layer_by_cell.len == 0) 0 else top_layer_by_cell[cell];
         const top = try inventory.index(cell, local);
-        inline for (@typeInfo(fertilizer.FertilizerState).@"struct".fields, 0..) |field, component|
+        inline for (ti_compat.fieldViews(fertilizer.FertilizerState), 0..) |field, component|
             @field(inventory.soil[top], field.name) = input[cell * component_count + component];
     }
 }
@@ -79,7 +80,7 @@ pub noinline fn exported(
     var nitrogen_mol: f64 = 0;
     for (0..workspace.cell_count) |cell| {
         const first = cell * component_count;
-        inline for (@typeInfo(fertilizer.FertilizerState).@"struct".fields, 0..) |_, component| {
+        inline for (ti_compat.fieldViews(fertilizer.FertilizerState), 0..) |_, component| {
             const amount = workspace.exported[first + component];
             if (!std.math.isFinite(amount) or amount < 0)
                 return error.InvalidFertilizerErosionExport;

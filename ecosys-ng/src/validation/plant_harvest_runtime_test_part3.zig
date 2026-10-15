@@ -28,6 +28,8 @@ const std = @import("std");
 const surface_nutrients = @import("../soil/biogeochemistry/organic_matter_fire_exchange.zig");
 const symbiotic_fixation = @import("../canopy/symbiosis/plant_symbiotic_fixation.zig");
 const plant_harvest_runtime = @import("../management/plant_harvest_runtime.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 test "source-order dead branch litterfall conserves runtime branch components" {
     const kinetics: litter_partition.ElementFractions = .{
         .carbon = .{ 1, 0, 0, 0 },
@@ -117,7 +119,7 @@ test "source-order dead branch storage recovery preserves six assignments" {
 
 test "source-order dead branch canopy reset preserves node zero exceptions" {
     var scalar: plant_harvest_runtime.SourceOrderDeadBranchScalarResetState = undefined;
-    inline for (@typeInfo(plant_harvest_runtime.SourceOrderDeadBranchScalarResetState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(plant_harvest_runtime.SourceOrderDeadBranchScalarResetState)) |field| {
         if (field.type == f64) {
             @field(scalar, field.name) = 1;
         } else {
@@ -174,10 +176,10 @@ test "source-order dead branch canopy reset preserves node zero exceptions" {
     try std.testing.expectEqual(@as(f64, 0), scalar.host_mobile.carbon_g);
     try std.testing.expectEqual(@as(f64, 1), nodes[0].bundle_sheath_mobile_carbon_g_c);
     try std.testing.expectEqual(@as(f64, 0), nodes[1].bundle_sheath_mobile_carbon_g_c);
-    try std.testing.expectEqual([_]f64{4} ** 4, node_layers[0].projected_leaf_surface_m2);
-    try std.testing.expectEqual([_]f64{0} ** 4, node_layers[1].projected_leaf_surface_m2);
+    try std.testing.expectEqual(@as([4]f64, @splat(@as(f64, 4))), node_layers[0].projected_leaf_surface_m2);
+    try std.testing.expectEqual(@as([4]f64, @splat(@as(f64, 0))), node_layers[1].projected_leaf_surface_m2);
     try std.testing.expectEqual(@as(f64, 0), stalk_area[0]);
-    try std.testing.expectEqual([_]f64{0} ** 4, stalk_surface[0]);
+    try std.testing.expectEqual(@as([4]f64, @splat(@as(f64, 0))), stalk_surface[0]);
 }
 
 test "source-order whole plant termination preserves winter annual reseed branch" {
@@ -424,7 +426,7 @@ test "source-order dead root depth reset preserves axis-major domain order" {
         .nitrogen_g = 0.1,
         .phosphorus_g = 0.01,
     };
-    var totals = [_]canopy.ElementalMass{mass} ** 6;
+    var totals = @as([6]canopy.ElementalMass, @splat(@as(canopy.ElementalMass, mass)));
     var deepest_active: usize = 9;
     var active_axes: usize = 2;
     try plant_harvest_runtime.sourceOrderResetDeadRootDepth(true, 3, 0.04, .{
@@ -437,7 +439,7 @@ test "source-order dead root depth reset preserves axis-major domain order" {
         .active_root_axis_count = &active_axes,
     });
     try std.testing.expectEqual([_]usize{ 3, 3 }, deepest_by_axis);
-    try std.testing.expectEqual([_]f64{0.04} ** 6, depths);
+    try std.testing.expectEqual(@as([6]f64, @splat(@as(f64, 0.04))), depths);
     for (totals) |total|
         try std.testing.expectEqual(@as(f64, 0), total.carbon_g);
     try std.testing.expectEqual(@as(usize, 3), deepest_active);
@@ -597,11 +599,11 @@ test "source-order complete death branch reset clears every runtime branch field
     var dead = [_]plant_harvest_runtime.SourceOrderCompleteDeathBranchState{ populated, populated };
     try plant_harvest_runtime.sourceOrderResetCompleteDeathBranches(true, true, &dead);
     for (dead) |branch| {
-        inline for (@typeInfo(plant_harvest_runtime.SourceOrderCompleteDeathBranchState).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(plant_harvest_runtime.SourceOrderCompleteDeathBranchState)) |field| {
             const value = @field(branch, field.name);
             if (field.type == f64) {
                 try std.testing.expectEqual(@as(f64, 0), value);
-            } else inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element|
+            } else inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element|
                 try std.testing.expectEqual(@as(f64, 0), @field(value, element.name));
         }
     }

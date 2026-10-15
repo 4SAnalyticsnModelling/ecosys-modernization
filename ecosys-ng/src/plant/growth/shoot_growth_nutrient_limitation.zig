@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     growth_respiration_unlimited_g_c: f64,
@@ -21,7 +22,7 @@ pub const Inputs = struct {
 /// The source admission gate deliberately tests only CNSHX or CNLFX; a
 /// phosphorus-only demand therefore does not admit growth.
 pub fn limit(inputs: Inputs) !f64 {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value))
             return error.InvalidShootGrowthNutrientLimitationInput;

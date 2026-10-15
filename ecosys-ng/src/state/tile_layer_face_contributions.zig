@@ -4,6 +4,7 @@ const lateral_store = @import("tile_lateral_contribution_store.zig");
 const solute_transport = @import("../soil/solute/transport.zig");
 const gas_transport = @import("../soil/gas/transport.zig");
 
+
 pub const Face = struct {
     source_layer_cell: usize,
     destination_layer_cell: usize,
@@ -459,7 +460,7 @@ test "accepted layered face fluxes round trip through two Morton passes" {
         .{ .first_cell = 7, .second_cell = 10 },
     };
     const accepted_gas_flux_g =
-        [_]f64{0.01} ** (faces.len * gas_transport.species_count);
+        @as([(faces.len * gas_transport.species_count)]f64, @splat(@as(f64, 0.01)));
     var gas_adapter_record_count: usize = 0;
     for (tile_plan.tiles, 0..) |_, tile_index| {
         var gas_contributions =

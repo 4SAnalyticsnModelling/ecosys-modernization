@@ -64,6 +64,7 @@
 //! after initialization. No discrepancy.
 //!
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const GasStateSource = enum {
     atmospheric_equilibrium,
@@ -153,11 +154,11 @@ pub fn initialize(
 ) !?GasInventories {
     if (control.gas_state_source != .atmospheric_equilibrium or
         control.gas_initialization_index != 0) return null;
-    inline for (@typeInfo(AtmosphericConcentrations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(AtmosphericConcentrations)) |field| {
         const value = @field(atmosphere, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidAtmosphericGasConcentration;
     }
-    inline for (@typeInfo(SolubilityParameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SolubilityParameters)) |field| {
         if (!std.math.isFinite(@field(solubility, field.name))) return error.InvalidGasSolubilityParameter;
     }
     if (!std.math.isFinite(environment.air_volume_m3) or environment.air_volume_m3 < 0 or
@@ -189,7 +190,7 @@ pub fn initialize(
         .aqueous_nitrous_oxide_g = correctedDissolvedInventory(atmosphere.nitrous_oxide_g_per_m3, solubility.nitrous_oxide_reference, solubility.nitrous_oxide_exponential_coefficient, environment.temperature_reference_transform, 0.897, 0.0299 * environment.air_temperature_c, environment.aqueous_volume_m3),
         .aqueous_hydrogen_g = correctedDissolvedInventory(atmosphere.hydrogen_g_per_m3, solubility.hydrogen_reference, solubility.hydrogen_exponential_coefficient, environment.temperature_reference_transform, 0.597, 0.0199 * environment.air_temperature_c, environment.aqueous_volume_m3),
     };
-    inline for (@typeInfo(GasInventories).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(GasInventories)) |field| {
         const value = @field(result, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidInitialSoilGasInventory;
     }
@@ -198,13 +199,13 @@ pub fn initialize(
 
 fn filledAtmosphere(value: f64) AtmosphericConcentrations {
     var result: AtmosphericConcentrations = undefined;
-    inline for (@typeInfo(AtmosphericConcentrations).@"struct".fields) |field| @field(result, field.name) = value;
+    inline for (ti_compat.fieldViews(AtmosphericConcentrations)) |field| @field(result, field.name) = value;
     return result;
 }
 
 fn filledSolubility(reference: f64, coefficient: f64) SolubilityParameters {
     var result: SolubilityParameters = undefined;
-    inline for (@typeInfo(SolubilityParameters).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SolubilityParameters)) |field|
         @field(result, field.name) = if (std.mem.endsWith(u8, field.name, "reference")) reference else coefficient;
     return result;
 }
@@ -301,7 +302,7 @@ test "STARTE-010 guard: this twin agrees with the bound owner on the gaseous and
     )).?;
 
     // Gaseous mass is concentration * VOLP in both.
-    const oxygen = @intFromEnum(transport.Species.oxygen);
+    const oxygen = @backingInt(transport.Species.oxygen);
     try std.testing.expectApproxEqRel(
         state.gaseous_mass_g[oxygen],
         twin.gaseous_oxygen_g,

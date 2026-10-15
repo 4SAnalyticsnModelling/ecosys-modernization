@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Signed convective-plus-diffusive solute transfer from `trnsfr.f` for
 /// one of the three REDIST biochemical fractions K=0..2, accumulated over
@@ -37,10 +38,10 @@ pub fn update(
     pools: [3]OrganicPool,
 ) ![3]OrganicPool {
     for (0..3) |k| {
-        inline for (@typeInfo(OrganicFlux).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(OrganicFlux)) |field|
             if (!std.math.isFinite(@field(fluxes[k], field.name)))
                 return error.InvalidLitterOrganicFlux;
-        inline for (@typeInfo(OrganicPool).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(OrganicPool)) |field|
             if (!std.math.isFinite(@field(pools[k], field.name)))
                 return error.InvalidLitterOrganicPool;
     }
@@ -53,7 +54,7 @@ pub fn update(
             .dop_g = pools[k].dop_g + fluxes[k].dop_g,
             .acetate_g = pools[k].acetate_g + fluxes[k].acetate_g,
         };
-        inline for (@typeInfo(OrganicPool).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(OrganicPool)) |field|
             if (!std.math.isFinite(@field(result[k], field.name)))
                 return error.NonFiniteLitterOrganicPool;
     }

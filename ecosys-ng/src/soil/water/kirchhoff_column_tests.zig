@@ -17,6 +17,7 @@ const retention = @import("retention.zig");
 const kirchhoff = @import("kirchhoff.zig");
 const water_flux = @import("flux.zig");
 
+
 const layer_count = 6;
 const layer_thickness_m = 0.10;
 const face_area_m2 = 1.0;
@@ -65,7 +66,7 @@ fn stepColumn(
             gravitational_mpa_per_m;
     }
 
-    var delta = [_]f64{0} ** layer_count;
+    var delta = @as([layer_count]f64, @splat(@as(f64, 0)));
     for (0..layer_count - 1) |upper| {
         const lower = upper + 1;
         const source_conductivity = switch (scheme) {
@@ -130,7 +131,7 @@ fn runColumn(scheme: Scheme, hours: usize) ![layer_count]f64 {
     const initial_fraction = parameters.residual_water_content_m3_per_m3 +
         0.02 * (parameters.saturated_water_content_m3_per_m3 -
             parameters.residual_water_content_m3_per_m3);
-    var water_m3 = [_]f64{initial_fraction * bulk_volume_m3} ** layer_count;
+    var water_m3 = @as([layer_count]f64, @splat(@as(f64, initial_fraction * bulk_volume_m3)));
     const infiltration_m3 = 0.002 * face_area_m2;
     for (0..hours) |_| {
         try stepColumn(scheme, parameters, &water_m3, infiltration_m3);
@@ -186,7 +187,7 @@ test "KIRCH-F6 conservation is unchanged, and is not evidence of the fix" {
         const initial_fraction = parameters.residual_water_content_m3_per_m3 +
             0.30 * (parameters.saturated_water_content_m3_per_m3 -
                 parameters.residual_water_content_m3_per_m3);
-        var water_m3 = [_]f64{initial_fraction * bulk_volume_m3} ** layer_count;
+        var water_m3 = @as([layer_count]f64, @splat(@as(f64, initial_fraction * bulk_volume_m3)));
         var total_before: f64 = 0;
         for (water_m3) |value| total_before += value;
         // No infiltration, so redistribution alone must conserve exactly.

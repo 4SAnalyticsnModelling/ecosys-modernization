@@ -5,6 +5,7 @@ const cation = @import("../solute/cation_exchange.zig");
 const geochemistry = @import("../solute/geochemistry_network.zig");
 const aqueous = @import("../solute/aqueous_network.zig");
 const ZoneFractions = @import("../solute/charge_classification.zig").ZoneFractions;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const ZoneWaterVolumes = struct {
     shared_m3: f64,
@@ -60,7 +61,7 @@ pub fn transferAqueousLayerFraction(
     if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1) return error.InvalidChemistryLayerRemapInput;
     var next_source_aqueous = chemistry.aqueous[source];
     var next_destination_aqueous = chemistry.aqueous[destination];
-    inline for (@typeInfo(aqueous.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(aqueous.State)) |field| {
         if ((comptime isBasePondedAqueousField(field.name)) or dynamic_salts) {
             const source_scale = aqueousFieldVolume(field.name, source_water);
             const destination_scale = aqueousFieldVolume(field.name, destination_water);
@@ -89,7 +90,7 @@ pub fn transferAqueousLayerFraction(
     var next_destination_non_band = chemistry.non_band_phosphate[destination];
     var next_source_band = chemistry.band_phosphate[source];
     var next_destination_band = chemistry.band_phosphate[destination];
-    inline for (@typeInfo(phosphate.State).@"struct".fields) |field| if ((comptime isBaseAqueousPhosphateField(field.name)) or (dynamic_salts and (comptime isAqueousPhosphateField(field.name)))) {
+    inline for (ti_compat.fieldViews(phosphate.State)) |field| if ((comptime isBaseAqueousPhosphateField(field.name)) or (dynamic_salts and (comptime isAqueousPhosphateField(field.name)))) {
         const non_band = try transferConcentration(@field(next_source_non_band, field.name), @field(next_destination_non_band, field.name), source_water.phosphate_non_band_m3, destination_water.phosphate_non_band_m3, source_water_after.phosphate_non_band_m3, destination_water_after.phosphate_non_band_m3, fraction);
         @field(next_source_non_band, field.name) = non_band.source;
         @field(next_destination_non_band, field.name) = non_band.destination;
@@ -157,7 +158,7 @@ pub fn transferSolidLayerFraction(
     var next_destination_cations = chemistry.cation_exchange_mol_per_megagram[destination];
     var next_source_pending_cations = chemistry.pending_cation_exchange_mol[source];
     var next_destination_pending_cations = chemistry.pending_cation_exchange_mol[destination];
-    inline for (@typeInfo(cation.Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(cation.Cations)) |field| {
         const next = try transferOwnedAmount(
             @field(next_source_cations, field.name),
             @field(next_destination_cations, field.name),
@@ -205,7 +206,7 @@ pub fn transferSolidLayerFraction(
             zone_fractions.source_after.phosphate_band,
             zone_fractions.destination_after.phosphate_band,
         },
-    }) |zones| inline for (@typeInfo(phosphate.State).@"struct".fields) |field| {
+    }) |zones| inline for (ti_compat.fieldViews(phosphate.State)) |field| {
         if (comptime isPondedPhosphateField(field.name)) {
             const per_mass = comptime std.mem.endsWith(u8, field.name, "_per_megagram");
             const source_scale = (if (per_mass) source_soil_mass_megagrams else source_water_m3) * zones[4];
@@ -227,7 +228,7 @@ pub fn transferSolidLayerFraction(
     var next_destination_solids = chemistry.geochemistry_solids[destination];
     var next_source_pending_solids = chemistry.pending_geochemistry_solids_mol[source];
     var next_destination_pending_solids = chemistry.pending_geochemistry_solids_mol[destination];
-    inline for (@typeInfo(geochemistry.SolidState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(geochemistry.SolidState)) |field| {
         const next = try transferOwnedAmount(@field(next_source_solids, field.name), @field(next_destination_solids, field.name), @field(next_source_pending_solids, field.name), @field(next_destination_pending_solids, field.name), source_water_m3, destination_water_m3, source_water_after_m3, destination_water_after_m3, fraction);
         @field(next_source_solids, field.name) = next.source_concentration;
         @field(next_destination_solids, field.name) = next.destination_concentration;
@@ -282,7 +283,7 @@ pub fn rebaseSolidSoilMassCarrier(
 
     var next_cations = chemistry.cation_exchange_mol_per_megagram[layer];
     var next_pending_cations = chemistry.pending_cation_exchange_mol[layer];
-    inline for (@typeInfo(cation.Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(cation.Cations)) |field| {
         const next = try rebaseOwnedAmount(
             @field(next_cations, field.name),
             @field(next_pending_cations, field.name),
@@ -306,7 +307,7 @@ pub fn rebaseSolidSoilMassCarrier(
     inline for (.{
         .{ &next_non_band, &next_pending_non_band, fractions.phosphate_non_band },
         .{ &next_band, &next_pending_band, fractions.phosphate_band },
-    }) |zone| inline for (@typeInfo(phosphate.State).@"struct".fields) |field| {
+    }) |zone| inline for (ti_compat.fieldViews(phosphate.State)) |field| {
         if (comptime std.mem.endsWith(u8, field.name, "_per_megagram")) {
             const next = try rebaseOwnedAmount(
                 @field(zone[0].*, field.name),
@@ -477,7 +478,7 @@ fn validateZoneFractionTransition(transition: ZoneFractionTransition) !void {
         transition.source_after,
         transition.destination_after,
     }) |fractions| {
-        inline for (@typeInfo(ZoneFractions).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ZoneFractions)) |field| {
             const value = @field(fractions, field.name);
             if (!std.math.isFinite(value) or value < 0 or value > 1)
                 return error.InvalidChemistryLayerRemapInput;
@@ -672,7 +673,7 @@ fn aqueousFieldVolume(comptime name: []const u8, volumes: ZoneWaterVolumes) f64 
 }
 
 fn validateZoneWater(volumes: ZoneWaterVolumes) !void {
-    inline for (@typeInfo(ZoneWaterVolumes).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ZoneWaterVolumes)) |field| {
         const value = @field(volumes, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidChemistryLayerRemapInput;
     }

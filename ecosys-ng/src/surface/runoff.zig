@@ -2,6 +2,8 @@ const std = @import("std");
 const terrain_module = @import("../state/terrain_hydrology.zig");
 const spatial_grid = @import("../state/spatial_grid.zig");
 const lateral_store = @import("../state/tile_lateral_contribution_store.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const Parameters = struct {
     ground_surface_retention_m3_per_m2: f64,
@@ -77,7 +79,7 @@ pub const State = struct {
     /// allocation failure edge.
     noinline fn deinitAllocatedPrefix(self: *State, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -96,7 +98,7 @@ pub const State = struct {
         result.cell_count = cell_count;
         var allocated: usize = 0;
         errdefer result.deinitAllocatedPrefix(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, cell_count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -106,7 +108,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -114,7 +116,7 @@ pub const State = struct {
 test "surface runoff state releases every partial allocation prefix" {
     const allocation_count = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(State).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) count += 1;
         }
         break :count count;
@@ -376,7 +378,7 @@ fn calculateHeatChanges(
             state.south_runoff_m3_per_step[source],
             state.north_runoff_m3_per_step[source],
         };
-        var heat_fluxes = [_]f64{0} ** 4;
+        var heat_fluxes = @as([4]f64, @splat(@as(f64, 0)));
         for (water_fluxes, &heat_fluxes) |water_flux, *heat_flux| {
             heat_flux.* = liquid_capacity * temperature * water_flux;
             if (!std.math.isFinite(heat_flux.*) or heat_flux.* < 0)
@@ -595,7 +597,7 @@ fn directionalFlux(source: usize, destination: ?usize, source_surface_m: f64, av
 }
 
 fn validateParameters(parameters: Parameters, boundaries: BoundaryFractions) !void {
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) < 0) return error.InvalidSurfaceRunoffParameter;
+    inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(parameters, field.name)) or @field(parameters, field.name) < 0) return error.InvalidSurfaceRunoffParameter;
     if (parameters.runoff_roughness_h_per_m_one_third <= 0 or parameters.maximum_hydraulic_depth_m <= 0 or parameters.manning_time_conversion_s_per_h <= 0 or parameters.ice_density_megagrams_per_m3 <= 0 or parameters.ice_density_megagrams_per_m3 > 1) return error.InvalidSurfaceRunoffParameter;
     inline for (.{ boundaries.north, boundaries.east, boundaries.south, boundaries.west }) |values| for (values) |value| if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidSurfaceRunoffBoundary;
 }

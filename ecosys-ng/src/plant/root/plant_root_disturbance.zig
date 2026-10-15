@@ -3,6 +3,7 @@ const Symbiosis = @import("../../canopy/symbiosis/plant_symbiotic_fixation.zig")
 const LitterPartition = @import("../partition/litter.zig");
 const RootMetabolism = @import("plant_root_metabolism.zig");
 const RootSystem = @import("plant_root_system.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const CombustionParameters = struct {
     minimum_combustion_temperature_k: f64,
@@ -28,7 +29,7 @@ pub const CombustionParameters = struct {
     methane_combustion_energy_megajoules_per_g_c: f64,
 
     pub fn validate(self: CombustionParameters) !void {
-        inline for (@typeInfo(CombustionParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(CombustionParameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value)) return error.InvalidPlantFireCombustionParameter;
             if (comptime std.mem.startsWith(u8, field.name, "maximum_") and std.mem.endsWith(u8, field.name, "_charcoal_fraction")) {
@@ -342,7 +343,7 @@ pub fn sourceOrderHostHarvestLitter(
                 removed.phosphorus_g_p * (1 - woody_fraction.phosphorus) * fine_root_litter.phosphorus[component];
         }
     }
-    inline for (@typeInfo(Symbiosis.Pool).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Symbiosis.Pool)) |field|
         if (!std.math.isFinite(@field(result.removed, field.name))) return error.NonFiniteHostRootHarvest;
     return result;
 }
@@ -603,7 +604,7 @@ pub fn rootGasWithdrawalForCell(roots: *const RootSystem.State, cell: usize, spe
         result.ammonia_g_n_per_h += roots.withdrawal_ammonia_loss_g_n_per_h[plant];
         result.hydrogen_g_h_per_h += roots.withdrawal_hydrogen_loss_g_h_per_h[plant];
     }
-    inline for (@typeInfo(CellRootGasWithdrawal).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(CellRootGasWithdrawal)) |field|
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteRootGasWithdrawal;
     return result;
 }
@@ -870,7 +871,7 @@ pub fn withdrawRootAxisLayersSourceOrder(
 }
 
 fn validatePool(pool: Symbiosis.Pool) !void {
-    inline for (@typeInfo(Symbiosis.Pool).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Symbiosis.Pool)) |field| {
         const value = @field(pool, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidRootSymbiontPool;
     }

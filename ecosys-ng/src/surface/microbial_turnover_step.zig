@@ -5,6 +5,7 @@ const metabolism = @import("../soil/microbial/metabolism.zig");
 const respiration = @import("microbial_respiration_step.zig");
 const maintenance = @import("microbial_maintenance_step.zig");
 
+
 pub const structural_component_count: usize = 2;
 
 pub const Parameters = struct {
@@ -167,8 +168,8 @@ test "surface turnover reproduces recycling decomposition and senescence routing
     maintenance_state.senescence_respiration_deficit_g_c[0] = 0.2;
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    const n = [_]f64{0.1} ** (organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
-    const p = [_]f64{0.02} ** (organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
+    const n = @as([(organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.1)));
+    const p = @as([(organic.substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.02)));
     var context: ApplyContext = .{ .result = &state, .surface_organic = &organic_state, .maintenance = &maintenance_state, .growth_temperature_response = &.{1}, .matric_plus_osmotic_potential_megapascal = &.{0}, .humification_fraction = &.{0.2}, .microbial_nitrogen_to_carbon_g_n_per_g_c = &n, .microbial_phosphorus_to_carbon_g_p_per_g_c = &p, .labile_biomass_fraction = 0.5, .decomposition_density_half_saturation_g_c_per_g_c = 0.01, .humus_nitrogen_per_carbon_g_n_per_g_c = 0.167, .humus_phosphorus_per_carbon_g_p_per_g_c = 0.0167, .negligible_carbon_g_c = 1e-12, .timestep_h = 1, .parameters = .{ .basal_decomposition_rate_per_h = .{ 0.01, 0.001 }, .minimum_carbon_recycling_fraction = 0.167, .carbon_recycling_range_fraction = 0.333, .maximum_nitrogen_recycling_fraction = 0.333, .maximum_phosphorus_recycling_fraction = 0.333, .dissolved_priming_rate_per_h = 0.01, .microbial_priming_rate_per_h = 0.001 } };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(state.basal[0].decomposed.carbon_g_c > 0);

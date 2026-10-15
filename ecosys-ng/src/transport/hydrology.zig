@@ -3,6 +3,7 @@ const grid_module = @import("../state/grid.zig");
 const snow_module = @import("../soil/solute/snow_solute_transport.zig");
 const solute = @import("../soil/solute/transport.zig");
 const layer_geometry = @import("../soil/profile/layer_geometry.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -201,7 +202,7 @@ pub const State = struct {
     }
 
     pub fn validateFinite(self: *const State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             for (@field(self, field.name), 0..) |value, index| {
                 if (!std.math.isFinite(value)) {
                     std.log.err("non-finite transport hydrology: field={s} index={d} value={e}", .{ field.name, index, value });

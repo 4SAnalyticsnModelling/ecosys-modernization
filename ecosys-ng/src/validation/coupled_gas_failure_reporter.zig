@@ -4,6 +4,7 @@ const solver = @import("../soil/gas/coupled_gas_solver.zig");
 const snapshot = @import("coupled_gas_failure_snapshot.zig");
 const gas = @import("../soil/gas/transport.zig");
 
+
 pub const Options = struct {
     write_buffer_bytes: usize = 64 * 1024,
     replace_existing: bool = true,
@@ -194,18 +195,18 @@ const TestFixture = struct {
         return .{
             .state = state,
             .faces = .{.{ .first_cell = 0, .second_cell = 1 }},
-            .conductance = [_]f64{0.01} ** gas.species_count,
+            .conductance = @as([gas.species_count]f64, @splat(@as(f64, 0.01))),
             .boundaries = .{.{
                 .cell_index = 0,
                 .aerodynamic_conductance_m3_per_step = 0.1,
-                .interior_conductance_m3_per_step = [_]f64{0.2} ** gas.species_count,
-                .atmospheric_concentration_g_per_m3 = [_]f64{0.001} ** gas.species_count,
+                .interior_conductance_m3_per_step = @as([gas.species_count]f64, @splat(@as(f64, 0.2))),
+                .atmospheric_concentration_g_per_m3 = @as([gas.species_count]f64, @splat(@as(f64, 0.001))),
             }},
             .water = .{ 0.3, 0.4 },
             .band_water = .{ 0.01, 0.02 },
-            .solubility = [_]f64{0.8} ** (2 * gas.species_count),
-            .exchange = [_]f64{0.1} ** (2 * gas.species_count),
-            .band_exchange = [_]f64{0.05} ** (2 * gas.species_count),
+            .solubility = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0.8))),
+            .exchange = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0.1))),
+            .band_exchange = @as([(2 * gas.species_count)]f64, @splat(@as(f64, 0.05))),
             .bubbling = .{ true, false },
             .bubble_receivers = .{ 1, null },
         };

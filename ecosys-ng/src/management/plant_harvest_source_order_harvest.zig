@@ -13,6 +13,7 @@ const grazing_manure = @import("grazing_manure.zig");
 const __parent = @import("plant_harvest_runtime.zig");
 const group_misc = @import("plant_harvest_source_order_misc.zig");
 const group_tillage = @import("plant_harvest_source_order_tillage.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const harvest_product_component_count = __parent.harvest_product_component_count;
 pub const sumHarvestProductComponents = __parent.sumHarvestProductComponents;
@@ -99,7 +100,7 @@ pub fn sourceOrderStandingDeadHarvest(
         .remaining_by_component = input.standing_dead_by_component,
     };
     for (&result.remaining_by_component) |*mass| {
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
             const initial = @field(mass, field.name);
             @field(result.harvested, field.name) += (1 - harvested_fraction) * initial;
             @field(result.returned_to_litter, field.name) +=
@@ -139,7 +140,7 @@ pub fn sourceOrderHarvestResidueRouting(
 
     var residue = input.harvested_by_component;
     if (input.harvest_code == 1) {
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
             @field(residue[2], field.name) -=
                 @field(input.harvested_grain, field.name) * input.ecosystem_export_fraction[1];
             if (!std.math.isFinite(@field(residue[2], field.name)) or
@@ -157,7 +158,7 @@ pub fn sourceOrderHarvestResidueRouting(
         input.ecosystem_export_fraction[3],
     };
     for (&residue, fraction_by_component) |*mass, export_fraction| {
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
             @field(mass, field.name) *= 1 - export_fraction;
     }
     return residue;
@@ -289,7 +290,7 @@ pub fn sourceOrderStandingDeadGeometry(
         input.stalk_volume_per_carbon_m3_g_c,
     }) |value| if (!std.math.isFinite(value) or value < 0)
         return error.InvalidStandingDeadGeometry;
-    for (input.components) |mass| inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+    for (input.components) |mass| inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
         const value = @field(mass, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidStandingDeadGeometry;

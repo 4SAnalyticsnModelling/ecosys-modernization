@@ -1,5 +1,6 @@
 const std = @import("std");
 const compute = @import("../../core/compute.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Derived, non-prognostic NITRO rates. Each tiled kernel writes only its own
 /// layer range; inventories are published later by one atomic C/N/O state_update.
@@ -97,7 +98,7 @@ pub const State = struct {
     /// fully unrolled copy of the cleanup loop.
     noinline fn deinitAllocatedPrefix(self: *State, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -115,7 +116,7 @@ pub const State = struct {
         result.process_unit_count_per_layer = process_unit_count_per_layer;
         var allocated: usize = 0;
         errdefer result.deinitAllocatedPrefix(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             const count = if (std.mem.startsWith(u8, field.name, "chemodenitrification_") or std.mem.startsWith(u8, field.name, "layer_")) layer_count else try std.math.mul(usize, layer_count, process_unit_count_per_layer);
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
@@ -125,7 +126,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -137,7 +138,7 @@ pub fn resetTile(context: *ResetContext, range: compute.CellRange) !void {
     if (range.first > range.end or range.end > state.layer_count) return error.SoilNitrogenFluxRangeOutOfBounds;
     const first_unit = try std.math.mul(usize, range.first, state.process_unit_count_per_layer);
     const end_unit = try std.math.mul(usize, range.end, state.process_unit_count_per_layer);
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         const values = @field(state, field.name);
         if (std.mem.startsWith(u8, field.name, "chemodenitrification_") or std.mem.startsWith(u8, field.name, "layer_"))
             @memset(values[range.first..range.end], 0)
@@ -162,7 +163,7 @@ test "soil nitrogen flux workspace resets independent runtime layer tiles" {
 test "soil nitrogen flux workspace releases every partial allocation prefix" {
     const allocation_count = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(State).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) count += 1;
         }
         break :count count;

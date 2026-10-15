@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Concentrations = struct {
     mobile_carbon_g_c_per_g_c: f64,
@@ -44,12 +45,12 @@ pub fn calculate(
     if (profile_count == 0 or root_profile_index >= profile_count)
         return error.ShootRecyclingProfileIndexOutOfBounds;
 
-    inline for (@typeInfo(Concentrations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Concentrations)) |field| {
         const value = @field(concentrations, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidShootRecyclingConcentration;
     }
-    inline for (@typeInfo(Inhibition).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inhibition)) |field| {
         const value = @field(inhibition, field.name);
         if (!std.math.isFinite(value) or value <= 0)
             return error.InvalidShootRecyclingInhibition;
@@ -98,7 +99,7 @@ pub fn calculate(
         .nitrogen = nitrogen_constraint * coefficients.maximum_nitrogen_fraction[root_profile_index],
         .phosphorus = phosphorus_constraint * coefficients.maximum_phosphorus_fraction[root_profile_index],
     };
-    inline for (@typeInfo(Fractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Fractions)) |field| {
         const value = @field(result, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.InvalidShootRecyclingResult;

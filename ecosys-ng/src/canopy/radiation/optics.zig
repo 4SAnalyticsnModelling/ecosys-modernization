@@ -3,6 +3,7 @@ const CellRange = @import("../../core/compute.zig").CellRange;
 const Assignments = @import("../../state/plant_assignment.zig").Assignments;
 const Catalog = @import("../../state/plant_catalog.zig").Catalog;
 const RadiationState = @import("radiation.zig").State;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const WoodyOpticsParameters = struct {
     stalk_shortwave_albedo: f64,
@@ -76,7 +77,7 @@ pub const State = struct {
         result.direct_leaf_par_micromol_per_m2_per_s = try allocator.alloc(f64, count);
         errdefer allocator.free(result.direct_leaf_par_micromol_per_m2_per_s);
         result.diffuse_leaf_par_micromol_per_m2_per_s = try allocator.alloc(f64, count);
-        inline for (@typeInfo(State).@"struct".fields) |field| switch (field.type) {
+        inline for (ti_compat.fieldViews(State)) |field| switch (field.type) {
             []f64 => @memset(@field(result, field.name), 0),
             []bool => @memset(@field(result, field.name), false),
             else => {},
@@ -119,7 +120,7 @@ pub const State = struct {
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) for (@field(self, field.name), 0..) |value, index| {
             if (!std.math.isFinite(value)) {
                 std.log.err("non-finite canopy optics: field={s} index={d} value={e}", .{ field.name, index, value });
                 return error.NonFiniteCanopyOptics;
@@ -182,7 +183,7 @@ test "absorption kernel supports inactive slots beyond assigned species" {
     };
     defer state.deinit();
     @memset(state.species_is_active, false);
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) @memset(@field(state, field.name), 0);
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) @memset(@field(state, field.name), 0);
     state.species_is_active[10] = true;
     state.leaf_shortwave_absorptivity[10] = 0.6;
     state.leaf_par_absorptivity[10] = 0.85;

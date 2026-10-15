@@ -22,6 +22,7 @@
 //! comparison oracle for the range above. Full argument and the census behind
 //! it: `docs/traceability/hour1_2039_5200_binding_survey.md`.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const GaseousMasses = struct {
     carbon_dioxide_g: f64,
@@ -82,12 +83,12 @@ pub fn calculate(
     air_volume_threshold_m3: f64,
     water_volume_threshold_m3: f64,
 ) ConcentrationError!Result {
-    inline for (std.meta.fields(GaseousMasses)) |field| {
+    inline for (ti_compat.fieldViews(GaseousMasses)) |field| {
         if (!std.math.isFinite(@field(gaseous_masses, field.name))) {
             return error.NonFiniteInput;
         }
     }
-    inline for (std.meta.fields(AqueousMasses)) |field| {
+    inline for (ti_compat.fieldViews(AqueousMasses)) |field| {
         if (!std.math.isFinite(@field(aqueous_masses, field.name))) {
             return error.NonFiniteInput;
         }
@@ -134,10 +135,10 @@ pub fn calculate(
     else
         std.mem.zeroes(AqueousConcentrations);
 
-    inline for (std.meta.fields(GaseousConcentrations)) |field| {
+    inline for (ti_compat.fieldViews(GaseousConcentrations)) |field| {
         if (!std.math.isFinite(@field(gaseous, field.name))) return error.NonFiniteResult;
     }
-    inline for (std.meta.fields(AqueousConcentrations)) |field| {
+    inline for (ti_compat.fieldViews(AqueousConcentrations)) |field| {
         if (!std.math.isFinite(@field(aqueous, field.name))) return error.NonFiniteResult;
     }
     return .{ .gaseous = gaseous, .aqueous = aqueous };

@@ -16,6 +16,8 @@ const inventory = @import("landscape_mass_inventory.zig");
 const ledger_module = @import("landscape_boundary_balance.zig");
 const hourly = @import("hourly_cell_conservation.zig");
 const symbiosis = @import("../canopy/symbiosis/plant_symbiotic_fixation.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 const precipitation_heat_parameters: ledger_module.PrecipitationHeatParameters = .{
     .snow_latent_heat_of_fusion_megajoules_per_m3 = 333,
@@ -27,7 +29,7 @@ const precipitation_heat_parameters: ledger_module.PrecipitationHeatParameters =
 test "accepted landscape boundary transactions publish every EXEC ledger" {
     var state: ledger_module.State = .{};
     var first = std.mem.zeroes(ledger_module.Fluxes);
-    inline for (std.meta.fields(ledger_module.Fluxes), 0..) |field, index|
+    inline for (ti_compat.fieldViews(ledger_module.Fluxes), 0..) |field, index|
         @field(first, field.name) = @floatFromInt(index + 1);
     try state.accumulateAccepted(first);
     try state.accumulateAccepted(first);
@@ -142,14 +144,14 @@ test "root soil and aqueous oxygen uptake reaches EXEC internal consumption atom
 
 test "dissolved external gas faces preserve active O2 and H2 directions" {
     var state: ledger_module.State = .{};
-    var boundary = [_]f64{0} ** (3 * gas.species_count);
-    boundary[@intFromEnum(gas.Species.oxygen)] = 3;
-    boundary[@intFromEnum(gas.Species.hydrogen)] = -4;
+    var boundary = @as([(3 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    boundary[@backingInt(gas.Species.oxygen)] = 3;
+    boundary[@backingInt(gas.Species.hydrogen)] = -4;
     // Inactive capacity must not contribute even when it contains stale data.
-    boundary[gas.species_count + @intFromEnum(gas.Species.oxygen)] = 500;
-    boundary[gas.species_count + @intFromEnum(gas.Species.hydrogen)] = -600;
-    boundary[2 * gas.species_count + @intFromEnum(gas.Species.oxygen)] = -2;
-    boundary[2 * gas.species_count + @intFromEnum(gas.Species.hydrogen)] = 1;
+    boundary[gas.species_count + @backingInt(gas.Species.oxygen)] = 500;
+    boundary[gas.species_count + @backingInt(gas.Species.hydrogen)] = -600;
+    boundary[2 * gas.species_count + @backingInt(gas.Species.oxygen)] = -2;
+    boundary[2 * gas.species_count + @backingInt(gas.Species.hydrogen)] = 1;
     try state.accumulateAcceptedDissolvedGasExternalBoundaries(
         &.{ true, false, true },
         &boundary,
@@ -160,7 +162,7 @@ test "dissolved external gas faces preserve active O2 and H2 directions" {
     try std.testing.expectEqual(@as(f64, 4), state.cumulative.hydrogen_output_g);
 
     const before = state;
-    boundary[2 * gas.species_count + @intFromEnum(gas.Species.oxygen)] =
+    boundary[2 * gas.species_count + @backingInt(gas.Species.oxygen)] =
         std.math.nan(f64);
     try std.testing.expectError(
         error.NonFiniteLandscapeBoundaryFlux,
@@ -679,25 +681,25 @@ test "ecosystem atmospheric gases include canopy exchange fixation and ammonia o
     // Soil gas convention matches the gas transport solver: positive = atmosphere
     // entering the ecosystem, negative = ecosystem emitting to atmosphere.
     soil.tracked_element_mass_g_by_cell_and_species[
-        @intFromEnum(gas.Species.carbon_dioxide)
+        @backingInt(gas.Species.carbon_dioxide)
     ] = -3; // CO2 emitted from soil
     soil.tracked_element_mass_g_by_cell_and_species[
-        @intFromEnum(gas.Species.methane)
+        @backingInt(gas.Species.methane)
     ] = 2; // CH4 absorbed from atmosphere into soil
     soil.tracked_element_mass_g_by_cell_and_species[
-        @intFromEnum(gas.Species.oxygen)
+        @backingInt(gas.Species.oxygen)
     ] = -4; // O2 emitted from soil
     soil.tracked_element_mass_g_by_cell_and_species[
-        @intFromEnum(gas.Species.nitrogen)
+        @backingInt(gas.Species.nitrogen)
     ] = 7; // N2 entering soil from atmosphere
     soil.tracked_element_mass_g_by_cell_and_species[
-        @intFromEnum(gas.Species.nitrous_oxide)
+        @backingInt(gas.Species.nitrous_oxide)
     ] = -8; // N2O emitted from soil
     soil.tracked_element_mass_g_by_cell_and_species[
-        @intFromEnum(gas.Species.ammonia)
+        @backingInt(gas.Species.ammonia)
     ] = 9; // NH3 absorbed from atmosphere into soil
     soil.tracked_element_mass_g_by_cell_and_species[
-        @intFromEnum(gas.Species.hydrogen)
+        @backingInt(gas.Species.hydrogen)
     ] = -10; // H2 emitted from soil
     canopy.net_carbon_dioxide_uptake_g_c[0] = 5;
     canopy.net_methane_uptake_g_c[0] = -1;
@@ -809,9 +811,9 @@ test "accepted signed subsurface oxygen reaches EXEC physical boundary exactly o
     defer soil.deinit();
     var canopy = try canopy_daily_gas.State.init(std.testing.allocator, 1);
     defer canopy.deinit();
-    var inward = [_]f64{0} ** gas.species_count;
-    var outward = [_]f64{0} ** gas.species_count;
-    const oxygen = @intFromEnum(gas.Species.oxygen);
+    var inward = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    var outward = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    const oxygen = @backingInt(gas.Species.oxygen);
     inward[oxygen] = 8.75;
     outward[oxygen] = -3.25;
     try soil.accumulateSubsurfacePhysicalBoundaryHour(1, &.{1}, &inward);
@@ -916,16 +918,16 @@ test "atmospheric solutes map tracked elements and phosphate atom counts" {
     var inputs = try atmospheric_solutes.State.init(std.testing.allocator, 1);
     defer inputs.deinit();
     const amounts = inputs.daily_input_g[0..snow.species_count];
-    amounts[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = 1;
-    amounts[@intFromEnum(snow.Species.methane_carbon)] = 2;
-    amounts[@intFromEnum(snow.Species.oxygen)] = 3;
-    amounts[@intFromEnum(snow.Species.dinitrogen_nitrogen)] = 4;
-    amounts[@intFromEnum(snow.Species.nitrous_oxide_nitrogen)] = 5;
-    amounts[@intFromEnum(snow.Species.ammonium_nitrogen)] = 6;
-    amounts[@intFromEnum(snow.Species.ammonia_nitrogen)] = 7;
-    amounts[@intFromEnum(snow.Species.nitrate_nitrogen)] = 8;
-    amounts[@intFromEnum(snow.Species.hydrogen_phosphate_phosphorus)] = 31;
-    amounts[@intFromEnum(snow.Species.dihydrogen_phosphate_phosphorus)] = 62;
+    amounts[@backingInt(snow.Species.carbon_dioxide_carbon)] = 1;
+    amounts[@backingInt(snow.Species.methane_carbon)] = 2;
+    amounts[@backingInt(snow.Species.oxygen)] = 3;
+    amounts[@backingInt(snow.Species.dinitrogen_nitrogen)] = 4;
+    amounts[@backingInt(snow.Species.nitrous_oxide_nitrogen)] = 5;
+    amounts[@backingInt(snow.Species.ammonium_nitrogen)] = 6;
+    amounts[@backingInt(snow.Species.ammonia_nitrogen)] = 7;
+    amounts[@backingInt(snow.Species.nitrate_nitrogen)] = 8;
+    amounts[@backingInt(snow.Species.hydrogen_phosphate_phosphorus)] = 31;
+    amounts[@backingInt(snow.Species.dihydrogen_phosphate_phosphorus)] = 62;
     inline for (0..8) |ion|
         amounts[10 + ion] += @as(f64, @floatFromInt(ion + 1));
     @memset(inputs.daily_salt_input_mol, 1);

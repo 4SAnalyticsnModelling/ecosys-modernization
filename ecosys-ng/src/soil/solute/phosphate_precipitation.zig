@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     dissolved_cation_mol_per_m3: f64,
@@ -139,7 +140,7 @@ fn validate(state: State, activity: f64, equilibrium: f64, stoichiometry: Stoich
 }
 
 fn validateState(state: State) !void {
-    inline for (@typeInfo(State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         const value = @field(state, field.name);
         if (!std.math.isFinite(value)) return error.NonFinitePhosphatePrecipitationState;
         if (value < 0) return error.NegativePhosphatePrecipitationState;

@@ -7,9 +7,11 @@ const SoilProperties = @import("../water/solver_properties.zig").State;
 const OrganicInitializationState = @import("../organic/initialization.zig").State;
 const SoluteChemistryState = @import("../solute/chemistry_state.zig").State;
 const ZoneFractions = @import("../solute/charge_classification.zig").ZoneFractions;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 fn validateZoneFractions(fractions: ZoneFractions) !void {
-    inline for (@typeInfo(ZoneFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ZoneFractions)) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidNutrientZoneFractions;
     }
@@ -222,14 +224,14 @@ pub const State = struct {
             const non_band_phosphate = chemistry.non_band_phosphate[layer];
             const band_phosphate = chemistry.band_phosphate[layer];
             const pools = try self.mineralPools(layer);
-            pools[@intFromEnum(nutrient.NutrientPool.ammonium_nonband)] = aqueous.ammonium_non_band * volumes.ammonium_non_band_m3[layer] * 14.0;
-            pools[@intFromEnum(nutrient.NutrientPool.ammonium_band)] = aqueous.ammonium_band * volumes.ammonium_band_m3[layer] * 14.0;
-            pools[@intFromEnum(nutrient.NutrientPool.nitrate_nonband)] = aqueous.nitrate_non_band * volumes.nitrate_non_band_m3[layer] * 14.0;
-            pools[@intFromEnum(nutrient.NutrientPool.nitrate_band)] = aqueous.nitrate_band * volumes.nitrate_band_m3[layer] * 14.0;
-            pools[@intFromEnum(nutrient.NutrientPool.phosphate_h2_nonband)] = non_band_phosphate.dissolved_h2po4_mol_p_per_m3 * volumes.phosphate_non_band_m3[layer] * 31.0;
-            pools[@intFromEnum(nutrient.NutrientPool.phosphate_h_nonband)] = non_band_phosphate.dissolved_hpo4_mol_p_per_m3 * volumes.phosphate_non_band_m3[layer] * 31.0;
-            pools[@intFromEnum(nutrient.NutrientPool.phosphate_h2_band)] = band_phosphate.dissolved_h2po4_mol_p_per_m3 * volumes.phosphate_band_m3[layer] * 31.0;
-            pools[@intFromEnum(nutrient.NutrientPool.phosphate_h_band)] = band_phosphate.dissolved_hpo4_mol_p_per_m3 * volumes.phosphate_band_m3[layer] * 31.0;
+            pools[@backingInt(nutrient.NutrientPool.ammonium_nonband)] = aqueous.ammonium_non_band * volumes.ammonium_non_band_m3[layer] * 14.0;
+            pools[@backingInt(nutrient.NutrientPool.ammonium_band)] = aqueous.ammonium_band * volumes.ammonium_band_m3[layer] * 14.0;
+            pools[@backingInt(nutrient.NutrientPool.nitrate_nonband)] = aqueous.nitrate_non_band * volumes.nitrate_non_band_m3[layer] * 14.0;
+            pools[@backingInt(nutrient.NutrientPool.nitrate_band)] = aqueous.nitrate_band * volumes.nitrate_band_m3[layer] * 14.0;
+            pools[@backingInt(nutrient.NutrientPool.phosphate_h2_nonband)] = non_band_phosphate.dissolved_h2po4_mol_p_per_m3 * volumes.phosphate_non_band_m3[layer] * 31.0;
+            pools[@backingInt(nutrient.NutrientPool.phosphate_h_nonband)] = non_band_phosphate.dissolved_hpo4_mol_p_per_m3 * volumes.phosphate_non_band_m3[layer] * 31.0;
+            pools[@backingInt(nutrient.NutrientPool.phosphate_h2_band)] = band_phosphate.dissolved_h2po4_mol_p_per_m3 * volumes.phosphate_band_m3[layer] * 31.0;
+            pools[@backingInt(nutrient.NutrientPool.phosphate_h_band)] = band_phosphate.dissolved_hpo4_mol_p_per_m3 * volumes.phosphate_band_m3[layer] * 31.0;
         }
     }
 
@@ -249,14 +251,14 @@ pub const State = struct {
             const non_band = chemistry.non_band_phosphate[layer];
             const band = chemistry.band_phosphate[layer];
             const pools = try self.mineralPools(layer);
-            pools[@intFromEnum(nutrient.NutrientPool.ammonium_nonband)] = aqueous.ammonium_non_band * water * fractions.ammonium_non_band * 14;
-            pools[@intFromEnum(nutrient.NutrientPool.ammonium_band)] = aqueous.ammonium_band * water * fractions.ammonium_band * 14;
-            pools[@intFromEnum(nutrient.NutrientPool.nitrate_nonband)] = aqueous.nitrate_non_band * water * fractions.nitrate_non_band * 14;
-            pools[@intFromEnum(nutrient.NutrientPool.nitrate_band)] = aqueous.nitrate_band * water * fractions.nitrate_band * 14;
-            pools[@intFromEnum(nutrient.NutrientPool.phosphate_h2_nonband)] = non_band.dissolved_h2po4_mol_p_per_m3 * water * fractions.phosphate_non_band * 31;
-            pools[@intFromEnum(nutrient.NutrientPool.phosphate_h2_band)] = band.dissolved_h2po4_mol_p_per_m3 * water * fractions.phosphate_band * 31;
-            pools[@intFromEnum(nutrient.NutrientPool.phosphate_h_nonband)] = non_band.dissolved_hpo4_mol_p_per_m3 * water * fractions.phosphate_non_band * 31;
-            pools[@intFromEnum(nutrient.NutrientPool.phosphate_h_band)] = band.dissolved_hpo4_mol_p_per_m3 * water * fractions.phosphate_band * 31;
+            pools[@backingInt(nutrient.NutrientPool.ammonium_nonband)] = aqueous.ammonium_non_band * water * fractions.ammonium_non_band * 14;
+            pools[@backingInt(nutrient.NutrientPool.ammonium_band)] = aqueous.ammonium_band * water * fractions.ammonium_band * 14;
+            pools[@backingInt(nutrient.NutrientPool.nitrate_nonband)] = aqueous.nitrate_non_band * water * fractions.nitrate_non_band * 14;
+            pools[@backingInt(nutrient.NutrientPool.nitrate_band)] = aqueous.nitrate_band * water * fractions.nitrate_band * 14;
+            pools[@backingInt(nutrient.NutrientPool.phosphate_h2_nonband)] = non_band.dissolved_h2po4_mol_p_per_m3 * water * fractions.phosphate_non_band * 31;
+            pools[@backingInt(nutrient.NutrientPool.phosphate_h2_band)] = band.dissolved_h2po4_mol_p_per_m3 * water * fractions.phosphate_band * 31;
+            pools[@backingInt(nutrient.NutrientPool.phosphate_h_nonband)] = non_band.dissolved_hpo4_mol_p_per_m3 * water * fractions.phosphate_non_band * 31;
+            pools[@backingInt(nutrient.NutrientPool.phosphate_h_band)] = band.dissolved_hpo4_mol_p_per_m3 * water * fractions.phosphate_band * 31;
         }
         try self.validateFinite();
     }
@@ -281,30 +283,30 @@ pub const State = struct {
                 .{ nutrient.NutrientPool.ammonium_band, fractions.ammonium_band },
                 .{ nutrient.NutrientPool.nitrate_nonband, fractions.nitrate_non_band },
                 .{ nutrient.NutrientPool.nitrate_band, fractions.nitrate_band },
-            }) |entry| if (entry[1] == 0 and pools[@intFromEnum(entry[0])] > 0) return error.NutrientMassInZeroVolumeZone;
+            }) |entry| if (entry[1] == 0 and pools[@backingInt(entry[0])] > 0) return error.NutrientMassInZeroVolumeZone;
             inline for (.{
                 .{ nutrient.NutrientPool.phosphate_h2_nonband, fractions.phosphate_non_band },
                 .{ nutrient.NutrientPool.phosphate_h_nonband, fractions.phosphate_non_band },
                 .{ nutrient.NutrientPool.phosphate_h2_band, fractions.phosphate_band },
                 .{ nutrient.NutrientPool.phosphate_h_band, fractions.phosphate_band },
-            }) |entry| if (entry[1] == 0 and pools[@intFromEnum(entry[0])] > 0) return error.NutrientMassInZeroVolumeZone;
+            }) |entry| if (entry[1] == 0 and pools[@backingInt(entry[0])] > 0) return error.NutrientMassInZeroVolumeZone;
         }
         for (0..self.layer_count) |layer| {
             const fractions = try mineralFractionsAt(fractions_source, layer);
             const water = water_volume_m3[layer];
             if (water == 0) continue;
             const pools = self.mineral_g_element[layer * nutrient.nutrient_pool_count ..][0..nutrient.nutrient_pool_count];
-            if (fractions.ammonium_non_band > 0) chemistry.aqueous[layer].ammonium_non_band = pools[@intFromEnum(nutrient.NutrientPool.ammonium_nonband)] / (water * fractions.ammonium_non_band * 14);
-            if (fractions.ammonium_band > 0) chemistry.aqueous[layer].ammonium_band = pools[@intFromEnum(nutrient.NutrientPool.ammonium_band)] / (water * fractions.ammonium_band * 14);
-            if (fractions.nitrate_non_band > 0) chemistry.aqueous[layer].nitrate_non_band = pools[@intFromEnum(nutrient.NutrientPool.nitrate_nonband)] / (water * fractions.nitrate_non_band * 14);
-            if (fractions.nitrate_band > 0) chemistry.aqueous[layer].nitrate_band = pools[@intFromEnum(nutrient.NutrientPool.nitrate_band)] / (water * fractions.nitrate_band * 14);
+            if (fractions.ammonium_non_band > 0) chemistry.aqueous[layer].ammonium_non_band = pools[@backingInt(nutrient.NutrientPool.ammonium_nonband)] / (water * fractions.ammonium_non_band * 14);
+            if (fractions.ammonium_band > 0) chemistry.aqueous[layer].ammonium_band = pools[@backingInt(nutrient.NutrientPool.ammonium_band)] / (water * fractions.ammonium_band * 14);
+            if (fractions.nitrate_non_band > 0) chemistry.aqueous[layer].nitrate_non_band = pools[@backingInt(nutrient.NutrientPool.nitrate_nonband)] / (water * fractions.nitrate_non_band * 14);
+            if (fractions.nitrate_band > 0) chemistry.aqueous[layer].nitrate_band = pools[@backingInt(nutrient.NutrientPool.nitrate_band)] / (water * fractions.nitrate_band * 14);
             if (fractions.phosphate_non_band > 0) {
-                chemistry.non_band_phosphate[layer].dissolved_h2po4_mol_p_per_m3 = pools[@intFromEnum(nutrient.NutrientPool.phosphate_h2_nonband)] / (water * fractions.phosphate_non_band * 31);
-                chemistry.non_band_phosphate[layer].dissolved_hpo4_mol_p_per_m3 = pools[@intFromEnum(nutrient.NutrientPool.phosphate_h_nonband)] / (water * fractions.phosphate_non_band * 31);
+                chemistry.non_band_phosphate[layer].dissolved_h2po4_mol_p_per_m3 = pools[@backingInt(nutrient.NutrientPool.phosphate_h2_nonband)] / (water * fractions.phosphate_non_band * 31);
+                chemistry.non_band_phosphate[layer].dissolved_hpo4_mol_p_per_m3 = pools[@backingInt(nutrient.NutrientPool.phosphate_h_nonband)] / (water * fractions.phosphate_non_band * 31);
             }
             if (fractions.phosphate_band > 0) {
-                chemistry.band_phosphate[layer].dissolved_h2po4_mol_p_per_m3 = pools[@intFromEnum(nutrient.NutrientPool.phosphate_h2_band)] / (water * fractions.phosphate_band * 31);
-                chemistry.band_phosphate[layer].dissolved_hpo4_mol_p_per_m3 = pools[@intFromEnum(nutrient.NutrientPool.phosphate_h_band)] / (water * fractions.phosphate_band * 31);
+                chemistry.band_phosphate[layer].dissolved_h2po4_mol_p_per_m3 = pools[@backingInt(nutrient.NutrientPool.phosphate_h2_band)] / (water * fractions.phosphate_band * 31);
+                chemistry.band_phosphate[layer].dissolved_hpo4_mol_p_per_m3 = pools[@backingInt(nutrient.NutrientPool.phosphate_h_band)] / (water * fractions.phosphate_band * 31);
             }
         }
     }
@@ -338,16 +340,16 @@ pub const State = struct {
                 const nitrate_total = nitrate[layer] * soil_mass_megagrams;
                 const phosphate_total = phosphate[layer] * soil_mass_megagrams;
                 inline for (.{ ammonium_total, nitrate_total, phosphate_total }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidPlantAvailableNutrientInitialization;
-                pools[@intFromEnum(nutrient.NutrientPool.ammonium_band)] = ammonium_total * parameters.initial_ammonium_band_fraction;
-                pools[@intFromEnum(nutrient.NutrientPool.ammonium_nonband)] = ammonium_total - pools[@intFromEnum(nutrient.NutrientPool.ammonium_band)];
-                pools[@intFromEnum(nutrient.NutrientPool.nitrate_band)] = nitrate_total * parameters.initial_nitrate_band_fraction;
-                pools[@intFromEnum(nutrient.NutrientPool.nitrate_nonband)] = nitrate_total - pools[@intFromEnum(nutrient.NutrientPool.nitrate_band)];
+                pools[@backingInt(nutrient.NutrientPool.ammonium_band)] = ammonium_total * parameters.initial_ammonium_band_fraction;
+                pools[@backingInt(nutrient.NutrientPool.ammonium_nonband)] = ammonium_total - pools[@backingInt(nutrient.NutrientPool.ammonium_band)];
+                pools[@backingInt(nutrient.NutrientPool.nitrate_band)] = nitrate_total * parameters.initial_nitrate_band_fraction;
+                pools[@backingInt(nutrient.NutrientPool.nitrate_nonband)] = nitrate_total - pools[@backingInt(nutrient.NutrientPool.nitrate_band)];
                 const phosphate_band = phosphate_total * parameters.initial_phosphate_band_fraction;
                 const phosphate_nonband = phosphate_total - phosphate_band;
-                pools[@intFromEnum(nutrient.NutrientPool.phosphate_h2_nonband)] = phosphate_nonband * parameters.initial_h2po4_fraction;
-                pools[@intFromEnum(nutrient.NutrientPool.phosphate_h_nonband)] = phosphate_nonband - pools[@intFromEnum(nutrient.NutrientPool.phosphate_h2_nonband)];
-                pools[@intFromEnum(nutrient.NutrientPool.phosphate_h2_band)] = phosphate_band * parameters.initial_h2po4_fraction;
-                pools[@intFromEnum(nutrient.NutrientPool.phosphate_h_band)] = phosphate_band - pools[@intFromEnum(nutrient.NutrientPool.phosphate_h2_band)];
+                pools[@backingInt(nutrient.NutrientPool.phosphate_h2_nonband)] = phosphate_nonband * parameters.initial_h2po4_fraction;
+                pools[@backingInt(nutrient.NutrientPool.phosphate_h_nonband)] = phosphate_nonband - pools[@backingInt(nutrient.NutrientPool.phosphate_h2_nonband)];
+                pools[@backingInt(nutrient.NutrientPool.phosphate_h2_band)] = phosphate_band * parameters.initial_h2po4_fraction;
+                pools[@backingInt(nutrient.NutrientPool.phosphate_h_band)] = phosphate_band - pools[@backingInt(nutrient.NutrientPool.phosphate_h2_band)];
             }
         }
         try self.validateFinite();
@@ -373,7 +375,7 @@ test "plant available nutrient pools use runtime layers and typed scientific ext
 test "soil profile nutrient concentrations initialize extensive non-band masses" {
     const allocator = std.testing.allocator;
     const soil_profile = @import("../../state/soil_profile.zig");
-    const fixture = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(soil_profile.LayerProperty).@"enum".fields.len);
+    const fixture = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(soil_profile.LayerProperty).@"enum".field_names.len);
     defer allocator.free(fixture);
     var catalog = @import("../profile/catalog.zig").Catalog.init(allocator);
     defer catalog.deinit();
@@ -390,20 +392,20 @@ test "soil profile nutrient concentrations initialize extensive non-band masses"
     const pools = try state.mineralPools(0);
     const soil_mass = properties.matrix_bulk_volume_m3[0] * properties.bulk_density_megagrams_per_m3[0];
     const profile = catalog.entries.items[0].profile;
-    try std.testing.expectApproxEqAbs(@max(@as(f64, 1), profile.property(.ammonium_g_per_megagram)[0]) * soil_mass, pools[@intFromEnum(nutrient.NutrientPool.ammonium_nonband)], 1.0e-12);
-    try std.testing.expectEqual(@as(f64, 0), pools[@intFromEnum(nutrient.NutrientPool.ammonium_band)]);
-    try std.testing.expectApproxEqAbs(profile.property(.phosphate_g_per_megagram)[0] * soil_mass, pools[@intFromEnum(nutrient.NutrientPool.phosphate_h2_nonband)], 1.0e-12);
+    try std.testing.expectApproxEqAbs(@max(@as(f64, 1), profile.property(.ammonium_g_per_megagram)[0]) * soil_mass, pools[@backingInt(nutrient.NutrientPool.ammonium_nonband)], 1.0e-12);
+    try std.testing.expectEqual(@as(f64, 0), pools[@backingInt(nutrient.NutrientPool.ammonium_band)]);
+    try std.testing.expectApproxEqAbs(profile.property(.phosphate_g_per_megagram)[0] * soil_mass, pools[@backingInt(nutrient.NutrientPool.phosphate_h2_nonband)], 1.0e-12);
 }
 
 test "STARTS dissolved organic initialization preserves five runtime substrate classes" {
     var state = try State.init(std.testing.allocator, 2);
     defer state.deinit();
     const count = 2 * plant_root_system.organic_substrate_count;
-    const microbial_carbon = [_]f64{100} ** count;
-    const nitrogen_to_carbon = [_]f64{0.1} ** count;
-    const phosphorus_to_carbon = [_]f64{0.01} ** count;
-    const allocation = [_]f64{1} ** count;
-    const dissolved_fraction = [_]f64{0.005} ** count;
+    const microbial_carbon = @as([count]f64, @splat(@as(f64, 100)));
+    const nitrogen_to_carbon = @as([count]f64, @splat(@as(f64, 0.1)));
+    const phosphorus_to_carbon = @as([count]f64, @splat(@as(f64, 0.01)));
+    const allocation = @as([count]f64, @splat(@as(f64, 1)));
+    const dissolved_fraction = @as([count]f64, @splat(@as(f64, 0.005)));
     try state.initializeDissolvedOrganic(.{
         .microbial_carbon_g_c = &microbial_carbon,
         .nitrogen_to_carbon_g_n_per_g_c = &nitrogen_to_carbon,
@@ -464,9 +466,9 @@ test "converged STARTE concentrations publish exact band and non-band masses" {
         .phosphate_band_m3 = &volumes,
     });
     const pools = try state.mineralPools(1);
-    try std.testing.expectApproxEqAbs(@as(f64, 2 * 0.2 * 14), pools[@intFromEnum(nutrient.NutrientPool.ammonium_nonband)], 1.0e-12);
-    try std.testing.expectApproxEqAbs(@as(f64, 7 * 0.2 * 31), pools[@intFromEnum(nutrient.NutrientPool.phosphate_h_nonband)], 1.0e-12);
-    try std.testing.expectApproxEqAbs(@as(f64, 8 * 0.2 * 31), pools[@intFromEnum(nutrient.NutrientPool.phosphate_h2_band)], 1.0e-12);
+    try std.testing.expectApproxEqAbs(@as(f64, 2 * 0.2 * 14), pools[@backingInt(nutrient.NutrientPool.ammonium_nonband)], 1.0e-12);
+    try std.testing.expectApproxEqAbs(@as(f64, 7 * 0.2 * 31), pools[@backingInt(nutrient.NutrientPool.phosphate_h_nonband)], 1.0e-12);
+    try std.testing.expectApproxEqAbs(@as(f64, 8 * 0.2 * 31), pools[@backingInt(nutrient.NutrientPool.phosphate_h2_band)], 1.0e-12);
 }
 
 test "hourly chemistry and root-available pools round trip without changing mass" {

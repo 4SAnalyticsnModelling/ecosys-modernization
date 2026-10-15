@@ -8,6 +8,7 @@ const stalk_state_update_module = @import("../../plant/growth/stalk_layer_state_
 const emergence_reset_module = @import("../morphology/emergence_layer_reset.zig");
 const height_hourly_rollover_module = @import("../state/height_hourly_rollover.zig");
 const PlantState = @import("../../state/grid.zig").PlantState;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Controls = struct {
     allocator: std.mem.Allocator,
@@ -144,7 +145,7 @@ pub const State = struct {
     /// edges do not each expand another copy in this already-large module.
     noinline fn deinitAllocatedPrefix(self: *State, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -161,7 +162,7 @@ pub const State = struct {
         var result: State = .{ .allocator = allocator, .cell_count = cell_count, .species_count = species_count, .layer_count = layer_count, .inclination_count = inclination_count, .azimuth_count = azimuth_count, .node_count = node_count, .branch_count = branch_count, .boundary_height_m = undefined, .node_leaf_area_m2 = undefined, .node_leaf_carbon_g = undefined, .node_leaf_nitrogen_g = undefined, .node_leaf_phosphorus_g = undefined, .node_leaf_projected_surface_m2 = undefined, .branch_stalk_area_m2 = undefined, .branch_stalk_projected_surface_m2 = undefined, .plant_leaf_projected_surface_m2 = undefined, .plant_stalk_projected_surface_m2 = undefined, .plant_standing_dead_area_m2 = undefined, .plant_standing_dead_projected_surface_m2 = undefined, .cell_leaf_area_m2 = undefined, .cell_leaf_carbon_g = undefined, .cell_stalk_area_m2 = undefined, .cell_standing_dead_area_m2 = undefined, .workspace = undefined, .branch_lowest_live_node = undefined, .previous_canopy_height_m_by_plant = undefined, .canopy_height_m_by_plant = undefined };
         var allocated: usize = 0;
         errdefer result.deinitAllocatedPrefix(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             const count = try fieldCount(field.name, cell_count, species_count, layer_count, inclination_count, node_count, branch_count);
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
@@ -180,7 +181,7 @@ pub const State = struct {
     pub fn deinit(self: *State) void {
         self.allocator.free(self.branch_lowest_live_node);
         self.workspace.deinit();
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
@@ -584,14 +585,14 @@ test "canopy layer state releases reflected prefix workspace and final branch al
 
     const state_f64_allocations = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(State).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) count += 1;
         }
         break :count count;
     };
     const workspace_allocations = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(Workspace).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(Workspace)) |field| {
             if (field.type == []f64) count += 1;
         }
         break :count count;

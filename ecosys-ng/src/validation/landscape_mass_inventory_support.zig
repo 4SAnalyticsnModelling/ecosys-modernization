@@ -28,6 +28,7 @@ const plant_roots = @import("../plant/root/plant_root_system.zig");
 const group_misc = @import("landscape_mass_inventory_misc.zig");
 const group_snow = @import("landscape_mass_inventory_snow.zig");
 const group_surface = @import("landscape_mass_inventory_surface.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Authoritative storage side of the all-storage conservation equations.
 /// Boundary additions/removals remain in their process-owned cumulative
@@ -93,7 +94,7 @@ pub const Storage = struct {
     anion_exchange_capacity_mol: f64 = 0,
 
     pub fn add(self: *Storage, contribution: Storage) !void {
-        inline for (std.meta.fields(Storage)) |field| {
+        inline for (ti_compat.fieldViews(Storage)) |field| {
             const value = @field(self, field.name) + @field(contribution, field.name);
             if (!std.math.isFinite(value)) return error.NonFiniteLandscapeInventory;
             @field(self, field.name) = value;
@@ -101,7 +102,7 @@ pub const Storage = struct {
     }
 
     pub fn validate(self: Storage) !void {
-        inline for (std.meta.fields(Storage)) |field| {
+        inline for (ti_compat.fieldViews(Storage)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value)) return error.NonFiniteLandscapeInventory;
             // `heat_megajoules` is an enthalpy measured against liquid water at
@@ -128,8 +129,11 @@ pub const ElementMoles = struct {
 
     pub fn scaled(self: ElementMoles, amount_mol: f64) ElementMoles {
         var result = self;
-        inline for (std.meta.fields(ElementMoles)) |field|
-            @field(result, field.name) *= amount_mol;
+        const info = @typeInfo(ElementMoles).@"struct";
+        inline for (info.field_names, info.field_types) |field_name, field_type| {
+            _ = field_type;
+            @field(result, field_name) *= amount_mol;
+        }
         return result;
     }
 };
@@ -145,7 +149,7 @@ pub const ElementMolesAccumulator = struct {
     correction: ElementMoles = .{},
 
     pub fn add(self: *ElementMolesAccumulator, elements: ElementMoles) !void {
-        inline for (std.meta.fields(ElementMoles)) |field| {
+        inline for (ti_compat.fieldViews(ElementMoles)) |field| {
             const value = @field(elements, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidElementInventory;
@@ -165,7 +169,7 @@ pub const ElementMolesAccumulator = struct {
 
     pub fn finish(self: ElementMolesAccumulator) !ElementMoles {
         var result: ElementMoles = .{};
-        inline for (std.meta.fields(ElementMoles)) |field| {
+        inline for (ti_compat.fieldViews(ElementMoles)) |field| {
             const value = @field(self.sum, field.name) +
                 @field(self.correction, field.name);
             if (!std.math.isFinite(value) or value < 0)
@@ -177,7 +181,7 @@ pub const ElementMolesAccumulator = struct {
 };
 
 pub fn addElementMoles(storage: *Storage, elements: ElementMoles) !void {
-    inline for (std.meta.fields(ElementMoles)) |field| {
+    inline for (ti_compat.fieldViews(ElementMoles)) |field| {
         const value = @field(elements, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidElementInventory;
@@ -249,7 +253,7 @@ pub fn publishStorage(
     totals.organic_phosphorus_g = storage.organic_phosphorus_g;
     totals.phosphate_phosphorus_g = storage.phosphate_phosphorus_g;
     totals.plant_phosphorus_g = storage.plant_phosphorus_g;
-    inline for (std.meta.fields(ElementMoles)) |element|
+    inline for (ti_compat.fieldViews(ElementMoles)) |element|
         @field(totals, element.name ++ "_storage_mol") =
             @field(storage, element.name ++ "_mol");
     totals.ion_inventory_mol = storage.ion_inventory_mol;
@@ -308,7 +312,7 @@ pub fn frozenWaterEnthalpyPerM3(
 }
 
 pub fn validateFiniteNonnegativeStruct(value: anytype) !void {
-    inline for (std.meta.fields(@TypeOf(value))) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field| {
         const number = @field(value, field.name);
         if (!std.math.isFinite(number) or number < 0)
             return error.InvalidProfileMineralNitrogenState;
@@ -317,7 +321,7 @@ pub fn validateFiniteNonnegativeStruct(value: anytype) !void {
 
 pub fn validateNumericStruct(value: anytype) !void {
     const T = @TypeOf(value);
-    inline for (std.meta.fields(T)) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const number = @field(value, field.name);
             if (!std.math.isFinite(number))
@@ -397,7 +401,6 @@ pub fn addOrganicPool(result: *Storage, pool: organic.ElementPool) !void {
         pool.phosphorus_g_p,
     }) |value| {
         if (!std.math.isFinite(value)) return error.NonFiniteSoilOrganicInventory;
-
     }
     result.organic_carbon_g += pool.carbon_g_c;
     result.organic_nitrogen_g += pool.nitrogen_g_n;
@@ -431,10 +434,10 @@ pub fn fourPhaseGas(
     band: []const f64,
     species: gas.Species,
 ) f64 {
-    const index = @intFromEnum(species);
+    const index = @backingInt(species);
     return gaseous[index] + dissolved[index] + macropore[index] + band[index];
 }
 
 pub fn speciesAmount(amounts: []const f64, species: snow.Species) f64 {
-    return amounts[@intFromEnum(species)];
+    return amounts[@backingInt(species)];
 }

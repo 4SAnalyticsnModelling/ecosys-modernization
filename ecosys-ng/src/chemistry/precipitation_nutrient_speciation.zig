@@ -2,6 +2,7 @@ const std = @import("std");
 const initialization = @import("../soil/chemistry/initialization.zig");
 const aqueous_rates = @import("../soil/solute/aqueous_reaction_rates.zig");
 const phosphate_rates = @import("../soil/solute/phosphate_reaction_rates.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     ph: f64,
@@ -15,7 +16,7 @@ pub const Inputs = struct {
 /// STARTE K=1 initial `CN41/CN31/CH1P1/CH2P1` speciation. The returned
 /// order is NH4-N, NH3-N, NO3-N, HPO4-P, H2PO4-P in mol m-3.
 pub fn calculate(inputs: Inputs, aqueous: aqueous_rates.EquilibriumConstants, phosphate: phosphate_rates.EquilibriumConstants) ![5]f64 {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0) return error.InvalidPrecipitationNutrientInput;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (!std.math.isFinite(@field(inputs, field.name)) or @field(inputs, field.name) < 0) return error.InvalidPrecipitationNutrientInput;
     if (inputs.ph > 14 or inputs.nitrogen_g_per_mol <= 0 or inputs.phosphorus_g_per_mol <= 0 or !std.math.isFinite(aqueous.ammonium) or aqueous.ammonium <= 0) return error.InvalidPrecipitationNutrientInput;
     const hydrogen = try initialization.hydrogenFromPh_mol_per_m3(inputs.ph);
     const total_ammoniacal_n = inputs.ammonium_g_n_per_m3 / inputs.nitrogen_g_per_mol;
@@ -41,6 +42,6 @@ test "STARTE precipitation initialization conserves ammoniacal N and phosphate P
 
 fn filled(comptime T: type, value: f64) T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| @field(result, field.name) = value;
+    inline for (ti_compat.fieldViews(T)) |field| @field(result, field.name) = value;
     return result;
 }

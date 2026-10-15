@@ -2,6 +2,7 @@ const std = @import("std");
 const nitrogen_module = @import("../../management/fertilizer_nitrogen_inventory.zig");
 const nitrogen_pools = @import("fertilizer_dissolution.zig");
 const mineral_module = @import("../../management/mineral_fertilizer_inventory.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// REDIST ponding transaction for ZNH4FA...ZNO3FB and the mineral P/Ca/
 /// ground-silicate stores. Mineral fertilizer moves only upward (L0 > L1), as
@@ -103,7 +104,7 @@ fn validateNitrogenStructTransfer(
     destination: nitrogen_pools.FertilizerState,
     fraction: f64,
 ) !void {
-    inline for (@typeInfo(nitrogen_pools.FertilizerState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(nitrogen_pools.FertilizerState)) |field| {
         const source_value = @field(source, field.name);
         const destination_value = @field(destination, field.name);
         const moved = @min(fraction * @field(boundary, field.name), source_value);
@@ -119,7 +120,7 @@ fn transferNitrogenStruct(
     destination: *nitrogen_pools.FertilizerState,
     fraction: f64,
 ) void {
-    inline for (@typeInfo(nitrogen_pools.FertilizerState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(nitrogen_pools.FertilizerState)) |field| {
         const moved = @min(fraction * @field(boundary.*, field.name), @field(source.*, field.name));
         @field(source.*, field.name) -= moved;
         @field(destination.*, field.name) += moved;
@@ -127,7 +128,7 @@ fn transferNitrogenStruct(
 }
 
 fn validateStructTransfer(comptime T: type, source: T, destination: T, fraction: f64) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(T)) |field| {
         const source_value = @field(source, field.name);
         const destination_value = @field(destination, field.name);
         const moved = fraction * source_value;
@@ -139,7 +140,7 @@ fn validateStructTransfer(comptime T: type, source: T, destination: T, fraction:
 }
 
 fn transferStruct(comptime T: type, source: *T, destination: *T, fraction: f64) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(T)) |field| {
         const moved = fraction * @field(source, field.name);
         @field(source, field.name) -= moved;
         @field(destination, field.name) += moved;

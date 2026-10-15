@@ -8,6 +8,7 @@ const decomposition = @import("../biogeochemistry/organic_substrate_decompositio
 const parameters_module = @import("parameters.zig");
 const priming_step = @import("priming_step.zig");
 
+
 pub const State = struct {
     allocator: std.mem.Allocator,
     layer_count: usize,
@@ -171,7 +172,7 @@ test "soil decomposition stages structural residue sorbed and charcoal fluxes" {
     respiration.layer_biologically_active_water_m3[0] = 1;
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    const rates = [_][organic.structural_fraction_count]f64{.{ 7.5, 7.5, 1.5, 0.5, 0.0015 }} ** organic.substrate_count;
+    const rates = @as([organic.substrate_count][organic.structural_fraction_count]f64, @splat(@as([organic.structural_fraction_count]f64, .{ 7.5, 7.5, 1.5, 0.5, 0.0015 })));
     var context: ApplyContext = .{ .result = &state, .organic_state = &organic_state, .microbial_state = &microbial_state, .respiration_fluxes = &respiration, .soil_temperature_k = &.{293.15}, .matrix_bulk_volume_m3 = &.{1}, .bulk_density_megagrams_per_m3 = &.{1}, .microbial_nitrogen_to_carbon_g_n_per_g_c = &.{ 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 }, .microbial_phosphorus_to_carbon_g_p_per_g_c = &.{ 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01 }, .substrate_nitrogen_to_carbon_g_n_per_g_c = &.{ 0.0333, 0.0333, 0.0333, 0.05, 0.167 }, .substrate_phosphorus_to_carbon_g_p_per_g_c = &.{ 0.00333, 0.00333, 0.00333, 0.005, 0.0167 }, .thermal_adaptation_offset_k_by_cell = &.{0}, .parameters = .{ .structural_rate_g_c_per_g_activity_h = rates, .microbial_residue_rate_g_c_per_g_activity_h = .{ 7.5, 1.5 }, .sorbed_organic_rate_g_c_per_g_activity_h = 0.25, .sorbed_acetate_rate_g_c_per_g_activity_h = 0.25, .environment = .{ .surface_activity_half_saturation_g_c_per_m3 = 10, .soil_activity_half_saturation_g_c_per_m3 = 10, .surface_activity_inhibition_g_c_per_m3_per_step = 50, .soil_activity_inhibition_g_c_per_m3_per_step = 50, .dissolved_carbon_product_inhibition_g_c_per_m3 = 1200 } }, .timestep_h = 1, .negligible_carbon_g_c = 1e-12 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(state.structural_decomposition[0].carbon_g_c > 0);

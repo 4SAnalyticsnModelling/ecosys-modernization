@@ -18,6 +18,9 @@ const surface_mineral_exchange = @import("microbial_mineral_exchange_step.zig");
 const topsoil_mineral_exchange = @import("topsoil_mineral_exchange_step.zig");
 const soil_chemistry = @import("../soil/solute/chemistry_state.zig");
 const zones = @import("../soil/solute/charge_classification.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
+const arr_compat = @import("../core/array_compat.zig");
 
 /// Source NITRO populations N=1,2,3,5 in the autotrophic K=5 complex.
 pub const active_population_count: usize = 4;
@@ -68,7 +71,7 @@ pub const State = struct {
     /// fallible allocation edge.
     noinline fn deinitAllocatedPrefix(self: *State, allocated_count: usize) void {
         var remaining = allocated_count;
-        inline for (@typeInfo(State).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) {
                 if (remaining == 0) return;
                 self.allocator.free(@field(self, field.name));
@@ -85,7 +88,7 @@ pub const State = struct {
         result.cell_count = cell_count;
         var allocated: usize = 0;
         errdefer result.deinitAllocatedPrefix(allocated);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -94,7 +97,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -102,7 +105,7 @@ pub const State = struct {
 test "surface autotrophic state releases every partial allocation prefix" {
     const allocation_count = comptime count: {
         var count: usize = 0;
-        for (@typeInfo(State).@"struct".fields) |field| {
+        for (ti_compat.fieldViews(State)) |field| {
             if (field.type == []f64) count += 1;
         }
         break :count count;
@@ -552,21 +555,21 @@ fn calculateCell(context: ApplyContext, cell: usize) !CellResult {
         for (0..organic.structural_fraction_count) |component|
             total_colonized_structural_g_c += context.surface_organic.colonized_structural_carbon_g_c[(cell * organic.substrate_count + complex) * organic.structural_fraction_count + component];
     }
-    result.actual_primary = .{0} ** active_population_count;
-    result.actual_respiration = .{0} ** active_population_count;
-    result.actual_uptake = .{0} ** active_population_count;
-    result.actual_gain = .{0} ** active_population_count;
-    result.surface_ammonium_exchange = .{0} ** active_population_count;
-    result.surface_nitrate_exchange = .{0} ** active_population_count;
-    result.surface_h2po4_exchange = .{0} ** active_population_count;
-    result.surface_hpo4_exchange = .{0} ** active_population_count;
-    result.topsoil_ammonium_exchange = .{0} ** active_population_count;
-    result.topsoil_nitrate_exchange = .{0} ** active_population_count;
-    result.topsoil_h2po4_exchange = .{0} ** active_population_count;
-    result.topsoil_hpo4_exchange = .{0} ** active_population_count;
-    result.surface_mineral_capacity = .{.{0} ** competition_history.surface_pool_count} ** active_population_count;
-    result.topsoil_residual_capacity = .{.{0} ** competition_history.surface_pool_count} ** active_population_count;
-    result.topsoil_organic_transfer = [_]organic.ElementPool{.{}} ** active_population_count;
+    result.actual_primary = @splat(0);
+    result.actual_respiration = @splat(0);
+    result.actual_uptake = @splat(0);
+    result.actual_gain = @splat(0);
+    result.surface_ammonium_exchange = @splat(0);
+    result.surface_nitrate_exchange = @splat(0);
+    result.surface_h2po4_exchange = @splat(0);
+    result.surface_hpo4_exchange = @splat(0);
+    result.topsoil_ammonium_exchange = @splat(0);
+    result.topsoil_nitrate_exchange = @splat(0);
+    result.topsoil_h2po4_exchange = @splat(0);
+    result.topsoil_hpo4_exchange = @splat(0);
+    result.surface_mineral_capacity = @as([active_population_count][competition_history.surface_pool_count]f64, @splat(@as([competition_history.surface_pool_count]f64, @splat(@as(f64, 0)))));
+    result.topsoil_residual_capacity = @as([active_population_count][competition_history.surface_pool_count]f64, @splat(@as([competition_history.surface_pool_count]f64, @splat(@as(f64, 0)))));
+    result.topsoil_organic_transfer = @as([active_population_count]organic.ElementPool, @splat(@as(organic.ElementPool, .{})));
 
     const ammonium_before = result.chemistry.ammonium_mol_per_m3 * water * context.nitrogen_molar_mass_g_per_mol;
     const nitrate_before = result.chemistry.nitrate_mol_per_m3 * water * context.nitrogen_molar_mass_g_per_mol;
@@ -943,12 +946,12 @@ fn validateApply(context: ApplyContext, range: compute.CellRange) !void {
     const ratio_count = organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count;
     if (range.first > range.end or range.end > cells or context.surface_organic.layer_count != cells or context.litter_chemistry.cells.len != cells or context.litter_chemistry.ph.len != cells or context.litter_denitrification.cell_count != cells or context.litter_gas.cell_count != cells or context.litter_water_m3.len != cells or context.oxygen_unit_count_per_cell < context.first_autotrophic_oxygen_unit + active_population_count or context.oxygen_satisfaction_fraction.len != cells * context.oxygen_unit_count_per_cell or context.soil_layer_capacity == 0 or context.topsoil_organic.layer_count != cells * context.soil_layer_capacity or context.topsoil_chemistry.cell_count != cells * context.soil_layer_capacity or context.topsoil_water_m3.len != cells * context.soil_layer_capacity or context.topsoil_humus_partition.len != cells or context.humification_fraction.len != cells or context.growth_temperature_response.len != cells or context.matric_plus_osmotic_potential_megapascal.len != cells or context.microbial_nitrogen_to_carbon_g_n_per_g_c.len != ratio_count or context.microbial_phosphorus_to_carbon_g_p_per_g_c.len != ratio_count or (context.zone_fractions_by_layer.len != 0 and context.zone_fractions_by_layer.len != cells * context.soil_layer_capacity) or (context.accepted_topsoil_organic_transfer != null and context.accepted_topsoil_organic_transfer.?.len != cells * active_population_count)) return error.SurfaceAutotrophicDimensionMismatch;
     inline for (.{ context.nitrogen_molar_mass_g_per_mol, context.phosphorus_molar_mass_g_per_mol, context.timestep_h, context.humus_nitrogen_per_carbon_g_n_per_g_c, context.humus_phosphorus_per_carbon_g_p_per_g_c, context.negligible_carbon_g_c, context.microbial_surface_area_m2_per_g_c }) |value| if (!std.math.isFinite(value) or value <= 0) return error.InvalidSurfaceAutotrophicParameter;
-    inline for (@typeInfo(surface_mineral_exchange.Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(context.mineral_exchange_parameters, field.name)) or @field(context.mineral_exchange_parameters, field.name) <= 0) return error.InvalidSurfaceAutotrophicParameter;
+    inline for (ti_compat.fieldViews(surface_mineral_exchange.Parameters)) |field| if (!std.math.isFinite(@field(context.mineral_exchange_parameters, field.name)) or @field(context.mineral_exchange_parameters, field.name) <= 0) return error.InvalidSurfaceAutotrophicParameter;
     if (!std.math.isFinite(context.minimum_competition_fraction) or context.minimum_competition_fraction < 0 or !std.math.isFinite(context.negligible_nitrogen_g_n) or context.negligible_nitrogen_g_n < 0 or !std.math.isFinite(context.negligible_phosphorus_g_p) or context.negligible_phosphorus_g_p < 0) return error.InvalidSurfaceAutotrophicParameter;
     if ((context.nutrient_competition == null) != (context.nutrient_competition_attempt == null)) return error.IncompleteSurfaceAutotrophicNutrientCompetitionBinding;
     if (context.nutrient_competition) |accepted| if (accepted.surface_cell_count != cells or accepted.soil_layer_count != context.topsoil_chemistry.cell_count) return error.SurfaceAutotrophicDimensionMismatch;
     const fractions_to_validate = if (context.zone_fractions_by_layer.len == 0) @as([]const zones.ZoneFractions, &.{context.zone_fractions}) else context.zone_fractions_by_layer;
-    for (fractions_to_validate) |fractions| inline for (@typeInfo(zones.ZoneFractions).@"struct".fields) |field| if (!std.math.isFinite(@field(fractions, field.name)) or @field(fractions, field.name) < 0 or @field(fractions, field.name) > 1) return error.InvalidSurfaceAutotrophicParameter;
+    for (fractions_to_validate) |fractions| inline for (ti_compat.fieldViews(zones.ZoneFractions)) |field| if (!std.math.isFinite(@field(fractions, field.name)) or @field(fractions, field.name) < 0 or @field(fractions, field.name) > 1) return error.InvalidSurfaceAutotrophicParameter;
     for (context.state.mineral_exchange_share) |value| if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidSurfaceAutotrophicParameter;
     for (context.topsoil_humus_partition) |partition| if (!std.math.isFinite(partition[0]) or !std.math.isFinite(partition[1]) or partition[0] < 0 or partition[1] < 0 or @abs(partition[0] + partition[1] - 1) > 1e-12) return error.InvalidSurfaceAutotrophicParameter;
     for (context.humification_fraction) |value| if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidSurfaceAutotrophicParameter;
@@ -1029,8 +1032,8 @@ test "surface K5 mineral exchange uses nonstructural ratios and permits release"
     defer denit.deinit();
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    var microbial_n = [_]f64{0.1} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
-    var microbial_p = [_]f64{0.01} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
+    var microbial_n = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.1)));
+    var microbial_p = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.01)));
     const first_ratio = (organic.autotrophic_substrate_index * organic.microbial_population_count + source_population_by_active[0]) * organic.kinetic_fraction_count;
     microbial_n[first_ratio] = 10;
     microbial_p[first_ratio] = 10;
@@ -1042,7 +1045,7 @@ test "surface K5 mineral exchange uses nonstructural ratios and permits release"
     state.mineral_exchange_share[1] = 0.5;
     litter.cells[0].ammonium_mol_per_m3 = 1;
     litter.cells[0].h2po4_mol_p_per_m3 = 1;
-    const oxygen = [_]f64{1} ** (surface_respiration.unit_count_per_cell + active_population_count);
+    const oxygen = @as([(surface_respiration.unit_count_per_cell + active_population_count)]f64, @splat(@as(f64, 1)));
     const n_before = (try organicElementTotals(&surface, 0)).nitrogen_g_n + 14 * litter.cells[0].ammonium_mol_per_m3;
     const p_before = (try organicElementTotals(&surface, 0)).phosphorus_g_p + 31 * litter.cells[0].h2po4_mol_p_per_m3;
     var context = try focusedExchangeContext(&state, &surface, &litter, &denit, &gas_state, &topsoil, &topsoil_chemistry_state, &.{1}, &.{1}, &oxygen, &microbial_n, &microbial_p);
@@ -1073,8 +1076,8 @@ test "surface K5 mineral exchange follows alternate species then topsoil fallbac
     defer denit.deinit();
     var gas_state = try gas.State.init(std.testing.allocator, 2);
     defer gas_state.deinit();
-    const microbial_n = [_]f64{0.1} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
-    const microbial_p = [_]f64{0.01} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
+    const microbial_n = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.1)));
+    const microbial_p = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.01)));
     for (0..2) |cell| {
         surface.microbial[microbialBase(cell, source_population_by_active[0]) + 2] = .{ .carbon_g_c = 1, .nitrogen_g_n = 0, .phosphorus_g_p = 0 };
         state.active_biomass_g_c[cell * active_population_count] = 1;
@@ -1084,7 +1087,7 @@ test "surface K5 mineral exchange follows alternate species then topsoil fallbac
     litter.cells[0].hpo4_mol_p_per_m3 = 1;
     topsoil_chemistry_state.aqueous[1].ammonium_non_band = 1;
     topsoil_chemistry_state.non_band_phosphate[1].dissolved_h2po4_mol_p_per_m3 = 1;
-    const oxygen = [_]f64{1} ** (2 * (surface_respiration.unit_count_per_cell + active_population_count));
+    const oxygen = @as([(2 * (surface_respiration.unit_count_per_cell + active_population_count))]f64, @splat(@as(f64, 1)));
     var context = try focusedExchangeContext(&state, &surface, &litter, &denit, &gas_state, &topsoil, &topsoil_chemistry_state, &.{ 1, 1 }, &.{ 1, 1 }, &oxygen, &microbial_n, &microbial_p);
     try applyTile(&context, .{ .first = 0, .end = 2 });
     try std.testing.expectEqual(@as(f64, 0), state.surface_ammonium_exchange_g_n[0]);
@@ -1127,21 +1130,21 @@ test "surface autotrophic apply is atomic on a late invalid cell" {
     chemistry_state.cells[0].ammonium_mol_per_m3 = 1;
     chemistry_state.cells[1].ammonium_mol_per_m3 = 0;
     const parameters = try nitrogen_parameters.sourceParameters();
-    const microbial_n = [_]f64{0.167} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
-    const microbial_p = [_]f64{0.0167} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
+    const microbial_n = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.167)));
+    const microbial_p = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.0167)));
     const before = chemistry_state.cells[0];
     const topsoil_chemistry_before = topsoil_chemistry_state.aqueous[0];
     const surface_carbon_before = try organic_state.totalCarbon_g_c(0);
     const topsoil_carbon_before = try topsoil_organic.totalCarbon_g_c(0);
-    const gas_carbon_before = gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)];
-    var oxygen = [_]f64{1} ** (2 * (surface_respiration.unit_count_per_cell + active_population_count));
+    const gas_carbon_before = gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)];
+    var oxygen = @as([(2 * (surface_respiration.unit_count_per_cell + active_population_count))]f64, @splat(@as(f64, 1)));
     var context: ApplyContext = .{ .state = &state, .surface_organic = &organic_state, .litter_chemistry = &chemistry_state, .litter_denitrification = &denit, .litter_gas = &gas_state, .litter_water_m3 = &.{ 1, 1 }, .topsoil_chemistry = &topsoil_chemistry_state, .topsoil_water_m3 = &.{ 1, 1 }, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .oxygen_satisfaction_fraction = &oxygen, .oxygen_unit_count_per_cell = surface_respiration.unit_count_per_cell + active_population_count, .first_autotrophic_oxygen_unit = surface_respiration.unit_count_per_cell, .topsoil_organic = &topsoil_organic, .soil_layer_capacity = 1, .topsoil_humus_partition = &.{ .{ 0.5, 0.5 }, .{ 0.5, 0.5 } }, .humification_fraction = &.{ 0.2, 0.2 }, .growth_temperature_response = &.{ 1, 1 }, .matric_plus_osmotic_potential_megapascal = &.{ 0, 0 }, .microbial_nitrogen_to_carbon_g_n_per_g_c = &microbial_n, .microbial_phosphorus_to_carbon_g_p_per_g_c = &microbial_p, .humus_nitrogen_per_carbon_g_n_per_g_c = 0.167, .humus_phosphorus_per_carbon_g_p_per_g_c = 0.0167, .negligible_carbon_g_c = 1e-12, .turnover_parameters = .{ .basal_decomposition_rate_per_h = .{ 0.01, 0.001 }, .minimum_carbon_recycling_fraction = 0.167, .carbon_recycling_range_fraction = 0.333, .maximum_nitrogen_recycling_fraction = 0.333, .maximum_phosphorus_recycling_fraction = 0.333, .dissolved_priming_rate_per_h = 0.01, .microbial_priming_rate_per_h = 0.001 }, .parameters = parameters, .nitrogen_molar_mass_g_per_mol = 14, .phosphorus_molar_mass_g_per_mol = 31, .mineral_exchange_parameters = testMineralExchangeParameters(), .microbial_surface_area_m2_per_g_c = 3, .timestep_h = 1 };
     try std.testing.expectError(error.InsufficientSurfaceAutotrophicAmmonium, applyTile(&context, .{ .first = 0, .end = 2 }));
     try std.testing.expectEqualDeep(before, chemistry_state.cells[0]);
     try std.testing.expectEqualDeep(topsoil_chemistry_before, topsoil_chemistry_state.aqueous[0]);
     try std.testing.expectEqual(surface_carbon_before, try organic_state.totalCarbon_g_c(0));
     try std.testing.expectEqual(topsoil_carbon_before, try topsoil_organic.totalCarbon_g_c(0));
-    try std.testing.expectEqual(gas_carbon_before, gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)]);
+    try std.testing.expectEqual(gas_carbon_before, gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)]);
     try std.testing.expectEqual(@as(f64, 0), state.actual_respiration_g_c[0]);
     try std.testing.expectEqual(@as(f64, -0.25), state.surface_ammonium_exchange_g_n[0]);
 }
@@ -1173,17 +1176,17 @@ test "surface ammonia and nitrite oxidizers return respiratory carbon and close 
     denit.nitrite_g_n[0] = 2;
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] = 10;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] = 10;
     const parameters = try nitrogen_parameters.sourceParameters();
-    const microbial_n = [_]f64{0.167} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
-    const microbial_p = [_]f64{0.0167} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
-    const carbon_before = try organic_state.totalCarbon_g_c(0) + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)];
-    const oxygen = [_]f64{1} ** (surface_respiration.unit_count_per_cell + active_population_count);
+    const microbial_n = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.167)));
+    const microbial_p = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.0167)));
+    const carbon_before = try organic_state.totalCarbon_g_c(0) + gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)];
+    const oxygen = @as([(surface_respiration.unit_count_per_cell + active_population_count)]f64, @splat(@as(f64, 1)));
     var context: ApplyContext = .{ .state = &state, .surface_organic = &organic_state, .litter_chemistry = &chemistry_state, .litter_denitrification = &denit, .litter_gas = &gas_state, .litter_water_m3 = &.{1}, .topsoil_chemistry = &topsoil_chemistry_state, .topsoil_water_m3 = &.{1}, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .oxygen_satisfaction_fraction = &oxygen, .oxygen_unit_count_per_cell = oxygen.len, .first_autotrophic_oxygen_unit = surface_respiration.unit_count_per_cell, .topsoil_organic = &topsoil_organic, .soil_layer_capacity = 1, .topsoil_humus_partition = &.{.{ 0.5, 0.5 }}, .humification_fraction = &.{0.2}, .growth_temperature_response = &.{1}, .matric_plus_osmotic_potential_megapascal = &.{0}, .microbial_nitrogen_to_carbon_g_n_per_g_c = &microbial_n, .microbial_phosphorus_to_carbon_g_p_per_g_c = &microbial_p, .humus_nitrogen_per_carbon_g_n_per_g_c = 0.167, .humus_phosphorus_per_carbon_g_p_per_g_c = 0.0167, .negligible_carbon_g_c = 1e-12, .turnover_parameters = .{ .basal_decomposition_rate_per_h = .{ 0.01, 0.001 }, .minimum_carbon_recycling_fraction = 0.167, .carbon_recycling_range_fraction = 0.333, .maximum_nitrogen_recycling_fraction = 0.333, .maximum_phosphorus_recycling_fraction = 0.333, .dissolved_priming_rate_per_h = 0.01, .microbial_priming_rate_per_h = 0.001 }, .parameters = parameters, .nitrogen_molar_mass_g_per_mol = 14, .phosphorus_molar_mass_g_per_mol = 31, .mineral_exchange_parameters = testMineralExchangeParameters(), .microbial_surface_area_m2_per_g_c = 3, .timestep_h = 1 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
-    const carbon_after = try organic_state.totalCarbon_g_c(0) + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)];
+    const carbon_after = try organic_state.totalCarbon_g_c(0) + gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)];
     try std.testing.expectApproxEqAbs(carbon_before, carbon_after, 1e-14);
-    try std.testing.expectApproxEqAbs(@as(f64, 9.85), gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)], 1e-14);
+    try std.testing.expectApproxEqAbs(@as(f64, 9.85), gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)], 1e-14);
     try std.testing.expectApproxEqAbs(@as(f64, 0.15), try organic_state.totalCarbon_g_c(0), 1e-14);
 }
 
@@ -1207,9 +1210,9 @@ test "surface autotrophs retain dry litter mineral concentrations" {
     defer denit.deinit();
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    const oxygen = [_]f64{1} ** (surface_respiration.unit_count_per_cell + active_population_count);
-    const microbial_n = [_]f64{0.167} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
-    const microbial_p = [_]f64{0.0167} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
+    const oxygen = @as([(surface_respiration.unit_count_per_cell + active_population_count)]f64, @splat(@as(f64, 1)));
+    const microbial_n = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.167)));
+    const microbial_p = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.0167)));
     var context: ApplyContext = .{ .state = &state, .surface_organic = &organic_state, .litter_chemistry = &chemistry_state, .litter_denitrification = &denit, .litter_gas = &gas_state, .litter_water_m3 = &.{0}, .topsoil_chemistry = &topsoil_chemistry_state, .topsoil_water_m3 = &.{0}, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .oxygen_satisfaction_fraction = &oxygen, .oxygen_unit_count_per_cell = oxygen.len, .first_autotrophic_oxygen_unit = surface_respiration.unit_count_per_cell, .topsoil_organic = &topsoil_organic, .soil_layer_capacity = 1, .topsoil_humus_partition = &.{.{ 0.5, 0.5 }}, .humification_fraction = &.{0.2}, .growth_temperature_response = &.{1}, .matric_plus_osmotic_potential_megapascal = &.{0}, .microbial_nitrogen_to_carbon_g_n_per_g_c = &microbial_n, .microbial_phosphorus_to_carbon_g_p_per_g_c = &microbial_p, .humus_nitrogen_per_carbon_g_n_per_g_c = 0.167, .humus_phosphorus_per_carbon_g_p_per_g_c = 0.0167, .negligible_carbon_g_c = 1e-12, .turnover_parameters = .{ .basal_decomposition_rate_per_h = .{ 0.01, 0.001 }, .minimum_carbon_recycling_fraction = 0.167, .carbon_recycling_range_fraction = 0.333, .maximum_nitrogen_recycling_fraction = 0.333, .maximum_phosphorus_recycling_fraction = 0.333, .dissolved_priming_rate_per_h = 0.01, .microbial_priming_rate_per_h = 0.001 }, .parameters = try nitrogen_parameters.sourceParameters(), .nitrogen_molar_mass_g_per_mol = 14, .phosphorus_molar_mass_g_per_mol = 31, .mineral_exchange_parameters = testMineralExchangeParameters(), .microbial_surface_area_m2_per_g_c = 3, .timestep_h = 1 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expectEqualDeep(before, chemistry_state.cells[0]);
@@ -1273,15 +1276,15 @@ test "surface K5 basal turnover and oxygen-limited senescence conserve C N P and
     denit.nitrite_g_n[0] = 0.75;
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    const co2 = @intFromEnum(gas.Species.carbon_dioxide);
+    const co2 = @backingInt(gas.Species.carbon_dioxide);
     gas_state.dissolved_mass_g[co2] = 5;
 
-    var microbial_n = [_]f64{0.167} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
-    var microbial_p = [_]f64{0.0167} ** (organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count);
+    var microbial_n = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.167)));
+    var microbial_p = @as([(organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count)]f64, @splat(@as(f64, 0.0167)));
     const ratio = (organic.autotrophic_substrate_index * organic.microbial_population_count + source_population_by_active[active]) * organic.kinetic_fraction_count;
     microbial_n[ratio + 1] = 0.125;
     microbial_p[ratio + 1] = 0.0125;
-    var oxygen = [_]f64{1} ** (surface_respiration.unit_count_per_cell + active_population_count);
+    var oxygen = @as([(surface_respiration.unit_count_per_cell + active_population_count)]f64, @splat(@as(f64, 1)));
     oxygen[surface_respiration.unit_count_per_cell + active] = 0.4;
     const parameters = try nitrogen_parameters.sourceParameters();
     const surface_before = try organicElementTotals(&surface, 0);
@@ -1294,7 +1297,7 @@ test "surface K5 basal turnover and oxygen-limited senescence conserve C N P and
     const residue_one_before = surface.residue[organic.residue_fraction_count].carbon_g_c;
     const labile_before = surface.microbial[microbial].carbon_g_c;
 
-    var accepted_topsoil_organic = [_]organic.ElementPool{.{}} ** active_population_count;
+    var accepted_topsoil_organic = @as([active_population_count]organic.ElementPool, @splat(@as(organic.ElementPool, .{})));
     var context: ApplyContext = .{
         .state = &state,
         .surface_organic = &surface,

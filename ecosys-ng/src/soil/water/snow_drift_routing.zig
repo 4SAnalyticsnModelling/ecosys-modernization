@@ -6,6 +6,7 @@ const solute_species = @import("../solute/transport_species.zig");
 const cell_conservation = @import("../../validation/hourly_cell_conservation.zig");
 const landscape_boundary = @import("../../validation/landscape_boundary_balance.zig");
 const ice_units = @import("../../core/ice_units.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const DownhillDirections = struct {
     east: []const bool,
@@ -187,7 +188,7 @@ pub fn produceAndRoute(
         inputs.accepted_fluxes.south_m3.len,
         inputs.accepted_fluxes.north_m3.len,
     }) |length| if (length != cells) return error.SnowDriftDimensionMismatch;
-    inline for (@typeInfo(snow.ThermodynamicParameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(snow.ThermodynamicParameters)) |field| {
         const value = @field(inputs.thermodynamics, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidSnowDriftInput;
     }
@@ -199,7 +200,7 @@ pub fn produceAndRoute(
         inputs.relative_tolerance,
     }) |value| if (!std.math.isFinite(value) or value <= 0) return error.InvalidSnowDriftInput;
     if (inputs.ice_density_megagrams_per_m3 > 1) return error.InvalidSnowDriftInput;
-    inline for (@typeInfo(@TypeOf(inputs.ion_molar_mass_g_per_mol)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(inputs.ion_molar_mass_g_per_mol))) |field| {
         const value = @field(inputs.ion_molar_mass_g_per_mol, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidSnowDriftInput;
     }
@@ -513,31 +514,31 @@ fn conservedTransfer(state: *const snow.State, layer: usize, fraction: f64, soli
             solid_correction_per_m3 * solid + ice_correction_per_m3 * ice_we,
     };
     const amounts = state.amount_g[layer * snow.species_count ..][0..snow.species_count];
-    result.carbon_g += fraction * (amounts[@intFromEnum(snow.Species.carbon_dioxide_carbon)] + amounts[@intFromEnum(snow.Species.methane_carbon)]);
-    result.oxygen_g += fraction * amounts[@intFromEnum(snow.Species.oxygen)];
-    result.nitrogen_g += fraction * (amounts[@intFromEnum(snow.Species.dinitrogen_nitrogen)] + amounts[@intFromEnum(snow.Species.nitrous_oxide_nitrogen)] + amounts[@intFromEnum(snow.Species.ammonium_nitrogen)] + amounts[@intFromEnum(snow.Species.ammonia_nitrogen)] + amounts[@intFromEnum(snow.Species.nitrate_nitrogen)]);
-    result.phosphorus_g += fraction * (amounts[@intFromEnum(snow.Species.hydrogen_phosphate_phosphorus)] + amounts[@intFromEnum(snow.Species.dihydrogen_phosphate_phosphorus)]);
-    var legacy_ion_mol = fraction * (2 * amounts[@intFromEnum(snow.Species.hydrogen_phosphate_phosphorus)] / snow.phosphorus_g_per_mol +
-        3 * amounts[@intFromEnum(snow.Species.dihydrogen_phosphate_phosphorus)] / snow.phosphorus_g_per_mol +
-        amounts[@intFromEnum(snow.Species.aluminum)] / inputs.ion_molar_mass_g_per_mol.aluminum +
-        amounts[@intFromEnum(snow.Species.iron)] / inputs.ion_molar_mass_g_per_mol.iron +
-        amounts[@intFromEnum(snow.Species.calcium)] / inputs.ion_molar_mass_g_per_mol.calcium +
-        amounts[@intFromEnum(snow.Species.magnesium)] / inputs.ion_molar_mass_g_per_mol.magnesium +
-        amounts[@intFromEnum(snow.Species.sodium)] / inputs.ion_molar_mass_g_per_mol.sodium +
-        amounts[@intFromEnum(snow.Species.potassium)] / inputs.ion_molar_mass_g_per_mol.potassium +
-        amounts[@intFromEnum(snow.Species.sulfate_sulfur)] / inputs.ion_molar_mass_g_per_mol.sulfur +
-        amounts[@intFromEnum(snow.Species.chloride)] / inputs.ion_molar_mass_g_per_mol.chloride);
-    result.aluminum_mol += fraction * amounts[@intFromEnum(snow.Species.aluminum)] / inputs.ion_molar_mass_g_per_mol.aluminum;
-    result.iron_mol += fraction * amounts[@intFromEnum(snow.Species.iron)] / inputs.ion_molar_mass_g_per_mol.iron;
-    result.calcium_mol += fraction * amounts[@intFromEnum(snow.Species.calcium)] / inputs.ion_molar_mass_g_per_mol.calcium;
-    result.magnesium_mol += fraction * amounts[@intFromEnum(snow.Species.magnesium)] / inputs.ion_molar_mass_g_per_mol.magnesium;
-    result.sodium_mol += fraction * amounts[@intFromEnum(snow.Species.sodium)] / inputs.ion_molar_mass_g_per_mol.sodium;
-    result.potassium_mol += fraction * amounts[@intFromEnum(snow.Species.potassium)] / inputs.ion_molar_mass_g_per_mol.potassium;
-    result.sulfur_mol += fraction * amounts[@intFromEnum(snow.Species.sulfate_sulfur)] / inputs.ion_molar_mass_g_per_mol.sulfur;
-    result.chloride_mol += fraction * amounts[@intFromEnum(snow.Species.chloride)] / inputs.ion_molar_mass_g_per_mol.chloride;
+    result.carbon_g += fraction * (amounts[@backingInt(snow.Species.carbon_dioxide_carbon)] + amounts[@backingInt(snow.Species.methane_carbon)]);
+    result.oxygen_g += fraction * amounts[@backingInt(snow.Species.oxygen)];
+    result.nitrogen_g += fraction * (amounts[@backingInt(snow.Species.dinitrogen_nitrogen)] + amounts[@backingInt(snow.Species.nitrous_oxide_nitrogen)] + amounts[@backingInt(snow.Species.ammonium_nitrogen)] + amounts[@backingInt(snow.Species.ammonia_nitrogen)] + amounts[@backingInt(snow.Species.nitrate_nitrogen)]);
+    result.phosphorus_g += fraction * (amounts[@backingInt(snow.Species.hydrogen_phosphate_phosphorus)] + amounts[@backingInt(snow.Species.dihydrogen_phosphate_phosphorus)]);
+    var legacy_ion_mol = fraction * (2 * amounts[@backingInt(snow.Species.hydrogen_phosphate_phosphorus)] / snow.phosphorus_g_per_mol +
+        3 * amounts[@backingInt(snow.Species.dihydrogen_phosphate_phosphorus)] / snow.phosphorus_g_per_mol +
+        amounts[@backingInt(snow.Species.aluminum)] / inputs.ion_molar_mass_g_per_mol.aluminum +
+        amounts[@backingInt(snow.Species.iron)] / inputs.ion_molar_mass_g_per_mol.iron +
+        amounts[@backingInt(snow.Species.calcium)] / inputs.ion_molar_mass_g_per_mol.calcium +
+        amounts[@backingInt(snow.Species.magnesium)] / inputs.ion_molar_mass_g_per_mol.magnesium +
+        amounts[@backingInt(snow.Species.sodium)] / inputs.ion_molar_mass_g_per_mol.sodium +
+        amounts[@backingInt(snow.Species.potassium)] / inputs.ion_molar_mass_g_per_mol.potassium +
+        amounts[@backingInt(snow.Species.sulfate_sulfur)] / inputs.ion_molar_mass_g_per_mol.sulfur +
+        amounts[@backingInt(snow.Species.chloride)] / inputs.ion_molar_mass_g_per_mol.chloride);
+    result.aluminum_mol += fraction * amounts[@backingInt(snow.Species.aluminum)] / inputs.ion_molar_mass_g_per_mol.aluminum;
+    result.iron_mol += fraction * amounts[@backingInt(snow.Species.iron)] / inputs.ion_molar_mass_g_per_mol.iron;
+    result.calcium_mol += fraction * amounts[@backingInt(snow.Species.calcium)] / inputs.ion_molar_mass_g_per_mol.calcium;
+    result.magnesium_mol += fraction * amounts[@backingInt(snow.Species.magnesium)] / inputs.ion_molar_mass_g_per_mol.magnesium;
+    result.sodium_mol += fraction * amounts[@backingInt(snow.Species.sodium)] / inputs.ion_molar_mass_g_per_mol.sodium;
+    result.potassium_mol += fraction * amounts[@backingInt(snow.Species.potassium)] / inputs.ion_molar_mass_g_per_mol.potassium;
+    result.sulfur_mol += fraction * amounts[@backingInt(snow.Species.sulfate_sulfur)] / inputs.ion_molar_mass_g_per_mol.sulfur;
+    result.chloride_mol += fraction * amounts[@backingInt(snow.Species.chloride)] / inputs.ion_molar_mass_g_per_mol.chloride;
     const salts = state.salt_amount_mol[layer * snow.salt_species_count ..][0..snow.salt_species_count];
     for (salts, 0..) |amount_mol, species| {
-        const aqueous_species = snow.aqueousSpeciesForSalt(@enumFromInt(species));
+        const aqueous_species = snow.aqueousSpeciesForSalt(@fromBackingInt(@intCast(species)));
         const formula = surface_aqueous.formula(aqueous_species);
         const transferred_mol = amount_mol * fraction;
         result.carbon_g += transferred_mol * formula.carbon_mol * 12;
@@ -551,7 +552,7 @@ fn conservedTransfer(state: *const snow.State, layer: usize, fraction: f64, soli
         }) |names| @field(result, names[0]) += transferred_mol * @field(formula, names[1]);
         legacy_ion_mol += transferred_mol * solute_species.legacyIonCount(aqueous_species);
     }
-    inline for (@typeInfo(cell_conservation.IntercellTransfer).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(cell_conservation.IntercellTransfer)) |field|
         if (!std.math.isFinite(@field(result, field.name)) or @field(result, field.name) < 0)
             return error.InvalidSnowDriftCandidate;
     if (!std.math.isFinite(legacy_ion_mol) or legacy_ion_mol < 0)
@@ -593,7 +594,7 @@ fn addTransferActivityDirection(activity: *cell_conservation.BoundaryActivity, t
 }
 
 fn addTransfer(total: *cell_conservation.IntercellTransfer, transfer: cell_conservation.IntercellTransfer) !void {
-    inline for (@typeInfo(cell_conservation.IntercellTransfer).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(cell_conservation.IntercellTransfer)) |field| {
         const next = @field(total, field.name) + @field(transfer, field.name);
         if (!std.math.isFinite(next)) return error.SnowDriftLedgerOverflow;
         @field(total, field.name) = next;
@@ -852,7 +853,7 @@ test "late QSX ledger overflow rolls back every physical chemical and accounting
     defer state.deinit();
     try state.initializePhysicalState(&.{0.1}, &.{1}, &.{260}, &.{1}, 0.1, snow.test_thermodynamics);
     @memset(try state.amounts(0, 0), 1);
-    state.amount_g[@intFromEnum(snow.Species.carbon_dioxide_carbon)] = std.math.floatMax(f64);
+    state.amount_g[@backingInt(snow.Species.carbon_dioxide_carbon)] = std.math.floatMax(f64);
     @memset(try state.saltAmounts(0, 0), 1);
     const solid_before = state.solid_snow_water_equivalent_m3[0];
     const amount_before = state.amount_g[0];

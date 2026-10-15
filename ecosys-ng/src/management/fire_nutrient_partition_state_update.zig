@@ -42,6 +42,7 @@
 // M4 disturbance group of
 // docs/traceability/management_unbound_family_is_superseded_by_the_schedule_dispatchers.md
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Fractions = struct {
     mineral_nitrogen_fraction: f64, // FCOMN
@@ -64,17 +65,17 @@ pub const State = struct {
 /// and 513--516. Applies one source-equation partition step to running fire
 /// nutrient products in source assignment order.
 pub fn publishStep(state: *State, inputs: Inputs, fractions: Fractions) !void {
-    inline for (std.meta.fields(Inputs)) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidFireNutrientPartitionInput;
     }
-    inline for (std.meta.fields(Fractions)) |field| {
+    inline for (ti_compat.fieldViews(Fractions)) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.InvalidFireNutrientPartitionFraction;
     }
-    inline for (std.meta.fields(State)) |field| {
+    inline for (ti_compat.fieldViews(State)) |field| {
         const value = @field(state.*, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteFireNutrientPartitionState;
@@ -97,7 +98,7 @@ pub fn publishStep(state: *State, inputs: Inputs, fractions: Fractions) !void {
             mineral_nitrogen,
         .mineral_dihydrogen_phosphate_g_p = state.mineral_dihydrogen_phosphate_g_p + mineral_phosphorus,
     };
-    inline for (std.meta.fields(State)) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (!std.math.isFinite(@field(next, field.name)))
             return error.NonFiniteFireNutrientPartitionResult;
     state.* = next;

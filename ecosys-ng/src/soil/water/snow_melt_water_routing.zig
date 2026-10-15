@@ -1,6 +1,7 @@
 const std = @import("std");
 const builtin = @import("builtin");
 
+
 pub const Inputs = struct {
     cell_count: usize,
     layer_capacity: usize,
@@ -144,7 +145,7 @@ fn validate(inputs: Inputs, outputs: Outputs) !void {
 }
 
 test "WATSUB snow liquid retention and lowest-layer routing are conservative" {
-    var downward = [_]f64{0} ** 2;
+    var downward = @as([2]f64, @splat(@as(f64, 0)));
     var litter = [_]f64{0};
     var micro = [_]f64{0};
     var macro = [_]f64{0};

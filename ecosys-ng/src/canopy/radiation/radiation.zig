@@ -2,6 +2,7 @@ const std = @import("std");
 const compute = @import("../../core/compute.zig");
 const CellRange = compute.CellRange;
 const spatial_grid = @import("../../state/spatial_grid.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Radiation carried by the direct-solar and four-sector diffuse-sky beams.
 /// Shortwave beam values are normal to the beam; horizontal totals include
@@ -40,12 +41,12 @@ pub const State = struct {
         result.horizontal_shortwave_megajoules_per_m2 = try allocator.alloc(f64, cell_count);
         errdefer allocator.free(result.horizontal_shortwave_megajoules_per_m2);
         result.horizontal_par_micromol_per_m2_per_s = try allocator.alloc(f64, cell_count);
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) @memset(@field(result, field.name), 0);
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) @memset(@field(result, field.name), 0);
         return result;
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
@@ -80,7 +81,7 @@ pub const MappedApplyContext = struct {
 pub fn applyUniformTile(context: *ApplyContext, range: CellRange) !void {
     if (range.end > context.state.cellCount()) return error.CanopyRadiationTileOutOfBounds;
     const value = try partition(context.horizontal_shortwave_megajoules_per_m2, context.extraterrestrial_horizontal_shortwave_megajoules_per_m2, context.solar_angle_sine, context.diffuse_sky_horizontal_projection);
-    for (range.first..range.end) |cell| inline for (@typeInfo(Partition).@"struct".fields) |field| {
+    for (range.first..range.end) |cell| inline for (ti_compat.fieldViews(Partition)) |field| {
         @field(context.state.*, field.name)[cell] = @field(value, field.name);
     };
 }
@@ -98,7 +99,7 @@ pub fn applyMappedTile(context: *MappedApplyContext, range: CellRange) !void {
             context.solar_angle_sine[cell],
             context.diffuse_sky_horizontal_projection,
         );
-        inline for (@typeInfo(Partition).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(Partition)) |field| {
             @field(context.state.*, field.name)[cell] = @field(value, field.name);
         }
     }

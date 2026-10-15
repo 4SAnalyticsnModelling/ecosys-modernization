@@ -23,6 +23,7 @@
 
 const std = @import("std");
 
+
 /// One audited quantity's breach history over the run.
 pub const QuantityTally = struct {
     breaches: u64 = 0,
@@ -197,7 +198,7 @@ pub const Survey = struct {
         // bitset: an earlier draft made it a struct-level `var`, which is
         // global mutable state and, worse, would not have reset between calls,
         // so a second summary would have printed nothing.
-        var emitted_already = [_]bool{false} ** 256;
+        var emitted_already = @as([256]bool, @splat(@as(bool, false)));
         if (self.tallies.len > emitted_already.len) {
             try writer.writeAll("  (too many quantities to rank; listing unordered)\n");
             for (self.tallies, 0..) |tally, index| {

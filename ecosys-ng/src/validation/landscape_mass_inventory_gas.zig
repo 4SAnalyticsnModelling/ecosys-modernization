@@ -288,7 +288,7 @@ fn aggregateSoilPhysicalAndGasRange(
             // ZNH3S/ZNH3B/ZNH3SH/ZNH3BH are inventoried once by the
             // mineral-N owner. Gas aqueous slots are transient solver mirrors;
             // only ZNH3G is an authoritative gas inventory.
-            result.ammonium_nitrogen_g += gaseous[@intFromEnum(gas.Species.ammonia)];
+            result.ammonium_nitrogen_g += gaseous[@backingInt(gas.Species.ammonia)];
         }
     }
     result.diagnostic_soil_heat_megajoules = result.heat_megajoules;

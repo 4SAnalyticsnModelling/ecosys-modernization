@@ -24,6 +24,8 @@ const grid = @import("../state/grid.zig");
 const zone_classification = @import("../soil/solute/charge_classification.zig");
 const scoped_conservation = @import("../validation/scoped_conservation.zig");
 const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const ApplyContext = struct {
     surface_organic: *organic.State,
@@ -135,7 +137,7 @@ fn state_updateCell(context: *ApplyContext, cell: usize) !void {
     const conserved_carbon_before_g_c = try authoritativeCellCarbon_g_c(context.*, cell);
     const conserved_nitrogen_before_g_n = try authoritativeCellNitrogen_g_n(context.*, cell);
     const conserved_phosphorus_before_g_p = try authoritativeCellPhosphorus_g_p(context.*, cell);
-    const hydrogen_index = cell * gas.species_count + @intFromEnum(gas.Species.hydrogen);
+    const hydrogen_index = cell * gas.species_count + @backingInt(gas.Species.hydrogen);
     const hydrogen_before_g_h = context.litter_gas.dissolved_mass_g[hydrogen_index];
     var dissolved_after: [respiration.litter_complex_count]organic.ElementPool = undefined;
     var acetate_after: [respiration.litter_complex_count]f64 = undefined;
@@ -329,8 +331,8 @@ fn state_updateCell(context: *ApplyContext, cell: usize) !void {
     const chemo_nitrite_reduction_g_n = context.denitrification.chemodenitrification_nitrite_reduction_g_n[cell];
     const chemo_n2o_production_g_n = context.denitrification.chemodenitrification_nitrous_oxide_production_g_n[cell];
     const nitrite_before_g_n = context.denitrification.nitrite_g_n[cell];
-    const n2o_index = cell * gas.species_count + @intFromEnum(gas.Species.nitrous_oxide);
-    const n2_index = cell * gas.species_count + @intFromEnum(gas.Species.nitrogen);
+    const n2o_index = cell * gas.species_count + @backingInt(gas.Species.nitrous_oxide);
+    const n2_index = cell * gas.species_count + @backingInt(gas.Species.nitrogen);
     const n2o_before_g_n = context.litter_gas.dissolved_mass_g[n2o_index];
     const n2_before_g_n = context.litter_gas.dissolved_mass_g[n2_index];
     const top = try context.model_grid.layerIndex(cell, 0);
@@ -633,8 +635,8 @@ fn state_updateCell(context: *ApplyContext, cell: usize) !void {
     }
     context.topsoil_organic.structural[topsoil_particulate_index] = topsoil_particulate_after;
     context.topsoil_organic.colonized_structural_carbon_g_c[topsoil_particulate_index] = topsoil_particulate_colonized_after;
-    context.litter_gas.dissolved_mass_g[cell * gas.species_count + @intFromEnum(gas.Species.carbon_dioxide)] += total_co2_g_c;
-    context.litter_gas.dissolved_mass_g[cell * gas.species_count + @intFromEnum(gas.Species.methane)] += total_ch4_g_c;
+    context.litter_gas.dissolved_mass_g[cell * gas.species_count + @backingInt(gas.Species.carbon_dioxide)] += total_co2_g_c;
+    context.litter_gas.dissolved_mass_g[cell * gas.species_count + @backingInt(gas.Species.methane)] += total_ch4_g_c;
     if (context.hourly_signed_heterotrophic_respiration_g_c) |ledger|
         ledger[cell] = -(total_co2_g_c + total_ch4_g_c);
     if (context.hourly_carbon_dioxide_production_g_c) |ledger|
@@ -771,7 +773,7 @@ fn projectedCellCarbon_g_c(
                 }
             };
     inline for ([_]gas.Species{ .carbon_dioxide, .methane }) |species| {
-        const index = cell * gas.species_count + @intFromEnum(species);
+        const index = cell * gas.species_count + @backingInt(species);
         total += context.litter_gas.gaseous_mass_g[index];
         total += context.litter_gas.dissolved_mass_g[index] + if (species == .carbon_dioxide) carbon_dioxide_production_g_c else methane_production_g_c;
         total += context.litter_gas.macropore_dissolved_mass_g[index] + context.litter_gas.band_dissolved_mass_g[index];
@@ -849,7 +851,7 @@ fn projectedCellNitrogen_g_n(
                 }
             };
     inline for ([_]gas.Species{ .nitrogen, .nitrous_oxide }) |species| {
-        const index = cell * gas.species_count + @intFromEnum(species);
+        const index = cell * gas.species_count + @backingInt(species);
         total += context.litter_gas.gaseous_mass_g[index];
         total += switch (species) {
             .nitrogen => dinitrogen_after_g_n,
@@ -860,7 +862,7 @@ fn projectedCellNitrogen_g_n(
             context.litter_gas.band_dissolved_mass_g[index];
     }
     total += context.litter_gas.gaseous_mass_g[
-        cell * gas.species_count + @intFromEnum(gas.Species.ammonia)
+        cell * gas.species_count + @backingInt(gas.Species.ammonia)
     ];
     const top = try context.model_grid.layerIndex(cell, 0);
     const top_water_m3 = context.model_grid.matrix_liquid_water_m3[top];
@@ -967,7 +969,7 @@ fn requireProjectedClosure(before: f64, after: f64, comptime failure: anyerror) 
 fn authoritativeCellCarbon_g_c(context: ApplyContext, cell: usize) !f64 {
     var total = try context.surface_organic.totalCarbon_g_c(cell);
     inline for ([_]gas.Species{ .carbon_dioxide, .methane }) |species| {
-        const index = cell * gas.species_count + @intFromEnum(species);
+        const index = cell * gas.species_count + @backingInt(species);
         total += context.litter_gas.gaseous_mass_g[index] + context.litter_gas.dissolved_mass_g[index] +
             context.litter_gas.macropore_dissolved_mass_g[index] + context.litter_gas.band_dissolved_mass_g[index];
     }
@@ -1003,12 +1005,12 @@ fn authoritativeCellNitrogen_g_n(context: ApplyContext, cell: usize) !f64 {
     const microbial_count = organic.microbial_substrate_count * organic.microbial_population_count * organic.kinetic_fraction_count;
     for (context.surface_organic.microbial[microbial_first..][0..microbial_count]) |pool| total += pool.nitrogen_g_n;
     inline for ([_]gas.Species{ .nitrogen, .nitrous_oxide }) |species| {
-        const index = cell * gas.species_count + @intFromEnum(species);
+        const index = cell * gas.species_count + @backingInt(species);
         total += context.litter_gas.gaseous_mass_g[index] + context.litter_gas.dissolved_mass_g[index] +
             context.litter_gas.macropore_dissolved_mass_g[index] + context.litter_gas.band_dissolved_mass_g[index];
     }
     total += context.litter_gas.gaseous_mass_g[
-        cell * gas.species_count + @intFromEnum(gas.Species.ammonia)
+        cell * gas.species_count + @backingInt(gas.Species.ammonia)
     ];
     const top = try context.model_grid.layerIndex(cell, 0);
     const top_water_m3 = context.model_grid.matrix_liquid_water_m3[top];
@@ -1157,7 +1159,7 @@ test "issue-073 Finding A: authoritativeCellNitrogen_g_n substitutes the topsoil
     var topsoil_organic = try organic.State.init(std.testing.allocator, 1);
     defer topsoil_organic.deinit();
     var parameters: respiration.Parameters = undefined;
-    parameters.populations = [_]@import("../soil/microbial/respiration_activity.zig").PopulationParameters{.{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 }} ** respiration.source_population_count;
+    parameters.populations = @as([respiration.source_population_count]@import("../soil/microbial/respiration_activity.zig").PopulationParameters, @splat(@as(@import("../soil/microbial/respiration_activity.zig").PopulationParameters, .{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 })));
     const context: ApplyContext = .{ .surface_organic = &organic_state, .litter_chemistry = &litter_chemistry_state, .litter_gas = &gas_state, .litter_water_m3 = &.{0}, .cell_area_m2 = &.{1}, .respiration = &respiration_state, .oxygen = &oxygen_state, .nitrogen_fixation = &fixation_state, .substrate_uptake = &uptake_state, .denitrification = &denitrification_state, .assimilation = &assimilation_state, .mineral_exchange = &mineral_exchange_state, .topsoil_exchange = &topsoil_exchange_state, .turnover = &turnover_state, .priming = &priming_state, .organic_decomposition = &organic_decomposition_state, .organic_sorption = &organic_sorption_state, .litter_colonization = &litter_colonization_state, .topsoil_organic = &topsoil_organic, .topsoil_humus_partition = &.{.{ 0.5, 0.5 }}, .topsoil_chemistry = &topsoil_chemistry, .model_grid = &model_grid, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .microbial_parameters = parameters, .nitrogen_molar_mass_g_per_mol = 14, .phosphorus_molar_mass_g_per_mol = 31, .negligible_carbon_g_c = 1e-12, .fraction_tolerance = 1e-12, .negligible_water_volume_m3 = negligible_water_volume_m3 };
 
     const nitrogen_census_g_n = try authoritativeCellNitrogen_g_n(context, 0);
@@ -1264,7 +1266,7 @@ test "signed surface mineral transfer accepts immobilization and mineralization"
 }
 
 fn finitePool(pool: organic.ElementPool) !void {
-    inline for (@typeInfo(organic.ElementPool).@"struct".fields) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.NonFiniteSurfaceMetabolismStateUpdate;
+    inline for (ti_compat.fieldViews(organic.ElementPool)) |field| if (!std.math.isFinite(@field(pool, field.name)) or @field(pool, field.name) < 0) return error.NonFiniteSurfaceMetabolismStateUpdate;
 }
 
 fn addPool(a: organic.ElementPool, b: organic.ElementPool) organic.ElementPool {
@@ -1298,7 +1300,7 @@ fn validate(context: ApplyContext, range: compute.CellRange) !void {
     for (context.topsoil_humus_partition) |partition| if (!std.math.isFinite(partition[0]) or !std.math.isFinite(partition[1]) or partition[0] < 0 or partition[1] < 0 or @abs(partition[0] + partition[1] - 1) > context.fraction_tolerance) return error.InvalidSurfaceMetabolismStateUpdateParameter;
     if (!std.math.isFinite(context.nitrogen_molar_mass_g_per_mol) or context.nitrogen_molar_mass_g_per_mol <= 0 or !std.math.isFinite(context.phosphorus_molar_mass_g_per_mol) or context.phosphorus_molar_mass_g_per_mol <= 0 or !std.math.isFinite(context.negligible_carbon_g_c) or context.negligible_carbon_g_c < 0 or !std.math.isFinite(context.fraction_tolerance) or context.fraction_tolerance < 0 or !std.math.isFinite(context.negligible_water_volume_m3) or context.negligible_water_volume_m3 < 0) return error.InvalidSurfaceMetabolismStateUpdateParameter;
     const fractions_to_validate = if (context.zone_fractions_by_layer.len == 0) @as([]const zone_classification.ZoneFractions, &.{context.zone_fractions}) else context.zone_fractions_by_layer;
-    for (fractions_to_validate) |fractions| inline for (@typeInfo(zone_classification.ZoneFractions).@"struct".fields) |field| if (!std.math.isFinite(@field(fractions, field.name)) or @field(fractions, field.name) < 0 or @field(fractions, field.name) > 1) return error.InvalidSurfaceMetabolismStateUpdateParameter;
+    for (fractions_to_validate) |fractions| inline for (ti_compat.fieldViews(zone_classification.ZoneFractions)) |field| if (!std.math.isFinite(@field(fractions, field.name)) or @field(fractions, field.name) < 0 or @field(fractions, field.name) > 1) return error.InvalidSurfaceMetabolismStateUpdateParameter;
 }
 
 test "surface sorption exchange cannot overdraw either shared pool" {
@@ -1316,8 +1318,8 @@ test "surface metabolism state_update conserves carbon nitrogen and phosphorus" 
     chemistry_state.cells[0].nitrate_mol_per_m3 = 0.1;
     var gas_state = try gas.State.init(std.testing.allocator, 1);
     defer gas_state.deinit();
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.nitrogen)] = 1;
-    gas_state.dissolved_mass_g[@intFromEnum(gas.Species.nitrous_oxide)] = 0.2;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.nitrogen)] = 1;
+    gas_state.dissolved_mass_g[@backingInt(gas.Species.nitrous_oxide)] = 0.2;
     var respiration_state = try respiration.State.init(std.testing.allocator, 1);
     defer respiration_state.deinit();
     respiration_state.substrate_limited_respiration_g_c[0] = 0.1;
@@ -1388,14 +1390,14 @@ test "surface metabolism state_update conserves carbon nitrogen and phosphorus" 
     var topsoil_organic = try organic.State.init(std.testing.allocator, 1);
     defer topsoil_organic.deinit();
     var parameters: respiration.Parameters = undefined;
-    parameters.populations = [_]@import("../soil/microbial/respiration_activity.zig").PopulationParameters{.{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 }} ** respiration.source_population_count;
-    const carbon_before = try organic_state.totalCarbon_g_c(0) + try topsoil_organic.totalCarbon_g_c(0) + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.methane)];
-    const nitrogen_before = organic_state.dissolved[0].nitrogen_g_n + chemistry_state.cells[0].nitrate_mol_per_m3 * 14 + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.nitrogen)] + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.nitrous_oxide)];
+    parameters.populations = @as([respiration.source_population_count]@import("../soil/microbial/respiration_activity.zig").PopulationParameters, @splat(@as(@import("../soil/microbial/respiration_activity.zig").PopulationParameters, .{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 })));
+    const carbon_before = try organic_state.totalCarbon_g_c(0) + try topsoil_organic.totalCarbon_g_c(0) + gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] + gas_state.dissolved_mass_g[@backingInt(gas.Species.methane)];
+    const nitrogen_before = organic_state.dissolved[0].nitrogen_g_n + chemistry_state.cells[0].nitrate_mol_per_m3 * 14 + gas_state.dissolved_mass_g[@backingInt(gas.Species.nitrogen)] + gas_state.dissolved_mass_g[@backingInt(gas.Species.nitrous_oxide)];
     var context: ApplyContext = .{ .surface_organic = &organic_state, .litter_chemistry = &chemistry_state, .litter_gas = &gas_state, .litter_water_m3 = &.{1}, .cell_area_m2 = &.{1}, .respiration = &respiration_state, .oxygen = &oxygen_state, .nitrogen_fixation = &fixation_state, .substrate_uptake = &uptake_state, .denitrification = &denitrification_state, .assimilation = &assimilation_state, .mineral_exchange = &mineral_exchange_state, .topsoil_exchange = &topsoil_exchange_state, .turnover = &turnover_state, .priming = &priming_state, .organic_decomposition = &organic_decomposition_state, .organic_sorption = &organic_sorption_state, .litter_colonization = &litter_colonization_state, .topsoil_organic = &topsoil_organic, .topsoil_humus_partition = &.{.{ 0.5, 0.5 }}, .topsoil_chemistry = &topsoil_chemistry, .model_grid = &model_grid, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .microbial_parameters = parameters, .nitrogen_molar_mass_g_per_mol = 14, .phosphorus_molar_mass_g_per_mol = 31, .negligible_carbon_g_c = 1e-12, .fraction_tolerance = 1e-12, .negligible_water_volume_m3 = 1e-12 };
     const phosphorus_before = try authoritativeCellPhosphorus_g_p(context, 0);
     try applyTile(&context, .{ .first = 0, .end = 1 });
-    const carbon_after = try organic_state.totalCarbon_g_c(0) + try topsoil_organic.totalCarbon_g_c(0) + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.carbon_dioxide)] + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.methane)];
-    const nitrogen_after = organic_state.dissolved[0].nitrogen_g_n + organic_state.microbial[2].nitrogen_g_n + (chemistry_state.cells[0].ammonium_mol_per_m3 + chemistry_state.cells[0].nitrate_mol_per_m3) * 14 + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.nitrogen)] + gas_state.dissolved_mass_g[@intFromEnum(gas.Species.nitrous_oxide)];
+    const carbon_after = try organic_state.totalCarbon_g_c(0) + try topsoil_organic.totalCarbon_g_c(0) + gas_state.dissolved_mass_g[@backingInt(gas.Species.carbon_dioxide)] + gas_state.dissolved_mass_g[@backingInt(gas.Species.methane)];
+    const nitrogen_after = organic_state.dissolved[0].nitrogen_g_n + organic_state.microbial[2].nitrogen_g_n + (chemistry_state.cells[0].ammonium_mol_per_m3 + chemistry_state.cells[0].nitrate_mol_per_m3) * 14 + gas_state.dissolved_mass_g[@backingInt(gas.Species.nitrogen)] + gas_state.dissolved_mass_g[@backingInt(gas.Species.nitrous_oxide)];
     try std.testing.expectApproxEqAbs(carbon_before, carbon_after, 1e-12);
     try std.testing.expectApproxEqAbs(nitrogen_before, nitrogen_after, 1e-12);
     try std.testing.expectApproxEqAbs(phosphorus_before, try authoritativeCellPhosphorus_g_p(context, 0), 1e-12);
@@ -1492,7 +1494,7 @@ test "insufficient substrate leaves every surface metabolism pool unchanged" {
     var topsoil_organic = try organic.State.init(std.testing.allocator, 1);
     defer topsoil_organic.deinit();
     var parameters: respiration.Parameters = undefined;
-    parameters.populations = [_]@import("../soil/microbial/respiration_activity.zig").PopulationParameters{.{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 }} ** respiration.source_population_count;
+    parameters.populations = @as([respiration.source_population_count]@import("../soil/microbial/respiration_activity.zig").PopulationParameters, @splat(@as(@import("../soil/microbial/respiration_activity.zig").PopulationParameters, .{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 })));
     const before_doc = organic_state.dissolved[0];
     const before_gas = gas_state.dissolved_mass_g;
     var gas_copy: [gas.species_count]f64 = undefined;

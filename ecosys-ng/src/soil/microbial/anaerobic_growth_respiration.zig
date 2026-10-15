@@ -38,6 +38,7 @@
 
 const std = @import("std");
 const nitrogen_parameters = @import("../nutrients/nitrogen_parameters.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Stoichiometric carbon basis for each source feedback conversion, in gram
 /// carbon per mole of the reaction the feedback energy is expressed over.
@@ -52,7 +53,7 @@ pub const CarbonBasis = struct {
     hydrogenotrophic_methanogenesis_g_c_per_mol: f64,
 
     pub fn validate(self: CarbonBasis) !void {
-        inline for (@typeInfo(CarbonBasis).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(CarbonBasis)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value <= 0)
                 return error.InvalidAnaerobicCarbonBasis;
@@ -87,7 +88,7 @@ pub const FeedbackEnvironmentParameters = struct {
     fermenter_acetate_feedback_stoichiometric_exponent: f64,
 
     pub fn validate(self: FeedbackEnvironmentParameters) !void {
-        inline for (@typeInfo(FeedbackEnvironmentParameters).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(FeedbackEnvironmentParameters)) |field| {
             const value = @field(self, field.name);
             if (!std.math.isFinite(value) or value <= 0)
                 return error.InvalidAnaerobicFeedbackParameter;
@@ -233,7 +234,7 @@ pub fn fermenterFeedback(
         .acetate_kilojoule_per_g_c = acetate,
         .combined_kilojoule_per_g_c = hydrogen + acetate,
     };
-    inline for (@typeInfo(FermenterFeedback).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(FermenterFeedback)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteAnaerobicFeedbackEnergy;
     return result;

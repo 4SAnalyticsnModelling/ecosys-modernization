@@ -1,6 +1,8 @@
 const std = @import("std");
 const delimited_input = @import("../../io/input/delimited_input.zig");
 const organic = @import("initialization.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 const Record = enum {
     initialization_scalars,
@@ -74,7 +76,7 @@ pub const OwnedParameters = struct {
     soil_microbial_priming_rate_per_h: f64,
 
     pub fn deinit(self: *OwnedParameters) void {
-        inline for (@typeInfo(OwnedParameters).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(OwnedParameters)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 
@@ -153,11 +155,11 @@ pub noinline fn parse(allocator: std.mem.Allocator, source: []const u8) !OwnedPa
     result.allocator = allocator;
     var allocated: usize = 0;
     errdefer freeAllocated(&result, allocated);
-    inline for (@typeInfo(OwnedParameters).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(OwnedParameters)) |field| if (field.type == []f64) {
         @field(result, field.name) = try allocator.alloc(f64, expectedCount(field.name));
         allocated += 1;
     };
-    var seen = [_]bool{false} ** @typeInfo(Record).@"enum".fields.len;
+    var seen = @as([@typeInfo(Record).@"enum".field_names.len]bool, @splat(@as(bool, false)));
     var records = std.mem.splitScalar(u8, source, '\n');
     while (records.next()) |line| {
         if (hasEmptyExplicitField(line))
@@ -166,7 +168,7 @@ pub noinline fn parse(allocator: std.mem.Allocator, source: []const u8) !OwnedPa
         const label = tokens.next() orelse continue;
         if (label[0] == '#') continue;
         const record = recordFromLabel(label) orelse return error.UnknownOrganicParameterRecord;
-        const record_index: usize = @intFromEnum(record);
+        const record_index: usize = @backingInt(record);
         if (seen[record_index]) return error.DuplicateOrganicParameterRecord;
         seen[record_index] = true;
         switch (record) {
@@ -195,7 +197,7 @@ pub noinline fn parse(allocator: std.mem.Allocator, source: []const u8) !OwnedPa
                 for (&result.soil_organic_decomposition.microbial_residue_rate_g_c_per_g_activity_h) |*value| value.* = try nextFinite(&tokens);
                 result.soil_organic_decomposition.sorbed_organic_rate_g_c_per_g_activity_h = try nextFinite(&tokens);
                 result.soil_organic_decomposition.sorbed_acetate_rate_g_c_per_g_activity_h = try nextFinite(&tokens);
-                inline for (@typeInfo(@TypeOf(result.soil_organic_decomposition.environment)).@"struct".fields) |field| @field(result.soil_organic_decomposition.environment, field.name) = try nextFinite(&tokens);
+                inline for (ti_compat.fieldViews(@TypeOf(result.soil_organic_decomposition.environment))) |field| @field(result.soil_organic_decomposition.environment, field.name) = try nextFinite(&tokens);
                 if (tokens.next() != null) return error.TooManyOrganicParameterValues;
             },
             .soil_organic_priming => {
@@ -237,7 +239,7 @@ pub fn sourceParameters(allocator: std.mem.Allocator) !OwnedParameters {
     result.allocator = allocator;
     var allocated: usize = 0;
     errdefer freeAllocated(&result, allocated);
-    inline for (@typeInfo(OwnedParameters).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(OwnedParameters)) |field| if (field.type == []f64) {
         @field(result, field.name) = try allocator.alloc(f64, expectedCount(field.name));
         @memset(@field(result, field.name), 0);
         allocated += 1;
@@ -347,9 +349,9 @@ fn validate(parameters: *const OwnedParameters) !void {
     for (parameters.soil_organic_decomposition.microbial_residue_rate_g_c_per_g_activity_h) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidOrganicParameter;
     inline for (.{ parameters.soil_organic_decomposition.sorbed_organic_rate_g_c_per_g_activity_h, parameters.soil_organic_decomposition.sorbed_acetate_rate_g_c_per_g_activity_h }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidOrganicParameter;
     inline for (.{ parameters.soil_dissolved_priming_rate_per_h, parameters.soil_microbial_priming_rate_per_h }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidOrganicParameter;
-    inline for (@typeInfo(@TypeOf(parameters.soil_organic_decomposition.environment)).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters.soil_organic_decomposition.environment, field.name)) or @field(parameters.soil_organic_decomposition.environment, field.name) <= 0) return error.InvalidOrganicParameter;
+    inline for (ti_compat.fieldViews(@TypeOf(parameters.soil_organic_decomposition.environment))) |field| if (!std.math.isFinite(@field(parameters.soil_organic_decomposition.environment, field.name)) or @field(parameters.soil_organic_decomposition.environment, field.name) <= 0) return error.InvalidOrganicParameter;
     if (parameters.humus_microbial_half_saturation_g_c_per_megagram <= 0 or parameters.less_resistant_humus_fraction_at_surface > 1 or parameters.reference_accumulation_fraction > 1 or parameters.fraction_at_reference_accumulation <= 0 or parameters.fraction_at_reference_accumulation > 1 or parameters.surface_litter_dry_mass_megagrams_per_g_c <= 0 or parameters.surface_litter_water_capacity_m3_per_g_c <= 0) return error.InvalidOrganicParameter;
-    inline for (@typeInfo(OwnedParameters).@"struct".fields) |field| if (field.type == []f64) for (@field(parameters, field.name)) |value| if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidOrganicParameter;
+    inline for (ti_compat.fieldViews(OwnedParameters)) |field| if (field.type == []f64) for (@field(parameters, field.name)) |value| if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidOrganicParameter;
     for (0..3) |substrate| {
         var sum: f64 = 0;
         for (parameters.residue_structural_fraction[substrate * organic.structural_fraction_count ..][0..organic.structural_fraction_count]) |value| sum += value;
@@ -386,7 +388,7 @@ fn nextFinite(tokens: anytype) !f64 {
 }
 
 fn recordFromLabel(label: []const u8) ?Record {
-    inline for (@typeInfo(Record).@"enum".fields) |field| if (std.ascii.eqlIgnoreCase(label, field.name)) return @enumFromInt(field.value);
+    inline for (ti_compat.enumFieldViews(Record)) |field| if (std.ascii.eqlIgnoreCase(label, field.name)) return @fromBackingInt(@intCast(field.value));
     return null;
 }
 
@@ -431,7 +433,7 @@ fn expectedCount(comptime name: []const u8) usize {
 
 fn freeAllocated(parameters: *OwnedParameters, count: usize) void {
     var visited: usize = 0;
-    inline for (@typeInfo(OwnedParameters).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(OwnedParameters)) |field| if (field.type == []f64) {
         if (visited < count) parameters.allocator.free(@field(parameters, field.name));
         visited += 1;
     };

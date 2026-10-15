@@ -1,5 +1,6 @@
 const std = @import("std");
 const phosphate_exchange = @import("../soil/solute/phosphate_exchange.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const ExchangeAdsorption = struct {
     ammonium_mol_per_megagram: f64,
@@ -159,11 +160,11 @@ pub fn assemble(extents: ReactionExtents, litter_mass_per_water_volume_megagrams
 
 fn validate(extents: ReactionExtents, density: f64) !void {
     if (!std.math.isFinite(density) or density <= 0) return error.InvalidLitterMassWaterRatio;
-    inline for (@typeInfo(ReactionExtents).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ReactionExtents)) |field| {
         const Field = field.type;
         switch (@typeInfo(Field)) {
             .float => if (!std.math.isFinite(@field(extents, field.name))) return error.NonFiniteLitterReactionExtent,
-            .@"struct" => inline for (@typeInfo(Field).@"struct".fields) |nested|
+            .@"struct" => inline for (ti_compat.fieldViews(Field)) |nested|
                 if (!std.math.isFinite(@field(@field(extents, field.name), nested.name))) return error.NonFiniteLitterReactionExtent,
             else => unreachable,
         }
@@ -222,10 +223,10 @@ test "fixed-pH formulation excludes salt-only reactions" {
 
 test "carboxyl hydrogen has its own exchange inventory" {
     var extents: ReactionExtents = undefined;
-    inline for (@typeInfo(ReactionExtents).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(ReactionExtents)) |field| switch (@typeInfo(field.type)) {
         .float => @field(extents, field.name) = 0,
         .@"struct" => {
-            inline for (@typeInfo(field.type).@"struct".fields) |nested| @field(@field(extents, field.name), nested.name) = 0;
+            inline for (ti_compat.fieldViews(field.type)) |nested| @field(@field(extents, field.name), nested.name) = 0;
         },
         else => unreachable,
     };

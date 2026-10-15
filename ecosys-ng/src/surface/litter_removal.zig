@@ -16,6 +16,7 @@ const Denitrification = @import("denitrification_step.zig");
 const Geometry = @import("litter_geometry.zig");
 const GeometryState = @import("litter_geometry_step.zig").State;
 const legacy_water_negligible_floor = @import("../core/legacy_water_negligible_floor.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 const litter_substrate_count: usize = 3;
 
 /// Runtime-sized authoritative surface pools bound from the REDIST operation
@@ -60,7 +61,7 @@ pub const Accounting = struct {
 /// accounting finish before the first pool is changed.
 pub fn apply(pools: Pools, inputs: Inputs) !Accounting {
     try validateInputs(inputs);
-    inline for (std.meta.fields(Pools)) |field|
+    inline for (ti_compat.fieldViews(Pools)) |field|
         try validatePool(@field(pools, field.name));
 
     const organic_c_before = try sumFinite(pools.organic_carbon_g_c);
@@ -328,7 +329,7 @@ pub fn applyRuntimeCell(context: *RuntimeContext, cell: usize, removal_fraction:
     context.surface_chemistry.cells[cell] = chemistry_next;
     context.surface_fertilizer.cells[cell] = fertilizer_next;
     context.surface_denitrification.nitrite_g_n[cell] = nitrite_next_g_n;
-    inline for (@typeInfo(Geometry.Result).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Geometry.Result)) |field|
         @field(context.surface_geometry, field.name)[cell] = @field(geometry_next, field.name);
     addToTargets(context.ledgers.carbon_output_g_c, carbon_output);
     addToTargets(context.ledgers.nitrogen_output_g_n, nitrogen_output);
@@ -372,7 +373,7 @@ fn validateRuntimeContext(context: *const RuntimeContext, cell: usize, removal_f
         context.surface_organic.structural.len != structural_count or
         context.surface_organic.colonized_structural_carbon_g_c.len != structural_count)
         return error.SurfaceLitterRemovalDimensionMismatch;
-    inline for (@typeInfo(GeometryState).@"struct".fields) |field| if (field.type == []f64 and @field(context.surface_geometry.*, field.name).len != cells)
+    inline for (ti_compat.fieldViews(GeometryState)) |field| if (field.type == []f64 and @field(context.surface_geometry.*, field.name).len != cells)
         return error.SurfaceLitterRemovalDimensionMismatch;
     inline for (.{ removal_fraction, context.nitrogen_g_per_mol, context.phosphorus_g_per_mol, context.dry_organic_heat_capacity_megajoules_per_g_c_k, context.litter_water_m3[cell], context.litter_ice_m3[cell], context.cell_area_m2[cell], context.surface_temperature_k[cell], context.surface_geometry.dry_mass_megagrams[cell], context.surface_chemistry.dry_reference_water_m3[cell] }) |value|
         if (!std.math.isFinite(value)) return error.NonFiniteSurfaceLitterRemovalInput;
@@ -418,11 +419,11 @@ fn accumulateCarbon(value: f64, removal_fraction: f64, charcoal: bool, totals: *
 }
 
 fn scaleElementPool(pool: *Organic.ElementPool, retained: f64) void {
-    inline for (std.meta.fields(Organic.ElementPool)) |field| @field(pool.*, field.name) *= retained;
+    inline for (ti_compat.fieldViews(Organic.ElementPool)) |field| @field(pool.*, field.name) *= retained;
 }
 
 fn scaleNumericStruct(comptime T: type, value: *T, scale_factor: f64) void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => @field(value, field.name) *= scale_factor,
         .@"struct" => scaleNumericStruct(field.type, &@field(value, field.name), scale_factor),
         else => @compileError("surface litter removal chemistry must be numeric"),
@@ -430,7 +431,7 @@ fn scaleNumericStruct(comptime T: type, value: *T, scale_factor: f64) void {
 }
 
 fn validateNumericStruct(comptime T: type, value: T) !void {
-    inline for (@typeInfo(T).@"struct".fields) |field| switch (@typeInfo(field.type)) {
+    inline for (ti_compat.fieldViews(T)) |field| switch (@typeInfo(field.type)) {
         .float => {
             const number = @field(value, field.name);
             if (!std.math.isFinite(number) or number < 0) return error.InvalidSurfaceLitterRemovalPool;
@@ -650,7 +651,7 @@ fn refreshTestGeometry(state: *GeometryState, organic: *const Organic.State, wat
         .water_m3 = water,
         .ice_m3 = ice,
     }, testGeometryParameters());
-    inline for (@typeInfo(Geometry.Result).@"struct".fields) |field| @field(state, field.name)[0] = @field(value, field.name);
+    inline for (ti_compat.fieldViews(Geometry.Result)) |field| @field(state, field.name)[0] = @field(value, field.name);
     state.previous_charcoal_carbon_g_c[0] = current_charcoal;
     state.retention_refresh_pending[0] = 0;
 }

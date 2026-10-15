@@ -6,6 +6,8 @@
 //! numerically identical in kelvin, so consumers add this value to `TKS`.
 
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -110,7 +112,7 @@ pub fn derive(
     const cell_count = mean_annual_soil_temperature_c.len;
     if (cell_count == 0 or thermal_adaptation_offset_c.len != cell_count)
         return error.MicrobialThermalAdaptationDimensionMismatch;
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         const value = @field(parameters, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteMicrobialThermalAdaptationParameter;
@@ -247,7 +249,7 @@ test "restored state resumes mode 2 refresh reproducibly" {
 }
 
 test "STARTS thermal adaptation reproduces both source branches and clamps" {
-    var offsets = [_]f64{0.0} ** 7;
+    var offsets = @as([7]f64, @splat(@as(f64, 0.0)));
     try derive(
         &offsets,
         &.{ -10.0, 0.0, 10.0, 15.0, 20.0, 30.0, 40.0 },

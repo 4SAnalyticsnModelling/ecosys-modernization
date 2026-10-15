@@ -11,6 +11,7 @@ const phenology = @import("../plant/lifecycle/phenology.zig");
 const litter_partition = @import("../plant/partition/litter.zig");
 const grazing_manure = @import("grazing_manure.zig");
 const __parent = @import("plant_harvest_runtime.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const TillageElementComposition = __parent.TillageElementComposition;
 pub const validateTillageComposition = __parent.validateTillageComposition;
@@ -61,7 +62,7 @@ pub fn sourceOrderTillagePopulationReduction(
         !std.math.isFinite(input.zero_population_threshold) or
         input.zero_population_threshold < 0)
         return error.InvalidTillagePopulationInput;
-    inline for (@typeInfo(SourceOrderTillagePopulationState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderTillagePopulationState)) |field| {
         const value = @field(input.state, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidTillagePopulationInput;
     }
@@ -87,7 +88,7 @@ pub fn sourceOrderTillagePopulationReduction(
     };
 
     var state = input.state;
-    inline for (@typeInfo(SourceOrderTillagePopulationState).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SourceOrderTillagePopulationState)) |field|
         @field(state, field.name) *= input.remaining_fraction;
     return .{
         .state = state,
@@ -139,7 +140,7 @@ pub fn sourceOrderTillageBranchLitter(
         !std.math.isFinite(input.pools.c4_mobile_carbon_g_c) or
         input.pools.c4_mobile_carbon_g_c < 0)
         return error.InvalidTillageBranchLitterInput;
-    inline for (@typeInfo(SourceOrderTillageBranchPools).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderTillageBranchPools)) |field| {
         if (field.type == canopy.ElementalMass) {
             const mass = @field(input.pools, field.name);
             inline for (.{ mass.carbon_g, mass.nitrogen_g, mass.phosphorus_g }) |value|
@@ -287,7 +288,7 @@ pub fn sourceOrderRetainTillageBranchState(
 ) !SourceOrderTillageBranchRetentionResult {
     if (!std.math.isFinite(remaining_fraction) or remaining_fraction < 0 or remaining_fraction > 1)
         return error.InvalidTillageBranchState;
-    inline for (@typeInfo(SourceOrderTillageBranchScalarState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderTillageBranchScalarState)) |field| {
         if (field.type == canopy.ElementalMass) {
             const mass = @field(scalar.*, field.name);
             inline for (.{ mass.carbon_g, mass.nitrogen_g, mass.phosphorus_g }) |value|
@@ -298,21 +299,21 @@ pub fn sourceOrderRetainTillageBranchState(
         }
     }
     const node_count = nodes.leaf_area_m2.len;
-    inline for (@typeInfo(SourceOrderTillageNodeState).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SourceOrderTillageNodeState)) |field|
         if (@field(nodes, field.name).len != node_count) return error.TillageBranchNodeDimensionMismatch;
     const sample_count = layer_samples.leaf_area_m2.len;
-    inline for (@typeInfo(SourceOrderTillageLayerSampleState).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SourceOrderTillageLayerSampleState)) |field|
         if (@field(layer_samples, field.name).len != sample_count) return error.TillageBranchSampleDimensionMismatch;
-    inline for (@typeInfo(SourceOrderTillageNodeState).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SourceOrderTillageNodeState)) |field|
         try validateTillageSlice(@field(nodes, field.name));
-    inline for (@typeInfo(SourceOrderTillageLayerSampleState).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(SourceOrderTillageLayerSampleState)) |field|
         try validateTillageSlice(@field(layer_samples, field.name));
 
     const seed_carbon_g_c = scalar.individual_seed_carbon_g_c;
-    inline for (@typeInfo(SourceOrderTillageBranchScalarState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderTillageBranchScalarState)) |field| {
         if (!std.mem.eql(u8, field.name, "individual_seed_carbon_g_c")) {
             if (field.type == canopy.ElementalMass) {
-                inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element|
+                inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element|
                     @field(@field(scalar.*, field.name), element.name) *= remaining_fraction;
             } else {
                 @field(scalar.*, field.name) *= remaining_fraction;
@@ -321,11 +322,11 @@ pub fn sourceOrderRetainTillageBranchState(
     }
     scalar.individual_seed_carbon_g_c = seed_carbon_g_c;
 
-    inline for (@typeInfo(SourceOrderTillageNodeState).@"struct".fields, 0..) |field, index| {
+    inline for (ti_compat.fieldViews(SourceOrderTillageNodeState), 0..) |field, index| {
         const first: usize = if (index < 4) 1 else 0;
         for (@field(nodes, field.name)[first..]) |*value| value.* *= remaining_fraction;
     }
-    inline for (@typeInfo(SourceOrderTillageLayerSampleState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SourceOrderTillageLayerSampleState)) |field| {
         for (@field(layer_samples, field.name)) |*value| value.* *= remaining_fraction;
     }
 
@@ -361,7 +362,7 @@ pub fn sourceOrderTillageStandingDead(
 
     var total: canopy.ElementalMass = .{};
     for (input.standing_dead_by_source_component) |mass| {
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
             const value = @field(mass, field.name);
             if (!std.math.isFinite(value) or value < 0) return error.InvalidTillageStandingDeadInput;
             @field(total, field.name) += value;
@@ -387,7 +388,7 @@ pub fn sourceOrderTillageStandingDead(
             input.stalk_kinetics.phosphorus[kinetic] * total.phosphorus_g * input.composition.phosphorus[1];
     }
     for (&result.remaining_by_source_component) |*mass| {
-        inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+        inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
             @field(mass, field.name) *= input.remaining_fraction;
     }
     return result;

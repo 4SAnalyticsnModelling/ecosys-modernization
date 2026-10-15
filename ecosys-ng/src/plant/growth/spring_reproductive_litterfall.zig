@@ -1,4 +1,6 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const EnableStatus = enum { enabled, disabled };
 pub const Elements = struct { carbon: f64, nitrogen: f64, phosphorus: f64 };
@@ -67,7 +69,7 @@ pub fn apply(state: State, inputs: Inputs) !bool {
 fn validate(state: State, inputs: Inputs) !usize {
     inline for (.{ inputs.accumulated_leafout_h, inputs.required_leafout_h, state.potential_seed_site_count.*, state.grain_count.*, state.individual_grain_carbon_g_c.* }) |value|
         if (!std.math.isFinite(value) or value < 0) return error.InvalidSpringReproductiveInput;
-    inline for (.{ state.husk.*, state.ear.*, state.grain.* }) |organ| inline for (@typeInfo(Elements).@"struct".fields) |field| {
+    inline for (.{ state.husk.*, state.ear.*, state.grain.* }) |organ| inline for (ti_compat.fieldViews(Elements)) |field| {
         const value = @field(organ, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidSpringReproductiveState;
     };
@@ -75,7 +77,7 @@ fn validate(state: State, inputs: Inputs) !usize {
     if (count == 0) return error.ZeroSpringReproductiveKineticPools;
     inline for (.{ inputs.reproductive_litter_kinetics.nitrogen, inputs.reproductive_litter_kinetics.phosphorus, state.litter_carbon_g_c, state.litter_nitrogen_g_n, state.litter_phosphorus_g_p }) |values|
         if (values.len != count) return error.SpringReproductiveKineticDimensionMismatch;
-    inline for (@typeInfo(Kinetics).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Kinetics)) |field| {
         var total: f64 = 0;
         for (@field(inputs.reproductive_litter_kinetics, field.name)) |fraction| {
             if (!std.math.isFinite(fraction) or fraction < 0 or fraction > 1) return error.InvalidSpringReproductiveKinetics;
@@ -110,7 +112,7 @@ test "spring reproductive litterfall conserves C N P and clears diagnostics" {
 
 test "disabled gate is strict no-op before state reads" {
     var organs: [3]Elements = @splat(.{ .carbon = std.math.nan(f64), .nitrogen = 0, .phosphorus = 0 });
-    var diagnostics = [_]f64{std.math.nan(f64)} ** 3;
+    var diagnostics = @as([3]f64, @splat(@as(f64, std.math.nan(f64))));
     var litter: [3][3]f64 = @splat(@splat(std.math.nan(f64)));
     var inputs = testInputs();
     inputs.leafout_status = .disabled;

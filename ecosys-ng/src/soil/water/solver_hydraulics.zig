@@ -40,7 +40,7 @@ pub fn conductivityAt(properties: group_types.Properties, cell: usize, axis: usi
 /// caller did not supply a lateral array, so every pre-existing caller that
 /// only ever populates `mualem_van_genuchten_parameters` keeps its previous,
 /// isotropic behaviour bit-for-bit.
-const vertical_axis: usize = @intFromEnum(group_types.Axis.z);
+const vertical_axis: usize = @backingInt(group_types.Axis.z);
 
 fn lateralSaturatedConductivityOverrideMPerH(properties: group_types.Properties, cell: usize, axis: usize) ?f64 {
     if (axis == vertical_axis) return null;

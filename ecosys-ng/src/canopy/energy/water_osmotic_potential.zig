@@ -4,6 +4,7 @@
 // published atomically to the detailed canopy before downstream dormancy,
 // growth, reproduction, and output consumers run.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     canopy_total_water_potential_megapascal: f64,
@@ -56,14 +57,14 @@ pub fn calculate(inputs: Inputs) !Result {
         .osmotic_water_potential_megapascal = osmotic_potential,
         .turgor_water_potential_megapascal = turgor_potential,
     };
-    inline for (@typeInfo(Result).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Result)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteCanopyWaterPotentialResult;
     return result;
 }
 
 fn validate(inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Inputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.InvalidCanopyWaterPotentialInput;
     if (inputs.minimum_dry_matter_fraction_g_c_per_g <= 0 or

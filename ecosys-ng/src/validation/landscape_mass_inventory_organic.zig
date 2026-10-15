@@ -310,10 +310,10 @@ fn aggregateSoilOrganicTransportMacroporeRange(
                 const base =
                     flat_layer * organic_transport.component_count +
                     substrate * organic_transport.components_per_substrate;
-                const doc_g_c = transport.macropore_amount_g[base + @intFromEnum(organic_transport.Component.dissolved_organic_carbon)];
-                const don_g_n = transport.macropore_amount_g[base + @intFromEnum(organic_transport.Component.dissolved_organic_nitrogen)];
-                const dop_g_p = transport.macropore_amount_g[base + @intFromEnum(organic_transport.Component.dissolved_organic_phosphorus)];
-                const acetate_g_c = transport.macropore_amount_g[base + @intFromEnum(organic_transport.Component.dissolved_acetate_carbon)];
+                const doc_g_c = transport.macropore_amount_g[base + @backingInt(organic_transport.Component.dissolved_organic_carbon)];
+                const don_g_n = transport.macropore_amount_g[base + @backingInt(organic_transport.Component.dissolved_organic_nitrogen)];
+                const dop_g_p = transport.macropore_amount_g[base + @backingInt(organic_transport.Component.dissolved_organic_phosphorus)];
+                const acetate_g_c = transport.macropore_amount_g[base + @backingInt(organic_transport.Component.dissolved_acetate_carbon)];
                 inline for (.{ doc_g_c, don_g_n, dop_g_p, acetate_g_c }) |value| {
                     if (!std.math.isFinite(value))
                         return error.NonFiniteSoilOrganicTransportInventory;

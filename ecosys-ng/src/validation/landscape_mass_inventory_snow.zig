@@ -28,6 +28,8 @@ const ice_units = @import("../core/ice_units.zig");
 const surface_aqueous = @import("../surface/aqueous_runoff_transport.zig");
 const snow_surface_discharge = @import("../soil/water/snow_surface_discharge.zig");
 const surface_solute_routing = @import("../soil/solute/surface_solute_routing.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const MolarMassesGPerMol = struct {
     nitrogen: f64,
@@ -184,7 +186,7 @@ fn aggregateSnowEnthalpyRange(
     inline for (.{ molar_mass_g_per_mol.nitrogen, molar_mass_g_per_mol.phosphorus }) |value|
         if (!std.math.isFinite(value) or value <= 0)
             return error.InvalidSnowInventoryMolarMass;
-    inline for (@typeInfo(@TypeOf(molar_mass_g_per_mol.ions)).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(@TypeOf(molar_mass_g_per_mol.ions))) |field| {
         const value = @field(molar_mass_g_per_mol.ions, field.name);
         if (!std.math.isFinite(value) or value <= 0)
             return error.InvalidSnowInventoryMolarMass;
@@ -305,7 +307,7 @@ fn aggregateSnowEnthalpyRange(
             .chloride = group_support.speciesAmount(amounts, .chloride) / molar_mass_g_per_mol.ions.chloride,
         };
         try group_support.addElementMoles(&result, elements);
-        inline for (std.meta.fields(group_support.ElementMoles)) |field|
+        inline for (ti_compat.fieldViews(group_support.ElementMoles)) |field|
             result.ion_inventory_mol += @field(elements, field.name);
 
         // The primary gram carrier above owns gases, N, the two free
@@ -318,7 +320,7 @@ fn aggregateSnowEnthalpyRange(
             if (amount_mol < 0) return error.NegativeSnowInventory;
             if (!state.dynamic_salts_by_cell[snow_cell] and amount_mol != 0)
                 return error.OverlappingSnowSaltInventory;
-            const aqueous_species = snow.aqueousSpeciesForSalt(@enumFromInt(snow_species_index));
+            const aqueous_species = snow.aqueousSpeciesForSalt(@fromBackingInt(@intCast(snow_species_index)));
             const formula = surface_aqueous.formula(aqueous_species);
             result.carbon_dioxide_carbon_g += amount_mol * formula.carbon_mol * 12;
             result.phosphate_phosphorus_g += amount_mol * formula.phosphorus_mol * molar_mass_g_per_mol.phosphorus;
@@ -409,8 +411,8 @@ test "static snow input retention and melt share authoritative molar masses" {
         .phosphorus = 30.5,
         .ions = .{ .aluminum = 27.5, .iron = 57, .calcium = 41, .magnesium = 25, .sodium = 24, .potassium = 40, .sulfur = 33, .chloride = 36 },
     };
-    var ion_input_g_per_m3 = [_]f64{0} ** snow.static_ion_species_count;
-    inline for (@typeInfo(snow_surface_discharge.IonMolarMassesGPerMol).@"struct".fields, 0..) |field, index|
+    var ion_input_g_per_m3 = @as([snow.static_ion_species_count]f64, @splat(@as(f64, 0)));
+    inline for (ti_compat.fieldViews(snow_surface_discharge.IonMolarMassesGPerMol), 0..) |field, index|
         ion_input_g_per_m3[index] = @field(masses.ions, field.name);
     const atmospheric_input = try snow.atmosphericInputG(1, 0, @splat(0), @splat(0), @splat(0), @splat(0), ion_input_g_per_m3, @splat(0));
 
@@ -420,13 +422,13 @@ test "static snow input retention and melt share authoritative molar masses" {
     snow_state.liquid_water_volume_m3[0] = 1;
     snow_state.temperature_k[0] = 273.15;
     snow_state.heat_capacity_megajoules_per_k[0] = 4.19;
-    var zero_downward_g = [_]f64{0} ** snow.species_count;
-    var zero_downward_salt_mol = [_]f64{0} ** snow.salt_species_count;
+    var zero_downward_g = @as([snow.species_count]f64, @splat(@as(f64, 0)));
+    var zero_downward_salt_mol = @as([snow.salt_species_count]f64, @splat(@as(f64, 0)));
     var no_discharge = [_]snow.SurfaceDischarge{.{}};
     const input_fluxes: snow.Fluxes = .{ .allocator = std.testing.allocator, .downward_g = &zero_downward_g, .downward_salt_mol = &zero_downward_salt_mol, .surface_discharge = &no_discharge };
     try snow.state_update(&snow_state, &atmospheric_input, &input_fluxes);
     const retained = try aggregateSnowEnthalpy(&snow_state, 0.917, 333, 2.095, 4.19, 1.9274, 273.15, masses);
-    inline for (@typeInfo(snow_surface_discharge.IonMolarMassesGPerMol).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(snow_surface_discharge.IonMolarMassesGPerMol)) |field|
         try std.testing.expectEqual(@as(f64, 1), @field(retained, field.name ++ "_mol"));
 
     var melt_fluxes = try snow.calculateFluxes(
@@ -460,11 +462,11 @@ test "static snow input retention and melt share authoritative molar masses" {
         .ion_molar_mass_g_per_mol = masses.ions,
         .surface_aqueous = &surface_solutes,
     }, &litter_gas, &soil_gas, &litter_state, &soil_state);
-    try snow.state_update(&snow_state, &([_]f64{0} ** snow.species_count), &melt_fluxes);
+    try snow.state_update(&snow_state, &(@as([snow.species_count]f64, @splat(@as(f64, 0)))), &melt_fluxes);
 
     const after = try aggregateSnowEnthalpy(&snow_state, 0.917, 333, 2.095, 4.19, 1.9274, 273.15, masses);
     try std.testing.expectEqual(@as(f64, 0), after.ion_inventory_mol);
-    inline for (@typeInfo(snow_surface_discharge.IonMolarMassesGPerMol).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(snow_surface_discharge.IonMolarMassesGPerMol)) |field| {
         const observed = if (comptime std.mem.eql(u8, field.name, "sulfur")) litter_state.cells[0].sulfate_mol_per_m3 else @field(litter_state.cells[0], field.name ++ "_mol_per_m3");
         try std.testing.expectEqual(@as(f64, 1), observed);
     }
@@ -522,7 +524,7 @@ test "all 41 snow salt species enter cell and domain elemental inventories exact
         0,
     );
     try std.testing.expectEqualDeep(first, first_layer);
-    inline for (std.meta.fields(group_support.Storage)) |field|
+    inline for (ti_compat.fieldViews(group_support.Storage)) |field|
         try std.testing.expectEqual(
             @field(first, field.name) + @field(second, field.name),
             @field(domain, field.name),

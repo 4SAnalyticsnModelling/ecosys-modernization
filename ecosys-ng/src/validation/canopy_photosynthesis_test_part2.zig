@@ -19,10 +19,11 @@ const shoot_recycling_fraction = @import("../plant/growth/shoot_recycling_fracti
 const shoot_total_senescence_setup = @import("../plant/growth/shoot_total_senescence_setup.zig");
 const std = @import("std");
 const canopy_photosynthesis = @import("../canopy/photosynthesis/photosynthesis.zig");
+
 test "GROSUB sheath and stalk growth retain runtime node geometry" {
     const branch_counts = [_]usize{1};
     const node_counts = [_]usize{5};
-    const sample_counts = [_]usize{0} ** 5;
+    const sample_counts = @as([5]usize, @splat(@as(usize, 0)));
     var state = try canopy_photosynthesis.State.init(std.testing.allocator, 1, 1, &branch_counts, &node_counts, &sample_counts);
     defer state.deinit();
     @memset(state.node_leaf_carbon_g, 1);
@@ -38,7 +39,7 @@ test "GROSUB sheath and stalk growth retain runtime node geometry" {
 test "GROSUB stalk allocation accepts an exact runtime window wider than twenty five nodes" {
     const branch_counts = [_]usize{1};
     const node_counts = [_]usize{32};
-    const sample_counts = [_]usize{0} ** 32;
+    const sample_counts = @as([32]usize, @splat(@as(usize, 0)));
     var state = try canopy_photosynthesis.State.init(std.testing.allocator, 1, 1, &branch_counts, &node_counts, &sample_counts);
     defer state.deinit();
 

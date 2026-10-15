@@ -17,6 +17,7 @@
 // disturbance fraction.
 const std = @import("std");
 
+
 pub const litter_species_count = 42;
 pub const soil_species_count = 50;
 const pre_phosphate_species_count = 34;
@@ -102,14 +103,14 @@ fn fixture(
 }
 
 test "TRNSFRS publishes exact litter and soil signs" {
-    const litter_boundary = [_]f64{10} ** litter_species_count;
-    const snow_litter = [_]f64{2} ** litter_species_count;
-    const soil_boundary = [_]f64{20} ** soil_species_count;
-    const snow_soil = [_]f64{3} ** soil_species_count;
-    const convective = [_]f64{1} ** soil_species_count;
-    const diffusive = [_]f64{0.5} ** soil_species_count;
-    var litter = [_]f64{0} ** litter_species_count;
-    var soil = [_]f64{0} ** soil_species_count;
+    const litter_boundary = @as([litter_species_count]f64, @splat(@as(f64, 10)));
+    const snow_litter = @as([litter_species_count]f64, @splat(@as(f64, 2)));
+    const soil_boundary = @as([soil_species_count]f64, @splat(@as(f64, 20)));
+    const snow_soil = @as([soil_species_count]f64, @splat(@as(f64, 3)));
+    const convective = @as([soil_species_count]f64, @splat(@as(f64, 1)));
+    const diffusive = @as([soil_species_count]f64, @splat(@as(f64, 0.5)));
+    var litter = @as([litter_species_count]f64, @splat(@as(f64, 0)));
+    var soil = @as([soil_species_count]f64, @splat(@as(f64, 0)));
     try publish(fixture(&litter_boundary, &snow_litter, &soil_boundary, &snow_soil, &convective, &diffusive), &litter, &soil);
     try std.testing.expectEqual(@as(f64, 10.5), litter[0]);
     try std.testing.expectEqual(@as(f64, 9), litter[34]);
@@ -118,42 +119,42 @@ test "TRNSFRS publishes exact litter and soil signs" {
 }
 
 test "internal exchange cancels exactly across litter and soil phosphate pools" {
-    const litter_boundary = [_]f64{0} ** litter_species_count;
-    const snow_litter = [_]f64{0} ** litter_species_count;
-    const soil_boundary = [_]f64{0} ** soil_species_count;
-    const snow_soil = [_]f64{0} ** soil_species_count;
-    var convective = [_]f64{0} ** soil_species_count;
-    var diffusive = [_]f64{0} ** soil_species_count;
+    const litter_boundary = @as([litter_species_count]f64, @splat(@as(f64, 0)));
+    const snow_litter = @as([litter_species_count]f64, @splat(@as(f64, 0)));
+    const soil_boundary = @as([soil_species_count]f64, @splat(@as(f64, 0)));
+    const snow_soil = @as([soil_species_count]f64, @splat(@as(f64, 0)));
+    var convective = @as([soil_species_count]f64, @splat(@as(f64, 0)));
+    var diffusive = @as([soil_species_count]f64, @splat(@as(f64, 0)));
     convective[34] = 2;
     convective[42] = 3;
     diffusive[34] = -0.5;
     diffusive[42] = 1;
-    var litter = [_]f64{0} ** litter_species_count;
-    var soil = [_]f64{0} ** soil_species_count;
+    var litter = @as([litter_species_count]f64, @splat(@as(f64, 0)));
+    var soil = @as([soil_species_count]f64, @splat(@as(f64, 0)));
     try publish(fixture(&litter_boundary, &snow_litter, &soil_boundary, &snow_soil, &convective, &diffusive), &litter, &soil);
     try std.testing.expectEqual(@as(f64, 0), litter[34] + soil[34] + soil[42]);
 }
 
 test "late invalid input leaves both totals atomic" {
-    const litter_boundary = [_]f64{10} ** litter_species_count;
-    const snow_litter = [_]f64{2} ** litter_species_count;
-    const soil_boundary = [_]f64{20} ** soil_species_count;
-    const snow_soil = [_]f64{3} ** soil_species_count;
-    const convective = [_]f64{1} ** soil_species_count;
-    var diffusive = [_]f64{0.5} ** soil_species_count;
+    const litter_boundary = @as([litter_species_count]f64, @splat(@as(f64, 10)));
+    const snow_litter = @as([litter_species_count]f64, @splat(@as(f64, 2)));
+    const soil_boundary = @as([soil_species_count]f64, @splat(@as(f64, 20)));
+    const snow_soil = @as([soil_species_count]f64, @splat(@as(f64, 3)));
+    const convective = @as([soil_species_count]f64, @splat(@as(f64, 1)));
+    var diffusive = @as([soil_species_count]f64, @splat(@as(f64, 0.5)));
     diffusive[soil_species_count - 1] = std.math.inf(f64);
-    var litter = [_]f64{9} ** litter_species_count;
-    var soil = [_]f64{7} ** soil_species_count;
+    var litter = @as([litter_species_count]f64, @splat(@as(f64, 9)));
+    var soil = @as([soil_species_count]f64, @splat(@as(f64, 7)));
     try std.testing.expectError(error.NonFiniteLitterSoilTotalSoluteFluxInput, publish(fixture(&litter_boundary, &snow_litter, &soil_boundary, &snow_soil, &convective, &diffusive), &litter, &soil));
     try std.testing.expectEqual(@as(f64, 9), litter[0]);
     try std.testing.expectEqual(@as(f64, 7), soil[0]);
 }
 
 test "total flux topology rejects short litter input" {
-    const short_litter = [_]f64{0} ** (litter_species_count - 1);
-    const litter = [_]f64{0} ** litter_species_count;
-    const soil = [_]f64{0} ** soil_species_count;
-    var litter_output = [_]f64{9} ** litter_species_count;
-    var soil_output = [_]f64{7} ** soil_species_count;
+    const short_litter = @as([(litter_species_count - 1)]f64, @splat(@as(f64, 0)));
+    const litter = @as([litter_species_count]f64, @splat(@as(f64, 0)));
+    const soil = @as([soil_species_count]f64, @splat(@as(f64, 0)));
+    var litter_output = @as([litter_species_count]f64, @splat(@as(f64, 9)));
+    var soil_output = @as([soil_species_count]f64, @splat(@as(f64, 7)));
     try std.testing.expectError(error.LitterSoilTotalSoluteFluxDimensionMismatch, publish(fixture(&short_litter, &litter, &soil, &soil, &soil, &soil), &litter_output, &soil_output));
 }

@@ -2,6 +2,7 @@ const std = @import("std");
 const SoilProfile = @import("../../state/soil_profile.zig").SoilProfile;
 const SoilMaterial = @import("../profile/initialization.zig").SoilMaterial;
 const retention = @import("retention.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const SoilHydrology = struct {
     allocator: std.mem.Allocator,
@@ -50,7 +51,7 @@ pub const SoilHydrology = struct {
             return error.InvalidMaximumRootingLayerCount;
         var allocated: usize = 0;
         errdefer freeAllocated(&result, allocated);
-        inline for (@typeInfo(SoilHydrology).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SoilHydrology)) |field| {
             if (field.type == []f64) {
                 @field(result, field.name) = try allocator.alloc(f64, result.layer_count);
                 allocated += 1;
@@ -118,14 +119,14 @@ pub const SoilHydrology = struct {
     }
 
     pub fn deinit(self: *SoilHydrology) void {
-        inline for (@typeInfo(SoilHydrology).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SoilHydrology)) |field| {
             if (field.type == []f64) self.allocator.free(@field(self, field.name));
         }
         self.* = undefined;
     }
 
     fn validateFinite(self: SoilHydrology) !void {
-        inline for (@typeInfo(SoilHydrology).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(SoilHydrology)) |field| {
             if (field.type == []f64) for (@field(self, field.name), 0..) |value, layer| {
                 if (!std.math.isFinite(value)) {
                     std.log.err("non-finite initialized hydrology: field={s} layer={d}", .{ field.name, layer });
@@ -159,7 +160,7 @@ fn decodeIceFraction(input: f64, porosity: f64, water_fraction: f64, field_capac
 
 fn freeAllocated(state: *SoilHydrology, count: usize) void {
     var visited: usize = 0;
-    inline for (@typeInfo(SoilHydrology).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SoilHydrology)) |field| {
         if (field.type == []f64) {
             if (visited < count) state.allocator.free(@field(state, field.name));
             visited += 1;
@@ -168,7 +169,7 @@ fn freeAllocated(state: *SoilHydrology, count: usize) void {
 }
 
 test "initialize water and ice from reference sentinel rules" {
-    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(std.testing.allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".fields.len);
+    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(std.testing.allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".field_names.len);
     defer std.testing.allocator.free(source);
     var profile = try @import("../../state/soil_profile.zig").parsePhysicalProfile(std.testing.allocator, source);
     defer profile.deinit();
@@ -192,7 +193,7 @@ test "negative initial water sentinel preserves source zero" {
 
 test "negative field capacity and wilting sentinels use HOUR1 runtime estimators" {
     const allocator = std.testing.allocator;
-    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".fields.len);
+    const source = try @import("../../core/test_fixtures.zig").soilProfileSource(allocator, @typeInfo(@import("../../state/soil_profile.zig").LayerProperty).@"enum".field_names.len);
     defer allocator.free(source);
     var profile = try @import("../../state/soil_profile.zig").parsePhysicalProfile(allocator, source);
     defer profile.deinit();

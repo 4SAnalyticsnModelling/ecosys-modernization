@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// One conservation identity in one quantity's native units:
 /// delta storage = external inputs - external outputs + internal production
@@ -85,7 +86,7 @@ fn closureArithmeticRoundoffAllowance(
 /// mineral, water, or energy inventory.
 pub fn evaluate(transaction: Transaction, tolerance: Tolerance) !Closure {
     try tolerance.validate();
-    inline for (std.meta.fields(Transaction)) |field| {
+    inline for (ti_compat.fieldViews(Transaction)) |field| {
         const value = @field(transaction, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteConservationTerm;
     }
@@ -150,7 +151,7 @@ pub fn summarize(
         maximum_absolute = @max(maximum_absolute, closure.absolute);
         maximum_relative = @max(maximum_relative, closure.normalized_relative);
         failures += @intFromBool(!closure.accepted);
-        inline for (std.meta.fields(Transaction)) |field| {
+        inline for (ti_compat.fieldViews(Transaction)) |field| {
             const next = @field(total, field.name) + @field(transaction, field.name);
             if (!std.math.isFinite(next)) return error.ConservationScopeOverflow;
             @field(total, field.name) = next;

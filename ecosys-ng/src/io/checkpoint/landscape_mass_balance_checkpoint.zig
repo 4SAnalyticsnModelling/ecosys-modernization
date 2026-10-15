@@ -5,6 +5,7 @@ const hourly_cell_conservation = @import("../../validation/hourly_cell_conservat
 const accumulated_cell_conservation = @import("../../validation/accumulated_cell_conservation.zig");
 const layer_local_conservation = @import("../../validation/layer_local_conservation.zig");
 const inventory = @import("../../validation/landscape_mass_inventory.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 const magic = "ECOSMBAL";
 // Version 2 added H2. Version 3 added scaled interval activity. Version 4
@@ -390,7 +391,7 @@ noinline fn readClosureHistory(reader: *std.Io.Reader) !HourlyCellClosureHistory
 }
 
 fn NumericFieldMetadata(comptime T: type) type {
-    const fields = std.meta.fields(T);
+    const fields = ti_compat.fieldViews(T);
     return struct {
         const offsets: [fields.len]usize = offsets: {
             var result: [fields.len]usize = undefined;
@@ -565,7 +566,7 @@ test "accepted hourly cell closure history records atomically" {
         .maximum_normalized_relative = @splat(0),
         .failing_cell_count = @splat(0),
     };
-    const water = @intFromEnum(hourly_cell_conservation.Quantity.water);
+    const water = @backingInt(hourly_cell_conservation.Quantity.water);
     report.maximum_absolute[water] = 3e-8;
     report.maximum_normalized_relative[water] = 4e-10;
     var history: HourlyCellClosureHistory = .{};
@@ -606,10 +607,10 @@ test "landscape mass balance checkpoint round trips cumulative history and monit
     try boundary_state.accumulateAcceptedHeatTransformationTotals(3.5, 0.25);
     try boundary_state.accumulateAcceptedPlantFireNutrientEmissionTotals(0.5, 0.25);
     var closure_history: HourlyCellClosureHistory = .{};
-    closure_history.last_maximum_absolute[@intFromEnum(hourly_cell_conservation.Quantity.water)] = 2.5e-8;
-    closure_history.last_maximum_normalized_relative[@intFromEnum(hourly_cell_conservation.Quantity.water)] = 4e-10;
-    closure_history.accumulated_maximum_absolute[@intFromEnum(hourly_cell_conservation.Quantity.water)] = 7.5e-8;
-    closure_history.accumulated_maximum_normalized_relative[@intFromEnum(hourly_cell_conservation.Quantity.water)] = 9e-10;
+    closure_history.last_maximum_absolute[@backingInt(hourly_cell_conservation.Quantity.water)] = 2.5e-8;
+    closure_history.last_maximum_normalized_relative[@backingInt(hourly_cell_conservation.Quantity.water)] = 4e-10;
+    closure_history.accumulated_maximum_absolute[@backingInt(hourly_cell_conservation.Quantity.water)] = 7.5e-8;
+    closure_history.accumulated_maximum_normalized_relative[@backingInt(hourly_cell_conservation.Quantity.water)] = 9e-10;
     closure_history.accepted_hour_count = 23;
     var accumulated = try accumulated_cell_conservation.State.initEmpty(
         std.testing.allocator,
@@ -629,7 +630,7 @@ test "landscape mass balance checkpoint round trips cumulative history and monit
     accumulated.cumulative_activity[0].cation_exchange_capacity_internal_production_mol = 0.125;
     accumulated.accepted_hour_count = 23;
     var layer_closure_history = closure_history;
-    layer_closure_history.last_maximum_absolute[@intFromEnum(hourly_cell_conservation.Quantity.water)] = 5e-8;
+    layer_closure_history.last_maximum_absolute[@backingInt(hourly_cell_conservation.Quantity.water)] = 5e-8;
     const layer_layout = try checkpoint_test_shape.layout();
     var accumulated_layer = try layer_local_conservation.AccumulatedState.initEmpty(
         std.testing.allocator,
@@ -753,10 +754,10 @@ test "landscape mass balance checkpoint round trips cumulative history and monit
         @as(f64, 1e-9),
         restored.monitor.?.relative_tolerance,
     );
-    try std.testing.expectEqual(@as(f64, 2.5e-8), restored.hourly_cell_closure.last_maximum_absolute[@intFromEnum(hourly_cell_conservation.Quantity.water)]);
-    try std.testing.expectEqual(@as(f64, 4e-10), restored.hourly_cell_closure.last_maximum_normalized_relative[@intFromEnum(hourly_cell_conservation.Quantity.water)]);
-    try std.testing.expectEqual(@as(f64, 7.5e-8), restored.hourly_cell_closure.accumulated_maximum_absolute[@intFromEnum(hourly_cell_conservation.Quantity.water)]);
-    try std.testing.expectEqual(@as(f64, 9e-10), restored.hourly_cell_closure.accumulated_maximum_normalized_relative[@intFromEnum(hourly_cell_conservation.Quantity.water)]);
+    try std.testing.expectEqual(@as(f64, 2.5e-8), restored.hourly_cell_closure.last_maximum_absolute[@backingInt(hourly_cell_conservation.Quantity.water)]);
+    try std.testing.expectEqual(@as(f64, 4e-10), restored.hourly_cell_closure.last_maximum_normalized_relative[@backingInt(hourly_cell_conservation.Quantity.water)]);
+    try std.testing.expectEqual(@as(f64, 7.5e-8), restored.hourly_cell_closure.accumulated_maximum_absolute[@backingInt(hourly_cell_conservation.Quantity.water)]);
+    try std.testing.expectEqual(@as(f64, 9e-10), restored.hourly_cell_closure.accumulated_maximum_normalized_relative[@backingInt(hourly_cell_conservation.Quantity.water)]);
     try std.testing.expectEqual(@as(u64, 23), restored.hourly_cell_closure.accepted_hour_count);
     try std.testing.expectEqual(@as(f64, 10), restored.accumulated_cell_closure.?.baseline_storage[0].water_m3);
     try std.testing.expectEqual(@as(f64, 12.5), restored.accumulated_cell_closure.?.latest_storage[0].water_m3);
@@ -768,7 +769,7 @@ test "landscape mass balance checkpoint round trips cumulative history and monit
     try std.testing.expectEqual(@as(f64, 0.25), restored.accumulated_cell_closure.?.cumulative_activity[0].calcium_input_mol);
     try std.testing.expectEqual(@as(f64, 0.125), restored.accumulated_cell_closure.?.cumulative_activity[0].cation_exchange_capacity_internal_production_mol);
     try std.testing.expectEqual(@as(u64, 23), restored.accumulated_cell_closure.?.accepted_hour_count);
-    try std.testing.expectEqual(@as(f64, 5e-8), restored.hourly_layer_closure.last_maximum_absolute[@intFromEnum(hourly_cell_conservation.Quantity.water)]);
+    try std.testing.expectEqual(@as(f64, 5e-8), restored.hourly_layer_closure.last_maximum_absolute[@backingInt(hourly_cell_conservation.Quantity.water)]);
     try std.testing.expectEqualDeep(layer_layout, restored.accumulated_layer_closure.?.layout);
     try std.testing.expectEqual(@as(f64, 0.75), restored.accumulated_layer_closure.?.baseline_storage[soil_scope].rock_additive);
     try std.testing.expectEqual(@as(f64, 0.5), restored.accumulated_layer_closure.?.latest_storage[soil_scope].rock_additive);

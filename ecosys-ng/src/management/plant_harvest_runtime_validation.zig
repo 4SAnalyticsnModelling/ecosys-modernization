@@ -29,6 +29,7 @@ const surface_nutrients = @import("../soil/biogeochemistry/organic_matter_fire_e
 const spring_reproductive_litterfall = @import("../plant/growth/spring_reproductive_litterfall.zig");
 const group_source_order_exports = @import("plant_harvest_runtime_source_order_exports.zig");
 const group_types = @import("plant_harvest_runtime_types.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub fn validateTillageComposition(composition: group_types.TillageElementComposition) !void {
     inline for (.{ composition.carbon, composition.nitrogen, composition.phosphorus }) |fractions| {
@@ -48,7 +49,7 @@ pub fn validateTillageSlice(values: []const f64) !void {
 }
 
 pub fn validateSourceOrderRootMass(mass: canopy.ElementalMass) !void {
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
         const value = @field(mass, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidDeadRootLitterfallInput;
@@ -56,7 +57,7 @@ pub fn validateSourceOrderRootMass(mass: canopy.ElementalMass) !void {
 }
 
 pub fn validateDeadRootResetMass(mass: canopy.ElementalMass) !void {
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
         const value = @field(mass, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidDeadRootResetInput;
@@ -64,7 +65,7 @@ pub fn validateDeadRootResetMass(mass: canopy.ElementalMass) !void {
 }
 
 pub fn validateDeadNoduleMass(mass: canopy.ElementalMass) !void {
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
         const value = @field(mass, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidDeadNoduleLitterfallInput;
@@ -72,7 +73,7 @@ pub fn validateDeadNoduleMass(mass: canopy.ElementalMass) !void {
 }
 
 pub fn validateDeadRootDepthMass(mass: canopy.ElementalMass) !void {
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
         const value = @field(mass, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidDeadRootDepthResetInput;
@@ -80,7 +81,7 @@ pub fn validateDeadRootDepthMass(mass: canopy.ElementalMass) !void {
 }
 
 pub fn validateCompleteDeathMass(mass: canopy.ElementalMass) !void {
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
         const value = @field(mass, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidCompleteDeathShootLitterfallInput;
@@ -88,7 +89,7 @@ pub fn validateCompleteDeathMass(mass: canopy.ElementalMass) !void {
 }
 
 pub fn validateCompleteDeathResultMass(mass: canopy.ElementalMass) !void {
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field|
         if (!std.math.isFinite(@field(mass, field.name)))
             return error.NonFiniteCompleteDeathShootLitterfall;
 }
@@ -121,7 +122,7 @@ pub fn validateNonnegativeFinite(comptime field_name: []const u8, values: []cons
 }
 
 pub fn validateScience(science: group_types.ScienceParameters) !void {
-    inline for (@typeInfo(group_types.ScienceParameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(group_types.ScienceParameters)) |field| {
         if (field.type != [2]f64) continue;
         const fractions = @field(science, field.name);
         if (!std.math.isFinite(fractions[0]) or !std.math.isFinite(fractions[1]) or fractions[0] < 0 or fractions[1] < 0 or @abs(fractions[0] + fractions[1] - 1) > 1e-8) return error.InvalidPlantHarvestScience;

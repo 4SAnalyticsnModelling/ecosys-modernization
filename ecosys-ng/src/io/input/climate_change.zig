@@ -4,6 +4,8 @@ const SeasonalWeatherChange = @import("../../core/options.zig").SeasonalWeatherC
 const HourlyForcing = @import("weather.zig").HourlyForcing;
 const Timestamp = @import("weather.zig").Timestamp;
 const execution_calendar_date = @import("../../driver/execution_calendar_date.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Modifier = struct {
     maximum_temperature_c: f64 = 0,
@@ -151,7 +153,7 @@ fn fromTarget(target: SeasonalWeatherChange) !Modifier {
 }
 
 fn validateTarget(target: SeasonalWeatherChange) !void {
-    inline for (@typeInfo(SeasonalWeatherChange).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(SeasonalWeatherChange)) |field| {
         const value = @field(target, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteClimateChange;
         if (comptime !std.mem.endsWith(u8, field.name, "temperature_c")) if (value < 0) return error.NegativeClimateMultiplier;
@@ -169,7 +171,7 @@ fn saturationVaporPressureKpa(temperature_c: f64, altitude_m: f64) f64 {
     return 0.61 * @exp(5360.0 * (0.003661 - 1.0 / (273.15 + temperature_c))) * @exp(-altitude_m / 7272.0);
 }
 fn validateForcing(forcing: HourlyForcing) !void {
-    inline for (@typeInfo(HourlyForcing).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(forcing, field.name))) return error.NonFiniteClimateForcing;
+    inline for (ti_compat.fieldViews(HourlyForcing)) |field| if (field.type == f64 and !std.math.isFinite(@field(forcing, field.name))) return error.NonFiniteClimateForcing;
     if (forcing.air_temperature_c < -273.15 or forcing.vapor_pressure_kpa < 0 or forcing.precipitation_m < 0 or forcing.rainfall_m < 0 or forcing.snowfall_water_equivalent_m < 0 or @abs(forcing.precipitation_m - forcing.rainfall_m - forcing.snowfall_water_equivalent_m) > 1.0e-12 or forcing.shortwave_radiation_megajoules_per_m2 < 0 or forcing.wind_speed_m_per_h < 0) return error.InvalidClimateForcing;
 }
 
@@ -231,18 +233,7 @@ test "step climate change follows seasonal Fortran modifiers" {
 test "atmospheric CO2 multiplier follows active season and mode" {
     var options = std.mem.zeroes(SceneOptions);
     options.climate_change_mode = 1;
-    options.seasonal_weather_changes = [_]SeasonalWeatherChange{.{
-        .maximum_temperature_c = 0,
-        .minimum_temperature_c = 0,
-        .radiation_fraction = 1,
-        .humidity_fraction = 1,
-        .precipitation_fraction = 1,
-        .irrigation_fraction = 1,
-        .wind_speed_fraction = 1,
-        .atmospheric_co2_fraction = 1,
-        .precipitation_ammonium_fraction = 1,
-        .precipitation_nitrate_fraction = 1,
-    }} ** 4;
+    options.seasonal_weather_changes = @as([4]SeasonalWeatherChange, @splat(@as(SeasonalWeatherChange, .{ .maximum_temperature_c = 0, .minimum_temperature_c = 0, .radiation_fraction = 1, .humidity_fraction = 1, .precipitation_fraction = 1, .irrigation_fraction = 1, .wind_speed_fraction = 1, .atmospheric_co2_fraction = 1, .precipitation_ammonium_fraction = 1, .precipitation_nitrate_fraction = 1, })));
     options.seasonal_weather_changes[1].atmospheric_co2_fraction = 1.25;
     try std.testing.expectApproxEqAbs(@as(f64, 1.25), try (State{}).atmosphericCo2Multiplier(options, 100), 1e-15);
     options.climate_change_mode = 0;
@@ -252,18 +243,7 @@ test "atmospheric CO2 multiplier follows active season and mode" {
 test "irrigation multiplier follows active season and mode" {
     var options = std.mem.zeroes(SceneOptions);
     options.climate_change_mode = 1;
-    options.seasonal_weather_changes = [_]SeasonalWeatherChange{.{
-        .maximum_temperature_c = 0,
-        .minimum_temperature_c = 0,
-        .radiation_fraction = 1,
-        .humidity_fraction = 1,
-        .precipitation_fraction = 1,
-        .irrigation_fraction = 1,
-        .wind_speed_fraction = 1,
-        .atmospheric_co2_fraction = 1,
-        .precipitation_ammonium_fraction = 1,
-        .precipitation_nitrate_fraction = 1,
-    }} ** 4;
+    options.seasonal_weather_changes = @as([4]SeasonalWeatherChange, @splat(@as(SeasonalWeatherChange, .{ .maximum_temperature_c = 0, .minimum_temperature_c = 0, .radiation_fraction = 1, .humidity_fraction = 1, .precipitation_fraction = 1, .irrigation_fraction = 1, .wind_speed_fraction = 1, .atmospheric_co2_fraction = 1, .precipitation_ammonium_fraction = 1, .precipitation_nitrate_fraction = 1, })));
     options.seasonal_weather_changes[1].irrigation_fraction = 1.75;
     try std.testing.expectEqual(
         @as(f64, 1.75),
@@ -291,18 +271,7 @@ test "irrigation multiplier follows active season and mode" {
 test "precipitation chemistry multipliers follow active season and reject invalid mode" {
     var options = std.mem.zeroes(SceneOptions);
     options.climate_change_mode = 1;
-    options.seasonal_weather_changes = [_]SeasonalWeatherChange{.{
-        .radiation_fraction = 1,
-        .maximum_temperature_c = 0,
-        .minimum_temperature_c = 0,
-        .humidity_fraction = 1,
-        .precipitation_fraction = 1,
-        .irrigation_fraction = 1,
-        .wind_speed_fraction = 1,
-        .atmospheric_co2_fraction = 1,
-        .precipitation_ammonium_fraction = 1,
-        .precipitation_nitrate_fraction = 1,
-    }} ** 4;
+    options.seasonal_weather_changes = @as([4]SeasonalWeatherChange, @splat(@as(SeasonalWeatherChange, .{ .radiation_fraction = 1, .maximum_temperature_c = 0, .minimum_temperature_c = 0, .humidity_fraction = 1, .precipitation_fraction = 1, .irrigation_fraction = 1, .wind_speed_fraction = 1, .atmospheric_co2_fraction = 1, .precipitation_ammonium_fraction = 1, .precipitation_nitrate_fraction = 1, })));
     options.seasonal_weather_changes[1].precipitation_ammonium_fraction = 2;
     options.seasonal_weather_changes[1].precipitation_nitrate_fraction = 3;
     const result = try (State{}).precipitationChemistryMultipliers(options, 100);
@@ -318,18 +287,7 @@ test "precipitation chemistry multipliers follow active season and reject invali
 test "average air temperature change accumulates under mode 2 and is zero otherwise" {
     var options = std.mem.zeroes(SceneOptions);
     options.climate_change_mode = 2;
-    options.seasonal_weather_changes = [_]SeasonalWeatherChange{.{
-        .radiation_fraction = 1,
-        .maximum_temperature_c = 0,
-        .minimum_temperature_c = 0,
-        .humidity_fraction = 1,
-        .precipitation_fraction = 1,
-        .irrigation_fraction = 1,
-        .wind_speed_fraction = 1,
-        .atmospheric_co2_fraction = 1,
-        .precipitation_ammonium_fraction = 1,
-        .precipitation_nitrate_fraction = 1,
-    }} ** 4;
+    options.seasonal_weather_changes = @as([4]SeasonalWeatherChange, @splat(@as(SeasonalWeatherChange, .{ .radiation_fraction = 1, .maximum_temperature_c = 0, .minimum_temperature_c = 0, .humidity_fraction = 1, .precipitation_fraction = 1, .irrigation_fraction = 1, .wind_speed_fraction = 1, .atmospheric_co2_fraction = 1, .precipitation_ammonium_fraction = 1, .precipitation_nitrate_fraction = 1, })));
     options.seasonal_weather_changes[1].maximum_temperature_c = 3.65;
     options.seasonal_weather_changes[1].minimum_temperature_c = 1.825;
     var state = State{};

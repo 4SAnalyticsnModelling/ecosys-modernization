@@ -65,7 +65,7 @@ pub fn tryPhosphateExtentCandidate(
     }
 
     for (0..group_aliases.coupled_extent_reaction_count) |column| {
-        const reaction: group_aliases.CoupledExtentReaction = @enumFromInt(column);
+        const reaction: group_aliases.CoupledExtentReaction = @fromBackingInt(@intCast(column));
         if (!group_aliases.coupledExtentReactionEnabled(reaction, limiting_index)) continue;
         var direction: f64 = if (branch_residual[column] < 0) -1 else 1;
         var available = group_aliases.maximumPhosphateExtent(
@@ -138,7 +138,7 @@ pub fn tryPhosphateExtentCandidate(
         var has_nonzero_extent = false;
         for (workspace.phosphate_extent_solution, 0..) |extent, index| {
             if (!std.math.isFinite(extent) or extent == 0) continue;
-            const reaction: group_aliases.CoupledExtentReaction = @enumFromInt(index);
+            const reaction: group_aliases.CoupledExtentReaction = @fromBackingInt(@intCast(index));
             if (!group_aliases.applyPhosphateExtent(
                 candidate_state,
                 reaction,

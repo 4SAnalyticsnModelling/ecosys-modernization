@@ -93,6 +93,7 @@
 //
 // STOMATE-CARBOX group of docs/traceability/stomate_grosub_canopy_carboxylation.md
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const RootProfile = enum {
     shallow,
@@ -125,7 +126,7 @@ pub const Response = struct {
 /// direct and diffuse radiation and to both C4 mesophyll and C3 mesophyll
 /// paths; C4 additionally copies the C3 response into WFN4.
 pub fn calculate(inputs: Inputs) !Response {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (field.type == f64) {
             const value = @field(inputs, field.name);
             if (!std.math.isFinite(value))

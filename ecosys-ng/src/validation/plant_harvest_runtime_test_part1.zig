@@ -28,6 +28,7 @@ const std = @import("std");
 const surface_nutrients = @import("../soil/biogeochemistry/organic_matter_fire_exchange.zig");
 const symbiotic_fixation = @import("../canopy/symbiosis/plant_symbiotic_fixation.zig");
 const plant_harvest_runtime = @import("../management/plant_harvest_runtime.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 test "GROSUB forest self thinning retains exact density law and runtime units" {
     try std.testing.expectEqual(@as(f64, 0), try plant_harvest_runtime.forestSelfThinningFraction(0, 10));
     try std.testing.expectEqual(@as(f64, 0), try plant_harvest_runtime.forestSelfThinningFraction(0.25, 0.05));
@@ -244,12 +245,12 @@ test "GROSUB perennial start-of-season residue is conserved before reconstructio
     var before_failure = try state.clone();
     defer before_failure.deinit();
     const products_before_failure = ledgers;
-    partitions.by_plant_and_organ[@intFromEnum(litter_partition.Organ.stalk)].carbon[3] = std.math.nan(f64);
+    partitions.by_plant_and_organ[@backingInt(litter_partition.Organ.stalk)].carbon[3] = std.math.nan(f64);
     try std.testing.expectError(error.InvalidPlantLitterFraction, plant_harvest_runtime.applyStartOfSeasonResidue(&context, 0, 0, 1));
-    inline for (@typeInfo(canopy.State).@"struct".fields) |field| if (field.type == []f64)
+    inline for (ti_compat.fieldViews(canopy.State)) |field| if (field.type == []f64)
         try std.testing.expectEqualSlices(f64, @field(before_failure, field.name), @field(state, field.name));
     try std.testing.expectEqualDeep(products_before_failure, ledgers);
-    partitions.by_plant_and_organ[@intFromEnum(litter_partition.Organ.stalk)].carbon = .{ 0.1, 0.2, 0.3, 0.4 };
+    partitions.by_plant_and_organ[@backingInt(litter_partition.Organ.stalk)].carbon = .{ 0.1, 0.2, 0.3, 0.4 };
     try plant_harvest_runtime.applyStartOfSeasonResidue(&context, 0, 0, 1);
     try std.testing.expectApproxEqAbs(@as(f64, 4), state.plant_standing_dead_carbon_g[0], 1e-12);
     try std.testing.expectApproxEqAbs(@as(f64, 2), state.plant_seed_storage_carbon_g[0], 1e-12);

@@ -1,6 +1,7 @@
 const std = @import("std");
 const builtin = @import("builtin");
 const inventory = @import("../../validation/landscape_mass_inventory_support.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 /// Canonical layer-storage sampler supplied by the conservation composition
 /// root. REDIST owns the exact sampling time and donor/recipient identity; the
@@ -47,7 +48,7 @@ pub const Tolerance = struct {
 
     pub fn validate(self: Tolerance) !void {
         try self.absolute.validate();
-        inline for (std.meta.fields(inventory.Storage)) |field|
+        inline for (ti_compat.fieldViews(inventory.Storage)) |field|
             if (@field(self.absolute, field.name) < 0)
                 return error.InvalidRelayeringActivityTolerance;
         if (!std.math.isFinite(self.relative) or self.relative < 0 or
@@ -203,7 +204,7 @@ pub const Sidecar = struct {
             return error.DuplicateRelayeringActivityBoundary;
         var transfer: inventory.Storage = .{};
         var heat_direction: Direction = .none;
-        inline for (std.meta.fields(inventory.Storage)) |field| {
+        inline for (ti_compat.fieldViews(inventory.Storage)) |field| {
             const before_donor = @field(donor_before, field.name);
             const after_donor = @field(donor_after, field.name);
             const before_recipient = @field(recipient_before, field.name);
@@ -274,7 +275,7 @@ pub const Sidecar = struct {
             }
         }
         try transfer.validate();
-        inline for (std.meta.fields(inventory.Storage)) |field|
+        inline for (ti_compat.fieldViews(inventory.Storage)) |field|
             if (@field(transfer, field.name) < 0)
                 return error.InvalidRelayeringActivityDelta;
         self.staged[index] = .{

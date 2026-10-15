@@ -1,5 +1,6 @@
 const std = @import("std");
 const snow = @import("../solute/snow_solute_transport.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 // REDIST 7405-7514 selects an adjacent source/destination and one fraction;
 // 7516-7549 moves every phase, sensible heat, and primary solute to the
@@ -249,7 +250,7 @@ fn applyInternal(
     tolerances: Tolerances,
     accepted: ?*AcceptedTransfers,
 ) !Report {
-    inline for (@typeInfo(snow.ThermodynamicParameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(snow.ThermodynamicParameters)) |field| {
         const value = @field(thermodynamics, field.name);
         if (!std.math.isFinite(value) or value <= 0) return error.InvalidSnowRelayeringThermodynamics;
     }
@@ -482,8 +483,8 @@ test "accepted relayering records exact upward lower-to-upper donor fraction" {
     const upper_volume = state.total_layer_volume_m3[0];
     const lower_volume = state.total_layer_volume_m3[1];
     state.target_layer_volume_m3[0] = upper_volume + 0.5 * lower_volume;
-    state.amount_g[snow.species_count + @intFromEnum(snow.Species.carbon_dioxide_carbon)] = 8;
-    state.salt_amount_mol[snow.salt_species_count + @intFromEnum(snow.SaltSpecies.calcium_carbonate)] = 4;
+    state.amount_g[snow.species_count + @backingInt(snow.Species.carbon_dioxide_carbon)] = 8;
+    state.salt_amount_mol[snow.salt_species_count + @backingInt(snow.SaltSpecies.calcium_carbonate)] = 4;
     state.dynamic_salts_by_cell[0] = true;
     const lower_solid_before = state.solid_snow_water_equivalent_m3[1];
     const lower_energy_before = state.heat_capacity_megajoules_per_k[1] * state.temperature_k[1];
@@ -513,7 +514,7 @@ test "accepted relayering records exact upward lower-to-upper donor fraction" {
         128 * std.math.floatEps(f64) * @max(1, lower_energy_before),
     );
     try std.testing.expectApproxEqAbs(@as(f64, 4), accepted.upward.amount_g[snow.species_count], 64 * std.math.floatEps(f64));
-    try std.testing.expectApproxEqAbs(@as(f64, 2), accepted.upward.salt_amount_mol[snow.salt_species_count + @intFromEnum(snow.SaltSpecies.calcium_carbonate)], 64 * std.math.floatEps(f64));
+    try std.testing.expectApproxEqAbs(@as(f64, 2), accepted.upward.salt_amount_mol[snow.salt_species_count + @backingInt(snow.SaltSpecies.calcium_carbonate)], 64 * std.math.floatEps(f64));
     try std.testing.expectEqual(@as(f64, 0), accepted.downward.solid_snow_water_equivalent_m3[1]);
     try std.testing.expectApproxEqAbs(
         lower_solid_before - accepted.upward.solid_snow_water_equivalent_m3[1],

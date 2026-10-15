@@ -3,6 +3,7 @@ const HourlyForcing = @import("../io/input/weather.zig").HourlyForcing;
 const Timestamp = @import("../io/input/weather.zig").Timestamp;
 const execution_calendar_date = @import("../driver/execution_calendar_date.zig");
 const sky_radiative_properties = @import("sky_radiative_properties.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Result = struct {
     forcing: HourlyForcing,
@@ -93,7 +94,7 @@ fn solarGeometry(day_of_year: u16, latitude_degrees: f64) struct { azimuth_compo
 }
 
 fn validate(forcing: HourlyForcing) !void {
-    inline for (@typeInfo(HourlyForcing).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(forcing, field.name))) return error.NonFiniteAtmosphericRadiation;
+    inline for (ti_compat.fieldViews(HourlyForcing)) |field| if (field.type == f64 and !std.math.isFinite(@field(forcing, field.name))) return error.NonFiniteAtmosphericRadiation;
     if (forcing.shortwave_radiation_megajoules_per_m2 < 0 or forcing.longwave_radiation_megajoules_per_m2.? < 0) return error.InvalidAtmosphericRadiation;
 }
 

@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     carboxyl_capacity_mol_per_megagram_carbon: f64,
@@ -22,11 +23,11 @@ pub const Result = struct {
 /// Direct translation of `starte.f` lines 400--403. The `1.0e-6` source factor
 /// converts organic carbon from g C to Mg C before applying mol sites/Mg C.
 pub fn calculate(inputs: Inputs, parameters: Parameters) !Result {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteCarboxylExchangeInput;
     }
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Parameters)) |field| {
         if (!std.math.isFinite(@field(parameters, field.name)))
             return error.NonFiniteCarboxylExchangeParameter;
     }
@@ -56,7 +57,7 @@ pub fn calculate(inputs: Inputs, parameters: Parameters) !Result {
             parameters.carboxyl_dissociation_mol_per_m3,
         ),
     };
-    inline for (@typeInfo(Result).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Result)) |field| {
         const value = @field(result, field.name);
         if (!std.math.isFinite(value))
             return error.NonFiniteCarboxylExchangeResult;

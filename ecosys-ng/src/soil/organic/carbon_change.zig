@@ -1,6 +1,7 @@
 const std = @import("std");
 const Organic = @import("initialization.zig");
 
+
 pub fn captureHourStart(state: *const Organic.State, carbon_g_c_by_layer: []f64) !void {
     if (carbon_g_c_by_layer.len != state.layer_count) return error.SoilOrganicCarbonLedgerDimensionMismatch;
     for (0..state.layer_count) |layer| carbon_g_c_by_layer[layer] = try state.totalCarbon_g_c(layer);
@@ -41,7 +42,7 @@ pub fn publishAcceptedHourlyChange(
 test "REDIST DORGC includes every runtime organic carbon owner and publishes atomically" {
     var state = try Organic.State.init(std.testing.allocator, 2);
     defer state.deinit();
-    var beginning = [_]f64{0} ** 2;
+    var beginning = @as([2]f64, @splat(@as(f64, 0)));
     var change = [_]f64{ 8, 9 };
     try captureHourStart(&state, &beginning);
     state.microbial[0].carbon_g_c = 1;

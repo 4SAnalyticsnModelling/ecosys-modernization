@@ -32,6 +32,8 @@ const plant_combustion_state_update = @import("../plant/state_update/combustion.
 const root_internal_gas_state_update = @import("../plant/root/internal_gas_state_update.zig");
 const root_soil_gas_state_update = @import("../plant/root/soil_gas_state_update.zig");
 const plant_root_system = @import("../plant/root/plant_root_system.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 fn readRepositorySource(path: []const u8) ![]u8 {
     return std.Io.Dir.cwd().readFileAlloc(
@@ -67,7 +69,7 @@ pub const Quantity = enum(u8) {
     silicon,
 };
 
-pub const quantity_count = @typeInfo(Quantity).@"enum".fields.len;
+pub const quantity_count = @typeInfo(Quantity).@"enum".field_names.len;
 
 /// Static production-readiness contract for the per-cell acceptance gate.
 /// This is deliberately independent of numerical closure: a zero residual is
@@ -133,7 +135,7 @@ pub const InternalProducer = enum(u8) {
 
 fn enumMask(comptime values: anytype) u64 {
     var result: u64 = 0;
-    inline for (values) |value| result |= @as(u64, 1) << @intFromEnum(value);
+    inline for (values) |value| result |= @as(u64, 1) << @backingInt(value);
     return result;
 }
 
@@ -164,58 +166,58 @@ const storage_mineral_texture = enumMask(.{StorageOwner.soil_mineral_texture});
 /// still exist so later activation cannot silently bypass the ledger.
 pub const production_requirements: [quantity_count]ProductionCoverage = blk: {
     var result: [quantity_count]ProductionCoverage = undefined;
-    result[@intFromEnum(Quantity.water)] = .{
+    result[@backingInt(Quantity.water)] = .{
         .storage = storage_water,
         .external = externalMask(&.{ .atmospheric_water_and_heat, .subsurface_irrigation, .surface_runoff, .soil_water_boundary }),
         .intercell = intercellMask(&.{ .soil_water_and_heat_faces, .surface_runoff_water_and_aqueous }),
     };
-    result[@intFromEnum(Quantity.heat)] = .{
+    result[@backingInt(Quantity.heat)] = .{
         .storage = storage_heat,
         .external = externalMask(&.{ .atmospheric_water_and_heat, .subsurface_irrigation, .surface_runoff, .soil_water_boundary }),
         .intercell = intercellMask(&.{ .soil_water_and_heat_faces, .surface_runoff_water_and_aqueous }),
         .internal = internalMask(&.{.heat_adjustments}),
     };
-    result[@intFromEnum(Quantity.oxygen)] = .{
+    result[@backingInt(Quantity.oxygen)] = .{
         .storage = storage_gases,
         .external = externalMask(&.{ .atmospheric_solutes, .dissolved_gas_boundary, .soil_litter_gas_atmosphere, .plant_atmosphere, .fire_and_harvest }),
         .intercell = intercellMask(&.{ .soil_gas_faces, .surface_runoff_dedicated_species, .dissolved_gas_faces }),
         .internal = internalMask(&.{.oxygen_reactions}),
     };
-    result[@intFromEnum(Quantity.hydrogen)] = .{
+    result[@backingInt(Quantity.hydrogen)] = .{
         .storage = storage_gases,
         .external = externalMask(&.{ .dissolved_gas_boundary, .soil_litter_gas_atmosphere, .plant_atmosphere }),
         .intercell = intercellMask(&.{ .soil_gas_faces, .dissolved_gas_faces }),
         .internal = internalMask(&.{.hydrogen_reactions}),
     };
-    result[@intFromEnum(Quantity.carbon)] = .{
+    result[@backingInt(Quantity.carbon)] = .{
         .storage = storage_gases | storage_elements | storage_organic | storage_plant_c,
         .external = externalMask(&.{ .atmospheric_solutes, .surface_runoff, .soil_aqueous_boundary, .dissolved_gas_boundary, .organic_transport_boundary, .soil_litter_gas_atmosphere, .plant_atmosphere, .fertilizer, .erosion, .fire_and_harvest, .symbiotic_inoculum }),
         .intercell = intercellMask(&.{ .soil_aqueous_faces, .soil_gas_faces, .surface_runoff_water_and_aqueous, .surface_runoff_dedicated_species, .dissolved_gas_faces, .organic_transport_faces, .erosion_faces }),
     };
-    result[@intFromEnum(Quantity.nitrogen)] = .{
+    result[@backingInt(Quantity.nitrogen)] = .{
         .storage = storage_gases | storage_elements | storage_organic | storage_plant_n,
         .external = externalMask(&.{ .atmospheric_solutes, .subsurface_irrigation, .surface_runoff, .soil_aqueous_boundary, .organic_transport_boundary, .mineral_nitrogen_boundary, .soil_litter_gas_atmosphere, .plant_atmosphere, .fertilizer, .erosion, .fire_and_harvest, .symbiotic_inoculum }),
         .intercell = intercellMask(&.{ .soil_aqueous_faces, .soil_gas_faces, .surface_runoff_dedicated_species, .organic_transport_faces, .mineral_nitrogen_faces, .erosion_faces }),
     };
-    result[@intFromEnum(Quantity.phosphorus)] = .{
+    result[@backingInt(Quantity.phosphorus)] = .{
         .storage = storage_elements | storage_organic | storage_plant_p,
         .external = externalMask(&.{ .atmospheric_solutes, .subsurface_irrigation, .surface_runoff, .soil_aqueous_boundary, .organic_transport_boundary, .fertilizer, .erosion, .fire_and_harvest, .symbiotic_inoculum }),
         .intercell = intercellMask(&.{ .soil_aqueous_faces, .surface_runoff_water_and_aqueous, .surface_runoff_dedicated_species, .organic_transport_faces, .erosion_faces }),
     };
     for (.{ Quantity.sand, Quantity.silt, Quantity.clay }) |quantity| {
-        result[@intFromEnum(quantity)] = .{
+        result[@backingInt(quantity)] = .{
             .storage = storage_mineral_texture,
             .external = externalMask(&.{.erosion}),
             .intercell = intercellMask(&.{.erosion_faces}),
         };
     }
-    result[@intFromEnum(Quantity.rock_additive)] = .{
+    result[@backingInt(Quantity.rock_additive)] = .{
         .storage = storage_mineral_texture,
         .external = 0,
         .intercell = 0,
     };
     for (.{ Quantity.cation_exchange_capacity, Quantity.anion_exchange_capacity }) |quantity| {
-        result[@intFromEnum(quantity)] = .{
+        result[@backingInt(quantity)] = .{
             .storage = storage_mineral_texture,
             .external = externalMask(&.{.erosion}),
             .intercell = intercellMask(&.{.erosion_faces}),
@@ -233,7 +235,7 @@ pub const production_requirements: [quantity_count]ProductionCoverage = blk: {
         Quantity.chloride,
         Quantity.silicon,
     }) |quantity| {
-        result[@intFromEnum(quantity)] = .{
+        result[@backingInt(quantity)] = .{
             .storage = storage_elements,
             .external = externalMask(&.{ .atmospheric_solutes, .subsurface_irrigation, .surface_runoff, .soil_aqueous_boundary, .fertilizer, .erosion }),
             .intercell = intercellMask(&.{ .soil_aqueous_faces, .surface_runoff_water_and_aqueous, .erosion_faces }),
@@ -392,7 +394,7 @@ pub const SignedElementActivity = struct {
 /// is introduced after this producer boundary.
 pub fn signedElementActivity(values: SignedElementActivity) !BoundaryActivity {
     var result: BoundaryActivity = .{};
-    inline for (std.meta.fields(SignedElementActivity)) |field| {
+    inline for (ti_compat.fieldViews(SignedElementActivity)) |field| {
         const value = @field(values, field.name);
         if (!std.math.isFinite(value)) return error.InvalidHourlyCellBoundaryActivity;
         const stem = field.name[0 .. field.name.len - 2];
@@ -655,26 +657,38 @@ pub fn aqueousElementActivity(
     if (amounts_mol_by_species.len != solute_species.AqueousSpecies.count)
         return error.HourlyCellBoundarySpeciesDimensionMismatch;
     var totals: inventory.ElementMoles = .{};
-    inline for (@typeInfo(solute_species.AqueousSpecies).@"enum".fields) |field| {
+    // Native parallel-slice reflection instead of ti_compat.fieldViews: this
+    // inner loop is unrolled once per aqueous species, and materialising the
+    // view array on every pass is what pushed the enclosing comptime
+    // evaluation past Zig 0.17's 1000-backwards-branch quota
+    // (audit/runs/zig017-test-20261014-1).  Same fields, same order, same
+    // types; only the reflection spelling changes.
+    const element_info = @typeInfo(inventory.ElementMoles).@"struct";
+    inline for (ti_compat.enumFieldViews(solute_species.AqueousSpecies)) |field| {
         const amount = amounts_mol_by_species[field.value];
         if (!std.math.isFinite(amount) or amount < 0)
             return error.InvalidHourlyCellBoundaryActivity;
-        const contribution = inventory.aqueousSpeciesElements(@enumFromInt(field.value)).scaled(amount);
-        inline for (std.meta.fields(inventory.ElementMoles)) |element| {
-            const next = @field(totals, element.name) + @field(contribution, element.name);
+        const contribution = inventory.aqueousSpeciesElements(@fromBackingInt(@intCast(field.value))).scaled(amount);
+        inline for (element_info.field_names, element_info.field_types) |element_name, element_type| {
+            _ = element_type;
+            const next = @field(totals, element_name) + @field(contribution, element_name);
             if (!std.math.isFinite(next)) return error.HourlyCellBoundaryOverflow;
-            @field(totals, element.name) = next;
+            @field(totals, element_name) = next;
         }
     }
     var result: BoundaryActivity = .{};
     switch (direction) {
         .input => {
-            inline for (std.meta.fields(inventory.ElementMoles)) |element|
-                @field(result, element.name ++ "_input_mol") = @field(totals, element.name);
+            inline for (element_info.field_names, element_info.field_types) |element_name, element_type| {
+                _ = element_type;
+                @field(result, element_name ++ "_input_mol") = @field(totals, element_name);
+            }
         },
         .output => {
-            inline for (std.meta.fields(inventory.ElementMoles)) |element|
-                @field(result, element.name ++ "_output_mol") = @field(totals, element.name);
+            inline for (element_info.field_names, element_info.field_types) |element_name, element_type| {
+                _ = element_type;
+                @field(result, element_name ++ "_output_mol") = @field(totals, element_name);
+            }
         },
     }
     return result;
@@ -696,7 +710,7 @@ pub fn atmosphericSoluteActivity(
         snow_input_g.len != try std.math.mul(usize, cell_count, snow_solutes.species_count) or
         snow_input_salt_mol.len != try std.math.mul(usize, cell_count, snow_solutes.salt_species_count))
         return error.HourlyCellBoundaryDimensionMismatch;
-    inline for (std.meta.fields(snow_discharge.IonMolarMassesGPerMol)) |field| {
+    inline for (ti_compat.fieldViews(snow_discharge.IonMolarMassesGPerMol)) |field| {
         const value = @field(ion_molar_mass_g_per_mol, field.name);
         if (!std.math.isFinite(value) or value <= 0)
             return error.InvalidHourlyCellBoundaryMolarMass;
@@ -713,29 +727,29 @@ pub fn atmosphericSoluteActivity(
     }
     var result: BoundaryActivity = .{
         .carbon_input_g = try addNonnegative(&.{
-            amounts[@intFromEnum(snow_solutes.Species.carbon_dioxide_carbon)],
-            amounts[@intFromEnum(snow_solutes.Species.methane_carbon)],
+            amounts[@backingInt(snow_solutes.Species.carbon_dioxide_carbon)],
+            amounts[@backingInt(snow_solutes.Species.methane_carbon)],
         }),
-        .oxygen_input_g = amounts[@intFromEnum(snow_solutes.Species.oxygen)],
+        .oxygen_input_g = amounts[@backingInt(snow_solutes.Species.oxygen)],
         .nitrogen_input_g = try addNonnegative(&.{
-            amounts[@intFromEnum(snow_solutes.Species.dinitrogen_nitrogen)],
-            amounts[@intFromEnum(snow_solutes.Species.nitrous_oxide_nitrogen)],
-            amounts[@intFromEnum(snow_solutes.Species.ammonium_nitrogen)],
-            amounts[@intFromEnum(snow_solutes.Species.ammonia_nitrogen)],
-            amounts[@intFromEnum(snow_solutes.Species.nitrate_nitrogen)],
+            amounts[@backingInt(snow_solutes.Species.dinitrogen_nitrogen)],
+            amounts[@backingInt(snow_solutes.Species.nitrous_oxide_nitrogen)],
+            amounts[@backingInt(snow_solutes.Species.ammonium_nitrogen)],
+            amounts[@backingInt(snow_solutes.Species.ammonia_nitrogen)],
+            amounts[@backingInt(snow_solutes.Species.nitrate_nitrogen)],
         }),
         .phosphorus_input_g = try addNonnegative(&.{
-            amounts[@intFromEnum(snow_solutes.Species.hydrogen_phosphate_phosphorus)],
-            amounts[@intFromEnum(snow_solutes.Species.dihydrogen_phosphate_phosphorus)],
+            amounts[@backingInt(snow_solutes.Species.hydrogen_phosphate_phosphorus)],
+            amounts[@backingInt(snow_solutes.Species.dihydrogen_phosphate_phosphorus)],
         }),
-        .aluminum_input_mol = amounts[@intFromEnum(snow_solutes.Species.aluminum)] / ion_molar_mass_g_per_mol.aluminum,
-        .iron_input_mol = amounts[@intFromEnum(snow_solutes.Species.iron)] / ion_molar_mass_g_per_mol.iron,
-        .calcium_input_mol = amounts[@intFromEnum(snow_solutes.Species.calcium)] / ion_molar_mass_g_per_mol.calcium,
-        .magnesium_input_mol = amounts[@intFromEnum(snow_solutes.Species.magnesium)] / ion_molar_mass_g_per_mol.magnesium,
-        .sodium_input_mol = amounts[@intFromEnum(snow_solutes.Species.sodium)] / ion_molar_mass_g_per_mol.sodium,
-        .potassium_input_mol = amounts[@intFromEnum(snow_solutes.Species.potassium)] / ion_molar_mass_g_per_mol.potassium,
-        .sulfur_input_mol = amounts[@intFromEnum(snow_solutes.Species.sulfate_sulfur)] / ion_molar_mass_g_per_mol.sulfur,
-        .chloride_input_mol = amounts[@intFromEnum(snow_solutes.Species.chloride)] / ion_molar_mass_g_per_mol.chloride,
+        .aluminum_input_mol = amounts[@backingInt(snow_solutes.Species.aluminum)] / ion_molar_mass_g_per_mol.aluminum,
+        .iron_input_mol = amounts[@backingInt(snow_solutes.Species.iron)] / ion_molar_mass_g_per_mol.iron,
+        .calcium_input_mol = amounts[@backingInt(snow_solutes.Species.calcium)] / ion_molar_mass_g_per_mol.calcium,
+        .magnesium_input_mol = amounts[@backingInt(snow_solutes.Species.magnesium)] / ion_molar_mass_g_per_mol.magnesium,
+        .sodium_input_mol = amounts[@backingInt(snow_solutes.Species.sodium)] / ion_molar_mass_g_per_mol.sodium,
+        .potassium_input_mol = amounts[@backingInt(snow_solutes.Species.potassium)] / ion_molar_mass_g_per_mol.potassium,
+        .sulfur_input_mol = amounts[@backingInt(snow_solutes.Species.sulfate_sulfur)] / ion_molar_mass_g_per_mol.sulfur,
+        .chloride_input_mol = amounts[@backingInt(snow_solutes.Species.chloride)] / ion_molar_mass_g_per_mol.chloride,
     };
     const salt_first = cell * snow_solutes.salt_species_count;
     for (0..snow_solutes.salt_species_count) |species| {
@@ -746,7 +760,7 @@ pub fn atmosphericSoluteActivity(
             direct_input[cell].soil_band_salt_mol[species],
         });
         const surface_species = if (species < 33) species else species + 1;
-        const formula = surface_aqueous.formula(@enumFromInt(surface_species));
+        const formula = surface_aqueous.formula(@fromBackingInt(@intCast(surface_species)));
         result.carbon_input_g = try addNonnegative(&.{ result.carbon_input_g, salt_amount * formula.carbon_mol * 12 });
         result.phosphorus_input_g = try addNonnegative(&.{ result.phosphorus_input_g, salt_amount * formula.phosphorus_mol * snow_solutes.phosphorus_g_per_mol });
         inline for (.{
@@ -1416,7 +1430,7 @@ fn aqueousExternalActivityForCell(
         // reflected `inline for` instantiated the complete formula switch and
         // all element updates once per species inside every caller.
         for (0..solute_species.AqueousSpecies.count) |species_index| {
-            const species: solute_species.AqueousSpecies = @enumFromInt(species_index);
+            const species: solute_species.AqueousSpecies = @fromBackingInt(@intCast(species_index));
             try accumulator.accumulateSpecies(species, fluxes[first + species_index]);
         }
     }
@@ -1468,13 +1482,13 @@ const AqueousExternalAccumulator = struct {
 };
 
 noinline fn validateAqueousExternalActivity(activity: *const BoundaryActivity) !void {
-    inline for (std.meta.fields(BoundaryActivity)) |field|
+    inline for (ti_compat.fieldViews(BoundaryActivity)) |field|
         if (!std.math.isFinite(@field(activity.*, field.name)) or @field(activity.*, field.name) < 0)
             return error.HourlyCellBoundaryOverflow;
 }
 
 comptime {
-    const fields = @typeInfo(solute_species.AqueousSpecies).@"enum".fields;
+    const fields = ti_compat.enumFieldViews(solute_species.AqueousSpecies);
     if (fields.len != solute_species.AqueousSpecies.count)
         @compileError("aqueous species count no longer matches its enum registry");
     for (fields, 0..) |field, expected_index|
@@ -1543,7 +1557,7 @@ pub fn accumulateDissolvedGasTransport(
     for (0..layer_count) |layer| {
         if (!faces.active_by_layer[layer]) continue;
         for (0..gas_transport.species_count) |species_index| {
-            const species: gas_transport.Species = @enumFromInt(species_index);
+            const species: gas_transport.Species = @fromBackingInt(@intCast(species_index));
             if (species == .ammonia) continue;
             const signed = boundary_net_flux_g[layer * gas_transport.species_count + species_index];
             switch (species) {
@@ -1561,7 +1575,7 @@ pub fn accumulateDissolvedGasTransport(
         const second_cell = face.second_cell / soil_layer_capacity;
         const start = face_index * gas_transport.species_count;
         for (0..gas_transport.species_count) |species_index| {
-            const species: gas_transport.Species = @enumFromInt(species_index);
+            const species: gas_transport.Species = @fromBackingInt(@intCast(species_index));
             if (species == .ammonia) continue;
             const signed = try checkedSignedSum(micropore_face_flux_g[start + species_index], macropore_face_flux_g[start + species_index]);
             switch (species) {
@@ -1854,7 +1868,7 @@ fn scaleIntercellTransfer(composition: IntercellTransfer, amount: f64) !Intercel
     if (!std.math.isFinite(amount) or amount < 0)
         return error.InvalidHourlyCellErosionAccounting;
     var result: IntercellTransfer = .{};
-    inline for (std.meta.fields(IntercellTransfer)) |field| {
+    inline for (ti_compat.fieldViews(IntercellTransfer)) |field| {
         const value = @field(composition, field.name) * amount;
         if (!std.math.isFinite(value) or value < 0)
             return error.HourlyCellBoundaryOverflow;
@@ -1896,21 +1910,21 @@ fn organicElementComposition(element: usize) IntercellTransfer {
 fn chemistryErosionComposition(component: usize, carbon_g_per_mol: f64, nitrogen_g_per_mol: f64, phosphorus_g_per_mol: f64) !IntercellTransfer {
     @setEvalBranchQuota(10_000);
     var cursor: usize = 0;
-    inline for (@typeInfo(cation_exchange.Cations).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(cation_exchange.Cations)) |field| {
         if (component == cursor) return chemistryCationComposition(field.name, nitrogen_g_per_mol);
         cursor += 1;
     }
     // Carboxyl-bound H is charge state, not molecular-hydrogen storage.
     if (component == cursor) return .{};
     cursor += 1;
-    inline for (0..2) |_| inline for (@typeInfo(phosphate_network.State).@"struct".fields) |field| {
+    inline for (0..2) |_| inline for (ti_compat.fieldViews(phosphate_network.State)) |field| {
         if (comptime isErodiblePhosphateField(field.name)) {
             if (component == cursor)
                 return phosphateErosionComposition(field.name, phosphorus_g_per_mol);
             cursor += 1;
         }
     };
-    inline for (@typeInfo(geochemistry_network.SolidState).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(geochemistry_network.SolidState)) |field| {
         if (component == cursor)
             return geochemistryErosionComposition(field.name, carbon_g_per_mol);
         cursor += 1;
@@ -1919,7 +1933,7 @@ fn chemistryErosionComposition(component: usize, carbon_g_per_mol: f64, nitrogen
 }
 
 fn mineralFertilizerErosionComposition(component: usize, carbon_g_per_mol: f64, phosphorus_g_per_mol: f64) IntercellTransfer {
-    inline for (@typeInfo(mineral_fertilizer_inventory.Inventory).@"struct".fields, 0..) |field, index| if (component == index) {
+    inline for (ti_compat.fieldViews(mineral_fertilizer_inventory.Inventory), 0..) |field, index| if (component == index) {
         if (comptime std.mem.indexOf(u8, field.name, "monocalcium_phosphate") != null)
             return .{ .phosphorus_g = 2 * phosphorus_g_per_mol, .calcium_mol = 1 };
         if (comptime std.mem.eql(u8, field.name, "hydroxyapatite_mol"))
@@ -2076,17 +2090,17 @@ fn applyGasFaceTransfer(
     if (first_cell == second_cell) return;
     var signed: IntercellTransfer = .{};
     const first = face_index * gas_transport.species_count;
-    inline for (@typeInfo(gas_transport.Species).@"enum".fields) |field| {
+    inline for (ti_compat.enumFieldViews(gas_transport.Species)) |field| {
         const flux = fluxes[first + field.value];
         if (!std.math.isFinite(flux)) return error.InvalidHourlyCellBoundaryActivity;
-        switch (@as(gas_transport.Species, @enumFromInt(field.value))) {
+        switch (@as(gas_transport.Species, @fromBackingInt(@intCast(field.value)))) {
             .carbon_dioxide, .methane => signed.carbon_g += flux,
             .oxygen => signed.oxygen_g += flux,
             .nitrogen, .nitrous_oxide, .ammonia => signed.nitrogen_g += flux,
             .hydrogen => signed.hydrogen_g += flux,
         }
     }
-    inline for (std.meta.fields(IntercellTransfer)) |field| {
+    inline for (ti_compat.fieldViews(IntercellTransfer)) |field| {
         const amount = @field(signed, field.name);
         if (!std.math.isFinite(amount)) return error.HourlyCellBoundaryOverflow;
         if (amount != 0) {
@@ -2127,10 +2141,10 @@ fn applyAqueousFaceTransfer(
     if (first_cell == second_cell) return error.InvalidHourlyCellSoilFaceTopology;
     var signed: IntercellTransfer = .{};
     const start = face * solute_species.AqueousSpecies.count;
-    inline for (@typeInfo(solute_species.AqueousSpecies).@"enum".fields) |field| {
+    inline for (ti_compat.enumFieldViews(solute_species.AqueousSpecies)) |field| {
         const flux = micropore_face_flux_mol[start + field.value] + macropore_face_flux_mol[start + field.value];
         if (!std.math.isFinite(flux)) return error.InvalidHourlyCellBoundaryActivity;
-        const formula = surface_aqueous.formula(@enumFromInt(field.value));
+        const formula = surface_aqueous.formula(@fromBackingInt(@intCast(field.value)));
         signed.carbon_g += flux * formula.carbon_mol * carbon_g_per_mol;
         signed.phosphorus_g += flux * formula.phosphorus_mol * phosphorus_g_per_mol;
         signed.aluminum_mol += flux * formula.aluminum_mol;
@@ -2143,7 +2157,7 @@ fn applyAqueousFaceTransfer(
         signed.chloride_mol += flux * formula.chloride_mol;
         signed.silicon_mol += flux * formula.silicon_mol;
     }
-    inline for (std.meta.fields(IntercellTransfer)) |field| {
+    inline for (ti_compat.fieldViews(IntercellTransfer)) |field| {
         const amount = @field(signed, field.name);
         if (!std.math.isFinite(amount)) return error.HourlyCellBoundaryOverflow;
         if (amount != 0) {
@@ -2208,7 +2222,7 @@ fn addBoundary(left: BoundaryActivity, right: BoundaryActivity) !BoundaryActivit
     try validateBoundary(left);
     try validateBoundary(right);
     var result = left;
-    inline for (std.meta.fields(BoundaryActivity)) |field| {
+    inline for (ti_compat.fieldViews(BoundaryActivity)) |field| {
         const left_value = @field(left, field.name);
         const right_value = @field(right, field.name);
         var value = left_value + right_value;
@@ -2239,7 +2253,7 @@ fn isArithmeticProvenanceField(comptime name: []const u8) bool {
 }
 
 fn validateIntercellTransfer(transfer: IntercellTransfer) !void {
-    inline for (std.meta.fields(IntercellTransfer)) |field| {
+    inline for (ti_compat.fieldViews(IntercellTransfer)) |field| {
         const value = @field(transfer, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidHourlyCellIntercellTransfer;
@@ -2420,8 +2434,8 @@ pub fn evaluateForScope(
         const area_m2 = cell_area_m2[cell];
         if (!std.math.isFinite(area_m2) or area_m2 <= 0)
             return error.InvalidHourlyCellConservationArea;
-        inline for (@typeInfo(Quantity).@"enum".fields) |field| {
-            const quantity: Quantity = @enumFromInt(field.value);
+        inline for (ti_compat.enumFieldViews(Quantity)) |field| {
+            const quantity: Quantity = @fromBackingInt(@intCast(field.value));
             const index: usize = @intCast(field.value);
             const terms = transaction(
                 quantity,
@@ -2483,10 +2497,10 @@ pub fn evaluateForScope(
             if (!closure.accepted and !builtin.is_test and quantity == .nitrogen) std.log.err(
                 "{s} {s} nitrogen storage components: {s}={d} residue={e}->{e} organic={e}->{e} dinitrogen={e}->{e} ammonium={e}->{e} nitrate={e}->{e} plant={e}->{e}",
                 .{
-                    @tagName(scope),                         domain_word,                            domain_word,                           cell,
-                    storage_before[cell].residue_nitrogen_g, storage_after[cell].residue_nitrogen_g, storage_before[cell].organic_nitrogen_g, storage_after[cell].organic_nitrogen_g,
+                    @tagName(scope),                            domain_word,                               domain_word,                              cell,
+                    storage_before[cell].residue_nitrogen_g,    storage_after[cell].residue_nitrogen_g,    storage_before[cell].organic_nitrogen_g,  storage_after[cell].organic_nitrogen_g,
                     storage_before[cell].dinitrogen_nitrogen_g, storage_after[cell].dinitrogen_nitrogen_g, storage_before[cell].ammonium_nitrogen_g, storage_after[cell].ammonium_nitrogen_g,
-                    storage_before[cell].nitrate_nitrogen_g, storage_after[cell].nitrate_nitrogen_g, storage_before[cell].plant_nitrogen_g, storage_after[cell].plant_nitrogen_g,
+                    storage_before[cell].nitrate_nitrogen_g,    storage_after[cell].nitrate_nitrogen_g,    storage_before[cell].plant_nitrogen_g,    storage_after[cell].plant_nitrogen_g,
                 },
             );
             if (!closure.accepted and !builtin.is_test and quantity == .heat) std.log.err(
@@ -2568,7 +2582,7 @@ fn storageUpdateRoundoffAllowance(
 }
 
 fn validateBoundary(activity: BoundaryActivity) !void {
-    inline for (std.meta.fields(BoundaryActivity)) |field| {
+    inline for (ti_compat.fieldViews(BoundaryActivity)) |field| {
         const value = @field(activity, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidHourlyCellBoundaryActivity;
@@ -2631,7 +2645,7 @@ fn compensatedSum(values: []const f64) f64 {
 test "production coverage is complete and runtime acceptance is transaction ordered" {
     for (production_requirements, 0..) |required, index| {
         try std.testing.expect(required.storage != 0);
-        if (index != @intFromEnum(Quantity.rock_additive)) {
+        if (index != @backingInt(Quantity.rock_additive)) {
             try std.testing.expect(required.external != 0);
             try std.testing.expect(required.intercell != 0);
         }
@@ -2823,7 +2837,7 @@ test "hourly mineral texture gate resolves intercell transfer and rejects ROCK l
     leaked[0].rock_additive -= 0.01;
     var rejected = try evaluate(std.testing.allocator, &before, &leaked, &activity, &.{ 1, 1 }, .{ .absolute_per_area = .{}, .relative = 1e-9 });
     defer rejected.deinit(std.testing.allocator);
-    try std.testing.expectEqual(@as(usize, 1), rejected.failing_cell_count[@intFromEnum(Quantity.rock_additive)]);
+    try std.testing.expectEqual(@as(usize, 1), rejected.failing_cell_count[@backingInt(Quantity.rock_additive)]);
 }
 
 test "hourly texture gate separates representation roundoff from physical leakage" {
@@ -2840,12 +2854,12 @@ test "hourly texture gate separates representation roundoff from physical leakag
         .{ .absolute_per_area = .{}, .relative = 1e-9 },
     );
     defer accepted_report.deinit(std.testing.allocator);
-    const rounded_closure = accepted_report.cells[0].closure[@intFromEnum(Quantity.sand)];
+    const rounded_closure = accepted_report.cells[0].closure[@backingInt(Quantity.sand)];
     try std.testing.expect(rounded_closure.absolute > rounded_closure.acceptance_limit);
     try std.testing.expect(rounded_closure.absolute <= rounded_closure.arithmetic_roundoff_allowance);
     try std.testing.expect(!rounded_closure.physical_accepted);
     try std.testing.expect(rounded_closure.accepted);
-    try std.testing.expectEqual(@as(usize, 0), accepted_report.failing_cell_count[@intFromEnum(Quantity.sand)]);
+    try std.testing.expectEqual(@as(usize, 0), accepted_report.failing_cell_count[@backingInt(Quantity.sand)]);
 
     const leaked = [_]inventory.Storage{.{ .sand_megagrams = standing + 1e-12 }};
     var rejected_report = try evaluate(
@@ -2857,9 +2871,9 @@ test "hourly texture gate separates representation roundoff from physical leakag
         .{ .absolute_per_area = .{}, .relative = 1e-9 },
     );
     defer rejected_report.deinit(std.testing.allocator);
-    const leaked_closure = rejected_report.cells[0].closure[@intFromEnum(Quantity.sand)];
+    const leaked_closure = rejected_report.cells[0].closure[@backingInt(Quantity.sand)];
     try std.testing.expect(leaked_closure.absolute > leaked_closure.effective_acceptance_limit);
-    try std.testing.expectEqual(@as(usize, 1), rejected_report.failing_cell_count[@intFromEnum(Quantity.sand)]);
+    try std.testing.expectEqual(@as(usize, 1), rejected_report.failing_cell_count[@backingInt(Quantity.sand)]);
 }
 
 test "chemistry carrier provenance is quantity-local and cannot mask material leakage" {
@@ -2886,8 +2900,8 @@ test "chemistry carrier provenance is quantity-local and cannot mask material le
         .{ .absolute_per_area = .{}, .relative = std.math.floatEps(f64) },
     );
     defer accepted_report.deinit(std.testing.allocator);
-    const calcium = accepted_report.cells[0].closure[@intFromEnum(Quantity.calcium)];
-    const phosphorus = accepted_report.cells[0].closure[@intFromEnum(Quantity.phosphorus)];
+    const calcium = accepted_report.cells[0].closure[@backingInt(Quantity.calcium)];
+    const phosphorus = accepted_report.cells[0].closure[@backingInt(Quantity.phosphorus)];
     try std.testing.expect(!calcium.physical_accepted);
     try std.testing.expect(calcium.accepted);
     try std.testing.expect(calcium.arithmetic_roundoff_allowance >= 1.0e-14);
@@ -2909,7 +2923,7 @@ test "chemistry carrier provenance is quantity-local and cannot mask material le
         .{ .absolute_per_area = .{}, .relative = std.math.floatEps(f64) },
     );
     defer rejected_report.deinit(std.testing.allocator);
-    try std.testing.expect(!rejected_report.cells[0].closure[@intFromEnum(Quantity.calcium)].accepted);
+    try std.testing.expect(!rejected_report.cells[0].closure[@backingInt(Quantity.calcium)].accepted);
 }
 
 test "plant atmosphere activity preserves fixation respiration fire and ammonia signs" {
@@ -3089,10 +3103,10 @@ test "shoot fire products precede SOLUTE while late accounting remains single-ow
 test "soil aqueous external activity preserves cell directions formulas and atomic preflight" {
     var ledger = try BoundaryLedger.init(std.testing.allocator, 2);
     defer ledger.deinit();
-    var fluxes = [_]f64{0} ** (2 * 2 * solute_species.AqueousSpecies.count);
-    const carbonate = @intFromEnum(solute_species.AqueousSpecies.carbonate);
-    const calcium_sulfate = @intFromEnum(solute_species.AqueousSpecies.calcium_sulfate);
-    const silicate = @intFromEnum(solute_species.AqueousSpecies.hydrogen_silicate);
+    var fluxes = @as([(2 * 2 * solute_species.AqueousSpecies.count)]f64, @splat(@as(f64, 0)));
+    const carbonate = @backingInt(solute_species.AqueousSpecies.carbonate);
+    const calcium_sulfate = @backingInt(solute_species.AqueousSpecies.calcium_sulfate);
+    const silicate = @backingInt(solute_species.AqueousSpecies.hydrogen_silicate);
     fluxes[carbonate] = 2;
     fluxes[solute_species.AqueousSpecies.count + carbonate] = -1;
     fluxes[solute_species.AqueousSpecies.count + calcium_sulfate] = -3;
@@ -3151,7 +3165,7 @@ test "soil aqueous external runtime traversal is formula and order equivalent" {
         for (0..species_count) |species_index| {
             const signed_mol = fluxes[first + species_index];
             const amount_mol = @abs(signed_mol);
-            const formula = surface_aqueous.formula(@enumFromInt(species_index));
+            const formula = surface_aqueous.formula(@fromBackingInt(@intCast(species_index)));
             const elements = [9]f64{
                 formula.aluminum_mol,
                 formula.iron_mol,
@@ -3227,15 +3241,15 @@ test "dedicated soil transports preserve boundary signs intercell direction and 
         .heat_flux_megajoules_per_step = &zero_face,
     };
 
-    var gas_boundary = [_]f64{0} ** (2 * gas_transport.species_count);
-    var gas_micro = [_]f64{0} ** gas_transport.species_count;
-    var gas_macro = [_]f64{0} ** gas_transport.species_count;
-    gas_boundary[@intFromEnum(gas_transport.Species.carbon_dioxide)] = 2;
-    gas_boundary[gas_transport.species_count + @intFromEnum(gas_transport.Species.oxygen)] = -3;
-    gas_micro[@intFromEnum(gas_transport.Species.carbon_dioxide)] = 5;
-    gas_macro[@intFromEnum(gas_transport.Species.carbon_dioxide)] = -1;
-    gas_micro[@intFromEnum(gas_transport.Species.nitrogen)] = -2;
-    gas_micro[@intFromEnum(gas_transport.Species.ammonia)] = 99;
+    var gas_boundary = @as([(2 * gas_transport.species_count)]f64, @splat(@as(f64, 0)));
+    var gas_micro = @as([gas_transport.species_count]f64, @splat(@as(f64, 0)));
+    var gas_macro = @as([gas_transport.species_count]f64, @splat(@as(f64, 0)));
+    gas_boundary[@backingInt(gas_transport.Species.carbon_dioxide)] = 2;
+    gas_boundary[gas_transport.species_count + @backingInt(gas_transport.Species.oxygen)] = -3;
+    gas_micro[@backingInt(gas_transport.Species.carbon_dioxide)] = 5;
+    gas_macro[@backingInt(gas_transport.Species.carbon_dioxide)] = -1;
+    gas_micro[@backingInt(gas_transport.Species.nitrogen)] = -2;
+    gas_micro[@backingInt(gas_transport.Species.ammonia)] = 99;
     var gas_ledger = try BoundaryLedger.init(std.testing.allocator, 2);
     defer gas_ledger.deinit();
     try accumulateDissolvedGasTransport(&gas_ledger, &faces, &gas_boundary, &gas_micro, &gas_macro, 1);
@@ -3246,14 +3260,14 @@ test "dedicated soil transports preserve boundary signs intercell direction and 
     try std.testing.expectEqual(@as(f64, 2), gas_ledger.cells[1].nitrogen_output_g);
     try std.testing.expectEqual(@as(f64, 2), gas_ledger.cells[0].nitrogen_input_g);
 
-    var organic_boundary = [_]f64{0} ** (2 * organic_transport.component_count);
-    var organic_micro = [_]f64{0} ** organic_transport.component_count;
-    var organic_macro = [_]f64{0} ** organic_transport.component_count;
-    organic_boundary[@intFromEnum(organic_transport.Component.dissolved_organic_carbon)] = 3;
-    organic_boundary[organic_transport.component_count + @intFromEnum(organic_transport.Component.dissolved_organic_nitrogen)] = -4;
-    organic_micro[@intFromEnum(organic_transport.Component.dissolved_organic_carbon)] = 5;
-    organic_macro[@intFromEnum(organic_transport.Component.dissolved_organic_carbon)] = 1;
-    organic_micro[@intFromEnum(organic_transport.Component.dissolved_organic_phosphorus)] = -2;
+    var organic_boundary = @as([(2 * organic_transport.component_count)]f64, @splat(@as(f64, 0)));
+    var organic_micro = @as([organic_transport.component_count]f64, @splat(@as(f64, 0)));
+    var organic_macro = @as([organic_transport.component_count]f64, @splat(@as(f64, 0)));
+    organic_boundary[@backingInt(organic_transport.Component.dissolved_organic_carbon)] = 3;
+    organic_boundary[organic_transport.component_count + @backingInt(organic_transport.Component.dissolved_organic_nitrogen)] = -4;
+    organic_micro[@backingInt(organic_transport.Component.dissolved_organic_carbon)] = 5;
+    organic_macro[@backingInt(organic_transport.Component.dissolved_organic_carbon)] = 1;
+    organic_micro[@backingInt(organic_transport.Component.dissolved_organic_phosphorus)] = -2;
     var organic_ledger = try BoundaryLedger.init(std.testing.allocator, 2);
     defer organic_ledger.deinit();
     try accumulateOrganicTransport(&organic_ledger, &faces, &organic_boundary, &organic_micro, &organic_macro, 1);
@@ -3264,10 +3278,10 @@ test "dedicated soil transports preserve boundary signs intercell direction and 
     try std.testing.expectEqual(@as(f64, 2), organic_ledger.cells[1].phosphorus_output_g);
     try std.testing.expectEqual(@as(f64, 2), organic_ledger.cells[0].phosphorus_input_g);
 
-    var mineral_micro = [_]f64{0} ** mineral_nitrogen_transport.species_count;
-    var mineral_macro = [_]f64{0} ** mineral_nitrogen_transport.species_count;
-    mineral_micro[@intFromEnum(mineral_nitrogen_transport.Species.nitrate_non_band)] = 0.5;
-    mineral_macro[@intFromEnum(mineral_nitrogen_transport.Species.ammonium_non_band)] = -0.25;
+    var mineral_micro = @as([mineral_nitrogen_transport.species_count]f64, @splat(@as(f64, 0)));
+    var mineral_macro = @as([mineral_nitrogen_transport.species_count]f64, @splat(@as(f64, 0)));
+    mineral_micro[@backingInt(mineral_nitrogen_transport.Species.nitrate_non_band)] = 0.5;
+    mineral_macro[@backingInt(mineral_nitrogen_transport.Species.ammonium_non_band)] = -0.25;
     var mineral_ledger = try BoundaryLedger.init(std.testing.allocator, 2);
     defer mineral_ledger.deinit();
     try accumulateMineralNitrogenTransport(&mineral_ledger, &faces, &.{ 7, 11 }, &mineral_micro, &mineral_macro, 1, 14);
@@ -3278,8 +3292,8 @@ test "dedicated soil transports preserve boundary signs intercell direction and 
 
     gas_ledger.reset();
     gas_ledger.cells[1].carbon_input_g = 0.75 * std.math.floatMax(f64);
-    gas_micro[@intFromEnum(gas_transport.Species.carbon_dioxide)] = 0.75 * std.math.floatMax(f64);
-    gas_macro[@intFromEnum(gas_transport.Species.carbon_dioxide)] = 0;
+    gas_micro[@backingInt(gas_transport.Species.carbon_dioxide)] = 0.75 * std.math.floatMax(f64);
+    gas_macro[@backingInt(gas_transport.Species.carbon_dioxide)] = 0;
     const before = gas_ledger.cells[0..2].*;
     try std.testing.expectError(
         error.HourlyCellBoundaryOverflow,
@@ -3293,7 +3307,7 @@ test "equal opposite cell leaks fail despite exact domain cancellation" {
     const after = [_]inventory.Storage{ .{ .water_m3 = 1 }, .{} };
     var report = try evaluate(std.testing.allocator, &before, &after, &.{ .{}, .{} }, &.{ 1, 1 }, .{ .absolute_per_area = .{ .water_m = 1e-12 }, .relative = 1e-9 });
     defer report.deinit(std.testing.allocator);
-    try std.testing.expectEqual(@as(usize, 2), report.failing_cell_count[@intFromEnum(Quantity.water)]);
+    try std.testing.expectEqual(@as(usize, 2), report.failing_cell_count[@backingInt(Quantity.water)]);
     try std.testing.expectError(error.HourlyCellConservationFailure, requireAccepted(report));
 }
 
@@ -3319,7 +3333,7 @@ test "surface runoff donor and recipient close water and immutable-temperature h
     defer report.deinit(std.testing.allocator);
     try requireAccepted(report);
     inline for (.{ Quantity.water, Quantity.heat }) |quantity| {
-        const index = @intFromEnum(quantity);
+        const index = @backingInt(quantity);
         try std.testing.expectEqual(@as(usize, 0), report.failing_cell_count[index]);
         for (report.cells) |cell_report|
             try std.testing.expectApproxEqAbs(@as(f64, 0), cell_report.closure[index].residual, 1e-13);
@@ -3359,7 +3373,7 @@ test "surface runoff boundary export closes local and domain water and heat" {
     defer report.deinit(std.testing.allocator);
     try requireAccepted(report);
     inline for (.{ Quantity.water, Quantity.heat }) |quantity| {
-        const closure = report.cells[0].closure[@intFromEnum(quantity)];
+        const closure = report.cells[0].closure[@backingInt(quantity)];
         try std.testing.expect(closure.accepted);
         try std.testing.expectApproxEqAbs(@as(f64, 0), closure.residual, 1e-13);
     }
@@ -3479,16 +3493,16 @@ test "aggregate ions cannot hide cross-element cancellation" {
         .relative = 1e-9,
     });
     defer report.deinit(std.testing.allocator);
-    try std.testing.expectEqual(@as(usize, 1), report.failing_cell_count[@intFromEnum(Quantity.aluminum)]);
-    try std.testing.expectEqual(@as(usize, 1), report.failing_cell_count[@intFromEnum(Quantity.sodium)]);
+    try std.testing.expectEqual(@as(usize, 1), report.failing_cell_count[@backingInt(Quantity.aluminum)]);
+    try std.testing.expectEqual(@as(usize, 1), report.failing_cell_count[@backingInt(Quantity.sodium)]);
     try std.testing.expectError(error.HourlyCellConservationFailure, requireAccepted(report));
 }
 
 test "full aqueous formula maps complexes to their conserved elements" {
-    var amounts = [_]f64{0} ** solute_species.AqueousSpecies.count;
-    amounts[@intFromEnum(solute_species.AqueousSpecies.aluminum_sulfate)] = 2;
-    amounts[@intFromEnum(solute_species.AqueousSpecies.band_calcium_h2po4)] = 3;
-    amounts[@intFromEnum(solute_species.AqueousSpecies.hydrogen_silicate)] = 4;
+    var amounts = @as([solute_species.AqueousSpecies.count]f64, @splat(@as(f64, 0)));
+    amounts[@backingInt(solute_species.AqueousSpecies.aluminum_sulfate)] = 2;
+    amounts[@backingInt(solute_species.AqueousSpecies.band_calcium_h2po4)] = 3;
+    amounts[@backingInt(solute_species.AqueousSpecies.hydrogen_silicate)] = 4;
     const activity = try aqueousElementActivity(&amounts, .output);
     try std.testing.expectEqual(@as(f64, 2), activity.aluminum_output_mol);
     try std.testing.expectEqual(@as(f64, 2), activity.sulfur_output_mol);
@@ -3497,19 +3511,19 @@ test "full aqueous formula maps complexes to their conserved elements" {
 }
 
 test "accepted atmospheric snow and direct branches book every tracked element by source cell" {
-    var primary = [_]f64{0} ** snow_solutes.species_count;
-    var salts = [_]f64{0} ** snow_solutes.salt_species_count;
+    var primary = @as([snow_solutes.species_count]f64, @splat(@as(f64, 0)));
+    var salts = @as([snow_solutes.salt_species_count]f64, @splat(@as(f64, 0)));
     var direct = [_]snow_solutes.SurfaceDischarge{.{}};
-    primary[@intFromEnum(snow_solutes.Species.carbon_dioxide_carbon)] = 1;
-    direct[0].litter_g[@intFromEnum(snow_solutes.Species.methane_carbon)] = 2;
-    primary[@intFromEnum(snow_solutes.Species.oxygen)] = 4;
-    primary[@intFromEnum(snow_solutes.Species.dinitrogen_nitrogen)] = 5;
-    direct[0].soil_nonband_g[@intFromEnum(snow_solutes.Species.ammonium_nitrogen)] = 6;
-    primary[@intFromEnum(snow_solutes.Species.hydrogen_phosphate_phosphorus)] = 7;
-    primary[@intFromEnum(snow_solutes.Species.aluminum)] = 27;
-    primary[@intFromEnum(snow_solutes.Species.sulfate_sulfur)] = 32;
-    salts[@intFromEnum(snow_solutes.SaltSpecies.calcium_sulfate)] = 2;
-    direct[0].litter_salt_mol[@intFromEnum(snow_solutes.SaltSpecies.carbonate)] = 3;
+    primary[@backingInt(snow_solutes.Species.carbon_dioxide_carbon)] = 1;
+    direct[0].litter_g[@backingInt(snow_solutes.Species.methane_carbon)] = 2;
+    primary[@backingInt(snow_solutes.Species.oxygen)] = 4;
+    primary[@backingInt(snow_solutes.Species.dinitrogen_nitrogen)] = 5;
+    direct[0].soil_nonband_g[@backingInt(snow_solutes.Species.ammonium_nitrogen)] = 6;
+    primary[@backingInt(snow_solutes.Species.hydrogen_phosphate_phosphorus)] = 7;
+    primary[@backingInt(snow_solutes.Species.aluminum)] = 27;
+    primary[@backingInt(snow_solutes.Species.sulfate_sulfur)] = 32;
+    salts[@backingInt(snow_solutes.SaltSpecies.calcium_sulfate)] = 2;
+    direct[0].litter_salt_mol[@backingInt(snow_solutes.SaltSpecies.carbonate)] = 3;
     const activity = try atmosphericSoluteActivity(0, 1, &primary, &salts, &direct, .{
         .aluminum = 27,
         .iron = 56,
@@ -3573,7 +3587,7 @@ test "hourly cell heat closure includes gross internal production and consumptio
     }};
     var report = try evaluate(std.testing.allocator, &before, &after, &activity, &.{1}, .{ .absolute_per_area = .{}, .relative = 1e-9 });
     defer report.deinit(std.testing.allocator);
-    try std.testing.expectEqual(@as(usize, 0), report.failing_cell_count[@intFromEnum(Quantity.heat)]);
+    try std.testing.expectEqual(@as(usize, 0), report.failing_cell_count[@backingInt(Quantity.heat)]);
 }
 
 test "the cell heat scale excludes inter-layer transfers, so per-layer criteria at the same tolerance permit 42x what this gate allows" {
@@ -3605,7 +3619,7 @@ test "the cell heat scale excludes inter-layer transfers, so per-layer criteria 
         .{ .absolute_per_area = .{}, .relative = 1.0e-9 },
     );
     defer report.deinit(std.testing.allocator);
-    const heat = report.cells[0].closure[@intFromEnum(Quantity.heat)];
+    const heat = report.cells[0].closure[@backingInt(Quantity.heat)];
 
     // The hour really is rejected, at the measured residual.
     try std.testing.expect(!heat.accepted);
@@ -3786,10 +3800,10 @@ test "aqueous face transfers preserve formula stoichiometry and independent dire
         .vapor_flux_m3_per_step = &zero,
         .heat_flux_megajoules_per_step = &zero,
     };
-    var micro = [_]f64{0} ** solute_species.AqueousSpecies.count;
-    var macro = [_]f64{0} ** solute_species.AqueousSpecies.count;
-    micro[@intFromEnum(solute_species.AqueousSpecies.calcium_carbonate)] = 2;
-    macro[@intFromEnum(solute_species.AqueousSpecies.sulfate)] = -3;
+    var micro = @as([solute_species.AqueousSpecies.count]f64, @splat(@as(f64, 0)));
+    var macro = @as([solute_species.AqueousSpecies.count]f64, @splat(@as(f64, 0)));
+    micro[@backingInt(solute_species.AqueousSpecies.calcium_carbonate)] = 2;
+    macro[@backingInt(solute_species.AqueousSpecies.sulfate)] = -3;
     try accumulateAqueousFaceTransfers(&ledger, &faces, &micro, &macro, 1, 12, 31);
     try std.testing.expectEqual(@as(f64, 24), ledger.cells[0].carbon_output_g);
     try std.testing.expectEqual(@as(f64, 24), ledger.cells[1].carbon_input_g);
@@ -3812,10 +3826,10 @@ test "gas face transfers preserve tracked-element species and skip vertical face
     state.accepted_faces[0] = .{ .first_cell = 0, .second_cell = 2 };
     state.accepted_faces[1] = .{ .first_cell = 0, .second_cell = 1 };
     @memset(state.accepted_face_flux_g_per_h, 0);
-    state.accepted_face_flux_g_per_h[@intFromEnum(gas_transport.Species.carbon_dioxide)] = 5;
-    state.accepted_face_flux_g_per_h[@intFromEnum(gas_transport.Species.methane)] = -2;
-    state.accepted_face_flux_g_per_h[@intFromEnum(gas_transport.Species.oxygen)] = -7;
-    state.accepted_face_flux_g_per_h[gas_transport.species_count + @intFromEnum(gas_transport.Species.hydrogen)] = 99;
+    state.accepted_face_flux_g_per_h[@backingInt(gas_transport.Species.carbon_dioxide)] = 5;
+    state.accepted_face_flux_g_per_h[@backingInt(gas_transport.Species.methane)] = -2;
+    state.accepted_face_flux_g_per_h[@backingInt(gas_transport.Species.oxygen)] = -7;
+    state.accepted_face_flux_g_per_h[gas_transport.species_count + @backingInt(gas_transport.Species.hydrogen)] = 99;
     try accumulateGasFaceTransfers(&ledger, &state, 2);
     try std.testing.expectEqual(@as(f64, 3), ledger.cells[0].carbon_output_g);
     try std.testing.expectEqual(@as(f64, 3), ledger.cells[1].carbon_input_g);
@@ -3891,7 +3905,7 @@ test "root soil and aqueous oxygen uptake closes per cell across root domains" {
         2,
     );
     defer root.deinit();
-    const passive_exchange = [_]f64{0} ** (8 * 6);
+    const passive_exchange = @as([(8 * 6)]f64, @splat(@as(f64, 0)));
     try root_soil_gas_state_update.refresh(&soil, .{
         .active_soil_layer_count_by_cell = &.{ 2, 1 },
         .active_by_plant = &.{ true, true },
@@ -3901,7 +3915,7 @@ test "root soil and aqueous oxygen uptake closes per cell across root domains" {
         // are deliberately nonzero and must not enter either cell ledger.
         .oxygen_uptake_from_soil_g_o_per_h_by_root = &.{ 1, 2, 3, 4, 10, 20, 30, 40 },
     });
-    const carbon_dioxide_reaction = [_]f64{0} ** 8;
+    const carbon_dioxide_reaction = @as([8]f64, @splat(@as(f64, 0)));
     try root_internal_gas_state_update.refresh(&root, .{
         .active_soil_layer_count_by_cell = &.{ 2, 1 },
         .active_by_plant = &.{ true, true },
@@ -3924,7 +3938,7 @@ test "root soil and aqueous oxygen uptake closes per cell across root domains" {
     try std.testing.expectApproxEqAbs(@as(f64, 11), ledger.cells[0].oxygen_internal_consumption_g, 1e-15);
     try std.testing.expectApproxEqAbs(@as(f64, 44), ledger.cells[1].oxygen_internal_consumption_g, 1e-15);
 
-    const zero = [_]f64{0} ** 4;
+    const zero = @as([4]f64, @splat(@as(f64, 0)));
     try accumulateRootOxygenUptake(&ledger, &.{ 2, 1 }, 2, &zero, &zero);
     try std.testing.expectApproxEqAbs(@as(f64, 11), ledger.cells[0].oxygen_internal_consumption_g, 1e-15);
     try std.testing.expectApproxEqAbs(@as(f64, 44), ledger.cells[1].oxygen_internal_consumption_g, 1e-15);
@@ -4161,11 +4175,11 @@ test "signed charcoal exchange-site changes close as internal production and con
     try requireAccepted(report);
     try std.testing.expectEqual(
         @as(f64, 0),
-        report.cells[0].closure[@intFromEnum(Quantity.cation_exchange_capacity)].residual,
+        report.cells[0].closure[@backingInt(Quantity.cation_exchange_capacity)].residual,
     );
     try std.testing.expectEqual(
         @as(f64, 0),
-        report.cells[0].closure[@intFromEnum(Quantity.anion_exchange_capacity)].residual,
+        report.cells[0].closure[@backingInt(Quantity.anion_exchange_capacity)].residual,
     );
 }
 
@@ -4232,7 +4246,7 @@ test "the conservation criterion's VALUE is pinned, not just gross-leak rejectio
         //    activity the same 1e-4 accumulates to 0.41 MJ, 0.022%. If this
         //    assertion ever flips to the storage scale, the criterion silently
         //    becomes four orders more permissive than it reads.
-        const index = @intFromEnum(Quantity.water);
+        const index = @backingInt(Quantity.water);
         const observed = report.maximum_normalized_relative[index];
         // Bound derived, not tuned. The leak is recovered as a difference of
         // numbers of magnitude `storage + activity`, so its relative accuracy

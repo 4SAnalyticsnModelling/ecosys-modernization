@@ -12,6 +12,7 @@ const litter_partition = @import("../plant/partition/litter.zig");
 const grazing_manure = @import("grazing_manure.zig");
 const __parent = @import("plant_harvest_runtime.zig");
 const group_harvest = @import("plant_harvest_source_order_harvest.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 const HourlyDisturbanceReset = __parent.HourlyDisturbanceReset;
 const PopulationAfterDisturbance = __parent.PopulationAfterDisturbance;
@@ -25,7 +26,7 @@ pub fn sourceOrderHourlyDisturbanceReset(
 ) !HourlyDisturbanceReset {
     if (!std.math.isFinite(cumulative_harvest_carbon_g_c) or cumulative_harvest_carbon_g_c < 0)
         return error.InvalidHourlyDisturbanceResetInput;
-    inline for (@typeInfo(HourlyDisturbanceReset).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(HourlyDisturbanceReset)) |field| {
         const value = @field(current, field.name);
         if (field.type == f64) {
             if (!std.math.isFinite(value) or value < 0) return error.InvalidHourlyDisturbanceResetInput;
@@ -103,7 +104,7 @@ pub fn sourceOrderTotalDisturbanceRemoval(
         .nitrogen_g = harvested.nitrogen_g - residue.nitrogen_g,
         .phosphorus_g = harvested.phosphorus_g - residue.phosphorus_g,
     };
-    inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(canopy.ElementalMass)) |field| {
         const value = @field(exported, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.DisturbanceRemovalResidueOverdraw;
@@ -174,7 +175,7 @@ pub fn sourceOrderPopulationScaledNumericalThresholds(
         .plant_mass_density_g_m2 = plant_mass_presence_g / horizontal_cell_area_m2,
         .plant_flux_presence_g_per_step = flux_threshold_g_per_plant_per_step * plant_population_count,
     };
-    inline for (@typeInfo(PopulationScaledNumericalThresholds).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(PopulationScaledNumericalThresholds)) |field| {
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFinitePopulationScaledNumericalThreshold;
     }

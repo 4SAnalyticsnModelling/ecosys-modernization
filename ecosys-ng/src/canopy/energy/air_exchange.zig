@@ -1,5 +1,6 @@
 const std = @import("std");
 const numerics = @import("../../core/numerics.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     saturation_vapor_prefactor_k: f64 = 2.173e-3,
@@ -258,8 +259,8 @@ fn saturationVaporFraction(inputs: Inputs, parameters: Parameters, temperature_k
 }
 
 fn validate(inputs: Inputs, parameters: Parameters, options: SolverOptions) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteCanopyAirInput;
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteCanopyAirParameter;
+    inline for (ti_compat.fieldViews(Inputs)) |field| if (!std.math.isFinite(@field(inputs, field.name))) return error.NonFiniteCanopyAirInput;
+    inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(parameters, field.name))) return error.NonFiniteCanopyAirParameter;
     if (inputs.initial_temperature_k <= 0 or inputs.atmospheric_temperature_k <= 0 or inputs.ground_air_temperature_k <= 0 or inputs.initial_vapor_fraction < 0 or inputs.atmospheric_vapor_fraction < 0 or inputs.ground_air_vapor_fraction < 0 or inputs.heat_capacity_megajoules_per_k <= 0 or inputs.air_volume_m3 <= 0) return error.InvalidCanopyAirInput;
     inline for (.{ inputs.atmospheric_sensible_conductance_megajoules_per_h_k, inputs.atmospheric_vapor_conductance_m3_per_h, inputs.ground_sensible_conductance_megajoules_per_h_k, inputs.ground_vapor_conductance_m3_per_h }) |value| if (value < 0) return error.InvalidCanopyAirInput;
     if (options.max_iterations == 0 or !options.anderson_recovery or !std.math.isFinite(options.absolute_temperature_tolerance_k) or options.absolute_temperature_tolerance_k <= 0 or !std.math.isFinite(options.absolute_vapor_fraction_tolerance) or options.absolute_vapor_fraction_tolerance <= 0 or !std.math.isFinite(options.relative_tolerance) or options.relative_tolerance <= 0 or !std.math.isFinite(options.picard_relaxation) or options.picard_relaxation <= 0 or options.picard_relaxation > 1 or options.divergence_patience == 0 or !std.math.isFinite(options.divergence_growth_factor) or options.divergence_growth_factor < 1) return error.InvalidCanopyAirSolverOptions;

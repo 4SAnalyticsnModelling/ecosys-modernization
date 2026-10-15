@@ -13,6 +13,7 @@ const group_directions = @import("coupled_gas_solver_directions.zig");
 const group_misc = @import("coupled_gas_solver_misc.zig");
 const group_validation = @import("coupled_gas_solver_validation.zig");
 
+
 fn readCoupledGasSolverSolveSource() ![]u8 {
     return std.Io.Dir.cwd().readFileAlloc(
         std.testing.io,
@@ -248,13 +249,13 @@ test "coupled gas preflight validates topology conductance and boundaries" {
     defer state.deinit();
     state.temperature_k[0] = 293.15;
     const self_face = [_]gas.Face{.{ .first_cell = 0, .second_cell = 0 }};
-    const conductance = [_]f64{0} ** gas.species_count;
+    const conductance = @as([gas.species_count]f64, @splat(@as(f64, 0)));
     var inputs = group_validation.validationTestInputs();
     inputs.faces = &self_face;
     inputs.face_conductance_m3_per_step = &conductance;
     try std.testing.expectError(error.InvalidGasTransportFace, group_validation.validate(&state, inputs, .{ .max_iterations = 1 }));
 
-    const invalid_conductance = [_]f64{-1} ** gas.species_count;
+    const invalid_conductance = @as([gas.species_count]f64, @splat(@as(f64, -1)));
     inputs.faces = &.{};
     inputs.face_conductance_m3_per_step = &.{};
     inputs.atmospheric_boundaries = &.{.{
@@ -279,11 +280,11 @@ test "coupled gas preflight enforces damped Newton and divergence options" {
 test "Newton merit cannot trade a worse limiting species for a lower L2 residual" {
     const options: group_misc.Options = .{ .absolute_tolerance_g = 1, .relative_tolerance = 1e-12, .max_iterations = 2 };
     const inventory_count = gas.species_count;
-    const state = [_]f64{0} ** (3 * inventory_count);
-    var current_residual = [_]f64{0} ** (3 * inventory_count);
-    var candidate_residual = [_]f64{0} ** (3 * inventory_count);
-    const limiting = @intFromEnum(gas.Species.oxygen);
-    const tied = @intFromEnum(gas.Species.nitrous_oxide);
+    const state = @as([(3 * inventory_count)]f64, @splat(@as(f64, 0)));
+    var current_residual = @as([(3 * inventory_count)]f64, @splat(@as(f64, 0)));
+    var candidate_residual = @as([(3 * inventory_count)]f64, @splat(@as(f64, 0)));
+    const limiting = @backingInt(gas.Species.oxygen);
+    const tied = @backingInt(gas.Species.nitrous_oxide);
     current_residual[limiting] = 10;
     current_residual[tied] = 10;
     candidate_residual[limiting] = 11;
@@ -307,12 +308,12 @@ test "Newton globalization accepts every strict infinity-norm improvement" {
 test "coordinate Newton merit can advance one of two tied limiting residuals" {
     const options: group_misc.Options = .{ .absolute_tolerance_g = 1, .relative_tolerance = 1.0e-12, .max_iterations = 2 };
     const inventory_count = gas.species_count;
-    const current = [_]f64{0} ** (3 * inventory_count);
-    var residual = [_]f64{0} ** (3 * inventory_count);
-    const candidate = [_]f64{0} ** (3 * inventory_count);
-    var candidate_residual = [_]f64{0} ** (3 * inventory_count);
-    const advanced = @intFromEnum(gas.Species.oxygen);
-    const tied = @intFromEnum(gas.Species.nitrous_oxide);
+    const current = @as([(3 * inventory_count)]f64, @splat(@as(f64, 0)));
+    var residual = @as([(3 * inventory_count)]f64, @splat(@as(f64, 0)));
+    const candidate = @as([(3 * inventory_count)]f64, @splat(@as(f64, 0)));
+    var candidate_residual = @as([(3 * inventory_count)]f64, @splat(@as(f64, 0)));
+    const advanced = @backingInt(gas.Species.oxygen);
+    const tied = @backingInt(gas.Species.nitrous_oxide);
     residual[advanced] = 2;
     residual[tied] = 2;
     candidate_residual[advanced] = 0.5;
@@ -336,8 +337,8 @@ test "trace-gas relative scaling has no implicit one-gram floor" {
         .max_iterations = 2,
     };
     const inventory_count = gas.species_count;
-    var state = [_]f64{0} ** (3 * gas.species_count);
-    var residual = [_]f64{0} ** (3 * gas.species_count);
+    var state = @as([(3 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    var residual = @as([(3 * gas.species_count)]f64, @splat(@as(f64, 0)));
     state[0] = 1.0e-10;
     residual[0] = 1.0e-9;
     // Relative error is ten times the entire pool; the species absolute floor,
@@ -380,8 +381,8 @@ test "semismooth budget handoff requires an active incoming extreme donor" {
         .max_iterations = 80,
     };
     const inventory_count = 2 * gas.species_count;
-    var current = [_]f64{1} ** (3 * 2 * gas.species_count);
-    var residual = [_]f64{0} ** (3 * 2 * gas.species_count);
+    var current = @as([(3 * 2 * gas.species_count)]f64, @splat(@as(f64, 1)));
+    var residual = @as([(3 * 2 * gas.species_count)]f64, @splat(@as(f64, 0)));
     var target = current;
     current[0] = 1.0e-4;
     current[gas.species_count] = 1.0e8;
@@ -392,13 +393,13 @@ test "semismooth budget handoff requires an active incoming extreme donor" {
             .first_cell = 0,
             .second_cell = 1,
         }},
-        .face_conductance_m3_per_step = &([_]f64{0} ** gas.species_count),
+        .face_conductance_m3_per_step = &(@as([gas.species_count]f64, @splat(@as(f64, 0)))),
         .atmospheric_boundaries = &.{},
         .water_volume_m3 = &.{ 0, 0 },
         .band_water_volume_m3 = &.{ 0, 0 },
-        .mass_solubility_ratio = &([_]f64{1} ** (2 * gas.species_count)),
-        .gas_water_exchange_rate_per_step = &([_]f64{0} ** (2 * gas.species_count)),
-        .band_gas_water_exchange_rate_per_step = &([_]f64{0} ** (2 * gas.species_count)),
+        .mass_solubility_ratio = &(@as([(2 * gas.species_count)]f64, @splat(@as(f64, 1)))),
+        .gas_water_exchange_rate_per_step = &(@as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)))),
+        .band_gas_water_exchange_rate_per_step = &(@as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)))),
         .bubbling_enabled = &.{ false, false },
     };
     try std.testing.expect(group_diagnostics.hasExtremeIncomingDonorResidual(
@@ -427,8 +428,8 @@ test "extreme gas face remains selectable when a dissolved residual is larger" {
         .max_iterations = 80,
     };
     const inventory_count = 2 * gas.species_count;
-    var current = [_]f64{1} ** (3 * 2 * gas.species_count);
-    var residual = [_]f64{0} ** (3 * 2 * gas.species_count);
+    var current = @as([(3 * 2 * gas.species_count)]f64, @splat(@as(f64, 1)));
+    var residual = @as([(3 * 2 * gas.species_count)]f64, @splat(@as(f64, 0)));
     var target = current;
     current[0] = 1.0e-4;
     current[gas.species_count] = 1.0e8;
@@ -440,13 +441,13 @@ test "extreme gas face remains selectable when a dissolved residual is larger" {
             .first_cell = 0,
             .second_cell = 1,
         }},
-        .face_conductance_m3_per_step = &([_]f64{0} ** gas.species_count),
+        .face_conductance_m3_per_step = &(@as([gas.species_count]f64, @splat(@as(f64, 0)))),
         .atmospheric_boundaries = &.{},
         .water_volume_m3 = &.{ 0, 0 },
         .band_water_volume_m3 = &.{ 0, 0 },
-        .mass_solubility_ratio = &([_]f64{1} ** (2 * gas.species_count)),
-        .gas_water_exchange_rate_per_step = &([_]f64{0} ** (2 * gas.species_count)),
-        .band_gas_water_exchange_rate_per_step = &([_]f64{0} ** (2 * gas.species_count)),
+        .mass_solubility_ratio = &(@as([(2 * gas.species_count)]f64, @splat(@as(f64, 1)))),
+        .gas_water_exchange_rate_per_step = &(@as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)))),
+        .band_gas_water_exchange_rate_per_step = &(@as([(2 * gas.species_count)]f64, @splat(@as(f64, 0)))),
         .bubbling_enabled = &.{ false, false },
     };
     try std.testing.expectEqual(
@@ -492,8 +493,8 @@ test "single remaining gas species is detected across all phases and cells" {
         .max_iterations = 80,
     };
     const inventory_count = 2 * gas.species_count;
-    const current = [_]f64{1} ** (3 * 2 * gas.species_count);
-    var residual = [_]f64{0} ** (3 * 2 * gas.species_count);
+    const current = @as([(3 * 2 * gas.species_count)]f64, @splat(@as(f64, 1)));
+    var residual = @as([(3 * 2 * gas.species_count)]f64, @splat(@as(f64, 0)));
     residual[gas.species_count + 6] = 1.0e-4;
     residual[2 * inventory_count + gas.species_count + 6] = -1.0e-4;
     try std.testing.expectEqual(
@@ -535,8 +536,8 @@ test "coupled gas scaled norm preserves species-specific absolute floors" {
         .relative_tolerance = 1.0e-14,
         .max_iterations = 2,
     };
-    var state = [_]f64{0} ** (3 * gas.species_count);
-    var residual = [_]f64{0} ** (3 * gas.species_count);
+    var state = @as([(3 * gas.species_count)]f64, @splat(@as(f64, 0)));
+    var residual = @as([(3 * gas.species_count)]f64, @splat(@as(f64, 0)));
     residual[0] = 1.0e-10;
     residual[1] = 1.0e-10;
     const carbon_norm = try group_diagnostics.scaledSpeciesNorm(&state, &residual, options, gas.species_count, 0);
@@ -597,21 +598,21 @@ test "dense gas Jacobian probe follows trace-species mass scale" {
 
 test "tail refinement selects the species controlling convergence" {
     const inventory_count = gas.species_count;
-    const state = [_]f64{0} ** gas.species_count;
-    var residual = [_]f64{0} ** gas.species_count;
-    residual[@intFromEnum(gas.Species.nitrous_oxide)] = 3;
-    residual[@intFromEnum(gas.Species.carbon_dioxide)] = 2;
+    const state = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    var residual = @as([gas.species_count]f64, @splat(@as(f64, 0)));
+    residual[@backingInt(gas.Species.nitrous_oxide)] = 3;
+    residual[@backingInt(gas.Species.carbon_dioxide)] = 2;
     const options: group_misc.Options = .{ .absolute_tolerance_g = 1, .relative_tolerance = 0, .max_iterations = 8 };
-    try std.testing.expectEqual(@intFromEnum(gas.Species.nitrous_oxide), try group_diagnostics.worstResidualSpecies(&state, &residual, options, inventory_count));
+    try std.testing.expectEqual(@backingInt(gas.Species.nitrous_oxide), try group_diagnostics.worstResidualSpecies(&state, &residual, options, inventory_count));
 }
 
 test "species tail rejects local progress that does not strictly reduce the global merit" {
     const inventory_count = gas.species_count;
-    const state = [_]f64{0} ** (3 * inventory_count);
-    var current_residual = [_]f64{0} ** (3 * inventory_count);
-    var candidate_residual = [_]f64{0} ** (3 * inventory_count);
-    const selected = @intFromEnum(gas.Species.oxygen);
-    const tied = @intFromEnum(gas.Species.nitrous_oxide);
+    const state = @as([(3 * inventory_count)]f64, @splat(@as(f64, 0)));
+    var current_residual = @as([(3 * inventory_count)]f64, @splat(@as(f64, 0)));
+    var candidate_residual = @as([(3 * inventory_count)]f64, @splat(@as(f64, 0)));
+    const selected = @backingInt(gas.Species.oxygen);
+    const tied = @backingInt(gas.Species.nitrous_oxide);
     current_residual[selected] = 5;
     current_residual[tied] = 5;
     candidate_residual[selected] = 4;

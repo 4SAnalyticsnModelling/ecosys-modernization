@@ -242,13 +242,13 @@ test "tillage runtime adapter compiles" {
     @memcpy(micropore_solutes.water_volume_m3, grid.matrix_liquid_water_m3);
     @memcpy(macropore_solutes.water_volume_m3, grid.macropore_liquid_water_m3);
     try AqueousBridge.exportChemistry(&chemistry, &micropore_solutes, &fertilizer_band, 0);
-    macropore_solutes.amount_mol[@intFromEnum(SoluteSpecies.hydrogen)] = 0.75;
-    macropore_solutes.amount_mol[@intFromEnum(SoluteSpecies.non_band_hpo4)] = 0.25;
-    macropore_solutes.amount_mol[@intFromEnum(SoluteSpecies.band_hpo4)] = 0.7;
+    macropore_solutes.amount_mol[@backingInt(SoluteSpecies.hydrogen)] = 0.75;
+    macropore_solutes.amount_mol[@backingInt(SoluteSpecies.non_band_hpo4)] = 0.25;
+    macropore_solutes.amount_mol[@backingInt(SoluteSpecies.band_hpo4)] = 0.7;
     var mineral_nitrogen_transport = try MineralNitrogen.State.init(std.testing.allocator, 2);
     defer mineral_nitrogen_transport.deinit();
     try mineral_nitrogen_transport.initializeMatrix(&chemistry, &reactive_nitrogen, grid.matrix_liquid_water_m3, &fertilizer_band, 14, 0);
-    mineral_nitrogen_transport.macropore.amount_mol[@intFromEnum(MineralNitrogen.Species.ammonium_non_band)] = 0.5;
+    mineral_nitrogen_transport.macropore.amount_mol[@backingInt(MineralNitrogen.Species.ammonium_non_band)] = 0.5;
     var surface_water = [_]f64{0.05};
     var surface_ice = [_]f64{0.01};
     var surface_heat_capacity = [_]f64{1.0};
@@ -289,13 +289,13 @@ test "tillage runtime adapter compiles" {
         surface_denitrification.nitrite_g_n[0] / 14;
     for (mineral_nitrogen_transport.matrix.amount_mol, mineral_nitrogen_transport.macropore.amount_mol) |matrix, macropore|
         mineral_transport_before += matrix + macropore;
-    const hydrogen_species = @intFromEnum(SoluteSpecies.hydrogen);
+    const hydrogen_species = @backingInt(SoluteSpecies.hydrogen);
     var aqueous_hydrogen_before = surface_chemistry.cells[0].hydrogen_mol_per_m3 * surface_water[0];
     for (0..2) |layer| aqueous_hydrogen_before +=
         micropore_solutes.amount_mol[layer * SoluteSpecies.count + hydrogen_species] +
         macropore_solutes.amount_mol[layer * SoluteSpecies.count + hydrogen_species];
-    const non_band_hpo4_species = @intFromEnum(SoluteSpecies.non_band_hpo4);
-    const band_hpo4_species = @intFromEnum(SoluteSpecies.band_hpo4);
+    const non_band_hpo4_species = @backingInt(SoluteSpecies.non_band_hpo4);
+    const band_hpo4_species = @backingInt(SoluteSpecies.band_hpo4);
     var aqueous_hpo4_before = surface_chemistry.cells[0].hpo4_mol_p_per_m3 * surface_water[0];
     for (0..2) |layer| aqueous_hpo4_before +=
         micropore_solutes.amount_mol[layer * SoluteSpecies.count + non_band_hpo4_species] +
@@ -410,7 +410,7 @@ test "tillage runtime adapter compiles" {
     try std.testing.expectEqual(@as(f64, 3), surface_chemistry.cells[0].salt_minerals.calcite_mol_per_m3);
     try std.testing.expectEqual(@as(f64, 0.05), surface_chemistry.mineral_reference_water_m3[0]);
     try std.testing.expectApproxEqAbs(@as(f64, 0.15), surface_water[0] + grid.matrix_liquid_water_m3[0] + grid.matrix_liquid_water_m3[1], 1e-12);
-    const aluminum_species = @intFromEnum(SoluteSpecies.aluminum);
+    const aluminum_species = @backingInt(SoluteSpecies.aluminum);
     try std.testing.expectApproxEqAbs(@as(f64, 1.25), micropore_solutes.amount_mol[aluminum_species] + micropore_solutes.amount_mol[SoluteSpecies.count + aluminum_species], 1e-12);
     for (plant_litter_salt_ingress.pending_mol) |amount| try std.testing.expectEqual(@as(f64, 0), amount);
     try std.testing.expectApproxEqAbs(@as(f64, 14) + held_carbon_before, try soil_organic.totalCarbon_g_c(0) + try soil_organic.totalCarbon_g_c(1) + try surface_organic.totalCarbon_g_c(0), 1e-12);

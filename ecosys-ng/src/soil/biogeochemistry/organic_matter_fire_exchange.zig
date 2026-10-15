@@ -8,6 +8,7 @@ const SoluteTransport = @import("../solute/transport.zig");
 const SoluteSpecies = @import("../solute/transport_species.zig");
 const SurfaceChemistry = @import("../../surface/litter_chemistry.zig");
 
+
 pub const salt_species_count = 8;
 
 pub const PhysicalTolerances = struct {
@@ -389,8 +390,8 @@ pub const State = struct {
         const gaseous_nitrogen_g_n = self.combusted_nitrogen_g_n[layer] - ammonium_g_n;
         const phosphate_g_p = self.combusted_phosphorus_g_p[layer] * phosphate_fraction;
         const gaseous_phosphorus_g_p = self.combusted_phosphorus_g_p[layer] - phosphate_g_p;
-        const ammonium_index = layer * NutrientUptake.nutrient_pool_count + @intFromEnum(NutrientUptake.NutrientPool.ammonium_nonband);
-        const phosphate_index = layer * NutrientUptake.nutrient_pool_count + @intFromEnum(NutrientUptake.NutrientPool.phosphate_h2_nonband);
+        const ammonium_index = layer * NutrientUptake.nutrient_pool_count + @backingInt(NutrientUptake.NutrientPool.ammonium_nonband);
+        const phosphate_index = layer * NutrientUptake.nutrient_pool_count + @backingInt(NutrientUptake.NutrientPool.phosphate_h2_nonband);
         const next_oxygen = oxygen_content_g_o - products.oxygen_consumed_g;
         const next_carbon_dioxide = gas.gaseous_mass_g[carbon_dioxide_index] + products.carbon_dioxide_emitted_g_carbon;
         const next_methane = methane_content_g_c + products.methane_emitted_g_carbon;
@@ -708,8 +709,8 @@ test "EXTRACT canopy fire solutes publish before SOLUTE without replaying older 
     var chemistry = try SurfaceChemistry.State.init(std.testing.allocator, 1);
     defer chemistry.deinit();
     const water_m3 = [_]f64{2};
-    const older_salts = [_]f64{1} ** salt_species_count;
-    const canopy_salts = [_]f64{2} ** salt_species_count;
+    const older_salts = @as([salt_species_count]f64, @splat(@as(f64, 1)));
+    const canopy_salts = @as([salt_species_count]f64, @splat(@as(f64, 2)));
     try state.addSurfaceNutrients(0, 5, 3);
     try state.addSurfaceSalts(0, &older_salts);
     try state.addCanopyFireSurfaceNutrients(0, 2, 1);

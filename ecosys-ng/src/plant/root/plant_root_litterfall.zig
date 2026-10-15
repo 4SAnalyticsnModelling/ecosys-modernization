@@ -1,6 +1,7 @@
 const std = @import("std");
 const RootLitter = @import("plant_root_metabolism.zig").RootLitter;
 const SoilOrganic = @import("../../soil/organic/initialization.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const substrate_kind_count: usize = 2;
 pub const kinetic_component_count: usize = 4;
@@ -9,7 +10,7 @@ pub const LayerInput = struct {
     litter: RootLitter = std.mem.zeroes(RootLitter),
 
     pub fn add(self: *LayerInput, litter: RootLitter) !void {
-        inline for (@typeInfo(RootLitter).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(RootLitter)) |field| {
             for (&@field(self.litter, field.name), @field(litter, field.name)) |*total, value| {
                 if (!std.math.isFinite(value) or value < 0) return error.InvalidRootLitterfall;
                 total.* += value;

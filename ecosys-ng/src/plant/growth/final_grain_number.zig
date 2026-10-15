@@ -1,5 +1,6 @@
 const std = @import("std");
 
+
 pub const State = struct { grain_count: []f64 };
 pub const Workspace = struct {
     grain_count: []f64,
@@ -124,8 +125,8 @@ test "runtime branch thirty is supported" {
     input.end_branch = 31;
     input.anthesis_started = &b;
     input.grain_fill_started = &b;
-    input.final_grain_number_set = &([_]bool{false} ** 31);
-    input.maximum_grain_size_set = &([_]bool{false} ** 31);
+    input.final_grain_number_set = &(@as([31]bool, @splat(@as(bool, false))));
+    input.maximum_grain_size_set = &(@as([31]bool, @splat(@as(bool, false))));
     input.mobile_carbon_g_c_per_g_c = &v;
     input.mobile_nitrogen_g_n_per_g_c = &v;
     input.mobile_phosphorus_g_p_per_g_c = &v;

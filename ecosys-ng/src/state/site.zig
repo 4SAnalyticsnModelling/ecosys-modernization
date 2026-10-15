@@ -1,6 +1,7 @@
 const std = @import("std");
 const delimited_input = @import("../io/input/delimited_input.zig");
 
+
 pub const LateralConnectionMode = enum(u8) {
     connected = 1,
     disconnected = 3,
@@ -118,8 +119,8 @@ pub fn parse(allocator: std.mem.Allocator, source: []const u8, east_column: usiz
     } else {
         result.artificial_water_table_depth_m = null;
         result.artificial_water_table_surface_slope = null;
-        result.artificial_water_table_distance_m = [_]f64{0} ** 4;
-        result.artificial_subsurface_exchange_fraction = [_]f64{0} ** 4;
+        result.artificial_water_table_distance_m = @as([4]f64, @splat(@as(f64, 0)));
+        result.artificial_subsurface_exchange_fraction = @as([4]f64, @splat(@as(f64, 0)));
     }
 
     var horizontal_widths = delimited_input.recordTokens(try nextRecord(&records));

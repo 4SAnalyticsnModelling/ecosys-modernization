@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 // DUPLICATE OWNER, do not bind. This is a faithful translation of
 // startq.f 113--285 (CFOPC/CFOPN/CFOPP), but plant/partition/litter.zig is
@@ -67,7 +68,7 @@ pub fn initialize(
 ) InitializationError!void {
     if (output.organ_count < 6) return error.InsufficientOrganCount;
     const component_count = output.component_count;
-    inline for (std.meta.fields(Profiles)) |field| {
+    inline for (ti_compat.fieldViews(Profiles)) |field| {
         if (@field(profiles, field.name).len != component_count) {
             return error.ComponentCountMismatch;
         }
@@ -148,7 +149,7 @@ fn copyOrgan(output: Output, organ: usize, profile: []const f64) void {
 }
 
 fn validateProfiles(profiles: Profiles) InitializationError!void {
-    inline for (std.meta.fields(Profiles)) |field| {
+    inline for (ti_compat.fieldViews(Profiles)) |field| {
         const values = @field(profiles, field.name);
         var sum: f64 = 0.0;
         for (values) |value| {
@@ -293,7 +294,7 @@ test "STARTQ CFOPC agrees with the bound plant/partition/litter owner on every t
         defer owner_state.deinit();
         try owner_state.initializePlant(0, traits, parameters);
         for (0..6) |organ| {
-            const owner = try owner_state.get(0, @enumFromInt(organ));
+            const owner = try owner_state.get(0, @fromBackingInt(@intCast(organ)));
             try std.testing.expectEqualSlices(f64, &owner.carbon, carbon[organ * 4 .. organ * 4 + 4]);
             try std.testing.expectEqualSlices(f64, &owner.nitrogen, nitrogen[organ * 4 .. organ * 4 + 4]);
             try std.testing.expectEqualSlices(f64, &owner.phosphorus, phosphorus[organ * 4 .. organ * 4 + 4]);

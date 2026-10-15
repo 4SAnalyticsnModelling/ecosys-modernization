@@ -15,6 +15,7 @@ const accounting_checkpoint = @import("plant_accounting_checkpoint.zig");
 const GridState = @import("../../state/grid.zig").GridState;
 const PlantState = @import("../../state/grid.zig").PlantState;
 const RootState = @import("../../plant/root/plant_root_system.zig").State;
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const LiveView = struct {
     grid: *const GridState,
@@ -58,7 +59,7 @@ pub fn publish(
     var names: [manifest_module.section_count][]u8 = undefined;
     var name_count: usize = 0;
     defer for (names[0..name_count]) |name| allocator.free(name);
-    inline for (@typeInfo(manifest_module.Section).@"enum".fields, 0..) |field, index| {
+    inline for (ti_compat.enumFieldViews(manifest_module.Section), 0..) |field, index| {
         names[index] = try std.fmt.allocPrint(allocator, "{d}.{s}.bin", .{ generation, field.name });
         name_count += 1;
     }

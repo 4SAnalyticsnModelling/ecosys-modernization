@@ -1,6 +1,8 @@
 const std = @import("std");
 const spatial_grid = @import("../state/spatial_grid.zig");
 const lateral_store = @import("../state/tile_lateral_contribution_store.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const Directions = struct {
     east_m3: []const f64,
@@ -20,7 +22,7 @@ pub const ElementMass = struct {
 
     pub fn add(self: ElementMass, other: ElementMass) !ElementMass {
         var result: ElementMass = undefined;
-        inline for (@typeInfo(ElementMass).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(ElementMass)) |field| {
             const value = @field(self, field.name) + @field(other, field.name);
             if (!std.math.isFinite(value) or value < 0)
                 return error.InvalidSurfaceRunoffElementActivity;
@@ -401,7 +403,7 @@ test "runtime-component carrier is conservative and separates boundary exports" 
         amount.* = @as(f64, @floatFromInt(index + 1));
     var changes: [original.len]f64 = undefined;
     var exports: [original.len]f64 = undefined;
-    const zero = [_]f64{0} ** cell_count;
+    const zero = @as([cell_count]f64, @splat(@as(f64, 0)));
     try calculateChanges(
         3,
         1,
@@ -439,7 +441,7 @@ test "Morton two-pass carrier matches resident routing for eleven runtime compon
     var original: [cell_count * component_count]f64 = undefined;
     for (&original, 0..) |*amount, index|
         amount.* = @as(f64, @floatFromInt(index + 1)) * 0.25;
-    const zero = [_]f64{0} ** cell_count;
+    const zero = @as([cell_count]f64, @splat(@as(f64, 0)));
     const directions = Directions{
         .east_m3 = &.{ 0.5, 0.25, 0.75, 0.5 },
         .west_m3 = &zero,

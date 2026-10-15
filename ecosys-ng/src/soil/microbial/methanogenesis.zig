@@ -1,5 +1,6 @@
 const std = @import("std");
 const anaerobic = @import("anaerobic_growth_respiration.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const AcetotrophicInputs = struct {
     soil_temperature_k: f64,
@@ -121,7 +122,7 @@ pub fn hydrogenotrophic(inputs: HydrogenotrophicInputs, parameters: Hydrogenotro
 }
 
 fn validateStruct(value: anytype, comptime failure: anyerror) !void {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field| if (field.type == f64 and !std.math.isFinite(@field(value, field.name))) return failure;
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field| if (field.type == f64 and !std.math.isFinite(@field(value, field.name))) return failure;
 }
 
 test "acetotrophic methane is half of acetate oxidation" {

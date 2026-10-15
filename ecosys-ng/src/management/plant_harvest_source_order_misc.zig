@@ -13,6 +13,7 @@ const grazing_manure = @import("grazing_manure.zig");
 const __parent = @import("plant_harvest_runtime.zig");
 const group_combustion = @import("plant_harvest_source_order_combustion.zig");
 const group_complete_death = @import("plant_harvest_source_order_complete_death.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 const remainingShootPools = __parent.remainingShootPools;
 pub const scaleElementalMass = __parent.scaleElementalMass;
@@ -69,12 +70,12 @@ pub fn sourceOrderApplyUncombustedShootState(
             branch.c4_intermediate_carbon_g_c < 0 or
             !std.math.isFinite(branch.leaf_area_m2) or branch.leaf_area_m2 < 0)
             return error.InvalidUncombustedShootInput;
-        inline for (@typeInfo(group_combustion.SourceOrderShootCombustionBranchPools).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(group_combustion.SourceOrderShootCombustionBranchPools)) |field| {
             const pool = @field(branch.pools, field.name);
             const loss = @field(burned, field.name);
             try group_complete_death.validateCompleteDeathMass(pool);
             try group_complete_death.validateCompleteDeathMass(loss);
-            inline for (@typeInfo(canopy.ElementalMass).@"struct".fields) |element| {
+            inline for (ti_compat.fieldViews(canopy.ElementalMass)) |element| {
                 const remaining = @field(pool, element.name) - @field(loss, element.name);
                 if (!std.math.isFinite(remaining) or remaining < 0)
                     return error.InvalidUncombustedShootLoss;

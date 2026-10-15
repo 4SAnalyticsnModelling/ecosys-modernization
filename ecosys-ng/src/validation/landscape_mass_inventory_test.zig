@@ -27,6 +27,8 @@ const surface_solute_routing = @import("../soil/solute/surface_solute_routing.zi
 const surface_aqueous = @import("../surface/aqueous_runoff_transport.zig");
 const zone_classification = @import("../soil/solute/charge_classification.zig");
 const landscape_mass_inventory = @import("landscape_mass_inventory.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 fn expectStoragePartition(
     whole: landscape_mass_inventory.Storage,
@@ -34,7 +36,7 @@ fn expectStoragePartition(
 ) !void {
     var sum: landscape_mass_inventory.Storage = .{};
     for (parts) |part| try sum.add(part);
-    inline for (std.meta.fields(landscape_mass_inventory.Storage)) |field| {
+    inline for (ti_compat.fieldViews(landscape_mass_inventory.Storage)) |field| {
         const expected = @field(whole, field.name);
         const actual = @field(sum, field.name);
         try std.testing.expectApproxEqAbs(expected, actual, 1e-10 * @max(1, @abs(expected)));
@@ -49,13 +51,13 @@ test "surface transport inventory counts authoritative complexes and PO4 H3PO4 o
         surface_aqueous.species_count,
     );
     defer state.deinit();
-    state.amount_mol[@intFromEnum(surface_aqueous.Species.calcium_carbonate)] = 2;
-    state.amount_mol[@intFromEnum(surface_aqueous.Species.non_band_iron_hpo4)] = 3;
+    state.amount_mol[@backingInt(surface_aqueous.Species.calcium_carbonate)] = 2;
+    state.amount_mol[@backingInt(surface_aqueous.Species.non_band_iron_hpo4)] = 3;
     // Free cations are mirrored in litter chemistry and must not be counted.
     // PO4 is distinct from the mineral owner's HPO4/H2PO4 and must be counted.
-    state.amount_mol[@intFromEnum(surface_aqueous.Species.calcium)] = 100;
-    state.amount_mol[@intFromEnum(surface_aqueous.Species.non_band_phosphate)] = 100;
-    state.amount_mol[@intFromEnum(surface_aqueous.Species.band_phosphate)] = 100;
+    state.amount_mol[@backingInt(surface_aqueous.Species.calcium)] = 100;
+    state.amount_mol[@backingInt(surface_aqueous.Species.non_band_phosphate)] = 100;
+    state.amount_mol[@backingInt(surface_aqueous.Species.band_phosphate)] = 100;
 
     const result = try landscape_mass_inventory.aggregateSurfaceTransportComplexes(&state, 12, 31);
     try std.testing.expectEqual(@as(f64, 24), result.carbon_dioxide_carbon_g);
@@ -111,17 +113,17 @@ test "REDIST soil inventory uses runtime active layers and all gas phases" {
     for (0..grid.layer_count) |layer| {
         const first = layer * gas.species_count;
         inline for (.{ gas_state.gaseous_mass_g, gas_state.dissolved_mass_g, gas_state.macropore_dissolved_mass_g, gas_state.band_dissolved_mass_g }) |phase| {
-            phase[first + @intFromEnum(gas.Species.carbon_dioxide)] = 1;
-            phase[first + @intFromEnum(gas.Species.methane)] = 2;
-            phase[first + @intFromEnum(gas.Species.oxygen)] = 3;
-            phase[first + @intFromEnum(gas.Species.nitrogen)] = 4;
-            phase[first + @intFromEnum(gas.Species.nitrous_oxide)] = 5;
-            phase[first + @intFromEnum(gas.Species.ammonia)] = 6;
-            phase[first + @intFromEnum(gas.Species.hydrogen)] = 7;
+            phase[first + @backingInt(gas.Species.carbon_dioxide)] = 1;
+            phase[first + @backingInt(gas.Species.methane)] = 2;
+            phase[first + @backingInt(gas.Species.oxygen)] = 3;
+            phase[first + @backingInt(gas.Species.nitrogen)] = 4;
+            phase[first + @backingInt(gas.Species.nitrous_oxide)] = 5;
+            phase[first + @backingInt(gas.Species.ammonia)] = 6;
+            phase[first + @backingInt(gas.Species.hydrogen)] = 7;
         }
     }
-    const dry_heat_capacity = [_]f64{2} ** 6;
-    const volume = [_]f64{0.5} ** 6;
+    const dry_heat_capacity = @as([6]f64, @splat(@as(f64, 2)));
+    const volume = @as([6]f64, @splat(@as(f64, 0.5)));
     const inventory = try landscape_mass_inventory.aggregateSoilPhysicalAndGas(
         &grid,
         &dry_heat_capacity,
@@ -457,13 +459,13 @@ test "REDIST surface physical inventory includes vapor and gas-owned phases" {
     for (0..2) |cell| {
         const first = cell * gas.species_count;
         inline for (.{ gas_state.gaseous_mass_g, gas_state.dissolved_mass_g, gas_state.macropore_dissolved_mass_g, gas_state.band_dissolved_mass_g }) |phase| {
-            phase[first + @intFromEnum(gas.Species.carbon_dioxide)] = 1;
-            phase[first + @intFromEnum(gas.Species.methane)] = 2;
-            phase[first + @intFromEnum(gas.Species.oxygen)] = 3;
-            phase[first + @intFromEnum(gas.Species.nitrogen)] = 4;
-            phase[first + @intFromEnum(gas.Species.nitrous_oxide)] = 5;
-            phase[first + @intFromEnum(gas.Species.ammonia)] = 6;
-            phase[first + @intFromEnum(gas.Species.hydrogen)] = 7;
+            phase[first + @backingInt(gas.Species.carbon_dioxide)] = 1;
+            phase[first + @backingInt(gas.Species.methane)] = 2;
+            phase[first + @backingInt(gas.Species.oxygen)] = 3;
+            phase[first + @backingInt(gas.Species.nitrogen)] = 4;
+            phase[first + @backingInt(gas.Species.nitrous_oxide)] = 5;
+            phase[first + @backingInt(gas.Species.ammonia)] = 6;
+            phase[first + @backingInt(gas.Species.hydrogen)] = 7;
         }
     }
     const ice = [_]f64{ 0.5, 0.25 };
@@ -811,10 +813,10 @@ test "REDIST profile mineral nitrogen counts each runtime owner once" {
     for ([_]usize{ 0, 2 }) |profile_cell| {
         const matrix = try transport.matrix.cellAmounts(profile_cell);
         const macropore = try transport.macropore.cellAmounts(profile_cell);
-        matrix[@intFromEnum(mineral_nitrogen.Species.ammonium_non_band)] = 1;
-        macropore[@intFromEnum(mineral_nitrogen.Species.ammonia_band)] = 2;
-        matrix[@intFromEnum(mineral_nitrogen.Species.nitrate_non_band)] = 3;
-        macropore[@intFromEnum(mineral_nitrogen.Species.nitrite_band)] = 4;
+        matrix[@backingInt(mineral_nitrogen.Species.ammonium_non_band)] = 1;
+        macropore[@backingInt(mineral_nitrogen.Species.ammonia_band)] = 2;
+        matrix[@backingInt(mineral_nitrogen.Species.nitrate_non_band)] = 3;
+        macropore[@backingInt(mineral_nitrogen.Species.nitrite_band)] = 4;
         chemistry.cation_exchange_mol_per_megagram[profile_cell]
             .ammonium_non_band = 0.5;
         fertilizer.soil[profile_cell].broadcast_ammonium_mol_n = 5;
@@ -1042,9 +1044,9 @@ test "per-cell organic macropore inventory partitions the global census" {
     grid.active_soil_layer_count[1] = 1;
     var transport = try organic_transport.State.init(std.testing.allocator, grid.layer_count);
     defer transport.deinit();
-    transport.macropore_amount_g[@intFromEnum(organic_transport.Component.dissolved_organic_carbon)] = 2;
+    transport.macropore_amount_g[@backingInt(organic_transport.Component.dissolved_organic_carbon)] = 2;
     const second_cell_base = grid.soil_layer_capacity * organic_transport.component_count;
-    transport.macropore_amount_g[second_cell_base + @intFromEnum(organic_transport.Component.dissolved_organic_nitrogen)] = 3;
+    transport.macropore_amount_g[second_cell_base + @backingInt(organic_transport.Component.dissolved_organic_nitrogen)] = 3;
 
     const whole = try landscape_mass_inventory.aggregateSoilOrganicTransportMacropore(&transport, &grid);
     try expectStoragePartition(whole, &.{

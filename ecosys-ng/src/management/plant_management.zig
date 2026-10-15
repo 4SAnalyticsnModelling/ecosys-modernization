@@ -286,7 +286,7 @@ fn cuttingHeightOrLeafAreaFraction(tokens: anytype, kind: HarvestKind) !f64 {
     if (value >= 0.0) return value;
     // Grazing spends this field on grazer biomass and the clumping-factor
     // reduction of `IHVST=3` is a multiplier, so neither admits the overload.
-    if (@intFromEnum(kind) > @intFromEnum(HarvestKind.above_ground))
+    if (@backingInt(kind) > @backingInt(HarvestKind.above_ground))
         return error.NegativeManagementValue;
     if (@abs(value) > 1.0) return error.InvalidLeafAreaRemovalFraction;
     return value;

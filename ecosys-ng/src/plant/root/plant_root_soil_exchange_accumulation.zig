@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -17,7 +18,7 @@ pub const State = struct {
         const values = try allocator.alloc(f64, try std.math.mul(usize, plant_count, 8));
         @memset(values, 0);
         var result: State = .{ .allocator = allocator, .plant_count = plant_count, .current_carbon_exchange_g_c = undefined, .current_nitrogen_exchange_g_n = undefined, .current_phosphorus_exchange_g_p = undefined, .cumulative_carbon_exchange_g_c = undefined, .cumulative_nitrogen_exchange_g_n = undefined, .cumulative_phosphorus_exchange_g_p = undefined, .cumulative_nitrogen_fixation_g_n = undefined, .cumulative_net_primary_productivity_g_c = undefined };
-        inline for (@typeInfo(State).@"struct".fields, 0..) |field, field_index| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State), 0..) |field, field_index| if (field.type == []f64) {
             const index = field_index - 2;
             @field(result, field.name) = values[index * plant_count .. (index + 1) * plant_count];
         };
@@ -99,20 +100,20 @@ fn calculate(state: *const State, inputs: Inputs, plant: usize) !Next {
         .cumulative_npp = inputs.carbon_balance_g_c[plant] +
             inputs.cumulative_respiration_g_c[plant],
     };
-    inline for (@typeInfo(Next).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(Next)) |field|
         if (!std.math.isFinite(@field(next, field.name)))
             return error.NonFiniteRootSoilExchange;
     return next;
 }
 
 fn validate(state: *const State, inputs: Inputs) !void {
-    inline for (@typeInfo(Inputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const values = @field(inputs, field.name);
         if (values.len != state.plant_count) return error.InvalidRootSoilExchangeDimensions;
         for (values) |value| if (!std.math.isFinite(value))
             return error.NonFiniteRootSoilExchangeInput;
     }
-    inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+    inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
         if (@field(state, field.name).len != state.plant_count)
             return error.InvalidRootSoilExchangeDimensions;
         for (@field(state, field.name)) |value| if (!std.math.isFinite(value))
@@ -173,7 +174,7 @@ test "repeated calls accumulate exchanges but replace current and NPP state_upda
 test "late overflow preserves every current and cumulative state_update" {
     var state = try State.init(std.testing.allocator, 2);
     defer state.deinit();
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64) @memset(@field(state, field.name), 7);
     const huge = std.math.floatMax(f64);
     const inputs: Inputs = .{
@@ -190,7 +191,7 @@ test "late overflow preserves every current and cumulative state_update" {
         .cumulative_respiration_g_c = &.{ 1, 1 },
     };
     try std.testing.expectError(error.NonFiniteRootSoilExchange, accumulate(&state, inputs));
-    inline for (@typeInfo(State).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(State)) |field|
         if (field.type == []f64)
             for (@field(state, field.name)) |value| try std.testing.expectEqual(@as(f64, 7), value);
 }

@@ -8,6 +8,8 @@ const nutrient_speciation = @import("../chemistry/precipitation_nutrient_speciat
 const aqueous_rates = @import("../soil/solute/aqueous_reaction_rates.zig");
 const phosphate_rates = @import("../soil/solute/phosphate_reaction_rates.zig");
 const ZoneFractions = @import("../soil/solute/charge_classification.zig").ZoneFractions;
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const ElementMolarMassesGPerMol = struct {
     nitrogen: f64,
@@ -301,7 +303,7 @@ fn boundaryInputForCell(
 
 fn addBoundaryInput(left: BoundaryInput, right: BoundaryInput) !BoundaryInput {
     var result = left;
-    inline for (std.meta.fields(BoundaryInput)) |field| {
+    inline for (ti_compat.fieldViews(BoundaryInput)) |field| {
         const value = @field(left, field.name) + @field(right, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidSubsurfaceIrrigationChemistryTransaction;
@@ -369,7 +371,7 @@ fn parameterZoneFractions(parameters: Parameters) ZoneFractions {
 
 fn irrigationFractionsAt(source: anytype, layer: usize) !ZoneFractions {
     const fractions = if (comptime @TypeOf(source) == ZoneFractions) source else try source.scienceZoneFractionsForFlatIndex(layer);
-    inline for (@typeInfo(ZoneFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(ZoneFractions)) |field| {
         const value = @field(fractions, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1) return error.InvalidSubsurfaceIrrigationBandFraction;
     }
@@ -421,7 +423,7 @@ fn validate(
         loads.subsurface_dissolved_mass_g.len !=
             try std.math.mul(usize, layer_count, routing.dissolved_species_count))
         return error.SubsurfaceIrrigationChemistryDimensionMismatch;
-    inline for (std.meta.fields(ElementMolarMassesGPerMol)) |field| {
+    inline for (ti_compat.fieldViews(ElementMolarMassesGPerMol)) |field| {
         const value = @field(parameters.molar_mass_g_per_mol, field.name);
         if (!std.math.isFinite(value) or value <= 0)
             return error.InvalidSubsurfaceIrrigationMolarMass;
@@ -582,14 +584,14 @@ test "subsurface nutrient binding preserves runtime band splits and selected lay
     defer nitrogen.deinit();
     try addMineralNitrogen(&loads, &nitrogen, testParameters());
     const first = selected * mineral_nitrogen.species_count;
-    try std.testing.expectApproxEqAbs(@as(f64, 0.75), nitrogen.matrix.amount_mol[first + @intFromEnum(mineral_nitrogen.Species.ammonium_non_band)], 1e-12);
-    try std.testing.expectApproxEqAbs(@as(f64, 0.25), nitrogen.matrix.amount_mol[first + @intFromEnum(mineral_nitrogen.Species.ammonium_band)], 1e-12);
-    try std.testing.expectApproxEqAbs(@as(f64, 1.2), nitrogen.matrix.amount_mol[first + @intFromEnum(mineral_nitrogen.Species.nitrate_non_band)], 1e-12);
-    try std.testing.expectApproxEqAbs(@as(f64, 0.8), nitrogen.matrix.amount_mol[first + @intFromEnum(mineral_nitrogen.Species.nitrate_band)], 1e-12);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.75), nitrogen.matrix.amount_mol[first + @backingInt(mineral_nitrogen.Species.ammonium_non_band)], 1e-12);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.25), nitrogen.matrix.amount_mol[first + @backingInt(mineral_nitrogen.Species.ammonium_band)], 1e-12);
+    try std.testing.expectApproxEqAbs(@as(f64, 1.2), nitrogen.matrix.amount_mol[first + @backingInt(mineral_nitrogen.Species.nitrate_non_band)], 1e-12);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.8), nitrogen.matrix.amount_mol[first + @backingInt(mineral_nitrogen.Species.nitrate_band)], 1e-12);
 
     var chemistry_state = try chemistry.State.init(std.testing.allocator, 7);
     defer chemistry_state.deinit();
-    const water = [_]f64{1} ** 7;
+    const water = @as([7]f64, @splat(@as(f64, 1)));
     try addPhosphate(&loads, &chemistry_state, &water, testParameters());
     try std.testing.expectApproxEqAbs(
         @as(f64, 1),
@@ -614,7 +616,7 @@ test "subsurface nutrient binding preserves runtime band splits and selected lay
             @as(f64, 0),
             nitrogen.matrix.amount_mol[
                 layer * mineral_nitrogen.species_count +
-                    @intFromEnum(mineral_nitrogen.Species.ammonium_non_band)
+                    @backingInt(mineral_nitrogen.Species.ammonium_non_band)
             ],
         );
     }

@@ -2,6 +2,7 @@ const std = @import("std");
 const ion_pairing = @import("ion_pairing.zig");
 const aqueous_network = @import("aqueous_network.zig");
 const activity_coefficients = @import("activity_coefficients.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const EquilibriumConstants = struct {
     ammonium: f64,
@@ -83,12 +84,12 @@ pub fn calculateRestrictedAmmoniumSourceOrder(
     input: RestrictedAmmoniumInputs,
     water: AmmoniumZoneWaterAdmission,
 ) !RestrictedAmmoniumFluxes {
-    inline for (@typeInfo(RestrictedAmmoniumInputs).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RestrictedAmmoniumInputs)) |field| {
         const value = @field(input, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidRestrictedAmmoniumInput;
     }
-    inline for (@typeInfo(AmmoniumZoneWaterAdmission).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(AmmoniumZoneWaterAdmission)) |field| {
         const value = @field(water, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidAmmoniumZoneWaterAdmission;
@@ -214,7 +215,7 @@ pub fn calculateSourceOrderForWaterVolumes(
     kinetics: Kinetics,
     water: AmmoniumZoneWaterAdmission,
 ) !aqueous_network.Fluxes {
-    inline for (@typeInfo(AmmoniumZoneWaterAdmission).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(AmmoniumZoneWaterAdmission)) |field| {
         const value = @field(water, field.name);
         if (!std.math.isFinite(value) or value < 0)
             return error.InvalidAmmoniumZoneWaterAdmission;
@@ -238,16 +239,16 @@ fn reaction(free_first: f64, free_second: f64, paired: f64, first_activity: f64,
 }
 
 fn validate(state: aqueous_network.State, coefficients: activity_coefficients.Result, constants: EquilibriumConstants, kinetics: Kinetics) !void {
-    inline for (@typeInfo(aqueous_network.State).@"struct".fields) |field| if (!std.math.isFinite(@field(state, field.name)) or @field(state, field.name) < 0) return error.InvalidAqueousReactionState;
+    inline for (ti_compat.fieldViews(aqueous_network.State)) |field| if (!std.math.isFinite(@field(state, field.name)) or @field(state, field.name) < 0) return error.InvalidAqueousReactionState;
     if (!std.math.isFinite(coefficients.monovalent_activity_coefficient) or coefficients.monovalent_activity_coefficient <= 0 or !std.math.isFinite(coefficients.divalent_activity_coefficient) or coefficients.divalent_activity_coefficient <= 0 or !std.math.isFinite(coefficients.trivalent_activity_coefficient) or coefficients.trivalent_activity_coefficient <= 0) return error.InvalidActivityCoefficient;
-    inline for (@typeInfo(EquilibriumConstants).@"struct".fields) |field| if (!std.math.isFinite(@field(constants, field.name)) or @field(constants, field.name) < 0) return error.InvalidAqueousEquilibriumConstant;
-    inline for (@typeInfo(Kinetics).@"struct".fields) |field| if (!std.math.isFinite(@field(kinetics, field.name)) or @field(kinetics, field.name) < 0) return error.InvalidAqueousKinetics;
+    inline for (ti_compat.fieldViews(EquilibriumConstants)) |field| if (!std.math.isFinite(@field(constants, field.name)) or @field(constants, field.name) < 0) return error.InvalidAqueousEquilibriumConstant;
+    inline for (ti_compat.fieldViews(Kinetics)) |field| if (!std.math.isFinite(@field(kinetics, field.name)) or @field(kinetics, field.name) < 0) return error.InvalidAqueousKinetics;
     if (kinetics.ammonium_substrate_limit_fraction > 1 or kinetics.general_substrate_limit_fraction > 1) return error.InvalidAqueousKinetics;
 }
 
 fn filled(comptime T: type, value: f64) T {
     var result: T = undefined;
-    inline for (@typeInfo(T).@"struct".fields) |field| @field(result, field.name) = value;
+    inline for (ti_compat.fieldViews(T)) |field| @field(result, field.name) = value;
     return result;
 }
 
@@ -287,7 +288,7 @@ test "all aqueous reactions are at equilibrium for unit activities and constants
     const state = filled(aqueous_network.State, 1);
     const coefficients = activity_coefficients.Result{ .ionic_strength_mol_per_l = 0, .monovalent_activity_coefficient = 1, .divalent_activity_coefficient = 1, .trivalent_activity_coefficient = 1, .total_ion_activity_mol_per_m3 = 1, .electrical_conductivity_dS_per_m = 0 };
     const fluxes = try calculate(state, coefficients, filled(EquilibriumConstants, 1), .{ .ammonium_substrate_limit_fraction = 0.2, .general_substrate_limit_fraction = 0.2, .maximum_fast_association_mol_per_m3_step = 0.1, .maximum_slow_association_mol_per_m3_step = 0.1 });
-    inline for (@typeInfo(aqueous_network.Fluxes).@"struct".fields) |field| try std.testing.expectApproxEqAbs(@as(f64, 0), @field(fluxes, field.name), 1e-15);
+    inline for (ti_compat.fieldViews(aqueous_network.Fluxes)) |field| try std.testing.expectApproxEqAbs(@as(f64, 0), @field(fluxes, field.name), 1e-15);
 }
 
 test "aqueous rate evaluator feeds conservative transformation ledger" {
@@ -302,13 +303,13 @@ test "aqueous rate evaluator feeds conservative transformation ledger" {
 test "aqueous evaluator matches every SOLUTE source pairing equation" {
     var state: aqueous_network.State = undefined;
     var state_value: f64 = 0.2;
-    inline for (@typeInfo(aqueous_network.State).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(aqueous_network.State)) |field| {
         @field(state, field.name) = state_value;
         state_value += 0.037;
     }
     var constants: EquilibriumConstants = undefined;
     var constant_value: f64 = 0.1;
-    inline for (@typeInfo(EquilibriumConstants).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(EquilibriumConstants)) |field| {
         @field(constants, field.name) = constant_value;
         constant_value += 0.013;
     }

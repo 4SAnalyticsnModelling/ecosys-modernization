@@ -7,6 +7,8 @@
 const std = @import("std");
 const ions_module = @import("../surface/litter_ion_transport_senescence_apply.zig");
 const overland = @import("../surface/overland_flow_litter_salt_update.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
+
 
 pub const Species = overland.Species;
 
@@ -122,7 +124,7 @@ fn boundaryIonExportCell(amounts: []const f64) !f64 {
         if (!std.math.isFinite(amount) or amount < 0)
             return error.InvalidLitterSaltBoundaryExport;
         if (species_index < overland.legacy_surface_species_count) {
-            total += amount * try aqueousIonCount(@enumFromInt(species_index));
+            total += amount * try aqueousIonCount(@fromBackingInt(@intCast(species_index)));
             if (!std.math.isFinite(total))
                 return error.InvalidLitterSaltBoundaryExport;
         } else if (amount != 0) return error.DedicatedSurfaceSpeciesInGenericSaltExport;
@@ -151,7 +153,7 @@ pub fn accumulateAcceptedBoundary(
 }
 
 fn validate(value: anytype) !void {
-    inline for (@typeInfo(@TypeOf(value)).@"struct".fields) |field|
+    inline for (ti_compat.fieldViews(@TypeOf(value))) |field|
         if (!std.math.isFinite(@field(value, field.name))) return error.InvalidLitterSaltInventoryInput;
 }
 
@@ -221,7 +223,7 @@ test "REDIST daily litter salt gate and failures" {
 
 test "accepted boundary census covers all 42 legacy coordinates exactly" {
     const stride = Species.count;
-    var boundary = [_]f64{0} ** stride;
+    var boundary = @as([stride]f64, @splat(@as(f64, 0)));
     for (0..overland.legacy_surface_species_count) |species_index|
         boundary[species_index] = 1;
     var output = [_]f64{0};
@@ -229,7 +231,7 @@ test "accepted boundary census covers all 42 legacy coordinates exactly" {
     try std.testing.expectEqual(@as(f64, 97), output[0]);
 
     const before = output;
-    boundary[@intFromEnum(Species.non_band_hpo4)] = 1;
+    boundary[@backingInt(Species.non_band_hpo4)] = 1;
     try std.testing.expectError(
         error.DedicatedSurfaceSpeciesInGenericSaltExport,
         boundaryIonExportByCell(&boundary, 1, stride, &output),

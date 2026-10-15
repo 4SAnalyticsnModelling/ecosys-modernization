@@ -1,0 +1,2 @@
+src/core/typeinfo_compat.zig
+src/erosion/transport_accumulator_reset.zig

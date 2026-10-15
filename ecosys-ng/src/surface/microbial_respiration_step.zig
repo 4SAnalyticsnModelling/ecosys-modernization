@@ -4,6 +4,8 @@ const organic = @import("../soil/organic/initialization.zig");
 const respiration = @import("../soil/microbial/respiration_activity.zig");
 const gas = @import("../soil/gas/transport.zig");
 const metabolism = @import("../soil/microbial/metabolism.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const litter_complex_count: usize = 3;
 pub const source_population_count: usize = organic.microbial_population_count;
@@ -26,11 +28,11 @@ pub const State = struct {
         result.allocator = allocator;
         result.cell_count = cell_count;
         var allocated: usize = 0;
-        errdefer inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 and allocated > 0) {
+        errdefer inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 and allocated > 0) {
             allocated -= 1;
             allocator.free(@field(result, field.name));
         };
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -39,7 +41,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -224,8 +226,8 @@ test "surface respiration tile retains separate DOC acetate demand and O2 potent
     state.potential_oxygen_demand_g_o[0] = 7;
     var litter_gas = try gas.State.init(std.testing.allocator, 1);
     defer litter_gas.deinit();
-    const populations = [_]respiration.PopulationParameters{.{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0.125 }} ** source_population_count;
-    var context: ApplyContext = .{ .result = &state, .surface_organic = &organic_state, .biologically_active_water_m3 = &.{1}, .growth_temperature_response = &.{1}, .matric_plus_osmotic_potential_megapascal = &.{0}, .litter_gas = &litter_gas, .litter_water_m3 = &.{1}, .timestep_h = 1, .parameters = .{ .populations = populations, .target_nitrogen_per_carbon_g_n_per_g_c = .{0.1} ** unit_count_per_cell, .target_phosphorus_per_carbon_g_p_per_g_c = .{0.01} ** unit_count_per_cell, .doc_respiration_requirement_g_c_per_g_c = .{0.5} ** source_population_count, .acetate_respiration_requirement_g_c_per_g_c = .{0.25} ** source_population_count, .labile_biomass_fraction = 0.55, .doc_half_saturation_g_c_per_m3 = 12, .acetate_half_saturation_g_c_per_m3 = 12, .minimum_competition_fraction = 0.001, .specific_maintenance_respiration_g_c_per_g_n_per_h = 0.01, .decomposition_density_half_saturation_g_c_per_g_c = 0.01, .maintenance_density_half_saturation_g_c_per_g_c = 1e-6, .acidity_half_response_mol_per_m3 = 1, .nitrogen_fixation_yield_g_n_per_g_c = .{0} ** source_population_count, .dinitrogen_half_saturation_g_n_per_m3 = 0.14, .nonstructural_to_structural_rate_per_h = 0.25, .denitrification_growth_respiration_requirement_g_c_per_g_c = 0.7142857142857143 } };
+    const populations = @as([source_population_count]respiration.PopulationParameters, @splat(@as(respiration.PopulationParameters, .{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0.125 })));
+    var context: ApplyContext = .{ .result = &state, .surface_organic = &organic_state, .biologically_active_water_m3 = &.{1}, .growth_temperature_response = &.{1}, .matric_plus_osmotic_potential_megapascal = &.{0}, .litter_gas = &litter_gas, .litter_water_m3 = &.{1}, .timestep_h = 1, .parameters = .{ .populations = populations, .target_nitrogen_per_carbon_g_n_per_g_c = @splat(0.1), .target_phosphorus_per_carbon_g_p_per_g_c = @splat(0.01), .doc_respiration_requirement_g_c_per_g_c = @splat(0.5), .acetate_respiration_requirement_g_c_per_g_c = @splat(0.25), .labile_biomass_fraction = 0.55, .doc_half_saturation_g_c_per_m3 = 12, .acetate_half_saturation_g_c_per_m3 = 12, .minimum_competition_fraction = 0.001, .specific_maintenance_respiration_g_c_per_g_n_per_h = 0.01, .decomposition_density_half_saturation_g_c_per_g_c = 0.01, .maintenance_density_half_saturation_g_c_per_g_c = 1e-6, .acidity_half_response_mol_per_m3 = 1, .nitrogen_fixation_yield_g_n_per_g_c = @splat(0), .dinitrogen_half_saturation_g_n_per_m3 = 0.14, .nonstructural_to_structural_rate_per_h = 0.25, .denitrification_growth_respiration_requirement_g_c_per_g_c = 0.7142857142857143 } };
     context.parameters.denitrification_growth_respiration_requirement_g_c_per_g_c = 0.7142857142857143;
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(state.unlimited_respiration_g_c[0] > 0);
@@ -247,10 +249,10 @@ test "surface anaerobic populations retain demand history without oxygen demand"
     defer state.deinit();
     var litter_gas = try gas.State.init(std.testing.allocator, 1);
     defer litter_gas.deinit();
-    var populations = [_]respiration.PopulationParameters{.{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 }} ** source_population_count;
+    var populations = @as([source_population_count]respiration.PopulationParameters, @splat(@as(respiration.PopulationParameters, .{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 })));
     populations[0] = .{ .metabolism = .fermenting_heterotroph, .substrate_unlimited_respiration_per_h = 0.125 };
     populations[4] = .{ .metabolism = .acetotrophic_methanogen, .substrate_unlimited_respiration_per_h = 0.125 };
-    var context: ApplyContext = .{ .result = &state, .surface_organic = &organic_state, .biologically_active_water_m3 = &.{1}, .growth_temperature_response = &.{1}, .matric_plus_osmotic_potential_megapascal = &.{0}, .litter_gas = &litter_gas, .litter_water_m3 = &.{1}, .timestep_h = 1, .parameters = .{ .populations = populations, .target_nitrogen_per_carbon_g_n_per_g_c = .{0.1} ** unit_count_per_cell, .target_phosphorus_per_carbon_g_p_per_g_c = .{0.01} ** unit_count_per_cell, .doc_respiration_requirement_g_c_per_g_c = .{0.5} ** source_population_count, .acetate_respiration_requirement_g_c_per_g_c = .{0.25} ** source_population_count, .labile_biomass_fraction = 0.55, .doc_half_saturation_g_c_per_m3 = 12, .acetate_half_saturation_g_c_per_m3 = 12, .minimum_competition_fraction = 0.001, .specific_maintenance_respiration_g_c_per_g_n_per_h = 0.01, .decomposition_density_half_saturation_g_c_per_g_c = 0.01, .maintenance_density_half_saturation_g_c_per_g_c = 1e-6, .acidity_half_response_mol_per_m3 = 1, .nitrogen_fixation_yield_g_n_per_g_c = .{0} ** source_population_count, .dinitrogen_half_saturation_g_n_per_m3 = 0.14, .nonstructural_to_structural_rate_per_h = 0.25, .denitrification_growth_respiration_requirement_g_c_per_g_c = 0.7142857142857143 } };
+    var context: ApplyContext = .{ .result = &state, .surface_organic = &organic_state, .biologically_active_water_m3 = &.{1}, .growth_temperature_response = &.{1}, .matric_plus_osmotic_potential_megapascal = &.{0}, .litter_gas = &litter_gas, .litter_water_m3 = &.{1}, .timestep_h = 1, .parameters = .{ .populations = populations, .target_nitrogen_per_carbon_g_n_per_g_c = @splat(0.1), .target_phosphorus_per_carbon_g_p_per_g_c = @splat(0.01), .doc_respiration_requirement_g_c_per_g_c = @splat(0.5), .acetate_respiration_requirement_g_c_per_g_c = @splat(0.25), .labile_biomass_fraction = 0.55, .doc_half_saturation_g_c_per_m3 = 12, .acetate_half_saturation_g_c_per_m3 = 12, .minimum_competition_fraction = 0.001, .specific_maintenance_respiration_g_c_per_g_n_per_h = 0.01, .decomposition_density_half_saturation_g_c_per_g_c = 0.01, .maintenance_density_half_saturation_g_c_per_g_c = 1e-6, .acidity_half_response_mol_per_m3 = 1, .nitrogen_fixation_yield_g_n_per_g_c = @splat(0), .dinitrogen_half_saturation_g_n_per_m3 = 0.14, .nonstructural_to_structural_rate_per_h = 0.25, .denitrification_growth_respiration_requirement_g_c_per_g_c = 0.7142857142857143 } };
     context.parameters.denitrification_growth_respiration_requirement_g_c_per_g_c = 0.7142857142857143;
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(state.unlimited_respiration_g_c[0] > 0);
@@ -274,9 +276,9 @@ test "NITRO 325 OXYI suppresses surface-litter fermentation toward zero as aqueo
     organic_state.adsorbed[0].carbon_g_c = 1;
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    var populations = [_]respiration.PopulationParameters{.{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 }} ** source_population_count;
+    var populations = @as([source_population_count]respiration.PopulationParameters, @splat(@as(respiration.PopulationParameters, .{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 })));
     populations[0] = .{ .metabolism = .fermenting_heterotroph, .substrate_unlimited_respiration_per_h = 0.125 };
-    const parameters: Parameters = .{ .populations = populations, .target_nitrogen_per_carbon_g_n_per_g_c = .{0.1} ** unit_count_per_cell, .target_phosphorus_per_carbon_g_p_per_g_c = .{0.01} ** unit_count_per_cell, .doc_respiration_requirement_g_c_per_g_c = .{0.5} ** source_population_count, .acetate_respiration_requirement_g_c_per_g_c = .{0.25} ** source_population_count, .labile_biomass_fraction = 0.55, .doc_half_saturation_g_c_per_m3 = 12, .acetate_half_saturation_g_c_per_m3 = 12, .minimum_competition_fraction = 0.001, .specific_maintenance_respiration_g_c_per_g_n_per_h = 0.01, .decomposition_density_half_saturation_g_c_per_g_c = 0.01, .maintenance_density_half_saturation_g_c_per_g_c = 1e-6, .acidity_half_response_mol_per_m3 = 1, .nitrogen_fixation_yield_g_n_per_g_c = .{0} ** source_population_count, .dinitrogen_half_saturation_g_n_per_m3 = 0.14, .nonstructural_to_structural_rate_per_h = 0.25, .denitrification_growth_respiration_requirement_g_c_per_g_c = 0.7142857142857143 };
+    const parameters: Parameters = .{ .populations = populations, .target_nitrogen_per_carbon_g_n_per_g_c = @splat(0.1), .target_phosphorus_per_carbon_g_p_per_g_c = @splat(0.01), .doc_respiration_requirement_g_c_per_g_c = @splat(0.5), .acetate_respiration_requirement_g_c_per_g_c = @splat(0.25), .labile_biomass_fraction = 0.55, .doc_half_saturation_g_c_per_m3 = 12, .acetate_half_saturation_g_c_per_m3 = 12, .minimum_competition_fraction = 0.001, .specific_maintenance_respiration_g_c_per_g_n_per_h = 0.01, .decomposition_density_half_saturation_g_c_per_g_c = 0.01, .maintenance_density_half_saturation_g_c_per_g_c = 1e-6, .acidity_half_response_mol_per_m3 = 1, .nitrogen_fixation_yield_g_n_per_g_c = @splat(0), .dinitrogen_half_saturation_g_n_per_m3 = 0.14, .nonstructural_to_structural_rate_per_h = 0.25, .denitrification_growth_respiration_requirement_g_c_per_g_c = 0.7142857142857143 };
 
     var anoxic_gas = try gas.State.init(std.testing.allocator, 1);
     defer anoxic_gas.deinit();

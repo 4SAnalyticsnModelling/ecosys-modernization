@@ -3,6 +3,7 @@ const compute = @import("../core/compute.zig");
 const CellRange = compute.CellRange;
 const spatial_grid = @import("../state/spatial_grid.zig");
 const HourlyForcing = @import("../io/input/weather.zig").HourlyForcing;
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 /// Heap-backed structure-of-arrays boundary between streamed weather and
 /// per-cell surface/canopy kernels.
@@ -76,7 +77,7 @@ pub const State = struct {
     }
 
     pub fn validateFinite(self: State) !void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             for (@field(self, field.name), 0..) |value, index| if (!std.math.isFinite(value)) {
                 std.log.err("non-finite atmospheric state: field={s} cell={d} value={e}", .{ field.name, index, value });
                 return error.NonFiniteAtmosphericState;
@@ -95,7 +96,7 @@ pub const MappedApplyContext = struct {
 /// dispatch because it performs no allocation, file I/O, or synchronization.
 pub fn applyUniformTile(context: *ApplyContext, range: CellRange) !void {
     const forcing = context.forcing;
-    inline for (@typeInfo(HourlyForcing).@"struct".fields) |field| if (field.type == f64) {
+    inline for (ti_compat.fieldViews(HourlyForcing)) |field| if (field.type == f64) {
         if (!std.math.isFinite(@field(forcing, field.name))) return error.NonFiniteWeatherForcing;
     };
     if (forcing.air_temperature_c < -273.15 or forcing.vapor_pressure_kpa < 0 or forcing.precipitation_m < 0 or forcing.rainfall_m < 0 or forcing.snowfall_water_equivalent_m < 0 or @abs(forcing.precipitation_m - forcing.rainfall_m - forcing.snowfall_water_equivalent_m) > 1.0e-12 or forcing.shortwave_radiation_megajoules_per_m2 < 0 or forcing.wind_speed_m_per_h < 0) return error.InvalidWeatherForcing;
@@ -118,7 +119,7 @@ pub fn applyMappedTile(context: *MappedApplyContext, range: CellRange) !void {
         range.end > context.state.cell_count) return error.AtmosphericTileOutOfBounds;
     for (range.first..range.end) |cell| {
         const forcing = context.forcing_by_cell[cell];
-        inline for (@typeInfo(HourlyForcing).@"struct".fields) |field| {
+        inline for (ti_compat.fieldViews(HourlyForcing)) |field| {
             if (field.type == f64 and !std.math.isFinite(@field(forcing, field.name)))
                 return error.NonFiniteWeatherForcing;
         }

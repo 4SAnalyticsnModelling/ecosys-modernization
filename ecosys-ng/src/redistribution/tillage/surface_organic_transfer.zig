@@ -24,6 +24,7 @@
 const std = @import("std");
 const soluble_module = @import("../surface/litter_soluble_removal.zig");
 const som_module = @import("../surface/litter_som_removal.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Totals = struct {
     remaining_carbon_g_c: f64, // DC
@@ -63,7 +64,7 @@ fn finiteNonnegative(values: []const f64) bool {
     return true;
 }
 fn validateTotals(t: Totals) !void {
-    inline for (std.meta.fields(Totals)) |field|
+    inline for (ti_compat.fieldViews(Totals)) |field|
         if (!std.math.isFinite(@field(t, field.name))) return error.NonFiniteTillageSurfaceOrganicTransferResult;
 }
 
@@ -74,13 +75,13 @@ pub fn transfer(surface_remaining_fraction: f64, pools: Pools, workspace: Worksp
         workspace.residue_carbon_g_c.len != 6 or workspace.residue_nitrogen_g_n.len != 6 or workspace.residue_phosphorus_g_p.len != 6 or
         workspace.soluble_by_pool_and_fraction.len != 36 or workspace.som_by_pool_m_and_fraction.len != 60)
         return error.TillageSurfaceOrganicTransferDimensionMismatch;
-    inline for (std.meta.fields(soluble_module.Pools)) |field| {
+    inline for (ti_compat.fieldViews(soluble_module.Pools)) |field| {
         const values = @field(pools.soluble, field.name);
         const expected = if (std.mem.startsWith(u8, field.name, "residue_")) 6 * layers else 3 * layers;
         if (values.len != expected) return error.TillageSurfaceOrganicTransferDimensionMismatch;
         if (!finiteNonnegative(values)) return error.InvalidTillageSurfaceOrganicTransferInput;
     }
-    inline for (std.meta.fields(som_module.Pools)) |field| {
+    inline for (ti_compat.fieldViews(som_module.Pools)) |field| {
         if (comptime std.mem.eql(u8, field.name, "layer_count")) continue;
         const values = @field(pools.som, field.name);
         if (values.len != 15 * layers) return error.TillageSurfaceOrganicTransferDimensionMismatch;

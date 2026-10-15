@@ -6,6 +6,8 @@ const respiration = @import("microbial_respiration_step.zig");
 const oxygen = @import("microbial_oxygen_driver.zig");
 const maintenance = @import("microbial_maintenance_step.zig");
 const fixation = @import("nonsymbiotic_nitrogen_fixation_step.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const State = struct {
     allocator: std.mem.Allocator,
@@ -26,11 +28,11 @@ pub const State = struct {
         result.allocator = allocator;
         result.cell_count = cell_count;
         var allocated: usize = 0;
-        errdefer inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 and allocated > 0) {
+        errdefer inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 and allocated > 0) {
             allocated -= 1;
             allocator.free(@field(result, field.name));
         };
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -39,7 +41,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -195,12 +197,12 @@ test "surface substrate uptake reproduces CGOQC CGOAC and CGROMC" {
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
     var parameters: respiration.Parameters = undefined;
-    parameters.populations = [_]@import("../soil/microbial/respiration_activity.zig").PopulationParameters{.{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 }} ** respiration.source_population_count;
+    parameters.populations = @as([respiration.source_population_count]@import("../soil/microbial/respiration_activity.zig").PopulationParameters, @splat(@as(@import("../soil/microbial/respiration_activity.zig").PopulationParameters, .{ .metabolism = .aerobic_heterotroph, .substrate_unlimited_respiration_per_h = 0 })));
     parameters.labile_biomass_fraction = 0.55;
-    parameters.target_nitrogen_per_carbon_g_n_per_g_c = .{0.1} ** respiration.unit_count_per_cell;
-    parameters.target_phosphorus_per_carbon_g_p_per_g_c = .{0.01} ** respiration.unit_count_per_cell;
-    parameters.doc_respiration_requirement_g_c_per_g_c = .{0.5} ** respiration.source_population_count;
-    parameters.acetate_respiration_requirement_g_c_per_g_c = .{0.25} ** respiration.source_population_count;
+    parameters.target_nitrogen_per_carbon_g_n_per_g_c = @splat(0.1);
+    parameters.target_phosphorus_per_carbon_g_p_per_g_c = @splat(0.01);
+    parameters.doc_respiration_requirement_g_c_per_g_c = @splat(0.5);
+    parameters.acetate_respiration_requirement_g_c_per_g_c = @splat(0.25);
     var context: ApplyContext = .{ .result = &state, .surface_organic = &organic_state, .respiration = &respiration_state, .oxygen = &oxygen_state, .maintenance = &maintenance_state, .nitrogen_fixation = &fixation_state, .parameters = parameters, .denitrification_growth_respiration_requirement_g_c_per_g_c = 1.0 / (1.0 + 10.0 / 25.0) };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(state.total_carbon_uptake_g_c[0] > 0.2);

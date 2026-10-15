@@ -21,6 +21,7 @@
 //! comparison oracle for the range above. Full argument and the census behind
 //! it: `docs/traceability/hour1_2039_5200_binding_survey.md`.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const SolubilitiesAt25C = struct {
     carbon_dioxide_ratio: f64,
@@ -76,12 +77,12 @@ pub fn calculate(
     }
     if (total_ion_activity_mol_m3 < 0.0) return error.NegativeIonActivity;
     if (soil_temperature_c <= -273.15) return error.InvalidSoilTemperature;
-    inline for (std.meta.fields(SolubilitiesAt25C)) |field| {
+    inline for (ti_compat.fieldViews(SolubilitiesAt25C)) |field| {
         const value = @field(base, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteInput;
         if (value < 0.0) return error.NegativeSolubility;
     }
-    inline for (std.meta.fields(Activities)) |field| {
+    inline for (ti_compat.fieldViews(Activities)) |field| {
         if (!std.math.isFinite(@field(activity, field.name))) {
             return error.NonFiniteInput;
         }
@@ -108,7 +109,7 @@ pub fn calculate(
         .hydrogen_ratio = base.hydrogen_ratio / @exp(activity.hydrogen) *
             @exp(0.597 - 0.0199 * soil_temperature_c) * water_solute_fraction,
     };
-    inline for (std.meta.fields(Result)) |field| {
+    inline for (ti_compat.fieldViews(Result)) |field| {
         const value = @field(result, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteResult;
         if (value < 0.0) return error.NegativeSolubility;

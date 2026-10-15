@@ -23,6 +23,7 @@
 //! comparison oracle for the range above. Full argument and the census behind
 //! it: `docs/traceability/hour1_2039_5200_binding_survey.md`.
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Inputs = struct {
     cell_width_x_m: f64,
@@ -64,7 +65,7 @@ pub const CalculationError = error{
 
 /// Translates `hour1.f` lines 3596--3622 in source operation order.
 pub fn calculate(inputs: Inputs) CalculationError!Result {
-    inline for (std.meta.fields(Inputs)) |field| {
+    inline for (ti_compat.fieldViews(Inputs)) |field| {
         const value = @field(inputs, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteInput;
         if (value < 0.0) return error.NegativeInput;
@@ -141,7 +142,7 @@ pub fn calculate(inputs: Inputs) CalculationError!Result {
         .pore_air_fraction_m3_m3 = pore_air_fraction_m3_m3,
         .total_air_fraction_m3_m3 = total_air_fraction_m3_m3,
     };
-    inline for (std.meta.fields(Result)) |field| {
+    inline for (ti_compat.fieldViews(Result)) |field| {
         if (!std.math.isFinite(@field(result, field.name))) return error.NonFiniteResult;
     }
     return result;

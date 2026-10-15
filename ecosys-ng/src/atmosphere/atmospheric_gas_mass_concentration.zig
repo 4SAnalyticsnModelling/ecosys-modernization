@@ -11,6 +11,7 @@
 // transport consumers read this hourly mass carrier directly.
 
 const std = @import("std");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const MixingRatios = struct {
     carbon_dioxide_umol_mol: f64,
@@ -45,7 +46,7 @@ pub fn convert(
     mixing_ratios: MixingRatios,
     canopy_air_temperature_k: f64,
 ) ConversionError!MassConcentrations {
-    inline for (std.meta.fields(MixingRatios)) |field| {
+    inline for (ti_compat.fieldViews(MixingRatios)) |field| {
         const value = @field(mixing_ratios, field.name);
         if (!std.math.isFinite(value)) return error.NonFiniteInput;
         if (value < 0.0) return error.InvalidMixingRatio;
@@ -69,7 +70,7 @@ pub fn convert(
         .hydrogen_g_m3 = mixing_ratios.hydrogen_umol_mol *
             8.92e-5 * 273.15 / canopy_air_temperature_k,
     };
-    inline for (std.meta.fields(MassConcentrations)) |field| {
+    inline for (ti_compat.fieldViews(MassConcentrations)) |field| {
         if (!std.math.isFinite(@field(concentrations, field.name))) {
             return error.NonFiniteResult;
         }

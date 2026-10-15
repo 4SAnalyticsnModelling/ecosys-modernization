@@ -6,6 +6,7 @@
 const std = @import("std");
 const ecosys = @import("ecosys_ng");
 const diagnostics = @import("diagnostics.zig");
+const ti_compat = @import("ecosys_ng").typeinfo_compat;
 
 /// Owns the short-lived slices used by one hourly chemistry invocation.
 ///
@@ -579,8 +580,8 @@ noinline fn solveHourlyReactionLayer(
                 backtracks.max_attempts,
             },
         );
-        inline for (@typeInfo(ecosys.solute_reaction_solver.DiagnosticStrategy).@"enum".fields) |field| {
-            const strategy: ecosys.solute_reaction_solver.DiagnosticStrategy = @enumFromInt(field.value);
+        inline for (ti_compat.enumFieldViews(ecosys.solute_reaction_solver.DiagnosticStrategy)) |field| {
+            const strategy: ecosys.solute_reaction_solver.DiagnosticStrategy = @fromBackingInt(@intCast(field.value));
             const evaluations = ecosys.solute_reaction_solver.diagnosticStrategyEvaluationCounts(strategy);
             const calls = ecosys.solute_reaction_solver.diagnosticStrategyCallCount(strategy);
             if (calls != 0 or evaluations.full_network != 0 or evaluations.reaction_span != 0)
@@ -589,8 +590,8 @@ noinline fn solveHourlyReactionLayer(
                     .{ cell, layer_within_cell, field.name, calls, evaluations.full_network, evaluations.reaction_span },
                 );
         }
-        inline for (@typeInfo(ecosys.solute_reaction_solver.DiagnosticSelectedCandidate).@"enum".fields) |field| {
-            const candidate: ecosys.solute_reaction_solver.DiagnosticSelectedCandidate = @enumFromInt(field.value);
+        inline for (ti_compat.enumFieldViews(ecosys.solute_reaction_solver.DiagnosticSelectedCandidate)) |field| {
+            const candidate: ecosys.solute_reaction_solver.DiagnosticSelectedCandidate = @fromBackingInt(@intCast(field.value));
             const count = ecosys.solute_reaction_solver.diagnosticSelectedCandidateCount(candidate);
             if (count != 0)
                 std.log.info(
@@ -598,8 +599,8 @@ noinline fn solveHourlyReactionLayer(
                     .{ cell, layer_within_cell, field.name, count },
                 );
         }
-        inline for (@typeInfo(ecosys.solute_reaction_solver.DiagnosticReactionSpanBoundsSite).@"enum".fields) |field| {
-            const site: ecosys.solute_reaction_solver.DiagnosticReactionSpanBoundsSite = @enumFromInt(field.value);
+        inline for (ti_compat.enumFieldViews(ecosys.solute_reaction_solver.DiagnosticReactionSpanBoundsSite)) |field| {
+            const site: ecosys.solute_reaction_solver.DiagnosticReactionSpanBoundsSite = @fromBackingInt(@intCast(field.value));
             const site_stats = ecosys.solute_reaction_solver.diagnosticReactionSpanBoundsSiteStats(site);
             if (site_stats.calls != 0 or site_stats.reaction_span_evaluations != 0)
                 std.log.info(

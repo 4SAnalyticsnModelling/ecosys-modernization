@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Elements = struct { carbon: f64, nitrogen: f64, phosphorus: f64 };
 
@@ -16,11 +17,11 @@ pub fn calculate(
     respiration_demand_g_c_per_timestep: f64,
     presence_threshold_g_c: f64,
 ) !?Request {
-    inline for (.{ residual_stalk, sapwood_recycling }) |values| inline for (@typeInfo(Elements).@"struct".fields) |field| {
+    inline for (.{ residual_stalk, sapwood_recycling }) |values| inline for (ti_compat.fieldViews(Elements)) |field| {
         const value = @field(values, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidResidualStalkSenescenceInput;
     };
-    inline for (@typeInfo(Elements).@"struct".fields) |field| if (@field(sapwood_recycling, field.name) > 1) return error.InvalidResidualStalkSenescenceInput;
+    inline for (ti_compat.fieldViews(Elements)) |field| if (@field(sapwood_recycling, field.name) > 1) return error.InvalidResidualStalkSenescenceInput;
     inline for (.{ respiration_demand_g_c_per_timestep, presence_threshold_g_c }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidResidualStalkSenescenceInput;
     if (residual_stalk.carbon <= presence_threshold_g_c) return null;
 

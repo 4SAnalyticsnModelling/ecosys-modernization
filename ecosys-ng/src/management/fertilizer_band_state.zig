@@ -4,6 +4,7 @@ const phase_module = @import("fertilizer_band_phase_coordinator.zig");
 const plant_available_nutrients = @import("../soil/nutrients/plant_available_nutrients.zig");
 const charge_classification = @import("../soil/solute/charge_classification.zig");
 
+
 pub const family_count = 3;
 const checkpoint_magic = "ECOBAND1";
 const checkpoint_version: u32 = 1;
@@ -288,15 +289,15 @@ pub const State = struct {
         const relative = hour_coordinator.persistentRelativeChanges();
         const ammonium = try preConsumptionPair(
             current.ammonium_non_band,
-            relative[@intFromEnum(Family.ammonium) * self.layer_capacity + layer],
+            relative[@backingInt(Family.ammonium) * self.layer_capacity + layer],
         );
         const nitrate = try preConsumptionPair(
             current.nitrate_non_band,
-            relative[@intFromEnum(Family.nitrate) * self.layer_capacity + layer],
+            relative[@backingInt(Family.nitrate) * self.layer_capacity + layer],
         );
         const phosphate = try preConsumptionPair(
             current.phosphate_non_band,
-            relative[@intFromEnum(Family.phosphate) * self.layer_capacity + layer],
+            relative[@backingInt(Family.phosphate) * self.layer_capacity + layer],
         );
         // The band side of 1 - VLNH4'/(1+FVL) cancels for a sliver band; use
         // the exact pre-HOUR1 fraction when the pending hour recorded it.
@@ -304,11 +305,11 @@ pub const State = struct {
         // shrink has already rescaled the concentrations onto it.
         return .{
             .ammonium_non_band = ammonium.non_band,
-            .ammonium_band = exactPreConsumptionBand(hour_coordinator, .ammonium, layer, relative[@intFromEnum(Family.ammonium) * self.layer_capacity + layer], ammonium.band),
+            .ammonium_band = exactPreConsumptionBand(hour_coordinator, .ammonium, layer, relative[@backingInt(Family.ammonium) * self.layer_capacity + layer], ammonium.band),
             .nitrate_non_band = nitrate.non_band,
-            .nitrate_band = exactPreConsumptionBand(hour_coordinator, .nitrate, layer, relative[@intFromEnum(Family.nitrate) * self.layer_capacity + layer], nitrate.band),
+            .nitrate_band = exactPreConsumptionBand(hour_coordinator, .nitrate, layer, relative[@backingInt(Family.nitrate) * self.layer_capacity + layer], nitrate.band),
             .phosphate_non_band = phosphate.non_band,
-            .phosphate_band = exactPreConsumptionBand(hour_coordinator, .phosphate, layer, relative[@intFromEnum(Family.phosphate) * self.layer_capacity + layer], phosphate.band),
+            .phosphate_band = exactPreConsumptionBand(hour_coordinator, .phosphate, layer, relative[@backingInt(Family.phosphate) * self.layer_capacity + layer], phosphate.band),
         };
     }
 
@@ -499,7 +500,7 @@ pub const State = struct {
                 initialization.active_layer_count_by_cell[cell];
             const profile_base = cell * self.layer_capacity;
             inline for (std.enums.values(Family)) |family| {
-                const family_index = @intFromEnum(family);
+                const family_index = @backingInt(family);
                 const scalar = cell * family_count + family_index;
                 const fraction =
                     initialization.initial_band_fraction_by_family[
@@ -544,7 +545,7 @@ pub const State = struct {
 
     fn scalarIndex(self: *const State, cell: usize, family: Family) !usize {
         if (cell >= self.cell_count) return error.FertilizerBandCellOutOfBounds;
-        return cell * family_count + @intFromEnum(family);
+        return cell * family_count + @backingInt(family);
     }
 
     fn layerRange(
@@ -562,7 +563,7 @@ pub const State = struct {
         family: Family,
     ) LayerRange {
         const start =
-            (cell * family_count + @intFromEnum(family)) *
+            (cell * family_count + @backingInt(family)) *
             self.layer_capacity;
         return .{ .start = start, .end = start + self.layer_capacity };
     }
@@ -648,7 +649,7 @@ pub fn writeCheckpoint(writer: anytype, state: *const State) !void {
     for (state.coordinators) |*coordinator| {
         try coordinator.validatePersistent();
         const metadata = coordinator.persistentMetadata();
-        try writer.writeByte(@intFromEnum(metadata.phase));
+        try writer.writeByte(@backingInt(metadata.phase));
         try writer.writeInt(u64, metadata.current_token, .little);
         try writer.writeInt(u64, metadata.last_completed_token, .little);
         try writer.writeInt(u64, @intCast(metadata.next_prepare_family), .little);
@@ -878,7 +879,7 @@ fn bounded(reader: *std.Io.Reader, maximum: usize) !usize {
 test "runtime owner initializes uniform fractions beyond legacy dimensions" {
     const cells = 7;
     const layers = 13;
-    var active = [_]usize{layers} ** cells;
+    var active = @as([cells]usize, @splat(@as(usize, layers)));
     var upper: [cells * layers]f64 = undefined;
     var lower: [cells * layers]f64 = undefined;
     var thickness: [cells * layers]f64 = undefined;
@@ -888,7 +889,7 @@ test "runtime owner initializes uniform fractions beyond legacy dimensions" {
         lower[index] = upper[index] + 0.1;
         thickness[index] = 0.1;
     };
-    var rows = [_]f64{0.2} ** (cells * family_count);
+    var rows = @as([(cells * family_count)]f64, @splat(@as(f64, 0.2)));
     var state = try State.init(std.testing.allocator, .{
         .cell_count = cells,
         .layer_capacity = layers,

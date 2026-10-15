@@ -1,6 +1,7 @@
 const std = @import("std");
 const builtin = @import("builtin");
 const numerics = @import("../core/numerics.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
 
 pub const Parameters = struct {
     minimum_richardson_number: f64,
@@ -1027,7 +1028,7 @@ fn temperaturePicard(context: TemperatureContext, temperature_k: f64) f64 {
 }
 
 fn validateParameters(p: Parameters) !void {
-    inline for (@typeInfo(Parameters).@"struct".fields) |field| if (!std.math.isFinite(@field(p, field.name))) return error.NonFiniteGroundAirParameter;
+    inline for (ti_compat.fieldViews(Parameters)) |field| if (!std.math.isFinite(@field(p, field.name))) return error.NonFiniteGroundAirParameter;
     if (p.maximum_richardson_number < p.minimum_richardson_number or p.richardson_resistance_multiplier <= 0 or p.minimum_aerodynamic_resistance_h_per_m <= 0 or p.maximum_aerodynamic_resistance_h_per_m < p.minimum_aerodynamic_resistance_h_per_m or p.volumetric_air_heat_capacity_megajoules_per_m3_k <= 0 or p.minimum_air_column_height_m <= 0 or p.sensible_heat_conductivity_megajoules_per_m_h_k <= 0 or p.liquid_water_latent_heat_megajoules_per_m3 <= 0 or p.saturation_vapor_prefactor_k <= 0 or p.saturation_relative_humidity < 0 or p.saturation_relative_humidity > 1 or p.saturation_temperature_k <= 0 or p.saturation_reference_inverse_temperature_per_k <= 0 or p.sublimation_latent_heat_megajoules_per_m3 <= p.liquid_water_latent_heat_megajoules_per_m3 or p.pure_water_freezing_temperature_k <= 0) return error.InvalidGroundAirParameter;
 }
 

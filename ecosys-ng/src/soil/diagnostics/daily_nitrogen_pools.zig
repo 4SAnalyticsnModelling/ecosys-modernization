@@ -1,5 +1,6 @@
 const std = @import("std");
 const Organic = @import("../organic/initialization.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const Result = struct {
     residue_nitrogen_g_n: f64,
@@ -21,7 +22,7 @@ pub fn calculate(profile: *const Organic.State, surface: *const Organic.State, f
         for (3..Organic.substrate_count) |substrate| result.humus_nitrogen_g_n += try substrateNitrogen(profile, layer, substrate);
         result.microbial_nitrogen_g_n += try microbialNitrogen(profile, layer);
     }
-    inline for (@typeInfo(Result).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(Result)) |field| {
         const value = @field(result, field.name);
         if (!std.math.isFinite(value) or value < 0) return error.InvalidDailyNitrogenPool;
     }

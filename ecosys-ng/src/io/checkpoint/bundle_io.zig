@@ -1,5 +1,6 @@
 const std = @import("std");
 const manifest_module = @import("manifest.zig");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 const checksum_seed: u64 = 0x45434f5359534e47;
 
@@ -105,7 +106,7 @@ test "file verification detects a replaced section before parsing" {
     var temporary = std.testing.tmpDir(.{});
     defer temporary.cleanup();
     var sources: [manifest_module.section_count]manifest_module.EntrySource = undefined;
-    inline for (@typeInfo(manifest_module.Section).@"enum".fields, 0..) |field, index| sources[index] = .{ .section = @enumFromInt(field.value), .file_name = field.name ++ ".bin", .bytes = field.name };
+    inline for (ti_compat.enumFieldViews(manifest_module.Section), 0..) |field, index| sources[index] = .{ .section = @fromBackingInt(@intCast(field.value)), .file_name = field.name ++ ".bin", .bytes = field.name };
     var manifest = try manifest_module.build(std.testing.allocator, 1, .{ .year = 2001, .day_of_year = 1, .hour = 23 }, .{ .canonical_root = if (@import("builtin").os.tag == .windows) "C:\\ecosys-output" else "/ecosys-output", .run_identity = 1 }, .{ .columns = 1, .rows = 1, .soil_layers = 1, .snow_layers = 1, .plant_species_per_cell = 1, .root_axes_per_plant = 1 }, &sources);
     defer manifest.deinit();
     var file = try temporary.dir.createFile(std.testing.io, manifest.entry(.plant_roots).?.file_name, .{});

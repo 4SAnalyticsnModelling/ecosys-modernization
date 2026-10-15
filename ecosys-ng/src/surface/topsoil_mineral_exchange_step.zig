@@ -8,6 +8,8 @@ const organic = @import("../soil/organic/initialization.zig");
 const respiration = @import("microbial_respiration_step.zig");
 const litter_exchange = @import("microbial_mineral_exchange_step.zig");
 const competition_history = @import("../soil/nutrients/competition_history.zig");
+const ti_compat = @import("../core/typeinfo_compat.zig");
+
 
 pub const TopsoilMineralInputs = struct {
     ammonium_non_band_g_n: f64,
@@ -38,7 +40,7 @@ pub const TopsoilMineralTotals = struct {
 pub fn calculateTopsoilMineralTotals(
     inputs: TopsoilMineralInputs,
 ) !TopsoilMineralTotals {
-    inline for (std.meta.fields(TopsoilMineralInputs)) |field|
+    inline for (ti_compat.fieldViews(TopsoilMineralInputs)) |field|
         if (!std.math.isFinite(@field(inputs, field.name)))
             return error.NonFiniteTopsoilMineralInput;
     const result: TopsoilMineralTotals = .{
@@ -65,7 +67,7 @@ pub fn calculateTopsoilMineralTotals(
                 inputs.dihydrogen_phosphate_band_g_p,
         ),
     };
-    inline for (std.meta.fields(TopsoilMineralTotals)) |field|
+    inline for (ti_compat.fieldViews(TopsoilMineralTotals)) |field|
         if (!std.math.isFinite(@field(result, field.name)))
             return error.NonFiniteTopsoilMineralTotal;
     return result;
@@ -86,11 +88,11 @@ pub const State = struct {
         result.allocator = allocator;
         result.cell_count = cell_count;
         var allocated: usize = 0;
-        errdefer inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64 and allocated > 0) {
+        errdefer inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64 and allocated > 0) {
             allocated -= 1;
             allocator.free(@field(result, field.name));
         };
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) {
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) {
             @field(result, field.name) = try allocator.alloc(f64, count);
             @memset(@field(result, field.name), 0);
             allocated += 1;
@@ -99,7 +101,7 @@ pub const State = struct {
     }
 
     pub fn deinit(self: *State) void {
-        inline for (@typeInfo(State).@"struct".fields) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
+        inline for (ti_compat.fieldViews(State)) |field| if (field.type == []f64) self.allocator.free(@field(self, field.name));
         self.* = undefined;
     }
 };
@@ -234,7 +236,7 @@ fn validate(context: ApplyContext, range: compute.CellRange) !void {
     if (range.first > range.end or range.end > context.result.cell_count or context.model_grid.cell_count != context.result.cell_count or context.topsoil_chemistry.cell_count != context.model_grid.layer_count or context.surface_organic.layer_count != context.result.cell_count or context.litter_exchange.cell_count != context.result.cell_count or context.growth_temperature_response.len != context.result.cell_count or context.matric_plus_osmotic_potential_megapascal.len != context.result.cell_count or context.microbial_nitrogen_to_carbon_g_n_per_g_c.len != ratios or context.microbial_phosphorus_to_carbon_g_p_per_g_c.len != ratios or (context.autotrophic_active_biomass_g_c.len != 0 and context.autotrophic_active_biomass_g_c.len != context.result.cell_count * 4) or (context.zone_fractions_by_layer.len != 0 and context.zone_fractions_by_layer.len != context.model_grid.layer_count)) return error.SurfaceTopsoilExchangeDimensionMismatch;
     for (context.autotrophic_active_biomass_g_c) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSurfaceTopsoilExchangeParameter;
     const fractions_to_validate = if (context.zone_fractions_by_layer.len == 0) @as([]const zones.ZoneFractions, &.{context.zone_fractions}) else context.zone_fractions_by_layer;
-    for (fractions_to_validate) |fractions| inline for (@typeInfo(zones.ZoneFractions).@"struct".fields) |field| if (!std.math.isFinite(@field(fractions, field.name)) or @field(fractions, field.name) < 0 or @field(fractions, field.name) > 1) return error.InvalidSurfaceTopsoilExchangeParameter;
+    for (fractions_to_validate) |fractions| inline for (ti_compat.fieldViews(zones.ZoneFractions)) |field| if (!std.math.isFinite(@field(fractions, field.name)) or @field(fractions, field.name) < 0 or @field(fractions, field.name) > 1) return error.InvalidSurfaceTopsoilExchangeParameter;
     if (!std.math.isFinite(context.minimum_competition_fraction) or context.minimum_competition_fraction < 0 or !std.math.isFinite(context.negligible_nitrogen_g_n) or context.negligible_nitrogen_g_n < 0 or !std.math.isFinite(context.negligible_phosphorus_g_p) or context.negligible_phosphorus_g_p < 0 or !std.math.isFinite(context.negligible_water_volume_m3) or context.negligible_water_volume_m3 < 0) return error.InvalidSurfaceTopsoilExchangeParameter;
     if ((context.nutrient_competition == null) != (context.nutrient_competition_attempt == null)) return error.IncompleteSurfaceTopsoilNutrientCompetitionBinding;
 }
@@ -257,8 +259,8 @@ test "residual litter deficit draws from runtime topsoil zones" {
     defer litter.deinit();
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    const n = [_]f64{0.1} ** 105;
-    const p = [_]f64{0.01} ** 105;
+    const n = @as([105]f64, @splat(@as(f64, 0.1)));
+    const p = @as([105]f64, @splat(@as(f64, 0.01)));
     var context: ApplyContext = .{ .result = &state, .model_grid = &model_grid, .topsoil_chemistry = &topsoil, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .surface_organic = &surface, .litter_exchange = &litter, .growth_temperature_response = &.{1}, .matric_plus_osmotic_potential_megapascal = &.{0}, .microbial_nitrogen_to_carbon_g_n_per_g_c = &n, .microbial_phosphorus_to_carbon_g_p_per_g_c = &p, .labile_biomass_fraction = 0.55, .microbial_surface_area_m2_per_g_c = 3, .nitrogen_molar_mass_g_per_mol = 14, .parameters = .{ .ammonium_maximum_uptake_g_n_per_m2_h = 0.014, .ammonium_minimum_concentration_g_n_per_m3 = 0.0125, .ammonium_half_saturation_g_n_per_m3 = 0.4, .nitrate_maximum_uptake_g_n_per_m2_h = 0.014, .nitrate_minimum_concentration_g_n_per_m3 = 0.03, .nitrate_half_saturation_g_n_per_m3 = 0.35, .phosphate_maximum_uptake_g_p_per_m2_h = 0.003, .phosphate_minimum_concentration_g_p_per_m3 = 0.009, .phosphate_half_saturation_g_p_per_m3 = 0.18, .phosphorus_molar_mass_g_per_mol = 31 }, .timestep_h = 1 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expect(state.ammonium_exchange_g_n[0] > 0);
@@ -309,8 +311,8 @@ test "issue-073 Finding B: a near-zero-but-nonzero topsoil water is skipped inst
     defer litter.deinit();
     var state = try State.init(std.testing.allocator, 1);
     defer state.deinit();
-    const n = [_]f64{0.1} ** 105;
-    const p = [_]f64{0.01} ** 105;
+    const n = @as([105]f64, @splat(@as(f64, 0.1)));
+    const p = @as([105]f64, @splat(@as(f64, 0.01)));
     var context: ApplyContext = .{ .result = &state, .model_grid = &model_grid, .topsoil_chemistry = &topsoil, .zone_fractions = .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, .surface_organic = &surface, .litter_exchange = &litter, .growth_temperature_response = &.{1}, .matric_plus_osmotic_potential_megapascal = &.{0}, .microbial_nitrogen_to_carbon_g_n_per_g_c = &n, .microbial_phosphorus_to_carbon_g_p_per_g_c = &p, .labile_biomass_fraction = 0.55, .microbial_surface_area_m2_per_g_c = 3, .nitrogen_molar_mass_g_per_mol = 14, .parameters = .{ .ammonium_maximum_uptake_g_n_per_m2_h = 0.014, .ammonium_minimum_concentration_g_n_per_m3 = 0.0125, .ammonium_half_saturation_g_n_per_m3 = 0.4, .nitrate_maximum_uptake_g_n_per_m2_h = 0.014, .nitrate_minimum_concentration_g_n_per_m3 = 0.03, .nitrate_half_saturation_g_n_per_m3 = 0.35, .phosphate_maximum_uptake_g_p_per_m2_h = 0.003, .phosphate_minimum_concentration_g_p_per_m3 = 0.009, .phosphate_half_saturation_g_p_per_m3 = 0.18, .phosphorus_molar_mass_g_per_mol = 31 }, .timestep_h = 1, .negligible_water_volume_m3 = negligible_water_volume_m3 };
     try applyTile(&context, .{ .first = 0, .end = 1 });
     try std.testing.expectEqual(@as(f64, 0), state.ammonium_exchange_g_n[0]);

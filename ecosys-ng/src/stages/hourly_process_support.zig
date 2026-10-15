@@ -43,15 +43,15 @@ pub fn snowpackInternalNonSaltFluxFromSpeciesAmounts(
     amounts: []const f64,
 ) ecosys.snowpack_internal_solute_aggregation.SoluteFlux {
     return .{
-        .carbon_dioxide_g_c_per_step = amounts[@intFromEnum(ecosys.snow_solute_transport.Species.carbon_dioxide_carbon)],
-        .methane_g_c_per_step = amounts[@intFromEnum(ecosys.snow_solute_transport.Species.methane_carbon)],
-        .oxygen_g_o_per_step = amounts[@intFromEnum(ecosys.snow_solute_transport.Species.oxygen)],
-        .dinitrogen_g_n_per_step = amounts[@intFromEnum(ecosys.snow_solute_transport.Species.dinitrogen_nitrogen)],
-        .nitrous_oxide_g_n_per_step = amounts[@intFromEnum(ecosys.snow_solute_transport.Species.nitrous_oxide_nitrogen)],
-        .ammonium_g_n_per_step = amounts[@intFromEnum(ecosys.snow_solute_transport.Species.ammonium_nitrogen)],
-        .ammonia_g_n_per_step = amounts[@intFromEnum(ecosys.snow_solute_transport.Species.ammonia_nitrogen)],
-        .nitrate_g_n_per_step = amounts[@intFromEnum(ecosys.snow_solute_transport.Species.nitrate_nitrogen)],
-        .hydrogen_phosphate_g_p_per_step = amounts[@intFromEnum(ecosys.snow_solute_transport.Species.hydrogen_phosphate_phosphorus)],
-        .dihydrogen_phosphate_g_p_per_step = amounts[@intFromEnum(ecosys.snow_solute_transport.Species.dihydrogen_phosphate_phosphorus)],
+        .carbon_dioxide_g_c_per_step = amounts[@backingInt(ecosys.snow_solute_transport.Species.carbon_dioxide_carbon)],
+        .methane_g_c_per_step = amounts[@backingInt(ecosys.snow_solute_transport.Species.methane_carbon)],
+        .oxygen_g_o_per_step = amounts[@backingInt(ecosys.snow_solute_transport.Species.oxygen)],
+        .dinitrogen_g_n_per_step = amounts[@backingInt(ecosys.snow_solute_transport.Species.dinitrogen_nitrogen)],
+        .nitrous_oxide_g_n_per_step = amounts[@backingInt(ecosys.snow_solute_transport.Species.nitrous_oxide_nitrogen)],
+        .ammonium_g_n_per_step = amounts[@backingInt(ecosys.snow_solute_transport.Species.ammonium_nitrogen)],
+        .ammonia_g_n_per_step = amounts[@backingInt(ecosys.snow_solute_transport.Species.ammonia_nitrogen)],
+        .nitrate_g_n_per_step = amounts[@backingInt(ecosys.snow_solute_transport.Species.nitrate_nitrogen)],
+        .hydrogen_phosphate_g_p_per_step = amounts[@backingInt(ecosys.snow_solute_transport.Species.hydrogen_phosphate_phosphorus)],
+        .dihydrogen_phosphate_g_p_per_step = amounts[@backingInt(ecosys.snow_solute_transport.Species.dihydrogen_phosphate_phosphorus)],
     };
 }

@@ -1,4 +1,5 @@
 const std = @import("std");
+const ti_compat = @import("../../core/typeinfo_compat.zig");
 
 pub const RecyclingFractions = struct {
     carbon: f64,
@@ -43,7 +44,7 @@ pub fn prepare(inputs: Inputs) !?Setup {
         inputs.presence_threshold_g_c < 0 or
         inputs.first_internode > inputs.last_internode)
         return error.InvalidStalkSenescenceSetupInput;
-    inline for (@typeInfo(RecyclingFractions).@"struct".fields) |field| {
+    inline for (ti_compat.fieldViews(RecyclingFractions)) |field| {
         const value = @field(inputs.shoot_recycling, field.name);
         if (!std.math.isFinite(value) or value < 0 or value > 1)
             return error.InvalidStalkSenescenceRecyclingFraction;
