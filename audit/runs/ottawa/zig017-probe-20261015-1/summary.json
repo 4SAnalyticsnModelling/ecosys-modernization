@@ -1,0 +1,46 @@
+{
+  "binding": {
+    "binding_id": "b5922267a86f95f4a52dddfa36d252077ca089c7cf915b1f2c76563aa82ac93e",
+    "build": {
+      "mode": "ReleaseFast",
+      "options": []
+    },
+    "checkpoint_schema_version": 3,
+    "deck": {
+      "files": 78,
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON",
+      "sha256": "23d0f607c312334c0dcad359e83b8f8d3751eee2ca78534eeafa203659066ada"
+    },
+    "schema_version": 1,
+    "source_commit": "ef528ee528dae41b307223f4180266d0a6ba6035",
+    "source_dirty": {
+      "dirty": false,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "untracked": 0
+    }
+  },
+  "conservation_breaches": null,
+  "error": null,
+  "evidence_class": "strict",
+  "exe_sha256": "a9e1ec25e072c65ceef3c5cb93a1c42ca466ea10a8c12a61b2cd35921bcce4c5",
+  "exit_code": 124,
+  "failure_hour": null,
+  "full_log": "audit/runs/ottawa/zig017-probe-20261015-1/stdout.log",
+  "full_run_justification": null,
+  "io_probe_seconds": 0.0002,
+  "last_checkpoint_key": 2880,
+  "last_completed_hour": null,
+  "limitations": "failure_hour/error are heuristic parses; conservation_breaches and solver_fallbacks_unexplained stay null until a validator fills them, so this summary alone can never promote the frontier.",
+  "mode": "strict",
+  "parse_confidence": "heuristic-last-match",
+  "receipt": "audit/runs/ottawa/zig017-probe-20261015-1/receipt.json",
+  "restart_from": null,
+  "run_id": "zig017-probe-20261015-1",
+  "runottawa_hash": "ecf5e61ab453288b1763f81f841729bee34e8426",
+  "schema_version": 1,
+  "solver_fallbacks_unexplained": null,
+  "staged_deck": "evidence/runs/zig017-probe-20261015-1/deck",
+  "start_hour": 0,
+  "status": "TIMED_OUT",
+  "wall_seconds": 900.1
+}

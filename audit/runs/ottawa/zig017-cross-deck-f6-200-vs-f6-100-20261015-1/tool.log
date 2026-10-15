@@ -1,0 +1,21 @@
+full report: audit/runs/ottawa/zig017-cross-deck-f6-200-vs-f6-100-20261015-1/zigdiff.json
+{
+ "status": "IDENTICAL",
+ "files_a": 17,
+ "files_b": 17,
+ "files_compared": 17,
+ "streams_identical": 17,
+ "streams_differing": 0,
+ "allow_extra_rows": true,
+ "files_only_in_a": [],
+ "files_only_in_b": [],
+ "one_sided_rows": 213,
+ "worst_overall": {
+  "abs": 0.0,
+  "rel": 0.0,
+  "file": null,
+  "column": null,
+  "key": null
+ },
+ "first_difference": null
+}

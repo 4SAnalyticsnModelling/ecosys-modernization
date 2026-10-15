@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/evidence/runs/zig017-frontier-20261015-1/deck/ecosys_ng",
+    "runottawa"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/evidence/runs/zig017-frontier-20261015-1/deck",
+  "elapsed_seconds": 3600.019,
+  "exit_code": 124,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 41129,
+  "pid": 41132,
+  "runottawa_hash": "ecf5e61ab453288b1763f81f841729bee34e8426",
+  "staged_deck": "evidence/runs/zig017-frontier-20261015-1/deck",
+  "started_unix": 1792062760.982075,
+  "status": "TIMED_OUT",
+  "stderr": {
+    "path": "audit/runs/ottawa/zig017-frontier-20261015-1/stderr.log",
+    "sha256": "9b1691aadb2a3d121fb42a9ad81480f018d4425223afde10f355f0c6df974852"
+  },
+  "stdout": {
+    "path": "audit/runs/ottawa/zig017-frontier-20261015-1/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 3600.0
+}

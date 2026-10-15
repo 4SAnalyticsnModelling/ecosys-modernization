@@ -208,5 +208,7 @@ Open-issue census: `uv run ecosys-audit/scripts/issue_status.py --summary` (afte
 
 ## Carried from the pre-plan loop (feed P3/P4, do not chase serially)
 - issue-108 cations: Ca/Na/K layer-2 residuals at hour 3,289 | `audit/issues/issue-108-*.md`
+- issue-109 surface conductive flux probe: 1,008 hits by hour 3,288 on 0.17 vs 16 on the 0.16 baseline log; root-salt implicit fallback at hours 3,384/3,408 | `audit/issues/issue-109-*.md`
+- no in-repo numeric oracle crosses the 0.16/0.17 (or Windows/macOS) boundary: 13 model-run receipts, all 0.16/ReleaseSafe/Windows diagnostics; legacy output streams and 0.16 ReleaseFast logs are outside the repo and gone. Digit-level G5 across that boundary is undecidable until an oracle is regenerated | cycle 00002 §1 item 3, `audit/manifest/command_registry.json` `commands.zig017_ottawa_bounded_run`
 - issue-106 test 71 substep ladder; issue-107 test 109 run-log lock spin | test-root failures (P3 item f)
 - issue-099 PO4 band activation; issue-093 litter-carbon composition; issue-097 reference-doc import

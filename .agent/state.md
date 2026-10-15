@@ -1,16 +1,38 @@
 # Mission State — ecosys-ng Ottawa (single autonomous agent)
 
 <!-- runner:begin -->
-## Cycle 00001 · PUSHED · 2026-10-15T10:12:37Z
+## Cycle 00002 · PLANNING · 2026-10-15T10:25:44Z
 - Actor: single autonomous agent (any harness/model). Verification: gates G1-G9 (Zig 0.17.x build, repo-contained work) + read-only sub-agents.
-- Target: Does ecosys-ng compile (Debug/ReleaseSafe/ReleaseFast) and pass its whole test suite on Zig 0.17.0 with every src change provably mechanical (no production number, tolerance, floor or clamp moved)?
-- Gates: G1=PASS, G2=PASS, G3=NA, G4=NA, G5=NA, G6=PASS, G7=PASS, G8=PASS, G9=PASS
-- Sync: in_sync (push every completed cycle to origin/main)
+- Target: Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded legacy oracle for the same hours, every difference explained by exact arithmetic or diagnosed to file:line (no tolerance loosened, no bound moved).
+- Gates: none recorded
+- Sync: unknown (push every completed cycle to origin/main)
 - Next target: Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded oracle for those hours (cycle_00001.md section 6).
 <!-- runner:end -->
 
 Updated 2026-10-09 (mandates added); workflow revised to a single agent on 2026-10-08. Plan: Complete
 30-Year Ottawa Run with Zero Science Gap.
+
+- **0.17 diagnostic divergence, resolved as far as this repository allows (2026-10-15, cycle 00002)**: ReleaseSafe ==
+  ReleaseFast bit-identical (0 differing of 382,178 cells over 3,338 h); the deck's `f6` iteration ceiling is **inert for
+  this deck** (`core/iteration_control.zig:96,119-141`: every ceiling is `min(hard, X<=100)`; `NPH=4, NPG=1`), proven by
+  staging the baseline blob `9ec1bf4e` (f6=200) under the same binary — outputs **bit-identical** (388,086 cells,
+  0 differing) and both markers unchanged (aqueous 1,237 from d57; probe onset d113). So neither optimisation level nor
+  the iteration ceiling explains the diagnostics. The earliest marker is the macropore aqueous extensive transport
+  fallback (`aqueous_extensive_transport.zig:455`): **1,237 hits from d57** (reason iteration-limit @ iteration=100) vs
+  **2 hits (d85, iter 28-30)** in the 0.16 baseline — the same 100-iteration ceiling, now exceeded. Every `aq=2` log in
+  the repo is Windows/0.16 (`cwd: D:\`), every `aq=1,237` log macOS/0.17, 735 commits apart and unbuildable here
+  without installing Zig 0.16, so host-ISA vs code remains unseparated by bisection; Debug-vs-ReleaseFast sensitivity on
+  this host (`max_rel 3.15e-8` by day 11) shows a 1-ulp cross-ISA difference reaches that regime before d57, so
+  diagnostic counts are not a parity oracle. Details: `audit/issues/issue-109-*.md`.
+- **G2 is a reproduced FAIL — issue-110, fix pending**: `plant.lifecycle.reproduction.test.reproduction worker scratch is
+  bitwise equivalent under disjoint grid concurrency` fails ~25% under CPU load (2/12 + 1/11 + 1 filter run;
+  `audit/runs/zig017-repro-reproduction-test-20261015-1/`). Root cause: three growth operators memcpy the **whole**
+  branch-indexed state array in and out (`potential_seed_site_accumulation.zig:36,58`, `final_grain_number.zig:46,77`,
+  `maximum_individual_grain_size.zig:33,54`), so one worker's copy-in reverts another worker's cells (observed
+  `branch_potential_seed_site_count` `[6,6]` -> `[6,0]`). Latent since `514dd68`; latent for the one-cell Ottawa deck.
+  Six-line fix + acceptance plan in **issue-110** (not applied: session ended).
+- **G1 recording gap**: build/test receipts contain no `zig_version` and no `0.17.0` string (toolchain is genuinely
+  0.17.0 by `zig version`, `build.zig.zon`, preflight). Next cycle: put `zig version` in the receipt argv.
 
 ## Mandates added 2026-10-09 (read before any build)
 - **Zig 0.17.x builds `ecosys-ng`; Zig 0.16 is retired** (protocol §8, gate G1). Machine check
@@ -33,6 +55,32 @@ Updated 2026-10-09 (mandates added); workflow revised to a single agent on 2026-
   worktree** and **48 after this setup round** (the hook fixes two). The remainder are pre-existing, mostly
   host/evidence-dependent (Windows paths, absent local artefacts) — not science regressions and not blockers for
   opening a cycle, but never let the number grow: record the count in every cycle that touches tooling.
+
+## Cycle 00002 findings (2026-10-15) — what a real 0.17 run proved, and what it cannot prove here
+- **The deck runs clean on this host under 0.17.** Strict ReleaseFast, staged deck `ecf5e61ab453288b1763f81f841729bee34e8426`:
+  hour 3,419 in 3,600 s, **142/142 daily conservation acceptances, zero rejections**, no model error (`audit/runs/ottawa/zig017-frontier-20261015-1`).
+- **The recorded frontier failure at hour 3,289 did not reproduce** on the current tree+deck (issue-108 Ca/Na/K layer-2
+  excess `+9.19e-8 / +2.9e-10 / +1.5e-10`, `audit/runs/run-038-*.md:28`): day 138 closes normally. `.agent/frontier.json`
+  is deliberately **unchanged** — a wall-clock-stopped bounded run is not a campaign and cannot promote. The
+  non-reproduction is not 0.17-attributable: the deck's `runtime` f6 (200 -> 100, `8a4a565`) and three weeks of source
+  changes differ from the 09-24 baseline as well.
+- **Same-toolchain parity is bit-exact where it should be**: ReleaseSafe == ReleaseFast over 2,400 h and a rebuilt
+  ReleaseFast == the original over 2,908 h, 17/17 output streams, **0 differing cells** (`ecosys-audit/scripts/zig_run_diff.py`,
+  reports under `audit/runs/ottawa/zig017-*-20261015-1/zigdiff.json`). Debug vs ReleaseFast is *not* comparable
+  digit-for-digit (75.2% of cells differ, worst rel `6.831e-11`, first difference day 1 h23) — **compare receipts only
+  within the same build mode.**
+- **0.16-vs-0.17 digit parity is undecidable from this repository**: 13 of ~413 `audit/runs/*` dirs are model runs and
+  all are 0.16/ReleaseSafe/Windows diagnostics; no 0.16 ReleaseFast log and no legacy output stream survived the
+  Windows hosts (`D:\ecosys-evidence`, `C:\ecosys-build`). Only behavioural parity + self-consistency is decidable here.
+- **New issue**: `audit/issues/issue-109-*.md` — the `implausible surface conductive flux` probe (`temperature_solver.zig:778-798`)
+  fires 1,008 times by hour 3,288 on 0.17 vs 16 in the 0.16 log (first hit hour ~2,712). Also 32 `root salt implicit
+  solve failed` fallbacks at hours 3,384/3,408 (baseline never got that far; 0.16-era same event was hour 3,562, `d38218a`).
+- **Throughput on this host (ReleaseFast, strict, 1 cell)**: 194 h/min in winter, but only **57 h/min** averaged to hour
+  3,419 because spring/summer days cost 19-47 s in the final hour alone. Budget any campaign from the second number:
+  262,920 h is not a single-run target on this machine.
+- **Tooling test baseline 2026-10-15**: `uv run --project ecosys-audit python -m pytest ecosys-audit/tests -q` =
+  **48 failed, 104 passed, 1 skipped** — the failure count is exactly the recorded post-setup baseline (48); the
+  +7 passes are `ecosys-audit/tests/test_zig_run_diff.py`.
 
 ## Actor (from 2026-10-08): one autonomous agent
 - **One agent** owns everything — planning, Zig implementation, builds, tests, runs, diagnosis, decisions, the

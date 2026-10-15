@@ -1,0 +1,69 @@
+########## filter=[reproduction worker scratch is bitwise equivalent under disjoint grid concurrency] 15:26:38
+    ^
+39/52 plant.root.plant_root_disturbance.test_0...OK
+40/52 plant.root.plant_root_metabolism.test_0...OK
+41/52 plant.root.plant_root_nutrient_uptake.test_0...OK
+42/52 plant.root.plant_root_system.test_0...OK
+43/52 plant.growth.storage_remobilization.test_0...OK
+44/52 plant.growth.shoot_growth_runtime.test_0...OK
+45/52 validation.plant_root_metabolism_test.test_0...OK
+46/52 canopy.photosynthesis.photosynthesis.test_0...OK
+47/52 management.land_management.test_0...OK
+48/52 management.plant_harvest_runtime.test_0...OK
+49/52 validation.plant_harvest_runtime_test.test_0...OK
+50/52 validation.canopy_photosynthesis_test.test_0...OK
+51/52 io.input.cell_grid_file.test_0...OK
+52/52 driver.runscript.test_0...OK
+51 passed; 0 skipped; 1 failed.
+error: the following test command failed with exit code 1:
+.zig-cache/o/3cef731213651fbe3da3ee242c2928a6/test --seed=0xe52f6494
+########## filter=[plant.lifecycle.reproduction] 15:26:42
+42/58 plant.lifecycle.reproduction.test.reproduction worker workspace retains capacity without steady allocations...OK
+43/58 plant.lifecycle.reproduction.test.reproduction worker scratch is bitwise equivalent under disjoint grid concurrency...OK
+44/58 plant.lifecycle.reproduction.test.production reproduction scratch reserves serially and stays outside rollback state...OK
+45/58 plant.root.plant_root_disturbance.test_0...OK
+46/58 plant.root.plant_root_metabolism.test_0...OK
+47/58 plant.root.plant_root_nutrient_uptake.test_0...OK
+48/58 plant.root.plant_root_system.test_0...OK
+49/58 plant.growth.storage_remobilization.test_0...OK
+50/58 plant.growth.shoot_growth_runtime.test_0...OK
+51/58 validation.plant_root_metabolism_test.test_0...OK
+52/58 canopy.photosynthesis.photosynthesis.test_0...OK
+53/58 validation.canopy_photosynthesis_test.test_0...OK
+54/58 management.land_management.test_0...OK
+55/58 management.plant_harvest_runtime.test_0...OK
+56/58 io.input.cell_grid_file.test_0...OK
+57/58 validation.plant_harvest_runtime_test.test_0...OK
+58/58 driver.runscript.test_0...OK
+All 58 tests passed.
+########## FULL zig build test repeat 15:26:44
+coupled mineral source iron_phosphate_mol_per_m3=-9.243692514506827e-15
+coupled mineral source dicalcium_phosphate_mol_per_m3=-0e0
+coupled mineral source hydroxyapatite_mol_per_m3=-6.143323596597705e-15
+coupled mineral source monocalcium_phosphate_mol_per_m3=-0e0
+coupled surface mineral candidate: iterations=16 full_quality=1.2467909828819151e-5 pH=3.893568578955552e-10
+coupled mineral source aluminum_phosphate_mol_per_m3=-1.5122200470483448e-14
+coupled mineral source iron_phosphate_mol_per_m3=-1.5835511813430782e-14
+coupled mineral source dicalcium_phosphate_mol_per_m3=-0e0
+coupled mineral source hydroxyapatite_mol_per_m3=-1.5436057461380275e-14
+coupled mineral source monocalcium_phosphate_mol_per_m3=-0e0
+coupled surface mineral candidate: iterations=18 full_quality=5.0768154869559104e-6 pH=3.088316571284895e-11
+coupled mineral source aluminum_phosphate_mol_per_m3=6.990449914954388e-15
+coupled mineral source iron_phosphate_mol_per_m3=6.448333390937517e-15
+coupled mineral source dicalcium_phosphate_mol_per_m3=-0e0
+coupled mineral source hydroxyapatite_mol_per_m3=7.589631336236192e-15
+coupled mineral source monocalcium_phosphate_mol_per_m3=-0e0
+coupled surface mineral candidate: iterations=17 full_quality=9.116535354578484e-5 pH=3.2795619944517427e-11
+coupled mineral source aluminum_phosphate_mol_per_m3=8.533038489674741e-15
+coupled mineral source iron_phosphate_mol_per_m3=5.6502552161359776e-15
+coupled mineral source dicalcium_phosphate_mol_per_m3=-0e0
+coupled mineral source hydroxyapatite_mol_per_m3=9.109595144382494e-15
+coupled mineral source monocalcium_phosphate_mol_per_m3=-0e0
+outer-hour allocation benchmark: baseline_ns=38461000 baseline_bytes=148897792 baseline_allocations=324 retained_ns=8926000 retained_bytes=0 retained_allocations=0
+failed command: ./.zig-cache/o/b7e9a5c6d9308c9ecccfad6622228e08/test --cache-dir=./.zig-cache --seed=0xa7d7e646 --listen=-
+Build Summary: 3/5 steps succeeded (1 failed); 4518/4520 tests passed (1 skipped, 1 crashed)
+test transitive failure
++- run test 4399 pass, 1 skip (4400 total) 8m MaxRSS:404M
+|  +- compile test debug native cached 112ms MaxRSS:34M
++- run test 119 pass, 1 crash (120 total)
+   +- compile test debug native cached 111ms MaxRSS:34M

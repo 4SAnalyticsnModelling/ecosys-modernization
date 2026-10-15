@@ -54,3 +54,4 @@ audit/runs/swarm-controller-*.log
 .zig-cache/
 ecosys-ng/.zig-cache-global/
 tools/zig/
+audit/runs/ottawa/zig017-debug-run-*/stderr.log

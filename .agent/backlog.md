@@ -6,12 +6,37 @@ lives here, not in a conversation. Protocol: `.agent/protocol.md` §9.
 **Reading order for a new session**: `state.md` → `cycle.json` → `frontier.json` → this file → `audit/unresolved-gaps.md`.
 
 ## Now (unblocked, take in cycle order)
-0. **Zig 0.17.x — compile half DONE (cycle 00001, 2026-10-15); the parity half is the open work.** G1/G2 are green on
-   0.17.0 (Debug/ReleaseSafe/ReleaseFast exit 0; 4518/4520 tests, 0 assertion failures, 1 known issue-106 crash) —
-   receipts in `.agent/cycles/cycle_00001.md` §2. What is NOT done is the second half of
-   `.agent/migrations/zig-0.17.md`: **prove 0.17 did not move a production number** — one bounded strict ReleaseFast
-   run on the Ottawa deck, compared row-by-row with the recorded legacy oracle for those hours (gates G3/G4/G5, all
-   recorded NA in cycle 00001). Blocked by nothing — take this first.
+0a. **Fix issue-110 first (G2 is a reproduced FAIL).** Worker-scratch operators write back the whole branch array, so
+    concurrent workers silently revert each other's cells (`potential_seed_site_accumulation.zig:36,58`,
+    `final_grain_number.zig:46,77`, `maximum_individual_grain_size.zig:33,54`). Six-line range-scoped fix, a 64-round
+    version of the existing test, `zig build test` back to 4518/4520 with **0 failures**, and a ReleaseFast deck rerun
+    that must diff bit-identically against `evidence/runs/zig017-frontier-20261015-1`. Then re-run the exact-name filter
+    12x under load (template `audit/runs/zig017-repro-reproduction-test-20261015-1/loop12.log`).
+0b. **Record `zig version` inside every build/test receipt** (G1 evidence gap found by the G7 verifier: the cited
+    receipts hold no `0.17.0` string), and make `zig_run_diff.py`'s docstring stop advertising `--atol/--rtol`.
+0c. **Divergence forensics continue at d57, not d113** (issue-109). Both confounders originally suspected — optimisation
+    level and the deck `f6` ceiling — are now killed with bit-identical evidence. Remaining candidates: upstream state
+    changes in the 735-commit window, or the Windows-x86_64/0.16 -> macOS-arm64/0.17 host change. Separating them needs
+    either an ancestor build (requires installing Zig 0.16 inside the repo) or a matched-state legacy oracle at
+    hour ~1,345; the daily ledgers are closed on every simulated day, so treat value parity vs legacy Fortran — not
+    diagnostic counts — as the authority.
+0. **Zig 0.17.x — compile half DONE (cycle 00001); measurement half DONE as far as this repository allows (cycle
+   00002, 2026-10-15); the remaining parity work is ORACLE work, not compile work.** Cycle 00002 put the first 0.17
+   strict runs on disk (hour 3,419, 142/142 daily closures, `audit/runs/ottawa/zig017-frontier-20261015-1`), proved
+   ReleaseSafe==ReleaseFast and rebuild==rebuild **bit-exactly** over thousands of hours, and established that
+   **digit-level 0.16-vs-0.17 parity cannot be decided from this repository** (no 0.16 ReleaseFast log, no legacy
+   output stream — cycle 00002 §1 item 3). Open sub-questions, in order:
+   0a. **issue-109**: is the 63x growth of the `implausible surface conductive flux` probe (1,008 vs 16 hits by hour
+       3,288) a real trajectory change? First command: read
+       `audit/runs/ottawa/zig017-releasesafe-run-20261015-2` (ReleaseSafe, reaches the spring hours) and diff it against
+       `zig017-frontier-20261015-1` with `zig_run_diff.py`; then one 900 s **diagnostic** run of the ReleaseFast binary
+       on a staged deck with `runtime` f6=200 (labelled non-qualification: the strict stager guards `ecf5e61a`).
+   0b. **Regenerate an oracle that crosses the boundary**: a gfortran-15.2 legacy build of the Ottawa kernels exists on
+       this host (`/opt/homebrew/bin/gfortran`; the recorded baseline was 16.1.0 MinGW, so a new dated binding), which is
+       the only way to get a value-for-value oracle here. Matched-state kernel oracles first
+       (`ecosys-source-navigation`), not a full legacy run.
+   0c. **Campaign budget**: at 57 h/min (spring-limited, 1 cell) 262,920 h is ~770 h of wall clock — the "one full run"
+       plan needs either checkpointed segments (each <= 3 h per protocol) or the performance thread.
    Toolchain mandate `.agent/protocol.md` §8, pin `.agent/toolchain.json`, check
    `uv run ecosys-audit/scripts/preflight.py`.
 1. **Advance the strict Ottawa run past the current failure hour.** Frozen-topsoil phase stagnation at 1998 d354

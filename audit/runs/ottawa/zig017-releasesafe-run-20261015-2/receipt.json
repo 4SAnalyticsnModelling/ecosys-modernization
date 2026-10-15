@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/evidence/runs/zig017-releasesafe-run-20261015-2/deck/ecosys_ng-releasesafe-20261015",
+    "runottawa"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/evidence/runs/zig017-releasesafe-run-20261015-2/deck",
+  "elapsed_seconds": 1799.996,
+  "exit_code": 124,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 48802,
+  "pid": 48812,
+  "runottawa_hash": "ecf5e61ab453288b1763f81f841729bee34e8426",
+  "staged_deck": "evidence/runs/zig017-releasesafe-run-20261015-2/deck",
+  "started_unix": 1792071269.431427,
+  "status": "TIMED_OUT",
+  "stderr": {
+    "path": "audit/runs/ottawa/zig017-releasesafe-run-20261015-2/stderr.log",
+    "sha256": "c410b6516b88a01e68ec91fb4f59eeabc42e47ceaba8f7574d33e8bd9168c290"
+  },
+  "stdout": {
+    "path": "audit/runs/ottawa/zig017-releasesafe-run-20261015-2/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 1800.0
+}

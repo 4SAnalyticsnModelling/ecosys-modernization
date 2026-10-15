@@ -1,0 +1,1368 @@
+{
+ "a": "evidence/runs/zig017-debug-run-20261015-1/deck/runottawa_output_files",
+ "b": "evidence/runs/zig017-frontier-20261015-1/deck/runottawa_output_files",
+ "files_a": 17,
+ "files_b": 17,
+ "files_compared": 17,
+ "files_only_in_a": [],
+ "files_only_in_b": [],
+ "streams": [
+  {
+   "file": "lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25cd1.txt",
+   "rows_a": 13,
+   "rows_b": 142,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 129,
+   "cells_compared": 455,
+   "cells_differing": 13,
+   "cells_text_only": 0,
+   "max_abs": 5.03375119365046e-13,
+   "max_rel": 2.9421616086380407e-13,
+   "worst": {
+    "key": [
+     "1998",
+     "5",
+     "23"
+    ],
+    "column": "root_length_density_layer_3[m m-3 plant m-2]",
+    "a": "1.710902344341526e0",
+    "b": "1.7109023443410227e0",
+    "abs": 5.03375119365046e-13,
+    "rel": 2.9421616086380407e-13
+   },
+   "first_diff": {
+    "key": [
+     "1998",
+     "1",
+     "23"
+    ],
+    "column": "root_length_density_layer_3[m m-3 plant m-2]",
+    "a": "1.7032217776388476e0",
+    "b": "1.7032217776388485e0",
+    "abs": 8.881784197001252e-16,
+    "rel": 5.21469623839236e-16
+   },
+   "diffs_sample": [
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "root_length_density_layer_3[m m-3 plant m-2]",
+     "a": "1.7032217776388476e0",
+     "b": "1.7032217776388485e0",
+     "abs": 8.881784197001252e-16,
+     "rel": 5.21469623839236e-16
+    },
+    {
+     "key": [
+      "1998",
+      "10",
+      "23"
+     ],
+     "column": "root_length_density_layer_3[m m-3 plant m-2]",
+     "a": "1.7231154582820847e0",
+     "b": "1.7231154582820858e0",
+     "abs": 1.1102230246251565e-15,
+     "rel": 6.4431145300735e-16
+    },
+    {
+     "key": [
+      "1998",
+      "11",
+      "23"
+     ],
+     "column": "root_length_density_layer_3[m m-3 plant m-2]",
+     "a": "1.7231153209690886e0",
+     "b": "1.7231153209690901e0",
+     "abs": 1.5543122344752192e-15,
+     "rel": 9.02036106092461e-16
+    },
+    {
+     "key": [
+      "1998",
+      "12",
+      "23"
+     ],
+     "column": "root_length_density_layer_3[m m-3 plant m-2]",
+     "a": "1.7231152688959452e0",
+     "b": "1.7231152688959468e0",
+     "abs": 1.5543122344752192e-15,
+     "rel": 9.02036133352306e-16
+    },
+    {
+     "key": [
+      "1998",
+      "13",
+      "23"
+     ],
+     "column": "root_length_density_layer_3[m m-3 plant m-2]",
+     "a": "1.7231151873483361e0",
+     "b": "1.7231151873483377e0",
+     "abs": 1.5543122344752192e-15,
+     "rel": 9.020361760417853e-16
+    }
+   ],
+   "extra_rows_allowed": true,
+   "identical": false,
+   "stream_path": "modelled_outputs/carbon/lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25cd1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25ch1.txt",
+   "rows_a": 314,
+   "rows_b": 3419,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 3105,
+   "cells_compared": 1570,
+   "cells_differing": 0,
+   "cells_text_only": 0,
+   "max_abs": 0.0,
+   "max_rel": 0.0,
+   "worst": null,
+   "first_diff": null,
+   "diffs_sample": [],
+   "extra_rows_allowed": true,
+   "identical": true,
+   "stream_path": "modelled_outputs/carbon/lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25ch1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25ed1.txt",
+   "rows_a": 13,
+   "rows_b": 142,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 129,
+   "cells_compared": 117,
+   "cells_differing": 0,
+   "cells_text_only": 0,
+   "max_abs": 0.0,
+   "max_rel": 0.0,
+   "worst": null,
+   "first_diff": null,
+   "diffs_sample": [],
+   "extra_rows_allowed": true,
+   "identical": true,
+   "stream_path": "modelled_outputs/carbon/lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25ed1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25cd1.txt",
+   "rows_a": 13,
+   "rows_b": 142,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 129,
+   "cells_compared": 390,
+   "cells_differing": 281,
+   "cells_text_only": 0,
+   "max_abs": 1.1078782335971482e-10,
+   "max_rel": 2.9985629876352036e-13,
+   "worst": {
+    "key": [
+     "1998",
+     "11",
+     "23"
+    ],
+    "column": "atmospheric_carbon_dioxide[umol mol-1]",
+    "a": "3.694697220520516e2",
+    "b": "3.6946972205194083e2",
+    "abs": 1.1078782335971482e-10,
+    "rel": 2.9985629876352036e-13
+   },
+   "first_diff": {
+    "key": [
+     "1998",
+     "1",
+     "23"
+    ],
+    "column": "residue_carbon[g C m-2]",
+    "a": "3.219854880515198e2",
+    "b": "3.2198548805151984e2",
+    "abs": 5.684341886080802e-14,
+    "rel": 1.7654031305818567e-16
+   },
+   "diffs_sample": [
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "residue_carbon[g C m-2]",
+     "a": "3.219854880515198e2",
+     "b": "3.2198548805151984e2",
+     "abs": 5.684341886080802e-14,
+     "rel": 1.7654031305818567e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "organic_carbon[g C m-2]",
+     "a": "5.816853408257824e3",
+     "b": "5.816853408257826e3",
+     "abs": 1.8189894035458565e-12,
+     "rel": 3.127102018702328e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "daily_soil_carbon_dioxide_exchange[g C m-2]",
+     "a": "-3.333255559261097e-1",
+     "b": "-3.33325555925644e-1",
+     "abs": 4.656830476790219e-13,
+     "rel": 1.3970817400579172e-12
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "daily_soil_oxygen_exchange[g O m-2]",
+     "a": "3.1578856019818686e0",
+     "b": "3.1578856019841366e0",
+     "abs": 2.2679635947042698e-12,
+     "rel": 7.181905491697615e-13
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "carbon_output[g C m-2]",
+     "a": "2.8341289214229772e0",
+     "b": "2.834128921423005e0",
+     "abs": 2.7977620220553945e-14,
+     "rel": 9.871682268605654e-15
+    }
+   ],
+   "extra_rows_allowed": true,
+   "identical": false,
+   "stream_path": "modelled_outputs/carbon/lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25cd1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25ch1.txt",
+   "rows_a": 314,
+   "rows_b": 3419,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 3105,
+   "cells_compared": 5338,
+   "cells_differing": 5337,
+   "cells_text_only": 0,
+   "max_abs": 3.2814320150009735e-09,
+   "max_rel": 1.501441313311409e-10,
+   "worst": {
+    "key": [
+     "1998",
+     "9",
+     "4"
+    ],
+    "column": "dissolved_oxygen_concentration_layer_1[g O2 m-3 water]",
+    "a": "2.185521329344414e1",
+    "b": "2.185521329016271e1",
+    "abs": 3.2814320150009735e-09,
+    "rel": 1.501441313311409e-10
+   },
+   "first_diff": {
+    "key": [
+     "1998",
+     "1",
+     "0"
+    ],
+    "column": "carbon_dioxide_emission[umol m-2 s-1]",
+    "a": "-5.6746639985157096e-2",
+    "b": "-5.6746639984265004e-2",
+    "abs": 8.920919558619289e-13,
+    "rel": 1.572061281681644e-11
+   },
+   "diffs_sample": [
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "carbon_dioxide_emission[umol m-2 s-1]",
+     "a": "-5.6746639985157096e-2",
+     "b": "-5.6746639984265004e-2",
+     "abs": 8.920919558619289e-13,
+     "rel": 1.572061281681644e-11
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "net_carbon_exchange[umol m-2 s-1]",
+     "a": "-5.6746639985157096e-2",
+     "b": "-5.6746639984265004e-2",
+     "abs": 8.920919558619289e-13,
+     "rel": 1.572061281681644e-11
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "methane_emission[umol m-2 s-1]",
+     "a": "-1.2707702696184476e-5",
+     "b": "-1.2707702693900396e-5",
+     "abs": 2.2840802464457396e-15,
+     "rel": 1.797398240306284e-10
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "oxygen_exchange[umol m-2 s-1]",
+     "a": "-1.4818508729305007e0",
+     "b": "-1.4818508726855553e0",
+     "abs": 2.4494539729857934e-10,
+     "rel": 1.6529692816806632e-10
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "dissolved_carbon_dioxide_carbon_concentration_layer_1[g C m-3 water]",
+     "a": "5.619759927907354e-1",
+     "b": "5.619759927976359e-1",
+     "abs": 6.900480187255198e-12,
+     "rel": 1.2278959022614367e-11
+    }
+   ],
+   "extra_rows_allowed": true,
+   "identical": false,
+   "stream_path": "modelled_outputs/carbon/lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25ch1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25eh1.txt",
+   "rows_a": 314,
+   "rows_b": 3419,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 3105,
+   "cells_compared": 1884,
+   "cells_differing": 317,
+   "cells_text_only": 0,
+   "max_abs": 1.5916157281026244e-12,
+   "max_rel": 1.0489389117446288e-13,
+   "worst": {
+    "key": [
+     "1998",
+     "13",
+     "7"
+    ],
+    "column": "canopy_temperature[degC]",
+    "a": "-1.517357884507527e1",
+    "b": "-1.5173578845076861e1",
+    "abs": 1.5916157281026244e-12,
+    "rel": 1.0489389117446288e-13
+   },
+   "first_diff": {
+    "key": [
+     "1998",
+     "1",
+     "12"
+    ],
+    "column": "temperature_function[fraction]",
+    "a": "1.1067971041669376e-5",
+    "b": "1.1067971041669378e-5",
+    "abs": 1.6940658945086007e-21,
+    "rel": 1.5306020300655624e-16
+   },
+   "diffs_sample": [
+    {
+     "key": [
+      "1998",
+      "1",
+      "12"
+     ],
+     "column": "temperature_function[fraction]",
+     "a": "1.1067971041669376e-5",
+     "b": "1.1067971041669378e-5",
+     "abs": 1.6940658945086007e-21,
+     "rel": 1.5306020300655624e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "15"
+     ],
+     "column": "canopy_temperature[degC]",
+     "a": "-1.6666160523594215e1",
+     "b": "-1.666616052359427e1",
+     "abs": 5.684341886080802e-14,
+     "rel": 3.4107087100436137e-15
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "15"
+     ],
+     "column": "temperature_function[fraction]",
+     "a": "4.0090625885774635e-5",
+     "b": "4.009062588577322e-5",
+     "abs": 1.4162390878091902e-18,
+     "rel": 3.532594107770501e-14
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "17"
+     ],
+     "column": "canopy_temperature[degC]",
+     "a": "-1.6933697236428145e1",
+     "b": "-1.6933697236428202e1",
+     "abs": 5.684341886080802e-14,
+     "rel": 3.3568226753532005e-15
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "17"
+     ],
+     "column": "temperature_function[fraction]",
+     "a": "3.53904120031821e-5",
+     "b": "3.539041200318132e-5",
+     "abs": 7.792703114739563e-19,
+     "rel": 2.2019249490621608e-14
+    }
+   ],
+   "extra_rows_allowed": true,
+   "identical": false,
+   "stream_path": "modelled_outputs/heat_energy/lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25eh1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25ed1.txt",
+   "rows_a": 13,
+   "rows_b": 142,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 129,
+   "cells_compared": 598,
+   "cells_differing": 493,
+   "cells_text_only": 0,
+   "max_abs": 6.423306331271306e-10,
+   "max_rel": 3.147646990078146e-08,
+   "worst": {
+    "key": [
+     "1998",
+     "11",
+     "23"
+    ],
+    "column": "surface_maximum_soil_temperature[degC]",
+    "a": "-2.040669156781405e-2",
+    "b": "-2.0406692210144683e-2",
+    "abs": 6.423306331271306e-10,
+    "rel": 3.147646990078146e-08
+   },
+   "first_diff": {
+    "key": [
+     "1998",
+     "1",
+     "23"
+    ],
+    "column": "maximum_soil_temperature_layer_1[degC]",
+    "a": "-1.4257103842642778e0",
+    "b": "-1.4257103842643346e0",
+    "abs": 5.684341886080802e-14,
+    "rel": 3.9870242573942655e-14
+   },
+   "diffs_sample": [
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "maximum_soil_temperature_layer_1[degC]",
+     "a": "-1.4257103842642778e0",
+     "b": "-1.4257103842643346e0",
+     "abs": 5.684341886080802e-14,
+     "rel": 3.9870242573942655e-14
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "minimum_soil_temperature_layer_1[degC]",
+     "a": "-1.9853445287650914e1",
+     "b": "-1.9853445287651027e1",
+     "abs": 1.1368683772161603e-13,
+     "rel": 5.7263027184672065e-15
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "minimum_soil_temperature_layer_2[degC]",
+     "a": "-6.841949022237657e0",
+     "b": "-6.841949022237884e0",
+     "abs": 2.2737367544323206e-13,
+     "rel": 3.323229604666976e-14
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "minimum_soil_temperature_layer_3[degC]",
+     "a": "-3.201375500670565e0",
+     "b": "-3.2013755006707925e0",
+     "abs": 2.2737367544323206e-13,
+     "rel": 7.102374444846906e-14
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "minimum_soil_temperature_layer_4[degC]",
+     "a": "-1.0581607362939849e-1",
+     "b": "-1.0581607362917111e-1",
+     "abs": 2.2737367544323206e-13,
+     "rel": 2.1487631098425264e-12
+    }
+   ],
+   "extra_rows_allowed": true,
+   "identical": false,
+   "stream_path": "modelled_outputs/heat_energy/lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25ed1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25eh1.txt",
+   "rows_a": 314,
+   "rows_b": 3419,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 3105,
+   "cells_compared": 7850,
+   "cells_differing": 5951,
+   "cells_text_only": 0,
+   "max_abs": 1.5714363144070376e-09,
+   "max_rel": 1.1073750184513545e-08,
+   "worst": {
+    "key": [
+     "1998",
+     "11",
+     "22"
+    ],
+    "column": "soil_temperature_layer_1[degC]",
+    "a": "1.41906426298533e-1",
+    "b": "1.419064247270967e-1",
+    "abs": 1.5714363144070376e-09,
+    "rel": 1.1073750184513545e-08
+   },
+   "first_diff": {
+    "key": [
+     "1998",
+     "1",
+     "0"
+    ],
+    "column": "ground_surface_net_radiation[W m-2]",
+    "a": "-1.2756275981859932e2",
+    "b": "-1.2756275981859937e2",
+    "abs": 5.684341886080802e-14,
+    "rel": 4.456113911430122e-16
+   },
+   "diffs_sample": [
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "ground_surface_net_radiation[W m-2]",
+     "a": "-1.2756275981859932e2",
+     "b": "-1.2756275981859937e2",
+     "abs": 5.684341886080802e-14,
+     "rel": 4.456113911430122e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "ground_surface_latent_heat_flux[W m-2]",
+     "a": "-1.9994207549371822e1",
+     "b": "-1.999420754937184e1",
+     "abs": 1.7763568394002505e-14,
+     "rel": 8.884357307054454e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "ground_surface_sensible_heat_flux[W m-2]",
+     "a": "-2.2320922467339532e1",
+     "b": "-2.2320922467339326e1",
+     "abs": 2.0605739337042905e-13,
+     "rel": 9.231580534896655e-15
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "ground_surface_storage_heat_flux[W m-2]",
+     "a": "2.1016695369783452e1",
+     "b": "2.1016695369783392e1",
+     "abs": 6.039613253960852e-14,
+     "rel": 2.873721652093909e-15
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "ecosystem_net_radiation[W m-2]",
+     "a": "-1.2756275981859932e2",
+     "b": "-1.2756275981859937e2",
+     "abs": 5.684341886080802e-14,
+     "rel": 4.456113911430122e-16
+    }
+   ],
+   "extra_rows_allowed": true,
+   "identical": false,
+   "stream_path": "modelled_outputs/heat_energy/lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25eh1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25nd1.txt",
+   "rows_a": 13,
+   "rows_b": 142,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 129,
+   "cells_compared": 273,
+   "cells_differing": 0,
+   "cells_text_only": 0,
+   "max_abs": 0.0,
+   "max_rel": 0.0,
+   "worst": null,
+   "first_diff": null,
+   "diffs_sample": [],
+   "extra_rows_allowed": true,
+   "identical": true,
+   "stream_path": "modelled_outputs/nitrogen/lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25nd1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25nd1.txt",
+   "rows_a": 13,
+   "rows_b": 142,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 129,
+   "cells_compared": 507,
+   "cells_differing": 429,
+   "cells_text_only": 0,
+   "max_abs": 7.170797289290931e-11,
+   "max_rel": 1.8083219165115485e-12,
+   "worst": {
+    "key": [
+     "1998",
+     "10",
+     "23"
+    ],
+    "column": "ammonium_nitrogen_concentration_layer_1[g N m-3]",
+    "a": "3.965442891453855e1",
+    "b": "3.965442891446684e1",
+    "abs": 7.170797289290931e-11,
+    "rel": 1.8083219165115485e-12
+   },
+   "first_diff": {
+    "key": [
+     "1998",
+     "1",
+     "23"
+    ],
+    "column": "residue_nitrogen[g N m-2]",
+    "a": "1.574154573397453e1",
+    "b": "1.5741545733974526e1",
+    "abs": 3.552713678800501e-15,
+    "rel": 2.256902682137994e-16
+   },
+   "diffs_sample": [
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "residue_nitrogen[g N m-2]",
+     "a": "1.574154573397453e1",
+     "b": "1.5741545733974526e1",
+     "abs": 3.552713678800501e-15,
+     "rel": 2.256902682137994e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "organic_nitrogen[g N m-2]",
+     "a": "4.972922016589455e2",
+     "b": "4.9729220165894554e2",
+     "abs": 5.684341886080802e-14,
+     "rel": 1.1430587222397777e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "ammonium_nitrogen[g N m-2]",
+     "a": "8.084754270056203e1",
+     "b": "8.084754270056162e1",
+     "abs": 4.121147867408581e-13,
+     "rel": 5.0974312016782324e-15
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "nitrate_nitrogen[g N m-2]",
+     "a": "4.076986193226776e0",
+     "b": "4.076986193226773e0",
+     "abs": 2.6645352591003757e-15,
+     "rel": 6.535551343114802e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "dissolved_organic_nitrogen_drainage[g N m-2]",
+     "a": "1.6561358324456057e-13",
+     "b": "1.6559914107125983e-13",
+     "abs": 1.44421733007375e-17,
+     "rel": 8.720403856856856e-05
+    }
+   ],
+   "extra_rows_allowed": true,
+   "identical": false,
+   "stream_path": "modelled_outputs/nitrogen/lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25nd1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25nh1.txt",
+   "rows_a": 314,
+   "rows_b": 3419,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 3105,
+   "cells_compared": 4082,
+   "cells_differing": 3768,
+   "cells_text_only": 0,
+   "max_abs": 1.3888672850681516e-10,
+   "max_rel": 3.394448072526818e-09,
+   "worst": {
+    "key": [
+     "1998",
+     "12",
+     "15"
+    ],
+    "column": "dinitrogen_emission[g N m-2 h-1]",
+    "a": "4.091584996084046e-2",
+    "b": "4.091585009972719e-2",
+    "abs": 1.3888672850681516e-10,
+    "rel": 3.394448072526818e-09
+   },
+   "first_diff": {
+    "key": [
+     "1998",
+     "1",
+     "0"
+    ],
+    "column": "nitrous_oxide_emission[g N m-2 h-1]",
+    "a": "-2.2636151583135775e-6",
+    "b": "-2.26361515820918e-6",
+    "abs": 1.0439765778203977e-16,
+    "rel": 4.611987925536661e-11
+   },
+   "diffs_sample": [
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "nitrous_oxide_emission[g N m-2 h-1]",
+     "a": "-2.2636151583135775e-6",
+     "b": "-2.26361515820918e-6",
+     "abs": 1.0439765778203977e-16,
+     "rel": 4.611987925536661e-11
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "dinitrogen_emission[g N m-2 h-1]",
+     "a": "-4.3911689717193525e-1",
+     "b": "-4.3911689707916957e-1",
+     "abs": 9.276568402327712e-11,
+     "rel": 2.1125509999893016e-10
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "ammonia_emission[g N m-2 h-1]",
+     "a": "-3.2437726498386524e-6",
+     "b": "-3.2437726523575213e-6",
+     "abs": 2.5188688855786855e-15,
+     "rel": 7.765244841521222e-10
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "dissolved_inorganic_nitrogen_drainage[g N m-2 h-1]",
+     "a": "1.731138064646512e-16",
+     "b": "2.0928651112254392e-16",
+     "abs": 3.617270465789273e-17,
+     "rel": 0.17283820378042644
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "dissolved_nitrous_oxide_nitrogen_concentration_layer_1[g N m-3 water]",
+     "a": "6.158809890489937e-4",
+     "b": "6.158809890575595e-4",
+     "abs": 8.565739263721728e-15,
+     "rel": 1.3908107923300722e-11
+    }
+   ],
+   "extra_rows_allowed": true,
+   "identical": false,
+   "stream_path": "modelled_outputs/nitrogen/lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25nh1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25pd1.txt",
+   "rows_a": 13,
+   "rows_b": 142,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 129,
+   "cells_compared": 234,
+   "cells_differing": 0,
+   "cells_text_only": 0,
+   "max_abs": 0.0,
+   "max_rel": 0.0,
+   "worst": null,
+   "first_diff": null,
+   "diffs_sample": [],
+   "extra_rows_allowed": true,
+   "identical": true,
+   "stream_path": "modelled_outputs/phosphorus/lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25pd1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25pd1.txt",
+   "rows_a": 13,
+   "rows_b": 142,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 129,
+   "cells_compared": 351,
+   "cells_differing": 272,
+   "cells_text_only": 0,
+   "max_abs": 2.8048674494129955e-10,
+   "max_rel": 8.501001343988713e-12,
+   "worst": {
+    "key": [
+     "1998",
+     "8",
+     "23"
+    ],
+    "column": "sorbed_phosphate_phosphorus_concentration_layer_6[g P m-3]",
+    "a": "3.2994553651877126e1",
+    "b": "3.299455365215761e1",
+    "abs": 2.8048674494129955e-10,
+    "rel": 8.501001343988713e-12
+   },
+   "first_diff": {
+    "key": [
+     "1998",
+     "1",
+     "23"
+    ],
+    "column": "organic_phosphorus[g P m-2]",
+    "a": "1.4110771529366497e2",
+    "b": "1.4110771529366502e2",
+    "abs": 5.684341886080802e-14,
+    "rel": 4.028370719666806e-16
+   },
+   "diffs_sample": [
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "organic_phosphorus[g P m-2]",
+     "a": "1.4110771529366497e2",
+     "b": "1.4110771529366502e2",
+     "abs": 5.684341886080802e-14,
+     "rel": 4.028370719666806e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "phosphate_phosphorus[g P m-2]",
+     "a": "3.297100064746577e1",
+     "b": "3.297100064746958e1",
+     "abs": 3.808509063674137e-12,
+     "rel": 1.155108728544588e-13
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "dissolved_organic_phosphorus_drainage[g P m-2]",
+     "a": "5.5413644395428476e-14",
+     "b": "5.5408925984470136e-14",
+     "abs": 4.718410958340666e-18,
+     "rel": 8.514890167970843e-05
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "dissolved_inorganic_phosphorus_drainage[g P m-2]",
+     "a": "1.3687958421687073e-12",
+     "b": "1.3683062545579551e-12",
+     "abs": 4.895876107522291e-16,
+     "rel": 0.00035767759929525436
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "precipitated_phosphorus[g P m-2]",
+     "a": "1.185243459976766e3",
+     "b": "1.185243459976761e3",
+     "abs": 5.002220859751105e-12,
+     "rel": 4.2204163352642865e-15
+    }
+   ],
+   "extra_rows_allowed": true,
+   "identical": false,
+   "stream_path": "modelled_outputs/phosphorus/lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25pd1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25wd1.txt",
+   "rows_a": 13,
+   "rows_b": 142,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 129,
+   "cells_compared": 39,
+   "cells_differing": 0,
+   "cells_text_only": 0,
+   "max_abs": 0.0,
+   "max_rel": 0.0,
+   "worst": null,
+   "first_diff": null,
+   "diffs_sample": [],
+   "extra_rows_allowed": true,
+   "identical": true,
+   "stream_path": "modelled_outputs/water/lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25wd1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25wh1.txt",
+   "rows_a": 314,
+   "rows_b": 3419,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 3105,
+   "cells_compared": 1570,
+   "cells_differing": 612,
+   "cells_text_only": 0,
+   "max_abs": 7.324585382662008e-12,
+   "max_rel": 8.915974409184226e-11,
+   "worst": {
+    "key": [
+     "1998",
+     "4",
+     "6"
+    ],
+    "column": "canopy_total_water_potential[MPa]",
+    "a": "-8.215126071317558e-2",
+    "b": "-8.215126072050016e-2",
+    "abs": 7.324585382662008e-12,
+    "rel": 8.915974409184226e-11
+   },
+   "first_diff": {
+    "key": [
+     "1998",
+     "1",
+     "0"
+    ],
+    "column": "canopy_turgor_potential[MPa]",
+    "a": "1.4931896115996053e0",
+    "b": "1.4931896115996055e0",
+    "abs": 2.220446049250313e-16,
+    "rel": 1.4870489534625288e-16
+   },
+   "diffs_sample": [
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "canopy_turgor_potential[MPa]",
+     "a": "1.4931896115996053e0",
+     "b": "1.4931896115996055e0",
+     "abs": 2.220446049250313e-16,
+     "rel": 1.4870489534625288e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "1"
+     ],
+     "column": "canopy_total_water_potential[MPa]",
+     "a": "-1.346468741530682e-2",
+     "b": "-1.3464687415307042e-2",
+     "abs": 2.220446049250313e-16,
+     "rel": 1.6490884494845727e-14
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "1"
+     ],
+     "column": "canopy_turgor_potential[MPa]",
+     "a": "1.4928447609418707e0",
+     "b": "1.492844760941871e0",
+     "abs": 2.220446049250313e-16,
+     "rel": 1.4873924652750775e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "10"
+     ],
+     "column": "canopy_total_water_potential[MPa]",
+     "a": "-2.849631951620599e0",
+     "b": "-2.849631951621249e0",
+     "abs": 6.501466032204917e-13,
+     "rel": 2.2815107854563534e-13
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "11"
+     ],
+     "column": "canopy_total_water_potential[MPa]",
+     "a": "-2.9063676831298353e0",
+     "b": "-2.9063676831303704e0",
+     "abs": 5.351274978693255e-13,
+     "rel": 1.841224360480619e-13
+    }
+   ],
+   "extra_rows_allowed": true,
+   "identical": false,
+   "stream_path": "modelled_outputs/water/lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25wh1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25wd1.txt",
+   "rows_a": 13,
+   "rows_b": 142,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 129,
+   "cells_compared": 624,
+   "cells_differing": 501,
+   "cells_text_only": 0,
+   "max_abs": 8.560800779378042e-08,
+   "max_rel": 6.831251123109891e-11,
+   "worst": {
+    "key": [
+     "1998",
+     "13",
+     "23"
+    ],
+    "column": "surface_water_potential[MPa]",
+    "a": "-1.253181975760947e3",
+    "b": "-1.253181975675339e3",
+    "abs": 8.560800779378042e-08,
+    "rel": 6.831251123109891e-11
+   },
+   "first_diff": {
+    "key": [
+     "1998",
+     "1",
+     "23"
+    ],
+    "column": "evaporation[mm]",
+    "a": "2.914395686004296e-1",
+    "b": "2.914395686004285e-1",
+    "abs": 1.0547118733938987e-15,
+    "rel": 3.618972806125489e-15
+   },
+   "diffs_sample": [
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "evaporation[mm]",
+     "a": "2.914395686004296e-1",
+     "b": "2.914395686004285e-1",
+     "abs": 1.0547118733938987e-15,
+     "rel": 3.618972806125489e-15
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "soil_water_storage[mm]",
+     "a": "7.961827913704979e2",
+     "b": "7.961827913705022e2",
+     "abs": 4.320099833421409e-12,
+     "rel": 5.4260150812667574e-15
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "water_outflow[mm]",
+     "a": "2.4293508226414187e-1",
+     "b": "2.429350822640831e-1",
+     "abs": 5.875855357828641e-14,
+     "rel": 2.418693629205789e-13
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "volumetric_liquid_water_fraction_layer_1[m3 m-3]",
+     "a": "1.481767886593869e-1",
+     "b": "1.4817678865938655e-1",
+     "abs": 3.608224830031759e-16,
+     "rel": 2.435081002009001e-15
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "23"
+     ],
+     "column": "volumetric_liquid_water_fraction_layer_2[m3 m-3]",
+     "a": "1.4878429908096172e-1",
+     "b": "1.4878429908096258e-1",
+     "abs": 8.604228440844963e-16,
+     "rel": 5.7830217932894114e-15
+    }
+   ],
+   "extra_rows_allowed": true,
+   "identical": false,
+   "stream_path": "modelled_outputs/water/lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25wd1.txt"
+  },
+  {
+   "file": "lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25wh1.txt",
+   "rows_a": 314,
+   "rows_b": 3419,
+   "malformed_rows_a": 0,
+   "malformed_rows_b": 0,
+   "header_identical": true,
+   "keys_only_in_a": 0,
+   "keys_only_in_b": 3105,
+   "cells_compared": 10048,
+   "cells_differing": 7350,
+   "cells_text_only": 0,
+   "max_abs": 7.915934574498351e-11,
+   "max_rel": 5.0845413539765787e-11,
+   "worst": {
+    "key": [
+     "1998",
+     "9",
+     "12"
+    ],
+    "column": "surface_volumetric_liquid_water_fraction[m3 m-3]",
+    "a": "1.556863052732352e0",
+    "b": "1.5568630528115113e0",
+    "abs": 7.915934574498351e-11,
+    "rel": 5.0845413539765787e-11
+   },
+   "first_diff": {
+    "key": [
+     "1998",
+     "1",
+     "0"
+    ],
+    "column": "evapotranspiration[mm]",
+    "a": "3.044457906815937e-2",
+    "b": "3.0444579068159398e-2",
+    "abs": 2.7755575615628914e-17,
+    "rel": 9.116754596438882e-16
+   },
+   "diffs_sample": [
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "evapotranspiration[mm]",
+     "a": "3.044457906815937e-2",
+     "b": "3.0444579068159398e-2",
+     "abs": 2.7755575615628914e-17,
+     "rel": 9.116754596438882e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "external_water_outflow[mm]",
+     "a": "2.4293508218884352e-1",
+     "b": "2.4293508218883522e-1",
+     "abs": 8.298917109073045e-15,
+     "rel": 3.416104843442065e-14
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "volumetric_liquid_water_fraction_layer_1[m3 m-3]",
+     "a": "1.4419044839096729e-1",
+     "b": "1.4419044839096626e-1",
+     "abs": 1.0269562977782698e-15,
+     "rel": 7.12222140397063e-15
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "volumetric_liquid_water_fraction_layer_2[m3 m-3]",
+     "a": "2.7657307497547096e-1",
+     "b": "2.765730749754709e-1",
+     "abs": 5.551115123125783e-17,
+     "rel": 2.0071061232616757e-16
+    },
+    {
+     "key": [
+      "1998",
+      "1",
+      "0"
+     ],
+     "column": "volumetric_liquid_water_fraction_layer_7[m3 m-3]",
+     "a": "3.293060746637359e-1",
+     "b": "3.29306074663736e-1",
+     "abs": 1.1102230246251565e-16,
+     "rel": 3.3714015927548176e-16
+    }
+   ],
+   "extra_rows_allowed": true,
+   "identical": false,
+   "stream_path": "modelled_outputs/water/lat_45.30_lon_-75.70_soil_or_eco_1998_exec01_scenario01_rep01_scene01_cell01_pop00_f25wh1.txt"
+  }
+ ],
+ "streams_identical": 5,
+ "streams_differing": 12,
+ "allow_extra_rows": true,
+ "status": "DIFFERENT"
+}

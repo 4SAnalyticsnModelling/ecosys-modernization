@@ -1,0 +1,6 @@
+OVERSIZE LOG NOT COMMITTED (GitHub 100 MB limit)
+path: audit/runs/ottawa/zig017-debug-run-20261015-1/stderr.log
+bytes: 144091593
+sha256: 42dd3f20f1c8360faeb303d36ec364f7945e3b4e497b95ba2c27f22d4d6f5f22
+lines: 351726
+kept on disk in-repo, untracked; every count quoted from it in cycle_00002.md is reproducible from this file.

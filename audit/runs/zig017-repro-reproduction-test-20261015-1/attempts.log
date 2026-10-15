@@ -1,0 +1,42 @@
+=== attempt 1 15:21:14
+42/52 plant.root.plant_root_system.test_0...OK
+43/52 plant.growth.storage_remobilization.test_0...OK
+44/52 plant.growth.shoot_growth_runtime.test_0...OK
+45/52 validation.plant_root_metabolism_test.test_0...OK
+46/52 canopy.photosynthesis.photosynthesis.test_0...OK
+47/52 management.land_management.test_0...OK
+48/52 management.plant_harvest_runtime.test_0...OK
+49/52 validation.plant_harvest_runtime_test.test_0...OK
+50/52 validation.canopy_photosynthesis_test.test_0...OK
+51/52 io.input.cell_grid_file.test_0...OK
+52/52 driver.runscript.test_0...OK
+All 52 tests passed.
+attempt 1 exit=0
+=== attempt 2 15:21:17
+42/52 plant.root.plant_root_system.test_0...OK
+43/52 plant.growth.storage_remobilization.test_0...OK
+44/52 plant.growth.shoot_growth_runtime.test_0...OK
+45/52 validation.plant_root_metabolism_test.test_0...OK
+46/52 canopy.photosynthesis.photosynthesis.test_0...OK
+47/52 management.land_management.test_0...OK
+48/52 management.plant_harvest_runtime.test_0...OK
+49/52 validation.plant_harvest_runtime_test.test_0...OK
+50/52 validation.canopy_photosynthesis_test.test_0...OK
+51/52 io.input.cell_grid_file.test_0...OK
+52/52 driver.runscript.test_0...OK
+All 52 tests passed.
+attempt 2 exit=0
+=== attempt 3 15:21:18
+42/52 plant.root.plant_root_system.test_0...OK
+43/52 plant.growth.storage_remobilization.test_0...OK
+44/52 plant.growth.shoot_growth_runtime.test_0...OK
+45/52 validation.plant_root_metabolism_test.test_0...OK
+46/52 canopy.photosynthesis.photosynthesis.test_0...OK
+47/52 management.land_management.test_0...OK
+48/52 management.plant_harvest_runtime.test_0...OK
+49/52 validation.plant_harvest_runtime_test.test_0...OK
+50/52 validation.canopy_photosynthesis_test.test_0...OK
+51/52 io.input.cell_grid_file.test_0...OK
+52/52 driver.runscript.test_0...OK
+All 52 tests passed.
+attempt 3 exit=0

@@ -1,90 +1,18 @@
 {
   "commit": null,
-  "cycle": 1,
+  "cycle": 2,
   "decisions": [],
-  "gates": {
-    "G1": {
-      "at": "2026-10-15T08:58:20Z",
-      "evidence": "zig 0.17.0; exit 0: audit/runs/zig017-debug-20261015-1 (28.1s), audit/runs/zig017-releasesafe-20261015-1 (163.6s), audit/runs/zig017-releasefast-20261015-1 (168.4s); preflight zig-version+build-zon-pin PASS",
-      "result": "PASS"
-    },
-    "G2": {
-      "at": "2026-10-15T08:58:20Z",
-      "evidence": "audit/runs/zig017-test-20261014-4/stderr.log:2498 4518/4520 passed (1 skip=env-gated freezing benchmark, 1 crash=tracked issue-106 fixture OOB at hourly_heat_water_solute.zig:10686); zero assertion failures; pytest 48 failed == recorded baseline 48",
-      "result": "PASS"
-    },
-    "G3": {
-      "at": "2026-10-15T08:58:21Z",
-      "evidence": "no run started this cycle; bounded strict run on the 0.17 ReleaseFast artefact is the next cycle's first command (cycle_00001.md section 6)",
-      "result": "NA"
-    },
-    "G4": {
-      "at": "2026-10-15T10:05:04Z",
-      "evidence": "corrected wording after G7: no .f file was needed or touched for the five hand fixes (test-side + host-portability edits); the one legacy citation was re-read (f77src/stomate.f:69-70). Full 0.17 traceability re-derivation is cycle 00002",
-      "result": "NA"
-    },
-    "G5": {
-      "at": "2026-10-15T08:58:21Z",
-      "evidence": "no output produced this cycle; parity re-derivation pending (section 6)",
-      "result": "NA"
-    },
-    "G6": {
-      "at": "2026-10-15T10:09:16Z",
-      "evidence": "re-scanned vs origin/main after the final edits: 9 candidate lines, all prose or already-registered -- 8 are the string DEV-021 quoted in cycle_00001.md/.agent ledgers and in the reaction_solver_tests comment (registered + CONFIRMED at audit/intentional-deviations.md:28, cited not new); 1 is the sentence 'new clamps/floors 0; new unreachable()/safety-off 0' in this cycle record matching its own pattern, not code. Independent numeric-multiset scan of the whole diff: 581 changed .zig files, numeric-token deltas only in 10 files, all mechanical or test-side (verifier re-derived the same 10); no tolerance, epsilon, ceiling, iteration count or floor value changed; 0 test blocks added or removed; f77src/, f77example/, ecosys-ng-prod-examples/ untouched",
-      "result": "PASS"
-    },
-    "G7": {
-      "at": "2026-10-15T10:05:04Z",
-      "evidence": "fresh-context read-only verifier, all 5 claims re-derived, no reproduced FAIL: correctly-rounded pins by 60-digit Decimal.exp (+2.41e-19 above midpoint -> 0x3fa0dba51e539ea0); aqueous_environment.zig:25-38 byte-identical to HEAD and matching f77src/stomate.f:69-70; whole-diff numeric scan of 580 files flags 10 accounted files, expectApproxEq +-116 balanced, 0 deleted tests, 0 new clamps; reaction fixture fires the guard for the original reason (warn once, error+bytes intact); selectionBaseName safe + production-neutral. Bounded run zig test src/module_index.zig --test-filter -> 3 pinned tests pass on 0.17.0. Details: .agent/cycles/cycle_00001.md section 3",
-      "result": "PASS"
-    },
-    "G8": {
-      "at": "2026-10-15T10:12:37Z",
-      "evidence": "commit 026c309 pushed by ./sync-main.sh push (b7b359d..026c309 main -> main); git rev-parse HEAD origin/main both 026c309",
-      "result": "PASS"
-    },
-    "G9": {
-      "at": "2026-10-15T08:58:21Z",
-      "evidence": "caches .tmp/ .cache/ .uv-cache/ ecosys-ng/.zig-cache ecosys-ng/.zig-cache-global; receipts under audit/runs/; scratch src/_scratch_test_root.zig and src/.probe_molarity.zig deleted; no write outside the repo",
-      "result": "PASS"
-    }
-  },
-  "metrics": {
-    "build_debug_s": "28.1",
-    "build_releasefast_s": "168.4",
-    "build_releasesafe_s": "163.6",
-    "fmt_pending_files": "168",
-    "pytest_tooling_failures": "48",
-    "tests_known_crash": "1",
-    "tests_passed": "4518",
-    "tests_skipped": "1",
-    "tests_total": "4520",
-    "zig_files_changed": "581",
-    "zig_version": "0.17.0"
-  },
+  "gates": {},
+  "metrics": {},
   "next_target": "Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded oracle for those hours (cycle_00001.md section 6).",
-  "opened_utc": "2026-10-13T20:58:21Z",
-  "record": ".agent/cycles/cycle_00001.md",
+  "opened_utc": "2026-10-15T10:25:44Z",
+  "record": ".agent/cycles/cycle_00002.md",
   "schema_version": 1,
-  "status": "DECIDED",
+  "status": "PLANNING",
   "steps_done": [
-    "0 plan: record opened",
-    "1 preflight PASS on 0.17.0 pin; codemod dry-run scope confirmed 1197 repeats / 188 files (2026-10-13T22:49Z)",
-    "2 build.zig b.args passthrough deleted (Zig 0.17 build runner applies -- args itself)",
-    "2026-10-15T09:01:31Z 3 build.zig b.args passthrough deleted; ** codemod 1197 repeats/188 files; zig fmt 0.17 rewrote 1563 @intFromEnum->@backingInt + 165 @enumFromInt->@fromBackingInt; std.meta.fields -> ti_compat.fieldViews; pointer .is_const -> pointer.attrs.const",
-    "2026-10-15T09:01:31Z 4 G1 PASS: Debug 28.1s / ReleaseSafe 163.6s / ReleaseFast 168.4s all exit 0 on zig 0.17.0 (audit/runs/zig017-{debug,releasesafe,releasefast}-20261015-1); preflight PASS",
-    "2026-10-15T09:01:31Z 4 G2 PASS: 4518/4520 tests pass, 0 assertion failures (trajectory 9 failed -> 4 -> 0); only failure = tracked issue-106 crash; pytest 48 failed == baseline 48",
-    "2026-10-15T09:01:31Z 4 ulp arbitration by exact arithmetic: exp(-3.413499999999999978683717927197)=0.032925758316023176033...; runtime @exp is correctly rounded, comptime @exp literal was 1 ulp low; pinned the correctly-rounded double and KEPT expectEqual (no tolerance) in aqueous_environment.zig:82 and stomatal_resistance.zig:290",
-    "2026-10-15T09:01:31Z 4 record.zig:247 selectionBaseName splits on / and \\ (host-independent editor-name check); reaction_solver_tests fixture sets ammonium_non_band=1 so the DEV-021-gated molarity guard is exercised for a present zone",
-    "2026-10-15T09:01:31Z 4 issue-106 re-measured on 0.17: the executable-root test step compiles and runs for the first time (120 tests, 119 pass); the crash is now fixture OOB schedules[4] vs the 8-rung recovery_substep_counts ladder. Untouched: the NFH/wthr.f question stays open",
-    "2026-10-15T09:01:31Z 3 scratch src/_scratch_test_root.zig and src/.probe_molarity.zig deleted (G9)",
-    "2026-10-15T10:05:04Z 4 G7 PASS (fresh-context verifier, section 3): no reproduced FAIL; two RECORD errors it caught and I fixed --  is rejected on 0.17 (working bounded form: zig test src/module_index.zig --test-filter) and the citation is f77src/stomate.f:69-70, not STOMATE.F:69-73",
-    "2026-10-15T10:05:04Z 9 audit/manifest/f77index.json was MISSING (gitignored) so f77query.py was dead; rebuilt with the recorded command -- totals reproduce the 2026-09-21 record exactly (95/95/53/1520/0/53803), independent proof f77src/ has not drifted. Backlog item added: rebuild after any clone",
-    "2026-10-15T10:05:04Z 1 command_registry.json re-pinned: toolchains.zig.current_version=0.17.0 + two dated 0.17 command entries; stale 'migration not yet executed' prose corrected; dated 0.16 records kept verbatim",
-    "2026-10-15T10:18:20Z close: zig 0.17 (cycle 00001): compile + full test suite green on 0.17.0; parity open",
-    "2026-10-15T10:21:18Z close: cycle 00001 close-out: fix cycle_runner.touched_paths (set+list TypeError crashed ; post-push it now falls back to HEAD's file list so the science-touch/G7 check is not evaluated against an empty diff) + final gate evidence, ledgers and cycle record"
+    "0 plan: record opened"
   ],
-  "sync_status": "in_sync",
-  "target": "Does ecosys-ng compile (Debug/ReleaseSafe/ReleaseFast) and pass its whole test suite on Zig 0.17.0 with every src change provably mechanical (no production number, tolerance, floor or clamp moved)?",
-  "updated_utc": "2026-10-15T10:21:18Z"
+  "sync_status": "unknown",
+  "target": "Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded legacy oracle for the same hours, every difference explained by exact arithmetic or diagnosed to file:line (no tolerance loosened, no bound moved).",
+  "updated_utc": "2026-10-15T10:25:44Z"
 }

@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "./ecosys_ng",
+    "runottawa"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/evidence/runs/zig017-f6-200-diag-20261015-1/deck",
+  "elapsed_seconds": 2400.022,
+  "exit_code": 124,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "parent_pid": 54058,
+  "pid": 54059,
+  "started_unix": 1792076221.455538,
+  "status": "TIMED_OUT",
+  "stderr": {
+    "path": "audit/runs/ottawa/zig017-f6-200-diag-20261015-1/stderr.log",
+    "sha256": "46bd3df9883a1f3f9c4f7f42dfa06aa146976b13aaca54c49d4dd14e2db59a29"
+  },
+  "stdout": {
+    "path": "audit/runs/ottawa/zig017-f6-200-diag-20261015-1/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": 2400.0
+}
