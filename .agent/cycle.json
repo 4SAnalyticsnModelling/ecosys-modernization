@@ -38,6 +38,11 @@
       "evidence": "fresh-context read-only verifier, all 5 claims re-derived, no reproduced FAIL: correctly-rounded pins by 60-digit Decimal.exp (+2.41e-19 above midpoint -> 0x3fa0dba51e539ea0); aqueous_environment.zig:25-38 byte-identical to HEAD and matching f77src/stomate.f:69-70; whole-diff numeric scan of 580 files flags 10 accounted files, expectApproxEq +-116 balanced, 0 deleted tests, 0 new clamps; reaction fixture fires the guard for the original reason (warn once, error+bytes intact); selectionBaseName safe + production-neutral. Bounded run zig test src/module_index.zig --test-filter -> 3 pinned tests pass on 0.17.0. Details: .agent/cycles/cycle_00001.md section 3",
       "result": "PASS"
     },
+    "G8": {
+      "at": "2026-10-15T10:12:37Z",
+      "evidence": "commit 026c309 pushed by ./sync-main.sh push (b7b359d..026c309 main -> main); git rev-parse HEAD origin/main both 026c309",
+      "result": "PASS"
+    },
     "G9": {
       "at": "2026-10-15T08:58:21Z",
       "evidence": "caches .tmp/ .cache/ .uv-cache/ ecosys-ng/.zig-cache ecosys-ng/.zig-cache-global; receipts under audit/runs/; scratch src/_scratch_test_root.zig and src/.probe_molarity.zig deleted; no write outside the repo",
@@ -61,7 +66,7 @@
   "opened_utc": "2026-10-13T20:58:21Z",
   "record": ".agent/cycles/cycle_00001.md",
   "schema_version": 1,
-  "status": "VERIFYING",
+  "status": "DECIDED",
   "steps_done": [
     "0 plan: record opened",
     "1 preflight PASS on 0.17.0 pin; codemod dry-run scope confirmed 1197 repeats / 188 files (2026-10-13T22:49Z)",
@@ -75,9 +80,11 @@
     "2026-10-15T09:01:31Z 3 scratch src/_scratch_test_root.zig and src/.probe_molarity.zig deleted (G9)",
     "2026-10-15T10:05:04Z 4 G7 PASS (fresh-context verifier, section 3): no reproduced FAIL; two RECORD errors it caught and I fixed --  is rejected on 0.17 (working bounded form: zig test src/module_index.zig --test-filter) and the citation is f77src/stomate.f:69-70, not STOMATE.F:69-73",
     "2026-10-15T10:05:04Z 9 audit/manifest/f77index.json was MISSING (gitignored) so f77query.py was dead; rebuilt with the recorded command -- totals reproduce the 2026-09-21 record exactly (95/95/53/1520/0/53803), independent proof f77src/ has not drifted. Backlog item added: rebuild after any clone",
-    "2026-10-15T10:05:04Z 1 command_registry.json re-pinned: toolchains.zig.current_version=0.17.0 + two dated 0.17 command entries; stale 'migration not yet executed' prose corrected; dated 0.16 records kept verbatim"
+    "2026-10-15T10:05:04Z 1 command_registry.json re-pinned: toolchains.zig.current_version=0.17.0 + two dated 0.17 command entries; stale 'migration not yet executed' prose corrected; dated 0.16 records kept verbatim",
+    "2026-10-15T10:18:20Z close: zig 0.17 (cycle 00001): compile + full test suite green on 0.17.0; parity open",
+    "2026-10-15T10:21:18Z close: cycle 00001 close-out: fix cycle_runner.touched_paths (set+list TypeError crashed ; post-push it now falls back to HEAD's file list so the science-touch/G7 check is not evaluated against an empty diff) + final gate evidence, ledgers and cycle record"
   ],
   "sync_status": "in_sync",
   "target": "Does ecosys-ng compile (Debug/ReleaseSafe/ReleaseFast) and pass its whole test suite on Zig 0.17.0 with every src change provably mechanical (no production number, tolerance, floor or clamp moved)?",
-  "updated_utc": "2026-10-15T10:09:16Z"
+  "updated_utc": "2026-10-15T10:21:18Z"
 }

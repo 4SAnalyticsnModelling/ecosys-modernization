@@ -1,10 +1,10 @@
 # Mission State — ecosys-ng Ottawa (single autonomous agent)
 
 <!-- runner:begin -->
-## Cycle 00001 · VERIFYING · 2026-10-15T10:09:16Z
+## Cycle 00001 · PUSHED · 2026-10-15T10:12:37Z
 - Actor: single autonomous agent (any harness/model). Verification: gates G1-G9 (Zig 0.17.x build, repo-contained work) + read-only sub-agents.
 - Target: Does ecosys-ng compile (Debug/ReleaseSafe/ReleaseFast) and pass its whole test suite on Zig 0.17.0 with every src change provably mechanical (no production number, tolerance, floor or clamp moved)?
-- Gates: G1=PASS, G2=PASS, G3=NA, G4=NA, G5=NA, G6=PASS, G7=PASS, G9=PASS
+- Gates: G1=PASS, G2=PASS, G3=NA, G4=NA, G5=NA, G6=PASS, G7=PASS, G8=PASS, G9=PASS
 - Sync: in_sync (push every completed cycle to origin/main)
 - Next target: Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded oracle for those hours (cycle_00001.md section 6).
 <!-- runner:end -->

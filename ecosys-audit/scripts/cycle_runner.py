@@ -129,8 +129,18 @@ def git_state() -> dict:
 
 def touched_paths(ref: str = "origin/main") -> list[str]:
     out = sh(["git", "diff", "--name-only", ref]).stdout.splitlines()
+    if not out:
+        # Nothing differs from `ref` — the agent already committed and pushed by hand
+        # (`./sync-main.sh push`), which is the protocol's own path. Fall back to the files the
+        # last commit touched, best-effort, so the science-touch check still sees the cycle's
+        # work instead of silently reading an empty tree. Measured 2026-10-15 (cycle 00001):
+        # after the push, `git diff --name-only origin/main` is empty and the G7 requirement
+        # would have evaluated against nothing. A cycle split over several commits is still
+        # under-reported here — record G7 explicitly in that case.
+        out = sh(["git", "show", "--name-only", "--pretty=format:", "HEAD"]).stdout.splitlines()
     untracked = sh(["git", "ls-files", "--others", "--exclude-standard"]).stdout.splitlines()
-    return sorted(set(out) + [l for l in untracked if l.startswith(("ecosys-ng/", "audit/", ".agent/cycles/"))])
+    kept = {line for line in untracked if line.startswith(("ecosys-ng/", "audit/", ".agent/cycles/"))}
+    return sorted(set(out) | kept)
 
 
 def write_state_block(ledger: dict) -> None:
