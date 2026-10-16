@@ -37,6 +37,10 @@ lives here, not in a conversation. Protocol: `.agent/protocol.md` §9.
        (`ecosys-source-navigation`), not a full legacy run.
    0c. **Campaign budget**: at 57 h/min (spring-limited, 1 cell) 262,920 h is ~770 h of wall clock — the "one full run"
        plan needs either checkpointed segments (each <= 3 h per protocol) or the performance thread.
+       **Revised 2026-10-16 (user directive): there is no wall-clock stop.** Runs are started unbounded
+       (`run_ottawa.py` without `--timeout`) and proceed to natural completion however long that takes; the
+       ~770 h wall clock is accepted and monitored in the background. The performance thread is an optimization,
+       not a prerequisite. A cycle stays a bounded *question*; only the run is unbounded.
    Toolchain mandate `.agent/protocol.md` §8, pin `.agent/toolchain.json`, check
    `uv run ecosys-audit/scripts/preflight.py`.
 1. **Advance the strict Ottawa run past the current failure hour.** Frozen-topsoil phase stagnation at 1998 d354

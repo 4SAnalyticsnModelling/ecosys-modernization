@@ -2,9 +2,11 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # ///
-"""Execute one bounded command; preserve raw streams and return a small receipt.
+"""Execute one command, optionally unbounded; preserve raw streams and return a small receipt.
 
 No shell interpretation. This wrapper does not establish scientific/test acceptance.
+2026-10-16 directive: production campaign runs proceed to natural completion — pass no
+--timeout for an unbounded run; the receipt then records timeout_seconds null.
 """
 from __future__ import annotations
 
@@ -49,9 +51,11 @@ def stop_owned_process(p: subprocess.Popen):
     p.wait(timeout=30)
 
 
-def run(root: Path, cwd: Path, out: Path, argv: list[str], timeout: float) -> dict:
-    if not argv or timeout <= 0:
-        raise ProtocolError("Command argv and positive timeout required")
+def run(root: Path, cwd: Path, out: Path, argv: list[str], timeout: float | None) -> dict:
+    if not argv:
+        raise ProtocolError("Command argv required")
+    if timeout is not None and timeout <= 0:
+        raise ProtocolError("Timeout, when given, must be positive")
     out.mkdir(parents=True, exist_ok=False)
     start = time.time()
     stdout, stderr = out / "stdout.log", out / "stderr.log"
@@ -88,7 +92,8 @@ def main():
     ap.add_argument("--root", type=Path, default=ROOT)
     ap.add_argument("--cwd", type=Path, default=Path.cwd())
     ap.add_argument("--out", help="New project-relative directory under audit/runs or audit/reviews")
-    ap.add_argument("--timeout", type=float, required=True, help="Seconds; caller tool timeout must exceed this by >=60s")
+    ap.add_argument("--timeout", type=float, default=None,
+                    help="Seconds; omit for an unbounded run that proceeds to natural completion")
     ap.add_argument("argv", nargs=argparse.REMAINDER)
     a = ap.parse_args()
     root = a.root.resolve()

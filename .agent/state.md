@@ -156,3 +156,11 @@ stiff solute image. Terminal ladder attempt enables DEV-011/014-ceiling/015 toge
   Windows account.
 - Richards→enthalpy rebase applies internal inflow heat only in the later spatial solve.
 - Many failure-only TEMP_DIAGNOSTIC logs to strip before release.
+
+## Run policy change (2026-10-16, user directive)
+- **No wall-clock stops, ever.** Production runs are started unbounded (`run_ottawa.py` without `--timeout`)
+  and proceed to natural completion — however many days that takes. `TIMED_OUT` receipts (all runs before this
+  date) are bounded stops, recorded as history, never scientific results. `run_logged.py`/`run_ottawa.py`
+  accept omitted `--timeout` (timeout_seconds null in receipts); the command-registry entry is renamed
+  `zig017_ottawa_run` (renamed_from `zig017_ottawa_bounded_run`); protocol §8 records the rule.
+- Cycle scoping is unchanged: one bounded, falsifiable question per cycle; only the run is unbounded.

@@ -89,8 +89,9 @@ def main():
     ap.add_argument("--lock-file", type=Path, default=None, help="Machine lock path (default: .agent/locks/machine.lock)")
     ap.add_argument("--restart-from", help="<prior-run-id>:<hour> checkpoint set to replay from")
     ap.add_argument("--threads", type=int)
-    ap.add_argument("--timeout", type=float, required=True, help="seconds")
-    ap.add_argument("--full-run-justification", help="required when --timeout exceeds 3 h (plan section 5)")
+    ap.add_argument("--timeout", type=float, default=None,
+                    help="seconds; omit to run to natural completion (unbounded, 2026-10-16 directive)")
+    ap.add_argument("--full-run-justification", help="required when a bounded --timeout exceeds 3 h (plan section 5)")
     ap.add_argument("--min-free-gb", type=float, default=20)
     ap.add_argument("--io-probe-limit", type=float, default=2.0)
     a = ap.parse_args()
@@ -98,8 +99,8 @@ def main():
     try:
         if a.mode == "dump":
             raise ProtocolError("dump mode needs the P2.2 Zig state-dump build option, which does not exist yet")
-        if a.timeout > LONG_RUN_SECONDS and not (a.full_run_justification and len(a.full_run_justification) > 20):
-            raise ProtocolError("a run longer than 3 h is a full run: pass --full-run-justification (plan section 5)")
+        if a.timeout is not None and a.timeout > LONG_RUN_SECONDS and not (a.full_run_justification and len(a.full_run_justification) > 20):
+            raise ProtocolError("a bounded run longer than 3 h is a full run: pass --full-run-justification or omit --timeout")
         run_id = a.run_id or f"{time.strftime('%Y%m%d-%H%M%S')}-{a.mode}-{uuid.uuid4().hex[:6]}"
         stage = inside(root, f"evidence/runs/{run_id}")
         logs = a.out or f"audit/runs/ottawa/{run_id}"
@@ -145,9 +146,10 @@ def main():
             argv.append("runottawa")
             started = time.time()
             p = subprocess.run([sys.executable, str(Path(__file__).resolve().parent / "run_logged.py"), "--root", str(root),
-                                "--cwd", str(deck), "--out", logs, "--timeout", str(a.timeout), "--", *argv],
+                                "--cwd", str(deck), "--out", logs, "--", *argv]
+                               + ([] if a.timeout is None else ["--timeout", str(a.timeout)]),
                                 cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace",
-                                timeout=a.timeout + 300)
+                                timeout=None if a.timeout is None else a.timeout + 300)
             staged_deck_rel = relative(root, deck) if deck.resolve().is_relative_to(root.resolve()) else str(deck.resolve())
             receipt_path = root / logs / "receipt.json"
             receipt = load(receipt_path) if receipt_path.exists() else {}
@@ -169,7 +171,8 @@ def main():
                 "parse_confidence": outcome["parse_confidence"],
                 "conservation_breaches": None, "solver_fallbacks_unexplained": None,
                 "binding": binding, "exe_sha256": file_digest(exe), "io_probe_seconds": round(probe, 4),
-                "wall_seconds": round(time.time() - started, 1), "full_run_justification": a.full_run_justification,
+                "wall_seconds": round(time.time() - started, 1), "timeout_seconds": a.timeout,
+                "full_run_justification": a.full_run_justification,
                 "full_log": f"{logs}/stdout.log", "receipt": f"{logs}/receipt.json", "staged_deck": staged_deck_rel,
                 "runottawa_hash": runottawa_hash,
                 "limitations": ("failure_hour/error are heuristic parses; conservation_breaches and "

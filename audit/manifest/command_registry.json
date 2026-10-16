@@ -365,7 +365,8 @@
    "last_verified_evidence": "2026-10-14 audit/runs/zig017-test-20261014-4/stderr.log:2498 — 4518/4520 tests passed (1 skipped: the env-gated production_freezing_column_validation benchmark admission; 1 crashed: tracked issue-106 fixture OOB at src/stages/hourly_heat_water_solute.zig:10686), zero assertion failures.",
    "verified_utc": "2026-10-15"
   },
-  "zig017_ottawa_bounded_run": {
+  "zig017_ottawa_run": {
+   "renamed_from": "zig017_ottawa_bounded_run (2026-10-16 directive: production runs are unbounded by default - no wall-clock stop)",
    "added_utc": "2026-10-15",
    "cwd": "<repo>",
    "argv": [
@@ -383,7 +384,7 @@
     "--out",
     "audit/runs/ottawa/<id>",
     "--timeout",
-    "<seconds>"
+    "<seconds> or omit entirely for an unbounded run to natural completion"
    ],
    "environment": {
     "TMPDIR": "<repo>/.tmp",
@@ -395,8 +396,8 @@
     "audit/runs/ottawa/<id>/{receipt.json,stdout.log,stderr.log,summary.json} (receipt argv = staged deck exe + 'runottawa', same shape as the 0.16-era Windows run receipts)",
     "evidence/runs/<id>/deck/ (staged deck + copied exe; gitignored scratch, referenced by the receipt)"
    ],
-   "completion_condition": "summary.json `status` in {COMPLETED, FAILED, TIMED_OUT} with `failure_hour`/`error` from the model's own terminal line; `runottawa_hash` must equal ecf5e61ab453288b1763f81f841729bee34e8426 (stager guard, DEV-004 deck half: f6=100). TIMED_OUT is a bounded wall-clock stop, NOT a scientific result: read the per-day `daily conservation accepted` lines and the output streams to find the real simulated horizon.",
-   "notes": "--timeout must stay <= 10800 s without a written justification (.agent/protocol.md run limits). Measured 2026-10-15 throughput on the macOS arm64 host, ReleaseFast, strict: 2,908 h in 900 s in winter (194 h/min), but the whole 3,600 s run reached only hour 3,419 (57 h/min) because summer days cost 19-47 s in the final hour alone (`day advanced ... final_hour_elapsed_ms`) — plan budgets from the second number, not the first.",
+   "completion_condition": "summary.json `status` in {COMPLETE, FAIL} with `failure_hour`/`error` from the model's own terminal line when run unbounded (the 2026-10-16 default); a bounded run additionally allows TIMED_OUT, which is a wall-clock stop, NOT a scientific result. `runottawa_hash` must equal ecf5e61ab453288b1763f81f841729bee34e8426 (stager guard, DEV-004 deck half: f6=100). TIMED_OUT is a bounded wall-clock stop, NOT a scientific result: read the per-day `daily conservation accepted` lines and the output streams to find the real simulated horizon.",
+   "notes": "2026-10-16 directive (user): production campaign runs must NOT be stopped by a wall-clock timeout - omit --timeout and let the run reach natural completion; a bounded --timeout remains available for diagnostics only. Measured 2026-10-15 throughput on the macOS arm64 host, ReleaseFast, strict: 2,908 h in 900 s in winter (194 h/min), but the whole 3,600 s run reached only hour 3,419 (57 h/min) because summer days cost 19-47 s in the final hour alone (`day advanced ... final_hour_elapsed_ms`) — plan budgets from the second number, not the first.",
    "last_verified_evidence": "2026-10-15: audit/runs/ottawa/zig017-probe-20261015-1 (TIMED_OUT, 900.1 s, last_checkpoint_key 2880), audit/runs/ottawa/zig017-frontier-20261015-1 (TIMED_OUT, 3600.1 s, last_checkpoint_key 3360, output to hour 3419, 142 `daily conservation accepted` lines, no failure)."
   },
   "zig017_run_output_diff": {

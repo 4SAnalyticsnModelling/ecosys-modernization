@@ -191,6 +191,12 @@ git rev-parse HEAD origin/main                       # both lines must be the sa
 - Long full runs are **detached** (background job or `nohup`), with the log path recorded in `state.md`, so a
   session end never kills the campaign. Never start a second full run of the same case while one is live;
   sub-agents are forbidden from starting full runs — they analyze.
+- **Runs are unbounded by default (2026-10-16 directive)**: a production run is started without `--timeout`
+  and proceeds to natural completion — `COMPLETE` at the model's own terminal line, or `FAIL` at its first
+  error — no matter how long that takes (days are expected). There is no wall-clock stop. A bounded
+  `--timeout` remains only a diagnostic tool; its `TIMED_OUT` receipt is never evidence and never a
+  scientific result, and it can never close G5 or promote the frontier. The agent's job while a run is
+  live is to keep working the rest of the campaign and monitor, not to stop or restart the run.
 - Token frugality: heavy output to disk via `run_logged.py`, cite receipts; never paste logs or whole files into
   prompts, sub-agent briefs, or cycle files.
 
