@@ -180,6 +180,10 @@ stiff solute image. Terminal ladder attempt enables DEV-011/014-ceiling/015 toge
   working detachment here. (2) Foreground probe `zig017-full-20261016-1-probe` ran 621 s to hour 24, then
   FAIL `FileNotFound` — **self-inflicted**: maintainer `rm -rf` of `evidence/runs/zig017-full-20261016-1-probe`
   pulled the staged deck out from under the live exe. Not a model defect; probe receipt discarded as invalid.
-- LIVE RUN: `zig017-full-20261016-1` — harness background job, unbounded (no `--timeout`), strict ReleaseFast,
-  binding `5c3955a6…` (source_commit 283feda, clean tree). Wrapper log: `audit/runs/cycle-runner/zig017-full-20261016-1.log`;
-  receipt+summary: `audit/runs/ottawa/zig017-full-20261016-1/`. Never start another Ottawa run while this is live.
+- RUN `zig017-full-20261016-1` TERMINAL **FAIL** (7338.8 s wall): `InsufficientSoilMineralNitrogen` ~20 h
+  after checkpoint 4320 (≈ simulation hour 4340, day ~181, first season; fertilizer apps h2508/2892/3276,
+  last 64 h before failure). Legacy completed 30 y on this deck → genuine Zig divergence in the soil-mineral-N
+  supply/uptake path. Evidence kept on disk: `evidence/runs/zig017-full-20261016-1/` (ckpt 4320 enables
+  `--restart-from` replay; bins to h4320 for legacy diff); receipts committed under `audit/runs/ottawa/zig017-full-20261016-1/`.
+  Binding `5c3955a6…` (source_commit 283feda, clean tree). Wrapper log: `audit/runs/cycle-runner/zig017-full-20261016-1.log`.
+  NO relaunch until diagnosis (bugs first per `playbooks/convergence-and-balance.md`); never two live runs.

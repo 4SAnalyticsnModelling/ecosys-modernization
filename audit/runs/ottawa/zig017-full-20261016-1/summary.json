@@ -1,0 +1,47 @@
+{
+  "binding": {
+    "binding_id": "5c3955a6637b7adcf39ebb4591e37762e7a9ecc55cac910a8465be1cd99ff923",
+    "build": {
+      "mode": "ReleaseFast",
+      "options": []
+    },
+    "checkpoint_schema_version": 3,
+    "deck": {
+      "files": 78,
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON",
+      "sha256": "23d0f607c312334c0dcad359e83b8f8d3751eee2ca78534eeafa203659066ada"
+    },
+    "schema_version": 1,
+    "source_commit": "283fedaa54d173a4923b1434d9070a453360f5db",
+    "source_dirty": {
+      "dirty": false,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "untracked": 0
+    }
+  },
+  "conservation_breaches": null,
+  "error": "InsufficientSoilMineralNitrogen",
+  "evidence_class": "strict",
+  "exe_sha256": "e0c6fe4f85e5c2f49c8ed14304bcf298314a419a3a58948488414150b8a8800a",
+  "exit_code": 1,
+  "failure_hour": 20,
+  "full_log": "audit/runs/ottawa/zig017-full-20261016-1/stdout.log",
+  "full_run_justification": null,
+  "io_probe_seconds": 0.0002,
+  "last_checkpoint_key": 4320,
+  "last_completed_hour": 19,
+  "limitations": "failure_hour/error are heuristic parses; conservation_breaches and solver_fallbacks_unexplained stay null until a validator fills them, so this summary alone can never promote the frontier.",
+  "mode": "strict",
+  "parse_confidence": "heuristic-last-match",
+  "receipt": "audit/runs/ottawa/zig017-full-20261016-1/receipt.json",
+  "restart_from": null,
+  "run_id": "zig017-full-20261016-1",
+  "runottawa_hash": "ecf5e61ab453288b1763f81f841729bee34e8426",
+  "schema_version": 1,
+  "solver_fallbacks_unexplained": null,
+  "staged_deck": "evidence/runs/zig017-full-20261016-1/deck",
+  "start_hour": 0,
+  "status": "FAIL",
+  "timeout_seconds": null,
+  "wall_seconds": 7338.8
+}
