@@ -3,6 +3,7 @@ ecosys-ng/.zig-cache-*/
 ecosys-ng/zig-out/
 ecosys-ng/ecosys-ng-bin/
 .claude/scheduled_tasks.lock
+.dsh-watchdog/
 
 # Generated, derivable artifacts -- never commit these.
 # `__pycache__/` is Python bytecode debris. The two JSON files are large derived

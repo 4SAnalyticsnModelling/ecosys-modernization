@@ -1,0 +1,22 @@
+✖ mounted watchdog dependencies permit meter access in a restricted plugin context (3.627375ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 102.566417
+
+✖ failing tests:
+
+test at tools/dsh-watchdog/tests/watchdog.test.mjs:107:1
+✖ mounted watchdog dependencies permit meter access in a restricted plugin context (3.627375ms)
+  Error: cannot get property "tokenMeter" without inject
+      at Object.measure (file:///Users/4sanalyticsnmodelling/Documents/ecosys-modernization/tools/dsh-watchdog/plugin.mjs:56:24)
+      at new MountedProbe (file:///Users/4sanalyticsnmodelling/Documents/ecosys-modernization/tools/dsh-watchdog/tests/watchdog.test.mjs:118:60)
+      at Fiber.execute (file:///Users/4sanalyticsnmodelling/.local/share/deepseek-harness/runtime/node_modules/@deepseek-ai/cordis/lib/index.js:1068:24)
+      at file:///Users/4sanalyticsnmodelling/.local/share/deepseek-harness/runtime/node_modules/@deepseek-ai/cordis/lib/index.js:1142:34
+      at TestContext.<anonymous> (file:///Users/4sanalyticsnmodelling/Documents/ecosys-modernization/tools/dsh-watchdog/tests/watchdog.test.mjs:121:15)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3)

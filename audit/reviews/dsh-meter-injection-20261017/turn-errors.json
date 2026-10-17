@@ -1,0 +1,36 @@
+{
+  "session_id": "1088e6c0-21dc-4ee6-9f37-dc091d3e05a2",
+  "source": ".dsh-watchdog/sessions/--Users-4sanalyticsnmodelling-Documents-ecosys-modernization--/1088e6c0-21dc-4ee6-9f37-dc091d3e05a2/session.v4.jsonl.zstd",
+  "events": [
+    {
+      "type": "turn/end",
+      "seq": 6,
+      "time": 1792261087954,
+      "data": {
+        "turn": 1,
+        "reason": {
+          "kind": "error",
+          "error": {
+            "message": "cannot get property \"tokenMeter\" without inject",
+            "code": "UNKNOWN"
+          }
+        }
+      }
+    },
+    {
+      "type": "turn/end",
+      "seq": 10,
+      "time": 1792261108584,
+      "data": {
+        "turn": 2,
+        "reason": {
+          "kind": "error",
+          "error": {
+            "message": "cannot get property \"tokenMeter\" without inject",
+            "code": "UNKNOWN"
+          }
+        }
+      }
+    }
+  ]
+}

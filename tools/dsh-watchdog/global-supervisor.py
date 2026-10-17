@@ -92,17 +92,13 @@ def main():
                 child.send_signal(sig)
             for sig in (signal.SIGTERM,signal.SIGHUP):signal.signal(sig,stop)
             signal.signal(signal.SIGINT,lambda *_:None)
-            last_progress=time.monotonic();previous=None
             try:
                 while child.poll() is None:
                     time.sleep(2)
                     reason=None
                     try:
                         state=load_state()
-                        fingerprint=sorted((str(f),f.stat().st_mtime_ns,f.stat().st_size) for f in (ROOT/'sessions').rglob('*') if f.is_file())
-                        if fingerprint!=previous:last_progress=time.monotonic();previous=fingerprint
                         if any(s.get('phase')=='blocked' for s in state['sessions'].values()):reason='blocked checkpoint'
-                        if time.monotonic()-last_progress>28800:reason='8h without durable progress'
                     except (OSError,ValueError) as error:
                         reason='Persistence unavailable: '+str(error)
                     if reason:

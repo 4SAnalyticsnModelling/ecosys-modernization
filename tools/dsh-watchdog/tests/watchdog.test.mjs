@@ -104,6 +104,27 @@ test('missing meter never silently permits request',()=> {
   assert.throws(()=>Watchdog.prototype.measure.call({ctx:{}},{session:{}}),/token meter/);
 });
 
+test('mounted watchdog dependencies permit meter access in a restricted plugin context',async()=> {
+  const ctx=new Context();
+  // Services must come from a sibling mounted plugin, as in production. Root
+  // providers bypass Cordis injection checks and hid this startup failure.
+  await ctx.plugin({apply(provider) {
+    for (const name of ['llm','sessions','agents']) provider.provide(name,{});
+    provider.provide('tokenMeter',{measure:()=>({totalTokens:123})});
+  }});
+  let measured;
+  class MountedProbe {
+    static inject=Watchdog.inject;
+    constructor(ctx) { measured=Watchdog.prototype.measure.call({ctx},{session:{}}); }
+  }
+  try {
+    await ctx.plugin(MountedProbe);
+    assert.equal(measured.totalTokens,123);
+  } finally {
+    await ctx.fiber.dispose();
+  }
+});
+
 test('durable notes are retained verbatim; conflicts and failed summary reject',()=> {
   const f=fixture();
   const memory=notes(f.dir);

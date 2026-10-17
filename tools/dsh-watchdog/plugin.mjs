@@ -27,8 +27,9 @@ const {default:Basic} = await import(pathToFileURL(path.join(runtime,
 // Native engine owns balanced selection, brackets, rollback, retention and commit.
 // Only policy admission, checkpoints and fail-closed behavior are deployment-owned.
 export default class WatchdogCompaction extends Basic {
-  // Mount even without the meter, so the request gate can fail closed.
-  static inject = ['llm','sessions','agents'];
+  // Preserve the native engine's dependencies: Cordis enforces injection when
+  // sibling plugins provide services, unlike direct construction in a root context.
+  static inject = [...Basic.inject,'agents'];
   constructor(ctx) {
     const root = initializeWorkspace();
     super(ctx, {...policy, auto:true});

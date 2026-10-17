@@ -1,0 +1,35 @@
+(node:87006) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ native code mode exposes both tools and batches calls beyond old deadlines (154.894042ms)
+✔ global dsh-tui has one policy and four 131K routes (117.120292ms)
+✔ global dsh-tui-safe has one policy and four 131K routes (97.644ms)
+✔ global headless has one policy and four 131K routes (87.591167ms)
+✔ exact trigger formula for every valid output reservation (1.553625ms)
+✔ 74K does not compact; 75K causes one native balanced compaction (365.35425ms)
+✔ failed native summary preserves original surface and blocks restart (389.589792ms)
+✔ missing meter never silently permits request (0.132292ms)
+✔ mounted watchdog dependencies permit meter access in a restricted plugin context (1.2505ms)
+✔ durable notes are retained verbatim; conflicts and failed summary reject (152.917709ms)
+✔ atomic state survives reload; corrupt state fails closed (195.656917ms)
+✔ operation repeat counters do not depend on call identifiers (0.723834ms)
+✔ confirmed overflow can compact below normal boundary (457.476667ms)
+✔ fully assembled request catches late admission and supported retry rebuilds (470.053958ms)
+✔ eight repeated tool operations block despite changing turn, step and callId (262.3255ms)
+✔ successful assistant resets consecutive failure and overflow counters (213.67375ms)
+✔ known interrupted task queues a durable-notes continuation through agent service (231.752541ms)
+✔ subagent telemetry cannot replace the root resume pointer (224.047625ms)
+✔ non-Git workspace snapshots source without recursively copying watchdog state (53.829584ms)
+✔ unborn Git repository checkpoints staged and untracked source (119.852625ms)
+✔ continuous hygiene below75K retains errors, originals, pairing, index and replay (201.044ms)
+✔ late cleanup crosses under75K and rebuilds without a summary (239.402792ms)
+✔ hygiene flush failure blocks subsequent requests even after surface changed (248.974417ms)
+✔ partial native pruning failure blocks retry admission (237.210916ms)
+✔ Unicode pruning preserves surrogate pairs and explicit retrieval notice (188.478ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4397.321208
