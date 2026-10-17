@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {pathToFileURL} from 'node:url';
-import {policy,LIMIT,WINDOW,OUTPUT,HEADROOM,validateRoute,atomic,readState,notes,verifySummary,repeatCount} from '../core.mjs';
+import {policy,LIMIT,WINDOW,OUTPUT,HEADROOM,validateRoute,atomic,readState,notes,verifySummary,repeatCount,snapshotWorktree} from '../core.mjs';
 const repo = path.resolve(import.meta.dirname,'../../..');
 const runtime = process.env.DSH_WATCHDOG_RUNTIME ?? path.join(os.homedir(),'.local/share/deepseek-harness/runtime');
 process.env.DSH_WATCHDOG_RUNTIME = runtime;
@@ -189,4 +189,29 @@ test('subagent telemetry cannot replace the root resume pointer',async()=> {
   assert.equal(state.currentSession,f.agent.session.id);
   assert.equal(state.sessions['child-session'].phase,'running');
   await f.ctx.fiber.dispose();
+});
+
+
+test('non-Git workspace snapshots source without recursively copying watchdog state',async()=> {
+  const root=fs.mkdtempSync(path.join(repo,'.tmp/nongit-'));
+  fs.writeFileSync(path.join(root,'.git'),'invalid git pointer\n'); // prevent discovery of the parent test repository
+  fs.writeFileSync(path.join(root,'source.txt'),'verified decision and source');
+  const wd=path.join(root,'.dsh-watchdog'), cp=path.join(wd,'checkpoints','cp1');
+  fs.mkdirSync(cp,{recursive:true});fs.writeFileSync(path.join(wd,'state.json'),'private');
+  await snapshotWorktree(cp,root,wd);
+  assert.equal(fs.readFileSync(path.join(cp,'untracked/source.txt'),'utf8'),'verified decision and source');
+  assert.ok(!fs.existsSync(path.join(cp,'untracked/.dsh-watchdog')));
+});
+
+test('unborn Git repository checkpoints staged and untracked source',async()=> {
+  const {execFileSync}=await import('node:child_process');
+  const root=fs.mkdtempSync(path.join(repo,'.tmp/unborn-'));
+  execFileSync('git',['init','-q'],{cwd:root});
+  fs.writeFileSync(path.join(root,'source.txt'),'staged code');
+  execFileSync('git',['add','source.txt'],{cwd:root});
+  const wd=path.join(root,'.dsh-watchdog'), cp=path.join(wd,'checkpoints','cp1');
+  fs.mkdirSync(cp,{recursive:true});fs.writeFileSync(path.join(wd,'state.json'),'private');
+  await snapshotWorktree(cp,root,wd);
+  assert.ok(fs.readFileSync(path.join(cp,'worktree.patch'),'utf8').includes('staged code'));
+  assert.ok(!fs.existsSync(path.join(cp,'untracked/.dsh-watchdog')));
 });

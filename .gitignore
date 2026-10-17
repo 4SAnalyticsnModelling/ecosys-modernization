@@ -59,3 +59,5 @@ audit/runs/ottawa/zig017-debug-run-*/stderr.log
 
 # Repository-contained DeepSeek watchdog deployment and private session evidence
 /watchdog/
+# Full local-model benchmark request/stream/server artifacts; summary is tracked.
+/audit/runs/qwen-rc1-16k-20261017/

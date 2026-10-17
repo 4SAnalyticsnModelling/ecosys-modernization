@@ -1,0 +1,45 @@
+{
+  "runtime": "0.7.1rc1",
+  "mlx": "0.32.4",
+  "model": "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp",
+  "prompt_tokens_expected": 16384,
+  "inference_requests": 1,
+  "output_cap": 128,
+  "cache": "fresh empty cache",
+  "status": "complete",
+  "usage": {
+    "prompt_tokens": 16384,
+    "completion_tokens": 128,
+    "total_tokens": 16512,
+    "input_tokens": 16384,
+    "output_tokens": 128,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 129
+    },
+    "time_to_first_token": 53.24,
+    "time_to_first_visible_token": 53.55,
+    "total_time": 63.88,
+    "prompt_eval_duration": 53.24,
+    "generation_duration": 10.64,
+    "prompt_tokens_per_second": 307.73,
+    "generation_tokens_per_second": 12.04
+  },
+  "client_ttft_seconds": 53.62795450002886,
+  "client_decode_tokens_per_second": 12.294639734449095,
+  "prompt_exact": true,
+  "server_stopped": true,
+  "model_load_seconds": 7.646994415903464,
+  "native_attention_fallback": "Fused attention kernel requested 1024 threads, maximum 896; native rc1 fell back to MLX and completed.",
+  "settings": {
+    "moe_expert_offload_resident_fraction": 0.6,
+    "mtp_enabled": true,
+    "mtp_adaptive_max_depth": 3,
+    "max_context_window": 262144,
+    "turboquant_kv_enabled": false
+  },
+  "prefill_chunk_tokens": 8192,
+  "comparison": "Single cold-cache rc1 test only; dev1 was not benchmarked or changed."
+}

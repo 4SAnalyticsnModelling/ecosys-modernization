@@ -1,0 +1,26 @@
+✔ global dsh-tui has one policy and four 131K routes (114.044792ms)
+✔ global dsh-tui-safe has one policy and four 131K routes (92.207375ms)
+✔ global headless has one policy and four 131K routes (87.817ms)
+✔ exact trigger formula for every valid output reservation (1.537084ms)
+✔ 74K does not compact; 75K causes one native balanced compaction (332.510709ms)
+✔ failed native summary preserves original surface and blocks restart (346.577584ms)
+✔ missing meter never silently permits request (0.112917ms)
+✔ durable notes are retained verbatim; conflicts and failed summary reject (155.925417ms)
+✔ atomic state survives reload; corrupt state fails closed (200.476958ms)
+✔ operation repeat counters do not depend on call identifiers (0.439167ms)
+✔ confirmed overflow can compact below normal boundary (384.395625ms)
+✔ fully assembled request catches late admission and supported retry rebuilds (375.746958ms)
+✔ eight repeated tool operations block despite changing turn, step and callId (267.5495ms)
+✔ successful assistant resets consecutive failure and overflow counters (221.27475ms)
+✔ known interrupted task queues a durable-notes continuation through agent service (233.264208ms)
+✔ subagent telemetry cannot replace the root resume pointer (220.104042ms)
+✔ non-Git workspace snapshots source without recursively copying watchdog state (54.889625ms)
+✔ unborn Git repository checkpoints staged and untracked source (119.212958ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3021.8135

@@ -1,0 +1,36 @@
+{
+  "scope": "Global dsh, dst and dsh-tui; all three installed profiles and all four current local models",
+  "installed_files_sha256": {
+    "core.mjs": "8a9fe42bdac80acfc68d1f059faf749d5ae0178e892eab0c325f2e104a579d17",
+    "plugin.mjs": "86ab8acfc2a30ec12b18a998b37f3a69aea96e3f97e8493c211a4158aef755b8",
+    "global-context.mjs": "f6f9dddfb1bc693595e9d69e187bfb997c81c66c09a7d2011aea5f07c8e587f3",
+    "global-supervisor.py": "e89316e3cdf103b47fa66b3794fddb3d9987a1bbedcb4dcfc6c61e0ae957002f",
+    "AGENTS.md": "1d232983605fc39920e92b209200fea4a8a4b66f709cfdb99ae6f0dc6d96ac51"
+  },
+  "profiles": [
+    "dsh-tui",
+    "dsh-tui-safe",
+    "headless"
+  ],
+  "window": 131072,
+  "hard_boundary": 75000,
+  "normal_output_cap": 32768,
+  "summary_cap": 4096,
+  "headroom": 8192,
+  "native_and_composition_tests_passed": 18,
+  "supervisor_tests_passed": 5,
+  "failed": 0,
+  "state_directory": "<workspace>/.dsh-watchdog",
+  "global_rules_injection": "ctx.systemPrompt.section",
+  "native_compaction_engines_per_profile": 1,
+  "independent_review": "PASS code/API contracts; final notes-path wording corrected",
+  "headless_recovery": "manual; automatic replay disabled",
+  "limitations": [
+    "live 131072-token capacity not stress-tested",
+    "full process/power-loss recovery not fault-injected",
+    "model summary/scientific correctness not benchmarked"
+  ],
+  "user_authorization": "Explicit request to apply globally for all local models and any future work; installed launcher/config writes authorized by that scope expansion",
+  "installed_supervisor_syntax": "PASS",
+  "installed_wrapper_syntax": "PASS dsh and dst"
+}

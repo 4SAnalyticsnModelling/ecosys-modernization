@@ -51,3 +51,42 @@ export function syncTree(root) {
   const fd = fs.openSync(root,'r');
   try { fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
 }
+
+export async function snapshotWorktree(dir, cwd, excludedRoot) {
+  const {spawnSync,execFileSync} = await import('node:child_process');
+  const git = args=>spawnSync('git',args,{cwd,encoding:'utf8'});
+  const inside = git(['rev-parse','--is-inside-work-tree']).status === 0;
+  let files=[], mode='no-git';
+  if (inside) {
+    const head = git(['rev-parse','--verify','HEAD']).status === 0;
+    mode=head ? 'git-head' : 'git-unborn';
+    const args=head ? ['diff','--binary','HEAD'] : ['diff','--binary','--cached'];
+    fs.writeFileSync(path.join(dir,'worktree.patch'),execFileSync('git',args,{cwd,maxBuffer:64*1024*1024}),{mode:0o600});
+    if (!head) fs.writeFileSync(path.join(dir,'unstaged.patch'),execFileSync('git',['diff','--binary'],{cwd,maxBuffer:64*1024*1024}),{mode:0o600});
+    files=execFileSync('git',['ls-files','--others','--exclude-standard','-z'],{cwd,maxBuffer:64*1024*1024}).toString().split('\0').filter(Boolean);
+  } else {
+    const skip=new Set(['.git','node_modules','.tmp','.cache','.uv-cache','__pycache__']);
+    const walk=folder=>{
+      for(const item of fs.readdirSync(folder,{withFileTypes:true})) {
+        const source=path.join(folder,item.name);
+        if (source===excludedRoot || source.startsWith(excludedRoot+path.sep) || skip.has(item.name)) continue;
+        if(item.isDirectory()) walk(source);
+        else if(item.isFile() || item.isSymbolicLink()) files.push(path.relative(cwd,source));
+      }
+    };
+    walk(cwd);
+    fs.writeFileSync(path.join(dir,'worktree.patch'),'No Git repository; source files archived under untracked/.\n');
+  }
+  const archived=[];
+  for(const file of files) {
+    const source=path.resolve(cwd,file);
+    if(source===excludedRoot || source.startsWith(excludedRoot+path.sep)) continue;
+    if (!source.startsWith(cwd+path.sep) || !fs.realpathSync(source).startsWith(cwd+path.sep))
+      throw Error('Checkpoint source escapes workspace');
+    if (!fs.statSync(source).isFile()) continue;
+    const dest=path.join(dir,'untracked',file);
+    fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(source,dest);
+    archived.push(file);
+  }
+  atomic(path.join(dir,'worktree-manifest.json'),{mode,archived});
+}

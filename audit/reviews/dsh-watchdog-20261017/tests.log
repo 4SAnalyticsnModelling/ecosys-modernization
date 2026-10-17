@@ -1,0 +1,21 @@
+✔ exact trigger formula for every valid output reservation (1.462958ms)
+✔ 74K does not compact; 75K causes one native balanced compaction (356.336333ms)
+✔ failed native summary preserves original surface and blocks restart (315.551ms)
+✔ missing meter never silently permits request (0.111084ms)
+✔ durable notes are retained verbatim; conflicts and failed summary reject (150.75525ms)
+✔ atomic state survives reload; corrupt state fails closed (207.242833ms)
+✔ operation repeat counters do not depend on call identifiers (2.259125ms)
+✔ confirmed overflow can compact below normal boundary (366.334667ms)
+✔ fully assembled request catches late admission and supported retry rebuilds (347.674958ms)
+✔ eight repeated tool operations block despite changing turn, step and callId (257.027833ms)
+✔ successful assistant resets consecutive failure and overflow counters (219.29225ms)
+✔ known interrupted task queues a durable-notes continuation through agent service (220.33575ms)
+✔ subagent telemetry cannot replace the root resume pointer (221.504875ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2800.360833

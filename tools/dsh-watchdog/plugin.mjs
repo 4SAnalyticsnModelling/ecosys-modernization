@@ -2,9 +2,24 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {pathToFileURL} from 'node:url';
-import {LIMIT, WINDOW, policy, validateRoute, atomic, readState, notes, verifySummary, repeatCount, syncTree} from './core.mjs';
-const runtime = process.env.DSH_WATCHDOG_RUNTIME;
-if (!runtime) throw Error('Launch with tools/dsh-watchdog/launch.py');
+import {LIMIT, WINDOW, policy, validateRoute, atomic, readState, notes, verifySummary, repeatCount, syncTree, snapshotWorktree} from './core.mjs';
+const runtime = process.env.DSH_WATCHDOG_RUNTIME ?? path.resolve(import.meta.dirname,'../../runtime');
+const defaultRoot = path.resolve(process.cwd(),'.dsh-watchdog');
+function initializeWorkspace() {
+  const root = process.env.DSH_WATCHDOG_ROOT ?? defaultRoot;
+  process.env.DSH_WATCHDOG_ROOT = root;
+  if (!fs.existsSync(path.join(root,'state.json'))) {
+    if (fs.existsSync(path.join(root,'sessions')) && fs.readdirSync(path.join(root,'sessions')).length || fs.existsSync(path.join(root,'checkpoints')))
+      throw Error('Missing watchdog state with prior sessions; refusing reset');
+    fs.mkdirSync(path.join(root,'sessions'),{recursive:true});
+    for (const file of ['progress.md','decisions.md','issues.md']) {
+      if (!fs.existsSync(path.join(root,file))) fs.copyFileSync(path.join(import.meta.dirname,'templates',file),path.join(root,file));
+    }
+    atomic(path.join(root,'state.json'),{schema:1,sessions:{}});
+  }
+  readState(path.join(root,'state.json'));
+  return root;
+}
 const {createUserMessage} = await import(pathToFileURL(path.join(runtime,'node_modules/@deepseek-ai/dsh-llm/lib/index.js')));
 const {default:Basic} = await import(pathToFileURL(path.join(runtime,
   'node_modules/@deepseek-ai/dsh-compaction-basic/lib/index.js')));
@@ -12,8 +27,17 @@ const {default:Basic} = await import(pathToFileURL(path.join(runtime,
 // Native engine owns balanced selection, brackets, rollback, retention and commit.
 // Only policy admission, checkpoints and fail-closed behavior are deployment-owned.
 export default class WatchdogCompaction extends Basic {
-  static inject = ['llm','sessions','tokenMeter','agents'];
-  constructor(ctx) { super(ctx, {...policy, auto:true}); }
+  // Mount even without the meter, so the request gate can fail closed.
+  static inject = ['llm','sessions','agents'];
+  constructor(ctx) {
+    const root = initializeWorkspace();
+    super(ctx, {...policy, auto:true});
+    ctx.inject(['systemPrompt'], promptCtx => {
+      promptCtx.systemPrompt.section({name:'dsh-watchdog-global-rules',order:900,interpolate:false,
+        text:fs.readFileSync(path.join(import.meta.dirname,'AGENTS.md'),'utf8') +
+          '\nAuthoritative durable notes directory: '+root+'. Maintain progress.md, decisions.md and issues.md before major edits/tests; read them when resuming.'});
+    });
+  }
   root() {
     const root = process.env.DSH_WATCHDOG_ROOT;
     if (!root || !path.isAbsolute(root)) throw Error('Missing absolute watchdog root');
@@ -137,17 +161,7 @@ export default class WatchdogCompaction extends Basic {
       fs.cpSync(path.join(this.root(),'sessions'),path.join(dir,'sessions'),{recursive:true});
       const memory = notes(this.root());
       fs.writeFileSync(path.join(dir,'notes.md'),memory.text,{mode:0o600});
-      const {execFileSync} = await import('node:child_process');
-      fs.writeFileSync(path.join(dir,'worktree.patch'),execFileSync('git',['diff','--binary','HEAD'],{cwd:process.cwd(),maxBuffer:64*1024*1024}),{mode:0o600});
-      const untracked = execFileSync('git',['ls-files','--others','--exclude-standard','-z'],{cwd:process.cwd()}).toString().split('\0').filter(Boolean);
-      for (const file of untracked) {
-        const source = path.resolve(process.cwd(),file);
-        if (!source.startsWith(process.cwd()+path.sep) || !fs.realpathSync(source).startsWith(process.cwd()+path.sep))
-          throw Error('Untracked path escapes repository');
-        const dest = path.join(dir,'untracked',file);
-        fs.mkdirSync(path.dirname(dest),{recursive:true});
-        fs.copyFileSync(source,dest);
-      }
+      await snapshotWorktree(dir,process.cwd(),this.root());
       syncTree(dir);
       const parentFd = fs.openSync(path.dirname(dir),'r');
       try { fs.fsyncSync(parentFd); } finally { fs.closeSync(parentFd); }

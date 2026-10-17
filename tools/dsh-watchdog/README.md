@@ -1,26 +1,42 @@
 # DeepSeek Harness watchdog
 
-Repository-contained deployment for installed **dsh 0.2.0-rc.2 / dsh-tui 0.15.0**.
-All four current local models have policies: Qwen Flash Next Q8, Qwen3.8 27B BF16,
-GLM 5.3 Flash 6-bit, and GLM 5.3 Flash mixed 4/8-bit. Other harnesses are untouched.
+Global deployment for installed **dsh 0.2.0-rc.2** and its three current profiles:
+**dsh-tui**, **dsh-tui-safe**, and **headless**. All four current local models are
+configured: Qwen Flash Next Q8, Qwen3.8 27B BF16, GLM 5.3 Flash 6-bit, and GLM 5.3
+Flash mixed 4/8-bit. Other harnesses are untouched.
 
-From the repository root:
+**Installed globally: use your normal `dsh`, `dst`, or `dsh-tui` command.**
+Launchers now start the external supervisor automatically. The model configuration
+generator reapplies the policy on startup, including newly catalogued supported
+local models. All installed profiles receive one engine, bounded outputs, and
+injected context-hygiene rules through `ctx.systemPrompt.section`.
+
+Global installed code lives under `~/.local/share/deepseek-harness/tool-env/watchdog`.
+Each future workspace gets independent **`.dsh-watchdog/`** notes, state, sessions,
+checkpoints, caches and diagnostics. Instructions name that workspace's absolute
+notes directory. No per-project AGENTS.md edit is needed. Add `.dsh-watchdog/` to
+your project's ignore rules if desired; checkpointing always excludes its own
+state directory. Existing historical sessions are preserved in their original
+locations; they are not silently migrated into new workspace stores.
+
+To reinstall the reviewed source after an intentional change:
 
 ```sh
-node tools/dsh-watchdog/setup.mjs
-python3 tools/dsh-watchdog/launch.py --check
-python3 tools/dsh-watchdog/launch.py
+node tools/dsh-watchdog/install-global.mjs
 ```
 
-Use this launcher for watchdog sessions. The ordinary installed `dsh` command
-retains its prior configuration. Setup reuses installed packages read-only and
-copies the current TUI composition under `watchdog/home`; generated profiles,
-logs, sessions and notes are private, gitignored, and remain inside this repo.
-A private TUI package copy redirects its hardcoded preference path to `watchdog/tui-data`; the installed package is unchanged. Re-run setup after model-catalog changes. Unknown dsh versions fail closed.
-The existing local gateway at **127.0.0.1:8090** must be running; the supervisor
-checks its catalog before launching. It does not invoke the old gateway manager,
-which writes outside the repository. At setup the gateway was offline, so live
-131,072-token capacity and model-task performance remain **unverified**.
+This explicitly updates the installed dsh/dst wrappers, configuration generator,
+and profile patches. Original files and deployment receipt are retained privately
+inside this repository under `watchdog/global-backup/` and
+`watchdog/global-install-receipt.json`. Upstream harness core is unchanged. Unknown
+dsh versions stop ordinary supervised work until contracts are revalidated.
+
+The earlier optional repository-isolated deployment remains available with
+`setup.mjs` and `launch.py`; its notes directory is `watchdog/`, and its local TUI
+copy redirects preferences into that directory. The global installation uses the
+normal installed TUI and preferences. The global launcher owns the existing
+session-managed model gateway; the isolated launcher requires a ready gateway.
+Live 131,072-token capacity and per-model coding correctness remain unverified.
 
 ## Policy
 
@@ -42,15 +58,15 @@ before network dispatch. `WATCHDOG_BOUNDARY` uses the native request-error/retry
 contract to compact and rebuild; it is separate from real provider overflow.
 
 At the boundary, native persistence must flush successfully. Checkpoints include
-original session files, tracked binary Git diff, untracked file contents,
-verbatim notes and a receipt. Contents and directories are fsynced before
+original session files, tracked binary Git diff (including an unborn-repository path), untracked file contents,
+verbatim notes and a receipt. Non-Git workspaces receive a source snapshot excluding dependency/cache directories; no Git repository is required. Contents and directories are fsynced before
 compaction. Native balanced selection, bracket locking, shrink checks and rollback
 remain authoritative. Exactly one summary attempt is allowed; failed or
 insufficient compaction blocks work. A recent 12,000-token tail is retained.
 Only confirmed `CONTEXT_WINDOW_EXCEEDED` permits emergency compaction below 75K,
 once per consecutive failure episode. Successful assistant output resets it.
 
-Update `watchdog/progress.md`, `decisions.md` and `issues.md` before major work or
+Update `progress.md`, `decisions.md` and `issues.md` in the configured notes directory before major work or
 tests. Notes (maximum 24KB) are copied **verbatim** into the candidate summary;
 a summary is never trusted to preserve scientific decisions through paraphrase.
 Notes changing during summarization, empty/truncated summaries, or `CONFLICT:`
@@ -60,7 +76,7 @@ compacts or submits the original task a second time.
 
 ## Recovery
 
-`watchdog/state.json` is independent of the dsh process and includes the current
+`<notes-directory>/state.json` is independent of the dsh process and includes the current
 session, request tokens, measurement baseline, checkpoint, compaction counts,
 errors and timings. Missing/corrupt state with existing sessions is an error,
 never an invitation to initialize an empty session.
@@ -68,14 +84,13 @@ never an invitation to initialize an empty session.
 Clean restart selects the recorded current session automatically; an interrupted
 running task receives a continuation through supported `agent/created` and
 `agent.followup`, instructing it to reconcile interrupted actions before acting.
-Unexpected child exit permits at most two persistent process restarts. Active-turn state, rather than a stale stream finish, determines whether to continue. Three failed gateway health checks also stop the child. Explicit
-selection is available with `--resume SESSION_ID`. Finished tasks are not woken.
-Eight identical consecutive tool operations or three identical failures block
+Unexpected child exit permits at most two persistent process restarts. Active-turn state, rather than a stale stream finish, determines whether to continue. Three failed gateway health checks also stop the child. The optional isolated launcher also accepts `--resume SESSION_ID`. Finished tasks are not woken.
+The installed headless runner always submits its CLI task after loading. To prevent replaying that task, **automatic headless process restart/continuation is disabled**; its compaction and checkpoint rules remain active, and recovery is explicit through the native headless session controls. Eight identical consecutive tool operations or three identical failures block
 work. No durable session progress for eight hours terminates the owned child
 (configurable with `--stall-seconds`; long local prefill is allowed).
 
 An interrupted `checkpointing`/`compacting` transaction or `blocked` state requires
-reconciliation: inspect `watchdog/checkpoints/ID/{receipt,completed}.json`, native
+reconciliation: inspect `<notes-directory>/checkpoints/ID/{receipt,completed}.json`, native
 session compaction brackets, the retained notes and worktree. Restore or verify
 the native session using its supported persistence loader, verify the summary
 and notes, then explicitly repair the affected session's phase in state.json.

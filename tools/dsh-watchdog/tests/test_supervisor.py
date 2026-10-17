@@ -39,3 +39,31 @@ class SupervisorTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+class GlobalSupervisorTests(unittest.TestCase):
+    def test_corrupt_persistence_terminates_child_and_does_not_replay_headless(self):
+        from unittest.mock import patch, Mock
+        import sys
+        spec = importlib.util.spec_from_file_location('global_supervisor', MODULE.parent / 'global-supervisor.py')
+        global_launcher = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(global_launcher)
+        with tempfile.TemporaryDirectory(dir=REPO / '.tmp') as tmp:
+            root = Path(tmp)
+            child = Mock()
+            child.returncode = None
+            child.poll.side_effect = lambda: child.returncode
+            child.terminate.side_effect = lambda: setattr(child, 'returncode', -15)
+            child.wait.return_value = -15
+            def corrupt(_):
+                (root / 'state.json').write_text('{')
+            with patch.object(global_launcher,'ROOT',root), \
+                 patch.object(global_launcher,'INSTALLED',Path.home() / '.local/share/deepseek-harness'), \
+                 patch.object(global_launcher.subprocess,'run'), \
+                 patch.object(global_launcher.subprocess,'Popen',return_value=child) as spawn, \
+                 patch.object(global_launcher.time,'sleep',side_effect=corrupt), \
+                 patch.object(global_launcher.signal,'signal'), \
+                 patch.object(sys,'argv',['global-supervisor','original-dsh','--profile','headless','--task','task']):
+                result = global_launcher.main()
+            self.assertEqual(result,-15)
+            self.assertEqual(spawn.call_count,1)
+            child.terminate.assert_called_once()

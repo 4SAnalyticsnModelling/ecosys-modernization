@@ -1,0 +1,11 @@
+PASS zig-version              /opt/homebrew/bin/zig -> 0.17.0
+PASS build-zon-pin            minimum_zig_version = 0.17.0
+PASS env:TMPDIR               TMPDIR is repo-local
+PASS env:UV_CACHE_DIR         UV_CACHE_DIR is repo-local
+PASS env:XDG_CACHE_HOME       XDG_CACHE_HOME is repo-local
+PASS env:ZIG_GLOBAL_CACHE_DIR ZIG_GLOBAL_CACHE_DIR is repo-local
+PASS git-branch               HEAD is on main
+PASS git-sync                 HEAD == origin/main (0b0efb963)
+WARN git-dirty                7 uncommitted path(s) — commit or revert; never leave main dirty between cycles
+PASS cycle-ledger             cycle 3 is PLANNING — finish the plan, then work
+PREFLIGHT PASS
