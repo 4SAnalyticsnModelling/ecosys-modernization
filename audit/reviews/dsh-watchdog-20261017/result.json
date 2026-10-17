@@ -1,0 +1,27 @@
+{
+  "task": "dsh-only local-model context watchdog",
+  "installed_dsh": "0.2.0-rc.2",
+  "installed_tui": "0.15.0",
+  "native_tests": {"passed": 13, "failed": 0, "duration_ms": 2800.360833},
+  "supervisor_tests": {"passed": 4, "failed": 0},
+  "simulation": {
+    "normal_compactions_at_74000": 0,
+    "normal_compactions_at_75000": 1,
+    "same_boundary_duplicate_compactions": 0,
+    "summary_failure_preserves_original_surface": true,
+    "durable_decisions_retained_verbatim": true,
+    "late_admission_rebuild": true,
+    "repeated_tool_loop_blocked": true,
+    "root_session_survives_child_telemetry": true
+  },
+  "live_model_benchmark": {
+    "status": "pending_gateway_offline",
+    "model_completion_correctness": null,
+    "repeated_work": null,
+    "prefill_latency_ms": null,
+    "full_process_restart_reliability": null,
+    "live_131072_capacity_verified": false
+  },
+  "meter": "installed route-aware envelope meter; baseline may be heuristic, not exact tokenizer count",
+  "independent_review": "PASS for code and installed API contracts; production readiness not established"
+}

@@ -56,3 +56,6 @@ audit/runs/swarm-controller-*.log
 ecosys-ng/.zig-cache-global/
 tools/zig/
 audit/runs/ottawa/zig017-debug-run-*/stderr.log
+
+# Repository-contained DeepSeek watchdog deployment and private session evidence
+/watchdog/
