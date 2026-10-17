@@ -38,6 +38,11 @@
       "evidence": "Independent fresh-context read-only verifier (foreground, 2026-10-16): VERDICT PASS on C1 concurrency safety (clamped copies at potential_seed_site_accumulation.zig:39,61, final_grain_number.zig:48,79, maximum_individual_grain_size.zig:35,56; disjoint owned ranges via balancedPartition compute.zig:779-818), C2 serial bit-identity (single-worker path first_branch=0,end_branch=count), C3 completeness (66 @memcpy hits in src/plant audited under worker-partitioned discriminator; no fourth case; plant_root_metabolism_state_update.zig:510-511 scratch->scratch exempt), C4 detector non-vacuous (detection prob 1-0.75^64; pre-fix failure first-captured-failure.log). Verdict verbatim + provenance + attempt trail (30d91c73 PASS-6/6 unpersisted; f973caa2 and cd3cf246 died mid-run): audit/runs/zig017-g7-issue110-verifier-20261016/verdict.md. Non-blocking coverage note (anthesis_day unset -> grain-number/size race paths not live in test) filed to backlog.md",
       "result": "PASS"
     },
+    "G8": {
+      "at": "2026-10-17T05:15:38Z",
+      "evidence": "pushed main -> origin at 283feda (close commit 71db4cbc + cache-untrack cleanup 86ead8b + post-push ledger sync 283feda); git rev-parse HEAD origin/main both 283fedaa54d173a4923b1434d9070a453360f5db, working tree clean (untracked evidence dirs committed in close). Cleanup note: cycle_runner close swept ecosys-ng/.zig-cache-coldtest (885 untracked cache files) into the close commit; removed from index in follow-up 86ead8b and ignored via ecosys-ng/.zig-cache-*/ (G9 hygiene, no history rewrite)",
+      "result": "PASS"
+    },
     "G9": {
       "at": "2026-10-16T20:08:42Z",
       "evidence": "all caches/logs/runs inside repo (.tmp .cache .uv-cache .zig-cache ecosys-ng/.zig-cache-global audit/runs/); no external writes this cycle",
@@ -58,5 +63,5 @@
   ],
   "sync_status": "unknown",
   "target": "Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded legacy oracle for the same hours, every difference explained by exact arithmetic or diagnosed to file:line (no tolerance loosened, no bound moved).",
-  "updated_utc": "2026-10-17T05:02:55Z"
+  "updated_utc": "2026-10-17T05:15:38Z"
 }
