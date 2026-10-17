@@ -1,0 +1,16 @@
+Prepared 4 local models.
+Synced 4 local models.
+{
+  "at": "2026-10-17T18:01:22.596005+00:00",
+  "version": "0.7.1rc1 0.32.4",
+  "model": "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp",
+  "state": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-qwen-flash-rc1",
+  "backup": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/watchdog/rc1-production-backup",
+  "files": {
+    "router.py": "dbe0d1d44107c51220ef343169995d485d7cd524eeabef9a63ea3e33d6422b42",
+    "production_runtime.py": "17ef12164a99262597af26eb711b530801229aa3b3b5b95cfa3db9ae36dc2d1e",
+    "configure.py": "32e7cd85673622d60c67cbacf0ec21b037e4c585c8abdfc8fbddf3f3ff5cb4d3",
+    "performance-overrides.json": "8dd7f4d39cb53aca1d0dc77283d43e7bc46c627543a594650cdcee4c1f781559",
+    "qwen_flash_rc1.py": "1395454e5bd85a57a5224e0ad8e5d12fcd77508dbbaa12649704b4c37f96c775"
+  }
+}

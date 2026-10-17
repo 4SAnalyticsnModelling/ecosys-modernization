@@ -44,15 +44,19 @@ Each routed model advertises W=131072 and O=32768, with B=8192,
 thresholdRatio=75000/131072=0.57220458984375 and summary maxTokens=4096:
 `floor(min(W*ratio, W-O-B)) = 75000`. A larger request output reservation is
 rejected. One root Cordis `BasicCompactionEngine` subclass serves every preset;
-other engines, manual compact commands, historical-result pruners and image
-compaction are disabled. Native spill policy limits newly injected outputs to
-2000 tokens and retains complete spill files. Retrieval must still be targeted.
+other summary engines, manual compact commands and image compaction are disabled.
+A single native-derived replay-safe result pruner runs before every step, without
+a model call. Results over 2048 Unicode codepoints retain a 768-codepoint head,
+384-codepoint tail and a full-output retrieval pointer. Original session entries,
+error metadata and call pairing remain intact. Newly injected tool output spills
+above 1200 estimated tokens and keeps its complete file. Retrieval must still be targeted.
 
 The supported token meter measures **current routed envelope pressure**, never
 lifetime usage. Its `baseline.kind` is recorded. **This installed meter uses a
 heuristic until matching provider usage exists; 75,000 meter tokens cannot be
 claimed to equal exactly 75,000 tokenizer tokens.** System prompt, tool schemas,
-images and current surface participate in native measurement. A pre-step check
+images and current surface participate in native measurement. Before every pre-step, deterministic output hygiene runs and flushes replacements
+to session storage; it makes no summary request. A pre-step check then
 handles existing pressure, and an `llm/stream` gate catches newly admitted input
 before network dispatch. `WATCHDOG_BOUNDARY` uses the native request-error/retry
 contract to compact and rebuild; it is separate from real provider overflow.
@@ -60,14 +64,15 @@ contract to compact and rebuild; it is separate from real provider overflow.
 At the boundary, native persistence must flush successfully. Checkpoints include
 original session files, tracked binary Git diff (including an unborn-repository path), untracked file contents,
 verbatim notes and a receipt. Non-Git workspaces receive a source snapshot excluding dependency/cache directories; no Git repository is required. Contents and directories are fsynced before
-compaction. Native balanced selection, bracket locking, shrink checks and rollback
-remain authoritative. Exactly one summary attempt is allowed; failed or
+compaction. Native balanced selection, bracket locking and shrink checks remain authoritative.
+Partial commit failures block for reconciliation; automatic rollback is not assumed. Exactly one summary attempt is allowed; failed or
 insufficient compaction blocks work. A recent 12,000-token tail is retained.
 Only confirmed `CONTEXT_WINDOW_EXCEEDED` permits emergency compaction below 75K,
 once per consecutive failure episode. Successful assistant output resets it.
 
 Update `progress.md`, `decisions.md` and `issues.md` in the configured notes directory before major work or
-tests. Notes (maximum 24KB) are copied **verbatim** into the candidate summary;
+tests. Notes (maximum 24KB) are copied **verbatim** into the candidate summary with
+verified facts distinguished from unresolved hypotheses;
 a summary is never trusted to preserve scientific decisions through paraphrase.
 Notes changing during summarization, empty/truncated summaries, or `CONFLICT:`
 decisions block the transaction. Original JSONL and checkpoints are never rotated
@@ -122,3 +127,25 @@ or completion score is inferred from mocked tests.
 Contracts inspected: installed package JS/types, and upstream
 [compaction policy](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/compaction/compaction-basic/README.md)
 and [compaction service](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/subsystems/compaction.md).
+
+
+## Continuous hygiene and the video strategy
+
+The requested IBM video captions were retrieved and reviewed; source notes and
+implementation mapping are in `audit/reviews/dsh-rc1-production-20261017/video-strategies.md`.
+Before each step the pruner scans the current tool-result surface. It rewrites
+only over-budget text; subsequent passes leave already bounded results unchanged.
+Full originals stay in JSONL, with a durable `hygiene-index.jsonl` mapping session
+ID, tool-call ID, original sequence and replacement sequence for retrieval. Source
+code/user messages and decisions are not blindly shortened, and tool calls are
+never removed without their paired results. The existing 75K summary gate is
+measured after cleanup; late cleanup triggers a request rebuild if necessary.
+
+The watchdog records `hygienePrunes`, `hygieneCharsRemoved`, `requestTools`, and
+`toolSchemaBytes`. Missing pruning, metering or persistence prevents request
+admission. A partial prune or flush failure persists a blocked phase. This is
+output budgeting, not a semantic determination that every omitted line is
+unnecessary: models must retrieve omitted diagnostics before drawing conclusions.
+Tool-set curation and evidence validation are explicit global instructions;
+the implementation does not silently remove capabilities or pretend to prove
+arbitrary claims. Current notes retire superseded assumptions into archives.

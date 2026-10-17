@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {atomic,policy,WINDOW,OUTPUT} from './core.mjs';
+import {atomic,policy,WINDOW,OUTPUT,hygiene,INLINE_TOKENS} from './core.mjs';
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const root = path.join(repo,'watchdog');
 const installed = process.env.DSH_INSTALLED_ROOT ?? path.join(os.homedir(),'.local/share/deepseek-harness');
@@ -30,22 +30,25 @@ YAML.visit(doc,{Map(_key,node) {
     }
     provider.set('defaultContextWindow',WINDOW); provider.set('defaultMaxTokens',OUTPUT);
   }
-  if (id === 'local-bounded-compaction') {
+  if (id === 'local-bounded-compaction' || id === 'global-watchdog-compaction') {
     node.set('name',path.join(repo,'tools/dsh-watchdog/plugin.mjs'));
     node.set('config',doc.createNode(policy)); node.set('disabled',false);
   }
+  if (id === 'global-watchdog-hygiene') {node.set('name',path.join(repo,'tools/dsh-watchdog/hygiene.mjs'));node.set('config',doc.createNode(hygiene));}
   if (id === 'compaction-basic') node.set('disabled',true);
   if (id === 'compaction' && node.get('isolate')) {
     node.get('isolate').delete('compaction');
     node.get('isolate').delete('toolResultPruner');
   }
   if (['command-compact','tool-result-pruner','image-offload','local-task-tool-environment'].includes(id)) node.set('disabled',true);
-  if (id === 'spill-policy') node.set('config',doc.createNode({maxInlineTokens:2000}));
+  if (id === 'spill-policy') node.set('config',doc.createNode({maxInlineTokens:INLINE_TOKENS}));
   if (id === 'session-persistence-jsonl') node.set('config',doc.createNode({root:path.join(root,'sessions')}));
 }});
+for (const row of doc.contents.items) if (row?.get?.('id')==='tool-result-pruner') row.delete('name');
 for (const override of [
-  {id:'spill-policy', config:{maxInlineTokens:2000}},
+  {id:'spill-policy', config:{maxInlineTokens:INLINE_TOKENS}},
   {id:'image-offload', disabled:true},
+  {id:'tool-result-pruner', disabled:true},
   {id:'session-persistence-jsonl', config:{root:path.join(root,'sessions')}},
 ]) doc.add(doc.createNode(override));
 const profile = path.join(root,'home/profiles/dsh-tui');

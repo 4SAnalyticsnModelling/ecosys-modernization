@@ -1,0 +1,72 @@
+{
+  "generation_requests": 0,
+  "status": "PASS",
+  "command": [
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/venv-0.7.1rc1/bin/python",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/qwen_flash_rc1.py",
+    "8192",
+    "serve",
+    "--base-path",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-qwen-flash-rc1",
+    "--model-dir",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/active-model",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8092",
+    "--memory-guard",
+    "balanced",
+    "--hot-cache-max-size",
+    "2GB",
+    "--paged-ssd-cache-dir",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-qwen-flash-rc1/cache",
+    "--memory-guard-gb",
+    "112"
+  ],
+  "models": {
+    "final_ceiling": 116007182160,
+    "current_model_memory": 90163358005,
+    "model_count": 1,
+    "loaded_count": 1,
+    "load_seconds_per_gb_estimate": 0.08967360289311355,
+    "load_time_observations": 1,
+    "models": [
+      {
+        "id": "Qwen3.8-Flash-Next-oQ8e-mtp",
+        "model_path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/active-model/Qwen3.8-Flash-Next-oQ8e-mtp",
+        "loaded": true,
+        "is_loading": false,
+        "loading_started_at": null,
+        "estimated_size": 204601485111,
+        "resident_estimated_size": 90163358005,
+        "distributed": false,
+        "cluster": null,
+        "actual_size": 86401195040,
+        "external_engine": null,
+        "pinned": false,
+        "engine_type": "vlm",
+        "model_type": "vlm",
+        "config_model_type": "qwen4_exp",
+        "realtime_stt": false,
+        "model_context_length": 262144,
+        "is_helper": false,
+        "thinking_default": true,
+        "preserve_thinking_default": true,
+        "reasoning_efforts": [
+          "low",
+          "medium",
+          "xhigh"
+        ],
+        "source_type": "local",
+        "source_repo_id": null,
+        "last_access": 1792259829.2746801,
+        "max_context_window": 262144,
+        "is_favorite": false,
+        "is_hidden": false,
+        "max_tokens": 32768
+      }
+    ]
+  },
+  "owned_backend_stopped": true,
+  "native_rc1_marker": true
+}

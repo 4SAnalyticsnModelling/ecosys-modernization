@@ -8,3 +8,19 @@ Before significant changes or tests, update progress.md, decisions.md and issues
 directory with evidence and next action. Never mark a test passed without a receipt.
 Conflicting decisions require an explicit supersession record; unresolved ones
 start with CONFLICT:. Never clear watchdog state to bypass recovery.
+Continuous hygiene runs before every step: oversized tool/file output is shortened
+without summarization; full originals remain in session storage or spill files.
+Preserve tool-call/result pairing; never discard decisions or errors as redundant.
+Read source by line range and search with bounded matches. Save full build/test
+logs to disk and bring only the exit status, error excerpt and artifact path into
+context. After an edit prefer its diff over another full-file read. If output is
+marked pruned or spilled, retrieve the relevant omitted lines before concluding
+success or diagnosing failure. Keep verified decisions and exact evidence paths
+in durable notes; avoid speculative notes, stale plans and repeated exploration.
+Validate before remembering: conclusions require a source location, test, or
+observable check; never promote a hypothesis by copying it into a summary.
+Keep hypotheses explicitly UNVERIFIED in issues.md. Correct a false conclusion
+in the current notes rather than retaining two active versions. Mark the old
+record SUPERSEDED and move detailed history to an archive with its evidence.
+Use the smallest relevant tool set/preset and discover additional capabilities
+only when needed. Treat tool descriptions and schemas as context costs too.

@@ -57,6 +57,32 @@ export default class WatchdogCompaction extends Basic {
     if (!Number.isFinite(m?.totalTokens) || m.totalTokens < 0) throw Error('Missing/invalid token meter; refusing request');
     return m;
   }
+  async cleanToolOutputs(agent) {
+    const pruner = this.ctx.get('toolResultPruner');
+    if (!pruner) throw Error('Continuous context hygiene service is missing; refusing request');
+    this.measure(agent); // Missing metering fails before any rewrite.
+    try {
+      const result = pruner.pruneSession(agent.session);
+      if (result.pruned.length) {
+        if (!await this.ctx.sessions.flush(agent.session)) throw Error('No persistence listener for context hygiene');
+        const index=path.join(this.root(),'hygiene-index.jsonl');
+        const fd=fs.openSync(index,'a',0o600);
+        try {
+          for(const item of result.pruned) fs.writeSync(fd,JSON.stringify({sessionId:agent.session.id,
+            sessionsRoot:path.join(this.root(),'sessions'),...item})+'\n');
+          fs.fsyncSync(fd);
+        } finally { fs.closeSync(fd); }
+        const old = this.record(agent);
+        this.update(agent,{hygienePrunes:(old.hygienePrunes ?? 0)+result.pruned.length,
+          hygieneCharsRemoved:(old.hygieneCharsRemoved ?? 0)+result.charsRemoved,
+          hygieneAt:new Date().toISOString()});
+      }
+      return result;
+    } catch (error) {
+      this.update(agent,{phase:'blocked',error:'Context hygiene failed: '+String(error)});
+      throw error;
+    }
+  }
   _registerAutomaticCompaction() {
     this.ctx.on('agent/created', ({agent, source}) => {
       const old = this.record(agent);
@@ -72,6 +98,7 @@ export default class WatchdogCompaction extends Basic {
       const state = this.record(agent);
       if (state.phase === 'checkpointing' || state.phase === 'compacting' || state.phase === 'blocked')
         throw Error(`Watchdog requires checkpoint reconciliation: ${state.checkpoint ?? agent.session.id}`);
+      await this.cleanToolOutputs(agent);
       await this.compactIfNeeded(agent, 'pressure', signal);
       return next();
     });
@@ -89,6 +116,7 @@ export default class WatchdogCompaction extends Basic {
         const old = owner.record(agent);
         if (['checkpointing','compacting','blocked'].includes(old.phase)) throw Error('Watchdog recovery required');
         owner.update(agent, {phase:'running', provider:options.provider, model:options.model,
+          requestTools:options.tools?.length ?? 0, toolSchemaBytes:Buffer.byteLength(JSON.stringify(options.tools ?? [])),
           taskActive:true, lastFinish:null, inputTokens:m.totalTokens, meterBaseline:m.baseline.kind, logRevision:m.logRevision,
           requestAt:new Date().toISOString()});
         if (m.totalTokens >= LIMIT) {
@@ -109,8 +137,10 @@ export default class WatchdogCompaction extends Basic {
     this.ctx.on('agent/request-error', async ({agent, failure, signal}, next) => {
       if (signal.aborted) return next();
       if (failure.code === 'WATCHDOG_BOUNDARY') {
+        const generation = agent.session.surface.replaceGeneration;
+        await this.cleanToolOutputs(agent);
         const result = await this.compactIfNeeded(agent,'pressure',signal);
-        if (!result) throw Error('Boundary cannot compact a balanced span; checkpoint retained');
+        if (!result && agent.session.surface.replaceGeneration <= generation) throw Error('Boundary cannot compact a balanced span; checkpoint retained');
         return {kind:'retry'};
       }
       if (failure.code === 'CONTEXT_WINDOW_EXCEEDED') {

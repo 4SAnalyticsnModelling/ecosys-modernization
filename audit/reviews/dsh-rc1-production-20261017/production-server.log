@@ -1,0 +1,95 @@
+Qwen Flash production: native oMLX0.7.1rc1 / MLX0.32.4; prefill8192; isolated rc1 cache
+2026-10-17 11:56:59,012 - omlx.settings - INFO - Saved settings to /Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-qwen-flash-rc1/settings.json
+INFO:     Uvicorn running on http://127.0.0.1:8092 (Press CTRL+C to quit)
+2026-10-17 11:57:00,558 - omlx.scheduler - INFO - ChunkedKVCache patch: methods already present upstream, skipped: size
+2026-10-17 11:57:00,691 - omlx.settings - INFO - Saved settings to /Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-qwen-flash-rc1/settings.json
+2026-10-17 11:57:00,691 - omlx.server - INFO - Generated and saved new auth secret key
+2026-10-17 11:57:00,691 - omlx.server - INFO - CORS origins: ['*']
+2026-10-17 11:57:00,692 - omlx.model_settings - INFO - Loaded settings for 1 models
+2026-10-17 11:57:00,735 - omlx.model_discovery - INFO - Discovered model: Qwen3.8-Flash-Next-oQ8e-mtp (type: vlm, engine: vlm, size: 190.55GB, text-only: 189.67GB)
+2026-10-17 11:57:00,735 - omlx.engine_pool - INFO - Discovered 1 models
+2026-10-17 11:57:00,738 - omlx.server - INFO - Server initialized with 1 models
+2026-10-17 11:57:00,738 - omlx.server - INFO - Default model: Qwen3.8-Flash-Next-oQ8e-mtp
+2026-10-17 11:57:00,738 - omlx.server - INFO - Memory guard tier: custom (guard on)
+2026-10-17 11:57:00,738 - omlx.server - INFO - Default max tokens: 32768
+2026-10-17 11:57:00,738 - omlx.server - INFO - HF Downloader initialized
+2026-10-17 11:57:00,739 - omlx.server - INFO - ModelScope SDK not installed, MS downloader disabled
+2026-10-17 11:57:00,740 - omlx.server - INFO - oQ Quantizer initialized
+2026-10-17 11:57:00,744 - omlx.server - INFO - HF Uploader initialized
+INFO:     Started server process [80088]
+INFO:     Waiting for application startup.
+2026-10-17 11:57:00,770 - omlx.settings - INFO - Saved settings to /Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-qwen-flash-rc1/settings.json
+2026-10-17 11:57:00,770 - omlx.server - INFO - Auto-detected server aliases: ['localhost', '127.0.0.1', '4Ss-Mac-Studio.local', '192.168.1.73', '100.78.45.7']
+2026-10-17 11:57:00,786 - omlx.process_memory_enforcer - WARNING - Metal cap (107.5GB, Apple max_recommended_working_set_size) is below the oMLX static ceiling (126.0GB); leaving Apple's default Metal cap active because iogpu.wired_limit_mb is unset. Raise it with: sudo sysctl iogpu.wired_limit_mb=124518
+2026-10-17 11:57:00,786 - omlx.process_memory_enforcer - INFO - Process memory enforcer started (tier=custom, ceiling=107.6GB, interval=1.0s)
+INFO:     Application startup complete.
+2026-10-17 11:57:01,736 - omlx.engine_pool - WARNING - Qwen4-Exp PLE forced to SSD for Qwen3.8-Flash-Next-oQ8e-mtp: resident 150.6GB leaves no room to serve prompts under the 115.4GB memory ceiling (mmap needs 90.2GB). Decode will be roughly 2.5x slower than a resident load.
+2026-10-17 11:57:01,755 - omlx.engine_pool - INFO - Loading model: Qwen3.8-Flash-Next-oQ8e-mtp
+2026-10-17 11:57:01,765 - omlx.engine_pool - WARNING - Qwen4-Exp PLE forced to SSD for Qwen3.8-Flash-Next-oQ8e-mtp: resident 150.6GB leaves no room to serve prompts under the 115.4GB memory ceiling (mmap needs 90.2GB). Decode will be roughly 2.5x slower than a resident load.
+2026-10-17 11:57:01,792 - omlx.utils.model_loading - INFO - M5 sorted gather_qmm reroute installed (issue #2267)
+2026-10-17 11:57:01,807 - omlx.patches.mlx_vlm_qwen4_exp_compat - INFO - Qwen4-Exp mlx-vlm compatibility patch applied
+2026-10-17 11:57:01,807 - omlx.utils.model_loading - INFO - Qwen4-Exp mlx-vlm compatibility patch applied for /Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/active-model/Qwen3.8-Flash-Next-oQ8e-mtp
+2026-10-17 11:57:01,817 - omlx.patches.mlx_lm_mtp.qwen35_model - INFO - Qwen3.5/3.6 MTP model patch applied (PR 990)
+2026-10-17 11:57:01,819 - omlx.patches.mlx_lm_mtp.nemotron_h_chain - INFO - nemotron_h MTP chain patch applied (depth-k drafting, sequential fused verify, replay-free rollback)
+2026-10-17 11:57:01,819 - omlx.patches.qwen35_verify_qmm - INFO - MTP verify qmm patch applied (rows 2..6 split-K, 7..8 sg8, 9..24 mma)
+2026-10-17 11:57:01,821 - omlx.patches.mlx_vlm_qwen4_exp_compat - INFO - Qwen4-Exp PLE mode for /Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/active-model/Qwen3.8-Flash-Next-oQ8e-mtp: mmap
+2026-10-17 11:57:01,821 - omlx.patches.mlx_vlm_qwen4_exp_compat - INFO - Qwen4-Exp Lightning MTP enabled for /Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/active-model/Qwen3.8-Flash-Next-oQ8e-mtp (checkpoint layout: mtp.)
+2026-10-17 11:57:01,880 - omlx.engine.vlm - INFO - qwen4_exp pre-quantization sanitize active for Qwen3.8-Flash-Next-oQ8e-mtp
+2026-10-17 11:57:02,111 - mlx_vlm.models.qwen4_exp.qwen4_exp - INFO - Skipped Qwen4-Exp exact hybrid projections while Lightning MTP target verification is enabled
+2026-10-17 11:57:02,112 - mlx_vlm.models.qwen4_exp.qwen4_exp - INFO - Enabled Qwen4-Exp hyper-connection optimizations: 0 exact hybrid projection pairs, 100 compiled decode paths
+2026-10-17 11:57:03,060 - omlx.patches.moe_expert_offload - INFO - moe expert offload: keeping MTP head resident: mtp.layers.0.mlp.switch_mlp
+2026-10-17 11:57:03,061 - omlx.patches.moe_expert_offload - INFO - moe expert offload: wrapped 48 layers at 60.0% residency (expert tables: 128.35 GB total, 76.96 GB resident)
+2026-10-17 11:57:07,197 - omlx.engine.vlm - INFO - moe expert offload active (48 layers): skipping gate/up fusion on the VLM path
+2026-10-17 11:57:07,197 - omlx.engine.vlm - INFO - Vision feature cache enabled (SSD: /Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-qwen-flash-rc1/cache/vision_features)
+2026-10-17 11:57:08,952 - omlx.scheduler - INFO - Loaded 1 additional EOS token(s) from generation_config.json: {248044}
+2026-10-17 11:57:08,952 - omlx.scheduler - INFO - Enlarging paged cache block_size=256 to 8192 for ArraysCache hybrid model (reduces boundary snapshot overhead)
+2026-10-17 11:57:08,955 - omlx.scheduler - INFO - Decode KV cache materialization interval set to 256 tokens
+2026-10-17 11:57:08,955 - omlx.memory_monitor - INFO - MemoryMonitor initialized (estimator-only, eviction disabled)
+2026-10-17 11:57:08,973 - omlx.memory_monitor - INFO - Model info set: 48 layers (12 KVCache), 2 KV heads, 24 Q heads, 256 head_dim. Estimated memory per 64-token block: 1.71 MB, KV override 27.28 KB/tok
+2026-10-17 11:57:08,973 - omlx.scheduler - INFO - paged SSD-only mode: max_blocks=100000, block_size=8192 tokens
+2026-10-17 11:57:08,974 - omlx.cache.paged_cache - INFO - PagedCacheManager initialized: block_size=8192, initial_blocks=256, max_blocks=100000, max_tokens=819200000
+2026-10-17 11:57:08,975 - omlx.cache.paged_ssd_cache - INFO - Scanning SSD cache directory: /Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-qwen-flash-rc1/cache
+2026-10-17 11:57:08,975 - omlx.cache.paged_ssd_cache - INFO - SSD cache scan complete: scanned=0, indexed=0, errors=0, total_size=0 B, gdn_sidecars=0
+2026-10-17 11:57:08,976 - omlx.cache.paged_ssd_cache - INFO - PagedSSDCacheManager initialized: dir=/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-qwen-flash-rc1/cache, max_size=64.00 GB, hot_cache=2.00 GB, auto_size=False, existing_files=0, disk_free=537.91 GB, cache_used=0 B, incompatible_files=0
+2026-10-17 11:57:08,976 - omlx.cache.paged_cache - INFO - paged SSD cache manager connected to PagedCacheManager
+2026-10-17 11:57:08,976 - omlx.scheduler - INFO - paged SSD cache enabled: cache_dir=/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-qwen-flash-rc1/cache, max_size=64.00 GB, block_size=8192 tokens
+2026-10-17 11:57:08,976 - omlx.scheduler - INFO - paged SSD cache enabled: /Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-qwen-flash-rc1/cache, block_size=8192, max_blocks=100000
+2026-10-17 11:57:08,976 - omlx.engine_core - INFO - Engine started
+2026-10-17 11:57:08,977 - omlx.patches.sdpa256_attention - INFO - sdpa256 attention patch applied (head_dim=256 prefill, kv_len>=8192, always force bounded for qualifying calls (#2025))
+2026-10-17 11:57:09,161 - omlx.patches.qwen35_fa256_attention - INFO - Qwen FA-256 dispatch budget auto-calibrated: 4.26e+09 work/s -> 42614044 (target 10ms/dispatch)
+2026-10-17 11:57:09,161 - omlx.patches.qwen35_fa256_attention - INFO - Qwen3.5/3.6 FA-256 steel attention patch applied (min_kv_len=2048, q_block=32, k_block=8, dispatch_budget=42614044)
+2026-10-17 11:57:09,168 - omlx.patches.qwen35_gdn_prework - INFO - mlx-vlm Qwen3.5 GDN q/k normalization follows mlx-lm normalize_qk
+2026-10-17 11:57:09,168 - omlx.patches.qwen35_gdn_verify_fused - INFO - GDN verify replay commit patch applied
+2026-10-17 11:57:09,168 - omlx.patches.qwen35_gdn_prework - INFO - Qwen fused GDN prework patch applied
+2026-10-17 11:57:09,168 - omlx.patches.qwen35_verify_sdpa_split - INFO - Qwen3.5/3.6 verify-width causal vector attention patch applied
+2026-10-17 11:57:09,169 - omlx.patches.qwen35_gdn_chunked - INFO - Qwen3.5/3.6 GDN prefill kernel patch applied (Metal, impl=pipelined, min_t=64)
+2026-10-17 11:57:09,169 - omlx.patches.qwen35_q4_mlp - INFO - Qwen quantized MLP prefill patch applied (variant=8, min_tokens=2048, q8_min_tokens=16384)
+2026-10-17 11:57:09,181 - omlx.patches.qwen35_q4_mlp - INFO - Muse Glimmer quantized prefill patch applied (variant=8, min_tokens=2048, q8_min_tokens=16384)
+2026-10-17 11:57:09,183 - omlx.patches.qwen35_moe_router - INFO - Qwen MoE fused router top-k patch applied
+2026-10-17 11:57:09,185 - omlx.patches.qwen35_moe_routed_decode - INFO - Qwen MoE fused routed-expert decode patch applied
+2026-10-17 11:57:09,187 - omlx.patches.qwen35_moe_weighted_sum - INFO - Qwen3.5/3.6 MoE weighted-sum patch applied (min_tokens=1024)
+2026-10-17 11:57:09,187 - omlx.patches.qwen35_ragged_decode - INFO - qwen3_5 ragged decode threadgroup fallback patch applied
+2026-10-17 11:57:09,194 - omlx.cache.paged_ssd_cache - INFO - PagedSSDCacheManager updated layer cache signature (48 layers, 2 unique types, turboquant_kv_bits=None, cachelist_subtypes=no, numerics=gdn-qk-norm-2)
+2026-10-17 11:57:09,270 - omlx.engine.vlm - INFO - VLM tool calling enabled: parser=qwen3_coder
+2026-10-17 11:57:09,274 - omlx.engine.vlm - INFO - VLMBatchedEngine loaded: /Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/active-model/Qwen3.8-Flash-Next-oQ8e-mtp
+2026-10-17 11:57:09,285 - omlx.engine_pool - INFO - Loaded model: Qwen3.8-Flash-Next-oQ8e-mtp (actual: 80.47GB, local estimate: 83.97GB, full model: 190.55GB, total: 83.97GB)
+2026-10-17 11:57:09,285 - omlx.admin.routes - INFO - Manually loaded model: Qwen3.8-Flash-Next-oQ8e-mtp
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-10-17 11:57:09,491 - omlx.process_memory_enforcer - INFO - Process memory enforcer stopped
+2026-10-17 11:57:09,491 - omlx.server - INFO - Process memory enforcer stopped
+2026-10-17 11:57:09,491 - omlx.admin.hf_downloader - INFO - HF Downloader shut down
+2026-10-17 11:57:09,491 - omlx.server - INFO - HF Downloader stopped
+2026-10-17 11:57:09,492 - omlx.engine_pool - INFO - Unloading model: Qwen3.8-Flash-Next-oQ8e-mtp (immediate abort)
+2026-10-17 11:57:09,492 - omlx.engine_core - INFO - Engine stopped
+2026-10-17 11:57:09,531 - omlx.scheduler - INFO - Scheduler shutdown initiated...
+2026-10-17 11:57:09,534 - omlx.cache.paged_ssd_cache - INFO - Shutting down PagedSSDCacheManager...
+2026-10-17 11:57:09,534 - omlx.scheduler - INFO - Scheduler shutdown completed
+2026-10-17 11:57:09,534 - omlx.cache.paged_cache - INFO - PagedCacheManager cleared (reset to 256 initial blocks)
+2026-10-17 11:57:09,606 - omlx.scheduler - INFO - Deep reset completed - all caches cleared
+2026-10-17 11:57:09,732 - omlx.engine.vlm - INFO - VLMBatchedEngine stopped
+2026-10-17 11:57:10,124 - omlx.engine_pool - INFO - Unloaded model: Qwen3.8-Flash-Next-oQ8e-mtp, freed=79.99GB (expected>=79.77GB), active_memory: 1.03KB (settled)
+2026-10-17 11:57:10,184 - omlx.engine_pool - INFO - Engine pool shutdown complete
+2026-10-17 11:57:10,185 - omlx.server - INFO - Engine pool shutdown
+INFO:     Application shutdown complete.
+INFO:     Finished server process [80088]

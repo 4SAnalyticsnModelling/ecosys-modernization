@@ -4,16 +4,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {pathToFileURL} from 'node:url';
-import {policy,LIMIT,WINDOW,OUTPUT,HEADROOM,validateRoute,atomic,readState,notes,verifySummary,repeatCount,snapshotWorktree} from '../core.mjs';
+import {policy,LIMIT,WINDOW,OUTPUT,HEADROOM,hygiene,validateRoute,atomic,readState,notes,verifySummary,repeatCount,snapshotWorktree} from '../core.mjs';
 const repo = path.resolve(import.meta.dirname,'../../..');
 const runtime = process.env.DSH_WATCHDOG_RUNTIME ?? path.join(os.homedir(),'.local/share/deepseek-harness/runtime');
 process.env.DSH_WATCHDOG_RUNTIME = runtime;
 async function installed(name) { return import(pathToFileURL(path.join(runtime,'node_modules/@deepseek-ai',name,'lib/index.js'))); }
 const {Context} = await installed('cordis');
-const {default:LlmRuntime,LlmAdapter,createUserMessage,createMessage} = await installed('dsh-llm');
-const {default:SessionStore,SessionId} = await installed('dsh-session');
+const {default:LlmRuntime,LlmAdapter,createUserMessage,createMessage,createToolResultMessage} = await installed('dsh-llm');
+const {default:SessionStore,Session,SessionId} = await installed('dsh-session');
 const {default:Projections} = await installed('dsh-session-projection');
 const {default:TokenMeter} = await installed('dsh-token-meter');
+const {default:Pruner} = await import('../hygiene.mjs');
 const {AgentRegistry} = await installed('dsh-agent');
 const {default:Watchdog} = await import('../plugin.mjs');
 const signal = new AbortController().signal;
@@ -25,7 +26,7 @@ function fixture() {
   atomic(path.join(dir,'state.json'),{schema:1,sessions:{}});
   for (const f of ['progress.md','decisions.md','issues.md']) fs.copyFileSync(path.join(repo,'tools/dsh-watchdog/templates',f),path.join(dir,f));
   const ctx = new Context();
-  new LlmRuntime(ctx); new SessionStore(ctx); new Projections(ctx); new TokenMeter(ctx); new AgentRegistry(ctx);
+  new LlmRuntime(ctx); new SessionStore(ctx); new Projections(ctx); new TokenMeter(ctx); new Pruner(ctx,hygiene); new AgentRegistry(ctx);
   class Adapter extends LlmAdapter {
     async resolveModel(provider,model) { return {provider,id:model,name:model,context:{contextWindow:WINDOW},defaultMaxTokens:OUTPUT}; }
     async *stream() { yield {type:'finish',reason:{kind:'stop'}}; }
@@ -214,4 +215,85 @@ test('unborn Git repository checkpoints staged and untracked source',async()=> {
   await snapshotWorktree(cp,root,wd);
   assert.ok(fs.readFileSync(path.join(cp,'worktree.patch'),'utf8').includes('staged code'));
   assert.ok(!fs.existsSync(path.join(cp,'untracked/.dsh-watchdog')));
+});
+
+function appendVerboseError(f) {
+  f.agent.session.append('step/start',{turn:5,step:1});
+  const callId='read-diagnostic';
+  const original='ERROR: failed binding\n'+'diagnostic detail '.repeat(400)+'\nSOURCE: /project/full-test.log:45\n'+'middle data '.repeat(400)+'\nEND: exit=1';
+  f.agent.session.append('assistant/message',{stream:[],turn:5,step:1,message:createMessage({role:'assistant',
+    content:[{type:'tool-call',id:callId,name:'read',arguments:'{"path":"full-test.log"}'}],
+    source:{kind:'model',provider:'mlx-local',model:'test'}})},{surfaceOp:'append'});
+  f.agent.session.append('tool/call',{turn:5,step:1,callId,name:'read',arguments:'{"path":"full-test.log"}'});
+  const event=f.agent.session.append('tool/result',{turn:5,step:1,
+    message:createToolResultMessage({callId,isError:true,content:[{type:'text',text:original}]}),
+    error:{name:'DiagnosticError',code:'BINDING_FAILURE',reason:'Check /project/full-test.log:45'},
+    meta:{fullLog:'/project/full-test.log',exitCode:1}},{surfaceOp:'append'});
+  return {event,original,callId};
+}
+
+test('continuous hygiene below75K retains errors, originals, pairing, index and replay',async()=> {
+  const f=fixture(), {event,original,callId}=appendVerboseError(f);
+  const file=path.join(f.dir,'sessions','native.jsonl');
+  f.ctx.on('session/flush', session=>fs.writeFileSync(file,session.snapshotEvents().map(e=>JSON.stringify(e)).join('\n')));
+  const result=await f.compact.cleanToolOutputs(f.agent);
+  assert.equal(result.pruned.length,1);assert.equal(f.calls(),0);
+  const entries=fs.readFileSync(file,'utf8').split('\n').map(x=>JSON.parse(x));
+  const originalEvent=entries.find(e=>e.seq===event.seq);
+  assert.equal(originalEvent.data.message.content[0].text,original);
+  const replacement=entries.find(e=>e.seq===result.pruned[0].replacementSeq);
+  assert.equal(replacement.data.message.source.callId,callId);
+  assert.equal(replacement.data.message.isError,true);
+  assert.deepEqual(replacement.data.error,event.data.error);
+  assert.deepEqual(replacement.data.meta,event.data.meta);
+  assert.ok(replacement.sourceEventSeqs.includes(event.seq));
+  const text=replacement.data.message.content.map(b=>b.text ?? '').join('');
+  assert.ok(text.includes('hygiene-index.jsonl'));assert.ok(text.includes('ERROR:'));assert.ok(text.includes('exit=1'));
+  assert.ok(Array.from(text).length<=hygiene.thresholdChars);
+  const replay=Session.create(SessionId('replayed-hygiene'),entries);
+  assert.deepEqual(replay.surface.nodes,f.agent.session.surface.nodes);
+  const again=await f.compact.cleanToolOutputs(f.agent);assert.equal(again.pruned.length,0);
+  assert.equal(f.compact.record(f.agent).hygienePrunes,1);
+  const index=JSON.parse(fs.readFileSync(path.join(f.dir,'hygiene-index.jsonl'),'utf8'));
+  assert.equal(index.callId,callId);assert.equal(index.originalSeq,event.seq);
+  await f.ctx.fiber.dispose();
+});
+
+test('late cleanup crosses under75K and rebuilds without a summary',async()=> {
+  const f=fixture();appendVerboseError(f);
+  const meter=f.ctx.tokenMeter.measure.bind(f.ctx.tokenMeter);
+  const generation=f.agent.session.surface.replaceGeneration;
+  f.ctx.tokenMeter.measure=(...args)=>({...meter(...args),totalTokens:f.agent.session.surface.replaceGeneration===generation ? 75001 : 74000});
+  const action=await f.ctx.waterfall('agent/request-error',{agent:f.agent,failure:{code:'WATCHDOG_BOUNDARY'},signal},()=>undefined);
+  assert.equal(action.kind,'retry');assert.equal(f.calls(),0);
+  assert.equal(f.compact.record(f.agent).compactions,undefined);
+  await f.ctx.fiber.dispose();
+});
+
+test('hygiene flush failure blocks subsequent requests even after surface changed',async()=> {
+  const f=fixture();appendVerboseError(f);
+  f.ctx.sessions.flush=async()=>{throw Error('disk unavailable');};
+  await assert.rejects(f.compact.cleanToolOutputs(f.agent),/disk unavailable/);
+  assert.equal(f.compact.record(f.agent).phase,'blocked');
+  await assert.rejects(f.ctx.waterfall('agent/pre-step',{agent:f.agent,signal},()=>({kind:'enter'})),/reconciliation/);
+  assert.equal(f.calls(),0);
+  await f.ctx.fiber.dispose();
+});
+
+test('partial native pruning failure blocks retry admission',async()=> {
+  const f=fixture();appendVerboseError(f);
+  const pruner=f.ctx.get('toolResultPruner'), prune=pruner.pruneSession.bind(pruner);
+  pruner.pruneSession=session=>{prune(session);throw Error('replacement failed after partial progress');};
+  await assert.rejects(f.compact.cleanToolOutputs(f.agent),/partial progress/);
+  assert.equal(f.compact.record(f.agent).phase,'blocked');
+  await f.ctx.fiber.dispose();
+});
+
+test('Unicode pruning preserves surrogate pairs and explicit retrieval notice',async()=> {
+  const f=fixture();
+  const content=f.ctx.get('toolResultPruner').pruneContent([{type:'text',text:'🌱'.repeat(4000)}]);
+  const text=content.map(b=>b.text).join('');
+  assert.ok(!text.includes('\ufffd'));assert.ok(text.includes('hygiene-index.jsonl'));
+  assert.ok(Array.from(text).length<=hygiene.thresholdChars);
+  await f.ctx.fiber.dispose();
 });

@@ -1,0 +1,28 @@
+✔ exact trigger formula for every valid output reservation (1.56475ms)
+✔ 74K does not compact; 75K causes one native balanced compaction (344.185167ms)
+✔ failed native summary preserves original surface and blocks restart (332.226166ms)
+✔ missing meter never silently permits request (0.1045ms)
+✔ durable notes are retained verbatim; conflicts and failed summary reject (153.75025ms)
+✔ atomic state survives reload; corrupt state fails closed (200.269458ms)
+✔ operation repeat counters do not depend on call identifiers (0.496791ms)
+✔ confirmed overflow can compact below normal boundary (392.25975ms)
+✔ fully assembled request catches late admission and supported retry rebuilds (396.453042ms)
+✔ eight repeated tool operations block despite changing turn, step and callId (263.641541ms)
+✔ successful assistant resets consecutive failure and overflow counters (224.687959ms)
+✔ known interrupted task queues a durable-notes continuation through agent service (229.092167ms)
+✔ subagent telemetry cannot replace the root resume pointer (228.903125ms)
+✔ non-Git workspace snapshots source without recursively copying watchdog state (56.63225ms)
+✔ unborn Git repository checkpoints staged and untracked source (113.919792ms)
+✔ continuous hygiene below75K retains errors, originals, pairing, index and replay (201.046833ms)
+✔ late cleanup crosses under75K and rebuilds without a summary (242.523625ms)
+✔ hygiene flush failure blocks subsequent requests even after surface changed (227.797667ms)
+✔ partial native pruning failure blocks retry admission (223.255541ms)
+✔ Unicode pruning preserves surrogate pairs and explicit retrieval notice (204.855417ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4166.0695

@@ -1,0 +1,53 @@
+{
+  "qwen_production_runtime": "oMLX0.7.1rc1 / MLX0.32.4",
+  "route": "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp",
+  "native_scheduler": true,
+  "isolated_state_and_cache": true,
+  "production_startup_and_load": "PASS",
+  "new_generation_requests": 0,
+  "other_local_profiles_unchanged": true,
+  "global_dsh_profiles": [
+    "dsh-tui",
+    "dsh-tui-safe",
+    "headless"
+  ],
+  "local_models": 4,
+  "hygiene_every_pre_step": true,
+  "inline_tool_token_cap": 1200,
+  "prune_threshold_codepoints": 2048,
+  "head_codepoints": 768,
+  "tail_codepoints": 384,
+  "preserved": "append-only originals, errors, metadata, tool/result pairing, replay, retrieval index",
+  "summary_threshold_tokens": 75000,
+  "window_tokens": 131072,
+  "automatic_early_summary": false,
+  "confirmed_overflow_exception": true,
+  "node_tests_passed": 23,
+  "supervisor_tests_passed": 5,
+  "production_route_tests_passed": 3,
+  "independent_verdict": "PASS reviewed deployment architecture and evidence",
+  "installed_watchdog_sha256": {
+    "core.mjs": "9eb7671602a3a9ce093770d5f999e66979e08d92dec4a9061b47dcb0f1767a21",
+    "plugin.mjs": "0d376705f16f0012ec68a52f081944379efcbfda898a82a019fdaa4bfc28862f",
+    "hygiene.mjs": "01e3368d520476832dd651b6710164878d4a1872091fa07a3d8c9649cc57f79b",
+    "global-context.mjs": "e99cf8f862086d802ae9c26cbeb7ead063b4af77605bf76b86a750386fe84ece",
+    "global-supervisor.py": "e89316e3cdf103b47fa66b3794fddb3d9987a1bbedcb4dcfc6c61e0ae957002f",
+    "AGENTS.md": "26e2bb1b4029ec6a39ab07951521dd4ee573c59d65d37b9883bba13206ee243c"
+  },
+  "installed_production_sha256": {
+    "router.py": "dbe0d1d44107c51220ef343169995d485d7cd524eeabef9a63ea3e33d6422b42",
+    "production_runtime.py": "17ef12164a99262597af26eb711b530801229aa3b3b5b95cfa3db9ae36dc2d1e",
+    "configure.py": "32e7cd85673622d60c67cbacf0ec21b037e4c585c8abdfc8fbddf3f3ff5cb4d3",
+    "performance-overrides.json": "8dd7f4d39cb53aca1d0dc77283d43e7bc46c627543a594650cdcee4c1f781559",
+    "qwen_flash_rc1.py": "1395454e5bd85a57a5224e0ad8e5d12fcd77508dbbaa12649704b4c37f96c775"
+  },
+  "video_caption_sha256": "1a0ddc888ab1a2ef3b536e04d6b65d34aa751467a47a98d76798d124bffc0553",
+  "video": "https://www.youtube.com/watch?v=BwXremQ-i6I",
+  "video_retrieval": "English auto-captions retrieved successfully with yt-dlp; summarized in video-strategies.md",
+  "limitations": [
+    "No prolonged session or live crash fault-injection exercise",
+    "Live131K capacity not stress-tested",
+    "Headless crash recovery remains explicit to avoid original-task replay",
+    "Text pruning is syntactic; omitted evidence must be retrieved before conclusions"
+  ]
+}

@@ -1,0 +1,31 @@
+✔ global dsh-tui has one policy and four 131K routes (113.170458ms)
+✔ global dsh-tui-safe has one policy and four 131K routes (94.791667ms)
+✔ global headless has one policy and four 131K routes (88.450333ms)
+✔ exact trigger formula for every valid output reservation (1.625917ms)
+✔ 74K does not compact; 75K causes one native balanced compaction (333.513958ms)
+✔ failed native summary preserves original surface and blocks restart (332.515417ms)
+✔ missing meter never silently permits request (0.101708ms)
+✔ durable notes are retained verbatim; conflicts and failed summary reject (153.510792ms)
+✔ atomic state survives reload; corrupt state fails closed (198.798833ms)
+✔ operation repeat counters do not depend on call identifiers (1.055625ms)
+✔ confirmed overflow can compact below normal boundary (416.451167ms)
+✔ fully assembled request catches late admission and supported retry rebuilds (384.959167ms)
+✔ eight repeated tool operations block despite changing turn, step and callId (250.380959ms)
+✔ successful assistant resets consecutive failure and overflow counters (208.194084ms)
+✔ known interrupted task queues a durable-notes continuation through agent service (220.139042ms)
+✔ subagent telemetry cannot replace the root resume pointer (224.52325ms)
+✔ non-Git workspace snapshots source without recursively copying watchdog state (53.424708ms)
+✔ unborn Git repository checkpoints staged and untracked source (120.864ms)
+✔ continuous hygiene below75K retains errors, originals, pairing, index and replay (197.049292ms)
+✔ late cleanup crosses under75K and rebuilds without a summary (234.443583ms)
+✔ hygiene flush failure blocks subsequent requests even after surface changed (240.059708ms)
+✔ partial native pruning failure blocks retry admission (242.449708ms)
+✔ Unicode pruning preserves surrogate pairs and explicit retrieval notice (210.766291ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4162.0845
