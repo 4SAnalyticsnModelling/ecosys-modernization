@@ -33,7 +33,10 @@ pub fn apply(state: State, workspace_seed_sites: []f64, inputs: Inputs) !void {
         if (!std.math.isFinite(value)) return error.InvalidPotentialSeedSiteInput;
     if (inputs.canopy_shoot_carbon_g_c < 0 or inputs.potential_seed_sites_per_g_c_growth < 0 or inputs.structural_presence_threshold_g_c < 0) return error.InvalidPotentialSeedSiteInput;
 
-    @memcpy(workspace_seed_sites[0..branch_count], state.potential_seed_site_count);
+    // Scratch and write-back are clamped to the owned branch range: compute-pool
+    // workers hold disjoint ranges over the shared branch-indexed state, so a
+    // whole-array write-back would revert other workers' cells (issue-110).
+    @memcpy(workspace_seed_sites[inputs.first_branch..inputs.end_branch], state.potential_seed_site_count[inputs.first_branch..inputs.end_branch]);
     for (inputs.first_branch..inputs.end_branch) |branch| {
         const current_sites = workspace_seed_sites[branch];
         const branch_shoot_carbon_g_c = inputs.branch_shoot_carbon_g_c[branch];
@@ -55,7 +58,7 @@ pub fn apply(state: State, workspace_seed_sites: []f64, inputs: Inputs) !void {
             return error.InvalidPotentialSeedSiteResult;
         workspace_seed_sites[branch] = updated_sites;
     }
-    @memcpy(state.potential_seed_site_count, workspace_seed_sites[0..branch_count]);
+    @memcpy(state.potential_seed_site_count[inputs.first_branch..inputs.end_branch], workspace_seed_sites[inputs.first_branch..inputs.end_branch]);
 }
 
 test "runtime branches receive shoot-growth-proportional potential sites" {

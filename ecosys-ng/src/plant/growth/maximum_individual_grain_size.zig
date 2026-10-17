@@ -30,7 +30,9 @@ pub fn apply(state: State, workspace_grain_carbon_g_c: []f64, inputs: Inputs) !v
     inline for (.{ inputs.water_growth_fraction, inputs.maximum_individual_grain_carbon_g_c }) |value|
         if (!std.math.isFinite(value) or value < 0) return error.InvalidGrainSizeInput;
 
-    @memcpy(workspace_grain_carbon_g_c[0..branch_count], state.individual_grain_carbon_g_c);
+    // Owned-range copies only: see the concurrency note in
+    // potential_seed_site_accumulation.zig (issue-110).
+    @memcpy(workspace_grain_carbon_g_c[inputs.first_branch..inputs.end_branch], state.individual_grain_carbon_g_c[inputs.first_branch..inputs.end_branch]);
     for (inputs.first_branch..inputs.end_branch) |branch| {
         const current_g_c = workspace_grain_carbon_g_c[branch];
         const nutrient_set = inputs.nutrient_set_fraction[branch];
@@ -51,7 +53,7 @@ pub fn apply(state: State, workspace_grain_carbon_g_c: []f64, inputs: Inputs) !v
             return error.InvalidGrainSizeResult;
         workspace_grain_carbon_g_c[branch] = updated_g_c;
     }
-    @memcpy(state.individual_grain_carbon_g_c, workspace_grain_carbon_g_c[0..branch_count]);
+    @memcpy(state.individual_grain_carbon_g_c[inputs.first_branch..inputs.end_branch], workspace_grain_carbon_g_c[inputs.first_branch..inputs.end_branch]);
 }
 
 test "runtime branches use fourth root of nutrient-water product" {

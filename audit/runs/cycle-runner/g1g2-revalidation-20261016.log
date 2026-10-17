@@ -1,0 +1,36 @@
+== zig build test (post-fix tree, pre-close revalidation) 2026-10-16T19:06:18Z zig 0.17.0
+[output_editor] (warn): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+[output_editor] (warn): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+[output_editor] (warn): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+[output_editor] (warn): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+[output_editor] (warn): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+[output_editor] (warn): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+[output_editor] (warn): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+[output_editor] (warn): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+[output_editor] (warn): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+[output_editor] (warn): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+[output_editor] (warn): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+outer-hour allocation benchmark: baseline_ns=42798000 baseline_bytes=148897792 baseline_allocations=324 retained_ns=9418000 retained_bytes=0 retained_allocations=0
+[default] (warn): solute transport Newton-Picard exhausted runtime ceiling: max_iterations=1 scaled_residual=2.0816681711721685e4 cell=1 species=0 amount_mol=3.3333333333333315e-1 residual_mol=2.7755575615628914e-16 newton_steps=1 picard_steps=0
+failed command: /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.zig-cache/o/4886dd00055ddfbe31cb25d1122a505d/test --cache-dir=/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.zig-cache --seed=0x687c92fe --listen=-
+
+Build Summary: 3/5 steps succeeded (1 failed); 4518/4520 tests passed (1 skipped, 1 crashed)
+test transitive failure
++- run test 4399 pass, 1 skip (4400 total) 7m MaxRSS:438M
+|  +- compile test debug native success 43s MaxRSS:2G
++- run test 119 pass, 1 crash (120 total)
+   +- compile test debug native success 6s MaxRSS:713M
+
+test_exit=0
+== zig build Debug
+install success
++- install ecosys_ng success
+   +- compile exe ecosys_ng debug native success 29s MaxRSS:2G
+
+debug_exit=0
+== zig build ReleaseSafe
+install success
++- install ecosys_ng success
+   +- compile exe ecosys_ng safe native success 2m MaxRSS:4G
+
+release_safe_exit=0

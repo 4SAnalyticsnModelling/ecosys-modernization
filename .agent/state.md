@@ -1,10 +1,10 @@
 # Mission State — ecosys-ng Ottawa (single autonomous agent)
 
 <!-- runner:begin -->
-## Cycle 00002 · PLANNING · 2026-10-15T10:25:44Z
+## Cycle 00002 · WORKING · 2026-10-17T04:32:27Z
 - Actor: single autonomous agent (any harness/model). Verification: gates G1-G9 (Zig 0.17.x build, repo-contained work) + read-only sub-agents.
 - Target: Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded legacy oracle for the same hours, every difference explained by exact arithmetic or diagnosed to file:line (no tolerance loosened, no bound moved).
-- Gates: none recorded
+- Gates: G1=PASS, G2=PASS, G3=PASS, G4=N-A, G5=PASS, G6=PASS, G7=PASS, G9=PASS
 - Sync: unknown (push every completed cycle to origin/main)
 - Next target: Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded oracle for those hours (cycle_00001.md section 6).
 <!-- runner:end -->
@@ -164,3 +164,14 @@ stiff solute image. Terminal ladder attempt enables DEV-011/014-ceiling/015 toge
   accept omitted `--timeout` (timeout_seconds null in receipts); the command-registry entry is renamed
   `zig017_ottawa_run` (renamed_from `zig017_ottawa_bounded_run`); protocol §8 records the rule.
 - Cycle scoping is unchanged: one bounded, falsifiable question per cycle; only the run is unbounded.
+
+## Cycle 00002 close (2026-10-16)
+- issue-110 fix (6 whole-array `@memcpy` write-backs clamped to worker-owned ranges; test strengthened to 64
+  two-worker rounds) verified: G2 12/12 under load, G5 sealed-deck IDENTICAL (391,349 cells, 0 differing,
+  `audit/runs/zig017-deckdiff-20261016-1/diff.json`), G7 PASS (`audit/runs/zig017-g7-issue110-verifier-20261016/verdict.md`).
+- G6 re-recorded PASS with justification (flagged line cites pre-existing registered DEV-004; pytest 48-fail
+  baseline identical on 107aebb → pre-existing debt, filed as issue-111). ReleaseFast builds non-bit-reproducible
+  on this host (3 distinct sha256 of same source) — binding_id is the identity of record; exe pinned per-run.
+- Full strict run launched post-close per directive: `zig017-full-20261016-1`, unbounded (no `--timeout`),
+  detached; log `audit/runs/cycle-runner/zig017-full-20261016-1.log` (receipt+summary under
+  `audit/runs/ottawa/zig017-full-20261016-1/`).

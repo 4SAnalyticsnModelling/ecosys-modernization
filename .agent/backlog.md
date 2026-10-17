@@ -94,3 +94,13 @@ lives here, not in a conversation. Protocol: `.agent/protocol.md` §9.
   under `archive/pre-solo-workflow/` — history, never a live entry point. `swarm_wrapper.py` + `workflow.py`
   stay (tooling/tests import them) but are not part of the protocol; keep as evidence.
 - `state.md` still records run paths on the retired Windows host; rewrite them once the macOS tree exists (item 5).
+
+- issue-111 (NEW 2026-10-16, cycle 00002 close): 48 pre-existing pytest failures on main (43 retired-harness
+  swarm tests, 3 traceability-range, 2 stale deck-blob constants `9ec1bf4e` vs `ecf5e61a`) — stash-verified
+  pre-existing, zero new failures from cycle 00002. Fix plan in the issue file. Do not block science cycles.
+- issue-110 follow-up (G7 coverage note, non-blocking): strengthened reproduction test never sets `anthesis_day`,
+  so `final_grain_number`/`maximum_individual_grain_size` race paths are not live in it — set grain-fill inputs
+  so all three operators' race paths execute.
+- build-reproducibility (non-blocking): Zig 0.17.0 ReleaseFast not bit-reproducible on this host (3 distinct
+  sha256, same source) — investigate embed paths/build-id via the ecosys-build-reproducibility skill when idle;
+  no gate rests on exe-byte identity (binding_id + per-run exe_sha256 is the provenance of record).

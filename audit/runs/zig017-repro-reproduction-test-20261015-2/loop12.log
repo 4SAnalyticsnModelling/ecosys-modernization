@@ -1,0 +1,32 @@
+# zig 0.17.0 · 2026-10-15 · zig test src/module_index.zig --cache-dir .zig-cache · 6x CPU load · issue-110 fix applied · 64-round concurrency test
+# NOTE: the first block below (iter=1..12 at=04:31:21, summary pass=0 fail=12) is a HARNESS ARTIFACT, not test
+# results: that earlier attempt wrote its per-iteration logs to /tmp_ignore.log, which the file sandbox denied,
+# so `zig test` itself never ran and every iteration "failed" in the same second. All 12 per-iteration logs of
+# the valid run are audit/runs/zig017-repro-reproduction-test-20261015-2/run-1.log..run-12.log (random --seed
+# per run, 6 spinner processes pinned one per CPU during each iteration). The valid block is the second one.
+iter=1 at=04:31:21 load=6x FAIL
+iter=2 at=04:31:21 load=6x FAIL
+iter=3 at=04:31:21 load=6x FAIL
+iter=4 at=04:31:21 load=6x FAIL
+iter=5 at=04:31:21 load=6x FAIL
+iter=6 at=04:31:21 load=6x FAIL
+iter=7 at=04:31:21 load=6x FAIL
+iter=8 at=04:31:21 load=6x FAIL
+iter=9 at=04:31:21 load=6x FAIL
+iter=10 at=04:31:21 load=6x FAIL
+iter=11 at=04:31:21 load=6x FAIL
+iter=12 at=04:31:21 load=6x FAIL
+summary: pass=0 fail=12
+iter=1 at=04:42:52 load=6x PASS
+iter=2 at=04:50:53 load=6x PASS
+iter=3 at=04:58:55 load=6x PASS
+iter=4 at=05:07:06 load=6x PASS
+iter=5 at=05:15:16 load=6x PASS
+iter=6 at=05:23:28 load=6x PASS
+iter=7 at=05:31:39 load=6x PASS
+iter=8 at=05:39:48 load=6x PASS
+iter=9 at=05:47:58 load=6x PASS
+iter=10 at=05:56:07 load=6x PASS
+iter=11 at=06:04:16 load=6x PASS
+iter=12 at=06:12:26 load=6x PASS
+summary: pass=12 fail=0

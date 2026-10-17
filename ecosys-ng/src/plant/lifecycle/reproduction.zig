@@ -434,23 +434,31 @@ test "reproduction worker scratch is bitwise equivalent under disjoint grid conc
     defer worker_canopy.deinit();
     const active = [_]bool{ true, true };
     var baseline_context: ApplyContext = .{ .canopy = &baseline_canopy, .plants = &plants, .growth_stages = &stages, .controls = &controls, .active_by_plant = &active, .minimum_turgor_potential_megapascal = 0.1, .seed_set_parameters = canopy_module.compatibilitySeedSetParameters(), .structural_presence_threshold_g_per_plant = 1.0e-12, .timestep_h = 1 };
-    try applyTile(&baseline_context, .{ .first = 0, .end = 2 });
+    // Serial oracle accumulates the same number of rounds the workers do, so a
+    // lost update in any round persists (linear accumulation is never reset).
+    const rounds = 64;
+    var round: usize = 0;
+    while (round < rounds) : (round += 1) try applyTile(&baseline_context, .{ .first = 0, .end = 2 });
 
     var workspace = try GridWorkspace.init(allocator, 2);
     defer workspace.deinit();
     try workspace.ensureBranchCapacity(2);
     var worker_context: ApplyContext = .{ .canopy = &worker_canopy, .plants = &plants, .growth_stages = &stages, .controls = &controls, .active_by_plant = &active, .minimum_turgor_potential_megapascal = 0.1, .seed_set_parameters = canopy_module.compatibilitySeedSetParameters(), .structural_presence_threshold_g_per_plant = 1.0e-12, .timestep_h = 1, .workspace = &workspace };
     const Worker = struct {
-        fn run(context: *ApplyContext, cell: usize, worker_index: usize, failed: *std.atomic.Value(bool)) void {
+        fn run(context: *ApplyContext, cell: usize, worker_index: usize, round_count: usize, failed: *std.atomic.Value(bool)) void {
             var cells = [1]usize{cell};
-            applyOwnedCells(context, &cells, worker_index) catch {
-                failed.store(true, .release);
-            };
+            var applied: usize = 0;
+            while (applied < round_count) : (applied += 1) {
+                applyOwnedCells(context, &cells, worker_index) catch {
+                    failed.store(true, .release);
+                    return;
+                };
+            }
         }
     };
     var failed = std.atomic.Value(bool).init(false);
-    const first = try std.Thread.spawn(.{}, Worker.run, .{ &worker_context, 0, 0, &failed });
-    const second = std.Thread.spawn(.{}, Worker.run, .{ &worker_context, 1, 1, &failed }) catch |err| {
+    const first = try std.Thread.spawn(.{}, Worker.run, .{ &worker_context, 0, 0, rounds, &failed });
+    const second = std.Thread.spawn(.{}, Worker.run, .{ &worker_context, 1, 1, rounds, &failed }) catch |err| {
         first.join();
         return err;
     };

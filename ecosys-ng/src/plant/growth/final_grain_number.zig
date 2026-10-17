@@ -43,7 +43,9 @@ pub fn apply(state: State, workspace: Workspace, inputs: Inputs) !void {
     inline for (.{ inputs.carbon_half_saturation_g_c_per_g_c, inputs.nitrogen_half_saturation_g_n_per_g_c, inputs.phosphorus_half_saturation_g_p_per_g_c, inputs.canopy_temperature_c, inputs.chilling_temperature_c, inputs.high_temperature_c, inputs.seed_loss_fraction_per_c_h, inputs.timestep_h, inputs.water_growth_fraction, inputs.maximum_seeds_per_site }) |value| if (!std.math.isFinite(value)) return error.NonFiniteFinalGrainNumberInput;
     if (inputs.carbon_half_saturation_g_c_per_g_c < 0 or inputs.nitrogen_half_saturation_g_n_per_g_c < 0 or inputs.phosphorus_half_saturation_g_p_per_g_c < 0 or inputs.seed_loss_fraction_per_c_h < 0 or inputs.timestep_h <= 0 or inputs.water_growth_fraction < 0 or inputs.maximum_seeds_per_site < 0) return error.InvalidFinalGrainNumberInput;
 
-    @memcpy(workspace.grain_count[0..count], state.grain_count);
+    // Owned-range copies only: see the concurrency note in
+    // potential_seed_site_accumulation.zig (issue-110).
+    @memcpy(workspace.grain_count[inputs.first_branch..inputs.end_branch], state.grain_count[inputs.first_branch..inputs.end_branch]);
     @memset(workspace.nutrient_set_fraction[0..count], 0);
     @memset(workspace.thermal_loss_fraction[0..count], 0);
     for (inputs.first_branch..inputs.end_branch) |branch| {
@@ -74,7 +76,7 @@ pub fn apply(state: State, workspace: Workspace, inputs: Inputs) !void {
             workspace.grain_count[branch] = updated;
         }
     }
-    @memcpy(state.grain_count, workspace.grain_count[0..count]);
+    @memcpy(state.grain_count[inputs.first_branch..inputs.end_branch], workspace.grain_count[inputs.first_branch..inputs.end_branch]);
 }
 
 fn saturation(concentration: f64, half_saturation: f64) !f64 {
