@@ -1,0 +1,410 @@
+[
+  {
+    "variant": "mtplx-auto",
+    "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+    "samples": [
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-auto-short-0",
+        "elapsed_s": 9.411,
+        "ttft_s": 0.582,
+        "usage": {
+          "prompt_tokens": 86,
+          "completion_tokens": 384,
+          "total_tokens": 470,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 43.41,
+        "output_chars": 1657,
+        "preview": "```python\nimport csv\nimport io\nimport logging\nfrom dataclasses import dataclass, field\nfrom typing import Any, Callable, Dict, Generator, List, Option",
+        "chunks": 172
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-auto-short-1",
+        "elapsed_s": 9.279,
+        "ttft_s": 0.636,
+        "usage": {
+          "prompt_tokens": 90,
+          "completion_tokens": 384,
+          "total_tokens": 474,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 44.36,
+        "output_chars": 1577,
+        "preview": "```python\nfrom dataclasses import dataclass\nfrom typing import Iterator, Dict, Any, List, Optional, Type\nimport csv\nimport io\nimport sys\nimport unitte",
+        "chunks": 179
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-auto-4k-0",
+        "elapsed_s": 17.159,
+        "ttft_s": 14.17,
+        "usage": {
+          "prompt_tokens": 3727,
+          "completion_tokens": 128,
+          "total_tokens": 3855,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 42.71,
+        "output_chars": 476,
+        "preview": "```python\nfrom __future__ import annotations\n\nimport csv\nimport io\nimport json\nimport logging\nimport re\nimport sys\nimport time\nfrom dataclasses import",
+        "chunks": 57,
+        "input_tps_including_ttft_overhead": 263.02
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-auto-4k-1",
+        "elapsed_s": 17.328,
+        "ttft_s": 14.146,
+        "usage": {
+          "prompt_tokens": 3726,
+          "completion_tokens": 128,
+          "total_tokens": 3854,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 40.13,
+        "output_chars": 536,
+        "preview": "```python\nimport csv\nimport io\nimport logging\nimport re\nfrom dataclasses import dataclass\nfrom typing import Any, Callable, Dict, Iterator, List, Opti",
+        "chunks": 58,
+        "input_tps_including_ttft_overhead": 263.4
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-auto-16k-0",
+        "elapsed_s": 61.299,
+        "ttft_s": 58.183,
+        "usage": {
+          "prompt_tokens": 14948,
+          "completion_tokens": 128,
+          "total_tokens": 15076,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 41.6,
+        "output_chars": 507,
+        "preview": "```python\nfrom __future__ import annotations\n\nimport csv\nimport io\nimport json\nimport logging\nimport time\nfrom dataclasses import dataclass, field\nfro",
+        "chunks": 59,
+        "input_tps_including_ttft_overhead": 256.91
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-auto-16k-1",
+        "elapsed_s": 61.65,
+        "ttft_s": 58.231,
+        "usage": {
+          "prompt_tokens": 14950,
+          "completion_tokens": 128,
+          "total_tokens": 15078,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 37.76,
+        "output_chars": 507,
+        "preview": "```python\nimport csv\nimport sys\nimport io\nfrom typing import List, Dict, Optional, Callable, Any, Generator\nfrom dataclasses import dataclass\n\n\n@datac",
+        "chunks": 52,
+        "input_tps_including_ttft_overhead": 256.74
+      }
+    ]
+  },
+  {
+    "variant": "mtplx-chunk4096",
+    "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+    "samples": [
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk4096-short-0",
+        "elapsed_s": 9.149,
+        "ttft_s": 0.578,
+        "usage": {
+          "prompt_tokens": 88,
+          "completion_tokens": 384,
+          "total_tokens": 472,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 45.12,
+        "output_chars": 1705,
+        "preview": "```python\n\"\"\"\nCSV Validation Pipeline\n\"\"\"\n\nfrom dataclasses import dataclass, field\nfrom typing import Optional, List, Iterator, Dict, Any\nimport csv\n",
+        "chunks": 172
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk4096-short-1",
+        "elapsed_s": 8.768,
+        "ttft_s": 0.636,
+        "usage": {
+          "prompt_tokens": 86,
+          "completion_tokens": 384,
+          "total_tokens": 470,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 47.14,
+        "output_chars": 1535,
+        "preview": "```python\nimport csv\nimport io\nfrom typing import List, Tuple, Dict, Any, Optional, Generator, Union\nfrom dataclasses import dataclass, field\nimport r",
+        "chunks": 169
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk4096-4k-0",
+        "elapsed_s": 17.374,
+        "ttft_s": 14.206,
+        "usage": {
+          "prompt_tokens": 3728,
+          "completion_tokens": 128,
+          "total_tokens": 3856,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 40.29,
+        "output_chars": 508,
+        "preview": "```python\nfrom dataclasses import dataclass\nfrom typing import Generator, List, Dict, Any, Optional, Tuple\nimport csv\nimport sys\nimport io\nimport uuid",
+        "chunks": 61,
+        "input_tps_including_ttft_overhead": 262.42
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk4096-4k-1",
+        "elapsed_s": 17.407,
+        "ttft_s": 14.281,
+        "usage": {
+          "prompt_tokens": 3725,
+          "completion_tokens": 128,
+          "total_tokens": 3853,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 41.87,
+        "output_chars": 521,
+        "preview": "```python\n\"\"\"\nCSV Validation Pipeline\n\"\"\"\nfrom __future__ import annotations\n\nimport csv\nimport io\nimport sys\nfrom dataclasses import dataclass, field",
+        "chunks": 60,
+        "input_tps_including_ttft_overhead": 260.84
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk4096-16k-0",
+        "elapsed_s": 61.949,
+        "ttft_s": 58.714,
+        "usage": {
+          "prompt_tokens": 14948,
+          "completion_tokens": 128,
+          "total_tokens": 15076,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 42.41,
+        "output_chars": 524,
+        "preview": "```python\nimport csv\nimport io\nfrom typing import List, Dict, Any, Iterator, Tuple, Optional\nfrom dataclasses import dataclass, field\n\n\n@dataclass\ncla",
+        "chunks": 56,
+        "input_tps_including_ttft_overhead": 254.59
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk4096-16k-1",
+        "elapsed_s": 62.241,
+        "ttft_s": 58.611,
+        "usage": {
+          "prompt_tokens": 14948,
+          "completion_tokens": 128,
+          "total_tokens": 15076,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 35.67,
+        "output_chars": 512,
+        "preview": "```python\nfrom __future__ import annotations\n\nimport csv\nimport io\nimport sys\nfrom dataclasses import dataclass\nfrom typing import Any, Callable, Dict",
+        "chunks": 56,
+        "input_tps_including_ttft_overhead": 255.04
+      }
+    ]
+  },
+  {
+    "variant": "mtplx-chunk8192",
+    "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+    "samples": [
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk8192-short-0",
+        "elapsed_s": 9.187,
+        "ttft_s": 0.582,
+        "usage": {
+          "prompt_tokens": 89,
+          "completion_tokens": 384,
+          "total_tokens": 473,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 44.56,
+        "output_chars": 1660,
+        "preview": "```python\nfrom __future__ import annotations\nimport csv\nfrom typing import Iterator, List, Tuple, Dict, Optional\nimport io\nimport unittest\nimport temp",
+        "chunks": 169
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk8192-short-1",
+        "elapsed_s": 8.803,
+        "ttft_s": 0.621,
+        "usage": {
+          "prompt_tokens": 86,
+          "completion_tokens": 384,
+          "total_tokens": 470,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 46.84,
+        "output_chars": 1490,
+        "preview": "import csv\nimport io\nimport logging\nfrom dataclasses import dataclass, field\nfrom datetime import datetime\nfrom decimal import Decimal, InvalidOperati",
+        "chunks": 172
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk8192-4k-0",
+        "elapsed_s": 17.414,
+        "ttft_s": 14.168,
+        "usage": {
+          "prompt_tokens": 3724,
+          "completion_tokens": 128,
+          "total_tokens": 3852,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 40.3,
+        "output_chars": 497,
+        "preview": "```python\nfrom __future__ import annotations\n\nimport csv\nimport io\nfrom dataclasses import dataclass\nfrom typing import Iterator, Any, Callable\nimport",
+        "chunks": 58,
+        "input_tps_including_ttft_overhead": 262.85
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk8192-4k-1",
+        "elapsed_s": 17.652,
+        "ttft_s": 14.171,
+        "usage": {
+          "prompt_tokens": 3731,
+          "completion_tokens": 128,
+          "total_tokens": 3859,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 36.69,
+        "output_chars": 544,
+        "preview": "```python\nfrom __future__ import annotations\n\nimport csv\nimport sys\nfrom typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, TypeVar, ",
+        "chunks": 58,
+        "input_tps_including_ttft_overhead": 263.28
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk8192-16k-0",
+        "elapsed_s": 64.881,
+        "ttft_s": 61.409,
+        "usage": {
+          "prompt_tokens": 14946,
+          "completion_tokens": 128,
+          "total_tokens": 15074,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 37.21,
+        "output_chars": 510,
+        "preview": "```python\n\"\"\"CSV Validation Pipeline with type hints, streaming input, error handling, and tests.\"\"\"\n\nimport csv\nimport io\nimport json\nimport logging\n",
+        "chunks": 60,
+        "input_tps_including_ttft_overhead": 243.38
+      },
+      {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk8192-16k-1",
+        "elapsed_s": 71.957,
+        "ttft_s": 68.298,
+        "usage": {
+          "prompt_tokens": 14946,
+          "completion_tokens": 128,
+          "total_tokens": 15074,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 36.12,
+        "output_chars": 485,
+        "preview": "```python\n\"\"\"\nCSV Validation Pipeline with streaming input, type hints, error handling, and tests.\n\"\"\"\nimport csv\nimport io\nimport re\nfrom typing impo",
+        "chunks": 53,
+        "input_tps_including_ttft_overhead": 218.84
+      }
+    ]
+  }
+]

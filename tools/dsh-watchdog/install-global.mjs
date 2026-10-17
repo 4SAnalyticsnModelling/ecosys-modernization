@@ -4,7 +4,7 @@ import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-for (const file of ['core.mjs','plugin.mjs','hygiene.mjs','global-context.mjs'])
+for (const file of ['core.mjs','plugin.mjs','hygiene.mjs','global-context.mjs','code-mode.mjs'])
   execFileSync('node',['--check',path.join(import.meta.dirname,file)]);
 execFileSync('python3',['-c',"import ast,sys; ast.parse(open(sys.argv[1]).read())",path.join(import.meta.dirname,'global-supervisor.py')],
   {env:{...process.env,PYTHONDONTWRITEBYTECODE:'1'}});
@@ -25,7 +25,7 @@ for(const file of files) {
  if(!fs.existsSync(saved))fs.copyFileSync(file,saved);
  receipt.push({file,backup:saved,beforeHash:crypto.createHash('sha256').update(fs.readFileSync(saved)).digest('hex')});
 }
-for(const file of ['core.mjs','plugin.mjs','hygiene.mjs','global-context.mjs','global-supervisor.py','AGENTS.md'])
+for(const file of ['core.mjs','plugin.mjs','hygiene.mjs','global-context.mjs','code-mode.mjs','global-supervisor.py','AGENTS.md'])
  fs.copyFileSync(path.join(import.meta.dirname,file),path.join(target,file));
 fs.cpSync(path.join(import.meta.dirname,'templates'),path.join(target,'templates'),{recursive:true});
 fs.writeFileSync(path.join(installed,'configure-context.mjs'),"export {configureContext} from './tool-env/watchdog/global-context.mjs';\n");

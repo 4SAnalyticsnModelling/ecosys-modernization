@@ -1,0 +1,34 @@
+(node:85586) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ native code mode exposes both tools and batches calls beyond old deadlines (150.770083ms)
+✔ global dsh-tui has one policy and four 131K routes (118.121583ms)
+✔ global dsh-tui-safe has one policy and four 131K routes (93.368334ms)
+✔ global headless has one policy and four 131K routes (88.925083ms)
+✔ exact trigger formula for every valid output reservation (1.636416ms)
+✔ 74K does not compact; 75K causes one native balanced compaction (331.665916ms)
+✔ failed native summary preserves original surface and blocks restart (316.712584ms)
+✔ missing meter never silently permits request (0.092167ms)
+✔ durable notes are retained verbatim; conflicts and failed summary reject (147.62ms)
+✔ atomic state survives reload; corrupt state fails closed (203.844ms)
+✔ operation repeat counters do not depend on call identifiers (0.588708ms)
+✔ confirmed overflow can compact below normal boundary (381.031042ms)
+✔ fully assembled request catches late admission and supported retry rebuilds (373.764292ms)
+✔ eight repeated tool operations block despite changing turn, step and callId (263.640625ms)
+✔ successful assistant resets consecutive failure and overflow counters (221.239042ms)
+✔ known interrupted task queues a durable-notes continuation through agent service (229.277917ms)
+✔ subagent telemetry cannot replace the root resume pointer (212.490583ms)
+✔ non-Git workspace snapshots source without recursively copying watchdog state (38.705333ms)
+✔ unborn Git repository checkpoints staged and untracked source (101.189458ms)
+✔ continuous hygiene below75K retains errors, originals, pairing, index and replay (198.016792ms)
+✔ late cleanup crosses under75K and rebuilds without a summary (228.005041ms)
+✔ hygiene flush failure blocks subsequent requests even after surface changed (238.13675ms)
+✔ partial native pruning failure blocks retry admission (244.560042ms)
+✔ Unicode pruning preserves surrogate pairs and explicit retrieval notice (201.411916ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4072.526916

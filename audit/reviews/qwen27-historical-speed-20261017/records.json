@@ -1,0 +1,147 @@
+{
+  "extracted_on": "2026-10-17",
+  "scope": "benchmark*.json and recursive qwen27-20261002, qwen27-speed-20261003, speed-20261006 JSON samples; incomplete/errors/config/state-only entries excluded; 165 samples identified",
+  "selection": "decode samples require at least 128 completion tokens; use client decode where present, otherwise server rate; model variants reported separately",
+  "records": {
+    "best_historical_variant_decode": {
+      "source": "benchmark-Youssofal-prefill.json",
+      "json_path": "/1/samples/1",
+      "model_context": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16 mtplx-chunk4096   samples Qwen3.8-27B-MTPLX-Optimized-Quality-FP16 mtplx-chunk4096-short-1",
+      "prompt_tokens": 86,
+      "completion_tokens": 384,
+      "cached_tokens": 0,
+      "client_decode_tps": 47.14,
+      "server_decode_tps": null,
+      "server_prefill_tps": null,
+      "ttft_s": 0.636,
+      "sample": {
+        "model": "Qwen3.8-27B-MTPLX-Optimized-Quality-FP16",
+        "variant": "mtplx-chunk4096-short-1",
+        "elapsed_s": 8.768,
+        "ttft_s": 0.636,
+        "usage": {
+          "prompt_tokens": 86,
+          "completion_tokens": 384,
+          "total_tokens": 470,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        },
+        "decode_tps": 47.14,
+        "output_chars": 1535,
+        "preview": "```python\nimport csv\nimport io\nfrom typing import List, Tuple, Dict, Any, Optional, Generator, Union\nfrom dataclasses import dataclass, field\nimport r",
+        "chunks": 169
+      }
+    },
+    "best_official_bf16_decode": {
+      "source": "qwen27-speed-20261003/baseline/omlx-mtp-d4-c8192.json",
+      "json_path": "/samples/2",
+      "model_context": "/Users/4sanalyticsnmodelling/models/Qwen/Qwen3.8-27B omlx-mtp-d4-c8192   samples Qwen3.8-27B omlx-mtp-d4-c8192-4k-0",
+      "prompt_tokens": 3731,
+      "completion_tokens": 128,
+      "cached_tokens": 0,
+      "client_decode_tps": 31.8,
+      "server_decode_tps": 32.01,
+      "server_prefill_tps": 243.55,
+      "ttft_s": 15.341,
+      "sample": {
+        "model": "Qwen3.8-27B",
+        "variant": "omlx-mtp-d4-c8192-4k-0",
+        "elapsed_s": 19.335,
+        "ttft_s": 15.341,
+        "usage": {
+          "prompt_tokens": 3731,
+          "completion_tokens": 128,
+          "total_tokens": 3859,
+          "input_tokens": 3731,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 15.32,
+          "time_to_first_visible_token": 15.32,
+          "total_time": 19.32,
+          "prompt_eval_duration": 15.32,
+          "generation_duration": 4.0,
+          "prompt_tokens_per_second": 243.55,
+          "generation_tokens_per_second": 32.01
+        },
+        "decode_tps": 31.8,
+        "output_chars": 468,
+        "preview": "```python\nimport csv\nimport io\nimport sys\nfrom typing import Dict, List, Optional, Any, Generator, Callable\nfrom dataclasses import dataclass, field\n\n",
+        "chunks": 29,
+        "input_tps_including_ttft_overhead": 243.2
+      }
+    },
+    "best_official_bf16_fresh_prefill_in_scanned_samples": {
+      "source": "qwen27-speed-20261003/omlx-mtp-d4-c8192-cpu10.json",
+      "json_path": "/samples/1",
+      "model_context": "/Users/4sanalyticsnmodelling/models/Qwen/Qwen3.8-27B omlx-mtp-d4-c8192-cpu10   samples Qwen3.8-27B omlx-mtp-d4-c8192-cpu10-lines110-1",
+      "prompt_tokens": 3729,
+      "completion_tokens": 128,
+      "cached_tokens": 0,
+      "client_decode_tps": 29.8,
+      "server_decode_tps": 30.01,
+      "server_prefill_tps": 255.11,
+      "ttft_s": 14.638,
+      "sample": {
+        "model": "Qwen3.8-27B",
+        "variant": "omlx-mtp-d4-c8192-cpu10-lines110-1",
+        "elapsed_s": 18.901,
+        "ttft_s": 14.638,
+        "usage": {
+          "prompt_tokens": 3729,
+          "completion_tokens": 128,
+          "total_tokens": 3857,
+          "input_tokens": 3729,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 14.62,
+          "time_to_first_visible_token": 14.62,
+          "total_time": 18.88,
+          "prompt_eval_duration": 14.62,
+          "generation_duration": 4.27,
+          "prompt_tokens_per_second": 255.11,
+          "generation_tokens_per_second": 30.01
+        },
+        "decode_tps": 29.8,
+        "output_chars": 507,
+        "preview": "```python\nfrom dataclasses import dataclass, field\nfrom typing import Any, Dict, Iterator, List, Optional, Tuple\nimport csv\nimport sys\n\n\n@dataclass\ncl",
+        "chunks": 32,
+        "input_tps_including_ttft_overhead": 254.7479163820194
+      }
+    }
+  },
+  "sources": [
+    {
+      "original": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/benchmark-Youssofal-prefill.json",
+      "extracted": "audit/reviews/qwen27-historical-speed-20261017/sources/benchmark-Youssofal-prefill.json",
+      "sha256": "32d7d0945d1054b97acab3204f3d108f7488c588f92de53ecba78f3f3e7e6d58"
+    },
+    {
+      "original": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/qwen27-20261002/production-verification.json",
+      "extracted": "audit/reviews/qwen27-historical-speed-20261017/sources/qwen27-20261002/production-verification.json",
+      "sha256": "3973672bb9ee9253f0afe7941a5b33f5cf161899c36157b8e975640cfd0183c3"
+    },
+    {
+      "original": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/qwen27-speed-20261003/baseline/omlx-mtp-d4-c8192.json",
+      "extracted": "audit/reviews/qwen27-historical-speed-20261017/sources/qwen27-speed-20261003/baseline/omlx-mtp-d4-c8192.json",
+      "sha256": "475d67a983dfaa62244b15b80d0e5af2bc51f9fc6d1283bcfe83224368bba0da"
+    },
+    {
+      "original": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/qwen27-speed-20261003/benchmark-summary.json",
+      "extracted": "audit/reviews/qwen27-historical-speed-20261017/sources/qwen27-speed-20261003/benchmark-summary.json",
+      "sha256": "ea6cbb9278518a855cf56af26958894d4eeff7d536af6d964fd14aaab26b0dc0"
+    },
+    {
+      "original": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/qwen27-speed-20261003/omlx-mtp-d4-c8192-cpu10.json",
+      "extracted": "audit/reviews/qwen27-historical-speed-20261017/sources/qwen27-speed-20261003/omlx-mtp-d4-c8192-cpu10.json",
+      "sha256": "d97c8da84e76c7467099cae687ddc6e62238e87a72c8081af9b2f69577f2cf96"
+    }
+  ]
+}

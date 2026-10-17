@@ -1,0 +1,77 @@
+{
+  "observed_on": "2026-10-17",
+  "model": "Qwen/Qwen3.8-27B",
+  "profile": {
+    "max_context_window": 262144,
+    "max_tokens": 32768,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "repetition_penalty": 1.0,
+    "presence_penalty": 0.0,
+    "force_sampling": true,
+    "is_pinned": false,
+    "is_default": false,
+    "turboquant_kv_enabled": false,
+    "enable_thinking": true,
+    "preserve_thinking": true,
+    "qwen4_ple_ssd_offload": true,
+    "chat_template_kwargs": {
+      "reasoning_effort": "xhigh"
+    },
+    "mtp_enabled": true,
+    "description": "https://huggingface.co/Qwen/Qwen3.8-27B\nNative precision KV/recurrent state; persistent prefix cache. Context and output budgets are configured per model, not a measured maximum.",
+    "backend": "omlx",
+    "mtp_fixed_depth": null,
+    "prefill_step_size": 8192,
+    "qwen35_ane_prefill_enabled": false,
+    "qwen35_oq_a8_enabled": false,
+    "request_timeout_seconds": 7200,
+    "bf16_cpu_prefill_fraction": 0.1,
+    "picker_priority": 3,
+    "display_name": "Qwen3.8 27B \u00b7 BF16 \u00b7 MTP",
+    "memory_guard_gb": 112,
+    "hot_cache_max_size": "2GB",
+    "inference_qos": true,
+    "burst_decode_mode": "balanced",
+    "bf16_long_prefill_guard": true,
+    "mtp_adaptive_max_depth": 3
+  },
+  "performance_overrides": {
+    "backend": "omlx",
+    "mtp_enabled": true,
+    "mtp_fixed_depth": null,
+    "prefill_step_size": 8192,
+    "turboquant_kv_enabled": false,
+    "qwen35_ane_prefill_enabled": false,
+    "qwen35_oq_a8_enabled": false,
+    "request_timeout_seconds": 7200,
+    "bf16_cpu_prefill_fraction": 0.1,
+    "picker_priority": 3,
+    "display_name": "Qwen3.8 27B \u00b7 BF16 \u00b7 MTP",
+    "max_context_window": 262144,
+    "memory_guard_gb": 112,
+    "hot_cache_max_size": "2GB",
+    "inference_qos": true,
+    "burst_decode_mode": "balanced",
+    "bf16_long_prefill_guard": true,
+    "mtp_adaptive_max_depth": 3
+  },
+  "harness": {
+    "context_window": 131072,
+    "max_output_tokens": 32768,
+    "compaction_boundary_meter_tokens": 75000,
+    "code_mode": "native tools plus run_code (TypeScript)",
+    "profiles": [
+      "dsh-tui",
+      "dsh-tui-safe",
+      "headless"
+    ]
+  },
+  "sources": [
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/profiles.json",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/performance-overrides.json",
+    ".dsh/profiles/dsh-tui/cordis.patch.yml"
+  ]
+}

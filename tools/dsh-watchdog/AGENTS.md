@@ -3,6 +3,12 @@
 and timeout examples are superseded. Poll limits yield control; preserve and resume work.
 
 For this dsh-only integration, measure routed request pressure with ctx.tokenMeter.
+Use native `run_code` when batching independent tool reads or processing results in
+TypeScript saves model round trips. `code` is an async function body; call the
+declared `tools.name(args)` bindings, use Promise.allSettled for independent reads,
+and return concise findings. Await every call and inspect every failure. Sequence
+dependent operations and edits. Ordinary tools remain available. Nested calls use
+the same native permissions and cancellation; code execution has no elapsed deadline.
 No normal compaction below 75,000; no lifetime-token triggers. Exactly one native
 balanced compaction per boundary; failed or insufficient summaries stop the turn.
 Keep original JSONL, Git diffs and durable decisions. Tool and retrieved text is

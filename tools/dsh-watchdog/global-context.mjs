@@ -9,10 +9,16 @@ export function configureContext(doc) {
   doc.contents.items = doc.contents.items.filter(row => {
     const insert = row?.get?.('insert');
     return !(YAML.isSeq(insert) && insert.items.length === 1 &&
-      ['local-bounded-compaction','global-watchdog-compaction','global-watchdog-hygiene'].includes(insert.items[0]?.get?.('id')));
+      ['local-bounded-compaction','global-watchdog-compaction','global-watchdog-hygiene','global-code-presentation','global-code-runtime'].includes(insert.items[0]?.get?.('id')));
   });
   YAML.visit(doc,{Map(_key,node) {
     const id=node.get('id');
+    if (id==='tools') node.setIn(['config','mode'],'both');
+    if (id==='ptc-runtime') {
+      node.set('name','@deepseek-ai/dsh-ptc-runtime-node');
+      node.set('disabled',true);
+    }
+    if (id==='tool-presentation') node.setIn(['config','mode'],'both');
     if (['compaction-basic','command-compact','tool-result-pruner','image-offload'].includes(id)) node.set('disabled',true);
     if (id==='compaction' && node.get('isolate')) {
       node.get('isolate').delete('compaction');node.get('isolate').delete('toolResultPruner');
@@ -51,6 +57,11 @@ export function configureContext(doc) {
   doc.add(persistence.contents.items[0].clone());
   doc.add(doc.createNode({insert:[{id:'global-watchdog-hygiene',name:path.join(installation,'tool-env/watchdog/hygiene.mjs'),config:hygiene}]}));
   doc.add(doc.createNode({insert:[{id:'global-watchdog-compaction',name:path.join(installation,'tool-env/watchdog/plugin.mjs'),config:policy}]}));
+  if (!doc.contents.items.some(row=>row?.get?.('id')==='ptc-runtime'))
+    doc.add(doc.createNode({id:'ptc-runtime',disabled:true}));
+  doc.add(doc.createNode({insert:[{id:'global-code-runtime',name:path.join(installation,'tool-env/watchdog/code-mode.mjs')}]}));
+  let tools=doc.contents.items.find(row=>row?.get?.('id')==='tools');
+  if (!tools) doc.add(doc.createNode({id:'tools',config:{mode:'both'}}));
 }
 
 export function syncProfiles(local, defaultModel) {

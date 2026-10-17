@@ -1,0 +1,200 @@
+[
+  {
+    "variant": "omlx-mtp-d4-c8192",
+    "prompt_size": "short",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 29.71,
+    "prefill_including_ttft_mean": 93.67,
+    "file": "baseline/omlx-mtp-d4-c8192.json"
+  },
+  {
+    "variant": "omlx-mtp-d4-c8192",
+    "prompt_size": "3.7K",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 30.09,
+    "prefill_including_ttft_mean": 243.04,
+    "file": "baseline/omlx-mtp-d4-c8192.json"
+  },
+  {
+    "variant": "omlx-mtp-d4-c8192",
+    "prompt_size": "15K",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 25.34,
+    "prefill_including_ttft_mean": 216.14,
+    "file": "baseline/omlx-mtp-d4-c8192.json"
+  },
+  {
+    "variant": "dspark-baseline-cpuoff",
+    "prompt_size": "short",
+    "n": 1,
+    "thinking": false,
+    "decode_tps_mean": 10.53,
+    "prefill_including_ttft_mean": 107.62,
+    "file": "dspark-baseline-cpuoff.json"
+  },
+  {
+    "variant": "dspark-baseline-cpuoff",
+    "prompt_size": "3.7K",
+    "n": 1,
+    "thinking": false,
+    "decode_tps_mean": 10.41,
+    "prefill_including_ttft_mean": 236.33,
+    "file": "dspark-baseline-cpuoff.json"
+  },
+  {
+    "variant": "dspark-dflash-cpuoff-b7",
+    "prompt_size": "short",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 12.53,
+    "prefill_including_ttft_mean": 120.77,
+    "file": "dspark-dflash-cpuoff-b7.json"
+  },
+  {
+    "variant": "dspark-dflash-cpuoff-b7",
+    "prompt_size": "3.7K",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 10.77,
+    "prefill_including_ttft_mean": 243.22,
+    "file": "dspark-dflash-cpuoff-b7.json"
+  },
+  {
+    "variant": "dspark-dflash-cpuoff-b7",
+    "prompt_size": "15K",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 11.64,
+    "prefill_including_ttft_mean": 230.71,
+    "file": "dspark-dflash-cpuoff-b7.json"
+  },
+  {
+    "variant": "dspark-dflash-cpuoff-draft4-b7-retry",
+    "prompt_size": "short",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 14.14,
+    "prefill_including_ttft_mean": 121.75,
+    "file": "dspark-dflash-cpuoff-draft4-b7-retry.json"
+  },
+  {
+    "variant": "omlx-dflash-b4",
+    "prompt_size": "short",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 25.38,
+    "prefill_including_ttft_mean": 92.57,
+    "file": "omlx-dflash-b4.json"
+  },
+  {
+    "variant": "omlx-dflash-b5",
+    "prompt_size": "short",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 26.21,
+    "prefill_including_ttft_mean": 91.63,
+    "file": "omlx-dflash-b5.json"
+  },
+  {
+    "variant": "omlx-dflash-b8",
+    "prompt_size": "short",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 22.52,
+    "prefill_including_ttft_mean": 92.3,
+    "file": "omlx-dflash-b8.json"
+  },
+  {
+    "variant": "omlx-dflash-b8",
+    "prompt_size": "3.7K",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 25.91,
+    "prefill_including_ttft_mean": 245.86,
+    "file": "omlx-dflash-b8.json"
+  },
+  {
+    "variant": "omlx-dflash-b8",
+    "prompt_size": "15K",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 24.05,
+    "prefill_including_ttft_mean": 220.88,
+    "file": "omlx-dflash-b8.json"
+  },
+  {
+    "variant": "omlx-dflash-draft4-b8",
+    "prompt_size": "short",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 24.04,
+    "prefill_including_ttft_mean": 94.55,
+    "file": "omlx-dflash-draft4-b8.json"
+  },
+  {
+    "variant": "omlx-dflash-draft4-b8",
+    "prompt_size": "3.7K",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 25.31,
+    "prefill_including_ttft_mean": 247.4,
+    "file": "omlx-dflash-draft4-b8.json"
+  },
+  {
+    "variant": "omlx-mtp-d4-c8192-burst",
+    "prompt_size": "short",
+    "n": 3,
+    "thinking": true,
+    "decode_tps_mean": 22.46,
+    "prefill_including_ttft_mean": 134.53,
+    "file": "omlx-mtp-d4-c8192-burst.json"
+  },
+  {
+    "variant": "omlx-mtp-d4-c8192-cpu10-fa16",
+    "prompt_size": "3.7K",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 27.65,
+    "prefill_including_ttft_mean": 253.74,
+    "file": "omlx-mtp-d4-c8192-cpu10-fa16.json"
+  },
+  {
+    "variant": "omlx-mtp-d4-c8192-cpu10-fa16",
+    "prompt_size": "15K",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 26.48,
+    "prefill_including_ttft_mean": 233.87,
+    "file": "omlx-mtp-d4-c8192-cpu10-fa16.json"
+  },
+  {
+    "variant": "omlx-mtp-d4-c8192-cpu10",
+    "prompt_size": "3.7K",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 27.77,
+    "prefill_including_ttft_mean": 254.69,
+    "file": "omlx-mtp-d4-c8192-cpu10.json"
+  },
+  {
+    "variant": "omlx-mtp-d4-c8192-cpu10",
+    "prompt_size": "15K",
+    "n": 2,
+    "thinking": false,
+    "decode_tps_mean": 26.15,
+    "prefill_including_ttft_mean": 229.48,
+    "file": "omlx-mtp-d4-c8192-cpu10.json"
+  },
+  {
+    "variant": "omlx-mtp-d4-c8192-decodecontrol",
+    "prompt_size": "short",
+    "n": 3,
+    "thinking": true,
+    "decode_tps_mean": 23.63,
+    "prefill_including_ttft_mean": 127.36,
+    "file": "omlx-mtp-d4-c8192-decodecontrol.json"
+  }
+]

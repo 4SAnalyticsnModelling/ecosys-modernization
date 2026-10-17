@@ -1,0 +1,191 @@
+{
+  "variant": "omlx-mtp-d4-c8192",
+  "model": "/Users/4sanalyticsnmodelling/models/Qwen/Qwen3.8-27B",
+  "samples": [
+    {
+      "model": "Qwen3.8-27B",
+      "variant": "omlx-mtp-d4-c8192-short-0",
+      "elapsed_s": 13.49,
+      "ttft_s": 0.918,
+      "usage": {
+        "prompt_tokens": 88,
+        "completion_tokens": 384,
+        "total_tokens": 472,
+        "input_tokens": 88,
+        "output_tokens": 384,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "time_to_first_token": 0.91,
+        "time_to_first_visible_token": 0.91,
+        "total_time": 13.49,
+        "prompt_eval_duration": 0.91,
+        "generation_duration": 12.57,
+        "prompt_tokens_per_second": 96.4,
+        "generation_tokens_per_second": 30.54
+      },
+      "decode_tps": 30.47,
+      "output_chars": 1597,
+      "preview": "```python\n\"\"\"\nCSV Validation Pipeline\nThis module provides a robust CSV validation pipeline with type hints, streaming input, error handling, and test",
+      "chunks": 89,
+      "input_tps_including_ttft_overhead": 95.86
+    },
+    {
+      "model": "Qwen3.8-27B",
+      "variant": "omlx-mtp-d4-c8192-short-1",
+      "elapsed_s": 14.17,
+      "ttft_s": 0.94,
+      "usage": {
+        "prompt_tokens": 86,
+        "completion_tokens": 384,
+        "total_tokens": 470,
+        "input_tokens": 86,
+        "output_tokens": 384,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "time_to_first_token": 0.93,
+        "time_to_first_visible_token": 0.93,
+        "total_time": 14.16,
+        "prompt_eval_duration": 0.93,
+        "generation_duration": 13.23,
+        "prompt_tokens_per_second": 92.36,
+        "generation_tokens_per_second": 29.02
+      },
+      "decode_tps": 28.95,
+      "output_chars": 1605,
+      "preview": "```python\nimport csv\nimport io\nfrom dataclasses import dataclass, field\nfrom typing import List, Dict, Any, Optional, Generator, Tuple\nfrom enum impor",
+      "chunks": 88,
+      "input_tps_including_ttft_overhead": 91.49
+    },
+    {
+      "model": "Qwen3.8-27B",
+      "variant": "omlx-mtp-d4-c8192-4k-0",
+      "elapsed_s": 19.335,
+      "ttft_s": 15.341,
+      "usage": {
+        "prompt_tokens": 3731,
+        "completion_tokens": 128,
+        "total_tokens": 3859,
+        "input_tokens": 3731,
+        "output_tokens": 128,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "time_to_first_token": 15.32,
+        "time_to_first_visible_token": 15.32,
+        "total_time": 19.32,
+        "prompt_eval_duration": 15.32,
+        "generation_duration": 4.0,
+        "prompt_tokens_per_second": 243.55,
+        "generation_tokens_per_second": 32.01
+      },
+      "decode_tps": 31.8,
+      "output_chars": 468,
+      "preview": "```python\nimport csv\nimport io\nimport sys\nfrom typing import Dict, List, Optional, Any, Generator, Callable\nfrom dataclasses import dataclass, field\n\n",
+      "chunks": 29,
+      "input_tps_including_ttft_overhead": 243.2
+    },
+    {
+      "model": "Qwen3.8-27B",
+      "variant": "omlx-mtp-d4-c8192-4k-1",
+      "elapsed_s": 19.81,
+      "ttft_s": 15.336,
+      "usage": {
+        "prompt_tokens": 3725,
+        "completion_tokens": 128,
+        "total_tokens": 3853,
+        "input_tokens": 3725,
+        "output_tokens": 128,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "time_to_first_token": 15.31,
+        "time_to_first_visible_token": 15.31,
+        "total_time": 19.79,
+        "prompt_eval_duration": 15.31,
+        "generation_duration": 4.48,
+        "prompt_tokens_per_second": 243.24,
+        "generation_tokens_per_second": 28.59
+      },
+      "decode_tps": 28.39,
+      "output_chars": 482,
+      "preview": "```python\nfrom __future__ import annotations\n\nimport csv\nimport io\nfrom pathlib import Path\nfrom typing import Any, Callable, Dict, Iterable, List, Op",
+      "chunks": 31,
+      "input_tps_including_ttft_overhead": 242.89
+    },
+    {
+      "model": "Qwen3.8-27B",
+      "variant": "omlx-mtp-d4-c8192-16k-0",
+      "elapsed_s": 74.104,
+      "ttft_s": 69.158,
+      "usage": {
+        "prompt_tokens": 14949,
+        "completion_tokens": 128,
+        "total_tokens": 15077,
+        "input_tokens": 14949,
+        "output_tokens": 128,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "time_to_first_token": 69.12,
+        "time_to_first_visible_token": 69.12,
+        "total_time": 74.07,
+        "prompt_eval_duration": 69.12,
+        "generation_duration": 4.95,
+        "prompt_tokens_per_second": 216.29,
+        "generation_tokens_per_second": 25.87
+      },
+      "decode_tps": 25.68,
+      "output_chars": 641,
+      "preview": "```python\n\"\"\"\nCSV Validation Pipeline with type hints, streaming input, error handling, and tests.\n\"\"\"\n\nimport csv\nimport io\nimport logging\nfrom datac",
+      "chunks": 32,
+      "input_tps_including_ttft_overhead": 216.16
+    },
+    {
+      "model": "Qwen3.8-27B",
+      "variant": "omlx-mtp-d4-c8192-16k-1",
+      "elapsed_s": 74.243,
+      "ttft_s": 69.161,
+      "usage": {
+        "prompt_tokens": 14947,
+        "completion_tokens": 128,
+        "total_tokens": 15075,
+        "input_tokens": 14947,
+        "output_tokens": 128,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "time_to_first_token": 69.11,
+        "time_to_first_visible_token": 69.11,
+        "total_time": 74.19,
+        "prompt_eval_duration": 69.11,
+        "generation_duration": 5.08,
+        "prompt_tokens_per_second": 216.28,
+        "generation_tokens_per_second": 25.17
+      },
+      "decode_tps": 24.99,
+      "output_chars": 547,
+      "preview": "```python\nimport csv\nimport io\nimport logging\nimport sys\nfrom dataclasses import dataclass, field\nfrom typing import Any, Dict, List, Optional, Set\n\nl",
+      "chunks": 31,
+      "input_tps_including_ttft_overhead": 216.12
+    }
+  ],
+  "started": 1791059210.3713,
+  "command": [
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/venv/bin/python",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/qwen27-20261002/audit_server.py",
+    "omlx",
+    "serve",
+    "--base-path",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/qwen27-speed-20261003/baseline/omlx-mtp-d4-c8192",
+    "--model-dir",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/qwen27-speed-20261003/baseline/omlx-mtp-d4-c8192/models",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8092"
+  ],
+  "omlx_prefill_step_size": 8192,
+  "finished": 1791059444.41621
+}

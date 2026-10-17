@@ -4,6 +4,20 @@ and timeout examples are superseded. Poll limits yield control; preserve and res
 
 # DeepSeek Harness watchdog
 
+Native code mode is now enabled beside ordinary tools for every catalog model in
+`dsh-tui`, `dsh-tui-safe` and `headless`. It uses the installed harness's `run_code`
+transport and managed TypeScript runtime, with the existing permissions, sandbox,
+memory/output limits and explicit cancellation. `code-mode.mjs` supplies the native
+`timeoutMs: null` setting so execution has no elapsed deadline. No extra model or
+generation server is needed. Restart a running harness to load changed plugins.
+
+Call `run_code` with `description` and `code` (an async function body). Inside,
+call the actual `tools.name(args)` declarations supplied in the system prompt.
+Batch independent reads with `await Promise.allSettled([...])`, inspect failures,
+and return only useful results. Sequence mutations and dependent steps. A codemod
+is a source transformation and can be performed through the existing edit/shell
+tools; it is distinct from code mode's tool orchestration.
+
 Global deployment for installed **dsh 0.2.0-rc.2** and its three current profiles:
 **dsh-tui**, **dsh-tui-safe**, and **headless**. All four current local models are
 configured: Qwen Flash Next Q8, Qwen3.8 27B BF16, GLM 5.3 Flash 6-bit, and GLM 5.3
