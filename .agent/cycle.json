@@ -49,13 +49,14 @@
   "opened_utc": "2026-10-15T10:25:44Z",
   "record": ".agent/cycles/cycle_00002.md",
   "schema_version": 1,
-  "status": "DECIDED",
+  "status": "PUSHED",
   "steps_done": [
     "0 plan: record opened",
     "2026-10-17T04:59:29Z close: Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded legacy oracle for the same hours, every difference explained by exact arithmetic or diagnosed to file:line (no tolerance loosened, no bound moved).",
-    "2026-10-17T05:01:57Z close: cycle 00002 close: issue-110 fix (whole-array worker write-back clamps, 64-round concurrency test) verified G2 12/12 + G5 sealed-deck IDENTICAL (391,349 cells) + G7 PASS; G6 PASS re-recorded with DEV-004 justification and stash-verified pytest baseline (48 pre-existing fails -> issue-111); runs unbounded per directive; full strict run zig017-full-20261016-1 next"
+    "2026-10-17T05:01:57Z close: cycle 00002 close: issue-110 fix (whole-array worker write-back clamps, 64-round concurrency test) verified G2 12/12 + G5 sealed-deck IDENTICAL (391,349 cells) + G7 PASS; G6 PASS re-recorded with DEV-004 justification and stash-verified pytest baseline (48 pre-existing fails -> issue-111); runs unbounded per directive; full strict run zig017-full-20261016-1 next",
+    "2026-10-17T05:02:55Z pushed and metrics appended"
   ],
   "sync_status": "unknown",
   "target": "Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded legacy oracle for the same hours, every difference explained by exact arithmetic or diagnosed to file:line (no tolerance loosened, no bound moved).",
-  "updated_utc": "2026-10-17T05:01:57Z"
+  "updated_utc": "2026-10-17T05:02:55Z"
 }

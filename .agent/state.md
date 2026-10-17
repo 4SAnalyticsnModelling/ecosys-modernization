@@ -1,7 +1,7 @@
 # Mission State — ecosys-ng Ottawa (single autonomous agent)
 
 <!-- runner:begin -->
-## Cycle 00002 · WORKING · 2026-10-17T04:32:27Z
+## Cycle 00002 · PUSHED · 2026-10-17T05:02:55Z
 - Actor: single autonomous agent (any harness/model). Verification: gates G1-G9 (Zig 0.17.x build, repo-contained work) + read-only sub-agents.
 - Target: Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded legacy oracle for the same hours, every difference explained by exact arithmetic or diagnosed to file:line (no tolerance loosened, no bound moved).
 - Gates: G1=PASS, G2=PASS, G3=PASS, G4=N-A, G5=PASS, G6=PASS, G7=PASS, G9=PASS
