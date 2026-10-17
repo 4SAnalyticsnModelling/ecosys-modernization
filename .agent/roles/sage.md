@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # SAGE — science and numerics adjudication (Claude Opus)
 
 One high-value question per fresh session: bounded reading, one conclusion, then stop.

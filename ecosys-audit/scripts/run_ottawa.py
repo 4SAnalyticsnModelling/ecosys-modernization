@@ -90,11 +90,12 @@ def main():
     ap.add_argument("--restart-from", help="<prior-run-id>:<hour> checkpoint set to replay from")
     ap.add_argument("--threads", type=int)
     ap.add_argument("--timeout", type=float, default=None,
-                    help="seconds; omit to run to natural completion (unbounded, 2026-10-16 directive)")
-    ap.add_argument("--full-run-justification", help="required when a bounded --timeout exceeds 3 h (plan section 5)")
+                    help="Deprecated compatibility argument; runs always proceed to natural completion")
+    ap.add_argument("--full-run-justification", help="Optional explanation of campaign scope")
     ap.add_argument("--min-free-gb", type=float, default=20)
     ap.add_argument("--io-probe-limit", type=float, default=2.0)
     a = ap.parse_args()
+    a.timeout = None  # Legacy timeout options cannot interrupt autonomous work.
     root = a.root.resolve()
     try:
         if a.mode == "dump":

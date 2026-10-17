@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # ecosys-ng Ottawa No-Science-Gap Autonomous Qualification System
 
 ## Mission
@@ -375,7 +379,7 @@ Responsibilities:
 - deliver task files;
 - detect completion;
 - enforce session limits;
-- enforce timeouts;
+- preserve continuous work without execution timeouts;
 - recover stale sessions;
 - archive results;
 - execute deterministic scripts;
@@ -683,56 +687,21 @@ read huge file
 
 ---
 
-# 10. Session budgets
+# 10. Continuous sessions
 
-Suggested initial budgets:
-
-## Sentinel
-
-```text
-5–8 meaningful tool calls
-1 routing decision
-then exit
-```
-
-## Pathfinder
-
-```text
-10–20 meaningful tool calls
-one investigation
-then exit
-```
-
-## Forge
-
-```text
-one implementation task
-one primary fix
-targeted validation
-then exit
-```
-
-## Sage
-
-```text
-one high-value scientific question
-bounded relevant source inspection
-one conclusion/recommendation
-then exit
-```
-
-Do not preserve a session merely because it remains technically usable.
+No time, token or tool-call budget terminates autonomous work. Scope each task to a
+verifiable objective. Compact context with durable notes and continue unfinished tasks
+automatically. See `.agent/continuous-autonomy.md`.
 
 ---
 
 # 11. Stagnation rules
 
-An investigation must terminate and escalate if any of these occur:
+An investigation must change approach and record a fresh diagnosis if any of these occur:
 
 ```text
 3 materially different hypotheses rejected
 2 repair attempts from the same diagnosis fail
-tool budget reached
 no meaningful new evidence appears
 agent begins revisiting already rejected ideas
 agent starts broad repo exploration without justification
@@ -743,8 +712,8 @@ Then:
 ```text
 write failure packet
 record rejected hypotheses
-terminate session
-start fresh routing decision
+preserve unfinished work
+continue with a fresh diagnosis
 escalate if appropriate
 ```
 

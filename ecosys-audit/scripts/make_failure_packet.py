@@ -48,7 +48,7 @@ def fortran_range(root: Path, spec: str) -> str:
         raise ProtocolError("--fortran range must be <=400 lines")
     p = subprocess.run(["uv", "run", "ecosys-audit/scripts/f77query.py", "show", m.group(1), "--lines",
                         f"{m.group(2)}-{m.group(3)}"], cwd=root, capture_output=True, text=True,
-                       encoding="utf-8", errors="replace", timeout=300)
+                       encoding="utf-8", errors="replace", timeout=None)
     if p.returncode:
         raise ProtocolError(f"f77query show failed: {p.stderr[:400]}")
     return f"=== f77src/{spec} (via f77query.py show)\n{p.stdout}\n"
@@ -88,7 +88,7 @@ def build(root: Path, a) -> dict:
     (d / "relevant-zig.txt").write_text("".join(zig_range(root, s) for s in a.zig) or "none supplied\n", encoding="utf-8")
     (d / "relevant-fortran.txt").write_text("".join(fortran_range(root, s) for s in a.fortran) or "none supplied\n", encoding="utf-8")
     diff = subprocess.run(["git", "diff", "HEAD", "--", "ecosys-ng/src", "ecosys-ng/build.zig"], cwd=root,
-                          capture_output=True, timeout=300).stdout
+                          capture_output=True, timeout=None).stdout
     (d / "recent-diff.patch").write_bytes(diff)
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=root, capture_output=True, text=True).stdout.strip()
     (d / "hypotheses.md").write_text("# Open hypotheses\n\n" + "".join(f"- {h}\n" for h in a.hypothesis) or "", encoding="utf-8")

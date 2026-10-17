@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # ecosys-ng Ottawa Qualification — Concrete Execution Plan
 
 Status: v4, REVIEWED — GPT-6 Astra verdict PASS (`audit/reviews/plan-ottawa-qualification-r4.md`), after
@@ -117,9 +121,9 @@ session. The plan changes three things:
   sent in §4. The exact commands are in `CLAUDE.md` (Loop Guard).
 - **Target.** Full 30-year Ottawa run with verified scientific comparability against legacy Fortran.
 
-- **Budget enforcement.** The wrapper enforces time limits and records tokens when the harness reports
-  them (`.agent/metrics.csv`). A task over its budget ends as STAGNATED, and the spec §11/§33 rules
-  apply (3 rejected hypotheses or 2 failed implementations → stop and escalate).
+- **Budget enforcement.** The wrapper records elapsed time and tokens as metrics only. No task is interrupted
+  or marked STAGNATED because time or tool budgets expire. Repeated failures require
+  a fresh diagnosis and continued work, per `.agent/continuous-autonomy.md`.
 - **Science review.** SAGE reviews each FORGE science change against its hypothesis file and packet, and
   may read the specific source ranges and raw evidence it names.
 - **Mechanical review.** Tooling, tests and bookkeeping changes are reviewed by a fresh PATHFINDER
@@ -420,7 +424,7 @@ All of this lives under `D:\ecosys-evidence\` (git-ignored, manifest-hashed). Th
 ---
 
 ## 7. Token-cost controls
-1. Fresh session per task (spec §1.2); the §2 budgets are enforced by the wrapper.
+1. Fresh session per task (spec §1.2); context handoffs preserve unfinished work; no time or tool budget halts it.
 2. SAGE gets packets and targeted reads, never broad search.
 3. `.agent/state.md` ≤1,500 words; results follow the spec §14 contract; logs stay on disk; agents read
    `summary.json` first.

@@ -3,6 +3,12 @@ name: ecosys-autonomous-orchestration
 description: "Run the ecosys-ng audit as one autonomous agent that owns the whole loop in cycles (plan -> work -> evidence/self-check -> independent verification -> decide & record -> commit & push -> next cycle) decided by objective gates G1-G9 on the pinned Zig 0.17.x toolchain with every byte of work contained inside the repository, optionally fanning out a swarm of read-only sub-agents (verifier, diagnose, legacy-oracle, parity-sweep) without conflicting edits or duplicate full runs. Use for cycle planning, independent verification, parallel diagnosis, parity sweeps and cross-harness pickups."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
+
 
 ## Shared prerequisites
 

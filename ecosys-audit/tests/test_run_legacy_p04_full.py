@@ -156,8 +156,8 @@ class TestRunLegacyP04Full(unittest.TestCase):
             self.assertIsNone(after_info)
             self.assertEqual(lock_p.read_bytes().strip(), b"0")
 
-    def test_stale_lock_recovery_stale_heartbeat(self):
-        """T-00150 C3: Heartbeat older than 10 minutes (600s) is reclaimable."""
+    def test_live_lock_not_stolen_with_stale_heartbeat(self):
+        """A stale observation cannot authorize killing or stealing a live process."""
         with tempfile.TemporaryDirectory() as td:
             lock_p = Path(td) / "machine.lock"
             hb_p = Path(td) / "heartbeat.json"
@@ -184,17 +184,12 @@ class TestRunLegacyP04Full(unittest.TestCase):
 
             status = inspect_lock_status(lock_p, hb_p, max_heartbeat_age=MAX_HEARTBEAT_STALE_SECONDS)
             self.assertTrue(status["locked"])
-            self.assertTrue(status["reclaimable"])
-            self.assertEqual(status["reason"], "STALE_HEARTBEAT")
+            self.assertFalse(status["reclaimable"])
+            self.assertEqual(status["reason"], "LIVE_LOCK")
             self.assertGreater(status["heartbeat_age"], 600.0)
-
-            # Reclaim the lock using MachineLock
-            mlock = MachineLock(lock_p, hb_p, "campaign-reclaim-stale", max_heartbeat_age=MAX_HEARTBEAT_STALE_SECONDS)
-            with mlock:
-                info = read_lock_info(lock_p)
-                self.assertIsNotNone(info)
-                self.assertEqual(info["pid"], os.getpid())
-                self.assertEqual(info["campaign_id"], "campaign-reclaim-stale")
+            mlock = MachineLock(lock_p, hb_p, "campaign-thief")
+            with self.assertRaises(ProtocolError):
+                mlock.acquire()
 
     def test_live_lock_never_stolen(self):
         """T-00150 C3: A live lock (live PID + fresh heartbeat <= 600s) is NEVER stolen."""

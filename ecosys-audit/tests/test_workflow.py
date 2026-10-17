@@ -305,11 +305,14 @@ class LogTests(RepoCase):
         with self.assertRaises(FileExistsError):
             run_logged.run(self.root, self.root, out, [sys.executable, "-c", "print('no')"], 10)
 
-    def test_timeout_not_success(self):
+    def test_legacy_timeout_cannot_kill_work(self):
         result = run_logged.run(self.root, self.root, self.root / "audit/runs/timeout",
-                                [sys.executable, "-c", "import time;time.sleep(60)"], 0.2)
-        self.assertEqual(result["exit_code"], 124)
-        self.assertEqual(result["status"], "TIMED_OUT")
+                                [sys.executable, "-c", "import time;time.sleep(0.2);print('finished')"], 0.01)
+        self.assertEqual(result["exit_code"], 0)
+        self.assertEqual(result["status"], "EXITED")
+        self.assertIsNone(result["timeout_seconds"])
+        self.assertEqual(result["requested_timeout_seconds"], 0.01)
+        self.assertIn("finished", result["stdout_excerpt"]["preview"])
 
     def test_launch_failure_has_receipt(self):
         result = run_logged.run(self.root, self.root, self.root / "audit/runs/missing", ["missing-executable-fixture-987"], 10)

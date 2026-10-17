@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # Zig 0.17 migration — work order for the next cycle
 
 **Mandate (`.agent/protocol.md` §8, gate G1):** `ecosys-ng` is built, tested and benchmarked with
@@ -73,13 +77,13 @@ cd ecosys-ng && zig fmt src && cd ..
 # 4. compile, in the repo, with repo-local caches, logged (§8a).
 #    Zig 0.17 note (measured 2026-10-12, audit/runs/zig017-pin017-debug-20261012): `zig build` no longer accepts
 #    --global-cache-dir — the global cache comes from ZIG_GLOBAL_CACHE_DIR in the export above.
-uv run ecosys-audit/scripts/run_logged.py --cwd ecosys-ng --timeout 5400 \
+uv run ecosys-audit/scripts/run_logged.py --cwd ecosys-ng \
   --out audit/runs/zig017-debug-$(date +%Y%m%d) -- \
   zig build -Doptimize=Debug --cache-dir .zig-cache
 #    … then ReleaseSafe, then ReleaseFast (production mode), same flags, new --out each time
 
 # 5. regressions
-uv run ecosys-audit/scripts/run_logged.py --cwd ecosys-ng --timeout 7200 \
+uv run ecosys-audit/scripts/run_logged.py --cwd ecosys-ng \
   --out audit/runs/zig017-test-$(date +%Y%m%d) -- \
   zig build test --cache-dir .zig-cache
 TMPDIR="$PWD/.tmp" UV_CACHE_DIR="$PWD/.uv-cache" uv run pytest ecosys-audit/tests -q
@@ -88,7 +92,7 @@ TMPDIR="$PWD/.tmp" UV_CACHE_DIR="$PWD/.uv-cache" uv run pytest ecosys-audit/test
 uv run ecosys-audit/scripts/preflight.py
 ```
 
-`run_logged.py` requires `--timeout`, wants `--out` to be a **new** directory under `audit/runs/`, and takes the
+`run_logged.py` runs without a timeout, wants `--out` to be a **new** directory under `audit/runs/`, and takes the
 command after `--`. Put the receipt path in the cycle file and print `zig version` there too, so the toolchain is
 bound to the evidence.
 

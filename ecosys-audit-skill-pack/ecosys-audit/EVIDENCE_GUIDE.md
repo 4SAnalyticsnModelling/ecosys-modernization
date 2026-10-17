@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # Evidence conventions
 
 Keep live project records under `audit/` at the outer project root. The installer creates no passing audit records and never changes model source. Create directories as needed; do not replace an existing audit system without reconciling it.

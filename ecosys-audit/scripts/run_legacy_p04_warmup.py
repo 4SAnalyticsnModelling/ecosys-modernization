@@ -69,7 +69,7 @@ def main():
     ap.add_argument("--staged-deck", type=Path, required=True)
     ap.add_argument("--exe", type=Path, required=True)
     ap.add_argument("--run-dir", type=Path, required=True)
-    ap.add_argument("--timeout", type=float, default=180.0)
+    ap.add_argument("--timeout", type=float, default=None, help="Deprecated compatibility option; never enforced")
     ap.add_argument("--out", type=Path, default=Path("audit/runs/legacy_p04_warmup_receipt.json"))
     a = ap.parse_args()
 
@@ -122,11 +122,10 @@ def main():
 
             # 5. Monitor progress: wait for Day 1 completion (signal: 'NOW EXECUTING DAY     2')
             day1_completed = False
-            deadline = start_time + a.timeout
 
             with log_file.open("rb") as f_chk:
                 buffer = bytearray()
-                while time.time() < deadline:
+                while True:
                     chunk = f_chk.read(65536)
                     if chunk:
                         buffer += chunk

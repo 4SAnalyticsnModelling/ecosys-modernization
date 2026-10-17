@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # Diagnose brief — parallel hypotheses for a stuck hour or a divergence
 
 **Purpose**: when the same command/error has repeated 3×, or a failure has survived two serious hypotheses, the

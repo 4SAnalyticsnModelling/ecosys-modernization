@@ -3,6 +3,11 @@ name: ecosys-conservation-audit
 description: "Build and independently verify local and global conservation budgets for ecosys-ng. Use for mass/energy drift, unexplained pool changes, coupling transfers, solver acceptance and release physics gates."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
 
 ## Shared prerequisites
 

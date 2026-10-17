@@ -97,7 +97,7 @@ class Herdr:
         if os.environ.get("HERDR_ENV") != "1":
             raise ProtocolError("swarm_wrapper must run inside a Herdr pane (HERDR_ENV=1)")
         p = subprocess.run(["herdr", "--session", self.session, *args], cwd=self.root, capture_output=True,
-                           text=True, encoding="utf-8", errors="replace", timeout=timeout)
+                           text=True, encoding="utf-8", errors="replace", timeout=None)
         text = (p.stdout or "").strip() or (p.stderr or "").strip()
         try:
             value = json.loads(text) if text else {}
@@ -130,8 +130,8 @@ class Herdr:
     def prompt(self, name: str, text: str, wait: bool, timeout_s: float | None = None):
         args = ["agent", "prompt", name, text]
         if wait:
-            args += ["--wait", "--timeout", str(int((timeout_s or 600) * 1000))]
-        self.call(*args, timeout=(timeout_s or 60) + 60)
+            args += ["--wait"]
+        self.call(*args, timeout=None)
 
     def send_keys(self, name: str, *keys: str):
         self.call("agent", "send-keys", name, *keys)
@@ -141,7 +141,7 @@ class Herdr:
         if os.environ.get("HERDR_ENV") != "1":
             raise ProtocolError("swarm_wrapper must run inside a Herdr pane (HERDR_ENV=1)")
         p = subprocess.run(["herdr", "--session", self.session, "agent", "read", name, "--source", "visible"],
-                           cwd=self.root, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
+                           cwd=self.root, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=None)
         if p.returncode:
             raise HerdrError(f"herdr agent read: exit {p.returncode}")
         return p.stdout
@@ -162,14 +162,14 @@ class Herdr:
         if os.environ.get("HERDR_ENV") != "1":
             raise ProtocolError("swarm_wrapper must run inside a Herdr pane (HERDR_ENV=1)")
         p = subprocess.run(["herdr", "--session", self.session, "pane", "read", pane, "--source", "visible"],
-                           cwd=self.root, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
+                           cwd=self.root, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=None)
         if p.returncode:
             raise HerdrError(f"herdr pane read: exit {p.returncode}")
         return p.stdout
 
     def start(self, name: str, kind: str, pane: str, args: list[str], timeout_s: float = 150):
         self.call("agent", "start", name, "--kind", kind, "--pane", pane, "--timeout", str(int(timeout_s * 1000)),
-                  "--", *args, timeout=timeout_s + 60)
+                  "--", *args, timeout=None)
 
 
 def session_id(agent: dict | None):
@@ -181,7 +181,7 @@ def session_id(agent: dict | None):
 
 def git_dirty(root: Path) -> dict[str, tuple | None]:
     """Git-visible changed/untracked files -> (size, mtime_ns) or None if deleted."""
-    p = subprocess.run(["git", "status", "--porcelain=v1", "-z", "-uall"], cwd=root, capture_output=True, timeout=300)
+    p = subprocess.run(["git", "status", "--porcelain=v1", "-z", "-uall"], cwd=root, capture_output=True, timeout=None)
     if p.returncode:
         raise ProtocolError("git status failed")
     tokens = p.stdout.decode("utf-8", errors="surrogateescape").split("\0")
@@ -514,10 +514,10 @@ class Swarm:
         """Worktree-only restore with Git's own eol/filter conversion (core.autocrlf=true here), so
         the bytes match a normal checkout -- reference files are sha256-manifested. Index untouched."""
         if subprocess.run(["git", "cat-file", "-e", f"HEAD:{rel}"], cwd=self.root, capture_output=True,
-                          timeout=120).returncode:
+                          timeout=None).returncode:
             return False
         p = subprocess.run(["git", "restore", "--source=HEAD", "--worktree", "--", rel], cwd=self.root,
-                           capture_output=True, timeout=300)
+                           capture_output=True, timeout=None)
         if p.returncode:
             raise OSError(p.stderr.decode(errors="replace")[:200])
         return True
@@ -637,7 +637,6 @@ class Swarm:
         return False
 
     def wait_settled(self, name: str, timeout_s: float) -> dict:
-        end = self.clock() + timeout_s
         gone = [None]
         while True:
             a = self.present(name, gone)
@@ -650,8 +649,6 @@ class Swarm:
                 continue
             if a["agent_status"] in ("idle", "done"):
                 return a
-            if self.clock() >= end:
-                raise AgentFault(self.role_of(name), f"agent {name} did not settle within {timeout_s:.0f} s")
             self.sleep(2)
 
     def fresh_session(self, role: str) -> dict:
@@ -689,20 +686,17 @@ class Swarm:
         raise AgentFault(role, f"{name} did not acknowledge {r['reset_command']} with a new session")
 
     def turn(self, role: str, text: str) -> str:
-        """Deliver one prompt and wait until the agent is REALLY done, up to the role's full budget.
+        """Deliver once and observe genuine completion without an elapsed-time deadline.
 
-        `agent prompt --wait` can return at a transient idle between tool steps, so completion
-        needs two consecutive settled observations. Only the full budget, not a short grace
-        period, may end a turn early (T-00007, 2026-09-25, was interrupted at 75 s this way).
+        Two consecutive settled observations avoid transient idle between tool steps.
         """
         r = self.role(role)
         name = r["agent_name"]
-        budget = float(r["budget"]["minutes"]) * 60
-        deadline = self.clock() + budget
+        # Retired roster budgets are historical metrics, never execution limits.
         need = 2  # consecutive settled observations, 3 s apart
         dismissals = 0
         try:
-            self.herdr.prompt(name, text, wait=True, timeout_s=budget)
+            self.herdr.prompt(name, text, wait=False)
         except (HerdrError, subprocess.TimeoutExpired) as e:
             if isinstance(e, HerdrError) and e.code == "agent_blocked":
                 # Blocked BEFORE the text was sent: the prompt never landed. Clear the dialog and
@@ -716,7 +710,7 @@ class Swarm:
             elif isinstance(e, HerdrError) and e.code not in ("timeout", "agent_prompt_stalled"):
                 raise
         settled, gone = 0, [None]
-        while self.clock() < deadline:
+        while True:
             a = self.present(name, gone)
             if a is None:
                 settled = 0
@@ -736,11 +730,7 @@ class Swarm:
             if settled >= need:
                 return "settled"
             self.sleep(3)
-        try:  # budget exhausted: interrupt generation; never kill the harness
-            self.herdr.send_keys(name, "esc")
-        except HerdrError:
-            pass
-        return "timeout"
+        return "blocked"  # Only an actual dialog failure can end this observation.
 
     def apply_state_update(self, d: dict):
         """Write SENTINEL's state_recent / state_next into the two state.md sections it owns.
@@ -823,15 +813,15 @@ class Swarm:
         skills = ", ".join(f".agents/skills/{s}/SKILL.md" for s in d.get("skills", [])) or "none"
         return (f"ROLE {role}. Read {r['prompt_file']} and follow it exactly. Task: {d['task_file']}. "
                 f"Skills to load: {skills}. Write ONLY {d['result_file']} (contract: .agent/templates/result.md). "
-                f"Budget {r['budget']['minutes']} minutes. Then stop.")
+                "No elapsed-time limit. Finish the assigned objective and record the result.")
 
     # --- hooks
     def _run_logged(self, argv: list[str], cwd: str, label: str, timeout: float) -> dict:
         out = f"audit/runs/swarm/{time.strftime('%Y%m%d-%H%M%S')}-{label}"
         p = subprocess.run([sys.executable, str(SCRIPTS / "run_logged.py"), "--root", str(self.root),
-                            "--cwd", str(self.root / cwd), "--out", out, "--timeout", str(timeout), "--", *argv],
+                            "--cwd", str(self.root / cwd), "--out", out, "--", *argv],
                            cwd=self.root,
-                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout + 120)
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=None)
         return {"exit_code": p.returncode, "receipt": f"{out}/receipt.json"}
 
     def forge_hooks(self, d: dict, changed: list[str]) -> dict:
@@ -848,7 +838,7 @@ class Swarm:
         argv = [sys.executable, str(SCRIPTS / "make_failure_packet.py"), "--root", str(self.root),
                 "--signature", d.get("signature") or f"{d['role']}:{d['task_id']}", "--task", d["task_id"],
                 "--exact-error", f"task {status}: " + "; ".join(notes)[:300]]
-        p = subprocess.run(argv, cwd=self.root, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600)
+        p = subprocess.run(argv, cwd=self.root, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=None)
         try:
             return json.loads(p.stdout).get("path")
         except ValueError:
@@ -948,7 +938,7 @@ class Swarm:
             u = {"input": 0, "cache_read": 0, "cache_write": 0, "output": 0, "tool_calls": 0, "llm_calls": 0, "cost": None}
             if kind == "opencode":
                 p = subprocess.run(["opencode", "export", sid], cwd=self.root, capture_output=True, text=True,
-                                   encoding="utf-8", errors="replace", timeout=120, shell=(os.name == "nt"))
+                                   encoding="utf-8", errors="replace", timeout=None, shell=(os.name == "nt"))
                 data = json.loads(p.stdout[p.stdout.index("{"):])
                 u["cost"] = 0.0
                 for m in data.get("messages", []):
@@ -1327,7 +1317,7 @@ class Swarm:
     def git(self, *args: str, timeout: float = 300) -> subprocess.CompletedProcess:
         env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}  # never block on a credential prompt
         return subprocess.run(["git", *args], cwd=self.root, capture_output=True, text=True,
-                              encoding="utf-8", errors="replace", timeout=timeout, env=env)
+                              encoding="utf-8", errors="replace", timeout=None, env=env)
 
     def commit_cycle(self, label: str) -> dict:
         """Commit exactly what this cycle changed, then push. Unapproved production source is withheld."""
@@ -1377,7 +1367,7 @@ class Swarm:
         if ahead.returncode == 0 and ahead.stdout.strip() == "0":
             return {"push": "up-to-date"}
         # Plain fast-forward push only: never --force, never pull/rebase/merge on the agents' behalf.
-        p = self.git("push", pol["remote"], f"HEAD:{pol['branch']}", timeout=600)
+        p = self.git("push", pol["remote"], f"HEAD:{pol['branch']}", timeout=None)
         if p.returncode == 0:
             st.update({"consecutive_push_failures": 0, "last_push_ok": self.clock()})
             atomic(state_path, encoded(st))

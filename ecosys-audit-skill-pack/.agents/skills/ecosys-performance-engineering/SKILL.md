@@ -3,6 +3,11 @@ name: ecosys-performance-engineering
 description: "Measure and improve ecosys-ng compile time, ReleaseFast runtime and memory without sacrificing scientific parity. Use after correctness evidence or for a focused diagnosed build/runtime bottleneck."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
 
 ## Shared prerequisites
 

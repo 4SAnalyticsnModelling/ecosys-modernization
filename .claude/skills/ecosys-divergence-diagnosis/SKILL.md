@@ -3,6 +3,12 @@ name: ecosys-divergence-diagnosis
 description: "Find the earliest cause of an ecosys legacy/Zig mismatch or failed hour. Use for significant differences, persistent zeros, solver failures and repeated unsuccessful full-run cycles."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
+
 
 ## Shared prerequisites
 

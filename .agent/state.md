@@ -1,10 +1,14 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # Mission State — ecosys-ng Ottawa (single autonomous agent)
 
 <!-- runner:begin -->
-## Cycle 00002 · PUSHED · 2026-10-17T05:15:38Z
+## Cycle 00003 · PLANNING · 2026-10-17T08:55:14Z
 - Actor: single autonomous agent (any harness/model). Verification: gates G1-G9 (Zig 0.17.x build, repo-contained work) + read-only sub-agents.
-- Target: Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded legacy oracle for the same hours, every difference explained by exact arithmetic or diagnosed to file:line (no tolerance loosened, no bound moved).
-- Gates: G1=PASS, G2=PASS, G3=PASS, G4=N-A, G5=PASS, G6=PASS, G7=PASS, G8=PASS, G9=PASS
+- Target: Why does strict Ottawa fail with InsufficientSoilMineralNitrogen at ~h4340 where legacy completes 30 y: which Zig routine diverges from f77src in the soil-mineral-N supply/uptake path, at file:line?
+- Gates: none recorded
 - Sync: unknown (push every completed cycle to origin/main)
 - Next target: Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded oracle for those hours (cycle_00001.md section 6).
 <!-- runner:end -->

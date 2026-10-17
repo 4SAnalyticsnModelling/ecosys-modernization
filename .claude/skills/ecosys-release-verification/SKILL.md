@@ -3,6 +3,12 @@ name: ecosys-release-verification
 description: "Independently decide whether the audited ecosys-ng candidate meets v1.0.0 production criteria. Use only after source/test/production evidence exists; never infer readiness from compilation or one successful exit."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
+
 
 ## Shared prerequisites
 

@@ -1,67 +1,18 @@
 {
   "commit": null,
-  "cycle": 2,
+  "cycle": 3,
   "decisions": [],
-  "gates": {
-    "G1": {
-      "at": "2026-10-16T20:00:50Z",
-      "evidence": "zig 0.17.0; Debug+ReleaseSafe install success, post-fix tree \u2014 audit/runs/cycle-runner/g1g2-revalidation-20261016.log",
-      "result": "PASS"
-    },
-    "G2": {
-      "at": "2026-10-16T20:00:50Z",
-      "evidence": "zig build test 4518/4520 (1 skip, 1 crash=issue-106 baseline, 0 assertion failures) \u2014 audit/runs/cycle-runner/g1g2-revalidation-20261016.log; stress exact-name filter 12/12 PASS under 6x load \u2014 audit/runs/zig017-repro-reproduction-test-20261015-2/loop12.log",
-      "result": "PASS"
-    },
-    "G3": {
-      "at": "2026-10-16T20:08:42Z",
-      "evidence": "bounded to what ran: 144 'daily conservation accepted' lines, 0 breaches, days 1-144 \u2014 audit/runs/ottawa/zig017-parity-20261016-1/stderr.log (counted 2026-10-16); not a full-horizon claim",
-      "result": "PASS"
-    },
-    "G4": {
-      "at": "2026-10-16T20:08:42Z",
-      "evidence": "no equation, floor, or legacy line adopted/changed this cycle; fix is range-clamping of per-worker scratch copies (mechanism-level, f77src untouched)",
-      "result": "N-A"
-    },
-    "G5": {
-      "at": "2026-10-16T20:08:42Z",
-      "evidence": "issue-110 fix acceptance: sealed-deck diff audit/runs/zig017-deckdiff-20261016-1/diff.json \u2014 17/17 streams, cells_compared 391349, cells_differing 0, max_abs 0.0, IDENTICAL (--allow-extra-rows, 2 extra rows); run behind it audit/runs/ottawa/zig017-parity-20261016-1 (TIMED_OUT bounded stop, recorded as history, NOT promotion evidence; verified_frontier stays 0)",
-      "result": "PASS"
-    },
-    "G6": {
-      "at": "2026-10-16T20:57:40Z",
-      "evidence": "cycle_runner gates --diff-ref 107aebb --record-g6: 1 flagged line = registry completion_condition string citing DEV-004 (stager guard deck-half f6=100), a PRE-EXISTING registered deviation (audit/intentional-deviations.md:12); the policy rewrite preserves the existing reference, registers no new deviation. No tolerance loosening, clamp, ceiling raise, or silent retry in the diff. pytest: 48 failed/104 passed on committed baseline (stash-verified, audit/runs/cycle-runner/pytest-baseline-107aebb-20261016.log) == this tree: zero new failures; the 48 are pre-existing debt filed as issue-111",
-      "result": "PASS"
-    },
-    "G7": {
-      "at": "2026-10-17T04:32:27Z",
-      "evidence": "Independent fresh-context read-only verifier (foreground, 2026-10-16): VERDICT PASS on C1 concurrency safety (clamped copies at potential_seed_site_accumulation.zig:39,61, final_grain_number.zig:48,79, maximum_individual_grain_size.zig:35,56; disjoint owned ranges via balancedPartition compute.zig:779-818), C2 serial bit-identity (single-worker path first_branch=0,end_branch=count), C3 completeness (66 @memcpy hits in src/plant audited under worker-partitioned discriminator; no fourth case; plant_root_metabolism_state_update.zig:510-511 scratch->scratch exempt), C4 detector non-vacuous (detection prob 1-0.75^64; pre-fix failure first-captured-failure.log). Verdict verbatim + provenance + attempt trail (30d91c73 PASS-6/6 unpersisted; f973caa2 and cd3cf246 died mid-run): audit/runs/zig017-g7-issue110-verifier-20261016/verdict.md. Non-blocking coverage note (anthesis_day unset -> grain-number/size race paths not live in test) filed to backlog.md",
-      "result": "PASS"
-    },
-    "G8": {
-      "at": "2026-10-17T05:15:38Z",
-      "evidence": "pushed main -> origin at 283feda (close commit 71db4cbc + cache-untrack cleanup 86ead8b + post-push ledger sync 283feda); git rev-parse HEAD origin/main both 283fedaa54d173a4923b1434d9070a453360f5db, working tree clean (untracked evidence dirs committed in close). Cleanup note: cycle_runner close swept ecosys-ng/.zig-cache-coldtest (885 untracked cache files) into the close commit; removed from index in follow-up 86ead8b and ignored via ecosys-ng/.zig-cache-*/ (G9 hygiene, no history rewrite)",
-      "result": "PASS"
-    },
-    "G9": {
-      "at": "2026-10-16T20:08:42Z",
-      "evidence": "all caches/logs/runs inside repo (.tmp .cache .uv-cache .zig-cache ecosys-ng/.zig-cache-global audit/runs/); no external writes this cycle",
-      "result": "PASS"
-    }
-  },
+  "gates": {},
   "metrics": {},
   "next_target": "Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded oracle for those hours (cycle_00001.md section 6).",
-  "opened_utc": "2026-10-15T10:25:44Z",
-  "record": ".agent/cycles/cycle_00002.md",
+  "opened_utc": "2026-10-17T08:55:14Z",
+  "record": ".agent/cycles/cycle_00003.md",
   "schema_version": 1,
-  "status": "PUSHED",
+  "status": "PLANNING",
   "steps_done": [
-    "0 plan: record opened",
-    "2026-10-17T04:59:29Z close: Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded legacy oracle for the same hours, every difference explained by exact arithmetic or diagnosed to file:line (no tolerance loosened, no bound moved).",
-    "2026-10-17T05:01:57Z close: cycle 00002 close: issue-110 fix (whole-array worker write-back clamps, 64-round concurrency test) verified G2 12/12 + G5 sealed-deck IDENTICAL (391,349 cells) + G7 PASS; G6 PASS re-recorded with DEV-004 justification and stash-verified pytest baseline (48 pre-existing fails -> issue-111); runs unbounded per directive; full strict run zig017-full-20261016-1 next",
-    "2026-10-17T05:02:55Z pushed and metrics appended"
+    "0 plan: record opened"
   ],
   "sync_status": "unknown",
-  "target": "Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded legacy oracle for the same hours, every difference explained by exact arithmetic or diagnosed to file:line (no tolerance loosened, no bound moved).",
-  "updated_utc": "2026-10-17T05:15:38Z"
+  "target": "Why does strict Ottawa fail with InsufficientSoilMineralNitrogen at ~h4340 where legacy completes 30 y: which Zig routine diverges from f77src in the soil-mineral-N supply/uptake path, at file:line?",
+  "updated_utc": "2026-10-17T08:55:14Z"
 }

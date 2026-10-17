@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # ecosys Fortran-to-Zig audit skill pack
 
 A shared, source-first audit workflow for **Claude Code, Pi and Codex CLI**, tailored to the `ecosys_modernization` workspace.

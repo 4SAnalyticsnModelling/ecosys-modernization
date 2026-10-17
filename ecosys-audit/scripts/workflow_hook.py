@@ -38,6 +38,7 @@ PICKUP = (
     "(Zig 0.17 rejects --global-cache-dir on zig build; the env var moves the global cache). Nothing outside; "
     "evidence lands in audit/runs/ via run_logged.py.\n"
     "Close a cycle: git commit, ./sync-main.sh push, then `git rev-parse HEAD origin/main` must match. "
+    "NO EXECUTION TIMEOUTS: .agent/continuous-autonomy.md applies to every stage; poll and resume. "
     "Optional read-only sub-agents come from .agent/briefs/ (verifier = G7, diagnose, legacy-oracle, parity-sweep)."
 )
 
@@ -157,8 +158,8 @@ def respond(root: Path, event: dict):
                 if noisy_command(command):
                     return {"hookSpecificOutput": {"hookEventName": kind, "additionalContext": (
                         "Evidence check: heavy build/test detected. Run it through the receipt wrapper so the log "
-                        "lands in audit/runs/ (gate G1/G2): uv run ecosys-audit/scripts/run_logged.py --label "
-                        "'<what>' --log-dir audit/runs/logs --audit-dir audit/runs -- timeout <s> <the command>. "
+                        "lands in audit/runs/ (gate G1/G2): uv run ecosys-audit/scripts/run_logged.py "
+                        "--out audit/runs/<unique-name> -- <the command>. "
                         "Advisory only - the hook never blocks.")}}
     # Everything else stays silent: hooks inform, they never halt the mission.
     return {}

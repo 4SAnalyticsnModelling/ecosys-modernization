@@ -3,6 +3,12 @@ name: ecosys-output-comparison
 description: "Compare every legacy and Zig production output file, row and column with verified units and time semantics. Use for parity reports, cumulative daily outputs, significant deviations and final production acceptance."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
+
 
 ## Shared prerequisites
 

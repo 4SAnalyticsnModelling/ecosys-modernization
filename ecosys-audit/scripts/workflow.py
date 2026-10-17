@@ -186,7 +186,7 @@ def verify_artifacts(root: Path, items):
 
 
 def git(root: Path, *args: str) -> bytes:
-    p = subprocess.run(["git", "-C", str(root), *args], capture_output=True, timeout=60)
+    p = subprocess.run(["git", "-C", str(root), *args], capture_output=True, timeout=None)
     if p.returncode:
         raise ProtocolError(p.stderr.decode(errors="replace")[:1000])
     return p.stdout

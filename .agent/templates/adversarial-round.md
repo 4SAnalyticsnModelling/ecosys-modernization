@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # Adversarial Round: {{ROUND_ID}}
 
 - **Worker**: {{WORKER}} (DEEPSEEK — local Qwen3.5-35B-A3B; does all the work)

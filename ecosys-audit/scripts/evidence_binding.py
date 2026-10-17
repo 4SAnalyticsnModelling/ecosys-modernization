@@ -27,7 +27,7 @@ LIMITATIONS = "Identity bookkeeping only; equal bindings do not prove equal beha
 
 
 def git(root: Path, *args: str) -> bytes:
-    p = subprocess.run(["git", *args], cwd=root, capture_output=True, timeout=300)
+    p = subprocess.run(["git", *args], cwd=root, capture_output=True, timeout=None)
     if p.returncode:
         raise ProtocolError(f"git {' '.join(args)} failed: {p.stderr.decode(errors='replace')[:400]}")
     return p.stdout

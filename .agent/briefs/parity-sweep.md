@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # Parity-sweep brief — legacy ↔ Zig output comparison while the parent works elsewhere
 
 **Purpose**: keep the comparability picture current without spending the parent agent's context. You compare

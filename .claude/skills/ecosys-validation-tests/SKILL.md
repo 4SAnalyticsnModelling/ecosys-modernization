@@ -3,6 +3,12 @@ name: ecosys-validation-tests
 description: "Create a layered test strategy and discriminating regressions for ecosys-ng. Use before integration runs, after fixes, for edge/failure/restart tests and for validating the comparison tooling itself."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
+
 
 ## Shared prerequisites
 

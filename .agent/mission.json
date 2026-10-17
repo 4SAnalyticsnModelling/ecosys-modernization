@@ -30,8 +30,8 @@
       "investigation and legacy reading",
       "Zig implementation, build, test, run",
       "diagnosis of divergences and solver failures",
-      "architecture decisions, DEV-NNN and legacy-inconsistency decisions (with the evidence discipline in protocol.md §6)",
-      "final scientific review of its own cycle against gates G1–G9",
+      "architecture decisions, DEV-NNN and legacy-inconsistency decisions (with the evidence discipline in protocol.md \u00a76)",
+      "final scientific review of its own cycle against gates G1\u2013G9",
       "ledgers: .agent/state.md, .agent/cycle.json, .agent/backlog.md, audit/*",
       "commit and push of every completed cycle"
     ]
@@ -176,7 +176,7 @@
       "git status -sb",
       "git log --oneline -5"
     ],
-    "session_end": "write state.md (frontier, live run, open threads, next target), push, then stop",
+    "session_end": "checkpoint state.md and push; automatically pick up unfinished work after unavoidable harness interruption",
     "loop_breaker": "same command/edit/error 3x, or re-reads with no new finding, or oscillating edits: stop, log attempts in the cycle file, spawn a fresh-context diagnose sub-agent, take the narrowest remaining step; two consecutive stalls on one target -> split it into two cycles",
     "context_discipline": "commit + push + update state.md and start a fresh session instead of degrading at high context use",
     "backoff": "record the blocker and the check that clears it in .agent/backlog.md, then take the next unblocked item; stop only for human-only conditions (credentials, destructive ops, spending)",
@@ -194,18 +194,18 @@
     "archive/pre-solo-workflow/": "retired launchers, judge-gated runner, poke tooling",
     "ecosys-audit/scripts/swarm_wrapper.py": "optional Herdr peer-agent controller, not part of this protocol"
   },
-  "revised": "2026-10-09",
+  "revised": "2026-10-17",
   "toolchain": {
-    "authority": ".agent/toolchain.json; protocol.md §8",
+    "authority": ".agent/toolchain.json; protocol.md \u00a78",
     "ecosys_ng": "Zig 0.17.x only (Debug + ReleaseSafe for gates, ReleaseFast for production runs)",
-    "retired": "Zig 0.16 — its receipts are dated history and cannot close a current gate",
+    "retired": "Zig 0.16 \u2014 its receipts are dated history and cannot close a current gate",
     "declared_in": "ecosys-ng/build.zig.zon minimum_zig_version = \"0.17.0\"",
     "check": "uv run ecosys-audit/scripts/preflight.py",
     "migration_work_order": ".agent/migrations/zig-0.17.md",
     "legacy_fortran": "unchanged: g77/gfortran-compatible -r8 -i4, recorded in audit/manifest/"
   },
   "workspace_containment": {
-    "authority": "protocol.md §8a (gate G9)",
+    "authority": "protocol.md \u00a78a (gate G9)",
     "rule": "all work stays inside this repository: investigation, edits, builds, tests, runs, staging, caches, checkpoints, downloads, logs and evidence. Nothing a later cycle needs to reproduce may live outside.",
     "scratch": ".tmp/",
     "caches": {
@@ -236,5 +236,17 @@
       "git fetch/pull/push to origin"
     ],
     "vet_command": "uv run ecosys-audit/scripts/preflight.py --command \"<the command>\""
+  },
+  "execution_policy": {
+    "timeout_seconds": null,
+    "agent_turn_timeout_seconds": null,
+    "build_test_timeout_seconds": null,
+    "diagnostic_timeout_seconds": null,
+    "simulation_timeout_seconds": null,
+    "enforce_time_or_tool_budgets": false,
+    "authority": ".agent/continuous-autonomy.md",
+    "on_poll_expiry": "yield and reattach; never kill underlying work",
+    "on_context_boundary": "checkpoint durable notes and automatically continue unfinished work",
+    "heartbeat_age_alone_proves_death": false
   }
 }

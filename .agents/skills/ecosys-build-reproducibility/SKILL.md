@@ -3,6 +3,11 @@ name: ecosys-build-reproducibility
 description: "Verify pinned compilers, actual build commands, runtime packaging, restart integrity and reproducible ecosys-ng production runs. Use for ReleaseFast compile issues, environment drift and clean-room release checks."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
 
 ## Shared prerequisites
 

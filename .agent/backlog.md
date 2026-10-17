@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # Backlog — open threads, deferred work, blockers
 
 Ordered, durable, and the first thing a new session reads after `.agent/state.md`. Anything that outlives a cycle

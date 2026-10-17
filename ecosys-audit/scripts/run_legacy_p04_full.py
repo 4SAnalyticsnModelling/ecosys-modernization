@@ -196,8 +196,8 @@ def inspect_lock_status(
     max_heartbeat_age: float = MAX_HEARTBEAT_STALE_SECONDS,
 ) -> dict:
     """Inspect lock file liveness per T-00150 C3:
-    - Dead PID or heartbeat older than 10 min -> reclaimable.
-    - Live PID with fresh heartbeat -> live lock (never stolen).
+    - Dead PID -> reclaimable.
+    - Live PID -> live lock, regardless of heartbeat age (never stolen).
     """
     if not lock_path.exists():
         return {
@@ -266,15 +266,6 @@ def inspect_lock_status(
                 hb_timestamp = 0.0
 
     heartbeat_age = max(0.0, now - hb_timestamp)
-    if heartbeat_age > max_heartbeat_age:
-        return {
-            "locked": True,
-            "reclaimable": True,
-            "reason": "STALE_HEARTBEAT",
-            "pid": pid,
-            "heartbeat_age": heartbeat_age,
-            "heartbeat_path": hb_path_str,
-        }
 
     return {
         "locked": True,
@@ -416,14 +407,6 @@ class MachineLock:
 
         if status["locked"] and status["reclaimable"]:
             print(f"[Lock] Reclaiming stale lock: reason={status['reason']}, stale_pid={status['pid']}")
-            if (
-                status["reason"] == "STALE_HEARTBEAT"
-                and status["pid"]
-                and status["pid"] != os.getpid()
-                and is_pid_alive(status["pid"])
-            ):
-                print(f"[Lock] Terminating hung process with stale heartbeat: PID={status['pid']}")
-                stop_process_by_pid(status["pid"])
 
         self.lock_path.parent.mkdir(parents=True, exist_ok=True)
         f = None
@@ -768,11 +751,10 @@ def run_1day_warmup(deck_src: Path, exe_src: Path, warmup_dir: Path, affinity_ma
         )
 
         set_process_affinity(p.pid, affinity_mask)
-        deadline = time.time() + timeout
 
         with log_file.open("rb") as f_chk:
             buf = bytearray()
-            while time.time() < deadline:
+            while True:
                 chunk = f_chk.read(65536)
                 if chunk:
                     buf += chunk
@@ -848,10 +830,9 @@ def execute_single_full_run(
                 marker = f"NOW EXECUTING DAY   {max_simulated_days + 1}".encode("latin-1")
                 marker_alt = f"NOW EXECUTING DAY     {max_simulated_days + 1}".encode("latin-1")
                 reached = False
-                deadline = time.time() + timeout
                 with log_file.open("rb") as f_chk:
                     buf = bytearray()
-                    while time.time() < deadline:
+                    while True:
                         chunk = f_chk.read(65536)
                         if chunk:
                             buf += chunk
@@ -869,7 +850,7 @@ def execute_single_full_run(
                     stop_process(p)
                 exit_code = 0 if reached else 1
             else:
-                exit_code = p.wait(timeout=timeout)
+                exit_code = p.wait()
         except subprocess.TimeoutExpired:
             timed_out = True
             stop_process(p)
@@ -1171,8 +1152,8 @@ def relaunch_campaign(
     campaign_id: str,
     runs: int = 3,
     core_affinity: int = 1,
-    timeout_per_run: float = 21600.0,
-    warmup_timeout: float = 180.0,
+    timeout_per_run: float | None = None,
+    warmup_timeout: float | None = None,
     out_receipt: Path = Path("audit/runs/p04_full_run_receipt.json"),
     lock_path: Path = DEFAULT_LOCK_PATH,
     heartbeat_path: Path = DEFAULT_HEARTBEAT_PATH,
@@ -1239,7 +1220,7 @@ def relaunch_campaign(
             "deck_source": str(deck_src),
             "exe_path": str(exe_src),
             "runs_planned": runs,
-            "timeout_per_run_s": timeout_per_run,
+            "timeout_per_run_s": None,
         }
         out_receipt.parent.mkdir(parents=True, exist_ok=True)
         out_receipt.write_text(json.dumps(relaunch_dry_receipt, indent=2), encoding="utf-8")
@@ -1256,8 +1237,8 @@ def relaunch_campaign(
         "--campaign-id", campaign_id,
         "--runs", str(runs),
         "--core-affinity", str(core_affinity),
-        "--timeout-per-run", str(timeout_per_run),
-        "--warmup-timeout", str(warmup_timeout),
+        "--timeout-per-run", str(timeout_per_run or 0),
+        "--warmup-timeout", str(warmup_timeout or 0),
         "--out", str(out_receipt),
         "--lock-file", str(lock_path),
         "--heartbeat-file", str(heartbeat_path),
@@ -1297,8 +1278,8 @@ def main():
     ap.add_argument("--campaign-id", type=str, default=None)
     ap.add_argument("--runs", type=int, default=3)
     ap.add_argument("--core-affinity", type=int, default=1, help="Core affinity mask (default: 1 for Core 0)")
-    ap.add_argument("--timeout-per-run", type=float, default=21600.0, help="Per-run timeout in seconds (default: 6h / 21600s)")
-    ap.add_argument("--warmup-timeout", type=float, default=180.0, help="Per-warmup timeout in seconds")
+    ap.add_argument("--timeout-per-run", type=float, default=None, help="Deprecated compatibility option; never enforced")
+    ap.add_argument("--warmup-timeout", type=float, default=None, help="Deprecated compatibility option; never enforced")
     ap.add_argument("--max-simulated-days", type=int, default=None, help="Bounded test simulation days (optional)")
     ap.add_argument("--dry-run", action="store_true", help="Validate configuration and exit without running simulation")
     ap.add_argument("--detach", action="store_true", help="Spawn detached background process and return immediately")
@@ -1390,8 +1371,8 @@ def main():
             "--campaign-id", cid,
             "--runs", str(a.runs),
             "--core-affinity", str(a.core_affinity),
-            "--timeout-per-run", str(a.timeout_per_run),
-            "--warmup-timeout", str(a.warmup_timeout),
+            "--timeout-per-run", str(a.timeout_per_run or 0),
+            "--warmup-timeout", str(a.warmup_timeout or 0),
             "--out", str(out_receipt),
             "--lock-file", str(lock_path),
             "--heartbeat-file", str(heartbeat_path),
@@ -1435,7 +1416,7 @@ def main():
     print(f"  Output directory base: {campaign_dir}")
     print(f"  Core affinity mask: {hex(a.core_affinity)}")
     print(f"  Runs requested: {a.runs}")
-    print(f"  Timeout per run: {a.timeout_per_run}s")
+    print("  Timeout per run: disabled (continuous autonomy)")
     print(f"  Dry-run: {a.dry_run}")
     print(f"  Machine lock path: {lock_path}")
     print(f"  Heartbeat path: {heartbeat_path}")
@@ -1472,7 +1453,7 @@ def main():
                 },
                 "machine_lock_path": str(lock_path),
                 "heartbeat_path": str(heartbeat_path),
-                "stale_lock_recovery": "Enabled (dead PID check + 600s heartbeat timeout)",
+                "stale_lock_recovery": "Enabled (dead PID check; heartbeat age is diagnostic only)",
                 "detached_mode_supported": True,
                 "core_affinity_mask": hex(a.core_affinity),
                 "core_affinity_verified": hex(verif_aff) if verif_aff is not None else "UNAVAILABLE",
@@ -1488,8 +1469,8 @@ def main():
                 "exe_path": str(exe_src),
                 "exe_sha256": sha256_file(exe_src),
                 "runs_planned": a.runs,
-                "timeout_per_run_s": a.timeout_per_run,
-                "warmup_timeout_s": a.warmup_timeout
+                "timeout_per_run_s": None,
+                "warmup_timeout_s": None
             }
         }
         out_receipt.parent.mkdir(parents=True, exist_ok=True)

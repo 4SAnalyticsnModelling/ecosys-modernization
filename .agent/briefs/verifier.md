@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # Verifier brief (gate G7) — fresh-context independent re-derivation
 
 **Purpose**: catch the errors self-review cannot catch — Fortran→Zig semantics, solver acceptance that hides a

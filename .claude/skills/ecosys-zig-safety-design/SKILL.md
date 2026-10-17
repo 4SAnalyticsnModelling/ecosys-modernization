@@ -3,6 +3,12 @@ name: ecosys-zig-safety-design
 description: "Apply the project’s Zig principles to ownership, APIs, error paths, memory, maintainability and ReleaseFast safety. Use for code review, refactoring proposals, unsafe constructs and production hardening."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
+
 
 ## Shared prerequisites
 

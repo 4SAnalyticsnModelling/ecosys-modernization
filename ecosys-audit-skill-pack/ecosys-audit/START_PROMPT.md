@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 Read `ecosys-audit/PROJECT_CONTRACT.md` and activate `ecosys-release-orchestrator`.
 
 Work in my `ecosys_modernization` workspace. Treat `f77src` and `f77example` as preserved references, audit `ecosys-ng`, and use the prescribed `ecosys-ng-prod-examples` deck for final production validation. Discover actual commands, compiler versions and existing work before changing anything.

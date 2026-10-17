@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 For this dsh-only integration, measure routed request pressure with ctx.tokenMeter.
 No normal compaction below 75,000; no lifetime-token triggers. Exactly one native
 balanced compaction per boundary; failed or insufficient summaries stop the turn.

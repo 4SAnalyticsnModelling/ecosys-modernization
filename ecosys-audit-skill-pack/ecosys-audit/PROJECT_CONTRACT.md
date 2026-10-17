@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # ecosys-ng production migration contract
 
 Skill-pack revision: 1.0.0. This is the revision of these instructions, **not** a release certification of ecosys-ng.

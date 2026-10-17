@@ -3,6 +3,12 @@ name: ecosys-source-navigation
 description: Navigate and audit the legacy ECOSYS Fortran 77 source and its traceability evidence using the f77index tooling. Use when you need to read, locate, or reason about anything in f77src/ (routines, COMMON state, loops, equations), when you need a coverage or binding number for a gate, or when you need a matched-state legacy oracle for a routine. Always prefer these tools over reading a .f file directly -- the routines are up to 13,179 lines each.
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
+
 # ECOSYS source navigation and audit tooling
 
 Five read-only tools in `ecosys-audit/scripts/`. Run every one with `uv run` from the

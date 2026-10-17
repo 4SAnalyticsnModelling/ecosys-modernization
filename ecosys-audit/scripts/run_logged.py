@@ -2,11 +2,11 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # ///
-"""Execute one command, optionally unbounded; preserve raw streams and return a small receipt.
+"""Execute one command without elapsed-time limits; preserve raw streams and return a small receipt.
 
 No shell interpretation. This wrapper does not establish scientific/test acceptance.
-2026-10-16 directive: production campaign runs proceed to natural completion — pass no
---timeout for an unbounded run; the receipt then records timeout_seconds null.
+2026-10-17 directive: every command proceeds without an elapsed-time cutoff.
+Legacy --timeout values are recorded as requested_timeout_seconds but never enforced.
 """
 from __future__ import annotations
 
@@ -54,13 +54,13 @@ def stop_owned_process(p: subprocess.Popen):
 def run(root: Path, cwd: Path, out: Path, argv: list[str], timeout: float | None) -> dict:
     if not argv:
         raise ProtocolError("Command argv required")
-    if timeout is not None and timeout <= 0:
-        raise ProtocolError("Timeout, when given, must be positive")
+    requested_timeout = timeout
+    timeout = None  # Continuous-autonomy directive: legacy arguments are metrics only.
     out.mkdir(parents=True, exist_ok=False)
     start = time.time()
     stdout, stderr = out / "stdout.log", out / "stderr.log"
     record = {"argv": argv, "cwd": str(cwd.resolve()), "started_unix": start,
-              "timeout_seconds": timeout, "status": "RUNNING", "parent_pid": os.getpid()}
+              "timeout_seconds": timeout, "requested_timeout_seconds": requested_timeout, "status": "RUNNING", "parent_pid": os.getpid()}
     atomic(out / "receipt.json", encoded(record))
     timed_out, launch_error = False, None
     with stdout.open("xb") as fo, stderr.open("xb") as fe:
@@ -93,7 +93,7 @@ def main():
     ap.add_argument("--cwd", type=Path, default=Path.cwd())
     ap.add_argument("--out", help="New project-relative directory under audit/runs or audit/reviews")
     ap.add_argument("--timeout", type=float, default=None,
-                    help="Seconds; omit for an unbounded run that proceeds to natural completion")
+                    help="Deprecated compatibility argument; recorded but never enforced")
     ap.add_argument("argv", nargs=argparse.REMAINDER)
     a = ap.parse_args()
     root = a.root.resolve()

@@ -1,6 +1,29 @@
+## Continuous autonomous work — 2026-10-17 directive
+
+Autonomous work has **no elapsed-time timeout** at any stage: planning, investigation,
+agent/sub-agent turns, builds, tests, diagnostics, verification, simulations, commits or sync.
+Continue until the assigned objective is verified or an actual error or human-only blocker
+requires action; time elapsed, silence, token usage, tool-call counts and session age are
+never reasons to terminate work. Do not wrap work in `timeout`, set finite execution
+deadlines, or interrupt a healthy process because a budget expires.
+
+Keep long commands detached with repo-local logs, receipts, process identity and checkpoints.
+A tool wait/poll limit yields control only: reattach and continue observing the same process.
+Context compaction or unavoidable harness interruption requires durable notes and automatic
+pickup of unfinished work; it does not complete or cancel the task. Watchdogs preserve and
+recover work. Health probes may time out individual observations and retry without killing
+work; explicit shutdown cleanup may be bounded after a genuine stop decision. Scientific
+iteration bounds, conservation gates, memory/concurrency limits and finite simulated test
+windows remain in force. Diagnose repeated failures and change approach without halting the
+mission. Never infer process death from heartbeat age alone; check process identity/liveness.
+
+This directive supersedes older time/session/tool budgets and timeout examples throughout
+the repository, including retired role cards, plans and archived workflows. Historical
+receipts remain unchanged and do not authorize new timeouts. Authority: `.agent/protocol.md`.
+
 # ecosys-ng Ottawa Completion Protocol — One Autonomous Agent
 
-Version: 1.1 (2026-10-09). Supersedes every worker/judge ("adversarial") workflow document in this repository.
+Version: 1.2 (2026-10-17). Supersedes every worker/judge ("adversarial") workflow document in this repository.
 This file is the **single source of protocol truth**. `AGENTS.md`, `.agent/README.md`, `.agent/mission.json`,
 the skills and both Ottawa plans all describe the same loop; if they ever disagree, this file wins.
 
@@ -193,8 +216,8 @@ git rev-parse HEAD origin/main                       # both lines must be the sa
   sub-agents are forbidden from starting full runs — they analyze.
 - **Runs are unbounded by default (2026-10-16 directive)**: a production run is started without `--timeout`
   and proceeds to natural completion — `COMPLETE` at the model's own terminal line, or `FAIL` at its first
-  error — no matter how long that takes (days are expected). There is no wall-clock stop. A bounded
-  `--timeout` remains only a diagnostic tool; its `TIMED_OUT` receipt is never evidence and never a
+  error — no matter how long that takes (days are expected). There is no wall-clock stop. Legacy
+  `--timeout` arguments no longer impose execution limits; its `TIMED_OUT` receipt is never evidence and never a
   scientific result, and it can never close G5 or promote the frontier. The agent's job while a run is
   live is to keep working the rest of the campaign and monitor, not to stop or restart the run.
 - Token frugality: heavy output to disk via `run_logged.py`, cite receipts; never paste logs or whole files into
@@ -268,8 +291,8 @@ is live, monitor/advance the frontier; if `main` is dirty, resolve that first (c
   spawn a fresh-context `diagnose` verifier with the loop description, and take the narrowest remaining step
   (a single `file:line`, a single failing hour, a single assertion). If the same target stalls twice in a row,
   split it into two cycles and record the split.
-- **Context discipline**: long sessions drift. At high context use, commit + push, write `state.md`, and start a
-  fresh session rather than degrading. Keep the durable state in files, never in your head.
+- **Context discipline**: long sessions drift. At high context use, commit + push, write `state.md`, and arrange automatic pickup in a
+  fresh context without ending unfinished work. Keep the durable state in files, never in your head.
 - **Backoff, not halt**: if genuinely blocked (missing baseline data, unavailable model server, hardware limit),
   record the blocker with the exact condition and the check that clears it in `.agent/backlog.md`, then work the
   next unblocked item. Only stop for real, human-only conditions (credentials, destructive operations, spending,

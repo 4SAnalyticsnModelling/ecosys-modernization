@@ -525,17 +525,22 @@ class SwarmTests(SwarmBase):
         self.assertEqual(self.runs, [])  # hooks do not run on a rejected change
         self.assertEqual((self.root / "ecosys-ng/src/a.zig").read_text(), "const a = 1;\n")
 
-    def test_budget_timeout_interrupts_and_stagnates(self):
-        self.dispatch_pending("T-00001", "PATHFINDER")
-
+    def test_turn_continues_past_retired_budget(self):
+        self.swarm.roster["roles"]["PATHFINDER"] = {"agent_name": "pathfinder"}
+        original_sleep = self.swarm.sleep
+        observations = []
         def slow(_t):
-            self.herdr.agents["pathfinder"]["agent_status"] = "working"  # never finishes
-            raise sw.HerdrError("timed out", "timeout")
+            self.herdr.agents["pathfinder"]["agent_status"] = "working"
+        def advance(seconds):
+            original_sleep(seconds)
+            observations.append(seconds)
+            self.now += 10000  # Far beyond every historical role budget.
+            if len(observations) >= 3:
+                self.herdr.agents["pathfinder"]["agent_status"] = "done"
         self.herdr.behaviors["pathfinder"] = slow
-        out = self.swarm.step()
-        self.assertEqual(out["result_status"], "STAGNATED")
-        self.assertEqual(self.herdr.keys, [("pathfinder", ("esc",))])
-        self.assertEqual(self.wf()["failure_signatures"], {"PATHFINDER:T-00001": 1})
+        self.swarm.sleep = advance
+        self.assertEqual(self.swarm.turn("PATHFINDER", "complete the objective"), "settled")
+        self.assertEqual(self.herdr.keys, [])
 
     def test_autonomy_requires_user_approval(self):
         wf = self.wf()

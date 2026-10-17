@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # Cycle {{CYCLE_ID}} — {{DATE}}
 
 - **Actor**: single autonomous agent (harness/model: ______) — owns plan, work, decisions and final review

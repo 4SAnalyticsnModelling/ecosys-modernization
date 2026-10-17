@@ -3,6 +3,11 @@ name: ecosys-state-io-bindings
 description: "Trace model state, COMMON replacements, process coupling, parsers, units and output writers end to end. Use for binding gaps, stale values, incorrect defaults, suspicious zeros, missing outputs and cumulative-field mismatches."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
 
 ## Shared prerequisites
 

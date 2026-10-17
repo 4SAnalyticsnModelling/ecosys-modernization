@@ -49,7 +49,7 @@ def finding(check: str, level: str, detail: str) -> dict:
 def zig_reported_version(zig_bin: str) -> str | None:
     """Return the compiler's own version string, or None if it cannot be read."""
     try:
-        out = subprocess.run([zig_bin, "version"], capture_output=True, text=True, timeout=30)
+        out = subprocess.run([zig_bin, "version"], capture_output=True, text=True, timeout=None)
     except (OSError, subprocess.SubprocessError):
         return None
     if out.returncode != 0:
@@ -148,7 +148,7 @@ def check_environment(env: dict, root: Path) -> list[dict]:
 
 def git_output(args: list[str], root: Path) -> str | None:
     try:
-        out = subprocess.run(["git", *args], cwd=root, capture_output=True, text=True, timeout=60)
+        out = subprocess.run(["git", *args], cwd=root, capture_output=True, text=True, timeout=None)
     except (OSError, subprocess.SubprocessError):
         return None
     return out.stdout.strip() if out.returncode == 0 else None

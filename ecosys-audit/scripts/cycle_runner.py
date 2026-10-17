@@ -61,8 +61,8 @@ def now() -> str:
     return _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def sh(args: list[str], timeout: int = 120) -> subprocess.CompletedProcess:
-    return subprocess.run(args, cwd=ROOT, capture_output=True, text=True, timeout=timeout)
+def sh(args: list[str], timeout: int | None = None) -> subprocess.CompletedProcess:
+    return subprocess.run(args, cwd=ROOT, capture_output=True, text=True, timeout=None)
 
 
 def load_mission() -> dict:
@@ -476,7 +476,7 @@ def main() -> int:
     p.add_argument("--tests", action="store_true", help="run the pytest suite")
     p.add_argument("--diff-ref", default="origin/main")
     p.add_argument("--record-g6", dest="record_g6", action="store_true", help="record the scan as G6")
-    p.add_argument("--timeout", type=int, default=1800)
+    p.add_argument("--timeout", type=int, default=None, help="Deprecated; autonomous gates have no timeout")
     p.set_defaults(func=cmd_gates)
 
     p = sub.add_parser("commit", help="stage and commit the cycle")

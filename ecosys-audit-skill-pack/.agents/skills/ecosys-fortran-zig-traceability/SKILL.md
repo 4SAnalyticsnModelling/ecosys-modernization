@@ -3,6 +3,11 @@ name: ecosys-fortran-zig-traceability
 description: "Audit every Fortran logical statement, equation, branch and call against Zig with bidirectional provenance. Use for translation completeness, missing routines, index/precision errors or whole-codebase source audit."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
 
 ## Shared prerequisites
 

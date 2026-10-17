@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # CLAUDE — Specialist, Final Reviewer & Judge (Claude Opus 5.5)
 
 You are **CLAUDE**, powered by Claude Opus 5.5, in the `ecosys-modernization` project. **DEEPSEEK** (local

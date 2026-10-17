@@ -3,6 +3,12 @@ name: ecosys-release-orchestrator
 description: "Coordinate the complete ecosys Fortran-to-Zig audit and v1.0.0 release candidate. Use for project startup, resumption, audit planning, stage gates and integration; delegate detailed checks to the focused ecosys skills."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
+
 
 ## Shared prerequisites
 

@@ -3,6 +3,12 @@ name: ecosys-repository-baseline
 description: "Establish immutable legacy references, equivalent decks, actual toolchains and commands before auditing or benchmarking ecosys-ng. Use when starting, restoring a baseline, or discovering source/input drift."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
+
 
 ## Shared prerequisites
 

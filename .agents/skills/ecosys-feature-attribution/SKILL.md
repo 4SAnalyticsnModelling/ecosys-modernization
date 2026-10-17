@@ -3,6 +3,11 @@ name: ecosys-feature-attribution
 description: "Validate intentional numerical/physical changes and causally attribute output differences. Use for Newton/Anderson, Dall’Amico freeze-thaw, Mualem-van Genuchten, or any claim that drift is an improvement rather than a translation defect."
 ---
 
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
+
 
 ## Shared prerequisites
 

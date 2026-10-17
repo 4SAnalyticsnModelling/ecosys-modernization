@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # The agent — one actor, whole project (any harness, any model)
 
 You are the sole agent of `ecosys-modernization`. There is no partner model, no supervisor, no reviewer to wait

@@ -1,3 +1,7 @@
+**Continuous autonomy:** No elapsed-time timeout at any stage of autonomous work. Follow
+`.agent/continuous-autonomy.md` and `.agent/protocol.md`; older time/session/tool budgets
+and timeout examples are superseded. Poll limits yield control; preserve and resume work.
+
 # Primary references and compatibility notes
 
 Checked on 2026-09-17. These are documentation/reference links, not evidence that the local model implements any method correctly. Pin the project's actual compiler and CLI versions. Public documentation may change after this pack was prepared. No external sources or copyrighted papers are bundled.
