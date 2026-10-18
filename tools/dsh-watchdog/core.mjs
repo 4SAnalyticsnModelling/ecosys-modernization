@@ -5,7 +5,7 @@ export const WINDOW = 131072, LIMIT = 75000, OUTPUT = 32768, HEADROOM = 8192;
 export const hygiene = {thresholdChars:2048, headChars:768, tailChars:384};
 export const INLINE_TOKENS = 1200;
 export const policy = {thresholdRatio: LIMIT / WINDOW, headroomTokens: HEADROOM,
-  maxTokens: 4096, retainTokens: 12000, compactionRetries: 0, maxOverflowRetries: 1};
+  maxTokens: 8192, retainTokens: 12000, compactionRetries: 0, maxOverflowRetries: 1};
 export function validateRoute(window, output) {
   if (window !== WINDOW || !Number.isInteger(output) || output < 1 || output > OUTPUT ||
       Math.floor(Math.min(window * policy.thresholdRatio, window - output - HEADROOM)) !== LIMIT)

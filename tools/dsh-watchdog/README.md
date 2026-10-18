@@ -62,7 +62,7 @@ Live 131,072-token capacity and per-model coding correctness remain unverified.
 ## Policy
 
 Each routed model advertises W=131072 and O=32768, with B=8192,
-thresholdRatio=75000/131072=0.57220458984375 and summary maxTokens=4096:
+thresholdRatio=75000/131072=0.57220458984375 and summary maxTokens=8192:
 `floor(min(W*ratio, W-O-B)) = 75000`. A larger request output reservation is
 rejected. One root Cordis `BasicCompactionEngine` subclass serves every preset;
 other summary engines, manual compact commands and image compaction are disabled.
@@ -86,8 +86,7 @@ At the boundary, native persistence must flush successfully. Checkpoints include
 original session files, tracked binary Git diff (including an unborn-repository path), untracked file contents,
 verbatim notes and a receipt. Non-Git workspaces receive a source snapshot excluding dependency/cache directories; no Git repository is required. Contents and directories are fsynced before
 compaction. Native balanced selection, bracket locking and shrink checks remain authoritative.
-Partial commit failures block for reconciliation; automatic rollback is not assumed. Exactly one summary attempt is allowed; failed or
-insufficient compaction blocks work. A recent 12,000-token tail is retained.
+Partial commit failures block for reconciliation; automatic rollback is not assumed. Exactly one model summary attempt is allowed. Output-cap exhaustion uses a complete deterministic recovery checkpoint containing verbatim durable notes and pointers to the fsynced full selected conversation, native session and Git snapshot; truncated model text is never committed. The native shrink, pairing and persistence checks still apply. A historical cap failure reconciles automatically only when adjacent native start/end events prove no replacement was committed and its saved checkpoint exists. Its next compaction uses the deterministic recovery path without another model call. Other failed or insufficient compactions block work. A recent 12,000-token tail is retained.
 Only confirmed `CONTEXT_WINDOW_EXCEEDED` permits emergency compaction below 75K,
 once per consecutive failure episode. Successful assistant output resets it.
 
@@ -95,8 +94,8 @@ Update `progress.md`, `decisions.md` and `issues.md` in the configured notes dir
 tests. Notes (maximum 24KB) are copied **verbatim** into the candidate summary with
 verified facts distinguished from unresolved hypotheses;
 a summary is never trusted to preserve scientific decisions through paraphrase.
-Notes changing during summarization, empty/truncated summaries, or `CONFLICT:`
-decisions block the transaction. Original JSONL and checkpoints are never rotated
+Notes changing during summarization, empty summaries, or `CONFLICT:`
+decisions block the transaction. Truncated model summaries are discarded and replaced by the archived recovery checkpoint described above. Original JSONL and checkpoints are never rotated
 away. Supervisor diagnostics rotate through four 4MB files. The supervisor never
 compacts or submits the original task a second time.
 

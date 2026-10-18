@@ -63,6 +63,26 @@ export default class WatchdogCompaction extends Basic {
     }
   }
   record(agent) { return readState(path.join(this.root(agent),'state.json')).sessions[agent.session.id] ?? {}; }
+  reconcileSummaryFailure(agent) {
+    const state = this.record(agent);
+    const message = 'summarization truncated at the token cap (incomplete checkpoint)';
+    if (state.phase !== 'blocked' || state.error !== 'Error: '+message) return false;
+    const events = agent.session.snapshotEvents();
+    const start = events.findLast(e => e.type === 'compaction/start');
+    const end = events.findLast(e => e.type === 'compaction/end');
+    // Adjacent brackets prove the native engine never appended a replacement.
+    if (!start || !end || end.seq !== start.seq+1 ||
+        end.data.compactionId !== start.data.compactionId || end.data.error !== message) return false;
+    const dir = path.join(this.root(agent),'checkpoints',state.checkpoint);
+    const receipt = JSON.parse(fs.readFileSync(path.join(dir,'receipt.json'),'utf8'));
+    if (receipt.sessionId !== agent.session.id || receipt.checkpoint !== state.checkpoint ||
+        fs.existsSync(path.join(dir,'completed.json')) || !fs.existsSync(path.join(dir,'sessions'))) return false;
+    atomic(path.join(dir,'reconciliation.json'),{checkpoint:state.checkpoint,
+      reason:'Native summary failed before commit; original surface retained',
+      startSeq:start.seq,endSeq:end.seq,at:new Date().toISOString()});
+    this.update(agent,{phase:'running',error:null,recoveryPending:true,reconciledCheckpoint:state.checkpoint});
+    return true;
+  }
   measure(agent) {
     const m = this.ctx.tokenMeter?.measure(agent.session);
     if (!Number.isFinite(m?.totalTokens) || m.totalTokens < 0) throw Error('Missing/invalid token meter; refusing request');
@@ -96,6 +116,7 @@ export default class WatchdogCompaction extends Basic {
   }
   _registerAutomaticCompaction() {
     this.ctx.on('agent/created', ({agent, source}) => {
+      this.reconcileSummaryFailure(agent);
       const old = this.record(agent);
       if (source === 'resume' && process.env.DSH_WATCHDOG_AUTO_RESUME === '1' && old.phase === 'running' && old.taskActive === true) {
         notes(this.root(agent));
@@ -106,6 +127,7 @@ export default class WatchdogCompaction extends Basic {
     });
     this.ctx.on('agent/pre-step', async ({agent, signal}, next) => {
       notes(this.root(agent));
+      this.reconcileSummaryFailure(agent);
       const state = this.record(agent);
       if (state.phase === 'checkpointing' || state.phase === 'compacting' || state.phase === 'blocked')
         throw Error(`Watchdog requires checkpoint reconciliation: ${state.checkpoint ?? agent.session.id}`);
@@ -225,7 +247,38 @@ export default class WatchdogCompaction extends Basic {
   }
   async summarize(input, agent, signal) {
     const memory = notes(this.root(agent));
-    const result = await super.summarize(input,agent,signal);
+    let result;
+    const fallback = () => {
+      const checkpoint = this.record(agent).checkpoint;
+      const archive = path.join(this.root(agent),'checkpoints',checkpoint);
+      // This is a complete deterministic recovery record, never truncated model output.
+      // Keep the selected prefix verbatim for targeted retrieval; native retains its tail.
+      const file = path.join(archive,'summary-input.json');
+      atomic(file,input);
+      const requests = input.messages.filter(m => m.role === 'user' && m.source?.kind === 'user')
+        .map(m => m.content.filter(b => b.type === 'text').map(b => b.text).join('\n'));
+      const text = 'Recovery checkpoint: the model summary was unavailable at its output cap. '+
+        'No partial model summary is used. Verified durable notes are attached below; '+
+        'the recent conversation remains after this checkpoint. Full selected conversation, '+
+        'including every original request, decision, tool call and result, is preserved at '+file+'. '+
+        'Original native session, Git changes and notes are preserved in '+archive+'. '+
+        'Before continuing, read the durable notes and retrieve relevant ranges from that archive '+
+        'to resolve any missing context. Never infer that pending work or a test succeeded.\n'+
+        (requests.length ? 'Original user request (excerpt; full text in archive):\n'+requests[0].slice(0,6000)+
+          '\nLatest user request (excerpt; full text in archive):\n'+requests.at(-1).slice(0,6000) : '');
+      atomic(path.join(archive,'summary-fallback.json'),{reason:'MAX_TOKENS',inputFile:file,at:new Date().toISOString()});
+      this.update(agent,{recoveryPending:false,summaryFallbacks:(this.record(agent).summaryFallbacks ?? 0)+1});
+      return {summary:[{type:'text',text}],provider:this.record(agent).provider ?? agent.options.provider,
+        model:this.record(agent).model ?? agent.options.model,maxTokens:policy.maxTokens};
+    };
+    if (this.record(agent).recoveryPending) result = fallback();
+    else {
+      try { result = await super.summarize(input,agent,signal); }
+      catch (error) {
+        if (error.code !== 'MAX_TOKENS' || signal?.aborted) throw error;
+        result = fallback();
+      }
+    }
     if (notes(this.root(agent)).hash !== memory.hash) throw Error('Notes changed during compaction');
     return verifySummary(result,memory,this.record(agent).checkpoint);
   }

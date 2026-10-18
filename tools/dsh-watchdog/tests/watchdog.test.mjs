@@ -66,6 +66,47 @@ test('exact trigger formula for every valid output reservation',()=> {
   assert.throws(()=>validateRoute(WINDOW,65536));
 });
 
+test('native token-cap exhaustion commits a complete archived recovery checkpoint',async()=> {
+  const f=fixture();
+  f.compact.summarize=Watchdog.prototype.summarize.bind(f.compact);
+  let calls=0;
+  f.ctx.llm.stream=()=>({async *[Symbol.asyncIterator]() {
+    calls++;
+    yield {type:'finish',reason:{kind:'max-tokens'}};
+  }});
+  const meter=f.ctx.tokenMeter.measure.bind(f.ctx.tokenMeter);
+  const generation=f.agent.session.surface.replaceGeneration;
+  f.ctx.tokenMeter.measure=(...args)=>({...meter(...args),totalTokens:f.agent.session.surface.replaceGeneration===generation ? 75001 : 20000});
+  const result=await f.compact.compactIfNeeded(f.agent,'pressure',signal);
+  assert.ok(result);assert.equal(calls,1);
+  assert.equal(f.compact.record(f.agent).phase,'running');
+  assert.equal(f.compact.record(f.agent).summaryFallbacks,1);
+  const dir=path.join(f.dir,'checkpoints',f.compact.record(f.agent).checkpoint);
+  assert.ok(fs.existsSync(path.join(dir,'completed.json')));
+  assert.ok(JSON.parse(fs.readFileSync(path.join(dir,'summary-input.json'))).messages.length>0);
+  assert.ok(f.agent.session.snapshotEvents().some(e=>e.type==='compaction/end' && !e.data.error));
+  await f.ctx.fiber.dispose();
+});
+
+test('only a closed pre-commit summary failure reconciles automatically',async()=> {
+  const f=fixture();
+  const checkpoint='closed-summary';
+  const dir=path.join(f.dir,'checkpoints',checkpoint);
+  fs.mkdirSync(path.join(dir,'sessions'),{recursive:true});
+  atomic(path.join(dir,'receipt.json'),{checkpoint,sessionId:f.agent.session.id});
+  const message='summarization truncated at the token cap (incomplete checkpoint)';
+  const start=f.agent.session.append('compaction/start',{compactionId:'failed',turn:5});
+  f.compact.update(f.agent,{phase:'blocked',checkpoint,error:'Error: '+message});
+  assert.equal(f.compact.reconcileSummaryFailure(f.agent),false);
+  f.agent.session.append('compaction/end',{compactionId:'failed',turn:5,error:message});
+  assert.equal(f.compact.reconcileSummaryFailure(f.agent),true);
+  assert.equal(f.compact.record(f.agent).recoveryPending,true);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dir,'reconciliation.json'))).startSeq,start.seq);
+  f.compact.update(f.agent,{phase:'blocked',error:'Error: disk unavailable'});
+  assert.equal(f.compact.reconcileSummaryFailure(f.agent),false);
+  await f.ctx.fiber.dispose();
+});
+
 test('74K does not compact; 75K causes one native balanced compaction',async()=> {
   const f=fixture();
   const realMeasure=f.ctx.tokenMeter.measure.bind(f.ctx.tokenMeter);

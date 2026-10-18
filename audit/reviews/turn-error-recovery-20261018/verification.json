@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-18T23:44:47.280230+00:00",
+  "sessionId": "9406883a-6494-42f9-aef2-0e1d556e50d8",
+  "instance": "b4a1c2c1-d3a6-471b-ab05-97d2c25c8574",
+  "phase": "running",
+  "error": null,
+  "reconciliation": {
+    "checkpoint": "c2ea7dde-a1cc-4480-8452-641d56d514af",
+    "reason": "Native summary failed before commit; original surface retained",
+    "startSeq": 1615,
+    "endSeq": 1616,
+    "at": "2026-10-18T23:44:16.470Z"
+  },
+  "completed": {
+    "checkpoint": "c222088c-6d46-4210-856c-6823b6f8bb0b",
+    "beforeTokens": 77474,
+    "afterTokens": 40428,
+    "trigger": "pressure"
+  },
+  "resumptions": 1,
+  "summaryFallbacks": 1,
+  "tests": {
+    "passed": 33,
+    "failed": 0,
+    "log": ".tmp/turn-error-watchdog-tests.log"
+  }
+}
