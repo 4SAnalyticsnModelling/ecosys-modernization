@@ -1,0 +1,5 @@
+{
+  "chip": "Apple M1 Ultra",
+  "memory_bytes": "137438953472",
+  "swap_at_start": "vm.swapusage: total = 2048.00M  used = 1290.88M  free = 757.12M  (encrypted)"
+}

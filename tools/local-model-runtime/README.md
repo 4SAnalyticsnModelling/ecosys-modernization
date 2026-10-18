@@ -33,3 +33,29 @@ single16K performance test remains the only speed benchmark.
 
 Evidence: `audit/reviews/dsh-rc1-production-20261017/`.
 Tests: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tools/local-model-runtime -p 'test_*.py'`.
+
+# GLM Flash 6-bit tuning
+
+The GLM6 route retains oMLX0.7.1rc1 / MLX0.32.4, the original six-bit
+checkpoint, native KV, MTP depth1, LFU and101/288 resident experts per layer.
+Qualified settings are12 CPU disk-I/O workers, bounded two-expert decode
+lookahead,8192-token prefill and maximum thinking by default. GPU execution
+uses MLX/Metal on one Apple GPU; there is no configurable GPU-worker count.
+
+`glm6_lookahead.py` stages raw checkpoint reads only, with a shared512MiB
+budget. True routing, expert arithmetic and slot writes remain native.
+`check_glm6_lookahead.py` checks six-bit arithmetic/slot parity and exception
+cleanup. `benchmark_glm6.py` isolates caches and records completion, memory,
+cache coverage and checkpoint metadata; `glm6_16k_suite.py` compares the
+strategies at exactly16384 prompt tokens. Only16K is qualified by this study.
+
+`deploy_glm6_lookahead.py --candidate chunk8192-16 --width 2 --chunk 8192`
+validates receipts and preserves original installed files before promotion.
+It requires the predeployment source hashes and an unused backup directory;
+it is intentionally not an idempotent reapply command. Keep the duration-floor
+environment value5632: the existing guard accepts it, and GLM6 replaces the
+adaptive scheduler after import. Actual fixed prefill width is8192.
+`smoke_glm6.py` loads through the real router, issues zero generation requests,
+and stops its owned backend. Normal sessions use the installed settings.
+
+Evidence and rollback bytes: `audit/reviews/glm6-speed-20261017/`.

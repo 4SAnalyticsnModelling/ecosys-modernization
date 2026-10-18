@@ -1,0 +1,21 @@
+base16
+base16 finished
+lookahead2-16
+lookahead2-16 finished
+chunk8192-16
+chunk8192-16 finished
+selected16K configuration
+retrieval16
+retrieval16 finished
+16K qualification failed
+Traceback (most recent call last):
+  File "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/tools/local-model-runtime/glm6_16k_suite.py", line 55, in <module>
+    if __name__=='__main__':
+            ^^^^^^
+  File "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/tools/local-model-runtime/glm6_16k_suite.py", line 50, in main
+    save('selected16K configuration')
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/tools/local-model-runtime/glm6_16k_suite.py", line 27, in run
+    if result.returncode or not receipt.get('complete'):raise RuntimeError('Failed16K test: '+name)
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Failed16K test: retrieval16

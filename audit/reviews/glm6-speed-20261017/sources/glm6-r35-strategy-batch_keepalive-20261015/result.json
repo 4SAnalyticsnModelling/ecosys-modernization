@@ -1,0 +1,7 @@
+{
+  "complete": true,
+  "skipped": true,
+  "reason": "Batched installation regressed warm throughput by more than 10%; combination not advanced",
+  "samples": [],
+  "peak_physical_bytes": 0
+}

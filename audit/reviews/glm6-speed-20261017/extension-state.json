@@ -1,0 +1,6 @@
+{
+  "pid": 87412,
+  "stage": "cancelled by user:16K-only tests",
+  "previous_stage": "waiting for64K baseline suite",
+  "cancelled_at": 1792304424.001805
+}

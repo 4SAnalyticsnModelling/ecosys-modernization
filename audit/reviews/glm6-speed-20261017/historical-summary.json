@@ -1,0 +1,1594 @@
+[
+  {
+    "name": "glm6-production-profile-omlx071rc1-16k-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 110738682960,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 184.6883021669928,
+        "elapsed_s": 239.76798116706777,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 129
+          },
+          "time_to_first_token": 184.38,
+          "time_to_first_visible_token": 184.62,
+          "total_time": 239.7,
+          "prompt_eval_duration": 184.38,
+          "generation_duration": 55.32,
+          "prompt_tokens_per_second": 90.93,
+          "generation_tokens_per_second": 2.31
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 1.4359112499514595,
+        "elapsed_s": 43.51433895796072,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 129
+          },
+          "time_to_first_token": 1.4,
+          "time_to_first_visible_token": 1.4,
+          "total_time": 43.48,
+          "prompt_eval_duration": 1.4,
+          "generation_duration": 42.08,
+          "prompt_tokens_per_second": 1.43,
+          "generation_tokens_per_second": 3.04
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r30-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": "RuntimeError({'message': 'oMLX prefill memory guard rejected this prompt: Prefill context too large for available memory (pre-chunk guard at 0 tokens, kv_len=5632): predicted peak would exceed prefill safety cap 102.4GB (95% of metal_cap ceiling 107.8GB). Raise kernel iogpu.wired_limit_mb in Terminal (currently caps Metal at 107.52 GB), or reduce context length. To continue, set Memory Guard to aggressive, raise the custom memory guard ceiling, free system memory, or compact/reduce context.', 'type': 'invalid_request_error', 'param': None, 'code': 'prefill_memory_exceeded', 'omlx_code': 'prefill_memory_exceeded', 'estimated_bytes': 110680085893, 'limit_bytes': 109962989500})",
+    "peak_physical_bytes": 99025155056,
+    "samples": []
+  },
+  {
+    "name": "glm6-r30-measured-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 98987078496,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 180.97794145799708,
+        "elapsed_s": 239.59569104097318,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 180.67,
+          "time_to_first_visible_token": 180.91,
+          "total_time": 239.53,
+          "prompt_eval_duration": 180.67,
+          "generation_duration": 58.86,
+          "prompt_tokens_per_second": 92.8,
+          "generation_tokens_per_second": 2.17
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 1.804159790975973,
+        "elapsed_s": 54.90830424998421,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.77,
+          "time_to_first_visible_token": 1.77,
+          "total_time": 54.88,
+          "prompt_eval_duration": 1.77,
+          "generation_duration": 53.11,
+          "prompt_tokens_per_second": 1.13,
+          "generation_tokens_per_second": 2.41
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_repeat",
+        "ttft_s": 1.384862625040114,
+        "elapsed_s": 51.07421524997335,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.35,
+          "time_to_first_visible_token": 1.35,
+          "total_time": 51.04,
+          "prompt_eval_duration": 1.35,
+          "generation_duration": 49.69,
+          "prompt_tokens_per_second": 1.48,
+          "generation_tokens_per_second": 2.58
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "ssd_cache_after_restart",
+        "ttft_s": 6.0863910840125754,
+        "elapsed_s": 69.84369179198984,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 5.78,
+          "time_to_first_visible_token": 6.02,
+          "total_time": 69.78,
+          "prompt_eval_duration": 5.78,
+          "generation_duration": 63.99,
+          "prompt_tokens_per_second": 0.35,
+          "generation_tokens_per_second": 2.0
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-layerweighted-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 110848505200,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 184.30332887498662,
+        "elapsed_s": 241.28456562501378,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 183.99,
+          "time_to_first_visible_token": 184.23,
+          "total_time": 241.22,
+          "prompt_eval_duration": 183.99,
+          "generation_duration": 57.23,
+          "prompt_tokens_per_second": 91.13,
+          "generation_tokens_per_second": 2.24
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 1.4894980000099167,
+        "elapsed_s": 49.31759766698815,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.46,
+          "time_to_first_visible_token": 1.46,
+          "total_time": 49.29,
+          "prompt_eval_duration": 1.46,
+          "generation_duration": 47.83,
+          "prompt_tokens_per_second": 1.37,
+          "generation_tokens_per_second": 2.68
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_repeat",
+        "ttft_s": 1.2311139999656007,
+        "elapsed_s": 45.81556374998763,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.19,
+          "time_to_first_visible_token": 1.19,
+          "total_time": 45.77,
+          "prompt_eval_duration": 1.19,
+          "generation_duration": 44.58,
+          "prompt_tokens_per_second": 1.69,
+          "generation_tokens_per_second": 2.87
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "ssd_cache_after_restart",
+        "ttft_s": 6.402895290986635,
+        "elapsed_s": 64.04177716607228,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 6.1,
+          "time_to_first_visible_token": 6.33,
+          "total_time": 63.97,
+          "prompt_eval_duration": 6.1,
+          "generation_duration": 57.87,
+          "prompt_tokens_per_second": 0.33,
+          "generation_tokens_per_second": 2.21
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-long-base-20261015",
+    "target": null,
+    "error": "AssertionError()",
+    "peak_physical_bytes": 111547644400,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": null,
+        "elapsed_s": 382.06475537491497,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 512,
+          "total_tokens": 17278,
+          "input_tokens": 16766,
+          "output_tokens": 512,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 182.08,
+          "time_to_first_visible_token": 182.32,
+          "total_time": 381.99,
+          "prompt_eval_duration": 182.08,
+          "generation_duration": 199.91,
+          "prompt_tokens_per_second": 92.08,
+          "generation_tokens_per_second": 2.56
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": 1313099264000
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-long-cached-base-20261015",
+    "target": null,
+    "error": null,
+    "peak_physical_bytes": 105206411648,
+    "samples": [
+      {
+        "kind": "ssd_cached_16k",
+        "ttft_s": null,
+        "elapsed_s": 212.69623245799448,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 512,
+          "total_tokens": 17278,
+          "input_tokens": 16766,
+          "output_tokens": 512,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 5.96,
+          "time_to_first_visible_token": 6.21,
+          "total_time": 212.63,
+          "prompt_eval_duration": 5.96,
+          "generation_duration": 206.66,
+          "prompt_tokens_per_second": 0.34,
+          "generation_tokens_per_second": 2.48
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": 863922774016
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-long-cached-lookahead-20261015",
+    "target": null,
+    "error": null,
+    "peak_physical_bytes": 105257218504,
+    "samples": [
+      {
+        "kind": "ssd_cached_16k",
+        "ttft_s": null,
+        "elapsed_s": 190.80181616696063,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 512,
+          "total_tokens": 17278,
+          "input_tokens": 16766,
+          "output_tokens": 512,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 6.85,
+          "time_to_first_visible_token": 7.08,
+          "total_time": 190.73,
+          "prompt_eval_duration": 6.85,
+          "generation_duration": 183.89,
+          "prompt_tokens_per_second": 0.29,
+          "generation_tokens_per_second": 2.78
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": 1104558882816
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-long-lookahead-20261015",
+    "target": null,
+    "error": null,
+    "peak_physical_bytes": 110743548936,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": null,
+        "elapsed_s": 382.2507809170056,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 512,
+          "total_tokens": 17278,
+          "input_tokens": 16766,
+          "output_tokens": 512,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 184.39,
+          "time_to_first_visible_token": 184.63,
+          "total_time": 382.18,
+          "prompt_eval_duration": 184.39,
+          "generation_duration": 197.79,
+          "prompt_tokens_per_second": 90.93,
+          "generation_tokens_per_second": 2.59
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": 1538446442496
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-measured-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 110751691952,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 185.98468658409547,
+        "elapsed_s": 240.86272570909932,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 185.67,
+          "time_to_first_visible_token": 185.91,
+          "total_time": 240.79,
+          "prompt_eval_duration": 185.67,
+          "generation_duration": 55.12,
+          "prompt_tokens_per_second": 90.3,
+          "generation_tokens_per_second": 2.32
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 1.7367850000737235,
+        "elapsed_s": 46.42757408309262,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.71,
+          "time_to_first_visible_token": 1.71,
+          "total_time": 46.4,
+          "prompt_eval_duration": 1.71,
+          "generation_duration": 44.69,
+          "prompt_tokens_per_second": 1.17,
+          "generation_tokens_per_second": 2.86
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_repeat",
+        "ttft_s": 1.2871661669341847,
+        "elapsed_s": 42.051851583993994,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.26,
+          "time_to_first_visible_token": 1.26,
+          "total_time": 42.02,
+          "prompt_eval_duration": 1.26,
+          "generation_duration": 40.77,
+          "prompt_tokens_per_second": 1.59,
+          "generation_tokens_per_second": 3.14
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "ssd_cache_after_restart",
+        "ttft_s": 6.685747458948754,
+        "elapsed_s": 62.39081625000108,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 6.38,
+          "time_to_first_visible_token": 6.62,
+          "total_time": 62.32,
+          "prompt_eval_duration": 6.38,
+          "generation_duration": 55.94,
+          "prompt_tokens_per_second": 0.31,
+          "generation_tokens_per_second": 2.29
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-profile-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 110763766816,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 184.42883970902767,
+        "elapsed_s": 239.4633728340268,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 184.1,
+          "time_to_first_visible_token": 184.36,
+          "total_time": 239.39,
+          "prompt_eval_duration": 184.1,
+          "generation_duration": 55.29,
+          "prompt_tokens_per_second": 91.07,
+          "generation_tokens_per_second": 2.32
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 1.49541583401151,
+        "elapsed_s": 46.280060125049204,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.46,
+          "time_to_first_visible_token": 1.47,
+          "total_time": 46.25,
+          "prompt_eval_duration": 1.46,
+          "generation_duration": 44.79,
+          "prompt_tokens_per_second": 1.37,
+          "generation_tokens_per_second": 2.86
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_repeat",
+        "ttft_s": 1.3109072919469327,
+        "elapsed_s": 42.07975145801902,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.26,
+          "time_to_first_visible_token": 1.26,
+          "total_time": 42.03,
+          "prompt_eval_duration": 1.26,
+          "generation_duration": 40.77,
+          "prompt_tokens_per_second": 1.59,
+          "generation_tokens_per_second": 3.14
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "ssd_cache_after_restart",
+        "ttft_s": 6.324165416066535,
+        "elapsed_s": 61.95532516599633,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 6.02,
+          "time_to_first_visible_token": 6.25,
+          "total_time": 61.89,
+          "prompt_eval_duration": 6.02,
+          "generation_duration": 55.86,
+          "prompt_tokens_per_second": 0.33,
+          "generation_tokens_per_second": 2.29
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-sharedcache-20261015",
+    "target": null,
+    "error": null,
+    "peak_physical_bytes": 105606525384,
+    "samples": [
+      {
+        "kind": null,
+        "ttft_s": null,
+        "elapsed_s": 60.54075758298859,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 6.12,
+          "time_to_first_visible_token": 6.35,
+          "total_time": 60.47,
+          "prompt_eval_duration": 6.12,
+          "generation_duration": 54.36,
+          "prompt_tokens_per_second": 0.33,
+          "generation_tokens_per_second": 2.35
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": null,
+        "ttft_s": null,
+        "elapsed_s": 40.89604070899077,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.34,
+          "time_to_first_visible_token": 1.35,
+          "total_time": 40.83,
+          "prompt_eval_duration": 1.34,
+          "generation_duration": 39.49,
+          "prompt_tokens_per_second": 1.49,
+          "generation_tokens_per_second": 3.24
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-strategy-base-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 110746039328,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 185.0710837499937,
+        "elapsed_s": 240.15199116698932,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 184.76,
+          "time_to_first_visible_token": 185.0,
+          "total_time": 240.08,
+          "prompt_eval_duration": 184.76,
+          "generation_duration": 55.33,
+          "prompt_tokens_per_second": 90.75,
+          "generation_tokens_per_second": 2.31
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 1.5048577919369563,
+        "elapsed_s": 46.45128333300818,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.47,
+          "time_to_first_visible_token": 1.47,
+          "total_time": 46.42,
+          "prompt_eval_duration": 1.47,
+          "generation_duration": 44.95,
+          "prompt_tokens_per_second": 1.36,
+          "generation_tokens_per_second": 2.85
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_repeat",
+        "ttft_s": 1.3279519580537453,
+        "elapsed_s": 42.38908824999817,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.28,
+          "time_to_first_visible_token": 1.28,
+          "total_time": 42.34,
+          "prompt_eval_duration": 1.28,
+          "generation_duration": 41.06,
+          "prompt_tokens_per_second": 1.57,
+          "generation_tokens_per_second": 3.12
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "ssd_cache_after_restart",
+        "ttft_s": 6.391496542026289,
+        "elapsed_s": 62.23363658308517,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 6.09,
+          "time_to_first_visible_token": 6.32,
+          "total_time": 62.16,
+          "prompt_eval_duration": 6.09,
+          "generation_duration": 56.07,
+          "prompt_tokens_per_second": 0.33,
+          "generation_tokens_per_second": 2.28
+        },
+        "disk_io_delta": null,
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-strategy-batch-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 110938649320,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 184.4353149579838,
+        "elapsed_s": 301.73391495796386,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 184.12,
+          "time_to_first_visible_token": 184.37,
+          "total_time": 301.67,
+          "prompt_eval_duration": 184.12,
+          "generation_duration": 117.54,
+          "prompt_tokens_per_second": 91.06,
+          "generation_tokens_per_second": 1.09
+        },
+        "disk_io_delta": {
+          "read_bytes": 788359778304,
+          "written_bytes": 455790592
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 3.7338883749907836,
+        "elapsed_s": 52.779681249987334,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 3.7,
+          "time_to_first_visible_token": 3.7,
+          "total_time": 52.75,
+          "prompt_eval_duration": 3.7,
+          "generation_duration": 49.05,
+          "prompt_tokens_per_second": 0.54,
+          "generation_tokens_per_second": 2.61
+        },
+        "disk_io_delta": {
+          "read_bytes": 183861403648,
+          "written_bytes": 643813376
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_repeat",
+        "ttft_s": 1.3703037910163403,
+        "elapsed_s": 46.48509337496944,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.33,
+          "time_to_first_visible_token": 1.33,
+          "total_time": 46.45,
+          "prompt_eval_duration": 1.33,
+          "generation_duration": 45.12,
+          "prompt_tokens_per_second": 1.5,
+          "generation_tokens_per_second": 2.84
+        },
+        "disk_io_delta": {
+          "read_bytes": 159988191232,
+          "written_bytes": 217088
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "ssd_cache_after_restart",
+        "ttft_s": 6.402326958021149,
+        "elapsed_s": 65.3523107910296,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 6.1,
+          "time_to_first_visible_token": 6.33,
+          "total_time": 65.28,
+          "prompt_eval_duration": 6.1,
+          "generation_duration": 59.18,
+          "prompt_tokens_per_second": 0.33,
+          "generation_tokens_per_second": 2.16
+        },
+        "disk_io_delta": {
+          "read_bytes": 260100788224,
+          "written_bytes": 233472
+        },
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-strategy-batch_keepalive-20261015",
+    "target": null,
+    "error": null,
+    "peak_physical_bytes": 0,
+    "samples": []
+  },
+  {
+    "name": "glm6-r35-strategy-keepalive-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 110763537512,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 183.65733520896174,
+        "elapsed_s": 244.77158283395693,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 183.34,
+          "time_to_first_visible_token": 183.59,
+          "total_time": 244.7,
+          "prompt_eval_duration": 183.34,
+          "generation_duration": 61.36,
+          "prompt_tokens_per_second": 91.45,
+          "generation_tokens_per_second": 2.09
+        },
+        "disk_io_delta": {
+          "read_bytes": 785049743360,
+          "written_bytes": 455585792
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 1.575433540972881,
+        "elapsed_s": 47.66821274999529,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.54,
+          "time_to_first_visible_token": 1.54,
+          "total_time": 47.64,
+          "prompt_eval_duration": 1.54,
+          "generation_duration": 46.09,
+          "prompt_tokens_per_second": 1.3,
+          "generation_tokens_per_second": 2.78
+        },
+        "disk_io_delta": {
+          "read_bytes": 180134223872,
+          "written_bytes": 509579264
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_repeat",
+        "ttft_s": 1.3482351660495624,
+        "elapsed_s": 43.71055041602813,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.3,
+          "time_to_first_visible_token": 1.3,
+          "total_time": 43.66,
+          "prompt_eval_duration": 1.3,
+          "generation_duration": 42.36,
+          "prompt_tokens_per_second": 1.54,
+          "generation_tokens_per_second": 3.02
+        },
+        "disk_io_delta": {
+          "read_bytes": 158371336192,
+          "written_bytes": 212992
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "ssd_cache_after_restart",
+        "ttft_s": 6.534469124977477,
+        "elapsed_s": 63.079404457937926,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 6.23,
+          "time_to_first_visible_token": 6.46,
+          "total_time": 63.01,
+          "prompt_eval_duration": 6.23,
+          "generation_duration": 56.78,
+          "prompt_tokens_per_second": 0.32,
+          "generation_tokens_per_second": 2.25
+        },
+        "disk_io_delta": {
+          "read_bytes": 258266890240,
+          "written_bytes": 225280
+        },
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-strategy-lookahead-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 110747006032,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 184.40383941703476,
+        "elapsed_s": 234.73950245801825,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 184.08,
+          "time_to_first_visible_token": 184.33,
+          "total_time": 234.67,
+          "prompt_eval_duration": 184.08,
+          "generation_duration": 50.59,
+          "prompt_tokens_per_second": 91.08,
+          "generation_tokens_per_second": 2.53
+        },
+        "disk_io_delta": {
+          "read_bytes": 828384419840,
+          "written_bytes": 455553024
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 1.4301338749937713,
+        "elapsed_s": 42.05770725000184,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.4,
+          "time_to_first_visible_token": 1.4,
+          "total_time": 42.02,
+          "prompt_eval_duration": 1.4,
+          "generation_duration": 40.63,
+          "prompt_tokens_per_second": 1.43,
+          "generation_tokens_per_second": 3.15
+        },
+        "disk_io_delta": {
+          "read_bytes": 237671399424,
+          "written_bytes": 428720128
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_repeat",
+        "ttft_s": 1.2829731249948964,
+        "elapsed_s": 39.37538137496449,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.25,
+          "time_to_first_visible_token": 1.25,
+          "total_time": 39.34,
+          "prompt_eval_duration": 1.25,
+          "generation_duration": 38.09,
+          "prompt_tokens_per_second": 1.6,
+          "generation_tokens_per_second": 3.36
+        },
+        "disk_io_delta": {
+          "read_bytes": 217217572864,
+          "written_bytes": 200704
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "ssd_cache_after_restart",
+        "ttft_s": 6.196102833026089,
+        "elapsed_s": 54.34134658309631,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 5.88,
+          "time_to_first_visible_token": 6.13,
+          "total_time": 54.27,
+          "prompt_eval_duration": 5.88,
+          "generation_duration": 48.39,
+          "prompt_tokens_per_second": 0.34,
+          "generation_tokens_per_second": 2.65
+        },
+        "disk_io_delta": {
+          "read_bytes": 312831963136,
+          "written_bytes": 192512
+        },
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-strategy-overlap-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 110745597152,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 184.64531908300705,
+        "elapsed_s": 246.54911008302588,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 184.33,
+          "time_to_first_visible_token": 184.57,
+          "total_time": 246.48,
+          "prompt_eval_duration": 184.33,
+          "generation_duration": 62.15,
+          "prompt_tokens_per_second": 90.95,
+          "generation_tokens_per_second": 2.06
+        },
+        "disk_io_delta": {
+          "read_bytes": 785072947200,
+          "written_bytes": 455593984
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 1.5282296249642968,
+        "elapsed_s": 48.67234470893163,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.49,
+          "time_to_first_visible_token": 1.5,
+          "total_time": 48.64,
+          "prompt_eval_duration": 1.49,
+          "generation_duration": 47.15,
+          "prompt_tokens_per_second": 1.34,
+          "generation_tokens_per_second": 2.72
+        },
+        "disk_io_delta": {
+          "read_bytes": 179722006528,
+          "written_bytes": 509554688
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_repeat",
+        "ttft_s": 1.3456166250398383,
+        "elapsed_s": 44.782212708028965,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.3,
+          "time_to_first_visible_token": 1.3,
+          "total_time": 44.74,
+          "prompt_eval_duration": 1.3,
+          "generation_duration": 43.44,
+          "prompt_tokens_per_second": 1.54,
+          "generation_tokens_per_second": 2.95
+        },
+        "disk_io_delta": {
+          "read_bytes": 158216511488,
+          "written_bytes": 217088
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "ssd_cache_after_restart",
+        "ttft_s": 16.188270166981965,
+        "elapsed_s": 73.71688570792321,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 15.88,
+          "time_to_first_visible_token": 16.12,
+          "total_time": 73.65,
+          "prompt_eval_duration": 15.88,
+          "generation_duration": 57.77,
+          "prompt_tokens_per_second": 0.13,
+          "generation_tokens_per_second": 2.22
+        },
+        "disk_io_delta": {
+          "read_bytes": 257968328704,
+          "written_bytes": 266240
+        },
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-strategy-overlap_compact-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 110730409640,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 183.95645070809405,
+        "elapsed_s": 239.35411379206926,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 183.63,
+          "time_to_first_visible_token": 183.89,
+          "total_time": 239.29,
+          "prompt_eval_duration": 183.63,
+          "generation_duration": 55.65,
+          "prompt_tokens_per_second": 91.3,
+          "generation_tokens_per_second": 2.3
+        },
+        "disk_io_delta": {
+          "read_bytes": 785235062784,
+          "written_bytes": 455573504
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 1.5587139159906656,
+        "elapsed_s": 46.38257945806254,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.53,
+          "time_to_first_visible_token": 1.53,
+          "total_time": 46.35,
+          "prompt_eval_duration": 1.53,
+          "generation_duration": 44.83,
+          "prompt_tokens_per_second": 1.31,
+          "generation_tokens_per_second": 2.86
+        },
+        "disk_io_delta": {
+          "read_bytes": 180094316544,
+          "written_bytes": 442454016
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_repeat",
+        "ttft_s": 1.3756122500635684,
+        "elapsed_s": 42.307715792092495,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.33,
+          "time_to_first_visible_token": 1.33,
+          "total_time": 42.26,
+          "prompt_eval_duration": 1.33,
+          "generation_duration": 40.93,
+          "prompt_tokens_per_second": 1.51,
+          "generation_tokens_per_second": 3.13
+        },
+        "disk_io_delta": {
+          "read_bytes": 158374780928,
+          "written_bytes": 212992
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "ssd_cache_after_restart",
+        "ttft_s": 6.871270792093128,
+        "elapsed_s": 62.55400845804252,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 6.57,
+          "time_to_first_visible_token": 6.8,
+          "total_time": 62.48,
+          "prompt_eval_duration": 6.57,
+          "generation_duration": 55.92,
+          "prompt_tokens_per_second": 0.3,
+          "generation_tokens_per_second": 2.29
+        },
+        "disk_io_delta": {
+          "read_bytes": 258290982912,
+          "written_bytes": 225280
+        },
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-strategy-packed-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 110979937768,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 185.59773808403406,
+        "elapsed_s": 242.16216308402363,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 185.29,
+          "time_to_first_visible_token": 185.53,
+          "total_time": 242.09,
+          "prompt_eval_duration": 185.29,
+          "generation_duration": 56.8,
+          "prompt_tokens_per_second": 90.48,
+          "generation_tokens_per_second": 2.25
+        },
+        "disk_io_delta": {
+          "read_bytes": 784164184064,
+          "written_bytes": 454922240
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 1.5722321660723537,
+        "elapsed_s": 48.08707387500908,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.54,
+          "time_to_first_visible_token": 1.54,
+          "total_time": 48.05,
+          "prompt_eval_duration": 1.54,
+          "generation_duration": 46.52,
+          "prompt_tokens_per_second": 1.3,
+          "generation_tokens_per_second": 2.75
+        },
+        "disk_io_delta": {
+          "read_bytes": 180326813696,
+          "written_bytes": 573149184
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_repeat",
+        "ttft_s": 1.3292427910491824,
+        "elapsed_s": 43.58154325000942,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.28,
+          "time_to_first_visible_token": 1.28,
+          "total_time": 43.53,
+          "prompt_eval_duration": 1.28,
+          "generation_duration": 42.25,
+          "prompt_tokens_per_second": 1.56,
+          "generation_tokens_per_second": 3.03
+        },
+        "disk_io_delta": {
+          "read_bytes": 158313058304,
+          "written_bytes": 98304
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "ssd_cache_after_restart",
+        "ttft_s": 6.411958291078918,
+        "elapsed_s": 64.19336483301595,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 6.1,
+          "time_to_first_visible_token": 6.34,
+          "total_time": 64.13,
+          "prompt_eval_duration": 6.1,
+          "generation_duration": 58.03,
+          "prompt_tokens_per_second": 0.33,
+          "generation_tokens_per_second": 2.21
+        },
+        "disk_io_delta": {
+          "read_bytes": 257317638144,
+          "written_bytes": 53248
+        },
+        "disk_read_bytes": null
+      }
+    ]
+  },
+  {
+    "name": "glm6-r35-strategy-phase-20261015",
+    "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "error": null,
+    "peak_physical_bytes": 110750069912,
+    "samples": [
+      {
+        "kind": "fresh",
+        "ttft_s": 183.90841970802285,
+        "elapsed_s": 238.7732592910761,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "time_to_first_token": 183.58,
+          "time_to_first_visible_token": 183.84,
+          "total_time": 238.7,
+          "prompt_eval_duration": 183.58,
+          "generation_duration": 55.12,
+          "prompt_tokens_per_second": 91.33,
+          "generation_tokens_per_second": 2.32
+        },
+        "disk_io_delta": {
+          "read_bytes": 784876756992,
+          "written_bytes": 455565312
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_1",
+        "ttft_s": 1.6072898750426248,
+        "elapsed_s": 46.44697920803446,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.57,
+          "time_to_first_visible_token": 1.57,
+          "total_time": 46.41,
+          "prompt_eval_duration": 1.57,
+          "generation_duration": 44.84,
+          "prompt_tokens_per_second": 1.27,
+          "generation_tokens_per_second": 2.85
+        },
+        "disk_io_delta": {
+          "read_bytes": 179952766976,
+          "written_bytes": 481857536
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "hot_cache_repeat",
+        "ttft_s": 1.4094247919274494,
+        "elapsed_s": 42.382284416933544,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 1.36,
+          "time_to_first_visible_token": 1.36,
+          "total_time": 42.33,
+          "prompt_eval_duration": 1.36,
+          "generation_duration": 40.97,
+          "prompt_tokens_per_second": 1.47,
+          "generation_tokens_per_second": 3.12
+        },
+        "disk_io_delta": {
+          "read_bytes": 158310244352,
+          "written_bytes": 212992
+        },
+        "disk_read_bytes": null
+      },
+      {
+        "kind": "ssd_cache_after_restart",
+        "ttft_s": 6.506112292059697,
+        "elapsed_s": 62.48820733302273,
+        "usage": {
+          "prompt_tokens": 16766,
+          "completion_tokens": 128,
+          "total_tokens": 16894,
+          "input_tokens": 16766,
+          "output_tokens": 128,
+          "prompt_tokens_details": {
+            "cached_tokens": 16764
+          },
+          "time_to_first_token": 6.2,
+          "time_to_first_visible_token": 6.44,
+          "total_time": 62.42,
+          "prompt_eval_duration": 6.2,
+          "generation_duration": 56.22,
+          "prompt_tokens_per_second": 0.32,
+          "generation_tokens_per_second": 2.28
+        },
+        "disk_io_delta": {
+          "read_bytes": 258717659136,
+          "written_bytes": 225280
+        },
+        "disk_read_bytes": null
+      }
+    ]
+  }
+]

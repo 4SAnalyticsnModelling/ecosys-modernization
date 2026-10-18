@@ -1,0 +1,8 @@
+{
+  "at": 1792303330.722738,
+  "max_fps": 30,
+  "animation_fps": 10,
+  "before_sha256": "fca3abeac5278e98588fdd972697086c7dcbfc9929e3a843a30b3bd6ee18c92d",
+  "after_sha256": "0076c6b4ee13553ea55e9599a407cdf6294e9965e982016798a512490afee500",
+  "benchmark_phase": "chunk8192-32: terminal settings changed mid-run; not an isolated chunk-size comparison"
+}

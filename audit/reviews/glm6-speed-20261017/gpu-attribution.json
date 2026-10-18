@@ -1,0 +1,56 @@
+{
+  "sample_seconds": 4.27533877058886,
+  "interpretation": "GPU elapsed-time counter deltas; not normalized per-core utilization or additive resource shares",
+  "processes": [
+    {
+      "pid": 89977,
+      "name": "wezterm-gui",
+      "gpu_time_delta_percent": 49.79
+    },
+    {
+      "pid": 86244,
+      "name": "Python",
+      "gpu_time_delta_percent": 27.84
+    },
+    {
+      "pid": 632,
+      "name": "WindowServer",
+      "gpu_time_delta_percent": 3.61
+    },
+    {
+      "pid": 71728,
+      "name": "Activity Monitor",
+      "gpu_time_delta_percent": 0.02
+    },
+    {
+      "pid": 752,
+      "name": "storagekitd",
+      "gpu_time_delta_percent": 0.0
+    },
+    {
+      "pid": 637,
+      "name": "runningboardd",
+      "gpu_time_delta_percent": 0.0
+    },
+    {
+      "pid": 1087,
+      "name": "NotificationCent",
+      "gpu_time_delta_percent": 0.0
+    },
+    {
+      "pid": 1108,
+      "name": "avconferenced",
+      "gpu_time_delta_percent": 0.0
+    },
+    {
+      "pid": 1063,
+      "name": "iconservicesagen",
+      "gpu_time_delta_percent": 0.0
+    },
+    {
+      "pid": 972,
+      "name": "AXVisualSupportA",
+      "gpu_time_delta_percent": 0.0
+    }
+  ]
+}

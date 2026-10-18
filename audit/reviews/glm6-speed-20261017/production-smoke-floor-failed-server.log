@@ -1,0 +1,16 @@
+GLM production runtime verified: oMLX0.7.1rc1 / MLX0.32.4
+GLM resident-first expert prefill enabled
+GLM overlap installed: shared=False, prefill=True, staging=536870912
+GLM expert cache: bounded aging-frequency eviction enabled
+Production runtime: oMLX 0.7.1rc1, MLX 0.32.4
+DeepSeek MLX device: Device(gpu, 0)
+Traceback (most recent call last):
+  File "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6_production.py", line 36, in <module>
+    import omlx_prefill_probe
+  File "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx_prefill_probe.py", line 43, in <module>
+    from gpu_server import main
+  File "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/gpu_server.py", line 35, in <module>
+    install_long_task_guard()
+  File "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/long_task_guard.py", line 102, in install
+    raise ValueError('Unsupported Local prefill duration floor')
+ValueError: Unsupported Local prefill duration floor

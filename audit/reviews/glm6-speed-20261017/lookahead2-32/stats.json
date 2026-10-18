@@ -1,0 +1,18 @@
+{
+  "total_prompt_tokens": 65106,
+  "total_completion_tokens": 256,
+  "total_cached_tokens": 32551,
+  "total_requests": 2,
+  "total_prefill_duration": 388.78386329184286,
+  "total_generation_duration": 88.30227116611786,
+  "per_model": {
+    "GLM-5.3-Flash-MLX-6bit": {
+      "prompt_tokens": 65106,
+      "completion_tokens": 256,
+      "cached_tokens": 32551,
+      "requests": 2,
+      "prefill_duration": 388.78386329184286,
+      "generation_duration": 88.30227116611786
+    }
+  }
+}

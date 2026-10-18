@@ -1,0 +1,10 @@
+{
+  "at": 1792303844.090643,
+  "instruction": "User requests only16K prompt tests per strategy to save time",
+  "stopped_controllers": [
+    85332,
+    87412
+  ],
+  "interrupted_runner": 86788,
+  "prior64K": "Interrupted by user scope change; not a successful qualification"
+}

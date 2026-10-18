@@ -1,0 +1,75 @@
+{
+  "command": [
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/venv-0.7.1.dev1/bin/python",
+    "-B",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-sharedcache-20261015/server.py",
+    "5632",
+    "serve",
+    "--base-path",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-sharedcache-20261015",
+    "--model-dir",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-layerweighted-20261015/models",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8092",
+    "--memory-guard-gb",
+    "106.17077350616455",
+    "--hot-cache-max-size",
+    "2GB",
+    "--paged-ssd-cache-dir",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-sharedcache-20261015/cache"
+  ],
+  "started": 1792093808.812109,
+  "samples": [
+    {
+      "index": 0,
+      "elapsed_s": 60.54075758298859,
+      "usage": {
+        "prompt_tokens": 16766,
+        "completion_tokens": 128,
+        "total_tokens": 16894,
+        "input_tokens": 16766,
+        "output_tokens": 128,
+        "prompt_tokens_details": {
+          "cached_tokens": 16764
+        },
+        "time_to_first_token": 6.12,
+        "time_to_first_visible_token": 6.35,
+        "total_time": 60.47,
+        "prompt_eval_duration": 6.12,
+        "generation_duration": 54.36,
+        "prompt_tokens_per_second": 0.33,
+        "generation_tokens_per_second": 2.35
+      },
+      "output_matches_uniform": true
+    },
+    {
+      "index": 1,
+      "elapsed_s": 40.89604070899077,
+      "usage": {
+        "prompt_tokens": 16766,
+        "completion_tokens": 128,
+        "total_tokens": 16894,
+        "input_tokens": 16766,
+        "output_tokens": 128,
+        "prompt_tokens_details": {
+          "cached_tokens": 16764
+        },
+        "time_to_first_token": 1.34,
+        "time_to_first_visible_token": 1.35,
+        "total_time": 40.83,
+        "prompt_eval_duration": 1.34,
+        "generation_duration": 39.49,
+        "prompt_tokens_per_second": 1.49,
+        "generation_tokens_per_second": 3.24
+      },
+      "output_matches_uniform": true
+    }
+  ],
+  "peak_physical_bytes": 105606525384,
+  "cache_source": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-profile-20261015/cache",
+  "pid": 85972,
+  "complete": true,
+  "finished": 1792093921.5762
+}

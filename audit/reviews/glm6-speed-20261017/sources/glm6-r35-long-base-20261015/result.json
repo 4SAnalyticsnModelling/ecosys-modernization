@@ -1,0 +1,39 @@
+{
+  "mode": "base",
+  "started": 1792102654.222242,
+  "samples": [
+    {
+      "index": 0,
+      "kind": "fresh",
+      "elapsed_s": 382.06475537491497,
+      "usage": {
+        "prompt_tokens": 16766,
+        "completion_tokens": 512,
+        "total_tokens": 17278,
+        "input_tokens": 16766,
+        "output_tokens": 512,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "time_to_first_token": 182.08,
+        "time_to_first_visible_token": 182.32,
+        "total_time": 381.99,
+        "prompt_eval_duration": 182.08,
+        "generation_duration": 199.91,
+        "prompt_tokens_per_second": 92.08,
+        "generation_tokens_per_second": 2.56
+      },
+      "disk_read_bytes": 1313099264000,
+      "peak_physical_bytes_observed": 110740255920
+    }
+  ],
+  "peak_physical_bytes": 111547644400,
+  "hard_peak_limit_bytes": 114000000000,
+  "prompt_cache_source": null,
+  "completion_tokens": 512,
+  "prompt_tokens": 16766,
+  "fresh_prefill": true,
+  "pid": 341,
+  "error": "AssertionError()",
+  "finished": 1792103321.70995
+}

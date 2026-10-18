@@ -1,0 +1,4 @@
+{
+  "content": "",
+  "reasoning_content": "\nLet me analyze this request carefully.\n\nThe user has pasted a large amount of repetitive generated code \u2014 512 nearly identical `transform_N` functions that each take a record dict, return a dict with `index`, `value` (with a per-index default, incremented by 17), and `active: True`. This looks like machine-generated code, possibly from a code-generation exercise or a test fixture. Then the actual request is:\n\n\"Review this code and design a streaming CSV validation library with typed errors, duplicate-key detection and required-column validation. Explain the implementation and provide Python code.\"\n\nSo the task has two parts:\n1."
+}

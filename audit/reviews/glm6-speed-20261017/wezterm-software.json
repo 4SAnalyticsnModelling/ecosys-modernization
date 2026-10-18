@@ -1,0 +1,8 @@
+{
+  "at": 1792303438.710826,
+  "front_end": "Software",
+  "max_fps": 30,
+  "animation_fps": 10,
+  "sha256": "720995fd813a338b9248d23124e39635bd1ad3b8de3eee1779d056890d02696c",
+  "authorization": "User explicitly requested CPU rendering with no WezTerm GPU usage"
+}

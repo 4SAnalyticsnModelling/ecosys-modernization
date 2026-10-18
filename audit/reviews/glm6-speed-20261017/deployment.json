@@ -1,0 +1,17 @@
+{
+  "candidate": "chunk8192-16",
+  "width": 2,
+  "chunk": 8192,
+  "validated_prompt_tokens": 16384,
+  "retrieval_run": "retrieval16",
+  "backup": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/deployment-backup",
+  "files": {
+    "glm6_production.py": "9d14efda3395a7f78c4558f7c24930aa49b35487111445f896521b9b66f153de",
+    "glm6_profile.py": "3f76a4155e7430658119ca269b8500c5f97419e1d323145fcf7ce6ed85c59e7b",
+    "glm6_lookahead.py": "6dfb36630b2c700dd3ce44525a91c5e95c50dc29813d0a38acd756b331c25332",
+    "performance-overrides.json": "56dbcb94e44c7b38c221825c3538da42c0b773f4bbd238ab74fcba2e091aeb8b",
+    "profiles.json": "8a874e73424dfd13e1731af6cbcea23ee5cc2c865ed860a8f86f7420b5684e4e",
+    "omlx-state-glm6-r35/model_settings.json": "9d2617f37db642134ca35c7d4c61088826d12b71fc44d004fc7e66497da064c2"
+  },
+  "startup_correction": "Retain qualified5632 duration-floor environment value; production replaces adaptive scheduling after import, as in benchmark. Actual prefill chunk remains8192."
+}

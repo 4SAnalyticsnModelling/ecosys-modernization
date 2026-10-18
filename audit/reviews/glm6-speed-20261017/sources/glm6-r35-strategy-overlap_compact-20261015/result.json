@@ -1,0 +1,296 @@
+{
+  "started": 1792101553.717153,
+  "profile": {
+    "max_context_window": 131072,
+    "max_tokens": 32768,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 0,
+    "min_p": 0.0,
+    "repetition_penalty": 1.0,
+    "presence_penalty": 0.0,
+    "force_sampling": true,
+    "is_pinned": false,
+    "is_default": false,
+    "turboquant_kv_enabled": false,
+    "enable_thinking": true,
+    "preserve_thinking": true,
+    "mtp_enabled": true,
+    "chat_template_kwargs": {
+      "reasoning_effort": "max",
+      "clear_thinking": true
+    },
+    "description": "Original GLM-5.3-Flash mixed 4/8 target weights with validated local MTP head; native KV/recurrent state, guarded SSD expert offload, and separate persistent MTP cache. Long-context and coding measurements are bounded tests, not a guarantee of uninterrupted operation.",
+    "backend": "omlx",
+    "display_name": "GLM 5.3 Flash \u00b7 Mixed 4/8 \u00b7 SSD",
+    "picker_priority": 4,
+    "prefill_step_size": 5632,
+    "moe_expert_offload_enabled": true,
+    "moe_expert_offload_resident_fraction": 0.35,
+    "memory_guard_gb": 106.17077350616455,
+    "hot_cache_max_size": "2GB",
+    "request_timeout_seconds": 7200,
+    "moe_offload_io_workers": 12,
+    "moe_offload_overlap": true,
+    "mtp_fixed_depth": 1,
+    "glm_mtp_overlay": true,
+    "glm_expert_cache_policy": "lfu",
+    "glm_nightly_runtime": true,
+    "glm_resident_first_prefill": true,
+    "glm_async_prefill": true
+  },
+  "command": [
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/venv-0.7.1.dev1/bin/python",
+    "-B",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-overlap_compact-20261015/server.py",
+    "5632",
+    "serve",
+    "--base-path",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-overlap_compact-20261015",
+    "--model-dir",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-overlap_compact-20261015/models",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8092",
+    "--memory-guard-gb",
+    "106.17077350616455",
+    "--hot-cache-max-size",
+    "2GB",
+    "--paged-ssd-cache-dir",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-overlap_compact-20261015/cache"
+  ],
+  "samples": [
+    {
+      "index": 0,
+      "kind": "fresh",
+      "elapsed_s": 239.35411379206926,
+      "ttft_s": 183.95645070809405,
+      "decode_tps": 2.29253583395517,
+      "usage": {
+        "prompt_tokens": 16766,
+        "completion_tokens": 128,
+        "total_tokens": 16894,
+        "input_tokens": 16766,
+        "output_tokens": 128,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "time_to_first_token": 183.63,
+        "time_to_first_visible_token": 183.89,
+        "total_time": 239.29,
+        "prompt_eval_duration": 183.63,
+        "generation_duration": 55.65,
+        "prompt_tokens_per_second": 91.3,
+        "generation_tokens_per_second": 2.3
+      },
+      "disk_io_delta": {
+        "read_bytes": 785235062784,
+        "written_bytes": 455573504
+      }
+    },
+    {
+      "index": 1,
+      "kind": "hot_cache_1",
+      "elapsed_s": 46.38257945806254,
+      "ttft_s": 1.5587139159906656,
+      "decode_tps": 2.8333427303994236,
+      "usage": {
+        "prompt_tokens": 16766,
+        "completion_tokens": 128,
+        "total_tokens": 16894,
+        "input_tokens": 16766,
+        "output_tokens": 128,
+        "prompt_tokens_details": {
+          "cached_tokens": 16764
+        },
+        "time_to_first_token": 1.53,
+        "time_to_first_visible_token": 1.53,
+        "total_time": 46.35,
+        "prompt_eval_duration": 1.53,
+        "generation_duration": 44.83,
+        "prompt_tokens_per_second": 1.31,
+        "generation_tokens_per_second": 2.86
+      },
+      "disk_io_delta": {
+        "read_bytes": 180094316544,
+        "written_bytes": 442454016
+      }
+    },
+    {
+      "index": 2,
+      "kind": "hot_cache_repeat",
+      "elapsed_s": 42.307715792092495,
+      "ttft_s": 1.3756122500635684,
+      "decode_tps": 3.102783325698663,
+      "usage": {
+        "prompt_tokens": 16766,
+        "completion_tokens": 128,
+        "total_tokens": 16894,
+        "input_tokens": 16766,
+        "output_tokens": 128,
+        "prompt_tokens_details": {
+          "cached_tokens": 16764
+        },
+        "time_to_first_token": 1.33,
+        "time_to_first_visible_token": 1.33,
+        "total_time": 42.26,
+        "prompt_eval_duration": 1.33,
+        "generation_duration": 40.93,
+        "prompt_tokens_per_second": 1.51,
+        "generation_tokens_per_second": 3.13
+      },
+      "disk_io_delta": {
+        "read_bytes": 158374780928,
+        "written_bytes": 212992
+      }
+    },
+    {
+      "index": 3,
+      "kind": "ssd_cache_after_restart",
+      "elapsed_s": 62.55400845804252,
+      "ttft_s": 6.871270792093128,
+      "decode_tps": 2.2807999921410977,
+      "usage": {
+        "prompt_tokens": 16766,
+        "completion_tokens": 128,
+        "total_tokens": 16894,
+        "input_tokens": 16766,
+        "output_tokens": 128,
+        "prompt_tokens_details": {
+          "cached_tokens": 16764
+        },
+        "time_to_first_token": 6.57,
+        "time_to_first_visible_token": 6.8,
+        "total_time": 62.48,
+        "prompt_eval_duration": 6.57,
+        "generation_duration": 55.92,
+        "prompt_tokens_per_second": 0.3,
+        "generation_tokens_per_second": 2.29
+      },
+      "disk_io_delta": {
+        "read_bytes": 258290982912,
+        "written_bytes": 225280
+      }
+    }
+  ],
+  "peak_physical_bytes": 110730409640,
+  "target": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+  "mtp_head": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm53-20261006/mtp-overlay/model-mtp-head.safetensors",
+  "hard_peak_limit_bytes": 114000000000,
+  "changes": [
+    "6-bit target checkpoint",
+    "expert residency 0.4 -> 0.35",
+    "114 decimal GB process ceiling with hard/soft watermarks at ceiling",
+    "measured-memory admission; no prediction-only rejection or automatic shrinking"
+  ],
+  "source_shards": {
+    "model-00009.safetensors": {
+      "size": 10005791897,
+      "mtime_ns": 1792080546000000000
+    },
+    "model-00015.safetensors": {
+      "size": 10079387761,
+      "mtime_ns": 1792081240000000000
+    },
+    "model-00022.safetensors": {
+      "size": 10079387759,
+      "mtime_ns": 1792082130000000000
+    },
+    "model-00010.safetensors": {
+      "size": 10011288211,
+      "mtime_ns": 1792080652000000000
+    },
+    "model-00005.safetensors": {
+      "size": 10065952118,
+      "mtime_ns": 1792080106000000000
+    },
+    "model-00019.safetensors": {
+      "size": 10040389036,
+      "mtime_ns": 1792081802000000000
+    },
+    "model-00006.safetensors": {
+      "size": 10019227426,
+      "mtime_ns": 1792080238000000000
+    },
+    "model-00013.safetensors": {
+      "size": 11953061312,
+      "mtime_ns": 1792081006000000000
+    },
+    "model-00021.safetensors": {
+      "size": 10087582488,
+      "mtime_ns": 1792082032000000000
+    },
+    "model-00016.safetensors": {
+      "size": 10005791865,
+      "mtime_ns": 1792081368000000000
+    },
+    "model-00024.safetensors": {
+      "size": 10011288177,
+      "mtime_ns": 1792082380000000000
+    },
+    "model-00003.safetensors": {
+      "size": 10024860812,
+      "mtime_ns": 1792079878000000000
+    },
+    "model-00018.safetensors": {
+      "size": 10101017881,
+      "mtime_ns": 1792081646000000000
+    },
+    "model-00004.safetensors": {
+      "size": 10005654659,
+      "mtime_ns": 1792079988000000000
+    },
+    "model-00011.safetensors": {
+      "size": 10101018021,
+      "mtime_ns": 1792080744000000000
+    },
+    "model-00023.safetensors": {
+      "size": 10005791909,
+      "mtime_ns": 1792082234000000000
+    },
+    "model-00014.safetensors": {
+      "size": 10087582584,
+      "mtime_ns": 1792081122000000000
+    },
+    "model-00008.safetensors": {
+      "size": 10079387761,
+      "mtime_ns": 1792080414000000000
+    },
+    "model-00001.safetensors": {
+      "size": 11819070608,
+      "mtime_ns": 1792079618000000000
+    },
+    "model-00002.safetensors": {
+      "size": 10087582241,
+      "mtime_ns": 1792079752000000000
+    },
+    "model-00025.safetensors": {
+      "size": 9129118887,
+      "mtime_ns": 1792082534000000000
+    },
+    "model-00017.safetensors": {
+      "size": 10011288237,
+      "mtime_ns": 1792081478000000000
+    },
+    "model-00020.safetensors": {
+      "size": 11953061312,
+      "mtime_ns": 1792081932000000000
+    },
+    "model-00012.safetensors": {
+      "size": 10040389058,
+      "mtime_ns": 1792080860000000000
+    },
+    "model-00007.safetensors": {
+      "size": 10032918493,
+      "mtime_ns": 1792080342000000000
+    }
+  },
+  "pid": 98348,
+  "load_seconds": 7.437951792031527,
+  "prompt_sha256": "0544eaaecf26957e3a5b0eaa1437948b77bc56be48dd8c447031c1358cfcd94d",
+  "first_backend_exit_code": -15,
+  "restarted_pid": 98692,
+  "complete": true,
+  "finished": 1792101966.574374
+}

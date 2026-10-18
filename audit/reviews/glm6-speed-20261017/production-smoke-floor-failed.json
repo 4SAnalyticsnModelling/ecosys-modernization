@@ -1,0 +1,6 @@
+{
+  "generation_requests": 0,
+  "status": "FAIL",
+  "error": "RuntimeError('MLX backend exited during startup; see backend.log')",
+  "owned_backend_stopped": true
+}

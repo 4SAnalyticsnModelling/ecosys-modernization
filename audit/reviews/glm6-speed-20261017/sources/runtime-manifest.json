@@ -1,0 +1,5 @@
+{
+  "omlx/patches/deepseek_v4/moe_offload.py": "e47a2b6f24b0abdd1c2efc292c1dec74b426562a6d6f539d7c402e0fb0397907",
+  "omlx/patches/moe_expert_offload.py": "d616a5a9fa1dff2b6fc22d5a5840d7eac02093a8b88b031fd49136585ea029d7",
+  "omlx/patches/mlx_vlm_glm5_next_compat/vendor/mlx_vlm/models/glm5_next/language.py": "1c5cc2a04eaca11c60deafe687f6d712bb08284229ad713bc72db6c696151cdb"
+}

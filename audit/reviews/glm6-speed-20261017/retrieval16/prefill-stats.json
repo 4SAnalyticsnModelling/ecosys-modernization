@@ -1,0 +1,10 @@
+{
+  "staged_bytes": 61341696,
+  "peak_staged_bytes": 531628032,
+  "prefetched_experts": 7850,
+  "reused_prefetches": 5639,
+  "shared_dispatches": 0,
+  "read_wait_s": 34.24813085922506,
+  "installed_bytes": 492001296384,
+  "prefill_groups": 126
+}

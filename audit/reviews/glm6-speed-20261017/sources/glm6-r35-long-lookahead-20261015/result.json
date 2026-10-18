@@ -1,0 +1,40 @@
+{
+  "mode": "lookahead",
+  "started": 1792103384.585196,
+  "samples": [
+    {
+      "index": 0,
+      "kind": "fresh",
+      "elapsed_s": 382.2507809170056,
+      "usage": {
+        "prompt_tokens": 16766,
+        "completion_tokens": 512,
+        "total_tokens": 17278,
+        "input_tokens": 16766,
+        "output_tokens": 512,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "time_to_first_token": 184.39,
+        "time_to_first_visible_token": 184.63,
+        "total_time": 382.18,
+        "prompt_eval_duration": 184.39,
+        "generation_duration": 197.79,
+        "prompt_tokens_per_second": 90.93,
+        "generation_tokens_per_second": 2.59
+      },
+      "disk_read_bytes": 1538446442496,
+      "peak_physical_bytes_observed": 110743548936
+    }
+  ],
+  "peak_physical_bytes": 110743548936,
+  "hard_peak_limit_bytes": 114000000000,
+  "prompt_cache_source": null,
+  "completion_tokens": 512,
+  "prompt_tokens": 16766,
+  "fresh_prefill": true,
+  "scope": "fresh 16K prompt only",
+  "pid": 1923,
+  "complete": true,
+  "finished": 1792103777.886985
+}

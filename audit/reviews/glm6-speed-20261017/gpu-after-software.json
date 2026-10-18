@@ -1,0 +1,71 @@
+{
+  "sample_seconds": 4.321202249964699,
+  "interpretation": "GPU elapsed-time deltas, not normalized core utilization or additive shares",
+  "processes": [
+    {
+      "pid": 86244,
+      "name": "Python",
+      "gpu_time_delta_percent": 25.09
+    },
+    {
+      "pid": 89977,
+      "name": "wezterm-gui",
+      "gpu_time_delta_percent": 2.71
+    },
+    {
+      "pid": 632,
+      "name": "WindowServer",
+      "gpu_time_delta_percent": 2.03
+    },
+    {
+      "pid": 71728,
+      "name": "Activity Monitor",
+      "gpu_time_delta_percent": 0.02
+    },
+    {
+      "pid": 752,
+      "name": "storagekitd",
+      "gpu_time_delta_percent": 0.0
+    },
+    {
+      "pid": 637,
+      "name": "runningboardd",
+      "gpu_time_delta_percent": 0.0
+    },
+    {
+      "pid": 1087,
+      "name": "NotificationCent",
+      "gpu_time_delta_percent": 0.0
+    },
+    {
+      "pid": 1108,
+      "name": "avconferenced",
+      "gpu_time_delta_percent": 0.0
+    },
+    {
+      "pid": 1063,
+      "name": "iconservicesagen",
+      "gpu_time_delta_percent": 0.0
+    },
+    {
+      "pid": 972,
+      "name": "AXVisualSupportA",
+      "gpu_time_delta_percent": 0.0
+    }
+  ],
+  "device_statistics": [
+    {
+      "Alloc system memory": 111479832576,
+      "Allocated PB Size": 78118912,
+      "Device Utilization %": 34,
+      "In use system memory": 108640501760,
+      "In use system memory (driver)": 0,
+      "Renderer Utilization %": 9,
+      "SplitSceneCount": 0,
+      "TiledSceneBytes": 4423680,
+      "Tiler Utilization %": 10,
+      "lastRecoveryTime": 0,
+      "recoveryCount": 0
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "mode": "lookahead",
+  "started": 1792104006.2003572,
+  "samples": [
+    {
+      "index": 0,
+      "kind": "ssd_cached_16k",
+      "elapsed_s": 190.80181616696063,
+      "usage": {
+        "prompt_tokens": 16766,
+        "completion_tokens": 512,
+        "total_tokens": 17278,
+        "input_tokens": 16766,
+        "output_tokens": 512,
+        "prompt_tokens_details": {
+          "cached_tokens": 16764
+        },
+        "time_to_first_token": 6.85,
+        "time_to_first_visible_token": 7.08,
+        "total_time": 190.73,
+        "prompt_eval_duration": 6.85,
+        "generation_duration": 183.89,
+        "prompt_tokens_per_second": 0.29,
+        "generation_tokens_per_second": 2.78
+      },
+      "disk_read_bytes": 1104558882816,
+      "peak_physical_bytes_observed": 105257218504
+    }
+  ],
+  "peak_physical_bytes": 105257218504,
+  "hard_peak_limit_bytes": 114000000000,
+  "prompt_cache_source": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-base-20261015/cache",
+  "completion_tokens": 512,
+  "prompt_tokens": 16766,
+  "fresh_prefill": false,
+  "scope": "cached 16K prefix; new backend; cold expert cache",
+  "pid": 2858,
+  "complete": true,
+  "finished": 1792104208.11448
+}

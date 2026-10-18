@@ -1,0 +1,14 @@
+**/cache/
+**/cache
+**/models/
+**/cluster/
+**/logs/
+**/*.sqlite3*
+**/*.tmp
+**/progress.json
+**/physical-memory.json
+**/settings.json
+**/model_settings.json
+**/server.py
+**/request.json
+gpu-client-snapshot.json

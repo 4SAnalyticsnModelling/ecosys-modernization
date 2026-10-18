@@ -1,0 +1,360 @@
+{
+  "lookahead": {
+    "predictions": 2542,
+    "predicted_experts": 4664,
+    "useful_experts": 3136,
+    "wasted_experts": 1528,
+    "demand_calls": 2730,
+    "misses": 12362,
+    "ensure_seconds": 32.003822931670584,
+    "prediction_seconds": 1.5620296568376943
+  },
+  "overlap": {
+    "staged_bytes": 0,
+    "peak_staged_bytes": 531628032,
+    "prefetched_experts": 11216,
+    "reused_prefetches": 9688,
+    "shared_dispatches": 0,
+    "read_wait_s": 47.777262965682894,
+    "installed_bytes": 799773032448,
+    "prefill_groups": 378
+  },
+  "layers": [
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 727,
+      "misses": 1234,
+      "fetched_bytes": 25231884288
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 718,
+      "misses": 1238,
+      "fetched_bytes": 25313673216
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 743,
+      "misses": 1222,
+      "fetched_bytes": 24986517504
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 769,
+      "misses": 1173,
+      "fetched_bytes": 23984603136
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 817,
+      "misses": 1073,
+      "fetched_bytes": 21939879936
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 798,
+      "misses": 1075,
+      "fetched_bytes": 21980774400
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 822,
+      "misses": 1095,
+      "fetched_bytes": 22389719040
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 785,
+      "misses": 1125,
+      "fetched_bytes": 23003136000
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 824,
+      "misses": 1015,
+      "fetched_bytes": 20753940480
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 864,
+      "misses": 936,
+      "fetched_bytes": 19138609152
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 884,
+      "misses": 920,
+      "fetched_bytes": 18811453440
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 919,
+      "misses": 899,
+      "fetched_bytes": 18382061568
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 916,
+      "misses": 928,
+      "fetched_bytes": 18975031296
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 891,
+      "misses": 901,
+      "fetched_bytes": 18422956032
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 961,
+      "misses": 847,
+      "fetched_bytes": 17318805504
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 936,
+      "misses": 789,
+      "fetched_bytes": 16132866048
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 946,
+      "misses": 805,
+      "fetched_bytes": 16460021760
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 956,
+      "misses": 766,
+      "fetched_bytes": 15662579712
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 936,
+      "misses": 834,
+      "fetched_bytes": 17052991488
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 932,
+      "misses": 828,
+      "fetched_bytes": 16930308096
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 915,
+      "misses": 885,
+      "fetched_bytes": 18095800320
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 935,
+      "misses": 858,
+      "fetched_bytes": 17543725056
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 916,
+      "misses": 787,
+      "fetched_bytes": 16091971584
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 919,
+      "misses": 818,
+      "fetched_bytes": 16725835776
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 921,
+      "misses": 841,
+      "fetched_bytes": 17196122112
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 902,
+      "misses": 890,
+      "fetched_bytes": 18198036480
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 887,
+      "misses": 867,
+      "fetched_bytes": 17727750144
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 896,
+      "misses": 865,
+      "fetched_bytes": 17686855680
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 871,
+      "misses": 905,
+      "fetched_bytes": 18504744960
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 890,
+      "misses": 935,
+      "fetched_bytes": 19118161920
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 929,
+      "misses": 828,
+      "fetched_bytes": 16930308096
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 920,
+      "misses": 858,
+      "fetched_bytes": 17543725056
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 919,
+      "misses": 873,
+      "fetched_bytes": 17850433536
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 915,
+      "misses": 915,
+      "fetched_bytes": 18709217280
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 912,
+      "misses": 871,
+      "fetched_bytes": 17809539072
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 902,
+      "misses": 891,
+      "fetched_bytes": 18218483712
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 929,
+      "misses": 856,
+      "fetched_bytes": 17502830592
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 904,
+      "misses": 933,
+      "fetched_bytes": 19077267456
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 859,
+      "misses": 925,
+      "fetched_bytes": 18913689600
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 846,
+      "misses": 885,
+      "fetched_bytes": 18095800320
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 862,
+      "misses": 930,
+      "fetched_bytes": 19015925760
+    },
+    {
+      "capacity": 101,
+      "total": 288,
+      "expert_bytes": 20447232,
+      "hits": 815,
+      "misses": 995,
+      "fetched_bytes": 20344995840
+    }
+  ]
+}

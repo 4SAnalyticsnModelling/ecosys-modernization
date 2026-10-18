@@ -1,0 +1,20 @@
+{
+  "pid": 85332,
+  "stage": "cancelled by user:16K-only tests",
+  "results": {
+    "lookahead2-32": {
+      "returncode": 0,
+      "complete": true,
+      "error": null
+    },
+    "chunk8192-32": {
+      "returncode": 0,
+      "complete": true,
+      "error": null
+    }
+  },
+  "selected_width": 2,
+  "selected_candidate": "lookahead2-32",
+  "previous_stage": "selected64",
+  "cancelled_at": 1792304424.0012748
+}

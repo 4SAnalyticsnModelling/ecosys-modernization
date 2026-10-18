@@ -1,0 +1,38 @@
+{
+  "pid": 87843,
+  "stage": "complete",
+  "results": {
+    "base16": {
+      "returncode": 0,
+      "complete": true,
+      "error": null
+    },
+    "lookahead2-16": {
+      "returncode": 0,
+      "complete": true,
+      "error": null
+    },
+    "chunk8192-16": {
+      "returncode": 0,
+      "complete": true,
+      "error": null
+    },
+    "retrieval16": {
+      "returncode": 0,
+      "complete": true,
+      "error": null,
+      "retrieval_pass": true
+    }
+  },
+  "selected_width": 2,
+  "selected_candidate": "chunk8192-16",
+  "selected_chunk": 8192,
+  "recovered_attempts": [
+    {
+      "error": "RuntimeError('Failed16K test: retrieval16')",
+      "directory": "retrieval16-formatting-failed",
+      "stage": "16K qualification failed",
+      "scope": "Prompt formatting stopped before inference"
+    }
+  ]
+}

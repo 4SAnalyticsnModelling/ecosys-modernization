@@ -1,0 +1,70 @@
+{
+  "generation_requests": 0,
+  "command": [
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/venv-0.7.1rc1/bin/python",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6_production.py",
+    "8192",
+    "serve",
+    "--base-path",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-glm6-r35",
+    "--model-dir",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/active-model",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8092",
+    "--memory-guard",
+    "balanced",
+    "--hot-cache-max-size",
+    "2GB",
+    "--paged-ssd-cache-dir",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-glm6-r35/cache-rc1",
+    "--memory-guard-gb",
+    "106.17077350616455"
+  ],
+  "models": {
+    "final_ceiling": 114000000000,
+    "current_model_memory": 112558877674,
+    "model_count": 1,
+    "loaded_count": 1,
+    "load_seconds_per_gb_estimate": 0.07246147945342385,
+    "load_time_observations": 1,
+    "models": [
+      {
+        "id": "GLM-5.3-Flash-MLX-6bit",
+        "model_path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/active-model/GLM-5.3-Flash-MLX-6bit",
+        "loaded": true,
+        "is_loading": false,
+        "loading_started_at": null,
+        "estimated_size": 273151437802,
+        "resident_estimated_size": 112558877674,
+        "distributed": false,
+        "cluster": null,
+        "actual_size": 100267370288,
+        "external_engine": null,
+        "pinned": false,
+        "engine_type": "vlm",
+        "model_type": "vlm",
+        "config_model_type": "glm5_next",
+        "realtime_stt": false,
+        "model_context_length": 1048576,
+        "is_helper": false,
+        "thinking_default": null,
+        "preserve_thinking_default": null,
+        "reasoning_efforts": [
+          "low",
+          "high"
+        ],
+        "source_type": "local",
+        "source_repo_id": null,
+        "last_access": 1792305224.706517,
+        "max_context_window": 131072,
+        "is_favorite": false,
+        "is_hidden": false,
+        "max_tokens": 32768
+      }
+    ]
+  },
+  "status": "PASS",
+  "owned_backend_stopped": true
+}

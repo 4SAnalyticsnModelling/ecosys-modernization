@@ -1,0 +1,178 @@
+{
+  "arguments": {
+    "name": "selected64",
+    "width": 2,
+    "tokens": 65536,
+    "chunk": 5632,
+    "output": 512,
+    "retrieval": false,
+    "cache_source": null,
+    "once": false,
+    "paired_decode": true
+  },
+  "command": [
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/venv-0.7.1rc1/bin/python",
+    "-B",
+    "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/selected64/server.py",
+    "5632",
+    "serve",
+    "--base-path",
+    "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/selected64",
+    "--model-dir",
+    "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/selected64/models",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8092",
+    "--memory-guard-gb",
+    "106.17077350616455",
+    "--hot-cache-max-size",
+    "2GB",
+    "--paged-ssd-cache-dir",
+    "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/selected64/cache"
+  ],
+  "started": 1792303465.224288,
+  "samples": [],
+  "peak_physical_bytes": 110845064632,
+  "prompt_sha256": "2c3eaaee7cdbe1b8a39cb35b47f1076413f2ff021800ad4f87c6be3b0d123e84",
+  "profile": {
+    "backend": "omlx",
+    "display_name": "GLM 5.3 Flash \u00b7 6-bit \u00b7 Uniform 35% \u00b7 rc1",
+    "picker_priority": 2,
+    "max_context_window": 131072,
+    "max_tokens": 32768,
+    "prefill_step_size": 5632,
+    "moe_expert_offload_enabled": true,
+    "moe_expert_offload_resident_fraction": 0.35,
+    "memory_guard_gb": 106.17077350616455,
+    "hot_cache_max_size": "2GB",
+    "request_timeout_seconds": 7200,
+    "moe_offload_io_workers": 12,
+    "moe_offload_overlap": true,
+    "mtp_enabled": true,
+    "turboquant_kv_enabled": false,
+    "mtp_fixed_depth": 1,
+    "glm_mtp_overlay": true,
+    "description": "Original 6-bit GLM target with the existing verified local MTP head, uniform 101/288 expert slots per layer, native KV, LFU and asynchronous resident-first prefill. Fixed 114 decimal GB measured process guard; no predictive admission rejection or automatic chunk shrinking. Decode lookahead disabled. Runtime: oMLX0.7.1rc1 with MLX0.32.4; separate rc1 prefix cache.",
+    "glm_expert_cache_policy": "lfu",
+    "top_k": 0,
+    "glm_nightly_runtime": true,
+    "glm_resident_first_prefill": true,
+    "glm_async_prefill": true,
+    "top_p": 0.95,
+    "chat_template_kwargs": {
+      "reasoning_effort": "max",
+      "clear_thinking": true
+    },
+    "glm6_measured_memory": true,
+    "glm_runtime_version": "0.7.1rc1"
+  },
+  "swap_at_start": "vm.swapusage: total = 2048.00M  used = 1290.88M  free = 757.12M  (encrypted)",
+  "source_shards": {
+    "model-00009.safetensors": [
+      10005791897,
+      1792080546000000000
+    ],
+    "model-00015.safetensors": [
+      10079387761,
+      1792081240000000000
+    ],
+    "model-00022.safetensors": [
+      10079387759,
+      1792082130000000000
+    ],
+    "model-00010.safetensors": [
+      10011288211,
+      1792080652000000000
+    ],
+    "model-00005.safetensors": [
+      10065952118,
+      1792080106000000000
+    ],
+    "model-00019.safetensors": [
+      10040389036,
+      1792081802000000000
+    ],
+    "model-00006.safetensors": [
+      10019227426,
+      1792080238000000000
+    ],
+    "model-00013.safetensors": [
+      11953061312,
+      1792081006000000000
+    ],
+    "model-00021.safetensors": [
+      10087582488,
+      1792082032000000000
+    ],
+    "model-00016.safetensors": [
+      10005791865,
+      1792081368000000000
+    ],
+    "model-00024.safetensors": [
+      10011288177,
+      1792082380000000000
+    ],
+    "model-00003.safetensors": [
+      10024860812,
+      1792079878000000000
+    ],
+    "model-00018.safetensors": [
+      10101017881,
+      1792081646000000000
+    ],
+    "model-00004.safetensors": [
+      10005654659,
+      1792079988000000000
+    ],
+    "model-00011.safetensors": [
+      10101018021,
+      1792080744000000000
+    ],
+    "model-00023.safetensors": [
+      10005791909,
+      1792082234000000000
+    ],
+    "model-00014.safetensors": [
+      10087582584,
+      1792081122000000000
+    ],
+    "model-00008.safetensors": [
+      10079387761,
+      1792080414000000000
+    ],
+    "model-00001.safetensors": [
+      11819070608,
+      1792079618000000000
+    ],
+    "model-00002.safetensors": [
+      10087582241,
+      1792079752000000000
+    ],
+    "model-00025.safetensors": [
+      9129118887,
+      1792082534000000000
+    ],
+    "model-00017.safetensors": [
+      10011288237,
+      1792081478000000000
+    ],
+    "model-00020.safetensors": [
+      11953061312,
+      1792081932000000000
+    ],
+    "model-00012.safetensors": [
+      10040389058,
+      1792080860000000000
+    ],
+    "model-00007.safetensors": [
+      10032918493,
+      1792080342000000000
+    ]
+  },
+  "pid": 86802,
+  "error": "KeyboardInterrupt()",
+  "finished": 1792303874.556573,
+  "swap_at_end": "vm.swapusage: total = 2048.00M  used = 1274.88M  free = 773.12M  (encrypted)",
+  "source_shards_unchanged": true
+}

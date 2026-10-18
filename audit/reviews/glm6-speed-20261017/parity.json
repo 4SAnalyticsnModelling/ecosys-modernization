@@ -1,0 +1,23 @@
+{
+  "mode": "lookahead",
+  "steps": 40,
+  "six_bit": true,
+  "exact_output": true,
+  "exact_slot_mapping": true,
+  "stats": {
+    "predictions": 40,
+    "predicted_experts": 76,
+    "useful_experts": 52,
+    "wasted_experts": 24,
+    "demand_calls": 81,
+    "misses": 190,
+    "ensure_seconds": 0.014993702992796898,
+    "prediction_seconds": 0.01426749606616795
+  },
+  "short_read_cleanup": true,
+  "planning_failure_cleanup": true,
+  "invalid_selection_cleanup": true,
+  "prefill_failure_cleanup": true,
+  "implementation_sha256": "6dfb36630b2c700dd3ce44525a91c5e95c50dc29813d0a38acd756b331c25332",
+  "check_sha256": "e32ab516a4e877e52d7bec86beb70df46b21f1ad3ee7b3b3f05beb09c87406d4"
+}
