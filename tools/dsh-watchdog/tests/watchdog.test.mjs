@@ -109,7 +109,7 @@ test('mounted watchdog dependencies permit meter access in a restricted plugin c
   // Services must come from a sibling mounted plugin, as in production. Root
   // providers bypass Cordis injection checks and hid this startup failure.
   await ctx.plugin({apply(provider) {
-    for (const name of ['llm','sessions','agents']) provider.provide(name,{});
+    for (const name of ['llm','sessions','agents','sessionPersistence']) provider.provide(name,{});
     provider.provide('tokenMeter',{measure:()=>({totalTokens:123})});
   }});
   let measured;

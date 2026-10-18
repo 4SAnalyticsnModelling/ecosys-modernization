@@ -1,0 +1,42 @@
+{
+  "instance": ".tmp/tui-isolation-live/.dsh-watchdog/instances/adb6ef60-94d5-42b6-88a9-7e54f3902d8e",
+  "beforeModelSwitch": [
+    {
+      "sessionId": "19aed394-e7e5-4274-bf57-64bf41466f50"
+    }
+  ],
+  "sockets": [
+    {
+      "file": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.s/10060bc7371841880516c19b30c7aa41.sock",
+      "bytes": 100
+    }
+  ],
+  "afterModelSwitch": [
+    {
+      "sessionId": "19aed394-e7e5-4274-bf57-64bf41466f50"
+    },
+    {
+      "sessionId": "6b81e611-8802-45c5-a816-771b05fce65c"
+    }
+  ],
+  "modelPreferenceAfterSwitch": {
+    "provider": "mlx-local",
+    "model": "Qwen/Qwen3.8-27B"
+  },
+  "modelSwitchCreatedFreshSession": true,
+  "afterNewSameModel": [
+    {
+      "sessionId": "3ef74b03-edee-4a39-966f-7aa321e8f48d"
+    },
+    {
+      "sessionId": "19aed394-e7e5-4274-bf57-64bf41466f50"
+    },
+    {
+      "sessionId": "6b81e611-8802-45c5-a816-771b05fce65c"
+    }
+  ],
+  "sameModelNewConversationIsolated": true,
+  "tuiBootedWithoutModuleErrors": true,
+  "socketPathWithinMacLimit": true,
+  "socketFilesAfterExit": []
+}

@@ -6,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 const installed=path.join(os.homedir(),'.local/share/deepseek-harness');
 const {default:YAML}=await import(pathToFileURL(path.join(installed,'runtime/node_modules/yaml/dist/index.js')));
-for(const profile of ['dsh-tui','dsh-tui-safe','headless']) test('global '+profile+' has one policy and four 131K routes',()=> {
+for(const profile of ['dsh-tui','dsh-tui-safe','headless']) test('global '+profile+' has one policy and two retained 131K routes',()=> {
   const text=execFileSync('node',[path.join(installed,'runtime/node_modules/@deepseek-ai/dsh/lib/bin.js'),
     '--profile',profile,'--dump-config'],{encoding:'utf8',env:{...process.env,DSH_WATCHDOG_ROOT:path.resolve('.tmp/config-test')}});
   const doc=YAML.parseDocument(text,{logLevel:'silent'});
@@ -31,6 +31,6 @@ for(const profile of ['dsh-tui','dsh-tui-safe','headless']) test('global '+profi
     if(node.has('contextWindow')) {models++;assert.equal(node.get('contextWindow'),131072);}
     if(id==='compaction') assert.notEqual(node.getIn(['isolate','compaction']),true);
   }});
-  assert.equal(active,1);assert.equal(models,4);assert.equal(pruners,1);assert.equal(spills,1);
+  assert.equal(active,1);assert.equal(models,2);assert.equal(pruners,1);assert.equal(spills,1);
   assert.equal(codeRuntimes,1);assert.equal(toolRegistries,1);
 });

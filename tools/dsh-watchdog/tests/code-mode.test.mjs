@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import fs from 'node:fs';
 import os from 'node:os';
 import {pathToFileURL} from 'node:url';
 
@@ -12,8 +13,11 @@ const {default:Subprocess}=await load('dsh-subprocess-local');
 const {default:Tools,defineTool}=await load('dsh-tools');
 const {default:Runtime}=await import('../code-mode.mjs');
 
-test('native code mode exposes both tools and batches calls beyond old deadlines',async()=>{
+test('native code mode exposes both tools and batches calls beyond old deadlines',async t=>{
+  const prior=process.env.DSH_WATCHDOG_ROOT;
+  process.env.DSH_WATCHDOG_ROOT=fs.mkdtempSync(path.join(process.cwd(),'.tmp/code-mode-'));
   const ctx=new Context();
+  t.after(async()=>{await ctx.fiber.dispose();if(prior===undefined)delete process.env.DSH_WATCHDOG_ROOT;else process.env.DSH_WATCHDOG_ROOT=prior;});
   new Subprocess(ctx);
   ctx.provide('sandboxPolicy',{defaultMode:'danger-full-access'});
   ctx.provide('fs',{processPathFromHostPath:p=>p});

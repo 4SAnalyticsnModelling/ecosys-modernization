@@ -19,9 +19,8 @@ is a source transformation and can be performed through the existing edit/shell
 tools; it is distinct from code mode's tool orchestration.
 
 Global deployment for installed **dsh 0.2.0-rc.2** and its three current profiles:
-**dsh-tui**, **dsh-tui-safe**, and **headless**. All four current local models are
-configured: Qwen Flash Next Q8, Qwen3.8 27B BF16, GLM 5.3 Flash 6-bit, and GLM 5.3
-Flash mixed 4/8-bit. Other harnesses are untouched.
+**dsh-tui**, **dsh-tui-safe**, and **headless**. The two retained local models are
+Qwen Flash Next Q8 and GLM 5.3 Flash 6-bit. Other harnesses are untouched.
 
 **Installed globally: use your normal `dsh`, `dst`, or `dsh-tui` command.**
 Launchers now start the external supervisor automatically. The model configuration
@@ -55,9 +54,9 @@ dsh versions stop ordinary supervised work until contracts are revalidated.
 
 The earlier optional repository-isolated deployment remains available with
 `setup.mjs` and `launch.py`; its notes directory is `watchdog/`, and its local TUI
-copy redirects preferences into that directory. The global installation uses the
-normal installed TUI and preferences. The global launcher owns the existing
-session-managed model gateway; the isolated launcher requires a ready gateway.
+copy redirects preferences into that directory. The global installation copies TUI code and preferences into each launch. Each
+launch owns its gateway, and each native conversation/model route owns a separate
+backend process and cache. The isolated launcher requires a ready gateway.
 Live 131,072-token capacity and per-model coding correctness remain unverified.
 
 ## Policy
@@ -187,3 +186,28 @@ unnecessary: models must retrieve omitted diagnostics before drawing conclusions
 Tool-set curation and evidence validation are explicit global instructions;
 the implementation does not silently remove capabilities or pretend to prove
 arbitrary claims. Current notes retire superseded assumptions into archives.
+
+## Complete session isolation
+
+Global launches, including nested shells and simultaneous instances of the same
+model, receive private profiles, TUI preferences, logs, process identities, ports,
+temporary directories and caches. Shared executables, dependencies and model
+weights are read-only inputs. Project files remain the user’s ordinary workspace.
+Each native agent has its own hashed directory under `agents/`, containing its
+watchdog state, notes, checkpoint transactions, hygiene index and tool caches.
+Tool execution and native code mode inherit that agent’s private temporary and
+cache paths; the host process environment is not rewritten between agents.
+
+Changing models in the TUI creates a new native conversation. `/new` also creates
+a separate conversation on the same model. New launches never automatically
+inherit watchdog state; explicit `--watchdog-resume UUID` selects recovery.
+Incomplete preparation and corrupt historical transactions fail closed. Only the
+TUI’s verified immediate internal harness spawn reuses its launch supervisor.
+
+Real retained-model harness checks and native TUI model-switch/new-session proof:
+`audit/reviews/dsh-full-isolation-20261017/`. Post-removal fresh generation proof:
+`audit/reviews/model-removal-20261017/`. Qwen 27B and GLM mixed 4/8 weights,
+dedicated tuning/cache directories and catalog/policy entries were removed at the
+user’s request. GLM 6-bit’s required MTP head was moved into its own directory
+and validated before and after relocation. The cancelled 27B speed test has no
+reported benchmark results.

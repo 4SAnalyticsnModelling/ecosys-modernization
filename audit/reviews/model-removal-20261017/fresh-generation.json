@@ -1,0 +1,180 @@
+[
+  {
+    "model": "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp",
+    "instance": 0,
+    "session": "cc157b156d2a4bc4880d817c486a271a",
+    "root": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/retained-model-check/1b7365a19f5a4b12800c84cae9c6606a/routes/e01ebea55bdf2f0ba72470a3be8fdfcfcfae8c6afdf5751a7d627308d9ea7712",
+    "routerPID": 81796,
+    "status": 200,
+    "seconds": 24.8454749584198,
+    "response": {
+      "id": "chatcmpl-2aaed51f",
+      "object": "chat.completion",
+      "created": 1792301524,
+      "model": "Qwen3.8-Flash-Next-oQ8e-mtp",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "OK",
+            "reasoning_content": "We need to respond to user: \"Reply with OK.\" Need final only OK. Ensure no extra."
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 56,
+        "completion_tokens": 25,
+        "total_tokens": 81,
+        "input_tokens": 56,
+        "output_tokens": 25,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 21
+        },
+        "time_to_first_token": 9.02,
+        "total_time": 12.18,
+        "prompt_eval_duration": 9.02,
+        "generation_duration": 3.16,
+        "prompt_tokens_per_second": 6.21,
+        "generation_tokens_per_second": 7.91
+      }
+    }
+  },
+  {
+    "model": "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp",
+    "instance": 1,
+    "session": "bf7556c5289e468a8b80cc5f753727f9",
+    "root": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/retained-model-check/1b7365a19f5a4b12800c84cae9c6606a/routes/b97ef593bce4389ae45d145fa5c09ed5bb215ed90c1ca439c245925c8f222bb6",
+    "routerPID": 82282,
+    "status": 200,
+    "seconds": 24.44476890563965,
+    "response": {
+      "id": "chatcmpl-8e8ff246",
+      "object": "chat.completion",
+      "created": 1792301550,
+      "model": "Qwen3.8-Flash-Next-oQ8e-mtp",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "OK",
+            "reasoning_content": "We need to respond to user: \"Reply with OK.\" Need final just OK. Ensure final only OK likely."
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 56,
+        "completion_tokens": 27,
+        "total_tokens": 83,
+        "input_tokens": 56,
+        "output_tokens": 27,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 23
+        },
+        "time_to_first_token": 9.02,
+        "total_time": 12.39,
+        "prompt_eval_duration": 9.02,
+        "generation_duration": 3.37,
+        "prompt_tokens_per_second": 6.21,
+        "generation_tokens_per_second": 8.02
+      }
+    }
+  },
+  {
+    "model": "GLM-5.3-Flash-MLX-6bit",
+    "instance": 0,
+    "session": "e9d4625c1ce745098beda7fe68093e15",
+    "root": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/retained-model-check/1b7365a19f5a4b12800c84cae9c6606a/routes/762540db6417ec1a3e3f9938085efe7e57a10b341ab58c5a42993d6aeb84a095",
+    "routerPID": 82664,
+    "status": 200,
+    "seconds": 36.670933961868286,
+    "response": {
+      "id": "chatcmpl-2e7fef68",
+      "object": "chat.completion",
+      "created": 1792301589,
+      "model": "GLM-5.3-Flash-MLX-6bit",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "reasoning_content": "The user has sent a message that just says \"Reply with OK.\" This is a simple instruction to respond with a single word. There's nothing harmful, ambiguous"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 16,
+        "completion_tokens": 32,
+        "total_tokens": 48,
+        "input_tokens": 16,
+        "output_tokens": 32,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 32
+        },
+        "time_to_first_token": 11.46,
+        "total_time": 24.61,
+        "prompt_eval_duration": 11.46,
+        "generation_duration": 13.16,
+        "prompt_tokens_per_second": 1.4,
+        "generation_tokens_per_second": 2.43
+      }
+    }
+  },
+  {
+    "model": "GLM-5.3-Flash-MLX-6bit",
+    "instance": 1,
+    "session": "dae8c605f14c4717a437527b700aed27",
+    "root": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/retained-model-check/1b7365a19f5a4b12800c84cae9c6606a/routes/c7297a8b06cce48bebabf4c29e9ed46ef7f4d03856ba19ff18ef5a762743041e",
+    "routerPID": 82901,
+    "status": 200,
+    "seconds": 37.226804971694946,
+    "response": {
+      "id": "chatcmpl-2514531a",
+      "object": "chat.completion",
+      "created": 1792301629,
+      "model": "GLM-5.3-Flash-MLX-6bit",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "reasoning_content": "The user has sent a very simple request: \"Reply with OK.\"\n\nThis is a straightforward instruction. The user wants me to reply with just \"OK\". There"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 16,
+        "completion_tokens": 32,
+        "total_tokens": 48,
+        "input_tokens": 16,
+        "output_tokens": 32,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 32
+        },
+        "time_to_first_token": 13.36,
+        "total_time": 25.43,
+        "prompt_eval_duration": 13.36,
+        "generation_duration": 12.07,
+        "prompt_tokens_per_second": 1.2,
+        "generation_tokens_per_second": 2.65
+      }
+    }
+  }
+]

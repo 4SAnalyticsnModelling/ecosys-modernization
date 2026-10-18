@@ -62,3 +62,6 @@ audit/runs/ottawa/zig017-debug-run-*/stderr.log
 /watchdog/
 # Full local-model benchmark request/stream/server artifacts; summary is tracked.
 /audit/runs/qwen-rc1-16k-20261017/
+
+# Private per-instance macOS injection sockets (short Unix socket paths).
+.s/

@@ -9,7 +9,7 @@ export function configureContext(doc) {
   doc.contents.items = doc.contents.items.filter(row => {
     const insert = row?.get?.('insert');
     return !(YAML.isSeq(insert) && insert.items.length === 1 &&
-      ['local-bounded-compaction','global-watchdog-compaction','global-watchdog-hygiene','global-code-presentation','global-code-runtime'].includes(insert.items[0]?.get?.('id')));
+      ['local-bounded-compaction','global-watchdog-compaction','global-watchdog-hygiene','global-code-presentation','global-code-runtime','isolated-local-transport','isolated-execution-environment'].includes(insert.items[0]?.get?.('id')));
   });
   YAML.visit(doc,{Map(_key,node) {
     const id=node.get('id');
@@ -55,6 +55,11 @@ export function configureContext(doc) {
   const persistence = YAML.parseDocument(`- id: session-persistence-jsonl\n  config:\n    root: !!js process.env.DSH_WATCHDOG_ROOT + '/sessions'\n`);
   doc.contents.items=doc.contents.items.filter(row=>row?.get?.('id')!=='session-persistence-jsonl');
   doc.add(persistence.contents.items[0].clone());
+  const spill=YAML.parseDocument(`- id: spill-local\n  config:\n    root: !!js process.env.DSH_WATCHDOG_ROOT + '/spills'\n    cleanupPeriodDays: 0\n`);
+  doc.contents.items=doc.contents.items.filter(row=>row?.get?.('id')!=='spill-local');
+  doc.add(spill.contents.items[0].clone());
+  doc.add(doc.createNode({insert:[{id:'isolated-local-transport',name:path.join(installation,'tool-env/watchdog/transport.mjs')}]}));
+  doc.add(doc.createNode({insert:[{id:'isolated-execution-environment',name:path.join(installation,'tool-env/watchdog/execution-isolation.mjs')}]}));
   doc.add(doc.createNode({insert:[{id:'global-watchdog-hygiene',name:path.join(installation,'tool-env/watchdog/hygiene.mjs'),config:hygiene}]}));
   doc.add(doc.createNode({insert:[{id:'global-watchdog-compaction',name:path.join(installation,'tool-env/watchdog/plugin.mjs'),config:policy}]}));
   if (!doc.contents.items.some(row=>row?.get?.('id')==='ptc-runtime'))

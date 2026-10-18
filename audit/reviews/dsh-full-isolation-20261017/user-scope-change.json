@@ -1,0 +1,12 @@
+{
+  "removedModels": [
+    "Qwen/Qwen3.8-27B",
+    "GLM-5.3-Flash-MLX-mixed-4_8bit"
+  ],
+  "retainedModels": [
+    "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp",
+    "GLM-5.3-Flash-MLX-6bit"
+  ],
+  "benchmark": "cancelled by user",
+  "glm6LiveCheckPID": 80666
+}

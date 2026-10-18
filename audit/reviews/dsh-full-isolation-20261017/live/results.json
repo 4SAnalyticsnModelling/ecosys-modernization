@@ -1,0 +1,26 @@
+[
+  {
+    "case": 0,
+    "model": "Qwen/Qwen3.8-27B",
+    "exit": 0,
+    "passed": true,
+    "seconds": 127.192,
+    "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/model-isolation-live/case-0"
+  },
+  {
+    "case": 1,
+    "model": "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp",
+    "exit": 0,
+    "passed": true,
+    "seconds": 139.46,
+    "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/model-isolation-live/case-1"
+  },
+  {
+    "case": 2,
+    "model": "GLM-5.3-Flash-MLX-mixed-4_8bit",
+    "exit": 0,
+    "passed": true,
+    "seconds": 787.823,
+    "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/model-isolation-live/case-2"
+  }
+]

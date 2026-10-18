@@ -1,0 +1,108 @@
+{
+  "started": 1792301125.2305942,
+  "paths": [
+    {
+      "path": "/Users/4sanalyticsnmodelling/models/Qwen/Qwen3.8-27B",
+      "files": 103,
+      "logicalBytes": 56646914307,
+      "uniqueAllocatedBytes": 56647122944
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-mixed-4_8bit",
+      "files": 59,
+      "logicalBytes": 181944543893,
+      "uniqueAllocatedBytes": 181944750080
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.cache/huggingface/hub/models--Qwen--Qwen3.8-27B",
+      "files": 1,
+      "logicalBytes": 112216,
+      "uniqueAllocatedBytes": 114688
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.cache/huggingface/hub/.locks/models--Qwen--Qwen3.8-27B",
+      "files": 1,
+      "logicalBytes": 0,
+      "uniqueAllocatedBytes": 0
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/qwen27-20261002",
+      "files": 168,
+      "logicalBytes": 1963748,
+      "uniqueAllocatedBytes": 2326528
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/qwen27-speed-20261003",
+      "files": 200,
+      "logicalBytes": 2688840,
+      "uniqueAllocatedBytes": 3145728
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm53-20261006",
+      "files": 4977,
+      "logicalBytes": 85010685,
+      "uniqueAllocatedBytes": 96079872
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm-speed-20261008",
+      "files": 15,
+      "logicalBytes": 41960,
+      "uniqueAllocatedBytes": 81920
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm-settings-speed-20261008",
+      "files": 1,
+      "logicalBytes": 19697,
+      "uniqueAllocatedBytes": 20480
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm-mixed-r50-16k-20261015",
+      "files": 26,
+      "logicalBytes": 644415356,
+      "uniqueAllocatedBytes": 644472832
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm-mixed-production-profile-omlx071rc1-16k-20261015",
+      "files": 30,
+      "logicalBytes": 643738724,
+      "uniqueAllocatedBytes": 643809280
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm-mixed-r50-production",
+      "files": 26,
+      "logicalBytes": 177700,
+      "uniqueAllocatedBytes": 249856
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state-glm-mixed-r50",
+      "files": 13,
+      "logicalBytes": 643593473,
+      "uniqueAllocatedBytes": 643620864
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/omlx-state/cache-glm53-mixed48-mtp1-native-v1",
+      "files": 293,
+      "logicalBytes": 56617902492,
+      "uniqueAllocatedBytes": 56618393600
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/qwen27_bench.py",
+      "files": 0,
+      "logicalBytes": 8170,
+      "uniqueAllocatedBytes": 0
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/model-isolation-live/case-2/.dsh-watchdog/instances/3fb26fa2-cc8b-4f7b-a5de-d6d377b26a62/runtime/routes/6cca75943194bb2725b98dc8cf7797d9e99c86227190f64e70413901c48214f1",
+      "files": 122,
+      "logicalBytes": 1001545261,
+      "uniqueAllocatedBytes": 1001824256
+    },
+    {
+      "path": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/model-isolation-live/case-0/.dsh-watchdog/instances/96c6161a-65eb-4759-a409-87e61d1d9909/runtime/routes/4bf2b764e528ecb7c47c54258d9849be72c5e6414dac3a197a6ec7c39615be9d",
+      "files": 122,
+      "logicalBytes": 1838306652,
+      "uniqueAllocatedBytes": 1838579712
+    }
+  ],
+  "uniqueAllocatedBytes": 300084592640
+}

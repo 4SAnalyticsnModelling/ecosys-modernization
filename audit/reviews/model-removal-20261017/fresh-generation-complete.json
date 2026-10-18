@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "models": 2,
+  "freshInstancesPerModel": 2,
+  "distinctRuntimeRoots": true
+}

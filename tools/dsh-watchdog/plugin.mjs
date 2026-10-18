@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import {sessionRoot,snapshotSession} from './session-paths.mjs';
 import {pathToFileURL} from 'node:url';
 import {LIMIT, WINDOW, policy, validateRoute, atomic, readState, notes, verifySummary, repeatCount, syncTree, snapshotWorktree} from './core.mjs';
 const runtime = process.env.DSH_WATCHDOG_RUNTIME ?? path.resolve(import.meta.dirname,'../../runtime');
@@ -29,30 +30,39 @@ const {default:Basic} = await import(pathToFileURL(path.join(runtime,
 export default class WatchdogCompaction extends Basic {
   // Preserve the native engine's dependencies: Cordis enforces injection when
   // sibling plugins provide services, unlike direct construction in a root context.
-  static inject = [...Basic.inject,'agents'];
+  static inject = [...Basic.inject,'agents','sessionPersistence'];
   constructor(ctx) {
     const root = initializeWorkspace();
     super(ctx, {...policy, auto:true});
     ctx.inject(['systemPrompt'], promptCtx => {
       promptCtx.systemPrompt.section({name:'dsh-watchdog-global-rules',order:900,interpolate:false,
-        text:fs.readFileSync(path.join(import.meta.dirname,'AGENTS.md'),'utf8') +
-          '\nAuthoritative durable notes directory: '+root+'. Maintain progress.md, decisions.md and issues.md before major edits/tests; read them when resuming.'});
+        text:context=> {
+          const agent=context.scope;
+          if(!agent?.session)return '';
+          return fs.readFileSync(path.join(import.meta.dirname,'AGENTS.md'),'utf8') +
+            '\nAuthoritative durable notes directory: '+this.root(agent)+'. Maintain progress.md, decisions.md and issues.md before major edits/tests; read them when resuming.';
+        }});
     });
   }
-  root() {
+  root(agent) {
     const root = process.env.DSH_WATCHDOG_ROOT;
     if (!root || !path.isAbsolute(root)) throw Error('Missing absolute watchdog root');
-    return root;
+    return sessionRoot(root,agent.session.id);
   }
   update(agent, patch) {
-    const file = path.join(this.root(), 'state.json');
+    const file = path.join(this.root(agent), 'state.json');
     const state = readState(file);
     const old = state.sessions[agent.session.id] ?? {};
     state.sessions[agent.session.id] = {...old, ...patch, updatedAt:new Date().toISOString()};
-    if (this.ctx.agents.roots().includes(agent)) state.currentSession = agent.session.id;
-    atomic(file, state);
+    const isRoot=this.ctx.agents.roots().includes(agent);
+    if(isRoot)state.currentSession=agent.session.id;
+    atomic(file,state);
+    if(isRoot) {
+      const base=process.env.DSH_WATCHDOG_ROOT;
+      if(base!==this.root(agent)){const index=readState(path.join(base,'state.json'));index.currentSession=agent.session.id;atomic(path.join(base,'state.json'),index);}
+    }
   }
-  record(agent) { return readState(path.join(this.root(),'state.json')).sessions[agent.session.id] ?? {}; }
+  record(agent) { return readState(path.join(this.root(agent),'state.json')).sessions[agent.session.id] ?? {}; }
   measure(agent) {
     const m = this.ctx.tokenMeter?.measure(agent.session);
     if (!Number.isFinite(m?.totalTokens) || m.totalTokens < 0) throw Error('Missing/invalid token meter; refusing request');
@@ -66,11 +76,11 @@ export default class WatchdogCompaction extends Basic {
       const result = pruner.pruneSession(agent.session);
       if (result.pruned.length) {
         if (!await this.ctx.sessions.flush(agent.session)) throw Error('No persistence listener for context hygiene');
-        const index=path.join(this.root(),'hygiene-index.jsonl');
+        const index=path.join(this.root(agent),'hygiene-index.jsonl');
         const fd=fs.openSync(index,'a',0o600);
         try {
           for(const item of result.pruned) fs.writeSync(fd,JSON.stringify({sessionId:agent.session.id,
-            sessionsRoot:path.join(this.root(),'sessions'),...item})+'\n');
+            sessionsRoot:path.join(process.env.DSH_WATCHDOG_ROOT,'sessions'),...item})+'\n');
           fs.fsyncSync(fd);
         } finally { fs.closeSync(fd); }
         const old = this.record(agent);
@@ -88,14 +98,14 @@ export default class WatchdogCompaction extends Basic {
     this.ctx.on('agent/created', ({agent, source}) => {
       const old = this.record(agent);
       if (source === 'resume' && process.env.DSH_WATCHDOG_AUTO_RESUME === '1' && old.phase === 'running' && old.taskActive === true) {
-        notes(this.root());
+        notes(this.root(agent));
         this.update(agent,{resumptions:(old.resumptions ?? 0)+1});
         agent.followup(createUserMessage({source:{kind:'user'},content:[{type:'text',text:
           'Resume the existing task from the durable session and watchdog notes. First reconcile current files, Git diff and recorded tests. Verify outcomes of interrupted tools before repeating actions. Preserve all scientific/code decisions; take the recorded next action.'}]}));
       }
     });
     this.ctx.on('agent/pre-step', async ({agent, signal}, next) => {
-      notes(this.root());
+      notes(this.root(agent));
       const state = this.record(agent);
       if (state.phase === 'checkpointing' || state.phase === 'compacting' || state.phase === 'blocked')
         throw Error(`Watchdog requires checkpoint reconciliation: ${state.checkpoint ?? agent.session.id}`);
@@ -115,6 +125,9 @@ export default class WatchdogCompaction extends Basic {
         validateRoute(info.context?.contextWindow, options.maxTokens ?? info.defaultMaxTokens);
         const m = owner.measure(agent);
         const old = owner.record(agent);
+        if(readState(path.join(process.env.DSH_WATCHDOG_ROOT,'state.json')).layout==='per-agent-v1' &&
+           old.provider && (old.provider!==options.provider || old.model!==options.model))
+          throw Error('Model isolation requires a fresh native conversation; previous session remains preserved');
         if (['checkpointing','compacting','blocked'].includes(old.phase)) throw Error('Watchdog recovery required');
         owner.update(agent, {phase:'running', provider:options.provider, model:options.model,
           requestTools:options.tools?.length ?? 0, toolSchemaBytes:Buffer.byteLength(JSON.stringify(options.tools ?? [])),
@@ -183,16 +196,16 @@ export default class WatchdogCompaction extends Basic {
     if (!target) throw Error('Missing routed envelope at boundary');
     const info = await this.ctx.llm.resolveModelInfo(target.provider,target.model,signal);
     validateRoute(info.context?.contextWindow,target.maxTokens ?? info.defaultMaxTokens);
-    const checkpoint = crypto.randomUUID(), dir = path.join(this.root(),'checkpoints',checkpoint);
+    const checkpoint = crypto.randomUUID(), dir = path.join(this.root(agent),'checkpoints',checkpoint);
     this.update(agent,{phase:'checkpointing',checkpoint,trigger,beforeTokens:before.totalTokens});
     try {
       fs.mkdirSync(dir,{recursive:true});
       if (!await this.ctx.sessions.flush(agent.session)) throw Error('No native persistence listener; refusing compaction');
       // Copy immutable session files only after awaited native persistence flush.
-      fs.cpSync(path.join(this.root(),'sessions'),path.join(dir,'sessions'),{recursive:true});
-      const memory = notes(this.root());
+      await snapshotSession(process.env.DSH_WATCHDOG_ROOT,agent.session.id,path.join(dir,'sessions'),this.ctx.sessionPersistence);
+      const memory = notes(this.root(agent));
       fs.writeFileSync(path.join(dir,'notes.md'),memory.text,{mode:0o600});
-      await snapshotWorktree(dir,process.cwd(),this.root());
+      await snapshotWorktree(dir,process.cwd(),process.env.DSH_WATCHDOG_ROOT);
       syncTree(dir);
       const parentFd = fs.openSync(path.dirname(dir),'r');
       try { fs.fsyncSync(parentFd); } finally { fs.closeSync(parentFd); }
@@ -211,9 +224,9 @@ export default class WatchdogCompaction extends Basic {
     }
   }
   async summarize(input, agent, signal) {
-    const memory = notes(this.root());
+    const memory = notes(this.root(agent));
     const result = await super.summarize(input,agent,signal);
-    if (notes(this.root()).hash !== memory.hash) throw Error('Notes changed during compaction');
+    if (notes(this.root(agent)).hash !== memory.hash) throw Error('Notes changed during compaction');
     return verifySummary(result,memory,this.record(agent).checkpoint);
   }
 }

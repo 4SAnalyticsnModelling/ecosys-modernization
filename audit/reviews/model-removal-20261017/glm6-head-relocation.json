@@ -1,0 +1,38 @@
+{
+  "from": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm53-20261006/mtp-overlay/model-mtp-head.safetensors",
+  "to": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-production/mtp-overlay/model-mtp-head.safetensors",
+  "bytes": 4306335966,
+  "sha256": "ca19ed3b86bb5cee1af85875a3429ce4802a826ceeb64d6a195c1e8e03454a81",
+  "sameInode": true,
+  "validationBefore": {
+    "passed": true,
+    "original_target_tensors": 2998,
+    "original_shards": 25,
+    "added_draft_tensors": 59,
+    "draft_bytes": 4306335966,
+    "scope": "Target identity, metadata and draft-header structure; not full weight hashes or quality"
+  },
+  "validationAfter": {
+    "passed": true,
+    "original_target_tensors": 2998,
+    "original_shards": 25,
+    "added_draft_tensors": 59,
+    "draft_bytes": 4306335966,
+    "scope": "Target identity, metadata and draft-header structure; not full weight hashes or quality"
+  },
+  "retargetedSixBitLinks": [
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-base-20261015/overlay/model-mtp-head.safetensors",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-lookahead-20261015/overlay/model-mtp-head.safetensors",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r30-20261015/overlay/model-mtp-head.safetensors",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r30-measured-20261015/overlay/model-mtp-head.safetensors",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-measured-20261015/overlay/model-mtp-head.safetensors",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-profile-20261015/overlay/model-mtp-head.safetensors",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-keepalive-20261015/overlay/model-mtp-head.safetensors",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-overlap_compact-20261015/overlay/model-mtp-head.safetensors",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-packed-20261015/overlay/model-mtp-head.safetensors",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-batch-20261015/overlay/model-mtp-head.safetensors",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-overlap-20261015/overlay/model-mtp-head.safetensors",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-layerweighted-20261015/overlay/model-mtp-head.safetensors",
+    "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/glm6-r35-strategy-phase-20261015/overlay/model-mtp-head.safetensors"
+  ]
+}

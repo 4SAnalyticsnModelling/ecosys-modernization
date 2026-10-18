@@ -1,0 +1,10 @@
+{
+  "DSH_HOME": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/private-config-probe/dsh",
+  "DSH_TUI_DATA_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/private-config-probe/tui-data",
+  "DSH_INSTALLED_ROOT": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness",
+  "DSH_INSTALL_HOME": "/Users/4sanalyticsnmodelling",
+  "DSH_ISOLATED_TUI_ENTRY": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/private-config-probe/tui/bin/dsh-tui.js",
+  "DSH_ISOLATED_ENDPOINT": "http://127.0.0.1:63006",
+  "DSH_TUI_NO_DELEGATE": "1",
+  "DSH_LOCAL_MLX_SESSION": "1"
+}

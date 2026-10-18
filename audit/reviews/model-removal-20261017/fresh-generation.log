@@ -1,0 +1,4 @@
+{"model": "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp", "instance": 0, "passed": true, "seconds": 24.8454749584198}
+{"model": "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp", "instance": 1, "passed": true, "seconds": 24.44476890563965}
+{"model": "GLM-5.3-Flash-MLX-6bit", "instance": 0, "passed": true, "seconds": 36.670933961868286}
+{"model": "GLM-5.3-Flash-MLX-6bit", "instance": 1, "passed": true, "seconds": 37.226804971694946}

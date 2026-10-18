@@ -1,0 +1,11 @@
+✔ global dsh-tui has one policy and two retained 131K routes (134.139584ms)
+✔ global dsh-tui-safe has one policy and two retained 131K routes (103.134042ms)
+✔ global headless has one policy and two retained 131K routes (91.532625ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 406.664917

@@ -1,0 +1,15 @@
+{
+  "catalog": [
+    "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp",
+    "GLM-5.3-Flash-MLX-6bit"
+  ],
+  "profiles": [
+    "/Users/4sanalyticsnmodelling/models/GLM-5.3-Flash-MLX-6bit",
+    "/Users/4sanalyticsnmodelling/models/mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp"
+  ],
+  "longTaskPolicyModels": [
+    "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp",
+    "GLM-5.3-Flash-MLX-6bit"
+  ],
+  "dedicatedRemovedEntrypointsAbsent": true
+}

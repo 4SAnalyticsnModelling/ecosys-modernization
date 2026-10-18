@@ -1,0 +1,16 @@
+{
+  "verdict": "PASS",
+  "base": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/ptc-isolation-verifier/launch-IkQvI0",
+  "results": [
+    {
+      "temp": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/ptc-isolation-verifier/launch-IkQvI0/agents/1882ce1807feeda04789463ed2c6928e58343322a6c26eb3f6e070ec01febe62/tmp",
+      "envTmp": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/ptc-isolation-verifier/launch-IkQvI0/agents/1882ce1807feeda04789463ed2c6928e58343322a6c26eb3f6e070ec01febe62/tmp",
+      "owner": "verifier-session-a"
+    },
+    {
+      "temp": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/ptc-isolation-verifier/launch-IkQvI0/agents/fefcdf41b0ffc4162740e7703864a6a9c8d8f78e66fc51217af84c24243b2b9a/tmp",
+      "envTmp": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/ptc-isolation-verifier/launch-IkQvI0/agents/fefcdf41b0ffc4162740e7703864a6a9c8d8f78e66fc51217af84c24243b2b9a/tmp",
+      "owner": "verifier-session-b"
+    }
+  ]
+}

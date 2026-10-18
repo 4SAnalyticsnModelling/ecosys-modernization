@@ -1,0 +1,16 @@
+{
+  "instance": ".tmp/tui-retained/.dsh-watchdog/instances/362ebdbc-4ab0-4cbc-94ae-8f46b79889ce",
+  "booted": true,
+  "onboarding": {
+    "completed": true,
+    "version": 1
+  },
+  "privatePreferences": ".tmp/tui-retained/.dsh-watchdog/instances/362ebdbc-4ab0-4cbc-94ae-8f46b79889ce/tui-data",
+  "exit": 0,
+  "selectedModel": "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp",
+  "configurationModels": [
+    "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp",
+    "GLM-5.3-Flash-MLX-6bit"
+  ],
+  "socketFilesAfterExit": []
+}

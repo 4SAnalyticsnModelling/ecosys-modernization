@@ -1,0 +1,9 @@
+{
+  "deletedPaths": 17,
+  "uniqueAllocatedBytes": 300084592640,
+  "retained": [
+    "mlx-community/Qwen3.8-Flash-Next-oQ8e-mtp",
+    "GLM-5.3-Flash-MLX-6bit"
+  ],
+  "glm6HeadSelfContained": true
+}
