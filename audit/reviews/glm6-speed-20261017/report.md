@@ -60,3 +60,9 @@ Per user instruction final strategy qualification is16K only. Earlier32K
 exploration is historical;64K was explicitly canceled and is not a success.
 No larger-context reliability claim follows from these tests. No ecosys science,
 Fortran, Zig source or scientific tolerance changed.
+
+## Subsequent lookahead2-versus4 comparison
+
+A fresh matched16K comparison retained lookahead2. Four gave1.1% higher fresh
+decode but2.1% lower cached decode and9.0% more cached SSD reads; outputs matched.
+See [comparison](width2-vs4.md) and its complete per-arm receipts.

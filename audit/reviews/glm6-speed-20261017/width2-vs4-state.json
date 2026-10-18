@@ -1,0 +1,552 @@
+{
+  "pid": 90563,
+  "started": 1792305382.8156328,
+  "scope": "16384 prompt tokens only",
+  "results": {
+    "2": {
+      "arguments": {
+        "name": "compare-width2-16",
+        "width": 2,
+        "tokens": 16384,
+        "chunk": 8192,
+        "output": 128,
+        "retrieval": false,
+        "cache_source": null,
+        "once": false,
+        "paired_decode": false
+      },
+      "command": [
+        "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/venv-0.7.1rc1/bin/python",
+        "-B",
+        "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/server.py",
+        "8192",
+        "serve",
+        "--base-path",
+        "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16",
+        "--model-dir",
+        "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/models",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8092",
+        "--memory-guard-gb",
+        "106.17077350616455",
+        "--hot-cache-max-size",
+        "2GB",
+        "--paged-ssd-cache-dir",
+        "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/cache"
+      ],
+      "started": 1792305384.64049,
+      "samples": [
+        {
+          "kind": "fresh",
+          "test_width": 2,
+          "elapsed_seconds": 210.55513554206118,
+          "ttft_seconds": 162.61775637499522,
+          "width_ack": null,
+          "usage": {
+            "prompt_tokens": 16384,
+            "completion_tokens": 128,
+            "total_tokens": 16512,
+            "input_tokens": 16384,
+            "output_tokens": 128,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 129
+            },
+            "time_to_first_token": 162.3,
+            "time_to_first_visible_token": 162.55,
+            "total_time": 210.49,
+            "prompt_eval_duration": 162.3,
+            "generation_duration": 48.18,
+            "prompt_tokens_per_second": 100.95,
+            "generation_tokens_per_second": 2.66
+          },
+          "disk_read_bytes": 672133955584,
+          "finish_reasons": [
+            "length"
+          ],
+          "client_decode_tokens_per_second": 2.649338659016253,
+          "full_prefix_restored": null,
+          "output_sha256": "75e2bf1bd4537998b7e14b08df5503fbac2fddaa3d99119398b17b1a273c1b2c"
+        },
+        {
+          "kind": "warm",
+          "test_width": 2,
+          "elapsed_seconds": 39.80400858295616,
+          "ttft_seconds": 1.1804859159747139,
+          "width_ack": null,
+          "usage": {
+            "prompt_tokens": 16384,
+            "completion_tokens": 128,
+            "total_tokens": 16512,
+            "input_tokens": 16384,
+            "output_tokens": 128,
+            "prompt_tokens_details": {
+              "cached_tokens": 16382
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 129
+            },
+            "time_to_first_token": 1.15,
+            "time_to_first_visible_token": 1.15,
+            "total_time": 39.77,
+            "prompt_eval_duration": 1.15,
+            "generation_duration": 38.62,
+            "prompt_tokens_per_second": 1.74,
+            "generation_tokens_per_second": 3.31
+          },
+          "disk_read_bytes": 200468434944,
+          "finish_reasons": [
+            "length"
+          ],
+          "client_decode_tokens_per_second": 3.288217255696545,
+          "full_prefix_restored": true,
+          "output_sha256": "75e2bf1bd4537998b7e14b08df5503fbac2fddaa3d99119398b17b1a273c1b2c"
+        }
+      ],
+      "peak_physical_bytes": 110913516480,
+      "prompt_sha256": "fee21750588ae38f59bf8d1bfc22000e10bfbcfe4dd4ace5731a7e5d13e6ef15",
+      "profile": {
+        "backend": "omlx",
+        "display_name": "GLM 5.3 Flash \u00b7 6-bit \u00b7 Uniform 35% \u00b7 rc1",
+        "picker_priority": 2,
+        "max_context_window": 131072,
+        "max_tokens": 32768,
+        "prefill_step_size": 8192,
+        "moe_expert_offload_enabled": true,
+        "moe_expert_offload_resident_fraction": 0.35,
+        "memory_guard_gb": 106.17077350616455,
+        "hot_cache_max_size": "2GB",
+        "request_timeout_seconds": 7200,
+        "moe_offload_io_workers": 12,
+        "moe_offload_overlap": true,
+        "mtp_enabled": true,
+        "turboquant_kv_enabled": false,
+        "mtp_fixed_depth": 1,
+        "glm_mtp_overlay": true,
+        "description": "Original 6-bit GLM target with the existing verified local MTP head, uniform 101/288 expert slots per layer, native KV, LFU and asynchronous resident-first prefill. Fixed 114 decimal GB measured process guard; no predictive admission rejection or automatic chunk shrinking. Bounded decode lookahead width2, prefill8192, qualified at16K with max thinking. Runtime: oMLX0.7.1rc1 with MLX0.32.4; separate rc1 prefix cache.",
+        "glm_expert_cache_policy": "lfu",
+        "top_k": 0,
+        "glm_nightly_runtime": true,
+        "glm_resident_first_prefill": true,
+        "glm_async_prefill": true,
+        "top_p": 0.95,
+        "chat_template_kwargs": {
+          "reasoning_effort": "max",
+          "clear_thinking": true
+        },
+        "glm6_measured_memory": true,
+        "glm_runtime_version": "0.7.1rc1",
+        "glm6_decode_lookahead_width": 2,
+        "enable_thinking": true
+      },
+      "terminal_config_sha256": "720995fd813a338b9248d23124e39635bd1ad3b8de3eee1779d056890d02696c",
+      "swap_at_start": "vm.swapusage: total = 2048.00M  used = 1274.88M  free = 773.12M  (encrypted)",
+      "source_shards": {
+        "model-00009.safetensors": [
+          10005791897,
+          1792080546000000000
+        ],
+        "model-00015.safetensors": [
+          10079387761,
+          1792081240000000000
+        ],
+        "model-00022.safetensors": [
+          10079387759,
+          1792082130000000000
+        ],
+        "model-00010.safetensors": [
+          10011288211,
+          1792080652000000000
+        ],
+        "model-00005.safetensors": [
+          10065952118,
+          1792080106000000000
+        ],
+        "model-00019.safetensors": [
+          10040389036,
+          1792081802000000000
+        ],
+        "model-00006.safetensors": [
+          10019227426,
+          1792080238000000000
+        ],
+        "model-00013.safetensors": [
+          11953061312,
+          1792081006000000000
+        ],
+        "model-00021.safetensors": [
+          10087582488,
+          1792082032000000000
+        ],
+        "model-00016.safetensors": [
+          10005791865,
+          1792081368000000000
+        ],
+        "model-00024.safetensors": [
+          10011288177,
+          1792082380000000000
+        ],
+        "model-00003.safetensors": [
+          10024860812,
+          1792079878000000000
+        ],
+        "model-00018.safetensors": [
+          10101017881,
+          1792081646000000000
+        ],
+        "model-00004.safetensors": [
+          10005654659,
+          1792079988000000000
+        ],
+        "model-00011.safetensors": [
+          10101018021,
+          1792080744000000000
+        ],
+        "model-00023.safetensors": [
+          10005791909,
+          1792082234000000000
+        ],
+        "model-00014.safetensors": [
+          10087582584,
+          1792081122000000000
+        ],
+        "model-00008.safetensors": [
+          10079387761,
+          1792080414000000000
+        ],
+        "model-00001.safetensors": [
+          11819070608,
+          1792079618000000000
+        ],
+        "model-00002.safetensors": [
+          10087582241,
+          1792079752000000000
+        ],
+        "model-00025.safetensors": [
+          9129118887,
+          1792082534000000000
+        ],
+        "model-00017.safetensors": [
+          10011288237,
+          1792081478000000000
+        ],
+        "model-00020.safetensors": [
+          11953061312,
+          1792081932000000000
+        ],
+        "model-00012.safetensors": [
+          10040389058,
+          1792080860000000000
+        ],
+        "model-00007.safetensors": [
+          10032918493,
+          1792080342000000000
+        ]
+      },
+      "pid": 90573,
+      "complete": true,
+      "finished": 1792305645.185175,
+      "swap_at_end": "vm.swapusage: total = 2048.00M  used = 1274.88M  free = 773.12M  (encrypted)",
+      "source_shards_unchanged": true
+    },
+    "4": {
+      "arguments": {
+        "name": "compare-width4-16",
+        "width": 4,
+        "tokens": 16384,
+        "chunk": 8192,
+        "output": 128,
+        "retrieval": false,
+        "cache_source": null,
+        "once": false,
+        "paired_decode": false
+      },
+      "command": [
+        "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/local-mlx/venv-0.7.1rc1/bin/python",
+        "-B",
+        "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width4-16/server.py",
+        "8192",
+        "serve",
+        "--base-path",
+        "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width4-16",
+        "--model-dir",
+        "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width4-16/models",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8092",
+        "--memory-guard-gb",
+        "106.17077350616455",
+        "--hot-cache-max-size",
+        "2GB",
+        "--paged-ssd-cache-dir",
+        "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width4-16/cache"
+      ],
+      "started": 1792305647.622832,
+      "samples": [
+        {
+          "kind": "fresh",
+          "test_width": 4,
+          "elapsed_seconds": 209.69140116707422,
+          "ttft_seconds": 162.3373155000154,
+          "width_ack": null,
+          "usage": {
+            "prompt_tokens": 16384,
+            "completion_tokens": 128,
+            "total_tokens": 16512,
+            "input_tokens": 16384,
+            "output_tokens": 128,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 129
+            },
+            "time_to_first_token": 162.02,
+            "time_to_first_visible_token": 162.27,
+            "total_time": 209.62,
+            "prompt_eval_duration": 162.02,
+            "generation_duration": 47.6,
+            "prompt_tokens_per_second": 101.12,
+            "generation_tokens_per_second": 2.69
+          },
+          "disk_read_bytes": 693474611200,
+          "finish_reasons": [
+            "length"
+          ],
+          "client_decode_tokens_per_second": 2.6819738717872923,
+          "full_prefix_restored": null,
+          "output_sha256": "75e2bf1bd4537998b7e14b08df5503fbac2fddaa3d99119398b17b1a273c1b2c"
+        },
+        {
+          "kind": "warm",
+          "test_width": 4,
+          "elapsed_seconds": 40.61613412492443,
+          "ttft_seconds": 1.1578457079594955,
+          "width_ack": null,
+          "usage": {
+            "prompt_tokens": 16384,
+            "completion_tokens": 128,
+            "total_tokens": 16512,
+            "input_tokens": 16384,
+            "output_tokens": 128,
+            "prompt_tokens_details": {
+              "cached_tokens": 16382
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 129
+            },
+            "time_to_first_token": 1.12,
+            "time_to_first_visible_token": 1.13,
+            "total_time": 40.58,
+            "prompt_eval_duration": 1.12,
+            "generation_duration": 39.46,
+            "prompt_tokens_per_second": 1.78,
+            "generation_tokens_per_second": 3.24
+          },
+          "disk_read_bytes": 218528649216,
+          "finish_reasons": [
+            "length"
+          ],
+          "client_decode_tokens_per_second": 3.218651611288355,
+          "full_prefix_restored": true,
+          "output_sha256": "75e2bf1bd4537998b7e14b08df5503fbac2fddaa3d99119398b17b1a273c1b2c"
+        }
+      ],
+      "peak_physical_bytes": 110896395104,
+      "prompt_sha256": "fee21750588ae38f59bf8d1bfc22000e10bfbcfe4dd4ace5731a7e5d13e6ef15",
+      "profile": {
+        "backend": "omlx",
+        "display_name": "GLM 5.3 Flash \u00b7 6-bit \u00b7 Uniform 35% \u00b7 rc1",
+        "picker_priority": 2,
+        "max_context_window": 131072,
+        "max_tokens": 32768,
+        "prefill_step_size": 8192,
+        "moe_expert_offload_enabled": true,
+        "moe_expert_offload_resident_fraction": 0.35,
+        "memory_guard_gb": 106.17077350616455,
+        "hot_cache_max_size": "2GB",
+        "request_timeout_seconds": 7200,
+        "moe_offload_io_workers": 12,
+        "moe_offload_overlap": true,
+        "mtp_enabled": true,
+        "turboquant_kv_enabled": false,
+        "mtp_fixed_depth": 1,
+        "glm_mtp_overlay": true,
+        "description": "Original 6-bit GLM target with the existing verified local MTP head, uniform 101/288 expert slots per layer, native KV, LFU and asynchronous resident-first prefill. Fixed 114 decimal GB measured process guard; no predictive admission rejection or automatic chunk shrinking. Bounded decode lookahead width2, prefill8192, qualified at16K with max thinking. Runtime: oMLX0.7.1rc1 with MLX0.32.4; separate rc1 prefix cache.",
+        "glm_expert_cache_policy": "lfu",
+        "top_k": 0,
+        "glm_nightly_runtime": true,
+        "glm_resident_first_prefill": true,
+        "glm_async_prefill": true,
+        "top_p": 0.95,
+        "chat_template_kwargs": {
+          "reasoning_effort": "max",
+          "clear_thinking": true
+        },
+        "glm6_measured_memory": true,
+        "glm_runtime_version": "0.7.1rc1",
+        "glm6_decode_lookahead_width": 2,
+        "enable_thinking": true
+      },
+      "terminal_config_sha256": "720995fd813a338b9248d23124e39635bd1ad3b8de3eee1779d056890d02696c",
+      "swap_at_start": "vm.swapusage: total = 2048.00M  used = 1274.88M  free = 773.12M  (encrypted)",
+      "source_shards": {
+        "model-00009.safetensors": [
+          10005791897,
+          1792080546000000000
+        ],
+        "model-00015.safetensors": [
+          10079387761,
+          1792081240000000000
+        ],
+        "model-00022.safetensors": [
+          10079387759,
+          1792082130000000000
+        ],
+        "model-00010.safetensors": [
+          10011288211,
+          1792080652000000000
+        ],
+        "model-00005.safetensors": [
+          10065952118,
+          1792080106000000000
+        ],
+        "model-00019.safetensors": [
+          10040389036,
+          1792081802000000000
+        ],
+        "model-00006.safetensors": [
+          10019227426,
+          1792080238000000000
+        ],
+        "model-00013.safetensors": [
+          11953061312,
+          1792081006000000000
+        ],
+        "model-00021.safetensors": [
+          10087582488,
+          1792082032000000000
+        ],
+        "model-00016.safetensors": [
+          10005791865,
+          1792081368000000000
+        ],
+        "model-00024.safetensors": [
+          10011288177,
+          1792082380000000000
+        ],
+        "model-00003.safetensors": [
+          10024860812,
+          1792079878000000000
+        ],
+        "model-00018.safetensors": [
+          10101017881,
+          1792081646000000000
+        ],
+        "model-00004.safetensors": [
+          10005654659,
+          1792079988000000000
+        ],
+        "model-00011.safetensors": [
+          10101018021,
+          1792080744000000000
+        ],
+        "model-00023.safetensors": [
+          10005791909,
+          1792082234000000000
+        ],
+        "model-00014.safetensors": [
+          10087582584,
+          1792081122000000000
+        ],
+        "model-00008.safetensors": [
+          10079387761,
+          1792080414000000000
+        ],
+        "model-00001.safetensors": [
+          11819070608,
+          1792079618000000000
+        ],
+        "model-00002.safetensors": [
+          10087582241,
+          1792079752000000000
+        ],
+        "model-00025.safetensors": [
+          9129118887,
+          1792082534000000000
+        ],
+        "model-00017.safetensors": [
+          10011288237,
+          1792081478000000000
+        ],
+        "model-00020.safetensors": [
+          11953061312,
+          1792081932000000000
+        ],
+        "model-00012.safetensors": [
+          10040389058,
+          1792080860000000000
+        ],
+        "model-00007.safetensors": [
+          10032918493,
+          1792080342000000000
+        ]
+      },
+      "pid": 90918,
+      "complete": true,
+      "finished": 1792305909.105485,
+      "swap_at_end": "vm.swapusage: total = 2048.00M  used = 1274.88M  free = 773.12M  (encrypted)",
+      "source_shards_unchanged": true
+    }
+  },
+  "stage": "complete",
+  "summary": {
+    "2": {
+      "fresh_seconds": 210.55513554206118,
+      "prefill_tps": 100.95,
+      "fresh_decode_tps": 2.66,
+      "warm_decode_tps": 3.31,
+      "warm_disk_read_bytes": 200468434944,
+      "warm_lookahead": {
+        "predictions": 2542,
+        "predicted_experts": 4155,
+        "useful_experts": 2310,
+        "wasted_experts": 1845,
+        "demand_calls": 2730,
+        "misses": 8631,
+        "ensure_seconds": 22.335735699976794,
+        "prediction_seconds": 1.5219463418470696
+      },
+      "peak_physical_bytes": 110913516480
+    },
+    "4": {
+      "fresh_seconds": 209.69140116707422,
+      "prefill_tps": 101.12,
+      "fresh_decode_tps": 2.69,
+      "warm_decode_tps": 3.24,
+      "warm_disk_read_bytes": 218528649216,
+      "warm_lookahead": {
+        "predictions": 2542,
+        "predicted_experts": 6479,
+        "useful_experts": 3433,
+        "wasted_experts": 3046,
+        "demand_calls": 2730,
+        "misses": 8631,
+        "ensure_seconds": 22.94184871192556,
+        "prediction_seconds": 1.5526251138653606
+      },
+      "peak_physical_bytes": 110896395104
+    }
+  },
+  "finished": 1792305909.191776,
+  "implementation_sha256": "6dfb36630b2c700dd3ce44525a91c5e95c50dc29813d0a38acd756b331c25332",
+  "decision": {
+    "production_width": 2,
+    "reason": "Four gives only1.1% fresh decode gain,2.1% lower warm decode,9.0% more warm disk reads; no useful overall benefit in one matched pair per strategy."
+  }
+}

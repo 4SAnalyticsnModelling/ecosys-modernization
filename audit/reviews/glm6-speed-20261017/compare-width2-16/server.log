@@ -1,0 +1,140 @@
+GLM production runtime verified: oMLX0.7.1rc1 / MLX0.32.4
+GLM resident-first expert prefill enabled
+GLM overlap installed: shared=False, prefill=True, staging=536870912
+GLM expert cache: bounded aging-frequency eviction enabled
+Production runtime: oMLX 0.7.1rc1, MLX 0.32.4
+DeepSeek MLX device: Device(gpu, 0)
+Local prefill protection: duration_enabled=True memory_floor=0; work/memory guards retained
+GLM6 measured-memory policy: prediction-only rejection and adaptive shrinking disabled; full-chunk and actual memory checks retained; decode lookahead disabled
+GLM6 bounded decode lookahead: 2; native routing and slot writes retained
+INFO:omlx.settings:Initialized settings with base_path: /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16
+INFO:omlx.settings:Saved settings to /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/settings.json
+INFO:     Uvicorn running on http://127.0.0.1:8092 (Press CTRL+C to quit)
+[33moMLX - LLM inference, optimized for your Mac[0m
+[33m├─ https://github.com/jundot/omlx[0m
+[33m└─ Version: 0.7.1rc1[0m
+
+Saved CLI arguments to settings.json
+Log directory: /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/logs
+Binding server at http://127.0.0.1:8092
+Base path: /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16
+Model directories: /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/models, /Users/4sanalyticsnmodelling/.cache/huggingface/hub
+Memory guard: on (tier: custom)
+Configured prefill_step_size=8192
+INFO:omlx.server:CORS origins: ['*']
+INFO:omlx.model_settings:Loaded settings for 1 models
+INFO:omlx.model_discovery:glm5_next detected as mlx-vlm native text model
+INFO:omlx.model_discovery:Discovered model: GLM-5.3-Flash-MLX-6bit (type: vlm, engine: vlm, size: 254.39GB, text-only: 253.29GB)
+INFO:omlx.engine_pool:Discovered 1 models
+INFO:omlx.server:Server initialized with 1 models
+INFO:omlx.server:Default model: GLM-5.3-Flash-MLX-6bit
+INFO:omlx.server:Memory guard tier: custom (guard on)
+INFO:omlx.server:Default max tokens: 32768
+INFO:omlx.server:HF Downloader initialized
+INFO:omlx.server:ModelScope SDK not installed, MS downloader disabled
+INFO:omlx.server:oQ Quantizer initialized
+INFO:omlx.server:HF Uploader initialized
+INFO:     Started server process [90573]
+INFO:     Waiting for application startup.
+WARNING:omlx.process_memory_enforcer:Metal cap (107.5GB, Apple max_recommended_working_set_size) is below the oMLX static ceiling (126.0GB); leaving Apple's default Metal cap active because iogpu.wired_limit_mb is unset. Raise it with: sudo sysctl iogpu.wired_limit_mb=124518
+INFO:omlx.process_memory_enforcer:Process memory enforcer started (tier=custom, ceiling=106.2GB, interval=1.0s)
+INFO:     Application startup complete.
+INFO:omlx.engine_pool:Loading model: GLM-5.3-Flash-MLX-6bit
+INFO:omlx.utils.model_loading:M5 sorted gather_qmm reroute installed (issue #2267)
+INFO:omlx.patches.mlx_lm_mtp.qwen35_model:Qwen3.5/3.6 MTP model patch applied (PR 990)
+INFO:omlx.patches.mlx_lm_mtp.nemotron_h_chain:nemotron_h MTP chain patch applied (depth-k drafting, sequential fused verify, replay-free rollback)
+INFO:omlx.patches.qwen35_verify_qmm:MTP verify qmm patch applied (rows 2..6 split-K, 7..8 sg8, 9..24 mma)
+INFO:omlx.utils.model_loading:Speculative backend selected for /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/models/GLM-5.3-Flash-MLX-6bit: Lightning MTP (model_type=glm5_next, active)
+INFO:omlx.patches.mlx_vlm_mtp.qwen35_vlm_model:Patched mlx_vlm.models.qwen3_5.Model.sanitize for MTP
+INFO:omlx.patches.mlx_vlm_mtp.qwen35_moe_vlm_model:Patched mlx_vlm.models.qwen3_5_moe.Model.sanitize for MTP
+INFO:omlx.patches.mlx_vlm_inkling_compat:Inkling mlx-vlm compatibility patch applied
+INFO:omlx.utils.model_loading:mlx-vlm MTP sanitize patch applied for /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/models/GLM-5.3-Flash-MLX-6bit
+INFO:omlx.patches.mlx_vlm_mtp.glm5_next_vlm_runtime:mlx-vlm GLM-5.3 (glm5_next) runtime MTP patch applied
+INFO:omlx.utils.model_loading:mlx-vlm runtime MTP patch applied for /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/models/GLM-5.3-Flash-MLX-6bit
+INFO:omlx.engine.vlm:glm5_next pre-quantization sanitize active for GLM-5.3-Flash-MLX-6bit
+INFO:omlx.patches.mlx_vlm_mtp.glm5_next_vlm_runtime:glm5_next sanitize: preserved 59 pre-converted mtp.* tensors
+INFO:omlx.patches.mlx_vlm_mtp.glm5_next_vlm_runtime:glm5_next sanitize: no nextn MTP layer in checkpoint
+INFO:omlx.patches.mlx_vlm_mtp.glm5_next_vlm_runtime:glm5_next sanitize: preserved 59 pre-converted mtp.* tensors
+INFO:omlx.patches.mlx_vlm_mtp.glm5_next_vlm_runtime:glm5_next sanitize: no nextn MTP layer in checkpoint
+INFO:omlx.patches.deepseek_v4.moe_offload:deepseek_v4 moe expert offload: wrapped 42 layers at 35.0% residency (expert tables: 247.33 GB total, 86.74 GB resident), draft head resident
+Mode: Multi-model serving (continuous batching + paged SSD cache)
+paged SSD cache: /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/cache (max: 64.0GB)
+Hot cache: 2.0GB (in-memory)
+Starting server at http://127.0.0.1:8092
+GLM6 production residency verified: 42 x 101/288 slots, fixed uniform 35%; existing MTP head resident
+INFO:omlx.engine.vlm:moe expert offload active (42 layers): skipping gate/up fusion on the VLM path
+INFO:omlx.engine.vlm:Vision feature cache enabled (SSD: /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/cache/vision_features)
+INFO:omlx.scheduler:Loaded 2 additional EOS token(s) from generation_config.json: {154827, 154829}
+INFO:omlx.scheduler:Enlarging paged cache block_size=256 to 8192 for ArraysCache hybrid model (reduces boundary snapshot overhead)
+INFO:omlx.scheduler:Decode KV cache materialization interval set to 256 tokens
+INFO:omlx.memory_monitor:MemoryMonitor initialized (estimator-only, eviction disabled)
+INFO:omlx.scheduler:paged SSD-only mode: max_blocks=100000, block_size=8192 tokens
+INFO:omlx.cache.paged_cache:PagedCacheManager initialized: block_size=8192, initial_blocks=256, max_blocks=100000, max_tokens=819200000
+INFO:omlx.cache.paged_ssd_cache:Scanning SSD cache directory: /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/cache
+INFO:omlx.cache.paged_ssd_cache:SSD cache scan complete: scanned=0, indexed=0, errors=0, total_size=0 B, gdn_sidecars=0
+INFO:omlx.cache.paged_ssd_cache:PagedSSDCacheManager initialized: dir=/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/cache, max_size=64.00 GB, hot_cache=2.00 GB, auto_size=False, existing_files=0, disk_free=781.89 GB, cache_used=0 B, incompatible_files=0
+INFO:omlx.cache.paged_cache:paged SSD cache manager connected to PagedCacheManager
+INFO:omlx.scheduler:paged SSD cache enabled: cache_dir=/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/cache, max_size=64.00 GB, block_size=8192 tokens
+INFO:omlx.scheduler:paged SSD cache enabled: /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/cache, block_size=8192, max_blocks=100000
+INFO:omlx.engine_core:Engine started
+INFO:omlx.patches.sdpa256_attention:sdpa256 attention patch applied (head_dim=256 prefill, kv_len>=8192, always force bounded for qualifying calls (#2025))
+INFO:omlx.patches.qwen35_fa256_attention:Qwen FA-256 dispatch budget auto-calibrated: 4.34e+09 work/s -> 43375972 (target 10ms/dispatch)
+INFO:omlx.patches.qwen35_fa256_attention:Qwen3.5/3.6 FA-256 steel attention patch applied (min_kv_len=2048, q_block=32, k_block=8, dispatch_budget=43375972)
+INFO:omlx.patches.qwen35_gdn_prework:mlx-vlm Qwen3.5 GDN q/k normalization follows mlx-lm normalize_qk
+INFO:omlx.patches.qwen35_gdn_verify_fused:GDN verify replay commit patch applied
+INFO:omlx.patches.qwen35_gdn_prework:Qwen fused GDN prework patch applied
+INFO:omlx.patches.qwen35_verify_sdpa_split:Qwen3.5/3.6 verify-width causal vector attention patch applied
+INFO:omlx.patches.qwen35_gdn_chunked:Qwen3.5/3.6 GDN prefill kernel patch applied (Metal, impl=pipelined, min_t=64)
+INFO:omlx.patches.qwen35_q4_mlp:Qwen quantized MLP prefill patch applied (variant=8, min_tokens=2048, q8_min_tokens=16384)
+INFO:omlx.patches.qwen35_q4_mlp:Muse Glimmer quantized prefill patch applied (variant=8, min_tokens=2048, q8_min_tokens=16384)
+INFO:omlx.patches.qwen35_moe_router:Qwen MoE fused router top-k patch applied
+INFO:omlx.patches.qwen35_moe_routed_decode:Qwen MoE fused routed-expert decode patch applied
+INFO:omlx.patches.qwen35_moe_weighted_sum:Qwen3.5/3.6 MoE weighted-sum patch applied (min_tokens=1024)
+INFO:omlx.patches.qwen35_ragged_decode:qwen3_5 ragged decode threadgroup fallback patch applied
+INFO:omlx.cache.paged_ssd_cache:PagedSSDCacheManager updated layer cache signature (45 layers, 2 unique types, turboquant_kv_bits=None, cachelist_subtypes=yes, numerics=None)
+INFO:omlx.engine.vlm:VLM tool calling enabled: parser=glm47
+INFO:omlx.engine.vlm:VLMBatchedEngine loaded: /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/reviews/glm6-speed-20261017/compare-width2-16/models/GLM-5.3-Flash-MLX-6bit
+INFO:omlx.engine_pool:Loaded model: GLM-5.3-Flash-MLX-6bit (actual: 93.38GB, local estimate: 104.83GB, full model: 254.39GB, total: 104.83GB)
+INFO:omlx.admin.routes:Manually loaded model: GLM-5.3-Flash-MLX-6bit
+INFO:omlx.engine.vlm:Structured output requires xgrammar. Install with: pip install 'omlx[grammar]'
+INFO:omlx.scheduler:Enabled boundary cache snapshots for stateful non-sliceable cache layers
+INFO:omlx.cache.prefix_cache:GDN SSD sidecar is unsupported for layout ['ArraysCache', 'ArraysCache', 'ArraysCache', 'CacheList', 'ArraysCache', 'ArraysCache', 'ArraysCache', 'CacheList', 'ArraysCache', 'ArraysCache', 'ArraysCache', 'CacheList', 'ArraysCache', 'ArraysCache', 'ArraysCache', 'CacheList', 'ArraysCache', 'ArraysCache', 'ArraysCache', 'CacheList', 'ArraysCache', 'ArraysCache', 'ArraysCache', 'CacheList', 'ArraysCache', 'ArraysCache', 'ArraysCache', 'CacheList', 'ArraysCache', 'ArraysCache', 'ArraysCache', 'CacheList', 'ArraysCache', 'ArraysCache', 'ArraysCache', 'CacheList', 'ArraysCache', 'ArraysCache', 'ArraysCache', 'CacheList', 'ArraysCache', 'ArraysCache', 'ArraysCache', 'CacheList', 'ArraysCache']; falling back to embedded GDN snapshots
+MEASURED guard: requested=8192 allowed=8192 current_bytes=100312050320 ceiling_bytes=114000000000 kv_len=0
+INFO:omlx.patches.glm53_kda_prework:GLM-5.3 fused KDA prefill prework and norm-gate engaged
+INFO:omlx.scheduler:Reserved prefill capacity for 16384 tokens across 22 caches (+0.09GB)
+MEASURED guard: requested=8190 allowed=8190 current_bytes=103929751037 ceiling_bytes=114000000000 kv_len=8192
+MEASURED guard: requested=1 allowed=1 current_bytes=103956741375 ceiling_bytes=114000000000 kv_len=16382
+INFO:omlx.patches.mlx_lm_mtp.batch_generator:MTP path activated for uid=0 (model has mtp_forward, batch=1, primed=16384)
+INFO:omlx.patches.mlx_lm_mtp.batch_generator:MTP[0] finish=length tokens=128 cycles=63 tok/cycle=2.03 accept=48/60 (80.0%) depth[d1=48/60] copy=15/21 in 3 emits[init=2,draft=63,bonus=50,verify=13] timing[backbone=47729.5ms mtp=83.7ms sample=2.8ms cache=34.5ms]
+INFO:omlx.scheduler:MoE offload: request=ec8bf94f-0cef-4eaa-bb23-ca10cddd858c hit_rate=50.8% hits=32977 misses=31878 fetched=651816.9 MB prompt=16384 output=128
+INFO:omlx.scheduler:Using boundary cache snapshot for ec8bf94f-0cef-4eaa-bb23-ca10cddd858c: storing 16382/16512 tokens (tail terminal, 1 intermediate snapshots)
+INFO:omlx.scheduler:Cache phase timings: cleanup_finished_sync=0.0ms/1, prefix_cache_lookup=1.4ms/1, store_cache_main_boundary=25.8ms/1, store_cache_main_collect=0.0ms/1, store_cache_main_dispatch=12.0ms/1
+INFO:omlx.server:Chat completion: model=GLM-5.3-Flash-MLX-6bit, 128 tokens in 210.49s (2.7 tok/s), prompt: 16384, finish_reason=length, max_tokens=128, request_max_tokens=128, stream_model_ttft=162.30s, stream_visible_ttft=162.55s
+INFO:omlx.scheduler:Prefix cache restore for ae390a7d-9c32-4574-8aaa-5f350f65b8fc: source=paged cached=16382 suffix=2 blocks=2 lookup=1.393ms reconstruct=44.428ms promote=True
+INFO:omlx.scheduler:Reserved prefill capacity for 16384 tokens across 22 caches (+0.00GB)
+MEASURED guard: requested=1 allowed=1 current_bytes=103686530883 ceiling_bytes=114000000000 kv_len=16382
+INFO:omlx.patches.mlx_lm_mtp.batch_generator:MTP path activated for uid=1 (model has mtp_forward, batch=1, primed=16384)
+INFO:omlx.patches.mlx_lm_mtp.batch_generator:MTP[1] finish=length tokens=128 cycles=63 tok/cycle=2.03 accept=48/60 (80.0%) depth[d1=48/60] copy=15/21 in 3 emits[init=2,draft=63,bonus=50,verify=13] timing[backbone=38445.5ms mtp=82.7ms sample=2.7ms cache=34.5ms]
+INFO:omlx.scheduler:MoE offload: request=ae390a7d-9c32-4574-8aaa-5f350f65b8fc hit_rate=79.0% hits=32610 misses=8686 fetched=177604.7 MB prompt=16384 output=128
+INFO:omlx.scheduler:Skipping cache store for ae390a7d-9c32-4574-8aaa-5f350f65b8fc: reason=boundary_snapshot_unavailable tokens=16384 prompt_tokens=16384 cached_tokens=16382 uncached_prompt_tokens=2 block_size=8192 available_boundaries=0
+INFO:omlx.scheduler:Cache phase timings: cleanup_finished_sync=0.1ms/2, prefix_cache_lookup=2.8ms/2, prefix_cache_reconstruct=44.4ms/1, store_cache_main_boundary=25.8ms/2, store_cache_main_collect=0.0ms/1, store_cache_main_dispatch=12.0ms/1, store_cache_worker_sync=0.3ms/1
+INFO:omlx.server:Chat completion: model=GLM-5.3-Flash-MLX-6bit, 128 tokens in 39.77s (3.3 tok/s), prompt: 16384, finish_reason=length, max_tokens=128, request_max_tokens=128, stream_model_ttft=1.15s, stream_visible_ttft=1.15s
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:omlx.process_memory_enforcer:Process memory enforcer stopped
+INFO:omlx.server:Process memory enforcer stopped
+INFO:omlx.admin.hf_downloader:HF Downloader shut down
+INFO:omlx.server:HF Downloader stopped
+INFO:omlx.engine_pool:Unloading model: GLM-5.3-Flash-MLX-6bit (immediate abort)
+INFO:omlx.engine_core:Engine stopped
+INFO:omlx.scheduler:Scheduler shutdown initiated...
+INFO:omlx.cache.paged_ssd_cache:Shutting down PagedSSDCacheManager...
+INFO:omlx.scheduler:Scheduler shutdown completed
+INFO:omlx.cache.paged_cache:PagedCacheManager cleared (reset to 256 initial blocks)
+INFO:omlx.scheduler:Deep reset completed - all caches cleared
+INFO:omlx.engine.vlm:VLMBatchedEngine stopped
+INFO:omlx.engine_pool:Settle for 'GLM-5.3-Flash-MLX-6bit' stalled at 13.91GB across two rounds (need>=99.59GB); skipping further settle rounds
+INFO:omlx.engine_pool:Engine pool shutdown complete
+INFO:omlx.server:Engine pool shutdown
+INFO:     Application shutdown complete.
+INFO:     Finished server process [90573]
