@@ -30,8 +30,12 @@ local models. All installed profiles receive one engine, bounded outputs, and
 injected context-hygiene rules through `ctx.systemPrompt.section`.
 
 Global installed code lives under `~/.local/share/deepseek-harness/tool-env/watchdog`.
-Each future workspace gets independent **`.dsh-watchdog/`** notes, state, sessions,
-checkpoints, caches and diagnostics. Instructions name that workspace's absolute
+Each ordinary `dsh`/`dst` launch gets independent
+**`.dsh-watchdog/instances/<UUID>/`** notes, state, sessions, checkpoints, caches
+and diagnostics. This applies to every model and Herdr session/pane, including
+recreated sessions with the same name. A failed historical compaction cannot
+block a new launch. The launcher prints its instance ID on startup.
+Instructions name that instance's absolute
 notes directory. No per-project AGENTS.md edit is needed. Add `.dsh-watchdog/` to
 your project's ignore rules if desired; checkpointing always excludes its own
 state directory. Existing historical sessions are preserved in their original
@@ -98,6 +102,22 @@ away. Supervisor diagnostics rotate through four 4MB files. The supervisor never
 compacts or submits the original task a second time.
 
 ## Recovery
+
+Ordinary launches start a new conversation. To resume a specific saved watchdog
+instance, run `dst --watchdog-resume <UUID>` (or `dsh` with the same option).
+If using the TUI's native `--resume` selector, also supply the watchdog instance
+that contains that conversation, for example `dst --watchdog-resume <UUID> --resume`.
+The supervisor strips this option before calling the native launcher, selects
+that instance's session store and resumes its recorded current session. Process
+restarts within one supervised launch keep the same instance automatically.
+To select the earlier workspace-wide store, use `dst --watchdog-resume legacy`.
+Its state, original session files and checkpoints remain in `.dsh-watchdog/`;
+they are never reset or migrated by starting a new conversation. Explicit resume
+of an interrupted transaction still requires the reconciliation described below.
+An invalid or missing resume ID fails without creating replacement state.
+Nested shell/agent launches also get fresh instances even when supervision
+variables are inherited. Only the TUI's immediate internal `dsh` handoff shares
+its supervising instance; automatic child restarts likewise retain their state.
 
 `<notes-directory>/state.json` is independent of the dsh process and includes the current
 session, request tokens, measurement baseline, checkpoint, compaction counts,

@@ -1,0 +1,11 @@
+# Watchdog session isolation
+
+Verified cause: the global supervisor previously reused workspace-wide state and rejected any blocked/interrupted compaction. Herdr session deletion leaves that independent state intact. Checkpoint 5d464af9-7f14-4d50-be29-0a427f63e48f records a failed summary request (Request timed out); two other sessions have interrupted compaction starts. Native JSONL persistence + Session.fromRestore validate all four saved sessions. No transaction was declared complete or silently retried.
+
+Implemented and globally installed: each ordinary dsh/dst/dsh-tui launch owns .dsh-watchdog/instances/UUID. Explicit --watchdog-resume UUID|legacy selects historical state and preserves reconciliation requirements. Automatic process restarts keep the same instance. Nested shell launches cannot inherit a supervisor bypass; only the immediate native TUI Node handoff can reuse supervision. Native --resume requires its corresponding watchdog instance selection.
+
+Verification: 10 Python tests and 25 Node tests pass (python-tests.log, node-tests.log). Installed smoke launches with /usr/bin/true create two distinct instances despite blocked historical state and inherited stale environment. These do not launch models or measure inference/summary reliability. All prior native session files, checkpoint receipts and workspace state match pre-install SHA256 (history-hashes.json, installed-smoke.json). Installed supervisor matches repository source. No previous session or checkpoint removed.
+
+Independent fresh-context verifier: initial FAIL reproduced inherited wrapper bypass; fixed with immediate-parent handoff validation. Final verdict PASS: independently reran 10 tests, confirmed launcher isolation, both native handoff paths, explicit recovery gate and installer syntax. Source references: tools/dsh-watchdog/global-supervisor.py (internal_handoff/select_instance/main); install-global.mjs (wrapper generation).
+
+Scope: harness tooling only; no ecosys science/build/solver changes, no model/full-run launch. User explicitly requested prevention across all local-model/Herdr sessions, authorizing global installed-launcher/config updates outside the scientific workspace containment rule. Installer retains its existing repository-local backups. Unrelated audit/runs/zig017-replay-h4556-20261017 remains unstaged.

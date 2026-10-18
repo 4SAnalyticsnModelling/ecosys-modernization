@@ -1,0 +1,18 @@
+{
+  "results": [
+    {
+      "modelArgument": "model-a",
+      "exit": 0,
+      "instance": "af8ae50f-eeae-4287-a7a2-794b56879433",
+      "launcher": "/usr/bin/true (no model started)"
+    },
+    {
+      "modelArgument": "model-b",
+      "exit": 0,
+      "instance": "56276067-b173-4961-a081-584b26e5e1dc",
+      "launcher": "/usr/bin/true (no model started)"
+    }
+  ],
+  "priorHistoryUnchanged": true,
+  "installedSourceMatches": true
+}

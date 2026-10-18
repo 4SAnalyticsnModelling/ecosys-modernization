@@ -38,7 +38,8 @@ for(const name of ['dsh','dst']) {
  if(!fs.existsSync(original)) fs.copyFileSync(file,original);
  fs.chmodSync(original,0o755);
  const q=value=>"'"+value.replaceAll("'","'\\''")+"'";
- fs.writeFileSync(file,`#!/bin/zsh\n# Global DeepSeek-only watchdog (original launcher preserved).\nfor arg in "$@"; do\n case "$arg" in --help|-h|--version|-V|help|version|doctor|update|plugin|--dump-*) exec ${q(original)} "$@";; esac\ndone\nif [[ "\${DSH_WATCHDOG_SUPERVISED:-}" == 1 ]]; then exec ${q(original)} "$@"; fi\nexec /usr/bin/python3 ${q(path.join(target,'global-supervisor.py'))} ${q(original)} "$@"\n`,{mode:0o755});
+ const handoff=name==='dsh' ? `if /usr/bin/python3 ${q(path.join(target,'global-supervisor.py'))} --watchdog-internal-handoff "$PPID"; then exec ${q(original)} "$@"; fi\n` : '';
+ fs.writeFileSync(file,`#!/bin/zsh\n# Global DeepSeek-only watchdog (original launcher preserved).\nfor arg in "$@"; do\n case "$arg" in --help|-h|--version|-V|help|version|doctor|update|plugin|--dump-*) exec ${q(original)} "$@";; esac\ndone\n${handoff}exec /usr/bin/python3 ${q(path.join(target,'global-supervisor.py'))} ${q(original)} "$@"\n`,{mode:0o755});
 }
 execFileSync('node',[path.join(installed,'configure.mjs')],{cwd:repo,env:{...process.env,DSH_INSTALLED_ROOT:installed},stdio:'inherit'});
 for(const item of receipt)item.afterHash=crypto.createHash('sha256').update(fs.readFileSync(item.file)).digest('hex');

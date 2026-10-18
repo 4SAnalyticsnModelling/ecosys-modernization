@@ -5,13 +5,61 @@ import json
 import os
 from pathlib import Path
 import signal
+import shlex
 import subprocess
 import sys
 import time
+import uuid
 
 HERE=Path(__file__).resolve().parent
 ROOT=Path.cwd()/'.dsh-watchdog'
 INSTALLED=HERE.parents[1]
+
+
+def internal_handoff(parent_pid, env):
+    """Only the installed TUI's immediate Node child shares its supervisor."""
+    root=Path(env.get('DSH_WATCHDOG_ROOT',''))
+    if env.get('DSH_WATCHDOG_SUPERVISED') != '1' or not root.is_absolute():return False
+    if not (root/'state.json').is_file() or env.get('DSH_TUI_SESSION_ROOT') != str(root/'sessions'):return False
+    try:
+        command=subprocess.check_output(['/bin/ps','-p',str(int(parent_pid)),'-o','command='],text=True)
+        argv=shlex.split(command)
+    except (ValueError,OSError,subprocess.CalledProcessError):return False
+    if len(argv)<2 or Path(argv[0]).name != 'node':return False
+    script=Path(argv[1])
+    profile_root=Path.home()/'.dsh/profiles'
+    if not script.is_absolute() or not script.is_relative_to(profile_root):return False
+    relative=script.relative_to(profile_root).parts
+    suffixes=[('node_modules','@deepseek-harness-tui','dsh-tui','bin','dsh-tui.js'),
+              ('node_modules','@deepseek-harness-tui','dsh-tui','lib','types','dsh-adapter','host-entry.js')]
+    return any(relative[1:] == suffix for suffix in suffixes)
+
+
+def select_instance(base, arguments):
+    """Fresh launches own fresh state; recovery is an explicit selection."""
+    args=list(arguments)
+    resume=None
+    for index,arg in enumerate(args):
+        if arg == '--watchdog-resume' or arg.startswith('--watchdog-resume='):
+            if arg == '--watchdog-resume':
+                if index+1 >= len(args):raise ValueError('--watchdog-resume needs an instance ID or legacy')
+                resume=args[index+1];del args[index:index+2]
+            else:
+                resume=arg.split('=',1)[1];del args[index]
+            break
+    if any(arg.startswith('--watchdog-resume') for arg in args):
+        raise ValueError('Specify --watchdog-resume only once')
+    if resume is not None:
+        if resume != 'legacy':
+            try:
+                if str(uuid.UUID(resume)) != resume:raise ValueError()
+            except ValueError:raise ValueError('Invalid watchdog instance ID') from None
+        root=base if resume == 'legacy' else base/'instances'/resume
+        if not (root/'state.json').is_file():raise ValueError('No saved watchdog instance: '+resume)
+        return root,args,False
+    root=base/'instances'/str(uuid.uuid4())
+    root.mkdir(parents=True,exist_ok=False)
+    return root,args,True
 
 
 def save(file,data):
@@ -51,9 +99,15 @@ def diagnostic(reason):
 
 
 def main():
+    global ROOT
     if len(sys.argv)<2:sys.exit('Expected original launcher and arguments')
+    if sys.argv[1] == '--watchdog-internal-handoff':
+        return 0 if len(sys.argv)==3 and internal_handoff(sys.argv[2],os.environ) else 1
     version=json.loads((INSTALLED/'runtime/node_modules/@deepseek-ai/dsh/package.json').read_text())['version']
     if version!='0.2.0-rc.2':sys.exit('Unverified dsh version '+version+'; revalidate watchdog contracts before use')
+    base=ROOT
+    try:ROOT,arguments,fresh=select_instance(base,sys.argv[2:])
+    except ValueError as error:sys.exit(str(error))
     ROOT.mkdir(parents=True,exist_ok=True)
     lock=(ROOT/'supervisor.lock').open('a')
     try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
@@ -68,10 +122,15 @@ def main():
                 dest=ROOT/file
                 if not dest.exists():dest.write_text((HERE/'templates'/file).read_text())
             save(state_file,{'schema':1,'sessions':{}})
-        headless=any(arg=='headless' or arg=='--profile=headless' for arg in sys.argv[2:])
+        save(ROOT/'instance.json',{'id':ROOT.name if ROOT != base else 'legacy',
+             'root':str(ROOT),'herdrSession':os.environ.get('HERDR_SESSION'),
+             'herdrPane':os.environ.get('HERDR_PANE_ID'),'freshLaunch':fresh})
+        print('Watchdog instance: '+('legacy' if ROOT == base else ROOT.name),file=sys.stderr,flush=True)
+        headless=any(arg=='headless' or arg=='--profile=headless' for arg in arguments)
         env=dict(os.environ,DSH_WATCHDOG_SUPERVISED='1',DSH_WATCHDOG_ROOT=str(ROOT),
                  DSH_WATCHDOG_RUNTIME=str(INSTALLED/'runtime'),DSH_WATCHDOG_AUTO_RESUME='0' if headless else '1',
                  DSH_TUI_SESSION_ROOT=str(ROOT/'sessions'),DSH_TELEMETRY_MODE='DISABLED')
+        env.pop('DSH_TUI_RESUME_SESSION',None)
         for key,sub in [('TMPDIR','tmp'),('XDG_CACHE_HOME','cache'),('UV_CACHE_DIR','uv-cache'),('HF_HOME','hf-cache')]:
             dest=ROOT/sub;dest.mkdir(exist_ok=True);env[key]=str(dest)
         sf=ROOT/'supervisor-state.json'
@@ -84,7 +143,7 @@ def main():
                     sys.exit('Checkpoint reconciliation required: '+str(s.get('checkpoint')))
             if not headless and state.get('currentSession'):
                 env['DSH_TUI_RESUME_SESSION']=state['currentSession']
-            child=subprocess.Popen(sys.argv[1:],env=env)
+            child=subprocess.Popen([sys.argv[1],*arguments],env=env)
             stopping=False
             def stop(sig,_frame):
                 nonlocal stopping
