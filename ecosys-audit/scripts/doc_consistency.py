@@ -6,7 +6,7 @@ from check_gate import STAGE_ALIASES
 from skill_sync import sync
 from cycle_runner import RESULTS
 
-ACTIVE = ['AGENTS.md','README.md','CLAUDE.md','.agent/protocol.md','.agent/backlog.md',
+ACTIVE = ['AGENTS.md','PROMPT.md','README.md','CLAUDE.md','.agent/protocol.md','.agent/backlog.md',
           '.agent/README.md','.agent/continuous-autonomy.md','.agent/briefs/verifier.md',
           '.agent/playbooks/convergence-and-balance.md','.agent/templates/cycle.md',
           'ecosys-ng_ottawa_qualification_execution_plan.md','ecosys-audit/PROJECT_CONTRACT.md',
