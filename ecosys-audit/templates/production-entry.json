@@ -10,50 +10,50 @@
       "id": "source-audit-reviewed",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "current-source-integration",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "bounded-solver-and-rollback",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "independent-conservation",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "releasefast-critical-safety",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "short-integration-completion",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "complete-output-schema",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     }
   ]
 }

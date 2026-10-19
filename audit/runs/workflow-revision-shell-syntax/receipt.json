@@ -1,0 +1,55 @@
+{
+  "argv": [
+    "bash",
+    "-n",
+    "sync-main.sh",
+    "scripts/project.sh"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization",
+  "elapsed_seconds": 0.244,
+  "environment": {
+    "TMPDIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp",
+    "UV_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.uv-cache",
+    "XDG_CACHE_HOME": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.cache",
+    "ZIG_GLOBAL_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/.zig-cache-global"
+  },
+  "executable_sha256": "d59c6f2312e551e9c46497329d435b6ec74fbc46e9155b84170f377127ed004e",
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "machine": "arm64",
+  "parent_pid": 53664,
+  "pid": 53672,
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "process_start": "Mon Oct 19 11:27:41 2026",
+  "started_unix": 1792430861.7215722,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/workflow-revision-shell-syntax/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/workflow-revision-shell-syntax/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": null,
+  "toolchain": {
+    "python3": {
+      "exit_code": 0,
+      "path": "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3",
+      "version": "Python 3.11.5"
+    },
+    "uv": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/uv",
+      "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+    },
+    "zig": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/zig",
+      "version": "0.17.0"
+    }
+  }
+}

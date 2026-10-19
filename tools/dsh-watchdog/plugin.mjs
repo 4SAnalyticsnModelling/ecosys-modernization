@@ -152,8 +152,7 @@ export default class WatchdogCompaction extends Basic {
           throw Error('Model isolation requires a fresh native conversation; previous session remains preserved');
         if (['checkpointing','compacting','blocked'].includes(old.phase)) throw Error('Watchdog recovery required');
         owner.update(agent, {phase:'running', provider:options.provider, model:options.model,
-          requestTools:options.tools?.length ?? 0, toolSchemaBytes:Buffer.byteLength(JSON.stringify(options.tools ?? [])),
-          taskActive:true, lastFinish:null, inputTokens:m.totalTokens, meterBaseline:m.baseline.kind, logRevision:m.logRevision,
+          taskActive:true, lastFinish:null, logRevision:m.logRevision,
           requestAt:new Date().toISOString()});
         if (m.totalTokens >= LIMIT) {
           yield {type:'finish',reason:{kind:'error',failure:{code:'WATCHDOG_BOUNDARY',message:'75K request boundary; rebuild after native compaction'}}};
@@ -162,10 +161,9 @@ export default class WatchdogCompaction extends Basic {
         const started = performance.now(); let first = true;
         for await (const chunk of next()) {
           if (first && /delta$/.test(chunk.type)) {
-            first = false; owner.update(agent,{firstDeltaMs:performance.now()-started});
+            first = false;
           }
-          if (chunk.type === 'finish') owner.update(agent,{lastFinish:chunk.reason.kind,
-            requestMs:performance.now()-started});
+          if (chunk.type === 'finish') owner.update(agent,{lastFinish:chunk.reason.kind});
           yield chunk;
         }
       }};
@@ -180,14 +178,15 @@ export default class WatchdogCompaction extends Basic {
         return {kind:'retry'};
       }
       if (failure.code === 'CONTEXT_WINDOW_EXCEEDED') {
-        if ((this.record(agent).overflowRetries ?? 0) >= 1) throw Error('Repeated context overflow; manual diagnosis required');
+        if ((this.record(agent).overflowRetries ?? 0) >= 1) throw Error('Repeated context overflow; preserve checkpoint and recover in a fresh context');
         this.update(agent,{overflowRetries:1});
         const result = await this.compactIfNeeded(agent,'context-overflow',signal);
         if (result) return {kind:'retry'};
       }
       const old = this.record(agent), signature = `${failure.code}:${failure.message}`;
       const count = repeatCount(old.failure, signature);
-      this.update(agent,{failure:{signature,count}, ...(count >= 3 ? {phase:'blocked'} : {})});
+      this.update(agent,{failure:{signature,count}});
+      if (count === 3) agent.followup(createUserMessage({source:{kind:'user'},content:[{type:'text',text:'Repeated failure: reconcile durable evidence, reduce the reproducer or change approach. Continue the objective; do not retry the same failed operation blindly.'}]}));
       return next();
     });
     this.ctx.on('session/event', (session, event) => {
@@ -208,7 +207,8 @@ export default class WatchdogCompaction extends Basic {
       if (!agent) return;
       const signature = crypto.createHash('sha256').update(JSON.stringify({name:event.data.name, arguments:event.data.arguments})).digest('hex');
       const count = repeatCount(this.record(agent).toolLoop, signature);
-      this.update(agent,{toolLoop:{signature,count}, ...(count >= 8 ? {phase:'blocked'} : {})});
+      this.update(agent,{toolLoop:{signature,count}});
+      if (count === 8) agent.followup(createUserMessage({source:{kind:'user'},content:[{type:'text',text:'Repeated tool operation: inspect the existing result and live process identity. For a healthy long job keep observing; otherwise choose a smaller decisive experiment. Continue without duplicating side effects.'}]}));
     });
   }
   async compactIfNeeded(agent, trigger, signal) {
@@ -219,7 +219,7 @@ export default class WatchdogCompaction extends Basic {
     const info = await this.ctx.llm.resolveModelInfo(target.provider,target.model,signal);
     validateRoute(info.context?.contextWindow,target.maxTokens ?? info.defaultMaxTokens);
     const checkpoint = crypto.randomUUID(), dir = path.join(this.root(agent),'checkpoints',checkpoint);
-    this.update(agent,{phase:'checkpointing',checkpoint,trigger,beforeTokens:before.totalTokens});
+    this.update(agent,{phase:'checkpointing',checkpoint,trigger});
     try {
       fs.mkdirSync(dir,{recursive:true});
       if (!await this.ctx.sessions.flush(agent.session)) throw Error('No native persistence listener; refusing compaction');
@@ -231,14 +231,14 @@ export default class WatchdogCompaction extends Basic {
       syncTree(dir);
       const parentFd = fs.openSync(path.dirname(dir),'r');
       try { fs.fsyncSync(parentFd); } finally { fs.closeSync(parentFd); }
-      atomic(path.join(dir,'receipt.json'),{checkpoint,sessionId:agent.session.id,trigger,beforeTokens:before.totalTokens,meterBaseline:before.baseline.kind,notesHash:memory.hash});
+      atomic(path.join(dir,'receipt.json'),{checkpoint,sessionId:agent.session.id,trigger,notesHash:memory.hash});
       this.update(agent,{phase:'compacting'});
       const result = await super.compactIfNeeded(agent,trigger,signal);
       const after = this.measure(agent);
       if (!result || after.totalTokens >= LIMIT) throw Error('One compaction did not relieve pressure');
       if (!await this.ctx.sessions.flush(agent.session)) throw Error('Native persistence disappeared');
-      atomic(path.join(dir,'completed.json'),{checkpoint,beforeTokens:before.totalTokens,afterTokens:after.totalTokens,trigger});
-      this.update(agent,{phase:'running',afterTokens:after.totalTokens,compactions:(this.record(agent).compactions ?? 0)+1});
+      atomic(path.join(dir,'completed.json'),{checkpoint,trigger,capacitySafe:true});
+      this.update(agent,{phase:'running',capacitySafe:true,compactions:(this.record(agent).compactions ?? 0)+1});
       return result;
     } catch (error) {
       this.update(agent,{phase:'blocked',error:String(error)});

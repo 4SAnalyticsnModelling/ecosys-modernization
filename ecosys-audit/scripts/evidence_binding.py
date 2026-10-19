@@ -18,8 +18,10 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import platform
 
 from workflow import ROOT, ProtocolError, digest, encoded, file_digest
+from project_runtime import content_digest, SOURCE_SCOPE as CANONICAL_SCOPE, toolchain
 
 SOURCE_SCOPE = ("ecosys-ng/src", "ecosys-ng/build.zig", "ecosys-ng/build.zig.zon")
 MANIFEST_ZIG = "ecosys-ng/src/io/checkpoint/manifest.zig"
@@ -72,14 +74,18 @@ def compute(root: Path, deck: str | None, build_mode: str | None, options: list[
     root = root.resolve()
     head = git(root, "rev-parse", "HEAD").decode().strip()
     binding = {
-        "schema_version": 1,
+        "schema_version": 2,
         "source_commit": head,
+        "source_digest": content_digest(root, CANONICAL_SCOPE),
+        "toolchain": toolchain(),
+        "target_host": {"system": platform.system(), "machine": platform.machine()},
         "source_dirty": dirty_source_digest(root),
         "deck": None if deck is None else {"path": deck, **tree_digest(root / deck)},
         "build": {"mode": build_mode, "options": sorted(options)},
         "checkpoint_schema_version": checkpoint_schema(root),
     }
-    binding["binding_id"] = digest(json.dumps(binding, sort_keys=True, separators=(",", ":")).encode())
+    identity = {k: v for k, v in binding.items() if k not in ("source_commit", "source_dirty")}
+    binding["binding_id"] = digest(json.dumps(identity, sort_keys=True, separators=(",", ":")).encode())
     return binding
 
 

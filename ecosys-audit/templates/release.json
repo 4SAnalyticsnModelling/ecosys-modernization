@@ -10,92 +10,92 @@
       "id": "source-audit-reviewed",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "production-entry-reviewed",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "clean-releasefast-build",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "full-deck-completion",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "all-output-comparison",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "feature-attribution-accepted",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "independent-conservation",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "edge-and-failure-tests",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "restart-and-repeatability",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "same-work-performance",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "memory-and-build-report",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "independent-release-review",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "reproducibility-and-scope-documentation",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     }
   ]
 }

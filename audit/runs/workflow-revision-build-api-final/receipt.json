@@ -1,0 +1,58 @@
+{
+  "argv": [
+    "zig",
+    "build",
+    "--cache-dir",
+    ".zig-cache",
+    "-Dtest-filter=workflow-probe",
+    "--help"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng",
+  "elapsed_seconds": 0.902,
+  "environment": {
+    "TMPDIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp",
+    "UV_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.uv-cache",
+    "XDG_CACHE_HOME": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.cache",
+    "ZIG_GLOBAL_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/.zig-cache-global"
+  },
+  "executable_sha256": "18fbdb9fb852846f0e91008c5b99c9c18db1115671701c2890bf84a44ddc202d",
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "machine": "arm64",
+  "parent_pid": 53575,
+  "pid": 53584,
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "process_start": "Mon Oct 19 11:26:59 2026",
+  "source_digest": "dd042f46ce38f7240b360e5fbd3d03c4f477ccfad43917da8766594e285c4ca5",
+  "started_unix": 1792430818.894079,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/workflow-revision-build-api-final/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/workflow-revision-build-api-final/stdout.log",
+    "sha256": "296444b5e8ead9de9699acb3498ad9eb91761a718cb7d146230bea77a8d505f6"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": null,
+  "toolchain": {
+    "python3": {
+      "exit_code": 0,
+      "path": "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3",
+      "version": "Python 3.11.5"
+    },
+    "uv": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/uv",
+      "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+    },
+    "zig": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/zig",
+      "version": "0.17.0"
+    }
+  }
+}

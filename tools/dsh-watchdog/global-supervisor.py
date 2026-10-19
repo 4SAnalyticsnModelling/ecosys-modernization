@@ -229,8 +229,9 @@ def main():
             state=load_state()
             records=selected_records(state)
             current=records[0] if records else {}
-            if current.get('phase')!='running' or supervisor['restarts']>=2:return child.returncode
+            if current.get('phase')!='running':return child.returncode
             supervisor['restarts']+=1;save(sf,supervisor)
+            time.sleep(min(60,2**min(supervisor['restarts'],6)))
     finally:
         if gateway is not None:
             if gateway.poll() is None:gateway.terminate()

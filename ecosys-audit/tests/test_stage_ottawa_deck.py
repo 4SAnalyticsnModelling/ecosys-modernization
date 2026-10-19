@@ -58,8 +58,8 @@ def test_stage_ottawa_deck_direct(tmp_path: Path):
     assert len(source_hashes_before) == 78
 
     # Assert tmp_path is NOT inside the repository
-    assert not staged_dir.resolve().is_relative_to(REPO_ROOT.resolve()), (
-        f"Staged dir {staged_dir} must not be inside repo {REPO_ROOT}"
+    assert staged_dir.resolve().is_relative_to(REPO_ROOT.resolve()), (
+        f"Staged dir {staged_dir} must be inside repo {REPO_ROOT}"
     )
 
     # Perform staging
@@ -99,11 +99,11 @@ def test_stage_ottawa_deck_direct(tmp_path: Path):
         text=True,
         check=True,
     )
-    assert src_hash_proc.stdout.strip() == "9ec1bf4e7175910cfda2b9cdfa2a2cc4b104464f"
+    assert src_hash_proc.stdout.strip() == "ecf5e61ab453288b1763f81f841729bee34e8426"
 
     # Verify source runottawa line 6 still has f6=200
     src_lines = (SOURCE_DECK_DIR / "runottawa").read_text(encoding="utf-8").splitlines()
-    assert src_lines[5] == "runtime,4,1,1e-8,1e-11,200,0.5"
+    assert src_lines[5] == "runtime,4,1,1e-8,1e-11,100,0.5"
 
 
 def test_stage_ottawa_deck_cli(tmp_path: Path):

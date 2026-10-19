@@ -1,252 +1,31 @@
 {
-  "schema_version": 1,
-  "supersedes": "roster.json (worker/judge roster, retired 2026-10-08)",
+  "schema_version": 2,
   "protocol": ".agent/protocol.md",
-  "project": "ottawa-qualification",
   "mission": {
-    "goal": "Full 30-year Ottawa run (262920 h) of ecosys-ng with zero science gap against legacy Fortran (f77src/) and scientifically comparable outputs",
-    "finish_line_file": ".agent/protocol.md",
-    "finish_line_section": "1. Mission and finish line",
+    "goal": "Verified 30-year Ottawa run with zero science gap and scientifically comparable outputs",
     "horizon_hours": 262920,
-    "duration_expectation": "multi-month autonomous operation, cycle after cycle, no artificial stopping gate",
     "plan_documents": [
-      "ecosys-ng_ottawa_qualification_execution_plan.md",
-      "ecosys-ng_ottawa_autonomous_qualification_plan.md"
+      "ecosys-ng_ottawa_qualification_execution_plan.md"
     ]
   },
   "agent": {
-    "required_name": null,
-    "optional_label": "ECOSYS-ONE",
-    "portable_across": [
-      "claude-code",
-      "deepseek-harness(dsh)",
-      "codex-cli",
-      "opencode",
-      "pi",
-      "any-model-local-or-hosted"
-    ],
-    "owns": [
-      "cycle planning and target choice",
-      "investigation and legacy reading",
-      "Zig implementation, build, test, run",
-      "diagnosis of divergences and solver failures",
-      "architecture decisions, DEV-NNN and legacy-inconsistency decisions (with the evidence discipline in protocol.md \u00a76)",
-      "final scientific review of its own cycle against gates G1\u2013G9",
-      "ledgers: .agent/state.md, .agent/cycle.json, .agent/backlog.md, audit/*",
-      "commit and push of every completed cycle"
-    ]
-  },
-  "subagents": {
-    "role": "optional swarm of fresh-context helpers; never co-owners, never authorities",
-    "briefs_dir": ".agent/briefs/",
-    "briefs": [
-      "verifier.md",
-      "diagnose.md",
-      "legacy-oracle.md",
-      "parity-sweep.md"
-    ],
-    "always_read_only": true,
-    "forbidden": [
-      "editing or creating files",
-      "git add/commit/push/checkout/reset",
-      "starting full or bounded simulation runs (analysis of existing run output only)",
-      "repeating a full-run benchmark the parent already owns"
-    ],
-    "when_mandatory": "gate G7: any change to process equations/parameters, solver formulation, bounds/floors, acceptance/rollback logic, restart/output semantics, architecture, any DEV, or a hard solver rung (S4/S5/S8/S9)",
-    "resource_note": "record available RAM; cap concurrent sub-agent builds; sub-agents never run full campaigns"
-  },
-  "cycle": {
-    "records_dir": ".agent/cycles/",
-    "ledger": ".agent/cycle.json",
-    "template": ".agent/templates/cycle.md",
-    "runner": "ecosys-audit/scripts/cycle_runner.py",
-    "statuses": [
-      "PLANNING",
-      "WORKING",
-      "VERIFYING",
-      "DECIDED",
-      "PUSHED",
-      "BLOCKED"
-    ],
-    "steps": [
-      "0 plan",
-      "1 work",
-      "2 evidence & self-check",
-      "3 independent verification (G7)",
-      "4 decide & record",
-      "5 commit & push",
-      "6 close & continue"
-    ],
-    "max_report_words": 600,
-    "one_bounded_question_per_cycle": true,
-    "on_gate_failure": "fix, or revert the diff and record the negative result; never commit a gate-failing diff to main"
-  },
-  "gates": {
-    "G1_build": "touched code builds clean in Debug + ReleaseSafe with Zig 0.17.x (a 0.16 build is not current evidence); production runs use ReleaseFast",
-    "G2_regressions": "zig build test + uv run pytest ecosys-audit/tests -q pass; new discriminating test with each fix",
-    "G3_conservation": "local and global water, heat, C, N, P ledgers close at every accepted hour",
-    "G4_traceability": "every physics change cites f77src file:line; every touched guard matches the legacy floor in value, scale, operator, units, placement",
-    "G5_parity": "affected production outputs compared against the legacy oracle with units and time semantics",
-    "G6_forbidden_diff": "no tolerance loosening, no post-solve clamps, no unregistered DEV-NNN, no ceiling or iteration raise without legacy justification, no silent retries, no new unreachable",
-    "G7_independent_verification": "fresh-context verifier sub-agent re-derives the decisive gates from diff + legacy ranges + receipts only; a reproduced FAIL means fix or revert",
-    "G8_sync": "cycle committed and pushed; git rev-parse HEAD and origin/main equal",
-    "G9_containment": "every input and output of this cycle's commands (sources, caches, temp files, checkpoints, run output, logs) stayed inside the repository root"
+    "models": 1,
+    "human_approval_required": false,
+    "mandatory_subagents": false
   },
   "sync": {
-    "required": true,
-    "cadence": "every completed cycle, without exception",
     "remote": "origin",
     "branch": "main",
-    "helper": "./sync-main.sh",
-    "runbook": "SYNC-LOCAL.md",
-    "cycle_start": "./sync-main.sh pull",
-    "cycle_end": [
-      "git add -A",
-      "git commit -m 'cycle NNNNN: <what + why>'",
-      "./sync-main.sh push",
-      "git rev-parse HEAD origin/main"
-    ],
-    "on_push_failure": "keep the commit, set cycle.json sync_status=PENDING, note it in state.md, retry at next cycle start, never stack more than one unpushed cycle",
-    "never": [
-      "push --force",
-      "rewrite pushed history",
-      "commit ignored run artifacts",
-      "leave main broken or half-applied"
-    ]
-  },
-  "token_frugality": {
-    "enabled": true,
-    "max_round_prompt_tokens": 12000,
-    "rules": [
-      "never paste raw logs or whole source files into prompts, cycle files or sub-agent briefs",
-      "cite file:line and short sha256; store bulky artifacts under audit/runs/ and cite receipt.json",
-      "use f77query.py / bindcheck.py and narrow ripgrep instead of bulk reads of 10k-line Fortran units",
-      "keep cycle reports <= 600 words"
-    ]
-  },
-  "lanes": {
-    "production_source": [
-      "ecosys-ng/src/",
-      "ecosys-ng/build.zig"
-    ],
-    "evidence": [
-      "audit/"
-    ],
-    "control_plane": [
-      ".agent/"
-    ],
-    "read_only": [
-      "f77src/",
-      "f77example/",
-      "ecosys-ng-prod-examples/"
-    ],
-    "note": "the single agent has one write lane covering all of the above except read_only; the lanes exist to keep sub-agent briefs and diff scans honest"
-  },
-  "prohibitions": [
-    "loosening tolerances or raising iteration/step ceilings to make a failure pass",
-    "post-solve clamps",
-    "publishing a non-converged state whose ledger does not close",
-    "new publish-best-bounded deviations (DEV-009/011/014/015 family is debt to retire)",
-    "silent retries",
-    "fabricated or extrapolated evidence",
-    "editing f77src/, f77example/, ecosys-ng-prod-examples/",
-    "committing a cycle whose recorded gates are missing or failed"
-  ],
-  "metrics_columns": [
-    "cycle",
-    "date",
-    "frontier_hour",
-    "iterations_per_hour_mean",
-    "iterations_per_hour_max",
-    "substep_cuts",
-    "s9_fallback_hours",
-    "max_balance_residual",
-    "hours_per_run_minute",
-    "releasefast_wall_s_per_sim_day",
-    "open_devs",
-    "gate_failures",
-    "sync_status"
-  ],
-  "continuity": {
-    "pickup": [
-      "./sync-main.sh pull",
-      "sed -n 1,60p .agent/state.md",
-      "cat .agent/cycle.json",
-      "cat .agent/frontier.json",
-      "git status -sb",
-      "git log --oneline -5"
-    ],
-    "session_end": "checkpoint state.md and push; automatically pick up unfinished work after unavoidable harness interruption",
-    "loop_breaker": "same command/edit/error 3x, or re-reads with no new finding, or oscillating edits: stop, log attempts in the cycle file, spawn a fresh-context diagnose sub-agent, take the narrowest remaining step; two consecutive stalls on one target -> split it into two cycles",
-    "context_discipline": "commit + push + update state.md and start a fresh session instead of degrading at high context use",
-    "backoff": "record the blocker and the check that clears it in .agent/backlog.md, then take the next unblocked item; stop only for human-only conditions (credentials, destructive ops, spending)",
-    "stale_recovery": "remove stale .agent/locks/* with a note; reconcile a mid-status cycle.json against git log and the cycle file; resume a dead run from its last checkpoint",
-    "long_runs": "detached background process, log path recorded in state.md, never two concurrent runs of the same case",
-    "pickup_preflight": "uv run ecosys-audit/scripts/preflight.py (Zig pin + containment + sync + cycle status)"
-  },
-  "legacy_files": {
-    ".agent/adversarial/": "worker/judge round records: science history, no authority",
-    ".agent/roster.json": "superseded by .agent/mission.json",
-    ".agent/workflow.json": "retired swarm-controller ledger, kept as history",
-    ".agent/dispatch.json": "retired swarm dispatch state, kept as history",
-    ".agent/current_task.md": "retired swarm task pointer, kept as history",
-    ".agent/roles/": "per-persona role cards (retired); see .agent/roles/agent.md",
-    "archive/pre-solo-workflow/": "retired launchers, judge-gated runner, poke tooling",
-    "ecosys-audit/scripts/swarm_wrapper.py": "optional Herdr peer-agent controller, not part of this protocol"
-  },
-  "revised": "2026-10-17",
-  "toolchain": {
-    "authority": ".agent/toolchain.json; protocol.md \u00a78",
-    "ecosys_ng": "Zig 0.17.x only (Debug + ReleaseSafe for gates, ReleaseFast for production runs)",
-    "retired": "Zig 0.16 \u2014 its receipts are dated history and cannot close a current gate",
-    "declared_in": "ecosys-ng/build.zig.zon minimum_zig_version = \"0.17.0\"",
-    "check": "uv run ecosys-audit/scripts/preflight.py",
-    "migration_work_order": ".agent/migrations/zig-0.17.md",
-    "legacy_fortran": "unchanged: g77/gfortran-compatible -r8 -i4, recorded in audit/manifest/"
-  },
-  "workspace_containment": {
-    "authority": "protocol.md \u00a78a (gate G9)",
-    "rule": "all work stays inside this repository: investigation, edits, builds, tests, runs, staging, caches, checkpoints, downloads, logs and evidence. Nothing a later cycle needs to reproduce may live outside.",
-    "scratch": ".tmp/",
-    "caches": {
-      "TMPDIR": ".tmp/",
-      "XDG_CACHE_HOME": ".cache/",
-      "UV_CACHE_DIR": ".uv-cache/",
-      "ZIG_GLOBAL_CACHE_DIR": "ecosys-ng/.zig-cache-global/",
-      "zig_flags": "--cache-dir .zig-cache",
-      "zig_flags_note": "Zig 0.17: `zig build` rejects --global-cache-dir (measured 2026-10-12, audit/runs/zig017-pin017-debug-20261012); the global cache is set by ZIG_GLOBAL_CACHE_DIR. Direct compiler calls (zig build-exe) still take it."
-    },
-    "evidence": [
-      "audit/runs/ (run_logged.py receipts + logs)",
-      "audit/issues/",
-      "audit/features/",
-      "evidence/manifest/"
-    ],
-    "forbidden_destinations": [
-      "/tmp",
-      "$HOME",
-      "sibling checkouts",
-      "external or removable drives",
-      "cloud storage",
-      "paste/upload services",
-      "git worktree outside the repository"
-    ],
-    "allowed_outside_read_only": [
-      "the machine's installed toolchain and system libraries",
-      "git fetch/pull/push to origin"
-    ],
-    "vet_command": "uv run ecosys-audit/scripts/preflight.py --command \"<the command>\""
+    "required": true
   },
   "execution_policy": {
     "timeout_seconds": null,
-    "agent_turn_timeout_seconds": null,
-    "build_test_timeout_seconds": null,
-    "diagnostic_timeout_seconds": null,
-    "simulation_timeout_seconds": null,
-    "enforce_time_or_tool_budgets": false,
-    "authority": ".agent/continuous-autonomy.md",
-    "on_poll_expiry": "yield and reattach; never kill underlying work",
-    "on_context_boundary": "checkpoint durable notes and automatically continue unfinished work",
-    "heartbeat_age_alone_proves_death": false
+    "retry_limit": null,
+    "backoff_max_seconds": 60,
+    "stop_only_on_validated_finish_or_explicit_signal": true
+  },
+  "cycle": {
+    "ledger": ".agent/cycle.json",
+    "max_report_words": 400
   }
 }

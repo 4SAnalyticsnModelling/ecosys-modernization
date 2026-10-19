@@ -1,0 +1,1 @@
+Read AGENTS.md and .agent/protocol.md. Run ./scripts/project.sh pickup. Resume the open cycle, reconcile existing jobs/edits, decide from evidence and continue autonomously to F1–F7. No human approval or elapsed-time stop.

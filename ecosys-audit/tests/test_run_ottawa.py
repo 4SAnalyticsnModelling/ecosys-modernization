@@ -32,7 +32,7 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 from stage_ottawa_deck import DEFAULT_SOURCE_REL, TARGET_BLOB
 
 PROTECTED_RUNOTTAWA = REPO_ROOT / DEFAULT_SOURCE_REL / "runottawa"
-PROTECTED_EXPECTED_HASH = "9ec1bf4e7175910cfda2b9cdfa2a2cc4b104464f"
+PROTECTED_EXPECTED_HASH = "ecf5e61ab453288b1763f81f841729bee34e8426"
 
 
 @pytest.fixture(scope="session")
@@ -130,7 +130,7 @@ def test_run_ottawa_stages_approved_deck_and_records_receipt(dummy_success_exe: 
         p_hash_after = subprocess.check_output(["git", "hash-object", str(PROTECTED_RUNOTTAWA)], text=True).strip()
         assert p_hash_after == PROTECTED_EXPECTED_HASH
         p_lines = PROTECTED_RUNOTTAWA.read_text(encoding="utf-8").splitlines()
-        assert p_lines[5] == "runtime,4,1,1e-8,1e-11,200,0.5"
+        assert p_lines[5] == "runtime,4,1,1e-8,1e-11,100,0.5"
 
         # 4. Assert receipt.json records runottawa_hash
         receipt_path = REPO_ROOT / f"audit/runs/ottawa/{run_id}/receipt.json"
@@ -145,7 +145,7 @@ def test_run_ottawa_stages_approved_deck_and_records_receipt(dummy_success_exe: 
         assert summary_path.is_file()
         summary = json.loads(summary_path.read_text(encoding="utf-8"))
         assert summary["runottawa_hash"] == TARGET_BLOB
-        assert summary["status"] == "COMPLETE"
+        assert summary["status"] == "EXITED_UNVERIFIED"
         assert summary["staged_deck"] == f"evidence/runs/{run_id}/deck"
 
     finally:

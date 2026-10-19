@@ -1,3 +1,0 @@
-cycle,date,frontier_hour,iterations_per_hour_mean,iterations_per_hour_max,substep_cuts,s9_fallback_hours,max_balance_residual,hours_per_run_minute,releasefast_wall_s_per_sim_day,open_devs,gate_failures,sync_status
-00001,2026-10-15,3288,,,,,,,,,,in_sync
-00002,2026-10-17,3288,,,,,,,,,,unknown

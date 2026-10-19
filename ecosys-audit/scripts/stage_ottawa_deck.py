@@ -2,15 +2,8 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # ///
-"""Stage the Ottawa production deck with verified f6=100 runottawa blob.
-
-Does three things:
-1. Copies the files of `ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/`
-   into DIR, read-only on the source.
-2. Overwrites `DIR/runottawa` with the raw bytes of
-   `git cat-file blob ecf5e61ab453288b1763f81f841729bee34e8426`.
-3. Exits nonzero unless `git hash-object DIR/runottawa` equals that blob.
-"""
+"""Stage the verified Ottawa deck inside the repository without modifying protected inputs.
+Use a fresh output directory; qualification runottawa must match TARGET_BLOB."""
 from __future__ import annotations
 
 import argparse
@@ -75,6 +68,9 @@ def stage_ottawa_deck(
         raise FileNotFoundError(f"Source deck directory not found: {src_dir}")
 
     out_dir = Path(out_dir).resolve()
+
+    if not out_dir.is_relative_to(repo_root):
+        raise ValueError(f"Staging path escapes repository: {out_dir}")
 
     # Safety checks: protected paths must not be staged into
     for protected in ("ecosys-ng-prod-examples", "f77src", "f77example"):

@@ -30,6 +30,7 @@ import json
 import os
 import re
 import shutil
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -112,8 +113,9 @@ def outside_root(path: str, root: Path, cwd: Path) -> Path | None:
 
 def check_command(command: str, root: Path, cwd: Path) -> list[dict]:
     offenders = []
-    for token in command.split():
-        escaped = outside_root(token, root, cwd)
+    for token in shlex.split(command):
+        value = token.split("=", 1)[1] if "=" in token else token
+        escaped = outside_root(value, root, cwd)
         if escaped is not None:
             offenders.append(str(escaped))
     if offenders:
@@ -132,14 +134,14 @@ def check_environment(env: dict, root: Path) -> list[dict]:
             continue
         escaped = outside_root(value, root, root)
         if escaped is not None:
-            results.append(finding(f"env:{name}", "WARN",
+            results.append(finding(f"env:{name}", "FAIL",
                                    f"{name}={value} points outside the repository; export it to a "
                                    "repo-local directory for build/test/run commands"))
         else:
             results.append(finding(f"env:{name}", "PASS", f"{name} is repo-local"))
     missing = [name for name in ("TMPDIR", "UV_CACHE_DIR", "ZIG_GLOBAL_CACHE_DIR") if not (env.get(name) or "").strip()]
     if missing:
-        results.append(finding("env:repo-local-caches", "WARN",
+        results.append(finding("env:repo-local-caches", "FAIL",
                                "not exported in this shell: " + ", ".join(missing) +
                                " — export them (mkdir -p first) for any build, test or run command "
                                "so caches land inside the repository (protocol.md §8a)"))

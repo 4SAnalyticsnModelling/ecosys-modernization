@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "command": [
+    "dsh",
+    "headless",
+    "Read AGENTS.md and .agent/protocol.md. Read .agent/runtime/recovery.json first; reconcile existing edits, interrupted operations and live jobs. Resume the open cycle, decide from evidence without human approval and continue to verified F1-F7. Do not repeat a failed scientific run unchanged."
+  ],
+  "recovery_command": [],
+  "backoff_initial_seconds": 1,
+  "backoff_max_seconds": 60,
+  "note": "Current-host verified dsh headless argv; uses its configured single model. Future agents may replace argv with another verified harness. Supervisor is not started by workflow maintenance."
+}

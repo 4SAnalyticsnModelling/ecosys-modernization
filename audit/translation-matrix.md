@@ -6,4 +6,4 @@ UNMAPPED, MAPPED, AUDITING, GAP_FOUND, FIXING, TESTING, REVIEW_REQUIRED, VERIFIE
 It is not duplicated here. The column is added in P3, when the P2.4 execution map exists.
 
 A filename or statement mapping is not scientific equivalence (`tracecov.py:300-303`). A row is VERIFIED
-only with `kernelgen.py` matched-state agreement or a SAGE-reviewed semantic argument.
+only with `kernelgen.py` matched-state agreement or a separately re-derived semantic argument.

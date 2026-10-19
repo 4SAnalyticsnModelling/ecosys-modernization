@@ -14,6 +14,8 @@ import argparse
 from collections import deque
 import json
 import os
+import shutil
+import platform
 from pathlib import Path
 import re
 import signal
@@ -22,7 +24,8 @@ import sys
 import time
 import uuid
 
-from workflow import ROOT, ProtocolError, artifact, atomic, encoded, inside, relative
+from workflow import ROOT, ProtocolError, artifact, atomic, encoded, inside, relative, file_digest
+from project_runtime import environment, process_identity, toolchain, content_digest, SOURCE_SCOPE
 
 
 def excerpt(path: Path, limit=1800) -> dict:
@@ -43,41 +46,42 @@ def excerpt(path: Path, limit=1800) -> dict:
             "chunks_scanned": total, "selection": "first/last/first diagnostic matches; NOT complete evidence"}
 
 
-def stop_owned_process(p: subprocess.Popen):
-    if os.name == "nt":
-        subprocess.run(["taskkill", "/PID", str(p.pid), "/T", "/F"], capture_output=True, timeout=30)
-    else:
-        os.killpg(p.pid, signal.SIGKILL)
-    p.wait(timeout=30)
-
-
 def run(root: Path, cwd: Path, out: Path, argv: list[str], timeout: float | None) -> dict:
     if not argv:
         raise ProtocolError("Command argv required")
-    requested_timeout = timeout
-    timeout = None  # Continuous-autonomy directive: legacy arguments are metrics only.
+    cwd = inside(root, str(cwd))
+    env = environment(root)
+    timeout = None  # Continuous-autonomy directive: compatibility arguments are never execution deadlines.
     out.mkdir(parents=True, exist_ok=False)
     start = time.time()
     stdout, stderr = out / "stdout.log", out / "stderr.log"
     record = {"argv": argv, "cwd": str(cwd.resolve()), "started_unix": start,
-              "timeout_seconds": timeout, "requested_timeout_seconds": requested_timeout, "status": "RUNNING", "parent_pid": os.getpid()}
+              "timeout_seconds": timeout, "status": "RUNNING", "parent_pid": os.getpid(),
+              "environment": {k: env[k] for k in ["TMPDIR","XDG_CACHE_HOME","UV_CACHE_DIR","ZIG_GLOBAL_CACHE_DIR"]},
+              "toolchain": toolchain(), "platform": platform.platform(), "machine": platform.machine()}
+    if Path(argv[0]).name == "zig" and (root/"ecosys-ng/src").exists():
+        record["source_digest"] = content_digest(root, SOURCE_SCOPE)
     atomic(out / "receipt.json", encoded(record))
-    timed_out, launch_error = False, None
+    launch_error = None
     with stdout.open("xb") as fo, stderr.open("xb") as fe:
         try:
             options = {"start_new_session": True} if os.name != "nt" else {}
-            p = subprocess.Popen(argv, cwd=cwd, stdin=subprocess.DEVNULL, stdout=fo, stderr=fe, **options)
+            p = subprocess.Popen(argv, cwd=cwd, stdin=subprocess.DEVNULL, stdout=fo, stderr=fe, env=env, **options)
             record["pid"] = p.pid
+            record["process_start"] = process_identity(p.pid)
+            executable = shutil.which(argv[0], path=env.get("PATH")) or str(cwd / argv[0])
+            if Path(executable).is_file():
+                record["executable_sha256"] = file_digest(Path(executable))
             atomic(out / "receipt.json", encoded(record))
-            try:
-                code = p.wait(timeout=timeout)
-            except subprocess.TimeoutExpired:
-                timed_out = True
-                stop_owned_process(p)
-                code = 124
+            code = p.wait()
         except OSError as e:
             code, launch_error = 127, str(e)
-    record.update({"status": "TIMED_OUT" if timed_out else "EXITED", "exit_code": code,
+    product=root/"ecosys-ng/ecosys-ng-bin/ecosys_ng"
+    if code == 0 and Path(argv[0]).name == "zig" and "build" in argv and not any(a in argv for a in ["--help", "-h", "test"]) and product.is_file():
+        record["build_product"] = artifact(root,relative(root,product))
+        record["build_mode"] = next((a.split("=",1)[1] for a in argv if a.startswith("-Doptimize=")), "Debug")
+        record["source_changed_during_command"] = record.get("source_digest") != content_digest(root, SOURCE_SCOPE)
+    record.update({"status": "EXITED", "exit_code": code,
                    "elapsed_seconds": round(time.time() - start, 3), "launch_error": launch_error,
                    "stdout": artifact(root, relative(root, stdout)), "stderr": artifact(root, relative(root, stderr)),
                    "test_acceptance": "NOT_ASSESSED", "test_count": None,

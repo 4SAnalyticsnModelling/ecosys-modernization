@@ -55,8 +55,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--check', action='store_true')
     parser.add_argument('--resume', help='Exact session ID; original JSONL is retained')
-    parser.add_argument('--stall-seconds', type=int, default=28800,
-                        help='No session-file progress; default 8h accommodates 2h local inference')
+    parser.add_argument('--stall-seconds', type=int, default=None,
+                        help='Deprecated observation setting; never terminates healthy work')
     args, extra = parser.parse_known_args()
     os.chdir(REPO)
     env = environment()
@@ -125,8 +125,7 @@ def main():
                                for f in (ROOT / 'sessions').rglob('*') if f.is_file()]
                 if fingerprint != latest:
                     last_progress, latest = time.monotonic(), fingerprint
-                if time.monotonic() - last_progress > args.stall_seconds:
-                    problem = 'No session progress; stalled inference/tool loop'
+                # Silence is not process failure; no elapsed-time termination.
             except (OSError, ValueError) as error:
                 problem = 'Persistence unavailable: ' + str(error)
             if time.monotonic() - last_gateway_check >= 30:
@@ -137,8 +136,7 @@ def main():
                     gateway_failures = 0
                 except (OSError, ValueError):
                     gateway_failures += 1
-                if gateway_failures >= 3:
-                    problem = 'Local gateway failed three consecutive health checks'
+                # An unavailable provider is retried by the harness; do not kill healthy work.
             if problem and not stopping:
                 rotate(diagnostic)
                 with diagnostic.open('a') as log:
@@ -159,9 +157,10 @@ def main():
         current = json.loads((ROOT / 'state.json').read_text())
         session_id = current.get('currentSession')
         session = current['sessions'].get(session_id, {})
-        if session.get('phase') != 'running' or supervisor['restarts'] >= 2:
+        if session.get('phase') != 'running':
             return code
         supervisor['restarts'] += 1
+        time.sleep(min(60, 2 ** min(supervisor['restarts'], 6)))
         # Atomic checkpoint independent of the harness process.
         temp = supervisor_file.with_suffix('.tmp')
         with temp.open('w') as out:

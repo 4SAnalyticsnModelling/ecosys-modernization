@@ -1,598 +1,132 @@
 {
- "status": "PARTIAL",
- "note": "BANNER 2026-10-09 (mandates, .agent/protocol.md §8 and §8a): the recorded toolchains and argv below are dated evidence from the Windows host (verified 2026-09-21/22) and are kept unchanged — they are not rewritten. Two changes govern everything recorded from now on. (1) G1 toolchain: ecosys-ng is built, tested and measured with Zig 0.17.x only; Zig 0.16 is retired, so any 0.16 build/test receipt here is history and cannot close a current gate — re-record under 0.17.x with `zig version` in the receipt (pin .agent/toolchain.json; work order .agent/migrations/zig-0.17.md). (2) G9 containment: every command must run with caches, temp files, checkpoints, run output and logs inside this repository (TMPDIR=$PWD/.tmp, XDG_CACHE_HOME=$PWD/.cache, UV_CACHE_DIR=$PWD/.uv-cache, ZIG_GLOBAL_CACHE_DIR=$PWD/ecosys-ng/.zig-cache-global, plus zig --cache-dir .zig-cache --global-cache-dir .zig-cache-global) and be logged by ecosys-audit/scripts/run_logged.py into audit/runs/. Recorded .exe paths and C:\\... artifacts belong to the retired host, not to this one. Status stays PARTIAL: no recorded slot is re-verified by this banner, and nothing here authorizes a command — establish each argv against the live build files before using it. Populated 2026-09-21 for the analysis tooling only. Every argv under 'analysis' was executed successfully on this machine on that date; the six model build/run slots remain null because they have NOT been run in this pass and must not be treated as verified. No executable command here is pre-authorized by the contract.",
- "toolchains": {
-  "zig": {
-   "mandated_version": "0.17.x",
-   "mandate": "protocol.md §8 / gate G1, pin .agent/toolchain.json, check `uv run ecosys-audit/scripts/preflight.py`. UPDATE 2026-10-15 (cycle 00001): the 0.17 migration IS executed — ecosys-ng/build.zig.zon declares minimum_zig_version = \"0.17.0\" and the tree builds and tests green on 0.17.0 (receipts audit/runs/zig017-{debug,releasesafe,releasefast}-20261015-1, audit/runs/zig017-test-20261014-4). Work order .agent/migrations/zig-0.17.md; cycle record .agent/cycles/cycle_00001.md.",
-   "recorded_version": "0.16.0",
-   "recorded_version_status": "RETIRED — host observation of 2026-09-21, kept as dated evidence",
-   "source": "zig version",
-   "verified_utc": "2026-09-21",
-   "current_version": "0.17.0",
-   "current_version_path": "/opt/homebrew/bin/zig",
-   "current_version_source": "zig version",
-   "current_version_status": "CURRENT — measured 2026-10-15 on the macOS host; preflight zig-version PASS, build-zon-pin PASS",
-   "current_verified_utc": "2026-10-15"
+  "schema_version": 2,
+  "authority": ".agent/protocol.md",
+  "rule": "argv are templates; verify source/toolchain before execution. Never treat a registry entry as a passed check.",
+  "commands": {
+    "pickup": [
+      "./scripts/project.sh",
+      "pickup"
+    ],
+    "logged": [
+      "./scripts/project.sh",
+      "exec",
+      "--out",
+      "audit/runs/<unique>",
+      "--cwd",
+      "<repo-relative>",
+      "--",
+      "<argv>"
+    ],
+    "code_batch": [
+      "./scripts/project.sh",
+      "code",
+      "--requests",
+      ".tmp/reads.json"
+    ],
+    "codemod_preview": [
+      "./scripts/project.sh",
+      "codemod",
+      "--spec",
+      ".tmp/edits.json"
+    ],
+    "zig_build": [
+      "zig",
+      "build",
+      "-Doptimize=<Debug|ReleaseSafe|ReleaseFast>",
+      "--cache-dir",
+      ".zig-cache"
+    ],
+    "zig_tests": [
+      "zig",
+      "build",
+      "test",
+      "--cache-dir",
+      ".zig-cache"
+    ],
+    "zig_filtered": [
+      "zig",
+      "test",
+      "src/module_index.zig",
+      "--cache-dir",
+      ".zig-cache",
+      "--test-filter",
+      "<name>"
+    ],
+    "python_tests": [
+      "uv",
+      "run",
+      "--with",
+      "pytest",
+      "pytest",
+      "ecosys-audit/tests",
+      "-q"
+    ],
+    "f77_index": [
+      "python3",
+      "-B",
+      "ecosys-audit/scripts/f77index.py",
+      "--root",
+      ".",
+      "--out",
+      "audit/manifest/f77index.json"
+    ],
+    "f77_outline": [
+      "python3",
+      "-B",
+      "ecosys-audit/scripts/f77query.py",
+      "outline",
+      "<file.f>",
+      "--depth",
+      "1"
+    ],
+    "oracle_driver": [
+      "python3",
+      "-B",
+      "ecosys-audit/scripts/kernelgen.py",
+      "<routine>",
+      "--root",
+      ".",
+      "--scope",
+      "referenced"
+    ],
+    "strict_run": [
+      "python3",
+      "-B",
+      "ecosys-audit/scripts/run_ottawa.py",
+      "--mode",
+      "strict",
+      "--exe",
+      "<repo-local-exe>",
+      "--build-mode",
+      "ReleaseFast",
+      "--run-id",
+      "<unique>",
+      "--build-receipt",
+      "<matching-build-receipt.json>"
+    ],
+    "restart_diagnostic": [
+      "python3",
+      "-B",
+      "ecosys-audit/scripts/run_ottawa.py",
+      "--mode",
+      "strict",
+      "--exe",
+      "<repo-local-exe>",
+      "--build-mode",
+      "ReleaseFast",
+      "--restart-from",
+      "<parent-run>:<hour>"
+    ],
+    "finish": [
+      "./scripts/project.sh",
+      "completion.py"
+    ]
   },
-  "fortran": {
-   "legacy_reference_compiler": "ifort",
-   "legacy_reference_flags": "-O2 -mp1 -r8 -i4 -align dcommons -cpp -auto-scalar",
-   "legacy_reference_available_on_this_host": false,
-   "oracle_substitute": "GNU Fortran 16.1.0 (MinGW-W64 x86_64-ucrt-posix-seh)",
-   "oracle_precision_flags": [
-    "-ffixed-form",
-    "-ffixed-line-length-72",
-    "-fdefault-real-8",
-    "-fdefault-double-8"
-   ],
-   "oracle_legacy_dialect_flags": [
-    "-std=legacy",
-    "-fallow-argument-mismatch"
-   ],
-   "note": "ifort is not installed on this host, so gfortran reproduces the -r8/-i4 precision contract only. This is not a claim of ifort-identical code generation. gfortran 16 implements the Fortran 2023 SPLIT intrinsic, which shadows this project's split.f and makes soil.f fail with 'Too many arguments in call to split' even though the call is correct (split.f declares 10 arguments, soil.f passes 10). Declare EXTERNAL split after that unit's header, or compile that one unit with -std=f95.",
-   "verified_utc": "2026-09-21"
+  "cwd": {
+    "zig_build": "ecosys-ng",
+    "zig_tests": "ecosys-ng",
+    "zig_filtered": "ecosys-ng",
+    "other": "repository root"
   },
-  "python": {
-   "runner": "uv",
-   "note": "All ecosys-audit/scripts/*.py carry PEP 723 inline metadata and are stdlib-only, so `uv run <script>` pins a managed interpreter instead of inheriting whichever python is on PATH (on this host, PATH python is MSYS2 3.12.13).",
-   "verified_utc": "2026-09-21"
-  }
- },
- "analysis": {
-  "note": "Read-only navigation and audit tooling. Safe at every gate including G0. Run from the project root.",
-  "f77_index_build": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/f77index.py",
-    "--root",
-    ".",
-    "--out",
-    "audit/manifest/f77index.json"
-   ],
-   "environment": {},
-   "expected_artifacts": [
-    "audit/manifest/f77index.json"
-   ],
-   "completion_condition": "exit 0 and totals.unclosed_loops == 0",
-   "last_verified_evidence": "2026-09-21: 95 files, 95 units, 53 COMMON blocks, 1520 loops, 0 unclosed, 53803 executable statements. All 41 program units re-extract by recorded line ranges and compile standalone under the oracle flags.",
-   "note": "Refuses to overwrite an existing output; delete or choose a new path to rebuild.",
-   "reverified_utc": "2026-10-15",
-   "recent_status": "audit/manifest/f77index.json was FOUND MISSING on 2026-10-15 (untracked and lost from the working tree), which silently disabled f77query.py for any agent that tried it — a G4 blocker. Rebuilt with the recorded argv; totals reproduced the 2026-10-09 record exactly: 95 files, 95 units, 53 COMMON blocks, 1520 loops, 0 unclosed, 53803 executable statements, 55704 logical statements. That identity is also independent evidence that nothing under f77src/ has drifted. NOTE: the file is gitignored/untracked, so it must be rebuilt after any fresh clone; it is not durable evidence."
-  },
-  "f77_query": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/f77query.py",
-    "<subcommand>",
-    "..."
-   ],
-   "environment": {},
-   "expected_artifacts": [],
-   "completion_condition": "exit 0",
-   "last_verified_evidence": "2026-09-21: units, stats, outline, loops, show, common, callers, grep all exercised.",
-   "subcommands": {
-    "units": "uv run ecosys-audit/scripts/f77query.py units",
-    "outline": "uv run ecosys-audit/scripts/f77query.py outline grosub.f --depth 1",
-    "show_loop": "uv run ecosys-audit/scripts/f77query.py show grosub.f --loop 2990",
-    "show_lines": "uv run ecosys-audit/scripts/f77query.py show redist.f --lines 6870-6900",
-    "common": "uv run ecosys-audit/scripts/f77query.py common BLK13A --users",
-    "grep": "uv run ecosys-audit/scripts/f77query.py grep 'ZNH4FA\\(' --limit 40",
-    "loops": "uv run ecosys-audit/scripts/f77query.py loops uptake.f"
-   }
-  },
-  "traceability_coverage": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/tracecov.py",
-    "--root",
-    ".",
-    "--out",
-    "audit/traceability/coverage-<date>.json"
-   ],
-   "environment": {},
-   "expected_artifacts": [
-    "audit/traceability/coverage-<date>.json"
-   ],
-   "completion_condition": "exit 0 means no problems and no blocking dispositions; exit 1 means a report was produced but something blocks a gate",
-   "last_verified_evidence": "audit/traceability/coverage-2026-09-21.json: 66.53% statement coverage (31095/46739 in-build executable statements), 80 unresolved dispositions, 149 problems (117 stale zig_sha256, 20 path/hash count mismatches, 8 missing zig paths, 3 unknown fortran paths, 1 unusable zig path)."
-  },
-  "binding_state_audit": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/bindcheck.py",
-    "--root",
-    ".",
-    "--out",
-    "audit/manifest/bindcheck-<date>.json"
-   ],
-   "environment": {},
-   "expected_artifacts": [
-    "audit/manifest/bindcheck-<date>.json"
-   ],
-   "completion_condition": "exit 0 means no register contradictions; exit 1 means a declared binding contradicts the index",
-   "last_verified_evidence": "audit/manifest/bindcheck-2026-09-21.json: 2970 COMMON members across 53 blocks; 214 names occur in Zig code, 1067 comment-only, 1689 absent; 553 named in traceability.csv. audit/traceability/bindings.csv has no usable rows, so shape validation was skipped."
-  },
-  "kernel_oracle_generate": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/kernelgen.py",
-    "<ROUTINE>",
-    "--root",
-    ".",
-    "--scope",
-    "referenced"
-   ],
-   "environment": {},
-   "expected_artifacts": [
-    "audit/tests/kernels/kernel_<routine>.f",
-    "audit/tests/kernels/kernel_<routine>.layout.json",
-    "audit/tests/kernels/kernel_<routine>.build.ps1"
-   ],
-   "completion_condition": "exit 0 and the reported snapshot size is acceptable for the intended test",
-   "last_verified_evidence": "2026-09-21 STOMATE: 15 includes, 13 COMMON blocks, 74 items, 36994008 bytes per side. Driver compiled and linked, ran twice on a zero-filled snapshot with bit-identical output (SHA256 9562904C1865D93F...), and mutated 2 of 36994008 bytes.",
-   "note": "--scope referenced dumps only members the routine mentions; --scope included dumps every member of every included block, which for UPTAKE is about 237 MB per side. Always check the reported size before generating snapshots."
-  },
-  "kernel_oracle_build": {
-   "cwd": ".",
-   "argv": [
-    "pwsh",
-    "-NoProfile",
-    "-File",
-    "audit/tests/kernels/kernel_<routine>.build.ps1"
-   ],
-   "environment": {},
-   "expected_artifacts": [
-    "audit/tests/kernels/build/kernel_<routine>.exe"
-   ],
-   "completion_condition": "exit 0 and the executable exists",
-   "last_verified_evidence": "2026-09-21: kernel_stomate.exe built and linked.",
-   "note": "The driver and the legacy unit are separate translation units on purpose. The driver needs ACCESS='STREAM' (Fortran 2003, rejected by -std=legacy); the legacy unit needs -std=legacy. Both carry identical precision flags."
-  },
-  "legacy_unit_compile_check": {
-   "cwd": ".",
-   "argv": [
-    "gfortran",
-    "-c",
-    "-ffixed-form",
-    "-ffixed-line-length-72",
-    "-fdefault-real-8",
-    "-fdefault-double-8",
-    "-std=legacy",
-    "-fallow-argument-mismatch",
-    "-I",
-    "f77src",
-    "-o",
-    "<tmp>/<unit>.o",
-    "f77src/<unit>.f"
-   ],
-   "environment": {},
-   "expected_artifacts": [
-    "<tmp>/<unit>.o"
-   ],
-   "completion_condition": "exit 0",
-   "last_verified_evidence": "2026-09-21: 40 of 41 units compile directly; soil.f additionally needs EXTERNAL split or -std=f95, after which all 41 pass."
-  },
-  "loc_denominator": {
-   "cwd": ".",
-   "argv": [
-    "tokei",
-    "--output",
-    "json",
-    "f77src",
-    "ecosys-ng/src"
-   ],
-   "environment": {},
-   "expected_artifacts": [],
-   "completion_condition": "exit 0",
-   "last_verified_evidence": "2026-09-21: tokei 12.1.2 installed and on PATH.",
-   "note": "Use f77index totals for the audited-statement denominator; tokei is for coarse line accounting only. The two are not interchangeable."
-  },
-  "benchmark": {
-   "cwd": ".",
-   "argv": [
-    "hyperfine",
-    "--warmup",
-    "1",
-    "--runs",
-    "<n>",
-    "<command>"
-   ],
-   "environment": {},
-   "expected_artifacts": [],
-   "completion_condition": "exit 0",
-   "last_verified_evidence": "2026-09-21: hyperfine 1.20.0 installed and on PATH. No model workload has been benchmarked yet.",
-   "note": "G4 requires fair, repeated, variance-reported measurements. Do not quote a single wall-clock reading as a performance result."
-  }
- },
- "commands": {
-  "note": "PARTIALLY populated. Three slots were established by actually executing them on 2026-09-22 and are marked with their evidence: zig_releasesafe_build, zig_targeted_tests, zig_production_run. The remaining slots (fortran_build, fortran_run, zig_releasefast_build, zig_short_integration) are STILL null and must not be treated as verified. Do not infer an argv from the analysis section above; establish and record each one against real build files before use, per G0.",
-  "zig_releasesafe_build": {
-   "cwd": "ecosys-ng",
-   "argv": [
-    "zig",
-    "build",
-    "-Doptimize=ReleaseSafe"
-   ],
-   "environment": {},
-   "source_hash": null,
-   "expected_artifacts": [
-    "ecosys-ng/ecosys-ng-bin/ecosys_ng.exe"
-   ],
-   "completion_condition": "exit 0 and the executable exists with a fresh mtime",
-   "last_verified_evidence": "2026-09-22: exit 0; wrote ecosys-ng/ecosys-ng-bin/ecosys_ng.exe (11,408,896 bytes). NOTE the artifact is NOT under zig-out/bin -- checking zig-out/bin returns not-found even on a successful build, which cost one false 'build produced no binary' reading. Wall clock is long (single-digit minutes to over 30) and the build writes nothing to stdout until it finishes, so an empty output file is not evidence of a hang; check CPU time and working-set of the zig child instead.",
-   "note": "ReleaseSafe, not ReleaseFast, is the build used for every production run recorded in audit/runs/ from run-021 onward. It is the mandated qualification build. Verify a diagnostic's strings are present in the built binary (Select-String on the .exe) BEFORE running, so a zero-firing probe is distinguishable from a probe that was never compiled in."
-  },
-  "fortran_build": {
-   "cwd": null,
-   "argv": [],
-   "environment": {},
-   "source_hash": null,
-   "expected_artifacts": [],
-   "completion_condition": null,
-   "last_verified_evidence": null
-  },
-  "fortran_run": {
-   "cwd": null,
-   "argv": [],
-   "environment": {},
-   "source_hash": null,
-   "expected_artifacts": [],
-   "completion_condition": null,
-   "last_verified_evidence": null
-  },
-  "zig_targeted_tests": {
-   "cwd": "ecosys-ng",
-   "argv": [
-    "zig",
-    "test",
-    "src/module_index.zig"
-   ],
-   "environment": {},
-   "source_hash": null,
-   "expected_artifacts": [],
-   "completion_condition": "exit 0 and zero failures",
-   "last_verified_evidence": "2026-09-22: 4380 passed / 1 skipped / 0 failed, with the issue-099 fix in tree (run-023). Add --test-filter \"<substring>\" to scope it; that form was used for the issue-098 and issue-099 regression tests.",
-   "note": "Invoke `zig test src/module_index.zig` DIRECTLY, not via `zig build test`, which has a known hang on this checkout. Do not kill a long test run on the basis of flat Get-Process CPU time ALONE -- two separate sessions killed legitimate runs that way; corroborate with the output log's content AND the zig cache's newest write time before concluding anything.",
-   "known_failure_mode": "CORRECTION recorded 2026-09-22 later the same day: the direct `zig test` form ALSO hangs, so it is not a reliable workaround. Observed twice consecutively: both zig processes sat at EXACTLY 0 CPU-seconds delta over 60 s, produced no output, spawned no compiler child, and wrote nothing to the global zig cache for over three hours. Distinguishing a real hang from buffered progress needs three signals together: zero CPU delta over >=60 s, no new writes under %LOCALAPPDATA%\\zig, and no build-exe/compile child process. The toolchain itself was proven healthy at the same moment by compiling and running a trivial one-test file in 25.5 s, so this is specific to this test binary and NOT an environment fault. A ReleaseSafe build of the same tree is the available compilation check when this hang occurs; it is weaker than the suite because it does not compile test blocks."
-  },
-  "zig_short_integration": {
-   "cwd": null,
-   "argv": [],
-   "environment": {},
-   "source_hash": null,
-   "expected_artifacts": [],
-   "completion_condition": null,
-   "last_verified_evidence": null
-  },
-  "zig_releasefast_build": {
-   "cwd": null,
-   "argv": [],
-   "environment": {},
-   "source_hash": null,
-   "expected_artifacts": [],
-   "completion_condition": null,
-   "last_verified_evidence": null
-  },
-  "zig_production_run": {
-   "cwd": "<staged deck directory containing runottawa, runottawa_input_files/, runottawa_output_files/>",
-   "argv": [
-    "./ecosys_ng.exe",
-    "runottawa"
-   ],
-   "environment": {},
-   "source_hash": null,
-   "expected_artifacts": [
-    "combined.log",
-    "<hour>.grid_and_plants.bin and the ten sibling checkpoint files, every 240 hours"
-   ],
-   "completion_condition": "the run reaches the intended hour; a clean full-horizon run would reach 262,920. As of 2026-09-22 it terminates at hour 3,275 with error HourlyCellConservationFailure (exit 1), which is the current frontier, NOT a successful completion.",
-   "last_verified_evidence": "2026-09-22 (run-024): staged from a previous run's deck into a fresh directory with NO checkpoints present, so it ran from hour 1; reached hour 3,275 in about 34 minutes wall clock and emitted the two reproducible nitrogen conservation rows plus the stage execution census. CLI shape independently confirmed by driver/cli.zig's own tests: ecosys_ng <runscript_path> [--threads N] [--survey-conservation] [--describe-timeline] [--execution-evidence <path>].",
-   "note": "Copy the freshly built ecosys_ng.exe INTO the deck directory and run it with cwd set there; the runscript's input_root/output_root resolve relative to cwd. Launch via a mechanism whose child survives the invoking shell -- PowerShell Start-Process children were killed when the tool call's job ended, which silently truncated three runs and caused a CORRECT fix to be reverted on false evidence (see run-023). Staging a fresh directory matters: leaving prior *.bin checkpoints in place risks a resume instead of a clean run."
-  },
-  "zig_executable_root_tests": {
-   "cwd": "ecosys-ng",
-   "argv": [
-    "zig",
-    "test",
-    "--dep",
-    "ecosys_ng",
-    "-Mroot=src\\ecosys_ng.zig",
-    "-Mecosys_ng=src\\module_index.zig"
-   ],
-   "environment": {},
-   "source_hash": null,
-   "expected_artifacts": [],
-   "completion_condition": "exit 0 and zero failures across all 115 tests",
-   "last_verified_evidence": "2026-09-24 (issue-104, audit/runs/issue-104-exe-root-full2/): compiles after the fixture fix; 109 of 115 started, 107 OK, 1 FAIL (test 71, stale NFH=4 expectation, issue-106), test 109 spins in the run-log lock and was stopped (issue-107); tests 110-115 NOT RUN. NOT a pass.",
-   "note": "Second test root from build.zig:39 (src/ecosys_ng.zig; every stages/*.zig test block). The module-index root never runs these. BACKSLASH module paths are required on this host: forward slashes fail with \"found another zig file '.zig' after root source file\". The test binary is a child process named root.exe; judge liveness from it, not from zig.exe. Add --test-filter <substring> to scope."
-  },
-  "zig017_build_all_modes": {
-   "added_utc": "2026-10-15",
-   "cwd": "ecosys-ng",
-   "argv": [
-    "zig",
-    "build",
-    "-Doptimize=<Debug|ReleaseSafe|ReleaseFast>",
-    "--cache-dir",
-    ".zig-cache"
-   ],
-   "environment": {
-    "TMPDIR": "<repo>/.tmp",
-    "XDG_CACHE_HOME": "<repo>/.cache",
-    "UV_CACHE_DIR": "<repo>/.uv-cache",
-    "ZIG_GLOBAL_CACHE_DIR": "<repo>/ecosys-ng/.zig-cache-global"
-   },
-   "toolchain": "zig 0.17.0 (/opt/homebrew/bin/zig)",
-   "expected_artifacts": [
-    "ecosys-ng/ecosys-ng-bin/ecosys_ng  (build.zig:19-22 overrides the install dest_dir to ../ecosys-ng-bin; zig-out/bin is NOT where this build description installs the executable — measured 2026-10-15: a ReleaseFast build leaves zig-out/ empty. The 2026-09-22 Windows note for zig_releasesafe_build said the same about ecosys-ng-bin/ecosys_ng.exe, so the trap is host-independent.)"
-   ],
-   "completion_condition": "exit 0 recorded by run_logged.py; zig version printed in the cycle record",
-   "last_verified_evidence": "2026-10-15 cycle 00001, all exit 0 on zig 0.17.0: Debug 28.1 s audit/runs/zig017-debug-20261015-1; ReleaseSafe 163.6 s audit/runs/zig017-releasesafe-20261015-1; ReleaseFast 168.4 s audit/runs/zig017-releasefast-20261015-1. NOTE `zig build` on 0.17 rejects --global-cache-dir: the global cache moves by ZIG_GLOBAL_CACHE_DIR only.",
-   "supersedes": "zig_releasesafe_build / zig_releasefast_build for any gate closed from 2026-10-13 onward",
-   "artifact_note": "A warm rebuild can finish in 0.5 s and leave the artefact mtime unchanged — that is a cache hit, not a failed build: verify freshness with `find ecosys-ng/src -name '*.zig' -newer ecosys-ng/ecosys-ng-bin/ecosys_ng` (empty = the exe is newer than every source file). `zig build test` does NOT install the executable. Measured 2026-10-15: ReleaseFast artefact 10,847,800 bytes, `./ecosys_ng --help` -> usage line `[--threads N] [--describe-timeline] [--execution-evidence <new-file>] [--verbose-diagnostics] <runscript>`."
-  },
-  "zig017_full_test_suite": {
-   "added_utc": "2026-10-15",
-   "cwd": "ecosys-ng",
-   "argv": [
-    "zig",
-    "build",
-    "test",
-    "--cache-dir",
-    ".zig-cache",
-    "--summary",
-    "all"
-   ],
-   "environment": {
-    "TMPDIR": "<repo>/.tmp",
-    "XDG_CACHE_HOME": "<repo>/.cache",
-    "UV_CACHE_DIR": "<repo>/.uv-cache",
-    "ZIG_GLOBAL_CACHE_DIR": "<repo>/ecosys-ng/.zig-cache-global"
-   },
-   "toolchain": "zig 0.17.0 (/opt/homebrew/bin/zig)",
-   "completion_condition": "read the `Build Summary` line of stderr (test counts) — receipt exit code alone is not test acceptance; ~9 min wall clock. Filters are NOT forwarded by build.zig on 0.17 (`zig build test --test-filter X` is rejected: unrecognized argument), so a bounded run is `zig test src/module_index.zig --cache-dir .zig-cache --test-filter \"<test name>\"` from ecosys-ng/ (measured 2026-10-15 by the cycle-00001 G7 verifier; `zig test <leaf file>` fails with 'import of file outside module path').",
-   "last_verified_evidence": "2026-10-14 audit/runs/zig017-test-20261014-4/stderr.log:2498 — 4518/4520 tests passed (1 skipped: the env-gated production_freezing_column_validation benchmark admission; 1 crashed: tracked issue-106 fixture OOB at src/stages/hourly_heat_water_solute.zig:10686), zero assertion failures.",
-   "verified_utc": "2026-10-15"
-  },
-  "zig017_ottawa_run": {
-   "renamed_from": "zig017_ottawa_bounded_run (2026-10-16 directive: production runs are unbounded by default - no wall-clock stop)",
-   "added_utc": "2026-10-15",
-   "cwd": "<repo>",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/run_ottawa.py",
-    "--mode",
-    "strict",
-    "--exe",
-    "<path to ecosys-ng executable>",
-    "--build-mode",
-    "<Debug|ReleaseSafe|ReleaseFast>",
-    "--run-id",
-    "<id>",
-    "--out",
-    "audit/runs/ottawa/<id>",
-    "--timeout",
-    "<seconds> or omit entirely for an unbounded run to natural completion"
-   ],
-   "environment": {
-    "TMPDIR": "<repo>/.tmp",
-    "XDG_CACHE_HOME": "<repo>/.cache",
-    "UV_CACHE_DIR": "<repo>/.uv-cache"
-   },
-   "toolchain": "run under uv (python) with the executable built by zig 0.17.0",
-   "expected_artifacts": [
-    "audit/runs/ottawa/<id>/{receipt.json,stdout.log,stderr.log,summary.json} (receipt argv = staged deck exe + 'runottawa', same shape as the 0.16-era Windows run receipts)",
-    "evidence/runs/<id>/deck/ (staged deck + copied exe; gitignored scratch, referenced by the receipt)"
-   ],
-   "completion_condition": "summary.json `status` in {COMPLETE, FAIL} with `failure_hour`/`error` from the model's own terminal line when run unbounded (the 2026-10-16 default); a bounded run additionally allows TIMED_OUT, which is a wall-clock stop, NOT a scientific result. `runottawa_hash` must equal ecf5e61ab453288b1763f81f841729bee34e8426 (stager guard, DEV-004 deck half: f6=100). TIMED_OUT is a bounded wall-clock stop, NOT a scientific result: read the per-day `daily conservation accepted` lines and the output streams to find the real simulated horizon.",
-   "notes": "2026-10-16 directive (user): production campaign runs must NOT be stopped by a wall-clock timeout - omit --timeout and let the run reach natural completion; a bounded --timeout remains available for diagnostics only. Measured 2026-10-15 throughput on the macOS arm64 host, ReleaseFast, strict: 2,908 h in 900 s in winter (194 h/min), but the whole 3,600 s run reached only hour 3,419 (57 h/min) because summer days cost 19-47 s in the final hour alone (`day advanced ... final_hour_elapsed_ms`) — plan budgets from the second number, not the first.",
-   "last_verified_evidence": "2026-10-15: audit/runs/ottawa/zig017-probe-20261015-1 (TIMED_OUT, 900.1 s, last_checkpoint_key 2880), audit/runs/ottawa/zig017-frontier-20261015-1 (TIMED_OUT, 3600.1 s, last_checkpoint_key 3360, output to hour 3419, 142 `daily conservation accepted` lines, no failure)."
-  },
-  "zig017_run_output_diff": {
-   "added_utc": "2026-10-15",
-   "cwd": "<repo>",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/zig_run_diff.py",
-    "--a",
-    "evidence/runs/<run-a>/deck/runottawa_output_files",
-    "--b",
-    "evidence/runs/<run-b>/deck/runottawa_output_files",
-    "--allow-extra-rows",
-    "--json",
-    "audit/runs/<id>/zigdiff.json"
-   ],
-   "environment": {
-    "TMPDIR": "<repo>/.tmp",
-    "XDG_CACHE_HOME": "<repo>/.cache",
-    "UV_CACHE_DIR": "<repo>/.uv-cache"
-   },
-   "toolchain": "python (uv); compares text output only",
-   "expected_artifacts": [
-    "stdout JSON summary (status, files_compared, streams_identical, one_sided_rows, first_difference, worst_overall)",
-    "--json report: per-stream per-column cells_compared/cells_differing/cells_text_only/max_abs/max_rel/first_diff"
-   ],
-   "completion_condition": "exit 0 = every compared cell is text-identical (status IDENTICAL); exit 1 = at least one difference, which the report locates by file + calendar key (year, day_of_year, hour) + column. It reports, it never decides: `--allow-extra-rows` only says a shorter run is not itself a difference; there is no tolerance that turns a differing cell into a pass.",
-   "notes": "Use for same-toolchain questions (rebuild vs rebuild, repeat vs repeat, Debug vs ReleaseSafe vs ReleaseFast). `outcompare.py` answers the different question 'Zig vs legacy Fortran' and needs a legacy output stream, which is not in this repo.",
-   "last_verified_evidence": "2026-10-15 self-test (7 pytest, ecosys-audit/tests/test_zig_run_diff.py): 1-ulp change located to file/key/column; same-double different spelling reported as cells_text_only, not hidden; truncation fails by default and is counted with the flag; header difference and non-numeric cell both fail. Real use: audit/runs/ottawa/zig017-cross-process-determinism-20261015-1/zigdiff.json — probe vs frontier, 17/17 streams, 2,908 common hours, 0 differing cells."
-  }
- },
- "swarm": {
-  "note": "4-agent Ottawa qualification swarm (ecosys-ng_ottawa_qualification_execution_plan.md). Run from the project root inside a Herdr pane. Evidence paths are in-repo (evidence/). Added 2026-09-25.",
-  "swarm_wrapper": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/swarm_wrapper.py",
-    "<subcommand>"
-   ],
-   "subcommands": {
-    "status": "status",
-    "ensure_agents": "ensure-agents [--start]",
-    "relaunch": "relaunch <ROLE>",
-    "validate_dispatch": "validate-dispatch",
-    "diff_hash": "diff-hash",
-    "precommit": "precommit",
-    "approve": "approve --by <user>  (USER ONLY; GP1)",
-    "step": "step [--manual]",
-    "run": "run [--resume] [--max-steps N]"
-   },
-   "completion_condition": "JSON on stdout; exit 0 unless FAIL/INVALID/HUMAN_REVIEW_REQUIRED (1) or BLOCKED (2)",
-   "last_verified_evidence": "2026-09-25: relaunch of all four roles and ensure-agents OK against live session ecosys-ng; fresh_session verified live (SAGE new session id; OpenCode welcome-screen marker, because Herdr keeps the old OpenCode session id after /new)."
-  },
-  "swarm_wrapper_tests": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/tests/test_swarm_wrapper.py"
-   ],
-   "completion_condition": "exit 0 and 'OK' with 18 tests in the raw log",
-   "last_verified_evidence": "2026-09-25: audit/runs/swarm-selftest-20260925-e (18/18 OK); -c,-d 17/17 OK before the reset-marker test was added; -b had one transient WinError 5 on os.replace, fixed by a bounded retry in workflow.atomic. test_workflow.py 48/48, test_herdr_adapter.py 19/19 after that change (-wf, -hd).",
-   "limitations": "Fake Herdr and temporary Git repo; no real model turns; orphaned-child cleanup is run_logged.py's, not tested here."
-  },
-  "divcheck_selftest": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/divcheck.py",
-    "selftest"
-   ],
-   "completion_condition": "exit 0 and status PASS",
-   "last_verified_evidence": "2026-09-25: audit/runs/divcheck-selftest-20260925-a exit 0 (7/7 cases: clean, hour and init perturbation located exactly, below-tolerance, last hour, missing record, out-of-order rejected).",
-   "limitations": "Synthetic dumps; proves the comparator, not either model's writer."
-  },
-  "divcheck_compare": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/divcheck.py",
-    "compare",
-    "--legacy",
-    "<dump dir|file>",
-    "--zig",
-    "<dump dir|file>",
-    "--out",
-    "<report.json>"
-   ],
-   "completion_condition": "exit 0 WITHIN_RULES, 1 DIVERGENT, 2 error",
-   "last_verified_evidence": null
-  },
-  "make_failure_packet": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/make_failure_packet.py",
-    "--signature",
-    "<sig>",
-    "--task",
-    "<T-NNNNN>",
-    "[--summary summary.json] [--zig path:N-M] [--fortran file.f:N-M]"
-   ],
-   "completion_condition": "exit 0; prints packet path",
-   "last_verified_evidence": "2026-09-25: exercised via swarm_wrapper_tests (STAGNATED paths create packets in the temp repo)."
-  },
-  "update_frontier": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/update_frontier.py",
-    "show|record --summary <s>|promote --summary <s> --divcheck <d> --restart <r>"
-   ],
-   "completion_condition": "exit 0; promote exits 1 REFUSED unless every P5.5 condition holds under one binding",
-   "last_verified_evidence": null
-  },
-  "evidence_binding": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/evidence_binding.py",
-    "--deck",
-    "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON",
-    "--build-mode",
-    "<mode>",
-    "[--option X] [--out f.json]"
-   ],
-   "completion_condition": "exit 0; binding_id is sha256 of the canonical binding",
-   "last_verified_evidence": "2026-09-25: exercised by run_ottawa smoke run (staging/lock/binding/summary path; exe stand-in, artifacts removed)."
-  },
-  "issue_status": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/issue_status.py",
-    "--summary"
-   ],
-   "completion_condition": "exit 0",
-   "last_verified_evidence": "2026-09-25: 105 issue files; 51 closed, 43 open, 7 missing, 4 unclear; 13 need normalization.",
-   "limitations": "Keyword classification; report only."
-  },
-  "run_ottawa": {
-   "cwd": ".",
-   "argv": [
-    "uv",
-    "run",
-    "ecosys-audit/scripts/run_ottawa.py",
-    "--mode",
-    "strict|survey",
-    "--exe",
-    "<abs ecosys_ng.exe>",
-    "--build-mode",
-    "<mode>",
-    "--timeout",
-    "<s>",
-    "[--restart-from <run-id>:<hour>] [--full-run-justification TEXT]"
-   ],
-   "completion_condition": "exit 0 COMPLETE, 1 FAIL/TIMED_OUT, 2 refused; summary.json under audit/runs/ottawa/<run-id>/",
-   "last_verified_evidence": "2026-09-25: dump mode refused as designed; staging+lock+summary smoke with a stand-in exe (no model run yet).",
-   "limitations": "failure_hour/error are heuristic parses; breach/fallback counts stay null until validators exist, so a summary alone cannot promote."
-  }
- },
- "workspace_containment": {
-  "authority": "protocol.md §8a (gate G9)",
-  "rule": "all inputs and outputs of every command stay inside the repository root: sources, builds, caches, temp files, checkpoints, run output, logs and evidence.",
-  "scratch": ".tmp/",
-  "caches": {
-   "XDG_CACHE_HOME": ".cache/",
-   "UV_CACHE_DIR": ".uv-cache/",
-   "ZIG_GLOBAL_CACHE_DIR": "ecosys-ng/.zig-cache-global/",
-   "zig cache flags": "--zig-cache-directory / --cache-dir .zig-cache (Zig 0.17: `zig build` rejects --global-cache-dir; global cache via ZIG_GLOBAL_CACHE_DIR — audit/runs/zig017-pin017-debug-20261012)"
-  },
-  "evidence": "audit/runs/ (run_logged.py receipts and logs), audit/issues/, audit/features/",
-  "forbidden": [
-   "/tmp",
-   "$HOME",
-   "sibling checkouts",
-   "external or removable drives",
-   "cloud storage",
-   "paste/upload services",
-   "git worktree outside the repository"
-  ],
-  "allowed_outside_read_only": [
-   "installed toolchain and system libraries",
-   "git fetch/pull/push to origin"
-  ],
-  "vet_command": "uv run ecosys-audit/scripts/preflight.py --command \"<the command>\"",
-  "added_utc": "2026-10-09"
- }
+  "limitations": "Filtered module tests do not cover the executable test root. Legacy compile/run argv must be discovered for the actual host. No campaign or science gate is passed by this registry."
 }

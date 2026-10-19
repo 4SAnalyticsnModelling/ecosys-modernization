@@ -64,6 +64,7 @@ def make_test_env(
         "schema_version": 1,
         "run_id": "ottawa-test-run-1" if "Cool Temperate" in deck_path or case == "Ottawa" else "generic-test-run",
         "mode": "strict",
+        "build_binding_verified": True,
         "status": "COMPLETE",
         "exit_code": 0,
         "start_hour": 0,

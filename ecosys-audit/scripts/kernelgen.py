@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import json
+import shlex
 from pathlib import Path
 import re
 import sys
@@ -352,7 +353,8 @@ def main() -> int:
         driver_path = outdir / f'{stem}.f'
         manifest_path = outdir / f'{stem}.layout.json'
         build_path = outdir / f'{stem}.build.ps1'
-        for path in (driver_path, manifest_path, build_path):
+        shell_path = outdir / f'{stem}.build.sh'
+        for path in (driver_path, manifest_path, build_path, shell_path):
             if path.exists() and not args.force:
                 raise KernelError(f'{path} exists; pass --force to regenerate.')
 
@@ -371,7 +373,7 @@ def main() -> int:
             'stream': {
                 'format': 'Fortran unformatted stream access, one record per item, in '
                           'the order given below. Element order is Fortran column-major.',
-                'endianness': 'native (little-endian on this x86_64 host)',
+                'endianness': f'native ({sys.byteorder}-endian)',
                 'total_bytes': total,
                 'items': len(layout),
             },
@@ -422,6 +424,19 @@ Write-Output "built $(Join-Path $out '{stem}.exe')"
 Write-Output "run it in a directory holding {stem}.in ({total} bytes); it writes {stem}.out"
 '''
         build_path.write_text(build_script, encoding='utf-8')
+        build_dir = outdir.relative_to(root).as_posix() + '/build'
+        driver_obj = build_dir + '/' + stem + '.o'
+        legacy_obj = build_dir + '/' + unit['name'].lower() + '.o'
+        executable = build_dir + '/' + stem
+        commands = [
+            ['mkdir', '-p', build_dir],
+            ['gfortran', '-c', *DRIVER_FLAGS, '-I', 'f77src', '-o', driver_obj, driver_path.relative_to(root).as_posix()],
+            ['gfortran', '-c', *LEGACY_FLAGS, '-I', 'f77src', '-o', legacy_obj, unit['file']],
+            ['gfortran', '-o', executable, driver_obj, legacy_obj],
+        ]
+        shell_path.write_text('#!/usr/bin/env bash\nset -euo pipefail\n# Run from repository root through project.sh exec.\n' +
+                              '\n'.join(shlex.join(argv) for argv in commands) + '\n', encoding='utf-8')
+
 
         print(f'=== matched-state oracle for {unit["name"]} ===')
         print(f'  source          : {manifest["source"]}')
@@ -434,8 +449,7 @@ Write-Output "run it in a directory holding {stem}.in ({total} bytes); it writes
         print(f'  driver          : {driver_path.relative_to(root).as_posix()}')
         print(f'  layout manifest : {manifest_path.relative_to(root).as_posix()}')
         print(f'  build script    : {build_path.relative_to(root).as_posix()}')
-        print(f'  build with      : pwsh -File '
-              f'{build_path.relative_to(root).as_posix()}')
+        print(f'  POSIX build     : bash {shell_path.relative_to(root).as_posix()}')
         if calls_split:
             print('    NOTE: this unit calls SPLIT, which gfortran 16 resolves to the '
                   'Fortran 2023 intrinsic. Add `EXTERNAL split` after the unit header '

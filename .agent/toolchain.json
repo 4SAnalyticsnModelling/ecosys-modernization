@@ -1,34 +1,36 @@
 {
   "schema_version": 1,
   "recorded": "2026-10-09",
-  "authority": ".agent/protocol.md §8 (gate G1) and §8a (gate G9)",
+  "authority": ".agent/protocol.md",
   "check": "uv run ecosys-audit/scripts/preflight.py",
   "ecosys_ng": {
     "zig": {
       "required": ">=0.17.0 <0.18.0",
       "expected_reported_prefix": "0.17.",
-      "retired_versions": ["0.16"],
       "declared_in": "ecosys-ng/build.zig.zon",
       "declared_field": "minimum_zig_version",
       "declared_value_required": "0.17.0",
-      "migration_work_order": ".agent/migrations/zig-0.17.md",
       "policy": [
-        "ecosys-ng is compiled, tested and benchmarked only with Zig 0.17.x.",
-        "Zig 0.16 is retired: a 0.16 build is not evidence for G1/G2 and may not be cited as current.",
-        "If only a 0.16 toolchain exists on the machine, install 0.17.x (prefer a repo-local tools/zig/) and record a blocker; never build with 0.16 instead.",
-        "Print `zig version` into every build/test receipt so the toolchain is recorded with the result."
+        "Zig 0.17.x only; record compiler version in every build/test receipt."
       ]
     },
     "build_modes": {
-      "gate_modes": ["Debug", "ReleaseSafe"],
+      "gate_modes": [
+        "Debug",
+        "ReleaseSafe"
+      ],
       "production_mode": "ReleaseFast"
     },
     "caches_must_live_in_repo": {
       "build_cache": "ecosys-ng/.zig-cache",
       "global_cache": "ecosys-ng/.zig-cache-global",
-      "flags": ["--cache-dir"],
+      "flags": [
+        "--cache-dir"
+      ],
       "flags_note": "Zig 0.17: `zig build`/`zig test` accept --cache-dir but REJECT --global-cache-dir (measured 2026-10-12, audit/runs/zig017-pin017-debug-20261012). Set ZIG_GLOBAL_CACHE_DIR instead; the build runner passes --global-cache-dir to the compiler itself.",
-      "env": ["ZIG_GLOBAL_CACHE_DIR"]
+      "env": [
+        "ZIG_GLOBAL_CACHE_DIR"
+      ]
     }
   },
   "legacy_fortran": {
@@ -36,7 +38,7 @@
     "note": "Unchanged by the Zig pin. The Zig 0.17 mandate applies to ecosys-ng only; legacy oracle builds keep their own recorded toolchain in audit/manifest/."
   },
   "workspace_containment": {
-    "rule": "Every read, write, build, test, run, cache, checkpoint, download and log of this project stays inside the repository root (protocol.md §8a).",
+    "rule": "Every read, write, build, test, run, cache, checkpoint, download and log of this project stays inside the repository root (protocol.md \u00a78a).",
     "scratch": ".tmp/",
     "python_cache": ".uv-cache/",
     "generic_cache": ".cache/ (XDG_CACHE_HOME)",

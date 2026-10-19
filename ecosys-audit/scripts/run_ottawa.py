@@ -2,18 +2,9 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # ///
-"""Stage and run one Ottawa ecosys-ng job; write a spec section 17 summary.json (plan P2.9).
-
-Modes: strict (fatal on first failure; the only mode that can promote the frontier),
-survey (--survey-conservation; hints, never evidence), dump (refused until the P2.2 state-dump
-build option exists). The binary resumes from any checkpoint files present in its deck, so a
-strict hour-0 run is staged into a fresh copy with NO checkpoints; --restart-from copies one
-checkpoint set in explicitly (a replay: provisional-diagnostic, never promotion evidence).
-
-Holds the exclusive machine lock (.agent/locks/machine.lock), refuses on low disk space or a
-slow D: read (a faulted D: presents as a zero-CPU hang), and binds the run to its evidence binding.
-Summary fields it cannot parse are null; update_frontier.py promote refuses nulls.
-"""
+"""Stage one strict/survey Ottawa job with source/build identity and restart provenance.
+Exit zero is execution success only; science completion requires terminal/output validation.
+Cross-revision replays are diagnostic. Dump mode is unavailable until its writer exists."""
 from __future__ import annotations
 
 import argparse
@@ -37,7 +28,6 @@ except ImportError:
 
 DECK = "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON"
 CHECKPOINT = re.compile(r"^(\d+)\.grid_and_plants\.bin$")
-LONG_RUN_SECONDS = 3 * 3600
 
 
 def checkpoints(tree: Path) -> dict[int, list[Path]]:
@@ -57,7 +47,7 @@ def io_probe(path: Path, limit_s: float) -> float:
         f.read(1 << 20)
     elapsed = time.perf_counter() - start
     if elapsed > limit_s:
-        raise ProtocolError(f"D: read probe took {elapsed:.2f}s (> {limit_s}s); drive may be faulted, refusing to start")
+        raise ProtocolError(f"Input read probe took {elapsed:.2f}s (> {limit_s}s); drive may be faulted, refusing to start")
     return elapsed
 
 
@@ -81,6 +71,7 @@ def main():
     ap.add_argument("--mode", choices=["strict", "survey", "dump"], required=True)
     ap.add_argument("--exe", type=Path, required=True, help="built ecosys_ng.exe (copied into the staged deck)")
     ap.add_argument("--build-mode", required=True, choices=["Debug", "ReleaseSafe", "ReleaseFast"])
+    ap.add_argument("--build-receipt", help="Successful build receipt proving source, mode and executable identity")
     ap.add_argument("--build-option", action="append", default=[])
     ap.add_argument("--deck", default=DECK)
     ap.add_argument("--run-id", default=None)
@@ -100,21 +91,19 @@ def main():
     try:
         if a.mode == "dump":
             raise ProtocolError("dump mode needs the P2.2 Zig state-dump build option, which does not exist yet")
-        if a.timeout is not None and a.timeout > LONG_RUN_SECONDS and not (a.full_run_justification and len(a.full_run_justification) > 20):
-            raise ProtocolError("a bounded run longer than 3 h is a full run: pass --full-run-justification or omit --timeout")
         run_id = a.run_id or f"{time.strftime('%Y%m%d-%H%M%S')}-{a.mode}-{uuid.uuid4().hex[:6]}"
         stage = inside(root, f"evidence/runs/{run_id}")
         logs = a.out or f"audit/runs/ottawa/{run_id}"
         deck_src = inside(root, a.deck)
-        exe = a.exe.resolve(strict=True)
+        exe = inside(root, str(a.exe)).resolve(strict=True)
         free_gb = shutil.disk_usage(root).free / 1e9
         if free_gb < a.min_free_gb:
             raise ProtocolError(f"only {free_gb:.1f} GB free (< {a.min_free_gb}); refusing to start")
         probe = io_probe(next(p for p in deck_src.rglob("*") if p.is_file()), a.io_probe_limit)
-        lock_path = a.lock_file.resolve() if a.lock_file else (root / ".agent/locks/machine.lock")
+        lock_path = inside(root, str(a.lock_file)) if a.lock_file else (root / ".agent/locks/machine.lock")
         with lock(lock_path):
             binding = compute_binding(root, a.deck, a.build_mode, a.build_option)
-            deck = a.staged_deck.resolve() if a.staged_deck else stage / "deck"
+            deck = inside(root, str(a.staged_deck)) if a.staged_deck else stage / "deck"
             if deck.exists() and any(deck.iterdir()):
                 raise ProtocolError(f"staged deck destination {deck} already exists and is not empty; qualification runs require a fresh directory")
             # Prior outputs (and their checkpoint siblings) are never staged; stage the approved deck
@@ -139,6 +128,19 @@ def main():
             elif pre:
                 raise ProtocolError(f"staged deck already holds checkpoints {sorted(pre)}; a strict hour-0 run needs none")
             shutil.copy2(exe, deck / exe.name)
+            staged_exe_sha256 = file_digest(deck / exe.name)
+            build_verified = False
+            if a.build_receipt:
+                build_receipt = load(inside(root,a.build_receipt))
+                build_verified = (build_receipt.get("exit_code") == 0
+                    and build_receipt.get("source_digest") == binding.get("source_digest")
+                    and not build_receipt.get("source_changed_during_command", True)
+                    and build_receipt.get("build_mode") == a.build_mode
+                    and (build_receipt.get("build_product") or {}).get("sha256") == staged_exe_sha256)
+                if not build_verified:
+                    raise ProtocolError("build receipt does not bind this source/mode/executable")
+            binding["executable_sha256"] = staged_exe_sha256
+            binding["effective_runottawa_hash"] = runottawa_hash
             argv = [str(deck / exe.name)]
             if a.mode == "survey":
                 argv.append("--survey-conservation")
@@ -160,7 +162,7 @@ def main():
             cps = checkpoints(deck)
             outcome = parse_outcome(root / logs / "stdout.log", root / logs / "stderr.log")
             code = receipt.get("exit_code")
-            status = "TIMED_OUT" if receipt.get("status") == "TIMED_OUT" else "COMPLETE" if code == 0 else "FAIL"
+            status = "TIMED_OUT" if receipt.get("status") == "TIMED_OUT" else "EXITED_UNVERIFIED" if code == 0 else "FAIL"
             last_cp = max(cps) if cps else None
             summary = {
                 "schema_version": 1, "run_id": run_id, "mode": a.mode, "status": status, "exit_code": code,
@@ -171,9 +173,10 @@ def main():
                 "failure_hour": outcome["failure_hour"], "error": outcome["error"],
                 "parse_confidence": outcome["parse_confidence"],
                 "conservation_breaches": None, "solver_fallbacks_unexplained": None,
-                "binding": binding, "exe_sha256": file_digest(exe), "io_probe_seconds": round(probe, 4),
+                "binding": binding, "build_binding_verified": build_verified, "build_receipt": a.build_receipt, "exe_sha256": staged_exe_sha256, "io_probe_seconds": round(probe, 4),
                 "wall_seconds": round(time.time() - started, 1), "timeout_seconds": a.timeout,
                 "full_run_justification": a.full_run_justification,
+                "completion_validation": "NOT_ASSESSED: validate terminal time and every required output before COMPLETE",
                 "full_log": f"{logs}/stdout.log", "receipt": f"{logs}/receipt.json", "staged_deck": staged_deck_rel,
                 "runottawa_hash": runottawa_hash,
                 "limitations": ("failure_hour/error are heuristic parses; conservation_breaches and "
@@ -181,17 +184,10 @@ def main():
                                 "can never promote the frontier."),
             }
             atomic(root / logs / "summary.json", encoded(summary))
-            if a.full_run_justification:
-                wf_path = root / ".agent/workflow.json"
-                wf = load(wf_path)
-                wf.setdefault("full_runs", {}).setdefault("zig", 0)
-                wf["full_runs"]["zig"] += 1
-                wf.setdefault("full_run_justifications", []).append({"run_id": run_id, "text": a.full_run_justification})
-                atomic(wf_path, encoded(wf))
         print(json.dumps({k: summary[k] for k in ("run_id", "status", "mode", "failure_hour", "error",
                                                   "last_checkpoint_key", "wall_seconds")} |
                          {"summary": f"{logs}/summary.json", "runottawa_hash": runottawa_hash}, indent=2))
-        return 0 if status == "COMPLETE" else 1
+        return 0 if code == 0 else 1
     except (OSError, ValueError, KeyError, StopIteration, ProtocolError, RuntimeError, subprocess.SubprocessError) as e:
         print(json.dumps({"status": "BLOCKED", "error": str(e)}), file=sys.stderr)
         return 2

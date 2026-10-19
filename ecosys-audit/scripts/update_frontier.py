@@ -96,6 +96,10 @@ def promote(root: Path, summary_path: str, divcheck_path: str, restart_path: str
     d, dref = art(root, divcheck_path)
     r, rref = art(root, restart_path)
     problems = []
+    if s.get("build_binding_verified") is not True:
+        problems.append("source/mode/executable build binding not verified")
+    if s.get("status") in ("TIMED_OUT", "INTERRUPTED", "EXITED_UNVERIFIED"):
+        problems.append("run outcome is not qualifying evidence")
     if s.get("mode") != "strict":
         problems.append("campaign mode is not strict")
     if s.get("start_hour") not in (0, 1):
@@ -120,8 +124,7 @@ def promote(root: Path, summary_path: str, divcheck_path: str, restart_path: str
     if problems:
         return {"status": "REFUSED", "problems": problems}
     candidates = [s.get("last_completed_hour")]
-    if d.get("status") != "WITHIN_RULES":
-        candidates.append(d.get("last_verified_hour"))
+    candidates.append(d.get("last_verified_hour"))
     candidates.append(r.get("last_equivalent_hour"))
     if not all(isinstance(c, int) for c in candidates):
         return {"status": "REFUSED", "problems": ["summary/divcheck/restart must give integer hours "

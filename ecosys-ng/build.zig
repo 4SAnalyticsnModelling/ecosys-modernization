@@ -31,12 +31,16 @@ pub fn build(b: *std.Build) void {
     b.step("run", "Run ecosys-ng").dependOn(&run_cmd.step);
 
     const test_step = b.step("test", "Run unit tests");
+    const test_filters: []const []const u8 = if (b.option([]const u8, "test-filter", "Run matching tests in both module roots")) |filter|
+        b.allocator.dupe([]const u8, &.{filter}) catch @panic("out of memory")
+    else
+        &.{};
 
-    const tests = b.addTest(.{ .root_module = module });
+    const tests = b.addTest(.{ .root_module = module, .filters = test_filters });
     test_step.dependOn(&b.addRunArtifact(tests).step);
 
     // src/ecosys_ng.zig is a second module root, not reachable from
     // src/module_index.zig, so its tests need their own test artifact.
-    const executable_tests = b.addTest(.{ .root_module = executable.root_module });
+    const executable_tests = b.addTest(.{ .root_module = executable.root_module, .filters = test_filters });
     test_step.dependOn(&b.addRunArtifact(executable_tests).step);
 }

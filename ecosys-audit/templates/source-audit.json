@@ -10,50 +10,50 @@
       "id": "baseline-integrity",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "complete-scope-inventory",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "bidirectional-traceability",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "state-and-output-bindings",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "process-science-review",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "feature-boundary-review",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     },
     {
       "id": "focused-regressions",
       "status": "NOT_ASSESSED",
       "author": null,
-      "reviewer": null,
-      "evidence": []
+      "evidence": [],
+      "verification_method": null
     }
   ]
 }

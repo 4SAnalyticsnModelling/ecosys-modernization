@@ -14,7 +14,7 @@ from pathlib import Path
 import sys
 
 ROOTS = ('f77src', 'f77example', 'ecosys-ng', 'ecosys-ng-prod-examples')
-EXCLUDED = ('.git', '.zig-cache', 'zig-cache', 'zig-out', '__pycache__')
+EXCLUDED = ('.git', '.zig-cache', 'zig-cache', 'zig-out', '__pycache__', '.zig-cache-global', 'ecosys-ng-bin')
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -50,7 +50,7 @@ def collect(root: Path) -> dict:
             kept = []
             for name in sorted(directories):
                 path = current / name
-                if name in EXCLUDED:
+                if name in EXCLUDED or name.startswith(".zig-cache-"):
                     excluded_paths.append(path.relative_to(root).as_posix())
                 elif path.is_symlink():
                     raise ValueError(f'Unresolved directory symlink: {path}')

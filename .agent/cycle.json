@@ -3,17 +3,21 @@
   "cycle": 3,
   "decisions": [],
   "gates": {},
-  "metrics": {},
-  "next_target": "Did Zig 0.17 move any production number? One bounded strict ReleaseFast run on the Ottawa deck, compared row-by-row against the recorded oracle for those hours (cycle_00001.md section 6).",
+  "next_target": "Reproduce parent h4556 failure from h4320, then falsify supply/consumption hypotheses with matched-state legacy terms.",
   "opened_utc": "2026-10-17T08:55:14Z",
   "record": ".agent/cycles/cycle_00003.md",
-  "schema_version": 1,
+  "schema_version": 2,
   "status": "WORKING",
-  "steps_done": [
-    "0 plan: record opened",
-    "0 plan: cycle_00003.md \u00a70 filled with exact failure signature and hypotheses H1-H4; source unchanged since run binding 283feda; replay plan from h4320 checkpoint"
-  ],
   "sync_status": "unknown",
   "target": "Why does strict Ottawa fail with InsufficientSoilMineralNitrogen at hour 4556 (1998 d190 h20, non-band layer 0, candidate -1.546e-9 vs scale 8.27e-6, roundoff_limit 1.17e-19; nitrogen_state_update.zig:1583-1590 via :280) where legacy completes 30 y: which Zig term diverges from f77src in the soil-mineral-N supply/uptake path, at file:line?",
-  "updated_utc": "2026-10-17T19:03:11Z"
+  "updated_utc": "2026-10-17T19:03:11Z",
+  "base_commit": "ea787634e514a0bb35cb4b73e8ba8d3262980204",
+  "owned_paths": [
+    "ecosys-ng/src/soil/nutrients/nitrogen_state_update.zig"
+  ],
+  "scope": [
+    "ecosys-ng/src",
+    "ecosys-ng/build.zig",
+    "ecosys-ng/build.zig.zon"
+  ]
 }

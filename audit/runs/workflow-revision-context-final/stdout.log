@@ -1,0 +1,45 @@
+(node:52631) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ two actual native code runtimes keep temp files private and strip inherited credentials (440.619ms)
+(node:52632) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ native code mode exposes both tools and batches calls beyond old deadlines (206.535708ms)
+✔ global dsh-tui has one policy and two retained 131K routes (571.954709ms)
+✔ global dsh-tui-safe has one policy and two retained 131K routes (164.95725ms)
+✔ global headless has one policy and two retained 131K routes (142.290041ms)
+✔ same-model native sessions and nested agents own independent notes/state (399.656625ms)
+✔ corrupt session state fails without replacing or blocking siblings (174.532917ms)
+✔ checkpoints retain native project layout and exclude siblings (31.995334ms)
+✔ concurrent streams of same model carry distinct native session identities (10.760375ms)
+✔ concurrent agent shell calls get separate managed roots and caches (226.315292ms)
+✔ exact trigger formula for every valid output reservation (1.761375ms)
+✔ native token-cap exhaustion commits a complete archived recovery checkpoint (2105.09275ms)
+✔ only a closed pre-commit summary failure reconciles automatically (200.809833ms)
+✔ 74K does not compact; 75K causes one native balanced compaction (543.407208ms)
+✔ failed native summary preserves original surface and blocks restart (427.561916ms)
+✔ missing meter never silently permits request (0.13525ms)
+✔ mounted watchdog dependencies permit meter access in a restricted plugin context (1.606958ms)
+✔ durable notes are retained verbatim; conflicts and failed summary reject (161.3895ms)
+✔ atomic state survives reload; corrupt state fails closed (153.15425ms)
+✔ operation repeat counters do not depend on call identifiers (0.351958ms)
+✔ confirmed overflow can compact below normal boundary (464.065959ms)
+✔ fully assembled request catches late admission and supported retry rebuilds (490.922625ms)
+✔ eight repeated tool operations block despite changing turn, step and callId (310.601167ms)
+✔ successful assistant resets consecutive failure and overflow counters (229.491458ms)
+✔ known interrupted task queues a durable-notes continuation through agent service (230.134666ms)
+✔ subagent telemetry cannot replace the root resume pointer (230.710834ms)
+✔ non-Git workspace snapshots source without recursively copying watchdog state (25.118083ms)
+✔ unborn Git repository checkpoints staged and untracked source (111.472959ms)
+✔ continuous hygiene below75K retains errors, originals, pairing, index and replay (193.1085ms)
+✔ late cleanup crosses under75K and rebuilds without a summary (186.571209ms)
+✔ hygiene flush failure blocks subsequent requests even after surface changed (185.831917ms)
+✔ partial native pruning failure blocks retry admission (181.200125ms)
+✔ Unicode pruning preserves surrogate pairs and explicit retrieval notice (150.690916ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7300.194917

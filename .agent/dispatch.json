@@ -1,6 +1,0 @@
-{
-  "schema_version": 1,
-  "status": "IDLE",
-  "reason": "no unblocked work: clean-tree G0 passes; no user decisions and no approved post-G0 task remains.",
-  "state_next": "await new evidence or a new task trigger"
-}

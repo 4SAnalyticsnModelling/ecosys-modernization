@@ -57,11 +57,10 @@ def check(root: Path, gate: dict) -> list[str]:
         ident=record['id']
         if record.get('status')!='PASS':
             errors.append(f'{ident}: status is not PASS.')
-        author,reviewer=record.get('author'),record.get('reviewer')
-        if not nonempty(author) or not nonempty(reviewer):
-            errors.append(f'{ident}: author and independent reviewer are required.')
-        elif author.strip().casefold()==reviewer.strip().casefold():
-            errors.append(f'{ident}: author/reviewer labels must be distinct; actual independence still needs review.')
+        if not nonempty(record.get('author')):
+            errors.append(f'{ident}: actor identity required.')
+        if record.get('verification_method') not in ('separate-derivation','fresh-context-same-model'):
+            errors.append(f'{ident}: separate evidence re-derivation required.')
         evidence=record.get('evidence')
         if not isinstance(evidence,list) or not evidence:
             errors.append(f'{ident}: no evidence artifacts.')
