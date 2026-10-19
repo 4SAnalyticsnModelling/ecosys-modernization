@@ -77,8 +77,11 @@ def run(root: Path, cwd: Path, out: Path, argv: list[str], timeout: float | None
         except OSError as e:
             code, launch_error = 127, str(e)
     product=root/"ecosys-ng/ecosys-ng-bin/ecosys_ng"
-    if code == 0 and Path(argv[0]).name == "zig" and "build" in argv and not any(a in argv for a in ["--help", "-h", "test"]) and product.is_file():
-        record["build_product"] = artifact(root,relative(root,product))
+    if code == 0 and cwd == (root/'ecosys-ng').resolve() and Path(argv[0]).name == "zig" and "build" in argv and not any(a in argv for a in ["--help", "-h", "test", "test-module", "test-executable"]) and product.is_file():
+        # Preserve each mode's binary: a subsequent build replaces the installed path.
+        saved=out/'build-product'/product.name;saved.parent.mkdir()
+        shutil.copy2(product,saved)
+        record["build_product"] = artifact(root,relative(root,saved))
         record["build_mode"] = next((a.split("=",1)[1] for a in argv if a.startswith("-Doptimize=")), "Debug")
         record["source_changed_during_command"] = record.get("source_digest") != content_digest(root, SOURCE_SCOPE)
     record.update({"status": "EXITED", "exit_code": code,

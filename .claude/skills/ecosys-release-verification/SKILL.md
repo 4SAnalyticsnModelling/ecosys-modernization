@@ -12,5 +12,8 @@ source/binding/feature inventory, DEV disposition, build/restart/performance and
 `check_gate.py` validates stage structure/hashes; it does not prove scientific correctness.
 Reject missing/stale/skipped/unassessed evidence. Final time and complete inventory are separate
 from exit 0. Verify synthetic validators detect truncation, corrupt restart and missing fields.
-Write hash-bound F1–F7 checks to `.agent/finish.json`; `completion.py` must validate before
+Write schema-2 finish evidence with structured F2–F6 reports and hash-bound F1–F7 checks to `.agent/finish.json`; `completion.py` must validate before
 supervision stops. If anything fails, choose the next falsifiable repair and continue autonomously.
+
+For report/dependency schemas, readiness and suite accounting, use
+[qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

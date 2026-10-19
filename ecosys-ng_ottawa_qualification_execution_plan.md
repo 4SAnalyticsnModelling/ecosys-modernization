@@ -30,3 +30,13 @@ Current gaps are tasks, never assumed passes: preserved legacy baseline is parti
 provenance CSV needs population; recorded Python failures need active-suite repair; Zig/host
 comparison history does not prove oracle parity. Do not reinstall old workflows or toolchains.
 All commands use `scripts/project.sh`; discover actual model/legacy CLI before registering argv.
+
+Prerequisites are explicit: populate mineral-N bindings while resolving cycle 3; extend the
+register by process. Baseline preparation and output/rule definitions are unblocked work during
+long experiments. Before ENTRY, run `readiness.py --output-inventory <reviewed-inventory.json>`;
+before CAMPAIGN, establish complete source/DEV dispositions and assessed required suites.
+Freeze comparison rules before evaluation; retained replacement physics requires predeclared
+envelopes and held-out independent benchmarks. Preserve failed and missing evidence as blockers.
+Before RELEASE, validate structured F2–F6 reports and the schema-2 finish certificate.
+See [qualification evidence](ecosys-audit/qualification-evidence.md) for exact interfaces.
+Workflow-only maintenance records its own evidence; it does not advance cycle 3 or the frontier.

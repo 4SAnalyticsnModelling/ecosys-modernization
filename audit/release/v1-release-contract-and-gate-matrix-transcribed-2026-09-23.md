@@ -1,3 +1,14 @@
+> Historical transcription; current authority is `.agent/protocol.md`. Quoted Zig 0.16,
+> four-root, elapsed-time, role/approval and publishing rules are superseded. Preserve the
+> quotations as provenance. Current requirements use Zig 0.17, both actual test roots,
+> autonomous evidence decisions and pushed main.
+>
+> Scientific obligations remain mapped as follows: execution identity → F1; conservation → F2;
+> complete outputs/oracle → F3; scientific ownership and dormant scope → F4; hydrology,
+> freeze-thaw and replacement benchmarks/attribution → F5; active/calendar/spatial restart,
+> production safety, reproducibility and equivalent-work performance → F6; publication → F7.
+> Historical status and missing external documents do not establish present compliance.
+
 # The v1.0.0 release contract and gate matrix, transcribed into this repository, 2026-09-23
 
 **Provenance, stated first because it governs how this file may be used.** Every quotation below is transcribed verbatim from `docs/v1_release_checklist.md` in the reference tree at `C:\Users\symon.mezbahuddin\OneDrive - Government of Alberta\ProjectsSymon\ecosys_modernization\ecosys-ng\`, which the user granted **read-only** access to. That file is 629 lines and is **not present in this repository** (`issue-097`). It is not a contract this session authored, agreed, or may amend. Its own baseline commit is `468ef0d52b63d5cb50445077e21efbbe62dd10a8`, which is **not** this repository's history, and it warns of itself: "Historical status columns are leads, not current verdicts."

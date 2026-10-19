@@ -37,10 +37,14 @@ pub fn build(b: *std.Build) void {
         &.{};
 
     const tests = b.addTest(.{ .root_module = module, .filters = test_filters });
-    test_step.dependOn(&b.addRunArtifact(tests).step);
+    const module_run = b.addRunArtifact(tests);
+    test_step.dependOn(&module_run.step);
+    b.step("test-module", "Run module_index tests with separate accounting").dependOn(&module_run.step);
 
     // src/ecosys_ng.zig is a second module root, not reachable from
     // src/module_index.zig, so its tests need their own test artifact.
     const executable_tests = b.addTest(.{ .root_module = executable.root_module, .filters = test_filters });
-    test_step.dependOn(&b.addRunArtifact(executable_tests).step);
+    const executable_run = b.addRunArtifact(executable_tests);
+    test_step.dependOn(&executable_run.step);
+    b.step("test-executable", "Run ecosys_ng tests with separate accounting").dependOn(&executable_run.step);
 }

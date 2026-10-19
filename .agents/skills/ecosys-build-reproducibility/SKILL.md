@@ -14,3 +14,6 @@ Do not run a stale binary after failed build. Compare behavior and separately in
 executable-byte nondeterminism. Full-state restart covers clocks, management, lagged fluxes,
 cumulative/output and solver state; reject incompatible/truncated checkpoints atomically.
 Prepare reproducible manifest/commands; publish only the verified cycle to origin/main.
+
+For report/dependency schemas, readiness and suite accounting, use
+[qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

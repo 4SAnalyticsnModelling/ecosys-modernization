@@ -14,3 +14,6 @@ scale. Use approved quantity-specific tolerances, never widen them to hide a fai
 Exercise closed systems, known source/sink, interface transfer and rejected-trial rollback;
 isolated omitted/sign/double-transfer fixtures must fail. Record each accepted hour's ledger.
 Reject nonfinite/unclosed states; publish no clipped or renormalized success.
+
+For report/dependency schemas, readiness and suite accounting, use
+[qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

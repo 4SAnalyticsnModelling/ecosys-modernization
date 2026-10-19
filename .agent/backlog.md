@@ -7,6 +7,8 @@
    issue-110 follow-up branch coverage. Recheck recorded results; do not treat stale lists as facts.
 4. Regenerate the complete legacy baseline with current compiler/input hashes; preserved manifest
    is partial. Complete raw-output adapters and `audit/output-provenance.csv` field by field.
+   Populate mineral-N bindings during items 1–2; build the remaining dictionary/rules during
+   unblocked waits. ENTRY requires `readiness.py` against the reviewed complete output inventory.
 5. Audit state bindings and process interfaces; retire unclosed/best-bounded DEV debt. Investigate
    snow, drainage, gas fluxes, frost heave and root-C discrepancies from their issue evidence.
 6. Profile representative accepted hours, incremental builds and I/O; verify equivalent work.

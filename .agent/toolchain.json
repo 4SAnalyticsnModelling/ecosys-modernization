@@ -38,7 +38,7 @@
     "note": "Unchanged by the Zig pin. The Zig 0.17 mandate applies to ecosys-ng only; legacy oracle builds keep their own recorded toolchain in audit/manifest/."
   },
   "workspace_containment": {
-    "rule": "Every read, write, build, test, run, cache, checkpoint, download and log of this project stays inside the repository root (protocol.md \u00a78a).",
+    "rule": "Every read, write, build, test, run, cache, checkpoint, download and log of this project stays inside the repository root (protocol.md execution and recovery).",
     "scratch": ".tmp/",
     "python_cache": ".uv-cache/",
     "generic_cache": ".cache/ (XDG_CACHE_HOME)",

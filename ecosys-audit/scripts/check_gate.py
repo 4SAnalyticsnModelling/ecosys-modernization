@@ -13,6 +13,7 @@ import sys
 from snapshot import safe_path, sha256, verify
 
 REQUIREMENTS = json.loads((Path(__file__).resolve().parents[1] / 'gate_requirements.json').read_text(encoding='utf-8'))
+STAGE_ALIASES = {'source-audit':'SOURCE', 'production-entry':'ENTRY', 'release':'RELEASE'}
 HASH_RE=re.compile(r'^[0-9a-f]{64}$')
 
 def nonempty(value: object) -> bool:
@@ -24,6 +25,7 @@ def check(root: Path, gate: dict) -> list[str]:
     if not isinstance(gate,dict) or gate.get('schema_version') != 1:
         return ['Invalid gate schema/version.']
     stage=gate.get('stage')
+    if isinstance(stage,str): stage=STAGE_ALIASES.get(stage,stage)
     if not isinstance(stage,str) or stage not in REQUIREMENTS:
         return ['Unknown gate stage.']
     subject=gate.get('snapshot')

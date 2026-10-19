@@ -10,8 +10,10 @@ import sys
 from workflow import ROOT, ProtocolError, artifact, atomic, encoded, inside, load
 from project_runtime import content_digest, environment, git
 from run_logged import run as execute
+from dependencies import capture as capture_dependencies, verify as verify_dependencies
 
 GATES=tuple('G'+str(i) for i in range(1,10))
+RESULTS=('PASS','FAIL','NA','INCONCLUSIVE')
 REQUIRED=tuple(x for x in GATES if x!='G8')
 FORBIDDEN=[r'unreachable\s*\(',r'@setRuntimeSafety\s*\(\s*false',r'\bDEV-\d+',
            r'(?i)\b(?:tol\w*|eps\w*|max\w*(?:iter|step|ceiling))\s*=\s*[0-9]']
@@ -34,13 +36,14 @@ def fingerprint(root,data):return content_digest(root,data.get('scope'))
 
 def record_gate(root,data,gid,result,evidence,reason=''):
     if gid not in REQUIRED:raise ProtocolError('record G1–G7/G9; G8 is derived after push')
-    if result not in ['PASS','FAIL','NA']:raise ProtocolError('result must be PASS, FAIL or NA')
+    if result not in RESULTS:raise ProtocolError('result must be PASS, FAIL, NA or INCONCLUSIVE')
     if not evidence:raise ProtocolError('all verdicts require evidence files')
     if result=='NA' and not reason.strip():raise ProtocolError('NA requires scope reason')
     refs=[artifact(root,p) for p in evidence]
     data.setdefault('gates',{})[gid]={'result':result,'evidence':refs,'reason':reason,
-                                  'candidate_digest':fingerprint(root,data)}
-    if result=='FAIL':data['status']='WORKING'
+                                  'candidate_digest':fingerprint(root,data),
+                                  'dependencies':capture_dependencies(root, **data.get('dependency_spec', {}))}
+    if result in ('FAIL','INCONCLUSIVE'):data['status']='WORKING'
     save(root,data)
 
 def blockers(root,data):
@@ -57,8 +60,13 @@ def blockers(root,data):
         for p in touched:
             if p.startswith('ecosys-ng/') and not any(p==s or p.startswith(s.rstrip('/')+'/') for s in scopes):
                 problems.append('owned source omitted from evidence scope: '+p)
+    dependency_checks = {}
     for gid in REQUIRED:
         g=data.get('gates',{}).get(gid,{})
+        dependency_key = json.dumps(g.get('dependencies'), sort_keys=True)
+        if dependency_key not in dependency_checks:
+            dependency_checks[dependency_key] = verify_dependencies(root, g.get('dependencies'))
+        problems.extend(gid + ': ' + e for e in dependency_checks[dependency_key])
         if g.get('result') not in ['PASS','NA']:problems.append(gid+': missing or failed')
         if g.get('candidate_digest')!=digest:problems.append(gid+': stale candidate')
         if not g.get('evidence'):problems.append(gid+': missing evidence')
@@ -115,12 +123,13 @@ def main():
     sub.add_parser('status')
     o=sub.add_parser('open');o.add_argument('--target',required=True);o.add_argument('--paths',nargs='+',required=True)
     o.add_argument('--scope',nargs='+',help='all source dependencies checked by this cycle; default owned paths')
-    g=sub.add_parser('gate');g.add_argument('gate',choices=REQUIRED);g.add_argument('--result',choices=['PASS','FAIL','NA'],required=True)
+    g=sub.add_parser('gate');g.add_argument('gate',choices=REQUIRED);g.add_argument('--result',choices=RESULTS,required=True)
     g.add_argument('--evidence',action='append',required=True);g.add_argument('--reason',default='')
     c=sub.add_parser('close');c.add_argument('--summary',required=True);c.add_argument('--dry-run',action='store_true')
     sub.add_parser('push')
     s=sub.add_parser('set');s.add_argument('--target');s.add_argument('--next-target');s.add_argument('--base-commit')
     s.add_argument('--paths',nargs='+');s.add_argument('--scope',nargs='+');s.add_argument('--note')
+    s.add_argument('--dependencies', help='JSON file with scope, justification and context; omit scope for conservative capture')
     gates=sub.add_parser('gates');gates.add_argument('--build',action='store_true');gates.add_argument('--tests',action='store_true')
     gates.add_argument('--diff-ref')
     a=p.parse_args();root=a.root.resolve();data=ledger(root) if (root/'.agent/cycle.json').exists() else {}
@@ -146,18 +155,28 @@ def main():
                 if getattr(a,key,None) is not None:data[key]=getattr(a,key)
             if a.paths:data['owned_paths']=a.paths
             if a.note:data['next_action']=a.note
+            if a.dependencies:
+                spec=load(inside(root,a.dependencies));capture_dependencies(root,**spec)
+                data['dependency_spec']=spec
             save(root,data)
         elif a.cmd=='gate':record_gate(root,data,a.gate,a.result,a.evidence,a.reason)
         elif a.cmd=='close':print(json.dumps(close(root,data,a.summary,a.dry_run)))
         elif a.cmd=='push':push(root);print(head(root))
         elif a.cmd=='gates':
             failures=[];receipts=[];env=environment(root)
-            for enabled,name,argv,cwd in [(a.build,'zig',['zig','build','test','--cache-dir','.zig-cache'],root/'ecosys-ng'),
-                                           (a.tests,'python',['uv','run','--with','pytest','pytest','ecosys-audit/tests','-q'],root)]:
-                if enabled:
-                    out=root/'audit/runs'/('cycle-check-'+name+'-'+datetime.now().strftime('%Y%m%d%H%M%S%f'))
-                    result=execute(root,cwd,out,argv,None);receipts.append(str((out/'receipt.json').relative_to(root)))
-                    if result['exit_code']!=0:failures.append(name)
+            from suite_check import run_case
+            if a.build:
+                for mode in ('Debug','ReleaseSafe','ReleaseFast'):
+                    out=root/'audit/runs'/('cycle-build-'+mode+'-'+datetime.now().strftime('%Y%m%d%H%M%S%f'))
+                    result=execute(root,root/'ecosys-ng',out,['zig','build','-Doptimize='+mode,'--cache-dir','.zig-cache'],None)
+                    receipts.append(str((out/'receipt.json').relative_to(root)))
+                    if result['exit_code']!=0: failures.append('build-'+mode)
+            cases=([f'tests-{r}-{m}' for r in ('module','executable') for m in ('Debug','ReleaseSafe','ReleaseFast')] if a.build else [])
+            if a.tests: cases.append('tooling')
+            for case in cases:
+                out='audit/runs/cycle-suite-'+case+'-'+datetime.now().strftime('%Y%m%d%H%M%S%f')
+                result=run_case(root,case,out);receipts.append(out+'/result.json')
+                if result['status']!='PASS': failures.append(case)
             flags=scan(root,a.diff_ref or data.get('base_commit','HEAD'))
             report={'failed_suites':failures,'receipts':receipts,'forbidden_candidates':flags,
                     'note':'Check test counts/skips and justify every flagged line; record gates explicitly.'}

@@ -260,6 +260,8 @@ def test_failure_packet_carries_rejections_without_empty_reports(repo):
     first=packets.build(repo,'summary.json','same failure',rejected=['wrong hypothesis'])
     second=packets.build(repo,'summary.json','same failure',ranges=['ecosys-ng/src/a.zig:1-1'])
     result=load(second)
-    assert result['rejected_hypotheses']==['wrong hypothesis']
+    assert result['rejected_hypotheses']==[]
+    assert result['rejection_records'][0]['hypothesis']=='wrong hypothesis'
+    assert result['rejection_records'][0]['current'] is False
     assert result['sources'][0]['rows'][0]['line']==1
     assert len(list(second.parent.iterdir()))==2

@@ -17,3 +17,7 @@ Independent ledgers assemble storage/flux terms separately from solver residuals
 Raw logs/runs stay under `audit/runs/` and `evidence/runs/`; commit compact receipts/manifests,
 not binary decks/caches. Investigations live under `audit/issues/`. Keep reports short and
 pointer-cited. Scientific receipts may be historical; only current hash-bound checks close gates.
+
+Use [qualification evidence](qualification-evidence.md) for versioned report schemas, dependency
+manifests, inventory completeness and named suite assessment. Finish schema 2 requires structured
+F2–F6 reports; existing certificates and unbound verdicts require revalidation.

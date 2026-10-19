@@ -42,7 +42,7 @@ def content_digest(root: Path = ROOT, scope=None) -> str:
 
 def toolchain() -> dict:
     result = {}
-    for name, args in [('zig', ['version']), ('uv', ['--version']), ('python3', ['--version'])]:
+    for name, args in [('zig', ['version']), ('uv', ['--version']), ('python3', ['--version']), ('gfortran', ['--version'])]:
         exe = shutil.which(name)
         if exe:
             p = subprocess.run([exe, *args], capture_output=True, text=True)
@@ -59,3 +59,21 @@ def process_identity(pid: int) -> str | None:
 def owned_alive(record: dict) -> bool:
     pid, identity = record.get('pid'), record.get('process_start')
     return isinstance(pid, int) and bool(identity) and process_identity(pid) == identity
+
+
+def job_state(record: dict) -> str:
+    """Missing identity or failed observation is unknown, never evidence of death."""
+    pid, identity = record.get('pid'), record.get('process_start')
+    if type(pid) is not int or pid <= 0 or not identity:
+        return 'unknown'
+    try:
+        current = process_identity(pid)
+        if current:
+            return 'alive' if current == identity else 'dead'
+        # ps failure alone can be permissions/tool failure. ESRCH establishes absence.
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return 'dead'
+    except (OSError, subprocess.SubprocessError):
+        return 'unknown'
+    return 'unknown'

@@ -39,6 +39,7 @@ unchanged evidence. Validate regression → coupling/balance → relevant event 
 | G8 | Pushed commit verified against origin/main |
 | G9 | All artifacts, caches, scratch, logs and checkpoints repo-local |
 
+Verdicts are PASS, FAIL, NA or INCONCLUSIVE; INCONCLUSIVE never passes.
 Every verdict needs hash-bound evidence. NA needs an explicit scope reason; science changes
 require G1–G5/G7 PASS. G7 also covers architecture, bounds, rollback, restart/output semantics
 and DEVs. Prefer fresh sequential context of the same model; otherwise label the separate
@@ -84,3 +85,6 @@ priorities; `audit/issues/` findings. Pickup exposes disagreements; `state.md` i
 Keep context hygiene, native balanced compaction, full original session/tool pairing and durable
 recovery snapshots. Stop supervision only on explicit signal or `completion.py` validating
 hash-bound F1–F7, never worker exit 0. Workflow maintenance is not Ottawa qualification.
+
+For structured report schemas, dependency reuse, suite accounting and readiness checks, read
+[qualification evidence](../ecosys-audit/qualification-evidence.md) when those gates are affected.

@@ -1,8 +1,13 @@
 # Intentional deviations from legacy ecosys
 
-Every Zig behaviour that differs from legacy on purpose (decision D2, plan section 1) or by adjudicated
-input change (D6). An entry is ACCEPTED only when SAGE has approved the attribution evidence and
-the user has signed it. Unlisted differences are defects until shown otherwise.
+Every intentional scientific or input difference must have a current evidence-based disposition
+under `.agent/protocol.md`: mechanism, measured impact, tests and separate verification. The single
+autonomous model makes the decision; unlisted differences remain defects until explained.
+
+The table below preserves historical decisions and role/user columns as provenance, not active
+approval requirements or current qualification. References to retired roles and pending approvals
+are historical. Revalidate each DEV in the structured F5 inventory/report before release; no
+historical ACCEPTED or CONFIRMED label alone closes the gate.
 
 | ID | Deviation | Legacy reference | Zig location | Reason | A/B attribution evidence | Affected outputs | SAGE | User | Status |
 |---|---|---|---|---|---|---|---|---|---|

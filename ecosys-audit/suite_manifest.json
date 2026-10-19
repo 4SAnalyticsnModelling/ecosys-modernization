@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "cases": {
+    "tooling": {
+      "root": "ecosys-audit/tests",
+      "mode": "python",
+      "cwd": ".",
+      "parser": "junit",
+      "argv": [
+        "uv",
+        "run",
+        "--with",
+        "pytest",
+        "pytest",
+        "ecosys-audit/tests",
+        "-q",
+        "--junitxml={junit}"
+      ]
+    },
+    "tests-module-Debug": {
+      "root": "ecosys-ng/src/module_index.zig",
+      "mode": "Debug",
+      "cwd": "ecosys-ng",
+      "parser": "zig-summary",
+      "argv": [
+        "zig",
+        "build",
+        "test-module",
+        "-Doptimize=Debug",
+        "--cache-dir",
+        ".zig-cache",
+        "--summary",
+        "all"
+      ]
+    },
+    "tests-module-ReleaseSafe": {
+      "root": "ecosys-ng/src/module_index.zig",
+      "mode": "ReleaseSafe",
+      "cwd": "ecosys-ng",
+      "parser": "zig-summary",
+      "argv": [
+        "zig",
+        "build",
+        "test-module",
+        "-Doptimize=ReleaseSafe",
+        "--cache-dir",
+        ".zig-cache",
+        "--summary",
+        "all"
+      ]
+    },
+    "tests-module-ReleaseFast": {
+      "root": "ecosys-ng/src/module_index.zig",
+      "mode": "ReleaseFast",
+      "cwd": "ecosys-ng",
+      "parser": "zig-summary",
+      "argv": [
+        "zig",
+        "build",
+        "test-module",
+        "-Doptimize=ReleaseFast",
+        "--cache-dir",
+        ".zig-cache",
+        "--summary",
+        "all"
+      ]
+    },
+    "tests-executable-Debug": {
+      "root": "ecosys-ng/src/ecosys_ng.zig",
+      "mode": "Debug",
+      "cwd": "ecosys-ng",
+      "parser": "zig-summary",
+      "argv": [
+        "zig",
+        "build",
+        "test-executable",
+        "-Doptimize=Debug",
+        "--cache-dir",
+        ".zig-cache",
+        "--summary",
+        "all"
+      ]
+    },
+    "tests-executable-ReleaseSafe": {
+      "root": "ecosys-ng/src/ecosys_ng.zig",
+      "mode": "ReleaseSafe",
+      "cwd": "ecosys-ng",
+      "parser": "zig-summary",
+      "argv": [
+        "zig",
+        "build",
+        "test-executable",
+        "-Doptimize=ReleaseSafe",
+        "--cache-dir",
+        ".zig-cache",
+        "--summary",
+        "all"
+      ]
+    },
+    "tests-executable-ReleaseFast": {
+      "root": "ecosys-ng/src/ecosys_ng.zig",
+      "mode": "ReleaseFast",
+      "cwd": "ecosys-ng",
+      "parser": "zig-summary",
+      "argv": [
+        "zig",
+        "build",
+        "test-executable",
+        "-Doptimize=ReleaseFast",
+        "--cache-dir",
+        ".zig-cache",
+        "--summary",
+        "all"
+      ]
+    }
+  }
+}

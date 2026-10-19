@@ -13,3 +13,6 @@ Use stages BASELINE, SOURCE, ENTRY, CAMPAIGN, RELEASE; G1–G9 mean cycle gates 
 Reuse hash-valid evidence; invalidate dependent checks after state/order/I/O changes. Keep
 full source scope while auditing Ottawa-critical paths first. During long jobs do cheap audit
 work. The same model decides architecture/science from reproduced evidence without approval.
+
+For report/dependency schemas, readiness and suite accounting, use
+[qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

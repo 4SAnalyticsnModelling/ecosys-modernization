@@ -14,3 +14,6 @@ interface tests separate from production-physics acceptance envelopes fixed befo
 Show local correctness, downstream impact and independent conservation. If rules legitimately
 change, validate held-out cases; never widen rules simply to encompass observed failure.
 The model decides and records mechanism, numbers, affected outputs and retirement/equivalence.
+
+For report/dependency schemas, readiness and suite accounting, use
+[qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

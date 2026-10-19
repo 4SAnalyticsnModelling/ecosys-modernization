@@ -1,21 +1,20 @@
-# evidence/ — in-repository evidence store (git-ignored except this file, manifest/ and schema/)
+# Repository-local evidence
 
-The execution plan names `D:\ecosys-evidence\...`. By user decision (2026-09-25) the project is standalone,
-so every such path maps here:
+Authority: `.agent/protocol.md`. Artifacts live here; committed manifests record identity and
+provenance. Generated binary artifacts remain ignored. Historical external Windows evidence
+paths map into this repository; they are not current execution requirements.
 
-| Plan path | Here | Content |
-|---|---|---|
-| `D:\ecosys-evidence\legacy\` | `evidence/legacy/` | legacy oracle binary, 30-yr reference outputs, legacy dumps (P0.3, P2.1) |
-| `D:\ecosys-evidence\oracle-src\` | `evidence/oracle-src/` | instrumented copy of the in-build Fortran (P2.1). `f77src/` stays untouched |
-| `D:\ecosys-evidence\checkpoints\<binding>\` | `evidence/checkpoints/<binding_id>/` | strict daily checkpoints (P2.9) |
-| — | `evidence/runs/<run-id>/deck/` | staged deck copies used by `run_ottawa.py` |
-| — | `evidence/dumps/<run-id>/` | Zig state dumps (latest 2 campaigns + any cited) |
-| — | `evidence/gcov/` | `-O0 --coverage` build and gcov output (P2.4) |
-| — | `evidence/timing/` | timing-run records (P0.4, P7) |
+| Directory | Content |
+|---|---|
+| `legacy/` | Complete legacy oracle binary, outputs and state dumps |
+| `oracle-src/` | Instrumented staged Fortran copies; protected references stay untouched |
+| `checkpoints/<binding_id>/` | Full-state checkpoints with verified restart provenance |
+| `runs/<run-id>/` | Staged decks and run artifacts |
+| `dumps/`, `gcov/`, `timing/` | Diagnostic dumps, source coverage and timing measurements |
+| `manifest/`, `schema/` | Committed artifact manifests and dump schemas |
 
-## Rules (plan section 6)
-- Every stored artifact gets a committed manifest entry in `evidence/manifest/` (sha256, size, producer
-  argv, compiler/flags, deck hash, binding_id). An artifact without a manifest entry is not citable.
-- Anything cited in `audit/` must never be deleted. Survey checkpoints are deleted after ranking.
-- `run_ottawa.py` refuses to start below the free-space floor or after a slow D: read probe.
-- Schemas for dumps live in `evidence/schema/` (committed).
+Every cited artifact needs a committed manifest/receipt with path, hash, producer argv, compiler
+and flags, input identity and binding where applicable. Preserve cited artifacts. Cleanup must
+check references and live-job ownership first. Read the actual runner's storage checks before
+launching; obsolete drive-specific probes are historical. Schemas and qualification requirements
+are documented in [qualification evidence](../ecosys-audit/qualification-evidence.md).

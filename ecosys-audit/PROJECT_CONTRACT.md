@@ -23,3 +23,7 @@ qualification follows readiness. Final evidence concerns one integrated candidat
 Use raw-format adapters with complete keys, files, columns, units and time semantics. Reject
 truncation/duplicates/nonfinite values. All artifacts/caches remain repo-local. Measured
 performance preserves outputs/checks/precision. Git push is required each completed cycle.
+
+[Qualification evidence](qualification-evidence.md) defines executable stage/status compatibility,
+acceptance prerequisites and report contracts. Empty registers and unestablished rules block
+qualification. Inventory completeness and scientific derivations still require separate review.

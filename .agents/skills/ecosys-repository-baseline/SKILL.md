@@ -13,3 +13,6 @@ Check the legacy manifest for actual final time and complete files: the preserve
 archive is not a full baseline. Stage with `prepare_legacy_build.py` and `stage_legacy_deck.py`
 only after inspecting their argv; compile/run through the logged wrapper with current host flags.
 Record instrumented-copy patches separately. Never infer readiness from hashes or compiler exit.
+
+For report/dependency schemas, readiness and suite accounting, use
+[qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

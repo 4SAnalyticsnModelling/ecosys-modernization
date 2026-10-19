@@ -5,14 +5,15 @@ import json
 from pathlib import Path
 from workflow import ROOT, artifact, load, inside
 from project_runtime import content_digest, SOURCE_SCOPE, git
+from qualification_reports import validate as validate_report, referenced
 
 
 def validate(root: Path = ROOT, certificate: str = '.agent/finish.json') -> list[str]:
     errors = []
     try:
         c = load(inside(root, certificate))
-        if c.get('schema_version') != 1:
-            errors.append('unsupported finish schema')
+        if c.get('schema_version') != 2:
+            errors.append('finish schema 2 required; historical certificates need revalidation')
         source=content_digest(root, SOURCE_SCOPE)
         if c.get('source_digest') != source:
             errors.append('finish source is stale')
@@ -28,6 +29,12 @@ def validate(root: Path = ROOT, certificate: str = '.agent/finish.json') -> list
             for ref in check['evidence']:
                 if artifact(root, ref['path']) != ref:
                     errors.append(gid + ': stale artifact ' + ref['path'])
+            if gid in ('F2', 'F3', 'F4', 'F5', 'F6'):
+                ref = check.get('report')
+                if ref not in check['evidence']:
+                    errors.append(gid + ': structured report must be hash-bound evidence')
+                else:
+                    errors.extend(validate_report(root, gid, referenced(root, ref), source, binding))
         frontier = load(root / '.agent/frontier.json')
         if frontier.get('verified_frontier') != 262920:
             errors.append('strict frontier is not 262920')

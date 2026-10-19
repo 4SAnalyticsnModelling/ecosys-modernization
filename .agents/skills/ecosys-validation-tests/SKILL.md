@@ -10,8 +10,12 @@ Choose the smallest test that would fail the plausible wrong implementation. Run
 kernel → affected coupling/conservation → simulated event window → full required suites.
 Account for both Zig roots (`module_index.zig`, `ecosys_ng.zig`), filters, counts and skips.
 Use `zig build test -Dtest-filter=<text> --cache-dir .zig-cache` to filter both roots.
+For full-suite acceptance use the named `suite_check.py` cases; filtered/zero-test runs cannot qualify.
 Use approved parent snapshots; cross-revision replay cannot certify earlier trajectory.
 Include freeze/thaw, dry/tiny pools, management, no vegetation, leap/year reset, malformed I/O,
 allocation failure, solver exhaustion and complete restart where affected. Production-critical
 checks must survive ReleaseFast. Test adapters against missing/duplicate keys, truncation,
 nonfinite/D-exponent/unit/cumulative errors. Record exact receipts; zero-test exit is not proof.
+
+For report/dependency schemas, readiness and suite accounting, use
+[qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

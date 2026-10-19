@@ -14,3 +14,6 @@ scope with explicit dispositions; never inflate coverage through broad range cla
 Write stable unit/binding IDs and source hashes in `audit/traceability/`. Separate claimed
 mapping, reviewed semantics and executed tests. An unresolved disposition blocks release.
 Validate unchanged kernels with matched-state regressions and separately derive the result.
+
+For report/dependency schemas, readiness and suite accounting, use
+[qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

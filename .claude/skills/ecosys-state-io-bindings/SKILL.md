@@ -13,3 +13,6 @@ Use `bindcheck.py` as triage only; presence of a name proves neither shape nor l
 Populate `audit/traceability/bindings.csv` and `audit/output-provenance.csv` from checked source.
 Capture matched boundary states to expose stale/duplicate writes. Test nonzero and absent
 inputs, reset/year boundaries and complete restart. Invalidate every dependent output check.
+
+For report/dependency schemas, readiness and suite accounting, use
+[qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

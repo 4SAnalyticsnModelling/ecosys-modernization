@@ -23,9 +23,10 @@ from pathlib import Path
 import random
 import sys
 import tempfile
+from workflow import ROOT, ProtocolError, verify_artifacts
 
 LIMITATIONS = ("Compares only the curated dump variables; agreement does not prove agreement of undumped "
-               "state. Tolerances come from the rule table; unapproved rules make the result provisional.")
+               "state. Rules without a verified evidence-based decision make the result provisional.")
 
 
 class DumpError(Exception):
@@ -94,7 +95,7 @@ def hours(path: Path):
         yield current, block
 
 
-def load_rules(path: Path | None) -> dict:
+def load_rules(path: Path | None, root: Path = ROOT) -> dict:
     if path is None:
         return {"approved_by": None, "default": {"abs": 0.0, "rel": 0.0}, "variables": {}, "groups": {}}
     rules = json.loads(path.read_text(encoding="utf-8-sig"))
@@ -102,6 +103,16 @@ def load_rules(path: Path | None) -> dict:
         if name not in rules:
             raise DumpError(f"rules missing {name!r}")
     rules.setdefault("groups", {})
+    rules['_decision_verified'] = False
+    for rule in [rules['default'], *rules['variables'].values()]:
+        if any(type(rule.get(k)) not in (int,float) or not math.isfinite(rule[k]) or rule[k]<0 for k in ('abs','rel')):
+            raise DumpError('Tolerances must be finite nonnegative numbers')
+    if rules.get('status') == 'ESTABLISHED' and rules.get('decision') and rules.get('evidence'):
+        try:
+            verify_artifacts(root,rules['evidence'])
+            rules['_decision_verified'] = True
+        except (OSError,KeyError,TypeError,ProtocolError) as exc:
+            raise DumpError('Stale comparison-rule decision evidence: '+str(exc)) from exc
     return rules
 
 
@@ -182,8 +193,9 @@ def compare(legacy: Path, zig: Path, schema: dict, rules: dict, clusters=5, max_
         return x
     return jsonable({
         "status": "WITHIN_RULES" if first is None else "DIVERGENT",
-        "rules_approved": bool(rules.get("approved_by")),
-        "provisional": not rules.get("approved_by"),
+        "rules_approved": bool(rules.get("_decision_verified")),  # compatibility field
+        "rules_established": bool(rules.get("_decision_verified")),
+        "provisional": not rules.get("_decision_verified"),
         "first_divergence": first,
         "last_key_within_rules_before_first_divergence": None if last_within is None else key_text(last_within),
         "earliest_clusters": ordered,

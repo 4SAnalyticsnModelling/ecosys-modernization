@@ -2,6 +2,7 @@ ecosys-ng/.zig-cache/
 ecosys-ng/.zig-cache-*/
 ecosys-ng/zig-out/
 ecosys-ng/ecosys-ng-bin/
+audit/runs/**/build-product/
 .claude/scheduled_tasks.lock
 .dsh-watchdog/
 

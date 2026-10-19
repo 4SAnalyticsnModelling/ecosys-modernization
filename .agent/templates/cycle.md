@@ -5,7 +5,7 @@ Base commit / candidate digest:
 Hypothesis / falsifier / simulated window:
 Legacy and candidate locations:
 Experiment receipts / result / rejected hypotheses:
-G1–G7,G9: PASS | FAIL | NA, artifact paths/hashes and scope; NA needs reason.
+G1–G7,G9: PASS | FAIL | NA | INCONCLUSIVE, artifact paths/hashes and scope; NA needs reason.
 Separate verification: legacy-first derivation and reproduced decisive result.
 Decision / DEV / affected evidence invalidation:
 Next action:

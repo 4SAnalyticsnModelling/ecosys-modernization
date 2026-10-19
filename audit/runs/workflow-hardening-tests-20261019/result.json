@@ -1,0 +1,75 @@
+{
+  "case": "tooling",
+  "counts": {
+    "executed": 82,
+    "failed": 0,
+    "selected": 82,
+    "skipped": 0
+  },
+  "counts_artifact": {
+    "path": "audit/runs/workflow-hardening-tests-20261019/junit.xml",
+    "sha256": "efa511ca34e7cbdad45627c838f18389c911c57c0825585edf3964ee89f760b3"
+  },
+  "dependencies": {
+    "contents": {
+      ".agent/toolchain.json": "8a17325d91e88de8469e3221bdf9389464e57d4507908b1144c8823476e3e59f",
+      "audit/intentional-deviations.md": "68ce814c7ef756489004bf5cd0ad31399c1054c7be4812da3ea9e7d9f42280b5",
+      "audit/output-provenance.csv": "a248002f5694b79361804f132ba66a653088cba5be6eaa9638bed71bbf40d88d",
+      "audit/traceability/bindings.csv": "8e5cd9f5d4829a3d22d16119850e94a8d2c6d8d81b9e3e3ae515b81a390af4aa",
+      "ecosys-audit/gate_requirements.json": "f174d7dc40fdaf638e91b14f954e06887e65d904930c807f9488151a3c53d0dd",
+      "ecosys-audit/scripts": "677fcb84c15affc3c1f394db1649be9e59bcac39559d0d8986e11c47f6fd2eaa",
+      "ecosys-audit/suite_manifest.json": "24b806f0c2ac00e0cda847cd4cd9b2e5faae5988c0e623df9660788f84fd5389",
+      "ecosys-audit/tests": "202a6c5c217e88ca2d007545c3b9ebf51e9d34c40b187ac1dae398bfac229f30",
+      "ecosys-ng-prod-examples": "23baa56e7a48cda6deb6c3503efa1b961f52aa7177a0e5961e64a7da7a64103b",
+      "ecosys-ng/build.zig": "3047014b83655545e3abf007f18b3a65276a8cb574d6971bbeafe0b26811846d",
+      "ecosys-ng/build.zig.zon": "831a94770d920e3a042340c3f4f3bf03a96bcf16b2d92d9dd22c0a8bc8578c09",
+      "ecosys-ng/src": "387f5bf9a60838eece44b1f814664666e5c4b256393e1f83b4eaed9681bb4e82",
+      "f77example": "c01be5dd4e1f8808e80b7a99689eb7ba9e9c65487b7285a2a9ae8e0541f005f5",
+      "f77src": "ced240a9f10d57ea3efd7f700dc29b2c9caa15099b3f4b23a524059b6a8da362",
+      "validation/rules": "36a420cecb373017127e47afad1fa9b9068402517d679c3addd5e5e2c47d52ed"
+    },
+    "context": {},
+    "digest": "376257face4baf4a12b66e0d54f91002f53124756618f6330b1f999039ec68e4",
+    "justification": "",
+    "schema_version": 1,
+    "scope": null,
+    "selection": "conservative",
+    "toolchain": {
+      "gfortran": {
+        "exit_code": 0,
+        "path": "/opt/homebrew/bin/gfortran",
+        "sha256": "0784ca5eb133cde6a2112eddb4000eb36c9d60eae1b18df1c1ba52fe97737492",
+        "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+      },
+      "python3": {
+        "exit_code": 0,
+        "path": "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3",
+        "sha256": "ff2d7180d4aa2dcc03193194c1999509239e00101ade54fcdd736d9fc25bd0c6",
+        "version": "Python 3.11.5"
+      },
+      "uv": {
+        "exit_code": 0,
+        "path": "/opt/homebrew/bin/uv",
+        "sha256": "c176d9aba8da67a88cd2e81e737afbadddde546b51882c7f6b7d1ce62e4cae60",
+        "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+      },
+      "zig": {
+        "exit_code": 0,
+        "path": "/opt/homebrew/bin/zig",
+        "sha256": "18fbdb9fb852846f0e91008c5b99c9c18db1115671701c2890bf84a44ddc202d",
+        "version": "0.17.0"
+      }
+    }
+  },
+  "junit_path": "audit/runs/workflow-hardening-tests-20261019/junit.xml",
+  "mode": "python",
+  "parser": "junit",
+  "problems": [],
+  "receipt": {
+    "path": "audit/runs/workflow-hardening-tests-20261019/command/receipt.json",
+    "sha256": "15e3ae0dae6445c50be9de5b927e73a99da48743321bbd4d2a37724226e72e94"
+  },
+  "root": "ecosys-audit/tests",
+  "schema_version": 1,
+  "status": "PASS"
+}

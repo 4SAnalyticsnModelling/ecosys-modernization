@@ -1,5 +1,10 @@
 {
-  "source-audit": [
+  "BASELINE": [
+    "reference-integrity",
+    "toolchain-input-identity",
+    "complete-legacy-output-inventory"
+  ],
+  "SOURCE": [
     "baseline-integrity",
     "complete-scope-inventory",
     "bidirectional-traceability",
@@ -8,7 +13,7 @@
     "feature-boundary-review",
     "focused-regressions"
   ],
-  "production-entry": [
+  "ENTRY": [
     "source-audit-reviewed",
     "current-source-integration",
     "bounded-solver-and-rollback",
@@ -17,7 +22,12 @@
     "short-integration-completion",
     "complete-output-schema"
   ],
-  "release": [
+  "CAMPAIGN": [
+    "strict-hour-zero-trajectory",
+    "independent-hourly-conservation",
+    "complete-output-extent"
+  ],
+  "RELEASE": [
     "source-audit-reviewed",
     "production-entry-reviewed",
     "clean-releasefast-build",

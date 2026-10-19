@@ -18,3 +18,6 @@ other unblocked work. Finish only after `completion.py` validates F1–F7.
 
 Batch source reads with `project.sh code`; use `tools/autonomy/code-reading.md` for code mode
 and `project.sh codemod` for previewed, hash/count-checked mechanical edits.
+
+For report/dependency schemas, readiness and suite accounting, use
+[qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

@@ -14,3 +14,6 @@ Use full year/date/hour/grid/layer/species keys, reject duplicates/missing/extra
 and verify cumulative reset semantics. No interpolation, smoothing, clipping or silent exclusions.
 Report first divergence, worst key, bias/RMSE and coverage for every column. Keep unchanged
 kernel rules separate from approved-feature envelopes. Diagnose unexplained drift before attribution.
+
+For report/dependency schemas, readiness and suite accounting, use
+[qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

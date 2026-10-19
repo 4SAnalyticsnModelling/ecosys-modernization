@@ -1,15 +1,17 @@
-# validation/ — qualification comparison products (spec section 5; plan P2.6-P2.7, P7)
+# Qualification comparisons
+
+Authority: `.agent/protocol.md`. Definitions and commands:
+[qualification evidence](../ecosys-audit/qualification-evidence.md).
 
 | Directory | Content |
 |---|---|
-| `rules/` | `divcheck-rules.json`: per-variable dump tolerances (DRAFT until the user approves; P2.6) |
-| `reference/` | pointers + hashes to the legacy reference outputs in `evidence/legacy/` (no large copies) |
-| `zig/` | pointers + hashes to the Zig candidate outputs under comparison |
-| `comparisons/` | output-comparison reports (`outcompare.py` / `compare_outputs.py` with raw adapters) |
-| `balances/` | independent local and global balance-checker reports (water, C, N, P, energy, active salts) |
-| `events/` | event, seasonal, annual and cumulative comparison reports |
-| `reports/` | `ottawa-scientific-qualification.md` (P7.6) and other final reports |
+| `rules/` | Per-variable rules established from evidence before qualification comparisons |
+| `reference/`, `zig/` | Hash-bound pointers to complete oracle/candidate outputs |
+| `comparisons/` | Every file/column/key compared with verified units and time support |
+| `balances/` | Independent local/global water, heat, C, N, P and active-salt reports |
+| `events/`, `reports/` | Event/seasonal/annual comparisons and final qualification evidence |
 
-Output semantics come from `audit/output-provenance.csv`. The comparison rule for each variable is fixed and
-approved before any full Zig comparison (decision D1). A report here cites its inputs by path and sha256
-and quotes each tool's own `limitations` field.
+Output semantics come from `audit/output-provenance.csv`; state ownership comes from
+`audit/traceability/bindings.csv`. Empty registers, DRAFT rules and missing comparison coverage
+remain blockers. The autonomous model establishes justified rules and records separate verification;
+no human or retired-role approval is required. Never widen rules to encompass a failed candidate.
