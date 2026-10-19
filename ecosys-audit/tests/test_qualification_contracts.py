@@ -2,6 +2,8 @@
 import copy
 import csv
 import json
+import subprocess
+import time
 from pathlib import Path
 import sys
 import pytest
@@ -11,6 +13,7 @@ from test_autonomy import repo
 import dependencies
 import completion
 import qualification_reports as qr
+import performance_check as pc
 import suite_check
 import project_runtime as runtime
 import cycle_runner
@@ -27,13 +30,19 @@ def put(root,name,value):
 
 @pytest.fixture
 def evidence(repo,monkeypatch):
+    monkeypatch.setattr(qr,'HOURS',2)
+    monkeypatch.setattr(pc,'HOURS',2)
+    monkeypatch.setattr(completion,'HOURS',2)
     compiler=repo/'compiler';compiler.write_bytes(b'synthetic compiler')
     monkeypatch.setattr(dependencies,'toolchain',lambda:{'zig':{'path':str(compiler),'version':'0.17.test'}})
     proof=put(repo,'proof.json',{'fixture':'synthetic evidence, not Ottawa'})
     (repo/'audit').mkdir(exist_ok=True)
     (repo/'audit/intentional-deviations.md').write_text('| DEV-001 | synthetic fixture |\n')
     rules={'status':'ESTABLISHED','decision':'synthetic exact rule','evidence':[proof],
-           'variables':{'fixture':{'abs':0,'rel':0,'rationale':'synthetic exact values'}}}
+           'variables':{'fixture':{'abs':0,'rel':0,'rationale':'synthetic exact values',
+               'metrics':{m:{'status':'REQUIRED','abs':0,'rel':0,'rationale':'synthetic '+m,
+                            'reducer':'peak_time' if m=='event_timing' else 'sum'}
+                          for m in ('instantaneous','event_timing','seasonal','annual','cumulative')}}}}
     put(repo,readiness.RULES,rules)
     def csvfile(path,fields,row):
         p=repo/path;p.parent.mkdir(parents=True,exist_ok=True)
@@ -49,6 +58,14 @@ def evidence(repo,monkeypatch):
     csvfile(readiness.BINDINGS,binding_fields,row)
     manifest=load(Path(__file__).resolve().parents[1]/'suite_manifest.json')
     put(repo,suite_check.MANIFEST,manifest)
+    (repo/'f77src').mkdir()
+    (repo/'f77src/makefile').write_text('SRCS=a.f\nFFLAGS=-r8 -i4\n')
+    (repo/'f77src/a.f').write_text('      SUBROUTINE A\n      COMMON /STATE/ X\n      X=X+1\n      END\n')
+    (repo/'f77src/dormant.f').write_text('      SUBROUTINE D\n      END\n')
+    adapter=repo/'ecosys-audit/adapters/canonical_jsonl.py';adapter.parent.mkdir(parents=True)
+    adapter.write_bytes((Path(__file__).resolve().parents[1]/'adapters/canonical_jsonl.py').read_bytes())
+    subprocess.run(['git','add','--','proof.json','f77src','validation','audit','ecosys-audit'],cwd=repo,check=True)
+    subprocess.run(['git','commit','-qm','synthetic predeclared policy'],cwd=repo,check=True)
     return repo,proof
 
 
@@ -65,6 +82,63 @@ def suite_result(root,proof,case='tests-module-Debug',summary='+- run test 3 pas
     return r
 
 
+def benchmark(root,proof,source):
+    import performance_check as pc
+    conditions={'hardware':{'platform':'synthetic host','machine':'synthetic cpu'},'allocated_cores':1,'effective_inputs_sha256':proof['sha256'],
+                'output_contract_sha256':proof['sha256'],'precision':'f64-i32'}
+    condition_ref=put(root,'benchmark-conditions.json',conditions)
+    builds={};binaries={}
+    for role in ('zig','legacy'):
+        binary=root/(role+'-binary');binary.write_bytes(role.encode());binaries[role]=artifact(root,binary.name)
+        builds[role]=put(root,role+'-build.json',{'status':'EXITED','exit_code':0,'argv':['gfortran','-O3','-fdefault-real-8','-fdefault-double-8'],
+            'build_mode':'ReleaseFast','source_digest':source,'source_changed_during_command':False,
+            'build_product':binaries[role],'toolchain':{'zig':{'version':'0.17.test'}}})
+    pairs=[]
+    for i in range(3):
+        pair={}
+        for j,role in enumerate(('zig','legacy')):
+            name=f'benchmark-{i}-{role}'
+            receipt=put(root,name+'-receipt.json',{'status':'EXITED','exit_code':0,
+                'executable_sha256':binaries[role]['sha256'],'benchmark_conditions':condition_ref,
+                'platform':'synthetic host','machine':'synthetic cpu','started_unix':1000+i*100+j*40,
+                'elapsed_seconds':10 if role=='zig' else 20})
+            summary=put(root,name+'-summary.json',{'status':'COMPLETE','start_hour':0,'last_completed_hour':pc.HOURS,
+                'normal_exit':True,'output_complete':True,'binding':{'binding_id':'fixture-binding'},'mode':'strict',
+                'conservation_breaches':0,'solver_fallbacks_unexplained':0})
+            pair[role]=put(root,name+'.json',{'conditions':conditions,'receipt':receipt,'summary':summary,
+                                            'build_receipt':builds[role],'executable':binaries[role]})
+        pairs.append(pair)
+    reports={gid:put(root,gid+'-science.json',report(root,proof,gid)) for gid in ('F2','F3','F4','F5')}
+    campaign=put(root,'science-campaign.json',{'status':'COMPLETE','mode':'strict','start_hour':0,
+        'last_completed_hour':pc.HOURS,'build_binding_verified':True,'binding':{'binding_id':'fixture-binding'},
+        'conservation_breaches':0,'solver_fallbacks_unexplained':0})
+    acceptance=put(root,'scientific-acceptance.json',{'source_digest':source,'binding_id':'fixture-binding',
+                                                    'campaign_summary':campaign,'reports':reports})
+    return put(root,'benchmark.json',{'schema_version':1,'conditions':conditions,'pairs':pairs,'scientific_acceptance':acceptance})
+
+
+def raw_fixture(root,proof,gid,source,inv,results):
+    receipt=put(root,gid+'-raw-receipt.json',{'status':'EXITED','exit_code':0,'started_unix':int(subprocess.check_output(['git','show','-s','--format=%ct','HEAD'],cwd=root))+1})
+    spec={'policy':artifact(root,readiness.RULES),'policy_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),
+          'evaluation_receipts':[receipt],'source_digest':source,'binding_id':'fixture-binding'}
+    if gid=='F2':
+        for expected,item in zip(inv,results):
+            path=root/(item['id']+'.jsonl')
+            rows=[{**{k:expected[k] for k in ('quantity','level','location','units')},
+                   'hour':n,'old':1,'new':1,'sources':[2],'sinks':[2]} for n in range(1,qr.HOURS+1)]
+            path.write_text(''.join(json.dumps(r)+'\n' for r in rows));item['ledger']=artifact(root,path.name)
+    else:
+        pair={'file':'fixture'}
+        for role in ('legacy','zig'):
+            directory=root/('raw-'+role);directory.mkdir(exist_ok=True)
+            path=directory/'fixture.jsonl'
+            path.write_text(''.join(json.dumps({'key':[n],'time':n,'values':{'fixture':n},
+                'periods':{'seasonal':'season1','annual':'year1','cumulative':'all'}})+'\n' for n in (1,2)))
+            pair[role]=artifact(root,str(path.relative_to(root)));spec[role+'_directory']=directory.name
+        spec.update(adapter=artifact(root,'ecosys-audit/adapters/canonical_jsonl.py'),pairs=[pair])
+    return put(root,gid+'-raw.json',spec)
+
+
 def report(root,proof,gid):
     source=runtime.content_digest(root,runtime.SOURCE_SCOPE)
     inv=[];results=[]
@@ -77,14 +151,13 @@ def report(root,proof,gid):
                                 'independent_assembly':True,'missing_hours':0,'duplicate_hours':0,'nonfinite':0,'breaches':0})
     elif gid=='F3':
         inv=[{'id':'field','file':'fixture','column':'fixture','units':'fixture','time_basis':'fixture','rule':'fixture',
-              'expected_rows':2,'terminal_key':'end'}]
-        results=[{'id':'field','rows_compared':2,'terminal_key':'end','missing':0,'extra':0,'duplicates':0,'nonfinite':0,'outside_rule':0}]
+              'expected_rows':2,'terminal_key':[2]}]
+        results=[{'id':'field','rows_compared':2,'terminal_key':[2],'missing':0,'extra':0,'duplicates':0,'nonfinite':0,'outside_rule':0}]
     elif gid=='F4':
-        for direction in ('legacy-to-zig','zig-to-legacy','state-binding'):
-            inv.append({'id':direction,'direction':direction,'source':'ecosys-ng/src/a.zig',
-                        'source_sha256':artifact(root,'ecosys-ng/src/a.zig')['sha256'],'dormant':True})
-            results.append({'id':direction,'semantics_reviewed':True,'disposition':'equivalent',
-                            'derivation':'fixture derivation','test_or_dormant_reason':'fixture case'})
+        from source_inventory import collect
+        inv=list(collect(root).values())
+        results=[{'id':v['id'],'semantics_reviewed':True,'disposition':'equivalent',
+                  'derivation':'fixture derivation','test_or_dormant_reason':'fixture case'} for v in inv]
     elif gid=='F5':
         inv=[{'id':'DEV-001','replacement_physics':False}]
         results=[{'id':'DEV-001','disposition':'retired','mechanism':'fixture','measured_impact':'fixture','decision':'removed'}]
@@ -102,14 +175,18 @@ def report(root,proof,gid):
                             corrupt_rejected=True,truncated_rejected=True,atomic_rejection=True)
             elif ident=='releasefast-safety':item.update(bounds_checked=True,rollback_checked=True,allocation_failure_checked=True)
             elif ident=='equivalent-work-performance':item.update(repeats=3,equivalent_work=True,
-                measurements=[{'wall_seconds':1,'cpu_seconds':1,'peak_rss_bytes':10,'accepted_hours':1} for _ in range(3)])
+                measurements=[{'wall_seconds':1,'cpu_seconds':1,'peak_rss_bytes':10,'accepted_hours':qr.HOURS} for _ in range(3)])
+            if ident=='equivalent-work-performance':item['benchmark']=benchmark(root,proof,source)
             results.append(item)
+    raw=None
+    if gid in ('F2','F3'):
+        raw=raw_fixture(root,proof,gid,source,inv,results)
     for item in results:item.update(status='PASS',evidence=[proof])
     inventory=put(root,gid+'-inventory.json',{'schema_version':1,'criterion':gid,'scope_complete':True,
         'verification_method':'separate-derivation','evidence':[proof],'items':inv})
     return {'schema_version':1,'criterion':gid,'source_digest':source,'binding_id':'fixture-binding',
             'status':'PASS','unresolved':[],'verification_method':'separate-derivation','dependencies':dependencies.capture(root),
-            'evidence':[proof],'inventory':inventory,'results':results}
+            'evidence':[proof],'inventory':inventory,'results':results,'raw_evidence':raw}
 
 
 @pytest.mark.parametrize('gid',['F2','F3','F4','F5','F6'])

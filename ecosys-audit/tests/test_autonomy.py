@@ -34,7 +34,7 @@ def repo(tmp_path):
 def ready(root):
     (root/'proof.json').write_text('{"measured":"fixture evidence"}\n')
     d={'cycle':1,'status':'WORKING','base_commit':cycles.head(root),
-       'owned_paths':['ecosys-ng/src/a.zig'],'scope':['ecosys-ng/src'],'gates':{}}
+       'owned_paths':['ecosys-ng/src/a.zig','proof.json'],'scope':['ecosys-ng/src'],'gates':{}}
     for g in cycles.REQUIRED:cycles.record_gate(root,d,g,'PASS',['proof.json'])
     return d
 

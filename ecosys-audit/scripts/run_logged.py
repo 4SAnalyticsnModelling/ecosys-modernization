@@ -46,7 +46,7 @@ def excerpt(path: Path, limit=1800) -> dict:
             "chunks_scanned": total, "selection": "first/last/first diagnostic matches; NOT complete evidence"}
 
 
-def run(root: Path, cwd: Path, out: Path, argv: list[str], timeout: float | None) -> dict:
+def run(root: Path, cwd: Path, out: Path, argv: list[str], timeout: float | None, *, benchmark_conditions=None) -> dict:
     if not argv:
         raise ProtocolError("Command argv required")
     cwd = inside(root, str(cwd))
@@ -59,6 +59,13 @@ def run(root: Path, cwd: Path, out: Path, argv: list[str], timeout: float | None
               "timeout_seconds": timeout, "status": "RUNNING", "parent_pid": os.getpid(),
               "environment": {k: env[k] for k in ["TMPDIR","XDG_CACHE_HOME","UV_CACHE_DIR","ZIG_GLOBAL_CACHE_DIR"]},
               "toolchain": toolchain(), "platform": platform.platform(), "machine": platform.machine()}
+    if benchmark_conditions:
+        from workflow import load
+        conditions_path=inside(root,benchmark_conditions)
+        conditions=load(conditions_path)
+        if any(conditions.get('hardware',{}).get(k)!=record[k] for k in ('platform','machine')):
+            raise ProtocolError('benchmark hardware does not match measured host')
+        record['benchmark_conditions']=artifact(root,relative(root,conditions_path))
     if Path(argv[0]).name == "zig" and (root/"ecosys-ng/src").exists():
         record["source_digest"] = content_digest(root, SOURCE_SCOPE)
     atomic(out / "receipt.json", encoded(record))
@@ -84,6 +91,11 @@ def run(root: Path, cwd: Path, out: Path, argv: list[str], timeout: float | None
         record["build_product"] = artifact(root,relative(root,saved))
         record["build_mode"] = next((a.split("=",1)[1] for a in argv if a.startswith("-Doptimize=")), "Debug")
         record["source_changed_during_command"] = record.get("source_digest") != content_digest(root, SOURCE_SCOPE)
+    if code==0 and Path(argv[0]).name.startswith('gfortran') and '-o' in argv and '-c' not in argv:
+        product=inside(root,str(cwd/argv[argv.index('-o')+1]))
+        if product.is_file():
+            saved=out/'build-product'/product.name;saved.parent.mkdir(exist_ok=True)
+            shutil.copy2(product,saved);record['build_product']=artifact(root,relative(root,saved))
     record.update({"status": "EXITED", "exit_code": code,
                    "elapsed_seconds": round(time.time() - start, 3), "launch_error": launch_error,
                    "stdout": artifact(root, relative(root, stdout)), "stderr": artifact(root, relative(root, stderr)),
@@ -101,6 +113,7 @@ def main():
     ap.add_argument("--out", help="New project-relative directory under audit/runs or audit/reviews")
     ap.add_argument("--timeout", type=float, default=None,
                     help="Deprecated compatibility argument; recorded but never enforced")
+    ap.add_argument('--benchmark-conditions',help='Frozen comparable-work conditions JSON for a measured full run')
     ap.add_argument("argv", nargs=argparse.REMAINDER)
     a = ap.parse_args()
     root = a.root.resolve()
@@ -110,7 +123,7 @@ def main():
         out = inside(root, name)
         if not any(out.is_relative_to(root / p) for p in ("audit/runs", "audit/reviews")):
             raise ProtocolError("Log output must be under audit/runs or audit/reviews")
-        result = run(root, a.cwd, out, argv, a.timeout)
+        result = run(root, a.cwd, out, argv, a.timeout,benchmark_conditions=a.benchmark_conditions)
         # ASCII JSON is safe even when Windows gives this pipe a cp1252 writer.
         print(json.dumps(result, ensure_ascii=True, separators=(",", ":")))
         return result["exit_code"] if 0 <= result["exit_code"] <= 255 else 1

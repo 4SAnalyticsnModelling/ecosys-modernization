@@ -8,7 +8,7 @@ from workflow import ROOT, ProtocolError, inside, encoded, atomic, digest, file_
 from project_runtime import SOURCE_SCOPE, toolchain
 
 SCIENCE = SOURCE_SCOPE + ['f77src', 'f77example', 'ecosys-ng-prod-examples']
-MANDATORY = ['ecosys-audit/scripts', 'ecosys-audit/tests', 'ecosys-audit/gate_requirements.json',
+MANDATORY = ['ecosys-audit/scripts', 'ecosys-audit/adapters', 'ecosys-audit/tests', 'ecosys-audit/gate_requirements.json',
              'ecosys-audit/suite_manifest.json', 'validation/rules', '.agent/toolchain.json',
              'audit/output-provenance.csv', 'audit/traceability/bindings.csv',
              'audit/intentional-deviations.md']

@@ -35,6 +35,21 @@ PROTECTED_RUNOTTAWA = REPO_ROOT / DEFAULT_SOURCE_REL / "runottawa"
 PROTECTED_EXPECTED_HASH = "ecf5e61ab453288b1763f81f841729bee34e8426"
 
 
+@pytest.fixture(autouse=True)
+def isolate_synthetic_experiment_records():
+    """Stand-in binaries must not leave failed mission experiments in the real registry."""
+    directory=REPO_ROOT/'audit/experiments'
+    before={p:p.read_bytes() for p in directory.glob('*.json')}
+    yield
+    for p in directory.glob('*.json'):
+        old=json.loads(before[p]) if p in before else {'attempts':[]}
+        current=json.loads(p.read_bytes());added=current['attempts'][len(old['attempts']):]
+        if added and all(x.get('summary',{}).get('path','').startswith(
+                ('audit/runs/ottawa/test-','audit/runs/ottawa/custom-')) for x in added):
+            if p in before:p.write_bytes(before[p])
+            else:p.unlink()
+
+
 @pytest.fixture(scope="session")
 def dummy_success_exe(tmp_path_factory) -> Path:
     """Compile a stand-in executable with Zig that exits 0 immediately."""

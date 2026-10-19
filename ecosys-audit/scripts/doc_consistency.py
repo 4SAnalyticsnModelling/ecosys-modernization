@@ -17,7 +17,8 @@ REQUIRED = ['audit/output-provenance.csv','audit/traceability/bindings.csv',
             'ecosys-audit/qualification-evidence.md']
 STAGES = ['BASELINE','SOURCE','ENTRY','CAMPAIGN','RELEASE']
 FORBIDDEN = [r'(?i)user (?:approves|has signed|must approve)',r'(?i)pending human review',
-             r'(?i)SAGE (?:drafts|approves|signs)',r'(?i)push only when asked']
+             r'(?i)SAGE (?:drafts|approves|signs)',r'(?i)push only when asked',r'(?i)unlimited (?:crash recovery|capped-backoff retries)',
+             r'(?i)profiled accepted windows → strict integrated campaign']
 
 
 def check(root=ROOT):

@@ -24,6 +24,54 @@ def ledger(root):return load(root/'.agent/cycle.json')
 def save(root,data):atomic(root/'.agent/cycle.json',encoded(data))
 def head(root):return git(root,'rev-parse','HEAD').decode().strip()
 
+def covered(path, paths):
+    return any(path==p or path.startswith(p.rstrip('/')+'/') for p in paths)
+
+def publication_errors(root, data):
+    """Walk hash references: compact evidence is committed; ignored payloads need a manifest."""
+    errors=[];seen=set();owned=data.get('owned_paths',[])
+    retained={}
+    manifest=data.get('retention_manifest')
+    if manifest:
+        try:
+            value=load(inside(root,manifest))
+            if value.get('policy')!='retain-through-F7-and-reproducibility':
+                raise ProtocolError('invalid evidence retention policy')
+            retained={x['path']:x['sha256'] for x in value['artifacts']}
+            if not covered(manifest,owned):raise ProtocolError('retention manifest must be cycle-owned')
+        except (OSError,KeyError,ValueError,ProtocolError) as exc:errors.append(str(exc))
+    def visit(value):
+        if isinstance(value,list):
+            for v in value:visit(v)
+        elif isinstance(value,dict):
+            if set(value)=={'path','sha256'}:
+                path=value['path']
+                if path in seen:return
+                seen.add(path)
+                try:
+                    if artifact(root,path)!=value:raise ProtocolError('stale publication evidence: '+path)
+                    ignored=subprocess.run(['git','check-ignore','-q','--',path],cwd=root).returncode==0
+                    if ignored:
+                        if retained.get(path)!=value['sha256']:errors.append('ignored evidence needs retention manifest: '+path)
+                    elif not covered(path,owned):
+                        # Tracked but modified evidence also has to be owned and staged.
+                        committed=git(root,'show','HEAD:'+path)
+                        if committed!=inside(root,path).read_bytes():errors.append('changed evidence not cycle-owned: '+path)
+                    if path.endswith('.json'):visit(load(inside(root,path)))
+                except (OSError,ValueError,ProtocolError) as exc:errors.append('unpublished evidence '+path+': '+str(exc))
+            else:
+                for v in value.values():visit(v)
+    visit([g.get('evidence',[]) for g in data.get('gates',{}).values()])
+    return errors
+
+def committed_closure(root, data):
+    if data.get('status')!='DECIDED' or not data.get('closure'):return False
+    try:
+        return (json.loads(git(root,'show','HEAD:.agent/cycle.json'))==data
+                and not git(root,'diff','HEAD','--',*data['owned_paths']).strip()
+                and not git(root,'ls-files','--others','--exclude-standard','--',*data['owned_paths']).strip())
+    except (ProtocolError,ValueError):return False
+
 def changed(root,base):
     names=git(root,'diff','--name-only',base).decode().splitlines()
     names+=git(root,'ls-files','--others','--exclude-standard').decode().splitlines()
@@ -78,6 +126,7 @@ def blockers(root,data):
     if science(touched):
         for gid in ['G1','G2','G3','G4','G5','G7']:
             if data.get('gates',{}).get(gid,{}).get('result')!='PASS':problems.append(gid+': scientific change requires PASS')
+    problems.extend(publication_errors(root,data))
     return problems
 
 def scan(root,base):
@@ -98,6 +147,9 @@ def close(root,data,summary,dry_run=False):
     if errors:raise ProtocolError('; '.join(errors))
     if dry_run:return {'ready':True}
     if git(root,'branch','--show-current').strip()!=b'main':raise ProtocolError('cycle closure requires main')
+    if committed_closure(root,data):
+        push(root)
+        return {'status':'PUSHED','commit':head(root),'note':'resumed publication; existing commit retained'}
     owned=data['owned_paths'];controls=['.agent/cycle.json']
     record=data.get('record')
     if record:controls.append(record)
@@ -128,7 +180,7 @@ def main():
     c=sub.add_parser('close');c.add_argument('--summary',required=True);c.add_argument('--dry-run',action='store_true')
     sub.add_parser('push')
     s=sub.add_parser('set');s.add_argument('--target');s.add_argument('--next-target');s.add_argument('--base-commit')
-    s.add_argument('--paths',nargs='+');s.add_argument('--scope',nargs='+');s.add_argument('--note')
+    s.add_argument('--retention-manifest');s.add_argument('--paths',nargs='+');s.add_argument('--scope',nargs='+');s.add_argument('--note')
     s.add_argument('--dependencies', help='JSON file with scope, justification and context; omit scope for conservative capture')
     gates=sub.add_parser('gates');gates.add_argument('--build',action='store_true');gates.add_argument('--tests',action='store_true')
     gates.add_argument('--diff-ref')
@@ -139,9 +191,10 @@ def main():
         elif a.cmd=='open':
             if data and data.get('status') not in ['PUSHED','IDLE']:
                 if data.get('status')!='DECIDED' or not data.get('closure'):raise ProtocolError('resume existing open cycle')
-                committed=json.loads(git(root,'show','HEAD:.agent/cycle.json'))
-                if committed!=data or git(root,'diff','HEAD','--',*data.get('owned_paths',[])).strip():
+                if not committed_closure(root,data):
                     raise ProtocolError('closure not committed; retry close before opening another cycle')
+                errors=blockers(root,data)
+                if errors:raise ProtocolError('; '.join(errors))
                 push(root)
             no=max([data.get('cycle',0)]+[int(x.stem.split('_')[1]) for x in (root/'.agent/cycles').glob('cycle_*.md')])+1
             path=f'.agent/cycles/cycle_{no:05d}.md'
@@ -151,7 +204,7 @@ def main():
                   'owned_paths':a.paths,'scope':a.scope or a.paths,'record':path,'gates':{}}
             save(root,data);print(path)
         elif a.cmd=='set':
-            for key in ['target','next_target','base_commit','scope']:
+            for key in ['target','next_target','base_commit','scope','retention_manifest']:
                 if getattr(a,key,None) is not None:data[key]=getattr(a,key)
             if a.paths:data['owned_paths']=a.paths
             if a.note:data['next_action']=a.note
@@ -161,7 +214,11 @@ def main():
             save(root,data)
         elif a.cmd=='gate':record_gate(root,data,a.gate,a.result,a.evidence,a.reason)
         elif a.cmd=='close':print(json.dumps(close(root,data,a.summary,a.dry_run)))
-        elif a.cmd=='push':push(root);print(head(root))
+        elif a.cmd=='push':
+            if not committed_closure(root,data):raise ProtocolError('use close to verify and commit this cycle first')
+            errors=blockers(root,data)
+            if errors:raise ProtocolError('; '.join(errors))
+            push(root);print(head(root))
         elif a.cmd=='gates':
             failures=[];receipts=[];env=environment(root)
             from suite_check import run_case

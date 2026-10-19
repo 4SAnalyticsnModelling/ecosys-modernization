@@ -10,8 +10,15 @@ Continue to verified F1–F7. This file governs; the execution plan selects prio
 | F3 | Every output file/row/column compared to legacy; units/time semantics verified |
 | F4 | Complete bidirectional logical-statement/equation/state traceability; no unexplained gap |
 | F5 | DEVs retired or justified by mechanism, measured impact and scientific equivalence |
-| F6 | Build/run reproducibility, full-state restart, safety and equivalent-work performance |
+| F6 | Build/run reproducibility, full-state restart, safety; full Ottawa ReleaseFast reproducibly faster than optimized Fortran |
 | F7 | Final evidence committed/pushed; main equals origin/main |
+
+## Priority
+Scientific accuracy and completeness come first: no unexplained science, translation or binding
+gaps; complete strict Ottawa with scientifically justified comparable outputs (F1–F5).
+Only then optimize runtime. Speed never offsets a failed scientific criterion. Revalidate
+F1–F5 for the final optimized source/binding; F6 additionally requires faster ReleaseFast.
+Earlier timing may diagnose a blocked correctness run, but is not a runtime optimization task.
 
 ## Work
 Run `./scripts/project.sh pickup`. Reconcile existing edits/jobs and resume the open cycle;
@@ -44,7 +51,8 @@ Every verdict needs hash-bound evidence. NA needs an explicit scope reason; scie
 require G1–G5/G7 PASS. G7 also covers architecture, bounds, rollback, restart/output semantics
 and DEVs. Prefer fresh sequential context of the same model; otherwise label the separate
 pass honestly. It is not an independent-model endorsement. Reproduced FAIL means fix/revert
-only owned changes. Never force-close failures, stage unrelated edits or force-push. Negative
+only owned changes. Interrupted publication resumes the existing verified commit; evidence
+references must be committed or covered by a committed retention manifest. Never force-close failures, stage unrelated edits or force-push. Negative
 results close after the candidate change is removed and applicable checks pass.
 
 ## Science
@@ -70,10 +78,14 @@ No elapsed execution deadline; healthy work survives silence, context boundaries
 expiry. Scientific iteration/resource limits and finite simulated windows remain valid.
 
 `project.sh supervise --config .agent/worker.json` automatically restarts the future worker
-with a recovery packet, one kernel lock and unlimited capped-backoff retries. Configure actual
-harness argv; never guess flags. Worker reconciles unfinished mutations/jobs before acting.
+with a recovery packet, one kernel lock and progress-aware capped backoff. Configure actual
+harness argv; never guess flags. Live runtime qualification is required before unattended launch;
+see `tools/autonomy/README.md`. Worker reconciles unfinished mutations/jobs before acting.
 Preserve ambiguous/corrupt state for evidence-based repair; never reset it to fabricate success.
-External outages trigger retry and other unblocked work, not a human decision. Recovery cannot
+Three unchanged exits trigger one REPLAN launch; a fourth waits for changed evidence or a new
+verified external-resource identity. Log growth, timestamps and restarts earn no progress.
+This is automatic event-driven waiting, not completion or an elapsed mission limit.
+External outages trigger bounded-cost probes and other unblocked work, not a human decision. Recovery cannot
 manufacture unavailable resources/credentials. Reboot recovery needs the same supervisor under
 a tested OS service. Never claim an uninstalled service works.
 A failed science run needs diagnosis, not unchanged relaunch. Same-binding crash restart needs

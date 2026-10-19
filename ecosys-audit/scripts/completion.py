@@ -8,6 +8,8 @@ from project_runtime import content_digest, SOURCE_SCOPE, git
 from qualification_reports import validate as validate_report, referenced
 
 
+HOURS = 262920
+
 def validate(root: Path = ROOT, certificate: str = '.agent/finish.json') -> list[str]:
     errors = []
     try:
@@ -36,14 +38,14 @@ def validate(root: Path = ROOT, certificate: str = '.agent/finish.json') -> list
                 else:
                     errors.extend(validate_report(root, gid, referenced(root, ref), source, binding))
         frontier = load(root / '.agent/frontier.json')
-        if frontier.get('verified_frontier') != 262920:
+        if frontier.get('verified_frontier') != HOURS:
             errors.append('strict frontier is not 262920')
         if (frontier.get('evidence_binding') or {}).get('binding_id') != binding:
             errors.append('frontier/certificate bindings differ')
         # F1 structured report must establish terminal hour; prose alone is insufficient.
         campaign = load(inside(root, c['campaign_summary']))
         if not (campaign.get('build_binding_verified') is True and campaign.get('status') == 'COMPLETE' and campaign.get('mode') == 'strict'
-                and campaign.get('start_hour') == 0 and campaign.get('last_completed_hour') == 262920
+                and campaign.get('start_hour') == 0 and campaign.get('last_completed_hour') == HOURS
                 and campaign.get('conservation_breaches') == 0
                 and campaign.get('solver_fallbacks_unexplained') == 0
                 and (campaign.get('binding') or {}).get('binding_id') == binding):

@@ -12,12 +12,15 @@ experiment. Use `cycle_runner.py open|gate|gates|close` through `scripts/project
 Run focused → coupling → event → full checks according to changed dependencies. Re-derive
 separately for G7, preferably in fresh sequential context of the same model. Fix/revert a
 reproduced FAIL. Record next action; stage owned paths, commit/push, continue.
-Use `supervise --config .agent/worker.json` for unlimited crash recovery; never launch duplicate
-science jobs or repeat an unchanged failed experiment. External outages trigger backoff and
-other unblocked work. Finish only after `completion.py` validates F1–F7.
+Use `supervise --config .agent/worker.json` after live runtime qualification; never launch duplicate
+science jobs or repeat an unchanged failed experiment. Three unchanged exits force REPLAN; a fourth waits for changed prerequisites.
+Use `tools/autonomy/README.md` for automatic rechecks; take other unblocked work first. Finish only after `completion.py` validates F1–F7.
 
 Batch source reads with `project.sh code`; use `tools/autonomy/code-reading.md` for code mode
 and `project.sh codemod` for previewed, hash/count-checked mechanical edits.
 
 For report/dependency schemas, readiness and suite accounting, use
 [qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.
+
+Retry interrupted closure with `close`; it reuses the existing commit after a push outage.
+Include all cycle-owned source/tests/decisions and evidence or retention manifests in publication.

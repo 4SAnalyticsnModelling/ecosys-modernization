@@ -1,0 +1,37 @@
+.........................................F.............................. [ 80%]
+.................                                                        [100%]
+=================================== FAILURES ===================================
+____________________ test_finish_invokes_structured_reports ____________________
+
+evidence = (PosixPath('/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/pytest-workflow/test_finish_invokes_structured0/repo'), {'path': 'proof.json', 'sha256': '62591230e4e8ea3bc8d9375397c098d0bf0e181601718b7b95024fc553cac335'})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x103e60610>
+
+    def test_finish_invokes_structured_reports(evidence,monkeypatch):
+        root,proof=evidence;source=runtime.content_digest(root,runtime.SOURCE_SCOPE);binding='fixture-binding'
+        checks={}
+        for gid in ('F1','F2','F3','F4','F5','F6','F7'):
+            checks[gid]={'status':'PASS','source_digest':source,'binding_id':binding,'evidence':[proof]}
+            if gid in ('F2','F3','F4','F5','F6'):
+                ref=put(root,gid+'.json',report(root,proof,gid));checks[gid].update(report=ref,evidence=[ref])
+        campaign=put(root,'campaign.json',{'build_binding_verified':True,'status':'COMPLETE','mode':'strict',
+            'start_hour':0,'last_completed_hour':qr.HOURS,'conservation_breaches':0,'solver_fallbacks_unexplained':0,
+            'binding':{'binding_id':binding}})
+        checks['F1']['evidence']=[campaign]
+        c={'schema_version':2,'source_digest':source,'binding_id':binding,'checks':checks,'campaign_summary':'campaign.json'}
+        put(root,'.agent/frontier.json',{'verified_frontier':qr.HOURS,'evidence_binding':{'binding_id':binding}})
+        put(root,'.agent/finish.json',c)
+        def git(_root,*args):
+            if args[0]=='branch':return b'main'
+            if args[0]=='status':return b''
+            return b'fixture-commit'
+        monkeypatch.setattr(completion,'git',git)
+>       assert completion.validate(root)==[]
+E       AssertionError: assert ['F2: stale a...receipt.json'] == []
+E         
+E         Left contains one more item: 'F2: stale artifact: raw-receipt.json'
+E         Use -v to get more diff
+
+ecosys-audit/tests/test_qualification_contracts.py:217: AssertionError
+=========================== short test summary info ============================
+FAILED ecosys-audit/tests/test_qualification_contracts.py::test_finish_invokes_structured_reports
+1 failed, 88 passed in 29.87s

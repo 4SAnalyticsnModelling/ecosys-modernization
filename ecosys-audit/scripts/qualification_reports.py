@@ -76,11 +76,16 @@ def validate(root, gid, report, source, binding):
         require(isinstance(results, list), 'results must be a list')
         ids = [item['id'] for item in results]
         require(len(ids) == len(set(ids)) and set(ids) == set(required), 'result/inventory coverage mismatch')
+        if gid in ('F2','F3'):
+            raw=referenced(root,report['raw_evidence'])
+            require(raw.get('binding_id')==binding and raw.get('source_digest')==source,'raw evidence binding/source mismatch')
         if gid == 'F2':
             coverage = {(x.get('quantity'), x.get('level')) for x in required.values()}
             require({(q, level) for q in ('water', 'heat', 'C', 'N', 'P')
                      for level in ('local', 'global')} <= coverage, 'missing required conservation quantity/level')
         elif gid == 'F4':
+            from source_inventory import check as check_scope
+            check_scope(root,required)
             require({x.get('direction') for x in required.values()} >= {'legacy-to-zig', 'zig-to-legacy', 'state-binding'},
                     'incomplete bidirectional/state scope')
             require(any(x.get('dormant') is True for x in required.values()), 'dormant scope not inventoried')
@@ -94,6 +99,9 @@ def validate(root, gid, report, source, binding):
             from readiness import check
             problems=check(root, required)
             require(not problems, '; '.join(problems))
+            from raw_evidence import outputs
+            outputs(root,required,raw)
+        source_hashes={}
         for item in results:
             expected = required[item['id']]
             require(item.get('status') == 'PASS', item['id'] + ': not PASS')
@@ -105,6 +113,8 @@ def validate(root, gid, report, source, binding):
                 require(item.get('independent_assembly') is True, 'ledger not assembled independently')
                 zeroes(item, ('missing_hours', 'duplicate_hours', 'nonfinite', 'breaches'))
                 text_fields(expected, ('quantity', 'level', 'location', 'units', 'rule'))
+                from raw_evidence import balance
+                balance(root,item,expected,raw,HOURS)
             elif gid == 'F3':
                 text_fields(expected, ('file', 'column', 'units', 'time_basis', 'rule'))
                 require(count(expected.get('expected_rows')) and expected['expected_rows'] > 0,
@@ -118,7 +128,9 @@ def validate(root, gid, report, source, binding):
                 require(item.get('disposition') in ('equivalent', 'justified-deviation', 'dormant-reviewed'), 'unresolved source disposition')
                 require(item.get('semantics_reviewed') is True, 'mapping alone is insufficient')
                 text_fields(expected, ('source', 'source_sha256', 'direction'))
-                require(artifact(root, expected['source'])['sha256'] == expected['source_sha256'], 'stale traceability source')
+                path=expected['source']
+                if path not in source_hashes:source_hashes[path]=artifact(root,path)['sha256']
+                require(source_hashes[path] == expected['source_sha256'], 'stale traceability source')
                 text_fields(item, ('derivation', 'test_or_dormant_reason'))
             elif gid == 'F5':
                 require(item.get('disposition') in ('retired', 'equivalent', 'merged'), 'unresolved DEV')
@@ -153,6 +165,9 @@ def validate(root, gid, report, source, binding):
                     suite = referenced(root, item['suite_result'])
                     require(suite.get('case') == item['id'] and not assess(root, suite), 'unassessed/incomplete test suite')
                 if item['id'] == 'equivalent-work-performance':
+                    from performance_check import check as check_performance
+                    performance=check_performance(root,referenced(root,item['benchmark']),binding,source)
+                    require(performance['status']=='PASS',performance.get('problem','benchmark failed'))
                     require(type(item.get('repeats')) is int and item['repeats'] >= 3
                             and item.get('equivalent_work') is True, 'performance lacks repeated equivalent work')
                     measurements=item.get('measurements')
@@ -162,7 +177,7 @@ def validate(root, gid, report, source, binding):
                             value=measurement.get(field)
                             require(type(value) in (float,int) and math.isfinite(value) and value>0,
                                     'invalid performance measurement: '+field)
-                    require(len({m['accepted_hours'] for m in measurements})==1, 'performance runs compare different work')
+                    require(all(m['accepted_hours']==HOURS for m in measurements), 'performance measurements must cover complete Ottawa')
         return []
-    except (OSError, ValueError, KeyError, TypeError, AttributeError, ProtocolError) as exc:
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, OverflowError, ProtocolError) as exc:
         return [gid + ': ' + str(exc)]

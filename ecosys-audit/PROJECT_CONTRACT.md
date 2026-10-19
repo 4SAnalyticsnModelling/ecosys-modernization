@@ -16,13 +16,17 @@ Never loosen tolerances, raise ceilings to pass, clamp after solve, silently ret
 forge success, or publish unclosed states. Register intentional changes with mechanism,
 source references, measured impact and retirement/equivalence decision.
 
+Scientific accuracy, complete translation/bindings and comparable full Ottawa outputs (F1–F5)
+precede runtime optimization. Speed has no acceptance value while any of those fails.
+
 Stages are BASELINE → SOURCE → ENTRY → CAMPAIGN → RELEASE. Cycle gates are G1–G9; never
 reuse these names for different stage meanings. Focused tests occur throughout; expensive
 qualification follows readiness. Final evidence concerns one integrated candidate.
 
 Use raw-format adapters with complete keys, files, columns, units and time semantics. Reject
 truncation/duplicates/nonfinite values. All artifacts/caches remain repo-local. Measured
-performance preserves outputs/checks/precision. Git push is required each completed cycle.
+performance preserves outputs/checks/precision; full Ottawa ReleaseFast must be reproducibly
+faster than the optimized precision-preserving legacy run on comparable resources. Git push is required each completed cycle.
 
 [Qualification evidence](qualification-evidence.md) defines executable stage/status compatibility,
 acceptance prerequisites and report contracts. Empty registers and unestablished rules block

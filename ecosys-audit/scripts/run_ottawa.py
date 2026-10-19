@@ -19,6 +19,7 @@ import uuid
 
 from workflow import ROOT, ProtocolError, atomic, encoded, file_digest, inside, load, lock, relative
 from evidence_binding import compute as compute_binding
+from experiment_guard import claim as claim_experiment, finish as finish_experiment
 
 try:
     from stage_ottawa_deck import TARGET_BLOB, stage_ottawa_deck
@@ -72,12 +73,14 @@ def main():
     ap.add_argument("--exe", type=Path, required=True, help="built ecosys_ng.exe (copied into the staged deck)")
     ap.add_argument("--build-mode", required=True, choices=["Debug", "ReleaseSafe", "ReleaseFast"])
     ap.add_argument("--build-receipt", help="Successful build receipt proving source, mode and executable identity")
+    ap.add_argument("--benchmark-conditions", help="Frozen full-run benchmark conditions for the logged receipt")
     ap.add_argument("--build-option", action="append", default=[])
     ap.add_argument("--deck", default=DECK)
     ap.add_argument("--run-id", default=None)
     ap.add_argument("--staged-deck", type=Path, default=None, help="Directory for staged deck (default: evidence/runs/<run-id>/deck)")
     ap.add_argument("--out", type=str, default=None, help="Directory for run logs and receipt under audit/runs (default: audit/runs/ottawa/<run-id>)")
     ap.add_argument("--lock-file", type=Path, default=None, help="Machine lock path (default: .agent/locks/machine.lock)")
+    ap.add_argument("--recovery-evidence", help="Bound infrastructure diagnosis; cannot override an unchanged scientific failure")
     ap.add_argument("--restart-from", help="<prior-run-id>:<hour> checkpoint set to replay from")
     ap.add_argument("--threads", type=int)
     ap.add_argument("--timeout", type=float, default=None,
@@ -115,11 +118,13 @@ def main():
             (deck / "runottawa_output_files").mkdir(exist_ok=True)
             pre = checkpoints(deck)
             start_hour = 0
+            restart_hashes=[]
             if a.restart_from:
                 prior, hour = a.restart_from.rsplit(":", 1)
                 source = checkpoints(inside(root, f"evidence/runs/{prior}/deck")).get(int(hour))
                 if not source:
                     raise ProtocolError(f"no checkpoint set for hour {hour} in run {prior}")
+                restart_hashes=[(f.name,file_digest(f)) for f in source]
                 for f in source:
                     target = deck / f.parent.relative_to(inside(root, f"evidence/runs/{prior}/deck")) / f.name
                     target.parent.mkdir(parents=True, exist_ok=True)
@@ -147,9 +152,14 @@ def main():
             if a.threads:
                 argv += ["--threads", str(a.threads)]
             argv.append("runottawa")
+            experiment=claim_experiment(root,{'binding_id':binding['binding_id'],'mode':a.mode,
+                'executable_sha256':staged_exe_sha256,'runottawa_hash':runottawa_hash,'threads':a.threads,
+                'start_hour':start_hour,'restart_hashes':restart_hashes},run_id,a.recovery_evidence)
             started = time.time()
             p = subprocess.run([sys.executable, str(Path(__file__).resolve().parent / "run_logged.py"), "--root", str(root),
-                                "--cwd", str(deck), "--out", logs, "--", *argv]
+                                "--cwd", str(deck), "--out", logs]
+                               + (["--benchmark-conditions",a.benchmark_conditions] if a.benchmark_conditions else [])
+                               + ["--", *argv]
                                + ([] if a.timeout is None else ["--timeout", str(a.timeout)]),
                                 cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace",
                                 timeout=None if a.timeout is None else a.timeout + 300)
@@ -183,7 +193,9 @@ def main():
                                 "solver_fallbacks_unexplained stay null until a validator fills them, so this summary alone "
                                 "can never promote the frontier."),
             }
+            summary["experiment_key"]=experiment
             atomic(root / logs / "summary.json", encoded(summary))
+            finish_experiment(root,experiment,f"{logs}/summary.json")
         print(json.dumps({k: summary[k] for k in ("run_id", "status", "mode", "failure_hour", "error",
                                                   "last_checkpoint_key", "wall_seconds")} |
                          {"summary": f"{logs}/summary.json", "runottawa_hash": runottawa_hash}, indent=2))

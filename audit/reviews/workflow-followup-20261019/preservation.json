@@ -1,0 +1,27 @@
+{
+  "baseline_commit": "a28da0cf14080994ad70ba46975cf4df3bedba73",
+  "preserved_files": {
+    "ecosys-ng/src/soil/nutrients/nitrogen_state_update.zig": "6c2ac0c78628a1d0bf5f9cdea6c6d4e815cf21986693a889f1dd2c4f2d690fd6",
+    ".agent/cycle.json": "70a32ec84ea6ff5b638a86c3565cee02a9205cf53566d37f1efddb13d8318138",
+    ".agent/frontier.json": "4f042e216a76ba882ca9a209b2ba31aae1d8e1c2298f0f50033bb3871671325d",
+    ".agent/cycles/cycle_00003.md": "031ee7dcaad4a3749a732716c0f070e2cbb381877149b153e943257451246128",
+    ".tmp-state-chunk.txt": "9e0ea7304a0f714e2c5d792f6d4038d4fdcd5f0e25f8b18d5de81f0656af52ab",
+    "audit/reviews/turn-error-recovery-20261018/AGENTS.md.before": "754a3c5f5bd98cf07e1c4350edb6d8f76743083795a82bd7fdc3afe97ff183d5",
+    "audit/reviews/turn-error-recovery-20261018/core.mjs.before": "9eb7671602a3a9ce093770d5f999e66979e08d92dec4a9061b47dcb0f1767a21",
+    "audit/reviews/turn-error-recovery-20261018/deployment.json": "6c2f7fe7db08bd1de30f72b3affbacebc0bc159c5d388c476999e64f629ae471",
+    "audit/reviews/turn-error-recovery-20261018/plugin.mjs.before": "1a9146bcf620fc52136a450f1f5437668ea3d8c0df2713a9c77be91e8f204398",
+    "audit/runs/ottawa/zig017-diag-h4556-20261018/receipt.json": "1938e3403e0fbf889418d33b27601898443d129d7958139444bb0e51d8682056",
+    "audit/runs/ottawa/zig017-diag-h4556-20261018/stderr.log": "3324115a10702cdbbcd25598fa83a7dfc39ea0f85cab275659e09a31702aab69",
+    "audit/runs/ottawa/zig017-diag-h4556-20261018/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "audit/runs/ottawa/zig017-replay-4320-20261018/receipt.json": "f6ed5220f29f536af9d38a42ab9f042d20019b0271053d60535bd794b47ae12a",
+    "audit/runs/ottawa/zig017-replay-4320-20261018/stderr.log": "c89ccffe8ab240b4cdf6127567a451d575e156a8852b5a5fd899ce245cd7ce11",
+    "audit/runs/ottawa/zig017-replay-4320-20261018/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "audit/runs/zig017-replay-h4556-20261017/receipt.json": "6a467e5dea4245d0b47678b5c642fb1f799146732dfa55515a9de97f4c016e9a",
+    "audit/runs/zig017-replay-h4556-20261017/stderr.log": "517f62b02fa3504a7c3e8e0587b8c0c266fbd33c41dc98b08921e023e6cc0cf9",
+    "audit/runs/zig017-replay-h4556-20261017/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "all_preserved": true,
+  "scientific_cycle_modified": false,
+  "science_worker_activated": false,
+  "supervisor_or_service_activated": false
+}

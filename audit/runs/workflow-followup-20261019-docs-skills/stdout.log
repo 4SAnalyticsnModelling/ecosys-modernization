@@ -1,0 +1,27 @@
+{
+  "document_errors": [],
+  "validated_skills": [
+    "ecosys-autonomous-orchestration",
+    "ecosys-build-reproducibility",
+    "ecosys-conservation-audit",
+    "ecosys-divergence-diagnosis",
+    "ecosys-feature-attribution",
+    "ecosys-fortran-zig-traceability",
+    "ecosys-nonlinear-solver-audit",
+    "ecosys-output-comparison",
+    "ecosys-performance-engineering",
+    "ecosys-process-science-parity",
+    "ecosys-release-orchestrator",
+    "ecosys-release-verification",
+    "ecosys-repository-baseline",
+    "ecosys-source-navigation",
+    "ecosys-state-io-bindings",
+    "ecosys-validation-tests",
+    "ecosys-zig-safety-design"
+  ],
+  "runtime_readiness_problems": [
+    "worker harness unavailable"
+  ],
+  "worker_launched": false,
+  "science_qualified": false
+}

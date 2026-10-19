@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "purpose": "workflow maintenance only",
+  "base_commit": "a28da0cf14080994ad70ba46975cf4df3bedba73",
+  "status": "VERIFIED",
+  "verification_method": "separate-derivation",
+  "final_suite": {
+    "path": "audit/runs/workflow-followup-20261019-tooling-05/result.json",
+    "sha256": "88b9aae0c8e8c1a0035a0ac9aba82c1540ec1cb8f580270a3723992b197282b1"
+  },
+  "test_counts": {
+    "executed": 122,
+    "failed": 0,
+    "selected": 122,
+    "skipped": 0
+  },
+  "canonical_skills_validated": 17,
+  "active_document_errors": [],
+  "runtime_qualified": false,
+  "runtime_blocker": "configured dsh unavailable; live deployment evidence not established",
+  "science_qualified": false,
+  "preserved_original_files": 18,
+  "source_inventory_status": "UNREVIEWED",
+  "source_inventory_items": 470448,
+  "evidence": [
+    {
+      "path": "audit/runs/workflow-followup-20261019-tooling-01/result.json",
+      "sha256": "214dbf867f2f952fdd60a52aee2d52a065126b55e085ee9efad3c35e8e465fb3"
+    },
+    {
+      "path": "audit/runs/workflow-followup-20261019-tooling-02/result.json",
+      "sha256": "6818741f6321a2802170ee5ceffec41502d1e44eacdf22d217c03f22d346f00a"
+    },
+    {
+      "path": "audit/runs/workflow-followup-20261019-tooling-03/result.json",
+      "sha256": "b845622afc1c1fc67fdaf0c5b0067fef0fc76f6f363c56ae9f90966d5191e143"
+    },
+    {
+      "path": "audit/runs/workflow-followup-20261019-tooling-04/result.json",
+      "sha256": "4a5e4134a72a3c6cb748ecaf9f05685a03f8eebca4dccc021daeb45d4df6f16e"
+    },
+    {
+      "path": "audit/runs/workflow-followup-20261019-tooling-05/result.json",
+      "sha256": "88b9aae0c8e8c1a0035a0ac9aba82c1540ec1cb8f580270a3723992b197282b1"
+    },
+    {
+      "path": "audit/runs/workflow-followup-20261019-docs-skills/receipt.json",
+      "sha256": "af57a9879a6d84e123a8ae59a0985d63302a8c1de8916ddac92410f628400492"
+    },
+    {
+      "path": "audit/runs/workflow-followup-20261019-source-scope/receipt.json",
+      "sha256": "be5ecc16935321d82db2dbb3fafbce557263e08b43beccb9d5d32bd016d36046"
+    },
+    {
+      "path": "audit/reviews/workflow-followup-20261019/preservation.json",
+      "sha256": "24d3f06c48f21ea3a7fb46bbb21a5eb5457fa58fcc3a64db14bf51c2a14c3c7b"
+    }
+  ],
+  "priority": "Complete scientific F1-F5 before runtime optimization; revalidate after speed changes"
+}

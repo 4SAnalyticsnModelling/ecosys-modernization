@@ -1,0 +1,71 @@
+........................................................................ [ 62%]
+................................F.F........                              [100%]
+=================================== FAILURES ===================================
+______ test_interrupted_push_retries_existing_commit_without_extra_commit ______
+
+repo = PosixPath('/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/pytest-workflow/test_interrupted_push_retries_0/repo')
+tmp_path = PosixPath('/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/pytest-workflow/test_interrupted_push_retries_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x101dba990>
+
+    def test_interrupted_push_retries_existing_commit_without_extra_commit(repo,tmp_path,monkeypatch):
+        remote=tmp_path/'remote.git';subprocess.run(['git','init','--bare','-q',str(remote)],check=True)
+        subprocess.run(['git','branch','-M','main'],cwd=repo,check=True)
+        subprocess.run(['git','remote','add','origin',str(remote)],cwd=repo,check=True)
+        data=ready(repo);original_push=cycles.push
+        def unavailable(_):raise ProtocolError('synthetic network outage')
+        monkeypatch.setattr(cycles,'push',unavailable)
+        with pytest.raises(ProtocolError):cycles.close(repo,data,'verified')
+        committed=cycles.head(repo)
+        monkeypatch.setattr(cycles,'push',original_push)
+>       result=cycles.close(repo,load(repo/'.agent/cycle.json'),'retry after network restored')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+ecosys-audit/tests/test_workflow_followup.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+ecosys-audit/scripts/cycle_runner.py:151: in close
+    push(root)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/pytest-workflow/test_interrupted_push_retries_0/repo')
+
+    def push(root):
+        # Never mutate the ledger after push: sync is a derived read-only property.
+        for argv in [['git','fetch','origin','main'],['git','push','origin','HEAD:main']]:
+            p=subprocess.run(argv,cwd=root,capture_output=True,text=True)
+>           if p.returncode:raise ProtocolError((p.stdout+p.stderr)[-1500:])
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           workflow.ProtocolError: fatal: couldn't find remote ref main
+
+ecosys-audit/scripts/cycle_runner.py:141: ProtocolError
+_ test_supervisor_parks_after_one_diagnostic_restart_and_resumes_on_new_source _
+
+repo = PosixPath('/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/pytest-workflow/test_supervisor_parks_after_on0/repo')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x102c25310>
+
+    def test_supervisor_parks_after_one_diagnostic_restart_and_resumes_on_new_source(repo,monkeypatch):
+        monkeypatch.setattr(supervisor,'validate',lambda _:['unfinished'])
+        code="""import json,pathlib,os
+    p=pathlib.Path('launches');p.write_text(str(int(p.read_text())+1) if p.exists() else '1')
+    r=json.loads(pathlib.Path(os.environ['ECOSYS_RECOVERY_PACKET']).read_text())
+    pathlib.Path('mode').write_text(r['mode'])
+    """
+        stop=threading.Event();waiting=[]
+        def sleep(_):
+            f=repo/'.agent/runtime/supervisor.json'
+            if f.exists() and load(f).get('status')=='WAITING_FOR_CHANGE':
+                waiting.append(load(f))
+                if len(waiting)==1:(repo/'ecosys-ng/src/a.zig').write_text('pub fn new_evidence() void {}\n')
+                else:stop.set()
+        config={'command':[sys.executable,'-c',code],'recovery_command':[], 'backoff_initial_seconds':.001,'backoff_max_seconds':.002}
+        assert supervisor.supervise(repo,config,stop_event=stop,sleep=sleep,max_launches=9)==130
+>       assert (repo/'launches').read_text()=='8' and len(waiting)==2 and (repo/'mode').read_text()=='REPLAN'
+E       AssertionError: assert ('5' == '8'
+E         
+E         - 8
+E         + 5)
+
+ecosys-audit/tests/test_workflow_followup.py:158: AssertionError
+=========================== short test summary info ============================
+FAILED ecosys-audit/tests/test_workflow_followup.py::test_interrupted_push_retries_existing_commit_without_extra_commit
+FAILED ecosys-audit/tests/test_workflow_followup.py::test_supervisor_parks_after_one_diagnostic_restart_and_resumes_on_new_source
+2 failed, 113 passed in 43.44s

@@ -2,9 +2,11 @@
   "status": "NOT_ASSESSED",
   "same_workload_runtime_target": {
     "metric": "median Zig wall seconds / median optimized Fortran wall seconds",
-    "maximum": 1.0,
     "minimum_measured_repeats": 3,
-    "conditions": "Same declared hardware, inputs, duration, output, allocated cores and comparable precision. Report spread and feature differences."
+    "conditions": "Same declared hardware, inputs, duration, output, allocated cores and comparable precision. Report spread and feature differences.",
+    "maximum_exclusive": 1.0,
+    "noise_requirement": "max Zig wall seconds < min optimized Fortran wall seconds",
+    "required_accepted_hours": 262920
   },
   "compile_time_budget_seconds": null,
   "peak_memory_budget_bytes": null,

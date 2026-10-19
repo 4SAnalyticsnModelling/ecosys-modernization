@@ -47,6 +47,8 @@ def check(root, output_inventory=None):
         for row in outputs:
             rule=rules.get('variables',{}).get(row['comparison_rule'])
             if not rule or not rule.get('rationale'): raise ProtocolError('missing justified rule: '+row['comparison_rule'])
+            from raw_evidence import metric_rules
+            metric_rules(rule)
             for key in ('abs','rel'):
                 v=rule.get(key)
                 if type(v) not in (int,float) or not math.isfinite(v) or v<0: raise ProtocolError('invalid comparison tolerance')

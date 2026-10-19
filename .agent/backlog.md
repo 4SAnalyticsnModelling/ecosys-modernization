@@ -11,8 +11,10 @@
    unblocked waits. ENTRY requires `readiness.py` against the reviewed complete output inventory.
 5. Audit state bindings and process interfaces; retire unclosed/best-bounded DEV debt. Investigate
    snow, drainage, gas fluxes, frost heave and root-C discrepancies from their issue evidence.
-6. Profile representative accepted hours, incremental builds and I/O; verify equivalent work.
-7. Run the strict integrated campaign and final qualification per the execution plan.
+6. Complete strict Ottawa and F1–F5: no science/translation/binding gaps and justified comparable
+   complete outputs. Correctness comes before runtime optimization.
+7. Then profile and optimize equivalent accepted work; revalidate F1–F5 and demonstrate full-run
+   ReleaseFast faster than optimized Fortran before final release.
 
 For each blocked item record exact condition and automatic recheck; take the next unblocked
 prerequisite. Retry external outages with backoff. Never request a human scientific decision.

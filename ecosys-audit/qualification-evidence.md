@@ -38,7 +38,7 @@ units, time level, initialization, reset and checkpoint ownership; write explici
 appropriate, with evidence. Blank required cells do not establish completeness.
 
 Rule tables use `status=ESTABLISHED`, an evidence-based `decision`, nonempty hashed `evidence`,
-and per-variable `{abs,rel,rationale}` entries with finite nonnegative tolerances. Rules must
+and per-variable `{abs,rel,rationale,metrics}` entries with finite nonnegative tolerances. Rules must
 be established before qualification comparisons. DRAFT/exact defaults remain diagnostic only.
 Replacement physics also needs predeclared envelopes and held-out benchmarks, beyond legacy
 agreement and conservation. This maintenance establishes no scientific acceptance thresholds.
@@ -63,10 +63,11 @@ results: [{id, status: PASS, evidence: [{path,sha256}, ...], ...}, ...]
 
 The referenced inventory has `schema_version=1`, the same `criterion`, `scope_complete=true`,
 `verification_method`, nonempty hashed `evidence` supporting completeness, and nonempty `items`
-with unique `id` values. Results must cover exactly those IDs, without duplicates. Build the
+with unique `id` values. Results must cover exactly those IDs, without duplicates. Regenerate the
 inventory independently from the candidate result set; source scope includes dormant units,
 output scope comes from the complete legacy inventory. Hashes and coverage assertions alone
-are not scientific proof. Inventory completeness and reported measurements require G7 review.
+are not scientific proof. F4 regenerates its source denominator and F2/F3 reread raw data; adapter completeness and
+scientific interpretation still require G7 review.
 
 | Criterion | Inventory item fields | Required result fields/checks |
 |---|---|---|
@@ -85,7 +86,8 @@ results require positive `fields_checked`, `full_state=true`, and zero
 `bounds_checked,rollback_checked,allocation_failure_checked=true`. Performance requires at
 least three `repeats`, `equivalent_work=true`, and a `measurements` array of that length with
 finite positive `wall_seconds,cpu_seconds,peak_rss_bytes,accepted_hours` per run. Accepted-hour
-counts must match across repeats; supporting artifacts establish output/check equivalence. G7 examines
+counts must match across repeats; the additional paired benchmark below enforces the full-run
+speed requirement after scientific acceptance. G7 examines
 the actual metrics and scientific equivalence, not only these structural prerequisites.
 
 ## Suite accounting
@@ -120,3 +122,125 @@ inputs, source, rules, validators or fixture reopen the hypothesis for considera
 language and skill alias drift. Historical review records are excluded. After skill edits use
 `skill_sync.py --apply`. Validate changed behavior with synthetic fixtures and the active tooling
 suite; workflow maintenance does not launch the Ottawa worker or advance qualification.
+
+## Scientific acceptance before performance
+
+F1–F5 must pass before runtime optimization. F6 validates their current hash-bound reports
+again through `benchmark.scientific_acceptance`, including a complete strict campaign summary.
+Every speed change must preserve/re-establish science, translation, binding and full-output
+acceptance for the final source/binding. An incomplete or inaccurate fast run has no release value.
+Timing before F1–F5 is limited to diagnosing a blocked correctness run, not optimizing runtime.
+
+## Regenerated scope and raw verification
+
+`source_inventory.py --out <new-path>` emits an UNREVIEWED F4 denominator from fixed-form
+logical statements, dormant-code blocks, every COMMON member declaration and every nonblank
+Zig source/build line. It also covers out-of-build legacy sources and C helpers. Its `items`
+are the exact F4 inventory items before separate review; retain IDs, hashes and line ranges.
+Final validation regenerates the set and refuses omissions even if both inventory and results
+omit the same item. This conservative textual denominator is not semantic equivalence proof;
+review aliasing, control flow, dormant branches, producer/consumer bindings and equations.
+Review coherent functions/ranges once and generate their per-ID result rows mechanically,
+sharing the derivation/test evidence; do not hand-author hundreds of thousands of duplicate rows.
+
+F2/F3 reports add `raw_evidence: {path,sha256}`. That JSON contains `source_digest,binding_id`,
+`policy` (hashed established rule table), `policy_commit` (ancestor commit storing exactly those
+rule bytes) and nonempty `evaluation_receipts` (hashed successful run receipts). The policy
+commit must precede every evaluation start. Freeze definitions before looking at qualification
+results; never adjust envelopes to turn an observed failure into a pass. Retain the old failure.
+Timestamps and Git ancestry establish recorded ordering, not scientific justification.
+
+F2 results also contain a hashed `ledger` JSONL stream. Each row has
+`hour,quantity,level,location,units,old,new,sources,sinks`. Sources/sinks are independently
+assembled integrated amounts for the accepted hour in declared units, not rates or solver
+residuals. The validator recomputes `(new-old)-sum(sources)+sum(sinks)`, checks storage continuity,
+finite values, exact hours 1–262920 and the frozen `abs+rel*scale` rule, where scale is the maximum
+of old/new storage magnitude and total absolute transfer. Explicitly inventory every active
+local location/species and global quantity from the decoded state/deck; internal transfers
+cancel globally. G7 verifies this spatial/species denominator and independent term assembly.
+
+F3 raw evidence additionally has `adapter`, `legacy_directory`, `zig_directory`, and `pairs`.
+The adapter is a hashed Python file under `ecosys-audit/adapters/` implementing
+`rows(path,role)` for `role=legacy|zig`. Each pair contains `file` (dictionary name), `legacy`
+and `zig` artifact references. Output-only directories are enumerated independently: every
+file must appear exactly once; no unexpected files are dropped. The adapter exposes every
+native data column under verified canonical names/units and yields ordered objects:
+`key` (complete coordinate tuple as JSON list), numeric elapsed `time`, `values` (column map),
+and `periods` (`seasonal,annual,cumulative` IDs). Keys include all calendar/repeat/grid/layer
+coordinates; no smoothing, clipping, interpolation, dropped columns or cumulative resets.
+Do not sort away malformed raw ordering. Audit conversions, calendar keys, native headers
+and native-to-canonical column coverage with discriminating adapter fixtures before use.
+The provided canonical JSONL reader supports audited exports and synthetic tests; it is not
+a completed Ottawa native-format adapter. Preserve hashed export inputs, adapter code and
+conversion receipts as evidence; native adapter completion remains a future scientific task.
+
+Raw F3 validation derives actual columns, counts and terminal keys from both streams and
+matches the reviewed inventory exactly. `terminal_key` is the complete JSON key list.
+Policies define all five `metrics`: `instantaneous,event_timing,seasonal,annual,cumulative`.
+Each has `status=REQUIRED`, justified finite `abs,rel,rationale`; noninstantaneous metrics may
+instead use `status=NA,rationale` only when scientifically inapplicable. Seasonal/annual/cumulative
+reducers are `sum|mean|min|max`; choose them from the quantity's units/time support, never by
+which one passes. Event timing groups by year and uses `peak_time` (first maximum) or
+`first_above` with a predeclared `threshold`, in the stream's time units. More complex event
+science requires an audited additional reducer before acceptance, not an NA workaround.
+Instantaneous checks use both the variable rule and metric rule. Aggregates use bounded-memory
+compensated sums. Missing events on one trajectory, extra/duplicate keys, nonfinite values,
+unmapped columns and breached rules fail even when report counters claim zero.
+
+## Full-run faster-than-Fortran gate
+
+F6's `equivalent-work-performance` result adds `benchmark: {path,sha256}`. The benchmark has
+`schema_version=1`, `scientific_acceptance` (hashed object with current `source_digest,binding_id`,
+`campaign_summary` and F2–F5 `reports` refs), `conditions`, and at least three `pairs`.
+Each pair references `zig` and `legacy` run-descriptor JSON artifacts. Each descriptor contains
+the same `conditions`, and hashed `receipt,summary,build_receipt,executable` references.
+Conditions are `hardware,allocated_cores,effective_inputs_sha256,output_contract_sha256,precision`;
+precision is `f64-i32`. `hardware` includes the measured `platform,machine` strings plus
+resource details. Use `run_ottawa.py --benchmark-conditions <file>` or `exec
+--benchmark-conditions <file> -- <argv>` to bind the frozen conditions artifact into each raw
+receipt; measured platform/machine must match. Direct successful `gfortran ... -o <product>`
+builds through `exec` preserve their product automatically under the build receipt directory. Hash the effective inputs and complete required output contract.
+
+Receipts establish successful execution, executable identity, start time and elapsed wall time.
+Runs must be distinct and sequential, with the same build per language across repeats. Both
+summaries prove normal exit, complete required outputs and hours 0–262920. Zig additionally
+has the final strict binding, zero conservation breaches/unexplained fallbacks and a preserved
+Zig 0.17.x ReleaseFast build. Legacy build evidence records actual optimized compiler argv
+(`-O2` or `-O3`), saved executable and precision verification. The current gfortran
+contract requires `-fdefault-real-8 -fdefault-double-8`, default i32 and no unsafe arithmetic flags; `-O0`, `-Ofast` and `-ffast-math`
+are disallowed. If a build driver invokes compilers indirectly, preserve its actual compiler
+receipts and product rather than inventing a direct compiler invocation.
+The checker derives timings from receipts: median Zig / median legacy must be strictly < 1,
+and max Zig < min legacy to establish separation beyond observed spread. Report CPU/memory,
+individual timings, build costs and feature differences too. Do not weaken checks or outputs,
+compare different durations, or claim a partial-run speedup as final acceptance.
+
+## Publication and loop recovery
+
+`close` reuses an already committed verified closure after interrupted push; `push` requires
+that closure, and a new cycle cannot bypass it. Every reachable compact JSON evidence reference
+must already be committed unchanged or be in `owned_paths`. Add all cycle-owned code, tests,
+scientific decisions and compact evidence explicitly. Ignored payloads require a cycle-owned
+`retention_manifest` JSON with `policy=retain-through-F7-and-reproducibility` and an `artifacts`
+array of their path/hash references; each payload must still exist. Retention is not a backup:
+the live backup/restore rehearsal must demonstrate recovery of cited local evidence. Never
+stage unrelated existing work to satisfy closure. `set --retention-manifest <path>` records
+that manifest before recording gates.
+
+See [autonomous launcher](../tools/autonomy/README.md) for live readiness and the durable
+RESUME → REPLAN → WAITING_FOR_CHANGE state machine. Healthy live work is never terminated
+because it is silent. An external wait is not a successful cycle or project completion.
+
+`run_ottawa.py` also claims a durable experiment key before launching, derived from binding,
+mode, executable, effective deck, threads and checkpoint bytes. A renamed run cannot repeat an
+unfinished/failed attempt. Confirmed scientific failures require a changed causal experiment.
+Heuristic error parsing remains RECONCILE, not a proved scientific diagnosis. For a verified
+infrastructure failure only, `--recovery-evidence <JSON>` requires the exact `experiment_key`,
+`prior_run_id`, `classification=INFRASTRUCTURE`, diagnosis, hashed evidence, a new stable
+`resource_identity`, and `prior_process_terminated=true`. If a heuristic science error was
+reported, add `scientific_failure_ruled_out=true` and hashed `classification_evidence` proving
+that adjudication. Never relabel a scientific failure to enable retry. Each resource recovery
+can be consumed once; successful executions may repeat for qualified benchmarks. Include the
+cycle's `audit/experiments/<key>.json` and its referenced decisions/summaries in publication.
+Historical runs without keys still require manual evidence-based reconciliation at pickup;
+this guard does not retroactively classify or rewrite them.
