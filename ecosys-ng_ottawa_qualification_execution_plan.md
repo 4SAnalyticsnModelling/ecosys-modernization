@@ -48,6 +48,12 @@ close, while causally justified large events pass. Use units, supply/capacity, e
 forcing to derive bounds, not literal magnitude caps. Attribute valid departures from a broken
 legacy oracle; preserve its bad rows as evidence. This is required science/safety work, not an
 optional performance tradeoff or permission to relaunch unchanged failures.
+Close focused cycles against affected-path evidence; queue unrelated hazards with explicit
+dispositions instead of requiring a model-wide rewrite before each fix. A simulator error
+returns the worker to diagnosis, not project completion. If actual legacy output is invalid,
+apply the [F3 invalid-reference prerequisite](ecosys-audit/qualification-evidence.md#invalid-legacy-reference)
+before attempting affected qualification: current validators have no DEV-only bypass. A new
+validated evidence contract is prerequisite work, never permission to conceal invalid rows.
 
 Before each experiment record hypothesis, falsifier, binding and simulated window. After it
 record result and next action. Three unproductive experiments require a smaller reproducer or

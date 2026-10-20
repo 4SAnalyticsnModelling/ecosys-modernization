@@ -19,7 +19,7 @@ Apply [numerical recovery](../../../.agent/playbooks/convergence-and-balance.md)
 and domain checks before hazardous operations, reductions/comparisons and state/I/O commitment.
 Audit finite-input overflow, unchecked float modes and catches that replace failures with numbers.
 Invalid private probes may recover transactionally within budget; invalid input/committed state
-or unrecoverable failure must exit nonzero with context and preserve the last valid checkpoint.
+or unrecoverable failure must exit the simulation nonzero with context and preserve the last valid checkpoint.
 No debug-only guards or reliance on floating-point traps. Prove production detection using
 runtime-supplied NaN, both infinities and invalid-domain/overflow cases; check no contaminated
 history, state, output or checkpoint survives. Finite values also require physical admissibility.

@@ -15,6 +15,9 @@ promptly on a captured kernel; keep failed scientific trials private and diagnos
 Do not restart a bounded nonconvergence as a worker crash or reset its budget unchanged.
 Nonfinite or impossible-state exits require the same causal repair. Preserve the last valid
 checkpoint; never resume from contaminated state or repeat an unchanged scientific crash.
+The simulator's fatal exit returns control to worker diagnosis; it does not terminate the
+autonomous task. Use a captured state or changed diagnostic fixture/instrumentation for parent
+reproduction; a renamed run or prose-only hypothesis cannot bypass the experiment guard.
 Run focused → coupling → event → full checks according to changed dependencies. Re-derive
 separately for G7, preferably in fresh sequential context of the same model. Fix/revert a
 reproduced FAIL. Record next action; stage owned paths, commit/push, continue.

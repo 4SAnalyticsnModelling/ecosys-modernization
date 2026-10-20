@@ -16,3 +16,5 @@ Use [bounded numerical recovery](playbooks/convergence-and-balance.md): finish b
 promptly, retain failed states and pursue the smallest causal fix without weakening acceptance.
 NaN/Inf or physically invalid simulation exits also require causal repair. Preserve the last
 valid checkpoint and failure evidence; a supervisor restart must not repeatedly propagate them.
+Stopping the simulation is distinct from stopping the worker: the worker records the failure
+and continues causal repair or another unblocked prerequisite without resetting the failed run.

@@ -26,3 +26,6 @@ Validate individual finite residual/Jacobian/scale/merit components before reduc
 acceptance; NaN can evade a comparison. Reject invalid private probes without contaminating
 history, then recover within budget or propagate a fatal contextual error. Prove these paths
 under production settings; no invalid or unexplained physical spike may become committed state.
+Distinguish a finite, domain-valid private line-search iterate from a physically accepted
+substep/hour. Intermediate search progress need not already close the final equations/ledger;
+only a validated endpoint may commit. Short-circuit cheap failed gates before costly checks.

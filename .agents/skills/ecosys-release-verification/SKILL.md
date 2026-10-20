@@ -20,6 +20,9 @@ benign near-zero completion, bounded recovery, signed/cumulative closure and pro
 domain checks. Require explicit failure before invalid state/output/checkpoint commitment.
 Inspect finite spike/reversal hours and local admissibility; net balance and legacy agreement
 cannot excuse physically invalid states. Retain and scientifically resolve broken oracle coverage.
+For an actual invalid legacy reference, enforce the
+[versioned evidence-contract prerequisite](../../../ecosys-audit/qualification-evidence.md#invalid-legacy-reference);
+current F3 has no DEV-only exemption. Do not claim future schema support already exists.
 
 For report/dependency schemas, readiness and suite accounting, use
 [qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

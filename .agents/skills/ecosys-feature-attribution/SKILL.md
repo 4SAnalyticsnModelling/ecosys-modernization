@@ -23,6 +23,9 @@ fewer iterations or legacy completion alone does not establish equivalence.
 When legacy produces nonfinite or physically invalid finite values, retain the failing oracle
 evidence, derive a valid modern behavior independently and attribute the repair. Do not copy
 the defect, hide affected rows or claim scientific equivalence solely from later net balance.
+Follow the [invalid-reference prerequisite](../../../ecosys-audit/qualification-evidence.md#invalid-legacy-reference):
+a DEV does not bypass current F3 finite/direct-comparison checks. A proved reference defect
+needs explicit validated evidence-contract support before affected qualification can pass.
 
 For report/dependency schemas, readiness and suite accounting, use
 [qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

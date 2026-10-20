@@ -80,6 +80,29 @@ runtime process checks can use interval activity. Compare the actual rules and r
 pass; reconcile inconsistent sensitivity in a separately tested science/validator change before
 qualification. Never drop the stricter check or silently adjust either rule to fit the candidate.
 
+### Invalid legacy reference
+
+The current F3 implementation (`raw_evidence.py:outputs`, `qualification_reports.py:validate`)
+requires finite values from both streams and passing direct comparison rules for every row.
+It has no invalid-reference disposition. A DEV or independent scientific result alone therefore
+cannot make an affected F3 report pass. Do not keep rerunning the same rejected comparison.
+
+If a defect is reproduced in the actual reference, preserve its original raw data, prove its
+cause and bound the affected fields/times, including downstream effects. First fix an adapter,
+unit or binding error if that is the cause. For a genuine reference-model defect, the next
+prerequisite is a separately tested, versioned evidence-contract/validator extension for explicit
+reference-defect resolution. It must retain every original key/value and defect provenance,
+require independent physical validation of the finite/admissible Zig trajectory against
+predeclared criteria, and preserve ordinary comparison rules wherever the reference remains
+valid. Test rejection of fabricated defects, missing coverage, unproven resolution and any
+invalid Zig result. Establish the scientific criteria before qualification evaluation; no
+NaN-to-number conversion, dropped rows, tolerance widening or fabricated direct comparison.
+
+This is a worker task specification, not implemented schema support or a waiver. Keep F3
+unqualified until that prerequisite and its scientific evidence pass. Continue verified local
+repairs and unblocked prerequisites meanwhile; complete coverage is required for release, not
+a reason to defer every focused defect repair. No change to protected legacy sources is allowed.
+
 ## Finish schema
 
 `finish.json` uses `schema_version=2`; retain existing F1/F7 fields and checks. Each F2–F6
@@ -159,6 +182,9 @@ inputs, source, rules, validators or fixture reopen the hypothesis for considera
 language and skill alias drift. Historical review records are excluded. After skill edits use
 `skill_sync.py --apply`. Validate changed behavior with synthetic fixtures and the active tooling
 suite; workflow maintenance does not launch the Ottawa worker or advance qualification.
+This checker does not detect semantic contradictions or prove termination. Separately review
+rule precedence, search-versus-commit scope, simulator-versus-worker failure, current validator
+capabilities and an actionable next step for every blocked prerequisite.
 
 ## Scientific acceptance before performance
 

@@ -94,6 +94,12 @@ balanced states still need local pool/supply/energy/constitutive checks every ac
 Large heat/flux values require units, reference and forcing evidence, not arbitrary caps.
 Trace and fix analogous legacy hazards in Zig with registered, tested deviations; preserve
 invalid legacy outputs as evidence rather than treating them as targets to reproduce.
+Simulation failure does not end the worker's task: retain evidence, diagnose and continue the
+next unblocked repair. A line-search step is private search progress, not physical acceptance.
+Existing helpers/DEV labels cannot override bounds or authorize clipping. Derive missing or
+proved-invalid rule definitions independently and freeze them before qualification; do not
+tune established scientific limits to a failed candidate. For conflicting legacy/F3 evidence,
+follow the [invalid-reference prerequisite](../ecosys-audit/qualification-evidence.md#invalid-legacy-reference).
 
 ## Execution and recovery
 Use `project.sh exec` for heavy work: contained cwd/caches, argv, toolchain/process identity,

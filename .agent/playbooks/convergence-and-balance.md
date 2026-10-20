@@ -10,6 +10,22 @@ NaN/Inf, impossible inventories and unexplained transient excursions are unaccep
 when legacy continues or a later hour cancels them. Diagnose and repair the Zig model; if valid
 recovery cannot be demonstrated, an explicit failed run is preferable to contaminated results.
 
+## Resolve instruction boundaries before experimenting
+
+The protocol governs; this playbook specifies its numerical workflow. Historical receipts and
+DEV labels describe evidence, not exceptions. Apply requirements to the current affected path;
+record other hazards for later cycles instead of making every local repair wait for a complete
+model rewrite. Full qualification still requires complete coverage.
+
+| Apparent conflict | Operative rule |
+|---|---|
+| Stop an invalid simulation / continue autonomously | Stop the simulation process and quarantine its invalid trial. The worker continues diagnosis and other unblocked work; it does not declare completion or exit merely because the model failed. |
+| Reproduce the parent / never relaunch unchanged failure | Reuse a verified captured state first. If decisive evidence is missing, change the measured diagnostic experiment (instrumentation or a reduced fixture) with a falsifier. A renamed run, prose-only hypothesis or reset counter is not a changed experiment. |
+| Preserve legacy floors / fix demonstrated legacy defects | Preserve verified semantics by default. Correct a proved defect through the registered science/DEV procedure with independent physical evidence; do not reproduce invalid legacy behavior for parity. |
+| Never loosen gates / establish an unvalidated rule | DRAFT values are not frozen scientific truth. Derive missing or incorrect unit/scale rules from independent evidence, retain earlier failures, test held-out cases and freeze the new version before qualification. Never fit an allowance to the failed candidate. |
+| Fast benign recovery / correctness before optimization | Removing false rejection or unbounded numerical work is correctness work. A safety repair need not run faster; it needs justified bounded overhead. Campaign speed tuning still waits for F1–F5. |
+| Fix invalid legacy outputs / require complete F3 comparison | Preserve every raw row and use the explicit [invalid-reference prerequisite](../../ecosys-audit/qualification-evidence.md#invalid-legacy-reference). A DEV alone does not bypass the current validator. |
+
 ## Diagnose once, on the smallest state
 
 1. Reconcile existing edits/jobs and reuse a hash-matched captured failure. If absent, reproduce
@@ -88,7 +104,7 @@ also appear as a surplus, and an omitted output as a deficit. Audit storage and 
 | Positive or negative residual within all established allowances | Accept promptly without a spurious warning. Preserve signed defect and numerical uncertainty in local and cumulative evidence; passing is not permission to erase the discrepancy. |
 | Either sign outside any applicable allowance | Keep the step private, diagnose and correct the responsible equation/transfer, then re-evaluate. No baseline rebase, phantom source/sink, arbitrary redistribution or unmodeled balancing reservoir. |
 | Actual negative mass pool | Distinguish from a negative residual. Constrain the coupled rates/reaction extents so all consumers share available supply and every donor/recipient changes consistently. A globally closed ledger cannot legalize a negative pool. |
-| Tiny negative value alleged to be roundoff | Prove the operation-specific error bound and conservative representation. Prefer recomputing the shared transfer/endpoint; no after-solve clipping. Any existing sanctioned roundoff normalization must retain its signed correction and pass independent local/global/cumulative ledgers. |
+| Tiny negative value alleged to be roundoff | Prove the operation-specific error bound and recompute a conservative shared transfer/endpoint. Accept only a finite nonnegative represented pool with every ledger closed; no after-solve clipping. Existing helpers or DEV labels grant no exception. Retain any numerical correction and its derivation. |
 | Per-step residuals pass but cumulative signed drift or absolute defect exceeds its budget | Reject the affected acceptance claim and fix the repeated bias. Opposite signs and spatial cancellation must not erase evidence. |
 
 Use one shared transfer amount for equal/opposite debit and credit; chemical extents preserve
@@ -115,7 +131,7 @@ vulnerabilities in Zig and attribute the differences; never reproduce a defect j
 
 - Require explicit finite/domain validation at input and restart ingestion, hazardous arithmetic,
   process/solver boundaries and before state/output/checkpoint commitment. Check operands and
-  results, individual residual/Jacobian components, scales, tolerances, fluxes and accumulated
+  results, computed residual/Jacobian components, scales, tolerances, fluxes and accumulated
   sums. Finite operands can overflow. Validate before norms, min/max or comparisons; a test
   only of `abs(residual) > tolerance` does not safely reject NaN. The accepting branch must
   require finite, valid quantities and every physical gate.
@@ -159,11 +175,18 @@ correction with independent physics and a registered deviation, without deleting
 
 ## Resolve benign cases quickly; bound unsuccessful work
 
-Check exact/no-op cases and all acceptance gates before expensive Jacobian work and after
-each accepted trial, including the final allowed iteration. Finish immediately when the
-equations, physical bounds and independent ledgers all pass; an advisory search score or a
+Check exact/no-op cases and candidate convergence before expensive Jacobian work, including on
+the final allowed iteration. Short-circuit failed cheap gates; assemble full acceptance checks
+for a viable endpoint. Do not compute an unused Jacobian merely to validate it. Finish immediately
+when equations, physical bounds and independent ledgers all pass; an advisory search score or
 scheduled retry must not veto a fully validated endpoint. Recompute the undamped equation
 residual: a tiny line-search fraction or tiny update is not evidence of equilibrium.
+
+Line-search acceptance only chooses the next private search iterate; it need not already solve
+the equations or close the interval ledger. Its evaluation must respect the search domain and
+finite-value checks. Physical acceptance of an internal substep requires that interval's gates;
+external-hour commitment additionally requires the complete hourly transaction and ledgers.
+Do not commit provisional internal results to external clocks, outputs or checkpoints.
 
 At an empty pool, allow replenishment and forbid withdrawal beyond available supply. Use
 constraint-aware Newton steps and reaction extents, not a positive epsilon inserted as matter.
@@ -182,8 +205,9 @@ Stop stalled work early after the applicable bounded recovery, with a reusable d
 Distinguish `solver nonconvergence`, `unresolved arithmetic precision`, `conservation defect`
 and `inadmissible state` in the report; these are diagnoses, not new PASS statuses. Restore all
 trial pools/fluxes/counters/clocks/outputs on failure. Never publish the best failed iterate.
-Demonstrate a finite work bound and fewer wasted evaluations on the repaired edge case; this
-is correctness recovery, not permission to start campaign speed optimization before F1–F5.
+Demonstrate a finite work bound. For a stall/false-rejection repair, show eliminated wasted work
+or bounded valid completion; for a safety repair, justify added checks and their bounded cost.
+This is correctness recovery, not campaign speed optimization before F1–F5.
 
 ## Prove the repair before another campaign
 

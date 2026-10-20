@@ -21,6 +21,10 @@ match, filter or average them into success. Examine first/worst hourly excursion
 their units, reference state, forcing and physical bounds. Net closure cannot excuse an invalid
 hour; legitimate large events need causal evidence. Attribute Zig repairs with independent
 physics and a registered deviation; parity to broken legacy output is not scientific validation.
+Current F3 rejects nonfinite values on either side and has no reference-defect disposition.
+Use the [invalid-reference prerequisite](../../../ecosys-audit/qualification-evidence.md#invalid-legacy-reference)
+to resolve that contract gap after a proved reference defect; never rerun the same comparison
+expecting a DEV alone to change its result. Preserve valid-reference checks and complete coverage.
 
 For report/dependency schemas, readiness and suite accounting, use
 [qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.
