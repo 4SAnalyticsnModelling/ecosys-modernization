@@ -2,7 +2,16 @@
 
 1. Resume cycle 3: reconcile existing mineral-N patch and h4556 diagnostic receipts; reproduce
    parent failure from h4320; establish source-anchored cause and discriminating regression.
+   Use [numerical recovery](playbooks/convergence-and-balance.md) for classification. The recorded
+   -1.546e-9 g candidate versus 1.175e-19 g roundoff allowance is not a rounding-sized deficit;
+   reproduce the terms and fix supply/consumption. This is a historical signature, not a new verdict.
 2. Build a matched-state mineral-N oracle; map producer/exchange/consumer terms and floors.
+   For affected implicit paths, audit fixed scales, ZERO units, both signed defects, shared
+   supply, prompt zero/trace success and bounded recovery. Reconcile DEV-010 concentration-to-
+   inventory conversion and runtime/F2 normalization before claiming near-zero qualification.
+   Audit nonfinite/domain hazards and finite spike/reversal behavior on that path, then shared
+   and dormant analogues. Require production guard tests and local per-interval admissibility;
+   retain invalid legacy evidence and repair Zig causes with attributed differences.
 3. Keep the active tooling suite green; address remaining Zig science-test failures and
    issue-110 follow-up branch coverage. Recheck recorded results; do not treat stale lists as facts.
 4. Regenerate the complete legacy baseline with current compiler/input hashes; preserved manifest

@@ -14,5 +14,12 @@ Populate `audit/traceability/bindings.csv` and `audit/output-provenance.csv` fro
 Capture matched boundary states to expose stale/duplicate writes. Test nonzero and absent
 inputs, reset/year boundaries and complete restart. Invalidate every dependent output check.
 
+Follow [numerical recovery](../../../.agent/playbooks/convergence-and-balance.md) for nonfinite
+or spiking fields. Reject invalid input/restart numbers before use; defaults apply only to
+documented absence, never malformed/NaN values. Trace the earliest bad producer, units, lag,
+reset or duplicate transfer. Validate finite/admissible state before atomic output/checkpoint
+commitment, including ReleaseFast; failures must retain the last valid checkpoint and exit
+explicitly. A next-hour correction cannot validate the preceding invalid state.
+
 For report/dependency schemas, readiness and suite accounting, use
 [qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

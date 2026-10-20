@@ -7,6 +7,12 @@ Start with `AGENTS.md`. Authority: `.agent/protocol.md`. Work order:
 `ecosys-ng_ottawa_qualification_execution_plan.md`. One autonomous model makes all decisions;
 separate verification uses measured evidence. No human approval or elapsed execution deadline.
 
+For numerical edge cases use [the recovery playbook](.agent/playbooks/convergence-and-balance.md):
+prompt validated zero/trace handling, conservative signed-balance repairs and bounded nonlinear
+recovery, production NaN/Inf rejection and physically validated hourly transitions. Unrecoverable
+invalid states stop explicitly; next-hour compensation cannot excuse them. The execution plan
+and skills apply the same scientific acceptance rules.
+
 ```sh
 ./scripts/project.sh pickup
 ./scripts/project.sh supervise --config .agent/worker.json

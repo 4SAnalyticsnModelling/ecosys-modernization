@@ -14,6 +14,13 @@ Reuse hash-valid evidence; invalidate dependent checks after state/order/I/O cha
 full source scope while auditing Ottawa-critical paths first. During long jobs do cheap audit
 work. The same model decides architecture/science from reproduced evidence without approval.
 
+Numerical edge-case work follows [the recovery playbook](../../../.agent/playbooks/convergence-and-balance.md)
+on the current failing path before broader solver changes. Require prompt zero/trace success,
+signed/cumulative conservation, admissibility and bounded recovery evidence. Reconcile runtime
+and F2 raw acceptance rules; unresolved ZERO conversions or exception/DEV claims remain gaps.
+Include production nonfinite/domain rejection and per-interval spike/admissibility coverage.
+Trace related hazards across shared/dormant paths; keep fixes ahead of performance tuning.
+
 For report/dependency schemas, readiness and suite accounting, use
 [qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.
 

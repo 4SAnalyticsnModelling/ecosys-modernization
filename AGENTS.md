@@ -14,3 +14,11 @@ Zig 0.17.x only. `f77src/`, `f77example/`, `ecosys-ng-prod-examples/` are read-o
 Use `f77query.py` for Fortran. Never loosen scientific gates, invent evidence, publish an
 unclosed ledger or silently change physics. Keep instructions and handoffs brief; receipts
 and source locations hold details. Skills are canonical in `.agents/skills/`.
+
+For near-zero values, signed balance defects, negative pools or nonlinear stalls, follow
+[the numerical recovery playbook](.agent/playbooks/convergence-and-balance.md). Resolve benign
+edge cases with bounded work and no false errors; preserve accuracy, all acceptance gates and
+cumulative accounting. Diagnose the cause before changing a scale, floor or solver path.
+Reject NaN/Inf, impossible pools and unexplained spikes before commitment, also in ReleaseFast.
+Use bounded private-trial recovery or an explicit fatal error; never silently propagate bad
+numbers or excuse an invalid hour because the next hour compensates. Fix legacy hazards in Zig.

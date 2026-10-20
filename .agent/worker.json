@@ -3,7 +3,7 @@
   "command": [
     "dsh",
     "headless",
-    "Read AGENTS.md and .agent/protocol.md. Read .agent/runtime/recovery.json first; reconcile existing edits, interrupted operations and live jobs. Resume the open cycle, decide from evidence without human approval and continue to verified F1-F7. Do not repeat a failed scientific run unchanged."
+    "Read AGENTS.md and .agent/protocol.md. Read .agent/runtime/recovery.json first; reconcile existing edits, interrupted operations and live jobs. Resume the open cycle, decide from evidence without human approval and continue to verified F1-F7. Do not repeat a failed scientific run unchanged. For near-zero values, signed balance defects, negative pools or nonlinear stalls, follow .agent/playbooks/convergence-and-balance.md: resolve benign cases promptly with bounded work while preserving all scientific gates and cumulative accounting. Prevent NaN/Inf and physically invalid finite spikes before commitment, including ReleaseFast. Use valid bounded private-trial recovery or a contextual fatal simulation error; never silent propagation or next-hour repayment. Fix and attribute analogous legacy hazards in Zig."
   ],
   "recovery_command": [],
   "backoff_initial_seconds": 1,

@@ -15,5 +15,10 @@ executable-byte nondeterminism. Full-state restart covers clocks, management, la
 cumulative/output and solver state; reject incompatible/truncated checkpoints atomically.
 Prepare reproducible manifest/commands; publish only the verified cycle to origin/main.
 
+For [numerical safety](../../../.agent/playbooks/convergence-and-balance.md), record actual
+floating-point modes/backend flags and prove finite/domain guards using runtime fault inputs
+in the production executable. Debug assertions or a safety-build pass alone are insufficient.
+Corrupt/nonfinite restart rejection must be atomic and preserve the last valid checkpoint.
+
 For report/dependency schemas, readiness and suite accounting, use
 [qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

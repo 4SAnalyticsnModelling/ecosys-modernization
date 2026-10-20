@@ -8,6 +8,7 @@ Choose the next unblocked task by prerequisite value and information gained per 
 |---|---|---|
 | 1 | Reconcile cycle 3, existing N patch, h4320 checkpoint and h4556 failure | Parent replay, exact signature, owned diff, ruled-out hypotheses |
 | 2 | Mineral-N matched-state legacy oracle and minimal regression | Supply/consumption terms, floors, update order and units mapped to legacy lines |
+| 2a | Affected numerical recovery and finite-state contract | Minimal cases; fixed scales/units; signed/cumulative closure; prompt bounded benign recovery; production NaN/Inf/domain rejection; physically explained per-interval transitions |
 | 3 | Active tooling/test baseline and reusable event replays | Zero unexplained active failures; both Zig roots accounted for |
 | 4 | Reproducible complete legacy Ottawa baseline | Exact compiler/flags/deck hashes, final time and output inventory |
 | 5 | Output dictionary and state-binding register | Every required field has producer, units, time support, conversion and comparison rule |
@@ -20,6 +21,33 @@ Use kernel/one-step → coupling → event replay → full suite → campaign. N
 30-year deck to answer a local question. Capture failed states as reusable fixtures. Cross-revision
 replays are diagnostic; final evidence requires a strict single-binding trajectory from hour 0.
 Background campaigns may coexist with cheap source/output audit, never duplicate full runs.
+
+For zero/trace states, signed outstanding balances, negative pools and Newton/Anderson edge
+cases, follow [numerical recovery](.agent/playbooks/convergence-and-balance.md). Prioritize the
+current failing path, then apply demonstrated repairs to shared infrastructure and affected
+callers. Do not replace cycle 3 with a speculative solver rewrite. Record raw residual versus
+scale/noise, floor branches, shared-pool accounting and evaluation counts; validate prompt
+benign success and rejection of real defects before an event replay. An inactive exact state
+should finish through normal gates without Jacobian work. A nonzero incoming source must be
+handled even when its receiving pool starts at zero.
+
+Deliver one unit-aware policy with distinct process thresholds, solver convergence, physical
+bounds and independent conservation. Reconcile concentration-to-inventory conversions (including
+DEV-010), fixed search references, runtime versus F2 raw rules, signed/absolute cumulative
+defects and total nested recovery budgets. This plan establishes no numeric tolerance. Freeze
+scientific allowances from evidence before qualification; efficient edge-case recovery must
+preserve them. Local evaluation counts diagnose wasted numerical work while F1–F5 are incomplete.
+
+Inventory legacy and modern hazards from inputs/restarts through state/solver to outputs, with
+source anchors, failure fixture and repair/test disposition; include analogous dormant paths.
+Fix nonfinite generation/propagation and physically invalid finite excursions in Zig, not in
+the protected reference. Verify runtime-supplied NaN/Inf/domain/overflow faults in production,
+atomic rejection and fatal nonzero exit when bounded private-trial recovery is impossible.
+Demonstrate that negative pools and invalid hourly spike/reversal pairs fail even when totals
+close, while causally justified large events pass. Use units, supply/capacity, enthalpy and
+forcing to derive bounds, not literal magnitude caps. Attribute valid departures from a broken
+legacy oracle; preserve its bad rows as evidence. This is required science/safety work, not an
+optional performance tradeoff or permission to relaunch unchanged failures.
 
 Before each experiment record hypothesis, falsifier, binding and simulated window. After it
 record result and next action. Three unproductive experiments require a smaller reproducer or

@@ -48,6 +48,17 @@ signal to resume, not proof of scientific advancement; review the falsifier and 
 A worker must diagnose an unchanged scientific failure on its first occurrence. Do other
 unblocked work before waiting. Planning prose and new filenames do not clear the guard.
 
+Route near-zero, positive/negative balance, negative-pool and Newton failures through
+[numerical recovery](../../.agent/playbooks/convergence-and-balance.md). Solver attempt/recovery
+budgets bound numerical work inside the worker; supervisor restart must not reset them into an
+unchanged experiment. Capture a minimal diagnostic state, fix the cause and verify prompt benign
+success with physical closure. An iteration cap is not an infrastructure outage. Numerical-work
+limits do not authorize killing a healthy process for elapsed time or accepting its last iterate.
+Nonfinite/domain or physically invalid-state exits are scientific failures too. Preserve their
+first-cause evidence and last valid checkpoint; repair the Zig cause before rerun. Explicit
+simulation failure is required when valid recovery is impossible, and must not be swallowed by
+the worker/supervisor or converted into successful publication by a later compensating hour.
+
 `recovery_command` is an optional **read-only** external-prerequisite probe, run only while
 waiting. It must complete promptly and emit JSON `{ready: true, identity: "stable-resource-id"}`
 when a real prerequisite becomes available. The identity describes that resource/configuration,

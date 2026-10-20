@@ -14,6 +14,14 @@ scientifically justified comparable outputs. Intentional improvements require ev
 bit-for-bit agreement is not required for justified differences. Only after F1–F5 pass,
 optimize ReleaseFast to beat optimized Fortran and revalidate the final candidate's science.
 
+For zero/trace pools, signed outstanding balances, negative pools and implicit-solver failures,
+use [the numerical recovery playbook](.agent/playbooks/convergence-and-balance.md). Make benign
+cases finish promptly without false errors; diagnose real defects and preserve all physical
+gates. Legacy warning-and-rebase behavior does not authorize unresolved modern states.
+Prevent NaN/Inf, impossible pools and unexplained spikes in accepted states and outputs, including
+ReleaseFast. Recover valid private trials within budget; otherwise stop with a contextual error.
+Next-hour compensation cannot excuse an invalid hour. Fix and attribute analogous legacy defects.
+
 Work autonomously through focused experiments, fixes, relevant tests and separate verification.
 Use the relevant canonical skills and `project.sh exec` for logged heavy work. Follow runtime
 readiness requirements before enabling unattended supervision. Never weaken scientific gates

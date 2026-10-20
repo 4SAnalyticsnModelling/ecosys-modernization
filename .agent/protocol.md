@@ -70,6 +70,31 @@ Register intentional differences in `audit/intentional-deviations.md`: legacy me
 numbers/units, parity impact, tests and retirement/equivalence. Decide from evidence;
 unexplained drift stays failed. Replacement physics needs separate predeclared envelopes.
 
+Near-zero/signed-balance/negative-pool or Newton/Anderson failures follow
+[the numerical recovery playbook](playbooks/convergence-and-balance.md). Accuracy and prompt
+progress are joint requirements: validated zero/trace cases finish without spurious errors;
+real defects require repair. Keep process ZERO floors, solver allowances, conservation rules
+and arithmetic uncertainty distinct and unit-correct. Freeze meaningful solve references;
+estimate rounding from operands, not the tiny residual. Check both residual signs and local,
+global and cumulative ledgers; no rebasing, phantom source/sink or balancing reservoir.
+Resolve shared-pool consumption conservatively. Accept as soon as every required gate passes;
+bound nested evaluations/recovery and restore rejected trials. A cap, tiny step or legacy
+completion proves no convergence. Existing exceptions/DEV labels require current evidence.
+Repair false rejection on a captured minimal state before another campaign; never widen
+scientific tolerances or raise ceilings merely to proceed. Numerical uncertainty larger than
+the scientific budget is INCONCLUSIVE until formulation/precision is repaired.
+
+Never accept or propagate NaN/Inf, impossible pools or unexplained physical excursions.
+Validate finite/domain conditions before comparisons/reductions and state/I/O commitment,
+including production ReleaseFast. Invalid private solver probes may recover transactionally
+within the existing budget; bad input/committed state or unrecoverable failure requires a
+contextual error and nonzero simulation exit, preserving the last valid checkpoint. No
+warning-only continuation, number substitution or later-hour repayment. Finite, globally
+balanced states still need local pool/supply/energy/constitutive checks every accepted interval.
+Large heat/flux values require units, reference and forcing evidence, not arbitrary caps.
+Trace and fix analogous legacy hazards in Zig with registered, tested deviations; preserve
+invalid legacy outputs as evidence rather than treating them as targets to reproduce.
+
 ## Execution and recovery
 Use `project.sh exec` for heavy work: contained cwd/caches, argv, toolchain/process identity,
 logs/receipts. Zig build uses `--cache-dir .zig-cache` and ZIG_GLOBAL_CACHE_DIR, never

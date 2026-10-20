@@ -15,5 +15,14 @@ Show local correctness, downstream impact and independent conservation. If rules
 change, validate held-out cases; never widen rules simply to encompass observed failure.
 The model decides and records mechanism, numbers, affected outputs and retirement/equivalence.
 
+For [numerical recovery](../../../.agent/playbooks/convergence-and-balance.md), show whether
+changed scales affect only search or also accepted states. A legacy ZERO floor cannot justify
+a new balance allowance without unit conversion and measured impact. Joint consumer limits,
+phase treatment and temporary explicit subcycles require attributed science/output differences;
+fewer iterations or legacy completion alone does not establish equivalence.
+When legacy produces nonfinite or physically invalid finite values, retain the failing oracle
+evidence, derive a valid modern behavior independently and attribute the repair. Do not copy
+the defect, hide affected rows or claim scientific equivalence solely from later net balance.
+
 For report/dependency schemas, readiness and suite accounting, use
 [qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

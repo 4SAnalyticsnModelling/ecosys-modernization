@@ -13,3 +13,9 @@ Check limiting factors, competition for shared pools and equal/opposite transfer
 matched-state kernel → coupling tests with independent conservation. Preserve actual variants;
 do not substitute textbook equations. Map intentional differences to measured feature/DEV
 dossiers. Finish with no unexplained terms and a separate numerical re-derivation.
+
+Apply [numerical recovery](../../../.agent/playbooks/convergence-and-balance.md) to threshold
+crossings and supply exhaustion. Distinguish working-concentration floors from pool mutation
+and stopping tolerances; convert through the actual carrier volume/mass and area. Audit joint
+consumer demand and both signs of unmatched transfers. Legacy warn/rebase or negative state
+is evidence to explain, not a modern acceptance rule; corrections need causal attribution.

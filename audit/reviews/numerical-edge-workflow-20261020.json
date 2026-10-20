@@ -1,0 +1,380 @@
+{
+  "schema_version": 1,
+  "purpose": "Documentation, worker prompt and skill guidance maintenance only; no runtime/science implementation or Ottawa qualification",
+  "base_commit": "c23ae1c5e6e7c1858ed91d96f36d14f8e847be4f",
+  "implementation": [
+    {
+      "path": ".agent/README.md",
+      "sha256": "3e13c50360aa9bc15f5c4dff662e045d2e11f494c9007d5ec16ef90d013222f2"
+    },
+    {
+      "path": ".agent/backlog.md",
+      "sha256": "133c2ae953e3f3f7de3b7808008eab2e08e5af5613fd8dc413c577afbfedf0a8"
+    },
+    {
+      "path": ".agent/briefs/verifier.md",
+      "sha256": "e4c486625461badc4864135666f7c4d3f862ca456918f3926c8dbe69147c36bf"
+    },
+    {
+      "path": ".agent/continuous-autonomy.md",
+      "sha256": "518c829b1a6229ddd90bd6b4516e70125c8f2dc5141fdc7d183430634165512e"
+    },
+    {
+      "path": ".agent/playbooks/convergence-and-balance.md",
+      "sha256": "0c427ba803a8dc013ad2bd3d7700efc53276e55de1bb5a8bc41f9090d76bbcee"
+    },
+    {
+      "path": ".agent/protocol.md",
+      "sha256": "e0a201c614fd55b2bce04f660904e52c47e166812465927ee857ef2d2371bdf1"
+    },
+    {
+      "path": ".agent/state.md",
+      "sha256": "068ee4c2fa6b368b23e3dc0416fb4e004e80e6f4c10dad3d7581ac0e754e1045"
+    },
+    {
+      "path": ".agent/templates/cycle.md",
+      "sha256": "453d296eef1486131f926513950df34486e20e3b332d26f757e94109f983274c"
+    },
+    {
+      "path": ".agent/worker.json",
+      "sha256": "d8faa44941113ae0370ff27ae5914d4d73b34b1f65c688178d65713b9566f728"
+    },
+    {
+      "path": ".agents/skills/ecosys-autonomous-orchestration/SKILL.md",
+      "sha256": "6971dad63d2baf00173458277fd1368cb33cdf72480272b2a2e661ec4463dcdc"
+    },
+    {
+      "path": ".agents/skills/ecosys-build-reproducibility/SKILL.md",
+      "sha256": "250d9bf2a1e60e91b12ca0ff36ca3cbdad1b0a7a68f26d72cff2a9204b0df9ab"
+    },
+    {
+      "path": ".agents/skills/ecosys-conservation-audit/SKILL.md",
+      "sha256": "2d2eb44ec52f1dd04043704ff7a38d11ed6da599ad99e04d9722ee84b54b476c"
+    },
+    {
+      "path": ".agents/skills/ecosys-divergence-diagnosis/SKILL.md",
+      "sha256": "c776732cd6af5d040b1a82388b8782bd5057f73b4f43b8b9b93eaa78b4cab4e7"
+    },
+    {
+      "path": ".agents/skills/ecosys-feature-attribution/SKILL.md",
+      "sha256": "07edae7a0836c8f1845d725108d9d6e9fa2ea2d8c5b4b75296eb40fab4745bba"
+    },
+    {
+      "path": ".agents/skills/ecosys-fortran-zig-traceability/SKILL.md",
+      "sha256": "8f0c92c573ed9898bcb8f6ed9fb523c15c265bafe5be9fd0dd2f3cca9017ace1"
+    },
+    {
+      "path": ".agents/skills/ecosys-nonlinear-solver-audit/SKILL.md",
+      "sha256": "48fbea4834c913977eed4eb2bd29b9bbc7d81678f655864c64225d0c026a04c3"
+    },
+    {
+      "path": ".agents/skills/ecosys-output-comparison/SKILL.md",
+      "sha256": "29e1852069571cb233d24726cb5a6afee10760bf4a7ab36738d9a1e086176fe3"
+    },
+    {
+      "path": ".agents/skills/ecosys-process-science-parity/SKILL.md",
+      "sha256": "6d8fb660c8a2303d497311fe7b9137b04be9df7a26f3af454ca2b3e86a28cfac"
+    },
+    {
+      "path": ".agents/skills/ecosys-release-orchestrator/SKILL.md",
+      "sha256": "e4bc27d3f8191840919fac05ccde4a17539bf7f188714150b572c0cf65f87ab3"
+    },
+    {
+      "path": ".agents/skills/ecosys-release-verification/SKILL.md",
+      "sha256": "142884ca230fd7b91e565d4cafddbdeb4d0fad5c7c76bbb562cc24352e9bd4a2"
+    },
+    {
+      "path": ".agents/skills/ecosys-state-io-bindings/SKILL.md",
+      "sha256": "4a8480f8e916a8d6b57596be8f1597c1df6a6717dad35c22afef4c4c68f40ff3"
+    },
+    {
+      "path": ".agents/skills/ecosys-validation-tests/SKILL.md",
+      "sha256": "b51ba406c3f7104bd887adac15bbc4ca3e99a8701f6712d13bb0dc6f50d7e86d"
+    },
+    {
+      "path": ".agents/skills/ecosys-zig-safety-design/SKILL.md",
+      "sha256": "ef6bb619645a26f326b882bee11d92bbffd9257684ddf9ef8ea2e07232f46427"
+    },
+    {
+      "path": ".claude/skills/ecosys-autonomous-orchestration/SKILL.md",
+      "sha256": "6971dad63d2baf00173458277fd1368cb33cdf72480272b2a2e661ec4463dcdc"
+    },
+    {
+      "path": ".claude/skills/ecosys-build-reproducibility/SKILL.md",
+      "sha256": "250d9bf2a1e60e91b12ca0ff36ca3cbdad1b0a7a68f26d72cff2a9204b0df9ab"
+    },
+    {
+      "path": ".claude/skills/ecosys-conservation-audit/SKILL.md",
+      "sha256": "2d2eb44ec52f1dd04043704ff7a38d11ed6da599ad99e04d9722ee84b54b476c"
+    },
+    {
+      "path": ".claude/skills/ecosys-divergence-diagnosis/SKILL.md",
+      "sha256": "c776732cd6af5d040b1a82388b8782bd5057f73b4f43b8b9b93eaa78b4cab4e7"
+    },
+    {
+      "path": ".claude/skills/ecosys-feature-attribution/SKILL.md",
+      "sha256": "07edae7a0836c8f1845d725108d9d6e9fa2ea2d8c5b4b75296eb40fab4745bba"
+    },
+    {
+      "path": ".claude/skills/ecosys-fortran-zig-traceability/SKILL.md",
+      "sha256": "8f0c92c573ed9898bcb8f6ed9fb523c15c265bafe5be9fd0dd2f3cca9017ace1"
+    },
+    {
+      "path": ".claude/skills/ecosys-nonlinear-solver-audit/SKILL.md",
+      "sha256": "48fbea4834c913977eed4eb2bd29b9bbc7d81678f655864c64225d0c026a04c3"
+    },
+    {
+      "path": ".claude/skills/ecosys-output-comparison/SKILL.md",
+      "sha256": "29e1852069571cb233d24726cb5a6afee10760bf4a7ab36738d9a1e086176fe3"
+    },
+    {
+      "path": ".claude/skills/ecosys-process-science-parity/SKILL.md",
+      "sha256": "6d8fb660c8a2303d497311fe7b9137b04be9df7a26f3af454ca2b3e86a28cfac"
+    },
+    {
+      "path": ".claude/skills/ecosys-release-orchestrator/SKILL.md",
+      "sha256": "e4bc27d3f8191840919fac05ccde4a17539bf7f188714150b572c0cf65f87ab3"
+    },
+    {
+      "path": ".claude/skills/ecosys-release-verification/SKILL.md",
+      "sha256": "142884ca230fd7b91e565d4cafddbdeb4d0fad5c7c76bbb562cc24352e9bd4a2"
+    },
+    {
+      "path": ".claude/skills/ecosys-state-io-bindings/SKILL.md",
+      "sha256": "4a8480f8e916a8d6b57596be8f1597c1df6a6717dad35c22afef4c4c68f40ff3"
+    },
+    {
+      "path": ".claude/skills/ecosys-validation-tests/SKILL.md",
+      "sha256": "b51ba406c3f7104bd887adac15bbc4ca3e99a8701f6712d13bb0dc6f50d7e86d"
+    },
+    {
+      "path": ".claude/skills/ecosys-zig-safety-design/SKILL.md",
+      "sha256": "ef6bb619645a26f326b882bee11d92bbffd9257684ddf9ef8ea2e07232f46427"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "462d893a4e7b8dacf4eed8db3f62824eb789d40e3b4fe92d4f7b7df4c7cebb0f"
+    },
+    {
+      "path": "PROMPT.md",
+      "sha256": "91f11a4a03914dac6635ced2fdeb77ce0cab2f410a533a9c96a17ab57ebce85a"
+    },
+    {
+      "path": "README.md",
+      "sha256": "169ef6cad920c27b62d93e7694f4953b86115acdcf4dcdfff1383ba453be91db"
+    },
+    {
+      "path": "ecosys-audit/EVIDENCE_GUIDE.md",
+      "sha256": "e7a6065a0eb3e27ee3dd2bf1a881cf119dcce654ce5166163cc875b9bf861299"
+    },
+    {
+      "path": "ecosys-audit/PROJECT_CONTRACT.md",
+      "sha256": "f9f824a6a944937172f8892f0d1ba78c5ce26df58543d464f9754d27021b39f5"
+    },
+    {
+      "path": "ecosys-audit/qualification-evidence.md",
+      "sha256": "4ba76572334bf5ba2a562f28840d7fa47b85f3e09f0d6322b2c9d193260438bf"
+    },
+    {
+      "path": "ecosys-audit/skill_index.json",
+      "sha256": "80e779bc1b98f5dc29a4469ebb3c588d4c13e50f39ece4f7a2daf6a0c8252cfb"
+    },
+    {
+      "path": "ecosys-ng_ottawa_qualification_execution_plan.md",
+      "sha256": "aa851fab3d2b095738997f592f8a0cb2d43fa4e9ac68652d193e206fdd0e692b"
+    },
+    {
+      "path": "tools/autonomy/README.md",
+      "sha256": "c1c02148dda32491f6a91e9c188d50ceff14a1df9644b350dcfe6e02e0da0b69"
+    },
+    {
+      "path": "validation/README.md",
+      "sha256": "47a65cc7892cd326e13778676af429edd38c4e8888f79a70db65ba28ae835aaa"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/document-check/receipt.json",
+      "sha256": "bd89b95e1babea5a9a91eadf3178f30e3efcbc9f224537c9607cdcf974fc9236"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/document-check/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/document-check/stdout.log",
+      "sha256": "fc615c7440ad7482dbec7e837130dc5b82010a6bcb0a5b2364bc25a8705b8eab"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/final-document-check/receipt.json",
+      "sha256": "546fadf75bad2f1d99a64acacac4a82fd4799b7cb099bf44a5b540151c1edc32"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/final-document-check/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/final-document-check/stdout.log",
+      "sha256": "fc615c7440ad7482dbec7e837130dc5b82010a6bcb0a5b2364bc25a8705b8eab"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/final-skill-validation/receipt.json",
+      "sha256": "8a05d8f2a5e98df0b698f67f983577d6fa6403a2167560bc09918a15aff0db9f"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/final-skill-validation/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/final-skill-validation/stdout.log",
+      "sha256": "7524a420fcb5efc730fa32c5ab89f7a004dd4fb98ec53fc3be68e56b286a82c8"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/review-document-check/receipt.json",
+      "sha256": "e0b9d8c29d367689f22c4e83c03cdf788e24f606269c7e146b485ecb6269bd23"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/review-document-check/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/review-document-check/stdout.log",
+      "sha256": "fc615c7440ad7482dbec7e837130dc5b82010a6bcb0a5b2364bc25a8705b8eab"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/skill-validation/receipt.json",
+      "sha256": "52cf57a1cb7e4c51538e8fbf4e47fe2822878fc26a98b747ac8f4b2ece00004e"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/skill-validation/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/skill-validation/stdout.log",
+      "sha256": "a34d0fcb5e5b450b288c0ce489023b362b6fe93dd8840ae19a9b5fc7250e8774"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/tooling-reassessment/receipt.json",
+      "sha256": "925ab62f88d780a574aaf8d84049ae211cb60cd2c1eb8051eab4243b2dc14baa"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/tooling-reassessment/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/tooling-reassessment/stdout.log",
+      "sha256": "5ba10ab8931e485829645d26ae85b58af97593717f1ea67711a2c587ae695dcc"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/tooling/command/receipt.json",
+      "sha256": "c641d92ba88ded3cd34eb8c154d613ea1655a377a84ccf7deeae142980142c04"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/tooling/command/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/tooling/command/stdout.log",
+      "sha256": "dbe8d7acab3ea9660eb354192351eda7248812a2a6b0db742a1a5c7459b4fcba"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/tooling/junit.xml",
+      "sha256": "d7e7aa2c3b10a126ff411d822721792d56ad756baf54c8828aae95ce25923a4b"
+    },
+    {
+      "path": "audit/runs/nearzero-workflow-20261020/tooling/result.json",
+      "sha256": "e71be42edc76452ab7dffb5bc9e7b10538927c4493771ee0ad066197b527fa3e"
+    }
+  ],
+  "artifact_retention": "All listed compact receipts, logs and JUnit/result artifacts are included in this maintenance commit; no binaries or caches are staged.",
+  "validation": {
+    "document_consistency": {
+      "path": "audit/runs/nearzero-workflow-20261020/review-document-check/receipt.json",
+      "sha256": "e0b9d8c29d367689f22c4e83c03cdf788e24f606269c7e146b485ecb6269bd23"
+    },
+    "canonical_skills": {
+      "passed": 14,
+      "receipt": {
+        "path": "audit/runs/nearzero-workflow-20261020/final-skill-validation/receipt.json",
+        "sha256": "8a05d8f2a5e98df0b698f67f983577d6fa6403a2167560bc09918a15aff0db9f"
+      },
+      "aliases": "synchronized; no drift in final document check"
+    },
+    "tooling": {
+      "result": {
+        "path": "audit/runs/nearzero-workflow-20261020/tooling/result.json",
+        "sha256": "e71be42edc76452ab7dffb5bc9e7b10538927c4493771ee0ad066197b527fa3e"
+      },
+      "counts": {
+        "executed": 122,
+        "failed": 0,
+        "selected": 122,
+        "skipped": 0
+      },
+      "final_reassessment": {
+        "path": "audit/runs/nearzero-workflow-20261020/tooling-reassessment/receipt.json",
+        "sha256": "925ab62f88d780a574aaf8d84049ae211cb60cd2c1eb8051eab4243b2dc14baa"
+      },
+      "reuse_reason": "Suite dependencies unchanged; raw counts and hashes reassessed after final instructions. Final document/skill checks cover revised guidance."
+    },
+    "whitespace": "git diff --check passed",
+    "science_suite_run": false,
+    "worker_launched": false,
+    "new_runtime_fault_tests": false
+  },
+  "review": {
+    "method": "Separate requirements and scenario walkthrough by the same model in the same context; not independent-model verification or executed simulation fixtures",
+    "conclusion": "Guidance covers requested benign progress and failure containment without new numeric tolerances or claims of implemented protection.",
+    "walkthroughs": [
+      "Exact inactive zero uses ordinary gates and returns promptly; zero with incoming supply still solves; a zero allowance never causes 0/0 normalization.",
+      "Vanishing residual/iterate cannot shrink the frozen search reference indefinitely; operation error uses pre-cancellation magnitudes, not residual fitting.",
+      "Positive/negative outstanding defects are checked symmetrically; no rebasing, phantom transfer or balancing reserve.",
+      "Small positive trace pools remain meaningful; negative actual pools require coupled conservative supply repair, not silent clipping.",
+      "Concentration floors convert through their carrier and area; process floors, solve tolerances, conservation and rounding remain distinct.",
+      "Per-interval passes cannot hide cumulative signed drift or absolute local defects; nested scopes do not double-count the same transfer.",
+      "All valid acceptance gates end work promptly, including the last allowed iteration; nested recovery counts against a finite total budget.",
+      "NaN/Inf is checked before comparisons/reductions; finite operands can overflow; private invalid probes cannot contaminate history or accepted state.",
+      "Invalid inputs/committed states stop explicitly; unrecoverable trials exit nonzero, roll back and preserve the last valid checkpoint.",
+      "Production runtime-supplied fault tests must prove guards; debug assertions and optimized floating assumptions cannot substitute for them.",
+      "A finite negative phosphorus pool fails even with global closure; an invalid hourly spike cannot be repaid by the next hour.",
+      "Large soil heat is judged by units/reference/enthalpy/forcing, not a universal magnitude cap; legitimate events must pass.",
+      "Legacy defects are retained as invalid oracle evidence, repaired in Zig and attributed through independent physics and DEV records, including analogous dormant paths."
+    ],
+    "historical_examples": "h4556 deficit and user-reported phosphorus/heat excursions are diagnostic leads, not reproduced or newly qualified by this maintenance."
+  },
+  "preservation": {
+    "files": [
+      {
+        "path": "ecosys-ng/src/soil/nutrients/nitrogen_state_update.zig",
+        "sha256": "6c2ac0c78628a1d0bf5f9cdea6c6d4e815cf21986693a889f1dd2c4f2d690fd6"
+      },
+      {
+        "path": ".agent/cycle.json",
+        "sha256": "70a32ec84ea6ff5b638a86c3565cee02a9205cf53566d37f1efddb13d8318138"
+      },
+      {
+        "path": ".agent/frontier.json",
+        "sha256": "4f042e216a76ba882ca9a209b2ba31aae1d8e1c2298f0f50033bb3871671325d"
+      },
+      {
+        "path": ".agent/cycles/cycle_00003.md",
+        "sha256": "031ee7dcaad4a3749a732716c0f070e2cbb381877149b153e943257451246128"
+      },
+      {
+        "path": ".tmp-state-chunk.txt",
+        "sha256": "9e0ea7304a0f714e2c5d792f6d4038d4fdcd5f0e25f8b18d5de81f0656af52ab"
+      }
+    ],
+    "match_prior_maintenance_hashes": true,
+    "protected_and_numeric_rule_diff_empty": true,
+    "dirty_science_patch_excluded": true,
+    "active_cycle_and_frontier_unchanged": true,
+    "deployment_still_unqualified": true
+  },
+  "limits": [
+    "No numerical tolerance changed.",
+    "No schema fields or runtime guards implemented.",
+    "Python tooling results do not validate ecosys-ng physics or the existing dirty science patch.",
+    "F1-F7 remain unqualified; this maintenance does not close cycle 3 or promote the frontier."
+  ]
+}

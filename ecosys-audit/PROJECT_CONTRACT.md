@@ -16,6 +16,19 @@ Never loosen tolerances, raise ceilings to pass, clamp after solve, silently ret
 forge success, or publish unclosed states. Register intentional changes with mechanism,
 source references, measured impact and retirement/equivalence decision.
 
+Use [numerical recovery](../.agent/playbooks/convergence-and-balance.md) for near-zero values,
+signed outstanding balances, negative pools and nonlinear stalls. Benign edge cases must
+advance promptly without false errors through all scientific gates. Keep process floors,
+solver criteria, arithmetic uncertainty and conservation rules distinct; preserve both signed
+and absolute cumulative defects. Surplus/deficit bookkeeping never authorizes a physical
+source, sink, balancing reserve or rebase. Corrections must close the responsible transfers.
+Prevent NaN/Inf and physically invalid finite states at their origin and before commitment,
+including ReleaseFast. Reject invalid private probes transactionally within budget; bad input/
+committed state or unrecoverable failure must stop with context and nonzero exit. No silent
+replacement numbers, warning-only success or next-hour compensation. Check per-interval local
+admissibility and explain large transitions with units, supply/energy and forcing. Repair and
+attribute analogous legacy vulnerabilities in Zig while retaining invalid oracle evidence.
+
 Scientific accuracy, complete translation/bindings and comparable full Ottawa outputs (F1–F5)
 precede runtime optimization. Speed has no acceptance value while any of those fails.
 

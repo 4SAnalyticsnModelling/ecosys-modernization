@@ -9,6 +9,12 @@ for current state and `exec` for logged heavy commands. One model decides; no hu
 Run `./scripts/project.sh pickup`; reconcile jobs, dirty edits and the open cycle before sync.
 Choose one falsifiable target from the execution plan/backlog. Record its falsifier and smallest
 experiment. Use `cycle_runner.py open|gate|gates|close` through `scripts/project.sh`.
+For near-zero, signed-balance, negative-pool or solver failures route immediately to
+[numerical recovery](../../../.agent/playbooks/convergence-and-balance.md). Resolve benign cases
+promptly on a captured kernel; keep failed scientific trials private and diagnose their cause.
+Do not restart a bounded nonconvergence as a worker crash or reset its budget unchanged.
+Nonfinite or impossible-state exits require the same causal repair. Preserve the last valid
+checkpoint; never resume from contaminated state or repeat an unchanged scientific crash.
 Run focused → coupling → event → full checks according to changed dependencies. Re-derive
 separately for G7, preferably in fresh sequential context of the same model. Fix/revert a
 reproduced FAIL. Record next action; stage owned paths, commit/push, continue.

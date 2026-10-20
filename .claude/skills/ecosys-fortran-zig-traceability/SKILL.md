@@ -15,5 +15,11 @@ Write stable unit/binding IDs and source hashes in `audit/traceability/`. Separa
 mapping, reviewed semantics and executed tests. An unresolved disposition blocks release.
 Validate unchanged kernels with matched-state regressions and separately derive the result.
 
+For [numerical hazards](../../../.agent/playbooks/convergence-and-balance.md), inventory unsafe
+domains, nonfinite propagation, impossible states and transient spike/reset paths in legacy and
+their Zig counterparts. Include shared/dormant paths with source, repair/DEV and test disposition.
+Traceability requires explaining and correcting demonstrated defects, never blindly preserving
+them; keep invalid legacy behavior as evidence and independently validate the Zig replacement.
+
 For report/dependency schemas, readiness and suite accounting, use
 [qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

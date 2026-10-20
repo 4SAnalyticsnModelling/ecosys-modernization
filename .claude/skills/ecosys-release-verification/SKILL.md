@@ -15,5 +15,11 @@ from exit 0. Verify synthetic validators detect truncation, corrupt restart and 
 Write schema-2 finish evidence with structured F2–F6 reports and hash-bound F1–F7 checks to `.agent/finish.json`; `completion.py` must validate before
 supervision stops. If anything fails, choose the next falsifiable repair and continue autonomously.
 
+Apply [numerical recovery](../../../.agent/playbooks/convergence-and-balance.md): verify prompt
+benign near-zero completion, bounded recovery, signed/cumulative closure and production finite/
+domain checks. Require explicit failure before invalid state/output/checkpoint commitment.
+Inspect finite spike/reversal hours and local admissibility; net balance and legacy agreement
+cannot excuse physically invalid states. Retain and scientifically resolve broken oracle coverage.
+
 For report/dependency schemas, readiness and suite accounting, use
 [qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.

@@ -9,7 +9,7 @@
   },
   {
     "name": "ecosys-conservation-audit",
-    "description": "Independently verify local/global mass and energy budgets; use for balance failures and physical acceptance."
+    "description": "Verify local/global/cumulative conservation and both signs of near-zero balance defects; distinguish rounding, missing transfers and negative pools."
   },
   {
     "name": "ecosys-divergence-diagnosis",
@@ -25,7 +25,7 @@
   },
   {
     "name": "ecosys-nonlinear-solver-audit",
-    "description": "Audit Newton/Anderson residuals, bounds and transactional acceptance; use for stiff, oscillatory or rejected hours."
+    "description": "Diagnose near-zero scaling, Newton/Anderson stalls and bounds; validate prompt conservative recovery without false errors."
   },
   {
     "name": "ecosys-output-comparison",
@@ -65,6 +65,6 @@
   },
   {
     "name": "ecosys-zig-safety-design",
-    "description": "Review Zig ownership, error handling and ReleaseFast safety; use for refactors and production hardening."
+    "description": "Audit Zig ownership, NaN/Inf/domain guards, fatal error propagation and ReleaseFast safety; use for numerical hazards and production hardening."
   }
 ]

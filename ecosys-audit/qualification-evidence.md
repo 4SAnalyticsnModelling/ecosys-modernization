@@ -43,6 +43,43 @@ be established before qualification comparisons. DRAFT/exact defaults remain dia
 Replacement physics also needs predeclared envelopes and held-out benchmarks, beyond legacy
 agreement and conservation. This maintenance establishes no scientific acceptance thresholds.
 
+## Near-zero, signed-defect and finite-state rules
+
+The [numerical recovery playbook](../.agent/playbooks/convergence-and-balance.md) governs
+scientific interpretation. For an affected rule, retain a compact hashed derivation with its
+residual definition/sign, native units, exact reference-scale recipe, carrier volume/mass/area
+conversion, absolute/relative allowance, arithmetic uncertainty and cumulative budget. Separate
+process activation/floors, numerical search and final physical acceptance. No concentration ZERO
+literal automatically establishes a mass or area-normalized allowance. Existing DEV labels
+require current attribution; changing search scales must not silently change acceptance.
+
+Retain both residual signs, absolute local defects, worst locations and any numerical corrections
+through substeps, scene transitions and restart. Bounded roundoff is not an unmodeled source or
+sink. Independent local/global/cumulative ledgers and pool bounds must pass; legacy rebase or
+completion cannot discharge an outstanding defect. Include prompt benign zero/trace completion,
+incoming supply to an empty pool, cancellation, shared-consumer limits, injected defects of both
+signs, capped recovery and rollback in the affected evidence. Count evaluations as well as iterations.
+
+Require explicit finite/domain checks before reductions/comparisons and state/output/checkpoint
+commitment in production. Evidence includes runtime-injected NaN/both infinities, finite-input
+overflow and invalid domains; bounded rejection/recovery of private solver probes or fatal
+nonzero simulation exit; and unchanged last-valid state/checkpoint on failure. Guards must not
+depend on debug assertions or compiler assumptions that exclude the tested nonfinite values.
+Also test finite impossible pools and spike/reversal pairs against each interval's local
+supply/capacity/energy/constitutive bounds, even when global or two-hour ledgers close. Establish
+units, enthalpy reference and forcing before judging a large heat value; include a valid large
+event to discriminate from an arbitrary cap. Next-hour repayment never validates a bad hour.
+Preserve invalid legacy rows and coverage, and attribute Zig repairs with independent physics
+and registered deviations. Required comparisons remain assessed; invalid oracle data is not a
+license for silent exclusions or invented passing comparisons.
+
+These are scientific review requirements, not newly implemented JSON fields or validators.
+Put extra diagnostics in referenced artifacts; do not invent schema support or claim docs enforce
+runtime behavior. The F2 raw schema below currently uses old/new storage in its relative scale;
+runtime process checks can use interval activity. Compare the actual rules and require both to
+pass; reconcile inconsistent sensitivity in a separately tested science/validator change before
+qualification. Never drop the stricter check or silently adjust either rule to fit the candidate.
+
 ## Finish schema
 
 `finish.json` uses `schema_version=2`; retain existing F1/F7 fields and checks. Each F2–F6

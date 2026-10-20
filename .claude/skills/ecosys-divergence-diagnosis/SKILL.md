@@ -16,5 +16,15 @@ experiment's falsifier/result. Capture producer/exchange/consumer terms and crea
 regression. After three unproductive experiments reduce the state/window or change hypothesis.
 Close with legacy file:line cause, before/after numbers, coupling/conservation and separate review.
 
+For implicit-only stalls or near-zero/signed defects use
+[numerical recovery](../../../.agent/playbooks/convergence-and-balance.md). Legacy completion
+does not prove admissibility or convergence. Capture raw residual, denominator, rounding bound,
+active branch and total evaluation counts; distinguish a moving scale from real supply failure.
+Demonstrate prompt benign completion as well as physical rejection on the minimal fixture.
+For NaN/Inf or finite spikes, capture the first producing operation and operands, plus adjacent
+hours for a reversal. Audit domains/overflow, units/timestep, initialization, reset/lag and
+duplicate transfers. Preserve invalid legacy output as evidence; fix analogous hazards in Zig
+with independent physical checks and attributed differences, including dormant code scope.
+
 For report/dependency schemas, readiness and suite accounting, use
 [qualification evidence](../../../ecosys-audit/qualification-evidence.md) when recording or reusing verdicts.
