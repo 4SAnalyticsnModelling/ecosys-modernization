@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 091 -- Windows Defender quarantines the `ReleaseFast` binary as `Trojan:Win32/Bearfoos.A!ml`
 
 Status: **RESOLVED 2026-09-22 WITHOUT ANY PRIVILEGED CHANGE -- `ReleaseSafe` is not detected, and it is also the build the performance qualification requires. No user decision needed after all.**

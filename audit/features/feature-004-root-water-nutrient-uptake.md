@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-004-ROOT-WATER-NUTRIENT-UPTAKE
 
 Status: PARTIALLY_ASSESSED (depth-read coverage of `uptake.f` is now effectively complete across six passes this session -- see the 2026-09-19 "Coverage and closing summary" addendum near the end of this file for the final tally; blocked from `PASS` by two `unresolved` items, `issue-039` and `issue-040`, and by not-yet-performed independent review)

@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 036 -- SOLUTE.F litter cation-exchange closure reads a stale, leftover `RXNBQ` from the last-processed soil layer; Zig's litter path structurally excludes it (undocumented, plausibly beneficial deviation)
 
 Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** Independently re-verified this pass (see "Closing review" below); Zig's litter path is confirmed structurally immune (zero closure weight, not merely zero value) to the legacy stale-`RXNBQ` carryover, now cited in-code.

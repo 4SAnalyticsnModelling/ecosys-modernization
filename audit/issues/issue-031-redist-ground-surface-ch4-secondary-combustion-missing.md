@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 031 -- REDIST ground-surface secondary CH4 combustion (`redist.f:10934-10971`) has no confirmed Zig counterpart
 
 Status: OPEN (needs reviewer decision on materiality; not yet confirmed as a mass-balance-relevant divergence, only confirmed as an unreproduced mechanism). **Follow-up (2026-09-19): CONFIRMED NOT REACHABLE for the Ottawa deck** -- no `ITILL=22` fire event is scheduled in any of the deck's five tillage files across 1998-2002, and ambient weather cannot organically reach the outer fire-gate's 100 degC threshold, so `ICHKF` is 0 every hour and this sub-block (nested at 200 degC) never executes on either side. See "Follow-up resolution (2026-09-19)" near the end of this file. Deprioritized accordingly; not closed.

@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-008-STARTE-SOIL-CHEMISTRY-INITIALIZATION
 
 Status: PARTIALLY_ASSESSED (source-audit; `starte.f` is 73KB/2205 lines; depth-read now complete -- both 1000-iteration convergence loops (`:406-1227`/`:1228-1709` tail, and `:1726-1906`/`:1907-2205` tail) read in full at statement level this pass; see "Closing summary" at the end of this dossier for the final tally)

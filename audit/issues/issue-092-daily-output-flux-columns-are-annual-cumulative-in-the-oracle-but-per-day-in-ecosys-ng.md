@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 092 -- daily output flux columns are ANNUAL CUMULATIVE totals in the oracle and PER-DAY values in ecosys-ng
 
 Status: **OPEN, CONFIRMED, systematic across the daily output streams (filed 2026-09-22, adversarial Claude/Pi session).** Not a single-column mistake: every daily column fed by a legacy `U*` annual accumulator reports a different quantity in ecosys-ng. Directly against the "outputs comparable to the legacy oracle" release criterion, and it is invisible to a spot check of day 1 because the two agree there by construction.

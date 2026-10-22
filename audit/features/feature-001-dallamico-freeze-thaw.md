@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-001-DALLAMICO-FREEZE-THAW
 
 Status: PARTIALLY_ASSESSED (2026-09-19, this session) -- literature-verified term-for-term equation correspondence between `dallAmicoEquilibrium` and Dall'Amico et al. (2011) Eqs. 11-13/17/19-24 (primary source fetched and read directly, not assumed); confirmed the caller-side `unfrozen_pressure_head_m` invariant that makes the coupling correct; confirmed existing, passing test coverage for conservation (water+enthalpy) across freeze/thaw transitions and for an independent analytical limiting case (the paper's own Stefan/Appendix C problem); confirmed the `DALLAMICO-BELOW-RESIDUAL-WATER-HOUR-2726-001` tag's citation is accurate against the live source. Remaining open items, explicitly not closed this session: (1) no fresh matched-state Fortran-vs-Zig numerical reproduction was run for the hour-2705/2726 case itself (the in-source record was read and confirmed accurate, not independently re-derived from a new run, per this task's explicit instruction not to re-attempt the reverted fix); (2) performance impact not measured; (3) predeclared quantitative acceptance envelope (beyond "conserves water/energy" and "matches the paper's own analytical benchmark") still not established as a formal acceptance record.

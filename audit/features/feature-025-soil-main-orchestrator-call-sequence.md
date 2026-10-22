@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-025-SOIL-MAIN-ORCHESTRATOR-CALL-SEQUENCE
 
 Status: FULLY_ASSESSED for call-order/scheduling scope only (source-audit; `soil.f` is 305 lines, full-file read, 100% of the file's control flow traced and cited; this dossier is exclusively a call-order/cadence check per the task's own framing -- there is no equation logic in `soil.f` itself to audit)

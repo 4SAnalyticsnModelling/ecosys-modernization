@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 078 -- hour 3,253 `RuntimeSoilPoreCapacityExceeded` (new frontier exposed by issue-024's committed universal `NFH=4` baseline fix)
 
 ## Eighth pass (2026-09-21, adversarial Claude/Pi session) -- ROOT CAUSE IS A GUARD DOMAIN PLUS A CLAMP INHERITANCE, BOTH OF WHICH CONTRADICT THE ORACLE; TWO SOURCE FIXES APPLIED, PRODUCTION VALIDATION OUTSTANDING

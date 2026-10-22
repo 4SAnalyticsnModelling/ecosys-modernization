@@ -1,0 +1,2369 @@
+{
+  "base_commit": "a40575ae3285ad2749ce1c40ef69e8f34e47dc4c",
+  "documents": 450,
+  "by_kind": {
+    "active-document": 104,
+    "historical-dossier": 168,
+    "retained-evidence": 148,
+    "protected-reference": 30
+  },
+  "historical_dossiers_with_retired_reviewer_clauses": 114,
+  "original_historical_bodies_preserved": true,
+  "problems": [],
+  "files": [
+    {
+      "path": ".agent/README.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agent/backlog.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agent/briefs/verifier.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agent/continuous-autonomy.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agent/cycles/cycle_00001.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": ".agent/cycles/cycle_00002.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": ".agent/cycles/cycle_00003.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": ".agent/cycles/cycle_00004.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": ".agent/cycles/cycle_00005.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": ".agent/cycles/cycle_00006.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": ".agent/cycles/cycle_00007.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": ".agent/playbooks/convergence-and-balance.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": ".agent/protocol.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agent/state.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": ".agent/templates/cycle.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-autonomous-orchestration/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-build-reproducibility/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-conservation-audit/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-divergence-diagnosis/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-feature-attribution/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-fortran-zig-traceability/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-nonlinear-solver-audit/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-output-comparison/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-performance-engineering/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-process-science-parity/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-release-orchestrator/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-release-verification/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-repository-baseline/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-source-navigation/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-state-io-bindings/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-validation-tests/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".agents/skills/ecosys-zig-safety-design/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-autonomous-orchestration/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-build-reproducibility/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-conservation-audit/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-divergence-diagnosis/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-feature-attribution/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-fortran-zig-traceability/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-nonlinear-solver-audit/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-output-comparison/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-performance-engineering/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-process-science-parity/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-release-orchestrator/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-release-verification/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-repository-baseline/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-source-navigation/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-state-io-bindings/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-validation-tests/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": ".claude/skills/ecosys-zig-safety-design/SKILL.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "AGENTS.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "CLAUDE.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "PROMPT.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "README.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "SYNC-LOCAL.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "audit/README.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "audit/analysis/T-00106-live-anchors-2026-09-26.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/analysis/criterion-3-performance-status-reconciliation-2026-09-22.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/analysis/frontier-hour-3275-is-the-day-137-banded-fertilizer-application-2026-09-22.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/analysis/issue-100-failing-invocation-is-hour-3276-not-the-probed-hour-3275-2026-09-23.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/analysis/issue-100-hour-3276-residual-decomposed-by-stage-interval-2026-09-24.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/analysis/issue-102-clamp-events-span-many-hours-not-the-failing-hour-2026-09-23.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/analysis/tracecov-changed-range-rowreview-batch-01.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/analysis/tracecov-stale-revalidation-2026-09-26.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/analysis/tracecov-stale-row-disposition-2026-09-26.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/experiments/cycle4-verify-dev023-20261022/g1-g9-digest.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/experiments/cycle5-replay-4320-20261022/README.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/experiments/cycle5-verify-scratch-20261022/README.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/experiments/cycle5-verify-scratch-20261022/g1-g9-digest.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/experiments/cycle6-verify-scratch-20261022/g1-g9-digest.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/experiments/ottawa-resume-deck-tools/README.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/experiments/recovered-state-chunk-20261021.txt",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/features/feature-001-dallamico-freeze-thaw.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-002-mualem-van-genuchten.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-003-newton-raphson-anderson-solute-reaction-solver.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-004-root-water-nutrient-uptake.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-005-nitrification-denitrification-mineralization.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-006-hour1-canopy-surface-physics.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-007-grosub-plant-growth-partitioning.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-008-starte-soil-chemistry-initialization.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-009-trnsfr-trnsfrs-solute-gas-transport.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-010-redist-state-acceptance-conservation.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-011-stomate-stomatal-photosynthesis-coupling.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-012-hfunc-plant-phenology.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-013-extract-fire-combustion-uptake-aggregation.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-014-erosion-sediment-constituent-transport.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-015-wthr-weather-forcing.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-016-day-daily-orchestration.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-017-solute-cation-anion-ion-pairing-exchange.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-018-watsub-heat-water-solver-core.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-019-oracle-vs-zig-output-comparison-hour1-2578.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-020-grosub-combustion-litter-balance-closure.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-021-startq-plant-variable-initialization.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-022-starts-soil-landscape-ecosystem-initialization.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-023-exec-daily-mass-balance-progress-and-reinit-gate.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-024-visual-inert-legacy-output-vs-live-zig-visualization-stream.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-025-soil-main-orchestrator-call-sequence.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/features/feature-026-restart-checkpoint-io.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/intentional-deviations.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "audit/issues/issue-001-build-zig-zon-paths.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-002-fortran-toolchain-substitution.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-004-topography-site-file-consolidation.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-005-missing-validation-index-dirs-CRITICAL.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-006-embedded-tag-findings-batch1.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-007-ottawa-ammonium-extract-multiplier-10x.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-008-robocopy-move-recycle-bin-recovery.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-010-hour1-002-canopy-radiation-fraction-fallback.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-011-atmospheric-diffusive-flux-asymmetry.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-012-pr-geom-01b-soc-cancellation-unwired.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-013-stage-census-root-uptake-geometry-mischaracterized.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-014-erosion-xer-directional-clobber-false-premise.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-015-hour-2578-frontier-needs-human-design-decision.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-016-root-metabolism-stale-rmncr-cap-order-needs-record.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-017-redist-pond-branch-relayering-asymmetry.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-018-xfrs-physical-fix-not-extended-to-gas-domain.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-019-macropore-flow-unification-missing-feature-entry.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-020-nitro-litter-no3-amax1-anomaly-undocumented.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-021-litter-gapon-exchange-unweighted-numerator-undocumented.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-022-grazing-cascade-dead-code-vs-live-algorithm-divergence.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-023-grosub-8821-format-write-argument-mismatch-oracle-build-crash.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-024-top-layer-water-content-divergence-oracle-vs-zig.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-025-grosub-litterfall-salt-zerop-column-index-typo.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-026-grosub-combustion-cascade-dead-duplicate-helper.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-027-starte-fionx-undefined-variable-phosphate-dissociation.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-028-starte-manure-nh4-mineralization-split-missing-in-zig.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-029-trnsfr-vertical-macropore-netting-directional-asymmetry.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-030-idayr-iold-scene-continuity-gate-unmirrored.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-031-redist-ground-surface-ch4-secondary-combustion-missing.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-032-outer-hour-transaction-test-hang.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-033-redist-macropore-h2gsh-omission-corrected-by-generic-zig-design.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-034-redist-litter-ssx-xoh2-double-count-deliberately-preserved.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-035-redist-erosion-soc-top-boundary-carry-omission.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-036-solute-litter-cation-exchange-stale-band-carryover.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-037-solute-restricted-soil-chemistry-formulas-unwired.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-038-solute-silicate-weathering-production-path-shares-fabricated-hydrogen-budget.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-039-uptake-mycorrhizal-domain-primary-axis-count-substitution.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-040-uptake-root-osmotic-turgor-potential-not-ported.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-041-trnsfr-h2-macropore-diffusive-flux-uses-nh3-diffusivity.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-042-trnsfrs-macropore-boundary-flux-branch-structure-diverges-from-sibling.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-043-trnsfr-macropore-boundary-gas-flux-hardcoded-zero.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-044-trnsfr-subsurface-irrigation-gas-flux-h2-zeroed-and-zig-gas-species-gap.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-045-solute-reaction-loop-final-iteration-cation-freshness-asymmetry.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-046-solute-litter-rhco3-stale-carboxyl-substrate-limit.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-047-grosub-annual-root-reserve-phosphorus-cap-uses-nitrogen-pool.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-048-watsub-under-snow-soil-freeze-thaw-uses-litter-heat-capacity.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-049-watsub-domain-boundary-snow-drift-legacy-disabled-zig-enabled.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-050-watsub-water-table-boundary-dimensional-fix-missing-feature-entry.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-051-watsub-macropore-freeze-thaw-uses-micropore-depressed-freezing-point.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-052-hour1-zs-surface-roughness-update-frequency-gated-by-disturbance-flag.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-053-hour1-cion-osmotic-potential-dual-formulation-unverified-equivalence.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-054-nitro-nitrification-ammonium-fallback-uses-nitrate-zone-fraction.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-055-starte-litter-cation-stale-scalar-vs-zig-unconditional-zero.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-056-starte-rainfall-irrigation-ion-pairing-newton-loop-not-ported.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-057-grosub-complete-death-reset-dead-duplicate-helper.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-058-recovery-substep-counts-two-inconsistent-consumers-crash-risk.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-059-transport-replay-time-step-hours-hardcoded-64-buffer-overflow.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-060-067-independent-review-2026-09-20.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-060-heat-solver-stagnation-negligible-layer-conservation-collapse-hour-2894.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-061-zeros2-exact-zero-carrier-guard-defect-class-sweep.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-062-relayering-activity-heat-conservation-failure-hour-2894.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-063-relayering-activity-carbon-dioxide-carbon-mismatch-hour-2894.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-064-hourly-cell-conservation-failure-hour-2894-multi-element.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-065-hour-2894-hourly-cell-conservation-failure-persists-after-zeros2-sweep.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-066-litter-ammonia-phase-bridge-exact-zero-carrier-round-trip.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-067-hour-2895-per-layer-post-richards-total-water-closure-mismatch.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-068-hour-2895-soil-heat-solver-temperature-outside-physical-domain.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-069-pond-chemistry-transfer-and-tillage-gather-exact-zero-carrier-gaps.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-072-nitrifier-environment-co2-and-autotrophic-denitrification-nitrite-carrier-gaps.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-073-live-water-field-sweep-topsoil-microbial-exchange-fertilizer-band-carrier-gaps.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-074-aqueous-transport-bridge-import-and-synchronize-carrier-gaps.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-075-pond-inventory-transfer-stale-carrier-volumes-literal.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-076-crlf-checkout-breaks-hardcoded-lf-multiline-source-scan-tests-seven-failures.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-077-ground-vapor-exchange-missing-substep-fractional-liquid-evaporation-cap.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-078-hour-3253-runtime-soil-pore-capacity-exceeded.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-079-winter-multi-layer-soil-water-creep-no-runoff-or-evap-accounting.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-080-tillage-mixing-applied-once-per-event-versus-legacy-per-substep-dosing.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-081-traceability-evidence-integrity-117-stale-hashes-and-first-tool-derived-coverage.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-082-kernelgen-driver-hardcodes-all-scalar-arguments-to-zero.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-083-mechanical-excess-relief-wrongly-inherits-the-darcy-recipient-clamp.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-084-preserved-gfortran-oracle-found-and-its-day-286-stop-is-issue-023.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-085-deck-selected-output-column-beyond-the-runtime-layer-profile-is-not-emitted.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-086-hourly-water-output-slot-4-writes-root-uptake-where-legacy-writes-total-soil-water.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-087-ecosys-ng-retains-its-snowpack-47-days-longer-than-the-oracle.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-088-hourly-precipitation-column-omits-snowfall-and-adds-irrigation.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-089-unbooked-heat-and-water-transfer-into-an-inactive-layer-slot-at-hour-3253.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-090-fertilizer-band-geometry-is-static-and-ignores-the-fertilizer-file-row-spacing.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-091-windows-defender-quarantines-the-releasefast-binary-blocking-all-production-runs.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-092-daily-output-flux-columns-are-annual-cumulative-in-the-oracle-but-per-day-in-ecosys-ng.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-093-litter-geometry-carbon-input-uses-the-wrong-per-pool-composition.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-094-subsurface-water-export-is-near-zero-so-the-profile-never-drains.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-095-ecosys-ng-hourly-and-daily-precipitation-outputs-disagree-with-each-other.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-096-retiring-the-hcnd-table-orphaned-psisa-thets-and-left-an-identically-false-discharge-gate.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-097-the-evidence-base-cited-256-times-by-the-source-is-absent-from-the-repository.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-098-the-ammonium-band-inventory-is-never-amalgamated-when-the-band-disappears.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-099-banded-monocalcium-phosphate-is-booked-as-an-external-input-but-never-deposited.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-102-fifteen-microbial-pool-guards-remain-relaxed-to-finiteness-only-after-their-reason-was-removed.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-103-hour-3277-nitrate-lost-in-the-chemistry-interval.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-104-executable-test-root-does-not-compile.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-105-hour-3289-root-geometry-unset-for-skipped-layers.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-106-substep-ladder-test-expects-1-where-nfh4-baseline-gives-4.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-107-outputtree-test-spins-in-run-log-lock.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-108-hour-3289-carbon-and-cation-closure-after-root-geometry-fix.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-109-spring-window-surface-conductive-flux-probe-fires-hundreds-of-times-more-often-in-0-17-than-in-the-0-16-baseline.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-110-worker-scratch-operators-write-back-the-whole-branch-array-lost-update-across-compute-pool-workers.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-111-preexisting-pytest-failures-48-on-main-retired-harness-and-stale-deck-hashes.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-112-h4556-non-band-layer-0-nitrate-candidate-negative-summed-fmn-floored-no3-reduction-demand-exceeds-zone-supply.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/issue-113-h4855-insufficientsoilnitrite-non-band-layer-0-nitrite-candidate-negative.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-114-h11806-invalidrootgastransportsettings.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-115-execroot-hourly-heat-recovery-ladder-oob.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-116-1999d138-carbonmassbalancelost.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/issue-117-1999d140-hourlyplantconservation.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/issues/workflow-001-herdr-readiness-field.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/workflow-002-handoff-as-sealed-evidence-makes-close-unsatisfiable.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/issues/workflow-003-goal-held-lead-never-idles-so-controller-never-dispatches.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/release/v1-release-contract-and-gate-matrix-transcribed-2026-09-23.md",
+      "kind": "historical-dossier",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/resolved-findings.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/06dff725-9efe-4e77-abf3-971b78794b89.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/0af3331f-11cc-4f73-b86b-e1a06d1a9eac.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/10cc9fc5-140d-4fcc-bfcf-4df85278e9da.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/117bc07a-1088-4509-8877-9b6c96089d23.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/15c0531d-27a1-45d7-81bc-7dc91d90c414.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/26a3023c-a185-4e6b-9858-7a6cbee72ab3.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/38f91e8f-d013-4523-956f-11eb40a7bcd5.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/3919a442-38b4-49dd-93ed-800e0e3da698.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/3b2abd84-6c9c-48e0-a990-729bc4de6d56.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/59c6d058-6141-42b4-960a-3e3950c1a3f5.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/5a04d789-1cb7-41a5-8d84-33dc1c70f529.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/739d0917-fa98-4c66-888a-4b7c66d918c9.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/74759eb1-952d-4d9a-b25c-8d9141254367.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/7bb15f99-0320-476c-bcfd-5c062e846063.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/82834fd6-4dbb-4a69-8322-05cb14f48c40.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/82a3b6fe-6cf1-4974-9054-21fa20508025.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/9bbfbbd0-0e05-401a-b8cd-f14ce639b003.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/aa18292d-f4cd-4117-a40d-fbead47d7bfe.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/aabc2846-7dd6-4923-915a-a64608dd3af4.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/ae44bbb2-87df-48cf-9c00-4b3e179d3130.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/b481af17-d32c-4bae-8f3e-1034f69b82d9.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/c77c82c6-f7b6-4af5-bce1-6b3117db7358.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/cd480d7a-8437-4cd4-b885-1225c861efb8.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/cfda6d41-92fc-4964-9663-553452f99b62.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/e9919127-1c53-4bd6-8719-c4142f6f7571.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/ea62b6f6-81f8-443b-b820-7189e08db536.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/ec17021e-214f-4a82-94bb-5e618270bb0d.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/f0edaf67-e792-4d11-b895-f53bb5b3956f.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/f23df799-f1f4-4d56-8295-def9f0ca454e.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/f6ce4b0f-449c-4330-b239-dfcb7990b007.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/f9335ef8-cb1e-4f30-9dc9-9a7f1d9b2f02.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/captured-tool-results/ffc263fc-874b-4cc6-93de-3ee689b2a2ef.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/carry-forward.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/dsh-code-mode-20261017/review.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/dsh-full-isolation-20261017/final.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/dsh-full-isolation-20261017/progress.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/dsh-meter-injection-20261017/review.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/dsh-rc1-production-20261017/design.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/dsh-rc1-production-20261017/review.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/dsh-rc1-production-20261017/video-strategies.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/dsh-session-isolation-20261017/progress.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/dsh-watchdog-20261017/design.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/dsh-watchdog-20261017/review.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/dsh-watchdog-global-20261017/review.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/glm6-speed-20261017/design.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/glm6-speed-20261017/independent-review.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/glm6-speed-20261017/report.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/glm6-speed-20261017/width2-vs4.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/notes-size-recovery-20261022/README.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/qwen-rc1-16k-20261017/result.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/qwen27-historical-speed-20261017/report.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-issue-024.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round10-grosub-2000-2551.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round11-lane-breach.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round12-itill-dose-count.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round12-kernelgen.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round13-entry-overfill-domain.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round13-input-writer.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round14-entry-overfill-drain-sufficiency.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round14-issue082-resolved.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round15-issue-083-fix-audit.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round16-restart-io-routs-wouts.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round17-unit22-state-family-mapping.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round18-hourly-carbon-output-units.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round19-dissolved-gas-initialization.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round2.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round20-issue-086-falsification.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round21-legacy-snowpack-discharge.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round22-isolated-guard-domain-safety.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round23-issue-089-ledger-fix.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round3.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round4-tillage.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round5-watsub-relief.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round6-design-fork.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round7-design-a-diff.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round8-issue080.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-21-round9-issue076.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-2026-09-22-round24-legacy-litter-thickness.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260923-184059-9b086122.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260923-203925-5f8b9e80.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260923-205755-0455a53b.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260923-225940-8ace44ed.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260923-231724-7fa23089.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260924-010007-ad41eae1.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260924-010818-3a58d636.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260924-021525-7f4d4a24.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260924-040425-db7ece4d.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260924-055505-f4a901f5.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260924-070126-c8a42446.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260924-085645-5b125e5c.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260924-104044-3fc27a08.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/review-pi-20260924-132727-40bac6ee.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/reviewer-policy-audit-20261022/README.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/single-leader-workflow-20261022/README.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/single-leader-workflow-20261022/continuation.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/reviews/workflow-followup-20261019.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/workflow-hardening-20261019.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/reviews/workflow-maintenance-20261019.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/codemod-zig017-fill-20261014/apply.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/codemod-zig017-fill-20261014/convergence.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/codemod-zig017-fill-20261014/dry-run-pass4.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/codemod-zig017-fill-20261014/dry-run.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/issue-100-fix-run/prediction-registered-before-run.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/issue-100-fix2-run/prediction-registered-before-run.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/issue-103-fix-prediction/prediction-registered-before-run.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/issue-103-probe-prediction/prediction-registered-before-run.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/issue-105-fix-prediction/prediction-registered-before-run.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/issue-105-probe-prediction/prediction-registered-before-run.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/issue-108-ca-probe-prediction/prediction-registered-before-run.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/issue-108-fix-prediction/prediction-registered-before-run.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/issue-108-probe-prediction/prediction-registered-before-run.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/ottawa/zig017-debug-run-20261015-1/LARGE-LOG-NOT-COMMITTED.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/ottawa/zig017-f6-200-diag-20261015-1.deckline6.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-001-ottawa-diagnostic-2026-09-18.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/runs/run-002-independent-gfortran-oracle-build-2026-09-18.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-003-performance-benchmark-zig-vs-fortran-2026-09-18.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-004-logging-overhead-fix-and-remeasurement-2026-09-18.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/runs/run-005-thermal-trace-logging-fix-and-remeasurement-2026-09-19.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-006-retry-ladder-profiling-2026-09-19.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-007-fresh-postfix-batch-remeasurement-2026-09-19.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-008-longer-window-remeasurement-2026-09-20.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-010-typical-hour-cumulative-overhead-2026-09-20.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-011-kernelgen-matched-state-harness-validation-2026-09-21.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/runs/run-012-kernelgen-harness-validated-against-hand-arithmetic-2026-09-21.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-013-issue-083-donor-bound-relief-validation-2026-09-21.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/runs/run-014-first-legacy-oracle-output-comparison-2026-09-21.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/runs/run-015-isolated-guard-domain-validation-2026-09-21.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/runs/run-018-issue-089-ledger-fix-validation-2026-09-21.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": true
+    },
+    {
+      "path": "audit/runs/run-021-first-releasesafe-production-run-and-criterion-3-measurement-2026-09-22.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-022-issue-098-fix-validated-and-a-deeper-defect-exposed-2026-09-22.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-023-issue-099-fix-validated-phosphorus-and-calcium-conservation-restored-2026-09-22.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-024-issue-100-ledger-probe-the-reported-terms-do-not-come-from-the-ledger-2026-09-22.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-025-issue-100-the-failure-rows-are-LAYER-rows-mislabelled-as-cells-2026-09-22.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-026-issue-101-CONFIRMED-in-production-and-two-distinct-ledger-allocations-measured-2026-09-23.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-027-issue-100-fixture-deck-stops-at-3162-and-the-frontier-depends-on-two-deck-edits-2026-09-23.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-028-issue-100-hour-3276-ledger-reconciles-exactly-storage-census-is-short-2026-09-23.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-029-issue-100-fertilizer-band-creation-rebases-non-band-exchange-ammonium-2026-09-24.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-030-issue-100-band-activation-exchange-redistribution-removes-99pct-of-residual-2026-09-24.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-031-issue-100-aqueous-band-redistribution-frontier-moves-to-3277-2026-09-24.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-032-issue-103-duplicate-no3-band-growth-in-chemistry-stage-rebases-nitrate-2026-09-24.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-033-issue-103-duplicate-band-growth-removed-frontier-moves-to-3289-2026-09-24.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-034-issue-104-executable-test-root-compiles-107-of-115-pass-2026-09-24.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-036-issue-105-root-geometry-fix-clears-the-error-and-exposes-conservation-at-3289-2026-09-24.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-037-issue-108-root-gas-venting-is-the-carbon-residual-2026-09-24.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/run-038-issue-108-root-atmosphere-gas-booked-with-legacy-sign-carbon-closes-2026-09-24.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/zig017-g7-issue110-verifier-20261016/verdict.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/runs/zig017-repro-reproduction-test-20261015-1/capture-summary.txt",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "audit/science-invariants.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "audit/traceability/embedded_tag_index.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "audit/translation-matrix.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "audit/unresolved-gaps.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-audit/EVIDENCE_GUIDE.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "ecosys-audit/PROJECT_CONTRACT.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "ecosys-audit/SOURCES.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-audit/START_PROMPT.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-audit/qualification-evidence.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "ecosys-audit/templates/feature.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-audit/templates/issue.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_1998.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_1999.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_2000.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_2001.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_2002.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_2003.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/landscape/grid_cell_inputs.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/plant/plant_grid_1998.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/plant/plant_grid_1999.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/plant/plant_grid_2000.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/plant/plant_grid_2001.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/plant/plant_grid_2002.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/plant/plant_grid_2003.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/soil/management_grid_1998.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/soil/management_grid_1999.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/soil/management_grid_2000.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/soil/management_grid_2001.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/soil/management_grid_2002.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/management/soil/management_grid_2003.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/parameters/physical_process_parameters.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/parameters/soil_chemistry_reaction_parameters.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/parameters/soil_nitrogen_parameters.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/parameters/soil_organic_initialization_parameters.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/parameters/surface_gas_and_litter_parameters.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/weather/weather_grid_1998.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/weather/weather_grid_1999.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/weather/weather_grid_2000.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/weather/weather_grid_2001.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/weather/weather_grid_2002.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng-prod-examples/Cool Temperate Maize-Soybean ON/runottawa_input_files/weather/weather_grid_2003.txt",
+      "kind": "protected-reference",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/README.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_1998.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_1999.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_2000.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_2001.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_2002.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/climate_forcing_and_simulation_controls/climate_grid_2003.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/landscape/grid_cell_inputs.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/management/plant/plant_grid_1998.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/management/plant/plant_grid_1999.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/management/plant/plant_grid_2000.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/management/plant/plant_grid_2001.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/management/plant/plant_grid_2002.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/management/plant/plant_grid_2003.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/management/soil/management_grid_1998.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/management/soil/management_grid_1999.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/management/soil/management_grid_2000.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/management/soil/management_grid_2001.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/management/soil/management_grid_2002.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/management/soil/management_grid_2003.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/parameters/physical_process_parameters.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/parameters/soil_chemistry_reaction_parameters.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/parameters/soil_nitrogen_parameters.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/parameters/soil_organic_initialization_parameters.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/parameters/surface_gas_and_litter_parameters.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/weather/weather_grid_1998.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/weather/weather_grid_1999.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/weather/weather_grid_2000.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/weather/weather_grid_2001.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/weather/weather_grid_2002.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng/src/validation/testdata/ottawa/runottawa_input_files/weather/weather_grid_2003.txt",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "ecosys-ng_ottawa_qualification_execution_plan.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "evidence/README.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "evidence/manifest/README.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "evidence/schema/state-dump-v1.md",
+      "kind": "retained-evidence",
+      "reviewer_mentions": false
+    },
+    {
+      "path": "tools/autonomy/README.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    },
+    {
+      "path": "tools/autonomy/code-reading.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "tools/dsh-watchdog/AGENTS.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "tools/dsh-watchdog/README.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "tools/dsh-watchdog/templates/decisions.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "tools/dsh-watchdog/templates/issues.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "tools/dsh-watchdog/templates/progress.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "tools/local-model-runtime/README.md",
+      "kind": "active-document",
+      "reviewer_mentions": false,
+      "problems": []
+    },
+    {
+      "path": "validation/README.md",
+      "kind": "active-document",
+      "reviewer_mentions": true,
+      "problems": []
+    }
+  ]
+}

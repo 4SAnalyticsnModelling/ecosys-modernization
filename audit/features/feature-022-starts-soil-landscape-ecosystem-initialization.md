@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-022-STARTS-SOIL-LANDSCAPE-ECOSYSTEM-INITIALIZATION
 
 Status: PARTIALLY_ASSESSED (source-audit, first dossier for this file; `starts.f` is 1,652 lines, fully read this pass; Zig-side tracing covers the many modules that self-cite `starts.f` by line number, not every sub-array independently re-derived)

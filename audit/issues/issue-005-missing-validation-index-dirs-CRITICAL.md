@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 005 -- src/validation and src/index missing; earlier "zig build test" result cannot be trusted (CRITICAL, live coordination issue)
 
 Status: **RESOLVED 2026-09-18.** See resolution section at the end. Root cause: `D:\ecosys_modernization` is a partial copy that dropped 83 `.zig` source files (all of `src/validation/`, `src/index/`, and 8 top-level compile-test/replay files) plus the `src/validation/testdata/ottawa/` fixture directory (81 non-`.zig` files), relative to the complete working copy at `C:\Users\symon.mezbahuddin\OneDrive - Government of Alberta\ProjectsSymon\ecosys_modernization\ecosys-ng` (user-provided location). Fixed by additively copying exactly those missing files from the OneDrive copy; nothing on `D:` was overwritten.

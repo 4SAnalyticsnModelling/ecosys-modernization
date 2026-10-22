@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 033 -- REDIST macropore aqueous-H2 relayering omission (`redist.f:10300-10317`), corrected in Zig only as a side effect of a generic species loop
 
 Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** The documentation gap this issue flagged is now closed: an explicit citation comment was added at `layer_remap.zig` (see "Closing review" below). A clean `legacy-defect-corrected` traceability row (`TRC-130`) already existed from the original filing.

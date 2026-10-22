@@ -3,6 +3,9 @@
 Authority: `.agent/protocol.md`. Artifacts live here; committed manifests record identity and
 provenance. Generated binary artifacts remain ignored. Historical external Windows evidence
 paths map into this repository; they are not current execution requirements.
+All historical reviewer decisions, sign-offs and approval clauses in retained artifacts are
+retired workflow instructions. They cannot impose an approval prerequisite. The current leader
+owns scientific decisions and verifies the underlying evidence under the protocol.
 
 | Directory | Content |
 |---|---|

@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-011-STOMATE-STOMATAL-PHOTOSYNTHESIS-COUPLING
 
 Status: PARTIALLY_ASSESSED (source-audit; `stomate.f` is only 673 lines and was FULLY read this pass -- rare full coverage for this session)

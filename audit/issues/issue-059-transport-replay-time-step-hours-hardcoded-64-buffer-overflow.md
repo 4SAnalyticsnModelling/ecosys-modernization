@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 059 -- `TransportReplay.time_step_hours` is a hardcoded `[64]f64` buffer sized independently of `recovery_substep_counts`; extending the ladder past 64 substeps overflows it and crashes the production binary
 
 Status: **CLOSED, FIXED -- 2026-09-19 (this pass).** `maximum_transport_replay_substeps` (`ecosys-ng/src/stages/hourly_heat_water_solute.zig`) is now genuinely derived from `recovery_substep_counts[recovery_substep_counts.len - 1]` instead of a hardcoded literal `64`, so `TransportReplay.time_step_hours`'s buffer size can never fall behind the ladder's true maximum again. `validatedTransportReplaySubstepCapacity` additionally now clamps/rejects (via a real, ReleaseFast-surviving runtime check, not a `std.debug.assert`) any `substep_capacity` that would exceed that buffer -- defense in depth so the two can never diverge even if a future refactor decouples the derivation. A sibling sweep of the rest of the codebase (see "## Sibling sweep" below) found and fixed one additional, previously-unaudited sibling in `ecosys-ng/src/state/adaptive_hour_schedule.zig` (a hardcoded switch duplicating the ladder's membership set for checkpoint-restore validation) and ruled out several other candidates as false positives. Full before/after evidence is in "## Fix applied (2026-09-19, this pass)" below. Prior-pass diagnosis (root cause identified, not fixed) is preserved verbatim immediately below for provenance.

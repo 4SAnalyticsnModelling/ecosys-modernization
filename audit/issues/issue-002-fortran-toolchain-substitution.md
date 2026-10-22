@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 002 -- Legacy Fortran oracle compiler (ifort) unavailable; gfortran is an unverified substitute
 
 Status: RESOLVED (2026-09-18/19, same session) -- a genuine, independently-built gfortran oracle now exists and has run this checkout's own Ottawa deck to full 30-year completion. See the "Resolution" section at the end of this file. The toolchain-precision caveat (gfortran vs. the historical ifort) remains a permanent, documented non-bitwise-equivalence caveat, not a blocker.

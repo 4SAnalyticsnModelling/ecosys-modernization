@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 080 -- ecosys-ng applies tillage soil mixing ONCE per event; legacy applies it on every substep of the tillage day (96 doses at NFH=4)
 
 Status: OPEN, diagnosis COMPLETE for the mechanism (2026-09-21) -- both sides verified from source and the end-state difference settled analytically, not merely suspected: legacy homogenizes the tillage zone completely on the tillage day (residual gradient `(1-CORP)^96`, `~8e-68` at `CORP=0.8` and `~7e-3` even at the floored minimum `CORP=0.05`), while ecosys-ng applies one dose and leaves `(1-CORP)`, i.e. 20% to 95% of the pre-tillage profile structure intact. What remains open is not the mechanism but **which behavior is correct**, which is a scientific-policy decision, plus the approved-divergence record that G3 output comparison will need either way. Filed by the adversarial Claude/Pi session while identifying issue-078's legacy counterpart. Source-reading only: no production run, no build, no test executed for this finding specifically. Not a re-filing of issue-078 -- that issue is about the pore-capacity guard rejecting the resulting state; this one is about the number of mixing applications, which is a separate fidelity question that would remain even if issue-078's guard/relief question were fully resolved.

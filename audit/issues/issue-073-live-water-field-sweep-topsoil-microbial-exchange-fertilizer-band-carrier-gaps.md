@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 073 -- more siblings of the "ZEROS2/ZEROS mistranslated as exact-zero carrier guard" defect class, found by sweeping the LIVE water field directly instead of `dry_reference_water_m3`
 
 Status: FIXED and LIVE-VALIDATED (Findings A, B, C, D -- all four), 2026-09-20/2026-09-21, together with the committed peer `issue-072`'s two findings, as one coordinated batch (same file family, same `biogeochemistry_batches.zig` batch, no duplicate `negligible_water_volume_m3` field additions to any shared struct). A clean, uncontended fresh-from-hour-1 re-run reached the hour-2895 boundary in 19.39 minutes (inside the established ~19-25 minute baseline band) with a byte-for-byte match to `run-008`'s own log/failure profile -- see "Live validation" under Disposition below: the fix batch introduces no performance regression; the prior INCONCLUSIVE attempt was contention from other concurrent agents, now resolved. Summary per finding:

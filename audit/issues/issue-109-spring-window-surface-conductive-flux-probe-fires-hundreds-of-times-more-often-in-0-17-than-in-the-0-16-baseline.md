@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 109 -- 1998 d113+ (hour 2,712+): the surface conductive flux probe fires ~30x more often in the 2026-10-15 0.17 runs than in the 2026-09-24 0.16 baseline, and optimisation level is NOT the cause
 
 Status: **OPEN — opened 2026-10-15 (cycle 00002); one of its three confounders is now killed by measurement, the deck

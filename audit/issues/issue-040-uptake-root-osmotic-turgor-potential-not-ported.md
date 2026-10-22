@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 040 -- UPTAKE.F's root osmotic/turgor potential equation (PSIRO/PSIRG, the temperature- and nonstructural-solute-dependent Van't Hoff term) was never ported; Zig substitutes a static per-plant constant, so root turgor never responds to root water status and silently neutralizes the downstream root-extension water-stress limitation
 
 Status: **OPEN, Tier 1 -- confirmed by 2026-09-19 scoping check to need a coordinator/scientist decision, not a simple fix; no source change made this pass.**

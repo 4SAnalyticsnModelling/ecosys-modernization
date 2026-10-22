@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 061 -- systematic sweep for issue-060's defect class ("ZEROS2 floor mistranslated as exact-zero guard on a water/liquid carrier"): found siblings, including one in PRODUCTION model state, not just a validation ledger
 
 Status: FIXED (source + regression tests, 2026-09-19 -- see "## Fix applied" below) -- all three genuine siblings (Findings 1-3) now floor at the shared `legacyNegligibleWaterVolumeM3` (`ZEROS2`) threshold instead of exact zero, mirroring issue-060's `aqueousCarrierM3` fix. Finding 4 remains correctly excluded (not a genuine instance; no action needed). NOT yet independently confirmed by a live full-deck rerun (same reachability-argument caveat as issue-060's own fix: no cheap checkpoint exists to rerun from).

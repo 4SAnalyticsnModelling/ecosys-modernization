@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-005-NITRIFICATION-DENITRIFICATION-MINERALIZATION
 
 Status: ASSESSED (source-audit; `nitro.f` is confirmed 4,592 lines (corrected from an earlier ~7000-line estimate); cumulative direct-read coverage across five passes ~100% -- see fifth-pass closing summary below. Independent reviewer pass and gate sign-off still pending; disposition remains source-audit-level, not a gate PASS.)

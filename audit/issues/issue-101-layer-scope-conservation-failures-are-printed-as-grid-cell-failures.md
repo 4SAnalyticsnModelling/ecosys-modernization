@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 101 -- layer-scope conservation failures are printed as grid-cell failures, and the printed index is meaningless without the domain
 
 Status: **RESOLVED, CONFIRMED IN PRODUCTION (`run-026`) and REGRESSION-TESTED (2026-09-23, task `20260923-184059-9b086122`): `zig test src/module_index.zig` -> 4380 passed; 1 skipped; 0 failed, exit 0, 339.0 s.** Pending independent review of that task packet; see "Regression test on a healthy D:" below. Earlier status, retained: RESOLVED and CONFIRMED IN PRODUCTION (2026-09-23, `run-026`). The relabelled row was observed at hour 3,275:

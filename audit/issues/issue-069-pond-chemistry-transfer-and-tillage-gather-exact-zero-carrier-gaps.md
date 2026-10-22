@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 069 -- two more genuine siblings of the issue-060/061/063/064/065/066 "ZEROS2 mistranslated as exact-zero carrier guard" defect class, missed by every prior sweep
 
 Status: FIXED (both findings) AND VALIDATED OVER THE FULL REACHABLE RANGE for Finding A. Both findings fixed in a follow-up pass, 2026-09-20 -- see "Fix and validation (2026-09-20)" below for before/after evidence, traceability rows (`TRC-329`, `TRC-330`), and test results. Finding A is now confirmed both by its self-contained regression tests AND by a fresh-from-hour-1 live production run over the full currently-reachable range (hour 1-2894/2895) -- see "Deferred live validation (2026-09-20, later pass)" below. Finding B remains confirmed by a self-contained regression test only, consistent with its own confirmed non-reachability in the current Ottawa deck (no live run needed or attempted for Finding B). Original diagnosis-only text below is preserved unchanged for provenance.

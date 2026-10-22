@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 084 -- a usable gfortran oracle output set already exists on this host, and its "externally terminated" day-286 stop is actually `issue-023`
 
 Status: **OPEN (informational/unblocking), filed 2026-09-21 by the adversarial Claude/Pi session.** Two findings: (a) a provenance-documented legacy oracle output set covering **hours 1-6,875** already exists on this host, which unblocks release criterion 3 for the whole range ecosys-ng can currently reach without the ~2h40m rebuild; (b) that artifact's own `PROVENANCE.md` misclassifies its stopping point, and the correct explanation is this project's already-diagnosed `issue-023`.

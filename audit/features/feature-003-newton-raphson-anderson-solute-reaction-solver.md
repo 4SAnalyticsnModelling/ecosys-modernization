@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-003-NEWTON-ANDERSON-REACTION-SOLVER
 
 Status: PARTIALLY_ASSESSED (source-audit level; scoped to the reaction-network solver and its whole-hour retry ladder; the currently-open hour-2,604-class convergence difficulty is explicitly out of scope for this dossier)

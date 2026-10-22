@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 027 -- `starte.f` phosphate dissociation reactions read an undeclared, never-assigned local variable `FIONX`; Zig silently normalizes to a defined value
 
 Status: CLOSED -- `legacy-defect-corrected` (confirmed 2026-09-19; see "Closing review" section below). Originally filed OPEN (source-audit finding; deepens and supersedes the `RM1P` "sibling inconsistency" note in `audit/features/feature-008-starte-soil-chemistry-initialization.md`'s Addendum)

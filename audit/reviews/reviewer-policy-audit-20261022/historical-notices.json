@@ -1,0 +1,804 @@
+{
+  "purpose": "Retire workflow constraints without changing original scientific text",
+  "count": 114,
+  "files": [
+    {
+      "path": "audit/experiments/cycle4-verify-dev023-20261022/g1-g9-digest.md",
+      "original_body_sha256": "b825d303054b2bb62082bce45f9f713dfc00c570a4b4479c25aa5b80dbf3a71d",
+      "retained_body_sha256": "b825d303054b2bb62082bce45f9f713dfc00c570a4b4479c25aa5b80dbf3a71d",
+      "notice_bytes": 521,
+      "updated_sha256": "158732f642dc7677f12496535da7178b2089ad33a5379d98cd77e3c31ecd4b1a"
+    },
+    {
+      "path": "audit/features/feature-001-dallamico-freeze-thaw.md",
+      "original_body_sha256": "d8d43fbfef0ef881fde4fcb86fa0c810b45941406245676f6442f57ee899dd96",
+      "retained_body_sha256": "d8d43fbfef0ef881fde4fcb86fa0c810b45941406245676f6442f57ee899dd96",
+      "notice_bytes": 518,
+      "updated_sha256": "59ed784c37ca3359126e5743b2f4293931226e78841b76e55227bda17c4f79d1"
+    },
+    {
+      "path": "audit/features/feature-002-mualem-van-genuchten.md",
+      "original_body_sha256": "73f5a42f56a2d03cf755b52060d6b87e1e3557096b9b0117690e45ae3dcd8789",
+      "retained_body_sha256": "73f5a42f56a2d03cf755b52060d6b87e1e3557096b9b0117690e45ae3dcd8789",
+      "notice_bytes": 518,
+      "updated_sha256": "86b1c08084e73e892b0f5058668e63b57d9bf774742ea80d276c6bece00a7dc8"
+    },
+    {
+      "path": "audit/features/feature-003-newton-raphson-anderson-solute-reaction-solver.md",
+      "original_body_sha256": "01b1b7e1988d7a9ee27aab61915e1269a4a30e097169cae0225b8e64f10f5244",
+      "retained_body_sha256": "01b1b7e1988d7a9ee27aab61915e1269a4a30e097169cae0225b8e64f10f5244",
+      "notice_bytes": 518,
+      "updated_sha256": "434c7b616e9bd9ffba661c118e4c81d3bf46b6f169a7eb65c76e30b37c73bc56"
+    },
+    {
+      "path": "audit/features/feature-004-root-water-nutrient-uptake.md",
+      "original_body_sha256": "97e5e69b7657003a4e537871674aa6c26875b7ee684c1d1e163ba35b99024d95",
+      "retained_body_sha256": "97e5e69b7657003a4e537871674aa6c26875b7ee684c1d1e163ba35b99024d95",
+      "notice_bytes": 518,
+      "updated_sha256": "da341cbd6a45dc0921858af58f7c00d9d71db23d8cafec4c6a16a774819b2256"
+    },
+    {
+      "path": "audit/features/feature-005-nitrification-denitrification-mineralization.md",
+      "original_body_sha256": "c43fabbe60e578f3ec32f582c7acff80b7bc300a7d2fd194880d2e688fa717a6",
+      "retained_body_sha256": "c43fabbe60e578f3ec32f582c7acff80b7bc300a7d2fd194880d2e688fa717a6",
+      "notice_bytes": 518,
+      "updated_sha256": "12ad48b138e8bf5a2f04ede5e9a662c5111a35e93c0888920625de3846b6ae85"
+    },
+    {
+      "path": "audit/features/feature-006-hour1-canopy-surface-physics.md",
+      "original_body_sha256": "b38653fbe12b4a35351bfad84e39b1ba46c45133472048017596f95dc2f6135c",
+      "retained_body_sha256": "b38653fbe12b4a35351bfad84e39b1ba46c45133472048017596f95dc2f6135c",
+      "notice_bytes": 518,
+      "updated_sha256": "60660635d50c4c57f4ab8dd7a9aed3d8e79a6bfc935e17d90c480927b54bf144"
+    },
+    {
+      "path": "audit/features/feature-007-grosub-plant-growth-partitioning.md",
+      "original_body_sha256": "1ec270c2849a21d30454bb9c5e03a3f6085b697465abc197f3cc52f7050413ae",
+      "retained_body_sha256": "1ec270c2849a21d30454bb9c5e03a3f6085b697465abc197f3cc52f7050413ae",
+      "notice_bytes": 518,
+      "updated_sha256": "1bcbdc577a4a18c3e1a4fd2b6af4091a39343a87f61bf5a90679e5778a0f4f08"
+    },
+    {
+      "path": "audit/features/feature-008-starte-soil-chemistry-initialization.md",
+      "original_body_sha256": "e88b1870d12c52a30c67e8b97c478101d420aa17b884f39450824a5c03339698",
+      "retained_body_sha256": "e88b1870d12c52a30c67e8b97c478101d420aa17b884f39450824a5c03339698",
+      "notice_bytes": 518,
+      "updated_sha256": "52c09ab022418d0ff4365ac56c38db533477f54c99bbd8447adaef9ed99c79a3"
+    },
+    {
+      "path": "audit/features/feature-009-trnsfr-trnsfrs-solute-gas-transport.md",
+      "original_body_sha256": "11321b72f2b9489cb2e0810e5e41a795484495a984fe9fcaf1dd0164167ecfca",
+      "retained_body_sha256": "11321b72f2b9489cb2e0810e5e41a795484495a984fe9fcaf1dd0164167ecfca",
+      "notice_bytes": 518,
+      "updated_sha256": "6be50e1ffaad47924d2b750326d6de89503f98f46697169f7cb43db83f41fa38"
+    },
+    {
+      "path": "audit/features/feature-010-redist-state-acceptance-conservation.md",
+      "original_body_sha256": "1e1d7e70d03134fc39a345a4709caa4e1f5b0c2b9735613ae99f774e27d337e0",
+      "retained_body_sha256": "1e1d7e70d03134fc39a345a4709caa4e1f5b0c2b9735613ae99f774e27d337e0",
+      "notice_bytes": 518,
+      "updated_sha256": "222dd4efed2eaca7628f339d6467a3085652cd2cb01529f9a820ed10e06f9b2f"
+    },
+    {
+      "path": "audit/features/feature-011-stomate-stomatal-photosynthesis-coupling.md",
+      "original_body_sha256": "32d26ac6099ce49d555b3be124c7f768e5985435032d4c4c89cd3162693cbdfa",
+      "retained_body_sha256": "32d26ac6099ce49d555b3be124c7f768e5985435032d4c4c89cd3162693cbdfa",
+      "notice_bytes": 518,
+      "updated_sha256": "7fdf303d03b837db98091bcd638d45ff3a56bcf789840aa0aa4afaecbfbe8c6d"
+    },
+    {
+      "path": "audit/features/feature-012-hfunc-plant-phenology.md",
+      "original_body_sha256": "b138a33ed1060938142f241b79b214e3471f60d6f22ab750379358aaaa1ea31d",
+      "retained_body_sha256": "b138a33ed1060938142f241b79b214e3471f60d6f22ab750379358aaaa1ea31d",
+      "notice_bytes": 518,
+      "updated_sha256": "84926633424ab773d1d2bd94e324233a726b4b3e93ad56b2a6b9086547399385"
+    },
+    {
+      "path": "audit/features/feature-013-extract-fire-combustion-uptake-aggregation.md",
+      "original_body_sha256": "933117af685e1098bc3ca250a7b1a3f866942ff91e3356b835c4dc364650cc12",
+      "retained_body_sha256": "933117af685e1098bc3ca250a7b1a3f866942ff91e3356b835c4dc364650cc12",
+      "notice_bytes": 518,
+      "updated_sha256": "1242ade4a40825f63f19a2dc8efc399e6bde37987eafc006abc60c9b34d1fb16"
+    },
+    {
+      "path": "audit/features/feature-014-erosion-sediment-constituent-transport.md",
+      "original_body_sha256": "11dd85d1410a5d93bc81fb32709a09d06f10e20077f9de7c6fa4ede28e652b50",
+      "retained_body_sha256": "11dd85d1410a5d93bc81fb32709a09d06f10e20077f9de7c6fa4ede28e652b50",
+      "notice_bytes": 518,
+      "updated_sha256": "e5752e4b2c2152466de8af736ac482d0ac0632ea88acee88e9c4c6adfa1144ed"
+    },
+    {
+      "path": "audit/features/feature-015-wthr-weather-forcing.md",
+      "original_body_sha256": "562640063097b891840058a587acdec2514ce5e490fbda384bc3334c18d0879d",
+      "retained_body_sha256": "562640063097b891840058a587acdec2514ce5e490fbda384bc3334c18d0879d",
+      "notice_bytes": 518,
+      "updated_sha256": "79bff40c076ea87e20e3fa66b567824d4faec26b40d50b79122d665c642c149d"
+    },
+    {
+      "path": "audit/features/feature-016-day-daily-orchestration.md",
+      "original_body_sha256": "8a350bfd975a95869bfdac735c0fff493a8e0a04fc4b8f8f50193037771a1720",
+      "retained_body_sha256": "8a350bfd975a95869bfdac735c0fff493a8e0a04fc4b8f8f50193037771a1720",
+      "notice_bytes": 518,
+      "updated_sha256": "115eec68dc70129ca2a3c39839db08e37340bf27d04df78746eccb537e952523"
+    },
+    {
+      "path": "audit/features/feature-017-solute-cation-anion-ion-pairing-exchange.md",
+      "original_body_sha256": "8b7bfb10425e55e6a14ea39a47202cd3afe35277a8b8c3883f736cd8aa58ac6f",
+      "retained_body_sha256": "8b7bfb10425e55e6a14ea39a47202cd3afe35277a8b8c3883f736cd8aa58ac6f",
+      "notice_bytes": 518,
+      "updated_sha256": "70f816593b00c3607a016d9663d6b191d0e7ab6e0c864bb634562d1530510a24"
+    },
+    {
+      "path": "audit/features/feature-018-watsub-heat-water-solver-core.md",
+      "original_body_sha256": "a88578b6046e3c34c1f08a38e9cd4f6bfb0f8cd442b94fc922c6f26b41729dd7",
+      "retained_body_sha256": "a88578b6046e3c34c1f08a38e9cd4f6bfb0f8cd442b94fc922c6f26b41729dd7",
+      "notice_bytes": 518,
+      "updated_sha256": "7b7f8e7ccb2e6d1c4aacbeb95e5bcb6f493ad13ace0873f73f7bc04d42427438"
+    },
+    {
+      "path": "audit/features/feature-019-oracle-vs-zig-output-comparison-hour1-2578.md",
+      "original_body_sha256": "ac2046a6f97a7fa80f4728843bffd1c3c5167bfe7ce64b1971942a5c16f2086e",
+      "retained_body_sha256": "ac2046a6f97a7fa80f4728843bffd1c3c5167bfe7ce64b1971942a5c16f2086e",
+      "notice_bytes": 518,
+      "updated_sha256": "88cd02810df8440cfe69fbe80042ec4d40ffd5cabc7c80ba2b56987571117767"
+    },
+    {
+      "path": "audit/features/feature-020-grosub-combustion-litter-balance-closure.md",
+      "original_body_sha256": "7801e337035b7c457ac307c16bb24b6ba09dd047aaa864df55a8b432bdc5d980",
+      "retained_body_sha256": "7801e337035b7c457ac307c16bb24b6ba09dd047aaa864df55a8b432bdc5d980",
+      "notice_bytes": 518,
+      "updated_sha256": "94cc476e49af1635e775b568040eaf2592a084fd98f394d2d2f9d13445c84987"
+    },
+    {
+      "path": "audit/features/feature-021-startq-plant-variable-initialization.md",
+      "original_body_sha256": "13badd9de1111652ed39432a87204212a1060c6a54d0bc9ecd5f43a720140370",
+      "retained_body_sha256": "13badd9de1111652ed39432a87204212a1060c6a54d0bc9ecd5f43a720140370",
+      "notice_bytes": 518,
+      "updated_sha256": "23da6942c1f749649f1764fe648a664f9ae9f89dffd0e1f40fb10a024042d3b8"
+    },
+    {
+      "path": "audit/features/feature-022-starts-soil-landscape-ecosystem-initialization.md",
+      "original_body_sha256": "e06872f2b6e443c12852ec596818c3a60b4cada7489cb6142fa70f1c6440979b",
+      "retained_body_sha256": "e06872f2b6e443c12852ec596818c3a60b4cada7489cb6142fa70f1c6440979b",
+      "notice_bytes": 518,
+      "updated_sha256": "5ac43c1a78a95ecd2bf3ba80581c01fc3e463bb0df215ea3e0c49901ae421db6"
+    },
+    {
+      "path": "audit/features/feature-023-exec-daily-mass-balance-progress-and-reinit-gate.md",
+      "original_body_sha256": "3f28f3d2481054db90bc68fece2e25c95a29ab3fe96a57336bef1421d8efa545",
+      "retained_body_sha256": "3f28f3d2481054db90bc68fece2e25c95a29ab3fe96a57336bef1421d8efa545",
+      "notice_bytes": 518,
+      "updated_sha256": "047e8d1513295e109d6aef446f3d216e5aca7db25093192e406aa70aa3470b4d"
+    },
+    {
+      "path": "audit/features/feature-024-visual-inert-legacy-output-vs-live-zig-visualization-stream.md",
+      "original_body_sha256": "4e78e8dd98212881ff0dca9db5775d437eafc32d2c9e981ee4bb6dae34206185",
+      "retained_body_sha256": "4e78e8dd98212881ff0dca9db5775d437eafc32d2c9e981ee4bb6dae34206185",
+      "notice_bytes": 518,
+      "updated_sha256": "9a4d98d34a29349e72e045c6631d81267c65bcc83288e06a7c2436b0d26a196e"
+    },
+    {
+      "path": "audit/features/feature-025-soil-main-orchestrator-call-sequence.md",
+      "original_body_sha256": "eef5ee6741e560abd16af019cda05a8d5bd57436d3ef32141967aaae9649647d",
+      "retained_body_sha256": "eef5ee6741e560abd16af019cda05a8d5bd57436d3ef32141967aaae9649647d",
+      "notice_bytes": 518,
+      "updated_sha256": "b4bdd8ab4e9e74e51bd9ce0c30327581d0e44cec904b6aa679c1778d2e30e48e"
+    },
+    {
+      "path": "audit/features/feature-026-restart-checkpoint-io.md",
+      "original_body_sha256": "b586d9ce09f68f5028e9342da8df11f96c9d1e5ac86a24daeb68b059076369d0",
+      "retained_body_sha256": "b586d9ce09f68f5028e9342da8df11f96c9d1e5ac86a24daeb68b059076369d0",
+      "notice_bytes": 518,
+      "updated_sha256": "010f34ae2d1aa7dd973f555b6aa5784e148259afb8c7ffe2758dc3a619c46378"
+    },
+    {
+      "path": "audit/issues/issue-001-build-zig-zon-paths.md",
+      "original_body_sha256": "2357c9683936608c79ed8abe2a619d4e59f3e152d6fa75cd57d6920397e9f19a",
+      "retained_body_sha256": "2357c9683936608c79ed8abe2a619d4e59f3e152d6fa75cd57d6920397e9f19a",
+      "notice_bytes": 518,
+      "updated_sha256": "55706789bbd43581b6f42284f85a5ca0e761d449e8291c62d0d9176ac8ac48aa"
+    },
+    {
+      "path": "audit/issues/issue-002-fortran-toolchain-substitution.md",
+      "original_body_sha256": "d3dd5f0fc47c5130373b7e95694741317e06083b4ebf4214bc3a4821ab2b04fa",
+      "retained_body_sha256": "d3dd5f0fc47c5130373b7e95694741317e06083b4ebf4214bc3a4821ab2b04fa",
+      "notice_bytes": 518,
+      "updated_sha256": "d7017c7321cb2230b76f3b0a7c1943813504450a0c5d116a9bcc0197277038a7"
+    },
+    {
+      "path": "audit/issues/issue-004-topography-site-file-consolidation.md",
+      "original_body_sha256": "8b609aec034ecc37d6af928baf53554a006c5d5d15d5d28b4e6715ec531db1ab",
+      "retained_body_sha256": "8b609aec034ecc37d6af928baf53554a006c5d5d15d5d28b4e6715ec531db1ab",
+      "notice_bytes": 518,
+      "updated_sha256": "ea042020616f30cf8380767d72d1571ad42d23fa65465b28c440a8afcaecac61"
+    },
+    {
+      "path": "audit/issues/issue-005-missing-validation-index-dirs-CRITICAL.md",
+      "original_body_sha256": "0a07af790570ae249bf318d6dfc927bca5bf9579bbf1ec0f457dcb5485a45b15",
+      "retained_body_sha256": "0a07af790570ae249bf318d6dfc927bca5bf9579bbf1ec0f457dcb5485a45b15",
+      "notice_bytes": 518,
+      "updated_sha256": "35923aa3d8a2df0323ac5797a2a1b76df114e90e9067e962332230dadee18d5f"
+    },
+    {
+      "path": "audit/issues/issue-007-ottawa-ammonium-extract-multiplier-10x.md",
+      "original_body_sha256": "d8bc5ca0bbc0c7086a8e6db90dca3809345ae92888e40eab62a1ff00be3c92c0",
+      "retained_body_sha256": "d8bc5ca0bbc0c7086a8e6db90dca3809345ae92888e40eab62a1ff00be3c92c0",
+      "notice_bytes": 518,
+      "updated_sha256": "a431d8d6dd06187ed5ef547ce4489f095a7ddfca965871f4d31237e575eb2f21"
+    },
+    {
+      "path": "audit/issues/issue-012-pr-geom-01b-soc-cancellation-unwired.md",
+      "original_body_sha256": "68d5a4defdb30e9757ab3f9925c5434cdec12f9e860a36c7aa4488d82adaf4d2",
+      "retained_body_sha256": "68d5a4defdb30e9757ab3f9925c5434cdec12f9e860a36c7aa4488d82adaf4d2",
+      "notice_bytes": 518,
+      "updated_sha256": "2cbaf4e4b605184d5bc0af307f62140d2edb5bf0c7104d5449f99d001b15f62b"
+    },
+    {
+      "path": "audit/issues/issue-015-hour-2578-frontier-needs-human-design-decision.md",
+      "original_body_sha256": "f656855031100a9229fa2fe8723ab4539350f394864b6fcf7c1726f3f38e62ea",
+      "retained_body_sha256": "f656855031100a9229fa2fe8723ab4539350f394864b6fcf7c1726f3f38e62ea",
+      "notice_bytes": 518,
+      "updated_sha256": "3224d550c09a5963ead9dff961493abed4244002bfad4b0fe881603328d1600f"
+    },
+    {
+      "path": "audit/issues/issue-017-redist-pond-branch-relayering-asymmetry.md",
+      "original_body_sha256": "be54e452678043927f613a3e79388c574326e1c780e8eb7df03cc27398b8ca17",
+      "retained_body_sha256": "be54e452678043927f613a3e79388c574326e1c780e8eb7df03cc27398b8ca17",
+      "notice_bytes": 518,
+      "updated_sha256": "1a350d2fe0c1dbb64b14e8df7248ad76d813f688fd2b24bacd2afe08801e4633"
+    },
+    {
+      "path": "audit/issues/issue-018-xfrs-physical-fix-not-extended-to-gas-domain.md",
+      "original_body_sha256": "3c6aab12686982e3760459fcc06092c1a65019c41d22779b147be4ec809a5af7",
+      "retained_body_sha256": "3c6aab12686982e3760459fcc06092c1a65019c41d22779b147be4ec809a5af7",
+      "notice_bytes": 518,
+      "updated_sha256": "7e58a42d919156ff7e7ac04d5d64bbf5962d66ee6f97e79346f45d81b37372d1"
+    },
+    {
+      "path": "audit/issues/issue-020-nitro-litter-no3-amax1-anomaly-undocumented.md",
+      "original_body_sha256": "170ed3fe6ee532e5f769b548ee11c4b6c94e11e100e6adf0f7fab9674a4c27d9",
+      "retained_body_sha256": "170ed3fe6ee532e5f769b548ee11c4b6c94e11e100e6adf0f7fab9674a4c27d9",
+      "notice_bytes": 518,
+      "updated_sha256": "dbc450f86145220f095020520358781eb20c8fae81ba3496f225a4bd5154355e"
+    },
+    {
+      "path": "audit/issues/issue-021-litter-gapon-exchange-unweighted-numerator-undocumented.md",
+      "original_body_sha256": "58f4916dd285920efc78c15ddec1529bfb0ff19efe15e2bf57ed69ceb6fd8cfb",
+      "retained_body_sha256": "58f4916dd285920efc78c15ddec1529bfb0ff19efe15e2bf57ed69ceb6fd8cfb",
+      "notice_bytes": 518,
+      "updated_sha256": "ff3652cca4fd79ed9ce0b00c44a718ebd8ca246414e3e76541d2d6e14fab9756"
+    },
+    {
+      "path": "audit/issues/issue-022-grazing-cascade-dead-code-vs-live-algorithm-divergence.md",
+      "original_body_sha256": "939cb3673e77a09f66a4e195da716dcf8e4663cf6c4522ff4827a3854d0fec96",
+      "retained_body_sha256": "939cb3673e77a09f66a4e195da716dcf8e4663cf6c4522ff4827a3854d0fec96",
+      "notice_bytes": 518,
+      "updated_sha256": "2521262ef4f6423fe9202c2bb350f32d6e5a7a95c5435163a25fc2f3f594ce4b"
+    },
+    {
+      "path": "audit/issues/issue-023-grosub-8821-format-write-argument-mismatch-oracle-build-crash.md",
+      "original_body_sha256": "a8579c185554bc0d7c46d49fb3119cd3e2ba64cc59feb7de6e0bab96c10ab71d",
+      "retained_body_sha256": "a8579c185554bc0d7c46d49fb3119cd3e2ba64cc59feb7de6e0bab96c10ab71d",
+      "notice_bytes": 518,
+      "updated_sha256": "223abed6f1cbdaeb3ad74c8c973fd9ddf92db5b01187a748a5eea81aa567c5b0"
+    },
+    {
+      "path": "audit/issues/issue-024-top-layer-water-content-divergence-oracle-vs-zig.md",
+      "original_body_sha256": "11c5c953841b5c298e735a7941ebfb54afea78f3e5881fe79d2c68fab59a518c",
+      "retained_body_sha256": "11c5c953841b5c298e735a7941ebfb54afea78f3e5881fe79d2c68fab59a518c",
+      "notice_bytes": 518,
+      "updated_sha256": "99b04daa903e45d94b9c31424d4a86c1cbd834d90113de59a1d920bfdfc317c2"
+    },
+    {
+      "path": "audit/issues/issue-025-grosub-litterfall-salt-zerop-column-index-typo.md",
+      "original_body_sha256": "cc3a643e675e9b77445c956e843557ad31f490b2f087f5ebc9c53ec664708bf7",
+      "retained_body_sha256": "cc3a643e675e9b77445c956e843557ad31f490b2f087f5ebc9c53ec664708bf7",
+      "notice_bytes": 518,
+      "updated_sha256": "5a93c4463f41dfe686cd567f9debac76f7c01116b1779308ce7eddce4f41e53d"
+    },
+    {
+      "path": "audit/issues/issue-026-grosub-combustion-cascade-dead-duplicate-helper.md",
+      "original_body_sha256": "78161613a788ba7be1ece0e62b75c5c36c9d8fd01e6839d533d07d8821588106",
+      "retained_body_sha256": "78161613a788ba7be1ece0e62b75c5c36c9d8fd01e6839d533d07d8821588106",
+      "notice_bytes": 518,
+      "updated_sha256": "27a873d967dda91e0b2bbf247d288016a123217280d07df768eac7a3a8a9fd07"
+    },
+    {
+      "path": "audit/issues/issue-027-starte-fionx-undefined-variable-phosphate-dissociation.md",
+      "original_body_sha256": "e11e130931021f836d2954b278f9954d193e5a6e1353b0b0346011d723cbc9e6",
+      "retained_body_sha256": "e11e130931021f836d2954b278f9954d193e5a6e1353b0b0346011d723cbc9e6",
+      "notice_bytes": 518,
+      "updated_sha256": "99776a9338de766a8f430fc930857384fd0f561b87bf56cf5320fb258aff95f1"
+    },
+    {
+      "path": "audit/issues/issue-028-starte-manure-nh4-mineralization-split-missing-in-zig.md",
+      "original_body_sha256": "b2ed8e31ab2457e12f1a07acb4cc24fe11a37324551bf8b40a5a340b7ec78f4c",
+      "retained_body_sha256": "b2ed8e31ab2457e12f1a07acb4cc24fe11a37324551bf8b40a5a340b7ec78f4c",
+      "notice_bytes": 518,
+      "updated_sha256": "d9c46066df18d575533e4afe1c7d02add57ca36604446414ec171ef933f45b38"
+    },
+    {
+      "path": "audit/issues/issue-029-trnsfr-vertical-macropore-netting-directional-asymmetry.md",
+      "original_body_sha256": "0bb32e235e2c84fceac180af4194812350fe3fc85da83322751ac4c53bb90b8c",
+      "retained_body_sha256": "0bb32e235e2c84fceac180af4194812350fe3fc85da83322751ac4c53bb90b8c",
+      "notice_bytes": 518,
+      "updated_sha256": "c11ebed61a6d802a9a3a2c2c02a69493774970a5d3c9e8a962f2cf4fa235af2c"
+    },
+    {
+      "path": "audit/issues/issue-030-idayr-iold-scene-continuity-gate-unmirrored.md",
+      "original_body_sha256": "bfe1c3f446cb2c5e8e2b3c742da1b580f7ab026f6cfcf430e50d6d7005b9bed7",
+      "retained_body_sha256": "bfe1c3f446cb2c5e8e2b3c742da1b580f7ab026f6cfcf430e50d6d7005b9bed7",
+      "notice_bytes": 518,
+      "updated_sha256": "f16cd8901a2c2f536f1815ca5c40d487b1908bd27135a944701fa8b831c092a0"
+    },
+    {
+      "path": "audit/issues/issue-031-redist-ground-surface-ch4-secondary-combustion-missing.md",
+      "original_body_sha256": "04c743927e08c2080e5160ca5697f447078d3c487d5dcede34245cab4542e597",
+      "retained_body_sha256": "04c743927e08c2080e5160ca5697f447078d3c487d5dcede34245cab4542e597",
+      "notice_bytes": 518,
+      "updated_sha256": "3459b87c1cc861416beda12f77230a73f1209797680e49b513741ea1fb42f085"
+    },
+    {
+      "path": "audit/issues/issue-032-outer-hour-transaction-test-hang.md",
+      "original_body_sha256": "7de620251573cd6e84b335b24c2d4a7d500b9cb5b83eaf0c44057447c6e1d8db",
+      "retained_body_sha256": "7de620251573cd6e84b335b24c2d4a7d500b9cb5b83eaf0c44057447c6e1d8db",
+      "notice_bytes": 518,
+      "updated_sha256": "a29f82fb4cd19c63584a20cfeea6ccec1e8ef468e29e236501a2664d6d24fa07"
+    },
+    {
+      "path": "audit/issues/issue-033-redist-macropore-h2gsh-omission-corrected-by-generic-zig-design.md",
+      "original_body_sha256": "b063612bc95b73f1daf25dd342f2fe851277ba904e70675d9dc295f27bd7e435",
+      "retained_body_sha256": "b063612bc95b73f1daf25dd342f2fe851277ba904e70675d9dc295f27bd7e435",
+      "notice_bytes": 518,
+      "updated_sha256": "0d22be3e80d8392f4a4ed74fbd54885636dea14ddc027451f403bb3771a4cfff"
+    },
+    {
+      "path": "audit/issues/issue-034-redist-litter-ssx-xoh2-double-count-deliberately-preserved.md",
+      "original_body_sha256": "178f3160728a473be4f560a8da48f45895aaa738cd6fb6589c26606e74442f07",
+      "retained_body_sha256": "178f3160728a473be4f560a8da48f45895aaa738cd6fb6589c26606e74442f07",
+      "notice_bytes": 518,
+      "updated_sha256": "8822a3f8d1d50c36b3b92ad7cd6943acd0099a6641bba2ed7490d25d1fcbcb21"
+    },
+    {
+      "path": "audit/issues/issue-035-redist-erosion-soc-top-boundary-carry-omission.md",
+      "original_body_sha256": "41e1048355ea1c207e35d6e4951bfe565b25726f90412cf26cc6d232a75eb020",
+      "retained_body_sha256": "41e1048355ea1c207e35d6e4951bfe565b25726f90412cf26cc6d232a75eb020",
+      "notice_bytes": 518,
+      "updated_sha256": "2aaf78a6d9912cf88aba9fd71e4f98e48ffefca43bfac1080b351a980c5f8507"
+    },
+    {
+      "path": "audit/issues/issue-036-solute-litter-cation-exchange-stale-band-carryover.md",
+      "original_body_sha256": "50557d9e7ceb106a6506b873004050fb41afb28a3e84ad53a977646a776cb956",
+      "retained_body_sha256": "50557d9e7ceb106a6506b873004050fb41afb28a3e84ad53a977646a776cb956",
+      "notice_bytes": 518,
+      "updated_sha256": "986e9d3b7304699e253fb6993ab84a7d923eca968ff35f374ea47614a51131c0"
+    },
+    {
+      "path": "audit/issues/issue-038-solute-silicate-weathering-production-path-shares-fabricated-hydrogen-budget.md",
+      "original_body_sha256": "fa71a6c10dc413d4613a6cdc31e32340cd2c15116e3ef07abb7cdadfc5a9bc65",
+      "retained_body_sha256": "fa71a6c10dc413d4613a6cdc31e32340cd2c15116e3ef07abb7cdadfc5a9bc65",
+      "notice_bytes": 518,
+      "updated_sha256": "ae7c3b20aabb5124bd833e88f5d7d9affbf2c63591948e0ac62d47af4809d9a4"
+    },
+    {
+      "path": "audit/issues/issue-040-uptake-root-osmotic-turgor-potential-not-ported.md",
+      "original_body_sha256": "d214c1895c89d5a02328605ee00d61829bbb3ab0de168bdf3584ea259d96621e",
+      "retained_body_sha256": "d214c1895c89d5a02328605ee00d61829bbb3ab0de168bdf3584ea259d96621e",
+      "notice_bytes": 518,
+      "updated_sha256": "0621b4c3dc1c8f04e385630238cca697380c52e59594dc7743cbfaa876255291"
+    },
+    {
+      "path": "audit/issues/issue-041-trnsfr-h2-macropore-diffusive-flux-uses-nh3-diffusivity.md",
+      "original_body_sha256": "30d4af8ded90a2aba9d67662f783a60a629c1f6830448deb2f9951d3ffba58df",
+      "retained_body_sha256": "30d4af8ded90a2aba9d67662f783a60a629c1f6830448deb2f9951d3ffba58df",
+      "notice_bytes": 518,
+      "updated_sha256": "899197edab50803b50589d4904370101134e6287c60162d6812d2994d50e0075"
+    },
+    {
+      "path": "audit/issues/issue-042-trnsfrs-macropore-boundary-flux-branch-structure-diverges-from-sibling.md",
+      "original_body_sha256": "d6899cffd04c4fea8155befef4e34dc846ded071b25567813c92a528fa0848ec",
+      "retained_body_sha256": "d6899cffd04c4fea8155befef4e34dc846ded071b25567813c92a528fa0848ec",
+      "notice_bytes": 518,
+      "updated_sha256": "9e9b6561f4aae7d04bfdbe51f7c0ec088d1dc5d0368896f55f7f680f995c7a22"
+    },
+    {
+      "path": "audit/issues/issue-043-trnsfr-macropore-boundary-gas-flux-hardcoded-zero.md",
+      "original_body_sha256": "d33c86882a899bb149a600bd9d1706a7c83eeb8af32b671d5636391336f16f00",
+      "retained_body_sha256": "d33c86882a899bb149a600bd9d1706a7c83eeb8af32b671d5636391336f16f00",
+      "notice_bytes": 518,
+      "updated_sha256": "281ba404e3222c573e979a3e970cb37e8a48d33e0c81635f172e73e3733f785f"
+    },
+    {
+      "path": "audit/issues/issue-044-trnsfr-subsurface-irrigation-gas-flux-h2-zeroed-and-zig-gas-species-gap.md",
+      "original_body_sha256": "d213ac11251abde97b82e0024821f1d6db5598b5ac7cbbc3b171ab15eb7fa423",
+      "retained_body_sha256": "d213ac11251abde97b82e0024821f1d6db5598b5ac7cbbc3b171ab15eb7fa423",
+      "notice_bytes": 518,
+      "updated_sha256": "974c27c5a91478785549b4c1e71fe7fa9b6bfbfec9bc94c8e52f4cfe6901e26b"
+    },
+    {
+      "path": "audit/issues/issue-045-solute-reaction-loop-final-iteration-cation-freshness-asymmetry.md",
+      "original_body_sha256": "5b14ab40b488f9ba7c44c3fe240126a352ea03d6524061b239c2c53e7a374410",
+      "retained_body_sha256": "5b14ab40b488f9ba7c44c3fe240126a352ea03d6524061b239c2c53e7a374410",
+      "notice_bytes": 518,
+      "updated_sha256": "d25f2b3358263b50bef9e17ebe7c74b41c1cad6d98d57bb60a271a3d466dce71"
+    },
+    {
+      "path": "audit/issues/issue-046-solute-litter-rhco3-stale-carboxyl-substrate-limit.md",
+      "original_body_sha256": "11acb2b922504d787203b5f18bac49211831a32908db15b3b10f13076921fe91",
+      "retained_body_sha256": "11acb2b922504d787203b5f18bac49211831a32908db15b3b10f13076921fe91",
+      "notice_bytes": 518,
+      "updated_sha256": "8ceeef622772ae6ba214f4b54415f010389faa1c69c1ca1f47101c6e33fbf90a"
+    },
+    {
+      "path": "audit/issues/issue-047-grosub-annual-root-reserve-phosphorus-cap-uses-nitrogen-pool.md",
+      "original_body_sha256": "25d856e3d3505748dba50915a07f8c290d27f2bd60821cc641573609d4087746",
+      "retained_body_sha256": "25d856e3d3505748dba50915a07f8c290d27f2bd60821cc641573609d4087746",
+      "notice_bytes": 518,
+      "updated_sha256": "36e838ba61d4dd626652f647b5b71ac3861fd2acc4b0bbe001199fd808fc8e35"
+    },
+    {
+      "path": "audit/issues/issue-048-watsub-under-snow-soil-freeze-thaw-uses-litter-heat-capacity.md",
+      "original_body_sha256": "495586bea8331f0bd1225e0b91c42a067cd6591d2cb0f51368eb56f9a7d19d21",
+      "retained_body_sha256": "495586bea8331f0bd1225e0b91c42a067cd6591d2cb0f51368eb56f9a7d19d21",
+      "notice_bytes": 518,
+      "updated_sha256": "119979019abfa48e1fc2c5d48216fdf818a7788144069158a5f28242f530132f"
+    },
+    {
+      "path": "audit/issues/issue-049-watsub-domain-boundary-snow-drift-legacy-disabled-zig-enabled.md",
+      "original_body_sha256": "5bf755f4c5fbc62c75bdc50495eb6cb95e628692d131e5d30162ae0b0fbe36e7",
+      "retained_body_sha256": "5bf755f4c5fbc62c75bdc50495eb6cb95e628692d131e5d30162ae0b0fbe36e7",
+      "notice_bytes": 518,
+      "updated_sha256": "92be5a9e97d7d4d664a48d88eef37579aa4d3ce3d649f8274f590794352ab216"
+    },
+    {
+      "path": "audit/issues/issue-050-watsub-water-table-boundary-dimensional-fix-missing-feature-entry.md",
+      "original_body_sha256": "88b478d564e63e336aff45ccce93ed9aa6a00f5dc5766e929107dd00bcd58b93",
+      "retained_body_sha256": "88b478d564e63e336aff45ccce93ed9aa6a00f5dc5766e929107dd00bcd58b93",
+      "notice_bytes": 518,
+      "updated_sha256": "a402ea7488dc1c9e8f4e78dfcc4734c1b7c26ce610ba3ce146c3eb5be7505175"
+    },
+    {
+      "path": "audit/issues/issue-051-watsub-macropore-freeze-thaw-uses-micropore-depressed-freezing-point.md",
+      "original_body_sha256": "59a611a0723cd4f7235f530bb2442190af3ad724e04d5547ee1e4165f06921f3",
+      "retained_body_sha256": "59a611a0723cd4f7235f530bb2442190af3ad724e04d5547ee1e4165f06921f3",
+      "notice_bytes": 518,
+      "updated_sha256": "a7b125ccc3d3f1b1b12bcc162c385288a055234379cc4eeaa26a28b9648183f5"
+    },
+    {
+      "path": "audit/issues/issue-052-hour1-zs-surface-roughness-update-frequency-gated-by-disturbance-flag.md",
+      "original_body_sha256": "c8b1a59d5d7b7ea5423e18ba89f39dc3b017bb120844ac2a54e9bc5363358886",
+      "retained_body_sha256": "c8b1a59d5d7b7ea5423e18ba89f39dc3b017bb120844ac2a54e9bc5363358886",
+      "notice_bytes": 518,
+      "updated_sha256": "800b622fa0dd947ff9e222d359e2715da63feca23c4c10b0b2cade91ff41e705"
+    },
+    {
+      "path": "audit/issues/issue-053-hour1-cion-osmotic-potential-dual-formulation-unverified-equivalence.md",
+      "original_body_sha256": "140a47a2ae0d2e1cd366b27e652b0c470c34f2e35259e00c227c8b60369eb169",
+      "retained_body_sha256": "140a47a2ae0d2e1cd366b27e652b0c470c34f2e35259e00c227c8b60369eb169",
+      "notice_bytes": 518,
+      "updated_sha256": "094f0e62e8d9ca7b1073a6f44cf612b2e61d71808c1eb34fc3e53cd82be47f50"
+    },
+    {
+      "path": "audit/issues/issue-054-nitro-nitrification-ammonium-fallback-uses-nitrate-zone-fraction.md",
+      "original_body_sha256": "94889cf0b060e5cc2d172330f952054cad9d8001eaf90b976446c426563aacbb",
+      "retained_body_sha256": "94889cf0b060e5cc2d172330f952054cad9d8001eaf90b976446c426563aacbb",
+      "notice_bytes": 518,
+      "updated_sha256": "225983948bbe0af2d9b453a0fa9ad59d3cc88973ccc9a4367fd07db2a639ac32"
+    },
+    {
+      "path": "audit/issues/issue-055-starte-litter-cation-stale-scalar-vs-zig-unconditional-zero.md",
+      "original_body_sha256": "2b7f8dee4e67cb79833849098aac862e3480454857b823032d7e0cacabe7132f",
+      "retained_body_sha256": "2b7f8dee4e67cb79833849098aac862e3480454857b823032d7e0cacabe7132f",
+      "notice_bytes": 518,
+      "updated_sha256": "8e364ac31ce0199ad7a56dbbe868d14e04a6ed29084305975b80153fe887a269"
+    },
+    {
+      "path": "audit/issues/issue-056-starte-rainfall-irrigation-ion-pairing-newton-loop-not-ported.md",
+      "original_body_sha256": "f30d9126739f2982444a20cdb317a3c23f4b3ee7b4b87ec2a9a505704214b1e6",
+      "retained_body_sha256": "f30d9126739f2982444a20cdb317a3c23f4b3ee7b4b87ec2a9a505704214b1e6",
+      "notice_bytes": 518,
+      "updated_sha256": "dc6f491af51cd948ade6252d69a08a59213b1c9761a17eefecb7f61c372971fd"
+    },
+    {
+      "path": "audit/issues/issue-057-grosub-complete-death-reset-dead-duplicate-helper.md",
+      "original_body_sha256": "703fa1cc721a236a8effc75386256af06085415f236a8e0c250563e2fbd91f65",
+      "retained_body_sha256": "703fa1cc721a236a8effc75386256af06085415f236a8e0c250563e2fbd91f65",
+      "notice_bytes": 518,
+      "updated_sha256": "52cd7824ab0faca416b884aa8657b1b1730b4c56d835eb3f4440e459ad586d5c"
+    },
+    {
+      "path": "audit/issues/issue-058-recovery-substep-counts-two-inconsistent-consumers-crash-risk.md",
+      "original_body_sha256": "bda27f88e9d689ca811ae193f329f358c7c44ef15790f0af4e0546c4deacefd2",
+      "retained_body_sha256": "bda27f88e9d689ca811ae193f329f358c7c44ef15790f0af4e0546c4deacefd2",
+      "notice_bytes": 518,
+      "updated_sha256": "296e5e62645b1d1b81afa404f935c1e692b9445773fe1a70a812a211d3f3925b"
+    },
+    {
+      "path": "audit/issues/issue-059-transport-replay-time-step-hours-hardcoded-64-buffer-overflow.md",
+      "original_body_sha256": "63255ff3e0270e055f9285dd2012118de6240af3b398695752bcc307315ec19b",
+      "retained_body_sha256": "63255ff3e0270e055f9285dd2012118de6240af3b398695752bcc307315ec19b",
+      "notice_bytes": 518,
+      "updated_sha256": "e61ee7915799abccdd85d97face0a39ff0e82d1bce1b0282bd139ce125380f4a"
+    },
+    {
+      "path": "audit/issues/issue-060-067-independent-review-2026-09-20.md",
+      "original_body_sha256": "8338f1de5baf69b8d0e78fc3360d2cf11f2e21b7a6b4adaba2bc9c68992d0525",
+      "retained_body_sha256": "8338f1de5baf69b8d0e78fc3360d2cf11f2e21b7a6b4adaba2bc9c68992d0525",
+      "notice_bytes": 518,
+      "updated_sha256": "cc785ba559226b202c9152f94f00cf5d68d19b5d4eaad43ae5b93df438cddb4b"
+    },
+    {
+      "path": "audit/issues/issue-060-heat-solver-stagnation-negligible-layer-conservation-collapse-hour-2894.md",
+      "original_body_sha256": "1296f91c1ff9366b5c784dab0f53c1304bb1e9fc007242a616d50fbb75428dd7",
+      "retained_body_sha256": "1296f91c1ff9366b5c784dab0f53c1304bb1e9fc007242a616d50fbb75428dd7",
+      "notice_bytes": 518,
+      "updated_sha256": "3533ba907f1146939ae62c78c6824ee13536599c08e4b0ad6a7dc90cb4fb7ff1"
+    },
+    {
+      "path": "audit/issues/issue-061-zeros2-exact-zero-carrier-guard-defect-class-sweep.md",
+      "original_body_sha256": "c92ef38c905634656a8a9fb4cfc8990b279b00cc692945ac4ce23a8d017cf8cc",
+      "retained_body_sha256": "c92ef38c905634656a8a9fb4cfc8990b279b00cc692945ac4ce23a8d017cf8cc",
+      "notice_bytes": 518,
+      "updated_sha256": "359e7a3db254f0d76672148e9c8d5e6f6f7f0944be962ce61e6d5d08c56b23d4"
+    },
+    {
+      "path": "audit/issues/issue-062-relayering-activity-heat-conservation-failure-hour-2894.md",
+      "original_body_sha256": "20a2d2b27db8b2ed0107a027c9e9bca49d207bf66bb34cc197cf158a00f05bda",
+      "retained_body_sha256": "20a2d2b27db8b2ed0107a027c9e9bca49d207bf66bb34cc197cf158a00f05bda",
+      "notice_bytes": 518,
+      "updated_sha256": "7e2f88b372630dc98968a6950271e5bc9d87ac611c01c46b7e6fbe70fdb4cbe0"
+    },
+    {
+      "path": "audit/issues/issue-065-hour-2894-hourly-cell-conservation-failure-persists-after-zeros2-sweep.md",
+      "original_body_sha256": "37be3db26d430a1d61ac79ebd8cb5f5c103907e09b786c9e589394a5f277d311",
+      "retained_body_sha256": "37be3db26d430a1d61ac79ebd8cb5f5c103907e09b786c9e589394a5f277d311",
+      "notice_bytes": 518,
+      "updated_sha256": "39c32c5ce7af2c9f11a42b08a51f627c003f6cf65c2352b7084b6d379aada142"
+    },
+    {
+      "path": "audit/issues/issue-066-litter-ammonia-phase-bridge-exact-zero-carrier-round-trip.md",
+      "original_body_sha256": "64b65245ef55e1b99b6f1d29a33f2c003d4d9013451e323538beba6728b0a548",
+      "retained_body_sha256": "64b65245ef55e1b99b6f1d29a33f2c003d4d9013451e323538beba6728b0a548",
+      "notice_bytes": 518,
+      "updated_sha256": "9544982e0bf7646ff5a4f32c5f6370f895fa91f2b7b4663d97e4c2f8fef2a801"
+    },
+    {
+      "path": "audit/issues/issue-068-hour-2895-soil-heat-solver-temperature-outside-physical-domain.md",
+      "original_body_sha256": "c154c7fc4d7d0a3e1ea045742036596ddfc6722034625c74fc6f688a4ec20bbd",
+      "retained_body_sha256": "c154c7fc4d7d0a3e1ea045742036596ddfc6722034625c74fc6f688a4ec20bbd",
+      "notice_bytes": 518,
+      "updated_sha256": "94abf2077955bbfd4e877cfb23933021f687991a0fddf4883e873352587e0587"
+    },
+    {
+      "path": "audit/issues/issue-069-pond-chemistry-transfer-and-tillage-gather-exact-zero-carrier-gaps.md",
+      "original_body_sha256": "279aefc781552ec014b69f0276f5e02736eebd0a50fe9b2f783fdbe31d558d4a",
+      "retained_body_sha256": "279aefc781552ec014b69f0276f5e02736eebd0a50fe9b2f783fdbe31d558d4a",
+      "notice_bytes": 518,
+      "updated_sha256": "be1accd573b82e5dbaeb2e287be91e5fe5f864f247339c736ac13eb226100359"
+    },
+    {
+      "path": "audit/issues/issue-073-live-water-field-sweep-topsoil-microbial-exchange-fertilizer-band-carrier-gaps.md",
+      "original_body_sha256": "0e16d32469d5f69fa3f10d98c0b759489c9f1f22426b4a92236f43b2ff5bb3c5",
+      "retained_body_sha256": "0e16d32469d5f69fa3f10d98c0b759489c9f1f22426b4a92236f43b2ff5bb3c5",
+      "notice_bytes": 518,
+      "updated_sha256": "79f1126a1c6241edc30898553ba566038191b358bbf46552b7a8c6467b97b09e"
+    },
+    {
+      "path": "audit/issues/issue-074-aqueous-transport-bridge-import-and-synchronize-carrier-gaps.md",
+      "original_body_sha256": "b771b3d961c298d9051c86542c8376d12e30ad41e2b3f677ff2c497c5fb4fb82",
+      "retained_body_sha256": "b771b3d961c298d9051c86542c8376d12e30ad41e2b3f677ff2c497c5fb4fb82",
+      "notice_bytes": 518,
+      "updated_sha256": "3d14e2fa16fd44e2ea2190264fb34f39ca185277008023a945c1419c5f1c30ea"
+    },
+    {
+      "path": "audit/issues/issue-075-pond-inventory-transfer-stale-carrier-volumes-literal.md",
+      "original_body_sha256": "879bba721349f9d66a17391d9ff515a40a015ae2e172b749c4924a50af7f90d8",
+      "retained_body_sha256": "879bba721349f9d66a17391d9ff515a40a015ae2e172b749c4924a50af7f90d8",
+      "notice_bytes": 518,
+      "updated_sha256": "77b0084afccb4c7b7b7715bb20ebbfa9ad6d4e8f42a41708c9817bb023d9ff91"
+    },
+    {
+      "path": "audit/issues/issue-076-crlf-checkout-breaks-hardcoded-lf-multiline-source-scan-tests-seven-failures.md",
+      "original_body_sha256": "175c2f312464485c3f071a0eae7328fc4b61396e5c26d5d0e27d831ff7c3ffc9",
+      "retained_body_sha256": "175c2f312464485c3f071a0eae7328fc4b61396e5c26d5d0e27d831ff7c3ffc9",
+      "notice_bytes": 518,
+      "updated_sha256": "1cffa4c4459dc58e04a789faaece0cb55cff6c94889d0ccd69750ac325f13091"
+    },
+    {
+      "path": "audit/issues/issue-077-ground-vapor-exchange-missing-substep-fractional-liquid-evaporation-cap.md",
+      "original_body_sha256": "53c6427742220eb7a4a5140970501a51db88e66b4230a3429fd87fefee4270d6",
+      "retained_body_sha256": "53c6427742220eb7a4a5140970501a51db88e66b4230a3429fd87fefee4270d6",
+      "notice_bytes": 518,
+      "updated_sha256": "7288364a029a3a5b9cf01c266a26756ba3b607a517cbb2f207f0fedfc5896bf4"
+    },
+    {
+      "path": "audit/issues/issue-078-hour-3253-runtime-soil-pore-capacity-exceeded.md",
+      "original_body_sha256": "6f2a575ca19fc6f18bb0a6cd9e81207dc896b526ac265e655c6468ef3fd31665",
+      "retained_body_sha256": "6f2a575ca19fc6f18bb0a6cd9e81207dc896b526ac265e655c6468ef3fd31665",
+      "notice_bytes": 518,
+      "updated_sha256": "5415cf6c7d8b6b7bd8f42512eb235f908b28f02d9caa46cd10a964a9e6acfba4"
+    },
+    {
+      "path": "audit/issues/issue-079-winter-multi-layer-soil-water-creep-no-runoff-or-evap-accounting.md",
+      "original_body_sha256": "8b62cf2701cf2fddd129539cdc78ec6e60c609ba05861d2e4aa14ef6de4e870c",
+      "retained_body_sha256": "8b62cf2701cf2fddd129539cdc78ec6e60c609ba05861d2e4aa14ef6de4e870c",
+      "notice_bytes": 518,
+      "updated_sha256": "f922312eedb42efb4c432d71b08f7e08846fbb41b50931ee532e76fcd585d492"
+    },
+    {
+      "path": "audit/issues/issue-080-tillage-mixing-applied-once-per-event-versus-legacy-per-substep-dosing.md",
+      "original_body_sha256": "e15e91c213a2fe09a5bc4e5394aeb01e51f8437aaebc7e0d9203f78eb55bf56c",
+      "retained_body_sha256": "e15e91c213a2fe09a5bc4e5394aeb01e51f8437aaebc7e0d9203f78eb55bf56c",
+      "notice_bytes": 518,
+      "updated_sha256": "dc575774691e00f08369517e1aae727c98b792744ee978bbdf3bd40822bd8d29"
+    },
+    {
+      "path": "audit/issues/issue-081-traceability-evidence-integrity-117-stale-hashes-and-first-tool-derived-coverage.md",
+      "original_body_sha256": "ce584439abd10a290e70451d8331080d0684d99f5fa5b11199daec816acf65df",
+      "retained_body_sha256": "ce584439abd10a290e70451d8331080d0684d99f5fa5b11199daec816acf65df",
+      "notice_bytes": 518,
+      "updated_sha256": "ce8aa6ebde9ae23d5bab863fa803f4ede60349eec38ad6ae2bb45c2f2bc3198d"
+    },
+    {
+      "path": "audit/issues/issue-082-kernelgen-driver-hardcodes-all-scalar-arguments-to-zero.md",
+      "original_body_sha256": "ec755fcde6108bec81545d135a281f3c5b44b983f6817664e20ffd136f67b303",
+      "retained_body_sha256": "ec755fcde6108bec81545d135a281f3c5b44b983f6817664e20ffd136f67b303",
+      "notice_bytes": 518,
+      "updated_sha256": "809eeb5a7944d4be0fd40fda0fb0172b22778c4daac1738776fe6b6db16d54cb"
+    },
+    {
+      "path": "audit/issues/issue-083-mechanical-excess-relief-wrongly-inherits-the-darcy-recipient-clamp.md",
+      "original_body_sha256": "56b9a16f4f3b8c1bbb82d7884710193d36fb1027e64a6bfd98236e1da5e07509",
+      "retained_body_sha256": "56b9a16f4f3b8c1bbb82d7884710193d36fb1027e64a6bfd98236e1da5e07509",
+      "notice_bytes": 518,
+      "updated_sha256": "1614c1504df0f4764296177a25cf9fc67885027c123ff0502451e3af55252559"
+    },
+    {
+      "path": "audit/issues/issue-084-preserved-gfortran-oracle-found-and-its-day-286-stop-is-issue-023.md",
+      "original_body_sha256": "8f79fe643c7b862085b09d176e15ef256c1e29721c4baf551f88a292989df116",
+      "retained_body_sha256": "8f79fe643c7b862085b09d176e15ef256c1e29721c4baf551f88a292989df116",
+      "notice_bytes": 518,
+      "updated_sha256": "53fc0b56f0c74e50d8fb296cb101775742963e290edd3275fe9213fd294d78e8"
+    },
+    {
+      "path": "audit/issues/issue-085-deck-selected-output-column-beyond-the-runtime-layer-profile-is-not-emitted.md",
+      "original_body_sha256": "4fb7c6067766673af1c49ce26b82c6acd652363309641c6ebb63d5699266dd66",
+      "retained_body_sha256": "4fb7c6067766673af1c49ce26b82c6acd652363309641c6ebb63d5699266dd66",
+      "notice_bytes": 518,
+      "updated_sha256": "f5b378850c29c5f0937dbf925f8fd605edf7ab2ed6232eb6b53c5edc9a291e53"
+    },
+    {
+      "path": "audit/issues/issue-086-hourly-water-output-slot-4-writes-root-uptake-where-legacy-writes-total-soil-water.md",
+      "original_body_sha256": "257f46a3d73d19679e19fb85697dfe056e9cfec42bbbae29a432e6b888d0ee35",
+      "retained_body_sha256": "257f46a3d73d19679e19fb85697dfe056e9cfec42bbbae29a432e6b888d0ee35",
+      "notice_bytes": 518,
+      "updated_sha256": "4569924f7aa2c56bc571dab9f2aadce52645376d684d2e039944b4cbedafb5b9"
+    },
+    {
+      "path": "audit/issues/issue-087-ecosys-ng-retains-its-snowpack-47-days-longer-than-the-oracle.md",
+      "original_body_sha256": "dc18760d2ef1578e64411f0917cf143e254e028671a91645c64fad18f727fb9b",
+      "retained_body_sha256": "dc18760d2ef1578e64411f0917cf143e254e028671a91645c64fad18f727fb9b",
+      "notice_bytes": 518,
+      "updated_sha256": "1369deb7f71e1fd50d94f01245a9325f09898658679bf9ce838e2476ff5e1034"
+    },
+    {
+      "path": "audit/issues/issue-088-hourly-precipitation-column-omits-snowfall-and-adds-irrigation.md",
+      "original_body_sha256": "defcc9068ca52b19d9416c99def48076b4f6861d2743c78be4b95c06c3ff13c8",
+      "retained_body_sha256": "defcc9068ca52b19d9416c99def48076b4f6861d2743c78be4b95c06c3ff13c8",
+      "notice_bytes": 518,
+      "updated_sha256": "ebc68b2b04c91eec2ddce24f0a76851cc05760ce1deed21b9349f13f459eca08"
+    },
+    {
+      "path": "audit/issues/issue-089-unbooked-heat-and-water-transfer-into-an-inactive-layer-slot-at-hour-3253.md",
+      "original_body_sha256": "de2c2cee9a9ddbae7b58f93b3ef699026bf010dc37d95f9f92c33d7aba5e4af0",
+      "retained_body_sha256": "de2c2cee9a9ddbae7b58f93b3ef699026bf010dc37d95f9f92c33d7aba5e4af0",
+      "notice_bytes": 518,
+      "updated_sha256": "f1dd9500a53a792f484055a5833a136b2411a4c151354ca31e87d3f1689fbb66"
+    },
+    {
+      "path": "audit/issues/issue-090-fertilizer-band-geometry-is-static-and-ignores-the-fertilizer-file-row-spacing.md",
+      "original_body_sha256": "ea22d067ca479e31937bfb934b3104a8fe91b36cc16338318f7c505ec06e3432",
+      "retained_body_sha256": "ea22d067ca479e31937bfb934b3104a8fe91b36cc16338318f7c505ec06e3432",
+      "notice_bytes": 518,
+      "updated_sha256": "96987470e6b9b82dce7ec4451840f109dc59d8ceff58b7bd8f610fa315fbf239"
+    },
+    {
+      "path": "audit/issues/issue-091-windows-defender-quarantines-the-releasefast-binary-blocking-all-production-runs.md",
+      "original_body_sha256": "c90a646487e31167462a0f3dd4a911404a3fcd46d354cd92241a64c4640d013c",
+      "retained_body_sha256": "c90a646487e31167462a0f3dd4a911404a3fcd46d354cd92241a64c4640d013c",
+      "notice_bytes": 518,
+      "updated_sha256": "74a64cbe8b59eb310440444b4753a0b30a81ca1b04489a6f5f911bd8f8a3a52a"
+    },
+    {
+      "path": "audit/issues/issue-092-daily-output-flux-columns-are-annual-cumulative-in-the-oracle-but-per-day-in-ecosys-ng.md",
+      "original_body_sha256": "1ab1481dc3576622ce10aaacada7cca2a2274f35d2385733c2cd7af0ac76d8f0",
+      "retained_body_sha256": "1ab1481dc3576622ce10aaacada7cca2a2274f35d2385733c2cd7af0ac76d8f0",
+      "notice_bytes": 518,
+      "updated_sha256": "416bb39f4dfe1ab329e5976ff91e261ac1e6176356c57eee29a9f03b0e63622b"
+    },
+    {
+      "path": "audit/issues/issue-093-litter-geometry-carbon-input-uses-the-wrong-per-pool-composition.md",
+      "original_body_sha256": "46872deaf428b8718e42ca3fdcbf44c8fdbf17d6050370cbf67b7f2152928d51",
+      "retained_body_sha256": "46872deaf428b8718e42ca3fdcbf44c8fdbf17d6050370cbf67b7f2152928d51",
+      "notice_bytes": 518,
+      "updated_sha256": "75b6f869d89b18b31bf7edcd296dfff158c242617c0a95568cb38a3a22151d5d"
+    },
+    {
+      "path": "audit/issues/issue-094-subsurface-water-export-is-near-zero-so-the-profile-never-drains.md",
+      "original_body_sha256": "01d97bb5da5e77ee3450e3fb179f60ee9c25a4df69cbafc6ad01381df397fc37",
+      "retained_body_sha256": "01d97bb5da5e77ee3450e3fb179f60ee9c25a4df69cbafc6ad01381df397fc37",
+      "notice_bytes": 518,
+      "updated_sha256": "b6190902464b3feed9d8f897effc28e88c02afdb3a55c5f7af18aaa7ad9652e2"
+    },
+    {
+      "path": "audit/issues/issue-097-the-evidence-base-cited-256-times-by-the-source-is-absent-from-the-repository.md",
+      "original_body_sha256": "d195be50e253927909956992821051a60aca189bb52bfae8f03d4a53a5f7d073",
+      "retained_body_sha256": "d195be50e253927909956992821051a60aca189bb52bfae8f03d4a53a5f7d073",
+      "notice_bytes": 518,
+      "updated_sha256": "296c36ff5e84132328c4987bf77c072c0a4b6a87b8ebca58ff3de8a2c31b7eed"
+    },
+    {
+      "path": "audit/issues/issue-098-the-ammonium-band-inventory-is-never-amalgamated-when-the-band-disappears.md",
+      "original_body_sha256": "7d14d159d04a1c505983935e551218c1c009c918fb6b1b33236bfd305a2f3f87",
+      "retained_body_sha256": "7d14d159d04a1c505983935e551218c1c009c918fb6b1b33236bfd305a2f3f87",
+      "notice_bytes": 518,
+      "updated_sha256": "a2fa34abb7729ccdc721f457026f59dc99b0a6d5206ec2f88958bef9600d61f4"
+    },
+    {
+      "path": "audit/issues/issue-099-banded-monocalcium-phosphate-is-booked-as-an-external-input-but-never-deposited.md",
+      "original_body_sha256": "98adce4a87409e78b43a0e1993e6a26305252e2fba7d56e5ceb9a88bf94f42bd",
+      "retained_body_sha256": "98adce4a87409e78b43a0e1993e6a26305252e2fba7d56e5ceb9a88bf94f42bd",
+      "notice_bytes": 518,
+      "updated_sha256": "20595a4151958f1459d4cd57f2a35660cc6661fc17f2a39655085545ec28cdf2"
+    },
+    {
+      "path": "audit/issues/issue-100-hour-3275-nitrogen-conservation-residual-is-8-percent-of-the-banded-ammonium-input.md",
+      "original_body_sha256": "89cebd9d594062a0cf95513be6d47da65f7200f054eef2ece75f25acd7d3d520",
+      "retained_body_sha256": "89cebd9d594062a0cf95513be6d47da65f7200f054eef2ece75f25acd7d3d520",
+      "notice_bytes": 518,
+      "updated_sha256": "151a92fa3d8d1b1dfa4e4d16b2aaca3b94bbb38f1c4efaa13ab1805f3522c2ac"
+    },
+    {
+      "path": "audit/issues/issue-101-layer-scope-conservation-failures-are-printed-as-grid-cell-failures.md",
+      "original_body_sha256": "63042111779d90bab1331eea5eb780975dfcaa0f299f8def7935b487dd2c10fe",
+      "retained_body_sha256": "63042111779d90bab1331eea5eb780975dfcaa0f299f8def7935b487dd2c10fe",
+      "notice_bytes": 518,
+      "updated_sha256": "8c9c76e855f9c59d4d8f90991ddd34fb539a2a8f34da986b65fa95ec3c1c03c3"
+    },
+    {
+      "path": "audit/issues/issue-109-spring-window-surface-conductive-flux-probe-fires-hundreds-of-times-more-often-in-0-17-than-in-the-0-16-baseline.md",
+      "original_body_sha256": "a23d1fe390d8c3aa511267b15f24d34bf20d1a5565a9fe51ad761ed5e312e003",
+      "retained_body_sha256": "a23d1fe390d8c3aa511267b15f24d34bf20d1a5565a9fe51ad761ed5e312e003",
+      "notice_bytes": 518,
+      "updated_sha256": "19860756a157ef9d0057c2873e03c1e9c90725981bee5ed4413eefd4645fc56a"
+    },
+    {
+      "path": "audit/issues/issue-112-h4556-non-band-layer-0-nitrate-candidate-negative-summed-fmn-floored-no3-reduction-demand-exceeds-zone-supply.md",
+      "original_body_sha256": "aff246b8f1eb3bf4b1fda1640f1c9f05c744c202e5c7ab3a18c4c2e995300902",
+      "retained_body_sha256": "aff246b8f1eb3bf4b1fda1640f1c9f05c744c202e5c7ab3a18c4c2e995300902",
+      "notice_bytes": 518,
+      "updated_sha256": "e1a416184e26f951b472c2e4a10433419b92de791f72ac9f7df1d7e315dfb0a9"
+    },
+    {
+      "path": "audit/issues/workflow-001-herdr-readiness-field.md",
+      "original_body_sha256": "66b8f1be774d77075dcfa36d62649dba0a669b0911bcfc2b58b884b98af7efc3",
+      "retained_body_sha256": "66b8f1be774d77075dcfa36d62649dba0a669b0911bcfc2b58b884b98af7efc3",
+      "notice_bytes": 518,
+      "updated_sha256": "a94c3d27610bcc6d6d174cff0dd47146137165b97f48a91809af15ce9b9ca6e6"
+    },
+    {
+      "path": "audit/issues/workflow-002-handoff-as-sealed-evidence-makes-close-unsatisfiable.md",
+      "original_body_sha256": "bfa05b90d04b1428d9b9d56a7171e67a9044eceeb1b697d55f021bebfdf3ac05",
+      "retained_body_sha256": "bfa05b90d04b1428d9b9d56a7171e67a9044eceeb1b697d55f021bebfdf3ac05",
+      "notice_bytes": 518,
+      "updated_sha256": "26a77d9fdf86d23e6f9600428bb3f3d53fc5e186d0bfdb053bf7d4ea414d1133"
+    },
+    {
+      "path": "audit/issues/workflow-003-goal-held-lead-never-idles-so-controller-never-dispatches.md",
+      "original_body_sha256": "fbbbe1fed163daf539da6a85e2cfe6f7a109489a50c290b4aeb7a6e39a7797ab",
+      "retained_body_sha256": "fbbbe1fed163daf539da6a85e2cfe6f7a109489a50c290b4aeb7a6e39a7797ab",
+      "notice_bytes": 518,
+      "updated_sha256": "53dd996b5944842422e57463219f21b155e9ee802ba793c639f07a890681c439"
+    }
+  ]
+}

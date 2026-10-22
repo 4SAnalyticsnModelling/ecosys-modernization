@@ -5,6 +5,9 @@ Optional sub-agents or swarms may perform scoped supporting work when safe; the 
 integrates their evidence and remains accountable. No adversarial reviewer roles, mandatory
 peer review, reviewer sign-offs or human approval queues. Verification is work the leader
 performs, not permission another actor grants. Continue to verified F1–F7.
+No reviewer decision or sign-off is required for scientific, architectural, tolerance,
+DEV, cycle, release or publication decisions. The leader makes and records those decisions
+from the required evidence; missing scientific evidence remains work, not an approval queue.
 This file governs; the execution plan selects priorities.
 
 Delegate independent scopes with explicit deliverables. Prefer read-only investigation or
@@ -19,6 +22,9 @@ Historical audit documents, cycle records, archived notes and saved conversation
 adversaries, independent reviewers or pending human decisions. Those role/approval requirements
 are superseded. Preserve their scientific observations and unresolved evidence obligations;
 the leader resolves them with tests and a recorded decision, without reviving reviewer gates.
+Historical dossiers carry an explicit retirement notice. Raw run/review artifacts are retained
+evidence, never operating instructions; their original approval clauses cannot block the leader.
+Run `project.sh doc_consistency.py` after workflow edits to catch reintroduced reviewer gates.
 
 | Finish | Evidence for one integrated Zig 0.17.x candidate |
 |---|---|

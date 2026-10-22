@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 083 -- the vertical mechanical excess-relief term wrongly inherits the Darcy term's recipient clamp, so an overfilled soil column cannot drain
 
 Status: **OPEN (LOW PRIORITY) -- AND ITS CENTRAL PREMISE IS NOW REFUTED: the FLQR path is NOT missing from ecosys-ng.** `run-018` established that `stages/hourly_heat_water_solute.zig:4539-4570` IS the FLQR analogue and was working correctly all along; only its ledger declaration was missing, and adding that cleared hour 3,253 (`issue-089`). So the `litter terminus port` this issue escalated as a solver-architecture decision is **not needed**. The recipient-clamp finding below remains real and correctly cited, but it is no longer on the critical path and its fix stays reverted.

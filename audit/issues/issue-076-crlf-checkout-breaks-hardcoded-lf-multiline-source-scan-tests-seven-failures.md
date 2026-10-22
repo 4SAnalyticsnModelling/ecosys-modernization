@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 076 -- Windows/CRLF checkout breaks 7 tests that hardcode LF-only multi-line source-text-scan literals; not a production regression
 
 Status: OPEN -- DIAGNOSED: single root cause (CRLF checkout vs hard-coded LF source-scan tests) for all 7 failures; classification (c) environment-dependent; no fix applied. No fix applied this pass (see "Why no fix was applied" below); this is a triage/classification record per this task's own instruction.

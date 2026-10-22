@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-019-ORACLE-VS-ZIG-WATER-OUTPUT-COMPARISON-HOUR1-2578
 
 Status: FIRST-PASS COMPARISON DONE; two findings need `ecosys-divergence-diagnosis` follow-up before they can be closed. EXTENDED to hour 2,894 on 2026-09-20 (see "## Extended comparison through hour 2,894 (2026-09-20)" below) using already-captured evidence (no new run performed for this extension pass) -- Finding 2's divergence does NOT simply keep growing smoothly; it changes character at the very last cleanly-committed hour with an abrupt single-hour collapse that is directly relevant to the paired issue-024/issue-068 decision. FURTHER EXTENDED to hour 3,252 on 2026-09-21 (see "## Extended comparison through hour 3,252 (2026-09-21)" below), after issue-024's committed universal `NFH=4` baseline fix (commit `99234f1`) removed the hour-2,894 collapse mechanism and let the run reach a new frontier (hour 3,253, `issue-078`) -- the collapse is confirmed gone (layer 1 no longer crashes to near-zero), but the underlying chronic top-layer-elevation divergence this session first identified at hour 1 (Finding 2's original, non-collapse symptom) is unchanged in character across the whole new window.

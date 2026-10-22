@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-010-REDIST-STATE-ACCEPTANCE-CONSERVATION
 
 Status: PARTIALLY_ASSESSED (source-audit; `redist.f` is 13,093 lines/530KB; approximately 12,706 lines (~97%) now depth-read across all passes (8 passes total this session, plus 2026-09-19 fourth and fifth follow-up passes closing named loose ends) -- see "Coverage accounting" note before "Not covered this pass" and the "Closing summary" section at the end of this dossier for the complete final-tally picture; `redist_utf8.f` confirmed same-session as a UTF-8 re-encoding of the same subroutine, NOT audited separately). **2026-09-19 update: the dossier's last previously-open loose end -- Finding 6(b)/(c)/(d)'s unmapped manure/canopy-litterfall-acceptance and competition-demand-accumulator sub-blocks (`:204-331`) -- is now CLOSED (`preserved`); see the "Addendum 2026-09-19 (fourth follow-up pass)" under Finding 6. No new issue filed; no genuine gap found. A fifth follow-up pass (same day) independently re-verified and CLOSED Finding 6(b)'s remaining `/31` vs `/62` phosphorus unit-basis sub-question (both divisors correct for their respective, non-equivalent intermediate P pools; also confirmed dormant for the validated Ottawa deck) -- no issue filed. Status remains PARTIALLY_ASSESSED only because no independent reviewer pass has yet been applied to any of this file's findings, per the contract's requirement that source-audit coverage and independent review are separate gates.**

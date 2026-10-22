@@ -9,9 +9,12 @@
     ]
   },
   "agent": {
-    "models": 1,
+    "leaders": 1,
     "human_approval_required": false,
-    "mandatory_subagents": false
+    "mandatory_subagents": false,
+    "optional_safe_subagents": true,
+    "reviewer_approval_required": false,
+    "reviewer_decision_required": false
   },
   "sync": {
     "remote": "origin",

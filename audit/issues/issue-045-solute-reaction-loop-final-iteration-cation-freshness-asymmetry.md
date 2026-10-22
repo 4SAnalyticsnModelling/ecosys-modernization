@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 045 -- `solute.f` reaction-equilibrium loop's final-iteration "skip update" exemption list is incomplete: gibbsite/Fe(OH)3 see fresh Al/Fe on iteration 60, calcite/gypsum see one-iteration-stale Ca/CO3/SO4
 
 Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** See "Closing review (2026-09-19)" section at the end of this file. Independently re-verified `reaction_solve.zig`/`geochemistry_reaction_rates.zig`: the Newton-Raphson solve updates the full joint chemistry state together on every accepted step, with `geochemistry_reaction_rates.calculate`/`calculateSourceOrder` computing gibbsite/iron-hydroxide/calcite/gypsum from one consistent snapshot each call -- there is no "last of N fixed iterations" concept anywhere in the solver, confirming the issue's own claim. A citation comment has been added at `ecosys-ng/src/soil/solute/geochemistry_reaction_rates.zig` (above `calculate`).

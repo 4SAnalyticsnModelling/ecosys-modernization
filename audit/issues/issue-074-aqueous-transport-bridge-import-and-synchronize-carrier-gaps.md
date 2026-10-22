@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 074 -- `aqueous_transport_bridge.zig`'s `importChemistry` and `synchronizeCellAfterCarrierChange` still use the raw live water carrier with only an exact-zero guard, distinct from this same file's already-fixed `exportChemistry`
 
 Status: FIXED (both findings) and validated. See "Fix and validation (2026-09-20, later pass)" below for evidence. The diagnosis narrative below (originally filed read-only/no-build/no-run) is preserved unchanged as the record of how these two findings were discovered.

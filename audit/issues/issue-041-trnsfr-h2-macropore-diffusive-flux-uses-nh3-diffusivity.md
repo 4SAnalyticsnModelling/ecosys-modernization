@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 041 -- `trnsfr.f:4744` H2 macropore-to-macropore diffusive flux uses the NH4/NH3 aqueous diffusivity coefficient (`DIFNH`) instead of its own (`DIFHG`); Zig does not reproduce this but only incidentally
 
 Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** Independently re-verified this session (read `dissolved_gas_face_parameters.zig` in full): the per-species loop always indexes `reference_diffusivity_m2_per_h[species]` for that same species, so H2 always gets its own `HLSG` constant and never `ZNSG`, confirming the issue's own claim. A citation comment has been added at `ecosys-ng/src/soil/gas/dissolved_gas_face_parameters.zig:82-88` (immediately before the per-species loop) naming this issue and instructing future refactors not to reintroduce the legacy species-swap. A clean traceability row already existed for this exact disposition (`TRC-175`, `disposition=legacy-defect-corrected`); no duplicate row added.

@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 012 -- PR-GEOM-01B / GEOM-SUBSIDENCE-001: uncancelled SOC-change input, currently latent (CONFIRMED OPEN, self-declared in-code)
 
 Status: **CLOSED -- `preserved`** (independent closing review, 2026-09-19; see "Closing review" section below). Originally filed OPEN, found via source-embedded evidence (the project's own in-code tag `PR-GEOM-01B`), not independently re-derived at filing time. Given the lesson learned this session on `issue-010`/HOUR1-002 (a stale-comment false alarm), the original filer checked for that exact possibility before filing -- see "Reachability check" below -- but that check only ruled out "stale comment about a bug that's actually fixed on the same code path it read"; it did not extend the search to sibling files in the same audit family that had already been corrected. The independent closing review found the original filing was itself the false-alarm pattern it thought it had ruled out: the SOC/erosion cancellation term is fully wired in production through a different pair of files than the ones the original filer traced.

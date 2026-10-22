@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 093 -- the litter-geometry carbon input uses one all-inclusive total for every pool, where legacy `RC0` uses a DIFFERENT composition per pool
 
 Status: **OPEN, CONFIRMED BY SOURCE ON BOTH SIDES, but MUCH SMALLER THAN FIRST CLAIMED -- see the correction immediately below. Behavioural fix deliberately NOT applied while `issue-091` blocks production validation (filed 2026-09-22, adversarial Claude/Pi session).** Found run-free, as the terminal step of the `run-014` litter-thickness trace.

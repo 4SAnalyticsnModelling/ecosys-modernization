@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 021 -- litter-surface Gapon cation exchange drops valence weights from the numerator (reproducible in 2 independent Fortran locations); Zig's unified, charge-consistent formula is undocumented as a deviation
 
 Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** Independently re-verified this pass (see "Closing review" below); Zig's uniform, always-weighted kernel is confirmed correct and is now cited in-code against a reintroduction of the legacy litter-specific unweighted-numerator bug.

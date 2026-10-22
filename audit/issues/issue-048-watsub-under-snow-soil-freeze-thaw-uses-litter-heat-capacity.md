@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 048 -- `watsub.f` under-snow soil-surface freeze-thaw (`HFLFGX`) is driven by the litter's heat capacity, not the soil's own
 
 Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** The Zig-side call-site trace this issue itself flagged as the missing confirmation step has now been performed (see "Closing review -- call-site trace (2026-09-19)" near the end of this file): Zig's soil-layer phase solve draws its heat capacity exclusively from that layer's own bulk density/volume, architecturally independent of the litter/surface skin's own heat capacity, so the legacy litter-for-soil substitution cannot occur. A citation comment has been added at `ecosys-ng/src/soil/water/heat_step.zig` (above the `dry_capacity` allocation). Legacy-side defect and its magnitude estimate remain as originally documented below; only the Zig-side confirmation status has changed.

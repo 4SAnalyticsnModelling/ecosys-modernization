@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 056 -- `starte.f`'s K=1/K=2 (rainfall/irrigation) ion-pairing convergence loop has no confirmed Zig counterpart; only the closed-form NH4/phosphate sub-piece is ported
 
 Status: OPEN, filed this pass (2026-09-19, statement-level read-only audit of `starte.f`'s two 1000-iteration convergence loops, closing `feature-008`'s "K=1/K=2 branches read but not matched to Zig" gap). **Follow-up (2026-09-19, same day): CONFIRMED NOT REACHABLE/immaterial for the Ottawa deck** -- irrigation is never scheduled (K=2 side moot) and the weather files' rainfall base-cation/anion chemistry (Al/Fe/Ca/Mg/Na/K/SO4/Cl) is exactly zero every year checked (K=1 side immaterial). See "Follow-up resolution (2026-09-19)" near the end of this file. Deprioritized accordingly; not closed.

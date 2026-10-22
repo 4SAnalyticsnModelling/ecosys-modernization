@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # feature-026 -- restart/checkpoint I/O: legacy `wouts.f`/`routs.f` + `woutp.f`/`routp.f` versus ecosys-ng's bundle checkpoint subsystem
 
 Status: **PARTIALLY ASSESSED, 2026-09-21 (adversarial Claude/Pi session).** The **legacy side is now verified** by an independent, reproducible tool check (result below). The **ecosys-ng side has substantial executed test evidence** (102 checkpoint tests, `--test-filter "checkpoint"` -> 172 passed / 1 skipped / 0 failed), **but its state coverage against the legacy stream is NOT verified** -- nothing shows ecosys-ng persists the same state SET the legacy pair persists, only that it faithfully restores what it wrote. Restart integrity is a named release criterion, so do not read either result as clearing it.

@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-013-EXTRACT-FIRE-COMBUSTION-UPTAKE-AGGREGATION
 
 Status: PARTIALLY_ASSESSED (source-audit; `extract.f` is 975 lines and was FULLY read this pass; ~60% is mechanical PFT-to-grid-cell summation with no independent math, spot-checked rather than line-by-line)

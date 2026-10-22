@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 030 -- `exec.f`/`soil.f`/`reads.f`'s `IDAYR`/`IOLD` scene-continuity and re-initialization-suppression gate has no confirmed Zig counterpart, self-flagged as unmeasured in ng's own code
 
 Status: OPEN -- escalated 2026-09-19. Bounded static trace (see "Trace findings" section below) confirms definitively that NO code anywhere in `ecosys-ng/src/ecosys_ng.zig` or its callees takes a `STARTS`/`STARTQ`/`STARTE`-equivalent or `ROUTS`/`ROUTP`-equivalent action keyed off detecting a scene/year-boundary discontinuity (the `IDAYR.NE.IOLD` test). "What is not yet known" item 1 below is now a confirmed fact, not an open question. This issue now needs item 3's design decision (human/coordinator judgment on whether ng's continuous-state architecture makes the legacy gate unnecessary by construction) -- that decision is out of scope for another static-analysis pass. No run evidence exists yet that actually exercises this boundary (see below), so the question remains untested empirically as well as unresolved architecturally.

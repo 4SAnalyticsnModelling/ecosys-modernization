@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 035 -- REDIST erosion/SOC top-of-profile boundary-carry omission (`redist.f:7842-7930`), not reproduced in Zig only as a side effect of a uniform-assignment design
 
 Status: CLOSED -- `legacy-defect-corrected` (confirmed 2026-09-19; see "Closing review" section below). Originally filed OPEN (structural finding, materiality not evaluated -- current production behavior appears scientifically correct and does not reproduce the legacy gap, but the correction is undocumented and emergent, not deliberate; needs a reviewer decision on documentation and, ideally, a dynamic check of the legacy-side magnitude)

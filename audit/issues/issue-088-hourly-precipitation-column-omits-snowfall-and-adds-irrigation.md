@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 088 -- hourly energy-stream precipitation column omits snowfall and adds irrigation; the legacy column is rain + snowfall
 
 Status: **OPEN, CONFIRMED (filed 2026-09-21, adversarial Claude/Pi session).** A deck-selected production output column reports a different *set* of water inputs than the oracle's corresponding column, differing in **both** directions. Found by `run-014`'s comparison harness in the hourly energy stream, where the neighbouring columns are pure weather forcing and agree to machine precision -- which is what made a 218-hour disagreement in this one stand out as a semantics problem rather than a physics one.

@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 087 -- ecosys-ng retains its snowpack ~47 days longer than the oracle; spring snowmelt does not complete
 
 Status: **OPEN, CONFIRMED against the legacy oracle, cause not yet diagnosed (filed 2026-09-21, adversarial Claude/Pi session).** This is a genuine physical-state divergence, not an output defect: the output expression was verified term-for-term faithful before the divergence was attributed to the model. It is the largest single unexplained divergence found in `run-014`'s first oracle comparison, and it plausibly sits upstream of several separately-tracked surface divergences.

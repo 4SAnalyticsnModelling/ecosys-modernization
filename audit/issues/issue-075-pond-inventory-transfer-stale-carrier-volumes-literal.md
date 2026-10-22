@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 075 -- `pond_inventory_transfer.zig`'s cross-file `CarrierVolumes` test literal was never updated when `issue-069` added a required `cell_area_m2` field, breaking the untargeted full test suite
 
 Status: **CLOSED, FIXED -- 2026-09-21.** One missing `.cell_area_m2 = 1` field added to a single anonymous `CarrierVolumes` struct literal in `ecosys-ng/src/surface/pond_inventory_transfer.zig`'s test `"pond sidecars count canonical gas and chemistry mirrors exactly once"`. Test-only change; no production logic touched.

@@ -5,6 +5,7 @@ from workflow import ROOT, load
 from check_gate import STAGE_ALIASES
 from skill_sync import sync
 from cycle_runner import RESULTS
+from workflow_documents import check_documents, configuration_errors
 
 ACTIVE = ['AGENTS.md','PROMPT.md','README.md','CLAUDE.md','.agent/protocol.md','.agent/backlog.md',
           '.agent/README.md','.agent/continuous-autonomy.md','.agent/briefs/verifier.md',
@@ -23,6 +24,8 @@ FORBIDDEN = [r'(?i)user (?:approves|has signed|must approve)',r'(?i)pending huma
 
 def check(root=ROOT):
     errors=[]
+    document_errors,_=check_documents(root)
+    errors.extend(document_errors)
     files=ACTIVE+[str(p.relative_to(root)) for p in (root/'.agents/skills').glob('*/SKILL.md')]
     for name in files:
         p=root/name
@@ -37,6 +40,7 @@ def check(root=ROOT):
     for name in REQUIRED:
         if not (root/name).is_file(): errors.append('missing required resource: '+name)
     try:
+        errors.extend(configuration_errors(root))
         if list(load(root/'ecosys-audit/gate_requirements.json'))!=STAGES:
             errors.append('canonical stage inventory differs from active contract')
         if set(STAGE_ALIASES.values())-set(STAGES): errors.append('stage alias has unknown destination')

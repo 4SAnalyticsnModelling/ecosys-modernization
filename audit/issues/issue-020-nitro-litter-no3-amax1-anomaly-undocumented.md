@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 020 -- nitro.f litter-surface NO3 mineralization uses AMAX1 where all 7 sibling blocks use AMIN1 (likely legacy typo); Zig's correct-looking deviation is undocumented
 
 Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** Independently re-verified this pass (see "Closing review" below); Zig's uniform `@min` cap is confirmed correct and is now cited in-code against a reintroduction of the legacy `AMAX1` floor.

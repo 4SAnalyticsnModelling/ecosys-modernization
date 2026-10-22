@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 034 -- REDIST surface-litter ion-inventory diagnostic double-counts `XOH2` (`redist.f:5828-5829`), deliberately and documentedly preserved in Zig as a "legacy pseudo-ion" parity quantity
 
 Status: CLOSED -- `preserved` (confirmed 2026-09-19; see "Closing review" section below). Originally filed OPEN (positive finding -- current Zig behavior is an intentional, documented bit-for-bit reproduction of a legacy diagnostic-only arithmetic defect; needs a reviewer decision on whether this parity choice is still wanted now that it is independently reconfirmed, not a physics fix)

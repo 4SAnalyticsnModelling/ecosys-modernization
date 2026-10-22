@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-018-WATSUB-HEAT-WATER-SOLVER-CORE
 
 Status: PARTIALLY_ASSESSED (source-audit; `watsub.f` is 7,030 lines; depth-read is now COMPLETE end to end -- this pass closed the last two unresolved sub-ranges, `:6197-6554` (net flux accumulation, below-surface evaporation-condensation, and micropore/macropore freeze-thaw, item 13) and `:6554-7030` (state-variable updates from net fluxes, item 14, confirming the scope note's "state updates" label was accurate). One new defect found and filed (`issue-051`). Depth-read completeness does not equal review completeness: four open issues touch this file (`issue-019`, `issue-049`, `issue-050`, `issue-051`) plus the shared `issue-015` stiff-solver frontier, and no independent reviewer pass has yet been applied to any of this dossier's 14 items -- see the closing tally at the end of this dossier)

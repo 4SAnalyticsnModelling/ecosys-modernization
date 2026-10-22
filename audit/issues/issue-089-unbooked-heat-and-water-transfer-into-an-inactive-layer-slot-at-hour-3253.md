@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 089 -- unbooked heat and water transfer from the top soil layer into the SURFACE (litter) scope at hour 3,253
 
 Status: **FIXED AND VALIDATED IN PRODUCTION (2026-09-21).** Hour 3,253 is cleared, the frontier advanced to hour **3,276**, and the run reports **zero** conservation failures. Full suite 4375 passed / 1 skipped / 0 failed (zero regressions); `ReleaseFast` exit 0, binary `C653A546...BB1B`. Record: `audit/runs/run-018-issue-089-ledger-fix-validation-2026-09-21.md`. The fix was bookkeeping only -- two `accumulateLitterSoilLocalTransfer` calls declaring the cascade's surface leg -- and the reviewer independently confirmed the sign, noting a reversal would have doubled the gap rather than cancelling it. The new blocker at hour 3,276 is `MissingFertilizerRecipientWaterVolume`, unrelated to this issue.

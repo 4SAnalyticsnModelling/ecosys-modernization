@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 046: `solute.f` litter HCO3-CO3+H dissociation (`RHCO3`) bounds against a stale, unrelated carboxyl-exchange substrate limit
 
 Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** See "Closing review (2026-09-19)" section at the end of this file. Independently re-verified `ion_pairing.zig`: the shared kernel's dissociation-side substrate limit is always computed fresh from the call's own `state` reactants, with no mutable scratch variable shared across reaction calls, confirming the issue's own claim. A citation comment has been added at `ecosys-ng/src/soil/solute/ion_pairing.zig` (above `calculate`).

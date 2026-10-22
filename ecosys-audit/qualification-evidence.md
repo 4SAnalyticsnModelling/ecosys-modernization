@@ -136,7 +136,7 @@ with unique `id` values. Results must cover exactly those IDs, without duplicate
 inventory independently from the candidate result set; source scope includes dormant units,
 output scope comes from the complete legacy inventory. Hashes and coverage assertions alone
 are not scientific proof. F4 regenerates its source denominator and F2/F3 reread raw data; adapter completeness and
-scientific interpretation still require G7 review.
+scientific interpretation still require the leader's G7 evidence re-derivation.
 
 | Criterion | Inventory item fields | Required result fields/checks |
 |---|---|---|
@@ -187,7 +187,9 @@ inputs, source, rules, validators or fixture reopen the hypothesis for considera
 
 ## Maintenance checks
 
-`doc_consistency.py` checks the active document list, links, stage vocabulary, obsolete approval
+`doc_consistency.py` discovers tracked and newly added project documents, checks active reviewer
+prerequisites, requires retirement notices on historical dossiers, and checks machine-readable
+leader/reviewer policy. It also checks links, stage vocabulary, obsolete approval
 language and skill alias drift. Historical review records are excluded. After skill edits use
 `skill_sync.py --apply`. Validate changed behavior with synthetic fixtures and the active tooling
 suite; workflow maintenance does not launch the Ottawa worker or advance qualification.

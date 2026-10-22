@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 032 -- `outer_hour_transaction` test hangs indefinitely under `zig build test`, consuming unbounded CPU
 
 Status: OPEN, DIAGNOSED (PARTIAL/INCONCLUSIVE ON HANG ROOT CAUSE; FAST-FAILURE SUB-FINDING NOW FULLY EXPLAINED) -- 2026-09-19, updated 2026-09-21. Static analysis rules out the named test's own body as an infinite-loop source (it is pure source-text string matching, no model execution, no retry ladder). A bounded dynamic rerun of the exact named test, and of its whole containing module's full test list, completed in seconds with an *assertion failure* (not a hang) under both routes actually exercised. The original 62,993-CPU-second hang was **not reproduced** in this session's bounded attempts. Root cause of the original hang remains unconfirmed; see Diagnosis section for what was ruled out, what changed, and what would be needed for full confirmation.

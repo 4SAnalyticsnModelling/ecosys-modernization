@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../../.agent/protocol.md).
+
 # Cycle 00004 gate evidence digest — DEV-023 nitrite supply admissibility (issue-113)
 
 Candidate: ReleaseSafe binary sha256 9021865ea89deff4e7eb8f4f63f2268472290b6ed47df32b7a949715df6586ae

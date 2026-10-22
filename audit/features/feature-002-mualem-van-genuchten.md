@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-002-MUALEM-VAN-GENUCHTEN
 
 Status: PARTIALLY_ASSESSED (2026-09-19, this session) -- confirmed the standard Mualem (1976)/van Genuchten (1980) closed-form retention and relative-conductivity equations against the primary/secondary literature and verified `retention.zig`'s `MualemVanGenuchtenParameters` implements them term-for-term (including the `pore_connectivity`/`L` exponent). Confirmed the anchor-point invariant flagged below as untested is in fact **already covered by an existing, passing test** (`src/validation/soil_water_retention_validation.zig`'s `"van Genuchten replaces a first-order joint with a second-order smooth curve"`), and additionally derived analytically from the fit algebra that the field-capacity anchor is reproduced *exactly* by construction (not merely to solver tolerance) while the wilting-point anchor is reproduced only to the Newton/Anderson solver's convergence tolerance -- a real, previously-unstated asymmetry between the two anchors. Ran the relevant tests directly this session under targeted `zig test --test-filter` invocations; all passed. Remaining open items: the legacy-side full read and the `bulk_density<=0` ice-content-analog gap addendum below are unchanged from the prior session (not re-verified this pass beyond confirming they are still accurately stated); performance impact and a formal acceptance envelope record are still not established.

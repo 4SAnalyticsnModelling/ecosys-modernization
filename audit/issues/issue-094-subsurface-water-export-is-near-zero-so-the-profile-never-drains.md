@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 094 -- ecosys-ng's subsurface water export is near zero, so the profile never drains: artificial (tile) drainage is 3.9 mm against the oracle's 213.5 mm
 
 Status: **OPEN. The measurement is sound and is an INDEPENDENT CONFIRMATION of an already-documented defect, not a new discovery (filed 2026-09-22, adversarial Claude/Pi session).** Found run-free while `issue-091` blocks all runs. This supersedes the framing of the cluster as five independent readouts: they are consequences of one missing water loss pathway.

@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 028 -- `starte.f`'s initial manure-protein 50% NH4 pre-mineralization has no Zig counterpart
 
 Status: OPEN (confirmed gap; escalates the "open trace, not a confirmed gap" note in `audit/features/feature-008-starte-soil-chemistry-initialization.md`'s Addendum). **Follow-up (2026-09-19): CONFIRMED NOT REACHABLE for the Ottawa deck** -- `f25sol98`'s manure C/N/P fields (`RSC(2,...)`/`RSN(2,...)`/`RSP(2,...)`) are exactly zero at the surface and every soil layer, in both the legacy and modern input copies. See "Follow-up resolution (2026-09-19)" near the end of this file. Deprioritized accordingly; not closed.

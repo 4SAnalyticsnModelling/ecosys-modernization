@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 018 -- macropore/micropore diffusive-exchange physical fix (SOLUTE-XFRS-PHYSICAL) applied to salts only, not to gases/dissolved nutrients, with no documented reason
 
 Status: **OPEN, candidate gap -- needs a reviewer's judgment call, not yet confirmed as a defect.** Same shape as `issue-017`: a domain-scope inconsistency verified against real production call sites (not a stale comment), where one branch of a physically-symmetric problem got an approved fix and a parallel branch didn't, with no record of whether that's deliberate.

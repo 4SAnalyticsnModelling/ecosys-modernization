@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 044: `trnsfr.f` subsurface-irrigation gas flux hardcodes H2 to zero while five sibling gases compute real values; Zig irrigation-chemistry schema carries no gas species at all
 
 Status: UNRESOLVED -- confirmed NOT REACHABLE for the Ottawa deck (2026-09-19; no irrigation scheduled in f25m98..f25m03); mechanism/scope questions remain open for any future irrigated deck.

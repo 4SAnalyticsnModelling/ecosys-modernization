@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 038 -- SOLUTE.F silicate weathering: the production Zig path shares an undocumented hydrogen budget between natural and ground rock dissolution that the Fortran does not have; the faithful translation exists only in a self-test
 
 Status: **OPEN, needs a coordinator/reviewer scope decision.** Not a sign error or a translation-order mistake; it is an added physical constraint with no legacy counterpart, currently exercised in production without appearing in the feature register.

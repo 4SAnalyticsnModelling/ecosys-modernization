@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 017 -- redist.f pond-branch layer relayering: two pool families are unconditional/active in the Fortran pond branch but Zig applies the soil-branch rule (gated/dead) uniformly
 
 Status: **OPEN, reachability CONFIRMED for the Ottawa deck (2026-09-19 follow-up) -- still needs conservation/feature-attribution review before a defect disposition can be assigned.** Both findings below are real code-vs-code asymmetries verified against actual production call sites (not inferred from a stale comment) -- the Zig comments accurately describe current behavior; they simply don't address the pond-branch divergence from the legacy reference. The 2026-09-19 reachability check (see section below) found, from the deck's own input files and source alone, that Ottawa's precipitation regularly exceeds the small (~4.7mm-depth) surface ponding-capacity threshold that gates the Fortran pond-relayering branch, so this is a live, recurring code path for this deck, not a dormant/paddy-only one. This raises this issue's priority (Tier-1-shaped: needs a human/scientist decision, not more static analysis) but does not by itself prove the asymmetry is scientifically wrong -- see "Why both need review" below, unchanged.

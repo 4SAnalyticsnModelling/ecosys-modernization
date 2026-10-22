@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 053 -- Two structurally different CION (total ion activity) pipelines feed the osmotic water-potential term; numeric equivalence for the Ottawa deck's top soil layer at hour 1 has never been checked
 
 Status: OPEN, PARTIALLY ADVANCED (2026-09-19 bounded follow-up) -- a real Zig production-path `PSISO`/`CION` number now exists for the Ottawa deck's hour-1/layer-1 (topsoil) cell (`CION~=3.41 mol/m3`, `PSISO~=-0.0076 MPa`, hand-derived from the already-captured `zig_run.log`'s `TEMP_CHEMISTRY_TRACE` species dump), but the cross-side (Fortran-oracle-vs-Zig) and cross-module (module-1-oracle-vs-module-2-production) numeric comparisons this issue asked for are still NOT closed: the Fortran oracle's equivalent number is not in any already-captured evidence and was found not to be obtainable by bounded hand computation (see `issue-024`'s round 5 addendum for the full trace), and module 1 (the unbound source-order oracle) was not separately evaluated against static soil-file inputs this pass. A freezing-point-formula sensitivity check does show the osmotic contribution's magnitude is too small (by ~3 orders of magnitude) to plausibly be the primary driver of `issue-024`'s observed hour-1 divergence on its own, which substantially lowers this issue's practical urgency without resolving its core unverified-equivalence question. See `issue-024`'s "## Round 5"/"## Resolution (round 5)" for the full write-up; original filing (static-source-only, no run/build/binary execution) preserved below.

@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # issue-112 — h4556 non-band layer 0 nitrate candidate −1.5464760719549581e-9 g: summed FMN-floored NO3 reduction demand exceeds zone supply
 
 **Status: FIXED & VERIFIED 2026-10-22 (cycle 00003 close-out).** Fix DEV-022 per-layer supply cap

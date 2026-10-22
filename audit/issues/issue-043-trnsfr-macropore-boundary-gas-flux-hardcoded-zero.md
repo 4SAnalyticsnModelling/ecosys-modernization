@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 043 -- `trnsfr.f:6470-6660` subsurface macropore *external boundary* convective flux hardcodes all six inorganic gases (CO2,CH4,O2,N2,N2O,H2) to zero; two smaller co-located copy/paste defects in the same block; Zig does not reproduce any of the three, but only incidentally
 
 Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected` (Findings A, B, and C).** See "Closing review (2026-09-19)" section at the end of this file. Independently re-verified `aqueous_extensive_transport.zig` and `external_boundaries.zig`: every species is handled by the same generic, sign-based rule with no per-species carve-out and no domain-flux-variable mixup possible, confirming the issue's own claim for all three co-located findings. A citation comment has been added at `ecosys-ng/src/soil/gas/aqueous_extensive_transport.zig` (above `state_updateBoundary`).

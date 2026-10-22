@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 085 -- a deck-selected output column for a soil layer beyond the runtime profile is emitted by the oracle as a structural zero and not emitted at all by ecosys-ng
 
 Status: **OPEN, needs an approved-intentional-difference record before G3 output comparison (filed 2026-09-21, adversarial Claude/Pi session).** Not a translation defect, not a binding error, and not a deck-input mismatch -- all three were checked and ruled out. It is a real, reproducible difference in the **emitted column inventory**, and the reason `issue-014`'s lesson applies: an unrecorded intentional difference gets misdiagnosed as a translation bug the first time someone runs a column-by-column comparison.

@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 042 -- `trnsfrs.f` subsurface macropore *boundary* discharge/recharge branch structure diverges from both its own micropore boundary treatment and the sibling gas file at the identical location
 
 Status: **CLOSED 2026-09-19, disposition `legacy-defect-corrected`.** See "Closing review (2026-09-19)" section at the end of this file: an independent reviewer pass (this session) confirms the legacy branch-structure asymmetry is a genuine unreviewed defect (Pattern A, consistent with 15+ other confirmed instances in this backlog) and that Zig's uniform, sign-based treatment is the scientifically favorable, architecturally-forced resolution. A citation comment has been added at `ecosys-ng/src/soil/solute/external_boundaries.zig` (in `calculateNetFluxMol`'s doc comment).

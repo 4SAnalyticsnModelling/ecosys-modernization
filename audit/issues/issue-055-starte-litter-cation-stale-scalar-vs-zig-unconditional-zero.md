@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 055 -- `starte.f`'s surface-litter free-ion seed (NH4/Al/Fe/Ca/Mg/Na/K) reads stale loop-carryover scalars when ISALTG=0; Zig instead zeros the same species unconditionally in both salt modes
 
 Status: **OPEN, corrected framing 2026-09-19.** Independent closing review confirmed Part A (the legacy Fortran stale-scalar defect) but found Part B's claim about Zig ("Zig instead zeros the same species unconditionally in both salt modes") to be **substantively wrong**: it cites the wrong Zig function. See "## Closing review (2026-09-19)" below for the corrected mechanism, the actual production seeder, and why this issue is being kept open rather than closed.

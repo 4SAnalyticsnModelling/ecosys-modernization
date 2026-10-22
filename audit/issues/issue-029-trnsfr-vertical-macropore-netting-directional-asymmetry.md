@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 029 -- `trnsfr.f`/`trnsfrs.f` vertical macropore/micropore double-depletion guard is applied only for downward (donor-current-cell) flow, not the mirror upward case
 
 Status: OPEN, disposition remains `unresolved` (confirms and closes out the "secondary, lower-confidence lead, not closed" flagged in `audit/features/feature-009-trnsfr-trnsfrs-solute-gas-transport.md`'s Addendum; extended 2026-09-19 to the sibling salt file, see "Sibling-file confirmation" below; further extended 2026-09-19 with an independent architectural re-confirmation, see "Independent review, not closure (2026-09-19)" at the end of this file -- structural claims confirmed, but this issue is NOT closed this pass)

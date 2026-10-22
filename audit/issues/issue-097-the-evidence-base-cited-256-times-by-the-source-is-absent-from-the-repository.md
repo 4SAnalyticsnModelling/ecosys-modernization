@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 097 -- the evidence base the source cites 256 times is absent from the repository under audit, and this session rediscovered documented findings because of it
 
 Status: **OPEN, CONFIRMED, PROCESS BLOCKER. Highest-priority systemic finding of round 26 (filed 2026-09-22, adversarial Claude/Pi session). Recommendation stated; the bulk import deliberately NOT performed -- see "Why I did not just copy it".**

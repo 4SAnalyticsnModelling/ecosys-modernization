@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-016-DAY-DAILY-ORCHESTRATION
 
 Status: PARTIALLY_ASSESSED (source-audit; `day.f` is 424 lines, full-file read, ~75-80% traced to a specific live Zig site, remainder unverified not flagged as gaps)

@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 082 -- `kernelgen.py`'s generated driver hardcodes every scalar argument to 0, so the routine is called out of bounds and computes nothing
 
 Status: **FIXED AND VALIDATED, same day (2026-09-21)** -- see `audit/runs/run-012-kernelgen-harness-validated-against-hand-arithmetic-2026-09-21.md`. The peer author rewrote the generator to take `I/J/NFZ/NZ/NY/NX` from `COMMAND_ARGUMENT_COUNT`/`GET_COMMAND_ARGUMENT` with a `<kernel>.args` sidecar fallback, to emit in-Fortran bounds checks that `STOP 2` before opening the snapshot, and to add `-fcheck=bounds` to both the driver and legacy-unit compiles. Rebuilt and re-run here on the run lane, with all three guard cases tested explicitly: out-of-bounds `NZ=0` refused (`argument NZ out of bounds [1,JP]`, exit 2), no-arguments refused (exit 2), valid subscripts accepted (exit 0, 0.068 s). The decisive proof is that the two quantities this issue used to expose the defect now come out right: `FMOL(1,1,1) = 40.89887640449439` against a hand-computed `1.2194e4/298.15`, matching to full f64 precision, and `CO2I(1,1,1) = 280` against `0.7*400`, exactly. Original filing preserved below unchanged.

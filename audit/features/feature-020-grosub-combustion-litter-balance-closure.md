@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Feature ID: FEAT-020-GROSUB-COMBUSTION-LITTER-BALANCE-CLOSURE
 
 Status: PARTIALLY_ASSESSED (source-audit; assigned range `f77src/grosub.f:11685-13177` read in full this pass, closing the gap left after TRC-168..TRC-171 (`8748-11557`; renumbered from an original TRC-032..TRC-035 after a later-discovered numbering collision was fixed); independent review not yet done)

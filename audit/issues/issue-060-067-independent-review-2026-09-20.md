@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Independent review -- issue-060 through issue-067 (water-carrier defect class, shared heat-floor-discard ledger, vapor-solver tolerance reconciliation)
 
 Status: CLOSED -- REVIEW COMPLETE (2026-09-20): all eight fixes re-verified against the then-current tree; none required correction. All eight issues' final fixes independently re-verified against the CURRENT source tree (not just the commit diffs) by direct reading, hand-traced arithmetic, and boundary-case inspection; none required correction. Two genuine, previously-undiscovered gaps in the SAME defect class were found during this review's cross-consumer sweep and are filed separately as `issue-069` (not folded into any of the eight issues below, per this project's own established discipline against conflating a confirmed fix with a newly found, distinct instance).

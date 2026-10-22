@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 024 -- Top 1-2 soil layers' water content diverges significantly and grows between the Fortran oracle and ecosys-ng (Zig), deep layers agree closely
 
 Status: OPEN -- REOPENED (round 11, 2026-09-21): legacy top-layer freeze/thaw limiter (watsub.f:2802-2823, per this file) has no Zig port; kinetic-vs-equilibrium formulation difference identified by source reading, not yet fixed or run-validated.

@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 062 -- fresh full-fix-batch production run still fails at hour 2,894, now with a NEW terminal error (`RelayeringActivityConservationFailure`), confirming issue-060/061's fix addressed only one downstream symptom of the WATSUB 6907 heat-discard root cause
 
 Status: FIXED (source + regression tests, 2026-09-19 -- see "## Fix applied" below) for the mechanism this issue actually diagnosed (`heat_megajoules`). **Confirmed by live validation run, resumed from a hour-2,880 checkpoint, that the fix is effective**: the identical resumed scenario that previously failed on `heat_megajoules` at hour 2,894 now passes that field and proceeds to fail on a DIFFERENT, previously-masked field (`carbon_dioxide_carbon_g`) -- see `issue-063`, filed this same pass, NOT this issue's scope and NOT reopening this issue. **Update (2026-09-19, root-cause investigation pass, see section below): the discard itself is confirmed FAITHFUL LEGACY BEHAVIOR (both `watsub.f:6907-6913` and `redist.f:9645-9666` discard/misallocate energy the same way when a layer's heat capacity is at/below `VHCPRX`), not a Zig defect. The concrete mechanism tripping THIS check is now identified via source reading (not yet an instrumented rerun): `heat_layer_remap.zig`'s own VHCPRX-floor fallback, exercised during the SAME hour's relayering transfer, not (only) the WATSUB-6907 solve-time discard this issue originally hypothesized. Recommended fix is a shared, cross-consumer reconciliation ledger, not a per-consumer patch -- see "## Root-cause investigation (2026-09-19)" below.**

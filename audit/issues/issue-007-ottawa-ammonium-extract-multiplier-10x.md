@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 007 -- Ottawa deck's soil_ammonium_extract_multiplier (0.01) is 10x smaller than the legacy oracle's hardcoded equivalent (0.1)
 
 Status: **FIXED 2026-09-18** in the `D:\ecosys_modernization` master project (per explicit user direction: read the OneDrive tree for reference, do the actual work here, legacy Fortran is the oracle). Not propagated to the OneDrive tree (read-only) or its `docs/discrepancy_register.md` -- if that project is later reconciled with this one, this fix and its regression test should be cross-checked there too.

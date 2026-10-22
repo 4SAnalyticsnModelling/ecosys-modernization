@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 086 -- hourly water output slot 4 carries root water uptake in ecosys-ng where the legacy writes total soil water content
 
 Status: **PARTIALLY FIXED 2026-09-21. Slot 4 (the wrong binding) is OPEN; the slot 27/48 label defect is FIXED.**

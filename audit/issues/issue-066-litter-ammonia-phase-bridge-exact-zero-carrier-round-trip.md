@@ -1,3 +1,10 @@
+<!-- workflow-policy: historical; reviewer-gates=retired -->
+> **Current workflow:** All reviewer-decision, reviewer sign-off and human-approval
+> requirements in this historical dossier are retired. The accountable leader resolves
+> scientific questions from evidence and performs verification; no other actor grants permission.
+> Supporting sub-agents are optional. Original observations and unresolved scientific
+> evidence obligations below remain intact. Authority: [current protocol](../../.agent/protocol.md).
+
 # Issue 066 -- `litter_ammonia_phase_bridge.zig`'s `refreshTransientFromChemistry`/`publishTransientToChemistry` round trip uses an exact-zero-only litter-water guard instead of the shared `ZEROS2`/`dry_reference_water_m3` carrier substitution -- a pack/unpack-shaped sibling the issue-061 keyword sweep could not have found
 
 Status: FIXED (disposition legacy-defect-corrected) -- fix applied 2026-09-20 with OLD/NEW regression tests. `litter_ammonia_phase_bridge.zig`'s `refreshTransientFromChemistry`/`publishTransientToChemistry` now take a `cell_area_m2` parameter, derive the `ZEROS2` floor via `legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3`, and route both the pack multiply and unpack divide through the new `litterAmmoniaCarrierM3` helper instead of the raw exact-zero water guard. Both call sites in `litter_gas_transport_step.zig`'s `advanceWithFailureReport` updated to pass `cell_area_m2` (already a parameter there). Existing "dry retained ammonia" test renamed and re-asserted to the corrected expected values; two new issue-066 OLD/NEW regression tests added. `litter_chemistry_carrier_rebase.zig` required no code change -- see "Fix disposition" below. Targeted `zig test` runs (module root `src/module_index.zig`, `--test-filter` scoped) confirm all 5 `litter_ammonia_phase_bridge.zig` tests and all 3 `litter_gas_transport_step.zig` tests pass; `zig build -Doptimize=ReleaseFast` succeeds (3/3 steps). Not yet independently reviewed; not execution-confirmed against a live production run (per this fix's own item 7, a full-deck rerun is not required to accept this fix).
