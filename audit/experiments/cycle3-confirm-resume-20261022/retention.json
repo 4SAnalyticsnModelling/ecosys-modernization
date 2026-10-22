@@ -1,0 +1,10 @@
+{
+  "policy": "retain-through-F7-and-reproducibility",
+  "note": "10 MB engine build products retained repo-local under their receipt directories; identity bound by sha256; excluded from git by repository no-binaries convention.",
+  "retained": {
+    "audit/runs/cycle-build-Debug-20261021220253397677/build-product/ecosys_ng": "c14a18bea6a508b68acbcaf72ab2de48a9072981bdabce80bbf3d961abe24d17",
+    "audit/runs/cycle-build-ReleaseSafe-20261021220322410232/build-product/ecosys_ng": "36c3784ae0e378d3193ea870050cf33ad659480e07fed0eec2b478caf0ed8556",
+    "audit/runs/cycle-build-ReleaseFast-20261021220322981273/build-product/ecosys_ng": "d070ebfe8444b4d237cb278addcaf6628f5f1a89aff6dcfe0299aa8850f45682",
+    "audit/runs/cycle3-confirm-build-ReleaseSafe-20261021234803/build-product/ecosys_ng": "36c3784ae0e378d3193ea870050cf33ad659480e07fed0eec2b478caf0ed8556"
+  }
+}
