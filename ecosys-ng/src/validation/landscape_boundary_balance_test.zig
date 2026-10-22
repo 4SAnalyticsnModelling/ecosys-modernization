@@ -84,6 +84,39 @@ test "accepted WTNDI inoculum publishes exact cell and domain C N P once" {
     try std.testing.expectEqual(@as(f64, 0), closed.phosphorus_g);
 }
 
+test "accepted planting seed mass publishes as boundary input and closes the identity" {
+    var state: ledger_module.State = .{};
+    const carbon = [_]f64{ 0.9, 0.42 };
+    const nitrogen = [_]f64{ 0.09, 0.042 };
+    const phosphorus = [_]f64{ 0.009, 0.0042 };
+    try state.accumulateAcceptedPlanting(&carbon, &nitrogen, &phosphorus);
+    try std.testing.expectEqual(@as(f64, 0.9 + 0.42), state.cumulative.planting_carbon_input_g_c);
+    try std.testing.expectEqual(@as(f64, 0.09 + 0.042), state.cumulative.planting_nitrogen_input_g_n);
+    try std.testing.expectEqual(@as(f64, 0.009 + 0.0042), state.cumulative.planting_phosphorus_input_g_p);
+
+    // The injected seed mass inside the plant census is exactly explained by
+    // the published boundary input: the daily identity must close at zero.
+    var totals = std.mem.zeroes(audit.Totals);
+    totals.landscape_area_m2 = 1;
+    totals.plant_carbon_g = 0.9 + 0.42;
+    totals.plant_nitrogen_g = 0.09 + 0.042;
+    totals.plant_phosphorus_g = 0.009 + 0.0042;
+    try state.publish(&totals);
+    const closed = try audit.balance(totals);
+    try std.testing.expectEqual(@as(f64, 0), closed.carbon_g);
+    try std.testing.expectEqual(@as(f64, 0), closed.nitrogen_g);
+    try std.testing.expectEqual(@as(f64, 0), closed.phosphorus_g);
+
+    // Without the ledger term the same census jump is an open deviation.
+    var open = std.mem.zeroes(audit.Totals);
+    open.landscape_area_m2 = 1;
+    open.plant_carbon_g = 0.9 + 0.42;
+    open.plant_nitrogen_g = 0.09 + 0.042;
+    open.plant_phosphorus_g = 0.009 + 0.0042;
+    const broken = try audit.balance(open);
+    try std.testing.expectEqual(@as(f64, 0.9 + 0.42), broken.carbon_g);
+}
+
 test "invalid WTNDI activity leaves cell domain and source buffers unchanged" {
     var state: ledger_module.State = .{};
     var cell_ledger = try hourly.BoundaryLedger.init(std.testing.allocator, 1);

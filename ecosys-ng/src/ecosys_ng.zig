@@ -7200,6 +7200,21 @@ noinline fn advancePlantLifecycleManagement(
                         .nitrogen_input_g = driver_context.plant_lifecycle_external_input.*[plant].nitrogen_g,
                         .phosphorus_input_g = driver_context.plant_lifecycle_external_input.*[plant].phosphorus_g,
                     });
+                    // The preflight admits this mass at the hourly cell gate;
+                    // mirror the same accepted external seeding mass into the
+                    // cumulative landscape ledger so the daily elemental
+                    // identities see the same boundary crossing (issue-116).
+                    {
+                        const reseed_input = driver_context.plant_lifecycle_external_input.*[plant];
+                        const seeding_carbon_g = [_]f64{reseed_input.carbon_g};
+                        const seeding_nitrogen_g = [_]f64{reseed_input.nitrogen_g};
+                        const seeding_phosphorus_g = [_]f64{reseed_input.phosphorus_g};
+                        try driver_context.landscape_mass_balance_state.*.boundary_ledger.accumulateAcceptedPlanting(
+                            &seeding_carbon_g,
+                            &seeding_nitrogen_g,
+                            &seeding_phosphorus_g,
+                        );
+                    }
                     try ecosys.plant_initialization.initializePlantHeatAndWater(&driver_context.plant_state.*, &driver_context.detailed_canopy_state.*.?, plant, driver_context.mean_annual_temperature_c_by_cell.*[cell], traits.water_relations.osmotic_potential_megapascal, driver_context.runscript.*.plant_heat_water_parameters);
                     try ecosys.canopy_photosynthesis.restorePersistentReseedInventories(&driver_context.detailed_canopy_state.*.?, plant, persistent_reseed_inventories);
                     if (!preserve_reseed_inventories) {

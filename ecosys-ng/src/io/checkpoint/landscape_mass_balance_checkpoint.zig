@@ -51,7 +51,10 @@ const magic = "ECOSMBAL";
 // Version 19 counts organic amendments once. A v18 accumulated boundary may
 // include its NBP diagnostic again; that history cannot be recovered from the
 // summed credit without the original events.
-const version: u32 = 19;
+// Version 20 records the planting seed boundary. A v19 history cannot
+// distinguish reseeded/replanted seed carbon, nitrogen and phosphorus entering
+// the plant census from an unexplained elemental gain.
+const version: u32 = 20;
 
 pub const ExpectedShape = struct {
     cell_count: usize,
@@ -240,6 +243,8 @@ noinline fn readHeaderAndLedger(reader: *std.Io.Reader, result: *State) !void {
         return error.LegacyCheckpointMissingMineralFertilizerCarbonHistory;
     if (encoded_version == 18)
         return error.LegacyCheckpointAmbiguousOrganicFertilizerCarbonHistory;
+    if (encoded_version == 19)
+        return error.LegacyCheckpointMissingPlantSeedingConservationHistory;
     if (encoded_version != version)
         return error.UnsupportedLandscapeMassBalanceCheckpointVersion;
     result.boundary_ledger.cumulative = try readNumericStruct(boundary.Fluxes, reader);
@@ -1064,6 +1069,18 @@ test "duplicate-organic-carbon checkpoint history cannot be resumed" {
     var reader = std.Io.Reader.fixed(writer.buffered());
     try std.testing.expectError(
         error.LegacyCheckpointAmbiguousOrganicFertilizerCarbonHistory,
+        read(std.testing.allocator, &reader, checkpoint_test_shape),
+    );
+}
+
+test "pre-planting-boundary checkpoint history cannot be resumed" {
+    var bytes: [32]u8 = undefined;
+    var writer = std.Io.Writer.fixed(&bytes);
+    try writer.writeAll(magic);
+    try writer.writeInt(u32, 19, .little);
+    var reader = std.Io.Reader.fixed(writer.buffered());
+    try std.testing.expectError(
+        error.LegacyCheckpointMissingPlantSeedingConservationHistory,
         read(std.testing.allocator, &reader, checkpoint_test_shape),
     );
 }

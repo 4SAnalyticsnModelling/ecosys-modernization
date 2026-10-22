@@ -99,6 +99,13 @@ pub const Fluxes = struct {
     // CaCO3 amendment carbon is neither atmospheric CO2 nor organic matter.
     // Appended for explicit checkpointed boundary provenance.
     mineral_fertilizer_carbon_g_c: f64 = 0,
+    // Seed storage injected into a living plant after the initial condition
+    // (GROSUB WTSTDG at replanting/reseeding) crosses the landscape boundary
+    // like inoculum: the seed elemental mass is sourced outside the simulated
+    // landscape. Appended to preserve the serialized order of earlier fields.
+    planting_carbon_input_g_c: f64 = 0,
+    planting_nitrogen_input_g_n: f64 = 0,
+    planting_phosphorus_input_g_p: f64 = 0,
 };
 
 /// Accepted transformations that create or consume an audited species
@@ -885,6 +892,24 @@ pub const State = struct {
         });
     }
 
+    /// Accepted planting seed mass that crosses the landscape boundary into
+    /// the plant census (GROSUB WTSTDG injected after the initial condition).
+    /// Follows the organic-fertilizer precedent; callers book exactly the mass
+    /// already admitted by the hourly cell-gate preflight for that event.
+    pub fn accumulateAcceptedPlanting(
+        self: *State,
+        carbon_g_c: []const f64,
+        nitrogen_g_n: []const f64,
+        phosphorus_g_p: []const f64,
+    ) !void {
+        try requireSameNonzeroLength(.{ carbon_g_c, nitrogen_g_n, phosphorus_g_p });
+        try self.accumulateAccepted(.{
+            .planting_carbon_input_g_c = try sumNonnegative(carbon_g_c),
+            .planting_nitrogen_input_g_n = try sumNonnegative(nitrogen_g_n),
+            .planting_phosphorus_input_g_p = try sumNonnegative(phosphorus_g_p),
+        });
+    }
+
     pub fn accumulateAcceptedExports(
         self: *State,
         carbon_exports_g_c: [4][]const f64,
@@ -1489,6 +1514,9 @@ pub const State = struct {
         totals.cumulative_plant_root_organic_phosphorus_exudate_g = f.plant_root_organic_exudate_g_p;
         totals.cumulative_symbiotic_inoculum_carbon_input_g = f.symbiotic_inoculum_carbon_input_g_c;
         totals.cumulative_mineral_fertilizer_carbon_g = f.mineral_fertilizer_carbon_g_c;
+        totals.cumulative_planting_carbon_input_g = f.planting_carbon_input_g_c;
+        totals.cumulative_planting_nitrogen_input_g = f.planting_nitrogen_input_g_n;
+        totals.cumulative_planting_phosphorus_input_g = f.planting_phosphorus_input_g_p;
         totals.cumulative_symbiotic_inoculum_nitrogen_input_g = f.symbiotic_inoculum_nitrogen_input_g_n;
         totals.cumulative_symbiotic_inoculum_phosphorus_input_g = f.symbiotic_inoculum_phosphorus_input_g_p;
         totals.cumulative_cation_exchange_capacity_input_mol = f.cation_exchange_capacity_input_mol;

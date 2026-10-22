@@ -131,6 +131,13 @@ pub const Totals = struct {
     cumulative_symbiotic_inoculum_nitrogen_input_g: f64 = 0,
     cumulative_symbiotic_inoculum_phosphorus_input_g: f64 = 0,
     cumulative_mineral_fertilizer_carbon_g: f64 = 0,
+    /// Planting seed storage injected into a living plant after the initial
+    /// condition (GROSUB WTSTDG via replanting/reseeding). The seed elemental
+    /// mass enters the plant census from outside the simulated landscape, so
+    /// every gram added to the plant pools must appear here as an input.
+    cumulative_planting_carbon_input_g: f64 = 0,
+    cumulative_planting_nitrogen_input_g: f64 = 0,
+    cumulative_planting_phosphorus_input_g: f64 = 0,
 };
 
 pub const Balance = struct {
@@ -265,9 +272,9 @@ pub fn balance(t: Totals) !Balance {
         // volume. Plant litter and root-soil exchange are internal transfers:
         // both donor and recipient are in storage, so the legacy soil-only
         // sink/exchange diagnostics must not enter this identity a second time.
-        .carbon_g = compensatedSum(&.{ t.residue_carbon_g, t.organic_carbon_g, t.carbon_dioxide_carbon_g, t.plant_carbon_g, -t.cumulative_carbon_dioxide_input_g, t.cumulative_carbon_output_g, -t.cumulative_organic_fertilizer_carbon_g, -t.cumulative_symbiotic_inoculum_carbon_input_g, -t.cumulative_mineral_fertilizer_carbon_g }),
-        .nitrogen_g = compensatedSum(&.{ t.residue_nitrogen_g, t.organic_nitrogen_g, t.dinitrogen_nitrogen_g, t.ammonium_nitrogen_g, t.nitrate_nitrogen_g, t.plant_nitrogen_g, -t.cumulative_dinitrogen_input_g, -t.cumulative_nitrogen_input_g, t.cumulative_nitrogen_output_g, -t.cumulative_organic_fertilizer_nitrogen_g, -t.cumulative_symbiotic_inoculum_nitrogen_input_g }),
-        .phosphorus_g = compensatedSum(&.{ t.residue_phosphorus_g, t.organic_phosphorus_g, t.phosphate_phosphorus_g, t.plant_phosphorus_g, -t.cumulative_phosphorus_input_g, t.cumulative_phosphorus_output_g, -t.cumulative_organic_fertilizer_phosphorus_g, -t.cumulative_symbiotic_inoculum_phosphorus_input_g }),
+        .carbon_g = compensatedSum(&.{ t.residue_carbon_g, t.organic_carbon_g, t.carbon_dioxide_carbon_g, t.plant_carbon_g, -t.cumulative_carbon_dioxide_input_g, t.cumulative_carbon_output_g, -t.cumulative_organic_fertilizer_carbon_g, -t.cumulative_symbiotic_inoculum_carbon_input_g, -t.cumulative_mineral_fertilizer_carbon_g, -t.cumulative_planting_carbon_input_g }),
+        .nitrogen_g = compensatedSum(&.{ t.residue_nitrogen_g, t.organic_nitrogen_g, t.dinitrogen_nitrogen_g, t.ammonium_nitrogen_g, t.nitrate_nitrogen_g, t.plant_nitrogen_g, -t.cumulative_dinitrogen_input_g, -t.cumulative_nitrogen_input_g, t.cumulative_nitrogen_output_g, -t.cumulative_organic_fertilizer_nitrogen_g, -t.cumulative_symbiotic_inoculum_nitrogen_input_g, -t.cumulative_planting_nitrogen_input_g }),
+        .phosphorus_g = compensatedSum(&.{ t.residue_phosphorus_g, t.organic_phosphorus_g, t.phosphate_phosphorus_g, t.plant_phosphorus_g, -t.cumulative_phosphorus_input_g, t.cumulative_phosphorus_output_g, -t.cumulative_organic_fertilizer_phosphorus_g, -t.cumulative_symbiotic_inoculum_phosphorus_input_g, -t.cumulative_planting_phosphorus_input_g }),
         .ions_mol = t.ion_inventory_mol - t.cumulative_ion_input_mol + t.cumulative_ion_output_mol,
         .hydrogen_g = compensatedSum(&.{
             t.hydrogen_storage_g,
@@ -514,24 +521,6 @@ pub const Monitor = struct {
         // precipitates, organic pools, litter carriers, and boundary ledgers.
         // Its census has roughly four times the rounded terms of C/N.
         const phosphorus_roundoff_per_m2 = 4 * representationFloorForInterval(current_scale.phosphorus_g, self.cancellation_scale_baseline.phosphorus_g, totals.landscape_area_m2);
-        if (!builtin.is_test and issue116_trace_day(day, year, totals.plant_carbon_g, current.carbon_g, self.baseline.carbon_g)) std.log.err(
-            "TEMP_DIAGNOSTIC issue-116 carbon terms: year={d} day={d} balance={e} baseline={e} residue={e} organic={e} co2={e} plant={e} cum_co2_in={e} cum_c_out={e} cum_orgfert={e} cum_inoc={e} cum_minfert={e}",
-            .{
-                year,
-                day,
-                current.carbon_g,
-                self.baseline.carbon_g,
-                totals.residue_carbon_g,
-                totals.organic_carbon_g,
-                totals.carbon_dioxide_carbon_g,
-                totals.plant_carbon_g,
-                totals.cumulative_carbon_dioxide_input_g,
-                totals.cumulative_carbon_output_g,
-                totals.cumulative_organic_fertilizer_carbon_g,
-                totals.cumulative_symbiotic_inoculum_carbon_input_g,
-                totals.cumulative_mineral_fertilizer_carbon_g,
-            },
-        );
         try checkOne(day, year, "carbon", d.carbon_g_m2, limit.carbon_g_m2 + carbon_roundoff_per_m2, error.CarbonMassBalanceLost);
         try checkOne(day, year, "nitrogen", d.nitrogen_g_m2, limit.nitrogen_g_m2 + nitrogen_roundoff_per_m2, error.NitrogenMassBalanceLost);
         try checkOne(day, year, "phosphorus", d.phosphorus_g_m2, limit.phosphorus_g_m2 + phosphorus_roundoff_per_m2, error.PhosphorusMassBalanceLost);
@@ -700,17 +689,6 @@ fn formatAuditLine(buf: []u8, day: u64, year: i32, d: Deviation) []const u8 {
         d.ions_mol_m2,
         d.water_m,
     }) catch unreachable;
-}
-
-var issue116_prev_plant_g: f64 = std.math.nan(f64);
-
-fn issue116_trace_day(day: u64, year: i32, plant_g: f64, balance_g: f64, baseline_g: f64) bool {
-    const jump = @abs(plant_g - issue116_prev_plant_g);
-    issue116_prev_plant_g = plant_g;
-    if (year == 1999 and day >= 135 and day <= 138) return true;
-    _ = balance_g;
-    _ = baseline_g;
-    return !std.math.isNan(jump) and jump > 0.4;
 }
 
 fn checkOne(day: u64, year: i32, comptime domain: []const u8, value: f64, tolerance: f64, comptime failure: anyerror) !void {
@@ -1411,9 +1389,10 @@ test "every cumulative Totals field is read by an identity, or is a named except
             return error.CumulativeFieldWithoutReader;
         }
     }
-    // Pins the measurement so the exception list cannot quietly grow: 79
-    // cumulative fields (including the mineral-carbon boundary), 11 unread.
-    try std.testing.expectEqual(@as(usize, 79), declared);
+    // Pins the measurement so the exception list cannot quietly grow: 82
+    // cumulative fields (including the mineral-carbon and planting seed
+    // boundaries), 11 unread.
+    try std.testing.expectEqual(@as(usize, 82), declared);
     try std.testing.expectEqual(@as(usize, 11), unread);
     try std.testing.expectEqual(cumulative_fields_without_a_reader.len, unread);
 }
@@ -1524,7 +1503,7 @@ test "no cumulative Totals field is read by more than one identity" {
             return error.CumulativeFieldReadByTwoIdentities;
         }
     }
-    // Same 79 the sibling test pins, reached by a different traversal, so a
+    // Same 82 the sibling test pins, reached by a different traversal, so a
     // change to `Totals` cannot satisfy one test and silently skip the other.
-    try std.testing.expectEqual(@as(usize, 79), checked);
+    try std.testing.expectEqual(@as(usize, 82), checked);
 }

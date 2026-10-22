@@ -50,6 +50,28 @@ sourced/booked there; 1999 re-establishment lost that leg. Candidates: establish
 residue/seedbed applied only on first planting; or second-year planting path skips the booking that
 first-year planting performs.
 
+## Resolution (cycle 00006, 2026-10-22)
+ROOT CAUSE (VERIFIED): the driver reseed/replant seeding site (ecosys-ng/src/ecosys_ng.zig,
+plant_lifecycle_external_input block ~7186-7220) admits the injected seed ElementalMass at the hourly
+cell gate (preflight) but nothing mirrored that mass into the cumulative landscape boundary ledger,
+and the daily elemental identities carried no planting term. The hourly gate therefore closed while
+the daily audit saw +1.320000 g C/m2 (soyb33, 37.5 stems/m2 x 0.0352 g seed C) appear in the plant
+census without a donor on the 1999 reseeding day (d138). probe v3 (audit/runs/ottawa/cycle6-diag-scratch2-*)
+shows 1998 carried its 1.32 g C seed storage inside the initial condition (plant=1.320000 g from day 1,
+1998 d138 emergence dP=+2.8e-5 only) - the baseline covers t0, so only the post-t0 reseed leaks.
+FIX (ledger-only, physics untouched): landscape_boundary_balance.Fluxes += planting_{carbon,nitrogen,
+phosphorus}_input (appended order-preserving); accumulateAcceptedPlanting (organic-fertilizer precedent);
+publish() maps the three into new audit.Totals cumulative_planting_*_input_g fields; balance() subtracts
+them for C/N/P; the driver reseed site books exactly the preflight-admitted mass per event; landscape
+mass-balance checkpoint v19->v20 with explicit legacy rejection (LegacyCheckpointMissingPlantSeeding-
+ConservationHistory) - v19 histories cannot distinguish seed gain from an unexplained source.
+The startup (initial-condition) seeding site is intentionally NOT booked: it is inside the baseline.
+Note: seed N and P (grain ratio) were equally unbooked and are covered by the same term set.
+LATENT (UNVERIFIED, out of scope): self-reseed with preserve_reseed_inventories=true books nothing
+anywhere (claims internal carryover) - if that carryover is invisible to the census during dormancy,
+a similar leak would appear; no Ottawa evidence that path fires. Standing-dead injection at replanting
+(standing_dead_carbon_g_per_m2>0 PFTs) may need the same treatment; soyb33 injects zero here.
+
 ## Next steps (next cycle)
 
 1. Diff the tillage carbon ledger: enumerate every carbon pool transfer the tillage pass performs
@@ -60,3 +82,11 @@ first-year planting performs.
 3. Falsifier for chaotic-amplification doubt: rerun 1999 d130-138 from a pre-fix binary deck segment? Not
    possible (old binary died at h11806 pre-dating tillage); instead bisect by disabling only management
    tillage? No — diagnose by ledger legs, no physics toggles.
+
+## Verification plan (cycle 00006)
+Checkpoint v20 invalidates every v19 resume deck => from-scratch verification on candidate
+52aba77c13d37470480216e7b522402b99d9a8d8420d5b2a56357b6f86e77cea, deck
+evidence/runs/cycle6-verify-scratch-20261022/deck (diff-verified prod inputs), receipt
+audit/runs/ottawa/cycle6-verify-scratch-candidate-20261022095502. Acceptance: 1999 d138 daily
+conservation accepted (deviation ~roundoff, not 1.32); 1998 ledgers bit-comparable to cycle-5
+candidate through d365 (no physics change); run advances past h12073 to the next distinct defect.
