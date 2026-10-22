@@ -33,7 +33,8 @@ skill-creator validator; `skill_sync.py` reports zero drift. The first `tests` a
 an import-order collection failure, fixed before the successful run. No science simulation,
 threshold, frontier promotion or release qualification is claimed by this maintenance.
 
-The existing HerdR pane's current DSH session receives the current policy and recovered
-cycle-7 handoff after publication; `../notes-size-recovery-20261022/resume.json` records the
-actual continuation evidence. The old session remains preserved and must not be launched
-as a duplicate leader while that current worker owns the mission.
+The original saved DSH instance was resumed in the existing HerdR pane after its briefly open
+fresh session exited. Native compaction completed; the current policy and recovered cycle-7
+handoff were queued after publication. `continuation.txt` and `submission.json` retain that
+instruction and endpoint identity; `../notes-size-recovery-20261022/resume.json` records the
+actual continuation evidence. That resumed worker is the sole leader for this mission.

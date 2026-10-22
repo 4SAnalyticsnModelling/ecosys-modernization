@@ -1,0 +1,27 @@
+{
+  "submittedAt": "2026-10-22T20:23:08.023Z",
+  "sessionId": "4c83caf2-c5bc-4235-81c5-f346a4f7f22a",
+  "pid": 124,
+  "socketPath": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.s/ef299ec27ad3740d9cb27c1b09e6fed8.sock",
+  "transport": "native DSH injection channel",
+  "priorHerdrPrompt": "rejected before submission: agent_not_ready (unnamed agent)",
+  "delivery": "Native queued followup was withdrawn and resubmitted through the steering UI; this installed runtime records the resulting inbox item as next-turn.",
+  "inboxEvents": [
+    {
+      "seq": 5119,
+      "target": "next-turn"
+    },
+    {
+      "seq": 5156,
+      "target": "next-turn"
+    }
+  ],
+  "currentTurnPolicy": {
+    "eventSeq": 5122,
+    "source": "Successfully loaded current ecosys-autonomous-orchestration skill",
+    "singleLeader": true,
+    "optionalSafeSubagents": true,
+    "noAdversarialReviewers": true,
+    "noReviewerApprovalGates": true
+  }
+}

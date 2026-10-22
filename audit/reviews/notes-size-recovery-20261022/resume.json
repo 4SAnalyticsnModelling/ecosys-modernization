@@ -1,0 +1,124 @@
+{
+  "verifiedAt": "2026-10-22T20:24:06.214Z",
+  "sessionId": "4c83caf2-c5bc-4235-81c5-f346a4f7f22a",
+  "instance": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.dsh-watchdog/instances/8275edde-5f78-4615-89d6-f02a66cc8361",
+  "herdrSession": "ecosys-work-qwen-3.8-8bit-Strata",
+  "pane": "w1:p1",
+  "launch": "/Users/4sanalyticsnmodelling/.local/bin/dst --watchdog-resume 8275edde-5f78-4615-89d6-f02a66cc8361",
+  "nativeCompactionEnd": {
+    "type": "compaction/end",
+    "seq": 5113,
+    "time": 1792700517093,
+    "data": {
+      "compactionId": "f6337504-cf35-4c9b-a004-93e972d29cb7",
+      "turn": 6
+    }
+  },
+  "completedReceipt": {
+    "checkpoint": "02f1af52-ef89-48a6-9261-04998267fd97",
+    "beforeTokens": 196687,
+    "afterTokens": 64433,
+    "trigger": "pressure"
+  },
+  "summaryRecovery": {
+    "reason": "INTERRUPTED_BEFORE_PUBLICATION",
+    "inputFile": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.dsh-watchdog/instances/8275edde-5f78-4615-89d6-f02a66cc8361/agents/dc1a19c0d0843dc600815c3cac54868bd89920e087459d740c26be23cd8020eb/checkpoints/02f1af52-ef89-48a6-9261-04998267fd97/summary-input.json",
+    "at": "2026-10-22T20:21:57.056Z"
+  },
+  "phase": "running",
+  "taskActive": true,
+  "policyQueuedSeq": 5119,
+  "latestSeq": 5156,
+  "scienceAcceptanceClaimed": false,
+  "observedWork": [
+    {
+      "type": "tool/call",
+      "seq": 5121,
+      "name": "skill",
+      "arguments": "{\"name\":\"ecosys-autonomous-orchestration\"}"
+    },
+    {
+      "type": "tool/result",
+      "seq": 5122,
+      "isError": false
+    },
+    {
+      "type": "tool/result",
+      "seq": 5125,
+      "isError": false
+    },
+    {
+      "type": "tool/call",
+      "seq": 5130,
+      "name": "bash",
+      "arguments": "{\"command\":\"./scripts/project.sh pickup 2>&1 | tail -25; echo ===; pgrep -fl \\\"ecosys_ng runottawa\\\" || echo NO-ENGINE; echo ===; git status --porcelain | head; git log --oneline -3 | cut -c1-90\",\"description\":\"Pickup cycle; reconcile engine and git state\",\"timeoutMs\":120000}"
+    },
+    {
+      "type": "tool/result",
+      "seq": 5131,
+      "isError": false
+    },
+    {
+      "type": "tool/result",
+      "seq": 5134,
+      "isError": false
+    },
+    {
+      "type": "tool/call",
+      "seq": 5138,
+      "name": "bash",
+      "arguments": "{\"command\":\"./scripts/project.sh pickup 2>&1 | head -40; echo ===; git rev-parse HEAD origin/main 2>/dev/null | cut -c1-12; echo ===; pgrep -fl \\\"runottawa\\\" | head -3 || echo NO-ENGINE\",\"description\":\"Cycle state, push parity, engine\",\"timeoutMs\":120000}"
+    },
+    {
+      "type": "tool/result",
+      "seq": 5139,
+      "isError": false
+    },
+    {
+      "type": "tool/result",
+      "seq": 5142,
+      "isError": false
+    },
+    {
+      "type": "tool/call",
+      "seq": 5146,
+      "name": "bash",
+      "arguments": "{\"command\":\"pgrep -fl \\\"runottawa\\\"; echo \\\"rc=$?\\\"; for r in audit/runs/ottawa/cycle6-verify-scratch-candidate-20261022095502/receipt.json; do python3 -c \\\"import json;d=json.load(open('$r'));print(d.get('pid'),d.get('state'),d.get('finished_at',''))\\\"; done; ls audit/runs/ottawa/cycle6-verify-scratch-candidate-20261022095502/ | head\",\"description\":\"Engine liveness and cycle-6 receipt state\"}"
+    },
+    {
+      "type": "tool/result",
+      "seq": 5147,
+      "isError": false
+    },
+    {
+      "type": "tool/call",
+      "seq": 5152,
+      "name": "bash",
+      "arguments": "{\"command\":\"ps -p 54505 >/dev/null && echo ALIVE || echo DEAD; tail -2 audit/runs/ottawa/cycle6-verify-scratch-candidate-20261022095502/stderr.log | cut -c1-110; grep -c \\\"\\\" audit/runs/ottawa/cycle6-verify-scratch-candidate-20261022095502/stderr.log\",\"description\":\"Verify stale receipt outcome from its logs\"}"
+    },
+    {
+      "type": "tool/result",
+      "seq": 5153,
+      "isError": false
+    }
+  ],
+  "policyDelivery": "Native queued followup was withdrawn and resubmitted through the steering UI; this installed runtime records the resulting inbox item as next-turn.",
+  "policyInboxEvents": [
+    {
+      "seq": 5119,
+      "target": "next-turn"
+    },
+    {
+      "seq": 5156,
+      "target": "next-turn"
+    }
+  ],
+  "currentTurnPolicy": {
+    "eventSeq": 5122,
+    "source": "Successfully loaded current ecosys-autonomous-orchestration skill",
+    "singleLeader": true,
+    "optionalSafeSubagents": true,
+    "noAdversarialReviewers": true,
+    "noReviewerApprovalGates": true
+  }
+}

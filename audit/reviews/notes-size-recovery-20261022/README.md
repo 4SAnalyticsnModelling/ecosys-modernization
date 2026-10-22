@@ -55,9 +55,12 @@ claiming a model summary was completed. The latest `interrupted-recovery-tests` 
 32 passed, zero failed/skipped/cancelled. Only the installed summarize method was changed,
 preserving its route policies; `summary-recovery-deployment.json` records that comparison.
 
-A fresh DSH session was already open in the same HerdR pane when the original boundary was
-reconciled. Use that existing session as the sole leader, with the recovered handoff, rather
-than launching a duplicate. Live continuation evidence is recorded separately in `resume.json`.
+A fresh DSH session was briefly open in the same HerdR pane, then returned to its shell before
+the handoff. After verifying that shell was foreground, the original saved instance was resumed
+there explicitly. Its native balanced compaction completed successfully at event 5113 using
+the preserved recovery record. The updated single-leader policy and cycle-7 handoff were queued
+through its verified native injection endpoint at event 5119. No duplicate leader was launched.
+Live continuation evidence is recorded separately in `resume.json`.
 
 This is harness maintenance, not Ottawa qualification or resolution of issue-117.
 Scientific builds and F1–F7 promotion are outside this change. Genuine persistence or
