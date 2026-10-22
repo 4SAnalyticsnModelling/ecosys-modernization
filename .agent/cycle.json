@@ -1,5 +1,9 @@
 {
   "base_commit": "ea787634e514a0bb35cb4b73e8ba8d3262980204",
+  "closure": {
+    "at": "2026-10-22T06:22:35.733267+00:00",
+    "summary": "DEV-022 per-layer nitrate supply cap verified: h4556 cleared byte-identically from scratch and resume (records 4321-4555 bit-identical, conservation ledgers 202/202+22/22 accepted, hours 4557-4854 new clean territory); next defect h4855 InsufficientSoilNitrite -> issue-113"
+  },
   "commit": null,
   "cycle": 3,
   "decisions": [],
@@ -604,15 +608,15 @@
     "audit/experiments/cycle3-confirm-resume-20261022/retention.json"
   ],
   "record": ".agent/cycles/cycle_00003.md",
+  "retention_manifest": "audit/experiments/cycle3-confirm-resume-20261022/retention.json",
   "schema_version": 2,
   "scope": [
     "ecosys-ng/src",
     "ecosys-ng/build.zig",
     "ecosys-ng/build.zig.zon"
   ],
-  "status": "WORKING",
-  "sync_status": "unknown",
+  "status": "DECIDED",
+  "sync_status": "PENDING",
   "target": "RESOLVED cause: h4556 nitrate overdraw = summed FMN-floored per-population NO3 reduction shares exceed zone supply (pool 4.133382671876368e-6 g vs demand 4.134932629096317e-6 g, +3.74e-4 rel; nitro.f 1682-1693 share sums uncapped, redist.f 6218-6220 unclamped; basis equality proven by dumps). Fix DEV-022 supply cap in heterotrophic_denitrification_step.zig.",
-  "updated_utc": "2026-10-17T19:03:11Z",
-  "retention_manifest": "audit/experiments/cycle3-confirm-resume-20261022/retention.json"
+  "updated_utc": "2026-10-17T19:03:11Z"
 }
