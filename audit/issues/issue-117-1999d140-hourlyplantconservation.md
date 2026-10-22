@@ -54,3 +54,27 @@ UNVERIFIED (next step): instrument the tillage hour (probe: plant pool sums befo
 booked shoot_litter next values) to pin the exact stale-snapshot line; candidate fix = deposit exactly the
 transaction-removed mass (bit-parity of removal and deposit), no pool change => resume verification from the
 cycle-6 deck (v20 checkpoint at 1999 d139 end, journal written by same-source binaries).
+
+## Legacy tillage semantics (VERIFIED f77query grosub.f, cycle 00007 session 3)
+Legacy tillage books EVERY plant removal as a fraction of the LIVE pool array read at leg time, then
+applies the retention in place, so deposit == debit by construction:
+  - branches: CSNC(M,..)+=(1-XHVST)*CFOP*(CPOOL+CPOLNB+CPOOLK+WTRSVB..) live reads (10096-10108);
+    branch state variables then *= XHVST (10161-10234).
+  - standing dead: CSNC(M,..)+=(1-XHVST)*CFOP*WTSTDG(N,..) live (10250-10264), pools *= XHVST (10267+).
+  - seasonal storage reserves: litter=(FHVSH-FHVST)*live, export=(1-FHVSH)*live, WTSTDG=FHVST*live
+    (10541-10551); plant-level WTRVC..*= XHVST (10479-10481). Roots same pattern (10292-10370).
+Zig deviation: applyAbovegroundTillage captures entry snapshots (standing @~751, storage_before @~765)
+BEFORE applyEventInternal, then books removals from those snapshots. Any intra-transaction movement of
+the same pools is lost from the ledger (seed pool additionally OVERWRITTEN from the snapshot).
+Applied fix direction = legacy live-read at leg time (both legs; validation keeps entry snapshots).
+
+## Live probe status
+applyEventInternal (918-1145 pre-edit numbering) contains NO plant_seed_storage writes on the tillage
+path (include_roots=false, include_standing_dead=false), so seed/standing snapshots equal live values
+unless another tillage-path stage mutates them. Upgraded from-scratch probe (mobres branch totals,
+node intermediates, seed N/P, standing N/P, litter array pre) running:
+audit/runs/ottawa/cycle7-probe-scratch2-20261022. If all above-ground legs book exactly while the gate
+still fails, the defect is on the separate dispatcher legs (host-root tillage root_litter_carbon_ledger
+path, disturbance_management_dispatch.zig:1010-1061) or in gate inventory components not covered by the
+shoot_litter arrays (root/nodule). Probe v3 will then target the roots side (roots state IS reachable
+at the dispatch site).
