@@ -1,0 +1,57 @@
+{
+  "argv": [
+    "./ecosys_ng",
+    "runottawa"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/evidence/runs/zig017-verify-dev021-20261021/deck",
+  "elapsed_seconds": 0.145,
+  "environment": {
+    "TMPDIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp",
+    "UV_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.uv-cache",
+    "XDG_CACHE_HOME": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.cache",
+    "ZIG_GLOBAL_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/.zig-cache-global"
+  },
+  "exit_code": 127,
+  "launch_error": "[Errno 1] Operation not permitted: 'ps'",
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "machine": "arm64",
+  "parent_pid": 74526,
+  "pid": 74535,
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "started_unix": 1792616091.3217971,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/ottawa/zig017-verify-dev021-20261021/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/ottawa/zig017-verify-dev021-20261021/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": null,
+  "toolchain": {
+    "gfortran": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/gfortran",
+      "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+    },
+    "python3": {
+      "exit_code": 0,
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/venv/bin/python3",
+      "version": "Python 3.12.13"
+    },
+    "uv": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/uv",
+      "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+    },
+    "zig": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/zig",
+      "version": "0.17.0"
+    }
+  },
+  "reconciliation": "Wrapper 127 = ps denied in sandbox at launch; engine (pid 74535) ran the full from-scratch strict trajectory with the DEV-022-fixed binary. DECISIVE: hour 4556 cleared \u2014 supply cap engaged (stderr.log: 'denitrification supply cap applied: layer=0 factor=9.996122280942202e-1 requested_non_band_g_n=4.134932629096317e-6 requested_band_g_n=1.0309808654745636e-4') with NO hourly science failure; hours 4557-4854 clean (new territory, 299 h past the previous failure boundary). Engine then exited at hour 4855 with error=InsufficientSoilNitrite (stderr.log:35911) \u2014 a distinct nitrite-path defect for the next cycle. pid absent 2026-10-21 22:02 MDT (kill ESRCH). reconciled_unix=1792641801.388173"
+}

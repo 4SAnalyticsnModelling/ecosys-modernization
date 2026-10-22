@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/evidence/runs/zig017-replay-4320-20261018/deck/ecosys_ng",
+    "runottawa"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/evidence/runs/zig017-replay-4320-20261018/deck",
+  "parent_pid": 4140,
+  "pid": 4141,
+  "requested_timeout_seconds": null,
+  "started_unix": 1792314254.39884,
+  "status": "EXITED",
+  "timeout_seconds": null,
+  "exit_code": null,
+  "termination_evidence": "pid 4141 kill(2)==ESRCH 2026-10-21T07:35+08:00; parent_pid 4140 also absent; stderr.log mtime 2026-10-18 05:06. pid=4141 still_absent_at_reconcile=True",
+  "reconciled_unix": 1792590057.6160388
+}

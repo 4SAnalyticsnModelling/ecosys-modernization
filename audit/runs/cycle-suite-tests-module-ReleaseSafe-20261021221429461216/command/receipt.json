@@ -1,0 +1,55 @@
+{
+  "argv": [
+    "zig",
+    "build",
+    "test-module",
+    "-Doptimize=ReleaseSafe",
+    "--cache-dir",
+    ".zig-cache",
+    "--summary",
+    "all"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng",
+  "environment": {
+    "TMPDIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp",
+    "UV_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.uv-cache",
+    "XDG_CACHE_HOME": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.cache",
+    "ZIG_GLOBAL_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/.zig-cache-global"
+  },
+  "executable_sha256": "18fbdb9fb852846f0e91008c5b99c9c18db1115671701c2890bf84a44ddc202d",
+  "machine": "arm64",
+  "parent_pid": 35918,
+  "pid": 38581,
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "process_start": "Wed 21 Oct 22:14:29 2026",
+  "source_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+  "started_unix": 1792642469.703804,
+  "status": "EXITED",
+  "timeout_seconds": null,
+  "toolchain": {
+    "gfortran": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/gfortran",
+      "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+    },
+    "python3": {
+      "exit_code": 0,
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/venv/bin/python3",
+      "version": "Python 3.12.13"
+    },
+    "uv": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/uv",
+      "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+    },
+    "zig": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/zig",
+      "version": "0.17.0"
+    }
+  },
+  "exit_code": 0,
+  "finished_unix": 1792642743.6540272,
+  "reconciliation": "Wrapper died before finalization (session interruption); pid 38581 absent (ps rc=1) 2026-10-22. Decisive logs: stderr.log ends 'Build Summary: 3/3 steps succeeded; 4400/4401 tests passed (1 skipped); test-module success; run test 4400 pass, 1 skip (4401 total) 1m MaxRSS:50M'. The single skip is the pre-existing hourly_heat_water_solute recovery-crash case (warn lines 2182-2185). Zero failures; no new failures vs Debug baseline audit/runs/cycle-suite-tests-module-Debug-20261021220603475954 (EXITED 0, same 4400/4401+1 skip). Source mtimes 14:56/16:01 precede this 22:14 build, so current working-tree edits are covered.",
+  "reconciled_unix": 1792646364.961641
+}

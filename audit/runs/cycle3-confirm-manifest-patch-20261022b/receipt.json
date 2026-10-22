@@ -1,0 +1,60 @@
+{
+  "argv": [
+    "python3",
+    "audit/experiments/cycle3-confirm-resume-20261022/patch_manifest.py",
+    "evidence/runs/cycle3-confirm-resume-20261022/deck/restart.manifest",
+    "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/evidence/runs/cycle3-confirm-resume-20261022/deck/runottawa_output_files"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization",
+  "elapsed_seconds": 1.993,
+  "environment": {
+    "TMPDIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp",
+    "UV_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.uv-cache",
+    "XDG_CACHE_HOME": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.cache",
+    "ZIG_GLOBAL_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/.zig-cache-global"
+  },
+  "executable_sha256": "31b9c9a8d50289f3a13f014b3efd8ea3534fc3eea7ca7d9809e166139910b805",
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "machine": "arm64",
+  "parent_pid": 57914,
+  "pid": 57923,
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "process_start": "Thu 22 Oct 00:05:10 2026",
+  "started_unix": 1792649110.083664,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/cycle3-confirm-manifest-patch-20261022b/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/runs/cycle3-confirm-manifest-patch-20261022b/stdout.log",
+    "sha256": "ca3c74883de860ed075401f1b169fcb5ef1ea572485b76ee430006aa115c519c"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": null,
+  "toolchain": {
+    "gfortran": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/gfortran",
+      "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+    },
+    "python3": {
+      "exit_code": 0,
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/venv/bin/python3",
+      "version": "Python 3.12.13"
+    },
+    "uv": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/uv",
+      "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+    },
+    "zig": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/zig",
+      "version": "0.17.0"
+    }
+  }
+}

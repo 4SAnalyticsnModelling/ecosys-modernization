@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/experiments/cycle3-confirm-resume-20261022/patch_manifest.py", line 70, in <module>
+    patch(Path(sys.argv[1]), sys.argv[2])
+  File "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/experiments/cycle3-confirm-resume-20261022/patch_manifest.py", line 54, in patch
+    control = fingerprint(run_identity, root)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/audit/experiments/cycle3-confirm-resume-20261022/patch_manifest.py", line 41, in fingerprint
+    return int(out.stdout.strip())
+           ^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: ''

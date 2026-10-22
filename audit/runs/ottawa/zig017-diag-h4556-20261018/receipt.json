@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "./ecosys_ng",
+    "runottawa"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/evidence/runs/zig017-diag-h4556-20261018/deck",
+  "parent_pid": 82052,
+  "pid": 82053,
+  "requested_timeout_seconds": null,
+  "started_unix": 1792375381.245046,
+  "status": "EXITED",
+  "timeout_seconds": null,
+  "exit_code": null,
+  "termination_evidence": "pid 82053 kill(2)==ESRCH 2026-10-21T07:35+08:00; stderr.log mtime 2026-10-18 20:40. pid=82053 still_absent_at_reconcile=True",
+  "reconciled_unix": 1792590057.6164281
+}

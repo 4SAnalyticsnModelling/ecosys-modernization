@@ -1,0 +1,31 @@
+  Windows account.
+- Richards→enthalpy rebase applies internal inflow heat only in the later spatial solve.
+- Many failure-only TEMP_DIAGNOSTIC logs to strip before release.
+
+## Run policy change (2026-10-16, user directive)
+- **No wall-clock stops, ever.** Production runs are started unbounded (`run_ottawa.py` without `--timeout`)
+  and proceed to natural completion — however many days that takes. `TIMED_OUT` receipts (all runs before this
+  date) are bounded stops, recorded as history, never scientific results. `run_logged.py`/`run_ottawa.py`
+  accept omitted `--timeout` (timeout_seconds null in receipts); the command-registry entry is renamed
+  `zig017_ottawa_run` (renamed_from `zig017_ottawa_bounded_run`); protocol §8 records the rule.
+- Cycle scoping is unchanged: one bounded, falsifiable question per cycle; only the run is unbounded.
+
+## Cycle 00002 close (2026-10-16)
+- issue-110 fix (6 whole-array `@memcpy` write-backs clamped to worker-owned ranges; test strengthened to 64
+  two-worker rounds) verified: G2 12/12 under load, G5 sealed-deck IDENTICAL (391,349 cells, 0 differing,
+  `audit/runs/zig017-deckdiff-20261016-1/diff.json`), G7 PASS (`audit/runs/zig017-g7-issue110-verifier-20261016/verdict.md`).
+- G6 re-recorded PASS with justification (flagged line cites pre-existing registered DEV-004; pytest 48-fail
+  baseline identical on 107aebb → pre-existing debt, filed as issue-111). ReleaseFast builds non-bit-reproducible
+  on this host (3 distinct sha256 of same source) — binding_id is the identity of record; exe pinned per-run.
+- Full strict run launched post-close per directive: `zig017-full-20261016-1`, unbounded (no `--timeout`),
+  detached; log `audit/runs/cycle-runner/zig017-full-20261016-1.log` (receipt+summary under
+  `audit/runs/ottawa/zig017-full-20261016-1/`).
+- Launch trail (honest, 2026-10-16/17): (1) first `nohup` attempt PID 89941 died at the harness sandbox
+  boundary in <1 s — wrapper log shows instant FAIL, no log files created; harness background jobs are the
+  working detachment here. (2) Foreground probe `zig017-full-20261016-1-probe` ran 621 s to hour 24, then
+  FAIL `FileNotFound` — **self-inflicted**: maintainer `rm -rf` of `evidence/runs/zig017-full-20261016-1-probe`
+  pulled the staged deck out from under the live exe. Not a model defect; probe receipt discarded as invalid.
+- RUN `zig017-full-20261016-1` TERMINAL **FAIL** (7338.8 s wall): `InsufficientSoilMineralNitrogen` ~20 h
+  after checkpoint 4320 (≈ simulation hour 4340, day ~181, first season; fertilizer apps h2508/2892/3276,
+  last 64 h before failure). Legacy completed 30 y on this deck → genuine Zig divergence in the soil-mineral-N
+  supply/uptake path. Evidence kept on disk: `evidence/runs/zig017-full-20261016-1/` (ckpt 4320 enables

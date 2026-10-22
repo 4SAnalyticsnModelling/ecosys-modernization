@@ -1,10 +1,15 @@
 # Priorities
 
-1. Resume cycle 3: reconcile existing mineral-N patch and h4556 diagnostic receipts; reproduce
-   parent failure from h4320; establish source-anchored cause and discriminating regression.
-   Use [numerical recovery](playbooks/convergence-and-balance.md) for classification. The recorded
-   -1.546e-9 g candidate versus 1.175e-19 g roundoff allowance is not a rounding-sized deficit;
-   reproduce the terms and fix supply/consumption. This is a historical signature, not a new verdict.
+1. Cycle 3 (2026-10-21): cause ESTABLISHED by instrumented replays — h4556 nitrate overdraw from
+   summed FMN-floored NO3 reduction shares exceeding zone supply (+3.74e-4 relative; basis equality
+   proven; nitro.f 1682-1693 / redist.f 6218-6220 unclamped legacy semantics). Fix = DEV-022 supply
+    cap with 64-eps deadband + discriminating test. Verification run
+    audit/runs/ottawa/zig017-verify-dev021-20261021 cleared hour 4556 (cap factor 9.996122280942202e-1;
+    hours 4557-4854 clean; 202 daily conservation ledgers accepted, max N defect 1.41e-14); cycle 3
+    closed 2026-10-22. Next failure boundary h4855 (1998 d203 h7) InsufficientSoilNitrite, zone_non_band
+    layer 0, candidate -1.3670655422748992e-11 g vs operation_scale 3.246187603319597e-7
+    (verify stderr.log:35908-35911) — cycle 4 owns it per the playbook (term-by-term legacy comparison
+    before any cap). Also: adversarial revalidation of DEV-022.
 2. Build a matched-state mineral-N oracle; map producer/exchange/consumer terms and floors.
    For affected implicit paths, audit fixed scales, ZERO units, both signed defects, shared
    supply, prompt zero/trace success and bounded recovery. Reconcile DEV-010 concentration-to-

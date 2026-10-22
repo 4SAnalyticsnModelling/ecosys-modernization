@@ -7,6 +7,9 @@
   "parent_pid": 15512,
   "pid": 17868,
   "started_unix": 1790263748.500737,
-  "status": "RUNNING",
-  "timeout_seconds": 9000.0
+  "status": "EXITED",
+  "timeout_seconds": 9000.0,
+  "exit_code": null,
+  "termination_evidence": "pid 17868 kill(2)==ESRCH 2026-10-21T07:35+08:00; receipt argv/cwd are Windows D:\\ paths (foreign host, cannot execute on this macOS); log mtime 2026-10-08. pid=17868 still_absent_at_reconcile=True",
+  "reconciled_unix": 1792590057.6140711
 }
