@@ -1,0 +1,26 @@
+{
+  "policy": "retain-through-F7-and-reproducibility",
+  "note": "Cycle-00004 engine build products retained repo-local under their receipt directories; identity bound by sha256; excluded from git by repository no-binaries convention. Candidate = ReleaseSafe 9021865e (verification run audit/runs/ottawa/cycle4-verify-dev023-20261022014415). Interim binaries kept for the diagnosis/confirmation chain.",
+  "artifacts": [
+    {
+      "path": "audit/runs/cycle4-instrument-build-20261022004402/build-product/ecosys_ng",
+      "sha256": "63dabd954257b278a7832c49cba5c4b65aefd0908690b283ad804e715f9d4164"
+    },
+    {
+      "path": "audit/runs/cycle4-build-dev023-20261022011332/build-product/ecosys_ng",
+      "sha256": "48097cc10385df701b9c345e8fa51903a44a068b38e867916760b0d8767f9dd9"
+    },
+    {
+      "path": "audit/runs/cycle4-build-candidate-20261022013832/build-product/ecosys_ng",
+      "sha256": "9021865ea89deff4e7eb8f4f63f2268472290b6ed47df32b7a949715df6586ae"
+    },
+    {
+      "path": "audit/runs/cycle4-build-ReleaseFast-20261022021333/build-product/ecosys_ng",
+      "sha256": "70a4393e32ebc8f738d210306ea0b12b0f924239e1326f483a071aeda5e8152f"
+    },
+    {
+      "path": "audit/runs/cycle4-build-Debug-20261022021610/build-product/ecosys_ng",
+      "sha256": "9b283fa789bd77d913aa26295244e404584573d3f76061423d97c6e23b3c9307"
+    }
+  ]
+}

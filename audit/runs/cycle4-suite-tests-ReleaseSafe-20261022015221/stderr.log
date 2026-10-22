@@ -1,0 +1,57 @@
+test
++- run test 119 pass, 1 crash (120 total)
+info: integer=42 text='exact'
+error(soil_water): hex=0x12ab
+info: thread=1 line=0 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=1 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=2 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=3 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=4 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=5 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=6 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=1 line=7 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=0 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=1 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=2 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=3 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=4 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=5 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=6 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=3 line=7 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=0 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=1 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=2 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=3 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=4 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=5 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=6 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=0 line=7 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=0 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=1 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=2 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=3 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=4 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=5 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=6 payload=abcdefghijklmnopqrstuvwxyz0123456789
+info: thread=2 line=7 payload=abcdefghijklmnopqrstuvwxyz0123456789
+error(grid_test): worker=0
+error(grid_test): worker=1
+warning: first-owner-still-active
+error: 'stages.hourly_heat_water_solute.test.fixed external hour recovery escalates through the full chain and stops on hard defects' terminated with signal ABRT with stderr:
+       thread 14207522 panic: index out of bounds: index 4, len 4
+       /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:10686:27: 0x104a6018f in run (test)
+                   self.schedules[self.attempts] = substep_count;
+                                 ^
+       /opt/homebrew/Cellar/zig/0.17.0/lib/zig/compiler/test_runner.zig:143:68: 0x1049af6f3 in mainServer (test)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       /opt/homebrew/Cellar/zig/0.17.0/lib/zig/compiler/test_runner.zig:72:26: 0x1049aec37 in main (test)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       ???:?:?: 0x18ca7fe7f in start (/usr/lib/dyld)
+failed command: ./.zig-cache/o/cbb6fba5fc379c7bd89618cb51ae1dba/test --cache-dir=./.zig-cache --seed=0x4b4b0366 --listen=-
+
+Build Summary: 3/5 steps succeeded (1 failed); 119/120 tests passed (1 crashed)
+test transitive failure
++- run test 119 pass, 1 crash (120 total)
+
