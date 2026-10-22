@@ -1,0 +1,26 @@
+{
+  "cycle": 5,
+  "purpose": "issue-114 complement-closure verification binaries; retain-through-F7-and-reproducibility",
+  "artifacts": [
+    {
+      "path": "audit/runs/cycle5-build-diag-20261022022758/build-product/ecosys_ng",
+      "sha256": "fdcffd4344e938e28d68d50b4a587d930058332c41e7e3ae89668720cb99b70b",
+      "role": "instrumented root-gas zone-fraction validator diagnostic (issue-114 violation capture)"
+    },
+    {
+      "path": "evidence/runs/cycle5-verify-scratch-20261022/deck/ecosys_ng",
+      "sha256": "028ff86e1b1c8949f3bc9663dd7b37d4441fe73b66edab339e61ac5d4177abf5",
+      "role": "corroboration fix binary (pre-test-addition source) running audit/runs/ottawa/cycle5-verify-scratch-20261022025641"
+    },
+    {
+      "path": "audit/runs/cycle5-build-candidate-20261022040240/build-product/ecosys_ng",
+      "sha256": "a1510febb6cf53b3a448b5373db7bf75bf9552771fd74d21f0ac6722ed7efe5b",
+      "role": "CANDIDATE ReleaseSafe (final source incl. issue-114 test); reproducible rebuild audit/runs/cycle5-rebuild-ReleaseSafe-20261022040742 identical"
+    },
+    {
+      "path": "audit/runs/cycle5-build-releasefast-20261022040509/build-product/ecosys_ng",
+      "sha256": "ff0a759f9a904fe9c6c11a644bd910ac84272539ef5ba34f1582b0e7f77bd29e",
+      "role": "ReleaseFast build of final source (F6 precondition, full optimization deferred)"
+    }
+  ]
+}

@@ -4,7 +4,6 @@ const phase_module = @import("fertilizer_band_phase_coordinator.zig");
 const plant_available_nutrients = @import("../soil/nutrients/plant_available_nutrients.zig");
 const charge_classification = @import("../soil/solute/charge_classification.zig");
 
-
 pub const family_count = 3;
 const checkpoint_magic = "ECOBAND1";
 const checkpoint_version: u32 = 1;
@@ -303,13 +302,24 @@ pub const State = struct {
         // the exact pre-HOUR1 fraction when the pending hour recorded it.
         // FVL = 0 (unchanged or shrunk band) keeps the current fraction: a
         // shrink has already rescaled the concentrations onto it.
+        // issue-114: the stored band fraction is authoritative and the non-band
+        // side is its exact complement, as in legacy hour1.f 374/5054
+        // (`VLNO3 = 1.0 - VLNOB` after the band volume is set). Reconstructing
+        // non_band via current/(1+FVL) while band comes from the stored value
+        // breaks the complementarity invariant that held when the pair was
+        // stored (observed 18 ulp gap at 1999 d127 h22 -> fatal validator stop).
+        // For FVL = 0 the complement is exact by the involution of 1-x on [0,1],
+        // so unchanged hours are bit-identical.
+        const ammonium_band = exactPreConsumptionBand(hour_coordinator, .ammonium, layer, relative[@backingInt(Family.ammonium) * self.layer_capacity + layer], ammonium.band);
+        const nitrate_band = exactPreConsumptionBand(hour_coordinator, .nitrate, layer, relative[@backingInt(Family.nitrate) * self.layer_capacity + layer], nitrate.band);
+        const phosphate_band = exactPreConsumptionBand(hour_coordinator, .phosphate, layer, relative[@backingInt(Family.phosphate) * self.layer_capacity + layer], phosphate.band);
         return .{
-            .ammonium_non_band = ammonium.non_band,
-            .ammonium_band = exactPreConsumptionBand(hour_coordinator, .ammonium, layer, relative[@backingInt(Family.ammonium) * self.layer_capacity + layer], ammonium.band),
-            .nitrate_non_band = nitrate.non_band,
-            .nitrate_band = exactPreConsumptionBand(hour_coordinator, .nitrate, layer, relative[@backingInt(Family.nitrate) * self.layer_capacity + layer], nitrate.band),
-            .phosphate_non_band = phosphate.non_band,
-            .phosphate_band = exactPreConsumptionBand(hour_coordinator, .phosphate, layer, relative[@backingInt(Family.phosphate) * self.layer_capacity + layer], phosphate.band),
+            .ammonium_non_band = 1 - ammonium_band,
+            .ammonium_band = ammonium_band,
+            .nitrate_non_band = 1 - nitrate_band,
+            .nitrate_band = nitrate_band,
+            .phosphate_non_band = 1 - phosphate_band,
+            .phosphate_band = phosphate_band,
         };
     }
 
@@ -1145,4 +1155,59 @@ test "science fractions preserve pre-consumption ownership across checkpoint" {
     defer restored.deinit();
     const after = try restored.scienceZoneFractions(0, 0);
     try std.testing.expectEqualDeep(before, after);
+}
+
+test "science fractions on a band-expansion hour stay exact complements" {
+    // issue-114: while the pending application hour is open, science consumers
+    // must receive the stored pre-prepare band fraction as authoritative and
+    // the non-band side as its exact complement (legacy hour1.f 374/5054
+    // `VLNO3 = 1.0 - VLNOB`). The old reconstruction current/(1+FVL) paired a
+    // non-complementary 18 ulp sum against the stored band and tripped the
+    // root gas transport zone fraction validator at 1999 d127 h22.
+    const upper = [_]f64{ 0, 0.1 };
+    const lower = [_]f64{ 0.1, 0.2 };
+    const thickness = [_]f64{ 0.1, 0.1 };
+    var rows = [_]f64{ 0.1, 0.1, 0.1 };
+    var state = try State.init(std.testing.allocator, .{
+        .cell_count = 1,
+        .layer_capacity = 2,
+        .active_layer_count_by_cell = &.{2},
+        .layer_upper_depth_m = &upper,
+        .layer_lower_depth_m = &lower,
+        .layer_thickness_m = &thickness,
+        .initial_band_fraction_by_family = .{ 0.4, 0.4, 0.4 },
+        .row_spacing_m_by_cell_family = &rows,
+    });
+    defer state.deinit();
+    const coordinator = try state.coordinator(0);
+    try coordinator.beginHour(.{ .value = 7 });
+    var geometry_workspace = try geometry_module.Workspace.init(std.testing.allocator, 2);
+    defer geometry_workspace.deinit();
+    const diffusivity = [_]f64{ 0.001, 0.001 };
+    const tortuosity = [_]f64{ 1, 1 };
+    inline for (std.enums.values(phase_module.Family)) |family| {
+        try state.prepareFamily(0, .{ .value = 7 }, family, .{
+            .upper_depth_m = &upper,
+            .lower_depth_m = &lower,
+            .thickness_m = &thickness,
+            .first_active_layer = 0,
+            .last_active_layer = 1,
+            .minimum_active_thickness_m = 0,
+            .structural_presence_threshold = 0,
+        }, .{
+            .diffusivity_m2_per_h = &diffusivity,
+            .tortuosity = &tortuosity,
+            .timestep_h = 1,
+        }, &geometry_workspace);
+    }
+    const fractions = try state.scienceZoneFractions(0, 0);
+    // Diffusive expansion must have opened the reconstruction path; the
+    // stored pre-prepare fraction must exist for the check to discriminate.
+    const stored_ammonium_band = coordinator.prePrepareBandFraction(.ammonium, 0);
+    try std.testing.expect(stored_ammonium_band != null);
+    try std.testing.expect(@abs(coordinator.persistentRelativeChanges()[0]) > 0);
+    try std.testing.expectEqual(stored_ammonium_band.?, fractions.ammonium_band);
+    try std.testing.expectEqual(1, fractions.ammonium_non_band + fractions.ammonium_band);
+    try std.testing.expectEqual(1, fractions.nitrate_non_band + fractions.nitrate_band);
+    try std.testing.expectEqual(1, fractions.phosphate_non_band + fractions.phosphate_band);
 }

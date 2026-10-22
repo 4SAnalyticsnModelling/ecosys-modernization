@@ -1,0 +1,1 @@
+Cycle 00005 issue-114 from-scratch verification (journal wall at first output-changing hour); deck = verbatim copy of ecosys-ng-prod-examples (diff-verified); receipts under audit/runs/ottawa/cycle5-verify-scratch-*.

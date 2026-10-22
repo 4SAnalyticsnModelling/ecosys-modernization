@@ -186,7 +186,13 @@ fn rootGasFractionsAt(source: anytype, soil: usize) !charge_classification.ZoneF
     if (!std.math.isFinite(fractions.ammonium_non_band) or fractions.ammonium_non_band < 0 or fractions.ammonium_non_band > 1 or
         !std.math.isFinite(fractions.ammonium_band) or fractions.ammonium_band < 0 or fractions.ammonium_band > 1 or
         @abs(fractions.ammonium_non_band + fractions.ammonium_band - 1) > 16 * std.math.floatEps(f64))
+    {
+        if (!@import("builtin").is_test) std.log.err(
+            "root gas transport zone fraction violation: soil={d} non_band={e} band={e} sum_deviation={e}",
+            .{ soil, fractions.ammonium_non_band, fractions.ammonium_band, fractions.ammonium_non_band + fractions.ammonium_band - 1 },
+        );
         return error.InvalidRootGasTransportSettings;
+    }
     return fractions;
 }
 
