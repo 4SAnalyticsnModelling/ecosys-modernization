@@ -1631,11 +1631,29 @@ fn applyZone(ammonium: *f64, nitrate: *f64, nitrite: *f64, ammonia_oxidation: f6
         );
         return err;
     };
-    nitrite.* = try nonnegativeCandidate(
+    nitrite.* = nonnegativeCandidate(
         nitrite_available - nitrite_consumed,
         @abs(nitrite_available) + @abs(nitrite_consumed),
         error.InsufficientSoilNitrite,
-    );
+    ) catch |err| {
+        if (!builtin.is_test) std.log.err(
+            "soil nitrogen state_update nitrite breakdown: pool_before={e} ammonia_oxidation={e} autotrophic_ammonium_oxidation={e} nitrate_reduction={e} nitrite_oxidation={e} heterotrophic_nitrite_reduction={e} autotrophic_nitrite_reduction={e} chemo_nitrite_reduction={e} available={e} consumed={e} candidate={e}",
+            .{
+                nitrite.*,
+                ammonia_oxidation,
+                autotrophic_ammonium_oxidation,
+                nitrate_reduction,
+                nitrite_oxidation,
+                heterotrophic_nitrite_reduction,
+                autotrophic_nitrite_reduction,
+                chemo_nitrite_reduction,
+                nitrite_available,
+                nitrite_consumed,
+                nitrite_available - nitrite_consumed,
+            },
+        );
+        return err;
+    };
 }
 
 fn concentrationFromMass(mass_g_n: f64, water_m3: f64, fraction: f64, molar_mass: f64) !f64 {

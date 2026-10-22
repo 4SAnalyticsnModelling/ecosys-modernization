@@ -51,6 +51,8 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
         var total_raw_nitrous_oxide_competition: f64 = 0;
         var requested_non_band_nitrate_g_n: f64 = 0;
         var requested_band_nitrate_g_n: f64 = 0;
+        var requested_non_band_nitrite_g_n: f64 = 0;
+        var requested_band_nitrite_g_n: f64 = 0;
         for (0..@min(context.microbial_state.substrate_count, organic.substrate_count)) |substrate| {
             if (substrate == context.nitrogen_parameters.nitrifier_indices.autotrophic_substrate_index) continue;
             const unit = layer * context.result.process_unit_count_per_layer + substrate * actual_population_count + denitrifier;
@@ -101,6 +103,8 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
             context.result.non_band_nitrate_reduction_potential_g_n[unit] = potential.non_band_nitrate_reduction_g_n;
             requested_non_band_nitrate_g_n += potential.non_band_nitrate_reduction_g_n;
             requested_band_nitrate_g_n += potential.band_nitrate_reduction_g_n;
+            requested_non_band_nitrite_g_n += potential.non_band_nitrite_reduction_g_n;
+            requested_band_nitrite_g_n += potential.band_nitrite_reduction_g_n;
             if (!builtin.is_test and potential.non_band_nitrate_reduction_g_n > 0) {
                 const diag = makeZone(context.*, layer, unit, water_m3, false);
                 if (potential.non_band_nitrate_reduction_g_n > diag.nitrate_amount_g_n * context.timestep_h) std.log.err(
@@ -127,6 +131,9 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
         // not: scale proportionally (uniform across acceptor stages and respiration,
         // preserving stoichiometry) so each zone's requested reduction <= supply.
         var supply_fraction: f64 = 1;
+        var nitrate_bound_fraction: f64 = 1;
+        var available_non_band_nitrite_g_n: f64 = 0;
+        var available_band_nitrite_g_n: f64 = 0;
         if (water_m3 > context.negligible_water_volume_m3) {
             const probe_unit = layer * context.result.process_unit_count_per_layer + denitrifier;
             const available_non_band_g_n = makeZone(context.*, layer, probe_unit, water_m3, false).nitrate_amount_g_n * context.timestep_h;
@@ -138,9 +145,29 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
             const tolerance_band = 64.0 * std.math.floatEps(f64) * @max(requested_band_nitrate_g_n, available_band_g_n);
             if (requested_non_band_nitrate_g_n > available_non_band_g_n + tolerance_non_band) supply_fraction = @min(supply_fraction, available_non_band_g_n / requested_non_band_nitrate_g_n);
             if (requested_band_nitrate_g_n > available_band_g_n + tolerance_band) supply_fraction = @min(supply_fraction, available_band_g_n / requested_band_nitrate_g_n);
+            // DEV-023: per-layer nitrite supply admissibility. Identical legacy
+            // pattern one stage downstream of DEV-022: FMN-floored per-population
+            // FNO2 competition shares (nitro.f 1781-1782 non-band denitrifiers,
+            // 1970-1971 band, 2943-2944 chemodenitrification) summed across
+            // populations without a <=1 cap; REDIST applies the NO2 balance
+            // unclamped (redist.f 6221-6222), so legacy NO2 pools dip slightly
+            // negative. The modern commit must not: supply here is the zone NO2
+            // pool over the step plus this step's already-capped NO3->NO2
+            // production; nitrifier NO2 supply is deliberately excluded
+            // (conservative under-allocation, never an over-withdraw). The same
+            // uniform supply_fraction then scales every acceptor stage and
+            // respiration, preserving stoichiometry as in DEV-022.
+            nitrate_bound_fraction = supply_fraction;
+            available_non_band_nitrite_g_n = makeZone(context.*, layer, probe_unit, water_m3, false).nitrite_amount_g_n * context.timestep_h + requested_non_band_nitrate_g_n * nitrate_bound_fraction;
+            available_band_nitrite_g_n = makeZone(context.*, layer, probe_unit, water_m3, true).nitrite_amount_g_n * context.timestep_h + requested_band_nitrate_g_n * nitrate_bound_fraction;
+            const tolerance_non_band_nitrite = 64.0 * std.math.floatEps(f64) * @max(requested_non_band_nitrite_g_n, available_non_band_nitrite_g_n);
+            const tolerance_band_nitrite = 64.0 * std.math.floatEps(f64) * @max(requested_band_nitrite_g_n, available_band_nitrite_g_n);
+            if (requested_non_band_nitrite_g_n > available_non_band_nitrite_g_n + tolerance_non_band_nitrite) supply_fraction = @min(supply_fraction, available_non_band_nitrite_g_n / requested_non_band_nitrite_g_n);
+            if (requested_band_nitrite_g_n > available_band_nitrite_g_n + tolerance_band_nitrite) supply_fraction = @min(supply_fraction, available_band_nitrite_g_n / requested_band_nitrite_g_n);
         }
         if (supply_fraction < 1) {
-            if (!builtin.is_test) std.log.err("DEV-022 denitrification supply cap applied: layer={d} factor={e} requested_non_band_g_n={e} requested_band_g_n={e}", .{ layer, supply_fraction, requested_non_band_nitrate_g_n, requested_band_nitrate_g_n });
+            if (!builtin.is_test and nitrate_bound_fraction < 1) std.log.err("DEV-022 denitrification supply cap applied: layer={d} factor={e} requested_non_band_g_n={e} requested_band_g_n={e}", .{ layer, supply_fraction, requested_non_band_nitrate_g_n, requested_band_nitrate_g_n });
+            if (!builtin.is_test and supply_fraction < nitrate_bound_fraction) std.log.err("DEV-023 denitrification nitrite supply cap applied: layer={d} factor={e} requested_non_band_nitrite_g_n={e} available_non_band_nitrite_g_n={e} requested_band_nitrite_g_n={e} available_band_nitrite_g_n={e}", .{ layer, supply_fraction, requested_non_band_nitrite_g_n, available_non_band_nitrite_g_n, requested_band_nitrite_g_n, available_band_nitrite_g_n });
             for (0..@min(context.microbial_state.substrate_count, organic.substrate_count)) |substrate| {
                 if (substrate == context.nitrogen_parameters.nitrifier_indices.autotrophic_substrate_index) continue;
                 const unit = layer * context.result.process_unit_count_per_layer + substrate * actual_population_count + denitrifier;
@@ -256,6 +283,79 @@ test "runtime soil denitrifier builds sequential nitrogen reduction potentials" 
     const residual_doc_after_aerobic_g_c = organic_state.dissolved[1].carbon_g_c * result.doc_competition_fraction[unit] - result.doc_respiration_demand_g_c[unit] * oxygen_state.demand_satisfaction_fraction[unit];
     try std.testing.expect(result.denitrification_respiration_g_c[unit] / nitrogen_parameters.heterotrophic_respiration.denitrification_growth_respiration_fraction_g_c_per_g_c <= residual_doc_after_aerobic_g_c + 1e-12);
     try std.testing.expectEqual(@as(f64, 0), result.non_band_nitrate_reduction_potential_g_n[unit - 1]);
+}
+
+test "DEV-023 layer nitrite supply cap keeps denitrification nitrite demand within zone nitrite supply" {
+    const config = @import("../../core/config.zig").SimulationConfig{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1, .worker_threads = 1, .tile_cells = 1, .relative_tolerance = 1e-8, .absolute_tolerance = 1e-12, .mass_balance_tolerance = 1e-12, .negligible_quantity_threshold = 1e-12, .max_nonlinear_iterations = 20, .picard_relaxation = 0.5 };
+    var model_grid = try grid.GridState.init(std.testing.allocator, config);
+    defer model_grid.deinit();
+    model_grid.matrix_liquid_water_m3[0] = 1e-7;
+    var microbial_state = try microbial.State.init(std.testing.allocator, 1, 1, 6, 2);
+    defer microbial_state.deinit();
+    var organic_state = try organic.State.init(std.testing.allocator, 1);
+    defer organic_state.deinit();
+    organic_state.dissolved[1].carbon_g_c = 10;
+    var chemistry_state = try chemistry.State.init(std.testing.allocator, 1);
+    defer chemistry_state.deinit();
+    chemistry_state.aqueous[0].nitrate_non_band = 1;
+    chemistry_state.aqueous[0].nitrate_band = 1;
+    var reactive_state = try reactive.State.init(std.testing.allocator, 1, 12);
+    defer reactive_state.deinit();
+    // A near-depleted NO2 pool with FMN-floored competition shares >1 is what made
+    // summed heterotrophic NO2 reduction demand exceed the zone's NO2 supply at
+    // Ottawa h4855 (pool 1.567e-7 g vs demand 1.623e-7 g, overdraw 1.367e-11 g).
+    reactive_state.non_band_nitrite_g_n[0] = 1e-9;
+    reactive_state.band_nitrite_g_n[0] = 1e-9;
+    reactive_state.previous_total_non_band_nitrite_demand_g_n[0] = 1e-6;
+    reactive_state.previous_total_band_nitrite_demand_g_n[0] = 1e-6;
+    for (reactive_state.previous_non_band_nitrite_reduction_capacity_g_n) |*value| value.* = 2;
+    for (reactive_state.previous_band_nitrite_reduction_capacity_g_n) |*value| value.* = 2;
+    var gas_state = try gas.State.init(std.testing.allocator, 1);
+    defer gas_state.deinit();
+    gas_state.dissolved_mass_g[try gas.massIndex(0, .nitrous_oxide, 1)] = 1;
+    var result = try fluxes.State.init(std.testing.allocator, 1, 12);
+    defer result.deinit();
+    const unit: usize = 3;
+    result.aerobic_oxygen_demand_g_o[unit] = 4;
+    result.doc_respiration_demand_g_c[unit] = 0.1;
+    result.doc_competition_fraction[unit] = 1;
+    result.substrate_complex_fraction[unit] = 0.5;
+    result.aerobic_fallback_active_fraction[unit] = 1;
+    result.total_active_fraction[unit] = 1;
+    result.layer_biologically_active_water_m3[0] = 0.2;
+    var oxygen_state = try oxygen.State.init(std.testing.allocator, 1, 12, 1);
+    defer oxygen_state.deinit();
+    oxygen_state.oxygen_uptake_g_o[unit] = 0.1;
+    oxygen_state.demand_satisfaction_fraction[unit] = 0.025;
+    const source =
+        "soil_nitrification 0.001 0.0002 7000 14 1.4 1.4 0.125 0.125 0.3 0.1 0.5 2.667 3.429 1.143\n" ++
+        "soil_denitrification 0.001 1.4 1.4 0.014 1 0.429 0.429 0.214 0.875\n" ++
+        "soil_autotrophic_denitrification 0.5 0.333\nsoil_chemodenitrification 0.0005 0.001 1e-12 0.5 0 0.5\n" ++
+        "nitrous_acid_dissociation_mol_per_m3 0.45\nsoil_microbial_thermal_adaptation_offset_k 0\n" ++
+        "soil_nitrifier_indices 5 0 1 1\nsoil_nitrifier_environment 0.55 0.1 0.1 0.01 0.01 12 0.1\n" ++
+        "soil_oxygen_uptake 1e-6 2.3866348449e11 0.064 -1.5e4 0.5 12 12 0.5 0.7 0.001 1e-12\n" ++
+        "soil_heterotrophic_respiration 0.125 0.1 0.01 12 12 0.5 0.42016806722689076 0.1 2.667 0.01 0.01 1e-6 1 0.7142857142857143\n" ++
+        "soil_microbial_mineral_exchange 0.014 0.0125 0.40 0.014 0.03 0.35 0.003 0.009 0.18 31\n" ++
+        "soil_nonsymbiotic_nitrogen_fixation 5 6 0.25 0.02 0.14 0.25\n" ++
+        "soil_microbial_turnover 0.01 0.001 0.167 0.333 0.333 0.333 0.150 0.300 0.333 0.25 2.0 5.0 1.0 0.5 0.182e-6";
+    const nitrogen_parameters = try parameters.parse(source);
+    var context: ApplyContext = .{ .result = &result, .reactive_nitrogen = &reactive_state, .chemistry_state = &chemistry_state, .organic_state = &organic_state, .microbial_state = &microbial_state, .gas_state = &gas_state, .model_grid = &model_grid, .oxygen_state = &oxygen_state, .zone_fractions = .{ .ammonium_non_band = 0.5, .ammonium_band = 0.5, .nitrate_non_band = 0.5, .nitrate_band = 0.5, .phosphate_non_band = 0.5, .phosphate_band = 0.5 }, .nitrogen_parameters = nitrogen_parameters, .nitrogen_molar_mass_g_per_mol = 14, .timestep_h = 1, .negligible_water_volume_m3 = 1e-12, .negligible_nitrogen_g_n = 1e-12 };
+    try applyTile(&context, .{ .first = 0, .end = 1 });
+    var requested_nitrite_non_band: f64 = 0;
+    for (result.non_band_heterotrophic_nitrite_reduction_potential_g_n) |value| requested_nitrite_non_band += value;
+    var reported_nitrate_non_band: f64 = 0;
+    for (result.non_band_nitrate_reduction_potential_g_n) |value| reported_nitrate_non_band += value;
+    // NO2 supply at cap time = zone NO2 pool over the step plus the raw NO3->NO2
+    // demand (conc 1 * 14 g/mol * 1e-7 m3 * fraction 0.5 * fallback share 0.5 = 3.5e-7,
+    // no nitrate cap since only NO2 is oversubscribed). The single supply fraction
+    // then lands the reported NO2 flux exactly on that supply while proportionally
+    // reducing the NO3 flux (reported 3.5e-7 * supply_fraction < raw 3.5e-7).
+    try std.testing.expect(requested_nitrite_non_band > 0);
+    const raw_nitrate_non_band_g_n = 1.0 * 14 * model_grid.matrix_liquid_water_m3[0] * 0.5 * 0.5;
+    const available_nitrite_non_band_g_n = reactive_state.non_band_nitrite_g_n[0] * 1 + raw_nitrate_non_band_g_n;
+    try std.testing.expectApproxEqRel(available_nitrite_non_band_g_n, requested_nitrite_non_band, 1e-9);
+    try std.testing.expect(reported_nitrate_non_band < raw_nitrate_non_band_g_n * 0.999);
+    try std.testing.expect(result.denitrification_respiration_g_c[unit] > 0);
 }
 
 test "DEV-022 layer supply cap keeps denitrification nitrate demand within zone supply" {

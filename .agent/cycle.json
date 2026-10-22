@@ -1,19 +1,17 @@
 {
-  "base_commit": "ea787634e514a0bb35cb4b73e8ba8d3262980204",
+  "base_commit": "9368a7b1b20f191c5d5a08e9c5158674cebd2580",
   "closure": {
-    "at": "2026-10-22T06:22:35.733267+00:00",
-    "summary": "DEV-022 per-layer nitrate supply cap verified: h4556 cleared byte-identically from scratch and resume (records 4321-4555 bit-identical, conservation ledgers 202/202+22/22 accepted, hours 4557-4854 new clean territory); next defect h4855 InsufficientSoilNitrite -> issue-113"
+    "at": "2026-10-22T08:24:03.390514+00:00",
+    "summary": "DEV-023 per-layer nitrite supply admissibility verified: issue-113 h4855 cleared (cap factor 9.999037288974819e-1 bit-identical across interim and candidate binaries), replay territory bit-identical through h4556/h4412, 311 daily conservation ledgers accepted into 1999 to distinct defect issue-114 (h11806 InvalidRootGasTransportSettings, next cycle); issue-115 pre-existing executable-root ladder OOB disclosed"
   },
-  "commit": null,
-  "cycle": 3,
-  "decisions": [],
+  "cycle": 4,
   "gates": {
     "G1": {
-      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "candidate_digest": "8c5f2591a0d9d42fb8cedb84ddbea85eaa000d515737a09724c2761706f0bf85",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
-          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/intentional-deviations.md": "f5f8fb8d1035ee41e9cf4f093c4188c8e6ff84e3f4c054d28bc70f23e5698dc6",
           "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
           "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
           "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
@@ -24,13 +22,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "ecosys-ng/src": "45f543d569971a37308976b2f5514b7403bd5c74dd91f73b9b1c22e7abadc489",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "digest": "b30df43fbe81c4d787486e00504a10284d4b4f9883cdb48d9089ac41c00a9e4e",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -64,31 +62,19 @@
       },
       "evidence": [
         {
-          "path": "audit/runs/cycle-build-Debug-20261021220253397677/receipt.json",
-          "sha256": "b7213295a09f60ee82a1380b4aaf975e9d3faf81e3567cf687f6325546a37f96"
-        },
-        {
-          "path": "audit/runs/cycle-build-ReleaseSafe-20261021220322410232/receipt.json",
-          "sha256": "2093a04b8053541c8b19da053c5922c005c7d5bba76ae40de04608c69699151c"
-        },
-        {
-          "path": "audit/runs/cycle-build-ReleaseFast-20261021220322981273/receipt.json",
-          "sha256": "009e63925cf0596826472237aed42f08d1298a35642dade882b8511082d5b5fc"
-        },
-        {
-          "path": "audit/runs/cycle3-confirm-build-ReleaseSafe-20261021234803/receipt.json",
-          "sha256": "6dd1c0b271c0cfe1e91ee029a6379ee4fcf8990eee6391937cf01806b138b730"
+          "path": "audit/experiments/cycle4-verify-dev023-20261022/g1-g9-digest.md",
+          "sha256": "b825d303054b2bb62082bce45f9f713dfc00c570a4b4479c25aa5b80dbf3a71d"
         }
       ],
-      "reason": "Debug+ReleaseSafe+ReleaseFast EXITED 0 on Zig 0.17.0; reproducible rebuild of candidate reproduces suite binary sha 36c3784a",
+      "reason": "",
       "result": "PASS"
     },
     "G2": {
-      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "candidate_digest": "8c5f2591a0d9d42fb8cedb84ddbea85eaa000d515737a09724c2761706f0bf85",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
-          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/intentional-deviations.md": "f5f8fb8d1035ee41e9cf4f093c4188c8e6ff84e3f4c054d28bc70f23e5698dc6",
           "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
           "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
           "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
@@ -99,13 +85,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "ecosys-ng/src": "45f543d569971a37308976b2f5514b7403bd5c74dd91f73b9b1c22e7abadc489",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "digest": "b30df43fbe81c4d787486e00504a10284d4b4f9883cdb48d9089ac41c00a9e4e",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -139,31 +125,19 @@
       },
       "evidence": [
         {
-          "path": "audit/runs/cycle-suite-tests-module-Debug-20261021220603475954/command/receipt.json",
-          "sha256": "baa1741dabeb23a55b9f4e92d6a9d7f0235c1992092167ccfa7d105b7f318313"
-        },
-        {
-          "path": "audit/runs/cycle-suite-tests-module-Debug-20261021220603475954/command/stderr.log",
-          "sha256": "960f914e1d85f0ee51e6ee505a6f5667477de9bd7bb2902f68e584bbfb9bfa54"
-        },
-        {
-          "path": "audit/runs/cycle-suite-tests-module-ReleaseSafe-20261021221429461216/command/receipt.json",
-          "sha256": "19e568f182d5e9ea8b3f3cb96aca7d347cbcaeab22710ddc5b612a6880f786b6"
-        },
-        {
-          "path": "audit/runs/cycle-suite-tests-module-ReleaseSafe-20261021221429461216/command/stderr.log",
-          "sha256": "de28c4a889edf334ccf3a151baeb8d7b061e6d02c6d8e7ca6e02f1440f072a91"
+          "path": "audit/experiments/cycle4-verify-dev023-20261022/g1-g9-digest.md",
+          "sha256": "b825d303054b2bb62082bce45f9f713dfc00c570a4b4479c25aa5b80dbf3a71d"
         }
       ],
-      "reason": "Both module suites 4400 pass/1 pre-existing skip/0 fail (DEV-022 test included); ReleaseSafe receipt reconciled from its own logs",
+      "reason": "",
       "result": "PASS"
     },
     "G3": {
-      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "candidate_digest": "8c5f2591a0d9d42fb8cedb84ddbea85eaa000d515737a09724c2761706f0bf85",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
-          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/intentional-deviations.md": "f5f8fb8d1035ee41e9cf4f093c4188c8e6ff84e3f4c054d28bc70f23e5698dc6",
           "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
           "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
           "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
@@ -174,13 +148,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "ecosys-ng/src": "45f543d569971a37308976b2f5514b7403bd5c74dd91f73b9b1c22e7abadc489",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "digest": "b30df43fbe81c4d787486e00504a10284d4b4f9883cdb48d9089ac41c00a9e4e",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -214,27 +188,19 @@
       },
       "evidence": [
         {
-          "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
-          "sha256": "47ae4cd4c8aa017f32d3a50263f0f0b8a898a4a37c5de111206feb28662a493a"
-        },
-        {
-          "path": "audit/runs/ottawa/cycle3-confirm-resume4320-20261022b/stderr.log",
-          "sha256": "59bd346f5ddcaf9e93eff7b9ceea468518e1f00423957b975a77067086f3a92e"
-        },
-        {
-          "path": "audit/runs/ottawa/zig017-verify-dev021-20261021/stderr.log",
-          "sha256": "3768cf02120b2c0257d4a922eff0f95023c0f108dad49908fb66b7a8204855c2"
+          "path": "audit/experiments/cycle4-verify-dev023-20261022/g1-g9-digest.md",
+          "sha256": "b825d303054b2bb62082bce45f9f713dfc00c570a4b4479c25aa5b80dbf3a71d"
         }
       ],
-      "reason": "Independently assembled daily pool+flux ledgers accepted 202/202 days from scratch and 22/22 in confirm resume, signed defects ~1e-14, beyond solver residuals",
+      "reason": "",
       "result": "PASS"
     },
     "G4": {
-      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "candidate_digest": "8c5f2591a0d9d42fb8cedb84ddbea85eaa000d515737a09724c2761706f0bf85",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
-          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/intentional-deviations.md": "f5f8fb8d1035ee41e9cf4f093c4188c8e6ff84e3f4c054d28bc70f23e5698dc6",
           "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
           "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
           "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
@@ -245,13 +211,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "ecosys-ng/src": "45f543d569971a37308976b2f5514b7403bd5c74dd91f73b9b1c22e7abadc489",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "digest": "b30df43fbe81c4d787486e00504a10284d4b4f9883cdb48d9089ac41c00a9e4e",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -285,31 +251,19 @@
       },
       "evidence": [
         {
-          "path": "audit/intentional-deviations.md",
-          "sha256": "ee74ce11330efe6d5f40e0a4101b207c2afd2cb35225cce5983261b9706b5201"
-        },
-        {
-          "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
-          "sha256": "47ae4cd4c8aa017f32d3a50263f0f0b8a898a4a37c5de111206feb28662a493a"
-        },
-        {
-          "path": "audit/runs/ottawa/zig017-replay-4320-terms-20261021/stderr.log",
-          "sha256": "01839bb6c3545db63b34cf7a19d0cc39aaacdc43653d2a9f1231ffb3eecbb569"
-        },
-        {
-          "path": "audit/runs/ottawa/zig017-replay-4320-terms2-20261021/stderr.log",
-          "sha256": "47a35153338b068727cd2adbf754c9a8c7432341c4758ac121d0be1c9abf0e90"
+          "path": "audit/experiments/cycle4-verify-dev023-20261022/g1-g9-digest.md",
+          "sha256": "b825d303054b2bb62082bce45f9f713dfc00c570a4b4479c25aa5b80dbf3a71d"
         }
       ],
-      "reason": "nitro.f 1682-1693/redist.f 6218-6220 order+floor semantics with reproduced term dumps; basis equality proven",
+      "reason": "",
       "result": "PASS"
     },
     "G5": {
-      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "candidate_digest": "8c5f2591a0d9d42fb8cedb84ddbea85eaa000d515737a09724c2761706f0bf85",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
-          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/intentional-deviations.md": "f5f8fb8d1035ee41e9cf4f093c4188c8e6ff84e3f4c054d28bc70f23e5698dc6",
           "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
           "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
           "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
@@ -320,13 +274,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "ecosys-ng/src": "45f543d569971a37308976b2f5514b7403bd5c74dd91f73b9b1c22e7abadc489",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "digest": "b30df43fbe81c4d787486e00504a10284d4b4f9883cdb48d9089ac41c00a9e4e",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -360,35 +314,19 @@
       },
       "evidence": [
         {
-          "path": "audit/runs/ottawa/cycle3-confirm-resume4320-20261022b/stderr.log",
-          "sha256": "59bd346f5ddcaf9e93eff7b9ceea468518e1f00423957b975a77067086f3a92e"
-        },
-        {
-          "path": "audit/runs/ottawa/cycle3-confirm-resume4320-20261022b/receipt.json",
-          "sha256": "53b0c066b44ee3bf27f8f491d5abdc17a9db00fbf17afc243f3c925a694f03a8"
-        },
-        {
-          "path": "audit/runs/ottawa/zig017-resume4320-dev021-20261021/stderr.log",
-          "sha256": "4e9488008886254be2b6051c24390cf0fa4076b8957188921ae19021d8d6d81c"
-        },
-        {
-          "path": "audit/runs/ottawa/zig017-verify-dev021-20261021/receipt.json",
-          "sha256": "d4fa8f0cf1aea18de99a1ebf9fda42ac79f20d5e0f7aa3e01e5ffc7d5d15bc51"
-        },
-        {
-          "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
-          "sha256": "47ae4cd4c8aa017f32d3a50263f0f0b8a898a4a37c5de111206feb28662a493a"
+          "path": "audit/experiments/cycle4-verify-dev023-20261022/g1-g9-digest.md",
+          "sha256": "b825d303054b2bb62082bce45f9f713dfc00c570a4b4479c25aa5b80dbf3a71d"
         }
       ],
-      "reason": "Candidate replays parent records 4321-4555 bit-identically (incl deadband-fixed h4412); cap decision byte-identical across from-scratch and resume",
+      "reason": "",
       "result": "PASS"
     },
     "G6": {
-      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "candidate_digest": "8c5f2591a0d9d42fb8cedb84ddbea85eaa000d515737a09724c2761706f0bf85",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
-          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/intentional-deviations.md": "f5f8fb8d1035ee41e9cf4f093c4188c8e6ff84e3f4c054d28bc70f23e5698dc6",
           "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
           "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
           "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
@@ -399,13 +337,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "ecosys-ng/src": "45f543d569971a37308976b2f5514b7403bd5c74dd91f73b9b1c22e7abadc489",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "digest": "b30df43fbe81c4d787486e00504a10284d4b4f9883cdb48d9089ac41c00a9e4e",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -439,23 +377,19 @@
       },
       "evidence": [
         {
-          "path": "audit/intentional-deviations.md",
-          "sha256": "ee74ce11330efe6d5f40e0a4101b207c2afd2cb35225cce5983261b9706b5201"
-        },
-        {
-          "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
-          "sha256": "47ae4cd4c8aa017f32d3a50263f0f0b8a898a4a37c5de111206feb28662a493a"
+          "path": "audit/experiments/cycle4-verify-dev023-20261022/g1-g9-digest.md",
+          "sha256": "b825d303054b2bb62082bce45f9f713dfc00c570a4b4479c25aa5b80dbf3a71d"
         }
       ],
-      "reason": "DEV-022 registered; no tolerance/ceiling change, no clamp-after-solve, f77src/f77example/ecosys-ng-prod-examples clean",
+      "reason": "",
       "result": "PASS"
     },
     "G7": {
-      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "candidate_digest": "8c5f2591a0d9d42fb8cedb84ddbea85eaa000d515737a09724c2761706f0bf85",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
-          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/intentional-deviations.md": "f5f8fb8d1035ee41e9cf4f093c4188c8e6ff84e3f4c054d28bc70f23e5698dc6",
           "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
           "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
           "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
@@ -466,13 +400,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "ecosys-ng/src": "45f543d569971a37308976b2f5514b7403bd5c74dd91f73b9b1c22e7abadc489",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "digest": "b30df43fbe81c4d787486e00504a10284d4b4f9883cdb48d9089ac41c00a9e4e",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -506,31 +440,19 @@
       },
       "evidence": [
         {
-          "path": ".agent/cycles/cycle_00003.md",
-          "sha256": "3cf0d8509fa0eb24a0d372160eb7d6d07280bba6c0ed2af1b922961e3b4df619"
-        },
-        {
-          "path": "audit/runs/ottawa/zig017-replay-4320-terms-20261021/receipt.json",
-          "sha256": "474242279a4353a7c43d01b373c1c6b0041e2c2819ed508004eed1db4a63a8db"
-        },
-        {
-          "path": "audit/runs/cycle3-confirm-build-ReleaseSafe-20261021234803/receipt.json",
-          "sha256": "6dd1c0b271c0cfe1e91ee029a6379ee4fcf8990eee6391937cf01806b138b730"
-        },
-        {
-          "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
-          "sha256": "47ae4cd4c8aa017f32d3a50263f0f0b8a898a4a37c5de111206feb28662a493a"
+          "path": "audit/experiments/cycle4-verify-dev023-20261022/g1-g9-digest.md",
+          "sha256": "b825d303054b2bb62082bce45f9f713dfc00c570a4b4479c25aa5b80dbf3a71d"
         }
       ],
-      "reason": "Legacy-first derivation separate from fix; decisive numbers reproduced under instrumented replay and reproducible rebuild",
+      "reason": "",
       "result": "PASS"
     },
     "G9": {
-      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "candidate_digest": "8c5f2591a0d9d42fb8cedb84ddbea85eaa000d515737a09724c2761706f0bf85",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
-          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/intentional-deviations.md": "f5f8fb8d1035ee41e9cf4f093c4188c8e6ff84e3f4c054d28bc70f23e5698dc6",
           "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
           "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
           "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
@@ -541,13 +463,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "ecosys-ng/src": "45f543d569971a37308976b2f5514b7403bd5c74dd91f73b9b1c22e7abadc489",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "digest": "b30df43fbe81c4d787486e00504a10284d4b4f9883cdb48d9089ac41c00a9e4e",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -581,34 +503,28 @@
       },
       "evidence": [
         {
-          "path": "audit/runs/cycle-build-ReleaseSafe-20261021220322410232/receipt.json",
-          "sha256": "2093a04b8053541c8b19da053c5922c005c7d5bba76ae40de04608c69699151c"
-        },
-        {
-          "path": "audit/runs/ottawa/cycle3-confirm-resume4320-20261022b/receipt.json",
-          "sha256": "53b0c066b44ee3bf27f8f491d5abdc17a9db00fbf17afc243f3c925a694f03a8"
-        },
-        {
-          "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
-          "sha256": "47ae4cd4c8aa017f32d3a50263f0f0b8a898a4a37c5de111206feb28662a493a"
+          "path": "audit/experiments/cycle4-verify-dev023-20261022/g1-g9-digest.md",
+          "sha256": "b825d303054b2bb62082bce45f9f713dfc00c570a4b4479c25aa5b80dbf3a71d"
         }
       ],
-      "reason": "All caches/cwd/logs/checkpoints repo-local (project.sh env; decks under evidence/); binaries retained repo-local with sha binding",
+      "reason": "",
       "result": "PASS"
     }
   },
-  "next_action": "2026-10-21: term/basis dumps in zig017-replay-4320-terms[-2]-20261021 receipts; DEV-022 row added; final suite 4519/4521 (only pre-existing hourly_heat_water_solute crash); resume-deck tooling archived audit/experiments/ottawa-resume-deck-tools.",
-  "next_target": "Verify audit/runs/ottawa/zig017-verify-dev021-20261021 clears hour 4556 (DEV-022 log expected, no hourly failure), then close cycle 3 (gates, commit, push) and continue the strict trajectory past the previous failure boundary.",
-  "opened_utc": "2026-10-17T08:55:14Z",
+  "next_target": "issue-114 h11806 InvalidRootGasTransportSettings; backlog: DEV-022/DEV-023 adversarial revalidation",
   "owned_paths": [
     "ecosys-ng/src/soil/nutrients/nitrogen_state_update.zig",
     "ecosys-ng/src/soil/microbial/heterotrophic_denitrification_step.zig",
+    "audit/issues/issue-113-h4855-insufficientsoilnitrite-non-band-layer-0-nitrite-candidate-negative.md",
+    "audit/issues/issue-114-h11806-invalidrootgastransportsettings.md",
+    "audit/issues/issue-115-execroot-hourly-heat-recovery-ladder-oob.md",
     "audit/intentional-deviations.md",
-    ".agent/cycles/cycle_00003.md",
-    "audit/experiments/cycle3-confirm-resume-20261022/retention.json"
+    "audit/experiments/cycle4-verify-dev023-20261022/build_resume_deck.py",
+    "audit/experiments/cycle4-verify-dev023-20261022/patch_manifest.py",
+    "audit/experiments/cycle4-verify-dev023-20261022/retention.json"
   ],
-  "record": ".agent/cycles/cycle_00003.md",
-  "retention_manifest": "audit/experiments/cycle3-confirm-resume-20261022/retention.json",
+  "record": ".agent/cycles/cycle_00004.md",
+  "retention_manifest": "audit/experiments/cycle4-verify-dev023-20261022/retention.json",
   "schema_version": 2,
   "scope": [
     "ecosys-ng/src",
@@ -617,6 +533,5 @@
   ],
   "status": "DECIDED",
   "sync_status": "PENDING",
-  "target": "RESOLVED cause: h4556 nitrate overdraw = summed FMN-floored per-population NO3 reduction shares exceed zone supply (pool 4.133382671876368e-6 g vs demand 4.134932629096317e-6 g, +3.74e-4 rel; nitro.f 1682-1693 share sums uncapped, redist.f 6218-6220 unclamped; basis equality proven by dumps). Fix DEV-022 supply cap in heterotrophic_denitrification_step.zig.",
-  "updated_utc": "2026-10-17T19:03:11Z"
+  "target": "issue-113: why does h4855 (1998 d203 h7) zone_non_band layer 0 produce nitrite candidate -1.3670655422748992e-11 g against operation scale 3.246187603319597e-7? Term-by-term NO2 supply/consumption vs legacy nitrif.f/nitro.f/redist.f; falsifier: summed NO2 consumers exceed hour-supply+pool or a translation/binding defect in the nitrite path; no cap or floor until the causal term is proven."
 }
