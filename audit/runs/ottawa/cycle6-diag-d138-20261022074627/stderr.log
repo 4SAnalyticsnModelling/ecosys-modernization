@@ -1,0 +1,420 @@
+info: runtime max_nonlinear_iterations=100 is the hard ceiling for all process solvers
+info: loaded runtime surface gas and microbial oxygen parameters
+info: loaded runtime layer-resolved soil nitrogen parameters
+info: startup phase complete: phase=run_plan elapsed_ms=30
+info: structured output tree ready: root='/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/evidence/runs/cycle6-diag-d138-20261022/deck/runottawa_output_files' resume=true
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+info: startup phase complete: phase=output_plan elapsed_ms=36
+info: startup phase complete: phase=domain_science elapsed_ms=36
+info: startup phase complete: phase=soil_process_transport elapsed_ms=36
+info: STARTE chemistry beginning: cell_count=1 layer_count=12 max_iterations=1000
+info: STARTE chemistry layer solved: cell=0 layer=0 elapsed_ms=3 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=0 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=0 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=0 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=4 elapsed_ms=2 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=4 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=4 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=4 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=8 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=6.9674543618124915e-6
+info: STARTE chemistry layer evaluations: cell=0 layer=8 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=8 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=8 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=1 elapsed_ms=3 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=1 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=1 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=1 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=5 elapsed_ms=2 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=5 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=5 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=5 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=9 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=4.961920283094378e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=9 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=9 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=9 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=2 elapsed_ms=3 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=2 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=2 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=2 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=6 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.068832344448537e-6
+info: STARTE chemistry layer evaluations: cell=0 layer=6 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=6 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=6 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=10 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=2.917909954728281e-6
+info: STARTE chemistry layer evaluations: cell=0 layer=10 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=10 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=10 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=3 elapsed_ms=3 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=1.956544401442184e-3
+info: STARTE chemistry layer evaluations: cell=0 layer=3 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=3 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=3 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=7 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=4.940888102257194e-6
+info: STARTE chemistry layer evaluations: cell=0 layer=7 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=7 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=7 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=11 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=1.623731417607197e-5
+info: STARTE chemistry layer evaluations: cell=0 layer=11 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=11 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=11 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: startup phase complete: phase=startup_soil_chemistry_starte elapsed_ms=46
+info: startup phase complete: phase=pre_timeline elapsed_ms=47
+info: daily conservation accepted: day=131 year=1999 hour=24 water=1.5675517571214622e-14 heat=3.6053303939464695e-12 oxygen=4.1246732095739147e-13 hydrogen=5.274050305854695e-13 carbon=8.458859656904831e-14 nitrogen=9.272907391251583e-14 phosphorus=0e0 aluminum=2.0588899852890252e-10 iron=6.95957073886995e-9 calcium=1.3526798371936546e-9 magnesium=4.5804892278565376e-5 sodium=8.531117419235583e-8 potassium=9.614440165529701e-8 sulfur=2.278255594425374e-13 chloride=1.0775538055861915e-13 silicon=3.5950562746558422e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=8.849251616025441e-3 aec=9.563943931378702e-3
+info: day advanced: scene_weather_hours=3144 final_hour_elapsed_ms=59
+info: daily conservation accepted: day=132 year=1999 hour=24 water=1.5610844325154785e-14 heat=3.5433442870127306e-12 oxygen=3.9802061260384833e-13 hydrogen=1.0485644333084235e-12 carbon=2.7282672289140822e-14 nitrogen=9.129664936498372e-14 phosphorus=3.0877076126594835e-13 aluminum=1.3654197602907962e-10 iron=9.278573291294087e-9 calcium=1.3705399004627783e-9 magnesium=5.30946289843891e-5 sodium=8.727173205487391e-8 potassium=9.85876340382473e-8 sulfur=2.2869727966593804e-13 chloride=1.0857130418275699e-13 silicon=3.4016385321055176e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=8.764271897841456e-3 aec=7.60241733113576e-3
+info: day advanced: scene_weather_hours=3168 final_hour_elapsed_ms=45
+info: daily conservation accepted: day=133 year=1999 hour=24 water=1.554436986581836e-14 heat=3.4699198230102236e-12 oxygen=3.8030089078547553e-13 hydrogen=5.210939980350005e-13 carbon=1.8490914893664433e-13 nitrogen=8.095251897890619e-14 phosphorus=3.0875261100254643e-13 aluminum=1.3581369251150161e-10 iron=9.277696853506697e-9 calcium=1.3653949988465937e-9 magnesium=6.781554002685414e-5 sodium=8.234649313274067e-8 potassium=9.569766913986298e-8 sulfur=2.258670805173316e-13 chloride=1.0880497629160917e-13 silicon=3.3715164099122323e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=1.3038827863703502e-2 aec=9.42423796200854e-3
+info: day advanced: scene_weather_hours=3192 final_hour_elapsed_ms=57
+info: daily conservation accepted: day=134 year=1999 hour=24 water=1.63513772677989e-14 heat=3.4026298159950864e-12 oxygen=3.68895922962012e-13 hydrogen=5.178420028885126e-13 carbon=7.662058645543982e-14 nitrogen=8.295892352857807e-14 phosphorus=1.0291138663289851e-13 aluminum=3.376800940563371e-10 iron=4.638397394761946e-9 calcium=1.3374849263267108e-9 magnesium=7.484325660275969e-5 sodium=8.200839394148277e-8 potassium=9.546730792947501e-8 sulfur=2.2698030030213252e-13 chloride=1.0903707673112928e-13 silicon=3.1820871453719973e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=4.323301921842808e-3 aec=7.4898696587135565e-3
+info: day advanced: scene_weather_hours=3216 final_hour_elapsed_ms=85
+error: TEMP_DIAGNOSTIC issue-116 carbon terms: day=135 balance=6.155043201399107e3 baseline=6.15504320139911e3 residue=4.589944111485946e2 organic=4.578392713101545e3 co2=1.0994352348582329e2 plant=0e0 cum_co2_in=5.902772855101287e0 cum_c_out=1.1216153265182443e3 cum_orgfert=0e0 cum_inoc=0e0 cum_minfert=1.08e2
+info: daily conservation accepted: day=135 year=1999 hour=24 water=1.6965507873179768e-14 heat=3.3366430913832975e-12 oxygen=3.533093701479767e-13 hydrogen=5.145349818943155e-13 carbon=9.861305332600246e-14 nitrogen=7.598369691025063e-14 phosphorus=2.0581025468808043e-13 aluminum=2.6863198153305934e-10 iron=2.318966288962438e-9 calcium=1.2419087869896876e-9 magnesium=7.43267972437959e-5 sodium=8.166370685669504e-8 potassium=9.258632178797378e-8 sulfur=2.2784306119757764e-13 chloride=1.0868782634837028e-13 silicon=2.6800376394918423e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=8.578657239079805e-3 aec=9.279531383665125e-3
+info: day advanced: scene_weather_hours=3240 final_hour_elapsed_ms=59
+error: TEMP_DIAGNOSTIC issue-116 carbon terms: day=136 balance=6.155043201399115e3 baseline=6.15504320139911e3 residue=4.572938887491961e2 organic=4.578522724912141e3 co2=1.1012465747890687e2 plant=0e0 cum_co2_in=5.908072003128613e0 cum_c_out=1.1230100022619997e3 cum_orgfert=0e0 cum_inoc=0e0 cum_minfert=1.08e2
+info: daily conservation accepted: day=136 year=1999 hour=24 water=1.598946852183894e-14 heat=3.264884094593235e-12 oxygen=3.389889889136108e-13 hydrogen=5.111567378890006e-13 carbon=1.1875957040895969e-13 nitrogen=8.060605131799198e-14 phosphorus=6.173925659112213e-13 aluminum=2.0031903198899286e-10 iron=4.637453891936533e-9 calcium=1.2818952320976623e-9 magnesium=6.64213978945702e-5 sodium=8.58299540016895e-8 potassium=1.0026800022519634e-7 sulfur=2.2697865568214795e-13 chloride=1.097858992315711e-13 silicon=2.9675039913474976e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=1.2802347096967778e-2 aec=9.234409719216229e-3
+info: day advanced: scene_weather_hours=3264 final_hour_elapsed_ms=66
+warning: TEMP_DIAGNOSTIC tillage surface carbon: packed=1.6372822766021888e0 authoritative=1.6372822766021888e0 water=2.99942058091861e-3 T=3.047782392478304e2
+warning: TEMP_DIAGNOSTIC tillage surface energy: cell=0 T=3.047782392478304e2 grid_T=3.047782392478304e2 gas_T=3.047782392478304e2 C_inc=4.086656562399049e-7 ice_inc=0e0 vapor_inc=0e0 water_inc=2.9994205809186095e-4 energy_to_soil=3.831568061104868e-1 heat_input=-1.2455239914985737e-4 water_before=2.99942058091861e-3 water_after=2.6994785228267493e-3 ice_before=0e0 ice_after=0e0 vhcp_after=1.1314493001550241e-2
+warning: TEMP_DIAGNOSTIC tillage surface booking: heat_before=3.831568061104868e0 heat_after=3.4484112549943817e0 booked_heat=3.831568061104864e-1 water_before=2.99942058091861e-3 water_after=2.6994785228267493e-3 carbon_before=0e0 carbon_after=0e0
+warning: large ammonium from transport publish: cell=2 conc_mol_m3=1.358307052062086e3 amount_mol=1.8768752892762636e-3 water_m3=1.3817754140546723e-2
+error: TEMP_DIAGNOSTIC issue-116 carbon terms: day=137 balance=6.155043201399114e3 baseline=6.15504320139911e3 residue=4.5544915501699944e2 organic=4.578666111260326e3 co2=1.10286936672489e2 plant=0e0 cum_co2_in=5.912561552374716e0 cum_c_out=1.124553560001674e3 cum_orgfert=0e0 cum_inoc=0e0 cum_minfert=1.08e2
+info: daily conservation accepted: day=137 year=1999 hour=24 water=1.6245832678191697e-14 heat=3.1966007583887386e-12 oxygen=3.2241665960226903e-13 hydrogen=1.015390044834617e-12 carbon=9.131593236008341e-14 nitrogen=8.539714117559012e-14 phosphorus=3.0867689607025427e-13 aluminum=3.3190976301859305e-10 iron=9.273924149510727e-9 calcium=1.1422525799449033e-9 magnesium=9.524932012386167e-5 sodium=7.645821262093416e-8 potassium=8.684960753541101e-8 sulfur=2.248822655610539e-13 chloride=1.105918895976324e-13 silicon=2.165985976147627e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=8.478224871667495e-3 aec=7.320455812756466e-3
+info: day advanced: scene_weather_hours=3288 final_hour_elapsed_ms=98
+warning: TEMP_DIAGNOSTIC root gas booking: layer=1 withdrawal_co2_c=-4.382675936356373e-6 withdrawal_ch4_c=-9.465476472413643e-10 withdrawal_n2o_n=-1.0325422695493475e-9 withdrawal_nh3_n=-4.41203947903986e-8 withdrawal_h2=-9.17259842284977e-13 atmosphere_co2_c=1.9019803706651676e-8 atmosphere_ch4_c=6.222132122091858e-10
+error: TEMP_DIAGNOSTIC issue-116 carbon terms: day=138 balance=6.156363201399106e3 baseline=6.15504320139911e3 residue=4.533389921343557e2 organic=4.57883446670767e3 co2=1.1051723102204619e2 plant=1.320014752083091e0 cum_co2_in=5.914460212662793e0 cum_c_out=1.126266956995614e3 cum_orgfert=0e0 cum_inoc=0e0 cum_minfert=1.08e2
+error: carbon mass balance lost: day=138 year=1999 deviation_per_m2=1.319999999996071e0 tolerance_per_m2=4.2075323895100345e-8
+info: stage execution census: 12 of 19 INSTRUMENTED stages never executed across 3312 simulated hour(s); 1 of 20 stages not yet instrumented
+info:   census is LIVE (positive control fired), so every zero below is a real finding about the model, not a dead instrument.
+info:   never executed (instrumented, ran zero times -- this is the finding):
+info:     plant_emergence_occurred
+info:     canopy_photosynthesis_occurred
+info:     root_water_uptake
+info:     symbiotic_nitrogen_fixation
+info:     second_plant_species
+info:     harvest_reproductive_organs
+info:     harvest_branch_stalk_and_reserve
+info:     tillage_aboveground_application
+info:     fertilizer_application
+info:     day_of_year_reset
+info:     scene_transition
+info:     forcing_repeat_transition
+info:   executed:
+info:     plant_pre_emergence entries=24 first_hour=3289 last_hour=3312
+info:     plant_emergence_refresh entries=192 first_hour=3121 last_hour=3312
+info:     canopy_carboxylation entries=192 first_hour=3121 last_hour=3312
+info:     canopy_energy_balance entries=192 first_hour=3121 last_hour=3312
+info:     nonsymbiotic_nitrogen_fixation entries=192 first_hour=3121 last_hour=3312
+info:     tillage_soil_application entries=1 first_hour=3276 last_hour=3276
+info:     census_positive_control entries=191 first_hour=3121 last_hour=3311
+info:   NOT YET INSTRUMENTED (execution unknown -- absence of a record here is NOT evidence):
+info:     root_uptake_geometry
+error: CarbonMassBalanceLost

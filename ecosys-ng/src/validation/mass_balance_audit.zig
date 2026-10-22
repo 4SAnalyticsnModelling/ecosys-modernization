@@ -514,6 +514,24 @@ pub const Monitor = struct {
         // precipitates, organic pools, litter carriers, and boundary ledgers.
         // Its census has roughly four times the rounded terms of C/N.
         const phosphorus_roundoff_per_m2 = 4 * representationFloorForInterval(current_scale.phosphorus_g, self.cancellation_scale_baseline.phosphorus_g, totals.landscape_area_m2);
+        if (!builtin.is_test and issue116_trace_day(day, year, totals.plant_carbon_g, current.carbon_g, self.baseline.carbon_g)) std.log.err(
+            "TEMP_DIAGNOSTIC issue-116 carbon terms: year={d} day={d} balance={e} baseline={e} residue={e} organic={e} co2={e} plant={e} cum_co2_in={e} cum_c_out={e} cum_orgfert={e} cum_inoc={e} cum_minfert={e}",
+            .{
+                year,
+                day,
+                current.carbon_g,
+                self.baseline.carbon_g,
+                totals.residue_carbon_g,
+                totals.organic_carbon_g,
+                totals.carbon_dioxide_carbon_g,
+                totals.plant_carbon_g,
+                totals.cumulative_carbon_dioxide_input_g,
+                totals.cumulative_carbon_output_g,
+                totals.cumulative_organic_fertilizer_carbon_g,
+                totals.cumulative_symbiotic_inoculum_carbon_input_g,
+                totals.cumulative_mineral_fertilizer_carbon_g,
+            },
+        );
         try checkOne(day, year, "carbon", d.carbon_g_m2, limit.carbon_g_m2 + carbon_roundoff_per_m2, error.CarbonMassBalanceLost);
         try checkOne(day, year, "nitrogen", d.nitrogen_g_m2, limit.nitrogen_g_m2 + nitrogen_roundoff_per_m2, error.NitrogenMassBalanceLost);
         try checkOne(day, year, "phosphorus", d.phosphorus_g_m2, limit.phosphorus_g_m2 + phosphorus_roundoff_per_m2, error.PhosphorusMassBalanceLost);
@@ -682,6 +700,17 @@ fn formatAuditLine(buf: []u8, day: u64, year: i32, d: Deviation) []const u8 {
         d.ions_mol_m2,
         d.water_m,
     }) catch unreachable;
+}
+
+var issue116_prev_plant_g: f64 = std.math.nan(f64);
+
+fn issue116_trace_day(day: u64, year: i32, plant_g: f64, balance_g: f64, baseline_g: f64) bool {
+    const jump = @abs(plant_g - issue116_prev_plant_g);
+    issue116_prev_plant_g = plant_g;
+    if (year == 1999 and day >= 135 and day <= 138) return true;
+    _ = balance_g;
+    _ = baseline_g;
+    return !std.math.isNan(jump) and jump > 0.4;
 }
 
 fn checkOne(day: u64, year: i32, comptime domain: []const u8, value: f64, tolerance: f64, comptime failure: anyerror) !void {
