@@ -1,0 +1,21 @@
+{
+  "cycle": 6,
+  "candidate": {
+    "role": "canonical verification binary (deck copy; produced audit/runs/ottawa/cycle6-verify-scratch-candidate-20261022101316)",
+    "path": "evidence/runs/cycle6-verify-scratch-20261022/deck/ecosys_ng",
+    "sha256": "52aba77c13d37470480216e7b522402b99d9a8d8420d5b2a56357b6f86e77cea",
+    "build": "zig 0.17.0 ReleaseSafe from source tree at commit 0d54b81 (fix) + committed test ratchet pin"
+  },
+  "rebuild_equivalent": {
+    "role": "same-source ReleaseSafe relink; differs from candidate only in Mach-O LC_UUID bytes (see digest linker-nondeterminism disclosure)",
+    "path": "ecosys-ng/ecosys-ng-bin/ecosys_ng",
+    "sha256": "415e999a2a0812b6d0f799eafd2c4fd9269ca89f73ac2c878c27f8f41acab536"
+  },
+  "superseded_interim": [
+    {
+      "role": "pre-test binary (a0e89825a7a3d691...) and pre-ratchet-pin binary (bf2c8b56dad8906f...); not used for gates",
+      "note": "deck wiped; receipts retained: audit/runs/ottawa/cycle6-verify-scratch-candidate-20261022095502 (killed ~d30)"
+    }
+  ],
+  "identity_policy": "macOS links embed a random LC_UUID; candidate identity is source+toolchain pinned, runtime equivalence proven output-level (502-ledger bit parity vs cycle-5 canonical; suite receipts)"
+}

@@ -90,3 +90,11 @@ evidence/runs/cycle6-verify-scratch-20261022/deck (diff-verified prod inputs), r
 audit/runs/ottawa/cycle6-verify-scratch-candidate-20261022095502. Acceptance: 1999 d138 daily
 conservation accepted (deviation ~roundoff, not 1.32); 1998 ledgers bit-comparable to cycle-5
 candidate through d365 (no physics change); run advances past h12073 to the next distinct defect.
+
+## Verification RESULT (cycle 00006, 2026-10-22) — RESOLVED
+Canonical from-scratch run audit/runs/ottawa/cycle6-verify-scratch-candidate-20261022101316:
+- 1999 d138 "daily conservation accepted" carbon defect 8.754659807282035e-14 (was +1.32 g C/m2); d139 accepted.
+- 504 accepted ledgers (1998 d1..1999 d139); first 502 lines bit-identical to the cycle-5 canonical run (cmp)
+  => outputs untouched; DEV-022 x2 / DEV-023 x3 / InsufficientSoilNitrite 0 (identical event profile).
+- Engine exit moves to a DISTINCT defect at 1999 d140: HourlyPlantConservationFailure -> issue-117 registered
+  (audit/issues/issue-117-1999d140-hourlyplantconservation.md).
