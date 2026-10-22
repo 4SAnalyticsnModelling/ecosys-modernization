@@ -1,0 +1,175 @@
+{
+  "count": 34,
+  "results": [
+    {
+      "skill": ".agents/skills/ecosys-autonomous-orchestration",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-build-reproducibility",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-conservation-audit",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-divergence-diagnosis",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-feature-attribution",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-fortran-zig-traceability",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-nonlinear-solver-audit",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-output-comparison",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-performance-engineering",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-process-science-parity",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-release-orchestrator",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-release-verification",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-repository-baseline",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-source-navigation",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-state-io-bindings",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-validation-tests",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".agents/skills/ecosys-zig-safety-design",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-autonomous-orchestration",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-build-reproducibility",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-conservation-audit",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-divergence-diagnosis",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-feature-attribution",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-fortran-zig-traceability",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-nonlinear-solver-audit",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-output-comparison",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-performance-engineering",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-process-science-parity",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-release-orchestrator",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-release-verification",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-repository-baseline",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-source-navigation",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-state-io-bindings",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-validation-tests",
+      "valid": true,
+      "message": "Skill is valid!"
+    },
+    {
+      "skill": ".claude/skills/ecosys-zig-safety-design",
+      "valid": true,
+      "message": "Skill is valid!"
+    }
+  ]
+}

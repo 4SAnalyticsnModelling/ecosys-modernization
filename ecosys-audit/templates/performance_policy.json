@@ -15,6 +15,6 @@
     "duration_years": 6,
     "applicability": "UNCONFIRMED for the current deck/hardware; establish from project evidence before treating it as a gate"
   },
-  "reviewer": null,
+  "decision_owner": null,
   "rationale": null
 }

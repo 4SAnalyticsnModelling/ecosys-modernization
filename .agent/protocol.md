@@ -1,7 +1,24 @@
 # Ottawa protocol
 
-One autonomous model owns all decisions and work; no human approval or mandatory sub-agent.
-Continue to verified F1–F7. This file governs; the execution plan selects priorities.
+One autonomous leader owns decisions, scientific acceptance, cycle state and publication.
+Optional sub-agents or swarms may perform scoped supporting work when safe; the leader
+integrates their evidence and remains accountable. No adversarial reviewer roles, mandatory
+peer review, reviewer sign-offs or human approval queues. Verification is work the leader
+performs, not permission another actor grants. Continue to verified F1–F7.
+This file governs; the execution plan selects priorities.
+
+Delegate independent scopes with explicit deliverables. Prefer read-only investigation or
+isolated fixtures; coordinate disjoint edits. Serialize shared-file changes, scientific run
+ownership, kernel locks, cycle/frontier/gate mutations and Git publication under the leader.
+Helpers cannot promote gates/frontiers or publish independently. Optional delegation must
+not create a wait-for-review state: if a helper is unavailable or unproductive, the leader
+does the work, changes the approach or takes another unblocked task. Preserve healthy jobs
+and reconcile their results before duplication; unverified helper claims never establish PASS.
+
+Historical audit documents, cycle records, archived notes and saved conversations may mention
+adversaries, independent reviewers or pending human decisions. Those role/approval requirements
+are superseded. Preserve their scientific observations and unresolved evidence obligations;
+the leader resolves them with tests and a recorded decision, without reviving reviewer gates.
 
 | Finish | Evidence for one integrated Zig 0.17.x candidate |
 |---|---|
@@ -49,8 +66,9 @@ unchanged evidence. Validate regression → coupling/balance → relevant event 
 Verdicts are PASS, FAIL, NA or INCONCLUSIVE; INCONCLUSIVE never passes.
 Every verdict needs hash-bound evidence. NA needs an explicit scope reason; science changes
 require G1–G5/G7 PASS. G7 also covers architecture, bounds, rollback, restart/output semantics
-and DEVs. Prefer fresh sequential context of the same model; otherwise label the separate
-pass honestly. It is not an independent-model endorsement. Reproduced FAIL means fix/revert
+and DEVs. The leader performs this separate derivation from raw evidence in the current
+session; a fresh context is optional and never a prerequisite. Record the actual method;
+do not claim an independent-model endorsement. Reproduced FAIL means fix/revert
 only owned changes. Interrupted publication resumes the existing verified commit; evidence
 references must be committed or covered by a committed retention manifest. Never force-close failures, stage unrelated edits or force-push. Negative
 results close after the candidate change is removed and applicable checks pass.

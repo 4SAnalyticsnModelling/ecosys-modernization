@@ -4,7 +4,8 @@ description: "Choose the critical path to complete Ottawa qualification; use for
 ---
 
 Authority: `.agent/protocol.md`; read it once per session. Use `./scripts/project.sh pickup`
-for current state and `exec` for logged heavy commands. One model decides; no human approval.
+for current state and `exec` for logged heavy commands. One leader decides and verifies;
+optional safe sub-agents follow the protocol. No adversarial reviewers or reviewer approval gates.
 
 Read the execution plan, pickup packet and current issue. Prioritize prerequisites and
 information gained per repeated work: reproducible failure/oracle → bindings/output dictionary

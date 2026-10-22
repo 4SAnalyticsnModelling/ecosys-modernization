@@ -9,7 +9,7 @@ canonical run. Candidate ReleaseSafe 52aba77c...; suites Debug+ReleaseSafe EXITE
 canonical from-scratch verification running (audit/runs/ottawa/cycle6-verify-scratch-candidate-20261022101316;
 acceptance = 1999 d138 ledger accepted, run advances past h12073). macOS linker embeds random LC_UUID —
 binary-hash reproducibility replaced by source-pinned identity + output-level equivalence (cycle6 digest).
-Then issue-115 (test-fixture OOB, file absent from module gate root); DEV-022/DEV-023 adversarial
+Then issue-115 (test-fixture OOB, file absent from module gate root); DEV-022/DEV-023 leader-led edge-case
 revalidation remains backlog. Legacy oracle blocked beyond h2173 (recorded).
 Verified strict frontier stays 0 in frontier.json (promotion only via update_frontier.py under P0
 binding); record-level strict trajectory now extends to h12072 accepted / h12073 failed (pre-fix).

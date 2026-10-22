@@ -1,0 +1,39 @@
+{
+  "status": "RECONCILED_UNPUBLISHED",
+  "sessionId": "4c83caf2-c5bc-4235-81c5-f346a4f7f22a",
+  "checkpoint": "5578a3c4-7891-4922-bba5-711c59154e08",
+  "preservedPrefixEvents": 5104,
+  "checkpointPrefixEvents": 5103,
+  "unchangedCheckpointPrefix": true,
+  "noSummaryPublication": true,
+  "backup": ".dsh-watchdog/maintenance/notes-size-recovery-20261022/interrupted-before.v4.jsonl.zstd",
+  "backupSha256": "19c6cf47eb10bac4ce3bbd431a2a10a8b913e6206e3a1f217492683e3621431b",
+  "appended": [
+    {
+      "type": "compaction/end",
+      "seq": 5104,
+      "time": 1792700366855,
+      "data": {
+        "compactionId": "e2d0bdd5-7727-4635-a0b2-074b95b7fd82",
+        "turn": 5,
+        "error": "Owner exited during uncommitted compaction; complete original event prefix verified unchanged against the saved checkpoint. No summary was published."
+      }
+    },
+    {
+      "type": "turn/end",
+      "seq": 5105,
+      "time": 1792700366855,
+      "data": {
+        "turn": 5,
+        "reason": {
+          "kind": "error",
+          "error": {
+            "code": "INTERRUPTED_BEFORE_PUBLICATION",
+            "message": "Owner exited during uncommitted compaction; complete original event prefix verified unchanged against the saved checkpoint. No summary was published."
+          }
+        }
+      }
+    }
+  ],
+  "sessionAfterSha256": "ea9e769dfd3124c393763f8665c91dc7a69739f30a26bbf499e6085b03674b58"
+}

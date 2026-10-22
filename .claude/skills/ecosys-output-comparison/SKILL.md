@@ -4,7 +4,8 @@ description: "Compare all raw legacy/Zig production outputs with verified units 
 ---
 
 Authority: `.agent/protocol.md`; read it once per session. Use `./scripts/project.sh pickup`
-for current state and `exec` for logged heavy commands. One model decides; no human approval.
+for current state and `exec` for logged heavy commands. One leader decides and verifies;
+optional safe sub-agents follow the protocol. No adversarial reviewers or reviewer approval gates.
 
 Inventory files, columns, keys and required terminal time before comparing values. Populate
 `audit/output-provenance.csv` with producer, units, aggregation, conversion and rule per field.

@@ -1,7 +1,9 @@
 # Ottawa execution plan
 
-Authority: `.agent/protocol.md`. One model, autonomous decisions and recovery, no approval
-queue. Finish F1–F7 for one integrated Zig 0.17.x candidate; preserve every scientific gate.
+Authority: `.agent/protocol.md`. One accountable leader owns decisions, verification and
+recovery. Optional safe sub-agents/swarms support scoped tasks; no adversarial reviewers or
+reviewer approval queue. The leader resolves historical pending-review items from raw evidence.
+Finish F1–F7 for one integrated Zig 0.17.x candidate; preserve every scientific gate.
 Choose the next unblocked task by prerequisite value and information gained per repeated work.
 
 | Order | Deliverable | Exit evidence |

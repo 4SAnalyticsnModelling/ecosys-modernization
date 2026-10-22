@@ -4,7 +4,8 @@ description: "Establish source/input/toolchain identity and a usable legacy orac
 ---
 
 Authority: `.agent/protocol.md`; read it once per session. Use `./scripts/project.sh pickup`
-for current state and `exec` for logged heavy commands. One model decides; no human approval.
+for current state and `exec` for logged heavy commands. One leader decides and verifies;
+optional safe sub-agents follow the protocol. No adversarial reviewers or reviewer approval gates.
 
 Use pickup and `preflight.py`; inspect real commands before registering them. Protect all
 reference trees. Pin Zig 0.17.x; legacy precision is f64/-i4 with exact compiler flags recorded.

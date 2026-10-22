@@ -1,7 +1,7 @@
 [
   {
     "name": "ecosys-autonomous-orchestration",
-    "description": "Resume and execute autonomous Ottawa cycles with one model; use for pickup, decisions, recovery and cycle closure."
+    "description": "Resume and execute autonomous Ottawa cycles with one accountable leader; use for pickup, decisions, recovery and cycle closure."
   },
   {
     "name": "ecosys-build-reproducibility",

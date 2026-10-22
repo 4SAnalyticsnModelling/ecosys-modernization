@@ -4,9 +4,11 @@ description: "Decide final Ottawa readiness from one integrated evidence set; us
 ---
 
 Authority: `.agent/protocol.md`; read it once per session. Use `./scripts/project.sh pickup`
-for current state and `exec` for logged heavy commands. One model decides; no human approval.
+for current state and `exec` for logged heavy commands. One leader decides and verifies;
+optional safe sub-agents follow the protocol. No adversarial reviewers or reviewer approval gates.
 
-Re-derive from raw artifacts in a separate pass of the same model; never trust only summaries.
+The leader re-derives from raw artifacts in a separate pass of its current session; never trust
+only summaries. No second actor, reviewer sign-off or fresh-context launch is required.
 Check F1–F7: strict 262920-hour binding, independent hourly ledgers, every output, complete
 source/binding/feature inventory, DEV disposition, build/restart/performance and pushed main.
 `check_gate.py` validates stage structure/hashes; it does not prove scientific correctness.

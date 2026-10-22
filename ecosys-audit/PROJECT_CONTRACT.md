@@ -1,7 +1,8 @@
 # Scientific contract
 
-Authority and autonomy: `.agent/protocol.md`. One model decides every project question from
-evidence; no approval queue. Required scope is complete legacy-to-Zig science traceability
+Authority and autonomy: `.agent/protocol.md`. One leader decides and verifies every project
+question from evidence; safe supporting sub-agents/swarms are optional, with no adversarial
+reviewer or approval queue. Required scope is complete legacy-to-Zig science traceability
 and the full Ottawa release, including dormant branches in the audit inventory.
 
 Protect `f77src/`, `f77example/`, `ecosys-ng-prod-examples/`; stage instrumented copies inside
@@ -43,4 +44,5 @@ faster than the optimized precision-preserving legacy run on comparable resource
 
 [Qualification evidence](qualification-evidence.md) defines executable stage/status compatibility,
 acceptance prerequisites and report contracts. Empty registers and unestablished rules block
-qualification. Inventory completeness and scientific derivations still require separate review.
+qualification. The leader still verifies inventory completeness and separately re-derives
+scientific conclusions from raw evidence; no second actor or reviewer sign-off is required.

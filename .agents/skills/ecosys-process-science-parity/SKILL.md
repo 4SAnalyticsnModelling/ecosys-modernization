@@ -4,7 +4,8 @@ description: "Audit process equations and coupled legacy semantics; use for scie
 ---
 
 Authority: `.agent/protocol.md`; read it once per session. Use `./scripts/project.sh pickup`
-for current state and `exec` for logged heavy commands. One model decides; no human approval.
+for current state and `exec` for logged heavy commands. One leader decides and verifies;
+optional safe sub-agents follow the protocol. No adversarial reviewers or reviewer approval gates.
 
 Select the unresolved process/interface from the issue/trace map. Read legacy via f77query,
 then candidate producers/consumers. Enumerate each term, coefficient, units, sign, domain,

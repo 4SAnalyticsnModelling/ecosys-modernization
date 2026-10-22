@@ -8,6 +8,6 @@
   "recovery_command": [],
   "backoff_initial_seconds": 1,
   "backoff_max_seconds": 60,
-  "note": "Historical dsh headless argv; dsh is unavailable in the current maintenance environment. Future worker must configure an actually available single-model harness, measured storage reserve and live recovery evidence before unattended launch. Workflow maintenance does not activate it.",
+  "note": "Historical dsh headless argv. Qualify the actual harness, measured storage reserve and live recovery evidence before unattended launch. One leader owns decisions, verification and publication; optional safe supporting sub-agents/swarms follow .agent/protocol.md. No adversarial reviewer or reviewer approval gate. Workflow maintenance does not activate this launcher.",
   "deployment_status": "UNQUALIFIED"
 }

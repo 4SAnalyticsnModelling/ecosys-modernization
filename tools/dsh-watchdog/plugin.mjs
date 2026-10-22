@@ -249,6 +249,9 @@ export default class WatchdogCompaction extends Basic {
     const memory = notes(this.root(agent));
     let result;
     const fallback = () => {
+      const reason=this.record(agent).recoveryReason ?? 'MAX_TOKENS';
+      if (!['MAX_TOKENS','INTERRUPTED_BEFORE_PUBLICATION'].includes(reason))
+        throw Error('Unknown summary recovery reason; preserve checkpoint');
       const checkpoint = this.record(agent).checkpoint;
       const archive = path.join(this.root(agent),'checkpoints',checkpoint);
       // This is a complete deterministic recovery record, never truncated model output.
@@ -257,7 +260,9 @@ export default class WatchdogCompaction extends Basic {
       atomic(file,input);
       const requests = input.messages.filter(m => m.role === 'user' && m.source?.kind === 'user')
         .map(m => m.content.filter(b => b.type === 'text').map(b => b.text).join('\n'));
-      const text = 'Recovery checkpoint: the model summary was unavailable at its output cap. '+
+      const text = (reason==='INTERRUPTED_BEFORE_PUBLICATION'
+        ? 'Recovery checkpoint: the prior owner exited before publishing a summary; the unchanged original surface was verified against its saved checkpoint. '
+        : 'Recovery checkpoint: the model summary was unavailable at its output cap. ')+
         'No partial model summary is used. Verified durable notes are attached below; '+
         'the recent conversation remains after this checkpoint. Full selected conversation, '+
         'including every original request, decision, tool call and result, is preserved at '+file+'. '+
@@ -266,8 +271,8 @@ export default class WatchdogCompaction extends Basic {
         'to resolve any missing context. Never infer that pending work or a test succeeded.\n'+
         (requests.length ? 'Original user request (excerpt; full text in archive):\n'+requests[0].slice(0,6000)+
           '\nLatest user request (excerpt; full text in archive):\n'+requests.at(-1).slice(0,6000) : '');
-      atomic(path.join(archive,'summary-fallback.json'),{reason:'MAX_TOKENS',inputFile:file,at:new Date().toISOString()});
-      this.update(agent,{recoveryPending:false,summaryFallbacks:(this.record(agent).summaryFallbacks ?? 0)+1});
+      atomic(path.join(archive,'summary-fallback.json'),{reason,inputFile:file,at:new Date().toISOString()});
+      this.update(agent,{recoveryPending:false,recoveryReason:null,summaryFallbacks:(this.record(agent).summaryFallbacks ?? 0)+1});
       return {summary:[{type:'text',text}],provider:this.record(agent).provider ?? agent.options.provider,
         model:this.record(agent).model ?? agent.options.model,maxTokens:policy.maxTokens};
     };

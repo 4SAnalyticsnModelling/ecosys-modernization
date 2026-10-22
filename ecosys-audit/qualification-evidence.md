@@ -5,6 +5,15 @@ passing them does not replace separate scientific derivation or inspection of ra
 Commands below run through `./scripts/project.sh`. Historical receipts remain readable;
 missing new fields require revalidation, never automatic conversion to PASS.
 
+One leader performs and records evidence re-derivation; no adversarial reviewer or second
+actor is required. Independent conservation/benchmarks mean independent mathematical terms,
+data or experiments, not reviewer independence. `author` records the accountable worker;
+`verification_method=separate-derivation` is valid in its current session. Fresh context is
+optional. RELEASE uses `leader-release-verification`, completed by that same leader.
+Normalized CSV schemas record the leader's frozen tolerance decision in `decision_owner`;
+historical `approved_by` is accepted as a field alias, not an external approval requirement.
+Historical role labels never waive scientific checks or create a wait-for-review prerequisite.
+
 ## Stages and verdicts
 
 BASELINE → SOURCE → ENTRY → CAMPAIGN → RELEASE. Requirements live in

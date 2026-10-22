@@ -1,0 +1,34 @@
+{
+  "liveCount": 5104,
+  "checkpointCount": 5103,
+  "unchangedCheckpointPrefix": true,
+  "liveTail": [
+    {
+      "type": "turn/start",
+      "seq": 5101
+    },
+    {
+      "type": "agent/inbox/spliced",
+      "seq": 5102
+    },
+    {
+      "type": "compaction/start",
+      "seq": 5103,
+      "data": {
+        "compactionId": "e2d0bdd5-7727-4635-a0b2-074b95b7fd82",
+        "turn": 5
+      }
+    }
+  ],
+  "checkpointTail": [
+    {
+      "type": "turn/start",
+      "seq": 5101
+    },
+    {
+      "type": "agent/inbox/spliced",
+      "seq": 5102
+    }
+  ],
+  "noCompletedReceipt": true
+}

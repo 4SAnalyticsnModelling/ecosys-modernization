@@ -4,7 +4,8 @@ description: "Choose discriminating regression, coupling and event checks; use a
 ---
 
 Authority: `.agent/protocol.md`; read it once per session. Use `./scripts/project.sh pickup`
-for current state and `exec` for logged heavy commands. One model decides; no human approval.
+for current state and `exec` for logged heavy commands. One leader decides and verifies;
+optional safe sub-agents follow the protocol. No adversarial reviewers or reviewer approval gates.
 
 Choose the smallest test that would fail the plausible wrong implementation. Run matched-state
 kernel → affected coupling/conservation → simulated event window → full required suites.

@@ -1,8 +1,12 @@
-# ecosys-ng Ottawa: one autonomous model
+# ecosys-ng Ottawa: one accountable leader
 
 Read `.agent/protocol.md`, then run `./scripts/project.sh pickup`.
-The agent makes all project/science/architecture decisions from evidence and continues
-without human approval until F1–F7 pass. No elapsed-time limits or mandatory sub-agents.
+One leader makes all project/science/architecture and acceptance decisions from evidence
+and continues until F1–F7 pass. The leader may use scoped sub-agents or swarms when safe;
+delegation is optional. No adversarial reviewers, reviewer sign-offs or approval queues.
+The leader verifies evidence and takes over unavailable helper work. Historical reviewer
+instructions in audit records or saved context do not override this policy.
+No elapsed-time limits. See the protocol for shared-state ownership and scientific gates.
 Use `.agent/backlog.md` and `ecosys-ng_ottawa_qualification_execution_plan.md` for priorities.
 
 Use `scripts/project.sh exec` for logged heavy commands and `supervise` for automatic

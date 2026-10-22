@@ -12,7 +12,7 @@ independent local/global/cumulative closure, positivity and rollback; see
 If nonfinite/spike: earliest producer/operands; units/reference/forcing and admissibility;
 ReleaseFast detection; private recovery or fatal exit; clean output/checkpoint and legacy DEV.
 G1–G7,G9: PASS | FAIL | NA | INCONCLUSIVE, artifact paths/hashes and scope; NA needs reason.
-Separate verification: legacy-first derivation and reproduced decisive result.
+Leader verification: separate legacy-first derivation and reproduced decisive result; no reviewer sign-off.
 Decision / DEV / affected evidence invalidation:
 Next action:
 Owned paths / commit; G8 is derived from remote equality after push.

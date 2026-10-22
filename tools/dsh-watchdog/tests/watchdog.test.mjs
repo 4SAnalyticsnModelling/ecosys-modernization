@@ -107,6 +107,25 @@ test('only a closed pre-commit summary failure reconciles automatically',async()
   await f.ctx.fiber.dispose();
 });
 
+test('proved unpublished interrupted summary uses a complete native recovery checkpoint',async()=> {
+  const f=fixture();
+  f.compact.summarize=Watchdog.prototype.summarize.bind(f.compact);
+  f.compact.update(f.agent,{recoveryPending:true,recoveryReason:'INTERRUPTED_BEFORE_PUBLICATION'});
+  f.ctx.llm.stream=()=>{throw Error('Recovery must use preserved evidence, not another model summary');};
+  const meter=f.ctx.tokenMeter.measure.bind(f.ctx.tokenMeter);
+  const generation=f.agent.session.surface.replaceGeneration;
+  f.ctx.tokenMeter.measure=(...args)=>({...meter(...args),totalTokens:f.agent.session.surface.replaceGeneration===generation ? 75001 : 20000});
+  try {
+    assert.ok(await f.compact.compactIfNeeded(f.agent,'pressure',signal));
+    const dir=path.join(f.dir,'checkpoints',f.compact.record(f.agent).checkpoint);
+    assert.equal(JSON.parse(fs.readFileSync(path.join(dir,'summary-fallback.json'))).reason,'INTERRUPTED_BEFORE_PUBLICATION');
+    assert.ok(JSON.parse(fs.readFileSync(path.join(dir,'summary-input.json'))).messages.length>0);
+    assert.ok(fs.existsSync(path.join(dir,'completed.json')));
+    assert.equal(f.compact.record(f.agent).recoveryPending,false);
+    assert.equal(f.compact.record(f.agent).phase,'running');
+  } finally { await f.ctx.fiber.dispose(); }
+});
+
 test('74K does not compact; 75K causes one native balanced compaction',async()=> {
   const f=fixture();
   const realMeasure=f.ctx.tokenMeter.measure.bind(f.ctx.tokenMeter);
@@ -173,6 +192,20 @@ test('durable notes are retained verbatim; conflicts and failed summary reject',
   assert.throws(()=>verifySummary({summary:[]},memory,'cp1'),/summary/);
   fs.appendFileSync(path.join(f.dir,'decisions.md'),'\nCONFLICT: scientific bound differs\n');
   assert.throws(()=>notes(f.dir),/conflict/);
+});
+
+test('oversized notes admit the native pre-step so the agent can curate them',async()=> {
+  const f=fixture();
+  fs.writeFileSync(path.join(f.dir,'progress.md'),'Historical verified progress.\n'.repeat(1200)+'CURRENT NEXT ACTION\n');
+  const meter=f.ctx.tokenMeter.measure.bind(f.ctx.tokenMeter);
+  f.ctx.tokenMeter.measure=(...args)=>({...meter(...args),totalTokens:1000});
+  let admitted=false;
+  try {
+    await f.ctx.waterfall('agent/pre-step',{agent:f.agent,signal},()=>{admitted=true;});
+    assert.equal(admitted,true);
+    assert.ok(notes(f.dir).archive);
+    assert.equal(f.calls(),0);
+  } finally { await f.ctx.fiber.dispose(); }
 });
 
 test('atomic state survives reload; corrupt state fails closed',()=> {

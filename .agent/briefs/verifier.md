@@ -1,6 +1,7 @@
-# Separate verification
+# Leader verification
 
-Use the same model in a separate pass, preferably fresh sequential context. Inputs: exact
+The leader performs a separate evidence derivation in the current session; fresh context is
+optional. This brief is a method, not a reviewer role or an approval gate. Inputs: exact
 cycle base/diff, legacy ranges, state fixtures, receipts and G1–G9. Read legacy first; derive
 expected numbers before inspecting candidate results. Check signs, units, index/time levels,
 floor value/scale/operator/placement, duplicate transfers, transaction rollback and acceptance.

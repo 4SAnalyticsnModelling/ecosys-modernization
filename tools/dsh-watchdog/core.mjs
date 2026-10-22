@@ -29,10 +29,47 @@ export function readState(file) {
 }
 export function notes(root) {
   const files = ['progress.md','decisions.md','issues.md'];
-  const text = files.map(f => `### ${f}\n${fs.readFileSync(path.join(root, f), 'utf8')}`).join('\n');
-  if (Buffer.byteLength(text) > 24000) throw Error('Durable notes exceed 24KB; curate notes before continuing');
+  const originals = Object.fromEntries(files.map(f => [f,fs.readFileSync(path.join(root,f),'utf8')]));
+  let text = files.map(f => `### ${f}\n${originals[f]}`).join('\n');
+  // Check the complete notes, including anything outside the bounded view.
   if (/^CONFLICT:/m.test(text)) throw Error('Unresolved durable decision conflict');
-  return {text, hash:crypto.createHash('sha256').update(text).digest('hex')};
+  let archive;
+  if (Buffer.byteLength(text) > 24000) {
+    // Size alone must not prevent the next turn from curating its own notes.
+    // Preserve every byte before exposing an explicitly partial, bounded view.
+    const digest=crypto.createHash('sha256').update(text).digest('hex');
+    const relative=path.join('notes-archive',digest+'.json');
+    archive=path.join(root,relative);
+    const record={schema:1,files:originals};
+    if (fs.existsSync(archive)) {
+      if (fs.readFileSync(archive,'utf8') !== JSON.stringify(record,null,2)+'\n')
+        throw Error('Durable notes archive mismatch; preserve and reconcile');
+    } else atomic(archive,record);
+    const notice='Durable notes size recovery: complete original notes are preserved verbatim in '+relative+
+      ' (relative to the authoritative notes directory). The views below may omit older lines, including decisions. '+
+      'Before acting, retrieve relevant complete decisions/issues from that archive and reconcile the current cycle. '+
+      'Curate the source notes; preserve archive references. No omitted fact or completed test may be inferred.\n';
+    const labels=files.map(f => `### ${f} (verbatim view; older lines may be archived)\n`);
+    const available=24000-Buffer.byteLength(notice+labels.join('')+'\n\n');
+    const sizes=files.map(f=>Buffer.byteLength(originals[f]));
+    const budgets=sizes.map(n=>Math.min(n,Math.floor(available/files.length)));
+    let unused=available-budgets.reduce((a,b)=>a+b,0);
+    // Keep decisions and issues whole whenever their size permits it.
+    for (const i of [1,2,0]) {
+      const extra=Math.min(unused,sizes[i]-budgets[i]);
+      budgets[i]+=extra;unused-=extra;
+    }
+    const views=files.map((f,i)=>{
+      const bytes=Buffer.from(originals[f]);
+      if (bytes.length<=budgets[i]) return originals[f];
+      // A whole-line tail avoids both broken UTF-8 and invented partial facts.
+      const tail=bytes.subarray(bytes.length-budgets[i]);
+      const newline=tail.indexOf(10);
+      return newline<0 ? '' : tail.subarray(newline+1).toString('utf8');
+    });
+    text=notice+files.map((f,i)=>labels[i]+views[i]).join('\n');
+  }
+  return {text, hash:crypto.createHash('sha256').update(text).digest('hex'),...(archive ? {archive} : {})};
 }
 export function verifySummary(result, memory, checkpoint) {
   const body = result.summary?.filter(b=>b.type==='text').map(b=>b.text).join('\n') ?? '';

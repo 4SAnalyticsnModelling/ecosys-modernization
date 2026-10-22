@@ -4,7 +4,8 @@ description: "Verify local/global/cumulative conservation and both signs of near
 ---
 
 Authority: `.agent/protocol.md`; read it once per session. Use `./scripts/project.sh pickup`
-for current state and `exec` for logged heavy commands. One model decides; no human approval.
+for current state and `exec` for logged heavy commands. One leader decides and verifies;
+optional safe sub-agents follow the protocol. No adversarial reviewers or reviewer approval gates.
 
 Use [numerical recovery](../../../.agent/playbooks/convergence-and-balance.md) for signed
 outstanding balances, negative pools and near-zero failures. Define `R=(new-old)-sources+sinks`;

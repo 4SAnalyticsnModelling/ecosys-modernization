@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-22T20:04:18.801Z",
+  "cause": "Durable notes exceed 24KB; curate notes before continuing",
+  "sessionId": "4c83caf2-c5bc-4235-81c5-f346a4f7f22a",
+  "instance": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.dsh-watchdog/instances/8275edde-5f78-4615-89d6-f02a66cc8361",
+  "root": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.dsh-watchdog/instances/8275edde-5f78-4615-89d6-f02a66cc8361/agents/dc1a19c0d0843dc600815c3cac54868bd89920e087459d740c26be23cd8020eb",
+  "installed": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/watchdog/core.mjs",
+  "beforeHash": "b858424a7109178e47140bbf59adb7911af2bfe1f0708aa615e6228d8239759d",
+  "afterHash": "302da1f9a3fa95c9928752e1a49fb472497931a6932f03cae872cd2381f4fd7f",
+  "deployedFunctionHash": "1f31916f423936e2b4ff48be42e29a4a41abd7a30a69bdea031ff7c0fdb7885c",
+  "sourceFunctionHash": "1f31916f423936e2b4ff48be42e29a4a41abd7a30a69bdea031ff7c0fdb7885c",
+  "notesArchive": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.dsh-watchdog/instances/8275edde-5f78-4615-89d6-f02a66cc8361/agents/dc1a19c0d0843dc600815c3cac54868bd89920e087459d740c26be23cd8020eb/notes-archive/9ce482f9f0b37b0f50ba5ed197a3c5cdd8d3366253e1c61ee4e923f917448973.json",
+  "originalNotesBytes": 24999,
+  "curatedNotesBytes": 8548,
+  "notes": {
+    "progress.md": {
+      "before": "9398fbcabf6dd79caec1cd3cfa40d81598a291cf762e0050aa0975ce0fbfffc8",
+      "after": "3da09fc785844bd2294e3f23b6f0315332f316c1a8b66b17a047a1fb893a48d3"
+    },
+    "decisions.md": {
+      "before": "1ab0d9fb799225ba76a5e305908ae6bb9997c8f5aa2f8c997ecd70c03575e5c8",
+      "after": "1ab0d9fb799225ba76a5e305908ae6bb9997c8f5aa2f8c997ecd70c03575e5c8"
+    },
+    "issues.md": {
+      "before": "6686e807059b02b049071676a46f0f8e213d6bc0a9e81179ff58fd5296622b7c",
+      "after": "6686e807059b02b049071676a46f0f8e213d6bc0a9e81179ff58fd5296622b7c"
+    }
+  },
+  "sessionBackup": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.dsh-watchdog/maintenance/notes-size-recovery-20261022/session-before.v4.jsonl.zstd",
+  "sessionBackupHash": "b992a48eee1f5245b39c78e311d9ff226d79df1a85fe8296ab8f1765b747d28c",
+  "preservedInstallationOutsideNotesFunction": true
+}

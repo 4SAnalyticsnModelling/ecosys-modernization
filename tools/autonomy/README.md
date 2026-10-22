@@ -3,7 +3,10 @@
 `.agent/protocol.md` governs. `.agent/worker.json` records historical harness argv; its deployment
 is UNQUALIFIED. Reverify the actual executable and arguments in the deployment environment.
 The worker reads `$ECOSYS_RECOVERY_PACKET`, reconciles jobs/edits and resumes the open cycle.
-The same model chooses scientific and architectural decisions. No human approval is required.
+One leader owns scientific/architectural decisions, verification and publication. Optional
+sub-agents/swarms support safe scopes under the protocol; they do not own worker leases or
+control-plane publication. No adversarial reviewer, reviewer sign-off or human approval is required.
+An unavailable helper triggers leader takeover or other unblocked work, never a review wait.
 
 Before unattended launch, establish live runtime evidence with benign isolated fixtures; this
 maintenance does not deploy an OS service, activate a worker or certify runtime readiness.

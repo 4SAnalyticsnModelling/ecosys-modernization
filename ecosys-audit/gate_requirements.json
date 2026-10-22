@@ -39,7 +39,7 @@
     "restart-and-repeatability",
     "same-work-performance",
     "memory-and-build-report",
-    "independent-release-review",
+    "leader-release-verification",
     "reproducibility-and-scope-documentation"
   ]
 }

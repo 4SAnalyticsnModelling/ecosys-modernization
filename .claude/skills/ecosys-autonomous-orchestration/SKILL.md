@@ -1,12 +1,16 @@
 ---
 name: ecosys-autonomous-orchestration
-description: "Resume and execute autonomous Ottawa cycles with one model; use for pickup, decisions, recovery and cycle closure."
+description: "Resume and execute autonomous Ottawa cycles with one accountable leader; use for pickup, decisions, recovery and cycle closure."
 ---
 
 Authority: `.agent/protocol.md`; read it once per session. Use `./scripts/project.sh pickup`
-for current state and `exec` for logged heavy commands. One model decides; no human approval.
+for current state and `exec` for logged heavy commands. One leader decides and verifies;
+optional safe sub-agents follow the protocol. No adversarial reviewers or reviewer approval gates.
 
 Run `./scripts/project.sh pickup`; reconcile jobs, dirty edits and the open cycle before sync.
+The leader may use scoped swarms for independent supporting tasks. Preserve shared-state/run
+ownership; only the leader integrates results, records gates and publishes. Take over unavailable
+helper work; never wait for reviewer sign-off or treat helper agreement as scientific evidence.
 Choose one falsifiable target from the execution plan/backlog. Record its falsifier and smallest
 experiment. Use `cycle_runner.py open|gate|gates|close` through `scripts/project.sh`.
 For near-zero, signed-balance, negative-pool or solver failures route immediately to
@@ -19,7 +23,7 @@ The simulator's fatal exit returns control to worker diagnosis; it does not term
 autonomous task. Use a captured state or changed diagnostic fixture/instrumentation for parent
 reproduction; a renamed run or prose-only hypothesis cannot bypass the experiment guard.
 Run focused → coupling → event → full checks according to changed dependencies. Re-derive
-separately for G7, preferably in fresh sequential context of the same model. Fix/revert a
+separately for G7 in the leader's current session; fresh context is optional. Fix/revert a
 reproduced FAIL. Record next action; stage owned paths, commit/push, continue.
 Use `supervise --config .agent/worker.json` after live runtime qualification; never launch duplicate
 science jobs or repeat an unchanged failed experiment. Three unchanged exits force REPLAN; a fourth waits for changed prerequisites.

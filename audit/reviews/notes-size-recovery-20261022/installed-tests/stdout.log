@@ -1,0 +1,15 @@
+✔ oversized progress preserves complete originals and permits the curation turn (16.68475ms)
+✔ all large notes use whole UTF-8 lines, with complete text recoverable (14.131625ms)
+✔ single enormous lines remain in the archive without invented partial statements (12.401125ms)
+✔ changes outside the visible tail change the checkpoint hash and retain both archives (23.634833ms)
+✔ hidden conflicts and corrupt archives still fail closed (13.6125ms)
+✔ failed archival cannot silently admit a truncated checkpoint (1.523167ms)
+✔ small notes retain their exact existing representation (0.931916ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 138.242042

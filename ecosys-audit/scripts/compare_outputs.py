@@ -62,8 +62,10 @@ def number(value: object,label: str)->Decimal:
 def validate_schema(schema: dict)->tuple[list[str],dict]:
     if schema.get('schema_version')!=1 or schema.get('status')!='APPROVED':
         raise ComparisonError('Schema must have schema_version=1 and status=APPROVED; templates cannot pass.')
-    if not isinstance(schema.get('approved_by'),str) or not schema['approved_by'].strip():
-        raise ComparisonError('A recorded independent tolerance reviewer is required; this is not identity authentication.')
+    # Historical approved_by records a policy decision, not a second actor.
+    owner=schema.get('decision_owner',schema.get('approved_by'))
+    if not isinstance(owner,str) or not owner.strip():
+        raise ComparisonError('Record the leader responsible for the tolerance decision in decision_owner (historical alias: approved_by).')
     keys=schema.get('keys')
     columns=schema.get('columns')
     if not isinstance(keys,list) or not keys or any(not isinstance(x,str) or not x.strip() for x in keys):

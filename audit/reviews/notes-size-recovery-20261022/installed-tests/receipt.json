@@ -1,0 +1,61 @@
+{
+  "argv": [
+    "env",
+    "NOTES_CORE_UNDER_TEST=/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/watchdog/core.mjs",
+    "node",
+    "--test",
+    "tools/dsh-watchdog/tests/notes-recovery.test.mjs"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization",
+  "elapsed_seconds": 0.277,
+  "environment": {
+    "TMPDIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp",
+    "UV_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.uv-cache",
+    "XDG_CACHE_HOME": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.cache",
+    "ZIG_GLOBAL_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/.zig-cache-global"
+  },
+  "executable_sha256": "2b2a1145527f00e8369fda0d2ffc523b520201bb08dbaf4b0bded837f7652ce0",
+  "exit_code": 0,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "machine": "arm64",
+  "parent_pid": 94295,
+  "pid": 94316,
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "process_start": "Thu Oct 22 14:04:19 2026",
+  "started_unix": 1792699458.9802501,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/reviews/notes-size-recovery-20261022/installed-tests/stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "audit/reviews/notes-size-recovery-20261022/installed-tests/stdout.log",
+    "sha256": "857c23f0331bc1e89d7a5a839cd897cdd4c7ce665cecb07877688c4ed0cdbf20"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": null,
+  "toolchain": {
+    "gfortran": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/gfortran",
+      "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+    },
+    "python3": {
+      "exit_code": 0,
+      "path": "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3",
+      "version": "Python 3.11.5"
+    },
+    "uv": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/uv",
+      "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+    },
+    "zig": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/zig",
+      "version": "0.17.0"
+    }
+  }
+}

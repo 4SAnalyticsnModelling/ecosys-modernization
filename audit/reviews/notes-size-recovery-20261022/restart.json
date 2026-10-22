@@ -1,0 +1,10 @@
+{
+  "target_pid": 47318,
+  "target_command": "/opt/homebrew/Cellar/node/24.10.0_1/bin/node /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.dsh-watchdog/instances/8275edde-5f78-4615-89d6-f02a66cc8361/tui/lib/types/dsh-adapter/host-entry.js",
+  "target_start": "Wed Oct 21 23:02:14 2026",
+  "last_event_seq": 5098,
+  "last_turn": 4,
+  "action": "SIGTERM idle failed-turn DSH host; existing supervisor resumes exact saved session",
+  "herdr_server_pid_preserved": 6067,
+  "strata_engine_pid_preserved": 47451
+}

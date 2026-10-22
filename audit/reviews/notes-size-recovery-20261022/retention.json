@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "purpose": "Retain complete pre-recovery notes, native session and curated note snapshot; do not remove while needed for recovery/audit",
+  "artifacts": [
+    {
+      "path": ".dsh-watchdog/instances/8275edde-5f78-4615-89d6-f02a66cc8361/agents/dc1a19c0d0843dc600815c3cac54868bd89920e087459d740c26be23cd8020eb/notes-archive/9ce482f9f0b37b0f50ba5ed197a3c5cdd8d3366253e1c61ee4e923f917448973.json",
+      "sha256": "7571edb0742330f65eece5b5a5dc20d7a622b47e245cdd636e10d1f05a35d30c",
+      "bytes": 25318
+    },
+    {
+      "path": ".dsh-watchdog/maintenance/notes-size-recovery-20261022/session-before.v4.jsonl.zstd",
+      "sha256": "b992a48eee1f5245b39c78e311d9ff226d79df1a85fe8296ab8f1765b747d28c",
+      "bytes": 4759506
+    },
+    {
+      "path": ".dsh-watchdog/maintenance/notes-size-recovery-20261022/curated-notes.json",
+      "sha256": "232071f35c31a74e1e29152240c7459a624340604fb9a18f33c79680ba325509",
+      "bytes": 8692
+    },
+    {
+      "path": ".dsh-watchdog/maintenance/notes-size-recovery-20261022/interrupted-before.v4.jsonl.zstd",
+      "sha256": "19c6cf47eb10bac4ce3bbd431a2a10a8b913e6206e3a1f217492683e3621431b",
+      "bytes": 4760125
+    },
+    {
+      "path": ".dsh-watchdog/maintenance/notes-size-recovery-20261022/interrupted-state.before.json",
+      "sha256": "440b7aa87db352cb0990d0aaf9553f24102a7c83342418b2ca6c0a93f25a7e2a",
+      "bytes": 1130
+    }
+  ]
+}

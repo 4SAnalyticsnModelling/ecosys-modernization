@@ -86,7 +86,7 @@ def check(root: Path, gate: dict) -> list[str]:
 def main()->int:
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,default=Path('.'))
-    parser.add_argument('--gate',required=True,help='Project-relative reviewed gate JSON path')
+    parser.add_argument('--gate',required=True,help='Project-relative leader-verified gate JSON path')
     args=parser.parse_args()
     try:
         root=args.root.resolve(strict=True)
@@ -94,7 +94,7 @@ def main()->int:
         gate=json.loads(path.read_text(encoding='utf-8'))
         errors=check(root,gate)
         print(json.dumps({'integrity_status':'FAIL' if errors else 'PASS','problems':errors,
-                          'limitation':'Checks records/hashes/freshness only. Does not prove scientific correctness, authenticate reviews, or authorize bypassing other project gates.'},indent=2))
+                          'limitation':'Checks records/hashes/freshness only. Does not prove scientific correctness, authenticate worker identities, or authorize bypassing other project gates.'},indent=2))
         return 1 if errors else 0
     except (OSError,ValueError,TypeError) as exc:
         print(json.dumps({'integrity_status':'ERROR','message':str(exc)},indent=2))

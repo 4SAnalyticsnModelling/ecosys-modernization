@@ -1,0 +1,40 @@
+✔ oversized progress preserves complete originals and permits the curation turn (18.306083ms)
+✔ all large notes use whole UTF-8 lines, with complete text recoverable (16.148ms)
+✔ single enormous lines remain in the archive without invented partial statements (12.403958ms)
+✔ changes outside the visible tail change the checkpoint hash and retain both archives (46.666167ms)
+✔ hidden conflicts and corrupt archives still fail closed (31.459292ms)
+✔ failed archival cannot silently admit a truncated checkpoint (5.829125ms)
+✔ small notes retain their exact existing representation (5.650958ms)
+✔ exact trigger formula for every valid output reservation (1.542333ms)
+✔ native token-cap exhaustion commits a complete archived recovery checkpoint (479.420208ms)
+✔ only a closed pre-commit summary failure reconciles automatically (281.811583ms)
+✔ proved unpublished interrupted summary uses a complete native recovery checkpoint (507.480416ms)
+✔ 74K does not compact; 75K causes one native balanced compaction (435.682625ms)
+✔ failed native summary preserves original surface and blocks restart (417.19125ms)
+✔ missing meter never silently permits request (0.1265ms)
+✔ mounted watchdog dependencies permit meter access in a restricted plugin context (1.351958ms)
+✔ durable notes are retained verbatim; conflicts and failed summary reject (168.049375ms)
+✔ oversized notes admit the native pre-step so the agent can curate them (241.277417ms)
+✔ atomic state survives reload; corrupt state fails closed (231.084834ms)
+✔ operation repeat counters do not depend on call identifiers (0.576458ms)
+✔ confirmed overflow can compact below normal boundary (469.565792ms)
+✔ fully assembled request catches late admission and supported retry rebuilds (470.886042ms)
+✔ eight repeated tool operations block despite changing turn, step and callId (304.475042ms)
+✔ successful assistant resets consecutive failure and overflow counters (242.149791ms)
+✔ known interrupted task queues a durable-notes continuation through agent service (241.583375ms)
+✔ subagent telemetry cannot replace the root resume pointer (245.542208ms)
+✔ non-Git workspace snapshots source without recursively copying watchdog state (54.950833ms)
+✔ unborn Git repository checkpoints staged and untracked source (115.9315ms)
+✔ continuous hygiene below75K retains errors, originals, pairing, index and replay (200.396708ms)
+✔ late cleanup crosses under75K and rebuilds without a summary (258.8775ms)
+✔ hygiene flush failure blocks subsequent requests even after surface changed (275.728375ms)
+✔ partial native pruning failure blocks retry admission (263.509792ms)
+✔ Unicode pruning preserves surrogate pairs and explicit retrieval notice (231.13925ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6276.363125

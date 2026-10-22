@@ -4,7 +4,8 @@ description: "Verify exact Zig/legacy builds, packaging and restart reproducibil
 ---
 
 Authority: `.agent/protocol.md`; read it once per session. Use `./scripts/project.sh pickup`
-for current state and `exec` for logged heavy commands. One model decides; no human approval.
+for current state and `exec` for logged heavy commands. One leader decides and verifies;
+optional safe sub-agents follow the protocol. No adversarial reviewers or reviewer approval gates.
 
 Use Zig 0.17.x; inspect actual build/CLI flags. `project.sh exec` pins caches and records version.
 Build Debug/ReleaseSafe and production ReleaseFast with `--cache-dir .zig-cache` in ecosys-ng.

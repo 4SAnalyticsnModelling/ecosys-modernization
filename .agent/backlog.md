@@ -9,7 +9,7 @@
     closed 2026-10-22. Next failure boundary h4855 (1998 d203 h7) InsufficientSoilNitrite, zone_non_band
     layer 0, candidate -1.3670655422748992e-11 g vs operation_scale 3.246187603319597e-7
     (verify stderr.log:35908-35911) — cycle 4 owns it per the playbook (term-by-term legacy comparison
-    before any cap). Also: adversarial revalidation of DEV-022.
+    before any cap). Also: leader-led edge-case revalidation of DEV-022.
 2. Build a matched-state mineral-N oracle; map producer/exchange/consumer terms and floors.
    For affected implicit paths, audit fixed scales, ZERO units, both signed defects, shared
    supply, prompt zero/trace success and bounded recovery. Reconcile DEV-010 concentration-to-

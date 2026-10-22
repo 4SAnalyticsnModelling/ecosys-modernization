@@ -4,7 +4,8 @@ description: "Audit complete bidirectional statement/equation/control-flow prove
 ---
 
 Authority: `.agent/protocol.md`; read it once per session. Use `./scripts/project.sh pickup`
-for current state and `exec` for logged heavy commands. One model decides; no human approval.
+for current state and `exec` for logged heavy commands. One leader decides and verifies;
+optional safe sub-agents follow the protocol. No adversarial reviewers or reviewer approval gates.
 
 Use f77query outlines/ranges and `tracecov.py` to select unresolved units, then read complete
 relevant statements, definitions and control edges. Map Fortran → Zig and Zig → legacy/DEV.

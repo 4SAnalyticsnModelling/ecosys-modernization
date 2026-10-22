@@ -4,8 +4,9 @@ Fortran ECOSYS → Zig ecosys-ng. Goal: a scientifically verified 30-year Ottawa
 (262920 hours), complete source/output traceability, conservation and a reproducible release whose ReleaseFast runtime beats optimized Fortran.
 
 Start with `AGENTS.md`. Authority: `.agent/protocol.md`. Work order:
-`ecosys-ng_ottawa_qualification_execution_plan.md`. One autonomous model makes all decisions;
-separate verification uses measured evidence. No human approval or elapsed execution deadline.
+`ecosys-ng_ottawa_qualification_execution_plan.md`. One accountable leader makes decisions and
+verifies measured evidence; optional sub-agents or swarms support safe, scoped tasks. No
+adversarial reviewers, reviewer approval gates, human approval or elapsed execution deadline.
 
 For numerical edge cases use [the recovery playbook](.agent/playbooks/convergence-and-balance.md):
 prompt validated zero/trace handling, conservative signed-balance repairs and bounded nonlinear

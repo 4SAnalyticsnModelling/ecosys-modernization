@@ -2,7 +2,7 @@
   "schema_version": 1,
   "status": "NOT_ASSESSED",
   "description": "TEMPLATE ONLY: replace the example keys/column with the complete discovered normalized output schema. No numerical acceptance values have been assumed.",
-  "approved_by": null,
+  "decision_owner": null,
   "keys": [
     "time",
     "cell"

@@ -1,4 +1,4 @@
-"""Adversarial synthetic regressions for science-first qualification and loop recovery."""
+"""Fault-injection synthetic regressions for science-first qualification and loop recovery."""
 import copy
 import json
 import subprocess
