@@ -22,7 +22,6 @@ const biochemical_acidity = @import("../chemistry/biochemical_acidity.zig");
 const scoped_conservation = @import("../../validation/scoped_conservation.zig");
 const ti_compat = @import("../../core/typeinfo_compat.zig");
 
-
 pub const ApplyContext = struct {
     reactive_nitrogen: *reactive.State,
     phosphorus_history: *phosphorus.State,
@@ -278,7 +277,22 @@ fn state_updateLayer(context: *ApplyContext, layer: usize) !void {
     if (!chemo_closure.accepted) return error.SoilNitrogenBalanceFailure;
 
     applyZone(&ammonium_non_band, &nitrate_non_band, &nitrite_non_band, ammonia_oxidation[0], nitrite_oxidation[0], nitrate_reduction[0], heterotrophic_nitrite_reduction[0], autotrophic_nitrite_reduction[0], autotrophic_ammonium_oxidation[0], chemo_nitrite[0]) catch |err| {
-        if (!builtin.is_test) std.log.err("soil nitrogen state_update failing site: {s} layer={d}", .{ "zone_non_band", layer });
+        if (!builtin.is_test) {
+            std.log.err("soil nitrogen state_update failing site: {s} layer={d}", .{ "zone_non_band", layer });
+            std.log.err(
+                "soil nitrogen state_update non_band pool basis: layer={d} nitrate_conc_mol_m3={e} water_m3={e} effective_water_m3={e} zone_fraction={e} n_mass_g_mol={e} pool_g={e} potential_reduction_g={e}",
+                .{
+                    layer,
+                    context.chemistry_state.aqueous[layer].nitrate_non_band,
+                    water_m3,
+                    effective_water_m3,
+                    zone_fractions.nitrate_non_band,
+                    n_mass,
+                    nitrate_non_band_entry,
+                    nitrate_reduction[0],
+                },
+            );
+        }
         return err;
     };
     applyZone(&ammonium_band, &nitrate_band, &nitrite_band, ammonia_oxidation[1], nitrite_oxidation[1], nitrate_reduction[1], heterotrophic_nitrite_reduction[1], autotrophic_nitrite_reduction[1], autotrophic_ammonium_oxidation[1], chemo_nitrite[1]) catch |err| {
@@ -1579,16 +1593,44 @@ fn applyZone(ammonium: *f64, nitrate: *f64, nitrite: *f64, ammonia_oxidation: f6
     inline for (.{ ammonia_oxidation, nitrite_oxidation, nitrate_reduction, heterotrophic_nitrite_reduction, autotrophic_nitrite_reduction, autotrophic_ammonium_oxidation, chemo_nitrite_reduction }) |value| if (!std.math.isFinite(value) or value < 0) return error.InvalidSoilNitrogenFlux;
     const nitrite_available = nitrite.* + ammonia_oxidation + autotrophic_ammonium_oxidation + nitrate_reduction;
     const nitrite_consumed = nitrite_oxidation + heterotrophic_nitrite_reduction + autotrophic_nitrite_reduction + chemo_nitrite_reduction;
-    ammonium.* = try nonnegativeCandidate(
-        ammonium.* - ammonia_oxidation - autotrophic_ammonium_oxidation,
-        @abs(ammonium.*) + @abs(ammonia_oxidation) + @abs(autotrophic_ammonium_oxidation),
+    const ammonium_before = ammonium.*;
+    const ammonium_candidate = ammonium_before - ammonia_oxidation - autotrophic_ammonium_oxidation;
+    ammonium.* = nonnegativeCandidate(
+        ammonium_candidate,
+        @abs(ammonium_before) + @abs(ammonia_oxidation) + @abs(autotrophic_ammonium_oxidation),
         error.InsufficientSoilMineralNitrogen,
-    );
-    nitrate.* = try nonnegativeCandidate(
-        nitrate.* + nitrite_oxidation - nitrate_reduction,
-        @abs(nitrate.*) + @abs(nitrite_oxidation) + @abs(nitrate_reduction),
+    ) catch |err| {
+        if (!builtin.is_test) std.log.err(
+            "soil nitrogen state_update ammonium breakdown: pool_before={e} ammonia_oxidation={e} autotrophic_ammonium_oxidation={e} candidate={e} operation_scale={e}",
+            .{
+                ammonium_before,
+                ammonia_oxidation,
+                autotrophic_ammonium_oxidation,
+                ammonium_candidate,
+                @abs(ammonium_before) + @abs(ammonia_oxidation) + @abs(autotrophic_ammonium_oxidation),
+            },
+        );
+        return err;
+    };
+    const nitrate_before = nitrate.*;
+    const nitrate_candidate = nitrate_before + nitrite_oxidation - nitrate_reduction;
+    nitrate.* = nonnegativeCandidate(
+        nitrate_candidate,
+        @abs(nitrate_before) + @abs(nitrite_oxidation) + @abs(nitrate_reduction),
         error.InsufficientSoilMineralNitrogen,
-    );
+    ) catch |err| {
+        if (!builtin.is_test) std.log.err(
+            "soil nitrogen state_update nitrate breakdown: pool_before={e} nitrite_oxidation={e} nitrate_reduction={e} candidate={e} operation_scale={e}",
+            .{
+                nitrate_before,
+                nitrite_oxidation,
+                nitrate_reduction,
+                nitrate_candidate,
+                @abs(nitrate_before) + @abs(nitrite_oxidation) + @abs(nitrate_reduction),
+            },
+        );
+        return err;
+    };
     nitrite.* = try nonnegativeCandidate(
         nitrite_available - nitrite_consumed,
         @abs(nitrite_available) + @abs(nitrite_consumed),

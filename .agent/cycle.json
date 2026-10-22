@@ -1,23 +1,618 @@
 {
+  "base_commit": "ea787634e514a0bb35cb4b73e8ba8d3262980204",
   "commit": null,
   "cycle": 3,
   "decisions": [],
-  "gates": {},
-  "next_target": "Reproduce parent h4556 failure from h4320, then falsify supply/consumption hypotheses with matched-state legacy terms.",
+  "gates": {
+    "G1": {
+      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "dependencies": {
+        "contents": {
+          ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
+          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
+          "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
+          "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
+          "ecosys-audit/gate_requirements.json": "a696ab34bc6fdc26082a32b78acb696b84f352f90fd3d84e5ac696317a35ae02",
+          "ecosys-audit/scripts": "1d087396e4ad608550ff1b39b861cd5f4f00f648220974d2c42aeda12d02d3c4",
+          "ecosys-audit/suite_manifest.json": "e49b7818819410a7eb7d56f2baf50fa967fb298dc31aaef543f821aefa17ba93",
+          "ecosys-audit/tests": "b639b8fbc1eebbc2fb7be68eb869427aeddfed9be562862fe7d5b6b104fe9563",
+          "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
+          "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
+          "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
+          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
+          "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
+          "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
+        },
+        "context": {},
+        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "justification": "",
+        "schema_version": 1,
+        "scope": null,
+        "selection": "conservative",
+        "toolchain": {
+          "gfortran": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/gfortran",
+            "sha256": "0784ca5eb133cde6a2112eddb4000eb36c9d60eae1b18df1c1ba52fe97737492",
+            "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "python3": {
+            "exit_code": 0,
+            "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/venv/bin/python3",
+            "sha256": "31b9c9a8d50289f3a13f014b3efd8ea3534fc3eea7ca7d9809e166139910b805",
+            "version": "Python 3.12.13"
+          },
+          "uv": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/uv",
+            "sha256": "c176d9aba8da67a88cd2e81e737afbadddde546b51882c7f6b7d1ce62e4cae60",
+            "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+          },
+          "zig": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/zig",
+            "sha256": "18fbdb9fb852846f0e91008c5b99c9c18db1115671701c2890bf84a44ddc202d",
+            "version": "0.17.0"
+          }
+        }
+      },
+      "evidence": [
+        {
+          "path": "audit/runs/cycle-build-Debug-20261021220253397677/receipt.json",
+          "sha256": "b7213295a09f60ee82a1380b4aaf975e9d3faf81e3567cf687f6325546a37f96"
+        },
+        {
+          "path": "audit/runs/cycle-build-ReleaseSafe-20261021220322410232/receipt.json",
+          "sha256": "2093a04b8053541c8b19da053c5922c005c7d5bba76ae40de04608c69699151c"
+        },
+        {
+          "path": "audit/runs/cycle-build-ReleaseFast-20261021220322981273/receipt.json",
+          "sha256": "009e63925cf0596826472237aed42f08d1298a35642dade882b8511082d5b5fc"
+        },
+        {
+          "path": "audit/runs/cycle3-confirm-build-ReleaseSafe-20261021234803/receipt.json",
+          "sha256": "6dd1c0b271c0cfe1e91ee029a6379ee4fcf8990eee6391937cf01806b138b730"
+        }
+      ],
+      "reason": "Debug+ReleaseSafe+ReleaseFast EXITED 0 on Zig 0.17.0; reproducible rebuild of candidate reproduces suite binary sha 36c3784a",
+      "result": "PASS"
+    },
+    "G2": {
+      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "dependencies": {
+        "contents": {
+          ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
+          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
+          "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
+          "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
+          "ecosys-audit/gate_requirements.json": "a696ab34bc6fdc26082a32b78acb696b84f352f90fd3d84e5ac696317a35ae02",
+          "ecosys-audit/scripts": "1d087396e4ad608550ff1b39b861cd5f4f00f648220974d2c42aeda12d02d3c4",
+          "ecosys-audit/suite_manifest.json": "e49b7818819410a7eb7d56f2baf50fa967fb298dc31aaef543f821aefa17ba93",
+          "ecosys-audit/tests": "b639b8fbc1eebbc2fb7be68eb869427aeddfed9be562862fe7d5b6b104fe9563",
+          "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
+          "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
+          "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
+          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
+          "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
+          "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
+        },
+        "context": {},
+        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "justification": "",
+        "schema_version": 1,
+        "scope": null,
+        "selection": "conservative",
+        "toolchain": {
+          "gfortran": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/gfortran",
+            "sha256": "0784ca5eb133cde6a2112eddb4000eb36c9d60eae1b18df1c1ba52fe97737492",
+            "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "python3": {
+            "exit_code": 0,
+            "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/venv/bin/python3",
+            "sha256": "31b9c9a8d50289f3a13f014b3efd8ea3534fc3eea7ca7d9809e166139910b805",
+            "version": "Python 3.12.13"
+          },
+          "uv": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/uv",
+            "sha256": "c176d9aba8da67a88cd2e81e737afbadddde546b51882c7f6b7d1ce62e4cae60",
+            "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+          },
+          "zig": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/zig",
+            "sha256": "18fbdb9fb852846f0e91008c5b99c9c18db1115671701c2890bf84a44ddc202d",
+            "version": "0.17.0"
+          }
+        }
+      },
+      "evidence": [
+        {
+          "path": "audit/runs/cycle-suite-tests-module-Debug-20261021220603475954/command/receipt.json",
+          "sha256": "baa1741dabeb23a55b9f4e92d6a9d7f0235c1992092167ccfa7d105b7f318313"
+        },
+        {
+          "path": "audit/runs/cycle-suite-tests-module-Debug-20261021220603475954/command/stderr.log",
+          "sha256": "960f914e1d85f0ee51e6ee505a6f5667477de9bd7bb2902f68e584bbfb9bfa54"
+        },
+        {
+          "path": "audit/runs/cycle-suite-tests-module-ReleaseSafe-20261021221429461216/command/receipt.json",
+          "sha256": "19e568f182d5e9ea8b3f3cb96aca7d347cbcaeab22710ddc5b612a6880f786b6"
+        },
+        {
+          "path": "audit/runs/cycle-suite-tests-module-ReleaseSafe-20261021221429461216/command/stderr.log",
+          "sha256": "de28c4a889edf334ccf3a151baeb8d7b061e6d02c6d8e7ca6e02f1440f072a91"
+        }
+      ],
+      "reason": "Both module suites 4400 pass/1 pre-existing skip/0 fail (DEV-022 test included); ReleaseSafe receipt reconciled from its own logs",
+      "result": "PASS"
+    },
+    "G3": {
+      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "dependencies": {
+        "contents": {
+          ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
+          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
+          "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
+          "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
+          "ecosys-audit/gate_requirements.json": "a696ab34bc6fdc26082a32b78acb696b84f352f90fd3d84e5ac696317a35ae02",
+          "ecosys-audit/scripts": "1d087396e4ad608550ff1b39b861cd5f4f00f648220974d2c42aeda12d02d3c4",
+          "ecosys-audit/suite_manifest.json": "e49b7818819410a7eb7d56f2baf50fa967fb298dc31aaef543f821aefa17ba93",
+          "ecosys-audit/tests": "b639b8fbc1eebbc2fb7be68eb869427aeddfed9be562862fe7d5b6b104fe9563",
+          "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
+          "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
+          "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
+          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
+          "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
+          "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
+        },
+        "context": {},
+        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "justification": "",
+        "schema_version": 1,
+        "scope": null,
+        "selection": "conservative",
+        "toolchain": {
+          "gfortran": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/gfortran",
+            "sha256": "0784ca5eb133cde6a2112eddb4000eb36c9d60eae1b18df1c1ba52fe97737492",
+            "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "python3": {
+            "exit_code": 0,
+            "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/venv/bin/python3",
+            "sha256": "31b9c9a8d50289f3a13f014b3efd8ea3534fc3eea7ca7d9809e166139910b805",
+            "version": "Python 3.12.13"
+          },
+          "uv": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/uv",
+            "sha256": "c176d9aba8da67a88cd2e81e737afbadddde546b51882c7f6b7d1ce62e4cae60",
+            "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+          },
+          "zig": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/zig",
+            "sha256": "18fbdb9fb852846f0e91008c5b99c9c18db1115671701c2890bf84a44ddc202d",
+            "version": "0.17.0"
+          }
+        }
+      },
+      "evidence": [
+        {
+          "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
+          "sha256": "47ae4cd4c8aa017f32d3a50263f0f0b8a898a4a37c5de111206feb28662a493a"
+        },
+        {
+          "path": "audit/runs/ottawa/cycle3-confirm-resume4320-20261022b/stderr.log",
+          "sha256": "59bd346f5ddcaf9e93eff7b9ceea468518e1f00423957b975a77067086f3a92e"
+        },
+        {
+          "path": "audit/runs/ottawa/zig017-verify-dev021-20261021/stderr.log",
+          "sha256": "3768cf02120b2c0257d4a922eff0f95023c0f108dad49908fb66b7a8204855c2"
+        }
+      ],
+      "reason": "Independently assembled daily pool+flux ledgers accepted 202/202 days from scratch and 22/22 in confirm resume, signed defects ~1e-14, beyond solver residuals",
+      "result": "PASS"
+    },
+    "G4": {
+      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "dependencies": {
+        "contents": {
+          ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
+          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
+          "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
+          "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
+          "ecosys-audit/gate_requirements.json": "a696ab34bc6fdc26082a32b78acb696b84f352f90fd3d84e5ac696317a35ae02",
+          "ecosys-audit/scripts": "1d087396e4ad608550ff1b39b861cd5f4f00f648220974d2c42aeda12d02d3c4",
+          "ecosys-audit/suite_manifest.json": "e49b7818819410a7eb7d56f2baf50fa967fb298dc31aaef543f821aefa17ba93",
+          "ecosys-audit/tests": "b639b8fbc1eebbc2fb7be68eb869427aeddfed9be562862fe7d5b6b104fe9563",
+          "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
+          "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
+          "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
+          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
+          "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
+          "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
+        },
+        "context": {},
+        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "justification": "",
+        "schema_version": 1,
+        "scope": null,
+        "selection": "conservative",
+        "toolchain": {
+          "gfortran": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/gfortran",
+            "sha256": "0784ca5eb133cde6a2112eddb4000eb36c9d60eae1b18df1c1ba52fe97737492",
+            "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "python3": {
+            "exit_code": 0,
+            "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/venv/bin/python3",
+            "sha256": "31b9c9a8d50289f3a13f014b3efd8ea3534fc3eea7ca7d9809e166139910b805",
+            "version": "Python 3.12.13"
+          },
+          "uv": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/uv",
+            "sha256": "c176d9aba8da67a88cd2e81e737afbadddde546b51882c7f6b7d1ce62e4cae60",
+            "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+          },
+          "zig": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/zig",
+            "sha256": "18fbdb9fb852846f0e91008c5b99c9c18db1115671701c2890bf84a44ddc202d",
+            "version": "0.17.0"
+          }
+        }
+      },
+      "evidence": [
+        {
+          "path": "audit/intentional-deviations.md",
+          "sha256": "ee74ce11330efe6d5f40e0a4101b207c2afd2cb35225cce5983261b9706b5201"
+        },
+        {
+          "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
+          "sha256": "47ae4cd4c8aa017f32d3a50263f0f0b8a898a4a37c5de111206feb28662a493a"
+        },
+        {
+          "path": "audit/runs/ottawa/zig017-replay-4320-terms-20261021/stderr.log",
+          "sha256": "01839bb6c3545db63b34cf7a19d0cc39aaacdc43653d2a9f1231ffb3eecbb569"
+        },
+        {
+          "path": "audit/runs/ottawa/zig017-replay-4320-terms2-20261021/stderr.log",
+          "sha256": "47a35153338b068727cd2adbf754c9a8c7432341c4758ac121d0be1c9abf0e90"
+        }
+      ],
+      "reason": "nitro.f 1682-1693/redist.f 6218-6220 order+floor semantics with reproduced term dumps; basis equality proven",
+      "result": "PASS"
+    },
+    "G5": {
+      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "dependencies": {
+        "contents": {
+          ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
+          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
+          "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
+          "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
+          "ecosys-audit/gate_requirements.json": "a696ab34bc6fdc26082a32b78acb696b84f352f90fd3d84e5ac696317a35ae02",
+          "ecosys-audit/scripts": "1d087396e4ad608550ff1b39b861cd5f4f00f648220974d2c42aeda12d02d3c4",
+          "ecosys-audit/suite_manifest.json": "e49b7818819410a7eb7d56f2baf50fa967fb298dc31aaef543f821aefa17ba93",
+          "ecosys-audit/tests": "b639b8fbc1eebbc2fb7be68eb869427aeddfed9be562862fe7d5b6b104fe9563",
+          "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
+          "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
+          "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
+          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
+          "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
+          "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
+        },
+        "context": {},
+        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "justification": "",
+        "schema_version": 1,
+        "scope": null,
+        "selection": "conservative",
+        "toolchain": {
+          "gfortran": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/gfortran",
+            "sha256": "0784ca5eb133cde6a2112eddb4000eb36c9d60eae1b18df1c1ba52fe97737492",
+            "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "python3": {
+            "exit_code": 0,
+            "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/venv/bin/python3",
+            "sha256": "31b9c9a8d50289f3a13f014b3efd8ea3534fc3eea7ca7d9809e166139910b805",
+            "version": "Python 3.12.13"
+          },
+          "uv": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/uv",
+            "sha256": "c176d9aba8da67a88cd2e81e737afbadddde546b51882c7f6b7d1ce62e4cae60",
+            "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+          },
+          "zig": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/zig",
+            "sha256": "18fbdb9fb852846f0e91008c5b99c9c18db1115671701c2890bf84a44ddc202d",
+            "version": "0.17.0"
+          }
+        }
+      },
+      "evidence": [
+        {
+          "path": "audit/runs/ottawa/cycle3-confirm-resume4320-20261022b/stderr.log",
+          "sha256": "59bd346f5ddcaf9e93eff7b9ceea468518e1f00423957b975a77067086f3a92e"
+        },
+        {
+          "path": "audit/runs/ottawa/cycle3-confirm-resume4320-20261022b/receipt.json",
+          "sha256": "53b0c066b44ee3bf27f8f491d5abdc17a9db00fbf17afc243f3c925a694f03a8"
+        },
+        {
+          "path": "audit/runs/ottawa/zig017-resume4320-dev021-20261021/stderr.log",
+          "sha256": "4e9488008886254be2b6051c24390cf0fa4076b8957188921ae19021d8d6d81c"
+        },
+        {
+          "path": "audit/runs/ottawa/zig017-verify-dev021-20261021/receipt.json",
+          "sha256": "d4fa8f0cf1aea18de99a1ebf9fda42ac79f20d5e0f7aa3e01e5ffc7d5d15bc51"
+        },
+        {
+          "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
+          "sha256": "47ae4cd4c8aa017f32d3a50263f0f0b8a898a4a37c5de111206feb28662a493a"
+        }
+      ],
+      "reason": "Candidate replays parent records 4321-4555 bit-identically (incl deadband-fixed h4412); cap decision byte-identical across from-scratch and resume",
+      "result": "PASS"
+    },
+    "G6": {
+      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "dependencies": {
+        "contents": {
+          ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
+          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
+          "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
+          "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
+          "ecosys-audit/gate_requirements.json": "a696ab34bc6fdc26082a32b78acb696b84f352f90fd3d84e5ac696317a35ae02",
+          "ecosys-audit/scripts": "1d087396e4ad608550ff1b39b861cd5f4f00f648220974d2c42aeda12d02d3c4",
+          "ecosys-audit/suite_manifest.json": "e49b7818819410a7eb7d56f2baf50fa967fb298dc31aaef543f821aefa17ba93",
+          "ecosys-audit/tests": "b639b8fbc1eebbc2fb7be68eb869427aeddfed9be562862fe7d5b6b104fe9563",
+          "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
+          "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
+          "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
+          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
+          "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
+          "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
+        },
+        "context": {},
+        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "justification": "",
+        "schema_version": 1,
+        "scope": null,
+        "selection": "conservative",
+        "toolchain": {
+          "gfortran": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/gfortran",
+            "sha256": "0784ca5eb133cde6a2112eddb4000eb36c9d60eae1b18df1c1ba52fe97737492",
+            "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "python3": {
+            "exit_code": 0,
+            "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/venv/bin/python3",
+            "sha256": "31b9c9a8d50289f3a13f014b3efd8ea3534fc3eea7ca7d9809e166139910b805",
+            "version": "Python 3.12.13"
+          },
+          "uv": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/uv",
+            "sha256": "c176d9aba8da67a88cd2e81e737afbadddde546b51882c7f6b7d1ce62e4cae60",
+            "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+          },
+          "zig": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/zig",
+            "sha256": "18fbdb9fb852846f0e91008c5b99c9c18db1115671701c2890bf84a44ddc202d",
+            "version": "0.17.0"
+          }
+        }
+      },
+      "evidence": [
+        {
+          "path": "audit/intentional-deviations.md",
+          "sha256": "ee74ce11330efe6d5f40e0a4101b207c2afd2cb35225cce5983261b9706b5201"
+        },
+        {
+          "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
+          "sha256": "47ae4cd4c8aa017f32d3a50263f0f0b8a898a4a37c5de111206feb28662a493a"
+        }
+      ],
+      "reason": "DEV-022 registered; no tolerance/ceiling change, no clamp-after-solve, f77src/f77example/ecosys-ng-prod-examples clean",
+      "result": "PASS"
+    },
+    "G7": {
+      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "dependencies": {
+        "contents": {
+          ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
+          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
+          "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
+          "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
+          "ecosys-audit/gate_requirements.json": "a696ab34bc6fdc26082a32b78acb696b84f352f90fd3d84e5ac696317a35ae02",
+          "ecosys-audit/scripts": "1d087396e4ad608550ff1b39b861cd5f4f00f648220974d2c42aeda12d02d3c4",
+          "ecosys-audit/suite_manifest.json": "e49b7818819410a7eb7d56f2baf50fa967fb298dc31aaef543f821aefa17ba93",
+          "ecosys-audit/tests": "b639b8fbc1eebbc2fb7be68eb869427aeddfed9be562862fe7d5b6b104fe9563",
+          "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
+          "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
+          "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
+          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
+          "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
+          "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
+        },
+        "context": {},
+        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "justification": "",
+        "schema_version": 1,
+        "scope": null,
+        "selection": "conservative",
+        "toolchain": {
+          "gfortran": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/gfortran",
+            "sha256": "0784ca5eb133cde6a2112eddb4000eb36c9d60eae1b18df1c1ba52fe97737492",
+            "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "python3": {
+            "exit_code": 0,
+            "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/venv/bin/python3",
+            "sha256": "31b9c9a8d50289f3a13f014b3efd8ea3534fc3eea7ca7d9809e166139910b805",
+            "version": "Python 3.12.13"
+          },
+          "uv": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/uv",
+            "sha256": "c176d9aba8da67a88cd2e81e737afbadddde546b51882c7f6b7d1ce62e4cae60",
+            "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+          },
+          "zig": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/zig",
+            "sha256": "18fbdb9fb852846f0e91008c5b99c9c18db1115671701c2890bf84a44ddc202d",
+            "version": "0.17.0"
+          }
+        }
+      },
+      "evidence": [
+        {
+          "path": ".agent/cycles/cycle_00003.md",
+          "sha256": "3cf0d8509fa0eb24a0d372160eb7d6d07280bba6c0ed2af1b922961e3b4df619"
+        },
+        {
+          "path": "audit/runs/ottawa/zig017-replay-4320-terms-20261021/receipt.json",
+          "sha256": "474242279a4353a7c43d01b373c1c6b0041e2c2819ed508004eed1db4a63a8db"
+        },
+        {
+          "path": "audit/runs/cycle3-confirm-build-ReleaseSafe-20261021234803/receipt.json",
+          "sha256": "6dd1c0b271c0cfe1e91ee029a6379ee4fcf8990eee6391937cf01806b138b730"
+        },
+        {
+          "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
+          "sha256": "47ae4cd4c8aa017f32d3a50263f0f0b8a898a4a37c5de111206feb28662a493a"
+        }
+      ],
+      "reason": "Legacy-first derivation separate from fix; decisive numbers reproduced under instrumented replay and reproducible rebuild",
+      "result": "PASS"
+    },
+    "G9": {
+      "candidate_digest": "841c69731d2fefb454d907b761939768c8444e776b189868b49cb66009f959fd",
+      "dependencies": {
+        "contents": {
+          ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
+          "audit/intentional-deviations.md": "ae607c48e9e8469e386a6ae983e1dfc6f5d3562ed566556c31035a1fe6ac0ab2",
+          "audit/output-provenance.csv": "26aa48e8035abe8943b069890c8b4cc2b661069f5a3df3f72296f9f1ef3b9403",
+          "audit/traceability/bindings.csv": "b2b3ee5337083926ddd90f695eb7bad03deae2ceb457477efc42a4ab1eb56d7a",
+          "ecosys-audit/adapters": "4dd411cd2603f6007c7dabfac5a20ccfc19467d87b9e2f0b03af9687f4d7250b",
+          "ecosys-audit/gate_requirements.json": "a696ab34bc6fdc26082a32b78acb696b84f352f90fd3d84e5ac696317a35ae02",
+          "ecosys-audit/scripts": "1d087396e4ad608550ff1b39b861cd5f4f00f648220974d2c42aeda12d02d3c4",
+          "ecosys-audit/suite_manifest.json": "e49b7818819410a7eb7d56f2baf50fa967fb298dc31aaef543f821aefa17ba93",
+          "ecosys-audit/tests": "b639b8fbc1eebbc2fb7be68eb869427aeddfed9be562862fe7d5b6b104fe9563",
+          "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
+          "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
+          "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
+          "ecosys-ng/src": "30d51f3597389cafd9558d7c28c400b793137ce54fcc6a7d6a73ee78310963f9",
+          "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
+          "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
+          "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
+        },
+        "context": {},
+        "digest": "a077eb6ecb31800ce09e0bfa98e9c18db6da6cbcfeb8f6c1ba09c70a794d046a",
+        "justification": "",
+        "schema_version": 1,
+        "scope": null,
+        "selection": "conservative",
+        "toolchain": {
+          "gfortran": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/gfortran",
+            "sha256": "0784ca5eb133cde6a2112eddb4000eb36c9d60eae1b18df1c1ba52fe97737492",
+            "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+          },
+          "python3": {
+            "exit_code": 0,
+            "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/venv/bin/python3",
+            "sha256": "31b9c9a8d50289f3a13f014b3efd8ea3534fc3eea7ca7d9809e166139910b805",
+            "version": "Python 3.12.13"
+          },
+          "uv": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/uv",
+            "sha256": "c176d9aba8da67a88cd2e81e737afbadddde546b51882c7f6b7d1ce62e4cae60",
+            "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+          },
+          "zig": {
+            "exit_code": 0,
+            "path": "/opt/homebrew/bin/zig",
+            "sha256": "18fbdb9fb852846f0e91008c5b99c9c18db1115671701c2890bf84a44ddc202d",
+            "version": "0.17.0"
+          }
+        }
+      },
+      "evidence": [
+        {
+          "path": "audit/runs/cycle-build-ReleaseSafe-20261021220322410232/receipt.json",
+          "sha256": "2093a04b8053541c8b19da053c5922c005c7d5bba76ae40de04608c69699151c"
+        },
+        {
+          "path": "audit/runs/ottawa/cycle3-confirm-resume4320-20261022b/receipt.json",
+          "sha256": "53b0c066b44ee3bf27f8f491d5abdc17a9db00fbf17afc243f3c925a694f03a8"
+        },
+        {
+          "path": "audit/experiments/cycle3-confirm-resume-20261022/g3-g5-digest.md",
+          "sha256": "47ae4cd4c8aa017f32d3a50263f0f0b8a898a4a37c5de111206feb28662a493a"
+        }
+      ],
+      "reason": "All caches/cwd/logs/checkpoints repo-local (project.sh env; decks under evidence/); binaries retained repo-local with sha binding",
+      "result": "PASS"
+    }
+  },
+  "next_action": "2026-10-21: term/basis dumps in zig017-replay-4320-terms[-2]-20261021 receipts; DEV-022 row added; final suite 4519/4521 (only pre-existing hourly_heat_water_solute crash); resume-deck tooling archived audit/experiments/ottawa-resume-deck-tools.",
+  "next_target": "Verify audit/runs/ottawa/zig017-verify-dev021-20261021 clears hour 4556 (DEV-022 log expected, no hourly failure), then close cycle 3 (gates, commit, push) and continue the strict trajectory past the previous failure boundary.",
   "opened_utc": "2026-10-17T08:55:14Z",
+  "owned_paths": [
+    "ecosys-ng/src/soil/nutrients/nitrogen_state_update.zig",
+    "ecosys-ng/src/soil/microbial/heterotrophic_denitrification_step.zig",
+    "audit/intentional-deviations.md",
+    ".agent/cycles/cycle_00003.md",
+    "audit/experiments/cycle3-confirm-resume-20261022/retention.json"
+  ],
   "record": ".agent/cycles/cycle_00003.md",
   "schema_version": 2,
-  "status": "WORKING",
-  "sync_status": "unknown",
-  "target": "Why does strict Ottawa fail with InsufficientSoilMineralNitrogen at hour 4556 (1998 d190 h20, non-band layer 0, candidate -1.546e-9 vs scale 8.27e-6, roundoff_limit 1.17e-19; nitrogen_state_update.zig:1583-1590 via :280) where legacy completes 30 y: which Zig term diverges from f77src in the soil-mineral-N supply/uptake path, at file:line?",
-  "updated_utc": "2026-10-17T19:03:11Z",
-  "base_commit": "ea787634e514a0bb35cb4b73e8ba8d3262980204",
-  "owned_paths": [
-    "ecosys-ng/src/soil/nutrients/nitrogen_state_update.zig"
-  ],
   "scope": [
     "ecosys-ng/src",
     "ecosys-ng/build.zig",
     "ecosys-ng/build.zig.zon"
-  ]
+  ],
+  "status": "WORKING",
+  "sync_status": "unknown",
+  "target": "RESOLVED cause: h4556 nitrate overdraw = summed FMN-floored per-population NO3 reduction shares exceed zone supply (pool 4.133382671876368e-6 g vs demand 4.134932629096317e-6 g, +3.74e-4 rel; nitro.f 1682-1693 share sums uncapped, redist.f 6218-6220 unclamped; basis equality proven by dumps). Fix DEV-022 supply cap in heterotrophic_denitrification_step.zig.",
+  "updated_utc": "2026-10-17T19:03:11Z",
+  "retention_manifest": "audit/experiments/cycle3-confirm-resume-20261022/retention.json"
 }
