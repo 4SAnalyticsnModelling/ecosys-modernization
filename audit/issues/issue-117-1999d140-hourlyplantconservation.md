@@ -37,3 +37,20 @@ runs died at d138 (issue-116) and never reached this hour; the event is masked, 
 4. Verification: if ledger/gate-only (no pool change), resume from this run's own v20 checkpoints
    (deck evidence/runs/cycle6-verify-scratch-20261022/deck currently at the d139/140 boundary) - ledger-only
    candidates replay bit-clean.
+
+## Booking-math refinement (cycle 00007 static pass, 2026-10-22)
+The gate identity itself is fine (litter sink IS booked as a plant output leg). Failure is a small booking
+MISMATCH (VERIFIED from stderr:70058 arithmetic): booked litter delta = 0.13199999999999998 (= 0.1 x exactly
+1.320000 - the pre-hour partition snapshot), while the actual pool debit was 1.3200229636121652-1.18802095319431
+= 0.1320020104178552 (= 0.1 x CURRENT plant pools incl. this-hour growth +2.0104e-6). Gap 2.0104e-6 g C >>
+~1e-13 tolerance. Same-class gaps in N/P. => The tillage deposit leg is computed from a one-hour-stale
+partition snapshot while the plant pools are thinned by 10% of their current contents.
+Booking route (VERIFIED sites): plant_harvest_runtime_harvest.zig:203/312 writes shoot_litter_*_by_plant
+(= next partition pool totals); driver stage reads them at ecosys_ng.zig:4214-4228
+(accumulateLitterStateUpdate, adds root_harvest_litter arrays); gate = plant/accounting/daily_flux.zig
+evaluateAcceptedHour (identity confirmed incl. litter sink output leg); tillage entry =
+disturbance_management_dispatch.zig:1032 applyAbovegroundTillage(remaining = 1-mixing_fraction=0.9).
+UNVERIFIED (next step): instrument the tillage hour (probe: plant pool sums before/after the transaction vs
+booked shoot_litter next values) to pin the exact stale-snapshot line; candidate fix = deposit exactly the
+transaction-removed mass (bit-parity of removal and deposit), no pool change => resume verification from the
+cycle-6 deck (v20 checkpoint at 1999 d139 end, journal written by same-source binaries).
