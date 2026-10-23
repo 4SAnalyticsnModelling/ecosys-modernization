@@ -514,6 +514,7 @@
     "ecosys-ng/src/management/plant_harvest_runtime_apply.zig",
     "audit/issues/issue-117-1999d140-hourlyplantconservation.md",
     "audit/issues/issue-118-1999d193-solutereactionacceptedstateconservation.md",
+    "audit/experiments/cycle7-verify-candidate-20261022",
     "audit/runs/ottawa/cycle7-probe-scratch-20261022",
     "audit/runs/ottawa/cycle7-probe-scratch2-20261022",
     "audit/runs/ottawa/cycle7-verify-candidate-20261022",
