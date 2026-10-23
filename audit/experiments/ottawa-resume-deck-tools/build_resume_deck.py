@@ -12,7 +12,7 @@ Usage: build_resume_deck.py <src_deck> <dst_deck>
 import re, struct, subprocess, sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]  # fixed 2026-10-22: tool relocated to audit/experiments/ottawa-resume-deck-tools/
 TOOL = REPO / ".tmp/manifest-tool"
 HDR = 67
 SEED_ROOT_REL = "runottawa_input_files/climate_forcing_and_simulation_controls"
