@@ -812,10 +812,14 @@ pub fn applyAbovegroundTillage(context: *group_misc.Context, plant: usize, remai
             @field(context.products_by_plant[plant].nonfoliar.litter, field.name) = next;
         }
     }
+    // issue-117: legacy grosub.f 10541-10551 applies the tillage fractions to the LIVE
+    // seasonal-storage arrays at leg time (deposit = (1-FHVST) x live, pool = FHVST x live, so the
+    // litter credit equals the pool debit bit-for-bit). The entry snapshot above is validation-only;
+    // reading it here lost any mass the common transaction moved into seed storage in between.
     const combined_storage: canopy.ElementalMass = .{
-        .carbon_g = storage_before.carbon_g + grain_to_storage.carbon_g,
-        .nitrogen_g = storage_before.nitrogen_g + grain_to_storage.nitrogen_g,
-        .phosphorus_g = storage_before.phosphorus_g + grain_to_storage.phosphorus_g,
+        .carbon_g = state.plant_seed_storage_carbon_g[plant] + grain_to_storage.carbon_g,
+        .nitrogen_g = state.plant_seed_storage_nitrogen_g[plant] + grain_to_storage.nitrogen_g,
+        .phosphorus_g = state.plant_seed_storage_phosphorus_g[plant] + grain_to_storage.phosphorus_g,
     };
     const removed_storage: canopy.ElementalMass = .{
         .carbon_g = combined_storage.carbon_g * removed_fraction,
@@ -849,10 +853,17 @@ pub fn applyAbovegroundTillage(context: *group_misc.Context, plant: usize, remai
             "branch_symbiont_structural_phosphorus_g",
         }) |field_name| @field(state, field_name)[branch] *= remaining_fraction;
     }
+    // issue-117: legacy grosub.f 10250-10264 reads the LIVE standing-dead pools at leg time
+    // ((1-XHVST) x live into litter, then pool *= XHVST in place). The entry snapshot is validation-only.
+    const standing_now: canopy.ElementalMass = .{
+        .carbon_g = state.plant_standing_dead_carbon_g[plant],
+        .nitrogen_g = state.plant_standing_dead_nitrogen_g[plant],
+        .phosphorus_g = state.plant_standing_dead_phosphorus_g[plant],
+    };
     const removed_standing: canopy.ElementalMass = .{
-        .carbon_g = standing.carbon_g * removed_fraction,
-        .nitrogen_g = standing.nitrogen_g * removed_fraction,
-        .phosphorus_g = standing.phosphorus_g * removed_fraction,
+        .carbon_g = standing_now.carbon_g * removed_fraction,
+        .nitrogen_g = standing_now.nitrogen_g * removed_fraction,
+        .phosphorus_g = standing_now.phosphorus_g * removed_fraction,
     };
     group_misc.addScaledMass(&context.products_by_plant[plant].woody.litter, removed_standing, 1 - root_nonwoody);
     group_misc.addScaledMass(&context.products_by_plant[plant].nonfoliar.litter, removed_standing, root_nonwoody);

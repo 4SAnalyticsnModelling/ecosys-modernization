@@ -302,6 +302,67 @@ fn stageDeferredTillage(pending: []DeferredTillage, cell: usize, depth_m: f64, m
     pending[cell] = .{ .pending = true, .depth_m = depth_m, .mixing_fraction = mixing_fraction };
 }
 
+/// issue-117: tillage root litterfall leaves the plant inventory, so the plant
+/// ledger's litter sink must carry it, mirroring the harvest/death root leg
+/// (plant_harvest_runtime_apply.zig:1767-1771) and legacy grosub.f:10292-10370,
+/// which books the live root removal into the CSNC/ZSNC/PSNC surface litter.
+/// Without this the hourly plant gate sees the root debit with no output leg.
+fn bookTillageRootLitterInPlantSink(
+    harvest: *PlantHarvest.Context,
+    plant: usize,
+    litter: RootMetabolism.RootLitter,
+) void {
+    if (harvest.root_litter_carbon_g_c_by_plant) |carbon| {
+        carbon[plant] += tillageRootLitterTotal(litter, "carbon_g_c");
+        harvest.root_litter_nitrogen_g_n_by_plant.?[plant] += tillageRootLitterTotal(litter, "nitrogen_g_n");
+        harvest.root_litter_phosphorus_g_p_by_plant.?[plant] += tillageRootLitterTotal(litter, "phosphorus_g_p");
+    }
+}
+
+test "issue-117 tillage root litter is booked into the plant litter sink for every element" {
+    var carbon = [_]f64{0};
+    var nitrogen = [_]f64{0};
+    var phosphorus = [_]f64{0};
+    var harvest: PlantHarvest.Context = .{
+        .canopy_state = undefined,
+        .branch_development = undefined,
+        .science_by_plant = &.{},
+        .products_by_plant = undefined,
+        .leaf_area_presence_tolerance_m2 = 0,
+        .root_litter_carbon_g_c_by_plant = &carbon,
+        .root_litter_nitrogen_g_n_by_plant = &nitrogen,
+        .root_litter_phosphorus_g_p_by_plant = &phosphorus,
+    };
+    var litter = std.mem.zeroes(RootMetabolism.RootLitter);
+    litter.woody_carbon_g_c[0] = 0.5;
+    litter.nonwoody_carbon_g_c[1] = 0.25;
+    litter.woody_nitrogen_g_n[0] = 0.04;
+    litter.nonwoody_phosphorus_g_p[3] = 0.006;
+    bookTillageRootLitterInPlantSink(&harvest, 0, litter);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.75), carbon[0], 0);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.04), nitrogen[0], 0);
+    try std.testing.expectApproxEqAbs(@as(f64, 0.006), phosphorus[0], 0);
+
+    // Without bound arrays the booking is inert (unbound harvest contexts).
+    var unbound: PlantHarvest.Context = .{
+        .canopy_state = undefined,
+        .branch_development = undefined,
+        .science_by_plant = &.{},
+        .products_by_plant = undefined,
+        .leaf_area_presence_tolerance_m2 = 0,
+    };
+    bookTillageRootLitterInPlantSink(&unbound, 0, litter);
+}
+
+/// issue-117: element total of a layer's tillage root litter, mirroring the
+/// harvest-side rootLitterElementTotal (plant_harvest_runtime_apply.zig).
+fn tillageRootLitterTotal(litter: RootMetabolism.RootLitter, comptime element: []const u8) f64 {
+    var total: f64 = 0;
+    for (@field(litter, "woody_" ++ element)) |value| total += value;
+    for (@field(litter, "nonwoody_" ++ element)) |value| total += value;
+    return total;
+}
+
 /// Completes the soil half after late plant-litter salt ingress. Each cell
 /// adapter remains attempt-atomic; production wraps the cross-cell sequence
 /// in the fixed external-hour transaction.
@@ -1093,6 +1154,10 @@ pub fn applyEvent(context: *ApplyContext, cell: usize, event: disturbance.Event)
             ledger.addValidated(plant, 1, layer, result.litterfall);
             for (0..context.biological_domain_count_by_plant[plant]) |domain|
                 ledger.addValidated(plant, domain, layer, host_litter_by_domain[domain]);
+            // issue-117: tillage root litterfall must appear as a plant-side output leg
+            // (see bookTillageRootLitterInPlantSink; legacy grosub.f:10292-10370 books the
+            // same live root removal into the surface litter that the budget counts).
+            bookTillageRootLitterInPlantSink(harvest, plant, state_update.litter);
         }
     }
 
