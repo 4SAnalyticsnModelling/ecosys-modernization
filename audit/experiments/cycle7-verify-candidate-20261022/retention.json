@@ -1,4 +1,11 @@
 {
+  "policy": "retain-through-F7-and-reproducibility",
+  "artifacts": [
+    {
+      "path": "evidence/runs/cycle7-verify-candidate-20261022/deck/ecosys_ng",
+      "sha256": "d963eaeda78b3e8fa4294d0eb6f4d33328c1ca0557c1bc7feda75962aea510f3"
+    }
+  ],
   "cycle": 7,
   "candidate": {
     "role": "canonical verification binary (deck copy; produced audit/runs/ottawa/cycle7-verify-candidate-20261022)",
