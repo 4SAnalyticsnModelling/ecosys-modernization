@@ -1,9 +1,13 @@
 {
   "base_commit": "ec2d159617f2c5991882130da40a6e25b166d14c",
+  "closure": {
+    "at": "2026-10-23T05:49:07.203336+00:00",
+    "summary": "issue-117 RESOLVED: tillage host-root litterfall booked into the plant-gate litter sink (bookTillageRootLitterInPlantSink; legacy grosub.f 10292-10370 parity) plus legacy-parity live-pool re-reads on the storage/standing-dead tillage legs. From-scratch verification: 1999 d140 conservation ACCEPTED (carbon residual 2.01e-14, stderr.log:70059), zero HourlyPlantConservationFailure, 89,712-row bit-parity through 1999 d139 vs cycle-6 verified outputs; frontier advanced to 1999 d193 where new issue-118 registered. Gates G1-G7,G9 PASS; suites Debug+ReleaseSafe green (4405 tests, 1 pre-existing skip)."
+  },
   "cycle": 7,
   "gates": {
     "G1": {
-      "candidate_digest": "29da4b1e86575b0de3564f89e229a0f99d1feabbb7f76ba4515ea84dcb35fd3b",
+      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -62,11 +66,11 @@
           "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
         }
       ],
-      "reason": "ReleaseSafe+Debug builds RC=0, zig 0.17.0; candidate sha d963eaed... in digest/retention",
+      "reason": "ReleaseSafe+Debug builds RC=0 zig 0.17.0; candidate sha d963eaed... (digest/retention)",
       "result": "PASS"
     },
     "G2": {
-      "candidate_digest": "29da4b1e86575b0de3564f89e229a0f99d1feabbb7f76ba4515ea84dcb35fd3b",
+      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -125,11 +129,11 @@
           "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
         }
       ],
-      "reason": "from-scratch run accepts 1999 d140 (stderr.log:70059 C residual 2.01e-14), zero gate failures, frontier advanced to d193 -> issue-118",
+      "reason": "from-scratch run accepts 1999 d140 (stderr.log:70059 C residual 2.01e-14); zero gate failures; frontier to d193 issue-118",
       "result": "PASS"
     },
     "G3": {
-      "candidate_digest": "29da4b1e86575b0de3564f89e229a0f99d1feabbb7f76ba4515ea84dcb35fd3b",
+      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -188,11 +192,11 @@
           "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
         }
       ],
-      "reason": "34/34 modelled outputs bit-identical through 1999 d139 (89,712 rows, 0 mismatches) vs cycle-6 verified run",
+      "reason": "34/34 modelled outputs bit-identical through 1999 d139 (89,712 rows) vs cycle-6 verified run",
       "result": "PASS"
     },
     "G4": {
-      "candidate_digest": "29da4b1e86575b0de3564f89e229a0f99d1feabbb7f76ba4515ea84dcb35fd3b",
+      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -251,11 +255,11 @@
           "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
         }
       ],
-      "reason": "tests-module Debug+ReleaseSafe RC=0, 4405 tests incl 1 pre-existing skip, 0 failures; discriminating issue-117 unit test",
+      "reason": "tests-module Debug+ReleaseSafe RC=0; 4405 tests incl 1 pre-existing skip; discriminating issue-117 unit test",
       "result": "PASS"
     },
     "G5": {
-      "candidate_digest": "29da4b1e86575b0de3564f89e229a0f99d1feabbb7f76ba4515ea84dcb35fd3b",
+      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -314,11 +318,11 @@
           "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
         }
       ],
-      "reason": "scope: 2 engine files + issues 117/118 + receipts + state.md + tool fix; probes stripped (grep 0); unrelated files preserved",
+      "reason": "scope = 2 engine files + issues 117/118 + receipts + state.md + tool fix; probes stripped; unrelated files preserved",
       "result": "PASS"
     },
     "G6": {
-      "candidate_digest": "29da4b1e86575b0de3564f89e229a0f99d1feabbb7f76ba4515ea84dcb35fd3b",
+      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -377,11 +381,11 @@
           "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
         }
       ],
-      "reason": "disclosed: zig parallel-build phantom suite failures; consumed decks; restart-fidelity backlog note; LC_UUID identity policy",
+      "reason": "disclosed zig parallel-build phantom suite failures; consumed decks; restart-fidelity backlog note; LC_UUID policy",
       "result": "PASS"
     },
     "G7": {
-      "candidate_digest": "29da4b1e86575b0de3564f89e229a0f99d1feabbb7f76ba4515ea84dcb35fd3b",
+      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -444,7 +448,7 @@
       "result": "PASS"
     },
     "G9": {
-      "candidate_digest": "29da4b1e86575b0de3564f89e229a0f99d1feabbb7f76ba4515ea84dcb35fd3b",
+      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -536,6 +540,7 @@
     ".agent/state.md",
     "audit/experiments/ottawa-resume-deck-tools/build_resume_deck.py"
   ],
-  "status": "PLANNING",
+  "status": "DECIDED",
+  "sync_status": "PENDING",
   "target": "issue-117: 1999 d140 tillage hour removes exactly 10% of plant C/N/P (1.32002->1.18802) with exact litter credit but no plant-side output leg, failing HourlyPlantConservationFailure. Locate the 0.9 destruction factor and litter deposit in the Zig tillage pass; compare legacy tillag.f crop-removal semantics (f77query: fraction, destination pools, booking sides); book the missing plant-side output leg (or gate admission) without physics/tolerance change; verify by resume from cycle-6 deck v20 checkpoints (ledger-only => bit-clean replay through d139) and advance past d140"
 }
