@@ -1,0 +1,20 @@
+{
+  "cycle": 7,
+  "candidate": {
+    "role": "canonical verification binary (deck copy; produced audit/runs/ottawa/cycle7-verify-candidate-20261022)",
+    "path": "evidence/runs/cycle7-verify-candidate-20261022/deck/ecosys_ng",
+    "sha256": "d963eaeda78b3e8fa4294d0eb6f4d33328c1ca0557c1bc7feda75962aea510f3",
+    "build": "zig 0.17.0 ReleaseSafe from source tree at commit 59e27cd (fix + discriminating test); install artifact identical to deck copy"
+  },
+  "rebuild_equivalent": {
+    "role": "install output ecosys-ng/ecosys-ng-bin/ecosys_ng is the SAME single link copied to the deck (identical sha256); relink equivalence policy inherited from cycle-6 LC_UUID disclosure",
+    "path": "ecosys-ng/ecosys-ng-bin/ecosys_ng",
+    "sha256": "d963eaeda78b3e8fa4294d0eb6f4d33328c1ca0557c1bc7feda75962aea510f3"
+  },
+  "superseded_interim": [
+    "audit/runs/ottawa/cycle7-probe-scratch-20261022 (receipt CANCELLED; probe binary; deck consumed)",
+    "audit/runs/ottawa/cycle7-probe-scratch2-20261022 (log-probe ReleaseSafe from-scratch diagnosis; deck consumed; numerics identical to unprobed lineage)",
+    "audit/runs/ottawa/cycle7-probe-d140-20261022 and cycle7-control-d140-20261022 resume experiments (restart-fidelity divergence; decks consumed; findings kept as backlog note)"
+  ],
+  "identity_policy": "output-level equivalence: 89,712 modelled-output rows through 1999 d139 bit-identical to the cycle-6 verified run; d140 conservation accepted at carbon residual 2.0148e-14; binary file hash not reproducible across relinks on macOS (LC_UUID) so source+toolchain pinning governs"
+}

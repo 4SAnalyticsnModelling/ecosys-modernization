@@ -2,10 +2,21 @@
   "base_commit": "ec2d159617f2c5991882130da40a6e25b166d14c",
   "cycle": 7,
   "gates": {},
+  "next_action": "fix 59e27cd verified: d140 accepted (stderr.log:70059, C residual 2.01e-14); 89712-row bit parity through d139; frontier advanced to d193 issue-118",
+  "next_target": "issue-118: SoluteReactionAcceptedStateConservationFailure 1999 d193 h2 (h13370); nitrogen retained-state inventory residual 4.23e-11 vs limit 7.36e-13 cell 0 layer 0; follow convergence-and-balance playbook",
   "owned_paths": [
-    "audit/issues/issue-117-1999d140-hourlyplantconservation.md"
+    "ecosys-ng/src/management/disturbance_management_dispatch.zig",
+    "ecosys-ng/src/management/plant_harvest_runtime_apply.zig",
+    "audit/issues/issue-117-1999d140-hourlyplantconservation.md",
+    "audit/issues/issue-118-1999d193-solutereactionacceptedstateconservation.md",
+    "audit/runs/ottawa/cycle7-probe-scratch-20261022",
+    "audit/runs/ottawa/cycle7-probe-scratch2-20261022",
+    "audit/runs/ottawa/cycle7-verify-candidate-20261022",
+    ".agent/state.md",
+    "audit/experiments/ottawa-resume-deck-tools/build_resume_deck.py"
   ],
   "record": ".agent/cycles/cycle_00007.md",
+  "retention_manifest": "audit/experiments/cycle7-verify-candidate-20261022/retention.json",
   "schema_version": 2,
   "scope": [
     "audit/issues/issue-117-1999d140-hourlyplantconservation.md"
