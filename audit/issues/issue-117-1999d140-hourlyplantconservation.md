@@ -78,3 +78,28 @@ still fails, the defect is on the separate dispatcher legs (host-root tillage ro
 path, disturbance_management_dispatch.zig:1010-1061) or in gate inventory components not covered by the
 shoot_litter arrays (root/nodule). Probe v3 will then target the roots side (roots state IS reachable
 at the dispatch site).
+
+## RESOLVED (cycle 00007, 2026-10-22) - root cause + verification
+Root cause (VERIFIED): the tillage host-root leg (disturbance_management_dispatch.applyEvent layer loop)
+published removed root litter to the SOIL owner and the root_litter_carbon_ledger validator but never fed
+the plant-side litter arrays (root_litter_{carbon,nitrogen,phosphorus}_*_by_plant) that
+accumulateLitterStateUpdate adds to the plant ledger sink (ecosys_ng.zig:4233-4235). The hourly plant gate
+therefore saw the host-root debit (2.328132700984975e-6 g C; N 8.04e-8, P 8.0e-9 same class) with no output
+leg. Above-ground seed/standing legs booked EXACTLY (scratch2 TEMPDIAG: seed 1.32 -> booked 0.132); the
+earlier stale-snapshot hypothesis is SUPERSEDED. Legacy truth: grosub.f 10292-10370 books the same live root
+removal into the CSNC/ZSNC/PSNC surface litter the budget counts; the harvest/death root leg already mirrors
+this in Zig (plant_harvest_runtime_apply.zig:1767-1771, DEV-017) - tillage lacked the mirror.
+
+Fix (commit 59e27cd): bookTillageRootLitterInPlantSink called from the tillage layer loop (C/N/P totals of
+state_update.litter), plus legacy-parity live-pool re-reads on the seed-storage and standing-dead tillage
+legs (bit-safe no-ops while snapshot==live, proven by parity below). Discriminating unit test:
+"issue-117 tillage root litter is booked into the plant litter sink for every element".
+
+Verification (from scratch, pristine scenario deck; audit/runs/ottawa/cycle7-verify-candidate-20261022):
+1999 d140 daily conservation ACCEPTED (stderr.log:70059, carbon residual 2.0148e-14); zero
+HourlyPlantConservationFailure in the whole run; run advanced the trajectory frontier from 1999 d140 to
+1999 d193 (new distinct frontier registered as issue-118). Bit-parity vs cycle-6 verified run
+(evidence/runs/cycle6-verify-scratch-20261022 outputs): all 34 modelled-output files identical for every
+shared row through 1999 d139 (89,712 rows, 0 mismatches) - the fix changes output only where the defect hour
+is executed. Gate suites green: tests-module ReleaseSafe and Debug, 4405 total incl. 1 pre-existing skip,
+0 failures. No DEV row (moves Zig toward legacy); no tolerance/gate/physics change.
