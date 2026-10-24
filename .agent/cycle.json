@@ -1,13 +1,13 @@
 {
-  "base_commit": "ec2d159617f2c5991882130da40a6e25b166d14c",
+  "base_commit": "42f5ce11eed5c7f96fec5bdbf325d2e766434f2b",
   "closure": {
-    "at": "2026-10-23T05:49:07.203336+00:00",
-    "summary": "issue-117 RESOLVED: tillage host-root litterfall booked into the plant-gate litter sink (bookTillageRootLitterInPlantSink; legacy grosub.f 10292-10370 parity) plus legacy-parity live-pool re-reads on the storage/standing-dead tillage legs. From-scratch verification: 1999 d140 conservation ACCEPTED (carbon residual 2.01e-14, stderr.log:70059), zero HourlyPlantConservationFailure, 89,712-row bit-parity through 1999 d139 vs cycle-6 verified outputs; frontier advanced to 1999 d193 where new issue-118 registered. Gates G1-G7,G9 PASS; suites Debug+ReleaseSafe green (4405 tests, 1 pre-existing skip)."
+    "at": "2026-10-24T09:32:34.009610+00:00",
+    "summary": "issue-118 RESOLVED: retainBestBoundedIterate eligibility failures (inventory closure/charge/carboxyl capacity) become non-retention (return false, warnings kept), not a fatal hour abort; root cause = unchecked anderson_depth_two base advance (replay census probes verified); publish+accepted-substep tiers unchanged; from-scratch verification: 1999 d193 h2 accepted (zero conservation failures, fix channel live as 46 warnings), 34-file/99,187-row bit-parity vs cycle-7 through d192; frontier advanced to 1999 d286 where issue-119 InvalidPlantInventory registered. Gates G1-G7,G9 PASS; suites 4406 passed/1 skipped/0 failed both configs."
   },
-  "cycle": 7,
+  "cycle": 8,
   "gates": {
     "G1": {
-      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
+      "candidate_digest": "11749161f69866bb39672d6d19ea016791bd3b803dd0ac509f1bc335d927e19e",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -22,13 +22,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "5a3bf6842a67b3bf651b2ab9b1be25f6cf677dc004382af4636e5edb97445c84",
+          "ecosys-ng/src": "d5be04da13402be550182c50f0b7fab302466c1a9b42e95a7a3a9ed30a1cf72e",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "465343c00963ef21888bdb128b4c63ffd7a096e64e9708953501e5f5d6e76715",
+        "digest": "b30af31296d3a1c61bf2aff870e80903bb468175f2db2e01b27ed7ed003192be",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -62,15 +62,15 @@
       },
       "evidence": [
         {
-          "path": "audit/experiments/cycle7-verify-candidate-20261022/g1-g9-digest.md",
-          "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
+          "path": "audit/experiments/cycle8-verify-candidate-20261023/g1-g9-digest.md",
+          "sha256": "ca3de3bae0c3d3601fed39397f975469363ef312d59c419dfed43d92c672e2a9"
         }
       ],
-      "reason": "ReleaseSafe+Debug builds RC=0 zig 0.17.0; candidate sha d963eaed... (digest/retention)",
+      "reason": "install ReleaseSafe RC=0; deck sha 46818c5213d6fe1cb32899f2381003bdbd97405cc7a42c205259775a2aebeb13 == install artifact; zig 0.17.0",
       "result": "PASS"
     },
     "G2": {
-      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
+      "candidate_digest": "11749161f69866bb39672d6d19ea016791bd3b803dd0ac509f1bc335d927e19e",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -85,13 +85,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "5a3bf6842a67b3bf651b2ab9b1be25f6cf677dc004382af4636e5edb97445c84",
+          "ecosys-ng/src": "d5be04da13402be550182c50f0b7fab302466c1a9b42e95a7a3a9ed30a1cf72e",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "465343c00963ef21888bdb128b4c63ffd7a096e64e9708953501e5f5d6e76715",
+        "digest": "b30af31296d3a1c61bf2aff870e80903bb468175f2db2e01b27ed7ed003192be",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -125,15 +125,19 @@
       },
       "evidence": [
         {
-          "path": "audit/experiments/cycle7-verify-candidate-20261022/g1-g9-digest.md",
-          "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
+          "path": "audit/experiments/cycle8-verify-candidate-20261023/logs/gate-suite-direct-testbin-both-configs.log",
+          "sha256": "417ecd329ec73366d9b2f4f691df557b32f6d3076f1c4edc7545f900e8514718"
+        },
+        {
+          "path": "audit/experiments/cycle8-verify-candidate-20261023/g1-g9-digest.md",
+          "sha256": "ca3de3bae0c3d3601fed39397f975469363ef312d59c419dfed43d92c672e2a9"
         }
       ],
-      "reason": "from-scratch run accepts 1999 d140 (stderr.log:70059 C residual 2.01e-14); zero gate failures; frontier to d193 issue-118",
+      "reason": "both configs 4406 passed/1 skipped/0 failed fresh at close; +1 = discriminating test (fails pre-fix)",
       "result": "PASS"
     },
     "G3": {
-      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
+      "candidate_digest": "11749161f69866bb39672d6d19ea016791bd3b803dd0ac509f1bc335d927e19e",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -148,13 +152,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "5a3bf6842a67b3bf651b2ab9b1be25f6cf677dc004382af4636e5edb97445c84",
+          "ecosys-ng/src": "d5be04da13402be550182c50f0b7fab302466c1a9b42e95a7a3a9ed30a1cf72e",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "465343c00963ef21888bdb128b4c63ffd7a096e64e9708953501e5f5d6e76715",
+        "digest": "b30af31296d3a1c61bf2aff870e80903bb468175f2db2e01b27ed7ed003192be",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -188,15 +192,15 @@
       },
       "evidence": [
         {
-          "path": "audit/experiments/cycle7-verify-candidate-20261022/g1-g9-digest.md",
-          "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
+          "path": "audit/runs/ottawa/cycle8-verify-candidate-20261023/stderr.log",
+          "sha256": "46005b0e19c14ad1ed83ee6b302d9771abcf66da7708d24eb813a24d2a746c52"
         }
       ],
-      "reason": "34/34 modelled outputs bit-identical through 1999 d139 (89,712 rows) vs cycle-6 verified run",
+      "reason": "zero AcceptedStateConservationFailure/fatal lines; 1,896 accepted conservation ledgers; 46 warning-level retain rejections in d193 window = fixed channel live",
       "result": "PASS"
     },
     "G4": {
-      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
+      "candidate_digest": "11749161f69866bb39672d6d19ea016791bd3b803dd0ac509f1bc335d927e19e",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -211,13 +215,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "5a3bf6842a67b3bf651b2ab9b1be25f6cf677dc004382af4636e5edb97445c84",
+          "ecosys-ng/src": "d5be04da13402be550182c50f0b7fab302466c1a9b42e95a7a3a9ed30a1cf72e",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "465343c00963ef21888bdb128b4c63ffd7a096e64e9708953501e5f5d6e76715",
+        "digest": "b30af31296d3a1c61bf2aff870e80903bb468175f2db2e01b27ed7ed003192be",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -251,15 +255,15 @@
       },
       "evidence": [
         {
-          "path": "audit/experiments/cycle7-verify-candidate-20261022/g1-g9-digest.md",
-          "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
+          "path": "audit/experiments/cycle8-verify-candidate-20261023/g1-g9-digest.md",
+          "sha256": "ca3de3bae0c3d3601fed39397f975469363ef312d59c419dfed43d92c672e2a9"
         }
       ],
-      "reason": "tests-module Debug+ReleaseSafe RC=0; 4405 tests incl 1 pre-existing skip; discriminating issue-117 unit test",
+      "reason": "legacy solute.f fixed-iteration publish without conservation guard; retain docstring eligibility semantics; no tolerance/floor change",
       "result": "PASS"
     },
     "G5": {
-      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
+      "candidate_digest": "11749161f69866bb39672d6d19ea016791bd3b803dd0ac509f1bc335d927e19e",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -274,13 +278,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "5a3bf6842a67b3bf651b2ab9b1be25f6cf677dc004382af4636e5edb97445c84",
+          "ecosys-ng/src": "d5be04da13402be550182c50f0b7fab302466c1a9b42e95a7a3a9ed30a1cf72e",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "465343c00963ef21888bdb128b4c63ffd7a096e64e9708953501e5f5d6e76715",
+        "digest": "b30af31296d3a1c61bf2aff870e80903bb468175f2db2e01b27ed7ed003192be",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -314,15 +318,15 @@
       },
       "evidence": [
         {
-          "path": "audit/experiments/cycle7-verify-candidate-20261022/g1-g9-digest.md",
-          "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
+          "path": "audit/experiments/cycle8-verify-candidate-20261023/g1-g9-digest.md",
+          "sha256": "ca3de3bae0c3d3601fed39397f975469363ef312d59c419dfed43d92c672e2a9"
         }
       ],
-      "reason": "scope = 2 engine files + issues 117/118 + receipts + state.md + tool fix; probes stripped; unrelated files preserved",
+      "reason": "34 files/99,187 rows bit-identical vs cycle-7 outputs through 1999 d192; divergence only after previously-fatal hour",
       "result": "PASS"
     },
     "G6": {
-      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
+      "candidate_digest": "11749161f69866bb39672d6d19ea016791bd3b803dd0ac509f1bc335d927e19e",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -337,13 +341,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "5a3bf6842a67b3bf651b2ab9b1be25f6cf677dc004382af4636e5edb97445c84",
+          "ecosys-ng/src": "d5be04da13402be550182c50f0b7fab302466c1a9b42e95a7a3a9ed30a1cf72e",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "465343c00963ef21888bdb128b4c63ffd7a096e64e9708953501e5f5d6e76715",
+        "digest": "b30af31296d3a1c61bf2aff870e80903bb468175f2db2e01b27ed7ed003192be",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -377,15 +381,15 @@
       },
       "evidence": [
         {
-          "path": "audit/experiments/cycle7-verify-candidate-20261022/g1-g9-digest.md",
-          "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
+          "path": "audit/experiments/cycle8-verify-candidate-20261023/g1-g9-digest.md",
+          "sha256": "ca3de3bae0c3d3601fed39397f975469363ef312d59c419dfed43d92c672e2a9"
         }
       ],
-      "reason": "disclosed zig parallel-build phantom suite failures; consumed decks; restart-fidelity backlog note; LC_UUID policy",
+      "reason": "no DEV row (moves toward legacy); no gate/tolerance loosening; guard still rejects leaking iterates",
       "result": "PASS"
     },
     "G7": {
-      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
+      "candidate_digest": "11749161f69866bb39672d6d19ea016791bd3b803dd0ac509f1bc335d927e19e",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -400,13 +404,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "5a3bf6842a67b3bf651b2ab9b1be25f6cf677dc004382af4636e5edb97445c84",
+          "ecosys-ng/src": "d5be04da13402be550182c50f0b7fab302466c1a9b42e95a7a3a9ed30a1cf72e",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "465343c00963ef21888bdb128b4c63ffd7a096e64e9708953501e5f5d6e76715",
+        "digest": "b30af31296d3a1c61bf2aff870e80903bb468175f2db2e01b27ed7ed003192be",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -440,15 +444,19 @@
       },
       "evidence": [
         {
-          "path": "audit/experiments/cycle7-verify-candidate-20261022/g1-g9-digest.md",
-          "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
+          "path": "audit/experiments/cycle8-verify-candidate-20261023/logs/replay118-prefix-reproduces-fatal.log",
+          "sha256": "f05de97c5fdd586904b0fbaebb639529a9f06fa517a5a9cbbae3898dacf4c619"
+        },
+        {
+          "path": "audit/experiments/cycle8-verify-candidate-20261023/logs/replay118-postfix-production.log",
+          "sha256": "b6965f6608d2b664eb4be165382aef3a9cf4b96cd55f00a772033b7f1203fb64"
         }
       ],
-      "reason": "doc_consistency consistent:true; digest+retention bind all claims",
+      "reason": "pre-fix replay reproduces fatal 4.2306602665576065e-11; post-fix production replay chronic DidNotConverge; from-scratch field run consistent",
       "result": "PASS"
     },
     "G9": {
-      "candidate_digest": "96ea7abeb64546c6e717bac8eff7c643ce4a8ec97faf51fb172a234672760924",
+      "candidate_digest": "11749161f69866bb39672d6d19ea016791bd3b803dd0ac509f1bc335d927e19e",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -463,13 +471,13 @@
           "ecosys-ng-prod-examples": "969c8c86cf23e92285aede52acaa1f4b5a2227c63e36b4cae792e8070d027495",
           "ecosys-ng/build.zig": "5536db1dd09ab63cc130954ab91e25e8a0621dcb8b6983cc3aba8ea867384ee6",
           "ecosys-ng/build.zig.zon": "de120e893eb72c519aae740fde126090ea9c55f6fb2940feb1e10e9f20522f08",
-          "ecosys-ng/src": "5a3bf6842a67b3bf651b2ab9b1be25f6cf677dc004382af4636e5edb97445c84",
+          "ecosys-ng/src": "d5be04da13402be550182c50f0b7fab302466c1a9b42e95a7a3a9ed30a1cf72e",
           "f77example": "f7ffbbfe7749f8ee0ef1674515c8b82e6c7dfd482fbb3f13320a10994e8ebd18",
           "f77src": "d48ed013697867c6dcfbfba63ca8793568376887728d56e9539d40394aa095ac",
           "validation/rules": "ae2c0458ef215c2e7bd8cdf102a8b860647362113ebdf9fe7e048d7526d2fc18"
         },
         "context": {},
-        "digest": "465343c00963ef21888bdb128b4c63ffd7a096e64e9708953501e5f5d6e76715",
+        "digest": "b30af31296d3a1c61bf2aff870e80903bb468175f2db2e01b27ed7ed003192be",
         "justification": "",
         "schema_version": 1,
         "scope": null,
@@ -503,44 +511,34 @@
       },
       "evidence": [
         {
-          "path": "audit/experiments/cycle7-verify-candidate-20261022/g1-g9-digest.md",
-          "sha256": "89aef612b6c8392f88f5b4afb4b6dbb68455f96b839cdc5bb1391acacdb70783"
+          "path": "audit/experiments/cycle8-verify-candidate-20261023/retention.json",
+          "sha256": "e2a2b318f5aacfd045d3f58ee8c65991aa826711452bb1d1747de33b818b3bc7"
         }
       ],
-      "reason": "no DEV row (toward legacy); no tolerance/gate/physics change; no checkpoint promoted",
+      "reason": "all decks/logs/caches repo-local",
       "result": "PASS"
     }
   },
-  "next_action": "fix 59e27cd verified: d140 accepted (stderr.log:70059, C residual 2.01e-14); 89712-row bit parity through d139; frontier advanced to d193 issue-118",
-  "next_target": "issue-118: SoluteReactionAcceptedStateConservationFailure 1999 d193 h2 (h13370); nitrogen retained-state inventory residual 4.23e-11 vs limit 7.36e-13 cell 0 layer 0; follow convergence-and-balance playbook",
+  "next_action": "issue-118 fix shipped+verified; closing cycle 8 with evidence digest, retention, issue-119 registration",
+  "next_target": "issue-119: InvalidPlantInventory 1999 d286 (cycle 00009 target)",
   "owned_paths": [
-    "ecosys-ng/src/management/disturbance_management_dispatch.zig",
-    "ecosys-ng/src/management/plant_harvest_runtime_apply.zig",
-    "audit/issues/issue-117-1999d140-hourlyplantconservation.md",
     "audit/issues/issue-118-1999d193-solutereactionacceptedstateconservation.md",
-    "audit/experiments/cycle7-verify-candidate-20261022",
-    "audit/runs/ottawa/cycle7-probe-scratch-20261022",
-    "audit/runs/ottawa/cycle7-probe-scratch2-20261022",
-    "audit/runs/ottawa/cycle7-verify-candidate-20261022",
+    "ecosys-ng/src/soil/solute/reaction_solve.zig",
+    "ecosys-ng/src/soil/solute/reaction_solver_tests.zig",
+    "audit/experiments/cycle8-verify-candidate-20261023",
+    "audit/runs/ottawa/cycle8-verify-candidate-20261023",
+    "audit/issues/issue-119-1999d286-invalidplantinventory.md",
     ".agent/state.md",
-    "audit/experiments/ottawa-resume-deck-tools/build_resume_deck.py"
+    ".agent/cycles/cycle_00008.md"
   ],
-  "record": ".agent/cycles/cycle_00007.md",
-  "retention_manifest": "audit/experiments/cycle7-verify-candidate-20261022/retention.json",
+  "record": ".agent/cycles/cycle_00008.md",
+  "retention_manifest": "audit/experiments/cycle8-verify-candidate-20261023/retention.json",
   "schema_version": 2,
   "scope": [
-    "ecosys-ng/src/management/disturbance_management_dispatch.zig",
-    "ecosys-ng/src/management/plant_harvest_runtime_apply.zig",
-    "audit/issues/issue-117-1999d140-hourlyplantconservation.md",
-    "audit/issues/issue-118-1999d193-solutereactionacceptedstateconservation.md",
-    "audit/experiments/cycle7-verify-candidate-20261022",
-    "audit/runs/ottawa/cycle7-probe-scratch-20261022",
-    "audit/runs/ottawa/cycle7-probe-scratch2-20261022",
-    "audit/runs/ottawa/cycle7-verify-candidate-20261022",
-    ".agent/state.md",
-    "audit/experiments/ottawa-resume-deck-tools/build_resume_deck.py"
+    "ecosys-ng/src/soil/solute/reaction_solve.zig",
+    "ecosys-ng/src/soil/solute/reaction_solver_tests.zig"
   ],
   "status": "DECIDED",
   "sync_status": "PENDING",
-  "target": "issue-117: 1999 d140 tillage hour removes exactly 10% of plant C/N/P (1.32002->1.18802) with exact litter credit but no plant-side output leg, failing HourlyPlantConservationFailure. Locate the 0.9 destruction factor and litter deposit in the Zig tillage pass; compare legacy tillag.f crop-removal semantics (f77query: fraction, destination pools, booking sides); book the missing plant-side output leg (or gate admission) without physics/tolerance change; verify by resume from cycle-6 deck v20 checkpoints (ledger-only => bit-clean replay through d139) and advance past d140"
+  "target": "issue-118: at 1999 d193 h2 (total_hour 13370) the hourly solute reaction solver fails SoluteReactionAcceptedStateConservationFailure: nitrogen retained-state inventory residual 4.2306602665576065e-11 vs limit 7.358943829275302e-13 (inventory nitrogen_mol_per_m3 1.61038565, cell 0 layer 0), preceded by phosphate site reconciliation nonconservative warnings (residual ~4.4e-20 vs envelope 1.3e-20). Diagnose the producing transformation per convergence-and-balance playbook (near-zero signed defect, accepted-state conservation); compare legacy hour1.f/soil chemistry accepted-state semantics; smallest booking/translation fix; never loosen gates/tolerances; verify from scratch past 1999 d193 with bit-parity through 1999 d192 vs cycle-7 candidate outputs."
 }
