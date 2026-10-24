@@ -1,0 +1,26 @@
+{
+  "policy": "retain-through-F7-and-reproducibility",
+  "artifacts": [
+    {
+      "path": "evidence/runs/cycle8-verify-candidate-20261023/deck/ecosys_ng",
+      "sha256": "46818c5213d6fe1cb32899f2381003bdbd97405cc7a42c205259775a2aebeb13"
+    }
+  ],
+  "cycle": 8,
+  "candidate": {
+    "role": "canonical verification binary (deck copy; produced audit/runs/ottawa/cycle8-verify-candidate-20261023)",
+    "path": "evidence/runs/cycle8-verify-candidate-20261023/deck/ecosys_ng",
+    "sha256": "46818c5213d6fe1cb32899f2381003bdbd97405cc7a42c205259775a2aebeb13",
+    "build": "zig 0.17.0 ReleaseSafe from source tree at commit 7dd6740 (fix + discriminating test); install artifact identical to deck copy"
+  },
+  "rebuild_equivalent": {
+    "role": "install output ecosys-ng/ecosys-ng-bin/ecosys_ng is the SAME single link copied to the deck (identical sha256); relink equivalence policy inherited from cycle-6 LC_UUID disclosure",
+    "path": "ecosys-ng/ecosys-ng-bin/ecosys_ng",
+    "sha256": "46818c5213d6fe1cb32899f2381003bdbd97405cc7a42c205259775a2aebeb13"
+  },
+  "superseded_interim": [
+    "ecosys-ng/.tmp-replay-solute (offline replay tool built ad-hoc for issue-118 diagnosis; deleted after use; rebuild recipe: zig build-exe -OReleaseSafe --dep ecosys_ng -Mroot=src/replay_solute_failure.zig -Mecosys_ng=src/module_index.zig --name .tmp-replay-solute)",
+    ".tmp/issue118-probes.patch (log-only census probe suite; reverted from tree; copy retained at audit/experiments/cycle8-verify-candidate-20261023/logs/issue118-probes.patch)"
+  ],
+  "identity_policy": "output-level equivalence: all 99,187 modelled-output rows written by the cycle-7 verified run (through 1999 d192) bit-identical in the cycle-8 deck; 1999 d193 h2 (total_hour 13370) accepted with zero conservation failures; trajectory advanced clean to 1999 d285 (issue-119 stop); binary file hash not reproducible across relinks on macOS (LC_UUID) so source+toolchain pinning governs"
+}

@@ -1,0 +1,197 @@
+diff --git a/ecosys-ng/src/soil/solute/chemistry_state.zig b/ecosys-ng/src/soil/solute/chemistry_state.zig
+index 2835401..02750d0 100644
+--- a/ecosys-ng/src/soil/solute/chemistry_state.zig
++++ b/ecosys-ng/src/soil/solute/chemistry_state.zig
+@@ -45,6 +45,13 @@ pub const CationExchangeWaterRatios = struct {
+     ammonium_band_megagrams_per_m3: f64,
+ };
+ 
++var temp118_calls: u64 = 0;
++var temp118_cum_nb: f64 = 0;
++var temp118_cum_b: f64 = 0;
++pub fn temp118Stats() struct { n: u64, nb: f64, b: f64 } {
++    return .{ .n = temp118_calls, .nb = temp118_cum_nb, .b = temp118_cum_b };
++}
++
+ pub const CellTransformations = struct {
+     aqueous: aqueous_network.Transformations,
+     non_band_phosphate: phosphate_network.Transformations,
+@@ -478,6 +485,14 @@ pub const State = struct {
+         monovalent_activity_coefficient: f64,
+         water_activity_product_mol2_per_m6: f64,
+     ) !water_equilibrium.Result {
++        // TEMP issue-118 probe: input-transformation nitrogen census (fraction-agnostic, per zone).
++        const temp_pre_aq = self.aqueous[cell_index];
++        const temp_pre_ex = self.cation_exchange_mol_per_megagram[cell_index];
++        const temp_r = transformations.cation_exchange_water_ratios;
++        const temp_in_nb = transformations.aqueous.ammonium_non_band + transformations.aqueous.ammonia_non_band +
++            transformations.aqueous.nitrate_non_band + temp_r.ammonium_non_band_megagrams_per_m3 * transformations.cation_adsorption_mol_per_megagram.ammonium_non_band;
++        const temp_in_b = transformations.aqueous.ammonium_band + transformations.aqueous.ammonia_band +
++            transformations.aqueous.nitrate_band + temp_r.ammonium_band_megagrams_per_m3 * transformations.cation_adsorption_mol_per_megagram.ammonium_band;
+         var staged: StagedCellUpdate = undefined;
+         try self.stageCellUpdate(cell_index, transformations, &staged);
+         const water = try water_equilibrium.projectProvisional(
+@@ -492,6 +507,24 @@ pub const State = struct {
+         staged.aqueous.hydrogen = water.hydrogen_concentration_mol_per_m3;
+         staged.aqueous.hydroxide = water.hydroxide_concentration_mol_per_m3;
+         self.publishStagedCellUpdate(cell_index, staged);
++        // TEMP issue-118 probe: realized census after publish; warn-scale filter keeps volume low.
++        {
++            const aq = self.aqueous[cell_index];
++            const ex = self.cation_exchange_mol_per_megagram[cell_index];
++            const real_nb = aq.ammonium_non_band + aq.ammonia_non_band + aq.nitrate_non_band +
++                temp_r.ammonium_non_band_megagrams_per_m3 * ex.ammonium_non_band -
++                (temp_pre_aq.ammonium_non_band + temp_pre_aq.ammonia_non_band + temp_pre_aq.nitrate_non_band +
++                    temp_r.ammonium_non_band_megagrams_per_m3 * temp_pre_ex.ammonium_non_band);
++            const real_b = aq.ammonium_band + aq.ammonia_band + aq.nitrate_band +
++                temp_r.ammonium_band_megagrams_per_m3 * ex.ammonium_band -
++                (temp_pre_aq.ammonium_band + temp_pre_aq.ammonia_band + temp_pre_aq.nitrate_band +
++                    temp_r.ammonium_band_megagrams_per_m3 * temp_pre_ex.ammonium_band);
++            temp118_calls += 1;
++            temp118_cum_nb += real_nb;
++            temp118_cum_b += real_b;
++            if (@abs(real_nb) > 1e-16 or @abs(real_b) > 1e-16)
++                std.log.err("TEMPDIAG118U n={d} in_nb={e:.6} in_b={e:.6} real_nb={e:.6} real_b={e:.6} cum_nb={e:.6} cum_b={e:.6}", .{ temp118_calls, temp_in_nb, temp_in_b, real_nb, real_b, temp118_cum_nb, temp118_cum_b });
++        }
+         return water;
+     }
+ 
+diff --git a/ecosys-ng/src/soil/solute/reaction_solve.zig b/ecosys-ng/src/soil/solute/reaction_solve.zig
+index 90cf318..d023028 100644
+--- a/ecosys-ng/src/soil/solute/reaction_solve.zig
++++ b/ecosys-ng/src/soil/solute/reaction_solve.zig
+@@ -683,6 +683,20 @@ pub fn requireConservedInventories(before: AcceptedStateInventory, after: Accept
+ /// Keeps the best chemical-quality score only after validating bounds and the same
+ /// entry inventories used by the terminal conservation check. Search probes
+ /// never call this function and cannot overwrite the retained iterate.
++
++// TEMP issue-118: N inventory of an arbitrary packed vector (shares scratch buffers; probe-only).
++fn temp118VectorN(scratch: *chemistry.State, vec: []const f64, parameters: chemistry.ReactionParameters) !f64 {
++    var s = scratch.*;
++    try s.unpackCell(0, vec);
++    const f = parameters.fractions;
++    const r = parameters.cation_exchange_water_ratios;
++    const aq = s.aqueous[0];
++    const ex = s.cation_exchange_mol_per_megagram[0];
++    return f.ammonium_non_band * (aq.ammonium_non_band + aq.ammonia_non_band + r.ammonium_non_band_megagrams_per_m3 * ex.ammonium_non_band) +
++        f.ammonium_band * (aq.ammonium_band + aq.ammonia_band + r.ammonium_band_megagrams_per_m3 * ex.ammonium_band) +
++        f.nitrate_non_band * aq.nitrate_non_band + f.nitrate_band * aq.nitrate_band;
++}
++
+ pub fn retainBestBoundedIterate(
+     workspace: *Workspace,
+     entry: *const chemistry.State,
+@@ -702,7 +716,35 @@ pub fn retainBestBoundedIterate(
+     try validateAqueousMolarity(&workspace.scratch, 0, parameters.fractions);
+     const before = try acceptedStateInventory(entry, cell_index, parameters);
+     const after = try acceptedStateInventory(&workspace.scratch, 0, parameters);
+-    try requireConservedInventories(before, after);
++    std.log.err("TEMPDIAG118I it={d} Ntot_b={e:.17} dN={e:.6} kind={s}", .{
++        iteration, before.nitrogen_mol_per_m3, after.nitrogen_mol_per_m3 - before.nitrogen_mol_per_m3, @tagName(workspace.last_selected_candidate),
++    });
++    // TEMP issue-117/118 probe: decompose the nitrogen identity when retention fails.
++    requireConservedInventories(before, after) catch |probe_err| {
++        if (probe_err == error.SoluteReactionAcceptedStateConservationFailure) {
++            const st = chemistry.temp118Stats();
++            std.log.err("TEMPDIAG118STATS n={d} cum_nb={e:.6} cum_b={e:.6}", .{ st.n, st.nb, st.b });
++            const f = parameters.fractions;
++            const ea = entry.aqueous[cell_index];
++            const sa = workspace.scratch.aqueous[0];
++            const ex = entry.cation_exchange_mol_per_megagram[cell_index];
++            const sx = workspace.scratch.cation_exchange_mol_per_megagram[0];
++            std.log.err("TEMPDIAG118 N aqNH4nb {e}->{e} aqNH4b {e}->{e} aqNH3nb {e}->{e} aqNH3b {e}->{e} exNH4nb*r {e}->{e} exNH4b*r {e}->{e} aqNO3nb {e}->{e} aqNO3b {e}->{e} Ntot {e}->{e}", .{
++                f.ammonium_non_band * ea.ammonium_non_band, f.ammonium_non_band * sa.ammonium_non_band,
++                f.ammonium_band * ea.ammonium_band, f.ammonium_band * sa.ammonium_band,
++                f.ammonium_non_band * ea.ammonia_non_band, f.ammonium_non_band * sa.ammonia_non_band,
++                f.ammonium_band * ea.ammonia_band, f.ammonium_band * sa.ammonia_band,
++                f.ammonium_non_band * parameters.cation_exchange_water_ratios.ammonium_non_band_megagrams_per_m3 * ex.ammonium_non_band,
++                f.ammonium_non_band * parameters.cation_exchange_water_ratios.ammonium_non_band_megagrams_per_m3 * sx.ammonium_non_band,
++                f.ammonium_band * parameters.cation_exchange_water_ratios.ammonium_band_megagrams_per_m3 * ex.ammonium_band,
++                f.ammonium_band * parameters.cation_exchange_water_ratios.ammonium_band_megagrams_per_m3 * sx.ammonium_band,
++                f.nitrate_non_band * ea.nitrate_non_band, f.nitrate_non_band * sa.nitrate_non_band,
++                f.nitrate_band * ea.nitrate_band, f.nitrate_band * sa.nitrate_band,
++                before.nitrogen_mol_per_m3, after.nitrogen_mol_per_m3,
++            });
++        }
++        return probe_err;
++    };
+     reaction_charge.requireConservedStates(entry, cell_index, &workspace.scratch, 0, parameters) catch |err| {
+         if (diagnostic_control.isEnabled()) std.log.warn("SOLUTE retained-state charge rejection: iteration={d} candidate={s}", .{ iteration, @tagName(workspace.last_selected_candidate) });
+         return err;
+@@ -1769,6 +1811,22 @@ fn solveEquilibriumWithInitialization(
+                     candidate_state,
+                 );
+                 _ = recovery_result catch break :recovery;
++                // TEMP issue-118 probe: recovery candidate N census vs its base (probe_state).
++                {
++                    var temp_state = scratch.*;
++                    try temp_state.unpackCell(0, probe_state);
++                    const t_r = parameters.cation_exchange_water_ratios;
++                    const t_a1 = temp_state.aqueous[0];
++                    const t_e1 = temp_state.cation_exchange_mol_per_megagram[0];
++                    try temp_state.unpackCell(0, candidate_state);
++                    const t_a2 = temp_state.aqueous[0];
++                    const t_e2 = temp_state.cation_exchange_mol_per_megagram[0];
++                    const t_nb = (t_a2.ammonium_non_band + t_a2.ammonia_non_band + t_a2.nitrate_non_band + t_r.ammonium_non_band_megagrams_per_m3 * t_e2.ammonium_non_band) -
++                        (t_a1.ammonium_non_band + t_a1.ammonia_non_band + t_a1.nitrate_non_band + t_r.ammonium_non_band_megagrams_per_m3 * t_e1.ammonium_non_band);
++                    const t_b = (t_a2.ammonium_band + t_a2.ammonia_band + t_a2.nitrate_band + t_r.ammonium_band_megagrams_per_m3 * t_e2.ammonium_band) -
++                        (t_a1.ammonium_band + t_a1.ammonia_band + t_a1.nitrate_band + t_r.ammonium_band_megagrams_per_m3 * t_e1.ammonium_band);
++                    std.log.err("TEMPDIAG118REC rec_nb={e:.6} rec_b={e:.6}", .{ t_nb, t_b });
++                }
+                 const recovered_changes = try evaluateAtLoaded(scratch, candidate_state, parameters);
+                 _ = try @import("reaction_solver_evaluate.zig").evaluateLoadedReactionBalance(scratch, recovered_changes, parameters, candidate_residual);
+                 const recovered_quality = try @import("reaction_physical_quality.zig").measure(scratch, parameters, candidate_residual, .{});
+@@ -1776,7 +1834,12 @@ fn solveEquilibriumWithInitialization(
+                 try requireConservedInventories(inventory, try acceptedStateInventory(scratch, 0, parameters));
+                 try reaction_charge.requireConservedStates(state, cell_index, scratch, 0, parameters);
+                 const accepted_norm = try @import("reaction_solver_evaluate.zig").requirePhysicalReactionBalance(scratch, candidate_state, parameters, options, candidate_residual);
+-                @memcpy(current, candidate_state);
++                    {
++                        const t_base_n = temp118VectorN(scratch, current, parameters) catch std.math.nan(f64);
++                        const t_cand_n = temp118VectorN(scratch, candidate_state, parameters) catch std.math.nan(f64);
++                        std.log.err("TEMPDIAG118M site={d} baseN={e:.17} candN={e:.17} dN={e:.6}", .{ 1, t_base_n, t_cand_n, t_cand_n - t_base_n });
++                    }
++                    @memcpy(current, candidate_state);
+                 @memcpy(residual, candidate_residual);
+                 workspace.last_selected_candidate = .surface_mineral_newton;
+                 diagnostic_control.recordSelectedCandidate(.surface_mineral_newton);
+@@ -1836,7 +1899,12 @@ fn solveEquilibriumWithInitialization(
+                 _ = try @import("reaction_solver_evaluate.zig").evaluateLoadedReactionBalance(scratch, target_changes, parameters, candidate_residual);
+                 const target_quality = try @import("reaction_physical_quality.zig").measure(scratch, parameters, candidate_residual, .{});
+                 if (target_quality.maximum <= 1) {
+-                    @memcpy(current, candidate_state);
++                        {
++                            const t_base_n = temp118VectorN(scratch, current, parameters) catch std.math.nan(f64);
++                            const t_cand_n = temp118VectorN(scratch, candidate_state, parameters) catch std.math.nan(f64);
++                            std.log.err("TEMPDIAG118M site={d} baseN={e:.17} candN={e:.17} dN={e:.6}", .{ 2, t_base_n, t_cand_n, t_cand_n - t_base_n });
++                        }
++                        @memcpy(current, candidate_state);
+                     workspace.last_selected_candidate = .surface_mineral_newton;
+                     newton_steps += 1;
+                     diagnostic_control.recordSelectedCandidate(.surface_mineral_newton);
+@@ -1921,7 +1989,12 @@ fn solveEquilibriumWithInitialization(
+                     _ = try @import("reaction_solver_evaluate.zig").evaluateLoadedReactionBalance(scratch, refined_changes, parameters, candidate_residual);
+                     const refined_quality = try @import("reaction_physical_quality.zig").measure(scratch, parameters, candidate_residual, .{});
+                     if (refined_quality.maximum <= 1) {
+-                        @memcpy(current, candidate_state);
++                            {
++                                const t_base_n = temp118VectorN(scratch, current, parameters) catch std.math.nan(f64);
++                                const t_cand_n = temp118VectorN(scratch, candidate_state, parameters) catch std.math.nan(f64);
++                                std.log.err("TEMPDIAG118M site={d} baseN={e:.17} candN={e:.17} dN={e:.6}", .{ 3, t_base_n, t_cand_n, t_cand_n - t_base_n });
++                            }
++                            @memcpy(current, candidate_state);
+                         workspace.last_selected_candidate = .surface_mineral_newton;
+                         newton_steps += 1;
+                         diagnostic_control.recordSelectedCandidate(.surface_mineral_newton);
+@@ -2797,6 +2870,11 @@ fn solveEquilibriumWithInitialization(
+                 previous_previous_residual,
+                 &history_count,
+             );
++            {
++                const t_base_n = temp118VectorN(scratch, current, parameters) catch std.math.nan(f64);
++                const t_best_n = temp118VectorN(scratch, best_state, parameters) catch std.math.nan(f64);
++                std.log.err("TEMPDIAG118BS it={d} baseN={e:.17} bestN={e:.17} dN={e:.6} kind={s}", .{ iteration, t_base_n, t_best_n, t_best_n - t_base_n, @tagName(best_kind) });
++            }
+             @memcpy(current, best_state);
+             workspace.last_selected_candidate = best_kind;
+             if (failure_kind_trace_len < failure_kind_trace.len) {

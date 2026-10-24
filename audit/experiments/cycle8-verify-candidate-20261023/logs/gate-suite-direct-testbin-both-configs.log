@@ -1,0 +1,6 @@
+== .zig-cache/o/e52157caeeb9716c3ff47558e4b54398/test
+4407/4407 atmosphere.sky_radiative_properties.test.nonfinite late input fails before returning sky properties...OK
+4406 passed; 1 skipped; 0 failed.
+== .zig-cache/o/bc30a7776649667fbd69e0f622e57a2e/test
+4407/4407 atmosphere.sky_radiative_properties.test.nonfinite late input fails before returning sky properties...OK
+4406 passed; 1 skipped; 0 failed.
