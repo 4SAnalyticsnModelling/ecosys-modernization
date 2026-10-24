@@ -410,7 +410,7 @@ test "best bounded chemistry iterate rejects a better score with an element or c
     const iron = group_numerics2.aqueousPackedIndex("iron");
     workspace.current[aluminum] += 0.25;
     workspace.current[iron] -= 0.25;
-    try std.testing.expectError(error.SoluteReactionAcceptedStateConservationFailure, retain(&workspace, &entry, 0, parameters, 1, 3));
+    try std.testing.expect(!try retain(&workspace, &entry, 0, parameters, 1, 3));
     try std.testing.expectEqual(@as(f64, 2), workspace.best_bounded_state[aluminum]);
     try std.testing.expectEqual(@as(f64, 2), workspace.best_bounded_state[iron]);
     try std.testing.expectEqual(@as(f64, 8), workspace.best_bounded_maximum);
@@ -423,7 +423,7 @@ test "best bounded chemistry iterate rejects a better score with an element or c
     {
         var suppression = diagnostic_control.suppress();
         defer suppression.restore();
-        try std.testing.expectError(error.SoluteReactionAcceptedStateConservationFailure, retain(&workspace, &entry, 0, parameters, 1, 4));
+        try std.testing.expect(!try retain(&workspace, &entry, 0, parameters, 1, 4));
     }
     try std.testing.expectEqual(@as(f64, 0), workspace.best_bounded_state[group_numerics2.aqueousPackedIndex("hydrogen")]);
     try std.testing.expectEqual(@as(f64, 8), workspace.best_bounded_maximum);
@@ -435,6 +435,36 @@ test "best bounded chemistry iterate rejects a better score with an element or c
     defer suppression.restore();
     try std.testing.expectError(error.SoluteConcentrationExceedsWaterMolarity, group_solve.solveCellWithWorkspace(&workspace, &entry, 0, parameters, .{}));
     try std.testing.expectEqual(@as(?u16, null), workspace.best_bounded_iteration);
+}
+
+test "issue-118 nitrogen leaking iterate is not retained instead of aborting the hour" {
+    var entry = try chemistry.State.init(std.testing.allocator, 1);
+    defer entry.deinit();
+    entry.water_mol_per_m3[0] = 100;
+    entry.aqueous[0].ammonium_non_band = 2;
+    entry.aqueous[0].nitrate_non_band = 0.5;
+    var workspace = try group_types.Workspace.init(std.testing.allocator);
+    defer workspace.deinit();
+    const parameters = acceptedStateConservationTestParameters();
+    const retain = @import("reaction_solve.zig").retainBestBoundedIterate;
+    try entry.packCell(0, workspace.current);
+    @memset(workspace.residual, 0);
+    workspace.residual[0] = 10;
+    try std.testing.expect(try retain(&workspace, &entry, 0, parameters, 10, 0));
+    // Create nitrogen out of nothing: +1e-9 mol N per m3 aqueous ammonium, far
+    // above the 2048-ulp retained-state allowance but physically finite.
+    workspace.current[group_numerics2.aqueousPackedIndex("ammonium_non_band")] += 1e-9;
+    {
+        var suppression = diagnostic_control.suppress();
+        defer suppression.restore();
+        try std.testing.expect(!try retain(&workspace, &entry, 0, parameters, 1, 1));
+    }
+    // Non-retention: the leaked iterate must never become the bounded fallback.
+    try std.testing.expectEqual(@as(f64, 10), workspace.best_bounded_maximum);
+    try std.testing.expectEqual(@as(?u16, 0), workspace.best_bounded_iteration);
+    try std.testing.expectEqual(@as(f64, 2), workspace.best_bounded_state[group_numerics2.aqueousPackedIndex("ammonium_non_band")]);
+    // The authoritative entry stays untouched.
+    try std.testing.expectEqual(@as(f64, 2), entry.aqueous[0].ammonium_non_band);
 }
 
 fn allocateRetainedChemistryWorkspace(allocator: std.mem.Allocator) !void {

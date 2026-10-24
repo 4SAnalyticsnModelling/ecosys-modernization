@@ -702,15 +702,26 @@ pub fn retainBestBoundedIterate(
     try validateAqueousMolarity(&workspace.scratch, 0, parameters.fractions);
     const before = try acceptedStateInventory(entry, cell_index, parameters);
     const after = try acceptedStateInventory(&workspace.scratch, 0, parameters);
-    try requireConservedInventories(before, after);
+    // Retention is eligibility, not acceptance: an iterate that fails the same
+    // inventories/charge/capacity validation the terminal publish re-checks is
+    // simply not retained (issue-118: vector-space Anderson/Picard mixes are
+    // legitimate search iterates whose transient closure defects must not
+    // abort the hour; publish and accepted-state tiers keep hard-error gates).
+    requireConservedInventories(before, after) catch |err| {
+        if (err != error.SoluteReactionAcceptedStateConservationFailure) return err;
+        return false;
+    };
     reaction_charge.requireConservedStates(entry, cell_index, &workspace.scratch, 0, parameters) catch |err| {
         if (diagnostic_control.isEnabled()) std.log.warn("SOLUTE retained-state charge rejection: iteration={d} candidate={s}", .{ iteration, @tagName(workspace.last_selected_candidate) });
-        return err;
+        if (err != error.SoluteReactionAcceptedStateConservationFailure) return err;
+        return false;
     };
     const capacity = parameters.total_carboxyl_sites_mol_per_megagram;
     const occupied = workspace.scratch.carboxyl_bound_hydrogen_mol_per_megagram[0];
-    if (occupied > capacity + acceptedStateConservationTolerance(capacity, occupied).absolute)
-        return error.SoluteReactionAcceptedStateConservationFailure;
+    if (occupied > capacity + acceptedStateConservationTolerance(capacity, occupied).absolute) {
+        if (diagnostic_control.isEnabled()) std.log.warn("SOLUTE retained-state carboxyl capacity rejection: iteration={d} candidate={s}", .{ iteration, @tagName(workspace.last_selected_candidate) });
+        return false;
+    }
     @memcpy(workspace.best_bounded_state, workspace.current);
     @memcpy(workspace.best_bounded_residual, workspace.residual);
     workspace.best_bounded_maximum = quality_norm;
