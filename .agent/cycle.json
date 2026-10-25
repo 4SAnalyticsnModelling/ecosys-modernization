@@ -7,7 +7,7 @@
   "cycle": 9,
   "gates": {
     "G1": {
-      "candidate_digest": "92d162d7923aae0fb2e365b9037ebdf686c33044847fc09809e9b627a38ae8d2",
+      "candidate_digest": "8fabde90e731f6ba2bb1c94042ea4cc47d83fc6b012ca30918e428c0036ba147",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -70,7 +70,7 @@
       "result": "PASS"
     },
     "G2": {
-      "candidate_digest": "92d162d7923aae0fb2e365b9037ebdf686c33044847fc09809e9b627a38ae8d2",
+      "candidate_digest": "8fabde90e731f6ba2bb1c94042ea4cc47d83fc6b012ca30918e428c0036ba147",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -125,15 +125,15 @@
       },
       "evidence": [
         {
-          "path": "audit/runs/ottawa/cycle9-probe-d286-20261024-attempt5-X-PINNED/stderr.log",
-          "sha256": "463f4b63842f35c76cdacd463a325639dc11e2e45266ea105259575bb532d581"
+          "path": "audit/runs/ottawa/cycle9-probe-d286-20261024-attempt5-X-PINNED/stderr.log.gz",
+          "sha256": "e81747261eaf421ebd357472cfa4747656f39a4160d7985f827b27cdb72121ef"
         }
       ],
-      "reason": "probe ladder attempt3/4/5: first-bad identity, writer tag harvest_adapter, birth arithmetic operands captured; deterministic re-abort proven",
+      "reason": "probe ladder attempt3/4/5: first-bad identity, writer tag harvest_adapter, birth arithmetic operands captured; deterministic re-abort proven; >100MB raw logs committed lossless-gzipped with pinned sha256",
       "result": "PASS"
     },
     "G3": {
-      "candidate_digest": "92d162d7923aae0fb2e365b9037ebdf686c33044847fc09809e9b627a38ae8d2",
+      "candidate_digest": "8fabde90e731f6ba2bb1c94042ea4cc47d83fc6b012ca30918e428c0036ba147",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -196,7 +196,7 @@
       "result": "PASS"
     },
     "G4": {
-      "candidate_digest": "92d162d7923aae0fb2e365b9037ebdf686c33044847fc09809e9b627a38ae8d2",
+      "candidate_digest": "8fabde90e731f6ba2bb1c94042ea4cc47d83fc6b012ca30918e428c0036ba147",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -259,7 +259,7 @@
       "result": "PASS"
     },
     "G5": {
-      "candidate_digest": "92d162d7923aae0fb2e365b9037ebdf686c33044847fc09809e9b627a38ae8d2",
+      "candidate_digest": "8fabde90e731f6ba2bb1c94042ea4cc47d83fc6b012ca30918e428c0036ba147",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -322,7 +322,7 @@
       "result": "PASS"
     },
     "G6": {
-      "candidate_digest": "92d162d7923aae0fb2e365b9037ebdf686c33044847fc09809e9b627a38ae8d2",
+      "candidate_digest": "8fabde90e731f6ba2bb1c94042ea4cc47d83fc6b012ca30918e428c0036ba147",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -385,7 +385,7 @@
       "result": "PASS"
     },
     "G7": {
-      "candidate_digest": "92d162d7923aae0fb2e365b9037ebdf686c33044847fc09809e9b627a38ae8d2",
+      "candidate_digest": "8fabde90e731f6ba2bb1c94042ea4cc47d83fc6b012ca30918e428c0036ba147",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -448,7 +448,7 @@
       "result": "PASS"
     },
     "G9": {
-      "candidate_digest": "92d162d7923aae0fb2e365b9037ebdf686c33044847fc09809e9b627a38ae8d2",
+      "candidate_digest": "8fabde90e731f6ba2bb1c94042ea4cc47d83fc6b012ca30918e428c0036ba147",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
