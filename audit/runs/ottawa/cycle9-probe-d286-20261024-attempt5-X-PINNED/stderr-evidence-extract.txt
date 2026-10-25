@@ -1,0 +1,80 @@
+warning: TEMPDIAG119S call=1268664 root_symstruct_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 root_symmob_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 root_symmob_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 root_symmob_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 root_axisprim_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 root_axisprim_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 root_axisprim_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 root_axissec_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 root_axissec_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 root_axissec_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 branch_salt min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 branch_mob_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 branch_mob_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 branch_mob_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 branch_res_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 branch_res_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 branch_res_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 branch_leaf_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 branch_leaf_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268664 branch_leaf_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_salt min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_mobile_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_mobile_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_mobile_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_symstruct_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_symstruct_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_symstruct_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_symmob_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_symmob_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_symmob_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_axisprim_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_axisprim_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_axisprim_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_axissec_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_axissec_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 root_axissec_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 branch_salt min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 branch_mob_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 branch_mob_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 branch_mob_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 branch_res_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 branch_res_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 branch_res_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 branch_leaf_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 branch_leaf_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268688 branch_leaf_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_salt min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_mobile_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_mobile_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_mobile_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_symstruct_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_symstruct_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_symstruct_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_symmob_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_symmob_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_symmob_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_axisprim_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_axisprim_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_axisprim_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_axissec_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_axissec_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 root_axissec_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 branch_salt min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 branch_mob_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 branch_mob_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 branch_mob_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 branch_res_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 branch_res_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 branch_res_p min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 branch_leaf_c min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 branch_leaf_n min=0e0 argmin=0
+warning: TEMPDIAG119S call=1268712 branch_leaf_p min=0e0 argmin=0
+error: TEMPDIAG119X root removal layer=1 root=3 salt=0 prev=1.9066168787981847e-16 total=1.4148265068566469e-12 litter=1.4148265068566469e-12 frac=1.3475976521207255e-4 lf_c=3.0413572522379505e-4 sumC=3.0413572522379505e-4 new=-2.465190328815662e-32
+error: TEMPDIAG119W writer=harvest_adapter plant=0 domain=1 layer=1 species=0 new=-2.465190328815662e-32
+error: TEMPDIAG119B first bad root_salt: call=1268719 index=104 value=-2.465190328815662e-32
+error: TEMPDIAG119 invalid salt slot=0 value=-2.465190328815662e-32 site=root_salt plant=0 domain=1 layer=1 axis_or_branch=13 vector={ -0.00000000000000000000000000000002465190328815662, 0, 0, 0, 0.00000000000000000000000000010097419586828951, 0, 0.00000000000000000000000000000000000000000000000000000016018142249937189, 0.0000000000000000000000000000000000000000000000000000000001634657332349777 }
+info: stage execution census: 9 of 19 INSTRUMENTED stages never executed across 8760 simulated hour(s); 1 of 20 stages not yet instrumented
+info:   census is LIVE (positive control fired), so every zero below is a real finding about the model, not a dead instrument.
+info:     census_positive_control entries=15611 first_hour=1 last_hour=6851
+error: InvalidPlantInventory

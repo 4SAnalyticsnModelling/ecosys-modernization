@@ -1,0 +1,99 @@
+1/120 ecosys_ng.test.MainResources retargets tracked cleanup to the live moved owner...OK
+2/120 ecosys_ng.test.STARTE chemistry transport synchronization is initial-scene only...OK
+3/120 ecosys_ng.test.lime-only production management closes the landscape carbon boundary...OK
+4/120 ecosys_ng.test.gypsum-only production management records real mineral input without carbon...OK
+5/120 ecosys_ng.test.organic fertilizer production management credits physical carbon once...OK
+6/120 ecosys_ng.test.accounting output initialization dispatches ordered noinline phases...OK
+7/120 ecosys_ng.test.accounting output phase ownership follows allocation order exactly...OK
+8/120 ecosys_ng.test.runtime environment workspace ownership follows source order and final address...OK
+9/120 ecosys_ng.test_0...OK
+10/120 stages.tile_kernels.test.tile driver preserves serial plan order...OK
+11/120 stages.tile_kernels.test.serial tile driver stops before the next tile after an error...OK
+12/120 stages.tile_kernels.test.production threading stays inside canonical grid-column dispatch...OK
+13/120 stages.plant_daily.test.nonWoodyLitterfallFraction: herbaceous turnover type (IBTYP==0) forces 100% fine-residue regardless of sapwood ratio...OK
+14/120 stages.plant_daily.test.nonWoodyLitterfallFraction: shallow root profile (IGTYP<=1) forces 100% fine-residue regardless of turnover type...OK
+15/120 stages.plant_daily.test.nonWoodyLitterfallFraction: woody, deep-rooted plant uses the true sapwood ratio...OK
+16/120 stages.plant_daily.test.nonWoodyLitterfallFraction: woody plant with zero stalk carbon still defaults to 100% fine-residue...OK
+17/120 stages.plant_daily.test.nonWoodyLitterfallFraction: sapwood ratio is clamped to [0, 1] even if inputs are inconsistent...OK
+18/120 stages.soil_chemistry_convergence.test.issue-073 Finding C: fertilizerBandGeometryCarrierM3 substitutes the dry reference below the floor, passes the live carrier through above it...OK
+19/120 stages.soil_chemistry_convergence.test.hourly chemistry scratch releases partial allocation prefixes...OK
+20/120 stages.soil_chemistry_convergence.test.hourly chemistry scratch releases cell scope and owner scope in reverse order...OK
+21/120 stages.soil_chemistry_convergence.test.hourly chemistry reaches source-volume fallback while per-mass owners remain pending...OK
+22/120 stages.soil_chemistry_convergence.test.root ammonium uptake rejects overdraw instead of clipping...OK
+23/120 stages.soil_chemistry_convergence.test.dissolved carbon dioxide rejects invalid mass instead of clipping...OK
+24/120 stages.soil_chemistry_convergence.test.ISSUE-103: the SOLUTE chemistry hour grows no fertilizer band outside the HOUR1 coordinator...OK
+25/120 stages.soil_chemistry_convergence.test.STARTE initial solute reaction equilibrium is bit-identical across solver ceilings 1000 and 2000...OK
+26/120 stages.soil_chemistry_convergence.test.solute reaction solver returns explicit error on exhaustion and rolls back state without truncation...OK
+27/120 stages.hourly_process_pipeline.test_0...OK
+28/120 stages.hourly_geometry_disturbance.test.hourly geometry preserves zero-density open-water slots and selects mineral receiver...OK
+29/120 stages.hourly_geometry_disturbance.test.production owner follows DORGC publication and excludes pond from geometry transaction...OK
+30/120 stages.hourly_geometry_disturbance.test.geometry rollback restores selected state and owned buffers byte exactly...OK
+31/120 stages.hourly_geometry_disturbance.test.geometry rollback restores fertilizer band geometry and coordinator phase...OK
+32/120 stages.hourly_heat_water_solute.test.signed interface accumulation retains gross directional activity...OK
+33/120 stages.hourly_heat_water_solute.test.surface residual budget rejects same-sign accumulation and hidden cancellation...OK
+34/120 stages.hourly_heat_water_solute.test.surface residual budget uses hourly net activity after substep reversal...OK
+35/120 stages.hourly_heat_water_solute.test.accepted substep water and topsoil atmospheric heat close the first hourly cell...OK
+36/120 stages.hourly_heat_water_solute.test.ground air full-hour geometry is seeded once across substeps and retry reset...OK
+37/120 stages.hourly_heat_water_solute.test.WATSUB phase displacement credits an unsaturated recipient with exact water and enthalpy...OK
+38/120 stages.hourly_heat_water_solute.test.WATSUB phase displacement cascades through a saturated recipient without loss...OK
+39/120 stages.hourly_heat_water_solute.test.MATRIX-ENTRY-OVERFILL-DOMAIN-001 an already-overfilled recipient retains nothing and cascades the whole credit...OK
+40/120 stages.hourly_heat_water_solute.test.MATRIX-ENTRY-OVERFILL-DOMAIN-001 non-finite and negative recipient state stay fatal...OK
+41/120 stages.hourly_heat_water_solute.test.WATSUB top phase displacement credits the canonical surface carrier exactly...OK
+42/120 stages.hourly_heat_water_solute.test.topsoil sensible exchange preserves WATSUB capacity bound in both directions...OK
+43/120 stages.hourly_heat_water_solute.test.ground air surface source owns direct sensible heat only...OK
+44/120 stages.hourly_heat_water_solute.test.ground air dry-air source cannot regain water carrier enthalpy...OK
+45/120 stages.hourly_heat_water_solute.test.transaction scratch arena remains valid after return move and repeated teardown...OK
+46/120 stages.hourly_heat_water_solute.test.transaction scratch arena cleans up pointer owner after backing allocation failure...OK
+47/120 stages.hourly_heat_water_solute.test.accepted ground air energy budget rejects accumulated cancellation and storage defects...OK
+48/120 stages.hourly_heat_water_solute.test.transport replay keeps pending retries private and certificates M-entry carriers...OK
+49/120 stages.hourly_heat_water_solute.test.maximum_transport_replay_substeps is genuinely ladder-derived, not a hardcoded duplicate (issue-059)...OK
+50/120 stages.hourly_heat_water_solute.test.transport replay substep buffer scales safely past today's committed maximum (extensibility, issue-059)...OK
+51/120 stages.hourly_heat_water_solute.test.temporary PSISO carrier rebase is restored before the accepted soil carrier commit...OK
+52/120 stages.hourly_heat_water_solute.test.stage transaction rolls bare-surface expulsion owners back byte exactly...OK
+53/120 stages.hourly_heat_water_solute.test.stage transaction restores resized soil gas step owner exactly...OK
+54/120 stages.hourly_heat_water_solute.test.production-shaped litter soil interface accepts only canonical transport width...OK
+55/120 stages.hourly_heat_water_solute.test.foldDelayedHeatSource retains the exact producer until accepted booking...OK
+56/120 stages.hourly_heat_water_solute.test.foldDelayedHeatSource rejects a non-finite result...OK
+57/120 stages.hourly_heat_water_solute.test.bounded recovery chooses only deliberate fallback schedules...OK
+58/120 stages.hourly_heat_water_solute.test.boundedInitialRecoverySubstepCount: ICHKV proactive floor (issue-024/issue-068/issue-077)...OK
+59/120 stages.hourly_heat_water_solute.test.boundedInitialRecoverySubstepCount: universal NFH=4 baseline floors every hour's first attempt (issue-024, 2026-09-21 committed fix)...OK
+60/120 stages.hourly_heat_water_solute.test.boundedRecoveryFallback matches the old hardcoded 20/32/64 chain across the full u8 domain (before/after equivalence, issue-058)...OK
+61/120 stages.hourly_heat_water_solute.test.fallbackWithinLadder escalates to a new tier beyond today's committed maximum (extensibility, issue-058)...OK
+62/120 stages.hourly_heat_water_solute.test.isRecoverySubstepCountMember distinguishes true ladder rungs from drifted values (guards issue-058 comptime assertions)...OK
+63/120 stages.hourly_heat_water_solute.test.accepted schedule duration uses bounded floating point accumulation...OK
+64/120 stages.hourly_heat_water_solute.test.accepted phase activity owns the freeze flow floor...OK
+65/120 stages.hourly_heat_water_solute.test.fixed external hour recovery rolls back before its single bounded fallback...OK
+66/120 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery escalates through the full fallback chain to the secondary rescue (parent: stopped at one fallback and failed)...OK
+67/120 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery escalates past the secondary rescue to the true ladder maximum (parent: hardcoded ceiling at 32 reproduced the hour-2,604 defect one rung later)...OK
+68/120 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery still terminates and reports failure when even the ladder maximum fails...OK
+69/120 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery retains a successful gas fallback...OK
+70/120 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery skips sub-quarter-hour rung after phase requirement...OK
+71/120 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery jumps directly from stiff whole-hour heat...OK
+72/120 stages.hourly_heat_water_solute.test.adaptive fixed-hour recovery reports its bounded terminal failure...OK
+73/120 stages.hourly_heat_water_solute.test.fixed external hour recovery escalates through the full chain and stops on hard defects...thread 21287505 panic: index out of bounds: index 4, len 4
+/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:10686:27: 0x104671583 in run (test)
+            self.schedules[self.attempts] = substep_count;
+                          ^
+/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:12168:16: 0x104671617 in runBoundedRecoveryAttempt__func_1774 (test)
+    attempt.run(substep_count) catch |err| {
+               ^
+/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:12263:46: 0x104671b7b in recoverFixedExternalHourAdaptively__func_1773 (test)
+            if (try runBoundedRecoveryAttempt(attempt, substep_count)) |final_error| return final_error;
+                                             ^
+/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:11966:46: 0x104671f5b in recoverFixedExternalHour__func_1771 (test)
+    return recoverFixedExternalHourAdaptively(
+                                             ^
+/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:10696:33: 0x104672d5f in test.fixed external hour recovery escalates through the full chain and stops on hard defects (test)
+        recoverFixedExternalHour(&retryable),
+                                ^
+/opt/homebrew/Cellar/zig/0.17.0/lib/zig/compiler/test_runner.zig:295:25: 0x104537263 in mainTerminal (test)
+        if (test_fn.func()) |_| {
+                        ^
+/opt/homebrew/Cellar/zig/0.17.0/lib/zig/compiler/test_runner.zig:74:28: 0x104536d43 in main (test)
+        return mainTerminal(init);
+                           ^
+/opt/homebrew/Cellar/zig/0.17.0/lib/zig/std/start.zig:789:88: 0x104534c73 in callMain (test)
+    if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+                                                                                       ^
+???:?:?: 0x18ca7fe7f in start (/usr/lib/dyld)
+EXEROOT_RC=134

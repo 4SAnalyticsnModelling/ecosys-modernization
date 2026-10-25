@@ -1,0 +1,1 @@
+stderr.log raw (112.7MB, exceeds 100MB git limit) retained locally at .tmp/probe-raw-logs-119/; lossless gzip committed as stderr.log.gz; raw sha256 in raw-stderr.sha256; decisive TEMPDIAG119/119W/119X lines in stderr-evidence-extract.txt.

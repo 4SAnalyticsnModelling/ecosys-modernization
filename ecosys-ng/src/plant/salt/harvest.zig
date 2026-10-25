@@ -263,7 +263,19 @@ fn state_updateRootRemoval(state: *State, inputs: Inputs) void {
                 for (start..end) |root| {
                     const index = root * salt_count + salt;
                     const root_fraction = state.root_salt_mol[index] / total;
-                    state.root_salt_mol[index] -= litter * root_fraction;
+                    const removal = litter * root_fraction;
+                    const next = state.root_salt_mol[index] - removal;
+                    // Full removal (litter == total, kill day) can double-round
+                    // total * fl(w / total) to w + 1 ulp. Never leave a negative
+                    // residue: clamp to zero like the legacy ZEROP cascade and
+                    // charge the litterfall ledger the realized removal so the
+                    // plant/litter salt books close exactly. Untouched when the
+                    // subtraction is non-negative, so accepted hours stay
+                    // bit-identical (issue-119).
+                    if (next < 0) {
+                        output[salt] -= removal - state.root_salt_mol[index];
+                        state.root_salt_mol[index] = 0;
+                    } else state.root_salt_mol[index] = next;
                 }
             }
         }
@@ -361,4 +373,46 @@ test "GROSUB plant salt removal rejects a late invalid root atomically" {
     try std.testing.expectEqualSlices(f64, harvest_before, state.cumulative_harvest_salt_mol);
     try std.testing.expectEqualSlices(f64, shoot_litter_before, state.shoot_litterfall_salt_mol);
     try std.testing.expectEqualSlices(f64, root_litter_before, state.root_litterfall_salt_mol_by_layer);
+}
+
+test "issue-119 kill-day full removal clamps one-ulp product overshoot to zero" {
+    // 1999 d286 mortality numbers (audit/runs/ottawa/cycle9-probe-d286-20261024-attempt5*):
+    // root carbon rows already zeroed by the C pass => litter_fraction == 1e0 exactly,
+    // litter == total == 1.4148265068566469e-12 mol, and the aluminium pool
+    // 1.9066168787981847e-16 mol on the second root. The double-rounded product
+    // total * fl(w / total) lands one ulp (2^-105) above w.
+    const total = 1.4148265068566469e-12;
+    const w_cell = try std.testing.allocator.create(f64);
+    defer std.testing.allocator.destroy(w_cell);
+    w_cell.* = 1.9066168787981847e-16;
+    const w = w_cell.*;
+    try std.testing.expectEqual(w + std.math.pow(f64, 2.0, -105.0), total * (w / total));
+
+    var state = try State.init(std.testing.allocator, 1, &.{2});
+    defer state.deinit();
+    const before_first = total - w;
+    state.root_salt_mol[0 * salt_count + 0] = before_first;
+    state.root_salt_mol[1 * salt_count + 0] = w;
+
+    try removeForHarvestAndLitterfall(&state, .{
+        .shoot_carbon_g_c = 0,
+        .current_harvest_carbon_g_c = 0,
+        .previous_harvest_carbon_g_c = 0,
+        .shoot_litterfall_carbon_g_c = 0,
+        .root_carbon_g_c = &.{ 0, 0 },
+        .root_litterfall_carbon_g_c_by_layer = &.{3.0413572522379505e-4},
+        .carbon_absolute_tolerance_g_c = 1e-12,
+        .salt_absolute_tolerance_mol = 1e-30,
+        .physical_relative_tolerance = 1e-12,
+    });
+
+    for (state.root_salt_mol) |value| {
+        try std.testing.expect(std.math.isFinite(value));
+        try std.testing.expect(value >= 0);
+    }
+    try std.testing.expectEqual(@as(f64, 0), state.root_salt_mol[1 * salt_count + 0]);
+    const booked = state.root_litterfall_salt_mol_by_layer[0 * salt_count + 0];
+    const realized_pools = before_first - state.root_salt_mol[0 * salt_count + 0];
+    try std.testing.expectEqual(realized_pools + w, booked);
+    try std.testing.expect(booked <= total);
 }

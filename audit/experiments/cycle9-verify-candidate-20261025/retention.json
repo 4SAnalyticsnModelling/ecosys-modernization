@@ -1,0 +1,25 @@
+{
+  "policy": "retain-through-F7-and-reproducibility",
+  "artifacts": [
+    {
+      "path": "evidence/runs/cycle9-verify-candidate-20261025/deck/ecosys_ng",
+      "sha256": "23057c94f9435ec840926991074ca0c2bc7aabaf9ae538849978d96efd1d0038"
+    }
+  ],
+  "cycle": 9,
+  "candidate": {
+    "role": "canonical verification binary (deck copy; produced audit/runs/ottawa/cycle9-verify-candidate-20261025)",
+    "path": "evidence/runs/cycle9-verify-candidate-20261025/deck/ecosys_ng",
+    "sha256": "23057c94f9435ec840926991074ca0c2bc7aabaf9ae538849978d96efd1d0038",
+    "build": "zig 0.17.0 ReleaseSafe from source tree with harvest.zig fix + discriminating test (uncommitted at build time; committed in cycle-9 close content commit); install artifact identical to deck copy"
+  },
+  "rebuild_equivalent": {
+    "role": "install output ecosys-ng/ecosys-ng-bin/ecosys_ng is the SAME single link copied to the deck (identical sha256); relink equivalence policy inherited from cycle-6 LC_UUID disclosure",
+    "path": "ecosys-ng/ecosys-ng-bin/ecosys_ng",
+    "sha256": "23057c94f9435ec840926991074ca0c2bc7aabaf9ae538849978d96efd1d0038"
+  },
+  "superseded_interim": [
+    "probe binaries for attempts 1-5 (log-only instrumentation in validation/landscape_mass_inventory_plant.zig, four salt writers, and salt/harvest.zig kernel; all reverted from tree before the candidate build; runtime receipts kept under audit/runs/ottawa/cycle9-probe-d286-20261024-attempt*)"
+  ],
+  "identity_policy": "output-level equivalence: all 115,811 modelled-output rows written by the cycle-8 verified run (through 1999 d285) bit-identical in the cycle-9 deck; 1999 d286 kill morning accepted with zero InvalidPlantInventory; trajectory advanced clean to 1999 d360 h24 (total_hour 17400); binary file hash not reproducible across relinks on macOS (LC_UUID) so source+toolchain pinning governs"
+}
