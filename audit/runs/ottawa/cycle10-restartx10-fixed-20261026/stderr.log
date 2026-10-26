@@ -1,0 +1,656 @@
+info: runtime max_nonlinear_iterations=100 is the hard ceiling for all process solvers
+info: loaded runtime surface gas and microbial oxygen parameters
+info: loaded runtime layer-resolved soil nitrogen parameters
+info: startup phase complete: phase=run_plan elapsed_ms=24
+info: structured output tree ready: root='/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/evidence/runs/cycle10-probe-17401-20261025/deck/runottawa_output_files' resume=true
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+info: startup phase complete: phase=output_plan elapsed_ms=30
+info: startup phase complete: phase=domain_science elapsed_ms=30
+info: startup phase complete: phase=soil_process_transport elapsed_ms=30
+info: STARTE chemistry beginning: cell_count=1 layer_count=12 max_iterations=1000
+info: STARTE chemistry layer solved: cell=0 layer=0 elapsed_ms=3 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=0 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=0 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=0 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=4 elapsed_ms=2 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=4 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=4 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=4 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=8 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=6.9674543618124915e-6
+info: STARTE chemistry layer evaluations: cell=0 layer=8 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=8 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=8 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=1 elapsed_ms=3 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=1 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=1 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=1 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=5 elapsed_ms=2 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=5 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=5 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=5 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=9 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=4.961920283094378e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=9 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=9 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=9 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=2 elapsed_ms=3 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=2 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=2 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=2 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=6 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.068832344448537e-6
+info: STARTE chemistry layer evaluations: cell=0 layer=6 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=6 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=6 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=10 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=2.917909954728281e-6
+info: STARTE chemistry layer evaluations: cell=0 layer=10 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=10 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=10 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=3 elapsed_ms=3 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=1.956544401442184e-3
+info: STARTE chemistry layer evaluations: cell=0 layer=3 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=3 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=3 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=7 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=4.940888102257194e-6
+info: STARTE chemistry layer evaluations: cell=0 layer=7 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=7 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=7 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=11 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=1.623731417607197e-5
+info: STARTE chemistry layer evaluations: cell=0 layer=11 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=11 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=11 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: startup phase complete: phase=startup_soil_chemistry_starte elapsed_ms=39
+info: startup phase complete: phase=pre_timeline elapsed_ms=40
+info: daily conservation accepted: day=361 year=1999 hour=24 water=1.4807998504348366e-13 heat=6.36917419264062e-13 oxygen=5.4190979907808654e-14 hydrogen=3.359828615254404e-14 carbon=5.956175647474337e-13 nitrogen=2.5069252913274345e-14 phosphorus=2.412053586856616e-12 aluminum=1.4774935247127922e-10 iron=5.810745524353585e-8 calcium=3.782657863765276e-11 magnesium=6.849259444107241e-6 sodium=3.804981144046001e-9 potassium=5.445107416235646e-9 sulfur=9.964458418246847e-7 chloride=1.334931078297289e-6 silicon=0e0 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=8.042524850145142e-3 aec=6.858747314103835e-4
+info: day advanced: scene_weather_hours=8664 final_hour_elapsed_ms=285
+info: daily conservation accepted: day=362 year=1999 hour=24 water=1.4740546493809835e-13 heat=6.355362371773153e-13 oxygen=5.3940329393684656e-14 hydrogen=3.481973074738719e-14 carbon=5.915100267197617e-13 nitrogen=2.4604709247976878e-14 phosphorus=2.411204060899314e-12 aluminum=1.1049109881630291e-10 iron=6.609509577092312e-8 calcium=3.0184969240272553e-11 magnesium=8.25571842748775e-6 sodium=2.8451347671053634e-9 potassium=3.950646125095615e-9 sulfur=9.915436848443246e-7 chloride=1.328271612866747e-6 silicon=8.103260827408615e-11 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=9.619961419946388e-3 aec=0e0
+info: day advanced: scene_weather_hours=8688 final_hour_elapsed_ms=3531
+info: daily conservation accepted: day=363 year=1999 hour=24 water=1.4730764727339605e-13 heat=6.346743060799868e-13 oxygen=5.415849752395792e-14 hydrogen=3.4208561523494086e-14 carbon=6.051538754024956e-13 nitrogen=2.4134888517865362e-14 phosphorus=2.4706298100966847e-12 aluminum=1.0283761640702267e-10 iron=6.40667994012818e-8 calcium=3.01118868597875e-11 magnesium=6.791862168367726e-6 sodium=3.1520968384399517e-9 potassium=3.9415904410531185e-9 sulfur=9.86783094656014e-7 chloride=1.3218057351664351e-6 silicon=4.850812595425896e-11 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=7.992806474173244e-3 aec=6.815906622079277e-4
+info: day advanced: scene_weather_hours=8712 final_hour_elapsed_ms=288
+info: daily conservation accepted: day=364 year=1999 hour=24 water=1.4714834421994599e-13 heat=6.343060032000772e-13 oxygen=5.437916692682275e-14 hydrogen=3.512456690522074e-14 carbon=6.010694542767501e-13 nitrogen=2.4916234300661768e-14 phosphorus=2.048727903098265e-12 aluminum=1.1721355048884924e-10 iron=6.003965678593648e-8 calcium=2.753840424694463e-11 magnesium=8.189177103491166e-6 sodium=3.1433108848619623e-9 potassium=4.4245101705776944e-9 sulfur=9.859167961532049e-7 chloride=1.3206101857233338e-6 silicon=4.8401164471755335e-11 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=9.568960683781982e-3 aec=6.795425828988862e-4
+info: day advanced: scene_weather_hours=8736 final_hour_elapsed_ms=294
+info: daily conservation accepted: day=365 year=1999 hour=24 water=1.4712576148837621e-13 heat=6.332935889896016e-13 oxygen=5.5067921513746246e-14 hydrogen=3.420799234893899e-14 carbon=6.225971051123501e-13 nitrogen=2.487595240955525e-14 phosphorus=2.3498267914469756e-12 aluminum=8.76833428363844e-11 iron=6.801985303529891e-8 calcium=2.7476957237840818e-11 magnesium=8.158000662091195e-6 sodium=1.880932013674195e-9 potassium=2.452846083829991e-9 sulfur=9.846061743137262e-7 chloride=1.3188144848022944e-6 silicon=1.1269647659498811e-10 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=7.945178269937432e-3 aec=6.779337849360994e-4
+info: day advanced: scene_weather_hours=8760 final_hour_elapsed_ms=3333
+info: daily conservation accepted: day=1 year=2000 hour=24 water=2.4811181421373317e-13 heat=3.2077654417534548e-12 oxygen=1.085446226759979e-12 hydrogen=1.5383159181634294e-10 carbon=5.253153592134881e-11 nitrogen=7.498520600205323e-13 phosphorus=9.802649699230486e-9 aluminum=5.869617846670444e-9 iron=1.1244906127405163e-5 calcium=3.4900349104151056e-9 magnesium=9.650486682517233e-5 sodium=7.278195785470934e-7 potassium=1.1989117121395002e-6 sulfur=1.5530161537252283e-12 chloride=0e0 silicon=2.3609887685370824e-8 sand=0e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=0e0 aec=0e0
+info: day advanced: scene_weather_hours=24 final_hour_elapsed_ms=1920
+info: daily conservation accepted: day=2 year=2000 hour=24 water=0e0 heat=1.0833794359127758e-12 oxygen=5.004979360096973e-13 hydrogen=1.36772095006509e-10 carbon=1.2873919129093823e-11 nitrogen=7.90459420991159e-13 phosphorus=1.5716345691420282e-9 aluminum=2.9861079862656994e-9 iron=5.7208013113227404e-6 calcium=5.926752925293857e-10 magnesium=9.81736779219673e-5 sodium=1.8520575318014453e-7 potassium=3.6609832871154404e-7 sulfur=1.2213732204315058e-13 chloride=1.4291093118018526e-13 silicon=0e0 sand=0e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=0e0 aec=1.2379110251450677e-1
+info: day advanced: scene_weather_hours=48 final_hour_elapsed_ms=296
+info: daily conservation accepted: day=3 year=2000 hour=24 water=0e0 heat=1.3661148546861263e-12 oxygen=3.2771343191864955e-13 hydrogen=1.5857038813198793e-10 carbon=5.761104400365657e-12 nitrogen=5.500640990087793e-13 phosphorus=1.027170705315034e-9 aluminum=2.024499167580092e-9 iron=1.936557337378161e-6 calcium=3.950877126382183e-10 magnesium=9.983276082064738e-5 sodium=2.093819140476932e-7 potassium=2.4833180449086987e-7 sulfur=1.2317835199203692e-14 chloride=9.881118290106319e-14 silicon=8.14966340813757e-9 sand=0e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=0e0 aec=0e0
+info: day advanced: scene_weather_hours=72 final_hour_elapsed_ms=596
+error: soil heat Newton-Raphson/Anderson stagnated after best-state physical audit: iteration=9 final_scaled_residual=2.599098201971121e0 best_scaled_residual=2.599098201971121e0 newton_steps=8 damped_directional_newton_steps=1 directional_newton_probes=2 topology_newton_steps=0 topology_newton_probes=0 enthalpy_topology_newton_steps=6 enthalpy_topology_newton_probes=162 enthalpy_dense_newton_steps=0 enthalpy_dense_newton_probes=0 megajoule_active_set_newton_steps=0 megajoule_active_set_newton_probes=0 constitutive_energy_newton_steps=0 constitutive_energy_newton_probes=8 enthalpy_representability_probes=118 phase_transition_newton_steps=0 enthalpy_repriced_neighbor_steps=2 picard_steps=0 anderson_steps=0 history_count=0 nonlinear_norm=3.845895055036894e-6 conservation_norm=1.4727056357015058e0
+error: soil heat Newton-Raphson/Anderson did not converge candidate range: min_temperature_k=2.727453948543188e2 max_temperature_k=2.7962561350839115e2
+error: soil heat worst conservation component: reason=stagnated cell=6 scaled_norm=1.4727056357015058e0 defect_mj=-2.0605739337042905e-13 tolerance_mj=1.39917569658974e-13 residual_k=-1.0815614876032125e-12 derivative_mj_per_k=1.9051842704482871e-1 base_temperature_k=2.735048812656708e2 trial_temperature_k=2.735011662415625e2 transport_capacity_mj_per_k=1.905184270448287e-1 dry_capacity_mj_per_k=8.398293500274558e-2 coupling_liquid_m3=2.5426131752287136e-2 coupling_ice_equivalent_m3=2.6020852134129233e-18 parameters_total_water_equivalent_m3=2.5426131752287095e-2 parameters_porous_medium_volume_m3=7.424999492938752e-2 capacity_ratio=9.999999999999999e-1 non_phase_heat_mj=-7.077805497566203e-4 cell_heat_source_mj=0e0
+error: soil heat worst conservation terms: reason=stagnated cell=6 base_enthalpy_mj=8.5345132940349e0 trial_enthalpy_mj=8.53380551348535e0 target_enthalpy_mj=8.533805513485143e0 non_phase_heat_mj=-7.077805497566203e-4 delta_storage_mj=-7.077805495505629e-4 interval_activity_mj=7.077805497566203e-4 arithmetic_roundoff_mj=1.2885849856902683e-13 temperature_representability_mj=0e0
+error: soil heat direct constitutive recovery probe: cell=6 current_temperature_k=2.735011662415625e2 candidate_temperature_k=2.735011662415614e2 current_nonlinear_norm=3.845895055036894e-6 candidate_nonlinear_norm=4.6069202249382215e-6 current_conservation_norm=1.4727056357015058e0 candidate_conservation_norm=1.1695017701110533e0 candidate_full_norm=4.055566335790866e0
+error: soil heat adjacent conservation probe: endpoint_aware=true cell=6 current_temperature_k=2.735011662415625e2 adjacent_temperature_k=2.7350116624156243e2 current_residual_k=-1.0815614876032125e-12 adjacent_residual_k=-1.025618652037529e-12 current_scaled_enthalpy=-2.4117753271091867e-6 adjacent_scaled_enthalpy=-2.2870283274311256e-6 current_defect_mj=-2.0605739337042905e-13 adjacent_defect_mj=-1.9539925233402755e-13 current_conservation_norm=1.4727056357015058e0 adjacent_conservation_norm=1.3965312062686701e0
+warning: soil coupled schedule failed: substep_count=4 failed_substep=2 time_step_hours=2.5e-1 error=SoilHeatSolverStagnated
+warning: bounded fixed external hour recovery rejected: exact_substep_count=4 error=SoilHeatSolverStagnated
+info: bounded fixed external hour recovery accepted: exact_substep_count=20 next_preferred_substep_count=20
+info: daily conservation accepted: day=4 year=2000 hour=24 water=1.2672812601771333e-14 heat=1.1818589992929153e-12 oxygen=1.8261918195918297e-13 hydrogen=1.5091559117038517e-10 carbon=0e0 nitrogen=4.598899870075065e-13 phosphorus=4.135699849739638e-10 aluminum=1.543776921742116e-9 iron=1.4772311171226763e-6 calcium=6.060014485168003e-10 magnesium=5.074378892144989e-5 sodium=1.2777900545828004e-7 potassium=1.8943548342672798e-7 sulfur=2.9553317414399804e-14 chloride=9.171462371623013e-14 silicon=0e0 sand=1e0 silt=0e0 clay=1e0 rock_additive=0e0 cec=0e0 aec=0e0
+info: day advanced: scene_weather_hours=96 final_hour_elapsed_ms=293
+info: daily conservation accepted: day=5 year=2000 hour=24 water=6.539166612686543e-14 heat=4.882391558059452e-12 oxygen=6.047461240296402e-13 hydrogen=9.769179004425296e-11 carbon=1.7187420222019654e-12 nitrogen=5.001162937126656e-13 phosphorus=3.2611427897974226e-10 aluminum=1.2552566963042878e-9 iron=2.402809358773716e-6 calcium=4.947163498947915e-10 magnesium=2.062734881194372e-5 sodium=2.5984565795507716e-8 potassium=0e0 sulfur=1.4820995751307761e-13 chloride=1.0566957388330067e-13 silicon=3.3707366897856922e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=0e0 aec=0e0
+info: day advanced: scene_weather_hours=120 final_hour_elapsed_ms=287
+info: daily conservation accepted: day=6 year=2000 hour=24 water=4.371926154396628e-14 heat=5.6056389764675866e-12 oxygen=6.670049229056442e-13 hydrogen=3.436024557740311e-11 carbon=1.859747310298386e-11 nitrogen=5.177774932605359e-13 phosphorus=4.020812330817054e-10 aluminum=0e0 iron=0e0 calcium=6.302999369167811e-10 magnesium=1.7463637129847025e-5 sodium=6.603096404282872e-8 potassium=8.701504632449014e-8 sulfur=1.1622639082076434e-13 chloride=1.189326004161364e-13 silicon=0e0 sand=0e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=9.538002980625931e-2 aec=0e0
+info: day advanced: scene_weather_hours=144 final_hour_elapsed_ms=297
+info: daily conservation accepted: day=7 year=2000 hour=24 water=5.153427942725512e-14 heat=3.914852250596789e-12 oxygen=9.08365895024741e-13 hydrogen=5.975391167238132e-12 carbon=1.8700861430699946e-11 nitrogen=5.939616029185974e-13 phosphorus=5.6754266936027e-10 aluminum=2.3133517819951197e-9 iron=5.315213314900626e-6 calcium=1.8340754964493216e-10 magnesium=6.0813582107552436e-5 sodium=1.3419732751256856e-7 potassium=2.2737034123007225e-7 sulfur=1.1221985259881467e-13 chloride=1.4056456688708263e-13 silicon=7.459168417274119e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=7.591933570581258e-2 aec=0e0
+info: day advanced: scene_weather_hours=168 final_hour_elapsed_ms=296
+info: daily conservation accepted: day=8 year=2000 hour=24 water=3.5878084023628383e-14 heat=6.666372153919239e-12 oxygen=9.281078355395467e-13 hydrogen=1.0594454476210963e-11 carbon=2.621056212260838e-11 nitrogen=5.640917359439578e-13 phosphorus=5.608234916669231e-10 aluminum=2.466512013018056e-9 iron=3.1486659020256653e-6 calcium=1.6334339313436661e-10 magnesium=8.104644282408886e-5 sodium=1.7041037137707365e-7 potassium=3.0316151001495997e-7 sulfur=9.694705053121996e-14 chloride=1.372288079289386e-13 silicon=7.734617623684262e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=0e0 aec=0e0
+info: day advanced: scene_weather_hours=192 final_hour_elapsed_ms=296
+info: daily conservation accepted: day=9 year=2000 hour=24 water=1.4011290452698726e-14 heat=8.47206687446333e-12 oxygen=9.907660530453024e-13 hydrogen=1.9099998813057314e-11 carbon=3.1690025080545766e-11 nitrogen=6.367292933880718e-13 phosphorus=6.28405441920455e-10 aluminum=4.451264360198795e-9 iron=4.972384545667272e-6 calcium=8.862554636998075e-10 magnesium=8.531838081543737e-5 sodium=1.8460432640402256e-7 potassium=3.3449348817367783e-7 sulfur=8.243254817791907e-14 chloride=1.533093443769794e-13 silicon=1.296573360990476e-8 sand=1e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=6.1925495887760036e-2 aec=2.6251025430680888e-2
+info: day advanced: scene_weather_hours=216 final_hour_elapsed_ms=297
+warning: SOLUTE inventory-balance progress stopped: cell=0 iteration=26 maximum=2.167873858689836e-7 rms=5.141121441029884e-8 best=2.167873858689836e-7 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=27 remaining=73
+warning: SOLUTE inventory-balance progress stopped: cell=0 iteration=26 maximum=2.167873858689836e-7 rms=5.141121441029884e-8 best=2.167873858689836e-7 stale=4 repeated_state=false
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=0 packed_cell_index=0 error=SoluteReactionSolverStagnated failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene3-year2000-day10-hour11.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=4 failure_report_bound=true error=SoluteReactionSolverStagnated
+warning: bounded fixed external hour recovery rejected: exact_substep_count=4 error=SoluteReactionSolverStagnated
+warning: SOLUTE inventory-balance progress stopped: cell=0 iteration=19 maximum=3.010268070180139e-7 rms=5.887379235564626e-8 best=3.010268070180139e-7 stale=2 repeated_state=true
+info: SOLUTE bounded entry-state retry: spent=20 remaining=80
+warning: SOLUTE inventory-balance progress stopped: cell=0 iteration=19 maximum=3.010268070180139e-7 rms=5.887379235564626e-8 best=3.010268070180139e-7 stale=2 repeated_state=true
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=0 packed_cell_index=0 error=SoluteReactionSolverStagnated failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene3-year2000-day10-hour11.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=20 failure_report_bound=true error=SoluteReactionSolverStagnated
+warning: bounded fixed external hour recovery rejected: exact_substep_count=20 error=SoluteReactionSolverStagnated
+warning: SOLUTE reaction network did not converge: cell=0 max_iterations=100 maximum_scaled_residual=1.3792605820500046e2 search_scaled_residual=8.683076687832649e1 newton_steps=67 picard_steps=33
+warning: SOLUTE terminal magnesium transformation: aqueous=8.295043282199545e-10 exchange=-1.2715872470101814e-7 geochemistry=0e0 non_band_phosphate=1.0299949750837693e-8 band_phosphate=0e0 assembled=-1.1602927062196048e-7
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=50 realized_endpoint_limiting_name=phosphate_non_band.aluminum_phosphate_solid_mol_per_m3 realized_endpoint_secant_limit=1e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=5.475032300293253e-3 h2po4=1.1116867404876285e-1 h3po4=7.500226585601983e-5 monovalent_activity_coefficient=9.612956379645039e-1 dissociation_constant=7.5e0 equilibrium_h3po4=7.499318371069397e-5 uncapped_driving=-1.3463224301682137e-5 bounded_rate=-1.3463224301682137e-5 dissociation_cap=1.5000453171203966e-5
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=0 packed_cell_index=0 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene3-year2000-day10-hour11.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=32 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=32 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE inventory-balance progress stopped: cell=0 iteration=77 maximum=1.8382141521816345e-6 rms=2.985328898137672e-7 best=1.8382141521816345e-6 stale=2 repeated_state=true
+info: SOLUTE bounded entry-state retry: spent=78 remaining=22
+warning: SOLUTE reaction network did not converge: cell=0 max_iterations=22 maximum_scaled_residual=8.719080926637289e2 search_scaled_residual=2.679702382360076e2 newton_steps=19 picard_steps=3
+warning: SOLUTE terminal magnesium transformation: aqueous=4.1999241889072334e-10 exchange=-5.59435363950655e-11 geochemistry=0e0 non_band_phosphate=2.2505260435824522e-10 band_phosphate=0e0 assembled=5.891014868539031e-10
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=50 realized_endpoint_limiting_name=phosphate_non_band.aluminum_phosphate_solid_mol_per_m3 realized_endpoint_secant_limit=1e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=5.4750665124835085e-3 h2po4=1.1117000822293821e-1 h3po4=7.499214209597515e-5 monovalent_activity_coefficient=9.612873893848042e-1 dissociation_constant=7.5e0 equilibrium_h3po4=7.499326534608875e-5 uncapped_driving=1.6651058436989388e-6 bounded_rate=1.6651058436989388e-6 dissociation_cap=1.4998428419195032e-5
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=0 packed_cell_index=0 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene3-year2000-day10-hour11.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=64 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=64 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE recovery ladder exhausted (SoluteReactionSolverDidNotConverge); final attempt exact_substep_count=64 with best-bounded-iterate / stiff-image publication
+warning: SOLUTE inventory-balance progress stopped: cell=0 iteration=77 maximum=1.8382141521816345e-6 rms=2.985328898137672e-7 best=1.8382141521816345e-6 stale=2 repeated_state=true
+info: SOLUTE bounded entry-state retry: spent=78 remaining=22
+warning: SOLUTE reaction network did not converge: cell=0 max_iterations=22 maximum_scaled_residual=8.719080926637289e2 search_scaled_residual=2.679702382360076e2 newton_steps=19 picard_steps=3
+warning: SOLUTE terminal magnesium transformation: aqueous=4.1999241889072334e-10 exchange=-5.59435363950655e-11 geochemistry=0e0 non_band_phosphate=2.2505260435824522e-10 band_phosphate=0e0 assembled=5.891014868539031e-10
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=50 realized_endpoint_limiting_name=phosphate_non_band.aluminum_phosphate_solid_mol_per_m3 realized_endpoint_secant_limit=1e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=5.4750665124835085e-3 h2po4=1.1117000822293821e-1 h3po4=7.499214209597515e-5 monovalent_activity_coefficient=9.612873893848042e-1 dissociation_constant=7.5e0 equilibrium_h3po4=7.499326534608875e-5 uncapped_driving=1.6651058436989388e-6 bounded_rate=1.6651058436989388e-6 dissociation_cap=1.4998428419195032e-5
+warning: SOLUTE terminal SoluteReactionSolverDidNotConverge: published best bounded iterate (legacy fixed-iteration SOLUTE analogue): cell=0 iteration=75 physical_quality=3.3928825603997655e2
+info: daily conservation accepted: day=10 year=2000 hour=24 water=4.0429849491508597e-14 heat=2.3168626071323265e-11 oxygen=9.216046518623831e-13 hydrogen=1.3074890000791346e-11 carbon=2.7514421722000846e-11 nitrogen=6.110309098306331e-13 phosphorus=1.3291716428899207e-10 aluminum=4.737100357526917e-9 iron=4.47161055395282e-6 calcium=5.72822776954048e-10 magnesium=1.22371225110291e-4 sodium=2.5109633130473106e-7 potassium=4.976006676562707e-7 sulfur=3.667723061650378e-14 chloride=5.887764027924298e-14 silicon=1.3261647228161622e-8 sand=0e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=0e0 aec=0e0
+info: day advanced: scene_weather_hours=240 final_hour_elapsed_ms=754
+info: daily conservation accepted: day=11 year=2000 hour=24 water=4.613299583049509e-14 heat=2.2240209902005704e-11 oxygen=9.714293336824648e-13 hydrogen=1.6067349793686787e-11 carbon=2.65168421277144e-11 nitrogen=5.524156275353609e-13 phosphorus=8.457775624219996e-11 aluminum=4.3690212765105806e-9 iron=4.7178521807976e-6 calcium=5.337660989364958e-10 magnesium=8.207937377986971e-5 sodium=1.67416926795562e-7 potassium=3.061904100541429e-7 sulfur=3.1224104163608854e-14 chloride=6.437575697028332e-14 silicon=1.0627458646013669e-8 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=0e0 aec=0e0
+info: day advanced: scene_weather_hours=264 final_hour_elapsed_ms=283
+info: daily conservation accepted: day=12 year=2000 hour=24 water=4.7191175006912664e-14 heat=2.209742594812444e-11 oxygen=1.037435326721598e-12 hydrogen=2.2368982458365047e-11 carbon=2.6843352375411088e-11 nitrogen=4.900836795575491e-13 phosphorus=3.068970954550435e-11 aluminum=3.7715397477214635e-9 iron=2.7439008329623317e-6 calcium=6.024845866939426e-10 magnesium=7.630066227790473e-5 sodium=1.6775160028768268e-7 potassium=3.085773436382877e-7 sulfur=4.1831068571705175e-14 chloride=7.26978390072776e-14 silicon=1.0662687389854582e-8 sand=1e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=0e0 aec=4.0037535189239915e-2
+info: day advanced: scene_weather_hours=288 final_hour_elapsed_ms=552
+info: daily conservation accepted: day=13 year=2000 hour=24 water=5.525036437512626e-14 heat=2.1775266621806458e-11 oxygen=8.743815018079667e-13 hydrogen=1.04412100299025e-11 carbon=2.7740296979737535e-11 nitrogen=5.069172680306282e-13 phosphorus=1.5312989453767176e-11 aluminum=3.257832426574023e-9 iron=1.5418902428782385e-6 calcium=2.847944569703181e-10 magnesium=4.462305527036139e-5 sodium=1.2343495797820116e-7 potassium=2.0003616979278166e-7 sulfur=1.691670009079564e-14 chloride=7.94848545376113e-14 silicon=7.140382519967555e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=0e0 aec=3.631205673758865e-2
+info: day advanced: scene_weather_hours=312 final_hour_elapsed_ms=282
+info: daily conservation accepted: day=14 year=2000 hour=24 water=3.753759466587784e-14 heat=2.1125286887638402e-11 oxygen=8.42223688265018e-13 hydrogen=9.806915922598771e-12 carbon=3.22391742595194e-11 nitrogen=4.4371236545962455e-13 phosphorus=4.584633194439798e-11 aluminum=3.57645460135884e-9 iron=1.4519199849544497e-6 calcium=9.014044890214981e-11 magnesium=3.359042689969151e-5 sodium=1.1623389805996626e-7 potassium=2.09270298890655e-7 sulfur=4.733443605570318e-14 chloride=8.476689560156197e-14 silicon=6.730037007684986e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=0e0 aec=3.335939536095908e-2
+info: day advanced: scene_weather_hours=336 final_hour_elapsed_ms=578
+info: daily conservation accepted: day=15 year=2000 hour=24 water=3.653726629451926e-14 heat=2.0458313956457858e-11 oxygen=8.089209143598908e-13 hydrogen=1.2347356052500457e-11 carbon=2.821975463846063e-11 nitrogen=4.4265860963522157e-13 phosphorus=3.785109674563381e-11 aluminum=3.1397821179214966e-9 iron=1.3735564493586985e-6 calcium=8.591574401086923e-11 magnesium=7.145461072485857e-5 sodium=9.997181768625328e-8 potassium=1.7817275403304874e-7 sulfur=4.341354286016861e-14 chloride=9.61487824287622e-14 silicon=5.735068817219937e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=3.690888119953864e-2 aec=4.7337278106508875e-2
+info: day advanced: scene_weather_hours=360 final_hour_elapsed_ms=539
+info: daily conservation accepted: day=16 year=2000 hour=24 water=3.290973975034264e-14 heat=1.9387292429454268e-11 oxygen=8.902492199653639e-13 hydrogen=2.0498452067550504e-11 carbon=2.4261802681664975e-11 nitrogen=4.868809274974779e-13 phosphorus=4.436235148619591e-11 aluminum=2.292780992062979e-9 iron=4.348823000841644e-7 calcium=2.464821177223577e-10 magnesium=5.275987682485101e-5 sodium=1.1396266340740899e-7 potassium=1.692404914935266e-7 sulfur=6.017042172199321e-14 chloride=1.037069460593379e-13 silicon=4.845983755196134e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=3.4487404014549375e-2 aec=1.4946286781877626e-2
+info: day advanced: scene_weather_hours=384 final_hour_elapsed_ms=540
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267676e0 residual=1.1154632773013873e-11 limit=3.368007353078537e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.37033851326781e0 residual=1.1288747714388592e-11 limit=3.3680073530786002e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE retained-state inventory failure: inventory=nitrogen_mol_per_m3 before=7.370338513256521e0 after=7.370338513267809e0 residual=1.1287859535968892e-11 limit=3.3680073530786e-12
+warning: SOLUTE reaction network did not converge: cell=0 max_iterations=100 maximum_scaled_residual=6.893160283450477e1 search_scaled_residual=2.1426341208860545e3 newton_steps=60 picard_steps=40
+warning: SOLUTE terminal magnesium transformation: aqueous=3.86245668363209e-7 exchange=-8.888815382954158e-6 geochemistry=0e0 non_band_phosphate=3.0585735708804363e-7 band_phosphate=0e0 assembled=-8.196712357502905e-6
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=53 realized_endpoint_limiting_name=phosphate_non_band.hydroxyapatite_solid_mol_per_m3 realized_endpoint_secant_limit=1e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=5.3553209426583075e-3 h2po4=1.0633875147248337e-1 h3po4=8.702505178748004e-5 monovalent_activity_coefficient=9.842923613827681e-1 dissociation_constant=7.5e0 equilibrium_h3po4=7.356377817784965e-5 uncapped_driving=-1.945869372582882e-2 bounded_rate=-1.740501035749601e-5 dissociation_cap=1.740501035749601e-5
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=0 packed_cell_index=0 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene3-year2000-day17-hour4.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=4 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=4 error=SoluteReactionSolverDidNotConverge
+info: bounded fixed external hour recovery accepted: exact_substep_count=20 next_preferred_substep_count=20
+info: daily conservation accepted: day=17 year=2000 hour=24 water=2.3277558216539334e-14 heat=1.890625502195086e-11 oxygen=9.517227922959499e-13 hydrogen=2.230185454432799e-11 carbon=2.084377049386665e-11 nitrogen=4.695344392067487e-13 phosphorus=4.428232510702225e-11 aluminum=1.7474594370991482e-9 iron=4.145144669250561e-7 calcium=7.879949000072152e-10 magnesium=4.3085612144638234e-5 sodium=7.242957296299557e-8 potassium=1.2547817005650934e-7 sulfur=5.410319856493314e-14 chloride=1.126765702222704e-13 silicon=2.311255908924373e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=6.610716591349258e-2 aec=2.763086886130599e-2
+info: day advanced: scene_weather_hours=408 final_hour_elapsed_ms=296
+info: daily conservation accepted: day=18 year=2000 hour=24 water=9.237544904680399e-15 heat=1.8705754962223438e-11 oxygen=9.120186626385287e-13 hydrogen=2.1303349107834332e-11 carbon=2.251619174718223e-11 nitrogen=5.003845054159291e-13 phosphorus=5.157191391162193e-11 aluminum=1.2525386062466362e-9 iron=3.9632689551396574e-7 calcium=9.850473181690443e-10 magnesium=5.490630831230305e-5 sodium=6.926634954907459e-8 potassium=1.0284788002580929e-7 sulfur=7.783670688315634e-14 chloride=1.1616540328525188e-13 silicon=1.6585672714482022e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=6.326454961077474e-2 aec=3.902439024390244e-2
+info: day advanced: scene_weather_hours=432 final_hour_elapsed_ms=290
+info: daily conservation accepted: day=19 year=2000 hour=24 water=3.0551367799310247e-15 heat=1.796851366536226e-11 oxygen=9.374046536743368e-13 hydrogen=7.65434154370542e-12 carbon=2.8515288840754562e-11 nitrogen=5.166367409462622e-13 phosphorus=5.148357588005499e-11 aluminum=1.2004176173557786e-9 iron=1.1399564361694617e-6 calcium=8.033657768168177e-10 magnesium=5.2625872406654274e-5 sodium=4.98199469605858e-8 potassium=8.218727849176653e-8 sulfur=1.0552100141223909e-13 chloride=1.2232113868925924e-13 silicon=2.121680200336389e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=3.029585798816568e-2 aec=2.4866440019426905e-2
+info: day advanced: scene_weather_hours=456 final_hour_elapsed_ms=291
+info: daily conservation accepted: day=20 year=2000 hour=24 water=1.6628607666293828e-14 heat=1.7615492556004582e-11 oxygen=1.0687492130083025e-12 hydrogen=7.354043573990368e-12 carbon=2.6343174421951506e-11 nitrogen=5.743697683552885e-13 phosphorus=4.39982694922069e-11 aluminum=1.922287188571296e-9 iron=1.8261237996031061e-6 calcium=4.93795481762806e-10 magnesium=5.6889402068717306e-5 sodium=5.5880606327419986e-8 potassium=7.901130276670651e-8 sulfur=1.0609067698837784e-13 chloride=1.2152793003781864e-13 silicon=3.5710211625665604e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=0e0 aec=3.586103847590587e-2
+info: day advanced: scene_weather_hours=480 final_hour_elapsed_ms=304
+info: daily conservation accepted: day=21 year=2000 hour=24 water=1.1990595163271871e-14 heat=1.7287333503413184e-11 oxygen=1.0298775162690925e-12 hydrogen=2.3601252031813944e-12 carbon=2.5177485979502823e-11 nitrogen=5.153051892643132e-13 phosphorus=5.124789305431636e-11 aluminum=2.5916538848682195e-9 iron=2.462810674045827e-6 calcium=5.461459495033819e-10 magnesium=3.6527411988238085e-5 sodium=6.15394201927267e-8 potassium=9.135803745528155e-8 sulfur=1.2216507634101892e-13 chloride=1.2495691304537609e-13 silicon=3.933927319826179e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=0e0 aec=2.2701072980402588e-2
+info: day advanced: scene_weather_hours=504 final_hour_elapsed_ms=280
+info: daily conservation accepted: day=22 year=2000 hour=24 water=1.4872119536555272e-14 heat=1.6909042559840022e-11 oxygen=1.0376043909613402e-12 hydrogen=4.5536421184635594e-12 carbon=2.6047039411290608e-11 nitrogen=4.599370919166141e-13 phosphorus=5.847626995615495e-11 aluminum=2.8582916114406335e-9 iron=1.6981282497715976e-6 calcium=3.309262319626493e-10 magnesium=2.9378422787086277e-5 sodium=5.942329018306231e-8 potassium=1.0291409871041632e-7 sulfur=1.1874918150082958e-13 chloride=1.2969115838870512e-13 silicon=4.7496555755121226e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=2.7047015319598522e-2 aec=4.34634974533107e-2
+info: day advanced: scene_weather_hours=528 final_hour_elapsed_ms=529
+info: daily conservation accepted: day=23 year=2000 hour=24 water=1.7597655831530803e-14 heat=1.6271329797302723e-11 oxygen=1.0115715718158938e-12 hydrogen=0e0 carbon=2.7266008605673383e-11 nitrogen=4.602898463954497e-13 phosphorus=6.547413852169071e-11 aluminum=3.2817627248553134e-9 iron=3.284632305687995e-6 calcium=1.2854189197984335e-10 magnesium=1.1363537339273938e-5 sodium=4.3116864134498196e-8 potassium=7.111412996664114e-8 sulfur=1.0930735688214082e-13 chloride=1.272569382182221e-13 silicon=5.5154141235575775e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=0e0 aec=3.132137030995106e-2
+info: day advanced: scene_weather_hours=552 final_hour_elapsed_ms=540
+info: daily conservation accepted: day=24 year=2000 hour=24 water=3.621632510268405e-14 heat=1.6192115879243358e-11 oxygen=9.026391009929853e-13 hydrogen=4.262947070546323e-12 carbon=2.6999584168353562e-11 nitrogen=4.4799550439597173e-13 phosphorus=6.520936689630132e-11 aluminum=3.5131877758972135e-9 iron=3.182182756795533e-6 calcium=6.250635851605418e-11 magnesium=5.503948030126193e-6 sodium=3.4821957477621784e-8 potassium=5.5133378499241235e-8 sulfur=8.257917821584145e-14 chloride=1.3409718686900823e-13 silicon=5.346332112741158e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=2.4558710667689946e-2 aec=3.0281523539153064e-2
+info: day advanced: scene_weather_hours=576 final_hour_elapsed_ms=557
+info: daily conservation accepted: day=25 year=2000 hour=24 water=4.651455381865115e-14 heat=1.5582973542941033e-11 oxygen=8.774268749644543e-13 hydrogen=8.269118407365324e-12 carbon=2.7395786468769364e-11 nitrogen=4.2197197969093625e-13 phosphorus=8.466405137582018e-11 aluminum=3.0836600177174313e-9 iron=2.779073256375112e-6 calcium=6.087531460932127e-11 magnesium=2.6701824276769044e-5 sodium=5.408280760333461e-8 potassium=9.365298056043488e-8 sulfur=8.534791701326747e-14 chloride=1.3415539042257412e-13 silicon=5.6231708706141465e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=2.3466862223851866e-2 aec=4.849219578724049e-2
+info: day advanced: scene_weather_hours=600 final_hour_elapsed_ms=581
+info: daily conservation accepted: day=26 year=2000 hour=24 water=5.1889990873479505e-14 heat=1.5312045779229593e-11 oxygen=8.961068859902739e-13 hydrogen=1.2046799195611683e-11 carbon=2.5132133548539923e-11 nitrogen=4.230730806823394e-13 phosphorus=7.629888894995107e-11 aluminum=3.312506664025021e-9 iron=2.7015769779461073e-6 calcium=1.7814148937831996e-10 magnesium=1.5572853523065504e-5 sodium=3.2869742805678046e-8 potassium=6.504814836115249e-8 sulfur=8.86099908116983e-14 chloride=1.4288852907315214e-13 silicon=5.4689375065709135e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=2.242270298677411e-2 aec=2.8059919620021922e-2
+info: day advanced: scene_weather_hours=624 final_hour_elapsed_ms=277
+info: daily conservation accepted: day=27 year=2000 hour=24 water=5.558141172331668e-14 heat=1.4930586578913747e-11 oxygen=9.16061315236736e-13 hydrogen=3.9044106214191205e-12 carbon=2.5301189869365613e-11 nitrogen=4.0848743605606107e-13 phosphorus=5.194545531683567e-11 aluminum=2.9271317727660715e-9 iron=1.1728913014227998e-6 calcium=2.3265520125698795e-10 magnesium=0e0 sodium=2.568268066799461e-8 potassium=2.5411833928488012e-8 sulfur=9.962146044235467e-14 chloride=1.4488164706644415e-13 silicon=3.6983478750108806e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=2.1512605042016807e-2 aec=3.577917540181691e-2
+info: day advanced: scene_weather_hours=648 final_hour_elapsed_ms=542
+info: daily conservation accepted: day=28 year=2000 hour=24 water=6.587307450491359e-14 heat=1.46502277620487e-11 oxygen=9.416278533579598e-13 hydrogen=5.7022340246447065e-12 carbon=2.358405293375746e-11 nitrogen=3.825549558738768e-13 phosphorus=2.4192861741522312e-11 aluminum=2.8621773887591934e-9 iron=1.7205592610286556e-6 calcium=0e0 magnesium=9.907410771889124e-6 sodium=3.766653972723401e-8 potassium=6.211377582294956e-8 sulfur=1.1055996521911697e-13 chloride=1.4320209795556522e-13 silicon=4.018258422124071e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=2.0851999674187504e-2 aec=2.592667611910067e-2
+info: day advanced: scene_weather_hours=672 final_hour_elapsed_ms=568
+info: daily conservation accepted: day=29 year=2000 hour=24 water=6.825209943230083e-14 heat=1.4512491740020466e-11 oxygen=1.0921680626649368e-12 hydrogen=9.2646978267069e-12 carbon=2.5032545541434e-11 nitrogen=3.9461137705976344e-13 phosphorus=2.263991425651204e-11 aluminum=2.6526345665330165e-9 iron=2.5251471907140014e-6 calcium=5.5940655189079555e-11 magnesium=9.688560554563307e-6 sodium=3.684611681612203e-8 potassium=6.075921567486186e-8 sulfur=1.189150030103907e-13 chloride=1.4763435102510206e-13 silicon=3.931159787902131e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=1.9881950916433674e-2 aec=2.514899469513393e-2
+info: day advanced: scene_weather_hours=696 final_hour_elapsed_ms=548
+info: daily conservation accepted: day=30 year=2000 hour=24 water=6.950344785267867e-14 heat=1.4284866672753916e-11 oxygen=9.601557733038413e-13 hydrogen=1.4467132212842872e-11 carbon=2.907005808361479e-11 nitrogen=3.6868595185685806e-13 phosphorus=4.2269631935824905e-11 aluminum=2.740439724977378e-9 iron=2.4717805108298615e-6 calcium=5.489552152317755e-11 magnesium=2.36977426446077e-5 sodium=5.409061543021239e-8 potassium=8.324684143725186e-8 sulfur=8.982649822802579e-14 chloride=1.467460043324387e-13 silicon=3.847733898923824e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=1.9288728149487643e-2 aec=2.4399542508577964e-2
+info: day advanced: scene_weather_hours=720 final_hour_elapsed_ms=562
+info: daily conservation accepted: day=31 year=2000 hour=24 water=6.609569344131784e-14 heat=1.3853842307401107e-11 oxygen=9.844234740175267e-13 hydrogen=1.0601353820642895e-11 carbon=2.7429608175190433e-11 nitrogen=3.29263833183803e-13 phosphorus=5.4038013794612e-11 aluminum=3.814281147629387e-9 iron=3.228412609953484e-6 calcium=2.156187039098248e-10 magnesium=9.280837828264846e-6 sodium=7.651862330801602e-8 potassium=1.3976051441218107e-7 sulfur=6.94651953773859e-14 chloride=1.5287837892640677e-13 silicon=6.406812535484401e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=3.732322495990669e-2 aec=1.5786877158362113e-2
+info: day advanced: scene_weather_hours=744 final_hour_elapsed_ms=583
+info: daily conservation accepted: day=32 year=2000 hour=24 water=6.881328302760692e-14 heat=1.3636194770041355e-11 oxygen=1.080516631530017e-12 hydrogen=1.3821420073500713e-11 carbon=3.009617320285302e-11 nitrogen=3.0196002385096315e-13 phosphorus=1.840931386219272e-11 aluminum=3.7385012916612355e-9 iron=3.4283960114063015e-6 calcium=2.118557578635947e-10 magnesium=4.5464440843816295e-6 sodium=7.498930649228841e-8 potassium=1.3696395406301663e-7 sulfur=2.1287727227581684e-14 chloride=1.5591871142089422e-13 silicon=6.648750163465306e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=3.621958121109225e-2 aec=1.5294539371490022e-2
+info: day advanced: scene_weather_hours=768 final_hour_elapsed_ms=557
+info: daily conservation accepted: day=33 year=2000 hour=24 water=6.364501674005989e-14 heat=1.3509822384315161e-11 oxygen=1.0280035205791713e-12 hydrogen=1.6902553225534017e-11 carbon=2.9506823891188674e-11 nitrogen=2.857223707575636e-13 phosphorus=3.9109862631087224e-11 aluminum=4.887499061543214e-9 iron=4.1378163389534976e-6 calcium=3.6440190629573005e-10 magnesium=4.4561446518298414e-6 sodium=7.917427394101352e-8 potassium=1.3427534322259605e-7 sulfur=0e0 chloride=1.612697841861018e-13 silicon=8.32984301559576e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=1.7533045681802615e-2 aec=1.486988847583643e-2
+info: day advanced: scene_weather_hours=792 final_hour_elapsed_ms=554
+info: daily conservation accepted: day=34 year=2000 hour=24 water=6.225130654769913e-14 heat=1.3356611330450397e-11 oxygen=1.0871979180414932e-12 hydrogen=1.48940485105519e-11 carbon=2.890985296566549e-11 nitrogen=2.8270753879637065e-13 phosphorus=2.057982389689377e-11 aluminum=3.994978744345864e-9 iron=2.283254052654145e-6 calcium=1.5354957547945655e-10 magnesium=1.3107905833495747e-5 sodium=7.210412084509231e-8 potassium=1.3168829065483228e-7 sulfur=1.5271497790708818e-14 chloride=1.6312004625228354e-13 silicon=6.394150321446619e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=3.4110592938041306e-2 aec=1.4414414414414415e-2
+info: day advanced: scene_weather_hours=816 final_hour_elapsed_ms=538
+info: daily conservation accepted: day=35 year=2000 hour=24 water=7.30338274186445e-14 heat=1.3209150077101591e-11 oxygen=1.0477796377684716e-12 hydrogen=1.1354052326303809e-11 carbon=2.9091686237784325e-11 nitrogen=2.6787292204086437e-13 phosphorus=1.1693815179720334e-11 aluminum=3.6596305577946506e-9 iron=9.96108182759141e-7 calcium=1.5105504700104704e-10 magnesium=2.5720773513989973e-5 sodium=5.443013855634265e-8 potassium=7.538366854361221e-8 sulfur=3.5126057292030194e-15 chloride=1.6842734216639435e-13 silicon=4.8809082090693055e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=3.31370137855155e-2 aec=1.4082957421058423e-2
+info: day advanced: scene_weather_hours=840 final_hour_elapsed_ms=543
+info: daily conservation accepted: day=36 year=2000 hour=24 water=7.458417246288167e-14 heat=1.2851144903978286e-11 oxygen=1.0996848483047565e-12 hydrogen=1.2726740844122975e-11 carbon=2.6941910622806294e-11 nitrogen=2.6549697225815355e-13 phosphorus=1.0999341120495082e-11 aluminum=3.463841604641025e-9 iron=1.4667668497329702e-6 calcium=3.467616531651709e-10 magnesium=8.41264664512193e-6 sodium=6.944670156697048e-8 potassium=1.268294344921839e-7 sulfur=3.3846371595664596e-14 chloride=1.699596393270049e-13 silicon=5.4752119734563275e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=3.235795993174493e-2 aec=2.0669609215200776e-2
+info: day advanced: scene_weather_hours=864 final_hour_elapsed_ms=529
+info: daily conservation accepted: day=37 year=2000 hour=24 water=8.010608068756e-14 heat=1.2257683833205898e-11 oxygen=1.1222722605928464e-12 hydrogen=1.7173126346122582e-11 carbon=2.8658049410460296e-11 nitrogen=2.991887676558654e-13 phosphorus=1.7461380809974243e-11 aluminum=3.149996744219415e-9 iron=4.802434930638384e-7 calcium=3.4133205199953153e-10 magnesium=1.2389236092912333e-5 sodium=7.868895987073658e-8 potassium=1.4530221410006953e-7 sulfur=3.036586078168776e-14 chloride=1.706122293592487e-13 silicon=5.041097855173882e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=1.565940787863959e-2 aec=2.0255301192108874e-2
+info: day advanced: scene_weather_hours=888 final_hour_elapsed_ms=567
+info: daily conservation accepted: day=38 year=2000 hour=24 water=8.743856216169464e-14 heat=1.1516581608369478e-11 oxygen=1.1083868260421547e-12 hydrogen=1.0730811992428152e-11 carbon=2.591679804159058e-11 nitrogen=2.9763138208166155e-13 phosphorus=2.996952376056001e-11 aluminum=3.7136742985653208e-9 iron=9.437313952500325e-7 calcium=2.8807014222241197e-10 magnesium=1.216762846413855e-5 sodium=7.729742648318725e-8 potassium=1.4272984850534334e-7 sulfur=5.027649210617083e-14 chloride=1.7408859957971472e-13 silicon=5.28254726925679e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=3.025825896814609e-2 aec=1.9626884743163812e-2
+info: day advanced: scene_weather_hours=912 final_hour_elapsed_ms=6670
+info: daily conservation accepted: day=39 year=2000 hour=24 water=9.628080757558193e-14 heat=1.3083457595021491e-11 oxygen=1.0645046259360633e-12 hydrogen=9.035002693525484e-12 carbon=2.441795232694615e-11 nitrogen=3.0765260299993063e-13 phosphorus=1.9068026362423075e-11 aluminum=3.1638273614666575e-9 iron=2.3194634005203077e-7 calcium=1.891853018680527e-10 magnesium=1.1956427738084849e-5 sodium=8.103528873275866e-8 potassium=1.4027713825265424e-7 sulfur=1.080414180699554e-13 chloride=1.7915583481915892e-13 silicon=4.543280232069738e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=2.9590244466277525e-2 aec=1.2749638926241346e-2
+info: day advanced: scene_weather_hours=936 final_hour_elapsed_ms=576
+info: daily conservation accepted: day=40 year=2000 hour=24 water=9.348375494684134e-14 heat=1.2442319392235261e-11 oxygen=1.0533779250666742e-12 hydrogen=0e0 carbon=2.5862105989508027e-11 nitrogen=3.497623756823383e-13 phosphorus=3.008698785907271e-11 aluminum=3.110958761342462e-9 iron=4.5618399726427554e-7 calcium=2.7962140157129326e-10 magnesium=3.1339630336081995e-5 sodium=8.464630188619611e-8 potassium=1.4775658794226343e-7 sulfur=1.6774109670818435e-13 chloride=1.7925199346672299e-13 silicon=4.147891507904049e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=2.9089256292256123e-2 aec=1.2449545299810339e-2
+info: day advanced: scene_weather_hours=960 final_hour_elapsed_ms=323
+info: daily conservation accepted: day=41 year=2000 hour=24 water=9.287149907458761e-14 heat=1.2434505310151114e-11 oxygen=1.0617118102420184e-12 hydrogen=4.36718445366034e-12 carbon=2.603671220684567e-11 nitrogen=3.6734227783485956e-13 phosphorus=2.5493886518593416e-11 aluminum=2.9428821897563355e-9 iron=2.2441973500142792e-7 calcium=2.2971056751174627e-10 magnesium=3.852542181477325e-5 sodium=7.836082034528643e-8 potassium=1.453312247606929e-7 sulfur=2.1293047391541277e-13 chloride=1.763239291184287e-13 silicon=3.766368115110898e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=4.241922120961061e-2 aec=1.2200352666444264e-2
+info: day advanced: scene_weather_hours=984 final_hour_elapsed_ms=589
+info: daily conservation accepted: day=42 year=2000 hour=24 water=1.0051759255073826e-13 heat=1.220576825765211e-11 oxygen=1.0428487546643013e-12 hydrogen=1.4322910942395952e-12 carbon=2.5580555038559768e-11 nitrogen=4.084246556647004e-13 phosphorus=2.418402085920245e-11 aluminum=2.2015063823045705e-9 iron=2.2091828134556176e-7 calcium=2.2655048076210275e-10 magnesium=4.169601359416221e-5 sodium=6.747349226457127e-8 potassium=1.2394517222738385e-7 sulfur=2.734761886105337e-13 chloride=1.8160833033359691e-13 silicon=2.471128833337981e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=4.1759556304714264e-2 aec=1.1958705096463773e-2
+info: day advanced: scene_weather_hours=1008 final_hour_elapsed_ms=1008
+info: daily conservation accepted: day=43 year=2000 hour=24 water=9.83218388176424e-14 heat=1.2108390060075881e-11 oxygen=1.096748338988642e-12 hydrogen=0e0 carbon=2.6911367598688093e-11 nitrogen=4.0690113382848116e-13 phosphorus=2.572236773995198e-11 aluminum=2.1680411859073213e-9 iron=2.1757779110838462e-7 calcium=2.68235306482523e-10 magnesium=3.358167829003988e-5 sodium=9.015377545989767e-8 potassium=1.6895716506377116e-7 sulfur=2.9344818373756594e-13 chloride=1.8019867089156898e-13 silicon=3.3455023355047343e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=2.7107157983905124e-2 aec=1.1654374943093872e-2
+info: day advanced: scene_weather_hours=1032 final_hour_elapsed_ms=595
+info: daily conservation accepted: day=44 year=2000 hour=24 water=9.615961155509623e-14 heat=1.0710770449917133e-11 oxygen=1.1133263507634323e-12 hydrogen=1.3881014477098614e-12 carbon=2.5990342739560898e-11 nitrogen=4.4283501156834856e-13 phosphorus=3.897701896513551e-11 aluminum=2.360393687058138e-9 iron=2.1433851651962672e-7 calcium=3.0883392045685293e-10 magnesium=2.2043238965125335e-5 sodium=7.94341067122437e-8 potassium=1.478920037719863e-7 sulfur=3.273490088858608e-13 chloride=1.7609205050366099e-13 silicon=3.893846894090775e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=2.6730708990289235e-2 aec=1.1403625996703639e-2
+info: day advanced: scene_weather_hours=1056 final_hour_elapsed_ms=594
+info: daily conservation accepted: day=45 year=2000 hour=24 water=9.476841752397244e-14 heat=1.0324431534330065e-11 oxygen=1.1575222113929266e-12 hydrogen=1.3676439861439805e-12 carbon=2.513089181980702e-11 nitrogen=4.573739631410361e-13 phosphorus=3.6832796194014026e-11 aluminum=2.5476927380834657e-9 iron=6.337359091741247e-7 calcium=3.484615909502281e-10 magnesium=1.8094666991415285e-5 sodium=7.365353390050829e-8 potassium=1.365917710226341e-7 sulfur=3.5796348921091204e-13 chloride=1.7702915989031456e-13 silicon=3.5413761044175295e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=2.6057305715303576e-2 aec=1.682144734536534e-2
+info: day advanced: scene_weather_hours=1080 final_hour_elapsed_ms=1034
+info: daily conservation accepted: day=46 year=2000 hour=24 water=1.0005723932084937e-13 heat=1.043464626501277e-11 oxygen=1.2421788589508616e-12 hydrogen=5.391287553384037e-12 carbon=2.7512821893842953e-11 nitrogen=4.832331822744807e-13 phosphorus=3.314301621147541e-11 aluminum=2.511286349107759e-9 iron=0e0 calcium=4.301180205906484e-10 magnesium=1.426245173134883e-5 sodium=7.711374099740596e-8 potassium=1.4356734986481397e-7 sulfur=3.88497188984838e-13 chloride=1.7934239922465756e-13 silicon=4.071637638023772e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=2.55629337460682e-2 aec=1.6496971259182886e-2
+info: day advanced: scene_weather_hours=1104 final_hour_elapsed_ms=537
+info: daily conservation accepted: day=47 year=2000 hour=24 water=9.39989175350346e-14 heat=9.875108939221114e-12 oxygen=1.3406597912522263e-12 hydrogen=9.302071000091138e-12 carbon=2.5797560583309723e-11 nitrogen=5.065703417915595e-13 phosphorus=3.5487060573210607e-11 aluminum=2.6912260116142974e-9 iron=2.0532471575105296e-7 calcium=5.522503930411807e-10 magnesium=7.0276818148326986e-6 sodium=1.0282787595359928e-7 potassium=1.8571563688356648e-7 sulfur=3.9754096804120935e-13 chloride=1.8056870088599204e-13 silicon=5.160076338519773e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=3.73813579946459e-2 aec=1.611955335404248e-2
+info: day advanced: scene_weather_hours=1128 final_hour_elapsed_ms=539
+info: daily conservation accepted: day=48 year=2000 hour=24 water=9.544574806969006e-14 heat=9.366449233308535e-12 oxygen=1.3854233158348954e-12 hydrogen=1.3101908952663995e-11 carbon=2.7402899485275446e-11 nitrogen=5.143891103053815e-13 phosphorus=4.834250543347202e-11 aluminum=3.0785059517261778e-9 iron=1.2149399694996531e-6 calcium=7.973175092600499e-10 magnesium=0e0 sodium=1.1458947844254604e-7 potassium=2.0051127117102772e-7 sulfur=4.3530666963833416e-13 chloride=1.8022555042897515e-13 silicon=6.500452206678349e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=2.4487062987230378e-2 aec=1.0446847582126096e-2
+info: day advanced: scene_weather_hours=1152 final_hour_elapsed_ms=579
+info: daily conservation accepted: day=49 year=2000 hour=24 water=9.447566090436784e-14 heat=1.0402994856216217e-11 oxygen=1.3400108342950355e-12 hydrogen=7.754863069070378e-12 carbon=2.7202613675150842e-11 nitrogen=5.188969734109142e-13 phosphorus=4.857935930130053e-11 aluminum=2.932346560877091e-9 iron=5.99334331882679e-7 calcium=8.293752653775051e-10 magnesium=3.4153368666260012e-6 sodium=9.996699401299655e-8 potassium=1.805432517024714e-7 sulfur=4.614544421508712e-13 chloride=1.8498027411551185e-13 silicon=6.132537653460923e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=3.562978427279054e-2 aec=1.5320778806255984e-2
+info: day advanced: scene_weather_hours=1176 final_hour_elapsed_ms=273
+info: daily conservation accepted: day=50 year=2000 hour=24 water=9.756003906837539e-14 heat=1.0339760775432937e-11 oxygen=1.3787991030263853e-12 hydrogen=1.2754990515539384e-12 carbon=2.7058644440101975e-11 nitrogen=5.23008255160644e-13 phosphorus=4.1349769830105524e-11 aluminum=2.5828607988136205e-9 iron=3.9419468498219676e-7 calcium=6.966386139813158e-10 magnesium=1.347123125576163e-5 sodium=1.0287190709344273e-7 potassium=1.9500249968767458e-7 sulfur=4.940259256797103e-13 chloride=1.8463154175611127e-13 silicon=5.223650855853095e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=2.351536306434575e-2 aec=9.982841990329122e-3
+info: day advanced: scene_weather_hours=1200 final_hour_elapsed_ms=563
+info: daily conservation accepted: day=51 year=2000 hour=24 water=9.819361055915461e-14 heat=1.0361634999366917e-11 oxygen=1.400975282151699e-12 hydrogen=3.777384257759552e-12 carbon=2.730957223934059e-11 nitrogen=4.987474918230275e-13 phosphorus=3.457810418128165e-11 aluminum=2.3446392595315477e-9 iron=0e0 calcium=6.885237029352804e-10 magnesium=9.964753240776757e-6 sodium=8.878570396613383e-8 potassium=1.5889047696715023e-7 sulfur=5.052422510937985e-13 chloride=1.825941821948649e-13 silicon=4.610575180751581e-9 sand=1e0 silt=1e0 clay=1e0 rock_additive=0e0 cec=3.469775006776904e-2 aec=1.9550939361539635e-2
+info: day advanced: scene_weather_hours=1224 final_hour_elapsed_ms=555
+info: daily conservation accepted: day=52 year=2000 hour=24 water=9.966818823800614e-14 heat=1.0010518140040493e-11 oxygen=1.392550412451851e-12 hydrogen=1.118915792499571e-11 carbon=2.715511612314658e-11 nitrogen=4.860553394940112e-13 phosphorus=2.645855903351184e-11 aluminum=2.4145037329538878e-9 iron=1.9195205094383626e-7 calcium=5.6050703533066e-10 magnesium=1.6383063550248416e-5 sodium=7.924917730382939e-8 potassium=1.4025050344399792e-7 sulfur=5.131561930375882e-13 chloride=1.8225270662025367e-13 silicon=4.013871146324539e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=3.383259911894273e-2 aec=1.9241609981585178e-2
+info: day advanced: scene_weather_hours=1248 final_hour_elapsed_ms=275
+info: daily conservation accepted: day=53 year=2000 hour=24 water=1.0431719529310866e-13 heat=1.0436443549803892e-11 oxygen=1.4140883137634632e-12 hydrogen=1.5963097310401732e-11 carbon=2.8167557474072696e-11 nitrogen=5.215944699962515e-13 phosphorus=2.0561099591614172e-11 aluminum=2.3827838509281793e-9 iron=7.577700604106122e-7 calcium=5.144850737408368e-10 magnesium=1.6161254032307983e-5 sodium=8.229752374046624e-8 potassium=1.5463883156233309e-7 sulfur=4.98265742462617e-13 chloride=1.8359292881557366e-13 silicon=3.696289932376208e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=4.435204435204435e-2 aec=1.8888806906220024e-2
+info: day advanced: scene_weather_hours=1272 final_hour_elapsed_ms=366
+info: daily conservation accepted: day=54 year=2000 hour=24 water=1.0647726962430392e-13 heat=1.0787018452449435e-11 oxygen=1.425963859410921e-12 hydrogen=1.0919068151099526e-11 carbon=2.897923080992065e-11 nitrogen=5.688000042178173e-13 phosphorus=1.6657349057714025e-11 aluminum=2.057920043187451e-9 iron=9.349977532833788e-7 calcium=3.91268828955642e-10 magnesium=3.507976764025081e-5 sodium=7.714410163266258e-8 potassium=1.4455188291921279e-7 sulfur=4.850617483204753e-13 chloride=1.8576940151822244e-13 silicon=2.865986841838162e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=3.278688524590164e-2 aec=1.3887382011500488e-2
+info: day advanced: scene_weather_hours=1296 final_hour_elapsed_ms=289
+info: daily conservation accepted: day=55 year=2000 hour=24 water=1.0335048624093069e-13 heat=1.0392761153432312e-11 oxygen=1.497970045292484e-12 hydrogen=4.79549100211138e-12 carbon=2.9731371044749786e-11 nitrogen=5.536500881682511e-13 phosphorus=9.668569993043893e-12 aluminum=1.9348678257950054e-9 iron=1.1077216599911282e-6 calcium=3.482013993460611e-10 magnesium=2.2029126367525295e-5 sodium=6.8118419196517e-8 potassium=1.1887842756953396e-7 sulfur=4.690477294419956e-13 chloride=1.7977224547024692e-13 silicon=2.571579852388036e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=4.265067266441751e-2 aec=1.3649936015924926e-2
+info: day advanced: scene_weather_hours=1320 final_hour_elapsed_ms=288
+info: daily conservation accepted: day=56 year=2000 hour=24 water=1.0142544836039531e-13 heat=1.037948518469034e-11 oxygen=1.4830533805929298e-12 hydrogen=9.479692048813478e-12 carbon=3.046609807467011e-11 nitrogen=5.407982340310612e-13 phosphorus=6.247359428189046e-12 aluminum=2.197024607084384e-9 iron=1.0938117715802458e-6 calcium=3.060943326413465e-10 magnesium=3.416651768449229e-5 sodium=6.328107014208692e-8 potassium=1.0951463057098182e-7 sulfur=4.894605518775085e-13 chloride=1.8184510703757702e-13 silicon=2.5385805256204333e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=3.1389218130543184e-2 aec=1.3468958260259558e-2
+info: day advanced: scene_weather_hours=1344 final_hour_elapsed_ms=561
+info: daily conservation accepted: day=57 year=2000 hour=24 water=9.663097703817667e-14 heat=1.0266883684955969e-11 oxygen=1.4667839020514299e-12 hydrogen=9.371649098320068e-12 carbon=2.938552420883239e-11 nitrogen=5.399180694326234e-13 phosphorus=1.2190892040593342e-11 aluminum=2.546488475768557e-9 iron=9.000330825004533e-7 calcium=3.4054533871152677e-10 magnesium=3.065578532016847e-5 sodium=6.63644006638985e-8 potassium=1.0809328047976813e-7 sulfur=5.300912950225263e-13 chloride=1.8151571614204127e-13 silicon=2.756577115203142e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=3.0819856334523856e-2 aec=1.7618719889883002e-2
+info: day advanced: scene_weather_hours=1368 final_hour_elapsed_ms=552
+info: daily conservation accepted: day=58 year=2000 hour=24 water=9.271809190671769e-14 heat=9.960154327991112e-12 oxygen=1.3809305689647006e-12 hydrogen=1.3900763100473903e-11 carbon=3.148799319675473e-11 nitrogen=5.223959639300626e-13 phosphorus=7.010341257032787e-12 aluminum=2.4210319256224762e-9 iron=1.2426815474919225e-6 calcium=2.578072103092694e-10 magnesium=2.4208463304739184e-5 sodium=5.009927540564912e-8 potassium=8.384157772393491e-8 sulfur=5.595663227928043e-13 chloride=1.7449543888367963e-13 silicon=2.4741955467294915e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=4.032607411491356e-2 aec=1.303727846811978e-2
+info: day advanced: scene_weather_hours=1392 final_hour_elapsed_ms=3242
+info: daily conservation accepted: day=59 year=2000 hour=24 water=9.039350715425433e-14 heat=1.0359392264111383e-11 oxygen=1.2511542315933506e-12 hydrogen=1.6038547576956385e-11 carbon=3.139581497449598e-11 nitrogen=4.971415294901911e-13 phosphorus=5.307139752797766e-12 aluminum=2.298924647294212e-9 iron=1.051268092692808e-6 calcium=2.1660465628212195e-10 magnesium=2.6887979331107212e-5 sodium=3.805024740367027e-8 potassium=6.772873860667726e-8 sulfur=5.835114174273492e-13 chloride=1.740095504820148e-13 silicon=2.1988781355028073e-9 sand=1e0 silt=1e0 clay=0e0 rock_additive=0e0 cec=2.9780138818876267e-2 aec=8.497643231759942e-3
+info: day advanced: scene_weather_hours=1416 final_hour_elapsed_ms=541
+warning: SOLUTE reaction network did not converge: cell=0 max_iterations=100 maximum_scaled_residual=5.148257951710792e3 search_scaled_residual=1.5824456938560645e3 newton_steps=49 picard_steps=51
+warning: SOLUTE terminal magnesium transformation: aqueous=-1.2697901677908384e-6 exchange=-4.488897380700513e-15 geochemistry=0e0 non_band_phosphate=-8.624449675534206e-7 band_phosphate=0e0 assembled=-2.132235139833156e-6
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=53 realized_endpoint_limiting_name=phosphate_non_band.hydroxyapatite_solid_mol_per_m3 realized_endpoint_secant_limit=1e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.9998232924317095e-3 h2po4=1.0856426457631795e-1 h3po4=4.156496951603237e-4 monovalent_activity_coefficient=9.908965297079235e-1 dissociation_constant=7.5e0 equilibrium_h3po4=7.10619141599733e-5 uncapped_driving=-5.264411952381667e-1 bounded_rate=-8.312993903206475e-5 dissociation_cap=8.312993903206475e-5
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=0 packed_cell_index=0 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene3-year2000-day60-hour3.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=4 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=4 error=SoluteReactionSolverDidNotConverge
+info: bounded fixed external hour recovery accepted: exact_substep_count=20 next_preferred_substep_count=20
+error: hourly cell conservation failure: cell=0 quantity=carbon before=4.726392231937252e3 after=4.726390769503288e3 external_inputs=6.4891652298282e-18 external_outputs=1.4624339520421478e-3 internal_production=0e0 internal_consumption=0e0 residual=-1.2619472307406898e-11 absolute=1.2619472307406898e-11 normalized_relative=8.629088637398315e-9 physical_limit=1.4624339646616137e-12 arithmetic_roundoff_allowance=1.0908581399401483e-11 effective_limit=1.2371015364063096e-11
+error: hourly cell carbon storage components: cell=0 residue_before=6.286322574940589e1 residue_after=6.286250953858022e1 organic_before=4.56017489981857e3 organic_after=4.560174317715281e3 inorganic_and_gas_before=1.0335410636927607e2 inorganic_and_gas_after=1.033539422494256e2 soil_gas_before=2.201436259647605e0 soil_gas_after=2.201994388215778e0 surface_gas_before=3.3628966416312505e-7 surface_gas_after=2.6059538509991916e-7 other_inorganic_before=1.011526697733388e2 other_inorganic_after=1.0115194760061443e2 plant_before=0e0 plant_after=0e0
+error: hourly carbon respiration diagnostics: surface_co2_production_g_c=1.8158872118532273e-7 soil_co2_production_g_c=1.2938166609173223e-3 surface_signed_co2_plus_methane_delta_g_c=-1.8158872118532275e-7 soil_signed_co2_plus_methane_delta_g_c=-1.2917366241098354e-3
+error: hourly post-NITRO conservation trace: points=after_nitro,after_post_watsub,after_uptake,after_chemistry,after_transport,after_interface_heat,after_surface_gas residue_carbon_g_c={ 62.862509553794325, 62.862509553794325, 62.862509553794325, 62.862509553794325, 62.86250953858027, 62.86250953858027, 62.86250953858027 } organic_carbon_g_c={ 4560.174318795921, 4560.174318795921, 4560.174318795921, 4560.174318795921, 4560.17431771529, 4560.17431771529, 4560.17431771529 } inorganic_and_gas_carbon_g_c={ 103.35540358753339, 103.35540358753339, 103.35540358753339, 103.35540358753346, 103.35394251002096, 103.35394251002096, 103.35394224942557 } plant_carbon_g_c={ 0, 0, 0, 0, 0, 0, 0 } soil_gas_carbon_g_c={ 2.2027332930153896, 2.2027332930153896, 2.2027332930153896, 2.203419135358919, 2.2019943882157778, 2.2019943882157778, 2.2019943882157778 } residue_nitrogen_g={ 2.593938330965918, 2.593938330965918, 2.593938330965918, 2.593938330965918, 2.593938330005669, 2.593938330005669, 2.593938330005669 } organic_nitrogen_g={ 429.28433567212227, 429.28433567212227, 429.28433567212227, 429.28433567212227, 429.284335573928, 429.284335573928, 429.284335573928 } dinitrogen_nitrogen_g={ 167.98274590143077, 167.98274590143077, 167.98274590143077, 167.98274590143077, 167.94029049585134, 167.94029049585134, 167.94028194089543 } ammonium_nitrogen_g={ 163.45117445705193, 163.45117445705193, 163.4513877251115, 163.4513877251115, 163.45137465779942, 163.45137465779942, 163.4513745305692 } nitrate_nitrogen_g={ 3.9313860223222497, 3.9313860223222497, 3.931385194321642, 3.931385194321642, 3.9313104965111902, 3.9313104965111902, 3.9313104965111902 } plant_nitrogen_g={ 0, 0, 0, 0, 0, 0, 0 } heat_storage_megajoules={ 1962.449435545661, 1962.449435545661, 1962.449435545661, 1962.449435545661, 1962.4494355456761, 1962.4494355456761, 1962.4494355456761 } heat_closed_megajoules={ 1594.4182284683864, 1594.4182284683864, 1594.4182284683864, 1594.4182284683864, 1594.4182284684018, 1594.4182284683864, 1594.4182284683864 } heat_internal_production_megajoules={ 0.004970877167648001, 0.004970877167648001, 0.004970877167648001, 0.004970877167648001, 0.004970877167648001, 0.004970877182921326, 0.004970877182921326 } heat_internal_consumption_megajoules={ 0, 0, 0, 0, 0, 0, 0 } litter_soil_organic_heat_rebase_megajoules=1.52733253412881e-11
+error: hourly surface census inputs: organic_carbon_g_c=3.032357006633502e0->3.0323577299481377e0 litter_water_m3=5.014115732541875e-3->5.014115731972639e-3 water_vapor_mol=0e0->0e0 ice_water_equivalent_m3=0e0->0e0 surface_temperature_k=2.729577688729574e2->2.729569975063318e2
+error: hourly litter-soil rebase drift: substeps=2e1 cross_term_megajoules=1.8112811095019542e-18 booked_over_c_org=6.11914814498719e-6 last_temperature_k=2.7295703524410476e2 carbon_step_total_g_c=2.241789287538154e-8 census_temperature_gap_megajoules=6.842859992815851e-17
+error: hourly surface respiration rebase: carbon_g_c=3.032357006633502e0->3.032357707530245e0 temperature_used_k=2.729569975063318e2 booked_rebase_megajoules=4.775214175552261e-10
+error: hourly surface solver residual: signed_total_megajoules=-3.8146569236729935e-16 absolute_total_megajoules=1.7573139124427148e-14
+error: hourly WATSUB heat trace: terms=pre_storage,pre_closed,post_solve_storage,post_solve_closed,post_atmosphere_closed,post_state_storage,post_state_closed,ground_air_storage_delta,ground_air_atmospheric,ground_air_prescribed,ground_air_implicit,surface_net_radiation,surface_sensible,surface_latent,surface_vapor_sensible,combined_surface,represented_snow,exposed_ground,topsoil_vapor,topsoil_sensible,surface_phase,surface_storage,surface_conduction,soil_boundary_input,soil_boundary_output,external_water_advective_outward,soil_cell_source,transaction_surface_conduction,snow_reference,surface_phase_sensible_path_sum,soil_richards_enthalpy_change,soil_vapor_enthalpy_change,soil_phase_enthalpy_change,soil_phase_absolute_enthalpy_change,soil_spatial_heat_enthalpy_change,soil_phase_latent_heat,soil_heat_solver_freeze_thaw_latent,surface_internal_vapor_latent_path_sum,surface_atmospheric_water_thermalization_path_sum values_megajoules={ 1962.5135983894093, 1594.4873621893028, 1962.4635844282093, 1594.4373482281023, 1594.4373482281023, 1962.4494355451832, 1594.4182284683864, -0.0024431555044362335, 0.1351573239195953, 0, -0.13760047942396736, -0.19291357645342153, 0.13760047942396772, 0, 0.0022305069605492596, -0.05308259006890455, -0.053082590068904915, 0.0000000000000003677613769070831, 0, 0, 0, 0.0019022471702969668, -0.001902247170297348, 0.0037548168259660462, 0, -0.00636752022017063, 0, 0.001902247170297348, 0, 0, 0.006357885658673013, 0.00000000000014566126083082054, -0.026173467855029386, 0.026173467855143073, 0.005657063957256625, -0.01528063923667069, 0.02916334288173357, 0, 0 }
+error: hourly surface chemistry ownership: cell=0 accepted_snow_litter_g={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } accepted_snow_soil_nonband_g={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } accepted_snow_soil_band_g={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } direct_litter_g={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } direct_soil_nonband_g={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } direct_soil_band_g={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } litter_atmospheric_gas_flux_g={ -0.00000026057421210647023, -0.00000000002117299348672665, -0.00000550876350037347, -0.000008554754967015719, -0.0000000002009401518420354, -0.00000012723021039488404, -0.0000000000000000000004083919145674948 }
+info: stage execution census: 13 of 19 INSTRUMENTED stages never executed across 8760 simulated hour(s); 1 of 20 stages not yet instrumented
+info:   census is LIVE (positive control fired), so every zero below is a real finding about the model, not a dead instrument.
+info:   never executed (instrumented, ran zero times -- this is the finding):
+info:     plant_pre_emergence
+info:     plant_emergence_occurred
+info:     canopy_photosynthesis_occurred
+info:     root_water_uptake
+info:     symbiotic_nitrogen_fixation
+info:     second_plant_species
+info:     harvest_reproductive_organs
+info:     harvest_branch_stalk_and_reserve
+info:     tillage_soil_application
+info:     tillage_aboveground_application
+info:     fertilizer_application
+info:     day_of_year_reset
+info:     forcing_repeat_transition
+info:   executed:
+info:     plant_emergence_refresh entries=1541 first_hour=8641 last_hour=8760
+info:     canopy_carboxylation entries=1541 first_hour=8641 last_hour=8760
+info:     canopy_energy_balance entries=1541 first_hour=8641 last_hour=8760
+info:     nonsymbiotic_nitrogen_fixation entries=1541 first_hour=8641 last_hour=8760
+info:     scene_transition entries=1 first_hour=8760 last_hour=8760
+info:     census_positive_control entries=1541 first_hour=8641 last_hour=1421
+info:   NOT YET INSTRUMENTED (execution unknown -- absence of a record here is NOT evidence):
+info:     root_uptake_geometry
+error: HourlyCellConservationFailure

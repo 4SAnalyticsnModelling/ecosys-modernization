@@ -1,0 +1,26 @@
+{
+  "policy": "retain-through-F7-and-reproducibility",
+  "artifacts": [
+    {
+      "path": "evidence/runs/cycle10-verify-candidate-20261026/deck/ecosys_ng",
+      "sha256": "ac1d46d3bdaefde44d04351bcc0fdc098ad095300781cadd09fea77dca916d55"
+    }
+  ],
+  "cycle": 10,
+  "candidate": {
+    "role": "canonical verification binary (deck copy; produced audit/runs/ottawa/cycle10-verify-candidate-20261026)",
+    "path": "evidence/runs/cycle10-verify-candidate-20261026/deck/ecosys_ng",
+    "sha256": "ac1d46d3bdaefde44d04351bcc0fdc098ad095300781cadd09fea77dca916d55",
+    "source_commit": "b264d01",
+    "toolchain": "zig 0.17.0 aarch64-macos ReleaseSafe"
+  },
+  "verification": {
+    "run": "audit/runs/ottawa/cycle10-verify-candidate-20261026",
+    "deck": "evidence/runs/cycle10-verify-candidate-20261026/deck (pristine prod-examples copy)",
+    "result": "exit 1 at 2000 d60 h3 (issue-121, registered); zero HourlyLayerConservationFailure anywhere; trajectory h1..h18938 accepted",
+    "parity": "34 modelled-output files, 129112 rows bit-identical vs cycle9-verify-candidate-20261025 outputs through 1999 d360 h24",
+    "suites": "zig build test Debug and -Doptimize=ReleaseSafe: 4527/4529 (1 pre-existing skip, 1 disclosed issue-115 executable-root crash reproduced at base with fix stashed)",
+    "smoke": "audit/runs/ottawa/cycle10-restartx10-fixed-20261026 (restart lane, diagnostic only): reproduced issue-121 bit-identically at 2000 d60 h3"
+  },
+  "notes": "binary file hash not reproducible across relinks on macOS (LC_UUID) so source+toolchain pinning governs; deck staging copies are never committed (repo policy); issue-120 producer receipts in audit/runs/ottawa/cycle10-probe-* and cycle10-restartx*-20261026"
+}

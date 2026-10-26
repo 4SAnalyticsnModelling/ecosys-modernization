@@ -13,12 +13,19 @@ proven by deterministic probe ladder attempt3/4/5 down to bit-exact ulp arithmet
 from scratch: 1999 d286 accepted, 115,811-row bit parity vs cycle-8 through 1999 d285, suites both
 configs 4407/1/0; frontier advanced to 1999 d361 where issue-120 (HourlyLayerConservationFailure,
 subnormal oxygen pool 3.4e-313, one denormal ulp, layer_scope=17) is registered — cycle 00010 target.
+Cycle 10 (issue-120) CLOSED and pushed (D-13: writer = surface microbial oxygen batch on the litter
+gas slot — scope 17 decoded as kind=SURFACE; soil/gas/oxygen_allocation.zig solveLayer returned
+SUM_i round(shared*frac_i), a one-subnormal-ulp unbooked drift on denormal pools; trace-window
+(<= floatMin) identity early-return keeps shared pools bit-exact; producer pinned via 45-s
+restart-resume lane + TEMPDIAG120B/L/M/W brackets, discriminating test fails at HEAD).
+Verification from scratch: cleared h17401 through h18938, 34-file/129,112-row bit parity vs cycle-9
+through 1999 d360 h24; new distinct defect at 2000 d60 h3 registered as issue-121 (cycle 00011).
 Then issue-115 (test-fixture OOB, file absent from module gate root); DEV-022/DEV-023 leader-owned
 edge-case testing (formerly "adversarial revalidation") remains backlog. Legacy oracle blocked beyond
 h2173 (recorded).
 Verified strict frontier stays 0 in frontier.json (promotion only via update_frontier.py under P0
-binding); record-level strict trajectory now extends to h17400 accepted / 1999 d361 failed (issue-120).
-Earlier orientation (cycles 3-8 era) is superseded by cycles/cycle_0000{3..9}.md records.
+binding); record-level strict trajectory now extends to h18938 accepted / 2000 d60 h3 failed (issue-121).
+Earlier orientation (cycles 3-9 era) is superseded by cycles/cycle_0000{3..10}.md records.
 
 Numerical edge cases: [recovery playbook](playbooks/convergence-and-balance.md) — diagnose once in the
 smallest state; never loosen gates, floors or validators; ledger closure is per-day and independent.

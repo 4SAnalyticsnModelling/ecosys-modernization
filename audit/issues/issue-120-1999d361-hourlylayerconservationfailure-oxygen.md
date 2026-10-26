@@ -1,6 +1,11 @@
 # issue-120: HourlyLayerConservationFailure at 1999 d361 h1 (subnormal oxygen pool)
 
-Status: REGISTERED at cycle 00009 close (fix scope = cycle 00010).
+Status: RESOLVED and CLOSED at cycle 00010 (fix commit b264d01; verified from scratch
+2026-10-26: audit/runs/ottawa/cycle10-verify-candidate-20261026, binary ac1d46d3, zero
+HourlyLayerConservationFailure through total_hour 18938 (run ends at the DISTINCT new defect
+issue-121, 2000 d60 h3); 34-file/129,112-row bit-identical parity vs cycle-9 outputs through
+1999 d360 h24; suites Debug+ReleaseSafe 4527/4529 with only the disclosed issue-115
+executable-root crash).
 
 Evidence (audit/runs/ottawa/cycle9-verify-candidate-20261025/stderr.log, exit_code=1):
 - 86005: info: daily conservation accepted: day=360 year=1999 hour=24 (oxygen ledger 5.37e-14)

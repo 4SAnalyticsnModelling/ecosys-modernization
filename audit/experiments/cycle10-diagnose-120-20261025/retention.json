@@ -1,0 +1,19 @@
+{
+  "policy": "retain-through-F7-and-reproducibility",
+  "cycle": 10,
+  "purpose": "issue-120 producer diagnosis: probe decks (never committed), probe patch snapshots, unit-level drift reproduction harness",
+  "artifacts": [
+    {
+      "path": "audit/experiments/cycle10-diagnose-120-20261025/prefix-drift-repro/prefix_test.zig",
+      "note": "standalone HEAD-copy harness; FAILS at HEAD (pool bits 1000000000 -> fffffffff) and PASSES against the fixed module"
+    },
+    {
+      "path": "audit/experiments/cycle10-diagnose-120-20261025/probes-attempt2b.patch",
+      "note": "attempt-2b probe vintage; later 120B/L/M/W probe edits were reverted from the working tree without a final snapshot (recoverable from session JSONL only) - recorded as process lesson"
+    }
+  ],
+  "restart_lane": {
+    "deck": "evidence/runs/cycle10-restartx-20261026/deck (consumed probe deck copy + scene f25y98 record6=YES)",
+    "property": "engine resumes at total_hour 17400 and reproduces the fatal in ~45 s; re-runnable; canonical_root in restart.manifest is absolute (writes land in the source probe-deck output dir)"
+  }
+}
