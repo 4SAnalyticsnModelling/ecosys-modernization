@@ -1,0 +1,5 @@
+# parity receipt 2026-10-26 (post-verify)
+# reference: evidence/runs/cycle9-verify-candidate-20261025/deck/runottawa_output_files/modelled_outputs (ends 1999 d360 h24)
+# script: .tmp/cycle10_parity.py
+compared_files=34 compared_rows=129112
+IDENTICAL through available cycle-10 outputs

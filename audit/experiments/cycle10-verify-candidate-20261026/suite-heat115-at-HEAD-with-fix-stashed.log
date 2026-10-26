@@ -1,0 +1,35 @@
+test-executable
++- run test 3 pass, 1 crash (4 total)
+error: 'stages.hourly_heat_water_solute.test.fixed external hour recovery escalates through the full chain and stops on hard defects' terminated with signal ABRT with stderr:
+       thread 23748416 panic: index out of bounds: index 4, len 4
+       /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:10686:27: 0x10451f677 in run (test)
+                   self.schedules[self.attempts] = substep_count;
+                                 ^
+       /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:12168:16: 0x10451f70b in runBoundedRecoveryAttempt__func_1002 (test)
+           attempt.run(substep_count) catch |err| {
+                      ^
+       /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:12263:46: 0x10452009b in recoverFixedExternalHourAdaptively__func_1001 (test)
+                   if (try runBoundedRecoveryAttempt(attempt, substep_count)) |final_error| return final_error;
+                                                    ^
+       /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:11966:46: 0x10452047b in recoverFixedExternalHour__func_999 (test)
+           return recoverFixedExternalHourAdaptively(
+                                                    ^
+       /Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/src/stages/hourly_heat_water_solute.zig:10696:33: 0x1045236bb in test.fixed external hour recovery escalates through the full chain and stops on hard defects (test)
+               recoverFixedExternalHour(&retryable),
+                                       ^
+       /opt/homebrew/Cellar/zig/0.17.0/lib/zig/compiler/test_runner.zig:143:68: 0x1044fa67b in mainServer (test)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       /opt/homebrew/Cellar/zig/0.17.0/lib/zig/compiler/test_runner.zig:72:26: 0x1044fac87 in main (test)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       /opt/homebrew/Cellar/zig/0.17.0/lib/zig/std/start.zig:789:88: 0x1044f8bd3 in callMain (test)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+                                                                                              ^
+       ???:?:?: 0x18ca7fe7f in start (/usr/lib/dyld)
+failed command: ./.zig-cache/o/47d439793cac4b0457b7af9223b1fbff/test --cache-dir=./.zig-cache --seed=0xe31d8204 --listen=-
+
+Build Summary: 1/3 steps succeeded (1 failed); 3/4 tests passed (1 crashed)
+test-executable transitive failure
++- run test 3 pass, 1 crash (4 total)
+
