@@ -100,6 +100,27 @@ pub fn solveLayer(state: *State, cell_index: usize, layer_index: usize, shared: 
 
     var final_gaseous_g_o: f64 = 0;
     var final_aqueous_g_o: f64 = 0;
+    // issue-120 (cycle 00010): on the denormal gram grid the per-population slice
+    // `shared * fraction` rounds, every slice solve returns its inputs verbatim
+    // (`oxygen_solver.solve` preserves trace inventories at or below `floatMin` with zero
+    // uptake), and the write-back is the SUM of the rounded slices — which differs from the
+    // shared pool by one subnormal ulp. That silent pool drift is an unbooked perturbation
+    // of the hourly layer-conservation gate. In this window the solve outcome for every
+    // population is provably the identity, so finish the layer exactly: normalize the
+    // allocation fractions, clear the per-population solver state, and keep the shared
+    // inventories bit-for-bit unchanged.
+    if (shared.gaseous_oxygen_g_o + shared.aqueous_oxygen_g_o <= std.math.floatMin(f64)) {
+        for (populations, 0..) |_, population_index| {
+            const index = base + population_index;
+            state.allocation_fraction[index] = state.allocation_fraction[index] / raw_sum;
+            state.oxygen_uptake_g_o[index] = 0;
+            state.demand_satisfaction_fraction[index] = 0;
+            state.iterations[index] = 0;
+        }
+        shared.gaseous_flux_g_o = 0;
+        shared.aqueous_flux_g_o = 0;
+        return;
+    }
     for (populations, 0..) |population, population_index| {
         const index = base + population_index;
         const fraction = state.allocation_fraction[index] / raw_sum;
@@ -181,4 +202,52 @@ test "invalid population leaves shared oxygen unmodified" {
     const before = layer;
     try std.testing.expectError(error.NonFiniteOxygenPopulation, solveLayer(&state, 0, 0, &layer, &populations, .{ .minimum_allocation_fraction = 0.001, .negligible_demand_g_o = 1e-12 }, testOptions()));
     try std.testing.expectEqualDeep(before, layer);
+}
+
+test "issue-120 trace-window allocation preserves subnormal shared oxygen exactly" {
+    var state = try State.init(std.testing.allocator, 2, 3, 19);
+    defer state.deinit();
+    // Heap-backed operands keep the decisive subnormal literals out of constant folding
+    // (issue-119 lesson). The gaseous pool is the exact fatal-hour value from the Ottawa
+    // run (1999 d361 h1): with three equal-demand populations the pre-fix slice sum
+    // drifted it one subnormal ulp (repro saved in the cycle-10 experiment directory).
+    const cells = try std.testing.allocator.alloc(f64, 2);
+    defer std.testing.allocator.free(cells);
+    cells[0] = 3.39519326554e-313;
+    cells[1] = 0;
+    var layer: SharedLayer = .{
+        .gaseous_oxygen_g_o = cells[0],
+        .aqueous_oxygen_g_o = cells[1],
+        .gaseous_flux_g_o = 0,
+        .aqueous_flux_g_o = 0,
+        .water_volume_m3 = 2,
+        .air_volume_m3 = 3,
+        .oxygen_solubility_water_to_air = 0.03,
+        .gas_exchange_rate_per_step = 0.5,
+        .maximum_aqueous_oxygen_concentration_g_o_per_m3 = 1,
+    };
+    var populations: [19]Population = undefined;
+    for (&populations, 0..) |*population, index| population.* = .{
+        .is_aerobic = index < 3,
+        .previous_oxygen_demand_g_o = if (index < 3) 2e-11 else 0,
+        .fallback_active_fraction = 1,
+        .uptake_conductance_m3_per_step = 0.02,
+        .oxygen_half_saturation_g_o_per_m3 = 0.1,
+        .maximum_oxygen_uptake_g_o = 1e-13,
+    };
+    const gaseous_before = layer.gaseous_oxygen_g_o;
+    const aqueous_before = layer.aqueous_oxygen_g_o;
+    try solveLayer(&state, 1, 2, &layer, &populations, .{
+        .minimum_allocation_fraction = 0.001,
+        .negligible_demand_g_o = 1e-12,
+    }, testOptions());
+    try std.testing.expectEqual(gaseous_before, layer.gaseous_oxygen_g_o);
+    try std.testing.expectEqual(aqueous_before, layer.aqueous_oxygen_g_o);
+    try std.testing.expectEqual(@as(f64, 0), layer.gaseous_flux_g_o);
+    try std.testing.expectEqual(@as(f64, 0), layer.aqueous_flux_g_o);
+    const base = try state.offset(1, 2);
+    for (0..19) |index| {
+        try std.testing.expectEqual(@as(f64, 0), state.oxygen_uptake_g_o[base + index]);
+        try std.testing.expectEqual(@as(u16, 0), state.iterations[base + index]);
+    }
 }

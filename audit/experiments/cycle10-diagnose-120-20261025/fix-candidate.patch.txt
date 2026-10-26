@@ -1,0 +1,98 @@
+--- a/ecosys-ng/src/soil/gas/oxygen_allocation.zig
++++ b/ecosys-ng/src/soil/gas/oxygen_allocation.zig
+@@ solveLayer, immediately before `var final_gaseous_g_o: f64 = 0;` (line ~101)
+     // issue-120: below the smallest normal, every population share quantizes to the fixed
+-    // 2^-1074 subnormal grid and the independent per-population solves re-round each share,
+-    // so the committed SUM_i round(x_i * fraction_i) can miss the layer inventory by
+-    // subnormal ulps. oxygen_solver already declares this magnitude class "preserve the
+-    // trace inventory exactly"; honour that across the partition by splitting the
+-    // flux-folded phase totals with an exact sequential remainder (uniform subnormal grid
+-    // makes every clamp/subtraction bit-exact). Non-trace hours keep the original
+-    // per-population products bit-for-bit.
+-    var trace_rem_gaseous: f64 = 0;
+-    var trace_rem_aqueous: f64 = 0;
+-    var trace_last_active: ?usize = null;
+-    const trace_inventory = (shared.gaseous_oxygen_g_o + shared.gaseous_flux_g_o) +
+-        (shared.aqueous_oxygen_g_o + shared.aqueous_flux_g_o) <= std.math.floatMin(f64);
+-    if (trace_inventory) {
+-        trace_rem_gaseous = shared.gaseous_oxygen_g_o + shared.gaseous_flux_g_o;
+-        trace_rem_aqueous = shared.aqueous_oxygen_g_o + shared.aqueous_flux_g_o;
+-        for (0..populations.len) |population_index|
+-            if (state.allocation_fraction[base + population_index] / raw_sum != 0)
+-                trace_last_active = population_index;
+-    }
++    // (existing loop gains the trace branch below)
+@@ inside the population loop, replacing the four allocated_* product fields
+-        const result = try oxygen_solver.solve(.{
+-            .allocated_gaseous_oxygen_g_o = shared.gaseous_oxygen_g_o * fraction,
+-            .allocated_aqueous_oxygen_g_o = shared.aqueous_oxygen_g_o * fraction,
+-            .allocated_gaseous_flux_g_o = shared.gaseous_flux_g_o * fraction,
+-            .allocated_aqueous_flux_g_o = shared.aqueous_flux_g_o * fraction,
++        var share_gaseous = shared.gaseous_oxygen_g_o * fraction;
++        var share_aqueous = shared.aqueous_oxygen_g_o * fraction;
++        var share_gaseous_flux = shared.gaseous_flux_g_o * fraction;
++        var share_aqueous_flux = shared.aqueous_flux_g_o * fraction;
++        if (trace_inventory and trace_last_active != null) {
++            // Flux is folded into the phase remainder; shares are clamped against it so
++            // partial sums stay on the subnormal grid (exact) and the last active
++            // population receives the exact residual.
++            share_gaseous_flux = 0;
++            share_aqueous_flux = 0;
++            if (population_index == trace_last_active.?) {
++                share_gaseous = trace_rem_gaseous;
++                share_aqueous = trace_rem_aqueous;
++            } else {
++                share_gaseous = @min((shared.gaseous_oxygen_g_o + shared.gaseous_flux_g_o) * fraction, trace_rem_gaseous);
++                share_aqueous = @min((shared.aqueous_oxygen_g_o + shared.aqueous_flux_g_o) * fraction, trace_rem_aqueous);
++                trace_rem_gaseous -= share_gaseous;
++                trace_rem_aqueous -= share_aqueous;
++            }
++        }
++        const result = try oxygen_solver.solve(.{
++            .allocated_gaseous_oxygen_g_o = share_gaseous,
++            .allocated_aqueous_oxygen_g_o = share_aqueous,
++            .allocated_gaseous_flux_g_o = share_gaseous_flux,
++            .allocated_aqueous_flux_g_o = share_aqueous_flux,
+(imports: ensure `const std = @import("std");` already present — yes, line 1)
+
+APPEND test (oxygen_allocation.zig end), literals via allocator-backed cells (cycle-9
+comptime-folding lesson):
+
+BRUTE-FORCE VERIFIED literals (python float64, 3-way 1/3 split at the observed pool scale):
+  g = 3.39519325823e-313, a = 3.39519334193e-313  -> (fg+fa) - (g+a) = +1 ulp (5e-324) PRE-FIX.
+  (First attempt 3.39519326554e-313/1.69759663277e-313 drifts 0 end-to-end — component sums
+   can cancel; the validator compares the SUM, so literals were searched on the sum.)
+
+test "issue-120 trace-inventory partition preserves the layer oxygen sum exactly" {
+    var state = try State.init(std.testing.allocator, 2, 3, 19);
+    defer state.deinit();
+    const g_cell = try std.testing.allocator.create(f64);
+    defer std.testing.allocator.destroy(g_cell);
+    const a_cell = try std.testing.allocator.create(f64);
+    defer std.testing.allocator.destroy(a_cell);
+    g_cell.* = 3.39519325823e-313;
+    a_cell.* = 3.39519334193e-313;
+    var populations: [19]Population = undefined;
+    for (&populations, 0..) |*population, index| population.* = .{
+        .is_aerobic = index < 3,
+        .previous_oxygen_demand_g_o = if (index < 3) 2e-11 else 0,
+        .fallback_active_fraction = 1,
+        .uptake_conductance_m3_per_step = if (index < 3) 1e-9 else 0,
+        .oxygen_half_saturation_g_o_per_m3 = if (index < 3) 1e-6 else 0,
+        .maximum_oxygen_uptake_g_o = if (index < 3) 1e-13 else 0,
+    };
+    var layer: SharedLayer = .{ .gaseous_oxygen_g_o = g_cell.*, .aqueous_oxygen_g_o = a_cell.*,
+        .gaseous_flux_g_o = 0, .aqueous_flux_g_o = 0, .water_volume_m3 = 2, .air_volume_m3 = 3,
+        .oxygen_solubility_water_to_air = 0.03, .gas_exchange_rate_per_step = 0.5,
+        .maximum_aqueous_oxygen_concentration_g_o_per_m3 = 1 };
+    const before_sum = layer.gaseous_oxygen_g_o + layer.aqueous_oxygen_g_o;
+    try solveLayer(&state, 1, 2, &layer, &populations, .{ .minimum_allocation_fraction = 0.001,
+        .negligible_demand_g_o = 1e-12 }, testOptions());
+    try std.testing.expect(layer.gaseous_oxygen_g_o >= 0);
+    try std.testing.expect(layer.aqueous_oxygen_g_o >= 0);
+    // discriminating assertion: pre-fix this SUM misses by exactly +1 subnormal ulp
+    try std.testing.expectEqual(before_sum, layer.gaseous_oxygen_g_o + layer.aqueous_oxygen_g_o);
+    const base = (1 * 3 + 2) * 19;
+    for (0..populations.len) |i|
+        try std.testing.expectEqual(@as(f64, 0), state.oxygen_uptake_g_o[base + i]);
+}

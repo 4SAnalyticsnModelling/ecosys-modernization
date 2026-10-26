@@ -1,0 +1,375 @@
+diff --git a/audit/issues/issue-120-1999d361-hourlylayerconservationfailure-oxygen.md b/audit/issues/issue-120-1999d361-hourlylayerconservationfailure-oxygen.md
+index 6f17058..5a4acdd 100644
+--- a/audit/issues/issue-120-1999d361-hourlylayerconservationfailure-oxygen.md
++++ b/audit/issues/issue-120-1999d361-hourlylayerconservationfailure-oxygen.md
+@@ -30,3 +30,32 @@ bit-reproducible at output level (retention.json).
+ 
+ Frontier: last accepted hour = 1999 d360 h24 (scene_hour 8640; total_hour 17400) — advanced from
+ issue-119's h15600 by 1,800 hours (~75 days) of clean trajectory.
++
++## Investigation (cycle 00010)
++
++Attempt-1 probe run (audit/runs/ottawa/cycle10-probe-17401-20261025, probe binary
++sha256 5c77662c0e1119a4bd0eefb2041fa0681967714c743816a57ad2ff66dfdbb401, exit 1, fatal
++reproduced bit-exactly):
++- TEMPDIAG120P (soil/gas/oxygen_step writeback operands) = 0 lines and TEMPDIAG120F (frozen-layer
++  skip) = 0 lines across the whole run => the microbial oxygen kernel never visits this layer at
++  trace scale; the allocation-split sum-drift hypothesis, while arithmetically real in isolation,
++  never fires here.
++- TEMPDIAG120T (before/after snapshot around coupled_gas_solver.solve inside
++  soil/gas/transport_step.zig State.advance) = 0 lines => the coupled gas solver never perturbs
++  any trace-scale pool.
++- TEMPDIAG120A (validator per-hour trace dump for pools < 1e-300): scope-17 nonzero residuals
++  occur only in the first hours of 1999 d361 — hour before h-2: before=3.0581182251113463e-297,
++  after=3.39519326554e-313 (residual +3.395e-313, within tol); h-1: before=2.080663984240254e0
++  (anomaly: previous check ended at 3.395e-313), after=3.39519326554e-313 (residual 1.6755e-12,
++  within tol); h0: fatal +1 subnormal ulp. Drift recurs hourly thereafter.
++- Conclusion so far: an untagged writer (or layer-scope identity shift) perturbs the pool without
++  touching the four hourly ledgers.
++
++Attempt-2b probe run (audit/runs/ottawa/cycle10-probe-17401-attempt2b-20261026, binary
++sha256 ca89c962..., adds TEMPDIAG120V slot-diff brackets around advanceDissolvedGasTransport,
++advanceSoilGasTransport (remainder outside the solve) and geometry_disturbance.finalize
++(hourly relayering in stages/hourly_vegetation.zig), plus TEMPDIAG120R bracketing
++plant_root_gas_transport.advanceOxygen soil-side uptake). Restart-from-17400 was attempted first
++but the engine resumes=false despite the scene control record and restart.manifest; scratch truth.
++Receipt: pending (run in progress at checkpoint time).
++
+diff --git a/ecosys-ng/src/plant/root/plant_root_gas_transport.zig b/ecosys-ng/src/plant/root/plant_root_gas_transport.zig
+index 500e8f7..35323a6 100644
+--- a/ecosys-ng/src/plant/root/plant_root_gas_transport.zig
++++ b/ecosys-ng/src/plant/root/plant_root_gas_transport.zig
+@@ -7,6 +7,50 @@ const plant_water = @import("water_balance.zig");
+ const soil_properties = @import("../../soil/water/solver_properties.zig");
+ const charge_classification = @import("../../soil/solute/charge_classification.zig");
+ 
++// TEMPDIAG120R (cycle 10 probe, revert before candidate): soil O2 slot diff for root uptake.
++const Probe120Soil = struct {
++    g: [512]f64 = undefined,
++    a: [512]f64 = undefined,
++    have: bool = false,
++
++    fn snap_soil(self: *Probe120Soil, soil_gas: *const gas_transport.State) void {
++        const stride = gas_transport.species_count;
++        const ox = @intFromEnum(gas_transport.Species.oxygen);
++        var slot: usize = 0;
++        var idx: usize = ox;
++        while (idx < soil_gas.gaseous_mass_g.len and slot < self.g.len) : ({
++            slot += 1;
++            idx += stride;
++        }) {
++            self.g[slot] = soil_gas.gaseous_mass_g[idx];
++            self.a[slot] = soil_gas.dissolved_mass_g[idx];
++        }
++        self.have = true;
++    }
++
++    fn diff_soil(self: *Probe120Soil, soil_gas: *const gas_transport.State) void {
++        if (!self.have) return;
++        const stride = gas_transport.species_count;
++        const ox = @intFromEnum(gas_transport.Species.oxygen);
++        var slot: usize = 0;
++        var idx: usize = ox;
++        while (idx < soil_gas.gaseous_mass_g.len and slot < self.g.len) : ({
++            slot += 1;
++            idx += stride;
++        }) {
++            const old_sum = self.g[slot] + self.a[slot];
++            const new_sum = soil_gas.gaseous_mass_g[idx] + soil_gas.dissolved_mass_g[idx];
++            if (@min(old_sum, new_sum) < 1.0e-300 and (self.g[slot] != soil_gas.gaseous_mass_g[idx] or self.a[slot] != soil_gas.dissolved_mass_g[idx])) std.log.err(
++                "TEMPDIAG120R block=root_oxygen slot={d} oldg={e} olda={e} newg={e} newa={e} sumdelta={e}",
++                .{ slot, self.g[slot], self.a[slot], soil_gas.gaseous_mass_g[idx], soil_gas.dissolved_mass_g[idx], new_sum - old_sum },
++            );
++            self.g[slot] = soil_gas.gaseous_mass_g[idx];
++            self.a[slot] = soil_gas.dissolved_mass_g[idx];
++        }
++    }
++};
++var probe120_root: Probe120Soil = .{};
++
+ pub const Settings = struct {
+     liquid_tortuosity_coefficient: f64,
+     minimum_aqueous_volume_m3: f64,
+@@ -237,6 +281,8 @@ pub fn advanceOxygen(
+     previous_total_aerobic_oxygen_demand_g_o_by_soil: []const f64,
+     settings: OxygenSettings,
+ ) !root_exchange.OxygenConstraintTotals {
++    // TEMPDIAG120R (cycle 10 probe, revert before candidate): bracket root oxygen uptake.
++    probe120_root.snap_soil(soil_gas);
+     try validateOxygen(roots, water, grid, properties, soil_gas, biological_domain_count_by_plant, active_by_plant, previous_total_aerobic_oxygen_demand_g_o_by_soil, settings);
+ 
+     const species_per_cell = roots.plant_count / grid.cell_count;
+@@ -370,6 +416,7 @@ pub fn advanceOxygen(
+         settings.significance_threshold_fraction,
+     );
+     try roots.validateFinite();
++    probe120_root.diff_soil(soil_gas); // TEMPDIAG120R (revert)
+     return totals;
+ }
+ 
+diff --git a/ecosys-ng/src/soil/gas/oxygen_step.zig b/ecosys-ng/src/soil/gas/oxygen_step.zig
+index e84a575..ab23313 100644
+--- a/ecosys-ng/src/soil/gas/oxygen_step.zig
++++ b/ecosys-ng/src/soil/gas/oxygen_step.zig
+@@ -64,6 +64,16 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
+         const base = layer * populations_per_layer;
+         const water_m3 = context.grid.matrix_liquid_water_m3[layer];
+         if (water_m3 <= 0) {
++            // TEMPDIAG120F (cycle 10 probe, revert before candidate): frozen-layer skip path —
++            // was a trace oxygen pool left untouched by this kernel?
++            if (gas_transport.massIndex(layer, gas_transport.Species.oxygen, context.gas.cell_count)) |gi| {
++                const pg = context.gas.gaseous_mass_g[gi];
++                const pa = context.gas.dissolved_mass_g[gi];
++                if (pg + pa < 1.0e-300) std.log.err(
++                    "TEMPDIAG120F layer={d} water_m3={e} poolg={e} poola={e}",
++                    .{ layer, water_m3, pg, pa },
++                );
++            } else |_| {}
+             @memset(context.result.allocation_fraction[base .. base + populations_per_layer], 0);
+             @memset(context.result.oxygen_uptake_g_o[base .. base + populations_per_layer], 0);
+             @memset(context.result.demand_satisfaction_fraction[base .. base + populations_per_layer], 0);
+@@ -123,6 +133,26 @@ pub fn applyTile(context: *ApplyContext, range: compute.CellRange) !void {
+         @memcpy(context.result.oxygen_uptake_g_o[base .. base + populations_per_layer], context.staging.staged_allocation.oxygen_uptake_g_o[base .. base + populations_per_layer]);
+         @memcpy(context.result.demand_satisfaction_fraction[base .. base + populations_per_layer], context.staging.staged_allocation.demand_satisfaction_fraction[base .. base + populations_per_layer]);
+         @memcpy(context.result.iterations[base .. base + populations_per_layer], context.staging.staged_allocation.iterations[base .. base + populations_per_layer]);
++        // TEMPDIAG120P (cycle 10 probe, revert before candidate): population-split sum drift on
++        // trace pools — dump exact operands at every tiny-pool kernel visit.
++        {
++            const old_g = context.gas.gaseous_mass_g[gas_index];
++            const old_a = context.gas.dissolved_mass_g[gas_index];
++            const new_g = shared.gaseous_oxygen_g_o;
++            const new_a = shared.aqueous_oxygen_g_o;
++            if (@min(old_g + old_a, new_g + new_a) < 1.0e-300) {
++                var fsum: f64 = 0;
++                var uptake_sum: f64 = 0;
++                for (0..populations_per_layer) |k| {
++                    fsum += context.result.allocation_fraction[base + k];
++                    uptake_sum += context.result.oxygen_uptake_g_o[base + k];
++                }
++                std.log.err(
++                    "TEMPDIAG120P layer={d} cell={d} oldg={e} olda={e} newg={e} newa={e} sumdelta={e} fsum={e} uptake={e} npop={d}",
++                    .{ layer, cell, old_g, old_a, new_g, new_a, (new_g + new_a) - (old_g + old_a), fsum, uptake_sum, populations_per_layer },
++                );
++            }
++        }
+         context.gas.gaseous_mass_g[gas_index] = shared.gaseous_oxygen_g_o;
+         context.gas.dissolved_mass_g[gas_index] = shared.aqueous_oxygen_g_o;
+     }
+diff --git a/ecosys-ng/src/soil/gas/transport_step.zig b/ecosys-ng/src/soil/gas/transport_step.zig
+index 4693a85..03fe819 100644
+--- a/ecosys-ng/src/soil/gas/transport_step.zig
++++ b/ecosys-ng/src/soil/gas/transport_step.zig
+@@ -509,6 +509,12 @@ pub const State = struct {
+         // after the Ottawa gas frontier has been captured and replayed.
+         step_options.emit_failure_diagnostics = request.failure_report != null or
+             time_step_hours == 1.0 / 64.0;
++        // TEMPDIAG120T (cycle 10 probe, revert before candidate): snapshot trace oxygen slots
++        // around the coupled gas solve to catch any pool perturbation without booked flux.
++        const probe120_gas_before = try self.allocator.dupe(f64, gas_state.gaseous_mass_g);
++        defer self.allocator.free(probe120_gas_before);
++        const probe120_aq_before = try self.allocator.dupe(f64, gas_state.dissolved_mass_g);
++        defer self.allocator.free(probe120_aq_before);
+         const result = gas_solver.solve(self.allocator, gas_state, solve_inputs, step_options) catch |err| {
+             if (!builtin.is_test) std.log.warn(
+                 "TEMP_DIAGNOSTIC soil-gas transport solve failed: time_step_hours={e} failure_report_bound={} error={s}",
+@@ -536,6 +542,22 @@ pub const State = struct {
+             profile.counters.solver_ns += temporary_profile_section_start.durationTo(now).nanoseconds;
+             temporary_profile_section_start = now;
+         }
++        // TEMPDIAG120T (cycle 10 probe, revert before candidate): compare solve-published oxygen
++        // masses against the pre-solve snapshot for trace pools.
++        {
++            var gas_cell: usize = 0;
++            while (gas_cell * gas.species_count < gas_state.gaseous_mass_g.len) : (gas_cell += 1) {
++                const slot = gas_cell * gas.species_count + @intFromEnum(gas.Species.oxygen);
++                const bg = probe120_gas_before[slot];
++                const ba = probe120_aq_before[slot];
++                const ng = gas_state.gaseous_mass_g[slot];
++                const na = gas_state.dissolved_mass_g[slot];
++                if (@min(bg + ba, ng + na) < 1.0e-300 and (ng != bg or na != ba)) std.log.err(
++                    "TEMPDIAG120T gascell={d} bg={e} ba={e} ng={e} na={e} sumdelta={e} tsh={e}",
++                    .{ gas_cell, bg, ba, ng, na, (ng + na) - (bg + ba), time_step_hours },
++                );
++            }
++        }
+         @memcpy(self.atmospheric_flux_g_per_h, self.substep_atmospheric_flux_g);
+         @memcpy(self.subsurface_flux_g_per_h, self.substep_subsurface_flux_g);
+         @memcpy(self.accepted_bubble_transfer_g_per_step, self.substep_bubble_transfer_g);
+diff --git a/ecosys-ng/src/stages/hourly_heat_water_solute.zig b/ecosys-ng/src/stages/hourly_heat_water_solute.zig
+index cf26736..2e6a606 100644
+--- a/ecosys-ng/src/stages/hourly_heat_water_solute.zig
++++ b/ecosys-ng/src/stages/hourly_heat_water_solute.zig
+@@ -7825,6 +7825,7 @@ fn CoupledSubstepTransaction(
+ 
+         noinline fn advanceDissolvedGasTransport(self: *Self, time_step_hours: f64) !void {
+             const context = self.context;
++            probe120_dissolved.snap(context); // TEMPDIAG120V (revert)
+             try context.soil_dissolved_gas_face_parameters.refresh(
+                 context.grid,
+                 context.soil_transport_faces,
+@@ -7883,10 +7884,12 @@ fn CoupledSubstepTransaction(
+             try addFiniteSlices(self.dissolved_gas_boundary_total_g, context.soil_dissolved_gas_transport.boundary_net_flux_g);
+             try addFiniteSlices(self.dissolved_gas_micropore_face_total_g, self.dissolved_gas_micropore_face_step_g);
+             try addFiniteSlices(self.dissolved_gas_macropore_face_total_g, self.dissolved_gas_macropore_face_step_g);
++            probe120_dissolved.diff(context, "dissolved_gas"); // TEMPDIAG120V (revert)
+         }
+ 
+         noinline fn advanceSoilGasTransport(self: *Self, time_step_hours: f64) !void {
+             const context = self.context;
++            probe120_gassolve.snap(context); // TEMPDIAG120V (revert)
+             const temporary_profile_active = !builtin.is_test and
+                 context.executed_weather_hours.* >= 2000 and
+                 context.executed_weather_hours.* < 2008;
+@@ -7974,6 +7977,7 @@ fn CoupledSubstepTransaction(
+             try addFiniteSlices(self.gas_atmospheric_total_g, context.soil_gas_transport.atmospheric_flux_g_per_h);
+             try addFiniteSlices(self.gas_subsurface_total_g, context.soil_gas_transport.subsurface_flux_g_per_h);
+             try addFiniteSlices(self.gas_face_total_g, context.soil_gas_transport.accepted_face_flux_g_per_h);
++            probe120_gassolve.diff(context, "gas_transport"); // TEMPDIAG120V (revert)
+             if (temporary_profile_active)
+                 self.temporary_profile_soil_gas_stage_post_ns += temporary_profile_post_start
+                     .durationTo(std.Io.Clock.now(.boot, context.io)).nanoseconds;
+@@ -12006,6 +12010,56 @@ const gas_coarsening_probe_cooldown_hours: u8 = 23;
+ /// `HANDOFF-SUMMARY-2026-09-20.md` Section 3's human-reviewer decision.
+ const universal_nfh_baseline_substeps: u8 = 4;
+ 
++// TEMPDIAG120 attempt-2 (cycle 10 probe, revert before candidate): bracketed slot-diff probes
++// pinning which sub-step leg perturbs subnormal soil-layer oxygen pools.
++const Probe120Pair = struct {
++    g: [512]f64 = undefined,
++    a: [512]f64 = undefined,
++    have: bool = false,
++
++    fn snap(self: *Probe120Pair, context: anytype) void {
++        const g = context.gas_transport.gaseous_mass_g;
++        const a = context.gas_transport.dissolved_mass_g;
++        const stride = ecosys.gas_transport.species_count;
++        const ox = @intFromEnum(ecosys.gas_transport.Species.oxygen);
++        var slot: usize = 0;
++        var idx: usize = ox;
++        while (idx < g.len and slot < self.g.len) : ({
++            slot += 1;
++            idx += stride;
++        }) {
++            self.g[slot] = g[idx];
++            self.a[slot] = a[idx];
++        }
++        self.have = true;
++    }
++
++    fn diff(self: *Probe120Pair, context: anytype, comptime label: []const u8) void {
++        if (!self.have) return;
++        const g = context.gas_transport.gaseous_mass_g;
++        const a = context.gas_transport.dissolved_mass_g;
++        const stride = ecosys.gas_transport.species_count;
++        const ox = @intFromEnum(ecosys.gas_transport.Species.oxygen);
++        var slot: usize = 0;
++        var idx: usize = ox;
++        while (idx < g.len and slot < self.g.len) : ({
++            slot += 1;
++            idx += stride;
++        }) {
++            const old_sum = self.g[slot] + self.a[slot];
++            const new_sum = g[idx] + a[idx];
++            if (@min(old_sum, new_sum) < 1.0e-300 and (self.g[slot] != g[idx] or self.a[slot] != a[idx])) std.log.err(
++                "TEMPDIAG120V block={s} slot={d} oldg={e} olda={e} newg={e} newa={e} sumdelta={e}",
++                .{ label, slot, self.g[slot], self.a[slot], g[idx], a[idx], new_sum - old_sum },
++            );
++            self.g[slot] = g[idx];
++            self.a[slot] = a[idx];
++        }
++    }
++};
++var probe120_dissolved: Probe120Pair = .{};
++var probe120_gassolve: Probe120Pair = .{};
++
+ comptime {
+     // `stiff_heat_direct_recovery_substeps` names the first rung of this
+     // stage's error-aware rescue chain (the established three-minute
+diff --git a/ecosys-ng/src/stages/hourly_vegetation.zig b/ecosys-ng/src/stages/hourly_vegetation.zig
+index 8434a7a..15e25bb 100644
+--- a/ecosys-ng/src/stages/hourly_vegetation.zig
++++ b/ecosys-ng/src/stages/hourly_vegetation.zig
+@@ -16,6 +16,55 @@ const tile_kernels = @import("tile_kernels.zig");
+ const group_support = @import("hourly_process_support.zig");
+ const geometry_disturbance = @import("hourly_geometry_disturbance.zig");
+ 
++// TEMPDIAG120 attempt-2 (cycle 10 probe, revert before candidate): bracket the hourly
++// geometry finalize (relayering/remap) for subnormal soil O2 slot rewrites.
++const Probe120Pair = struct {
++    g: [512]f64 = undefined,
++    a: [512]f64 = undefined,
++    have: bool = false,
++
++    fn snap(self: *Probe120Pair, context: anytype) void {
++        const g = context.gas_transport.gaseous_mass_g;
++        const a = context.gas_transport.dissolved_mass_g;
++        const stride = ecosys.gas_transport.species_count;
++        const ox = @intFromEnum(ecosys.gas_transport.Species.oxygen);
++        var slot: usize = 0;
++        var idx: usize = ox;
++        while (idx < g.len and slot < self.g.len) : ({
++            slot += 1;
++            idx += stride;
++        }) {
++            self.g[slot] = g[idx];
++            self.a[slot] = a[idx];
++        }
++        self.have = true;
++    }
++
++    fn diff(self: *Probe120Pair, context: anytype, comptime label: []const u8) void {
++        if (!self.have) return;
++        const g = context.gas_transport.gaseous_mass_g;
++        const a = context.gas_transport.dissolved_mass_g;
++        const stride = ecosys.gas_transport.species_count;
++        const ox = @intFromEnum(ecosys.gas_transport.Species.oxygen);
++        var slot: usize = 0;
++        var idx: usize = ox;
++        while (idx < g.len and slot < self.g.len) : ({
++            slot += 1;
++            idx += stride;
++        }) {
++            const old_sum = self.g[slot] + self.a[slot];
++            const new_sum = g[idx] + a[idx];
++            if (@min(old_sum, new_sum) < 1.0e-300 and (self.g[slot] != g[idx] or self.a[slot] != a[idx])) std.log.err(
++                "TEMPDIAG120V block={s} slot={d} oldg={e} olda={e} newg={e} newa={e} sumdelta={e}",
++                .{ label, slot, self.g[slot], self.a[slot], g[idx], a[idx], new_sum - old_sum },
++            );
++            self.g[slot] = g[idx];
++            self.a[slot] = a[idx];
++        }
++    }
++};
++var probe120_geometry: Probe120Pair = .{};
++
+ /// UPTAKE tail, GROSUB and EXTRACT. Living STOMATE/root hydraulics are the
+ /// immediately preceding post-WATSUB hook; this owner consumes that accepted
+ /// publication and completes plant/root state before SOLUTE/TRNSFR.
+@@ -486,7 +535,9 @@ pub fn finalizeRedistAndLedgers(
+     try diagnostics.traceStageBoundaryLayer0Carbon(context, "before_geometry_disturbance_finalize");
+     try diagnostics.traceIssue078SoilPoreOverfill(context, "before_geometry_disturbance_finalize");
+     try diagnostics.traceIssue100LayerAmmonium(context, "before_geometry_disturbance_finalize", context.executed_weather_hours.* + 1);
++    probe120_geometry.snap(context); // TEMPDIAG120V (revert)
+     try geometry_disturbance.finalize(context);
++    probe120_geometry.diff(context, "geometry_finalize"); // TEMPDIAG120V (revert)
+     try diagnostics.traceIssue100LayerAmmonium(context, "after_geometry_disturbance_finalize", context.executed_weather_hours.* + 1);
+     try diagnostics.traceStageBoundaryLayer0Carbon(context, "after_geometry_disturbance_finalize");
+     try diagnostics.traceIssue078SoilPoreOverfill(context, "after_geometry_disturbance_finalize");
+diff --git a/ecosys-ng/src/validation/hourly_cell_conservation.zig b/ecosys-ng/src/validation/hourly_cell_conservation.zig
+index 52f2fad..4911cf8 100644
+--- a/ecosys-ng/src/validation/hourly_cell_conservation.zig
++++ b/ecosys-ng/src/validation/hourly_cell_conservation.zig
+@@ -2464,6 +2464,13 @@ pub fn evaluateForScope(
+                 },
+             );
+             result.cells[cell].closure[index] = closure;
++            // TEMPDIAG120A (cycle 10 probe, revert before candidate): dump trace-oxygen scopes
++            // every hour so the first subnormal-ulp drift hour is captured, not just the fatal one.
++            if (quantity == .oxygen and (terms.storage_before < 1.0e-300 or terms.storage_after < 1.0e-300))
++                std.log.err(
++                    "TEMPDIAG120A {s} scope={d} before={e} after={e} residual={e} rel={e} eff={e}",
++                    .{ domain_word, cell, terms.storage_before, terms.storage_after, closure.residual, closure.normalized_relative, closure.effective_acceptance_limit },
++                );
+             result.maximum_absolute[index] = @max(result.maximum_absolute[index], closure.absolute);
+             result.maximum_normalized_relative[index] = @max(result.maximum_normalized_relative[index], closure.normalized_relative);
+             result.failing_cell_count[index] += @intFromBool(!closure.accepted);
