@@ -237,6 +237,7 @@ pub fn finalize(context: anytype) !void {
             context.runscript.soil_phase_heat_parameters.freeze_thaw.ice_density_megagrams_per_m3,
         );
     var science: ecosys.soil_profile_relayering.Context = .{
+        .allocator = context.allocator,
         .grid = context.grid,
         .soil_thermal = context.soil_thermal,
         .gas_transport = context.gas_transport,

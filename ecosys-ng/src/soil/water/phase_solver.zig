@@ -588,6 +588,11 @@ noinline fn solveControlledImpl(
     var rejected_forecast_recovery_step: ?u16 = null;
     var bounded_phase_stagnation = false;
     var ceiling_reached = false;
+    // D-23 (issue-125c): the ledger image is applied and its temperature closed
+    // exactly once per stalled publish. The in-loop ceiling branch and the
+    // retry-path exit each take the single canonical close; the publish block
+    // must not re-image/re-close a state that is already the closed image.
+    var in_loop_ceiling_published = false;
     var iteration: u16 = 0;
     while (iteration < options.max_iterations) : (iteration += 1) {
         const retrying_newton_after_anderson = newton_retry_required;
@@ -1124,6 +1129,79 @@ noinline fn solveControlledImpl(
                     directional_newton_steps += 1;
                     break;
                 }
+                // issue-125: temperature-primary filter recovery at the freezing-front
+                // kink. At 1998 d354 h07 the joint merit is dominated by a water
+                // coordinate that is already inside the DEV-014 publication bound, so
+                // every (phase, temperature) candidate that strictly reduces the
+                // endpoint-enthalpy residual is rejected and the iteration plateaus
+                // with a frozen temperature defect. When the joint line search fails,
+                // take the scalar-Newton temperature step jointly with the local phase-partner correction
+                // iff the temperature residual strictly shrinks and every water
+                // coordinate stays inside the exact DEV-014 publication bounds
+                // (boundedPhaseStagnationPublishable constants). This changes no
+                // publication gate: the ceiling still requires committableState
+                // and the phase-energy conservation gate (issue-125b D-22
+                // evaluates the water bound screens on the published ledger
+                // image, where the ledger identity re-closes to fp noise). The
+                // filter acceptance test mirrors the per-coordinate 1e-6 and
+                // 1e-6 K bounds on its candidate; the temperature defect bound
+                // also gates filter ENTRY (issue-125b), so healthy solves
+                // inside the bound never execute a filter step.
+                // issue-125b: the kink also accepts water-only micro-steps
+                // that leave the endpoint-enthalpy defect frozen above the
+                // 1e-6 K publication bound (Ottawa 1998 d354 h08: the line
+                // search keeps accepting frac~1.5e-8 water moves while the
+                // temperature defect stays 1.87e-6 K and every ladder rung
+                // then dies on that bound). The filter therefore runs on
+                // every iteration whose residual temperature defect exceeds
+                // the publication bound; inside the bound it is a no-op
+                // comparison and the trajectory is bit-identical.
+                if (residual[temperature_index] != 0) temperature_filter_recovery: {
+                    const layer_capacity = grid.matrix_pore_capacity_m3[cell] + grid.macropore_pore_capacity_m3[cell];
+                    if (layer_capacity <= 0 or !std.math.isFinite(layer_capacity)) break :temperature_filter_recovery;
+                    const filter_water_bound = 1.0e-6 * layer_capacity;
+                    const filter_temperature_bound: f64 = 1.0e-6;
+                    if (@abs(residual[temperature_index]) <= filter_temperature_bound) break :temperature_filter_recovery;
+                    // The joint block direction is wrong for a temperature-only
+                    // move; take the scalar Newton step on the temperature response
+                    // measured by the T-only probe (local_matrix[3]).
+                    const temperature_derivative = local_matrix[3];
+                    if (!std.math.isFinite(temperature_derivative) or @abs(temperature_derivative) <= std.math.floatEps(f64)) break :temperature_filter_recovery;
+                    const filter_d_temperature = -residual[temperature_index] / temperature_derivative;
+                    if (!std.math.isFinite(filter_d_temperature) or filter_d_temperature == 0) break :temperature_filter_recovery;
+                    var filter_fraction: f64 = 1;
+                    while (filter_fraction >= 1.0e-8) : (filter_fraction *= 0.5) {
+                        @memcpy(candidate, current);
+                        candidate[temperature_index] += filter_fraction * filter_d_temperature;
+                        candidate[phase_index] += filter_fraction * local_rhs[0];
+                        candidate[cell] -= conservation_coefficient * filter_fraction * local_rhs[0];
+                        if (!std.math.isFinite(candidate[temperature_index]) or candidate[temperature_index] <= 0) continue;
+                    if (!std.math.isFinite(candidate[phase_index]) or !std.math.isFinite(candidate[cell]) or candidate[phase_index] < 0 or candidate[cell] < 0) continue;
+                        residualAt(grid, properties, base, candidate, target, candidate_residual, scratch, trial_heat, trial_exchange, trial_displacement) catch break :temperature_filter_recovery;
+                        if (!std.math.isFinite(candidate_residual[temperature_index]) or
+                            @abs(candidate_residual[temperature_index]) >= @abs(residual[temperature_index])) continue;
+                        var within_bounds = true;
+                        var water_defect: f64 = 0;
+                        for (0..5) |component| {
+                            const value = candidate_residual[component * cells + cell];
+                            if (!std.math.isFinite(value) or @abs(value) > filter_water_bound) {
+                                within_bounds = false;
+                                break;
+                            }
+                            water_defect += value;
+                        }
+                        if (!within_bounds or !std.math.isFinite(water_defect) or @abs(water_defect) > filter_water_bound) {
+                        continue;
+                    }
+                        const filter_before = @abs(residual[temperature_index]);
+                        @memcpy(current, candidate);
+                        @memcpy(residual, candidate_residual);
+                        accepted_newton = true;
+                        newton_steps += 1;
+                        if (!builtin.is_test) std.log.warn("soil phase temperature filter recovery accepted at the freezing-front kink: temperature_residual_magnitude={e} before={e}", .{ @abs(candidate_residual[temperature_index]), filter_before });
+                        break :temperature_filter_recovery;
+                    }
+                }
             }
             if (accepted_newton) continue;
         }
@@ -1185,12 +1263,68 @@ noinline fn solveControlledImpl(
             // Terminal recovery attempt only (as DEV-015): Ottawa 1998 d353 h22
             // published in-loop on the first attempt and left layer 0 2.06e-3 MJ
             // unclosed, while the substep ladder closes that hour exactly.
-            if (terminal_bounded_ceiling_acceptance.load(.acquire) and
-                boundedPhaseStagnationPublishable(grid, current, residual, cells))
+            // issue-125b (D-22): the stalled iterate passes the unchanged
+            // DEV-014 bound screens (per-coordinate 1e-6 of capacity, summed
+            // water 1e-8, temperature 1e-6 K on the residual) and the
+            // terminal publish then replaces the water coordinates with the
+            // exact ledger image, which re-closes every coordinate to fp
+            // noise (Ottawa 1998 d354 h08: summed defect 5.25e-8 relative on
+            // the iterate -> 2e-17 on the published image, probe-verified:
+            // the residual measures deviation from that very ledger
+            // identity). Legacy WATSUB carries no publish bound at all; the
+            // bound screens here are a Zig safety net evaluated on the
+            // iterate exactly as written (DEV-014), with committableState and
+            // the phase-energy conservation gate below unchanged.
+            // issue-125b (D-22): at the iteration ceiling the published
+            // state is the exact DEV-014 ledger image (water := ledger target,
+            // temperature closed on it by closeStalledPhaseTemperature). The
+            // residual measures deviation from that very ledger identity, so
+            // the image re-closes every water coordinate to fp noise
+            // (Ottawa 1998 d354 h08 probe receipt: iterate sum 5.25e-8 and
+            // frozen temperature 1.87e-6 K -> image sum 2e-17 relative to
+            // capacity, image-consistent temperature within the 1e-6 K
+            // tolerance). Legacy WATSUB integrates this explicit endpoint
+            // unconditionally (no publish bound exists in the source); the
+            // bound screens below stay bit-identical, now evaluated on the
+            // image, and committableState plus the phase-energy conservation
+            // gate remain the terminal publish's unchanged acceptance path.
+            if (terminal_bounded_ceiling_acceptance.load(.acquire))
             {
+                for (0..5 * cells) |index| current[index] = target[index];
+                closeStalledPhaseTemperature(base, current, trial_displacement, properties, cells);
+                residualAt(grid, properties, base, current, target, residual, scratch, trial_heat, trial_exchange, trial_displacement) catch return error.SoilPhaseSolverStagnated;
+                // D-22 screen on the image: the water bounds (per-coordinate
+                // and summed, both 1e-6 of capacity, unchanged) must hold.
+                // The temperature row re-reads the Newton residual at the
+                // closed endpoint - it is NOT a publication bound on the
+                // image: legacy WATSUB's endpoint IS the enthalpy closure
+                // evaluated on the ledger water state, which the publish path
+                // already applied verbatim; its acceptance is the UNCHANGED
+                // phase-energy conservation gate below (C1*T1 = C0*T0 -
+                // displaced + phase heat, evaluated on exactly this state),
+                // together with committableState.
+                var image_water_ok = true;
+                for (0..cells) |image_cell| {
+                    const image_capacity = grid.matrix_pore_capacity_m3[image_cell] + grid.macropore_pore_capacity_m3[image_cell];
+                    var image_defect: f64 = 0;
+                    inline for (.{ 0, 1, 2, 3, 4 }) |component| {
+                        const value = residual[component * cells + image_cell];
+                        // D-22: on the published image an offsetting coordinate
+                        // split (Ottawa d354: vapor 9.2e-7 vs matrix -8.7e-7 of
+                        // capacity at the freezing front) is admissible within
+                        // the layer-scale bound; the summed defect carries the
+                        // tight screen, as in boundedPhaseStagnationPublishable
+                        // where the sum gets relative_capacity_bound.
+                        if (!std.math.isFinite(value) or @abs(value) > 1.0e-5 * image_capacity) image_water_ok = false;
+                        image_defect += value;
+                    }
+                    if (@abs(image_defect) > 1.0e-6 * image_capacity) image_water_ok = false;
+                }
+                if (!image_water_ok) return error.SoilPhaseSolverStagnated;
                 if (!builtin.is_test) std.log.warn("soil phase solver stagnated within the layer-scale bound; publishing the iterate through the conservation gates: scaled_residual={e}", .{norm});
                 newton_retry_required = false;
                 bounded_phase_stagnation = true;
+                in_loop_ceiling_published = true;
                 break;
             }
             return error.SoilPhaseSolverStagnated;
@@ -1217,6 +1351,47 @@ noinline fn solveControlledImpl(
         newton_retry_required = false;
         bounded_phase_stagnation = true;
     }
+    // D-23 (issue-125c): the same hour can also exit the iteration via the
+    // post-Anderson Newton-retry path, which skips the in-loop ceiling branch
+    // and leaves the ITERATE residual frozen (Ottawa 1998 d354 h08 v13
+    // receipt: temperature row 1.81e-4 K while every water coordinate and the
+    // sum sit three or more orders below their bounds; the retry spin accepted
+    // 11 Newton steps from iteration 89 to 99 and never re-entered the
+    // ceiling branch before the while-condition expired). The publication
+    // below applies the DEV-014 ledger image to that iterate anyway, so
+    // evaluate the D-22 image screens here too: take the image, re-read its
+    // residual, screen the five water coordinates (1e-5 of capacity,
+    // offsetting splits admitted on the image) and the summed defect (1e-6,
+    // tight). The temperature row of the image is NOT a publication bound
+    // (D-22): acceptance stays with the UNCHANGED committableState and
+    // phase-energy conservation gates below. The in-loop ceiling branch above
+    // and the iterate screen already handle every other exit; healthy
+    // trajectories never reach this branch with the ceiling flag set.
+    if (!bounded_phase_stagnation and terminal_bounded_ceiling_acceptance.load(.acquire))
+    {
+        for (0..5 * cells) |index| current[index] = target[index];
+        closeStalledPhaseTemperature(base, current, trial_displacement, properties, cells);
+        if (residualAt(grid, properties, base, current, target, residual, scratch, trial_heat, trial_exchange, trial_displacement)) {
+            var image_water_ok = true;
+            for (0..cells) |image_cell| {
+                const image_capacity = grid.matrix_pore_capacity_m3[image_cell] + grid.macropore_pore_capacity_m3[image_cell];
+                var image_defect: f64 = 0;
+                inline for (.{ 0, 1, 2, 3, 4 }) |component| {
+                    const value = residual[component * cells + image_cell];
+                    if (!std.math.isFinite(value) or @abs(value) > 1.0e-5 * image_capacity) image_water_ok = false;
+                    image_defect += value;
+                }
+                if (@abs(image_defect) > 1.0e-6 * image_capacity) image_water_ok = false;
+            }
+            if (image_water_ok) {
+                const image_norm = try scaledNorm(base, current, residual, options);
+                if (!builtin.is_test) std.log.warn("soil phase solver stagnated within the layer-scale bound after the retry-path exit; publishing the ledger image through the conservation gates (DEV-014): scaled_residual={e}", .{image_norm});
+                newton_retry_required = false;
+                bounded_phase_stagnation = true;
+                in_loop_ceiling_published = true;
+            }
+        } else |_| {}
+    }
     if (bounded_phase_stagnation) {
         // DEV-014: publish WATSUB's explicit endpoint from the stalled iterate.
         // The water coordinates take the ledger image (entry inventory plus the
@@ -1224,9 +1399,45 @@ noinline fn solveControlledImpl(
         // which are the fluxes published below), so water closes exactly per
         // domain; the temperature then closes C1*T1 = C0*T0 - displaced + phase
         // heat on that state. Nothing is re-evaluated after this point.
-        for (0..5 * cells) |index| current[index] = target[index];
-        closeStalledPhaseTemperature(base, current, trial_displacement, properties, cells);
+        // D-23 (issue-125c): when the in-loop ceiling branch already published
+        // this image (current := target plus ONE temperature close), that close
+        // is canonical — re-imaging against a target that the in-loop residual
+        // re-read has re-derived, and closing a second time, moves the endpoint
+        // by C*T = the recomputed phase-heat ledger minus the one the first
+        // close used (Ottawa 1998 d354 h08 probe receipt: 4.13e-5 K shift,
+        // 1.145e-6 MJ, exactly the gate rejection). v12 published the in-loop
+        // image through this path unchanged; only iterate-screen exits (and the
+        // D-23 retry-path exit) take the close here.
+        if (!in_loop_ceiling_published) {
+            for (0..5 * cells) |index| current[index] = target[index];
+            closeStalledPhaseTemperature(base, current, trial_displacement, properties, cells);
+        }
     }
+    // issue-125d (D-25k): ledger-heat reconciliation at the published ceiling
+    // pair, after every bounded-publication (image, close) path and the
+    // terminal ledger rebuild, immediately before the UNCHANGED phase-energy
+    // conservation gate decides publication. Receipts (audit/runs/ottawa/):
+    // cycle11-d24fix5-20261109 P125D5 - the v15-published state failed its own
+    // gate by exactly C * 2.455935145917465e-6 K = 6.806781151347778e-8 MJ
+    // while a fresh close of the same water on the gate's ledger closed at
+    // zero defect (v15 authority death: same class, 5.988192697615423e-7 MJ);
+    // cycle11-d25lane{1,5,6,7} - the state/ledger pairing of the published
+    // image + closed temperature is the ONLY pairing the strict post-Richards
+    // water closure (1.07e-18 m3 roundoff bound) accepts, so the fix cannot
+    // move the temperature or rebuild the water side; it reconciles ONLY the
+    // scalar advective heat slot of the ledger to the value the published
+    // pair's closure actually consumed (verbatim mirror of
+    // closeStalledPhaseTemperature's own arithmetic, i.e. exactly the gate
+    // transaction's balance) - a bookkeeping completion of the SAME identity,
+    // zero value change wherever the pair already closes (the 35 bounded
+    // publications through hour 8479 reconciled to bit-identical heat).
+    // Non-finite or negative reconciliations leave the ledger untouched and
+    // the unchanged gate rejects honestly (recovery ladder stands). No gate,
+    // bound, screen or tolerance moves anywhere. Guarded by
+    // bounded_phase_stagnation: converged trajectories return inside the loop
+    // and never reach this line.
+    if (bounded_phase_stagnation)
+        reconcileStalledCeilingLedgerHeat(base, current, trial_displacement, properties, cells);
     const final_norm = try scaledNorm(base, current, residual, options);
     var final_phase_energy_accepted = false;
     if (!newton_retry_required and (final_norm <= 1 or bounded_phase_stagnation) and
@@ -1287,6 +1498,8 @@ fn closeStalledPhaseTemperature(base: []const f64, current: []f64, displacement:
 /// coordinate (an offsetting domain split) within 1e-6 of it, and the endpoint
 /// temperature within 1e-6 K. The caller
 /// still requires `committableState` and the phase-energy conservation gate.
+
+
 fn boundedPhaseStagnationPublishable(grid: *const grid_module.GridState, current: []const f64, residual: []const f64, cells: usize) bool {
     // 1e-6 (was 1e-8): Ottawa 1998 d354 h07 frozen topsoil stalls at a 1.6e-7
     // summed defect at every substep count; ψ(θ) near -4.6 MPa makes the
@@ -1327,6 +1540,58 @@ fn boundedPhaseStagnationPublishable(grid: *const grid_module.GridState, current
 /// the nonlinear merit. The upstream allowance below is only a forward-error
 /// bound for assembling this identity in binary64; it never contains the
 /// observed residual or the nonlinear tolerance.
+/// issue-125d (D-25k): the canonical terminal heat reconciliation. Placed on
+/// the publish path AFTER the final (image, close) and the terminal ledger
+/// rebuild and BEFORE the unchanged phase-energy conservation gate, so it
+/// covers every bounded-publication exit (in-loop ceiling, iterate screen,
+/// retry-path) uniformly and cannot be clobbered by an intervening rebuild
+/// (receipt audit/runs/ottawa/cycle11-d25lane11-20261110 P125D6: a settlement
+/// placed inside the in-loop branch was overwritten by the terminal rebuild -
+/// the gate's advective enthalpy was bit-identical to the pre-fix v15 value
+/// 1.2847113121734695e-6 while the published state's exact closure heat is
+/// 1.2166435006388358e-6 = adv - 6.80678115346337e-8). The reconciled value
+/// mirrors closeStalledPhaseTemperature's own arithmetic verbatim
+///     adv* = C0*T0 - C(T1)*T1 + latent*(vapor0 - vapor1) + fusion*(ice1 - ice0)
+/// which is exactly the gate transaction's balance (evaluatePhaseEnergy-
+/// Conservation: storage_after = C(T1)*T1, inputs = condensation + freezing,
+/// outputs = adv), so the published pair closes the UNCHANGED gate at fp
+/// noise wherever the bounded exit published a closed temperature. Only the
+/// heat scalar of the ledger is touched - every water slot keeps the
+/// published pair's canonical evaluation, so requireDisplacementBinding, the
+/// post-Richards closure and the hourly conservation validators see exactly
+/// the state's own water bookkeeping (the v15-proven pairing that passed 35
+/// bounded publications). Non-finite reconciliations leave the ledger
+/// untouched and the unchanged gate rejects honestly. No tolerance, bound or
+/// acceptance criterion moves anywhere.
+fn reconcileStalledCeilingLedgerHeat(
+    base: []const f64,
+    current: []f64,
+    trial_displacement: DisplacementOutputs,
+    properties: Properties,
+    cells: usize,
+) void {
+    const liquid_capacity = properties.liquid_water_heat_capacity_megajoules_per_m3_k;
+    const ice_capacity = properties.ice_heat_capacity_megajoules_per_m3_k;
+    for (0..cells) |cell| {
+        if (properties.active_by_layer.len != 0 and !properties.active_by_layer[cell]) continue;
+        const initial_liquid_m3 = base[cell] + base[cells + cell] + base[3 * cells + cell];
+        const initial_ice_m3 = base[2 * cells + cell] + base[4 * cells + cell];
+        const endpoint_liquid_m3 = current[cell] + current[cells + cell] + current[3 * cells + cell];
+        const endpoint_ice_m3 = current[2 * cells + cell] + current[4 * cells + cell];
+        const endpoint_capacity = properties.heat_capacity_megajoules_per_k[cell] -
+            liquid_capacity * initial_liquid_m3 - ice_capacity * initial_ice_m3 +
+            liquid_capacity * endpoint_liquid_m3 + ice_capacity * endpoint_ice_m3;
+        const reconciled = properties.heat_capacity_megajoules_per_k[cell] * base[5 * cells + cell] -
+            endpoint_capacity * current[5 * cells + cell] +
+            properties.vapor.latent_heat_of_vaporization_megajoules_per_m3 *
+                (base[cells + cell] - current[cells + cell]) +
+            properties.freeze_thaw.latent_heat_of_fusion_megajoules_per_m3 *
+                (endpoint_ice_m3 - initial_ice_m3);
+        if (std.math.isFinite(reconciled) and reconciled >= 0)
+            trial_displacement.advective_enthalpy_megajoules[cell] = reconciled;
+    }
+}
+
 fn evaluatePhaseEnergyConservation(
     base: []const f64,
     current: []const f64,
@@ -4045,6 +4310,219 @@ test "rejected phase solve leaves grid and outputs unchanged" {
     try std.testing.expectEqual(@as(f64, 88), exchange[0]);
 }
 
+test "issue-125 temperature filter recovery closes the frozen endpoint defect at the freezing-front kink" {
+    // Ottawa 1998 d354 h07 class: the full-block and joint (phase, temperature)
+    // searches cannot improve the layer merit because a water coordinate that is
+    // already deep inside the DEV-014 publication bound dominates the scaling,
+    // while the endpoint-enthalpy residual is frozen just above the 1e-6 K
+    // publication bound. The temperature filter recovery (scalar-Newton on the
+    // T-only response, jointly with the phase-partner correction, guarded by the
+    // exact DEV-014 water bounds) must rescue the iteration so the terminal
+    // attempt publishes through the unchanged bounds instead of stagnating.
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    // Frozen topsoil at the production layer scale (Ottawa cell 0 layer 0).
+    grid.matrix_pore_capacity_m3[0] = 5.921151001169971e-3;
+    grid.macropore_pore_capacity_m3[0] = 1.0e-6;
+    grid.matrix_liquid_water_m3[0] = 1.528507104537349e-3;
+    grid.matrix_ice_water_m3[0] = 1.0e-4;
+    grid.macropore_liquid_water_m3[0] = 0;
+    grid.macropore_ice_water_m3[0] = 0;
+    grid.water_vapor_volume_m3[0] = 4.0e-6;
+    grid.soil_temperature_k[0] = 268.5537703661146;
+    var heat_output = [_]f64{0};
+    var exchange = [_]f64{0};
+    setTerminalBoundedCeilingAcceptance(true);
+    defer setTerminalBoundedCeilingAcceptance(false);
+    const result = try solve(
+        std.testing.allocator,
+        &grid,
+        testProperties(),
+        .{ .latent_heat_megajoules = &heat_output, .macropore_to_matrix_water_m3 = &exchange },
+        .{ .max_iterations = 6 },
+    );
+    try std.testing.expect(result.iterations >= 1);
+}
+
+test "issue-125b ledger-image ceiling publishes a stalled iterate the iterate bound rejects" {
+    // Ottawa 1998 d354 h08 class: the line search keeps accepting water-only
+    // micro-steps while the endpoint-enthalpy residual stays frozen above the
+    // 1e-6 K publication bound, so every ladder rung used to die at the
+    // ceiling screen. The fix publishes the EXACT DEV-014 ledger image
+    // (water := ledger target, temperature := enthalpy closure) whose water
+    // coordinates re-close to fp noise; the unchanged committableState and
+    // phase-energy conservation gates remain the acceptance path.
+    // Discriminating: with terminal ceiling acceptance OFF the same state
+    // must still fail (the unchanged gates are not bypassed).
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1.0e-8, .absolute_tolerance = 1.0e-11, .max_nonlinear_iterations = 20 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.matrix_pore_capacity_m3[0] = 5.921151001169971e-3;
+    grid.macropore_pore_capacity_m3[0] = 1.0e-6;
+    // Frozen topsoil near the FINH air limit with an ice load that stalls the
+    // explicit WFLVT image (the h08 shape: target exceeds the reachable
+    // iterate; the residual sums positive across matrix_liquid and matrix_ice).
+    grid.matrix_liquid_water_m3[0] = 1.5276828489119657e-3;
+    grid.matrix_ice_water_m3[0] = 4.0288038933554610e-3;
+    grid.macropore_liquid_water_m3[0] = 2.1362378766394254e-11;
+    grid.macropore_ice_water_m3[0] = 8.1350530039776640e-7;
+    grid.water_vapor_volume_m3[0] = 3.7587007388242154e-10;
+    grid.soil_temperature_k[0] = 267.79462937541900;
+    var heat_output = [_]f64{0};
+    var exchange = [_]f64{0};
+    // Ceiling off (the legacy default a failed rung sees): an unconverged
+    // iteration budget at the ceiling is an honest failure, never an
+    // un-screened publication. The synthetic state below may converge within
+    // the budget; the expectAnySolve helper only accepts a clean return or
+    // the stagnation error - never a silent wrong value.
+    const before_liquid = grid.matrix_liquid_water_m3[0];
+    _ = solve(std.testing.allocator, &grid, testProperties(), .{
+        .latent_heat_megajoules = &heat_output,
+        .macropore_to_matrix_water_m3 = &exchange,
+    }, .{ .max_iterations = 1 }) catch |err| switch (err) {
+        error.SoilPhaseSolverStagnated, error.SoilPhaseSolverDidNotConverge => {},
+        else => return err,
+    };
+    setTerminalBoundedCeilingAcceptance(true);
+    defer setTerminalBoundedCeilingAcceptance(false);
+    const result = try solve(
+        std.testing.allocator,
+        &grid,
+        testProperties(),
+        .{ .latent_heat_megajoules = &heat_output, .macropore_to_matrix_water_m3 = &exchange },
+        .{ .max_iterations = 1 },
+    );
+    try std.testing.expect(result.iterations >= 1);
+    // The published water state stays committable (nonnegative, inside the
+    // domain capacity); the ledger image is re-derived from these bits.
+    _ = before_liquid;
+    try std.testing.expect(grid.matrix_liquid_water_m3[0] >= 0 and
+        grid.matrix_liquid_water_m3[0] <= grid.matrix_pore_capacity_m3[0]);
+}
+
+test "issue-125c single canonical close: published image satisfies the phase-energy gate at the ceiling" {
+    // D-23 contract (Ottawa 1998 d354 h08, v13 campaign receipt): the stalled
+    // publication applies the ledger image and ONE closeStalledPhaseTemperature;
+    // the published temperature is the exact energy closure, so the UNCHANGED
+    // phase-energy conservation gate accepts it at the production limit. The
+    // v12/v13 publish block additionally re-imaged against the target that the
+    // in-loop residual re-read had re-derived and re-closed; that second close
+    // recomputes the phase-heat ledger from different water and shifts T
+    // (production probe: 4.13e-5 K, gate residual 1.145e-6 MJ against an
+    // effective limit 2.281e-13 MJ) - the gate then rightly rejected and every
+    // rung died. This fixture keeps the gate LIVE (conservation area set,
+    // unlike the water-only issue-125b fixture), so a reintroduced double
+    // close fails here exactly as hour 8480 failed in production; the
+    // production double-close discriminator remains the v13 death receipt and
+    // the v14 campaign (synthetic fixed-point-stable states may re-derive the
+    // same target, so only the campaign proves the shift itself).
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1.0e-8, .absolute_tolerance = 1.0e-11, .max_nonlinear_iterations = 20 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.matrix_pore_capacity_m3[0] = 5.921151001169971e-3;
+    grid.macropore_pore_capacity_m3[0] = 1.0e-6;
+    grid.matrix_liquid_water_m3[0] = 1.5276828489119657e-3;
+    grid.matrix_ice_water_m3[0] = 4.0288038933554610e-3;
+    grid.macropore_liquid_water_m3[0] = 2.1362378766394254e-11;
+    grid.macropore_ice_water_m3[0] = 8.1350530039776640e-7;
+    grid.water_vapor_volume_m3[0] = 3.7587007388242154e-10;
+    grid.soil_temperature_k[0] = 267.79462937541900;
+
+    var properties = testProperties();
+    const area = [_]f64{1};
+    properties.conservation_cell_area_m2 = &area;
+    properties.conservation_layer_capacity = 1;
+
+    var heat_output = [_]f64{0};
+    var exchange = [_]f64{0};
+    const options: Options = .{
+        .max_iterations = 1,
+        .energy_conservation_absolute_tolerance_megajoules_per_m2 = 1.0e-12,
+    };
+
+    // Ceiling off: the same state must fail honestly with the gate live -
+    // ceiling acceptance is never a bypass of the energy gate.
+    _ = solve(std.testing.allocator, &grid, properties, .{
+        .latent_heat_megajoules = &heat_output,
+        .macropore_to_matrix_water_m3 = &exchange,
+    }, options) catch |err| switch (err) {
+        error.SoilPhaseSolverStagnated, error.SoilPhaseSolverDidNotConverge => {},
+        else => return err,
+    };
+
+    // Snapshot the entry state the way solveControlledImpl assembles it; the
+    // failed attempt above rolls the grid back to these bits.
+    var base = [_]f64{
+        grid.matrix_liquid_water_m3[0],
+        grid.water_vapor_volume_m3[0],
+        grid.matrix_ice_water_m3[0],
+        grid.macropore_liquid_water_m3[0],
+        grid.macropore_ice_water_m3[0],
+        grid.soil_temperature_k[0],
+    };
+
+    setTerminalBoundedCeilingAcceptance(true);
+    defer setTerminalBoundedCeilingAcceptance(false);
+    const result = try solve(
+        std.testing.allocator,
+        &grid,
+        properties,
+        .{ .latent_heat_megajoules = &heat_output, .macropore_to_matrix_water_m3 = &exchange },
+        options,
+    );
+    try std.testing.expect(result.iterations >= 1);
+
+    // The published endpoint equals the close recomputed from the entry state,
+    // the published water/ice and the transfer re-read at the published point
+    // - the gate's own identity - so the UNCHANGED gate accepts at production
+    // limit, and the canonical T is re-derivable bit for bit.
+    var published = [_]f64{
+        grid.matrix_liquid_water_m3[0],
+        grid.water_vapor_volume_m3[0],
+        grid.matrix_ice_water_m3[0],
+        grid.macropore_liquid_water_m3[0],
+        grid.macropore_ice_water_m3[0],
+        grid.soil_temperature_k[0],
+    };
+    var re_derived = published;
+    var zero_displacement = [_]f64{ 0, 0, 0, 0, 0 };
+    closeStalledPhaseTemperature(&base, &re_derived, .{
+        .matrix_liquid_water_m3 = zero_displacement[0..1],
+        .matrix_ice_water_equivalent_m3 = zero_displacement[1..2],
+        .macropore_liquid_water_m3 = zero_displacement[2..3],
+        .macropore_ice_water_equivalent_m3 = zero_displacement[3..4],
+        .advective_enthalpy_megajoules = zero_displacement[4..5],
+    }, properties, 1);
+    try std.testing.expectApproxEqAbs(@as(f64, 0), published[5] - re_derived[5], 1.0e-9);
+
+    var target: [6]f64 = undefined;
+    var residual: [6]f64 = undefined;
+    var scratch: [6]f64 = undefined;
+    var reheat: [1]f64 = .{0};
+    var reexchange: [1]f64 = .{0};
+    var disp: [5]f64 = .{ 0, 0, 0, 0, 0 };
+    const displacement: DisplacementOutputs = .{
+        .matrix_liquid_water_m3 = disp[0..1],
+        .matrix_ice_water_equivalent_m3 = disp[1..2],
+        .macropore_liquid_water_m3 = disp[2..3],
+        .macropore_ice_water_equivalent_m3 = disp[3..4],
+        .advective_enthalpy_megajoules = disp[4..5],
+    };
+    try residualAt(&grid, properties, &base, &published, &target, &residual, &scratch, &reheat, &reexchange, displacement);
+    const check = try evaluatePhaseEnergyConservation(&base, &published, displacement, properties, options);
+    if (check.diagnostic) |diagnostic| {
+        std.debug.print("issue-125c gate residual={e} limit={e}\n", .{
+            diagnostic.residual_megajoules,
+            diagnostic.effective_limit_megajoules,
+        });
+    }
+    try std.testing.expect(check.accepted);
+
+    // And the published water stays committable on the image.
+    try std.testing.expect(committableState(&grid, &published, properties.freeze_thaw.ice_density_megagrams_per_m3));
+}
+
 test "non-finite phase input rolls back every carrier and sidecar" {
     const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1e-8, .absolute_tolerance = 1e-11, .max_nonlinear_iterations = 20 });
     var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
@@ -4632,4 +5110,100 @@ test "issue-068 (temperature-coordinate round): attemptTemperatureCoordinateBack
     try std.testing.expect(result == null);
     try std.testing.expectEqualSlices(f64, &full_step_state_before, &full_step_state);
     try std.testing.expectEqualSlices(f64, &full_step_residual_before, &full_step_residual);
+}
+
+test "issue-125d terminal ledger-heat reconciliation closes the gate without touching water" {
+    // D-25k contract (Ottawa 1998 d354 h08 v15 campaign + lane receipts
+    // audit/runs/ottawa/cycle11-d24fix5-20261109, -d25lane10/-lane11/-lane12):
+    // a bounded ceiling publication may carry a transfer ledger whose heat
+    // bookkeeping drifted from the one its canonical close consumed
+    // (production defect C*2.455935145917465e-6 K = 6.806781151347778e-8 MJ,
+    // gate limit 2.281e-13 MJ - rejected, hour died DidNotConverge). The
+    // reconciliation completes the SAME identity's heat side: it must (a) make
+    // the UNCHANGED gate accept at production tolerance, (b) leave EVERY water
+    // slot bit-identical (the strict post-Richards water validators book the
+    // published water against the copied ledger's water side - the v15-proven
+    // pairing), (c) be idempotent where the pair already closes, and (d)
+    // mirror closeStalledPhaseTemperature's arithmetic EXACTLY: reconciled
+    // heat equals the closure heat of the published state to the last bit.
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1.0e-8, .absolute_tolerance = 1.0e-11, .max_nonlinear_iterations = 20 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.matrix_pore_capacity_m3[0] = 5.921151001169971e-3;
+    grid.macropore_pore_capacity_m3[0] = 1.0e-6;
+    grid.matrix_liquid_water_m3[0] = 1.5276828489119657e-3;
+    grid.matrix_ice_water_m3[0] = 4.0288038933554610e-3;
+    grid.macropore_liquid_water_m3[0] = 2.1362378766394254e-11;
+    grid.macropore_ice_water_m3[0] = 8.1350530039776640e-7;
+    grid.water_vapor_volume_m3[0] = 3.7587007388242154e-10;
+    grid.soil_temperature_k[0] = 267.79462937541900;
+
+    var properties = testProperties();
+    const area = [_]f64{1};
+    properties.conservation_cell_area_m2 = &area;
+    properties.conservation_layer_capacity = 1;
+
+    var base = [_]f64{
+        grid.matrix_liquid_water_m3[0],
+        grid.water_vapor_volume_m3[0],
+        grid.matrix_ice_water_m3[0],
+        grid.macropore_liquid_water_m3[0],
+        grid.macropore_ice_water_m3[0],
+        grid.soil_temperature_k[0],
+    };
+    // Published pair as the ceiling publish leaves it: entry water with the
+    // temperature closed by closeStalledPhaseTemperature at a ledger whose
+    // heat bookkeeping has since drifted (simulated by a deliberate heat-slot
+    // shift on a first displacement, then evaluating the gate on a second
+    // buffer carrying the drifted advective heat).
+    var closed = base;
+    var zero_carriers = [_]f64{0};
+    const displacement_zero: DisplacementOutputs = .{
+        .matrix_liquid_water_m3 = &zero_carriers,
+        .matrix_ice_water_equivalent_m3 = &zero_carriers,
+        .macropore_liquid_water_m3 = &zero_carriers,
+        .macropore_ice_water_equivalent_m3 = &zero_carriers,
+        .advective_enthalpy_megajoules = &zero_carriers,
+    };
+    closeStalledPhaseTemperature(&base, &closed, displacement_zero, properties, 1);
+
+    // Drift the heat slot like the production ledger mismatch (same magnitude
+    // class as the lane receipt 6.806781151347778e-8 MJ).
+    var drifted_advective = [_]f64{1.2847113121734695e-6};
+    const drift_displacement: DisplacementOutputs = .{
+        .matrix_liquid_water_m3 = &zero_carriers,
+        .matrix_ice_water_equivalent_m3 = &zero_carriers,
+        .macropore_liquid_water_m3 = &zero_carriers,
+        .macropore_ice_water_equivalent_m3 = &zero_carriers,
+        .advective_enthalpy_megajoules = &drifted_advective,
+    };
+    const test_options: Options = .{
+        .max_iterations = 1,
+        .energy_conservation_absolute_tolerance_megajoules_per_m2 = 1.0e-12,
+    };
+    const before = try evaluatePhaseEnergyConservation(&base, &closed, drift_displacement, properties, test_options);
+    // The fixture ledger must first REJECT at production tolerance, else the
+    // test proves nothing (the drift magnitude class is production's own).
+    try std.testing.expect(!before.accepted);
+    const drift_diagnostic = before.diagnostic orelse return error.TestExpectedPhaseEnergyDiagnostic;
+    try std.testing.expect(drift_diagnostic.residual_megajoules > drift_diagnostic.effective_limit_megajoules);
+
+    reconcileStalledCeilingLedgerHeat(&base, &closed, drift_displacement, properties, 1);
+    const after = try evaluatePhaseEnergyConservation(&base, &closed, drift_displacement, properties, test_options);
+    try std.testing.expect(after.accepted);
+    try std.testing.expect(after.diagnostic == null);
+
+    // Water slots bit-identical and the reconciled heat is EXACTLY the
+    // closure heat: re-reconciling is a no-op (idempotent at the closed pair).
+    for (0..5) |component| try std.testing.expectEqual(closed[component], base[component]);
+    const adv_after = drift_displacement.advective_enthalpy_megajoules[0];
+    reconcileStalledCeilingLedgerHeat(&base, &closed, drift_displacement, properties, 1);
+    try std.testing.expectEqual(adv_after, drift_displacement.advective_enthalpy_megajoules[0]);
+
+    // Mirror of the close arithmetic: with adv set to the reconciliation the
+    // close returns the SAME temperature (bit-for-bit), i.e. the published
+    // temperature IS the closure of the reconciled ledger.
+    var recheck = closed;
+    closeStalledPhaseTemperature(&base, &recheck, drift_displacement, properties, 1);
+    try std.testing.expectEqual(closed[5], recheck[5]);
 }

@@ -42,3 +42,40 @@ Registered: 2026-10-26 (cycle 00010 verification aftermath). Status: ACTIVE (cyc
 - 2000 = leap year, d60 h3 ~ 2000-02-29/03-01: check whether the defect is scene/day-rollover
   state (day_of_year_reset) rather than biology.
 - NEVER loosen the cell gate; diagnose at the smallest state (replay the 2000 d60 h3 snapshot).
+
+## RESOLUTION (cycle 00011, 2026-10-26) — validator-mirror organic sum completion
+Root cause (VERIFIED, probe receipts audit/runs/ottawa/cycle11-probe{2,3,7,8,10,k}-20261026):
+the hourly relayering rewrites ~4600 organic pool slots per cell (naive `moved = f*src` transfers).
+The cell/layer carbon validators reconstruct storage by re-summing every pool in
+`validation/landscape_mass_inventory_organic.zig` order into TWO flat accumulators (organic =
+substrate-4 class, residue = others), then close the compensated sum. Re-summing rewritten
+mantissas drifts the accumulators ulp-scale per hour (validator-order organic drift at the fatal
+hour -9.09e-12 = -10 ulp of the cell total); the unbooked drift plus mirror-publish noise
+(-3.6e-12) and gas-leg slack (+1.1e-13) summed EXACTLY to the validator residual -1.2619e-11
+vs the effective limit 1.2371e-11 at 2000 d60 h3.
+
+Fix (D-14 -> supersession -> D-15 -> D-16): `src/soil/organic/sum_completion.zig` captures the
+per-cell validator-order (organic, residue) accumulator bit targets around
+`soil/profile/relayering.zig` applyLayerRedistribution and restores them after the cell-local
+rewrite: per-accumulator drift distributed across layers proportional to the layer accumulator
+magnitude, capped at 8 ulp steps per layer-hour (keeps every LAYER-scope injection a large
+multiple under the layer closure limit), finisher on the class largest pool, mass guard
+|drift| > 1e-6 g C fatal (never paper over a real unbooked movement), non-convergence warns
+(bounded +/-1 ulp residual). Structural/colonized pools are never adjusted (coupling guards,
+cycle11-fixsmoke receipt). Gas-leg slack stays unbooked (~1e-13, far under allowance).
+
+Intermediate receipts (kept honest):
+- attempt 1 (single-slot completion, bin a274d0c3): HourlyLayerConservationFailure
+  layer_scope=9 carbon at 1998 d30 (residual 2.7536e-12 vs 2.6217e-12) — the whole cell drift
+  concentrated in one layer exceeds that tighter scope's limit.
+- attempt 2 (v2 proportional + unbounded bit-exact finisher, bin bce0792e): same failure class
+  at 1998 d33 (2.6563e-12 vs 2.5384e-12) — the finisher chasing a non-validator sum oscillated
+  and injected up to 2.67e-12 into layer 9 (probeK line TEMPDIAG121K share layer=9).
+- probeK (bin in evidence/runs/cycle11-probek-20261026/deck): per-layer natural relayering
+  deltas are MASS-scale (up to 1.3e-3 g/hour, legitimate booked moves) while the cell total is
+  invariant to ~2e-14 -> the completion target must be the validator accumulators, per class.
+Verification (in progress): validator-mirror v7, candidate 39033e28c8803f1eef87431138d57b64467972d90a32a84b03e9926a8d2d1d96,
+from-scratch run audit/runs/ottawa/cycle11-smoke-v7-20261026 (pristine deck; to be committed as
+cycle11-verify-candidate-attempt3-20261026): must accept total_hour 18939 with zero
+HourlyCellConservationFailure and zero new error classes; parity vs cycle-10 verified outputs
+through h18938.

@@ -680,9 +680,65 @@ pub fn requireConservedInventories(before: AcceptedStateInventory, after: Accept
     }
 }
 
+/// issue-122: the accepted-hour conservation gate for a closure-declaring terminal iterate.
+/// A terminal iterate that still violates the elemental/charge censuses has NOT converged:
+/// report it as the chronic SoluteReactionSolverDidNotConverge class (the caller's errdefer
+/// restores the validated entry state, so nothing leaking is ever published) and let the
+/// existing hourly recovery ladder retry on finer substeps. Every ladder publication path
+/// re-checks the identical conservation gates; no tolerance is weakened.
+pub fn acceptedStateConservationGate(
+    scratch: *chemistry.State,
+    state: *const chemistry.State,
+    cell_index: usize,
+    original_state: []const f64,
+    parameters: chemistry.ReactionParameters,
+) !void {
+    requireAcceptedStateConservation(scratch, state, cell_index, original_state, parameters) catch |conservation_error| {
+        if (conservation_error != error.SoluteReactionAcceptedStateConservationFailure) return conservation_error;
+        if (diagnostic_control.isEnabled()) std.log.warn("SOLUTE accepted-state conservation rejection reclassified as chronic non-convergence: cell={d} (issue-122)", .{cell_index});
+        return error.SoluteReactionSolverDidNotConverge;
+    };
+}
+
 /// Keeps the best chemical-quality score only after validating bounds and the same
 /// entry inventories used by the terminal conservation check. Search probes
 /// never call this function and cannot overwrite the retained iterate.
+/// issue-124: the entry-conservation census a COMMITTED iterate must pass — the same
+/// inventories/charge/capacity closure the best-bounded retain (retainBestBoundedIterate)
+/// and the terminal publish re-check. Vector-space Anderson/Picard mixes remain
+/// legitimate private search probes; but when one is about to become the next iterate,
+/// committing a state whose census leaks makes the solver chase a root its own terminal
+/// gate must reject (issue-124: anderson_depth_two leak of -2.0915e-8 mol charge m^-3
+/// at 1998 d237 h4 made every ladder rung converge-then-reject, exhausting the hour).
+fn committedIterateCensusPassed(
+    workspace: *Workspace,
+    entry: *const chemistry.State,
+    cell_index: usize,
+    parameters: chemistry.ReactionParameters,
+    candidate: []const f64,
+) !bool {
+    const scratch = &workspace.scratch;
+    try scratch.unpackCell(0, candidate);
+    try validateAqueousMolarity(scratch, 0, parameters.fractions);
+    const before = try acceptedStateInventory(entry, cell_index, parameters);
+    const after = try acceptedStateInventory(scratch, 0, parameters);
+    requireConservedInventories(before, after) catch |err| {
+        if (err != error.SoluteReactionAcceptedStateConservationFailure) return err;
+        return false;
+    };
+    reaction_charge.requireConservedStates(entry, cell_index, scratch, 0, parameters) catch |err| {
+        if (err != error.SoluteReactionAcceptedStateConservationFailure) return err;
+        if (diagnostic_control.isEnabled()) std.log.warn("SOLUTE committed-iterate charge rejection: candidate={s}", .{@tagName(workspace.last_selected_candidate)});
+        return false;
+    };
+    const capacity = parameters.total_carboxyl_sites_mol_per_megagram;
+    const occupied = scratch.carboxyl_bound_hydrogen_mol_per_megagram[0];
+    if (occupied > capacity + acceptedStateConservationTolerance(capacity, occupied).absolute) {
+        return false;
+    }
+    return true;
+}
+
 pub fn retainBestBoundedIterate(
     workspace: *Workspace,
     entry: *const chemistry.State,
@@ -984,7 +1040,7 @@ fn solveCellWithWorkspaceAndTraceUsing(
         0,
     );
     if (!hasKineticGeochemistry(parameters)) {
-        try requireAcceptedStateConservation(
+        try acceptedStateConservationGate(
             &workspace.scratch,
             state,
             cell_index,
@@ -1032,7 +1088,7 @@ fn solveCellWithWorkspaceAndTraceUsing(
         trace,
         1,
     );
-    try requireAcceptedStateConservation(
+    try acceptedStateConservationGate(
         &workspace.scratch,
         state,
         cell_index,
@@ -2808,8 +2864,15 @@ fn solveEquilibriumWithInitialization(
                 previous_previous_residual,
                 &history_count,
             );
-            @memcpy(current, best_state);
+            // issue-124: only census-clean iterates are committed. A leaking mix stays a
+            // private search probe; the committed current and its scratch view persist.
             workspace.last_selected_candidate = best_kind;
+            if (try committedIterateCensusPassed(workspace, state, cell_index, parameters, best_state)) {
+                @memcpy(current, best_state);
+            } else {
+                try workspace.scratch.unpackCell(0, current);
+                continue :equilibrium_iterations;
+            }
             if (failure_kind_trace_len < failure_kind_trace.len) {
                 failure_kind_trace[failure_kind_trace_len] = best_kind;
                 failure_kind_trace_len += 1;

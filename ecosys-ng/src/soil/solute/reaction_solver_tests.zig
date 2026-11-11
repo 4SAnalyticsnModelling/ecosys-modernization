@@ -467,6 +467,91 @@ test "issue-118 nitrogen leaking iterate is not retained instead of aborting the
     try std.testing.expectEqual(@as(f64, 2), entry.aqueous[0].ammonium_non_band);
 }
 
+test "issue-122 leaky terminal iterate at the accepted-hour tier reports chronic non-convergence" {
+    var entry = try chemistry.State.init(std.testing.allocator, 1);
+    defer entry.deinit();
+    entry.water_mol_per_m3[0] = 100;
+    entry.aqueous[0].ammonium_non_band = 2;
+    entry.aqueous[0].nitrate_non_band = 0.5;
+    var mutated = try chemistry.State.init(std.testing.allocator, 1);
+    defer mutated.deinit();
+    var scratch = try chemistry.State.init(std.testing.allocator, 1);
+    defer scratch.deinit();
+    const original = try std.testing.allocator.alloc(f64, chemistry.State.packedComponentCount());
+    defer std.testing.allocator.free(original);
+    try entry.packCell(0, original);
+    try mutated.unpackCell(0, original);
+    const parameters = acceptedStateConservationTestParameters();
+    const gate = @import("reaction_solve.zig").acceptedStateConservationGate;
+    // Control: a terminal iterate identical to the entry passes the gate.
+    try gate(&scratch, &mutated, 0, original, parameters);
+    // A leaky terminal iterate: aqueous ammonia gain without the compensating
+    // ammonium loss violates the nitrogen census far beyond the 2048-ulp limit.
+    mutated.aqueous[0].ammonia_non_band += 0.004;
+    try std.testing.expectError(
+        error.SoluteReactionAcceptedStateConservationFailure,
+        @import("reaction_solve.zig").requireAcceptedStateConservation(&scratch, &mutated, 0, original, parameters),
+    );
+    // issue-122: the accepted-hour tier routes exactly that class to the chronic
+    // non-convergence ladder instead of aborting the hour.
+    try std.testing.expectError(
+        error.SoluteReactionSolverDidNotConverge,
+        gate(&scratch, &mutated, 0, original, parameters),
+    );
+}
+
+test "issue-124 committed iterates keep the entry charge census (day237 hour-4 fixture)" {
+    // Production fatal fixture (scene hour 5668): an anderson_depth_two commit leaked
+    // -2.0915422282996587e-8 mol charge m^-3 into the iterate lineage; the solver then
+    // "converged" onto a root the accepted-state census had to reject, every ladder rung
+    // converge-then-rejected, and the hour failed. The fix gates the single per-iteration
+    // commit chokepoint (reaction_solve.committedIterateCensusPassed) with the same entry
+    // census retainBestBoundedIterate applies; leaking mixes stay private search probes.
+    const encoded = @embedFile("testdata/ottawa_day237_hour4_layer0_issue124.b64");
+    const decoder = std.base64.standard.decoderWithIgnore(" \r\n\t");
+    const bytes = try std.testing.allocator.alloc(u8, decoder.calcSizeUpperBound(encoded.len));
+    defer std.testing.allocator.free(bytes);
+    const length = try decoder.decode(bytes, encoded);
+    var reader: std.Io.Reader = .fixed(bytes[0..length]);
+    var captured = try failure_snapshot.read(std.testing.allocator, &reader);
+    defer captured.deinit();
+    var suppression = diagnostic_control.suppress();
+    defer suppression.restore();
+    var workspace = try group_types.Workspace.init(std.testing.allocator);
+    defer workspace.deinit();
+    // Preserve the entry cell for the post-solve census.
+    const entry_packed = try std.testing.allocator.alloc(f64, chemistry.State.packedComponentCount());
+    defer std.testing.allocator.free(entry_packed);
+    try captured.state.packCell(0, entry_packed);
+    var entry_clone = try chemistry.State.init(std.testing.allocator, 1);
+    defer entry_clone.deinit();
+    try entry_clone.unpackCell(0, entry_packed);
+
+    const result = @import("reaction_solve.zig").solveCellWithWorkspace(
+        &workspace,
+        &captured.state,
+        0,
+        captured.parameters,
+        captured.options,
+    );
+    if (result) |_| {} else |err| switch (err) {
+        // The raw accepted-state conservation class must never surface from the solver:
+        // a terminal leak is now refused at the commit, not carried to the publish gate.
+        error.SoluteReactionAcceptedStateConservationFailure => return error.TestExpectedEqual,
+        else => {},
+    }
+    // The last COMMITTED iterate must still conserve the entry charge census. Before the
+    // fix this line failed with the -2.09e-8 excursion (SoluteReactionAcceptedStateConservationFailure).
+    try workspace.scratch.unpackCell(0, workspace.current);
+    try @import("reaction_charge.zig").requireConservedStates(
+        &entry_clone,
+        0,
+        &workspace.scratch,
+        0,
+        captured.parameters,
+    );
+}
+
 fn allocateRetainedChemistryWorkspace(allocator: std.mem.Allocator) !void {
     var workspace = try group_types.Workspace.init(allocator);
     defer workspace.deinit();

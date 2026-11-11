@@ -26,6 +26,12 @@ pub fn main(init: std.process.Init) !void {
         &reader,
     );
     defer replay_case.deinit();
+    {
+        var env_map = try std.process.Environ.createMap(init.minimal.environ, allocator);
+        defer env_map.deinit();
+        if (env_map.get("REPLAY_MAX_ITERATIONS")) |v|
+            replay_case.options.max_iterations = try std.fmt.parseInt(@TypeOf(replay_case.options.max_iterations), v, 10);
+    }
     const packed_count =
         ecosys.solute_chemistry_state.State.packedComponentCount();
     const initial_state = try allocator.alloc(f64, packed_count);

@@ -24,6 +24,8 @@ const geometry_transaction = @import("geometry_disturbance_transaction.zig");
 const water_heat_remap = @import("../water/heat_layer_remap.zig");
 const gas_remap = @import("../gas/layer_remap.zig");
 const organic_remap = @import("../organic/layer_remap.zig");
+const sum_completion = @import("../organic/sum_completion.zig");
+const texture_sum_completion = @import("texture_sum_completion.zig");
 const chemistry_remap = @import("../chemistry/layer_remap.zig");
 const nitrite_remap = @import("../microbial/nitrite_layer_remap.zig");
 const fertilizer_remap = @import("../nutrients/fertilizer_layer_remap.zig");
@@ -117,6 +119,9 @@ pub const Workspace = struct {
 };
 
 pub const Context = struct {
+    /// ISSUE-121: cell-total capture buffers for the relayering organic-carbon
+    /// sum completion; supplied by the end-of-hour geometry owner.
+    allocator: std.mem.Allocator,
     grid: *GridState,
     soil_thermal: *thermal_module.State,
     gas_transport: *gas.State,
@@ -197,7 +202,87 @@ pub const NutrientZoneFractions = struct {
 /// changes for the current hour as assembled by soil_geometry_disturbance_transaction
 /// or soil_geometry_change_assembly helpers. Zero arrays are acceptable when a
 /// driver is inactive.
+/// ISSUE-121 (cycle 00011): profile relayering moves organic carbon between
+/// layers within one cell only; the per-cell organic-carbon total (validator
+/// fixed order) must be exactly invariant across the call. Capture the target
+/// totals first, run the uncorrected redistribution, then complete each cell
+/// bit-exactly. A drift larger than arithmetic scale is a real unbooked mass
+/// movement and propagates as an error instead of being compensated.
 pub fn applyLayerRedistribution(ctx: Context, geometry_changes: Geometry.DisturbanceChanges) !void {
+    if (ctx.grid.cell_count == 0) return;
+    if (ctx.soil_organic.layer_count % ctx.grid.cell_count != 0)
+        return error.RelayeringOrganicCellLayerMismatch;
+    const layers_per_cell = ctx.soil_organic.layer_count / ctx.grid.cell_count;
+    // ISSUE-121: the validator reconstructs cell carbon by re-summing every
+    // organic pool (landscape_mass_inventory_organic.zig); the bulk slot
+    // rewrites below drift those flat accumulators by ulp-scale per hour.
+    // Capture the validator-order accumulators per cell and complete them
+    // after the cell-local rewrite so the relayering contributes exactly
+    // zero unbooked cell-carbon drift.
+    const targets = try ctx.allocator.alloc(sum_completion.CellAccumulators, ctx.grid.cell_count);
+    defer ctx.allocator.free(targets);
+    for (0..ctx.grid.cell_count) |cell|
+        targets[cell] = try sum_completion.cellAccumulators(ctx.soil_organic, cell, layers_per_cell);
+    // ISSUE-123: same doctrine for the six validator mineral-texture folds
+    // (validation/landscape_mass_inventory_misc.zig aggregateSoilMineralTextureRange:
+    // plain left fold over slots [0, active_soil_layer_count) per cell). Capture the
+    // validator-mirror targets, and after the cell-local rewrite complete every cell
+    // whose validator fold domain (active layer count) is unchanged. Cells whose active
+    // domain moved keep today's behaviour: their mass crosses the validator's active
+    // window boundary and is a booked geometry event, not arithmetic noise.
+    var texture_targets: ?[]texture_sum_completion.Targets = null;
+    var texture_active_before: ?[]usize = null;
+    defer if (texture_targets) |values| if (ctx.soil_properties) |props| props.allocator.free(values);
+    defer if (texture_active_before) |values| if (ctx.soil_properties) |props| props.allocator.free(values);
+    if (ctx.soil_properties) |props| {
+        const capacity = ctx.grid.soil_layer_capacity;
+        const values = try props.allocator.alloc(texture_sum_completion.Targets, ctx.grid.cell_count);
+        const active_before = try props.allocator.alloc(usize, ctx.grid.cell_count);
+        texture_targets = values;
+        texture_active_before = active_before;
+        for (0..ctx.grid.cell_count) |cell| {
+            active_before[cell] = ctx.grid.active_soil_layer_count[cell];
+            values[cell] = texture_sum_completion.captureTargets(
+                textureCompletionArrays(props),
+                cell * capacity,
+                active_before[cell],
+            );
+        }
+    }
+    try applyLayerRedistributionUncorrected(ctx, geometry_changes);
+    for (0..ctx.grid.cell_count) |cell|
+        try sum_completion.completeCellCarbon(ctx.soil_organic, cell, layers_per_cell, targets[cell]);
+    if (texture_targets) |values| {
+        if (ctx.soil_properties) |props| {
+            const capacity = ctx.grid.soil_layer_capacity;
+            const active_before = texture_active_before.?;
+            const arrays = textureCompletionArrays(props);
+            for (0..ctx.grid.cell_count) |cell| {
+                const active = ctx.grid.active_soil_layer_count[cell];
+                if (active != active_before[cell]) continue;
+                _ = try texture_sum_completion.completeCellTextures(
+                    arrays,
+                    cell * capacity,
+                    active,
+                    values[cell],
+                );
+            }
+        }
+    }
+}
+
+fn textureCompletionArrays(props: *properties.State) texture_sum_completion.Arrays {
+    return .{
+        .sand_megagrams = props.sand_mass_megagrams,
+        .silt_megagrams = props.silt_mass_megagrams,
+        .clay_megagrams = props.clay_mass_megagrams,
+        .rock_fraction = props.rock_fraction,
+        .cation_exchange_capacity_mol = props.cation_exchange_capacity_mol,
+        .anion_exchange_capacity_mol = props.anion_exchange_capacity_mol,
+    };
+}
+
+fn applyLayerRedistributionUncorrected(ctx: Context, geometry_changes: Geometry.DisturbanceChanges) !void {
     if (ctx.grid.cell_count == 0) return;
     if (ctx.salinity_enabled_by_cell.len != ctx.grid.cell_count)
         return error.SoilRelayeringSalinityDimensionMismatch;
@@ -1424,6 +1509,7 @@ test "sub-floor nonzero layer redistribution conserves and moves water" {
     defer local_activity.deinit();
 
     try applyLayerRedistribution(.{
+    .allocator = std.testing.allocator,
         .grid = &grid,
         .soil_thermal = &thermal_state,
         .gas_transport = &gas_state,
@@ -1527,6 +1613,7 @@ test "REDIST freeze-thaw moves soil boundaries without transferring soil materia
     const water_before = [_]f64{ grid.matrix_liquid_water_m3[0], grid.matrix_liquid_water_m3[1], grid.matrix_liquid_water_m3[2] };
     const dry_before = [_]f64{ thermal_dry[0] * thermal_lv[0], thermal_dry[1] * thermal_lv[1], thermal_dry[2] * thermal_lv[2] };
     try applyLayerRedistribution(.{
+    .allocator = std.testing.allocator,
         .grid = &grid,
         .soil_thermal = &thermal_state,
         .gas_transport = &gas_state,
@@ -1605,6 +1692,7 @@ test "EXEC-002 rebase aligns thermal volume with geometry and preserves census e
     for (0..3) |layer| census_energy_before += thermal_total[layer] * thermal_volume[layer] * grid.soil_temperature_k[layer];
 
     try rebaseThermalVolumeToGeometry(.{
+    .allocator = std.testing.allocator,
         .grid = &grid,
         .soil_thermal = &thermal_state,
         .gas_transport = undefined,
@@ -1676,6 +1764,7 @@ test "EXEC-002 rebase restores a zero-volume layer with retained macropore heat"
     const expected_capacity = 4.19 * 0.02 + 1.9274 * 0.01;
 
     try rebaseThermalVolumeToGeometry(.{
+    .allocator = std.testing.allocator,
         .grid = &grid,
         .soil_thermal = &thermal_state,
         .gas_transport = undefined,
@@ -1771,6 +1860,7 @@ test "DISC-WATSUB-002 relayering refills a recipient emptied earlier in the same
     const water_before = grid.matrix_liquid_water_m3[0] + grid.matrix_liquid_water_m3[1] + grid.matrix_liquid_water_m3[2];
 
     try applyLayerRedistribution(.{
+    .allocator = std.testing.allocator,
         .grid = &grid,
         .soil_thermal = &thermal_state,
         .gas_transport = &gas_state,
@@ -1860,6 +1950,7 @@ test "DISC-WATSUB-002 zero-matrix donor still transfers FHOL macropore owners" {
     const macro_water_before = grid.macropore_liquid_water_m3[1] + grid.macropore_liquid_water_m3[2];
     const macro_ice_before = grid.macropore_ice_water_m3[1] + grid.macropore_ice_water_m3[2];
     try applyLayerRedistribution(.{
+    .allocator = std.testing.allocator,
         .grid = &grid,
         .soil_thermal = &thermal_state,
         .gas_transport = &gas_state,
