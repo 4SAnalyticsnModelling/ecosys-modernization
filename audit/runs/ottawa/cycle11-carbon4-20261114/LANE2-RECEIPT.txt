@@ -1,0 +1,4 @@
+RECEIPT lane2 carbon4 2026-11-14T19:14:38Z
+days=94 sci=0 pub=67 wall=0 carbonfail=1
+last=info: day advanced: scene_weather_hours=1896 final_hour_elapsed_ms=36
+death=error: HourlyCellConservationFailure

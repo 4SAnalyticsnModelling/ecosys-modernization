@@ -1,0 +1,4 @@
+RECEIPT lane2 carbon7 2026-11-14T20:17:38Z
+days=197 sci=0 pub=67 wall=0 carbonfail=0
+last=info: day advanced: scene_weather_hours=4368 final_hour_elapsed_ms=771
+death=error: AccumulatedCellConservationFailure
