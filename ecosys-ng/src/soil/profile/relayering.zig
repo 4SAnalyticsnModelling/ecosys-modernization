@@ -159,6 +159,11 @@ pub const Context = struct {
     transport_geometry_floor_m: f64 = 1.0e-6,
     water_heat_parameters: water_heat_remap.Parameters,
     salinity_enabled_by_cell: []const bool,
+    /// D-27 (issue-126): per-cell producer-provenance sink for the exact carbon
+    /// sum-completion residuals left by the relayering rewrite. The hourly cell
+    /// carbon gate consumes this as arithmetic provenance for pools this stage
+    /// legitimately rewrote outside any booked transfer. Empty slice = disabled.
+    carbon_rewrite_provenance_g: []f64 = &.{},
     nutrient_zone_fractions: NutrientZoneFractions,
     nutrient_zone_fractions_by_layer: []const NutrientZoneFractions = &.{},
     plant_populations: usize,
@@ -250,8 +255,25 @@ pub fn applyLayerRedistribution(ctx: Context, geometry_changes: Geometry.Disturb
         }
     }
     try applyLayerRedistributionUncorrected(ctx, geometry_changes);
-    for (0..ctx.grid.cell_count) |cell|
-        try sum_completion.completeCellCarbon(ctx.soil_organic, cell, layers_per_cell, targets[cell]);
+    for (0..ctx.grid.cell_count) |cell| {
+        const residuals = try sum_completion.completeCellCarbon(
+            ctx.soil_organic,
+            cell,
+            layers_per_cell,
+            targets[cell],
+        );
+        if (ctx.carbon_rewrite_provenance_g.len == ctx.grid.cell_count) {
+            const magnitude = @abs(residuals.organic_carbon_g) + @abs(residuals.residue_carbon_g);
+            if (magnitude > 0) {
+                if (!std.math.isFinite(magnitude))
+                    return error.RelayeringCarbonProvenanceNotFinite;
+                const updated = ctx.carbon_rewrite_provenance_g[cell] + magnitude;
+                if (!std.math.isFinite(updated))
+                    return error.RelayeringCarbonProvenanceNotFinite;
+                ctx.carbon_rewrite_provenance_g[cell] = updated;
+            }
+        }
+    }
     if (texture_targets) |values| {
         if (ctx.soil_properties) |props| {
             const capacity = ctx.grid.soil_layer_capacity;

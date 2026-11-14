@@ -277,12 +277,38 @@ fn capFor(magnitude: f64) f64 {
 /// the layer's accumulator share (capped at `layer_injection_ulp_steps` ulp
 /// steps per layer) and finishes on the largest class pool. Never books
 /// anything; never hides a mass-scale movement.
+pub const CompletionResiduals = struct {
+    /// Exact signed post-retry residual (validator-order fold minus target) for
+    /// the organic accumulator; the amount by which the cell's organic-carbon
+    /// inventory legitimately moved outside any booked transfer. The hourly cell
+    /// carbon gate's producer-provenance channel consumes its magnitude.
+    organic_carbon_g: f64 = 0,
+    residue_carbon_g: f64 = 0,
+};
+
+/// Early-exit path (exclusion table full): measure the exact residuals of both
+/// accumulators at the current state so the caller's provenance bookkeeping
+/// stays exact even when the ladder gave up mid-sweep.
+fn measureExitResiduals(
+    state: *const Organic.State,
+    cell: usize,
+    layers_per_cell: usize,
+    target: CellAccumulators,
+) !CompletionResiduals {
+    const final = try cellAccumulators(state, cell, layers_per_cell);
+    return .{
+        .organic_carbon_g = final.organic_carbon_g - target.organic_carbon_g,
+        .residue_carbon_g = final.residue_carbon_g - target.residue_carbon_g,
+    };
+}
+
 pub fn completeCellCarbon(
     state: *Organic.State,
     cell: usize,
     layers_per_cell: usize,
     target: CellAccumulators,
-) !void {
+) !CompletionResiduals {
+    var residuals = CompletionResiduals{};
     if (!std.math.isFinite(target.organic_carbon_g) or !std.math.isFinite(target.residue_carbon_g))
         return error.InvalidOrganicSumCompletionTarget;
     var excluded: [16]?Slot = @splat(@as(?Slot, null));
@@ -320,7 +346,7 @@ pub fn completeCellCarbon(
                     if (excluded_count < excluded.len) {
                         excluded[excluded_count] = slot;
                         excluded_count += 1;
-                    } else return;
+                    } else return try measureExitResiduals(state, cell, layers_per_cell, target);
                     continue;
                 }
                 setSlotValue(state, slot, corrected);
@@ -345,7 +371,7 @@ pub fn completeCellCarbon(
                     if (excluded_count < excluded.len) {
                         excluded[excluded_count] = slot;
                         excluded_count += 1;
-                    } else return;
+                    } else return try measureExitResiduals(state, cell, layers_per_cell, target);
                     continue;
                 }
                 setSlotValue(state, slot, corrected);
@@ -355,11 +381,16 @@ pub fn completeCellCarbon(
         }
         const final = try cellAccumulators(state, cell, layers_per_cell);
         const residual = accumulatorValue(final, which) - accumulatorValue(target, which);
+        switch (which) {
+            .organic => residuals.organic_carbon_g = residual,
+            .residue => residuals.residue_carbon_g = residual,
+        }
         if (residual != 0)
             std.log.warn("organic carbon sum completion residual after retries: cell={d} accumulator={s} residual_g_c={e}", .{
                 cell, @tagName(which), residual,
             });
     }
+    return residuals;
 }
 
 const testing = std.testing;
@@ -427,7 +458,7 @@ test "issue-121 sum completion restores both validator accumulators bit-exactly"
     for (state.microbial, 0..) |pool, idx| snap_microbial[idx] = pool.carbon_g_c;
     for (state.residue, 0..) |pool, idx| snap_microbial[state.microbial.len + idx] = pool.carbon_g_c;
 
-    try completeCellCarbon(&state, 0, layers_per_cell, target);
+    _ = try completeCellCarbon(&state, 0, layers_per_cell, target);
 
     const repaired = try cellAccumulators(&state, 0, layers_per_cell);
     try testing.expectEqual(target.organic_carbon_g, repaired.organic_carbon_g);

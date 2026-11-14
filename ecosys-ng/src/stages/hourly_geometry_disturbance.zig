@@ -236,8 +236,17 @@ pub fn finalize(context: anytype) !void {
             context.runscript.soil_phase_heat_parameters.ice_heat_capacity_megajoules_per_m3_k,
             context.runscript.soil_phase_heat_parameters.freeze_thaw.ice_density_megagrams_per_m3,
         );
+        // D-27 (issue-126): the relayering sum-completion leaves exact ulp-scale
+    // carbon residuals on the rewritten pools with no booked transfer; collect
+    // them per cell and publish them as producer arithmetic provenance on the
+    // hourly cell ledger (the validator's carbon provenance lane), so a small-
+    // flux hour is not charged the standing-pool rewrite noise as physics loss.
+    const carbon_rewrite_provenance_g = try context.allocator.alloc(f64, context.grid.cell_count);
+    defer context.allocator.free(carbon_rewrite_provenance_g);
+    @memset(carbon_rewrite_provenance_g, 0);
     var science: ecosys.soil_profile_relayering.Context = .{
         .allocator = context.allocator,
+        .carbon_rewrite_provenance_g = carbon_rewrite_provenance_g,
         .grid = context.grid,
         .soil_thermal = context.soil_thermal,
         .gas_transport = context.gas_transport,
@@ -332,6 +341,22 @@ pub fn finalize(context: anytype) !void {
         .negligible_sediment_megagrams = negligible_sediment_megagrams,
         .negligible_carbon_change_g_c = negligible_carbon_change_g_c,
     });
+    {
+        const provenance_activities = try context.allocator.alloc(
+            ecosys.hourly_cell_conservation.BoundaryActivity,
+            context.grid.cell_count,
+        );
+        defer context.allocator.free(provenance_activities);
+        @memset(provenance_activities, .{});
+        var any = false;
+        for (provenance_activities, carbon_rewrite_provenance_g) |*activity, magnitude| {
+            if (magnitude > 0) {
+                activity.carbon_storage_update_roundoff_allowance_g = magnitude;
+                any = true;
+            }
+        }
+        if (any) try context.hourly_cell_boundary_ledger.accumulateCells(provenance_activities);
+    }
     try ecosys.layer_local_conservation.accumulateSoilRelayeringActivity(
         context.hourly_layer_boundary_ledger,
         &activity_sidecar,

@@ -511,6 +511,11 @@ noinline fn solveControlledImpl(
     defer allocator.free(target);
     const scratch = try allocator.alloc(f64, components);
     defer allocator.free(scratch);
+    const image_entry = try allocator.alloc(f64, components);
+    defer allocator.free(image_entry);
+    const producing_ledger_storage = try allocator.alloc(f64, 4 * cells);
+    defer allocator.free(producing_ledger_storage);
+    var producing_captured = false;
     const trial_heat = try allocator.alloc(f64, cells);
     defer allocator.free(trial_heat);
     const trial_exchange = try allocator.alloc(f64, cells);
@@ -1291,6 +1296,12 @@ noinline fn solveControlledImpl(
             if (terminal_bounded_ceiling_acceptance.load(.acquire))
             {
                 for (0..5 * cells) |index| current[index] = target[index];
+                @memcpy(image_entry, current);
+                @memcpy(producing_ledger_storage[0 * cells .. 1 * cells], trial_displacement.matrix_liquid_water_m3);
+                @memcpy(producing_ledger_storage[1 * cells .. 2 * cells], trial_displacement.matrix_ice_water_equivalent_m3);
+                @memcpy(producing_ledger_storage[2 * cells .. 3 * cells], trial_displacement.macropore_liquid_water_m3);
+                @memcpy(producing_ledger_storage[3 * cells .. 4 * cells], trial_displacement.macropore_ice_water_equivalent_m3);
+                producing_captured = true;
                 closeStalledPhaseTemperature(base, current, trial_displacement, properties, cells);
                 residualAt(grid, properties, base, current, target, residual, scratch, trial_heat, trial_exchange, trial_displacement) catch return error.SoilPhaseSolverStagnated;
                 // D-22 screen on the image: the water bounds (per-coordinate
@@ -1370,6 +1381,12 @@ noinline fn solveControlledImpl(
     if (!bounded_phase_stagnation and terminal_bounded_ceiling_acceptance.load(.acquire))
     {
         for (0..5 * cells) |index| current[index] = target[index];
+        @memcpy(image_entry, current);
+        @memcpy(producing_ledger_storage[0 * cells .. 1 * cells], trial_displacement.matrix_liquid_water_m3);
+        @memcpy(producing_ledger_storage[1 * cells .. 2 * cells], trial_displacement.matrix_ice_water_equivalent_m3);
+        @memcpy(producing_ledger_storage[2 * cells .. 3 * cells], trial_displacement.macropore_liquid_water_m3);
+        @memcpy(producing_ledger_storage[3 * cells .. 4 * cells], trial_displacement.macropore_ice_water_equivalent_m3);
+        producing_captured = true;
         closeStalledPhaseTemperature(base, current, trial_displacement, properties, cells);
         if (residualAt(grid, properties, base, current, target, residual, scratch, trial_heat, trial_exchange, trial_displacement)) {
             var image_water_ok = true;
@@ -1410,6 +1427,8 @@ noinline fn solveControlledImpl(
         // D-23 retry-path exit) take the close here.
         if (!in_loop_ceiling_published) {
             for (0..5 * cells) |index| current[index] = target[index];
+            @memcpy(image_entry, current);
+            producing_captured = false;
             closeStalledPhaseTemperature(base, current, trial_displacement, properties, cells);
         }
     }
@@ -1437,7 +1456,20 @@ noinline fn solveControlledImpl(
     // bounded_phase_stagnation: converged trajectories return inside the loop
     // and never reach this line.
     if (bounded_phase_stagnation)
-        reconcileStalledCeilingLedgerHeat(base, current, trial_displacement, properties, cells);
+        reconcileStalledCeilingLedger(
+            base,
+            current,
+            image_entry,
+            if (producing_captured) ProducingLedger{
+                .matrix_liquid_water_m3 = producing_ledger_storage[0 * cells .. 1 * cells],
+                .matrix_ice_water_equivalent_m3 = producing_ledger_storage[1 * cells .. 2 * cells],
+                .macropore_liquid_water_m3 = producing_ledger_storage[2 * cells .. 3 * cells],
+                .macropore_ice_water_equivalent_m3 = producing_ledger_storage[3 * cells .. 4 * cells],
+            } else null,
+            trial_displacement,
+            properties,
+            cells,
+        );
     const final_norm = try scaledNorm(base, current, residual, options);
     var final_phase_energy_accepted = false;
     if (!newton_retry_required and (final_norm <= 1 or bounded_phase_stagnation) and
@@ -1563,17 +1595,62 @@ fn boundedPhaseStagnationPublishable(grid: *const grid_module.GridState, current
 /// bounded publications). Non-finite reconciliations leave the ledger
 /// untouched and the unchanged gate rejects honestly. No tolerance, bound or
 /// acceptance criterion moves anywhere.
-fn reconcileStalledCeilingLedgerHeat(
+/// issue-125e (D-26): the bounded ceiling exits (in-loop branch and the
+/// D-23 retry path) publish the pair (image of the PRE-CLOSE chain,
+/// closeStalledPhaseTemperature temperature), then rebuild the transfer
+/// ledger at the closed state; at the freezing kink the closed-state chain
+/// differs from the producing chain (P125E1: per-solve identity error
+/// 1.6381332052964451e-9 m3 at layer 0 on Ottawa 1998 d354 h08, hour defect
+/// 5.36975872251842e-10 vs limit 1.0758747266121567e-18), so the strict
+/// post-Richards validator books water the published state never moved
+/// through. For a published cell - one whose temperature actually moved
+/// under closeStalledPhaseTemperature - the four water displacement slots
+/// are restored to the producing chain captured at the exit before the
+/// close-rebuild, exactly the pairing the validator's own identity closes
+/// for every unbounded substep (the image was copied FROM that chain's
+/// target). The terminal fallback publish needs nothing: its water IS its
+/// ledger's image. The advective slot keeps the D-25k mirror, so the
+/// unchanged phase-energy gate stays closed. Cells whose close moved no
+/// temperature are bit-identical (same chain inputs -> same rebuild), so
+/// every trajectory that already closes is untouched. No gate, bound,
+/// screen or tolerance moves anywhere.
+/// D-26 capture: the four water displacement slots of the chain whose image
+/// the bounded exit published, snapshotted before the close-rebuild.
+const ProducingLedger = struct {
+    matrix_liquid_water_m3: []const f64,
+    matrix_ice_water_equivalent_m3: []const f64,
+    macropore_liquid_water_m3: []const f64,
+    macropore_ice_water_equivalent_m3: []const f64,
+};
+
+fn reconcileStalledCeilingLedger(
     base: []const f64,
-    current: []f64,
+    current: []const f64,
+    pre_close: ?[]const f64,
+    producing_ledger: ?ProducingLedger,
     trial_displacement: DisplacementOutputs,
     properties: Properties,
     cells: usize,
 ) void {
-    const liquid_capacity = properties.liquid_water_heat_capacity_megajoules_per_m3_k;
-    const ice_capacity = properties.ice_heat_capacity_megajoules_per_m3_k;
     for (0..cells) |cell| {
         if (properties.active_by_layer.len != 0 and !properties.active_by_layer[cell]) continue;
+        // D-26 water restoration: only for a cell the bounded exit published
+        // (pre-close snapshot present) whose temperature actually moved under
+        // closeStalledPhaseTemperature, and only where the producing chain was
+        // captured (in-loop branch / D-23 retry path; the terminal fallback
+        // publishes its own chain's image and needs nothing).
+        if (pre_close) |entry| {
+            if (entry[5 * cells + cell] != current[5 * cells + cell]) {
+                if (producing_ledger) |producing| {
+                    trial_displacement.matrix_liquid_water_m3[cell] = producing.matrix_liquid_water_m3[cell];
+                    trial_displacement.matrix_ice_water_equivalent_m3[cell] = producing.matrix_ice_water_equivalent_m3[cell];
+                    trial_displacement.macropore_liquid_water_m3[cell] = producing.macropore_liquid_water_m3[cell];
+                    trial_displacement.macropore_ice_water_equivalent_m3[cell] = producing.macropore_ice_water_equivalent_m3[cell];
+                }
+            }
+        }
+        const liquid_capacity = properties.liquid_water_heat_capacity_megajoules_per_m3_k;
+        const ice_capacity = properties.ice_heat_capacity_megajoules_per_m3_k;
         const initial_liquid_m3 = base[cell] + base[cells + cell] + base[3 * cells + cell];
         const initial_ice_m3 = base[2 * cells + cell] + base[4 * cells + cell];
         const endpoint_liquid_m3 = current[cell] + current[cells + cell] + current[3 * cells + cell];
@@ -5188,7 +5265,7 @@ test "issue-125d terminal ledger-heat reconciliation closes the gate without tou
     const drift_diagnostic = before.diagnostic orelse return error.TestExpectedPhaseEnergyDiagnostic;
     try std.testing.expect(drift_diagnostic.residual_megajoules > drift_diagnostic.effective_limit_megajoules);
 
-    reconcileStalledCeilingLedgerHeat(&base, &closed, drift_displacement, properties, 1);
+    reconcileStalledCeilingLedger(&base, &closed, null, null, drift_displacement, properties, 1);
     const after = try evaluatePhaseEnergyConservation(&base, &closed, drift_displacement, properties, test_options);
     try std.testing.expect(after.accepted);
     try std.testing.expect(after.diagnostic == null);
@@ -5197,7 +5274,7 @@ test "issue-125d terminal ledger-heat reconciliation closes the gate without tou
     // closure heat: re-reconciling is a no-op (idempotent at the closed pair).
     for (0..5) |component| try std.testing.expectEqual(closed[component], base[component]);
     const adv_after = drift_displacement.advective_enthalpy_megajoules[0];
-    reconcileStalledCeilingLedgerHeat(&base, &closed, drift_displacement, properties, 1);
+    reconcileStalledCeilingLedger(&base, &closed, null, null, drift_displacement, properties, 1);
     try std.testing.expectEqual(adv_after, drift_displacement.advective_enthalpy_megajoules[0]);
 
     // Mirror of the close arithmetic: with adv set to the reconciliation the
@@ -5206,4 +5283,153 @@ test "issue-125d terminal ledger-heat reconciliation closes the gate without tou
     var recheck = closed;
     closeStalledPhaseTemperature(&base, &recheck, drift_displacement, properties, 1);
     try std.testing.expectEqual(closed[5], recheck[5]);
+}
+
+test "issue-125e bounded publication restores the producing-chain water ledger" {
+    // D-26 contract (Ottawa 1998 d354 h08 v16 campaign death + lane receipts
+    // audit/runs/ottawa/cycle11-d25lane15e1-20261109, -d25lane20e6-20261109):
+    // the bounded ceiling exits publish the image of the PRE-CLOSE chain,
+    // while the terminal rebuild re-books the closed-state chain; at the
+    // freezing kink the two chains differ (per-solve identity error
+    // 1.6381332052964451e-9 m3 at layer 0; hour defect 5.36975872251842e-10
+    // m3 vs the roundoff limit 1.0758747266121567e-18 = the v16
+    // PerLayerPostRichardsTotalWaterClosureMismatch death). The reconciliation
+    // must (a) restore the four water slots to the producing-chain capture
+    // for a cell whose temperature moved under closeStalledPhaseTemperature,
+    // (b) leave the ledger of a cell whose temperature did NOT move (or has
+    // no pre-close snapshot) bit-identical, and (c) leave the advective slot
+    // exactly at the D-25k closure heat (water restoration cannot reopen the
+    // UNCHANGED phase-energy gate), idempotently.
+    const cfg = try @import("../../core/config.zig").SimulationConfig.init(.{ .lon_count = 1, .lat_count = 1, .soil_layers = 1, .plant_populations = 1 }, .{ .worker_threads = 1, .tile_cells = 1 }, .{ .relative_tolerance = 1.0e-8, .absolute_tolerance = 1.0e-11, .max_nonlinear_iterations = 20 });
+    var grid = try grid_module.GridState.init(std.testing.allocator, cfg);
+    defer grid.deinit();
+    grid.matrix_pore_capacity_m3[0] = 5.921151001169971e-3;
+    grid.macropore_pore_capacity_m3[0] = 1.0e-6;
+    grid.matrix_liquid_water_m3[0] = 1.5276828489119657e-3;
+    grid.matrix_ice_water_m3[0] = 4.0288038933554610e-3;
+    grid.macropore_liquid_water_m3[0] = 2.1362378766394254e-11;
+    grid.macropore_ice_water_m3[0] = 8.1350530039776640e-7;
+    grid.water_vapor_volume_m3[0] = 3.7587007388242154e-10;
+    grid.soil_temperature_k[0] = 267.79462937541900;
+
+    const properties = testProperties();
+    var base = [_]f64{
+        grid.matrix_liquid_water_m3[0],
+        grid.water_vapor_volume_m3[0],
+        grid.matrix_ice_water_m3[0],
+        grid.macropore_liquid_water_m3[0],
+        grid.macropore_ice_water_m3[0],
+        grid.soil_temperature_k[0],
+    };
+    // The published pair as the bounded exit leaves it: the producing chain's
+    // image (condensation moved vapor into liquid, production shift class
+    // 1.699e-11 m3) at the pre-close temperature (entry), then ONE canonical
+    // close solving the kink temperature from the image's phase heat.
+    var entry = base;
+    entry[1] -= 1.6990040017233214e-11;
+    entry[0] += 1.6990040017233214e-11;
+    var zero = [_]f64{0};
+    const no_ledger: DisplacementOutputs = .{
+        .matrix_liquid_water_m3 = &zero,
+        .matrix_ice_water_equivalent_m3 = &zero,
+        .macropore_liquid_water_m3 = &zero,
+        .macropore_ice_water_equivalent_m3 = &zero,
+        .advective_enthalpy_megajoules = &zero,
+    };
+    var published = entry;
+    closeStalledPhaseTemperature(&base, &published, no_ledger, properties, 1);
+    try std.testing.expect(published[5] != entry[5]); // fixture: kink close moves T
+
+    // Ledger as the terminal rebuild leaves it: the CLOSED-state chain(T1)
+    // (production death values: matrix-liquid slot 1.0875545386132557e-9 with
+    // zero ice carriers), versus the capture of the PRODUCING chain(T0) that
+    // generated the published image water.
+    var rebuilt_matrix_liquid = [_]f64{1.0875545386132557e-9};
+    var rebuilt_matrix_ice = [_]f64{0};
+    var rebuilt_macro_liquid = [_]f64{1.0e-12};
+    var rebuilt_macro_ice = [_]f64{0};
+    var rebuilt_advective = [_]f64{1.2847113121734695e-6};
+    const rebuilt: DisplacementOutputs = .{
+        .matrix_liquid_water_m3 = &rebuilt_matrix_liquid,
+        .matrix_ice_water_equivalent_m3 = &rebuilt_matrix_ice,
+        .macropore_liquid_water_m3 = &rebuilt_macro_liquid,
+        .macropore_ice_water_equivalent_m3 = &rebuilt_macro_ice,
+        .advective_enthalpy_megajoules = &rebuilt_advective,
+    };
+    var producing_matrix_liquid = [_]f64{5.505786663613e-10};
+    var producing_matrix_ice = [_]f64{0};
+    var producing_macro_liquid = [_]f64{1.7e-12};
+    var producing_macro_ice = [_]f64{0};
+    reconcileStalledCeilingLedger(&base, &published, &entry, .{
+        .matrix_liquid_water_m3 = &producing_matrix_liquid,
+        .matrix_ice_water_equivalent_m3 = &producing_matrix_ice,
+        .macropore_liquid_water_m3 = &producing_macro_liquid,
+        .macropore_ice_water_equivalent_m3 = &producing_macro_ice,
+    }, rebuilt, properties, 1);
+
+    // (a) water slots restored to the producing chain, bit-for-bit.
+    try std.testing.expectEqual(producing_matrix_liquid[0], rebuilt_matrix_liquid[0]);
+    try std.testing.expectEqual(producing_matrix_ice[0], rebuilt_matrix_ice[0]);
+    try std.testing.expectEqual(producing_macro_liquid[0], rebuilt_macro_liquid[0]);
+    try std.testing.expectEqual(producing_macro_ice[0], rebuilt_macro_ice[0]);
+    // (c) advective slot sits exactly at the D-25k closure heat of the
+    // published pair (same arithmetic as the reconciliation itself).
+    const liquid_capacity = properties.liquid_water_heat_capacity_megajoules_per_m3_k;
+    const ice_capacity = properties.ice_heat_capacity_megajoules_per_m3_k;
+    const initial_liquid_m3 = base[0] + base[1] + base[3];
+    const initial_ice_m3 = base[2] + base[4];
+    const endpoint_liquid_m3 = published[0] + published[1] + published[3];
+    const endpoint_ice_m3 = published[2] + published[4];
+    const endpoint_capacity = properties.heat_capacity_megajoules_per_k[0] -
+        liquid_capacity * initial_liquid_m3 - ice_capacity * initial_ice_m3 +
+        liquid_capacity * endpoint_liquid_m3 + ice_capacity * endpoint_ice_m3;
+    const closure_heat = properties.heat_capacity_megajoules_per_k[0] * base[5] -
+        endpoint_capacity * published[5] +
+        properties.vapor.latent_heat_of_vaporization_megajoules_per_m3 *
+            (base[1] - published[1]) +
+        properties.freeze_thaw.latent_heat_of_fusion_megajoules_per_m3 *
+            (endpoint_ice_m3 - initial_ice_m3);
+    try std.testing.expect(std.math.isFinite(closure_heat) and closure_heat >= 0);
+    try std.testing.expectEqual(closure_heat, rebuilt_advective[0]);
+
+    // Idempotence: a second reconciliation changes nothing.
+    reconcileStalledCeilingLedger(&base, &published, &entry, .{
+        .matrix_liquid_water_m3 = &producing_matrix_liquid,
+        .matrix_ice_water_equivalent_m3 = &producing_matrix_ice,
+        .macropore_liquid_water_m3 = &producing_macro_liquid,
+        .macropore_ice_water_equivalent_m3 = &producing_macro_ice,
+    }, rebuilt, properties, 1);
+    try std.testing.expectEqual(producing_matrix_liquid[0], rebuilt_matrix_liquid[0]);
+    try std.testing.expectEqual(closure_heat, rebuilt_advective[0]);
+
+    // (b) no pre-close snapshot (terminal fallback publish, whose water IS its
+    // ledger's image) -> water slots untouched; heat mirror still applied.
+    var untouched_matrix_liquid = [_]f64{2.0e-9};
+    const untouched: DisplacementOutputs = .{
+        .matrix_liquid_water_m3 = &untouched_matrix_liquid,
+        .matrix_ice_water_equivalent_m3 = &rebuilt_matrix_ice,
+        .macropore_liquid_water_m3 = &rebuilt_macro_liquid,
+        .macropore_ice_water_equivalent_m3 = &rebuilt_macro_ice,
+        .advective_enthalpy_megajoules = &rebuilt_advective,
+    };
+    reconcileStalledCeilingLedger(&base, &published, null, null, untouched, properties, 1);
+    try std.testing.expectEqual(@as(f64, 2.0e-9), untouched_matrix_liquid[0]);
+    try std.testing.expectEqual(closure_heat, untouched.advective_enthalpy_megajoules[0]);
+
+    // (b) snapshot present but temperature NOT moved -> water untouched.
+    var kept_matrix_liquid = [_]f64{3.0e-9};
+    const kept: DisplacementOutputs = .{
+        .matrix_liquid_water_m3 = &kept_matrix_liquid,
+        .matrix_ice_water_equivalent_m3 = &rebuilt_matrix_ice,
+        .macropore_liquid_water_m3 = &rebuilt_macro_liquid,
+        .macropore_ice_water_equivalent_m3 = &rebuilt_macro_ice,
+        .advective_enthalpy_megajoules = &rebuilt_advective,
+    };
+    reconcileStalledCeilingLedger(&base, &published, &published, .{
+        .matrix_liquid_water_m3 = &producing_matrix_liquid,
+        .matrix_ice_water_equivalent_m3 = &producing_matrix_ice,
+        .macropore_liquid_water_m3 = &producing_macro_liquid,
+        .macropore_ice_water_equivalent_m3 = &producing_macro_ice,
+    }, kept, properties, 1);
+    try std.testing.expectEqual(@as(f64, 3.0e-9), kept_matrix_liquid[0]);
 }

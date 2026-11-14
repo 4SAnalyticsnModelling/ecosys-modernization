@@ -2391,7 +2391,7 @@ pub fn evaluate(
     cell_area_m2: []const f64,
     tolerances: Tolerances,
 ) !Report {
-    return evaluateForScope(
+    const report = try evaluateForScope(
         allocator,
         storage_before,
         storage_after,
@@ -2400,6 +2400,7 @@ pub fn evaluate(
         tolerances,
         .hourly,
     );
+    return report;
 }
 
 pub fn evaluateForScope(
@@ -2458,6 +2459,31 @@ pub fn evaluateForScope(
                         // commit; carry a 64-op binary64 floor on the standing
                         // census (accumulated Ottawa CEC 519.79: 10 ulps).
                         (if (quantity == .cation_exchange_capacity or quantity == .anion_exchange_capacity)
+                            128 * std.math.floatEps(f64) * @max(@abs(terms.storage_before), @abs(terms.storage_after))
+                        else
+                            0) +
+                        // issue-126: cell carbon is a census of per-layer organic,
+                        // residue, CO2 and plant pools rewritten by every biology,
+                        // gas-transport and relayering commit; carry a binary64
+                        // floor on the standing census (64 recovery substeps x the
+                        // four fold owners). Ottawa lanes 2026-11-14 prove the
+                        // rewrite noise bound at 61.3 ulps of the standing pool
+                        // over 13,616 consecutive hours; the budget covers it with
+                        // a 4.2x structural margin. Exact sum-completion residuals
+                        // additionally arrive through the ledger provenance lane.
+                        (if (quantity == .carbon)
+                            256 * std.math.floatEps(f64) * @max(@abs(terms.storage_before), @abs(terms.storage_after))
+                        else
+                            0) +
+                        // issue-128: mineral texture folds (sand, silt, clay and
+                        // the rock additive) are per-layer censuses rewritten by
+                        // every texture-completion ladder; carry the same
+                        // standing-census binary64 floor as the exchange
+                        // capacities (lane cycle11-carbon7: accumulated silt
+                        // drift of 2 ulps over 197 days with zero throughput,
+                        // missed by 4.8e-17).
+                        (if (quantity == .sand or quantity == .silt or
+                            quantity == .clay or quantity == .rock_additive)
                             128 * std.math.floatEps(f64) * @max(@abs(terms.storage_before), @abs(terms.storage_after))
                         else
                             0),
@@ -2874,6 +2900,128 @@ test "hourly texture gate separates representation roundoff from physical leakag
     const leaked_closure = rejected_report.cells[0].closure[@backingInt(Quantity.sand)];
     try std.testing.expect(leaked_closure.absolute > leaked_closure.effective_acceptance_limit);
     try std.testing.expectEqual(@as(usize, 1), rejected_report.failing_cell_count[@backingInt(Quantity.sand)]);
+}
+
+test "issue-126 hourly carbon census floor covers rewrite roundoff but not leakage" {
+    // Ottawa lanes 2026-11-14 (cycle11-carbon2..6): the standing cell carbon
+    // pool 5159.108975213581 g carries uncorrelated per-commit rewrite noise of
+    // up to 61.3 ulps every hour; the death-hour defect below is the exact
+    // 1999-d80 lane value. The census floor must absorb it; a physical leak
+    // seventeen thousand floors deep must not.
+    const standing: f64 = 5159.108975213581;
+    const booked_output_g: f64 = 3.384900314213131e-3;
+    const rewrite_noise_g: f64 = 1.6061700580660698e-11;
+    const carbon_index = @backingInt(Quantity.carbon);
+    var before: inventory.Storage = .{
+        .residue_carbon_g = 457.9619792252295,
+        .organic_carbon_g = 4592.4312461859545,
+        .carbon_dioxide_carbon_g = 108.71574980239716,
+    };
+    before.residue_carbon_g += 5159.108975213581 -
+        (before.residue_carbon_g + before.organic_carbon_g + before.carbon_dioxide_carbon_g);
+    try std.testing.expectEqual(standing, totalCarbon(before));
+
+    var rounded: inventory.Storage = .{
+        .residue_carbon_g = 457.9566215811285,
+        .organic_carbon_g = 4592.432182611461,
+        .carbon_dioxide_carbon_g = 108.71678612066181,
+    };
+    rounded.residue_carbon_g += (standing - rewrite_noise_g - booked_output_g) -
+        (rounded.residue_carbon_g + rounded.organic_carbon_g + rounded.carbon_dioxide_carbon_g);
+    var rounded_report = try evaluate(
+        std.testing.allocator,
+        &.{before},
+        &.{rounded},
+        &.{.{ .carbon_output_g = booked_output_g }},
+        &.{1},
+        .{ .absolute_per_area = .{}, .relative = 1e-9 },
+    );
+    defer rounded_report.deinit(std.testing.allocator);
+    const rounded_closure = rounded_report.cells[0].closure[carbon_index];
+    try std.testing.expectApproxEqAbs(rewrite_noise_g, @abs(rounded_closure.residual), 1.0e-27);
+    try std.testing.expect(rounded_closure.absolute > rounded_closure.acceptance_limit);
+    try std.testing.expect(rounded_closure.accepted);
+    try std.testing.expectEqual(@as(usize, 0), rounded_report.failing_cell_count[carbon_index]);
+
+    var leaked: inventory.Storage = rounded;
+    leaked.organic_carbon_g -= 1.0e-5;
+    var leaked_report = try evaluate(
+        std.testing.allocator,
+        &.{before},
+        &.{leaked},
+        &.{.{ .carbon_output_g = booked_output_g }},
+        &.{1},
+        .{ .absolute_per_area = .{}, .relative = 1e-9 },
+    );
+    defer leaked_report.deinit(std.testing.allocator);
+    const leaked_closure = leaked_report.cells[0].closure[carbon_index];
+    try std.testing.expect(leaked_closure.absolute > leaked_closure.effective_acceptance_limit);
+    try std.testing.expectEqual(@as(usize, 1), leaked_report.failing_cell_count[carbon_index]);
+
+    // The ledger provenance lane (exact sum-completion residuals published by
+    // the geometry stage) must remain consumable on top of the census floor.
+    const deep_noise_g: f64 = 7.0e-10;
+    var deep: inventory.Storage = rounded;
+    deep.residue_carbon_g -= deep_noise_g - rewrite_noise_g;
+    var deep_report = try evaluate(
+        std.testing.allocator,
+        &.{before},
+        &.{deep},
+        &.{.{
+            .carbon_output_g = booked_output_g,
+            .carbon_storage_update_roundoff_allowance_g = deep_noise_g,
+        }},
+        &.{1},
+        .{ .absolute_per_area = .{}, .relative = 1e-9 },
+    );
+    defer deep_report.deinit(std.testing.allocator);
+    try std.testing.expect(deep_report.cells[0].closure[carbon_index].accepted);
+    var deep_reject = try evaluate(
+        std.testing.allocator,
+        &.{before},
+        &.{deep},
+        &.{.{ .carbon_output_g = booked_output_g }},
+        &.{1},
+        .{ .absolute_per_area = .{}, .relative = 1e-9 },
+    );
+    defer deep_reject.deinit(std.testing.allocator);
+    try std.testing.expect(!deep_reject.cells[0].closure[carbon_index].accepted);
+}
+
+test "issue-128 mineral texture census floor absorbs completion drift not leakage" {
+    // Lane cycle11-carbon7 (2026-11-14): accumulated silt at day 197 carried a
+    // 2.220446049250313e-15 texture-completion rewrite drift with zero
+    // throughput, 4.8e-17 over the Higham-only limit. The census floor must
+    // absorb it; a 1e-9 megagram mineral leak may not.
+    const standing: f64 = 9.781818513054545e-1;
+    const drift: f64 = 2.220446049250313e-15;
+    const silt_index = @backingInt(Quantity.silt);
+    const before = [_]inventory.Storage{.{ .silt_megagrams = standing }};
+    const rounded = [_]inventory.Storage{.{ .silt_megagrams = standing + drift }};
+    var rounded_report = try evaluate(
+        std.testing.allocator,
+        &before,
+        &rounded,
+        &.{.{}},
+        &.{1},
+        .{ .absolute_per_area = .{}, .relative = 1e-9 },
+    );
+    defer rounded_report.deinit(std.testing.allocator);
+    try std.testing.expect(rounded_report.cells[0].closure[silt_index].accepted);
+    try std.testing.expectEqual(@as(usize, 0), rounded_report.failing_cell_count[silt_index]);
+
+    const leaked = [_]inventory.Storage{.{ .silt_megagrams = standing + 1.0e-9 }};
+    var leaked_report = try evaluate(
+        std.testing.allocator,
+        &before,
+        &leaked,
+        &.{.{}},
+        &.{1},
+        .{ .absolute_per_area = .{}, .relative = 1e-9 },
+    );
+    defer leaked_report.deinit(std.testing.allocator);
+    try std.testing.expect(!leaked_report.cells[0].closure[silt_index].accepted);
+    try std.testing.expectEqual(@as(usize, 1), leaked_report.failing_cell_count[silt_index]);
 }
 
 test "chemistry carrier provenance is quantity-local and cannot mask material leakage" {
