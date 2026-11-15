@@ -1,0 +1,4 @@
+RECEIPT lane2 carbon8 2026-11-15T10:32:02Z
+days=363 sci=1 pub=169 wall=0 carbonfail=0
+last=info: day advanced: scene_weather_hours=8352 final_hour_elapsed_ms=6371
+death=error: AcceptedTopsoilVaporPoreOverfill
