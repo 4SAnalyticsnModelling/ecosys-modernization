@@ -1,0 +1,4 @@
+RECEIPT lane2 v129c 2026-11-17T12:06:32Z
+days=875 sci=1 pub=197 wall=0 carbonfail=0
+last=info: day advanced: scene_weather_hours=3096 final_hour_elapsed_ms=57
+death=error: SoluteConcentrationExceedsWaterMolarity
