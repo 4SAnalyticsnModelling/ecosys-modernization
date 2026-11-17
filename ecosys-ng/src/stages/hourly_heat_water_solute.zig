@@ -6924,9 +6924,24 @@ fn CoupledSubstepTransaction(
                     grid.matrix_ice_water_m3[top] / ice_density;
                 const macro_air_raw = grid.macropore_pore_capacity_m3[top] - grid.macropore_liquid_water_m3[top] -
                     grid.macropore_ice_water_m3[top] / ice_density;
-                const air_tolerance = context.config.physical_tolerance.water_volume_m3 +
-                    context.config.physical_tolerance.relative *
-                        (grid.matrix_pore_capacity_m3[top] + grid.macropore_pore_capacity_m3[top]);
+                // D-30 (issue-129): an accepted topsoil state may already exceed
+                // the pore capacity by exactly what the PUBLISHER accepted --
+                // the soil phase solver (phase_solver.zig poreCapacityRoundoff-
+                // ToleranceM3) and precipitation ingress both accept over-full
+                // states up to max(1e-12, 64*eps*layer_scale) and clamp the air
+                // slot to zero, mirroring legacy `VOLP2 = AMAX1(0.0, VOLA1 -
+                // VOLW2 - VOLI2)` (watsub.f:2824), which makes an over-full layer
+                // self-stabilizing (zero further vapor flux, hydrology drains it).
+                // This backstop guards against corruption BEYOND that producer
+                // provenance, so it must use the producer's own predicate; the
+                // old waterVolume(caps) tolerance (1.6e-14 here) was 61x tighter
+                // than the publisher and turned a legal post-thaw state into a
+                // fatal error (lane v129b: overfill 7.462077830644454e-13 <
+                // 1e-12 floor, vapor update delta exactly 0).
+                const air_tolerance = topsoilPoreOverfillToleranceM3(
+                    grid.matrix_pore_capacity_m3[top],
+                    grid.macropore_pore_capacity_m3[top],
+                );
                 if (matrix_air_raw < -air_tolerance or macro_air_raw < -air_tolerance)
                     return error.AcceptedTopsoilVaporPoreOverfill;
                 grid.matrix_liquid_water_m3[top] = next_liquid_m3;
@@ -13848,4 +13863,50 @@ noinline fn solveSoilHeatWaterAndSoluteTransportAttempt(
     try coupled_substeps.publishChemistryRebaseRoundoff();
     stage_succeeded = true;
     return accepted_soil_water_heat.had_significant_heat_induced_phase_change;
+}
+
+/// D-30 (issue-129): pore-overfill backstop tolerance for the accepted topsoil
+/// vapor update. An accepted topsoil state may legitimately sit above the pore
+/// capacity by up to exactly what the PUBLISHER accepted: the soil phase solver
+/// publish (`poreCapacityRoundoffToleranceM3`, phase_solver.zig) and
+/// precipitation ingress (`poreCapacityRoundoffToleranceM3`, precipitation.zig)
+/// both use `max(1e-12, 64*eps*max(1, layer_scale))` and clamp the air slot to
+/// zero (legacy `VOLP2 = AMAX1(0.0, VOLA1-VOLW2-VOLI2)`, watsub.f:2824, makes
+/// an over-full layer self-stabilizing: zero vapor flux, hydrology drains it).
+/// This consumer backstop therefore fires only on corruption BEYOND producer
+/// provenance; over-full states inside the producer predicate are the same
+/// documented, conservation-gated states every other consumer already accepts.
+fn topsoilPoreOverfillToleranceM3(matrix_capacity_m3: f64, macropore_capacity_m3: f64) f64 {
+    return @max(
+        1.0e-12,
+        64.0 * std.math.floatEps(f64) * @max(
+            1.0,
+            @abs(matrix_capacity_m3) + @abs(macropore_capacity_m3),
+        ),
+    );
+}
+
+test "issue-129 topsoil vapor pore guard matches the producer tolerance, not leakage" {
+    // Exact lane v129b trip at hour 17115 cell 0: vapor update contributed
+    // exactly zero; the state carried mcap - mliq - mice/rho =
+    // -7.462077830644454e-13 m3, inside the phase publisher's 1e-12 floor.
+    const mcap: f64 = 6.23224676761516e-3;
+    const macap: f64 = 1.2183590485857751e-4;
+    const trip_overfill: f64 = 7.462077830644454e-13;
+    const tol = topsoilPoreOverfillToleranceM3(mcap, macap);
+    try std.testing.expectEqual(@as(f64, 1.0e-12), tol); // floor dominates at layer scale
+    try std.testing.expect(-trip_overfill < -@as(f64, 1.6354082672473738e-14)); // old guard: fatal
+    try std.testing.expect(trip_overfill <= tol); // producer predicate: accepted state stays legal
+    // Genuine corruption (overfill past every producer bound) must stay fatal.
+    const leakage: f64 = 1.0e-11;
+    try std.testing.expect(leakage > tol);
+    // Large layers scale with 64 eps like the producer (mirror of the
+    // phase_solver tolerance test at its own site).
+    const big = topsoilPoreOverfillToleranceM3(8.9e6, 0);
+    try std.testing.expect(big > 1.0e-12);
+    try std.testing.expectApproxEqRel(
+        64.0 * std.math.floatEps(f64) * 8.9e6,
+        big,
+        1.0e-12,
+    );
 }
