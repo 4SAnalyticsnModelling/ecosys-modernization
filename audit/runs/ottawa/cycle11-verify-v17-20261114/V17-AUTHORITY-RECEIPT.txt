@@ -1,0 +1,5 @@
+V17 AUTHORITY RECEIPT (engine ship126_p17 raw 5016923f08df682186670a3cdd628907b78edf888bf548e9a33f87ad8ea1fb55, __text 0x753a70 sha 8227a9cac2a56fe5d1e2; source 9c1c646)
+exit: EXITED 1 (terminal below); days=0 ; sci=0; cons=0; bounded_pubs=0
+terminal: total_hour=17115 scene=2 1999 d349 h3 error=AcceptedTopsoilVaporPoreOverfill (issue-129, EXPECTED; matches lanes carbon8/v129b bit-zone)
+AUTHORITY CONFIRMED: D-26 (8480 kink + 165 bounded publications, zero water/heat conservation failure through 713 d), D-27 (1999-d80 carbon hour class passed), D-28 (accumulated mineral zones passed).
+next: v18 (ship130_p18 = +D-30) running same trajectory; target wh 18939 EXITED 0.
