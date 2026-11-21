@@ -1,0 +1,4 @@
+B. v18 vs cycle-10: files=51 rows=140528 differing=108990 ulp-only(<=1e-12 rel)=665
+   first_macro(|v|>1,rel>1e-6)=('heat_energy/lat_45.30_lon_-75.70_maiz33_1998_exec01_scenario01_rep01_scene01_cell01_pop01_f25eh1.txt', 1812, 0.006921820147870467)
+C) hourly_cons_failures=0 accumulated_failures=0 days_completed=1225
+   issue122_reclassifications=0 organic_completion_warns=14986 texture_completion_warns=0
