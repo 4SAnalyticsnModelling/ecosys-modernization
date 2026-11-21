@@ -23,6 +23,15 @@ through 1999 d360 h24; new distinct defect at 2000 d60 h3 registered as issue-12
 Then issue-115 (test-fixture OOB, file absent from module gate root); DEV-022/DEV-023 leader-owned
 edge-case testing (formerly "adversarial revalidation") remains backlog. Legacy oracle blocked beyond
 h2173 (recorded).
+Cycle 11 (issues 121-129) CLOSED: from-scratch v18 authority campaign (binary d429893e, source 8af954d)
+passed the target hour 18939 (2000 d60 h3, issue-121 carbon) and every falsifier hour of issues 122-125
+with ZERO hourly/accumulated conservation failures across 1225 days, terminating only at wh 29422 with
+issue-130 (SoluteConcentrationExceedsWaterMolarity, 2001 d130 h22, next cycle). Fixes: D-26 producing-chain
+ledger restore at bounded publications; D-27 carbon completion-residual provenance lane + census floor;
+D-28 mineral texture census floors; D-30 topsoil vapor pore guard = exact producer tolerance (issue-129,
+authority-received at v17 wh 17115). Frontier advanced past h18939 to h29421 accepted / h29422 failed
+(issue-130); v129c lane proves the fixed engine clean to 29422 h; issue-130 forensics banked (lane v130a
+P130 series: chronic non-band nitrate ~0.5-1.0 M, NOT desiccation; resume state .tmp/cycle121/deck-29184-snapshot).
 Verified strict frontier stays 0 in frontier.json (promotion only via update_frontier.py under P0
 binding); record-level strict trajectory now extends to h18938 accepted / 2000 d60 h3 failed (issue-121).
 Earlier orientation (cycles 3-9 era) is superseded by cycles/cycle_0000{3..10}.md records.

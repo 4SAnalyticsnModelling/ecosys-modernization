@@ -1,0 +1,27 @@
+{
+  "policy": "retain-through-F7-and-reproducibility",
+  "artifacts": [
+    {
+      "path": "evidence/runs/cycle11-verify-v18-20261117/deck/ecosys_ng",
+      "sha256": "d429893e775978385ba32a6c082baf4a671c2c7d77ad0e1c2cdf34380d29c06d"
+    }
+  ],
+  "cycle": 11,
+  "candidate": {
+    "role": "canonical verification binary (deck copy; produced audit/runs/ottawa/cycle11-verify-v18-20261117)",
+    "path": "evidence/runs/cycle11-verify-v18-20261117/deck/ecosys_ng",
+    "sha256": "d429893e775978385ba32a6c082baf4a671c2c7d77ad0e1c2cdf34380d29c06d",
+    "build": "zig build-exe -O ReleaseSafe --dep ecosys_ng -Mroot=src/ecosys_ng.zig -Mecosys_ng=src/module_index.zig from source commit 8af954d (D-26/27/28 landed 9c1c646 + D-30 landed 8af954d); __text 0x753a7c sha 0f51d90b505319b45c3f double-build stable; zero probe strings"
+  },
+  "authority_predecessor": {
+    "role": "issue-129 authority binary (v17 campaign; died exactly at wh 17115 AcceptedTopsoilVaporPoreOverfill as predicted)",
+    "path": "evidence/runs/cycle11-verify-v17-20261114/deck/ecosys_ng",
+    "sha256": "5016923f08df682186670a3cdd628907b78edf888bf548e9a33f87ad8ea1fb55",
+    "source_commit": "9c1c646"
+  },
+  "identity_policy": "binary file hash not reproducible across relinks on macOS (LC_UUID); reproducibility pinned by source_commit 8af954d + toolchain zig 0.17.0 aarch64-macos ReleaseSafe + __text section hash 0x753a7c/0f51d90b505319b45c3f (link-entropy invariant); v18 campaign trajectory is value-identical to lane v129c through its terminal hour 29422 (bit-exact issue-130 trip numbers)",
+  "superseded_interim": [
+    "probe binaries fix129_p1/p1b (P129SRC/P129TRIP log-only), fix129_p3 (probes+D-30 lane), fix130_p1 (P130 log-only) - all probe instrumentation reverted from tree before ship130_p18 build; runtime receipts under audit/runs/ottawa/cycle11-{carbon8,v129b,v129c,v130a}-20261114/20261117"
+  ],
+  "retention_notes": "git-tracked files are the retention layer; verify-run dirs commit receipt.json/stdout/stderr (>90MB stderr gzipped losslessly, gz verified before removing plain: v17 274MB->47MB, v18 equivalent); decks stay in evidence/runs/*/deck (git-ignored; deck identity = binary sha + pristine input tree); issue-130 resume state preserved at .tmp/cycle121/deck-29184-snapshot (1365 checkpoint bins, v129c final state; path outside git by size, re-creatable from lane v129c recipe + checkpoint cadence)"
+}
