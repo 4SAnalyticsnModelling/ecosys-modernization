@@ -1,0 +1,5 @@
+V18 AUTHORITY RECEIPT (engine ship130_p18 raw d429893e775978385ba3..., __text 0x753a7c sha 0f51d90b505319b45c3f; source 8af954d)
+exit: EXITED 1 at total_hour=29422 (2001 d130 h22 scene 4) error=SoluteConcentrationExceedsWaterMolarity = issue-130 (banked next-cycle mountain); bit-exact to lane v129c terminal (conc 5.563792700510589e4 vs water 5.541803700441147e4 cell=1 nitrate_non_band).
+CYCLE-11 TARGET MET: campaign passed total_hour 18939 (2000 d60, issue-121 carbon HourlyCellConservationFailure hour) with ZERO hourly/accumulated conservation failures and ZERO science failures through 29,422 h (days=1225).
+AUTHORITY CONFIRMED SEQUENCE: D-26 kink 8479/8480 (bounded pubs incl), D-27 carbon 1999-d80 zone, D-28 accumulated minerals, D-30 wh 17115 AcceptedTopsoilVaporPoreOverfill hour PASSED (v17 died exactly here with same bits minus D-30).
+cons=0 sci=1(death 130) days=1225
