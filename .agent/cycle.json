@@ -5,7 +5,10 @@
   "owned_paths": [
     "audit/issues/issue-130-soluteconcentrationexceedswatermolarity.md",
     ".agent/state.md",
-    ".agent/cycles/cycle_00012.md"
+    ".agent/cycles/cycle_00012.md",
+    "audit/runs/ottawa/cycle12-verify-v19-20261122",
+    "audit/runs/ottawa/cycle12-fix131-20261122",
+    "audit/experiments/cycle12-verify-v19-20261122"
   ],
   "record": ".agent/cycles/cycle_00012.md",
   "schema_version": 2,
