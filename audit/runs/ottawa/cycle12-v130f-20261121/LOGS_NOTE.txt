@@ -1,0 +1,1 @@
+stderr.log compressed to stderr.log.gz (gzip -dk to inspect). Raw copy also in session store.
