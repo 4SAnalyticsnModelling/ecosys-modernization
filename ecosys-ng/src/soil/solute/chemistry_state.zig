@@ -12,6 +12,7 @@ const geochemistry_reaction_rates = @import("geochemistry_reaction_rates.zig");
 const carboxyl_exchange = @import("carboxyl_exchange.zig");
 const water_equilibrium = @import("water_equilibrium.zig");
 const ti_compat = @import("../../core/typeinfo_compat.zig");
+const legacy_water_negligible_floor = @import("../../core/legacy_water_negligible_floor.zig");
 
 pub const PhosphateTransformations = struct {
     non_band: phosphate_network.Transformations,
@@ -37,6 +38,18 @@ pub const ReactionParameters = struct {
     geochemistry_kinetics: geochemistry_reaction_rates.Kinetics,
     water_activity_product_mol2_per_m6: f64,
     negligible_water_ion_concentration_mol_per_m3: f64,
+    /// SOLUTE `VOLW(L,NY,NX)` for this layer (`solute.f:470` carrier, m3).
+    /// issue-130: the aqueous molarity guard gates each zone exactly as SOLUTE
+    /// gates its concentration read (`VOLWNO.GT.ZEROS2`, `solute.f:533`), so it
+    /// needs the layer carrier water this hour. The default keeps every zone
+    /// present (guard behaviour unchanged) for builders that do not carry an
+    /// hourly carrier yet; hourly and startup soil chemistry set it explicitly.
+    water_volume_m3: f64 = std.math.inf(f64),
+    /// Legacy `ZEROS2(NY,NX) = ZERO2*DH*DV` noise floor for this cell
+    /// (`starts.f:94` ZERO2=1e-6, `starts.f:270`), already scaled by the cell's
+    /// horizontal footprint. Zones whose water (`fraction*water_volume_m3`) is
+    /// at or below this floor hold no legacy concentration.
+    zone_water_floor_m3: f64 = legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(1.0),
 };
 
 pub const CationExchangeWaterRatios = struct {

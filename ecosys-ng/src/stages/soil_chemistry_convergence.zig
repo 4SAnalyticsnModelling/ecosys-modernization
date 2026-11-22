@@ -472,6 +472,13 @@ noinline fn solveHourlyReactionLayer(
         cell,
         layer_within_cell,
     );
+    // issue-130: the aqueous molarity guard gates each zone on the legacy
+    // `VOLWNO.GT.ZEROS2` predicate (`solute.f:533`), so it needs this hour's
+    // SOLUTE carrier water `VOLW` and the cell's area-scaled `ZEROS2` floor
+    // (`starts.f:270`, ZERO2=1e-6 m3 per m2 of horizontal footprint).
+    parameters.water_volume_m3 = water_volume_m3;
+    parameters.zone_water_floor_m3 = ecosys.soil_chemistry_water_carrier_rebase
+        .legacyNegligibleWaterVolumeM3(context.canopy_cell_area_m2[cell]);
     const prepared_zones = try ecosys.soil_fertilizer_dissolution
         .prepareLayerZones(.{
         .water_volume_m3 = water_volume_m3,

@@ -7,6 +7,7 @@
 const std = @import("std");
 const numerics = @import("../../core/numerics.zig");
 const chemistry = @import("chemistry_state.zig");
+const charge_classification = @import("charge_classification.zig");
 const aqueous_network = @import("aqueous_network.zig");
 const phosphate_network = @import("phosphate_network.zig");
 const cation_exchange = @import("cation_exchange.zig");
@@ -300,6 +301,9 @@ test "bounded reaction KKT releases the same face after equation rescaling" {
 
 fn acceptedStateConservationTestParameters() chemistry.ReactionParameters {
     var result = std.mem.zeroes(chemistry.ReactionParameters);
+    // issue-130: keep every zone present (pre-ZEROS2-guard semantics).
+    result.water_volume_m3 = std.math.inf(f64);
+    result.zone_water_floor_m3 = 1.0e-6;
     result.fractions = .{
         .ammonium_non_band = 0.75,
         .ammonium_band = 0.25,
@@ -4348,6 +4352,9 @@ test "raw mineral owner skips only fractions proven negative" {
         .ammonium_band_megagrams_per_m3 = 1,
     };
     var parameters = std.mem.zeroes(chemistry.ReactionParameters);
+    // issue-130: keep every zone present (pre-ZEROS2-guard semantics).
+    parameters.water_volume_m3 = std.math.inf(f64);
+    parameters.zone_water_floor_m3 = 1.0e-6;
     parameters.fractions = .{
         .ammonium_non_band = 0.8,
         .ammonium_band = 0.2,
@@ -4421,6 +4428,9 @@ test "zero aqueous donor reaches its complementarity face without underflow back
         .ammonium_band_megagrams_per_m3 = 1,
     };
     var parameters = std.mem.zeroes(chemistry.ReactionParameters);
+    // issue-130: keep every zone present (pre-ZEROS2-guard semantics).
+    parameters.water_volume_m3 = std.math.inf(f64);
+    parameters.zone_water_floor_m3 = 1.0e-6;
     parameters.fractions = .{
         .ammonium_non_band = 0.8,
         .ammonium_band = 0.2,
@@ -4681,10 +4691,48 @@ test "day 12 snapshot rejects ammonium above water molarity" {
     state.aqueous[0].ammonium_non_band = 1353591.0109655228;
     try std.testing.expectError(
         error.SoluteConcentrationExceedsWaterMolarity,
-        group_numerics.validateAqueousMolarity(&state, 0, .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }),
+        group_numerics.validateAqueousMolarity(&state, 0, .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, 1.0, 1.0e-6),
     );
     state.aqueous[0].ammonium_non_band = 0.6232257391219167;
-    try group_numerics.validateAqueousMolarity(&state, 0, .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 });
+    try group_numerics.validateAqueousMolarity(&state, 0, .{ .ammonium_non_band = 1, .ammonium_band = 0, .nitrate_non_band = 1, .nitrate_band = 0, .phosphate_non_band = 1, .phosphate_band = 0 }, 1.0, 1.0e-6);
+}
+
+test "issue-130 molarity guard applies exactly where legacy reads the zone (ZEROS2)" {
+    // Trip shape from wh 29422 (audit runs cycle12-v130d/v130a): non-band zone
+    // fraction 1-0.9999, layer carrier water 3.7280625661375065e-3 m3, nitrate
+    // 5.563792700510589e4 mol/m3. Zone water = 3.73e-7 m3 <= legacy
+    // ZEROS2 = 1e-6 m3 (Ottawa f25si98 DH=DV=1.0 m), so SOLUTE solute.f:533
+    // sets CNO1=0.0: the zone holds no legacy concentration and the port-only
+    // molarity bound must not reject it.
+    var state = try chemistry.State.init(std.testing.allocator, 1);
+    defer state.deinit();
+    state.water_mol_per_m3[0] = 5.541803700441147e4;
+    state.aqueous[0].nitrate_non_band = 5.563792700510589e4;
+    const fractions = charge_classification.ZoneFractions{
+        .ammonium_non_band = 1,
+        .ammonium_band = 0,
+        .nitrate_non_band = 9.999999999998899e-5,
+        .nitrate_band = 0.9999,
+        .phosphate_non_band = 1,
+        .phosphate_band = 0,
+    };
+    // Zone water 3.728062566137096e-7 <= 1e-6: legacy skips the zone read.
+    try group_numerics.validateAqueousMolarity(&state, 0, fractions, 3.7280625661375065e-3, 1.0e-6);
+    // Same fraction with a wetter carrier (legacy DOES read the zone): the
+    // molarity bound still fires unchanged.
+    try std.testing.expectError(
+        error.SoluteConcentrationExceedsWaterMolarity,
+        group_numerics.validateAqueousMolarity(&state, 0, fractions, 3.7280625661375065e-2, 1.0e-6),
+    );
+    // Boundary: zone water exactly at the floor is still "not greater than
+    // ZEROS2" (legacy `IF(VOLWNO.GT.ZEROS2)`), so the zone remains skipped.
+    try group_numerics.validateAqueousMolarity(&state, 0, fractions, 1.0e-6 / fractions.nitrate_non_band, 1.0e-6);
+    // A missing (non-finite) carrier keeps every zone present: a builder that
+    // does not carry hourly water can never weaken the bound.
+    try std.testing.expectError(
+        error.SoluteConcentrationExceedsWaterMolarity,
+        group_numerics.validateAqueousMolarity(&state, 0, fractions, std.math.inf(f64), 1.0e-6),
+    );
 }
 
 test "diagnostic suppression preserves solver error and rollback bytes" {
@@ -4693,10 +4741,13 @@ test "diagnostic suppression preserves solver error and rollback bytes" {
     state.water_mol_per_m3[0] = 1;
     state.aqueous[0].ammonium_non_band = 2;
     var parameters = std.mem.zeroes(chemistry.ReactionParameters);
-    // DEV-021 (r00050, 2026-09-30): the water-molarity bound skips a zone whose
-    // fraction is structurally absent (< 1e-12, reaction_solver_numerics.zig:30).
-    // This fixture needs the ammonium zone present for the bound to be exercised
-    // at all; the sibling "day 12 snapshot" test got the same update in DEV-021.
+    // DEV-021 (r00050, 2026-09-30) / issue-130: the water-molarity bound skips
+    // a zone whose carried water is at or below the legacy ZEROS2 floor
+    // (reaction_solver_numerics.zig zoneHoldsLegacySolution). This fixture
+    // needs the ammonium zone present for the bound to be exercised at all;
+    // the sibling "day 12 snapshot" test got the same update in DEV-021.
+    parameters.water_volume_m3 = std.math.inf(f64);
+    parameters.zone_water_floor_m3 = 1.0e-6;
     parameters.fractions.ammonium_non_band = 1;
     var before: [chemistry.State.packedComponentCount()]f64 = undefined;
     try state.packCell(0, &before);

@@ -21,13 +21,37 @@ const group_types = @import("reaction_solver_types.zig");
 const diagnostic_control = @import("reaction_diagnostic_control.zig");
 const charge_classification = @import("charge_classification.zig");
 const ti_compat = @import("../../core/typeinfo_compat.zig");
+const legacy_water_negligible_floor = @import("../../core/legacy_water_negligible_floor.zig");
 
 
-/// Zone fraction below which a band/non-band zone is structurally absent.
-/// HOUR1 3845 and SOLUTE evaluate a zone only while its water volume VL*B
-/// exceeds ZERO; a REDIST relayering sliver below that holds a concentration
-/// legacy never reads, so the molarity bound does not apply to it (DEV-021).
-const structurally_absent_zone_fraction = 1.0e-12;
+/// Zone water at or below this floor holds no legacy concentration. SOLUTE
+/// gates every zone concentration read on the zone water volume against the
+/// area-scaled `ZEROS2` noise floor (`solute.f:533/539` for NO3,
+/// `IF(VOLWNO.GT.ZEROS2)` else `CNO1=0.0`; `starts.f:94` ZERO2=1e-6 m3 per m2,
+/// `starts.f:270` `ZEROS2=ZERO2*DH*DV`), and HOUR1 3845 gates band reads the
+/// same way. A zone whose fraction-carried water sits at or below the floor
+/// (REDIST relayering slivers, fertilizer-band near-clamps) therefore holds a
+/// concentration legacy never evaluates, so no legacy quantity — and no
+/// molarity bound — exists for it (issue-130; replaces the DEV-021 fraction
+/// proxy, which applied the ZERO-scale proxy `1e-12` to the fraction instead
+/// of the legacy ZERO2-scale predicate to the zone water volume).
+const zone_present_water_floor_m3_per_m2 = 1.0e-6;
+
+fn zoneHoldsLegacySolution(
+    fraction: f64,
+    water_volume_m3: f64,
+    zone_water_floor_m3: f64,
+) bool {
+    std.debug.assert(zone_present_water_floor_m3_per_m2 ==
+        legacy_water_negligible_floor.legacy_negligible_water_volume_m3_per_m2);
+    const floor = if (zone_water_floor_m3 > 0) zone_water_floor_m3 else
+        legacy_water_negligible_floor.legacyNegligibleWaterVolumeM3(1.0);
+    // A non-finite carrier means the caller carries no hourly water: keep the
+    // zone present so the guard stays at least as strict as before (a builder
+    // that never learned the carrier can never weaken the bound).
+    if (!std.math.isFinite(water_volume_m3)) return true;
+    return fraction * water_volume_m3 > floor;
+}
 
 fn aqueousFieldZoneFraction(
     comptime name: []const u8,
@@ -50,6 +74,8 @@ pub fn validateAqueousMolarity(
     state: *const chemistry.State,
     cell_index: usize,
     fractions: charge_classification.ZoneFractions,
+    water_volume_m3: f64,
+    zone_water_floor_m3: f64,
 ) !void {
     const water_mol_per_m3 = state.water_mol_per_m3[cell_index];
     if (!std.math.isFinite(water_mol_per_m3) or water_mol_per_m3 <= 0)
@@ -62,8 +88,11 @@ pub fn validateAqueousMolarity(
         if (!std.math.isFinite(concentration) or concentration < 0)
             return error.NonFiniteSoluteReactionState;
         if (concentration > water_mol_per_m3 and
-            aqueousFieldZoneFraction(field.name, fractions) >=
-                structurally_absent_zone_fraction)
+            zoneHoldsLegacySolution(
+                aqueousFieldZoneFraction(field.name, fractions),
+                water_volume_m3,
+                zone_water_floor_m3,
+            ))
         {
             if (diagnostic_control.isEnabled()) std.log.warn(
                 "SOLUTE aqueous concentration exceeds water molarity: cell={d} packed_component={d} name=aqueous.{s} concentration_mol_per_m3={e} water_mol_per_m3={e}",

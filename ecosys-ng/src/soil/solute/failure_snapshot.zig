@@ -5,8 +5,25 @@ const solver = @import("reaction_solver.zig");
 
 const magic = "ECOSSOL!";
 const legacy_format_version: u32 = 1;
-const format_version: u32 = 2;
+const pre_zone_water_format_version: u32 = 2;
+const format_version: u32 = 3;
 const checksum_seed: u64 = 0x45434f53534f4c46;
+
+/// Versions 1 and 2 predate the issue-130 zone-water carrier fields
+/// (`water_volume_m3`, `zone_water_floor_m3`) appended to
+/// `chemistry.ReactionParameters`. Their parameter payload is the live struct
+/// minus exactly those trailing two f64s; decoding copies that prefix over a
+/// default-initialized struct, so archived failures replay with every zone
+/// present (the guard semantics those archives were captured under).
+const pre_zone_water_parameters_missing_bytes = 2 * @sizeOf(f64);
+
+fn parametersPayloadSize(version: u32) usize {
+    const live = @sizeOf(chemistry.ReactionParameters);
+    return switch (version) {
+        1, pre_zone_water_format_version => live - pre_zone_water_parameters_missing_bytes,
+        else => live,
+    };
+}
 
 /// Snapshot v1 predated separate concentration- and soil-mass-based absolute
 /// tolerances. Keep its exact in-memory field set here so archived production
@@ -186,7 +203,9 @@ pub fn read(
     if (!std.mem.eql(u8, try reader.takeArray(magic.len), magic))
         return error.InvalidSoluteSnapshotMagic;
     const version = try reader.takeInt(u32, .little);
-    if (version != legacy_format_version and version != format_version)
+    if (version != legacy_format_version and
+        version != pre_zone_water_format_version and
+        version != format_version)
         return error.UnsupportedSoluteSnapshotVersion;
     const payload_size = std.math.cast(
         usize,
@@ -194,7 +213,7 @@ pub fn read(
     ) orelse return error.InvalidSoluteSnapshotSize;
     const checksum = try reader.takeInt(u64, .little);
     const payload_without_options = @sizeOf(Context) +
-        @sizeOf(chemistry.ReactionParameters) +
+        parametersPayloadSize(version) +
         chemistry.State.packedComponentCount() * @sizeOf(f64);
     const legacy_payload_size = payload_without_options +
         @sizeOf(LegacyOptionsV1);
@@ -204,6 +223,10 @@ pub fn read(
         legacy_format_version => if (payload_size == legacy_payload_size)
             .legacy_single_tolerance
         else if (payload_size == unit_specific_payload_size)
+            .unit_specific_tolerances
+        else
+            return error.InvalidSoluteSnapshotSize,
+        pre_zone_water_format_version => if (payload_size == unit_specific_payload_size)
             .unit_specific_tolerances
         else
             return error.InvalidSoluteSnapshotSize,
@@ -232,11 +255,12 @@ pub fn read(
     var offset: usize = 0;
     @memcpy(std.mem.asBytes(&context), payload[offset..][0..@sizeOf(Context)]);
     offset += @sizeOf(Context);
+    const parameters_size = parametersPayloadSize(version);
     @memcpy(
-        std.mem.asBytes(&parameters),
-        payload[offset..][0..@sizeOf(chemistry.ReactionParameters)],
+        std.mem.asBytes(&parameters)[0..parameters_size],
+        payload[offset..][0..parameters_size],
     );
-    offset += @sizeOf(chemistry.ReactionParameters);
+    offset += parameters_size;
     const options_size: usize = switch (options_encoding) {
         .legacy_single_tolerance => @sizeOf(LegacyOptionsV1),
         .unit_specific_tolerances => @sizeOf(OptionsWithUnitTolerances),
@@ -289,6 +313,10 @@ test "solute failure snapshot is self contained checksummed and replayable" {
         .phosphate_non_band = 1,
         .phosphate_band = 0,
     };
+    // issue-130: keep every zone present for this zero-parameter snapshot
+    // (same guard semantics as before the ZEROS2 zone predicate).
+    parameters.water_volume_m3 = std.math.inf(f64);
+    parameters.zone_water_floor_m3 = 1.0e-6;
     const options: solver.Options = .{ .max_iterations = 1 };
     var search_options = options;
     search_options.search_reference_concentrations = &packed_values;
@@ -367,7 +395,11 @@ test "v1 solute failure snapshot upgrades one absolute tolerance to both units" 
     var payload: std.Io.Writer.Allocating = .init(std.testing.allocator);
     defer payload.deinit();
     try payload.writer.writeAll(std.mem.asBytes(&context));
-    try payload.writer.writeAll(std.mem.asBytes(&parameters));
+    // v1 predates the issue-130 zone-water carrier fields: the archived
+    // parameter payload is the struct prefix without those trailing f64s.
+    try payload.writer.writeAll(
+        std.mem.asBytes(&parameters)[0..parametersPayloadSize(legacy_format_version)],
+    );
     try payload.writer.writeAll(std.mem.asBytes(&legacy_options));
     try payload.writer.writeAll(std.mem.asBytes(&packed_values));
 
@@ -437,7 +469,9 @@ test "v1 expanded solute snapshot preserves distinct unit tolerances" {
     var payload: std.Io.Writer.Allocating = .init(std.testing.allocator);
     defer payload.deinit();
     try payload.writer.writeAll(std.mem.asBytes(&context));
-    try payload.writer.writeAll(std.mem.asBytes(&parameters));
+    try payload.writer.writeAll(
+        std.mem.asBytes(&parameters)[0..parametersPayloadSize(legacy_format_version)],
+    );
     try payload.writer.writeAll(std.mem.asBytes(&snapshot_options));
     try payload.writer.writeAll(std.mem.asBytes(&packed_values));
 

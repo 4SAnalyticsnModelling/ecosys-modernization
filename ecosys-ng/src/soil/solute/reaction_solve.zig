@@ -719,7 +719,7 @@ fn committedIterateCensusPassed(
 ) !bool {
     const scratch = &workspace.scratch;
     try scratch.unpackCell(0, candidate);
-    try validateAqueousMolarity(scratch, 0, parameters.fractions);
+    try validateAqueousMolarity(scratch, 0, parameters.fractions, parameters.water_volume_m3, parameters.zone_water_floor_m3);
     const before = try acceptedStateInventory(entry, cell_index, parameters);
     const after = try acceptedStateInventory(scratch, 0, parameters);
     requireConservedInventories(before, after) catch |err| {
@@ -755,7 +755,7 @@ pub fn retainBestBoundedIterate(
         workspace.scratch.aqueous[0].hydroxide = projected_hydroxide;
     }
     try workspace.scratch.unpackCell(0, workspace.current);
-    try validateAqueousMolarity(&workspace.scratch, 0, parameters.fractions);
+    try validateAqueousMolarity(&workspace.scratch, 0, parameters.fractions, parameters.water_volume_m3, parameters.zone_water_floor_m3);
     const before = try acceptedStateInventory(entry, cell_index, parameters);
     const after = try acceptedStateInventory(&workspace.scratch, 0, parameters);
     // Retention is eligibility, not acceptance: an iterate that fails the same
@@ -967,7 +967,7 @@ pub fn rebaseEntryCarboxylCapacity(
     transformations.cation_exchange_water_ratios =
         parameters.cation_exchange_water_ratios;
     try state.state_updateCell(cell_index, transformations);
-    try validateAqueousMolarity(state, cell_index, parameters.fractions);
+    try validateAqueousMolarity(state, cell_index, parameters.fractions, parameters.water_volume_m3, parameters.zone_water_floor_m3);
 }
 
 pub fn solveCellWithWorkspaceAndTrace(
@@ -1022,7 +1022,7 @@ fn solveCellWithWorkspaceAndTraceUsing(
     try validateOptions(options);
     if (cell_index >= state.cell_count)
         return error.ChemistryCellIndexOutOfBounds;
-    try validateAqueousMolarity(state, cell_index, parameters.fractions);
+    try validateAqueousMolarity(state, cell_index, parameters.fractions, parameters.water_volume_m3, parameters.zone_water_floor_m3);
     try state.packCell(cell_index, workspace.rollback_state);
     const original_state = workspace.rollback_state;
     errdefer state.unpackCell(cell_index, original_state) catch

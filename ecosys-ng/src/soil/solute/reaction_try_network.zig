@@ -5917,6 +5917,9 @@ test "zero-rate magnesium exchange axis remains on the complementarity face" {
     state.water_mol_per_m3[0] = 100;
 
     var parameters = std.mem.zeroes(chemistry.ReactionParameters);
+    // issue-130: keep every zone present (pre-ZEROS2-guard semantics).
+    parameters.water_volume_m3 = std.math.inf(f64);
+    parameters.zone_water_floor_m3 = 1.0e-6;
     parameters.fractions = .{
         .ammonium_non_band = 0.8,
         .ammonium_band = 0.2,
