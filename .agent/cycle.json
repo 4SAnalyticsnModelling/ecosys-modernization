@@ -14,6 +14,6 @@
     ".agent/state.md",
     ".agent/cycles/cycle_00012.md"
   ],
-  "status": "PLANNING",
+  "status": "EXECUTING",
   "target": "issue-130: total_hour 29422 (2001 d130 h22 scene 4) SoluteConcentrationExceedsWaterMolarity cell=1 aqueous.nitrate_non_band 5.563792700510589e4 > water 5.541803700441147e4 mol/m3 - attribute the chronic non-band nitrate accumulation (0.5-1.0 M from wh 29184, frac_nb 1e-4, NOT desiccation); bounded benign fix, no gate/tolerance change"
 }
