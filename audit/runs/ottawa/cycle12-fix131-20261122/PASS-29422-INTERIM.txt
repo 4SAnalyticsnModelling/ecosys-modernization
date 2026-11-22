@@ -1,0 +1,19 @@
+issue-130 D-31 behaviour receipt (interim; engine = fix131_p1 = tree 34f2f49, __text
+0x7544ac sha 58e2c7a769ecf4308e75; resume of deck-29184-snapshot, launched 2026-11-22).
+Trip hour wh 29422 (2001 d130 h22) PASSED with ZERO SoluteConcentrationExceedsWaterMolarity.
+Interim frontier: latest journaled hour = 29766 (>= 150 h past the historical trip).
+SoluteConcentration matches in stderr: 0
+hourly-science-failed matches: 0
+daily conservation violations: 0
+Documented non-fatal families present: implausible-flux storm + SOLUTE recovery-ladder
+warnings beyond 29422 (banked observation, issues.md; every hour survives, dailies accepted).
+UPDATE: frontier extended to journaled hour 33475 (2001 d299 h19; 4053 h past trip), still ZERO solute failures.
+
+FINAL (planned stop 2026-11-22 04:15, SIGTERM; receipt exit_code -15 intentional):
+frontier journaled 34448 (2001 d335) = 5026 h (209 days) past the historical
+issue-130 trip hour 29422, ZERO SoluteConcentrationExceedsWaterMolarity,
+ZERO conservation violations, ZERO hourly-science failures across the whole lane.
+Documented non-fatal families only (implausible-flux storm + bounded SOLUTE
+recovery-ladder warnings beyond 29422, every hour published, dailies accepted).
+Engine executable_sha256 cb1ce695c76235dd... (fix131_p1, tree 34f2f49,
+__text 58e2c7a769ecf4308e75). D-31 BEHAVIOUR RECEIPT: COMPLETE.
