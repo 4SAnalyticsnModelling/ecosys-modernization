@@ -56,7 +56,7 @@ Receipt: audit/runs/ottawa/cycle11-v130a-20261117/stderr.log (P130 series 771 li
   ZERO2*DH*DV = 1e-6*DH*DV, starts.f:94/:270; Ottawa f25si98 DH=DV=1.0 m). At the trip hour
   (v130d last P130D line) sliver zone water = 9.999999999998899e-5 * 3.7280625661375065e-3 m3
   = 3.728062566137096e-7 <= 1e-6 => legacy sets CNO1=0.0; the port guard evaluated the sliver as
-  a solution because DEV-021 used a fraction proxy 1e-12 instead of the legacy ZERO2-scale
+  a solution because the 2026-09-30 fix used a fraction proxy 1e-12 instead of the legacy ZERO2-scale
   zone-water predicate (wrong scale by 6 orders).
 - Fix = producer-parity predicate (NOT a loosening): zoneHoldsLegacySolution compares
   fraction x carrier water against the area-scaled ZEROS2 (issue-061 helper

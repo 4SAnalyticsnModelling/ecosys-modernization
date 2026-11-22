@@ -32,7 +32,7 @@ const legacy_water_negligible_floor = @import("../../core/legacy_water_negligibl
 /// same way. A zone whose fraction-carried water sits at or below the floor
 /// (REDIST relayering slivers, fertilizer-band near-clamps) therefore holds a
 /// concentration legacy never evaluates, so no legacy quantity — and no
-/// molarity bound — exists for it (issue-130; replaces the DEV-021 fraction
+/// molarity bound — exists for it (issue-130; replaces the 2026-09-30 zone-presence fraction
 /// proxy, which applied the ZERO-scale proxy `1e-12` to the fraction instead
 /// of the legacy ZERO2-scale predicate to the zone water volume).
 const zone_present_water_floor_m3_per_m2 = 1.0e-6;

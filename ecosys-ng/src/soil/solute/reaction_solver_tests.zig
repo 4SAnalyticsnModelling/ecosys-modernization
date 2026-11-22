@@ -4741,11 +4741,11 @@ test "diagnostic suppression preserves solver error and rollback bytes" {
     state.water_mol_per_m3[0] = 1;
     state.aqueous[0].ammonium_non_band = 2;
     var parameters = std.mem.zeroes(chemistry.ReactionParameters);
-    // DEV-021 (r00050, 2026-09-30) / issue-130: the water-molarity bound skips
+    // 2026-09-30 zone-presence precedent (r00050) / issue-130: the molarity bound skips
     // a zone whose carried water is at or below the legacy ZEROS2 floor
     // (reaction_solver_numerics.zig zoneHoldsLegacySolution). This fixture
     // needs the ammonium zone present for the bound to be exercised at all;
-    // the sibling "day 12 snapshot" test got the same update in DEV-021.
+    // the sibling "day 12 snapshot" test got the same update then.
     parameters.water_volume_m3 = std.math.inf(f64);
     parameters.zone_water_floor_m3 = 1.0e-6;
     parameters.fractions.ammonium_non_band = 1;
