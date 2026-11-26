@@ -1,0 +1,7 @@
+FRONTIER RECEIPT 2026-11-26 (cycle 14 / issue-131)
+engine=96081 resume=true from checkpoint 35064, engine sha256 e522a1f67d52cbd8ca39..., __text 58e2c7a769ecf4308e75 (v19 identity, no rebuild)
+trajectory parity: all failure-snapshot names through shared region (2002 d1..d2 h12 = v19 stop 35124) are a strict subset of the v19 authority set
+NEW FAILURE BOUNDARY: total_hour=35283 (2002-01-10 03:00) error=InvalidSnowSourceOrderCandidate (soil/water/snow_source_order_energy.zig:153/163/167 snow candidate validation)
+engine exited 1 on its own (no SIGTERM); counters to boundary: hourly-science=1 (the boundary itself), conservation violation=0, FATAL=0, SoluteConcentration=0, Untracked=0
+days published 1826-scene5-internal: day-line count 9 (scene5) => full-plan day lines 1461+9=1470; dailies accepted through day 9 (water 3.4e-13 heat 4.3e-11 class)
+failure report: heat-failure-35283.json (copied from deck root)

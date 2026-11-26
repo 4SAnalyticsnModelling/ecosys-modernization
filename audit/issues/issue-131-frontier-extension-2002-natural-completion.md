@@ -36,3 +36,24 @@ reached beyond hour 35124).
 - Engine re-solves from checkpoint 35064 (journals are not replayed as logs); 60-h overlap
   reproduces v19's published hours (bit-parity sampled via identical failure-snapshot names
   and ladder-count windows).
+
+## FRONTIER FOUND (2026-11-26 17:0x): next failure boundary = InvalidSnowSourceOrderCandidate
+- v20c (resume, v19-identity engine) advanced the verified frontier 35124 -> 35283
+  (2002-01-10 03:00, scene 5 day 10 hour 3) - +159 h of NEW territory, all published
+  through day 9 with accepted dailies (water 3.4e-13 / heat 4.3e-11 class) and ZERO
+  conservation violations, ZERO solute-guard trips, ZERO Untracked/Replay errors.
+- Failure class: snow source-order candidate validation (soil/water/snow_source_order_energy.zig
+  :153/:163/:167 - candidate temperature non-positive/non-finite, or next_capacity<=0 with
+  nonzero energy). Fatal by design -> engine EXITED 1 naturally (no SIGTERM).
+- Failure report heat-failure-35283.json (format ecosys-heat-v1): topsoil temperatures
+  273.93/273.55 K (thaw-sided) with snow heat-capacity arrays all zero (snow-free or
+  negligible-snow surface) - UNVERIFIED hypothesis: source-order candidate row degenerates
+  when the snow source pass runs with zero-capacity snow rows during a thaw transition.
+- Evidence: audit/runs/ottawa/cycle14-verify-v20resume-20261126 (FRONTIER_RECEIPT.txt,
+  heat-failure-35283.json, receipt.json exit 1, stderr.log.gz); lane deck frozen at
+  .tmp/cycle121/v19-deck (bins/bank/cursor/manifest untouched, checkpoint 35064 intact,
+  restart.manifest advanced - re-resume must re-verify boundary).
+- NEXT (forensics): replay the hour from the published day-9 state with the existing
+  heat-failure JSON input via the module's apply() (unit-scale repro), pin which raise site
+  fires and the source-row arithmetic; then legacy-parity comparison of the snow source
+  ordering (f77src snow heat source terms) before any fix design. NO gate/tolerance touched.
