@@ -1,0 +1,6 @@
+v19 boot parity receipt (2026-11-22): first 40 'day advanced' lines identical to
+v18 (cycle11-verify-v18-20261117, p18 engine) after stripping elapsed_ms =>
+D-31 is bit-inert before the sliver regime, as designed (guard decision set
+identical while every readable-zone concentration stays under the molarity bound).
+Engine: ship130_p19/a __text sha 58e2c7a769ecf4308e75 (re-verified p19c, comment-only
+delta). Deck inputs bit-identical to v18 deck (prod-examples ON runottawa).

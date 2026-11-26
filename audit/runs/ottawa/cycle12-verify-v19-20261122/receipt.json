@@ -1,0 +1,58 @@
+{
+  "argv": [
+    "./ecosys_ng",
+    "runottawa"
+  ],
+  "cwd": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/cycle121/v19-deck",
+  "elapsed_seconds": 390446.774,
+  "environment": {
+    "TMPDIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp",
+    "UV_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.uv-cache",
+    "XDG_CACHE_HOME": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.cache",
+    "ZIG_GLOBAL_CACHE_DIR": "/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/ecosys-ng/.zig-cache-global"
+  },
+  "executable_sha256": "e522a1f67d52cbd8ca398f86622d9b50164654fb91c376492afc4d21517f9be3",
+  "exit_code": -15,
+  "launch_error": null,
+  "limitations": "Exit code is process outcome only. Preview is selective; inspect raw logs and prove test counts/completeness.",
+  "machine": "arm64",
+  "parent_pid": 21014,
+  "pid": 21021,
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "process_start": "Sat 21 Nov 23:33:04 2026",
+  "started_unix": 1795325584.271113,
+  "status": "EXITED",
+  "stderr": {
+    "path": "audit/runs/ottawa/cycle12-verify-v19-20261122/stderr.log",
+    "sha256": "437b1fe862dbb8146ee0fd41e0fd9f22bf4acc1bd57f9e8bb4a9be8804c0f74d"
+  },
+  "stdout": {
+    "path": "audit/runs/ottawa/cycle12-verify-v19-20261122/stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "test_acceptance": "NOT_ASSESSED",
+  "test_count": null,
+  "timeout_seconds": null,
+  "toolchain": {
+    "gfortran": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/gfortran",
+      "version": "GNU Fortran (Homebrew GCC 15.2.0_1) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+    },
+    "python3": {
+      "exit_code": 0,
+      "path": "/Users/4sanalyticsnmodelling/.local/share/deepseek-harness/tool-env/venv/bin/python3",
+      "version": "Python 3.12.13"
+    },
+    "uv": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/uv",
+      "version": "uv 0.12.0 (Homebrew 2026-07-28 aarch64-apple-darwin)"
+    },
+    "zig": {
+      "exit_code": 0,
+      "path": "/opt/homebrew/bin/zig",
+      "version": "0.17.0"
+    }
+  }
+}

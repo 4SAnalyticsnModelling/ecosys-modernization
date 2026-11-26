@@ -1,0 +1,28 @@
+MILESTONE 2026-11-25 05:55: v19 passed day index 713 = total_hour 17115 (2000 d282 h3,
+the hour v17/p17 DIED with AcceptedTopsoilVaporPoreOverfill). Days 712-714 advanced
+clean; sci=0 cons=0 FATAL=0 solute=0 campaign-wide at that point. D-30 authority
+re-confirmed on the D-31 engine. Next milestones: day 789 (wh 18939 cycle-11 target),
+day 1225 (wh 29422 issue-130 trip hour - D-31 decisive test).
+MILESTONE 2026-11-25 (check ~10:00): v19 passed day 789 = total_hour 18939 (cycle-11
+TARGET, 2000 d60 issue-121 carbon hour) days 788-790 advanced clean; sci=0 cons=0
+FATAL=0 solute=0 campaign-wide through day 1016. Final frontier left: day 1225
+(total_hour 29422) = issue-130 trip hour decisive D-31 authority test.
+
+*** DECISIVE MILESTONE 2026-11-26 02:30 (sentinel days>=1226): ***
+v19 FROM-SCRATCH AUTHORITY PASSED total_hour 29422 (2001 d130 h22 scene 4) - the
+exact hour at which EVERY pre-D-31 campaign terminated with
+SoluteConcentrationExceedsWaterMolarity (v129c lane, v18 authority, scratch probe
+lane 2b1b563, v130a probe lane). Days 1224-1226 advanced (annual counters 3072/3096/
+3120); campaign-wide counters AT PASS: solute=0 sci=0 cons=0 FATAL=0. D-31 = FIRST-
+EVER PASS THROUGH issue-130 at from-scratch authority. Campaign continues to natural
+end (scene 4 horizon; v18-equivalent continuation expected past d365 2001); after
+EXITED 0 -> close ladder.
+
+FINAL 2026-11-26 11:50 (planned SIGTERM stop; receipt exit_code -15 intentional):
+campaign completed 1463 days (1998 d1 .. 2001 d363, all days conservation-accepted)
+= total_hour ~35,130. FINAL COUNTERS: SoluteConcentrationExceedsWaterMolarity=0,
+hourly-science-failed=0, conservation-violation/rejected=0, FATAL=0.
+Elapsed 390,447 s (4.5 d wall). Authority verdict: D-31 PASSES issue-130 hour 29422
+FROM SCRATCH where every pre-fix campaign (v129c, v18, v130a lane, scratch probe
+lane 2b1b563) terminated; continues 5700+ h past with zero failures; boot-parity +
+ladder-count parity vs v18 prove no behavioral delta before the sliver regime.
