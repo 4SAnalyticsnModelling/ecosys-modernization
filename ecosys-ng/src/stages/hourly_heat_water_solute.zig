@@ -10692,7 +10692,13 @@ test "adaptive fixed-hour recovery reports its bounded terminal failure" {
 
 test "fixed external hour recovery escalates through the full chain and stops on hard defects" {
     const RetryableFixture = struct {
-        schedules: [4]u8 = @splat(0),
+        // Ladder rungs {NFH-floor 4, 20, 32, 64} (issue-024 universal NFH=4
+        // baseline on the first rung) plus the terminal best-bounded attempt
+        // (issue-115): five calls total. The terminal attempt re-runs at the
+        // ceiling rung with the acceptance flags armed - the shape authority
+        // logs record as 'SOLUTE recovery ladder exhausted ...
+        // final attempt exact_substep_count=64'.
+        schedules: [5]u8 = @splat(0),
         attempts: usize = 0,
         scientific_pool: f64 = 5,
 
@@ -10712,10 +10718,10 @@ test "fixed external hour recovery escalates through the full chain and stops on
     );
     try std.testing.expectEqualSlices(
         u8,
-        &.{ 1, 20, 32, 64 },
+        &.{ 4, 20, 32, 64, 64 },
         &retryable.schedules,
     );
-    try std.testing.expectEqual(@as(usize, 4), retryable.attempts);
+    try std.testing.expectEqual(@as(usize, 5), retryable.attempts);
     try std.testing.expectEqual(@as(f64, 5), retryable.scientific_pool);
     inline for (.{
         error.LitterExchangeSolverDiverged,

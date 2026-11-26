@@ -1,6 +1,29 @@
 # issue-115 — executable-root test 'fixed external hour recovery escalates...' panics (index OOB, schedules rung overflow)
 
-Status: OPEN — PRE-EXISTING at base 9368a7b (reproduced with cycle-4 edits stashed); surfaced by `zig build test`
+Status: FIXED by D-32 (cycle 00013, 2026-11-26) — root cause CONFIRMED, fixture corrected; production untouched.
+
+## Resolution (D-32, 2026-11-26)
+
+Root cause = the TEST FIXTURE predated two production evolutions (both authority-proven):
+1. The universal NFH=4 baseline floor (issue-024): the first ladder rung is 4, not 1
+   (`boundedInitialRecoverySubstepCount` -> `requested = @max(requested, universal_nfh_baseline_substeps)`),
+   so the old expectation `.{1,20,32,64}` never matched; the panic simply happened first.
+2. The terminal best-bounded attempt (DEV-011/014/015): after rungs {4,20,32,64} exhaust,
+   `recoverFixedExternalHourAdaptively` makes ONE final attempt at the ceiling rung (64) with
+   the acceptance flags armed -> FIVE calls; the len-4 fixture wrote index 4 -> panic.
+   Production shape is receipt-backed: authority logs carry 'SOLUTE recovery ladder exhausted
+   (...); final attempt exact_substep_count=64 with best-bounded-iterate' and those hours publish
+   (v19/v18 whole campaigns; fix131 lane PASS-BEYOND).
+Fix = fixture only: `schedules: [5]u8`, expectation `.{4,20,32,64,64}`, `attempts=5`.
+Discrimination: wrong expectation (drop terminal rung) -> RC=1 (NEUTER); correct -> RC=0;
+production file byte-identical before/after (only test block changed).
+Root coverage answer (open question above): `module_index.zig` does NOT compile stages-file
+tests (D-30 lesson) - this test runs ONLY in the test-EXECUTABLE root; gate recording must use
+that root (cycle-13 gates record it).
+
+## Original record (kept for lineage)
+
+PRE-EXISTING at base 9368a7b (reproduced with cycle-4 edits stashed); surfaced by `zig build test`
 (executable test root), not by the gate suite `zig build test-module` (4401 tests green Debug+ReleaseSafe).
 
 ## Observation

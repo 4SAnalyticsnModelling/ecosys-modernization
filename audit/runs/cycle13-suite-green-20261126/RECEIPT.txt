@@ -1,0 +1,6 @@
+FULLSUITE_RC=0: zig build test (Debug+ReleaseSafe x module+executable roots) ALL GREEN
+at D-32 fixture fix (first full green since issue-115 filed). Neuter receipt:
+expectation .{1,20,32,64} (drop terminal rung) -> RC=1; restored -> RC=0 (te_c13_restored).
+Production hourly_heat_water_solute.zig recovery code UNTOUCHED (test block only;
+verified by cp restore from /tmp/hwws_c13_good.zig after neuter, __text identity below).
+prod_check __text 58e2c7a769ecf4308e75 == ship130_p19 __text => production code UNCHANGED by D-32 (test-only diff)
