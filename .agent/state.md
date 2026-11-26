@@ -41,6 +41,13 @@ trip hour 29422 - terminal for every pre-fix run (v129c, v18, scratch probe lane
 (day 1463, planned stop). Earlier milestones day 713 (17115, D-30) and day 789
 (18939, cycle-11 target) clean on the same binary; boot + ladder-count bit parity vs
 v18 prove no delta before the sliver regime. NO gate/tolerance/physics value moved.
+Cycle 13 (issue-115) CLOSED: D-32 corrected the exec-root recovery-ladder fixture to
+production truth (five calls: NFH=4 floor rung + {20,32,64} + terminal best-bounded
+attempt at the ceiling, 2026-10 terminal-attempt doctrine; receipt-backed by every
+campaign's 'ladder exhausted ... final attempt exact_substep_count=64' lines). Test
+block only; engine __text 58e2c7a769ecf4308e75 identical to the v19 authority binary,
+so v19 evidence transfers; full suite (Debug+ReleaseSafe x module+executable) RC=0 -
+first full green since the suite existed.
 Verified strict frontier stays 0 in frontier.json (promotion only via update_frontier.py under P0
 binding); record-level strict trajectory now extends to h18938 accepted / 2000 d60 h3 failed (issue-121).
 Earlier orientation (cycles 3-9 era) is superseded by cycles/cycle_0000{3..10}.md records.
