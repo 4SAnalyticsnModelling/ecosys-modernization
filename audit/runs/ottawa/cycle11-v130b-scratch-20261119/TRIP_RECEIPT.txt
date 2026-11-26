@@ -1,0 +1,10 @@
+FROM-SCRATCH issue-130 trip receipt (PRE-D-31 engine fix130b_p1 = ship130_p17 bits
++ P130/P130B/P130M probes, cell-0 coverage): campaign launched 2026-11-19 from hour 0
+on the pristine deck, ran 6+ days wall, TERMINATED at total_hour 29422 (last day-line
+day-index 1225 = 2001 d129; trip 2001 d130 h22 scene 4) error=
+SoluteConcentrationExceedsWaterMolarity - bit-consistent class terminal with v129c/
+v18/v130a lane lineage; independent from-scratch confirmation of issue-130 on the
+OLD guard. Also captured the full from-hour-0 cell-0 band timeline (frac_l0 grows
+0.202 by 2001; the 0.9999 clamp is cell=1-specific per probe lanes - layer>=6 clamp
+lines from 1998 = downward width-copy doctrine hour1.f:5034, benign). sci=0 cons=0
+throughout (1 sci_fail at death hour). Watchers clean pre-terminal.
