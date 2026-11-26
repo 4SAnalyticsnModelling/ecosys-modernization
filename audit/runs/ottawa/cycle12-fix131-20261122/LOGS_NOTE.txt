@@ -1,0 +1,4 @@
+stderr.log gzipped losslessly (gzip -t verified) to keep the tracked tree lean,
+same doctrine as the v130/v19 run dirs. receipt.json remains the raw machine receipt;
+gate/evidence references use this note + PASS-29422-INTERIM.txt + stdout.log only
+(never the gz), per the cycle-11 close lesson about publication_errors walking refs.

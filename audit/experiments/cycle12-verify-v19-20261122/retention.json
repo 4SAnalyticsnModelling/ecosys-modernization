@@ -1,0 +1,29 @@
+{
+  "policy": "retain-through-F7-and-reproducibility",
+  "artifacts": [
+    {
+      "path": "evidence/runs/cycle12-verify-v19-20261122/deck/ecosys_ng",
+      "sha256": "e522a1f67d52cbd8ca398f86622d9b50164654fb91c376492afc4d21517f9be3"
+    }
+  ],
+  "cycle": 12,
+  "candidate": {
+    "role": "canonical verification binary (v19 deck copy; produced audit/runs/ottawa/cycle12-verify-v19-20261122 - first-ever authority pass through issue-130 hour 29422)",
+    "path": "evidence/runs/cycle12-verify-v19-20261122/deck/ecosys_ng",
+    "sha256": "e522a1f67d52cbd8ca398f86622d9b50164654fb91c376492afc4d21517f9be3",
+    "build": "zig build-exe -O ReleaseSafe --dep ecosys_ng -Mroot=src/ecosys_ng.zig -Mecosys_ng=src/module_index.zig",
+    "source_commit": "ec59c0a"
+  },
+  "authority_predecessor": {
+    "role": "cycle-11 authority binary (v18 campaign; target 18939 clean, terminal issue-130 at 29422 as predicted)",
+    "path": "evidence/runs/cycle11-verify-v18-20261117/deck/ecosys_ng",
+    "sha256": "d429893e775978385ba32a6c082baf4a671c2c7d77ad0e1c2cdf34380d29c06d",
+    "source_commit": "8af954d"
+  },
+  "identity_policy": "binary file hash not reproducible across relinks on macOS (LC_UUID); reproducibility pinned by source_commit ec59c0a (D-31 content through 34f2f49 + comment-only rewords) + toolchain zig 0.17.0 aarch64-macos ReleaseSafe + __text section hash 0x7544ac/58e2c7a769ecf4308e75 (link-entropy invariant; double-build stable ship130_p19 a/b + p19c recheck post-reword); v19 trajectory value-identical to v18 through shared prefix (first-40-day bit parity + ladder-count parity 333@3888/2042@6000) and fix131 lane proves value-continuation past 29422 with zero failures",
+  "superseded_interim": [
+    "probe binaries fix130_p1/p1b (P130 series log-only), fix130c/d/e/f (round-3/4 probes) - probe code stripped; patch archived .tmp/cycle121/probes_p129_p130series.patch",
+    "fix131_p1 engine (same __text 58e2c7a769ecf4308e75 as ship130_p19; single build)"
+  ],
+  "retention_notes": "git-tracked files are the retention layer; v19 stderr gzipped losslessly (gzip -t verified) BEFORE committing: 315MB->53MB at audit/runs/ottawa/cycle12-verify-v19-20261122/stderr.log.gz (gate evidence uses MILESTONES.txt/BOOT_PARITY.txt/stdout.log/receipt.json, never the gz); deck relocated to evidence/runs/cycle12-verify-v19-20261122/deck (engine + runner + pristine inputs diff-identical to prod-examples; no bins/manifest/outputs)"
+}
