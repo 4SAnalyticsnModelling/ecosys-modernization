@@ -1,5 +1,9 @@
 {
   "base_commit": "a2fcef27bb7d4e10ca1e1cacdb042e9032985fe5",
+  "closure": {
+    "at": "2026-11-26T18:45:56.065175+00:00",
+    "summary": "issue-115 CLOSED: D-32 test-fixture parity (five-call recovery ladder = NFH floor + terminal best-bounded attempt); full suite green first time; production binary bit-identical to v19 authority (__text equality)"
+  },
   "cycle": 13,
   "gates": {
     "G1": {
@@ -186,10 +190,14 @@
         {
           "path": "audit/runs/cycle13-suite-green-20261126/RECEIPT.txt",
           "sha256": "02e1ebbd89d4e470aed64bf3f91c93d5811c558715dc2e0cd42c4232d538537b"
+        },
+        {
+          "path": "audit/runs/ottawa/cycle12-verify-v19-20261122/MILESTONES.txt",
+          "sha256": "c74fbec4acd123e9ea3d2456a27a2f4ad8a2845f6b9dda5e24308255271fb396"
         }
       ],
-      "reason": "Test-only change; engine binary bit-identical (__text equality receipt) => v19 authority covers behaviour; no new run required.",
-      "result": "NA"
+      "reason": "Behavioural verification by identity: changed lines are inside a test block only; rebuilt engine __text 58e2c7a769ecf4308e75 == v19 authority binary (receipt). v19 from-scratch authority (1463 days, zero failures, 29422 pass) therefore IS the behaviour evidence for this exact production code.",
+      "result": "PASS"
     },
     "G4": {
       "candidate_digest": "e013b5854ac10b3b5ad71a29d21e45e5863e506cea3037d2b5b5addfc471cbde",
@@ -249,10 +257,14 @@
         {
           "path": "audit/runs/cycle13-suite-green-20261126/RECEIPT.txt",
           "sha256": "02e1ebbd89d4e470aed64bf3f91c93d5811c558715dc2e0cd42c4232d538537b"
+        },
+        {
+          "path": "audit/runs/ottawa/cycle12-verify-v19-20261122/MILESTONES.txt",
+          "sha256": "c74fbec4acd123e9ea3d2456a27a2f4ad8a2845f6b9dda5e24308255271fb396"
         }
       ],
-      "reason": "No production change; conservation behaviour identical to v19 binary by __text equality.",
-      "result": "NA"
+      "reason": "Conservation: production binary bit-identical to v19 (all 1463 daily ledgers accepted there); no numeric or ledger code touched; full suite green.",
+      "result": "PASS"
     },
     "G5": {
       "candidate_digest": "e013b5854ac10b3b5ad71a29d21e45e5863e506cea3037d2b5b5addfc471cbde",
@@ -311,14 +323,14 @@
       "evidence": [
         {
           "path": "audit/issues/issue-115-execroot-hourly-heat-recovery-ladder-oob.md",
-          "sha256": "d4a028ee50c333d5dd730ecd81af53a64d4c04fe081292844d9acd4704734f83"
+          "sha256": "f2dcb69ae9a35ac479849daad17e17f70a77865868c430d6441938e3dd65fbb5"
         },
         {
           "path": "audit/runs/ottawa/cycle12-verify-v19-20261122/MILESTONES.txt",
           "sha256": "c74fbec4acd123e9ea3d2456a27a2f4ad8a2845f6b9dda5e24308255271fb396"
         }
       ],
-      "reason": "Causal: fixture predates NFH floor + terminal attempt; old shape reproduced OOB in every baseline receipt since cycle-4; fix closes exactly that.",
+      "reason": "Causal: fixture predates NFH=4 floor and terminal best-bounded attempt; old shape OOB-reproduced in every baseline since cycle-4; fix closes exactly that (neuter RC=1, restored RC=0).",
       "result": "PASS"
     },
     "G6": {
@@ -508,7 +520,7 @@
         },
         {
           "path": "audit/issues/issue-115-execroot-hourly-heat-recovery-ladder-oob.md",
-          "sha256": "d4a028ee50c333d5dd730ecd81af53a64d4c04fe081292844d9acd4704734f83"
+          "sha256": "f2dcb69ae9a35ac479849daad17e17f70a77865868c430d6441938e3dd65fbb5"
         }
       ],
       "reason": "Neuter receipts + full-suite log committed; issue doc FIXED with receipts; no probes.",
@@ -517,7 +529,7 @@
   },
   "owned_paths": [
     "ecosys-ng/src/stages/hourly_heat_water_solute.zig",
-    "audit/issues/issue-115-hourly-recovery-oob.md",
+    "audit/issues/issue-115-execroot-hourly-heat-recovery-ladder-oob.md",
     ".agent/state.md",
     ".agent/cycles/cycle_00013.md"
   ],
@@ -526,6 +538,7 @@
   "scope": [
     "ecosys-ng/src/stages/hourly_heat_water_solute.zig"
   ],
-  "status": "PLANNING",
+  "status": "DECIDED",
+  "sync_status": "PENDING",
   "target": "issue-115: test-executable OOB - test 'fixed external hour recovery escalates through the full chain and stops on hard defects' (hourly_heat_water_solute.zig:10693) panics index out of bounds index 4 len 4 at self.schedules[self.attempts] in RetryableFixture; the LAST baseline suite crash; fix fixture/oracle without touching production recovery semantics"
 }
