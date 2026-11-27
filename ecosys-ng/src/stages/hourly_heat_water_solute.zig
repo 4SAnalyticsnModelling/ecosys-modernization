@@ -5423,11 +5423,32 @@ fn CoupledSubstepTransaction(
                         // next_capacity*entry_T while the flux ledger valued
                         // next_energy. Legacy books the difference into the
                         // aggregated snow heat lane (XHFLWW, watsub.f:2412/2492);
-                        // book the identical signed amount as this hour's
-                        // reference-state process so the cell ledger stays exact.
+                        // book the identical signed amount twice: into the pack
+                        // ledger's process term and into the reference-state
+                        // totals (the XHFLWW parity lane whose totals feed the
+                        // cell, layer-local and landscape ledgers). The totals
+                        // are published directly (not the step array, which
+                        // snow_inactive_temperature.apply overwrites below) and
+                        // are zeroed with every hour like the sibling totals.
+                        const retained_reference_heat = next_capacity *
+                            context.snow_transport.temperature_k[source] - next_energy;
                         source_order_process_heat_by_cell[cell] = try checkedAddFiniteValue(
                             source_order_process_heat_by_cell[cell],
-                            next_capacity * context.snow_transport.temperature_k[source] - next_energy,
+                            retained_reference_heat,
+                        );
+                        self.snow_inactive_reference_heat_total_megajoules_by_layer[source] =
+                            try checkedAddFiniteValue(
+                                self.snow_inactive_reference_heat_total_megajoules_by_layer[source],
+                                retained_reference_heat,
+                            );
+                        self.snow_inactive_reference_heat_total_megajoules_by_cell[cell] =
+                            try checkedAddFiniteValue(
+                                self.snow_inactive_reference_heat_total_megajoules_by_cell[cell],
+                                retained_reference_heat,
+                            );
+                        self.snow_inactive_reference_heat_total_megajoules = try checkedAddFiniteValue(
+                            self.snow_inactive_reference_heat_total_megajoules,
+                            retained_reference_heat,
                         );
                     }
                     context.snow_transport.heat_capacity_megajoules_per_k[source] = next_capacity;
