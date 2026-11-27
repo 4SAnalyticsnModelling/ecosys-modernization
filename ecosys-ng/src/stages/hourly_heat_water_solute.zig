@@ -5035,6 +5035,14 @@ fn CoupledSubstepTransaction(
                 if (context.snow_transport.active[layer]) bottom_by_cell[cell] = local_layer;
             };
 
+            // D-33: legacy VHCPWX(NY,NX)=8.380E-04*AREA(3,NU,NY,NX) (starts.f:654),
+            // per-cell snow minimum heat capacity in MJ/K (AREA(3) = cell footprint,
+            // the same plan area used by acceptedSnowBaseConduction).
+            const snow_minimum_heat_capacity_megajoules_per_k = try self.allocator.alloc(f64, cells);
+            defer self.allocator.free(snow_minimum_heat_capacity_megajoules_per_k);
+            for (0..cells) |cell| snow_minimum_heat_capacity_megajoules_per_k[cell] =
+                8.380e-04 * context.canopy_cell_area_m2[cell];
+
             const route_downward = try self.allocator.alloc(f64, layers);
             defer self.allocator.free(route_downward);
             const route_litter = try self.allocator.alloc(f64, cells);
@@ -5399,10 +5407,13 @@ fn CoupledSubstepTransaction(
                         signed_face_heat - discharge_heat -
                         base_conduction.total_megajoules + local_heat;
                     if (!std.math.isFinite(next_capacity) or next_capacity < 0 or
-                        !std.math.isFinite(next_energy) or
-                        (next_capacity == 0 and next_energy != 0))
+                        !std.math.isFinite(next_energy))
                         return error.InvalidSnowSourceOrderCandidate;
-                    if (next_capacity > 0) {
+                    // D-33 legacy parity (watsub.f:2441-2446, starts.f:654): capacity is
+                    // always recomputed; the temperature is recomputed only above the
+                    // per-cell VHCPWX floor = 8.380E-04 * cell footprint. At/below the
+                    // floor legacy assigns no TK02 - the entry temperature is retained.
+                    if (next_capacity > snow_minimum_heat_capacity_megajoules_per_k[cell]) {
                         context.snow_transport.temperature_k[source] = next_energy / next_capacity;
                         if (!std.math.isFinite(context.snow_transport.temperature_k[source]) or
                             context.snow_transport.temperature_k[source] <= 0)
@@ -5458,11 +5469,18 @@ fn CoupledSubstepTransaction(
                 return error.UnconsumedSnowSourceOrderEnergy;
             var replay = try ecosys.snow_source_order_energy.cloneState(self.allocator, &entry);
             defer replay.deinit();
+            const floor_rows = try self.allocator.alloc(f64, layers);
+            defer self.allocator.free(floor_rows);
+            for (0..cells) |cell| {
+                for (0..capacity) |local_layer|
+                    floor_rows[cell * capacity + local_layer] = snow_minimum_heat_capacity_megajoules_per_k[cell];
+            }
             try ecosys.snow_source_order_energy.apply(
                 self.allocator,
                 &replay,
                 thermodynamics,
                 steps,
+                floor_rows,
             );
             inline for (.{
                 .{ replay.solid_snow_water_equivalent_m3, context.snow_transport.solid_snow_water_equivalent_m3 },

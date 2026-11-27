@@ -79,6 +79,7 @@ pub fn apply(
     state: *snow.State,
     thermodynamics: snow.ThermodynamicParameters,
     steps: []const LayerStep,
+    minimum_heat_capacity_megajoules_per_k: []const f64,
 ) !void {
     inline for (ti_compat.fieldViews(snow.ThermodynamicParameters)) |field| {
         const value = @field(thermodynamics, field.name);
@@ -87,6 +88,8 @@ pub fn apply(
     }
     const layer_count = try std.math.mul(usize, state.cell_count, state.layer_capacity);
     if (steps.len != layer_count) return error.SnowSourceOrderDimensionMismatch;
+    if (minimum_heat_capacity_megajoules_per_k.len != layer_count)
+        return error.SnowSourceOrderDimensionMismatch;
     const solid = try allocator.dupe(f64, state.solid_snow_water_equivalent_m3);
     defer allocator.free(solid);
     const liquid = try allocator.dupe(f64, state.liquid_water_volume_m3);
@@ -161,16 +164,17 @@ pub fn apply(
             step.local_process_heat_megajoules;
         if (!std.math.isFinite(next_capacity) or next_capacity < 0 or !std.math.isFinite(next_energy))
             return error.InvalidSnowSourceOrderCandidate;
-        if (next_capacity > 0) {
+        // D-33 legacy parity (watsub.f:2441-2446): recomputed capacity is always
+        // assigned (VHCPWM2=... is unguarded), but temperature is recomputed only
+        // while capacity exceeds the per-cell VHCPWX floor (starts.f:654). At or
+        // below the floor legacy assigns no TK02: the entry temperature is
+        // retained and the row stays out of the thermal cascade (watsub.f:1475).
+        capacity[source] = next_capacity;
+        if (next_capacity > minimum_heat_capacity_megajoules_per_k[source]) {
             const next_temperature = next_energy / next_capacity;
             if (!std.math.isFinite(next_temperature) or next_temperature <= 0)
                 return error.InvalidSnowSourceOrderCandidate;
-            capacity[source] = next_capacity;
             temperature[source] = next_temperature;
-        } else if (next_energy != 0) {
-            return error.SnowSourceOrderEnergyWithoutCapacity;
-        } else {
-            capacity[source] = 0;
         }
         pending_energy[source] = 0;
     }
@@ -202,7 +206,7 @@ test "source ordered melt energy waits for destination layer turn" {
     try apply(std.testing.allocator, &state, snow.test_thermodynamics, &.{
         .{ .cell = 0, .local_layer = 0, .liquid_to_lower_m3 = flux, .signed_face_heat_to_lower_megajoules = heat },
         .{ .cell = 0, .local_layer = 1, .has_active_lower = false },
-    });
+    }, &.{ 0, 0 });
     try std.testing.expectApproxEqAbs(@as(f64, 280), state.temperature_k[0], 1e-12);
     const expected_lower_temperature = (lower_capacity_before * 260 + heat) /
         (lower_capacity_before + 4.19 * flux);
@@ -253,7 +257,7 @@ test "source ordered phase replay uses the complete frozen carrier reference" {
         .local_liquid_change_m3 = -liquid_to_ice_we_m3,
         .local_ice_change_m3 = liquid_to_ice_we_m3 / density,
         .local_process_heat_megajoules = phase_sensible_heat,
-    }});
+    }}, &.{ 0 });
     const after = state.heat_capacity_megajoules_per_k[0] * state.temperature_k[0] +
         solid_reference * state.solid_snow_water_equivalent_m3[0] +
         ice_reference * state.ice_volume_m3[0] * density;
@@ -290,7 +294,7 @@ test "source ordered base conduction leaves only the bottom layer, in both signs
                 .base_conduction_heat_megajoules = signed_heat,
             },
             .{ .cell = 0, .local_layer = 1, .has_active_lower = false },
-        });
+        }, &.{ 0, 0 });
         try std.testing.expectEqual(capacity_before, state.heat_capacity_megajoules_per_k[0]);
         try std.testing.expectApproxEqAbs(
             energy_before - signed_heat,
@@ -315,6 +319,7 @@ test "source ordered base conduction leaves only the bottom layer, in both signs
             .{ .cell = 0, .local_layer = 0, .base_conduction_heat_megajoules = 0.01 },
             .{ .cell = 0, .local_layer = 1, .has_active_lower = false },
         },
+        &.{ 0, 0 },
     ));
 }
 
@@ -332,9 +337,67 @@ test "late source ordered overdraw leaves live snow state unchanged" {
             .{ .cell = 0, .local_layer = 0 },
             .{ .cell = 0, .local_layer = 1, .has_active_lower = false, .discharge_water_m3 = 1 },
         },
+        &.{ 0, 0 },
     ));
     try std.testing.expectEqualSlices(f64, &liquid_before, state.liquid_water_volume_m3);
     try std.testing.expectEqualSlices(f64, &temperature_before, state.temperature_k);
+}
+
+test "issue-131 sliver below the legacy VHCPWX floor keeps its temperature instead of failing" {
+    // Trip receipt (cycle 14, hour 35283): capacity 6.052356012140523e-4 MJ/K with
+    // next_energy -4.2175924079204435e-1 MJ. Legacy (watsub.f:2441-2446, starts.f:654)
+    // assigns VHCPWM2 but recomputes TK02 only above VHCPWX = 8.380E-04*AREA(3); this
+    // row is below the floor, so legacy computes no temperature and never fails.
+    var state = try snow.State.init(std.testing.allocator, 1, 2);
+    defer state.deinit();
+    try state.initializePhysicalState(&.{0.1}, &.{1}, &.{270}, &.{ 0.1, 0.2 }, 0.1, snow.test_thermodynamics);
+    // Shaped sliver: 1e-4 m3 liquid -> capacity 4.19e-4 MJ/K < floor 8.38e-4 MJ/K.
+    state.solid_snow_water_equivalent_m3[0] = 0;
+    state.liquid_water_volume_m3[0] = 1.0e-4;
+    state.heat_capacity_megajoules_per_k[0] = 4.19 * 1.0e-4;
+    state.temperature_k[0] = 270;
+    const sliver_energy = 4.19 * 1.0e-4 * 270;
+    try apply(std.testing.allocator, &state, snow.test_thermodynamics, &.{
+        .{
+            .cell = 0,
+            .local_layer = 0,
+            .has_active_lower = false,
+            .base_conduction_heat_megajoules = sliver_energy + 0.42175924079204435,
+        },
+        .{ .cell = 0, .local_layer = 1, .has_active_lower = false },
+    }, &.{ 8.380e-04, 8.380e-04 });
+    // Below-floor row: capacity updated (legacy unguarded VHCPWM2= at watsub.f:2442),
+    // temperature retained (guarded TK02= at :2445-2446).
+    try std.testing.expectApproxEqAbs(4.19 * 1.0e-4, state.heat_capacity_megajoules_per_k[0], 1e-15);
+    try std.testing.expectEqual(@as(f64, 270), state.temperature_k[0]);
+}
+
+test "issue-131 above-floor rows keep the strict candidate validation" {
+    // Same arithmetic with recomputed capacity above VHCPWX: legacy DOES compute TK02
+    // there (watsub.f:2445-2446), so the negative candidate temperature stays fatal.
+    var state = try snow.State.init(std.testing.allocator, 1, 2);
+    defer state.deinit();
+    try state.initializePhysicalState(&.{0.1}, &.{1}, &.{270}, &.{ 0.1, 0.2 }, 0.1, snow.test_thermodynamics);
+    state.solid_snow_water_equivalent_m3[0] = 0;
+    state.liquid_water_volume_m3[0] = 3.0e-4; // capacity 1.257e-3 > floor 8.38e-4
+    state.heat_capacity_megajoules_per_k[0] = 4.19 * 3.0e-4;
+    state.temperature_k[0] = 270;
+    const row_energy = 4.19 * 3.0e-4 * 270;
+    try std.testing.expectError(error.InvalidSnowSourceOrderCandidate, apply(
+        std.testing.allocator,
+        &state,
+        snow.test_thermodynamics,
+        &.{
+            .{
+                .cell = 0,
+                .local_layer = 0,
+                .has_active_lower = false,
+                .base_conduction_heat_megajoules = row_energy + 0.42175924079204435,
+            },
+            .{ .cell = 0, .local_layer = 1, .has_active_lower = false },
+        },
+        &.{ 8.380e-04, 8.380e-04 },
+    ));
 }
 
 test "source ordered discharge uses actual last active layer before capacity end" {
@@ -366,7 +429,7 @@ test "source ordered discharge uses actual last active layer before capacity end
             .discharge_heat_megajoules = discharge_heat,
         },
         .{ .cell = 0, .local_layer = 2, .has_active_lower = false },
-    });
+    }, &.{ 0, 0, 0 });
     try std.testing.expectApproxEqAbs(@as(f64, 0.006), state.liquid_water_volume_m3[1], 1e-15);
     try std.testing.expectEqual(@as(f64, 0), state.liquid_water_volume_m3[2]);
     const after_energy = state.heat_capacity_megajoules_per_k[0] * state.temperature_k[0] +
