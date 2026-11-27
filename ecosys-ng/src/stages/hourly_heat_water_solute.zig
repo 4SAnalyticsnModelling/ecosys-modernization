@@ -5418,6 +5418,17 @@ fn CoupledSubstepTransaction(
                         if (!std.math.isFinite(context.snow_transport.temperature_k[source]) or
                             context.snow_transport.temperature_k[source] <= 0)
                             return error.InvalidSnowSourceOrderCandidate;
+                    } else {
+                        // The legacy :2445 skip retains TK02, so the row stores
+                        // next_capacity*entry_T while the flux ledger valued
+                        // next_energy. Legacy books the difference into the
+                        // aggregated snow heat lane (XHFLWW, watsub.f:2412/2492);
+                        // book the identical signed amount as this hour's
+                        // reference-state process so the cell ledger stays exact.
+                        source_order_process_heat_by_cell[cell] = try checkedAddFiniteValue(
+                            source_order_process_heat_by_cell[cell],
+                            next_capacity * context.snow_transport.temperature_k[source] - next_energy,
+                        );
                     }
                     context.snow_transport.heat_capacity_megajoules_per_k[source] = next_capacity;
                     pending_heat[source] = 0;
