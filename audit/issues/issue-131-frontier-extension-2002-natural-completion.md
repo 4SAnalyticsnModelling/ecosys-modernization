@@ -57,3 +57,20 @@ reached beyond hour 35124).
   heat-failure JSON input via the module's apply() (unit-scale repro), pin which raise site
   fires and the source-row arithmetic; then legacy-parity comparison of the snow source
   ordering (f77src snow heat source terms) before any fix design. NO gate/tolerance touched.
+
+## D-33 FIX LANDED IN TREE (2026-11-26 night, leader decision - decisions.md D-33)
+- VHCPWX floor parity in BOTH snow candidate sites: fused-hour schedule builder
+  (hourly_heat_water_solute.zig, floor = 8.380e-04 * canopy_cell_area_m2[cell], starts.f:654)
+  and atomic replay snow_source_order_energy.apply() (new per-row
+  minimum_heat_capacity_megajoules_per_k parameter). Legacy semantics watsub.f:2441-2446:
+  capacity always recomputed; temperature recomputed ONLY above the floor; below-floor rows
+  retain entry temperature and NEVER fatal (that fatal had no legacy analogue). Above-floor
+  rows keep the full strict validation; volume non-negativity and finiteness fatals kept.
+  Old EnergyWithoutCapacity + (capacity==0 && energy!=0) fatal branches replaced per parity.
+- Discrimination: new tests 'issue-131 sliver below the legacy VHCPWX floor...' (trip-shaped
+  sliver 4.19e-4 MJ/K, -0.42176 MJ drawdown => no fatal, T retained) and 'issue-131
+  above-floor rows keep the strict candidate validation' (fatal kept). NEUTER (predicate ->
+  next_capacity>0) fails EXACTLY the sliver test; restored -> module suite RC=0.
+- NEXT: full suite battery (Debug+ReleaseSafe x module+executable) in flight; ship131
+  double-build identity; verification lane = SAME frozen deck resume (boundary 35283 must
+  pass, continue to natural scene-5 completion, counters absolute); then close ladder.
