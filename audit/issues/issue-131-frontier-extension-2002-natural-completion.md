@@ -74,3 +74,25 @@ reached beyond hour 35124).
 - NEXT: full suite battery (Debug+ReleaseSafe x module+executable) in flight; ship131
   double-build identity; verification lane = SAME frozen deck resume (boundary 35283 must
   pass, continue to natural scene-5 completion, counters absolute); then close ladder.
+
+## D-33 v2/v3 ledger evolution (2026-11-26/27)
+- v1 (8ea6a73) lane: SnowSourceOrderEnergyConservationFailure at 35278 = the pack-internal
+  ledger did not know the below-floor retained-T energy (d68d684 = v2 books it).
+- v2 lane: HourlyCellConservationFailure heat day 9 (residual 4.50369e-7 MJ cell=0 =
+  exactly the retained-heat term): the cell/layer/landscape ledgers did not see it.
+  0e11350 = v3: publish the term into the XHFLWW-parity totals
+  (snow_inactive_reference_heat_total_megajoules_by_layer/by_cell/grand - the exact
+  lanes feeding all three ledgers; step array untouched because
+  snow_inactive_temperature.apply memcpy-overwrites it and its own !active gate never
+  touches active sliver rows). Algebra closes exactly. Suites MOD/EXE Debug+RS rc=0.
+
+## LANE RESULT (v3, ship131 __text 76233418bbd74420e516) - issue-131 ACCEPTED
+- Frozen-deck resume 35064: PASSED 35283 CLEAN; 2002 days 9..99 absolute counters ZERO
+  (science/conservation/FATAL/SoluteConcentration); dailies nominal (water ~3e-13,
+  heat ~2e-11 class).
+- NEW separate boundary at 37445 (2002-04-10 h5): hydrogen layer-scope ledger after
+  bounded-recovery publication -> REGISTERED AS ISSUE-132 (fix scope cycle 15).
+- issue-131 acceptance MET: old frontier passed, trajectory-faithful resume, +2156 h of
+  first-ever territory with zero counters. Natural scene-5 completion remains open ONLY
+  behind issue-132; carried to cycle 15 with the same frozen deck (checkpoints through
+  37224, journals through ~37311+ kept).
