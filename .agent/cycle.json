@@ -1,13 +1,27 @@
 {
-  "base_commit": "1aba791374dc6d01a15b8c71f5071305377c164a",
+  "base_commit": "b62280f",
   "cycle": 14,
   "gates": {},
+  "next_action": "cycle-14 science = verification lane 43f7099; candidate binary evidence/runs/...116b438; suites 4-lane green at 0e11350",
+  "next_target": "issue-132 hydrogen layer-scope ledger after bounded recovery (cycle 15); then natural scene-5 completion 43824",
   "owned_paths": [
     ".agent/state.md",
     ".agent/cycles/cycle_00014.md",
-    "audit/issues/"
+    "audit/issues/",
+    "audit/experiments/cycle14-verify-v21lane-20261126/",
+    "audit/runs/ottawa/cycle14-verify-v20resume-20261126",
+    "audit/runs/ottawa/cycle14-v20falsestart-20261126",
+    "audit/runs/ottawa/cycle14-v20b-untracked-20261126",
+    "audit/runs/ottawa/cycle14-v131probeb-20261126",
+    "audit/runs/ottawa/cycle14-v21lane-ledgerfail-20261126",
+    "audit/runs/ottawa/cycle14-v21lane2-cellledger-20261126",
+    "audit/runs/ottawa/cycle14-verify-v21lane-20261126",
+    "evidence/runs/cycle14-verify-v21lane-20261126/ecosys_ng",
+    "ecosys-ng/src/soil/water/snow_source_order_energy.zig",
+    "ecosys-ng/src/stages/hourly_heat_water_solute.zig"
   ],
   "record": ".agent/cycles/cycle_00014.md",
+  "retention_manifest": "audit/experiments/cycle14-verify-v21lane-20261126/retention.json",
   "schema_version": 2,
   "scope": [
     ".agent/state.md",

@@ -1,0 +1,22 @@
+{
+  "policy": "retain-through-F7-and-reproducibility",
+  "artifacts": [
+    {
+      "path": "evidence/runs/cycle14-verify-v21lane-20261126/ecosys_ng",
+      "sha256": "116b438377dadf0231dbaee7e844bc9226e759737203f0959ccc03d3552fea10"
+    }
+  ],
+  "cycle": 14,
+  "candidate": {
+    "role": "canonical verification binary (ship131 v3; produced audit/runs/ottawa/cycle14-verify-v21lane-20261126 - first pass beyond hour 35283 to 37439 with zero counters)",
+    "path": "evidence/runs/cycle14-verify-v21lane-20261126/ecosys_ng",
+    "sha256": "116b438377dadf0231dbaee7e844bc9226e759737203f0959ccc03d3552fea10",
+    "build": "zig build-exe -O ReleaseSafe --dep ecosys_ng -Mroot=src/ecosys_ng.zig -Mecosys_ng=src/module_index.zig",
+    "source_commit": "0e11350"
+  },
+  "authority": {
+    "note": "verification lane (deck resume), NOT from-scratch authority; from-scratch v21 authority is cycle-15+ scope while the frontier keeps extending; text identity 76233418bbd74420e516...",
+    "text_section_sha": "76233418bbd74420e516"
+  },
+  "notes": "lane engine stderr gzip-verified (stderr.log.gz, gate evidence cites FRONTIER_RECEIPT_v21lane3.txt/receipt.json/stdout only); retained live resume deck .tmp/cycle121/v19-deck (checkpoint bins through 37224 + hour journals through ~37311 + restart.manifest + runottawa_output_files incl solute-failure day100-hour5 bin) is REQUIRED STATE for cycle-15 issue-132 resume forensics - do not delete; ledgerfail/cellledger predecessor run dirs committed as forensics."
+}
