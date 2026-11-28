@@ -1,0 +1,22 @@
+CYCLE 14 - FRONTIER EXTENSION 2002 (issue-131, D-33) - verification lane kit
+Status: LIVE (engine ship131 v3, frozen v19 deck, resume 35064; boundary 35278/35283
+PASSED clean; target: natural scene-5 completion hour 43824, EXITED 0).
+
+Candidate binary: .tmp/cycle141/ship131/{a,b} (double-build identical, file sha256
+116b438377dadf02..., __text 0x754a18-class sha 76233418bbd74420e516...), built from
+source_commit 0e11350 with the canonical recipe:
+  zig build-exe -O ReleaseSafe --dep ecosys_ng -Mroot=src/ecosys_ng.zig -Mecosys_ng=src/module_index.zig
+
+Lane: audit/runs/ottawa/cycle14-verify-v21lane-20261126 (run_logged, resume=true).
+Predecessor attempts kept as forensics (do not delete):
+  cycle14-verify-v20resume-20261126  v19 engine: frontier 35065..35282, trip 35283
+  cycle14-v21lane-ledgerfail-20261126  ship131 v1: pack-ledger trip 35278 (D-33 v2 root-cause)
+  cycle14-v21lane2-cellledger-20261126 ship131 v2: cell-ledger residual 4.50369e-7 MJ day 9
+Fix chain: 8ea6a73 (v1 VHCPWX floor parity) -> d68d684 (v2 pack-ledger booking) ->
+0e11350 (v3 XHFLWW-parity totals = cell/layer/landscape lanes). Suite: module+executable
+x Debug+ReleaseSafe rc=0; neuter discriminates exactly the issue-131 sliver test.
+
+GATE EVIDENCE RULE: gzip engine stderr BEFORE gate scans (DEV-token lines); gates cite
+MILESTONES/receipt/stdout/plain-text receipts only. On natural EXITED 0: fill
+g1-g9-digest.md, bind retention.json, record gates AFTER all evidence commits, close
+--dry-run then push. frontier.json untouched (P0 rule).

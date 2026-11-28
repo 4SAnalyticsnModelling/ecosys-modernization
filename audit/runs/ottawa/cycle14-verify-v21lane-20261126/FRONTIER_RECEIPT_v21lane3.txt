@@ -1,0 +1,5 @@
+FRONTIER RECEIPT v21lane3 (2026-11-27): ship131 v3 (0e11350, __text 76233418bbd74420e516) on frozen v19 deck, resume 35064.
+PASSED old frontier 35283 (2002-01-10) CLEAN through 2002 day 99 (abs hour 37439): DAYS=99 ERR=0 until new boundary.
+NEW BOUNDARY: 2002-04-10 hour 5 (scene_hour 2381, abs 37445) error=HourlyLayerConservationFailure layer_scope=9 quantity=hydrogen residual=2.6438128362738157e-2 g vs storage ~2.1e-6 g (4 orders, real deficit not rounding).
+CONTEXT: preceded by SOLUTE DidNotConverge storm cell=6 layer=7 (cell 6 = issue-130 lineage sliver-heavy), 'inventory-balance progress stopped', accepted retry exact_substep_count=32 -> hydrogen layer-scope deficit at publication. Sibling snapshot: ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day100-hour5.bin.
+EXITED 1 (fail-closed, correct). Frontier EXTENDED 35283 -> 37439 (+2156 h).
