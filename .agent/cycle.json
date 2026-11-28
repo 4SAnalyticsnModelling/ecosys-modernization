@@ -1,5 +1,9 @@
 {
   "base_commit": "b62280f",
+  "closure": {
+    "at": "2026-11-28T03:35:08.315990+00:00",
+    "summary": "issue-131 ACCEPTED: D-33 (VHCPWX floor parity, watsub.f:2441-2446) v1->v3 root-caused through two ledger trips; lane3 (ship131 v3 116b438, __text 76233418) passed frontier 35283 clean through 37439 with absolute counters zero; new boundary registered as issue-132 (cycle-15); suites 4-lane green; no bounds loosened; frontier.json untouched."
+  },
   "cycle": 14,
   "gates": {
     "G1": {
@@ -521,7 +525,6 @@
     "audit/runs/ottawa/cycle14-v21lane-ledgerfail-20261126",
     "audit/runs/ottawa/cycle14-v21lane2-cellledger-20261126",
     "audit/runs/ottawa/cycle14-verify-v21lane-20261126",
-    "evidence/runs/cycle14-verify-v21lane-20261126/ecosys_ng",
     "ecosys-ng/src/soil/water/snow_source_order_energy.zig",
     "ecosys-ng/src/stages/hourly_heat_water_solute.zig"
   ],
@@ -534,6 +537,7 @@
     "ecosys-ng/src/soil/water/snow_source_order_energy.zig",
     "ecosys-ng/src/stages/hourly_heat_water_solute.zig"
   ],
-  "status": "PLANNING",
+  "status": "DECIDED",
+  "sync_status": "PENDING",
   "target": "issue-131 (to be registered): extend the verified trajectory beyond 2001 d363 (v19 stop) through the deck horizon 2002-2003 via resume from v19 hour-bin 35124; characterize the next failure boundary or natural completion; conservation/science counters absolute"
 }
