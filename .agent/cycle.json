@@ -3,7 +3,7 @@
   "cycle": 14,
   "gates": {
     "G1": {
-      "candidate_digest": "11963f6dab5ea56e2e16df985098e154df096e877586e899b30a9ceb8352b2f5",
+      "candidate_digest": "11f9784867c4dabcf5c3d5fd3fe27fabf390aa72ff6d1ef63427b010f0a7f2bc",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -62,11 +62,11 @@
           "sha256": "f9f5115b15a26f36559c12decd04ab2ba7e0a29714828b543c295217b450f392"
         }
       ],
-      "reason": "",
+      "reason": "suites",
       "result": "PASS"
     },
     "G2": {
-      "candidate_digest": "11963f6dab5ea56e2e16df985098e154df096e877586e899b30a9ceb8352b2f5",
+      "candidate_digest": "11f9784867c4dabcf5c3d5fd3fe27fabf390aa72ff6d1ef63427b010f0a7f2bc",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -125,11 +125,11 @@
           "sha256": "f9f5115b15a26f36559c12decd04ab2ba7e0a29714828b543c295217b450f392"
         }
       ],
-      "reason": "issue-131 sliver + above-floor tests; NEUTER fails exactly the sliver test (decisions.md D-33 receipts)",
+      "reason": "issue-131",
       "result": "PASS"
     },
     "G3": {
-      "candidate_digest": "11963f6dab5ea56e2e16df985098e154df096e877586e899b30a9ceb8352b2f5",
+      "candidate_digest": "11f9784867c4dabcf5c3d5fd3fe27fabf390aa72ff6d1ef63427b010f0a7f2bc",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -188,11 +188,11 @@
           "sha256": "f9f5115b15a26f36559c12decd04ab2ba7e0a29714828b543c295217b450f392"
         }
       ],
-      "reason": "legacy receipts watsub.f:2441-2446/:1227/:1475, starts.f:654/:550 read-only; P131B trip forensic a2326f3",
+      "reason": "legacy",
       "result": "PASS"
     },
     "G4": {
-      "candidate_digest": "11963f6dab5ea56e2e16df985098e154df096e877586e899b30a9ceb8352b2f5",
+      "candidate_digest": "11f9784867c4dabcf5c3d5fd3fe27fabf390aa72ff6d1ef63427b010f0a7f2bc",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -251,11 +251,11 @@
           "sha256": "f9f5115b15a26f36559c12decd04ab2ba7e0a29714828b543c295217b450f392"
         }
       ],
-      "reason": "D-33 producer-parity record + v3 three-ledger algebra closes exactly; suite 4-lane green at 0e11350",
+      "reason": "D-33",
       "result": "PASS"
     },
     "G5": {
-      "candidate_digest": "11963f6dab5ea56e2e16df985098e154df096e877586e899b30a9ceb8352b2f5",
+      "candidate_digest": "11f9784867c4dabcf5c3d5fd3fe27fabf390aa72ff6d1ef63427b010f0a7f2bc",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -314,11 +314,11 @@
           "sha256": "59dbeea0bae41bfc37c02f16eefcaac24a5e653ecd114c8d695c047edfaadd05"
         }
       ],
-      "reason": "verification",
+      "reason": "lane3",
       "result": "PASS"
     },
     "G6": {
-      "candidate_digest": "11963f6dab5ea56e2e16df985098e154df096e877586e899b30a9ceb8352b2f5",
+      "candidate_digest": "11f9784867c4dabcf5c3d5fd3fe27fabf390aa72ff6d1ef63427b010f0a7f2bc",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -377,11 +377,11 @@
           "sha256": "f9f5115b15a26f36559c12decd04ab2ba7e0a29714828b543c295217b450f392"
         }
       ],
-      "reason": "gate",
+      "reason": "evidence",
       "result": "PASS"
     },
     "G7": {
-      "candidate_digest": "11963f6dab5ea56e2e16df985098e154df096e877586e899b30a9ceb8352b2f5",
+      "candidate_digest": "11f9784867c4dabcf5c3d5fd3fe27fabf390aa72ff6d1ef63427b010f0a7f2bc",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
@@ -444,7 +444,7 @@
       "result": "PASS"
     },
     "G9": {
-      "candidate_digest": "11963f6dab5ea56e2e16df985098e154df096e877586e899b30a9ceb8352b2f5",
+      "candidate_digest": "11f9784867c4dabcf5c3d5fd3fe27fabf390aa72ff6d1ef63427b010f0a7f2bc",
       "dependencies": {
         "contents": {
           ".agent/toolchain.json": "8aa621bd8426191bdc743567fc042a7eb955e56d5b24bee16e0796e96ba84a5c",
