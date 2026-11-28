@@ -530,7 +530,9 @@
   "schema_version": 2,
   "scope": [
     ".agent/state.md",
-    ".agent/cycles/cycle_00014.md"
+    ".agent/cycles/cycle_00014.md",
+    "ecosys-ng/src/soil/water/snow_source_order_energy.zig",
+    "ecosys-ng/src/stages/hourly_heat_water_solute.zig"
   ],
   "status": "PLANNING",
   "target": "issue-131 (to be registered): extend the verified trajectory beyond 2001 d363 (v19 stop) through the deck horizon 2002-2003 via resume from v19 hour-bin 35124; characterize the next failure boundary or natural completion; conservation/science counters absolute"
