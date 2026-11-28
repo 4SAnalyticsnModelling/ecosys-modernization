@@ -1,0 +1,1059 @@
+info: runtime max_nonlinear_iterations=100 is the hard ceiling for all process solvers
+info: loaded runtime surface gas and microbial oxygen parameters
+info: loaded runtime layer-resolved soil nitrogen parameters
+info: startup phase complete: phase=run_plan elapsed_ms=25
+info: structured output tree ready: root='/Users/4sanalyticsnmodelling/Documents/ecosys-modernization/.tmp/cycle121/v19-deck/runottawa_output_files' resume=true
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): plant editor slot 8 is selected but fouts.f/foutp.f name no variable there; the column is not emitted
+warning(output_editor): soil editor slot 20 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 21 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 22 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 23 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 24 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 25 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 26 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 40 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 41 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 42 selects layer 15, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 43 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 44 selects layer 17, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 45 selects layer 18, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 46 selects layer 19, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 47 selects layer 20, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 29 selects layer 16, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 19 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 32 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 33 selects layer 13, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 34 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+warning(output_editor): soil editor slot 35 selects layer 14, but this run has 12 layers in that block; the column is not emitted
+info: startup phase complete: phase=output_plan elapsed_ms=31
+info: startup phase complete: phase=domain_science elapsed_ms=31
+info: startup phase complete: phase=soil_process_transport elapsed_ms=31
+info: STARTE chemistry beginning: cell_count=1 layer_count=12 max_iterations=1000
+info: STARTE chemistry layer solved: cell=0 layer=0 elapsed_ms=2 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=0 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=0 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=0 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=0 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=0 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=4 elapsed_ms=2 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=4 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=4 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=4 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=4 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=4 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=8 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=6.9674543618124915e-6
+info: STARTE chemistry layer evaluations: cell=0 layer=8 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=8 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=8 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=8 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=8 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=1 elapsed_ms=2 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=1 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=1 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=1 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=1 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=1 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=5 elapsed_ms=2 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=5 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=5 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=5 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=5 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=5 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=9 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=4.961920283094378e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=9 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=9 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=9 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=9 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=9 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=2 elapsed_ms=2 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.2359811462323e-4
+info: STARTE chemistry layer evaluations: cell=0 layer=2 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=2 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=2 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=2 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=2 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=6 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=8.068832344448537e-6
+info: STARTE chemistry layer evaluations: cell=0 layer=6 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=6 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=6 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=6 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=6 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=10 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=2.917909954728281e-6
+info: STARTE chemistry layer evaluations: cell=0 layer=10 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=10 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=10 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=10 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=10 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=3 elapsed_ms=2 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=1.956544401442184e-3
+info: STARTE chemistry layer evaluations: cell=0 layer=3 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=3 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=3 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=3 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=3 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=7 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=4.940888102257194e-6
+info: STARTE chemistry layer evaluations: cell=0 layer=7 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=7 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=7 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=7 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=7 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer solved: cell=0 layer=11 elapsed_ms=1 iterations=4 newton_steps=2 anderson_steps=0 converged=true max_scaled_residual=1.623731417607197e-5
+info: STARTE chemistry layer evaluations: cell=0 layer=11 full_network_evaluations=8 reaction_span_evaluations=2
+info: STARTE chemistry layer strategy calls: cell=0 layer=11 full_network_newton=0 retained_complementarity=0 analytic_coordinate_newton=0 phosphate_extent=0 global_inventory_boundary_recovery=0 active_boundary_surface_recovery=0 active_row_newton=0 ternary_correction_face=0 current_sign_coordinate_anderson=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=full_network_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=retained_complementarity full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=analytic_coordinate_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=phosphate_extent full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=global_inventory_boundary_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=active_boundary_surface_recovery full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=active_row_newton full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=ternary_correction_face full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry strategy evaluations: cell=0 layer=11 strategy=current_sign_coordinate_anderson full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE chemistry layer admissibility backtracks: cell=0 layer=11 calls=0 total_attempts=0 max_attempts=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=active_boundary_surface calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=active_row_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=analytic_coordinate_newton calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=current_sign_coordinate_anderson calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: STARTE reaction-span bounds site: cell=0 layer=11 site=full_network_axes calls=0 full_network_evaluations=0 reaction_span_evaluations=0
+info: startup phase complete: phase=startup_soil_chemistry_starte elapsed_ms=40
+info: startup phase complete: phase=pre_timeline elapsed_ms=41
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=32 maximum=3.2492495071401476e-4 rms=5.7177321084178015e-5 best=3.2491902090561964e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=33 remaining=67
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=34 maximum=1.3823953637422183e-4 rms=2.5154512618803796e-5 best=1.3823820140307884e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=35 remaining=65
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=74 maximum=3.0684599170178194e-5 rms=6.604548253466856e-6 best=3.0379191769869988e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=75 remaining=25
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=13 maximum=2.549107301698385e-4 rms=4.672455435990487e-5 best=2.5490667995935933e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=14 remaining=86
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=12 maximum=2.1326583781570123e-4 rms=3.62696396672875e-5 best=2.132652526445361e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=13 remaining=87
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=51 maximum=1.367128613021366e-4 rms=2.3708418217463303e-5 best=1.367117406659562e-4 stale=1 repeated_state=true
+info: SOLUTE bounded entry-state retry: spent=52 remaining=48
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=28 maximum=2.458961377192994e-4 rms=4.808343664496784e-5 best=2.4589013111108425e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=29 remaining=71
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=61 maximum=7.312745485367075e-6 rms=1.4232097036731095e-6 best=7.312675197433311e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=62 remaining=38
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=1.6407724635249251e3 search_scaled_residual=1.738965251669852e4 newton_steps=29 picard_steps=71
+warning: SOLUTE terminal magnesium transformation: aqueous=2.693700091015435e-7 exchange=-2.107897396938122e-5 geochemistry=0e0 non_band_phosphate=-1.054045626537543e-5 band_phosphate=0e0 assembled=-3.135006022565511e-5
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=1.027347981439868e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.117846146327043e-4 h2po4=3.772684633009487e-2 h3po4=1.4035774609854157e-5 monovalent_activity_coefficient=9.576624129603192e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.899696577834797e-6 uncapped_driving=-2.4101530544729494e-1 bounded_rate=-2.8071549219708313e-6 dissociation_cap=2.8071549219708313e-6
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day1-hour9.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=4 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=4 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=9 maximum=2.054522807652581e-6 rms=4.396769107611706e-7 best=2.054522807652581e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=10 remaining=90
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+info: bounded fixed external hour recovery accepted: exact_substep_count=20 next_preferred_substep_count=20
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=12 maximum=8.583451955130136e-4 rms=1.4270452478827052e-4 best=8.583370956671725e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=13 remaining=87
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=13 maximum=2.0545544887581164e-6 rms=4.37295294409016e-7 best=2.0545544887581164e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=14 remaining=86
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=14 maximum=2.0545712332748164e-6 rms=4.415777991086688e-7 best=2.0545712332748164e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=15 remaining=85
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=39 maximum=1.2720965115035437e-4 rms=2.4782199309333043e-5 best=1.2720965115035437e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=40 remaining=60
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=13 maximum=2.0546051624246757e-6 rms=4.101353635034159e-7 best=2.0546051624246757e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=14 remaining=86
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=12 maximum=2.0546158242385147e-6 rms=4.0443481940290947e-7 best=2.054608773475796e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=13 remaining=87
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=31 maximum=4.663796195509193e-5 rms=7.379825521817511e-6 best=4.6637931143257416e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=32 remaining=68
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=17 maximum=5.100117836040026e-5 rms=8.756067482425684e-6 best=5.100117835745169e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=18 remaining=82
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=23 maximum=1.555635247142607e-4 rms=2.742237432779867e-5 best=1.5538073088135424e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=24 remaining=76
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=3.1808731212994695e2 search_scaled_residual=2.0878024326072627e1 newton_steps=65 picard_steps=35
+warning: SOLUTE terminal magnesium transformation: aqueous=1.9828983885524367e-7 exchange=3.6651109273667027e-13 geochemistry=0e0 non_band_phosphate=-5.647591474189702e-7 band_phosphate=0e0 assembled=-3.6646894205263383e-7
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=1.1258020969317193e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.118203924842526e-4 h2po4=3.768495610524874e-2 h3po4=1.8977480856018907e-6 monovalent_activity_coefficient=9.576508935397662e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8977064555711061e-6 uncapped_driving=-8.266957611791263e-7 bounded_rate=-3.7954961712037817e-7 dissociation_cap=3.7954961712037817e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day1-hour19.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=4 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=4 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=5.238432384419026e2 search_scaled_residual=1.5690472719755024e2 newton_steps=56 picard_steps=44
+warning: SOLUTE terminal magnesium transformation: aqueous=2.3332852700221914e-7 exchange=4.901653267543531e-10 geochemistry=0e0 non_band_phosphate=5.8384565945312956e-8 band_phosphate=0e0 assembled=2.9220325827428647e-7
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.33345183129169e-1 aqueous_index=12 name=iron current_mol_per_m3=9.895701473906056e-6 applied_change_mol_per_m3=-9.895701475483263e-6 candidate_mol_per_m3=-1.5772075350395029e-15
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333451831291689e-1 rejected_boundary_fraction=8.33345183129169e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333451831291689e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.3334518314594e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.118209940330647e-4 h2po4=3.768046055581531e-2 h3po4=1.8971517010232697e-6 monovalent_activity_coefficient=9.576500080106792e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8974793350785008e-6 uncapped_driving=6.5062116180423695e-6 bounded_rate=6.5062116180423695e-6 dissociation_cap=3.79430340204654e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day1-hour19.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=20 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=20 error=SoluteReactionSolverDidNotConverge
+error: implausible surface conductive flux: cell=0 flux_megajoules_per_m2=2.043586617600392e-1 conductance=8.172477090733588e-1 conductivity_arm=1.123100250598563e0 capacity_arm=8.172477090733588e-1 thermal_conductivity_m_megajoules_per_h_k=5.758364251602731e-3 soil_thermal_total_capacity_per_m3_k=2.4905377496252634e0 layer_thickness_m=1.0254408274833482e-2 timestep_hours=3.125e-2 subsurface_temperature_k=2.7218015169129364e2 surface_temperature_k=2.719300945060716e2 temperature_difference_k=2.5005718522203324e-1
+error: implausible surface conductive flux: cell=0 flux_megajoules_per_m2=2.0061449899912678e-1 conductance=8.172227603328406e-1 conductivity_arm=1.123100250598563e0 capacity_arm=8.172227603328406e-1 thermal_conductivity_m_megajoules_per_h_k=5.758364251602731e-3 soil_thermal_total_capacity_per_m3_k=2.490461719090854e0 layer_thickness_m=1.0254408274833482e-2 timestep_hours=3.125e-2 subsurface_temperature_k=2.7215768161756415e2 surface_temperature_k=2.7191219836778606e2 temperature_difference_k=2.4548324977808988e-1
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=26 maximum=7.412375869861327e-5 rms=1.2566244179286657e-5 best=7.412371070906939e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=27 remaining=73
+info: bounded fixed external hour recovery accepted: exact_substep_count=32 next_preferred_substep_count=32
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=37 maximum=5.445833426408479e-4 rms=9.132571383210909e-5 best=5.44569695324218e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=38 remaining=62
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=32 maximum=2.054731811985547e-6 rms=5.180801049186946e-7 best=2.0544646463565287e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=33 remaining=67
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=13 maximum=1.3084245363746585e-4 rms=2.519491478605247e-5 best=1.3083997651663388e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=14 remaining=86
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=23 maximum=1.1194749056501173e-4 rms=2.111932362583693e-5 best=1.1194721262370535e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=24 remaining=76
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=19 maximum=1.6380867028682213e-4 rms=2.99865481505578e-5 best=1.6380862959504877e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=20 remaining=80
+info: daily conservation accepted: day=1 year=2002 hour=24 water=1.6922412350535368e-12 heat=1.6658268303780483e-11 oxygen=1.0846142205650697e-12 hydrogen=2.359246793663286e-10 carbon=3.5005511682843935e-10 nitrogen=5.330287562714648e-13 phosphorus=0e0 aluminum=4.6807561024228954e-8 iron=2.9837599820895223e-5 calcium=1.5350325210273187e-9 magnesium=1.1602197430655952e-4 sodium=0e0 potassium=3.699637871565891e-7 sulfur=5.053134581446007e-13 chloride=1.4526036357981885e-12 silicon=4.8482019689893764e-8 sand=0e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=0e0 aec=1.699867197875166e-1
+info: day advanced: scene_weather_hours=24 final_hour_elapsed_ms=5524
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=16 maximum=5.714026972611913e-5 rms=1.0109855660122052e-5 best=5.7139143297669334e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=17 remaining=83
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=25 maximum=2.054091935371567e-6 rms=5.21824079742527e-7 best=2.0540715885392714e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=26 remaining=74
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=9 maximum=1.446394517304307e-4 rms=2.246778694636515e-5 best=1.446367832495188e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=10 remaining=90
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=23 maximum=7.694605710960427e-5 rms=1.3456537059142546e-5 best=7.694602636042067e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=24 remaining=76
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=16 maximum=2.0537113040489753e-6 rms=5.253242184782461e-7 best=2.05370511242455e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=17 remaining=83
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=11 maximum=8.709688865234296e-5 rms=1.5134826947427052e-5 best=8.709605961165161e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=12 remaining=88
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=16 maximum=1.4331366225875408e-4 rms=2.8569521112095316e-5 best=1.4331077200404173e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=17 remaining=83
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=16 maximum=2.0532701297856267e-6 rms=4.2665675130894617e-7 best=2.0532701297856267e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=17 remaining=83
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=-3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=26 maximum=1.3089860766951237e-4 rms=3.223765389602775e-5 best=1.3089524313645686e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=27 remaining=73
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=-3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=40 maximum=1.3157426394697108e-4 rms=3.0801966425974896e-5 best=1.3157426394697108e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=41 remaining=59
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=11 maximum=1.8314691757592252e-4 rms=3.110087451542384e-5 best=1.8314675533825426e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=12 remaining=88
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=6.750245301589848e2 search_scaled_residual=6.202737996013281e3 newton_steps=54 picard_steps=46
+warning: SOLUTE terminal magnesium transformation: aqueous=1.727399674141339e-7 exchange=3.007978163537177e-13 geochemistry=0e0 non_band_phosphate=-2.222284749415854e-6 band_phosphate=0e0 assembled=-2.049544481203904e-6
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333333395319084e-1 aqueous_index=12 name=iron current_mol_per_m3=1.6020097129607944e-8 applied_change_mol_per_m3=-1.6020097967355217e-8 candidate_mol_per_m3=-8.377472724694087e-16
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333333395319082e-1 rejected_boundary_fraction=8.333333395319084e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333333395319082e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333333883564993e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.1173201318078816e-4 h2po4=3.75737971709213e-2 h3po4=1.8133907670902896e-6 monovalent_activity_coefficient=9.576265762252689e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8916066817434004e-6 uncapped_driving=1.5536363563727013e-3 bounded_rate=8.234640263615764e-5 dissociation_cap=3.6267815341805797e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day2-hour12.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=4 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=4 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=61 maximum=1.254778105397813e-4 rms=2.6923926184096125e-5 best=1.2547691225990752e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=62 remaining=38
+info: bounded fixed external hour recovery accepted: exact_substep_count=20 next_preferred_substep_count=20
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=61 maximum=7.675525247050897e-5 rms=1.3124940391010446e-5 best=7.675505993159526e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=62 remaining=38
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=31 maximum=1.0558516398000317e-4 rms=1.6770438133559696e-5 best=1.055811934164264e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=32 remaining=68
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=24 maximum=2.052057354017487e-6 rms=5.669508400161826e-7 best=2.052057354017487e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=25 remaining=75
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=19 maximum=1.2606436312493784e-4 rms=2.3651888915125936e-5 best=1.260643518890208e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=20 remaining=80
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=13 maximum=7.874206442277048e-5 rms=1.6522982739601568e-5 best=7.874200683903434e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=14 remaining=86
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=20 maximum=2.051491565780798e-6 rms=4.4813184054904245e-7 best=2.051491565780798e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=21 remaining=79
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=2.753900154695246e2 search_scaled_residual=9.243027249186347e3 newton_steps=74 picard_steps=26
+warning: SOLUTE terminal magnesium transformation: aqueous=3.7910429362863476e-6 exchange=-5.5963911812496823e-5 geochemistry=0e0 non_band_phosphate=1.4485131100717798e-6 band_phosphate=0e0 assembled=-5.0724355766138694e-5
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=9.71542152675093e-1 aqueous_index=12 name=iron current_mol_per_m3=1.7838739143334975e-4 applied_change_mol_per_m3=-1.7838739143334978e-4 candidate_mol_per_m3=-2.710505431213761e-20
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=9.715421526750929e-1 rejected_boundary_fraction=9.71542152675093e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=9.715421526750929e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=9.715421526750929e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.1178700932400033e-4 h2po4=3.7559920455670075e-2 h3po4=1.9086727509470752e-6 monovalent_activity_coefficient=9.576040045956322e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.891071499459943e-6 uncapped_driving=-3.495910154458619e-4 bounded_rate=-3.8173455018941505e-7 dissociation_cap=3.8173455018941505e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day2-hour19.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=4 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=4 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=24 maximum=2.348729845455807e-4 rms=4.2657536760288176e-5 best=2.3487185480971216e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=25 remaining=75
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=-3.552713678800501e-15
+info: bounded fixed external hour recovery accepted: exact_substep_count=20 next_preferred_substep_count=20
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=20 maximum=2.051108915878817e-6 rms=4.687724744291579e-7 best=2.051108915878817e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=21 remaining=79
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=6.2317677360519205e1 search_scaled_residual=2.5776350778133624e3 newton_steps=51 picard_steps=49
+warning: SOLUTE terminal magnesium transformation: aqueous=1.4431520661490452e-6 exchange=4.0158978175449006e-11 geochemistry=0e0 non_band_phosphate=6.694384418515362e-8 band_phosphate=0e0 assembled=1.5101360693123741e-6
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=1.062623155587333e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.117181577790116e-4 h2po4=3.747103723976869e-2 h3po4=1.8890798115523106e-6 monovalent_activity_coefficient=9.576086372382635e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8862992047080113e-6 uncapped_driving=-5.523631794565828e-5 bounded_rate=-3.7781596231046213e-7 dissociation_cap=3.7781596231046213e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day2-hour21.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=20 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=20 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=36 maximum=1.5434821591561036e-6 rms=3.62682197124042e-7 best=1.5434645788739472e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=37 remaining=63
+info: bounded fixed external hour recovery accepted: exact_substep_count=32 next_preferred_substep_count=32
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=8.923229644727854e2 search_scaled_residual=1.0441760867084822e2 newton_steps=52 picard_steps=48
+warning: SOLUTE terminal magnesium transformation: aqueous=-2.0071609896599385e-6 exchange=1.205658525061854e-11 geochemistry=0e0 non_band_phosphate=3.847489307498129e-6 band_phosphate=0e0 assembled=1.8403403744234416e-6
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333350028541593e-1 aqueous_index=12 name=iron current_mol_per_m3=6.203998894385608e-7 applied_change_mol_per_m3=-6.203998894385609e-7 candidate_mol_per_m3=-1.0587911840678754e-22
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333350028541592e-1 rejected_boundary_fraction=8.333350028541593e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333350028541592e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333350028541592e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.11727118143858e-4 h2po4=3.750113213728126e-2 h3po4=1.8878410523788653e-6 monovalent_activity_coefficient=9.576049151363044e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.887840597103282e-6 uncapped_driving=-9.04385138863464e-9 bounded_rate=-9.04385138863464e-9 dissociation_cap=3.775682104757731e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day2-hour22.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=32 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=32 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=41 maximum=2.0506942994308334e-6 rms=5.466251575737074e-7 best=2.0506942994308334e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=42 remaining=58
+info: bounded fixed external hour recovery accepted: exact_substep_count=64 next_preferred_substep_count=64
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=52 maximum=5.610916267398173e-5 rms=9.66073766893683e-6 best=5.6109162214723724e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=53 remaining=47
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=10 maximum=8.54321539244082e-5 rms=1.769470365225561e-5 best=8.543136556697491e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=11 remaining=89
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=-3.552713678800501e-15
+info: daily conservation accepted: day=2 year=2002 hour=24 water=1.1791918250026996e-12 heat=1.5736189440451594e-11 oxygen=1.1319465820755782e-12 hydrogen=1.4379046708655485e-10 carbon=3.258593732539623e-10 nitrogen=3.810716214649003e-13 phosphorus=2.7493330691360573e-9 aluminum=2.9088156572220065e-8 iron=4.551320765114383e-5 calcium=1.5618129750600993e-9 magnesium=1.5729933306826783e-4 sodium=1.3841346486930936e-7 potassium=3.135396165673704e-7 sulfur=1.7993413661352143e-12 chloride=7.389389939767629e-13 silicon=4.108709974931261e-8 sand=0e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=1.9937694704049844e-1 aec=7.154835103409726e-2
+info: day advanced: scene_weather_hours=48 final_hour_elapsed_ms=2732
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=23 maximum=9.901323778000792e-5 rms=1.3670075009740198e-5 best=9.90125304922843e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=24 remaining=76
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=3.897709208057104e2 search_scaled_residual=8.712524080044437e3 newton_steps=72 picard_steps=28
+warning: SOLUTE terminal magnesium transformation: aqueous=2.2548833653426674e-9 exchange=7.422862589294368e-10 geochemistry=0e0 non_band_phosphate=4.921197711248791e-6 band_phosphate=0e0 assembled=4.9241948808730626e-6
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=4 realized_endpoint_limiting_name=aqueous.hydrogen realized_endpoint_secant_limit=1.0025730422891022e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.1172431963610944e-4 h2po4=3.6233099578997084e-2 h3po4=1.8445087446042803e-6 monovalent_activity_coefficient=9.573562983876017e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.823047323390158e-6 uncapped_driving=-4.2654614720150585e-4 bounded_rate=-3.6890174892085607e-7 dissociation_cap=3.6890174892085607e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day3-hour2.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=32 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=32 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=30 maximum=3.838563182948221e-5 rms=8.208638639952211e-6 best=3.8385506714166536e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=31 remaining=69
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+info: bounded fixed external hour recovery accepted: exact_substep_count=64 next_preferred_substep_count=64
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=71 maximum=4.115431318703324e-6 rms=8.720946944063885e-7 best=4.115431318703324e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=72 remaining=28
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=2.2262441818658613e2 search_scaled_residual=1.1470346447060688e3 newton_steps=50 picard_steps=50
+warning: SOLUTE terminal magnesium transformation: aqueous=2.387558527325733e-9 exchange=3.4484949641900984e-11 geochemistry=0e0 non_band_phosphate=2.1555677548968223e-6 band_phosphate=0e0 assembled=2.15798979837379e-6
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333352314039827e-1 aqueous_index=12 name=iron current_mol_per_m3=1.0543240647143637e-6 applied_change_mol_per_m3=-1.054324065472483e-6 candidate_mol_per_m3=-7.58119263506306e-16
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333352314039826e-1 rejected_boundary_fraction=8.333352314039827e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333352314039826e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333352322087951e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.122501718920837e-4 h2po4=3.769473831807872e-2 h3po4=1.152336817849399e-6 monovalent_activity_coefficient=9.575881945591974e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8999312294518716e-6 uncapped_driving=1.4832313547234688e-2 bounded_rate=8.245003437841675e-5 dissociation_cap=2.3046736356987978e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day3-hour4.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=64 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=64 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE recovery ladder exhausted (SoluteReactionSolverDidNotConverge); final attempt exact_substep_count=64 with best-bounded-iterate / stiff-image publication
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=2.2262441818658613e2 search_scaled_residual=1.1470346447060688e3 newton_steps=50 picard_steps=50
+warning: SOLUTE terminal magnesium transformation: aqueous=2.387558527325733e-9 exchange=3.4484949641900984e-11 geochemistry=0e0 non_band_phosphate=2.1555677548968223e-6 band_phosphate=0e0 assembled=2.15798979837379e-6
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333352314039827e-1 aqueous_index=12 name=iron current_mol_per_m3=1.0543240647143637e-6 applied_change_mol_per_m3=-1.054324065472483e-6 candidate_mol_per_m3=-7.58119263506306e-16
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333352314039826e-1 rejected_boundary_fraction=8.333352314039827e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333352314039826e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333352322087951e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.122501718920837e-4 h2po4=3.769473831807872e-2 h3po4=1.152336817849399e-6 monovalent_activity_coefficient=9.575881945591974e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8999312294518716e-6 uncapped_driving=1.4832313547234688e-2 bounded_rate=8.245003437841675e-5 dissociation_cap=2.3046736356987978e-7
+warning: SOLUTE terminal SoluteReactionSolverDidNotConverge: published best bounded iterate (legacy fixed-iteration SOLUTE analogue): cell=6 iteration=0 physical_quality=6.927030165383655e1
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=1.9187626548330454e2 search_scaled_residual=1.0087560196850072e3 newton_steps=65 picard_steps=35
+warning: SOLUTE terminal magnesium transformation: aqueous=3.5896360085413477e-6 exchange=1.1084792326684204e-10 geochemistry=0e0 non_band_phosphate=1.1523048117847371e-5 band_phosphate=0e0 assembled=1.5112794974311986e-5
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=1.0639252494069258e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.117547177149233e-4 h2po4=3.74138641296914e-2 h3po4=1.538353839493769e-5 monovalent_activity_coefficient=9.575056956017737e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8831833996134632e-6 uncapped_driving=-2.68216280794179e-1 bounded_rate=-3.076707678987538e-6 dissociation_cap=3.076707678987538e-6
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day3-hour5.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=64 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=64 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE recovery ladder exhausted (SoluteReactionSolverDidNotConverge); final attempt exact_substep_count=64 with best-bounded-iterate / stiff-image publication
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=1.9187626548330454e2 search_scaled_residual=1.0087560196850072e3 newton_steps=65 picard_steps=35
+warning: SOLUTE terminal magnesium transformation: aqueous=3.5896360085413477e-6 exchange=1.1084792326684204e-10 geochemistry=0e0 non_band_phosphate=1.1523048117847371e-5 band_phosphate=0e0 assembled=1.5112794974311986e-5
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=1.0639252494069258e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.117547177149233e-4 h2po4=3.74138641296914e-2 h3po4=1.538353839493769e-5 monovalent_activity_coefficient=9.575056956017737e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8831833996134632e-6 uncapped_driving=-2.68216280794179e-1 bounded_rate=-3.076707678987538e-6 dissociation_cap=3.076707678987538e-6
+warning: SOLUTE terminal SoluteReactionSolverDidNotConverge: published best bounded iterate (legacy fixed-iteration SOLUTE analogue): cell=6 iteration=0 physical_quality=6.971979909083359e1
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=33 maximum=2.9857335302621347e-5 rms=7.66488892477125e-6 best=2.9856162205810998e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=34 remaining=66
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=2.859991719184116e2 search_scaled_residual=5.0072772163250025e4 newton_steps=46 picard_steps=54
+warning: SOLUTE terminal magnesium transformation: aqueous=-3.2853299634099895e-10 exchange=1.7095860414972785e-10 geochemistry=0e0 non_band_phosphate=1.8914489705999665e-8 band_phosphate=0e0 assembled=1.8756915313808396e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333381778566734e-1 aqueous_index=12 name=iron current_mol_per_m3=7.628296554623367e-8 applied_change_mol_per_m3=-7.628296554623368e-8 candidate_mol_per_m3=-1.3234889800848443e-23
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333381778566733e-1 rejected_boundary_fraction=8.333381778566734e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333381778566733e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333381778566733e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.1423728298361795e-4 h2po4=3.1138432786387643e-2 h3po4=1.884882037629667e-6 monovalent_activity_coefficient=9.575922071328506e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.5770515075756974e-6 uncapped_driving=-6.078026128911019e-3 bounded_rate=-3.769764075259334e-7 dissociation_cap=3.769764075259334e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day3-hour7.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=64 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=64 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE recovery ladder exhausted (SoluteReactionSolverDidNotConverge); final attempt exact_substep_count=64 with best-bounded-iterate / stiff-image publication
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=2.859991719184116e2 search_scaled_residual=5.0072772163250025e4 newton_steps=46 picard_steps=54
+warning: SOLUTE terminal magnesium transformation: aqueous=-3.2853299634099895e-10 exchange=1.7095860414972785e-10 geochemistry=0e0 non_band_phosphate=1.8914489705999665e-8 band_phosphate=0e0 assembled=1.8756915313808396e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333381778566734e-1 aqueous_index=12 name=iron current_mol_per_m3=7.628296554623367e-8 applied_change_mol_per_m3=-7.628296554623368e-8 candidate_mol_per_m3=-1.3234889800848443e-23
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333381778566733e-1 rejected_boundary_fraction=8.333381778566734e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333381778566733e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333381778566733e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.1423728298361795e-4 h2po4=3.1138432786387643e-2 h3po4=1.884882037629667e-6 monovalent_activity_coefficient=9.575922071328506e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.5770515075756974e-6 uncapped_driving=-6.078026128911019e-3 bounded_rate=-3.769764075259334e-7 dissociation_cap=3.769764075259334e-7
+warning: SOLUTE terminal SoluteReactionSolverDidNotConverge: published best bounded iterate (legacy fixed-iteration SOLUTE analogue): cell=6 iteration=0 physical_quality=7.028228586887207e1
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=31 maximum=6.504620219375736e-4 rms=1.0931804945521767e-4 best=6.504620219375736e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=32 remaining=68
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=45 maximum=5.382786042528177e-4 rms=1.0042572926807554e-4 best=5.382786042528177e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=46 remaining=54
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=88 maximum=6.832363876379787e-4 rms=1.1730030503649818e-4 best=6.832363876379787e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=89 remaining=11
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=11 maximum_scaled_residual=3.0058528918325464e3 search_scaled_residual=8.092487732793817e4 newton_steps=5 picard_steps=6
+warning: SOLUTE terminal magnesium transformation: aqueous=8.045255888259666e-10 exchange=4.501570598713856e-13 geochemistry=0e0 non_band_phosphate=2.3601194402352567e-10 band_phosphate=0e0 assembled=1.0409876899093637e-9
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333333333333334e-1 aqueous_index=33 name=sulfate current_mol_per_m3=6.652409194462732e-46 applied_change_mol_per_m3=-6.652409194462733e-46 candidate_mol_per_m3=-7.778769097326427e-62
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333333333333333e-1 rejected_boundary_fraction=8.333333333333334e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333333333333333e-1 realized_endpoint_limiting_index=33 realized_endpoint_limiting_name=aqueous.sulfate realized_endpoint_secant_limit=8.333333333333333e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.141536019449874e-4 h2po4=3.275021726321092e-2 h3po4=1.8889522721928462e-6 monovalent_activity_coefficient=9.575820500088884e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.6583124375069731e-6 uncapped_driving=-4.554934597770356e-3 bounded_rate=-3.7779045443856926e-7 dissociation_cap=3.7779045443856926e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day3-hour10.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=64 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=64 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE recovery ladder exhausted (SoluteReactionSolverDidNotConverge); final attempt exact_substep_count=64 with best-bounded-iterate / stiff-image publication
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=88 maximum=6.832363876379787e-4 rms=1.1730030503649818e-4 best=6.832363876379787e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=89 remaining=11
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=11 maximum_scaled_residual=3.0058528918325464e3 search_scaled_residual=8.092487732793817e4 newton_steps=5 picard_steps=6
+warning: SOLUTE terminal magnesium transformation: aqueous=8.045255888259666e-10 exchange=4.501570598713856e-13 geochemistry=0e0 non_band_phosphate=2.3601194402352567e-10 band_phosphate=0e0 assembled=1.0409876899093637e-9
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333333333333334e-1 aqueous_index=33 name=sulfate current_mol_per_m3=6.652409194462732e-46 applied_change_mol_per_m3=-6.652409194462733e-46 candidate_mol_per_m3=-7.778769097326427e-62
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333333333333333e-1 rejected_boundary_fraction=8.333333333333334e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333333333333333e-1 realized_endpoint_limiting_index=33 realized_endpoint_limiting_name=aqueous.sulfate realized_endpoint_secant_limit=8.333333333333333e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.141536019449874e-4 h2po4=3.275021726321092e-2 h3po4=1.8889522721928462e-6 monovalent_activity_coefficient=9.575820500088884e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.6583124375069731e-6 uncapped_driving=-4.554934597770356e-3 bounded_rate=-3.7779045443856926e-7 dissociation_cap=3.7779045443856926e-7
+warning: SOLUTE terminal SoluteReactionSolverDidNotConverge: published best bounded iterate (legacy fixed-iteration SOLUTE analogue): cell=6 iteration=0 physical_quality=7.048863219807377e1
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=3.310938074849717e2 search_scaled_residual=5.1215964492388994e4 newton_steps=26 picard_steps=74
+warning: SOLUTE terminal magnesium transformation: aqueous=1.6979835102758677e-10 exchange=1.873233599957632e-9 geochemistry=0e0 non_band_phosphate=1.891103321352519e-8 band_phosphate=0e0 assembled=2.095406516451041e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333863321919213e-1 aqueous_index=12 name=iron current_mol_per_m3=5.8325463177639366e-8 applied_change_mol_per_m3=-5.832546317763937e-8 candidate_mol_per_m3=-6.617444900424222e-24
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333863321919212e-1 rejected_boundary_fraction=8.333863321919213e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333863321919212e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333863321919212e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.142349494231692e-4 h2po4=3.0974994604884527e-2 h3po4=1.854628498136269e-6 monovalent_activity_coefficient=9.575915456672943e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.56876293684626e-6 uncapped_driving=-5.64437367221411e-3 bounded_rate=-3.709256996272538e-7 dissociation_cap=3.709256996272538e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day3-hour11.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=64 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=64 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE recovery ladder exhausted (SoluteReactionSolverDidNotConverge); final attempt exact_substep_count=64 with best-bounded-iterate / stiff-image publication
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=3.310938074849717e2 search_scaled_residual=5.1215964492388994e4 newton_steps=26 picard_steps=74
+warning: SOLUTE terminal magnesium transformation: aqueous=1.6979835102758677e-10 exchange=1.873233599957632e-9 geochemistry=0e0 non_band_phosphate=1.891103321352519e-8 band_phosphate=0e0 assembled=2.095406516451041e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333863321919213e-1 aqueous_index=12 name=iron current_mol_per_m3=5.8325463177639366e-8 applied_change_mol_per_m3=-5.832546317763937e-8 candidate_mol_per_m3=-6.617444900424222e-24
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333863321919212e-1 rejected_boundary_fraction=8.333863321919213e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333863321919212e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333863321919212e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.142349494231692e-4 h2po4=3.0974994604884527e-2 h3po4=1.854628498136269e-6 monovalent_activity_coefficient=9.575915456672943e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.56876293684626e-6 uncapped_driving=-5.64437367221411e-3 bounded_rate=-3.709256996272538e-7 dissociation_cap=3.709256996272538e-7
+warning: SOLUTE terminal SoluteReactionSolverDidNotConverge: published best bounded iterate (legacy fixed-iteration SOLUTE analogue): cell=6 iteration=0 physical_quality=7.047861568603192e1
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=27 maximum=6.688873224817935e-4 rms=1.1081465723291523e-4 best=6.688873224817935e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=28 remaining=72
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=2.133236428253504e3 search_scaled_residual=6.87612599241765e4 newton_steps=12 picard_steps=88
+warning: SOLUTE terminal magnesium transformation: aqueous=-1.0325302185491512e-9 exchange=4.5481344572474727e-11 geochemistry=0e0 non_band_phosphate=-4.58814583662329e-9 band_phosphate=0e0 assembled=-5.575194710599967e-9
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333346101631411e-1 aqueous_index=12 name=iron current_mol_per_m3=3.1116467587885016e-8 applied_change_mol_per_m3=-3.111646758788502e-8 candidate_mol_per_m3=-6.617444900424222e-24
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.33334610163141e-1 rejected_boundary_fraction=8.333346101631411e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.33334610163141e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.33334610163141e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.14214454175578e-4 h2po4=3.068481886979374e-2 h3po4=1.8841772379804508e-6 monovalent_activity_coefficient=9.575876938627487e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.5539772725151087e-6 uncapped_driving=-6.520125043217235e-3 bounded_rate=-3.768354475960902e-7 dissociation_cap=3.768354475960902e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day3-hour13.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=64 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=64 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE recovery ladder exhausted (SoluteReactionSolverDidNotConverge); final attempt exact_substep_count=64 with best-bounded-iterate / stiff-image publication
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=2.133236428253504e3 search_scaled_residual=6.87612599241765e4 newton_steps=12 picard_steps=88
+warning: SOLUTE terminal magnesium transformation: aqueous=-1.0325302185491512e-9 exchange=4.5481344572474727e-11 geochemistry=0e0 non_band_phosphate=-4.58814583662329e-9 band_phosphate=0e0 assembled=-5.575194710599967e-9
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333346101631411e-1 aqueous_index=12 name=iron current_mol_per_m3=3.1116467587885016e-8 applied_change_mol_per_m3=-3.111646758788502e-8 candidate_mol_per_m3=-6.617444900424222e-24
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.33334610163141e-1 rejected_boundary_fraction=8.333346101631411e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.33334610163141e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.33334610163141e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.14214454175578e-4 h2po4=3.068481886979374e-2 h3po4=1.8841772379804508e-6 monovalent_activity_coefficient=9.575876938627487e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.5539772725151087e-6 uncapped_driving=-6.520125043217235e-3 bounded_rate=-3.768354475960902e-7 dissociation_cap=3.768354475960902e-7
+warning: SOLUTE terminal SoluteReactionSolverDidNotConverge: published best bounded iterate (legacy fixed-iteration SOLUTE analogue): cell=6 iteration=0 physical_quality=7.046530903196542e1
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=57 maximum=6.065125097248755e-4 rms=1.0767946028375237e-4 best=6.065125097248755e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=58 remaining=42
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=2.989573924714159e2 search_scaled_residual=4.940663174047635e4 newton_steps=20 picard_steps=80
+warning: SOLUTE terminal magnesium transformation: aqueous=3.0732746685853396e-9 exchange=9.597532184758637e-10 geochemistry=0e0 non_band_phosphate=1.8911289574657068e-8 band_phosphate=0e0 assembled=2.294431746171827e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333604652049434e-1 aqueous_index=12 name=iron current_mol_per_m3=1.2564770524032228e-6 applied_change_mol_per_m3=-1.2564770524032232e-6 candidate_mol_per_m3=-4.235164736271502e-22
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333604652049433e-1 rejected_boundary_fraction=8.333604652049434e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333604652049433e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333604652049433e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.1424446897851534e-4 h2po4=3.011434207067444e-2 h3po4=9.181670774140853e-4 monovalent_activity_coefficient=9.575737804783714e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.5251526946643823e-6 uncapped_driving=-1.8099216277748816e1 bounded_rate=-1.836334154828171e-4 dissociation_cap=1.836334154828171e-4
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day3-hour16.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=64 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=64 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE recovery ladder exhausted (SoluteReactionSolverDidNotConverge); final attempt exact_substep_count=64 with best-bounded-iterate / stiff-image publication
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=2.989573924714159e2 search_scaled_residual=4.940663174047635e4 newton_steps=20 picard_steps=80
+warning: SOLUTE terminal magnesium transformation: aqueous=3.0732746685853396e-9 exchange=9.597532184758637e-10 geochemistry=0e0 non_band_phosphate=1.8911289574657068e-8 band_phosphate=0e0 assembled=2.294431746171827e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333604652049434e-1 aqueous_index=12 name=iron current_mol_per_m3=1.2564770524032228e-6 applied_change_mol_per_m3=-1.2564770524032232e-6 candidate_mol_per_m3=-4.235164736271502e-22
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333604652049433e-1 rejected_boundary_fraction=8.333604652049434e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333604652049433e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333604652049433e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.1424446897851534e-4 h2po4=3.011434207067444e-2 h3po4=9.181670774140853e-4 monovalent_activity_coefficient=9.575737804783714e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.5251526946643823e-6 uncapped_driving=-1.8099216277748816e1 bounded_rate=-1.836334154828171e-4 dissociation_cap=1.836334154828171e-4
+warning: SOLUTE terminal SoluteReactionSolverDidNotConverge: published best bounded iterate (legacy fixed-iteration SOLUTE analogue): cell=6 iteration=0 physical_quality=7.034430295907724e1
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=2.851233236758838e2 search_scaled_residual=4.477792129855713e4 newton_steps=34 picard_steps=66
+warning: SOLUTE terminal magnesium transformation: aqueous=2.8217582365036676e-9 exchange=2.0012229059908818e-8 geochemistry=0e0 non_band_phosphate=1.891008964450931e-8 band_phosphate=0e0 assembled=4.1744076940921796e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.338993041531938e-1 aqueous_index=12 name=iron current_mol_per_m3=7.254982000095399e-7 applied_change_mol_per_m3=-7.2549820000954e-7 candidate_mol_per_m3=-1.0587911840678754e-22
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.338993041531937e-1 rejected_boundary_fraction=8.338993041531938e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.338993041531937e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.338993041531937e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.144432496530345e-4 h2po4=3.076377431511096e-2 h3po4=1.8911424755917252e-6 monovalent_activity_coefficient=9.575400025725145e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.5586811246229348e-6 uncapped_driving=-6.561807805413049e-3 bounded_rate=-3.782284951183451e-7 dissociation_cap=3.782284951183451e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day3-hour17.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=64 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=64 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE recovery ladder exhausted (SoluteReactionSolverDidNotConverge); final attempt exact_substep_count=64 with best-bounded-iterate / stiff-image publication
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=2.851233236758838e2 search_scaled_residual=4.477792129855713e4 newton_steps=34 picard_steps=66
+warning: SOLUTE terminal magnesium transformation: aqueous=2.8217582365036676e-9 exchange=2.0012229059908818e-8 geochemistry=0e0 non_band_phosphate=1.891008964450931e-8 band_phosphate=0e0 assembled=4.1744076940921796e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.338993041531938e-1 aqueous_index=12 name=iron current_mol_per_m3=7.254982000095399e-7 applied_change_mol_per_m3=-7.2549820000954e-7 candidate_mol_per_m3=-1.0587911840678754e-22
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.338993041531937e-1 rejected_boundary_fraction=8.338993041531938e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.338993041531937e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.338993041531937e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.144432496530345e-4 h2po4=3.076377431511096e-2 h3po4=1.8911424755917252e-6 monovalent_activity_coefficient=9.575400025725145e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.5586811246229348e-6 uncapped_driving=-6.561807805413049e-3 bounded_rate=-3.782284951183451e-7 dissociation_cap=3.782284951183451e-7
+warning: SOLUTE terminal SoluteReactionSolverDidNotConverge: published best bounded iterate (legacy fixed-iteration SOLUTE analogue): cell=6 iteration=0 physical_quality=7.027332763447887e1
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+info: daily conservation accepted: day=3 year=2002 hour=24 water=2.3996654938569325e-12 heat=3.743944899387848e-11 oxygen=1.506535673035308e-12 hydrogen=1.458975560609409e-10 carbon=3.5607125211138526e-10 nitrogen=6.65973345185222e-13 phosphorus=7.457598229185365e-9 aluminum=2.5088246901543615e-8 iron=6.168627328441138e-5 calcium=3.1769062616451583e-9 magnesium=6.661939274946196e-5 sodium=2.3460135650205767e-8 potassium=2.549958782119343e-7 sulfur=2.0913432918112877e-12 chloride=6.012081898442207e-13 silicon=3.341433578456501e-8 sand=0e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=1.3928182807399347e-1 aec=8.25008056719304e-2
+info: day advanced: scene_weather_hours=72 final_hour_elapsed_ms=734
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=-3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-1.8189894035458565e-12
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+info: daily conservation accepted: day=4 year=2002 hour=24 water=1.817431606739101e-12 heat=7.338403682465476e-11 oxygen=8.855251820395532e-13 hydrogen=1.597662655754872e-10 carbon=3.23878909856517e-10 nitrogen=8.297190332648308e-13 phosphorus=6.3985347683127734e-9 aluminum=1.3657542904236504e-8 iron=4.9625200847268504e-5 calcium=3.2300678761642802e-9 magnesium=8.123293796116083e-5 sodium=3.577564887277472e-8 potassium=2.9154175852212397e-7 sulfur=2.2591067563564486e-12 chloride=4.584319679012825e-13 silicon=2.1223170021961035e-8 sand=0e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=0e0 aec=2.8039430449069005e-2
+info: day advanced: scene_weather_hours=96 final_hour_elapsed_ms=782
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=-3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-1.8189894035458565e-12
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+info: daily conservation accepted: day=5 year=2002 hour=24 water=1.3132594631032335e-12 heat=1.0009516572415053e-10 oxygen=9.43980740790365e-13 hydrogen=1.197498420721719e-10 carbon=3.039835372911244e-10 nitrogen=8.313498193136789e-13 phosphorus=5.781524039622446e-9 aluminum=1.3318380453777607e-8 iron=4.03275901934294e-5 calcium=2.626346292045943e-9 magnesium=4.1257067389200125e-5 sodium=1.0180153244197938e-7 potassium=2.1061928760248376e-7 sulfur=1.944805803386024e-12 chloride=3.106100916948662e-13 silicon=2.069758383248567e-8 sand=0e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=6.745718050065876e-2 aec=2.165454237861614e-2
+info: day advanced: scene_weather_hours=120 final_hour_elapsed_ms=732
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=36 maximum=1.547949251227044e-6 rms=3.554901400651574e-7 best=1.5479327266496575e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=37 remaining=63
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=7.111978757863352e1 search_scaled_residual=3.04471348999063e1 newton_steps=58 picard_steps=42
+warning: SOLUTE terminal magnesium transformation: aqueous=2.8773269664368944e-7 exchange=5.474933733598645e-12 geochemistry=0e0 non_band_phosphate=4.176998453774279e-8 band_phosphate=0e0 assembled=3.295081561151658e-7
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=1.030814399097051e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.1139265609028546e-4 h2po4=3.695976853456225e-2 h3po4=1.8582276422547233e-6 monovalent_activity_coefficient=9.574585825694008e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8585083086108845e-6 uncapped_driving=5.581553502390917e-6 bounded_rate=5.581553502390917e-6 dissociation_cap=3.7164552845094467e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day6-hour20.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=4 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=4 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=62 maximum=2.2023795423328496e-6 rms=5.82873591877664e-7 best=2.2020672706568682e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=63 remaining=37
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+info: bounded fixed external hour recovery accepted: exact_substep_count=20 next_preferred_substep_count=20
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=18 maximum=8.396160555022168e-4 rms=1.4095595059021316e-4 best=8.396068859530447e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=19 remaining=81
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=14 maximum=2.057597129369407e-6 rms=5.211095582875509e-7 best=2.057587566700226e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=15 remaining=85
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=51 maximum=7.968456732254049e-5 rms=1.3098595516037843e-5 best=7.968328720507393e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=52 remaining=48
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=17 maximum=1.6272569721977105e-4 rms=3.613092748025696e-5 best=1.6272390604110638e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=18 remaining=82
+info: daily conservation accepted: day=6 year=2002 hour=24 water=4.387647437677101e-13 heat=7.321044412266902e-11 oxygen=1.060455972100451e-12 hydrogen=1.0963931401678523e-10 carbon=2.4446540696871683e-10 nitrogen=8.645921044749863e-13 phosphorus=6.402818567848462e-10 aluminum=9.286883951699807e-9 iron=3.051893595030531e-5 calcium=2.1756974812298374e-9 magnesium=1.3794963102617215e-5 sodium=2.176440211533275e-8 potassium=9.669621989830003e-8 sulfur=1.1691798191242085e-12 chloride=1.5448139883584054e-13 silicon=1.3135857412744536e-8 sand=0e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=5.843414745491897e-2 aec=0e0
+info: day advanced: scene_weather_hours=144 final_hour_elapsed_ms=4541
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=22 maximum=3.086085094424009e-4 rms=5.4777040072452004e-5 best=3.0860729920750976e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=23 remaining=77
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=24 maximum=1.16676712045124e-4 rms=2.4488108896553375e-5 best=1.1667317267711428e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=25 remaining=75
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=14 maximum=3.443857520350155e-5 rms=5.786655929469726e-6 best=3.443726283635291e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=15 remaining=85
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=21 maximum=2.059515240883282e-6 rms=5.505711578011449e-7 best=2.059515240883282e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=22 remaining=78
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=61 maximum=3.059222839436419e-5 rms=7.017526365628591e-6 best=3.059222246350818e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=62 remaining=38
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=15 maximum=2.0601103869433666e-6 rms=4.5694144632601834e-7 best=2.0601103869433666e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=16 remaining=84
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=14 maximum=3.106932852761414e-4 rms=5.184004345853024e-5 best=3.106858588188846e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=15 remaining=85
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=23 maximum=2.0606815350579807e-6 rms=5.886624148251775e-7 best=2.0606810813000575e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=24 remaining=76
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=50 maximum=1.5513201585676912e-6 rms=4.830501690078219e-7 best=1.5513201585676912e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=51 remaining=49
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=28 maximum=2.7401524233991085e-4 rms=4.438644353096253e-5 best=2.740133479566745e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=29 remaining=71
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=52 maximum=5.9779368500930174e-5 rms=1.083855790377758e-5 best=5.9779368383050096e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=53 remaining=47
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=-3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=25 maximum=1.586147235514223e-4 rms=2.652198829481079e-5 best=1.5861431855635036e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=26 remaining=74
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=42 maximum=1.5167911018317532e-4 rms=2.815617814038017e-5 best=1.5167404735510923e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=43 remaining=57
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=24 maximum=1.0714053304222223e-4 rms=1.969969143865924e-5 best=1.071404738689586e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=25 remaining=75
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=18 maximum=4.028638654535776e-5 rms=6.81535334012978e-6 best=4.028638231511782e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=19 remaining=81
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=40 maximum=4.362064703599503e-5 rms=9.000325533157964e-6 best=4.361976541395541e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=41 remaining=59
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=19 maximum=1.1343759212712369e-4 rms=2.4195034365112072e-5 best=1.1343751583657882e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=20 remaining=80
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=99 maximum=3.675305584320097e-5 rms=8.862388595217058e-6 best=3.675246011101876e-5 stale=4 repeated_state=false
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverStagnated failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day7-hour18.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=4 failure_report_bound=true error=SoluteReactionSolverStagnated
+warning: bounded fixed external hour recovery rejected: exact_substep_count=4 error=SoluteReactionSolverStagnated
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=64 maximum=3.1184441771990557e-4 rms=5.2315308720387785e-5 best=3.118388193175467e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=65 remaining=35
+info: bounded fixed external hour recovery accepted: exact_substep_count=20 next_preferred_substep_count=20
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=46 maximum=6.008437636496461e-6 rms=1.094406127980111e-6 best=6.0084361193368965e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=47 remaining=53
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=60 maximum=1.2301722895577993e-4 rms=2.5444181399512313e-5 best=1.2301722895577993e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=61 remaining=39
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=2.2575428859068683e2 search_scaled_residual=4.247689306053165e3 newton_steps=35 picard_steps=65
+warning: SOLUTE terminal magnesium transformation: aqueous=-4.858013490684002e-7 exchange=4.106764339236476e-11 geochemistry=0e0 non_band_phosphate=3.610313225349652e-7 band_phosphate=0e0 assembled=-1.247289588900427e-7
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=1.0249022154763678e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.112505733011769e-4 h2po4=3.683278211588711e-2 h3po4=9.322620676183338e-7 monovalent_activity_coefficient=9.574350739561795e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8513922569739488e-6 uncapped_driving=1.8285764063852728e-2 bounded_rate=8.225011466023539e-5 dissociation_cap=1.864524135236668e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day7-hour21.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=20 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=20 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=1.978275353224438e3 search_scaled_residual=1.0838525969666283e2 newton_steps=63 picard_steps=37
+warning: SOLUTE terminal magnesium transformation: aqueous=3.2495204680992634e-9 exchange=4.677573030887091e-12 geochemistry=0e0 non_band_phosphate=-4.171188850831062e-7 band_phosphate=0e0 assembled=-4.138646870419761e-7
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333348955730525e-1 aqueous_index=12 name=iron current_mol_per_m3=9.602566654186213e-8 applied_change_mol_per_m3=-9.602567218530242e-8 candidate_mol_per_m3=-5.643440298243293e-15
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333348955730524e-1 rejected_boundary_fraction=8.333348955730525e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333348955730524e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333348955853788e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.1126831353179477e-4 h2po4=3.684246812545035e-2 h3po4=1.851896519693235e-6 monovalent_activity_coefficient=9.574352359705145e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8519596340548946e-6 uncapped_driving=1.2555829052289812e-6 bounded_rate=1.2555829052289812e-6 dissociation_cap=3.7037930393864705e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day7-hour21.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=32 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=32 error=SoluteReactionSolverDidNotConverge
+error: implausible surface conductive flux: cell=0 flux_megajoules_per_m2=1.2182803421571403e-1 conductance=1.1221642588277978e0 conductivity_arm=1.1221642588277978e0 capacity_arm=1.635564202395557e0 thermal_conductivity_m_megajoules_per_h_k=5.753178460108055e-3 soil_thermal_total_capacity_per_m3_k=2.4923338351041053e0 layer_thickness_m=1.0253718945063838e-2 timestep_hours=1.5625e-2 subsurface_temperature_k=2.7249480131194196e2 surface_temperature_k=2.723862360700379e2 temperature_difference_k=1.085652419040457e-1
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=17 maximum=2.0640948174663946e-6 rms=6.389132034070924e-7 best=2.0640948174663946e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=18 remaining=82
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+info: bounded fixed external hour recovery accepted: exact_substep_count=64 next_preferred_substep_count=64
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=25 maximum=2.3861215318209426e-4 rms=4.847664924383563e-5 best=2.3861143948263047e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=26 remaining=74
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=16 maximum=2.1333889471850557e-4 rms=4.067420758257788e-5 best=2.133356818451308e-4 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=17 remaining=83
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=13 maximum=2.064683920270579e-6 rms=5.331365752578767e-7 best=2.064683920270579e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=14 remaining=86
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+info: daily conservation accepted: day=7 year=2002 hour=24 water=4.420445588517516e-13 heat=6.900984000750157e-11 oxygen=1.5711825169748807e-12 hydrogen=1.3171603039570463e-10 carbon=2.678300839115767e-10 nitrogen=7.897128732001823e-13 phosphorus=5.580673048339727e-10 aluminum=6.4736664461896224e-9 iron=4.061467511756341e-5 calcium=2.1368437690686557e-9 magnesium=4.207589255957669e-5 sodium=1.057931685846144e-7 potassium=1.0273517377122237e-7 sulfur=9.294378731891798e-13 chloride=2.5572700702305865e-13 silicon=1.778034872810553e-8 sand=0e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=5.0453291288923924e-2 aec=1.642078255291854e-2
+info: day advanced: scene_weather_hours=168 final_hour_elapsed_ms=4531
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=26 maximum=2.0648287148894095e-6 rms=5.373784323316723e-7 best=2.0648287148894095e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=27 remaining=73
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=28 maximum=4.6114017406832316e-6 rms=1.1298260748408563e-6 best=4.610743197408548e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=29 remaining=71
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=3.912107936134128e1 search_scaled_residual=1.0917695861731208e2 newton_steps=32 picard_steps=68
+warning: SOLUTE terminal magnesium transformation: aqueous=-7.840214045738044e-8 exchange=4.240549564475353e-11 geochemistry=0e0 non_band_phosphate=2.911655116520231e-8 band_phosphate=0e0 assembled=-4.9243183796533374e-8
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=1.0419042160671328e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.1124347847753997e-4 h2po4=3.681227844425897e-2 h3po4=1.8502969579960605e-6 monovalent_activity_coefficient=9.574271062994153e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8502989256922107e-6 uncapped_driving=3.914793310769341e-8 bounded_rate=3.914793310769341e-8 dissociation_cap=3.700593915992121e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day8-hour3.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=16 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=16 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=3.9644478624634013e2 search_scaled_residual=2.18887117323906e2 newton_steps=43 picard_steps=57
+warning: SOLUTE terminal magnesium transformation: aqueous=-6.155596852238194e-9 exchange=1.0632709795972637e-10 geochemistry=0e0 non_band_phosphate=3.510712785728419e-8 band_phosphate=0e0 assembled=2.9057858103005724e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333363030971663e-1 aqueous_index=12 name=iron current_mol_per_m3=2.113729163724185e-6 applied_change_mol_per_m3=-2.1137291637241854e-6 candidate_mol_per_m3=-4.235164736271502e-22
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333363030971662e-1 rejected_boundary_fraction=8.333363030971663e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333363030971662e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333363030971662e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.112448449320242e-4 h2po4=3.681245201086135e-2 h3po4=1.8510131042282157e-6 monovalent_activity_coefficient=9.57426225411004e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.850310392984238e-6 uncapped_driving=-1.3980640245282807e-5 bounded_rate=-3.7020262084564317e-7 dissociation_cap=3.7020262084564317e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day8-hour3.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=20 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=20 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=20 maximum=2.0650270397682653e-6 rms=5.372183288653111e-7 best=2.0650270397682653e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=21 remaining=79
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+info: bounded fixed external hour recovery accepted: exact_substep_count=32 next_preferred_substep_count=32
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=1.1515022619563224e3 search_scaled_residual=7.146968037125547e2 newton_steps=48 picard_steps=52
+warning: SOLUTE terminal magnesium transformation: aqueous=1.3065034545851142e-8 exchange=3.271025380280292e-14 geochemistry=0e0 non_band_phosphate=1.8241717323778187e-8 band_phosphate=0e0 assembled=3.130678457988313e-8
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=1.022831628639122e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.1129932959674785e-4 h2po4=3.686285967933457e-2 h3po4=1.853282989545456e-6 monovalent_activity_coefficient=9.574256809037973e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.853087412284176e-6 uncapped_driving=-3.890554267025328e-6 bounded_rate=-3.7065659790909124e-7 dissociation_cap=3.7065659790909124e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day8-hour4.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=32 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=32 error=SoluteReactionSolverDidNotConverge
+error: implausible surface conductive flux: cell=0 flux_megajoules_per_m2=9.992949080038856e-2 conductance=1.1230442998477337e0 conductivity_arm=1.1230442998477337e0 capacity_arm=1.6346431023798897e0 thermal_conductivity_m_megajoules_per_h_k=5.7580467998864324e-3 soil_thermal_total_capacity_per_m3_k=2.4907760096072176e0 layer_thickness_m=1.0254353814301233e-2 timestep_hours=1.5625e-2 subsurface_temperature_k=2.722249823632621e2 surface_temperature_k=2.721360014648114e2 temperature_difference_k=8.89808984506999e-2
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=18 maximum=2.065091837198019e-6 rms=5.365839767390371e-7 best=2.0650700980178653e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=19 remaining=81
+info: bounded fixed external hour recovery accepted: exact_substep_count=64 next_preferred_substep_count=64
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=38 maximum=4.11084513609368e-6 rms=7.938759365432962e-7 best=4.1108166831270695e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=39 remaining=61
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=7.716839638528342e2 search_scaled_residual=1.647829147465388e4 newton_steps=89 picard_steps=11
+warning: SOLUTE terminal magnesium transformation: aqueous=-2.577550572037208e-6 exchange=7.0689358281057215e-12 geochemistry=0e0 non_band_phosphate=-8.337571423208345e-10 band_phosphate=0e0 assembled=-2.578377260243701e-6
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=4 realized_endpoint_limiting_name=aqueous.hydrogen realized_endpoint_secant_limit=1.0484986765859807e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.113068058797811e-4 h2po4=3.680339938956928e-2 h3po4=1.8497196876410288e-6 monovalent_activity_coefficient=9.574214304538298e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8501155598389703e-6 uncapped_driving=7.874882479953197e-6 bounded_rate=7.874882479953197e-6 dissociation_cap=3.699439375282058e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day8-hour6.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=64 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=64 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE recovery ladder exhausted (SoluteReactionSolverDidNotConverge); final attempt exact_substep_count=64 with best-bounded-iterate / stiff-image publication
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=7.716839638528342e2 search_scaled_residual=1.647829147465388e4 newton_steps=89 picard_steps=11
+warning: SOLUTE terminal magnesium transformation: aqueous=-2.577550572037208e-6 exchange=7.0689358281057215e-12 geochemistry=0e0 non_band_phosphate=-8.337571423208345e-10 band_phosphate=0e0 assembled=-2.578377260243701e-6
+warning: SOLUTE terminal global admissibility: accepted_fraction=1e0 realized_endpoint_limiting_index=4 realized_endpoint_limiting_name=aqueous.hydrogen realized_endpoint_secant_limit=1.0484986765859807e0
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.113068058797811e-4 h2po4=3.680339938956928e-2 h3po4=1.8497196876410288e-6 monovalent_activity_coefficient=9.574214304538298e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8501155598389703e-6 uncapped_driving=7.874882479953197e-6 bounded_rate=7.874882479953197e-6 dissociation_cap=3.699439375282058e-7
+warning: SOLUTE terminal SoluteReactionSolverDidNotConverge: published best bounded iterate (legacy fixed-iteration SOLUTE analogue): cell=6 iteration=0 physical_quality=5.5560440064365224e1
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=20 maximum=3.134196613912252e-5 rms=4.4145916824323995e-6 best=3.134184816463534e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=21 remaining=79
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=25 maximum=2.064787789357247e-6 rms=5.481389426508419e-7 best=2.064787789357247e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=26 remaining=74
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=79 maximum=4.112007506223467e-6 rms=1.1258952979460757e-6 best=4.1114360665889635e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=80 remaining=20
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=-3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=35 maximum=5.895161687227061e-5 rms=8.708203318652247e-6 best=5.895103056875796e-5 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=36 remaining=64
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=43 maximum=1.7932056803029666e-6 rms=3.4127545607501687e-7 best=1.792948685360467e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=44 remaining=56
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=12 maximum=1.53610954886958e-3 rms=2.3375650908588616e-4 best=1.536105745711688e-3 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=13 remaining=87
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=89 maximum=2.292916194292675e-6 rms=7.559213227488248e-7 best=2.2929084895303094e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=90 remaining=10
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=10 maximum_scaled_residual=1.6231811453525086e3 search_scaled_residual=3.265240677727958e2 newton_steps=6 picard_steps=4
+warning: SOLUTE terminal magnesium transformation: aqueous=-6.462440821670737e-8 exchange=1.4561855645506251e-9 geochemistry=0e0 non_band_phosphate=2.709325454099224e-8 band_phosphate=0e0 assembled=-3.60749681111645e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.7407980360342e-1 aqueous_index=12 name=iron current_mol_per_m3=3.681656271161894e-5 applied_change_mol_per_m3=-3.681656271161895e-5 candidate_mol_per_m3=-6.776263578034403e-21
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.740798036034199e-1 rejected_boundary_fraction=8.7407980360342e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.740798036034199e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.740798036034199e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.112228881576848e-4 h2po4=3.674805934029116e-2 h3po4=1.8475032926833173e-6 monovalent_activity_coefficient=9.574024203513745e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8468833526094508e-6 uncapped_driving=-1.2335156191467735e-5 bounded_rate=-3.695006585366635e-7 dissociation_cap=3.695006585366635e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day8-hour13.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=8 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=8 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=32 maximum=2.0634402602119674e-6 rms=5.040689255433008e-7 best=2.0634402602119674e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=33 remaining=67
+info: bounded fixed external hour recovery accepted: exact_substep_count=20 next_preferred_substep_count=20
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=87 maximum=2.0630403455943966e-6 rms=5.571738493634749e-7 best=2.0630403455943966e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=88 remaining=12
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=12 maximum_scaled_residual=1.4510133563513114e3 search_scaled_residual=2.73881268013798e2 newton_steps=8 picard_steps=4
+warning: SOLUTE terminal magnesium transformation: aqueous=3.31171786679916e-9 exchange=1.7286602053227095e-9 geochemistry=0e0 non_band_phosphate=2.719700671261231e-8 band_phosphate=0e0 assembled=3.223738478473418e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333815106511961e-1 aqueous_index=12 name=iron current_mol_per_m3=2.249428627480714e-5 applied_change_mol_per_m3=-2.2494286275627436e-5 candidate_mol_per_m3=-8.202971993071656e-16
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.33381510651196e-1 rejected_boundary_fraction=8.333815106511961e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.33381510651196e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333815106866168e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.112216412000734e-4 h2po4=3.6744008398478856e-2 h3po4=1.8456250735897155e-6 monovalent_activity_coefficient=9.573988826309182e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.846660513373491e-6 uncapped_driving=2.0602708421845132e-5 bounded_rate=2.0602708421845132e-5 dissociation_cap=3.691250147179431e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day8-hour14.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=20 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=20 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=1.4672557234996189e3 search_scaled_residual=2.3093356330526785e2 newton_steps=46 picard_steps=54
+warning: SOLUTE terminal magnesium transformation: aqueous=6.857650092601728e-9 exchange=2.1298854163649385e-9 geochemistry=0e0 non_band_phosphate=1.1935231824026768e-8 band_phosphate=0e0 assembled=2.0922767332993437e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333765174147902e-1 aqueous_index=12 name=iron current_mol_per_m3=2.5139426508349063e-5 applied_change_mol_per_m3=-2.5139426508349066e-5 candidate_mol_per_m3=-3.3881317890172014e-21
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333765174147901e-1 rejected_boundary_fraction=8.333765174147902e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333765174147901e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333765174147902e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.1122255372090164e-4 h2po4=3.674246917244759e-2 h3po4=1.8762740230836655e-6 monovalent_activity_coefficient=9.573990801992692e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8465880155631576e-6 uncapped_driving=-5.906770795556495e-4 bounded_rate=-3.7525480461673314e-7 dissociation_cap=3.7525480461673314e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day8-hour14.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=32 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=32 error=SoluteReactionSolverDidNotConverge
+error: implausible surface conductive flux: cell=0 flux_megajoules_per_m2=9.626996544692534e-2 conductance=1.122851724328134e0 conductivity_arm=1.122851724328134e0 capacity_arm=1.634861795990997e0 thermal_conductivity_m_megajoules_per_h_k=5.756979856596509e-3 soil_thermal_total_capacity_per_m3_k=2.4911436752554543e0 layer_thickness_m=1.0254212077807936e-2 timestep_hours=1.5625e-2 subsurface_temperature_k=2.723027304626894e2 surface_temperature_k=2.722169934385026e2 temperature_difference_k=8.57370241868125e-2
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=1.4227664034419274e3 search_scaled_residual=2.4637695555466027e2 newton_steps=31 picard_steps=69
+warning: SOLUTE terminal magnesium transformation: aqueous=-1.3584831140990875e-8 exchange=1.9913377417661333e-9 geochemistry=0e0 non_band_phosphate=2.4944740465744513e-8 band_phosphate=0e0 assembled=1.3351247066519771e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333766067024277e-1 aqueous_index=12 name=iron current_mol_per_m3=2.1001926415038762e-5 applied_change_mol_per_m3=-2.100192641503877e-5 candidate_mol_per_m3=-6.776263578034403e-21
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333766067024276e-1 rejected_boundary_fraction=8.333766067024277e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333766067024276e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333766067024276e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.112218243882563e-4 h2po4=3.674024518193869e-2 h3po4=1.8443998913336365e-6 monovalent_activity_coefficient=9.573992654481057e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8464736828529586e-6 uncapped_driving=4.126330615143139e-5 bounded_rate=4.126330615143139e-5 dissociation_cap=3.688799782667273e-7
+warning: SOLUTE hourly reaction solver failed: cell=0 layer=6 packed_cell_index=6 error=SoluteReactionSolverDidNotConverge failure_report_bound=true
+info: SOLUTE failure snapshot written: path=ecosys-ng-solute-failure-ex1-scenario1-repeat1-scene5-year2002-day8-hour14.bin
+warning: SOLUTE fixed-hour recovery attempt failed: exact_substep_count=64 failure_report_bound=true error=SoluteReactionSolverDidNotConverge
+warning: bounded fixed external hour recovery rejected: exact_substep_count=64 error=SoluteReactionSolverDidNotConverge
+warning: SOLUTE recovery ladder exhausted (SoluteReactionSolverDidNotConverge); final attempt exact_substep_count=64 with best-bounded-iterate / stiff-image publication
+error: implausible surface conductive flux: cell=0 flux_megajoules_per_m2=9.626996544692534e-2 conductance=1.122851724328134e0 conductivity_arm=1.122851724328134e0 capacity_arm=1.634861795990997e0 thermal_conductivity_m_megajoules_per_h_k=5.756979856596509e-3 soil_thermal_total_capacity_per_m3_k=2.4911436752554543e0 layer_thickness_m=1.0254212077807936e-2 timestep_hours=1.5625e-2 subsurface_temperature_k=2.723027304626894e2 surface_temperature_k=2.722169934385026e2 temperature_difference_k=8.57370241868125e-2
+warning: SOLUTE reaction network did not converge: cell=6 max_iterations=100 maximum_scaled_residual=1.4227664034419274e3 search_scaled_residual=2.4637695555466027e2 newton_steps=31 picard_steps=69
+warning: SOLUTE terminal magnesium transformation: aqueous=-1.3584831140990875e-8 exchange=1.9913377417661333e-9 geochemistry=0e0 non_band_phosphate=2.4944740465744513e-8 band_phosphate=0e0 assembled=1.3351247066519771e-8
+warning: SOLUTE terminal rejected aqueous boundary: rejected_fraction=8.333766067024277e-1 aqueous_index=12 name=iron current_mol_per_m3=2.1001926415038762e-5 applied_change_mol_per_m3=-2.100192641503877e-5 candidate_mol_per_m3=-6.776263578034403e-21
+warning: SOLUTE terminal admissibility rejection: first_fraction=1 first_error=NegativeAqueousState accepted_boundary_fraction=8.333766067024276e-1 rejected_boundary_fraction=8.333766067024277e-1 boundary_error=NegativeAqueousState
+warning: SOLUTE terminal global admissibility: accepted_fraction=8.333766067024276e-1 realized_endpoint_limiting_index=12 realized_endpoint_limiting_name=aqueous.iron realized_endpoint_secant_limit=8.333766067024276e-1
+warning: TEMP_DIAGNOSTIC SOLUTE terminal H3PO4 branch: hydrogen=4.112218243882563e-4 h2po4=3.674024518193869e-2 h3po4=1.8443998913336365e-6 monovalent_activity_coefficient=9.573992654481057e-1 dissociation_constant=7.5e0 equilibrium_h3po4=1.8464736828529586e-6 uncapped_driving=4.126330615143139e-5 bounded_rate=4.126330615143139e-5 dissociation_cap=3.688799782667273e-7
+warning: SOLUTE terminal SoluteReactionSolverDidNotConverge: published best bounded iterate (legacy fixed-iteration SOLUTE analogue): cell=6 iteration=8 physical_quality=2.4015386390653084e1
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=14 maximum=2.0626175225523796e-6 rms=5.179614713959551e-7 best=2.0626054589809006e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=15 remaining=85
+warning: SOLUTE inventory-balance progress stopped: cell=6 iteration=28 maximum=8.129112691386606e-6 rms=1.6191536553777032e-6 best=8.129067721670519e-6 stale=4 repeated_state=false
+info: SOLUTE bounded entry-state retry: spent=29 remaining=71
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+info: daily conservation accepted: day=8 year=2002 hour=24 water=5.60387727546439e-13 heat=6.068128870471638e-11 oxygen=1.0813949061476329e-12 hydrogen=1.167009715738118e-10 carbon=2.339360285066931e-10 nitrogen=9.109975795852575e-13 phosphorus=4.930291886137699e-10 aluminum=1.4385394245468409e-8 iron=5.409465382201206e-5 calcium=2.1137371876010444e-10 magnesium=7.480663073362526e-5 sodium=1.209947358461368e-7 potassium=9.24408912114183e-8 sulfur=8.836654648827599e-13 chloride=4.889933523243061e-13 silicon=2.8193328906163518e-8 sand=0e0 silt=0e0 clay=0e0 rock_additive=0e0 cec=4.351521332653408e-2 aec=4.151800194615634e-2
+info: day advanced: scene_weather_hours=192 final_hour_elapsed_ms=700
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=-3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-1.8189894035458565e-12
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=-3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=-3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=residue residual_g_c=-3.552713678800501e-15
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=-9.094947017729282e-13
+warning: organic carbon sum completion residual after retries: cell=0 accumulator=organic residual_g_c=9.094947017729282e-13
+error: source-ordered snow energy failure: cell=0 before_mj=2.3790242596125083e1 after_mj=2.3513890875824536e1 local_process_mj=1.6235264908238927e-3 discharge_mj=2.7797551336890386e-1 vapor_water_m3=0e0 vapor_carrier_heat_mj=0e0 defect_mj=2.6657753365855186e-7 tolerance_mj=2.3792947233574467e-8
+error: hourly science failed: execution=1 scenario=1 scenario_repeat=1 scene=5 scene_hour=214 total_hour=35278 year=2002 day_of_year=9 month=1 day=9 hour=22 error=SnowSourceOrderEnergyConservationFailure
+info: stage execution census: 13 of 19 INSTRUMENTED stages never executed across 8760 simulated hour(s); 1 of 20 stages not yet instrumented
+info:   census is LIVE (positive control fired), so every zero below is a real finding about the model, not a dead instrument.
+info:   never executed (instrumented, ran zero times -- this is the finding):
+info:     plant_pre_emergence
+info:     plant_emergence_occurred
+info:     canopy_photosynthesis_occurred
+info:     root_water_uptake
+info:     symbiotic_nitrogen_fixation
+info:     second_plant_species
+info:     harvest_reproductive_organs
+info:     harvest_branch_stalk_and_reserve
+info:     tillage_soil_application
+info:     tillage_aboveground_application
+info:     fertilizer_application
+info:     day_of_year_reset
+info:     forcing_repeat_transition
+info:   executed:
+info:     plant_emergence_refresh entries=213 first_hour=8760 last_hour=8760
+info:     canopy_carboxylation entries=213 first_hour=8760 last_hour=8760
+info:     canopy_energy_balance entries=213 first_hour=8760 last_hour=8760
+info:     nonsymbiotic_nitrogen_fixation entries=213 first_hour=8760 last_hour=8760
+info:     scene_transition entries=1 first_hour=8760 last_hour=8760
+info:     census_positive_control entries=213 first_hour=1 last_hour=213
+info:   NOT YET INSTRUMENTED (execution unknown -- absence of a record here is NOT evidence):
+info:     root_uptake_geometry
+error: SnowSourceOrderEnergyConservationFailure
